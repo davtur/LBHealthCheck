@@ -1,0 +1,44 @@
+/* Copyright (C) YOOtheme GmbH, YOOtheme Proprietary Use License (http://www.yootheme.com/license) */
+
+/*Background Blue*/
+
+#page {	background: #a4e0f6; }
+
+#block-main { 
+	border-color: #95d3e9;
+	border-color: rgba(15,95,130,0.1);
+	background-color: #d1effa;
+	background-color: rgba(255,255,255,0.5);
+	box-shadow: 0 1px 0 rgba(255,255,255,0.6) inset, 
+				0 0 0 1px rgba(255,255,255,0.3) inset;
+}
+
+#block-main > div {
+	border-color: #c9dce3;
+	border-color: rgba(40,115,145,0.25);
+}
+
+#toolbar,
+.menu-dropdown a.level1,
+.menu-dropdown span.level1 { 
+	color: #55747f;
+	text-shadow: 0 1px 0 rgba(255,255,255,0.3);
+}
+
+#toolbar .menu-line li { background-image: url(../../images/background/blue/menu_line_item.png); }
+#toolbar .menu-line li:first-child { background: none; }
+
+.searchbox {
+	background-color: #9bd4e9;
+	background-color: rgba(0,0,0,0.05);
+	box-shadow: 0 1px 1px rgba(0,0,0,0.2) inset,
+				0 0 1px rgba(255,255,255,0.4);
+}
+
+.searchbox input { color: #55747f; }
+
+.searchbox input:-moz-placeholder { color: #7099a9; }
+.searchbox input::-webkit-input-placeholder { color: #7099a9; }
+.searchbox input.placeholder { color: #7099a9; }
+
+.searchbox.loading button { background: url(../../images/background/blue/searchbox_loader.gif) 50% 50% no-repeat; }

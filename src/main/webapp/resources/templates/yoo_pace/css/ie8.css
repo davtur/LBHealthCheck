@@ -1,0 +1,48 @@
+/* Copyright (C) YOOtheme GmbH, YOOtheme Proprietary Use License (http://www.yootheme.com/license) */
+
+@import url(../warp/css/ie8.css);
+
+/* Base
+----------------------------------------------------------------------------------------------------*/
+
+
+/* Layout
+----------------------------------------------------------------------------------------------------*/
+
+
+/* Menus
+----------------------------------------------------------------------------------------------------*/
+
+.menu-dropdown .dropdown { -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)"; } /* Needed for vertical dropdown */
+
+.menu-dropdown .dropdown-bg > div,
+.searchbox .results { 
+	border-width: 1px 1px 1px 0;
+ 	border-style: solid; 
+ 	border-color: #ddd;
+ }
+
+.searchbox .results { border-width: 1px; }
+
+/* Modules
+----------------------------------------------------------------------------------------------------*/
+
+.mod-inset { border: 1px solid #ddd; }
+
+
+/* Tools
+----------------------------------------------------------------------------------------------------*/
+
+
+/* System
+----------------------------------------------------------------------------------------------------*/
+
+#system .item > header time { border: 1px solid #ddd; }
+
+/* Search Box */
+.searchbox input { line-height: 35px; }
+
+
+/* Style
+----------------------------------------------------------------------------------------------------*/
+

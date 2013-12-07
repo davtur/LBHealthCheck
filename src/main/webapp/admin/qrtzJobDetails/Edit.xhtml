@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" >
+
+    <ui:composition template="/template.xhtml">
+        <ui:define name="title">
+            <h:outputText value="#{configMapController.getKey('EditQrtzJobDetailsTitle')}"></h:outputText>
+        </ui:define>
+        <ui:define name="body">
+            <h:panelGroup id="messagePanel" layout="block">
+                <h:messages errorStyle="color: red" infoStyle="color: green" layout="table"/>
+            </h:panelGroup>
+            <h:form>
+                <p:panel>
+                    <h:panelGrid columns="2">
+                        <h:outputLabel value="#{configMapController.getKey('EditQrtzJobDetailsLabel_qrtzJobDetailsPK_schedName')}" for="qrtzJobDetailsPK_schedName" />
+                        <h:inputText id="qrtzJobDetailsPK_schedName" value="#{qrtzJobDetailsController.selected.qrtzJobDetailsPK.schedName}" title="#{configMapController.getKey('EditQrtzJobDetailsTitle_qrtzJobDetailsPK_schedName')}" required="true" requiredMessage="#{configMapController.getKey('EditQrtzJobDetailsRequiredMessage_qrtzJobDetailsPK_schedName')}"/>
+                        <h:outputLabel value="#{configMapController.getKey('EditQrtzJobDetailsLabel_qrtzJobDetailsPK_jobName')}" for="qrtzJobDetailsPK_jobName" />
+                        <h:inputText id="qrtzJobDetailsPK_jobName" value="#{qrtzJobDetailsController.selected.qrtzJobDetailsPK.jobName}" title="#{configMapController.getKey('EditQrtzJobDetailsTitle_qrtzJobDetailsPK_jobName')}" required="true" requiredMessage="#{configMapController.getKey('EditQrtzJobDetailsRequiredMessage_qrtzJobDetailsPK_jobName')}"/>
+                        <h:outputLabel value="#{configMapController.getKey('EditQrtzJobDetailsLabel_qrtzJobDetailsPK_jobGroup')}" for="qrtzJobDetailsPK_jobGroup" />
+                        <h:inputText id="qrtzJobDetailsPK_jobGroup" value="#{qrtzJobDetailsController.selected.qrtzJobDetailsPK.jobGroup}" title="#{configMapController.getKey('EditQrtzJobDetailsTitle_qrtzJobDetailsPK_jobGroup')}" required="true" requiredMessage="#{configMapController.getKey('EditQrtzJobDetailsRequiredMessage_qrtzJobDetailsPK_jobGroup')}"/>
+                        <h:outputLabel value="#{configMapController.getKey('EditQrtzJobDetailsLabel_description')}" for="description" />
+                        <h:inputText id="description" value="#{qrtzJobDetailsController.selected.description}" title="#{configMapController.getKey('EditQrtzJobDetailsTitle_description')}" />
+                        <h:outputLabel value="#{configMapController.getKey('EditQrtzJobDetailsLabel_jobClassName')}" for="jobClassName" />
+                        <h:inputText id="jobClassName" value="#{qrtzJobDetailsController.selected.jobClassName}" title="#{configMapController.getKey('EditQrtzJobDetailsTitle_jobClassName')}" required="true" requiredMessage="#{configMapController.getKey('EditQrtzJobDetailsRequiredMessage_jobClassName')}"/>
+                        <h:outputLabel value="#{configMapController.getKey('EditQrtzJobDetailsLabel_isDurable')}" for="isDurable" />
+                        <h:inputText id="isDurable" value="#{qrtzJobDetailsController.selected.isDurable}" title="#{configMapController.getKey('EditQrtzJobDetailsTitle_isDurable')}" required="true" requiredMessage="#{configMapController.getKey('EditQrtzJobDetailsRequiredMessage_isDurable')}"/>
+                        <h:outputLabel value="#{configMapController.getKey('EditQrtzJobDetailsLabel_isNonconcurrent')}" for="isNonconcurrent" />
+                        <h:inputText id="isNonconcurrent" value="#{qrtzJobDetailsController.selected.isNonconcurrent}" title="#{configMapController.getKey('EditQrtzJobDetailsTitle_isNonconcurrent')}" required="true" requiredMessage="#{configMapController.getKey('EditQrtzJobDetailsRequiredMessage_isNonconcurrent')}"/>
+                        <h:outputLabel value="#{configMapController.getKey('EditQrtzJobDetailsLabel_isUpdateData')}" for="isUpdateData" />
+                        <h:inputText id="isUpdateData" value="#{qrtzJobDetailsController.selected.isUpdateData}" title="#{configMapController.getKey('EditQrtzJobDetailsTitle_isUpdateData')}" required="true" requiredMessage="#{configMapController.getKey('EditQrtzJobDetailsRequiredMessage_isUpdateData')}"/>
+                        <h:outputLabel value="#{configMapController.getKey('EditQrtzJobDetailsLabel_requestsRecovery')}" for="requestsRecovery" />
+                        <h:inputText id="requestsRecovery" value="#{qrtzJobDetailsController.selected.requestsRecovery}" title="#{configMapController.getKey('EditQrtzJobDetailsTitle_requestsRecovery')}" required="true" requiredMessage="#{configMapController.getKey('EditQrtzJobDetailsRequiredMessage_requestsRecovery')}"/>
+                        <h:outputLabel value="#{configMapController.getKey('EditQrtzJobDetailsLabel_jobData')}" for="jobData" />
+                        <h:inputTextarea rows="4" cols="30" id="jobData" value="#{qrtzJobDetailsController.selected.jobData}" title="#{configMapController.getKey('EditQrtzJobDetailsTitle_jobData')}" />
+                    </h:panelGrid>
+                </p:panel>
+                <p:commandButton   ajax="false"    action="#{qrtzJobDetailsController.update}" value="#{configMapController.getKey('EditQrtzJobDetailsSaveLink')}"/>
+                <br />
+                <br />
+                <p:commandButton   ajax="false"    action="View" value="#{configMapController.getKey('EditQrtzJobDetailsViewLink')}" immediate="true"/>
+                <br />
+                <p:commandButton   ajax="false"    action="#{qrtzJobDetailsController.prepareList}" value="#{configMapController.getKey('EditQrtzJobDetailsShowAllLink')}" immediate="true"/>
+                <br />
+                <br />
+                <p:commandButton   ajax="false"    value="#{configMapController.getKey('EditQrtzJobDetailsIndexLink')}" action="/index" immediate="true" />
+            </h:form>
+        </ui:define>
+    </ui:composition>
+
+</html>

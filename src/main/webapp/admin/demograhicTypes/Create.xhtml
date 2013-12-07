@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" >
+
+    <ui:composition template="/template.xhtml">
+        <ui:define name="title">
+            <h:outputText value="#{configMapController.getKey('CreateDemograhicTypesTitle')}"></h:outputText>
+        </ui:define>
+        <ui:define name="body">
+            <h:panelGroup id="messagePanel" layout="block">
+                <h:messages errorStyle="color: red" infoStyle="color: green" layout="table"/>
+            </h:panelGroup>
+            <h:form>
+               <p:panel>
+                <h:panelGrid columns="2">
+                     <h:outputLabel value="#{configMapController.getKey('CreateDemograhicTypesLabel_name')}" for="name" />
+                    <h:inputText id="name" value="#{demograhicTypesController.selected.name}" title="#{configMapController.getKey('CreateDemograhicTypesTitle_name')}" required="true" requiredMessage="#{configMapController.getKey('CreateDemograhicTypesRequiredMessage_name')}"/>
+                    <h:outputLabel value="#{configMapController.getKey('CreateDemograhicTypesLabel_description')}" for="description" />
+                    <h:inputText id="description" value="#{demograhicTypesController.selected.description}" title="#{configMapController.getKey('CreateDemograhicTypesTitle_description')}" required="true" requiredMessage="#{configMapController.getKey('CreateDemograhicTypesRequiredMessage_description')}"/>
+                </h:panelGrid>
+                 </p:panel>
+                <br />
+                <p:commandButton   ajax="false"   action="#{demograhicTypesController.create}" value="#{configMapController.getKey('CreateDemograhicTypesSaveLink')}" />
+                <br />
+                <br />
+                <p:commandButton   ajax="false"   action="#{demograhicTypesController.prepareList}" value="#{configMapController.getKey('CreateDemograhicTypesShowAllLink')}" immediate="true"/>
+                <br />
+                <br />
+                <p:commandButton  ajax="false"   value="#{configMapController.getKey('CreateDemograhicTypesIndexLink')}" action="/index" immediate="true" />
+            </h:form>
+        </ui:define>
+    </ui:composition>
+
+</html>

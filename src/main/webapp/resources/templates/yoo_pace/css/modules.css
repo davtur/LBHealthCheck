@@ -1,0 +1,282 @@
+/* Copyright (C) YOOtheme GmbH, YOOtheme Proprietary Use License (http://www.yootheme.com/license) */
+
+@import url(../warp/css/modules.css);
+
+
+/* Module Badges
+----------------------------------------------------------------------------------------------------*/
+
+.module .badge {
+	top: -10px;
+	right: -10px;
+	width: 41px;
+	height: 41px;
+	background-image: url(../images/module_badges.png);
+	background-position: 0 0;
+	background-repeat: no-repeat;
+}
+ 
+.module .badge-hot { background-position: 0 0; }
+.module .badge-top { background-position: 0 -45px; }
+.module .badge-free { background-position: 0 -90px; }
+.module .badge-new { background-position: 0 -135px; }
+
+.mod-line .badge { 
+	top: 0;
+	right: 0;
+}
+
+.module .badge + .module-title { padding-right: 30px; }
+
+
+/* Module Icons
+----------------------------------------------------------------------------------------------------*/
+
+.module .module-title .icon { background: url(../images/module_icons.png) 0 0 no-repeat; }
+
+.module .module-title .icon-download { background-position: 0 0; }
+.module .module-title .icon-twitter { background-position: 0 -30px; }
+.module .module-title .icon-mail { background-position: 0 -60px; }
+.module .module-title .icon-bubble { background-position: 0 -90px; }
+.module .module-title .icon-login { background-position: 0 -120px; }
+.module .module-title .icon-cart { background-position: 0 -150px; }
+
+
+/* Module Type: Line
+----------------------------------------------------------------------------------------------------*/
+
+.mod-line { padding: 15px; }
+
+.mod-line:before {
+	content: "";
+	display: block;
+	position: absolute;
+}
+
+/* horizontal line */
+.grid-h .mod-line:before {
+	top: 0;
+	bottom: 0;
+	left: -15px;
+	border-width: 0 0 0 1px;
+	border-style: solid;
+	border-color: #e5e5e5;
+}
+
+/* vertical line */
+.grid-v .mod-line:before {
+	top: -15px;
+	left: 0;
+	right: 0;
+	border-width: 1px 0 0 0;
+	border-style:  solid;
+	border-color: #e5e5e5;
+}
+
+.grid-h:first-child > .mod-line:before,
+.grid-v:first-child > .mod-line:before { border-width: 0; }
+
+
+/* Module Type: Outline
+----------------------------------------------------------------------------------------------------*/
+
+.mod-outline {
+	padding: 15px;
+	border: 1px solid #e5e5e5;
+	border: 1px solid rgba(0,0,0,0.1);
+	border-radius: 3px;
+}
+
+.mod-outline-header .module-title {
+	position: relative;
+	margin: -16px -16px 15px -16px;
+	padding: 10px 15px;
+	border-radius: 3px 3px 0 0;
+	box-shadow: 0 -1px 1px rgba(0,0,0,0.2) inset;
+	color: #fff;
+	text-shadow: 0 1px 1px rgba(0,0,0,0.15);
+}
+
+.mod-outline-header .module-title:before {
+	content: "";
+	display: block;
+	position: absolute;
+	bottom: -6px;
+	left: 15px;
+	width: 13px;
+	height: 8px;
+	background-position: 50% 50%;
+	background-repeat: no-repeat;
+}
+
+.mod-outline-header .module-title .icon { margin-left: -7px; }
+
+
+/* Module Type: Dashed
+----------------------------------------------------------------------------------------------------*/
+
+.mod-dashed {
+	padding: 15px;
+	border: 1px dashed #ddd;
+	border: 1px dashed rgba(0,0,0,0.1);
+	border-radius: 3px;
+}
+
+
+/* Module Type: Inset
+----------------------------------------------------------------------------------------------------*/
+
+.mod-inset { 
+	padding: 15px;
+	background: #efefef;
+	background: rgba(0,0,0,0.03);
+	border-radius: 3px;
+	border-bottom: 1px solid #fff;
+	box-shadow: 0 1px 1px rgba(0,0,0,0.1) inset, 
+				0 0 2px rgba(0,0,0,0.1) inset;
+}
+
+
+/* Module Type: Box
+----------------------------------------------------------------------------------------------------*/
+
+.mod-box {
+	padding: 15px;
+	border-radius: 3px;
+}
+
+.mod-box-default {
+	border: 1px solid #ededef;
+	border: 1px solid rgba(0,0,0,0.03);
+	background: #efefef;
+	background: rgba(0,0,0,0.03);
+}
+
+/* Module Box Color*/
+
+.mod-box-color { color: #fff; }
+.mod-box-color .module-title { text-shadow: 0 -1px 1px rgba(0,0,0,0.15); }
+
+/* Accordion Menu */
+.mod-box-color .menu-sidebar a,
+.mod-box-color .menu-sidebar li > span { color: #fff; }
+
+.mod-box-color .menu-sidebar li.level1 > span,
+.mod-box-color .menu-sidebar li.level1 > a { background: rgba(0,0,0,0.1); }
+
+.mod-box-color .menu-sidebar li.level1:hover .level1 {
+	box-shadow: 0 0 0 rgba(0,0,0,0),
+				0 1px 1px rgba(0,0,0,0.15) inset, 
+				0 1px 0 rgba(255,255,255,0.2);
+	text-shadow: 0 1px 0 rgba(255,255,255,0.3);
+}
+
+.mod-box-color .menu-sidebar li.parent:hover .level1 > span { background-position: 100% -200px; }
+
+.mod-box-color .menu-sidebar li.level1 .level1.active { position: relative; }
+
+.mod-box-color .menu-sidebar li.parent .level1.active:before { background-position: 0 -20px; }
+
+.mod-box-color .menu-sidebar .level2 a:hover > span,
+.mod-box-color .menu-sidebar .level2 a.current > span { 
+	background-position: 0 -200px;
+	color: #fff;
+}
+
+
+/* Typography for Module Styles
+----------------------------------------------------------------------------------------------------*/
+
+/* Tools for Module Box and Module Inset */
+.mod-box-default .button-default,
+.mod-inset .button-default { 
+	background: #fff;
+	box-shadow: 0 -1px 0 rgba(0,0,0,0.2) inset;
+}
+
+.mod-box-default .button-default:hover,
+.mod-inset .button-default:hover { 
+	background: #e5e5e5;
+	background: rgba(0,0,0,0.08);
+}
+
+.mod-box-default .button-default:active,
+.mod-inset .button-default:active { 
+	background: #ddd;
+	background: rgba(0,0,0,0.15);
+}
+
+.mod-box-default form.style input[type="text"],
+.mod-box-default form.style input[type="password"], 
+.mod-box-default form.style textarea, 
+.mod-box-default form.style select,
+.mod-inset form.style input[type="text"],
+.mod-inset form.style input[type="password"], 
+.mod-inset form.style textarea, 
+.mod-inset form.style select { 
+	background: #e5e5e5;
+}
+
+.mod-box-default form.style input[type="text"]:focus,
+.mod-box-default form.style input[type="password"]:focus, 
+.mod-box-default form.style textarea:focus, 
+.mod-box-default form.style select:focus,
+.mod-inset form.style input[type="text"]:focus,
+.mod-inset form.style input[type="password"]:focus, 
+.mod-inset form.style textarea:focus, 
+.mod-inset form.style select:focus { 
+	background: #ddd;
+}
+
+/* Tools for Module Box Color */
+.mod-box-color .button-default {
+	box-shadow: 0 0 0 rgba(0,0,0,0),
+				0 -1px 0 rgba(0,0,0,0.1) inset;
+	text-shadow: 0 1px 0 rgba(255,255,255,0.2);
+}
+
+.mod-box-color .button-default:hover {
+	box-shadow: 0 1px 0 rgba(0,0,0,0),
+				0 1px 0 rgba(0,0,0,0.1) inset, 
+				0 1px 0 rgba(255,255,255,0.15);
+	text-shadow: 0 1px 0 rgba(255,255,255,0.2);
+}
+
+.mod-box-color .button-primary,
+.mod-box-color form.style button,
+.mod-box-color form.style input[type="button"],
+.mod-box-color form.style input[type="submit"] {
+	background: #fff;
+	box-shadow: 0 1px 1px rgba(0,0,0,0.15),
+				0 1px 0 rgba(0,0,0,0) inset;
+	text-shadow: none;
+}
+
+.mod-box-color .button-primary:hover,
+.mod-box-color form.style button:hover,
+.mod-box-color form.style input[type="button"]:hover,
+.mod-box-color form.style input[type="submit"]:hover {
+	background: #efefef;
+	box-shadow: 0 -1px 0 rgba(0,0,0,0.1),  
+				0 1px 3px rgba(0,0,0,0.15) inset;
+	text-shadow: none;
+}
+
+.mod-box-color .button-primary:active,
+.mod-box-color form.style button:active,
+.mod-box-color form.style input[type="button"]:active,
+.mod-box-color form.style input[type="submit"]:active { background: #ddd; }
+
+.mod-box-color ul.line > li { box-shadow: 0 1px 0 rgba(255,255,255,0.1) inset; }
+
+.mod-box-color ul.line li > a { color: #fff; }
+
+.mod-box-color ul.line-bullet > li,
+.mod-box-color ul.check > li { background-position: 0 -100px; }
+
+.mod-box-color ul.line-bullet > li:first-child { background-position: 0 -105px; }
+
+.mod-box-color em.box {
+	color: #fff;
+	text-shadow: 0 -1px 1px rgba(0,0,0,0.15);
+}

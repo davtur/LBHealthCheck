@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.prime.com.tr/ui" >
+
+    <ui:composition template="/template.xhtml">
+        <ui:define name="title">
+            <h:outputText value="#{bundle.EditCustomersTitle}"></h:outputText>
+        </ui:define>
+        <ui:define name="body">
+            <h:panelGroup id="messagePanel" layout="block">
+                <h:messages errorStyle="color: red" infoStyle="color: green" layout="table"/>
+            </h:panelGroup>
+            <h:form id="createCustomerForm">
+                <p:panel>
+                    <p:commandButton   ajax="false"    action="#{customersController.update}" value="#{bundle.EditCustomersSaveLink}"/>
+                    &nbsp;
+                    <p:commandButton   ajax="false"    action="#{customersController.prepareList}" value="#{bundle.EditCustomersShowAllLink}" immediate="true"/>
+
+                    &nbsp;
+
+                    <p:commandButton   ajax="false"    action="View" value="#{bundle.EditCustomersViewLink}" immediate="true"/>
+                </p:panel>
+                <h:panelGrid columns="1">
+                    <h:panelGrid columns="2">
+                        <p:panel id="panel1">
+                            <h:panelGrid columns="2">
+                                <h:outputLabel value="#{bundle.EditCustomersLabel_gender}" for="gender" />
+                                <h:selectOneMenu id="gender" value="#{customersController.selected.gender}" title="#{bundle.EditCustomersTitle_gender}" required="true" requiredMessage="#{bundle.EditCustomersRequiredMessage_gender}">
+                                    <f:selectItem itemValue="M" itemLabel="Male" />
+                                    <f:selectItem itemValue="F" itemLabel="Female" />
+                                    <p:ajax update=":createCustomerForm:panel3" event="change" />
+                                </h:selectOneMenu>
+
+                                <h:outputLabel value="#{bundle.EditCustomersLabel_firstname}" for="firstname" />
+                                <p:inputText id="firstname"  value="#{customersController.selected.firstname}" title="#{bundle.EditCustomersTitle_firstname}" valueChangeListener="#{customersController.firstNameListener}" required="true" requiredMessage="#{bundle.EditCustomersRequiredMessage_firstname}">
+                                    <p:ajax update="createCustomerForm:username" event="keyup"/>
+                                </p:inputText>
+                                <h:outputLabel value="#{bundle.EditCustomersLabel_lastname}" for="lastname" />
+                                <p:inputText id="lastname" value="#{customersController.selected.lastname}" title="#{bundle.EditCustomersTitle_lastname}" valueChangeListener="#{customersController.lastNameListener}" required="true" requiredMessage="#{bundle.EditCustomersRequiredMessage_lastname}">
+                                    <p:ajax update="createCustomerForm:username" event="keyup" />
+                                </p:inputText>
+                                <h:outputLabel value="#{bundle.EditCustomersLabel_username}" for="username" />
+                                <p:inputText id="username" value="#{customersController.selected.username}" title="#{bundle.EditCustomersTitle_username}" required="true" requiredMessage="#{bundle.EditCustomersRequiredMessage_username}"/>
+                                <h:outputLabel value="#{bundle.EditCustomersLabel_emailAddress}" for="emailAddress" />
+                                <p:inputText id="emailAddress" value="#{customersController.selected.emailAddress}" title="#{bundle.EditCustomersTitle_emailAddress}" required="true" requiredMessage="#{bundle.EditCustomersRequiredMessage_emailAddress}">
+                                    <f:validator validatorId="au.com.purefitnessmanly.stats.classes.util.EmailValidator" />
+                                </p:inputText>
+                                <h:outputLabel value="#{bundle.EditCustomersLabel_dob}" for="dob" />
+                                <p:calendar id="dob" value="#{customersController.selected.dob}" pattern="MM/dd/yyyy" onSelectUpdate=":menuForm:growl,:createCustomerForm:panel3" selectListener="#{customersController.dobChangeListener}" title="#{bundle.EditCustomersTitle_dob}"  required="true" requiredMessage="#{bundle.EditCustomersRequiredMessage_dob}"/>
+
+
+
+                                <h:outputLabel value="#{bundle.EditCustomersLabel_password}" for="password" />
+                                <p:password id="password" minLength="8"  value="#{customersController.checkPass}" onfocus="this.select()" feedback="true" title="#{bundle.EditCustomersTitle_password}" required="true" requiredMessage="#{bundle.EditCustomersRequiredMessage_password}">
+                                    <p:ajax listener="#{customersController.checkPassChange}" event="keyup" />
+                                </p:password>
+                                <p:commandButton   ajax="true" actionListener="#{customersController.updatepass}" update=":menuForm:growl"   value="#{bundle.EditCustomersUpdatePassword}" immediate="true"/>
+                            </h:panelGrid>
+                        </p:panel>
+                        <p:panel id="panel2">
+                            <h:panelGrid columns="2">
+                                <h:outputLabel value="#{bundle.EditCustomersLabel_streetAddress}" for="streetAddress" />
+                                <p:inputText id="streetAddress" value="#{customersController.selected.streetAddress}" title="#{bundle.EditCustomersTitle_streetAddress}" required="false" requiredMessage="#{bundle.EditCustomersRequiredMessage_streetAddress}"/>
+                                <h:outputLabel value="#{bundle.EditCustomersLabel_suburb}" for="suburb" />
+                                <p:inputText id="suburb" value="#{customersController.selected.suburb}" title="#{bundle.EditCustomersTitle_suburb}" required="true" requiredMessage="#{bundle.EditCustomersRequiredMessage_suburb}"/>
+                                <h:outputLabel value="#{bundle.EditCustomersLabel_postcode}" for="postcode" />
+                                <p:inputText id="postcode" value="#{customersController.selected.postcode}" title="#{bundle.EditCustomersTitle_postcode}" required="true" requiredMessage="#{bundle.EditCustomersRequiredMessage_postcode}"/>
+                                <h:outputLabel value="#{bundle.EditCustomersLabel_city}" for="city" />
+                                <p:inputText id="city" value="#{customersController.selected.city}" title="#{bundle.EditCustomersTitle_city}" />
+                                <h:outputLabel value="#{bundle.EditCustomersLabel_addrState}" for="addrState" />
+                                <p:inputText id="addrState" value="#{customersController.selected.addrState}" title="#{bundle.EditCustomersTitle_addrState}" />
+                                <h:outputLabel value="#{bundle.EditCustomersLabel_countryId}" for="countryId" />
+                                <p:inputText id="countryId" value="#{customersController.selected.countryId}" title="#{bundle.EditCustomersTitle_countryId}" />
+                                <h:outputLabel value="#{bundle.EditCustomersLabel_telephone}" for="telephone" />
+                                <p:inputText id="telephone" value="#{customersController.selected.telephone}" title="#{bundle.EditCustomersTitle_telephone}" required="false" requiredMessage="#{bundle.EditCustomersRequiredMessage_telephone}"/>
+                                <h:outputLabel value="#{bundle.EditCustomersLabel_fax}" for="fax" />
+                                <p:inputText id="fax" value="#{customersController.selected.fax}" title="#{bundle.EditCustomersTitle_fax}" />
+                            </h:panelGrid>
+                        </p:panel>
+                    </h:panelGrid>
+                    <p:panel id="panel3">
+                        <h:panelGrid columns="2">
+                            <h:outputLabel value="#{bundle.EditCustomersLabel_preferredContact}" for="preferredContact" />
+                            <h:selectOneMenu id="preferredContact" value="#{customersController.selected.preferredContact}" title="#{bundle.EditCustomersTitle_preferredContact}" >
+                                <f:selectItem itemValue="0" itemLabel="Email" />
+                                <f:selectItem itemValue="1" itemLabel="Mobile" />
+                                <f:selectItem itemValue="2" itemLabel="HomePhone" />
+                                <f:selectItem itemValue="3" itemLabel="Any" />
+                                <f:selectItem itemValue="4" itemLabel="None" />
+                            </h:selectOneMenu>
+
+                            <h:outputLabel value="#{bundle.EditCustomersLabel_newsletter}" for="newsletter" />
+                            <h:selectOneMenu id="newsletter" value="#{customersController.selected.newsletter}" title="#{bundle.EditCustomersTitle_newsletter}" >
+                                <f:selectItem itemValue="Y" itemLabel="Send Newsletter" />
+                                <f:selectItem itemValue="N" itemLabel="Dont Send" />
+                            </h:selectOneMenu>
+
+                            <!--
+                            <h:outputLabel value="#{bundle.EditCustomersLabel_groupPricing}" for="groupPricing" />
+                             <h:inputText id="groupPricing" value="#{customersController.selected.groupPricing}" title="#{bundle.EditCustomersTitle_groupPricing}" />
+                            -->
+                            <h:outputLabel value="#{bundle.EditCustomersLabel_emailFormat}" for="emailFormat" />
+                            <h:selectOneMenu id="emailFormat" value="#{customersController.selected.emailFormat}" title="#{bundle.EditCustomersTitle_emailFormat}" required="true" requiredMessage="#{bundle.EditCustomersRequiredMessage_emailFormat}">
+                                <f:selectItem itemValue="HTML" itemLabel="Use HTML" />
+                                <f:selectItem itemValue="TEXT" itemLabel="Plain Text" />
+                            </h:selectOneMenu>
+                            <!--
+                            <h:outputLabel value="#{bundle.EditCustomersLabel_auth}" for="auth" />
+                              <h:inputText id="auth" value="#{customersController.selected.auth}" title="#{bundle.EditCustomersTitle_auth}" />
+                            -->
+                            <h:outputLabel value="#{bundle.EditCustomersLabel_active}" for="active" />
+                            <h:selectOneMenu id="active" value="#{customersController.selected.active}" title="#{bundle.EditCustomersTitle_active}" >
+                                <f:selectItem itemValue="1" itemLabel="Active" />
+                                <f:selectItem itemValue="0" itemLabel="Inactive" />
+
+                            </h:selectOneMenu>
+
+
+                            <h:outputLabel value="#{bundle.EditCustomersLabel_referredby}" for="referredby" />
+                            <h:selectOneMenu id="referredby" value="#{customersController.selected.referredby}" title="#{bundle.EditCustomersTitle_referredby}" >
+                                <f:selectItems value="#{customersController.itemsAvailableSelectOne}"/>
+                            </h:selectOneMenu>
+
+                            <h:outputLabel value="#{bundle.EditCustomersLabel_demographic}" for="demographic" />
+                            <h:outputText id="demographic" value="#{customersController.selected.demograhicTypes.name}" title="#{bundle.EditCustomersTitle_demographic}" />
+
+                        </h:panelGrid>
+                    </p:panel>
+                </h:panelGrid>
+            </h:form>
+        </ui:define>
+    </ui:composition>
+
+</html>

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" >
+
+    <ui:composition template="/template.xhtml">
+        <ui:define name="title">
+            <h:outputText value="#{configMapController.getKey('ViewCustomerImagesTitle')}"></h:outputText>
+        </ui:define>
+        <ui:define name="body">
+            <h:panelGroup id="messagePanel" layout="block">
+                <h:messages errorStyle="color: red" infoStyle="color: green" layout="table"/>
+            </h:panelGroup>
+            <h:form>
+                <p:panel>
+                    <h:panelGrid columns="2">
+                        <h:outputText value="#{configMapController.getKey('ViewCustomerImagesLabel_id')}"/>
+                        <h:outputText value="#{customerImagesController.selected.id}" title="#{configMapController.getKey('ViewCustomerImagesTitle_id')}"/>
+                        <h:outputText value="#{configMapController.getKey('ViewCustomerImagesLabel_imageType')}"/>
+                        <h:outputText value="#{customerImagesController.selected.imageType}" title="#{configMapController.getKey('ViewCustomerImagesTitle_imageType')}"/>
+                        <h:outputText value="#{configMapController.getKey('ViewCustomerImagesLabel_datetaken')}"/>
+                        <h:outputText value="#{customerImagesController.selected.datetaken}" title="#{configMapController.getKey('ViewCustomerImagesTitle_datetaken')}">
+                            <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                        </h:outputText>
+                        <h:outputText value="#{configMapController.getKey('ViewCustomerImagesLabel_image')}"/>
+                        <p:graphicImage  value="#{customerImagesController.selected.imageStream}" title="#{configMapController.getKey('ViewCustomerImagesTitle_image')}"/>
+                        <h:outputText value="#{configMapController.getKey('ViewCustomerImagesLabel_customerId')}"/>
+                        <h:outputText value="#{customerImagesController.selected.customerId.username}" title="#{configMapController.getKey('ViewCustomerImagesTitle_customerId')}"/>
+                    </h:panelGrid>
+                </p:panel>
+                <h:panelGrid columns="3">
+                    <p:commandButton rendered="#{customerImagesController.isUserInRole('ADMIN')}"  ajax="false"  action="#{customerImagesController.prepareCreate}" value="#{configMapController.getKey('ViewCustomerImagesCreateLink')}" />
+
+                    <p:commandButton                                                                 ajax="false"  action="#{customerImagesController.prepareList}" value="#{configMapController.getKey('ViewCustomerImagesShowAllLink')}"/>
+
+                    <p:commandButton rendered="#{customerImagesController.isUserInRole('ADMIN')}"  ajax="false"  action="#{customerImagesController.destroyAndView}" value="#{configMapController.getKey('ViewCustomerImagesDestroyLink')}"/>
+                </h:panelGrid>
+            </h:form>
+        </ui:define>
+    </ui:composition>
+
+</html>

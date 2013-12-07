@@ -1,0 +1,38 @@
+/* Copyright (C) YOOtheme GmbH, YOOtheme Proprietary Use License (http://www.yootheme.com/license) */
+
+/*Background Mint*/
+
+#page {	background: #d3fcf5; }
+
+#block-main { 
+	border-color: #c8efe8;
+	border-color: rgba(0,0,0,0.05);
+	background-color: #e9fdfa;
+	background-color: rgba(255,255,255,0.5);
+}
+
+#block-main > div {
+	border-color: #ebebeb;
+	border-color: rgba(0,0,0,0.08);
+}
+
+#toolbar,
+.searchbox input,
+.menu-dropdown a.level1,
+.menu-dropdown span.level1 { color: #697e7a; }
+
+#toolbar .menu-line li { background-image: url(../../images/background/mint/menu_line_item.png); }
+#toolbar .menu-line li:first-child { background: none; }
+
+.searchbox {
+	background-color: #c8efe8;
+	background-color: rgba(0,0,0,0.05);
+	box-shadow: 0 1px 1px rgba(0,0,0,0.2) inset,
+				0 0 1px rgba(255,255,255,0.4);
+}
+
+.searchbox input:-moz-placeholder { color: #91ada8; }
+.searchbox input::-webkit-input-placeholder { color: #91ada8; }
+.searchbox input.placeholder { color: #91ada8; }
+
+.searchbox.loading button { background: url(../../images/background/mint/searchbox_loader.gif) 50% 50% no-repeat; }

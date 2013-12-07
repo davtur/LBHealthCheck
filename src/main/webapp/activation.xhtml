@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" >
+    <body>
+
+        <ui:composition template="/template.xhtml">
+
+            <ui:define name="title">
+                <h2> Pure Fitness Manly Password Reset</h2>
+            </ui:define>
+
+            <ui:define name="body">
+                <h:panelGroup layout="block" rendered="#{activationBean.valid}">
+                    <div >
+                        <strong>
+                    <p>  You have been sent an email with a password reset link.</p>
+                    <p>  This is the email account that you provided to Pure Fitness Manly.</p>
+                    <p>  Please go to your email and click this link within 10 minutes to reset your password.</p>
+                    <p>  Note: You will be required to change your password when you are logged in.</p>
+                        </strong>
+                    </div>
+                    <h1> </h1>
+                    <h1> </h1>
+                    <div>
+                    <p>  If you still experience problems or if the email is removed by an overzealous spam filter,</p>
+                    <p>  please call <strong>0433818067</strong> or email <a href="mailto:sarah@purefitnessmanly.com.au">sarah@purefitnessmanly.com.au</a> to have your password reset.</p>
+                    </div>
+                    <h1> </h1>
+                    <h1> </h1>
+                </h:panelGroup>
+                <h:panelGroup layout="block" rendered="#{!activationBean.valid}">
+                    <p>The online password reset failed. Did you put the correct username in the login box before clicking the password reset button?</p> 
+                    <p>Please call <strong>0433818067</strong> or email <a href="mailto:sarah@purefitnessmanly.com.au">sarah@purefitnessmanly.com.au</a> to have your password reset or try again by clicking the back button on your web browser.</p> 
+                    
+                </h:panelGroup>
+
+            </ui:define>
+
+        </ui:composition>
+
+    </body>
+</html>

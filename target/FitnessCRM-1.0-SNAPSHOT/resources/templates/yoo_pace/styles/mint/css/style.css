@@ -1,0 +1,279 @@
+/* Copyright (C) YOOtheme GmbH, YOOtheme Proprietary Use License (http://www.yootheme.com/license) */
+
+/*
+ * Style Style Sheet - Defines the main look like colors and backgrounds
+ * Not all style related CSS is included, only colors and backgrounds which may change for different theme styles
+ */
+
+
+/* Base
+----------------------------------------------------------------------------------------------------*/
+
+a { color: #7fc6c9; }
+
+a:hover,
+em, code { color: #619799; }
+
+ins, mark { background-color: #7fc6c9; }
+ins { color: #446a6b; }
+
+::-moz-selection { background: #7fc6c9; }
+::selection { background: #7fc6c9; }
+
+/* Layout
+----------------------------------------------------------------------------------------------------*/
+
+#totop-scroller { background-image: url(../images/totop_scroller.png); }
+
+/* Menus
+----------------------------------------------------------------------------------------------------*/
+
+.menu-dropdown li.active .level1,
+.menu-dropdown li.level1.hover .level1 { background: #8ed5d8; }
+
+.menu-dropdown li:nth-child(6n-4).active .level1,
+.menu-dropdown li:nth-child(6n-4).level1.hover .level1 { background: #86ced0; }
+
+.menu-dropdown li:nth-child(6n-3).active .level1,
+.menu-dropdown li:nth-child(6n-3).level1.hover .level1 { background: #7fc6c9; }
+
+.menu-dropdown li:nth-child(6n-2).active .level1,
+.menu-dropdown li:nth-child(6n-2).level1.hover .level1 { background: #77bec1; }
+
+.menu-dropdown li:nth-child(6n-1).active .level1,
+.menu-dropdown li:nth-child(6n-1).level1.hover .level1 { background: #6fb7b9; }
+
+.menu-dropdown li:nth-child(6n).active .level1,
+.menu-dropdown li:nth-child(6n).level1.hover .level1 { background: #67afb1; }
+
+.menu-dropdown li.active .level1:after,
+.menu-dropdown li.level1.hover .level1:after { background-image: url(../images/menu_dropdown_arrow.png); }
+
+.menu-dropdown li:nth-child(6n-4).active .level1:after,
+.menu-dropdown li:nth-child(6n-4).level1.hover .level1:after { background-image: url(../images/menu_dropdown_arrow_2.png); }
+
+.menu-dropdown li:nth-child(6n-3).active .level1:after,
+.menu-dropdown li:nth-child(6n-3).level1.hover .level1:after { background-image: url(../images/menu_dropdown_arrow_3.png); }
+
+.menu-dropdown li:nth-child(6n-2).active .level1:after,
+.menu-dropdown li:nth-child(6n-2).level1.hover .level1:after { background-image: url(../images/menu_dropdown_arrow_4.png); }
+
+.menu-dropdown li:nth-child(6n-1).active .level1:after,
+.menu-dropdown li:nth-child(6n-1).level1.hover .level1:after { background-image: url(../images/menu_dropdown_arrow_5.png); }
+
+.menu-dropdown li:nth-child(6n).active .level1:after,
+.menu-dropdown li:nth-child(6n).level1.hover .level1:after { background-image: url(../images/menu_dropdown_arrow_6.png); }
+
+.menu-dropdown a.level3 { background-image: url(../images/menu_dropdown_level3.png); }
+
+.menu-dropdown a.level2:hover,
+.menu-dropdown a.current.level2, 
+.menu-dropdown a.level3:hover,
+.menu-dropdown a.current.level3 { color: #7fc6c9; }
+
+.menu-sidebar li.level1 .level1.active { 
+	background: #7fc6c9;
+	background: -moz-linear-gradient(top, #8ed5d8, #7fc6c9);
+	background: -webkit-linear-gradient(top, #8ed5d8, #7fc6c9);
+	background: -o-linear-gradient(top, #8ed5d8, #7fc6c9);
+	background: linear-gradient(to bottom, #8ed5d8, #7fc6c9);
+}
+
+.menu-sidebar li.parent .level1.active:before { background-image: url(../images/menu_sidebar_parent_active.png); }
+
+.menu-sidebar .level2 a > span { background-image: url(../images/menu_sidebar_level2.png); }
+
+.menu-sidebar .level2 a:hover > span,
+.menu-sidebar .level2 a.current > span { color: #7fc6c9; }
+
+/* Modules
+----------------------------------------------------------------------------------------------------*/
+
+.module .badge { background-image: url(../images/module_badges.png); }
+
+.mod-outline-header .module-title {
+	background: #7fc6c9;
+	background: -o-linear-gradient(top, #8ed5d8, #7fc6c9);
+	background: -webkit-linear-gradient(top, #8ed5d8, #7fc6c9);
+	background: -moz-linear-gradient(top, #8ed5d8, #7fc6c9);
+	background: linear-gradient(to bottom, #8ed5d8, #7fc6c9);
+}
+
+.mod-outline-header .module-title:before { background-image: url(../images/mod_headbox_arrow.png); }
+
+/* Colors used for Module Box Color:
+#7fc6c9 main color
+#619799 mod box color selection background, link hover, code, em
+#446a6b mod box color em, input, sidebar menu level2
+#72b2b5 #68a2a5 IE fallback colors
+#c1fffa mod box color link
+*/
+
+.mod-box-color { background: #7fc6c9; }
+
+/* Base */
+.mod-box-color a { color: #c1fffa; }
+.mod-box-color em, 
+.mod-box-color code { color: #446a6b; }
+.mod-box-color a:hover { color: #619799; }
+
+.mod-box-color ::-moz-selection { background: #619799; }
+.mod-box-color ::selection { background: #619799; }
+
+.mod-box-color .menu-sidebar li.level1 > span,
+.mod-box-color .menu-sidebar li.level1 > a { background: #72b2b5; }
+
+.mod-box-color .menu-sidebar li.level1:hover .level1 {
+	background: #68a2a5;
+	background: rgba(0,0,0,0.08);
+	color: #446a6b;
+}
+
+.mod-box-color .menu-sidebar li.level1 .level1.active { 
+	box-shadow: 0 -1px 0 #72b2b5 inset;
+	background: #fff;
+	color: #72b2b5;
+}
+
+.mod-box-color .menu-sidebar .level2 a { color: #446a6b; }
+
+/* Tools for Module Box Color */
+.mod-box-color .button-default {
+	background: #72b2b5;
+	background: rgba(0,0,0,0.08);
+	color: #446a6b;
+}
+
+.mod-box-color .button-default:hover {
+	background: #68a2a5;
+	background: rgba(0,0,0,0.15);
+	color: #446a6b;
+}
+
+.mod-box-color .button-default:active {
+	background: #619799;
+	background: rgba(0,0,0,0.2);
+}
+
+.mod-box-color .button-primary,
+.mod-box-color form.style button,
+.mod-box-color form.style input[type="button"],
+.mod-box-color form.style input[type="submit"] { color: #72b2b5; }
+
+.mod-box-color .button-primary:hover,
+.mod-box-color form.style button:hover,
+.mod-box-color form.style input[type="button"]:hover,
+.mod-box-color form.style input[type="submit"]:hover { color: #446a6b; }
+
+.mod-box-color ul.line > li { 	
+	border-color: #72b2b5;
+	border-color: rgba(0,0,0,0.08);
+}
+
+.mod-box-color ul.line li > a:hover { color: #619799; }
+
+.mod-box-color ul.zebra > li { 
+	border-bottom: 1px solid #72b2b5;
+	border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+.mod-box-color ul.zebra > li:first-child { 	
+	border-top: 1px solid #72b2b5;
+	border-top: 1px solid rgba(0,0,0,0.1);
+}
+
+.mod-box-color form.style input[type="text"],
+.mod-box-color form.style input[type="password"], 
+.mod-box-color form.style textarea, 	
+.mod-box-color form.style select { 
+	background: #72b2b5;
+	background: rgba(0,0,0,0.03);
+	color: #446a6b;
+}
+
+.mod-box-color form.style input[type="text"]:focus,
+.mod-box-color form.style input[type="password"]:focus, 
+.mod-box-color form.style textarea:focus, 	
+.mod-box-color form.style select:focus { 
+	background: #68a2a5;
+	background: rgba(0,0,0,0.1);
+	color: #355556;
+}
+
+
+/* Tools
+----------------------------------------------------------------------------------------------------*/
+
+.button-primary,
+form.style button,
+form.style input[type="button"],
+form.style input[type="submit"] {
+	background: #7fc6c9;
+	background: -moz-linear-gradient(top, #8ed5d8, #7fc6c9);
+	background: -webkit-linear-gradient(top, #8ed5d8, #7fc6c9);
+	background: -o-linear-gradient(top, #8ed5d8, #7fc6c9);
+	background: linear-gradient(to bottom, #8ed5d8, #7fc6c9);
+}
+
+.button-primary:hover,
+form.style button:hover,
+form.style input[type="button"]:hover,
+form.style input[type="submit"]:hover {
+	background: #8ed5d8;
+	background: -moz-linear-gradient(top, #7fc6c9, #8ed5d8);
+	background: -webkit-linear-gradient(top, #7fc6c9, #8ed5d8);
+	background: -o-linear-gradient(top, #7fc6c9, #8ed5d8);
+	background: linear-gradient(to bottom, #7fc6c9, #8ed5d8);
+	color: #446a6b;
+}
+
+.button-primary:active,
+form.style button:active,
+form.style input[type="button"]:active,
+form.style input[type="submit"]:active {
+	background: #72b2b5;
+	background: -moz-linear-gradient(top, #72b2b5, #7fc6c9);
+	background: -webkit-linear-gradient(top, #72b2b5, #7fc6c9);
+	background: -o-linear-gradient(top, #72b2b5, #7fc6c9);
+	background: linear-gradient(to bottom, #72b2b5, #7fc6c9);
+}
+
+ul.line li > a:hover { color: #7fc6c9; }
+
+ul.line-icon li { background-image: url(../../../images/tools/list_icon.png); }
+
+ul.line-bullet > li { background-image: url(../images/tools/list_bullet.png); }
+
+ul.check > li { background-image: url(../images/tools/list_check.png); }
+
+em.box { color: #7fc6c9; }
+
+/* System
+----------------------------------------------------------------------------------------------------*/
+
+#system .item > header time .month { background: #7fc6c9; }
+
+#system .item > .links a { background-image: url(../images/tools/system_item_links.png); }
+
+#system .pagination strong {
+	background: #7fc6c9;
+	background: -o-linear-gradient(top, #7fc6c9, #8ed5d8);
+	background: -webkit-linear-gradient(top, #7fc6c9, #8ed5d8);
+	background: -moz-linear-gradient(top, #7fc6c9, #8ed5d8);
+	background: linear-gradient(to bottom, #7fc6c9, #8ed5d8);
+}
+
+.searchbox .results li.more-results:hover { color: #7fc6c9; }
+
+.searchbox .results li.result.selected { background: #7fc6c9; }
+
+/* Extensions
+----------------------------------------------------------------------------------------------------*/
+
+.image-circle .spotlight .overlay-default > div,
+.wk-ie .image-circle .spotlight .overlay-default { background-image: url(../images/widgetkit/magnifier.png); }
+
+/* Custom
+----------------------------------------------------------------------------------------------------*/
+
+.frontpage-tabs p.subtitle,
+.grid-seperator .subtitle { color: #7fc6c9; }

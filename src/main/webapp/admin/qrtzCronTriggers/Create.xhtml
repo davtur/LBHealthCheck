@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" >
+
+    <ui:composition template="/template.xhtml">
+        <ui:define name="title">
+            <h:outputText value="#{configMapController.getKey('CreateQrtzCronTriggersTitle')}"></h:outputText>
+        </ui:define>
+        <ui:define name="body">
+            <h:panelGroup id="messagePanel" layout="block">
+                <h:messages errorStyle="color: red" infoStyle="color: green" layout="table"/>
+            </h:panelGroup>
+            <h:form>
+                <p:panel>
+                    <h:panelGrid columns="2">
+                        <h:outputLabel value="#{configMapController.getKey('CreateQrtzCronTriggersLabel_cronExpression')}" for="cronExpression" />
+                        <h:inputText id="cronExpression" value="#{qrtzCronTriggersController.selected.cronExpression}" title="#{configMapController.getKey('CreateQrtzCronTriggersTitle_cronExpression')}" required="true" requiredMessage="#{configMapController.getKey('CreateQrtzCronTriggersRequiredMessage_cronExpression')}"/>
+                        <h:outputLabel value="#{configMapController.getKey('CreateQrtzCronTriggersLabel_timeZoneId')}" for="timeZoneId" />
+                        <h:inputText id="timeZoneId" value="#{qrtzCronTriggersController.selected.timeZoneId}" title="#{configMapController.getKey('CreateQrtzCronTriggersTitle_timeZoneId')}" />
+                        <h:outputLabel value="#{configMapController.getKey('CreateQrtzCronTriggersLabel_qrtzTriggers')}" for="qrtzTriggers" />
+                        <h:selectOneMenu id="qrtzTriggers" value="#{qrtzCronTriggersController.selected.qrtzTriggers}" title="#{configMapController.getKey('CreateQrtzCronTriggersTitle_qrtzTriggers')}" required="true" requiredMessage="#{configMapController.getKey('CreateQrtzCronTriggersRequiredMessage_qrtzTriggers')}">
+                            <f:selectItems value="#{qrtzTriggersController.itemsAvailableSelectOne}"/>
+                        </h:selectOneMenu>
+                    </h:panelGrid>
+                </p:panel>
+                <br />
+                <p:commandButton   ajax="false"   action="#{qrtzCronTriggersController.create}" value="#{configMapController.getKey('CreateQrtzCronTriggersSaveLink')}" />
+                <br />
+                <br />
+                <p:commandButton   ajax="false"   action="#{qrtzCronTriggersController.prepareList}" value="#{configMapController.getKey('CreateQrtzCronTriggersShowAllLink')}" immediate="true"/>
+                <br />
+                <br />
+                <p:commandButton  ajax="false"   value="#{configMapController.getKey('CreateQrtzCronTriggersIndexLink')}" action="/index" immediate="true" />
+            </h:form>
+        </ui:define>
+    </ui:composition>
+
+</html>

@@ -1,0 +1,217 @@
+<?xml version='1.0' encoding='UTF-8' ?> 
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+    <f:view contentType="text/html">
+        <h:head>
+            <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" ></meta>
+            <title><ui:insert name="title">Default Title</ui:insert></title>
+            <link rel="stylesheet" href="/FitnessStats/resources/templates/yoo_pace/css/base.css" />
+            <link rel="stylesheet" href="/FitnessStats/resources/templates/yoo_pace/css/layout.css" />
+            <link rel="stylesheet" href="/FitnessStats/resources/templates/yoo_pace/css/menus.css" />
+            <style>.wrapper { max-width: 980px; }
+                .menu-dropdown a.level1 > span, .menu-dropdown span.level1 > span { width: 70px; }
+                #header, #block-main { margin-left: 89px; }
+                #maininner { width: 100%; }
+                #menu .dropdown { width: 250px; }
+                #menu .columns2 { width: 500px; }
+                #menu .columns3 { width: 750px; }
+                #menu .columns4 { width: 1000px; }</style>
+            <link rel="stylesheet" href="/FitnessStats/resources/templates/yoo_pace/css/modules.css" />
+            <link rel="stylesheet" href="/FitnessStats/resources/templates/yoo_pace/css/tools.css" />
+            <link rel="stylesheet" href="/FitnessStats/resources/templates/yoo_pace/css/system.css" />
+            <link rel="stylesheet" href="/FitnessStats/resources/templates/yoo_pace/css/extensions.css" />
+            <link rel="stylesheet" href="/templates/yoo_pace/css/custom.css" />
+            <link rel="stylesheet" href="/templates/yoo_pace/css/purefitness.css" />
+            <link rel="stylesheet" href="/templates/yoo_pace/css/animation.css" />
+            <link rel="stylesheet" href="/templates/yoo_pace/css/background/ocean.css" />
+            <link rel="stylesheet" href="/templates/yoo_pace/css/font1/arial.css" />
+            <link rel="stylesheet" href="/templates/yoo_pace/css/font2/pt.css" />
+            <link rel="stylesheet" href="/templates/yoo_pace/css/font3/arial.css" />
+            <link rel="stylesheet" href="/templates/yoo_pace/styles/deep_blue/css/style.css" />
+            <link rel="stylesheet" href="/templates/yoo_pace/css/responsive.css" />
+            <link rel="stylesheet" href="/templates/yoo_pace/css/print.css" />
+            <link rel="stylesheet" href="/templates/yoo_pace/fonts/pt.css" />
+        </h:head>
+
+        <h:body id="page_bg">
+
+            <div id="wrapper">
+                <div id="top">
+
+
+                </div>
+                <div id="header">
+                    <div class="newsflash">
+                        <div id="ajaxStatus">
+
+                            <p:ajaxStatus>
+                                <f:facet name="prestart">
+                                    <h:outputText value="Working..." />
+                                </f:facet>
+                                <f:facet name="error">
+                                    <h:outputText value="Error!" />
+                                </f:facet>
+                                <f:facet name="success">
+                                    <h:outputText value="" />
+                                </f:facet>
+                            </p:ajaxStatus></div>
+                    </div>
+                    <div class="cpathway"><span class="breadcrumbs pathway">
+                        </span>
+
+                    </div>
+                    <div class="clr"></div>
+                    <div id="pillmenu">
+                        <h:form id="menuForm">
+                            <p:growl id="growl" showDetail="true"/>
+
+
+                            <p:menubar id="mainmenubar1" autoDisplay="true">
+
+                                <p:submenu  label="Admin" rendered="#{customersController.isUserInRole('ADMIN')}"  id="adminMenu1" >
+                                    <p:menuitem
+                                        id="customers"                              
+                                        action="/admin/customers/List.xhtml" value="Customers"  ajax="false"   >                        
+                                    </p:menuitem>
+                                    <p:menuitem
+                                        id="statstaken"                              
+                                        action="/admin/statsTaken/List.xhtml" value="Statistics"  ajax="false"   >                        
+                                    </p:menuitem>
+                                    <p:menuitem
+                                        id="sessionhist"
+                                        action="/admin/sessionHistory/List.xhtml"  ajax="false" value="Session History"  >
+                                    </p:menuitem>
+                                    <p:menuitem
+                                        id="photos"                              
+                                        action="/admin/customerImages/List.xhtml" ajax="false"  value="Photos"   >                        
+                                    </p:menuitem>
+                                    <p:menuitem
+                                        id="goals"                              
+                                        action="/admin/customerGoals/List.xhtml" ajax="false"  value="Goals"    >                       
+                                    </p:menuitem>
+                                    <p:menuitem
+                                        id="emailqueue"                              
+                                        action="/admin/emailQueue/List.xhtml" ajax="false"  value="EmailQueue"    >                       
+                                    </p:menuitem>
+                                    <p:menuitem
+                                        id="emails"                              
+                                        action="/admin/emailQueue/CreateEmail.xhtml" ajax="false"  value="New Email"    >                       
+                                    </p:menuitem>
+                                   <p:menuitem
+                                        id="currency"                              
+                                        action="/admin/currency/List.xhtml" ajax="false"  value="Currency"    >                       
+                                    </p:menuitem>
+                                   <p:menuitem
+                                        id="invoice"                              
+                                        action="/admin/invoice/List.xhtml" ajax="false"  value="Invoice"    >                       
+                                    </p:menuitem>
+                                   <p:menuitem
+                                        id="invoiceLine"                              
+                                        action="/admin/invoiceLine/List.xhtml" ajax="false"  value="InvoiceLine"    >                       
+                                    </p:menuitem>
+                                   <p:menuitem
+                                        id="invoiceLineType"                              
+                                        action="/admin/invoiceLineType/List.xhtml" ajax="false"  value="Invoice Line Type"    >                       
+                                    </p:menuitem>
+                                   <p:menuitem
+                                        id="item"                              
+                                        action="/admin/item/List.xhtml" ajax="false"  value="Item"    >                       
+                                    </p:menuitem>
+
+                                </p:submenu>
+                                <p:submenu  label="Maintenence" rendered="#{customersController.isUserInRole('ADMIN')}"  id="adminMenu2" >
+                                    <p:menuitem
+                                        id="demographic"                              
+                                        action="/admin/demograhicTypes/List.xhtml"  ajax="false" value="Edit DemograhicTypes Items" >                         
+                                    </p:menuitem>
+                                    <p:menuitem
+                                        id="groups"                              
+                                        action="/admin/groups/List.xhtml"  ajax="false" value="Edit Groups Items"    >                       
+                                    </p:menuitem>
+
+                                    <p:menuitem
+                                        id="sessiontype"                              
+                                        action="/admin/sessionTypes/List.xhtml" ajax="false" value="Edit SessionTypes Items"    >                        
+                                    </p:menuitem>
+                                    <p:menuitem
+                                        id="stats"                              
+                                        action="/admin/stat/List.xhtml" ajax="false" value="Edit Statistics"   >                        
+                                    </p:menuitem>
+                                    <p:menuitem
+                                        id="stattypes"                              
+                                        action="/admin/statTypes/List.xhtml" ajax="false" value="Edit Stat Types"    >                        
+                                    </p:menuitem>
+                                    <p:menuitem
+                                        id="crontriggers"                              
+                                        action="/admin/qrtzCronTriggers/List.xhtml" ajax="false" value="Job Cron Triggers"    >                        
+                                    </p:menuitem>
+                                    <p:menuitem
+                                        id="simpleTriggers"                              
+                                        action="/admin/qrtzSimpleTriggers/List.xhtml" ajax="false" value="Job Simple Triggers"    >                        
+                                    </p:menuitem>
+                                    <p:menuitem
+                                        id="jobDetails"                              
+                                        action="/admin/qrtzJobDetails/List.xhtml" ajax="false" value="Job Details"    >                        
+                                    </p:menuitem>
+                                    <p:menuitem
+                                        id="webMonitor"                              
+                                        action="/admin/monitor/websiteMonitor/List.xhtml" ajax="false" value="Monitoring"    >                        
+                                    </p:menuitem>
+                                    <p:menuitem
+                                        id="configMap"                              
+                                        action="/admin/configMap/List.xhtml" ajax="false" value="Configuration"    >                        
+                                    </p:menuitem>
+                                    <p:menuitem
+                                        id="monitorCharts"                              
+                                        action="/admin/monitoringcharts/List.xhtml" ajax="false" value="Charts"    >                        
+                                    </p:menuitem>
+                                    <p:menuitem
+                                        id="mobile"                              
+                                        action="/mobile/sessionHistory/List.xhtml" ajax="false"  value="Mobile"    >                       
+                                    </p:menuitem>
+
+
+
+                                </p:submenu>
+                                <p:submenu label="User" rendered="#{customersController.isUserInRole('USER')}" id="logout1" >
+                                    <p:menuitem
+                                        id="myStats"
+                                        action="/index.xhtml" ajax="false" value="My Stats"  >
+                                    </p:menuitem>
+                                    <p:menuitem
+                                        id="myDetails"
+                                        action="/myDetails.xhtml" ajax="false" value="My Details"  >
+                                    </p:menuitem>
+                                    <p:menuitem
+                                        id="mySessions"
+                                        action="/mySessions.xhtml" ajax="false" value="My Sessions"  >
+                                    </p:menuitem>
+
+                                    <p:menuitem  action="#{customersController.logout}"
+                                                 id="logout"
+                                                 value="Logout" >
+                                    </p:menuitem>
+
+                                </p:submenu>
+                            </p:menubar>
+                        </h:form>
+                    </div>
+
+                </div>
+                <h1>
+                    <ui:insert name="title">Default Title</ui:insert>
+                </h1>
+                <div>
+                    <ui:insert name="body">Default Body</ui:insert>
+                </div>
+                <div id="footer">
+
+                </div>
+            </div>
+        </h:body>
+    </f:view>
+</html>

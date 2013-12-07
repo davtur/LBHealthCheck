@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" >
+
+    <ui:composition template="/template.xhtml">
+        <ui:define name="title">
+            <h:outputText value="#{configMapController.getKey('ViewMonitoringchartsTitle')}"></h:outputText>
+        </ui:define>
+        <ui:define name="body">
+            <h:panelGroup id="messagePanel" layout="block">
+                <h:messages errorStyle="color: red" infoStyle="color: green" layout="table"/>
+            </h:panelGroup>
+            <h:form>
+                <p:panel>
+                    <h:panelGrid columns="2">
+                        <h:outputText value="#{configMapController.getKey('ViewMonitoringchartsLabel_id')}"/>
+                        <h:outputText value="#{monitoringchartsController.selected.id}" title="#{configMapController.getKey('ViewMonitoringchartsTitle_id')}"/>
+                        <h:outputText value="#{configMapController.getKey('ViewMonitoringchartsLabel_type')}"/>
+                        <h:outputText value="#{monitoringchartsController.selected.type}" title="#{configMapController.getKey('ViewMonitoringchartsTitle_type')}"/>
+                        <h:outputText value="#{configMapController.getKey('ViewMonitoringchartsLabel_date')}"/>
+                        <h:outputText value="#{monitoringchartsController.selected.date}" title="#{configMapController.getKey('ViewMonitoringchartsTitle_date')}">
+                            <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                        </h:outputText>
+                        <h:outputText value="#{configMapController.getKey('ViewMonitoringchartsLabel_chart')}"/>
+                        <h:outputText value="#{monitoringchartsController.selected.chart}" title="#{configMapController.getKey('ViewMonitoringchartsTitle_chart')}"/>
+                    </h:panelGrid>
+                </p:panel>
+                <br />
+                <p:commandButton rendered="#{monitoringchartsController.isUserInRole('ADMIN')}"  ajax="false"  action="#{monitoringchartsController.destroyAndView}" value="#{configMapController.getKey('ViewMonitoringchartsDestroyLink')}"/>
+                <br />
+                <br />
+                <p:commandButton rendered="#{monitoringchartsController.isUserInRole('ADMIN')}"  ajax="false"  action="Edit" value="#{configMapController.getKey('ViewMonitoringchartsEditLink')}"/>
+                <br />
+                <p:commandButton rendered="#{monitoringchartsController.isUserInRole('ADMIN')}"  ajax="false"  action="#{monitoringchartsController.prepareCreate}" value="#{configMapController.getKey('ViewMonitoringchartsCreateLink')}" />
+                <br />
+                <p:commandButton                                                                 ajax="false"  action="#{monitoringchartsController.prepareList}" value="#{configMapController.getKey('ViewMonitoringchartsShowAllLink')}"/>
+                <br />
+                <br />
+                <p:commandButton                                                                 ajax="false"  value="#{configMapController.getKey('ViewMonitoringchartsIndexLink')}" action="/index" immediate="true" />
+
+            </h:form>
+        </ui:define>
+    </ui:composition>
+
+</html>

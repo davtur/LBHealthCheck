@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core">
+
+    <ui:composition template="/template.xhtml">
+        <ui:define name="title">
+            <h:outputText value="#{configMapController.getKey('ListParticipantsTitle')}"></h:outputText>
+        </ui:define>
+        <ui:define name="body">
+        <h:form styleClass="jsfcrud_list_form">
+            <h:panelGroup id="messagePanel" layout="block">
+                <h:messages errorStyle="color: red" infoStyle="color: green" layout="table"/>
+            </h:panelGroup>
+            <h:outputText escape="false" value="#{configMapController.getKey('ListParticipantsEmpty')}" rendered="#{participantsController.items.rowCount == 0}"/>
+            <h:panelGroup rendered="#{participantsController.items.rowCount > 0}">
+                <h:outputText value="#{participantsController.pagination.pageFirstItem + 1}..#{participantsController.pagination.pageLastItem + 1}/#{participantsController.pagination.itemsCount}"/>&nbsp;
+                <h:commandLink action="#{participantsController.previous}" value="#{configMapController.getKey('Previous')} #{participantsController.pagination.pageSize}" rendered="#{participantsController.pagination.hasPreviousPage}"/>&nbsp;
+                <h:commandLink action="#{participantsController.next}" value="#{configMapController.getKey('Next')} #{participantsController.pagination.pageSize}" rendered="#{participantsController.pagination.hasNextPage}"/>&nbsp;
+                <h:dataTable value="#{participantsController.items}" var="item" border="0" cellpadding="2" cellspacing="0" rowClasses="jsfcrud_odd_row,jsfcrud_even_row" rules="all" style="border:solid 1px">
+                    <h:column>
+                        <f:facet name="header">
+                            <h:outputText value="#{configMapController.getKey('ListParticipantsTitle_id')}"/>
+                        </f:facet>
+                        <h:outputText value="#{item.id}"/>
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">
+                            <h:outputText value="#{configMapController.getKey('ListParticipantsTitle_customers')}"/>
+                        </f:facet>
+                        <h:outputText value="#{item.customers}"/>
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">
+                            <h:outputText value="#{configMapController.getKey('ListParticipantsTitle_sessionHistory')}"/>
+                        </f:facet>
+                        <h:outputText value="#{item.sessionHistory}"/>
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">
+                            <h:outputText value="&nbsp;"/>
+                        </f:facet>
+                        <h:commandLink action="#{participantsController.prepareView}" value="#{configMapController.getKey('ListParticipantsViewLink')}"/>
+                        <h:outputText value=" "/>
+                        <h:commandLink action="#{participantsController.prepareEdit}" value="#{configMapController.getKey('ListParticipantsEditLink')}"/>
+                        <h:outputText value=" "/>
+                        <h:commandLink action="#{participantsController.destroy}" value="#{configMapController.getKey('ListParticipantsDestroyLink')}"/>
+                    </h:column>
+                </h:dataTable>
+            </h:panelGroup>
+            <br />
+            <h:commandLink action="#{participantsController.prepareCreate}" value="#{configMapController.getKey('ListParticipantsCreateLink')}"/>
+            <br />
+            <br />
+            <h:commandLink value="#{configMapController.getKey('ListParticipantsIndexLink')}" action="/index" immediate="true" />
+        </h:form>
+        </ui:define>
+    </ui:composition>
+
+</html>

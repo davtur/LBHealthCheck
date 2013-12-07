@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.prime.com.tr/ui" >
+
+    <ui:composition template="/template.xhtml">
+        <ui:define name="title">
+            <h:outputText value="#{bundle.ListQrtzJobDetailsTitle}"></h:outputText>
+        </ui:define>
+        <ui:define name="body">
+            <h:form id="listForm1">
+                <h:panelGroup >
+                    <p:commandButton id="scheduleButton" update=":listForm1" actionListener="#{qrtzJobDetailsController.scheduleAllJobs}" value="#{bundle.ListQrtzJobDetailsScheduleJobsLink}"/>
+                    <h:outputText value="    " />
+                    <p:commandButton id="removeButton"  update=":listForm1" action="#{qrtzJobDetailsController.removeAllJobs}" value="#{bundle.ListQrtzJobDetailsRemoveJobsLink}"/>
+                  <!--  <p:commandButton id="createButton" ajax="false" action="#{qrtzJobDetailsController.prepareCreate}" value="#{bundle.ListQrtzJobDetailsCreateLink}"/>   -->           
+                </h:panelGroup>
+                <h:outputText escape="false" value="#{bundle.ListQrtzJobDetailsEmpty}" rendered="#{qrtzJobDetailsController.items.rowCount == 0}"/>
+                <h:panelGroup rendered="#{qrtzJobDetailsController.items.rowCount > 0}">
+                    <p:dataTable value="#{qrtzJobDetailsController.items}"  widgetVar="qrtzJobDetailsTable" var="item"  paginator="true" rows="15"  paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  rowsPerPageTemplate="5,10,15,20,25,50,100" >
+                        <f:facet name="header">
+                            <p:outputPanel>
+                                <h:outputText value="Search all fields:" />
+                                <h:inputText id="globalFilter" onkeyup="qrtzJobDetailsTable.filter()" />
+                            </p:outputPanel>
+                        </f:facet>
+
+                        <p:column sortBy="#{item.qrtzJobDetailsPK.schedName}" filterBy="#{item.qrtzJobDetailsPK.schedName}" headerText="#{bundle.ListQrtzJobDetailsTitle_qrtzJobDetailsPK_schedName}"   >
+                            <f:facet name="header">
+                                <h:outputText value="#{bundle.ListQrtzJobDetailsTitle_qrtzJobDetailsPK_schedName}"/>
+                            </f:facet>
+                            <h:outputText value="#{item.qrtzJobDetailsPK.schedName}"/>
+                        </p:column>
+                        <p:column sortBy="#{item.qrtzJobDetailsPK.jobName}" filterBy="#{item.qrtzJobDetailsPK.jobName}" headerText="#{bundle.ListQrtzJobDetailsTitle_qrtzJobDetailsPK_jobName}"   >
+                            <f:facet name="header">
+                                <h:outputText value="#{bundle.ListQrtzJobDetailsTitle_qrtzJobDetailsPK_jobName}"/>
+                            </f:facet>
+                            <h:outputText value="#{item.qrtzJobDetailsPK.jobName}"/>
+                        </p:column>
+                        <p:column sortBy="#{item.qrtzJobDetailsPK.jobGroup}" filterBy="#{item.qrtzJobDetailsPK.jobGroup}" headerText="#{bundle.ListQrtzJobDetailsTitle_qrtzJobDetailsPK_jobGroup}"   >
+                            <f:facet name="header">
+                                <h:outputText value="#{bundle.ListQrtzJobDetailsTitle_qrtzJobDetailsPK_jobGroup}"/>
+                            </f:facet>
+                            <h:outputText value="#{item.qrtzJobDetailsPK.jobGroup}"/>
+                        </p:column>
+                        <p:column sortBy="#{item.description}" filterBy="#{item.description}" headerText="#{bundle.ListQrtzJobDetailsTitle_description}"   >
+                            <f:facet name="header">
+                                <h:outputText value="#{bundle.ListQrtzJobDetailsTitle_description}"/>
+                            </f:facet>
+                            <h:outputText value="#{item.description}"/>
+                        </p:column>
+                        <p:column sortBy="#{item.jobClassName}" filterBy="#{item.jobClassName}" headerText="#{bundle.ListQrtzJobDetailsTitle_jobClassName}"   >
+                            <f:facet name="header">
+                                <h:outputText value="#{bundle.ListQrtzJobDetailsTitle_jobClassName}"/>
+                            </f:facet>
+                            <h:outputText value="#{item.jobClassName}"/>
+                        </p:column>
+                        <p:column sortBy="#{item.isDurable}" filterBy="#{item.isDurable}" headerText="#{bundle.ListQrtzJobDetailsTitle_isDurable}"   >
+                            <f:facet name="header">
+                                <h:outputText value="#{bundle.ListQrtzJobDetailsTitle_isDurable}"/>
+                            </f:facet>
+                            <h:outputText value="#{item.isDurable}"/>
+                        </p:column>
+                        <p:column sortBy="#{item.isNonconcurrent}" filterBy="#{item.isNonconcurrent}" headerText="#{bundle.ListQrtzJobDetailsTitle_isNonconcurrent}"   >
+                            <f:facet name="header">
+                                <h:outputText value="#{bundle.ListQrtzJobDetailsTitle_isNonconcurrent}"/>
+                            </f:facet>
+                            <h:outputText value="#{item.isNonconcurrent}"/>
+                        </p:column>
+                        <p:column sortBy="#{item.isUpdateData}" filterBy="#{item.isUpdateData}" headerText="#{bundle.ListQrtzJobDetailsTitle_isUpdateData}"   >
+                            <f:facet name="header">
+                                <h:outputText value="#{bundle.ListQrtzJobDetailsTitle_isUpdateData}"/>
+                            </f:facet>
+                            <h:outputText value="#{item.isUpdateData}"/>
+                        </p:column>
+                        <p:column sortBy="#{item.requestsRecovery}" filterBy="#{item.requestsRecovery}" headerText="#{bundle.ListQrtzJobDetailsTitle_requestsRecovery}"   >
+                            <f:facet name="header">
+                                <h:outputText value="#{bundle.ListQrtzJobDetailsTitle_requestsRecovery}"/>
+                            </f:facet>
+                            <h:outputText value="#{item.requestsRecovery}"/>
+                        </p:column>
+                        <p:column sortBy="#{item.jobData}" filterBy="#{item.jobData}" headerText="#{bundle.ListQrtzJobDetailsTitle_jobData}"   >
+                            <f:facet name="header">
+                                <h:outputText value="#{bundle.ListQrtzJobDetailsTitle_jobData}"/>
+                            </f:facet>
+                            <h:outputText value="#{item.jobData}"/>
+                        </p:column>
+                        <p:column>
+                            <f:facet name="header">
+                                <h:outputText value="&nbsp;"/>
+                            </f:facet>
+                            <p:commandButton                                                            ajax="false" action="#{qrtzJobDetailsController.prepareView}" value="#{bundle.ListQrtzJobDetailsViewLink}"/>
+                            <h:outputText value=" "/>
+                            <p:commandButton rendered="#{qrtzJobDetailsController.isUserInRole('ADMIN')}"  ajax="false" action="#{qrtzJobDetailsController.prepareEdit}" value="#{bundle.ListQrtzJobDetailsEditLink}"/>
+                            <h:outputText value=" "/>
+                            <p:commandButton rendered="#{qrtzJobDetailsController.isUserInRole('ADMIN')}"  ajax="false" action="#{qrtzJobDetailsController.destroy}" value="#{bundle.ListQrtzJobDetailsDestroyLink}"/>
+                        </p:column>
+                    </p:dataTable>
+                </h:panelGroup>
+            </h:form>
+        </ui:define>
+    </ui:composition>
+
+</html>

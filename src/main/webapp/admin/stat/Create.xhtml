@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" >
+
+    <ui:composition template="/template.xhtml">
+        <ui:define name="title">
+            <h:outputText value="#{configMapController.getKey('CreateStatTitle')}"></h:outputText>
+        </ui:define>
+        <ui:define name="body">
+            <h:panelGroup id="messagePanel" layout="block">
+                <h:messages errorStyle="color: red" infoStyle="color: green" layout="table"/>
+            </h:panelGroup>
+            <h:form>
+               <p:panel>
+                <h:panelGrid columns="2">
+                     <h:outputLabel value="#{configMapController.getKey('CreateStatLabel_value')}" for="value" />
+                    <h:inputText id="value" value="#{statController.selected.value}" title="#{configMapController.getKey('CreateStatTitle_value')}" required="true" requiredMessage="#{configMapController.getKey('CreateStatRequiredMessage_value')}"/>
+                    <h:outputLabel value="#{configMapController.getKey('CreateStatLabel_statsTakenId')}" for="statsTakenId" />
+                    <h:selectOneMenu id="statsTakenId" value="#{statController.selected.statsTakenId}" title="#{configMapController.getKey('CreateStatTitle_statsTakenId')}" required="true" requiredMessage="#{configMapController.getKey('CreateStatRequiredMessage_statsTakenId')}">
+                        <f:selectItems value="#{statsTakenController.itemsAvailableSelectOne}"/>
+                    </h:selectOneMenu>
+                    <h:outputLabel value="#{configMapController.getKey('CreateStatLabel_statType')}" for="statType" />
+                    <h:selectOneMenu id="statType" value="#{statController.selected.statType}" title="#{configMapController.getKey('CreateStatTitle_statType')}" required="true" requiredMessage="#{configMapController.getKey('CreateStatRequiredMessage_statType')}">
+                        <f:selectItems value="#{statTypesController.itemsAvailableSelectOne}"/>
+                    </h:selectOneMenu>
+                </h:panelGrid>
+                 </p:panel>
+                <br />
+                <p:commandButton   ajax="false"   action="#{statController.create}" value="#{configMapController.getKey('CreateStatSaveLink')}" />
+                <br />
+                <br />
+                <p:commandButton   ajax="false"   action="#{statController.prepareList}" value="#{configMapController.getKey('CreateStatShowAllLink')}" immediate="true"/>
+                <br />
+                <br />
+                <p:commandButton  ajax="false"   value="#{configMapController.getKey('CreateStatIndexLink')}" action="/index" immediate="true" />
+            </h:form>
+        </ui:define>
+    </ui:composition>
+
+</html>

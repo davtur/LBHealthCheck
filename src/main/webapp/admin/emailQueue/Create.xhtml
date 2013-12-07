@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" >
+
+    <ui:composition template="/template.xhtml">
+        <ui:define name="title">
+            <h:outputText value="#{configMapController.getKey('CreateEmailQueueTitle')}"></h:outputText>
+        </ui:define>
+        <ui:define name="body">
+            <h:panelGroup id="messagePanel" layout="block">
+                <h:messages errorStyle="color: red" infoStyle="color: green" layout="table"/>
+            </h:panelGroup>
+            <h:form>
+                <p:panel>
+                    <h:panelGrid columns="2">
+                        <h:outputLabel value="To:" for="pickerpanel" />
+                        <p:panel id="pickerpanel"  >
+                            <p:pickList id="picker"  value="#{emailQueueController.participants}"
+                                        var="cust"
+
+                                        itemLabel="#{cust.firstname} #{cust.lastname}"
+                                        itemValue="#{cust}" converter="#{custConverter}">
+                                <f:facet name="sourceCaption">Customer</f:facet>
+                                <f:facet name="targetCaption">Email List</f:facet>
+                            </p:pickList>
+
+                            <p:dialog  modal="true" showEffect="fade" hideEffect="fade" widgetVar="cityDialog">
+                                <h:panelGrid  id="displayCities" columns="2">
+                                    <h:outputText value="Source: " style="font-weight:bold"/>
+                                    <ui:repeat value="#{emailQueueController.participants.source}" var="item">
+                                        <h:outputText value="#{item}" style="margin-right:5px" />
+                                    </ui:repeat>
+
+                                    <h:outputText value="Target: " style="font-weight:bold"/>
+                                    <ui:repeat  value="#{emailQueueController.participants.target}" var="item">
+                                        <h:outputText value="#{item}" style="margin-right:5px" />
+                                    </ui:repeat>
+                                </h:panelGrid>
+                            </p:dialog>
+                        </p:panel>
+                        <h:outputLabel value="#{configMapController.getKey('CreateEmailQueueLabel_fromaddress')}" for="fromaddress" />
+                        <h:inputText style="width:600px" id="fromaddress" value="#{emailQueueController.selected.fromaddress}" title="#{configMapController.getKey('CreateEmailQueueTitle_fromaddress')}" required="true" requiredMessage="#{configMapController.getKey('CreateEmailQueueRequiredMessage_fromaddress')}"/>
+                        <h:outputLabel value="#{configMapController.getKey('CreateEmailQueueLabel_ccaddresses')}" for="ccaddresses" />
+                        <h:inputTextarea rows="4" cols="75" id="ccaddresses" value="#{emailQueueController.selected.ccaddresses}" title="#{configMapController.getKey('CreateEmailQueueTitle_ccaddresses')}" />
+                        <h:outputLabel value="#{configMapController.getKey('CreateEmailQueueLabel_subject')}" for="subject" />
+                        <h:inputText style="width:600px" id="subject" value="#{emailQueueController.selected.subject}" title="#{configMapController.getKey('CreateEmailQueueTitle_subject')}" required="true" requiredMessage="#{configMapController.getKey('CreateEmailQueueRequiredMessage_subject')}"/>
+                        <h:outputLabel value="#{configMapController.getKey('CreateEmailQueueLabel_message')}" for="message" />
+                        <p:panel>
+                            <h:outputLabel value="#{configMapController.getKey('CreateSessionHistoryLabel_sessiondate')}" for="sessiondate" />
+                            <p:editor id="message" value="#{emailQueueController.selected.message}" widgetVar="editor" width="800" height="400"/>  
+
+                            <h:panelGrid columns="2" style="margin-top:10px">  
+                                <p:commandButton value="Submit" update="display" oncomplete="dlg.show()"  
+                                                 image="ui-icon ui-icon-disk" />  
+                                <p:commandButton type="button" value="Clear" onclick="editor.clear()"  
+                                                 image="ui-icon ui-icon-close" />  
+                            </h:panelGrid>  
+
+                            <p:dialog header="Content" widgetVar="dlg" showEffect="fade" hideEffect="fade" modal="true">           <h:outputText id="display" value="#{editorBean.value}" escape="false" />  
+                            </p:dialog>  
+                        </p:panel>
+
+
+
+                        <h:outputLabel value="#{configMapController.getKey('CreateEmailQueueLabel_sendDate')}" for="sendDate" />
+
+                        <p:calendar id="sendDate" value="#{emailQueueController.selected.sendDate}" mode="inline"
+                                    title="#{configMapController.getKey('CreateEmailQueueTitle_sendDate')}">
+
+                            <p:ajax event="dateSelect" listener="#{emailQueueController.handleDateSelect}" update=":menuForm:growl"  />
+
+                        </p:calendar>   
+
+
+                    </h:panelGrid>
+                </p:panel>
+                <br />
+                <p:commandButton   ajax="false"   actionListener="#{emailQueueController.sendTheEmail}" value="Send Email" />
+                <p:commandButton   ajax="false"   action="#{emailQueueController.create}" value="#{configMapController.getKey('CreateEmailQueueSaveLink')}" />
+                <br />
+                <br />
+                <p:commandButton   ajax="false"   action="#{emailQueueController.prepareList}" value="#{configMapController.getKey('CreateEmailQueueShowAllLink')}" immediate="true"/>
+                <br />
+                <br />
+                <p:commandButton  ajax="false"   value="#{configMapController.getKey('CreateEmailQueueIndexLink')}" action="/index" immediate="true" />
+            </h:form>
+        </ui:define>
+    </ui:composition>
+
+</html>

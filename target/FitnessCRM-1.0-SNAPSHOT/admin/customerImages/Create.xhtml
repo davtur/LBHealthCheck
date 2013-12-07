@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" >
+
+    <ui:composition template="/template.xhtml">
+        <ui:define name="title">
+            <h:outputText value="#{configMapController.getKey('CreateCustomerImagesTitle')}"></h:outputText>
+        </ui:define>
+        <ui:define name="body">
+            <h:panelGroup id="messagePanel" layout="block">
+                <h:messages errorStyle="color: red" infoStyle="color: green" layout="table"/>
+            </h:panelGroup>
+            <h:form id="photoCreate">
+                <p:panel>
+                    <h:panelGrid columns="2">
+                        <h:outputLabel value="#{configMapController.getKey('CreateCustomerImagesLabel_customerId')}" for="customerId" />
+                        <h:outputLabel value="#{configMapController.getKey('CreateCustomerImagesLabel_imageType')}" for="imageType" />
+                        <h:selectOneMenu  valueChangeListener="#{customerImagesController.handleCustomerChange}" id="customerId" value="#{customerImagesController.selected.customerId}" title="#{configMapController.getKey('CreateCustomerImagesTitle_customerId')}" required="true" requiredMessage="#{configMapController.getKey('CreateCustomerImagesRequiredMessage_customerId')}">
+                            <f:selectItems  value="#{customersController.itemsAvailableSelectOneObject}"/>
+                            <p:ajax update=":menuForm:growl" />
+
+                        </h:selectOneMenu>
+
+
+                        <h:selectOneMenu id="imageType" value="#{customerImagesController.selected.imageType}" title="#{configMapController.getKey('CreateCustomerImagesTitle_imageType')}" required="true" requiredMessage="#{configMapController.getKey('CreateCustomerImagesRequiredMessage_imageType')}">
+                            <f:selectItem   itemValue="0" itemLabel="JPEG"/>
+                        </h:selectOneMenu>
+
+
+
+                        <h:outputLabel value="#{configMapController.getKey('CreateCustomerImagesLabel_image')}" for="photo1" />
+                        <h:outputLabel value="#{configMapController.getKey('CreateCustomerImagesLabel_datetaken')}" for="datetaken" />
+                        <p:panel id="photoPanel3" header="Select a photo to upload (jpeg)">
+                            <h:panelGrid columns="2" width="400px">
+                                <p:fileUpload  fileUploadListener="#{customerImagesController.handleFileUpload}" auto="true" update=":photoCreate:photoPanel3,:photoCreate:datetaken,:menuForm:growl,:photoCreate:saveButton" allowTypes="*.jpg;*.JPG;*.jpeg;*.JPEG" sizeLimit="10000000" />
+                                <p:graphicImage  value="#{customerImagesController.uploadedImage}" width="180px" cache="false" id="photo1"/>
+                            </h:panelGrid>
+                        </p:panel>
+
+
+                        <p:calendar id="datetaken" value="#{customerImagesController.selected.datetaken}" mode="inline">
+
+
+                            <p:ajax event="dateSelect" listener="#{customerImagesController.handleDateSelect}" update=":menuForm:growl"  />
+
+                        </p:calendar>
+
+                    </h:panelGrid>
+                    <p:panel id="saveButton">
+
+                        <h:panelGrid  columns="2">
+                            <p:commandButton  disabled="#{customerImagesController.saveButtonDisabled}" update=":photoCreate:photoPanel3,:photoCreate:datetaken,:menuForm:growl,:photoCreate:saveButton"   actionListener="#{customerImagesController.create}" value="#{configMapController.getKey('CreateCustomerImagesSaveLink')}" />
+
+
+                            <p:commandButton   ajax="false"   action="#{customerImagesController.prepareList}" value="#{configMapController.getKey('CreateCustomerImagesShowAllLink')}" immediate="true"/>
+                        </h:panelGrid>
+                    </p:panel>
+                </p:panel>
+
+            </h:form>
+        </ui:define>
+    </ui:composition>
+
+</html>

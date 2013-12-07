@@ -1,0 +1,67 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>Pure Fitness Manly Member Services</title>
+        <link type="text/css" rel="stylesheet" href="/FitnessStats/resources/css/aristo/theme.css"/>
+        <link type="text/css" rel="stylesheet" href="/FitnessStats/resources/css/template.css"/>
+        <script type="text/javascript">
+
+            function passReset(){   
+                //alert("Resetting Password");
+                userString = document.loginFrm.j_username.value;
+                if(userString.trim().length > 0){
+                    redirectURL = "https://services.purefitnessmanly.com.au/FitnessStats/faces/activation.xhtml?key=" + userString;
+                    //redirectURL = "http://localhost:26153/FitnessStats/faces/activation.xhtml?key=" + userString;
+                    // alert(redirectURL);
+                    window.location = redirectURL;
+                }else{
+                    alert("Your username is empty.Please enter your username in the text box under the name label."); 
+                }
+            }
+
+        </script>
+
+    </head>
+    <body id="page_bg">
+        <div id="wrapper">
+            <div id="top">
+
+
+            </div>
+            <div id="header">
+
+            </div>
+            <div id="content" >
+                <div id="content_top" >
+                    <div  id="ptstats_login_wrapper">
+                        <div  id="ptstats_login">
+                            <h1 >Pure Fitness Manly Member Statistics</h1>
+                            <h3 >Login Form</h3>
+                            <FORM name="loginFrm" action="j_security_check" method="POST">
+                                <h4> Name </h4>
+                                <div >
+                                    <p style="color: red"> Authentication Failure: Your username or password was incorrect</p>
+                                    <p><a href="mailto:sarah@purefitnessmanly.com.au" > Click here</a> to email the administrator or call <strong>0433 818 067</strong> if you are having problems accessing this site.</p>
+                                </div>
+                                <input name="j_username" size="15"  type="text"/>
+                                <h4> Password </h4>
+                                <input name="j_password" size="15"  type="password"/><br/><br/>
+                                <input  type="submit" value="Login"/><br/><br/>
+                            </FORM>
+                            <p style="width:300px">If you have forgotten your password, enter your username above and click the Password Reset button below.</p>
+                            <p style="width:300px">If you have forgotten your username, please phone <strong>0433818067</strong> or email <a href="mailto:sarah@purefitnessmanly.com.au">sarah@purefitnessmanly.com.au</a>.</p>
+                            <FORM name="passwordResetForm" action="#" >
+                                <input type="button" value="Reset Password" OnClick="passReset();">
+                             </FORM>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="footer">
+
+            </div>
+        </div>
+    </body>
+</html>

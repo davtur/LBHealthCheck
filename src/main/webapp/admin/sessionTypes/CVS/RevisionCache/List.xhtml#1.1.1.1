@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.prime.com.tr/ui" >
+
+    <ui:composition template="/template.xhtml">
+        <ui:define name="title">
+            <h:outputText value="#{bundle.ListSessionTypesTitle}"></h:outputText>
+        </ui:define>
+        <ui:define name="body">
+        <h:form id="listSessionTypesForm1">
+            <h:panelGroup >
+                <p:commandButton id="createButton" ajax="false" action="#{sessionTypesController.prepareCreate}" value="#{bundle.ListSessionTypesCreateLink}"/>
+            </h:panelGroup>
+            <h:outputText escape="false" value="#{bundle.ListSessionTypesEmpty}" rendered="#{sessionTypesController.items.rowCount == 0}"/>
+            <h:panelGroup rendered="#{sessionTypesController.items.rowCount > 0}">
+                <p:dataTable value="#{sessionTypesController.items}" var="item"  paginator="true" rows="15"  paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  rowsPerPageTemplate="5,10,15,20,25,50,100" >
+                    <p:column sortBy="#{item.id}" >
+                        <f:facet name="header">
+                            <h:outputText value="#{bundle.ListSessionTypesTitle_id}"/>
+                        </f:facet>
+                        <h:outputText value="#{item.id}"/>
+                    </p:column>
+                    <p:column sortBy="#{item.name}" >
+                        <f:facet name="header">
+                            <h:outputText value="#{bundle.ListSessionTypesTitle_name}"/>
+                        </f:facet>
+                        <h:outputText value="#{item.name}"/>
+                    </p:column>
+                    <p:column sortBy="#{item.description}" >
+                        <f:facet name="header">
+                            <h:outputText value="#{bundle.ListSessionTypesTitle_description}"/>
+                        </f:facet>
+                        <h:outputText value="#{item.description}"/>
+                    </p:column>
+                    <p:column>
+                        <f:facet name="header">
+                            <h:outputText value="&nbsp;"/>
+                        </f:facet>
+                        <p:commandButton                                                            ajax="false" action="#{sessionTypesController.prepareView}" value="#{bundle.ListSessionTypesViewLink}"/>
+                        <h:outputText value=" "/>
+                        <p:commandButton rendered="#{sessionTypesController.isUserInRole('ADMIN')}"  ajax="false" action="#{sessionTypesController.prepareEdit}" value="#{bundle.ListSessionTypesEditLink}"/>
+                        <h:outputText value=" "/>
+                        <p:commandButton rendered="#{sessionTypesController.isUserInRole('ADMIN')}"  ajax="false" action="#{sessionTypesController.destroy}" value="#{bundle.ListSessionTypesDestroyLink}"/>
+                    </p:column>
+                </p:dataTable>
+            </h:panelGroup>
+        </h:form>
+        </ui:define>
+    </ui:composition>
+
+</html>

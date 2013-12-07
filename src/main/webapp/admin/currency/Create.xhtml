@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" >
+
+    <ui:composition template="/template.xhtml">
+        <ui:define name="title">
+            <h:outputText value="#{configMapController.getKey('CreateCurrencyTitle')}"></h:outputText>
+        </ui:define>
+        <ui:define name="body">
+            <h:panelGroup id="messagePanel" layout="block">
+                <h:messages errorStyle="color: red" infoStyle="color: green" layout="table"/>
+            </h:panelGroup>
+            <h:form id="formCurrencyCreate1">
+                <p:panel id="panelCurrencyCreate1">
+                    <p:panelGrid columns="2">
+                        <p:outputLabel value="#{configMapController.getKey('CreateCurrencyLabel_id')}" for="id" />
+                        <p:inputText id="id" value="#{currencyController.selected.id}" title="#{configMapController.getKey('CreateCurrencyTitle_id')}" required="true" requiredMessage="#{configMapController.getKey('CreateCurrencyRequiredMessage_id')}"/>
+                        <p:outputLabel value="#{configMapController.getKey('CreateCurrencyLabel_symbol')}" for="symbol" />
+                        <p:inputText id="symbol" value="#{currencyController.selected.symbol}" title="#{configMapController.getKey('CreateCurrencyTitle_symbol')}" required="true" requiredMessage="#{configMapController.getKey('CreateCurrencyRequiredMessage_symbol')}"/>
+                        <p:outputLabel value="#{configMapController.getKey('CreateCurrencyLabel_code')}" for="code" />
+                        <p:inputText id="code" value="#{currencyController.selected.code}" title="#{configMapController.getKey('CreateCurrencyTitle_code')}" required="true" requiredMessage="#{configMapController.getKey('CreateCurrencyRequiredMessage_code')}"/>
+                        <p:outputLabel value="#{configMapController.getKey('CreateCurrencyLabel_countryCode')}" for="countryCode" />
+                        <p:inputText id="countryCode" value="#{currencyController.selected.countryCode}" title="#{configMapController.getKey('CreateCurrencyTitle_countryCode')}" required="true" requiredMessage="#{configMapController.getKey('CreateCurrencyRequiredMessage_countryCode')}"/>
+                        <p:outputLabel value="#{configMapController.getKey('CreateCurrencyLabel_optlock')}" for="optlock" />
+                        <p:inputText id="optlock" value="#{currencyController.selected.optlock}" title="#{configMapController.getKey('CreateCurrencyTitle_optlock')}" required="true" requiredMessage="#{configMapController.getKey('CreateCurrencyRequiredMessage_optlock')}"/>
+                    </p:panelGrid>
+                </p:panel>
+                <br />
+                <p:commandButton   ajax="false"   action="#{currencyController.create}" value="#{configMapController.getKey('CreateCurrencySaveLink')}" />
+                <br />
+                <br />
+                <p:commandButton   ajax="false"   action="#{currencyController.prepareList}" value="#{configMapController.getKey('CreateCurrencyShowAllLink')}" immediate="true"/>
+            </h:form>
+        </ui:define>
+    </ui:composition>
+
+</html>
