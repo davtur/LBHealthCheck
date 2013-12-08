@@ -24,7 +24,7 @@ import java.util.ResourceBundle;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.ejb.EJB;
+import javax.inject.Inject;
 import javax.imageio.ImageIO;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -47,7 +47,7 @@ import org.quartz.JobDataMap;
  */
 public class renderMonitoringChartsCallable1 implements Callable<CallableTaskResults> {
 
-    @EJB
+    @Inject
     private ConfigMapFacade configMapFacade;
 
     //@PersistenceContext(unitName="FitnessStatsPU")

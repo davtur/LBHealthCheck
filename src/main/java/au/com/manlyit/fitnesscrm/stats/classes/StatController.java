@@ -8,9 +8,9 @@ import au.com.manlyit.fitnesscrm.stats.beans.StatsFacade;
 import au.com.manlyit.fitnesscrm.stats.db.StatsTaken;
 
 import java.io.Serializable;
-import javax.ejb.EJB;
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.SessionScoped;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.enterprise.context.SessionScoped;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 import javax.faces.convert.Converter;
@@ -21,16 +21,16 @@ import javax.faces.model.SelectItem;
 import org.primefaces.event.RowEditEvent;
 import org.primefaces.event.SelectEvent;
 
-@ManagedBean(name = "statController")
+@Named("statController")
 @SessionScoped
 public class StatController implements Serializable {
 
     private Stat current;
     private StatsTaken parent;
     private DataModel items = null;
-    @EJB
+    @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.StatsFacade ejbFacade;
-    @EJB
+    @Inject
     private ConfigMapFacade configMapFacade;
     private PaginationHelper pagination;
     private int selectedItemIndex;

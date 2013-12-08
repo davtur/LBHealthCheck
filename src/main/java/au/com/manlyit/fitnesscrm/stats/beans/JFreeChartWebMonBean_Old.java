@@ -21,9 +21,9 @@ import java.util.GregorianCalendar;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
-import javax.ejb.EJB;
+import javax.inject.Inject;
 import javax.enterprise.context.RequestScoped;
-import javax.faces.bean.ManagedBean;
+import javax.inject.Named;
 import javax.imageio.ImageIO;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
@@ -40,7 +40,7 @@ import org.primefaces.model.StreamedContent;
  *
  * @author david
  */
-@ManagedBean(name = "jFreeChartWebMonBeanold")
+@Named("jFreeChartWebMonBeanold")
 @RequestScoped
 public class JFreeChartWebMonBean_Old implements Serializable {
 
@@ -53,7 +53,7 @@ public class JFreeChartWebMonBean_Old implements Serializable {
     /** Creates a new instance of MeasurementsChart */
     public JFreeChartWebMonBean_Old() {
     }
-    @EJB
+    @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.WebsiteMonitorFacade WebsiteMonitorFacade;
 
     @PostConstruct

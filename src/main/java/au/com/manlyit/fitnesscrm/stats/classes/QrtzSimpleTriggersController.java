@@ -6,9 +6,9 @@ import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PaginationHelper;
 import au.com.manlyit.fitnesscrm.stats.beans.QrtzSimpleTriggersFacade;
 
-import javax.ejb.EJB;
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.SessionScoped;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.enterprise.context.SessionScoped;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 import javax.faces.convert.Converter;
@@ -18,15 +18,15 @@ import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
 import java.io.Serializable;
 
-@ManagedBean(name = "qrtzSimpleTriggersController")
+@Named("qrtzSimpleTriggersController")
 @SessionScoped
 public class QrtzSimpleTriggersController implements Serializable {
 
     private QrtzSimpleTriggers current;
     private DataModel items = null;
-    @EJB
+    @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.QrtzSimpleTriggersFacade ejbFacade;
-    @EJB
+    @Inject
     private ConfigMapFacade configMapFacade;
     private PaginationHelper pagination;
     private int selectedItemIndex;

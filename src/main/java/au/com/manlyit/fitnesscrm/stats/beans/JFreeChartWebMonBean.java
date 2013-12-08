@@ -22,9 +22,9 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
-import javax.ejb.EJB;
-import javax.faces.bean.SessionScoped;
-import javax.faces.bean.ManagedBean;
+import javax.inject.Inject;
+import javax.enterprise.context.SessionScoped;
+import javax.inject.Named;
 import javax.faces.event.ActionEvent;
 import javax.imageio.ImageIO;
 import org.jfree.chart.JFreeChart;
@@ -39,7 +39,7 @@ import org.primefaces.model.StreamedContent;
  *
  * @author david
  */
-@ManagedBean(name = "jFreeChartWebMonBean")
+@Named("jFreeChartWebMonBean")
 @SessionScoped
 public class JFreeChartWebMonBean implements Serializable {
 
@@ -67,9 +67,9 @@ public class JFreeChartWebMonBean implements Serializable {
         }
 
     }
-    @EJB
+    @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.MonitoringchartsFacade monitoringchartsFacadeFacade;
-    @EJB
+    @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.WebsiteMonitorFacade WebsiteMonitorFacade;
 
     @PostConstruct

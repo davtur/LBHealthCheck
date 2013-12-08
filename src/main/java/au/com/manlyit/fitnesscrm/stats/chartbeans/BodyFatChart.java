@@ -9,7 +9,7 @@ import au.com.manlyit.fitnesscrm.stats.db.StatTypes;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.PostConstruct;
-import javax.ejb.EJB;
+import javax.inject.Inject;
 import javax.faces.context.FacesContext;
 import  org.primefaces.model.chart.LineChartSeries;
 import org.primefaces.model.chart.CartesianChartModel;
@@ -20,10 +20,10 @@ import org.primefaces.model.chart.CartesianChartModel;
  */
 
 import javax.enterprise.context.RequestScoped;
-import javax.faces.bean.ManagedBean;
+import javax.inject.Named;
 import java.io.Serializable;
 
-@ManagedBean(name = "bodyFatChart")
+@Named("bodyFatChart")
 @RequestScoped
 public class BodyFatChart  implements Serializable {
 
@@ -34,7 +34,7 @@ public class BodyFatChart  implements Serializable {
     /** Creates a new instance of measurementsChart */
     public BodyFatChart() {
     }
-    @EJB
+    @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.StatTypesFacade ejbStatTypesFacade;
 
     @PostConstruct

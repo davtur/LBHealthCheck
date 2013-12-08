@@ -12,10 +12,10 @@ import java.util.List;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.ejb.EJB;
+import javax.inject.Inject;
 import javax.ejb.EJBException;
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.SessionScoped;
+import javax.inject.Named;
+import javax.enterprise.context.SessionScoped;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 import javax.faces.convert.Converter;
@@ -28,7 +28,7 @@ import javax.persistence.EntityExistsException;
 import javax.persistence.PersistenceException;
 import org.primefaces.event.RowEditEvent;
 
-@ManagedBean(name = "configMapController")
+@Named("configMapController")
 @SessionScoped
 public class ConfigMapController implements Serializable {
 
@@ -38,9 +38,9 @@ public class ConfigMapController implements Serializable {
     private String password1 = "";
     private String password2 = "";
     private boolean password = false;
-    @EJB
+    @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade ejbFacade;
-    @EJB
+    @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade configMapFacade;
     private PaginationHelper pagination;
     private int selectedItemIndex;

@@ -8,7 +8,7 @@ import au.com.manlyit.fitnesscrm.stats.classes.CustomersController;
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import javax.annotation.PostConstruct;
-import javax.ejb.EJB;
+import javax.inject.Inject;
 import javax.faces.context.FacesContext;
 import  org.primefaces.model.chart.LineChartSeries;
 import org.primefaces.model.chart.CartesianChartModel;
@@ -18,14 +18,14 @@ import org.primefaces.model.chart.CartesianChartModel;
  * @author david
  */
 import javax.enterprise.context.RequestScoped;
-import javax.faces.bean.ManagedBean;
+import javax.inject.Named;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 
-@ManagedBean(name = "mySessionsChart1")
+@Named("mySessionsChart1")
 @RequestScoped
 public class MySessionsChart1 implements Serializable {
 
@@ -35,11 +35,11 @@ public class MySessionsChart1 implements Serializable {
     /** Creates a new instance of MeasurementsChart */
     public MySessionsChart1() {
     }
-    @EJB
+    @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.ParticipantsFacade ejbParticipantsFacade;
-    @EJB
+    @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.CustomersFacade ejbCustomerFacade;
-    @EJB
+    @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.SessionHistoryFacade ejbSessionHistoryFacade;
 
     @PostConstruct

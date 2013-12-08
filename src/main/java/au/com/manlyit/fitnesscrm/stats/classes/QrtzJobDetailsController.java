@@ -18,9 +18,9 @@ import java.io.Serializable;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.ejb.EJB;
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.SessionScoped;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.enterprise.context.SessionScoped;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 import javax.faces.convert.Converter;
@@ -54,15 +54,15 @@ import static org.quartz.impl.matchers.GroupMatcher.*;
 
  * 
  */
-@ManagedBean(name = "qrtzJobDetailsController")
+@Named("qrtzJobDetailsController")
 @SessionScoped
 public class QrtzJobDetailsController implements Serializable {
 
     private QrtzJobDetails current;
     private DataModel items = null;
-    @EJB
+    @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.QrtzJobDetailsFacade ejbFacade;
-    @EJB
+    @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade configMapFacade;
     private PaginationHelper pagination;
     private int selectedItemIndex;

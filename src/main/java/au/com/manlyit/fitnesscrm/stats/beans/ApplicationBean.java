@@ -8,13 +8,13 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.faces.bean.ApplicationScoped;
-import javax.faces.bean.ManagedBean;
+import javax.inject.Named;
 
 /**
  *
  * @author david
  */
-@ManagedBean(name = "applicationBean")
+@Named("applicationBean")
 @ApplicationScoped
 public class ApplicationBean {
 

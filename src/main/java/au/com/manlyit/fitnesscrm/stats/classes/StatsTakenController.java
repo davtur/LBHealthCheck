@@ -15,10 +15,10 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import javax.ejb.EJB;
+import javax.inject.Inject;
 import javax.faces.application.FacesMessage;
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.SessionScoped;
+import javax.inject.Named;
+import javax.enterprise.context.SessionScoped;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 import javax.faces.convert.Converter;
@@ -29,7 +29,7 @@ import javax.faces.model.SelectItem;
 
 import org.primefaces.event.SelectEvent;
 
-@ManagedBean(name = "statsTakenController")
+@Named("statsTakenController")
 @SessionScoped
 public class StatsTakenController implements Serializable {
 
@@ -37,17 +37,17 @@ public class StatsTakenController implements Serializable {
     private StatsTaken selectedForDeletion;
     private Stat currentStat;
     private DataModel items = null;
-    @EJB
+    @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.CustomerImagesFacade ejbCustomerImages;
-    @EJB
+    @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.StatsTakenFacade ejbFacade;
-    @EJB
+    @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.StatsFacade ejbStatFacade;
-    @EJB
+    @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.StatTypesFacade ejbStatTypesFacade;
-    @EJB
+    @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.CustomersFacade ejbCustomerFacade;
-    @EJB
+    @Inject
     private ConfigMapFacade configMapFacade;
     private PaginationHelper pagination;
     private int selectedItemIndex;
@@ -475,10 +475,10 @@ public class StatsTakenController implements Serializable {
  import java.text.SimpleDateFormat;
  import java.util.Date;
  import java.util.ResourceBundle;
- import javax.ejb.EJB;
+ import javax.inject.Inject;
  import javax.faces.application.FacesMessage;
- import javax.faces.bean.ManagedBean;
- import javax.faces.bean.SessionScoped;
+ import javax.inject.Named;
+ import javax.enterprise.context.SessionScoped;
  import javax.faces.component.UIComponent;
  import javax.faces.context.FacesContext;
  import javax.faces.convert.Converter;
@@ -488,20 +488,20 @@ public class StatsTakenController implements Serializable {
  import javax.faces.model.SelectItem;
  import org.primefaces.event.DateSelectEvent;
 
- @ManagedBean(name = "statsTakenController")
+ @Named("statsTakenController")
  @SessionScoped
  public class StatsTakenController_old implements Serializable {
 
  private StatsTaken current;
  private Stat currentStat;
  private DataModel items = null;
- @EJB
+ @Inject
  private au.com.manlyit.fitnesscrm.stats.beans.StatsTakenFacade ejbFacade;
- @EJB
+ @Inject
  private au.com.manlyit.fitnesscrm.stats.beans.StatsFacade ejbStatFacade;
- @EJB
+ @Inject
  private au.com.manlyit.fitnesscrm.stats.beans.StatTypesFacade ejbStatTypesFacade;
- @EJB
+ @Inject
  private au.com.manlyit.fitnesscrm.stats.beans.CustomersFacade ejbCustomerFacade;
  private PaginationHelper pagination;
  private int selectedItemIndex;

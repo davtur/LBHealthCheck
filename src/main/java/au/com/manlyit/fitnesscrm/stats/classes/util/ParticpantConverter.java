@@ -6,7 +6,7 @@
 package au.com.manlyit.fitnesscrm.stats.classes.util;
 
 import au.com.manlyit.fitnesscrm.stats.db.Participants;
-import javax.ejb.EJB;
+import javax.inject.Inject;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 import javax.faces.convert.Converter;
@@ -19,7 +19,7 @@ import javax.faces.convert.FacesConverter;
 @FacesConverter(value = "particpantConverter")
 public class ParticpantConverter implements Converter{
 
-   @EJB
+   @Inject
   private  au.com.manlyit.fitnesscrm.stats.beans.ParticipantsFacade ejbFacade;
 
    public ParticpantConverter(){

@@ -15,10 +15,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
-import javax.ejb.EJB;
+import javax.inject.Inject;
 import javax.faces.application.FacesMessage;
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.SessionScoped;
+import javax.inject.Named;
+import javax.enterprise.context.SessionScoped;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 import javax.faces.convert.Converter;
@@ -29,19 +29,19 @@ import javax.faces.model.SelectItem;
 import org.primefaces.event.SelectEvent;
 import org.primefaces.model.DualListModel;
 
-@ManagedBean(name = "emailQueueController")
+@Named("emailQueueController")
 @SessionScoped
 public class EmailQueueController implements Serializable {
 
     private EmailQueue current;
     private DataModel items = null;
-    @EJB
+    @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.EmailQueueFacade ejbFacade;
-    @EJB
+    @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.CustomersFacade ejbCustomerFacade;
-    @EJB
+    @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.ActivationFacade ejbActivationFacade;
-    @EJB
+    @Inject
     private ConfigMapFacade configMapFacade;
     private PaginationHelper pagination;
     private int selectedItemIndex;

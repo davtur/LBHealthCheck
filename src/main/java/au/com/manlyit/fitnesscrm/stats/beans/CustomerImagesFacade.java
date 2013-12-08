@@ -8,7 +8,7 @@ import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.db.CustomerImages;
 import java.util.Date;
 import java.util.List;
-import javax.ejb.EJB;
+import javax.inject.Inject;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -25,7 +25,7 @@ import javax.persistence.criteria.Root;
 @Stateless
 public class CustomerImagesFacade extends AbstractFacade<CustomerImages> {
 
-    @EJB
+    @Inject
     private ConfigMapFacade configMapFacade;
     @PersistenceContext(unitName = "FitnessStatsPU")
     private EntityManager em;

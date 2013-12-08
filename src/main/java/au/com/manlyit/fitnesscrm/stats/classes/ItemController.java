@@ -6,7 +6,6 @@ import au.com.manlyit.fitnesscrm.stats.classes.util.PaginationHelper;
 import au.com.manlyit.fitnesscrm.stats.beans.ItemFacade;
 
 import java.io.Serializable;
-import java.util.ResourceBundle;
 import java.util.Date;
 import javax.enterprise.context.SessionScoped;
 
@@ -33,6 +32,9 @@ public class ItemController implements Serializable {
     private DataModel items = null;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.ItemFacade ejbFacade;
+    @Inject
+    private au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade configMapFacade;
+
     private PaginationHelper pagination;
     private int selectedItemIndex;
 

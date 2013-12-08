@@ -9,7 +9,7 @@ import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.ejb.EJB;
+import javax.inject.Inject;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -26,7 +26,7 @@ import javax.persistence.criteria.Root;
 @Stateless
 public class CustomersFacade extends AbstractFacade<Customers> {
 
-    @EJB
+    @Inject
     private ConfigMapFacade configMapFacade;
     @PersistenceContext(unitName = "FitnessStatsPU")
     private EntityManager em;

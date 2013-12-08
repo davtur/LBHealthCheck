@@ -15,10 +15,10 @@ import java.util.GregorianCalendar;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
-import javax.ejb.EJB;
+import javax.inject.Inject;
 import javax.faces.FacesException;
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.SessionScoped;
+import javax.inject.Named;
+import javax.enterprise.context.SessionScoped;
 import javax.faces.component.UIComponent;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
@@ -33,20 +33,20 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import org.primefaces.event.SelectEvent;
 
-@ManagedBean(name = "customersController")
+@Named("customersController")
 @SessionScoped
 public class CustomersController implements Serializable {
 
     private Customers current;
     private Customers selectedForDeletion;
     private DataModel items = null;
-    @EJB
+    @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.CustomersFacade ejbFacade;
-    @EJB
+    @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.DemograhicTypesFacade ejbDemoFacade;
-    @EJB
+    @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.GroupsFacade ejbGroupsFacade;
-    @EJB
+    @Inject
     private ConfigMapFacade configMapFacade;
     private PaginationHelper pagination;
     private int selectedItemIndex;

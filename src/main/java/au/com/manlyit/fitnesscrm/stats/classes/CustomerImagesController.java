@@ -23,10 +23,10 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
-import javax.ejb.EJB;
+import javax.inject.Inject;
 import javax.faces.application.FacesMessage;
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.SessionScoped;
+import javax.inject.Named;
+import javax.enterprise.context.SessionScoped;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 import javax.faces.convert.Converter;
@@ -48,18 +48,18 @@ import org.primefaces.model.DefaultStreamedContent;
 import org.primefaces.model.StreamedContent;
 import org.primefaces.model.UploadedFile;
 
-@ManagedBean(name = "customerImagesController")
+@Named("customerImagesController")
 @SessionScoped
 public class CustomerImagesController implements Serializable {
 
     private CustomerImages current;
     private CustomerImages selectedForDeletion;
     private DataModel items = null;
-    @EJB
+    @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.CustomerImagesFacade ejbFacade;
-    @EJB
+    @Inject
     private ConfigMapFacade configMapFacade;
-    @EJB
+    @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.CustomersFacade ejbCustomersFacade;
     private PaginationHelper pagination;
     private int selectedItemIndex;

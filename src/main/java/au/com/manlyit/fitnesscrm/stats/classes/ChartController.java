@@ -14,9 +14,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.ejb.EJB;
+import javax.inject.Inject;
 import javax.enterprise.context.SessionScoped;
-import javax.faces.bean.ManagedBean;
+import javax.inject.Named;
 import javax.faces.context.FacesContext;
 import  org.primefaces.model.chart.LineChartSeries;
 
@@ -24,20 +24,20 @@ import  org.primefaces.model.chart.LineChartSeries;
  *
  * @author david
  */
-@ManagedBean(name = "chartController")
+@Named("chartController")
 @SessionScoped
 public class ChartController implements Serializable {
 
     /** Creates a new instance of chartController */
     public ChartController() {
     }
-    @EJB
+    @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.StatsFacade ejbStatsFacade;
-    @EJB
+    @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.StatTypesFacade ejbStatTypesFacade;
-    @EJB
+    @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.StatsTakenFacade ejbStatsTakenFacade;
-    @EJB
+    @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.CustomersFacade ejbCustomerFacade;
     private JsfUtil jsfUtil = new JsfUtil();
     private SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yy");

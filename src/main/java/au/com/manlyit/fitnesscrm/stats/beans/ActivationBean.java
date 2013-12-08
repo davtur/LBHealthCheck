@@ -17,9 +17,9 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Random;
 import java.util.ResourceBundle;
-import javax.faces.bean.ManagedBean;
+import javax.inject.Named;
 import javax.annotation.PostConstruct;
-import javax.ejb.EJB;
+import javax.inject.Inject;
 import javax.enterprise.context.RequestScoped;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.context.ExternalContext;
@@ -30,19 +30,19 @@ import javax.servlet.http.HttpServletRequest;
  *
  * @author david
  */
-@ManagedBean(name = "activationBean")
+@Named("activationBean")
 @RequestScoped
 public class ActivationBean {
 
     @ManagedProperty(value = "#{param.key}")
     private String key;
-    @EJB
+    @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.CustomersFacade ejbFacade;
-    @EJB
+    @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.ActivationFacade ejbActivationFacade;
-    @EJB
+    @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.CustomersFacade ejbCustomerFacade;
-    @EJB
+    @Inject
     private ConfigMapFacade configMapFacade;
     private boolean valid;
     private Customers current;

@@ -5,7 +5,7 @@ import au.com.manlyit.fitnesscrm.stats.classes.CustomersController;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import java.util.List;
 import java.util.logging.Logger;
-import javax.ejb.EJB;
+import javax.inject.Inject;
 import javax.faces.application.FacesMessage;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
@@ -13,7 +13,7 @@ import javax.faces.convert.Converter;
 import javax.faces.model.SelectItem;
 
 public class JsfUtil {
-  @EJB
+  @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.CustomersFacade ejbCustomerFacade;
   
     public static SelectItem[] getSelectItems(List<?> entities, boolean selectOne) {

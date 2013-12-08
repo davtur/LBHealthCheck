@@ -6,11 +6,10 @@ import au.com.manlyit.fitnesscrm.stats.classes.util.PaginationHelper;
 import au.com.manlyit.fitnesscrm.stats.beans.InvoiceFacade;
 
 import java.io.Serializable;
-import java.util.ResourceBundle;
-import javax.ejb.EJB;
+
 import java.util.Date;
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.SessionScoped;
+import javax.enterprise.context.SessionScoped;
+
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 import javax.faces.convert.Converter;
@@ -20,18 +19,23 @@ import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
 import javax.faces.event.ValueChangeEvent;
 import javax.faces.event.ActionEvent;
+import javax.inject.Inject;
+import javax.inject.Named;
 import org.primefaces.event.SelectEvent;
 import org.primefaces.event.RowEditEvent;
 
-@ManagedBean(name = "invoiceController")
+@Named("invoiceController")
 @SessionScoped
 public class InvoiceController implements Serializable {
 
     private Invoice current;
     private Invoice selectedForDeletion;
     private DataModel items = null;
-    @EJB
+    @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.InvoiceFacade ejbFacade;
+    @Inject
+    private au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade configMapFacade;
+
     private PaginationHelper pagination;
     private int selectedItemIndex;
 

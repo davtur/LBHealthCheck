@@ -11,17 +11,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
-import javax.ejb.EJB;
+import javax.inject.Inject;
 
 import javax.faces.context.FacesContext;
 import  org.primefaces.model.chart.LineChartSeries;
 import org.primefaces.model.chart.CartesianChartModel;
 
 import javax.enterprise.context.RequestScoped;
-import javax.faces.bean.ManagedBean;
+import javax.inject.Named;
 import java.io.Serializable;
 
-@ManagedBean(name = "weightChart")
+@Named("weightChart")
 @RequestScoped
 public class WeightChart  implements Serializable {
 
@@ -30,7 +30,7 @@ public class WeightChart  implements Serializable {
     /** Creates a new instance of measurementsChart */
     public WeightChart() {
     }
-    @EJB
+    @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.StatTypesFacade ejbStatTypesFacade;
 
     @PostConstruct

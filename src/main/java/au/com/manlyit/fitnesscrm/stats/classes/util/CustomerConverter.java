@@ -7,10 +7,10 @@ package au.com.manlyit.fitnesscrm.stats.classes.util;
 
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import java.io.Serializable;
-import javax.faces.bean.ManagedBean;
-import javax.ejb.EJB;
+
+import javax.inject.Inject;
 import javax.enterprise.context.SessionScoped;
-import javax.faces.bean.ManagedBean;
+import javax.inject.Named;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 import javax.faces.convert.Converter;
@@ -20,12 +20,12 @@ import javax.faces.convert.FacesConverter;
  *
  * @author david
  */
-@ManagedBean (name="custConverter")
+@Named ("custConverter")
 @SessionScoped
 @FacesConverter(value = "customerConverter")
 public class CustomerConverter implements Converter, Serializable{
 
-   @EJB
+   @Inject
   private  au.com.manlyit.fitnesscrm.stats.beans.CustomersFacade ejbFacade;
 
    public CustomerConverter(){

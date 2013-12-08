@@ -7,7 +7,7 @@ package au.com.manlyit.fitnesscrm.stats.chartbeans;
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.db.WebsiteMonitor;
 import javax.annotation.PostConstruct;
-import javax.ejb.EJB;
+import javax.inject.Inject;
 
 import org.primefaces.model.chart.CartesianChartModel;
 
@@ -16,7 +16,7 @@ import org.primefaces.model.chart.CartesianChartModel;
  * @author david
  */
 import javax.enterprise.context.RequestScoped;
-import javax.faces.bean.ManagedBean;
+import javax.inject.Named;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -27,7 +27,7 @@ import java.util.logging.Logger;
 
 import org.primefaces.model.chart.LineChartSeries;
 
-@ManagedBean(name = "websiteMonitorChart")
+@Named("websiteMonitorChart")
 @RequestScoped
 public class websiteMonitorChart implements Serializable {
 
@@ -38,7 +38,7 @@ public class websiteMonitorChart implements Serializable {
     /** Creates a new instance of MeasurementsChart */
     public websiteMonitorChart() {
     }
-    @EJB
+    @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.WebsiteMonitorFacade WebsiteMonitorFacade;
 
     @PostConstruct
