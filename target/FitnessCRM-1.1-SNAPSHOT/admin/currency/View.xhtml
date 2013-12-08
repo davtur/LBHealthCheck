@@ -25,9 +25,7 @@
                         <h:outputText value="#{currencyController.selected.code}" title="#{configMapController.getKey('ViewCurrencyTitle_code')}"/>
                         <h:outputText value="#{configMapController.getKey('ViewCurrencyLabel_countryCode')}"/>
                         <h:outputText value="#{currencyController.selected.countryCode}" title="#{configMapController.getKey('ViewCurrencyTitle_countryCode')}"/>
-                        <h:outputText value="#{configMapController.getKey('ViewCurrencyLabel_optlock')}"/>
-                        <h:outputText value="#{currencyController.selected.optlock}" title="#{configMapController.getKey('ViewCurrencyTitle_optlock')}"/>
-                    </h:panelGrid>
+                      </h:panelGrid>
                 </p:panel>
                 <br />
                 <p:commandButton rendered="#{currencyController.isUserInRole('ADMIN')}"  action="#{currencyController.destroyAndView}" value="#{configMapController.getKey('ViewCurrencyDestroyLink')}"/>

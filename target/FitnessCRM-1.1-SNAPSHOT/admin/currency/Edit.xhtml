@@ -25,9 +25,7 @@
                         <h:inputText id="code"  value="#{currencyController.selected.code}" title="#{configMapController.getKey('EditCurrencyTitle_code')}" required="true" requiredMessage="#{configMapController.getKey('EditCurrencyRequiredMessage_code')}"/>
                         <h:outputLabel value="#{configMapController.getKey('EditCurrencyLabel_countryCode')}" for="countryCode" />
                         <h:inputText id="countryCode"  value="#{currencyController.selected.countryCode}" title="#{configMapController.getKey('EditCurrencyTitle_countryCode')}" required="true" requiredMessage="#{configMapController.getKey('EditCurrencyRequiredMessage_countryCode')}"/>
-                        <h:outputLabel value="#{configMapController.getKey('EditCurrencyLabel_optlock')}" for="optlock" />
-                        <h:inputText id="optlock"  value="#{currencyController.selected.optlock}" title="#{configMapController.getKey('EditCurrencyTitle_optlock')}" required="true" requiredMessage="#{configMapController.getKey('EditCurrencyRequiredMessage_optlock')}"/>
-                    </h:panelGrid>
+                     </h:panelGrid>
                 </p:panel>
                 <p:commandButton   ajax="false"    action="#{currencyController.update}" value="#{configMapController.getKey('EditCurrencySaveLink')}"/>
                 <br />

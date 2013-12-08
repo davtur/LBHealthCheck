@@ -35,7 +35,7 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Currency.findBySymbol", query = "SELECT c FROM Currency c WHERE c.symbol = :symbol"),
     @NamedQuery(name = "Currency.findByCode", query = "SELECT c FROM Currency c WHERE c.code = :code"),
     @NamedQuery(name = "Currency.findByCountryCode", query = "SELECT c FROM Currency c WHERE c.countryCode = :countryCode"),
-    @NamedQuery(name = "Currency.findByOptlock", query = "SELECT c FROM Currency c WHERE c.optlock = :optlock")})
+    })
 public class Currency implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
@@ -58,11 +58,7 @@ public class Currency implements Serializable {
     @Size(min = 1, max = 2)
     @Column(name = "country_code")
     private String countryCode;
-    @Basic(optional = false)
-    @NotNull
-    @Column(name = "OPTLOCK")
-    private int optlock;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "currencyId")
+     @OneToMany(cascade = CascadeType.ALL, mappedBy = "currencyId")
     private Collection<Invoice> invoiceCollection;
 
     public Currency() {
@@ -77,7 +73,7 @@ public class Currency implements Serializable {
         this.symbol = symbol;
         this.code = code;
         this.countryCode = countryCode;
-        this.optlock = optlock;
+        
     }
 
     public Integer getId() {
@@ -112,14 +108,7 @@ public class Currency implements Serializable {
         this.countryCode = countryCode;
     }
 
-    public int getOptlock() {
-        return optlock;
-    }
-
-    public void setOptlock(int optlock) {
-        this.optlock = optlock;
-    }
-
+   
     @XmlTransient
     public Collection<Invoice> getInvoiceCollection() {
         return invoiceCollection;

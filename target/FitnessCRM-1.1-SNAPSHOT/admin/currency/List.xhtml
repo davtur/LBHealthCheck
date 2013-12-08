@@ -26,8 +26,6 @@
                         <p:inputText id="code" value="#{currencyController.selected.code}" title="#{configMapController.getKey('CreateCurrencyTitle_code')}" required="true" requiredMessage="#{configMapController.getKey('CreateCurrencyRequiredMessage_code')}"/>
                         <p:outputLabel value="#{configMapController.getKey('CreateCurrencyLabel_countryCode')}" for="countryCode" />
                         <p:inputText id="countryCode" value="#{currencyController.selected.countryCode}" title="#{configMapController.getKey('CreateCurrencyTitle_countryCode')}" required="true" requiredMessage="#{configMapController.getKey('CreateCurrencyRequiredMessage_countryCode')}"/>
-                        <p:outputLabel value="#{configMapController.getKey('CreateCurrencyLabel_optlock')}" for="optlock" />
-                        <p:inputText id="optlock" value="#{currencyController.selected.optlock}" title="#{configMapController.getKey('CreateCurrencyTitle_optlock')}" required="true" requiredMessage="#{configMapController.getKey('CreateCurrencyRequiredMessage_optlock')}"/>
                         <p:commandButton oncomplete="CurrencyCreateDialogue.hide();currencyControllerTable.filter()" actionListener="#{currencyController.createDialogue}" value="#{configMapController.getKey('CreateCurrencySaveLink')}" update=":menuForm:growl"/>                
                     </p:panelGrid>
                 </p:confirmDialog>
@@ -102,24 +100,12 @@
 
 
                         </p:column>
-                        <p:column sortBy="#{item.optlock}" filterBy="#{item.optlock}" headerText="#{configMapController.getKey('ListCurrencyTitle_optlock')}"   >
-                            <p:cellEditor> 
-                                <f:facet name="output">
-                                    <h:outputText value="#{item.optlock}"/>
-                                </f:facet>
-                                <f:facet name="input">
-                                    <p:inputText value="#{item.optlock}" label="#{configMapController.getKey('ListCurrencyTitle_optlock')}" />
-                                </f:facet>
-                            </p:cellEditor> 
-
-
-                        </p:column>
                         <p:column rendered="#{currencyController.isUserInRole('ADMIN')}"  headerText="Edit" style="width:50px">  
                             <p:rowEditor />  
                         </p:column>  
 
                         <p:column>
-                            <p:commandButton rendered="#{currencyController.isUserInRole('ADMIN')}"  update=":CurrencylistForm1 :menuForm:growl" action="#{currencyController.destroy}" value="#{configMapController.getKey('ListCurrencyDestroyLink')}">
+                            <p:commandButton rendered="#{currencyController.isUserInRole('ADMIN')}"  oncomplete="currencyControllerTable.filter()" update=":menuForm:growl"  value="#{configMapController.getKey('ListCurrencyDestroyLink')}">
                                 <f:setPropertyActionListener value="#{item}" target="#{currencyController.selectedForDeletion}" />
                             </p:commandButton>                        
 
