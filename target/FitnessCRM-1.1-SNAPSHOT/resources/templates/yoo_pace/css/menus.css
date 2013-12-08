@@ -1,0 +1,205 @@
+/* Copyright (C) YOOtheme GmbH, YOOtheme Proprietary Use License (http://www.yootheme.com/license) */
+
+@import url(../warp/css/menus.css);
+
+
+/* Mega Drop-Down Menu
+----------------------------------------------------------------------------------------------------*/
+
+.menu-dropdown, 
+.menu-dropdown .level1,
+.menu-dropdown .level1 > span { float: none; }
+
+/* Level 1 */
+.menu-dropdown li.level1 { margin-bottom: 5px; }
+
+.menu-dropdown a.level1,
+.menu-dropdown span.level1 {
+	font-size: 12px;
+	color: #666;
+	text-shadow: 0 1px 0 rgba(255,255,255,0.7);
+}
+
+.menu-dropdown a.level1 > span, 
+.menu-dropdown span.level1 > span {
+	display: table-cell;
+	width: 70px;
+	height: 85px;
+	vertical-align: middle;
+	text-align: center;
+	line-height: 16px;
+}
+
+/* Set Active + Hover */
+.menu-dropdown li.active .level1,
+.menu-dropdown li.level1.hover .level1 { 
+	position: relative;
+	z-index: 101;
+	border-radius: 3px 0 0 3px;
+	box-shadow: 0 -1px 1px rgba(0,0,0,0.2) inset;
+	color: #fff;
+	text-shadow: 0 -1px 0 rgba(0,0,0,0.15);
+}
+
+.menu-dropdown li.active .level1:after,
+.menu-dropdown li.level1.hover .level1:after {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 50%;
+	right: -6px;
+	width: 7px;
+	height: 14px;
+	margin-top: -4px;
+	background-position: 0 50%;
+	background-repeat: no-repeat;
+}
+
+/* Drop-Down */
+.menu-dropdown .dropdown { 
+	display: block; /* Needed for vertical dropdown */
+	top: -5px;
+	left: 100%;
+	opacity: 0;	/* Needed for vertical dropdown */
+	-webkit-backface-visibility: hidden;
+}
+
+.menu-dropdown .dropdown-bg > div {
+	margin: 5px 5px 5px 0;
+	padding: 15px 20px;
+	background: #fff;
+	background: rgba(255,255,255,0.96);
+	border-radius: 0 3px 3px 0;
+	box-shadow: 1px 1px 4px rgba(0,0,0,0.1);
+}
+
+/* Level 2 */
+.menu-dropdown li.level2 { margin: 0 5px; }
+
+.menu-dropdown a.level2,
+.menu-dropdown span.level2 { color: #666; }
+
+/* Level 3 */
+.menu-dropdown a.level3 {
+	padding-left: 15px;
+	background-position: 0 0;
+	background-repeat: no-repeat;
+	color: #666;
+}
+
+.menu-dropdown a.level3:hover, 
+.menu-dropdown a.level3.current { background-position: 0 -100px; }
+
+/* Icons */
+.menu-dropdown .level1 .level1 span.icon {
+	display: inline-block;
+	width: 100%;
+	height: 30px;
+	margin-left: 0;
+	background-position: 50% 0;
+	float: none;
+}
+.menu-dropdown .level1.hover .level1 span.icon,
+.menu-dropdown .level1.active .level1 span.icon { background-position: 50% -50px; }
+
+.menu-dropdown .level1 .level1 span.icon + span,
+.menu-dropdown .level1 .level1 span.icon + span + span { margin-left: 0; }
+
+/* Subtitles */
+.menu-dropdown span.subtitle { font-size: 10px; }
+
+
+/* Sidebar/Accordion Menu
+----------------------------------------------------------------------------------------------------*/
+
+/* Link */
+.menu-sidebar a,
+.menu-sidebar li > span { color: #666; }
+
+
+/* Level 1 */
+.menu-sidebar li.level1 { padding-top: 5px; }
+
+.menu-sidebar li.level1 > a,
+.menu-sidebar li.level1 > span {
+	background: #e3e3e3;
+	background: rgba(0,0,0,0.04);
+	border-radius: 3px;
+	box-shadow: 0 1px 0 rgba(0,0,0,0.2);
+}
+
+.menu-sidebar a.level1 > span, 
+.menu-sidebar span.level1 > span { padding: 5px 10px; }
+
+/* Parent */
+.menu-sidebar li.parent .level1 > span {
+	padding-right: 20px;
+	background: url(../images/menu_sidebar_parent.png) 100% 0 no-repeat;
+}
+
+/* Hover */
+.menu-sidebar li.level1:hover .level1 {
+	background: #ddd;
+	background: rgba(0,0,0,0.08);
+	box-shadow: 0 1px 0 rgba(0,0,0,0.04),
+				0 0 2px rgba(0,0,0,0.05) inset,
+				0 1px 0 rgba(0,0,0,0.1) inset;
+	color: #666;
+	text-shadow: 0 1px 0 #fff;
+}
+
+.menu-sidebar li.parent:hover .level1 > span { background-position: 100% -100px; }
+
+/* Active */
+.menu-sidebar li.level1 .level1.active { 
+	position: relative;
+	box-shadow: 0 -1px 1px rgba(0,0,0,0.2) inset;
+	color: #fff;
+	text-shadow: 0 1px 1px rgba(0,0,0,0.15);
+}
+
+/* Parent Active */
+.menu-sidebar li.parent .level1.active:before { 	
+	content: "";
+	display: block;
+	position: absolute;
+	bottom: -6px;
+	left: 15px;
+	width: 13px;
+	height: 8px;
+	background-position: 0 0;
+	background-repeat: no-repeat;
+}
+
+.menu-sidebar li.parent .level1.active > span { background: none; }
+
+/* Level 2-4 */
+.menu-sidebar ul.level2 { padding: 10px 15px 5px 15px; }
+
+.menu-sidebar .level2 a > span { 
+	padding-left: 17px;
+	background-position: 0 0;
+	background-repeat: no-repeat;
+	line-height: 18px;
+}
+
+.menu-sidebar .level2 a:hover > span,
+.menu-sidebar .level2 a.current > span { background-position: 0 -100px; }
+
+.menu-sidebar ul.level2 ul { padding-left: 12px; }
+
+
+/* Line Menu
+----------------------------------------------------------------------------------------------------*/
+
+.menu-line li {
+	margin-left: 7px;
+	padding-left: 8px;
+	background: url(../images/menu_line_item.png) 0 50% no-repeat;
+}
+
+.menu-line li:first-child {
+	margin-left: 0;
+	padding-left: 0;
+	background: none;
+}

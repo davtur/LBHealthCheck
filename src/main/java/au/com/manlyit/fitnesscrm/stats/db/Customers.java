@@ -23,6 +23,10 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 
 /**
  *
@@ -30,6 +34,7 @@ import javax.persistence.TemporalType;
  */
 @Entity
 @Table(name = "customers")
+@XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "Customers.findAll", query = "SELECT c FROM Customers c"),
     @NamedQuery(name = "Customers.findById", query = "SELECT c FROM Customers c WHERE c.id = :id"),
@@ -63,49 +68,70 @@ public class Customers implements Serializable {
     @Column(name = "id")
     private Integer id;
     @Basic(optional = false)
+    @NotNull
     @Column(name = "gender")
     private char gender;
     @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 127)
     @Column(name = "firstname")
     private String firstname;
     @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 127)
     @Column(name = "lastname")
     private String lastname;
     @Basic(optional = false)
+    @NotNull
     @Column(name = "dob")
     @Temporal(TemporalType.TIMESTAMP)
     private Date dob;
     @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 255)
     @Column(name = "email_address")
     private String emailAddress;
     @Column(name = "preferred_contact")
     private Integer preferredContact;
     @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 96)
     @Column(name = "username")
     private String username;
+    @Size(max = 127)
     @Column(name = "street_address")
     private String streetAddress;
+    @Size(max = 127)
     @Column(name = "suburb")
     private String suburb;
+    @Size(max = 10)
     @Column(name = "postcode")
     private String postcode;
+    @Size(max = 127)
     @Column(name = "city")
     private String city;
+    @Size(max = 32)
     @Column(name = "addr_state")
     private String addrState;
     @Column(name = "country_id")
     private Integer countryId;
+    @Size(max = 63)
     @Column(name = "telephone")
     private String telephone;
+    // @Pattern(regexp="^\\(?(\\d{3})\\)?[- ]?(\\d{3})[- ]?(\\d{4})$", message="Invalid phone/fax format, should be as xxx-xxx-xxxx")//if the field contains phone or fax number consider using this annotation to enforce field validation
+    @Size(max = 63)
     @Column(name = "fax")
     private String fax;
     @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 255)
     @Column(name = "password")
     private String password;
     @Column(name = "newsletter")
     private Character newsletter;
     @Column(name = "group_pricing")
     private Integer groupPricing;
+    @Size(max = 4)
     @Column(name = "email_format")
     private String emailFormat;
     @Column(name = "auth")
@@ -114,11 +140,29 @@ public class Customers implements Serializable {
     private Integer active;
     @Column(name = "referredby")
     private Integer referredby;
+    @OneToMany(mappedBy = "userId")
+    private Collection<Invoice> invoiceCollection;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "trainer")
+    private Collection<SessionHistory> sessionRegisterCollection;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "customerId")
+    private Collection<CustomerGoals> customerGoalsCollection;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "customerId")
+    private Collection<Participants> participantsCollection;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "customerId")
+    private Collection<CustomerImages> customerImagesCollection;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "customerId")
+    private Collection<Activation> activationCollection;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "username")
+    private Collection<Groups> groupsCollection;
     @JoinColumn(name = "demographic", referencedColumnName = "id")
     @ManyToOne
-    private DemograhicTypes demograhicTypes;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "customers")
-    private Collection<Groups> groupsCollection;
+    private DemographicTypes demographic;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "customerId")
+    private Collection<StatsTaken> statsTakenCollection;
+    @OneToMany(mappedBy = "userId")
+    private Collection<Notes> notesCollection;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "trainer")
+    private Collection<SessionHistory> sessionHistoryCollection;
 
     public Customers() {
     }
@@ -322,20 +366,102 @@ public class Customers implements Serializable {
         this.referredby = referredby;
     }
 
-    public DemograhicTypes getDemograhicTypes() {
-        return demograhicTypes;
+    @XmlTransient
+    public Collection<Invoice> getInvoiceCollection() {
+        return invoiceCollection;
     }
 
-    public void setDemograhicTypes(DemograhicTypes demograhicTypes) {
-        this.demograhicTypes = demograhicTypes;
+    public void setInvoiceCollection(Collection<Invoice> invoiceCollection) {
+        this.invoiceCollection = invoiceCollection;
     }
 
+    @XmlTransient
+    public Collection<SessionHistory> getSessionRegisterCollection() {
+        return sessionRegisterCollection;
+    }
+
+    public void setSessionRegisterCollection(Collection<SessionHistory> sessionRegisterCollection) {
+        this.sessionRegisterCollection = sessionRegisterCollection;
+    }
+
+    @XmlTransient
+    public Collection<CustomerGoals> getCustomerGoalsCollection() {
+        return customerGoalsCollection;
+    }
+
+    public void setCustomerGoalsCollection(Collection<CustomerGoals> customerGoalsCollection) {
+        this.customerGoalsCollection = customerGoalsCollection;
+    }
+
+    @XmlTransient
+    public Collection<Participants> getParticipantsCollection() {
+        return participantsCollection;
+    }
+
+    public void setParticipantsCollection(Collection<Participants> participantsCollection) {
+        this.participantsCollection = participantsCollection;
+    }
+
+    @XmlTransient
+    public Collection<CustomerImages> getCustomerImagesCollection() {
+        return customerImagesCollection;
+    }
+
+    public void setCustomerImagesCollection(Collection<CustomerImages> customerImagesCollection) {
+        this.customerImagesCollection = customerImagesCollection;
+    }
+
+    @XmlTransient
+    public Collection<Activation> getActivationCollection() {
+        return activationCollection;
+    }
+
+    public void setActivationCollection(Collection<Activation> activationCollection) {
+        this.activationCollection = activationCollection;
+    }
+
+    @XmlTransient
     public Collection<Groups> getGroupsCollection() {
         return groupsCollection;
     }
 
     public void setGroupsCollection(Collection<Groups> groupsCollection) {
         this.groupsCollection = groupsCollection;
+    }
+
+    public DemographicTypes getDemographic() {
+        return demographic;
+    }
+
+    public void setDemographic(DemographicTypes demographic) {
+        this.demographic = demographic;
+    }
+
+    @XmlTransient
+    public Collection<StatsTaken> getStatsTakenCollection() {
+        return statsTakenCollection;
+    }
+
+    public void setStatsTakenCollection(Collection<StatsTaken> statsTakenCollection) {
+        this.statsTakenCollection = statsTakenCollection;
+    }
+
+    @XmlTransient
+    public Collection<Notes> getNotesCollection() {
+        return notesCollection;
+    }
+
+    public void setNotesCollection(Collection<Notes> notesCollection) {
+        this.notesCollection = notesCollection;
+    }
+
+    @XmlTransient
+    public Collection<SessionHistory> getSessionHistoryCollection() {
+        return sessionHistoryCollection;
+    }
+
+    public void setSessionHistoryCollection(Collection<SessionHistory> sessionHistoryCollection) {
+        this.sessionHistoryCollection = sessionHistoryCollection;
     }
 
     @Override

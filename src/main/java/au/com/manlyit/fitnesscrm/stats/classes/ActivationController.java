@@ -6,6 +6,7 @@ import au.com.manlyit.fitnesscrm.stats.classes.util.PaginationHelper;
 import au.com.manlyit.fitnesscrm.stats.beans.ActivationFacade;
 
 import au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade;
+import java.io.Serializable;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.enterprise.context.SessionScoped;
@@ -19,7 +20,7 @@ import javax.faces.model.SelectItem;
 
 @Named("activationController")
 @SessionScoped
-public class ActivationController {
+public class ActivationController implements Serializable {
 
     private Activation current;
     private DataModel items = null;

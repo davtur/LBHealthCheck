@@ -1,5 +1,6 @@
 /*
- * To change this template, choose Tools | Templates
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
 
@@ -18,6 +19,10 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 
 /**
  *
@@ -25,14 +30,13 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name = "session_types")
+@XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "SessionTypes.findAll", query = "SELECT s FROM SessionTypes s"),
     @NamedQuery(name = "SessionTypes.findById", query = "SELECT s FROM SessionTypes s WHERE s.id = :id"),
     @NamedQuery(name = "SessionTypes.findByName", query = "SELECT s FROM SessionTypes s WHERE s.name = :name"),
     @NamedQuery(name = "SessionTypes.findByDescription", query = "SELECT s FROM SessionTypes s WHERE s.description = :description")})
 public class SessionTypes implements Serializable {
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "sessionTypes")
-    private Collection<SessionHistory> sessionHistoryCollection;
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -40,11 +44,17 @@ public class SessionTypes implements Serializable {
     @Column(name = "id")
     private Integer id;
     @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 32)
     @Column(name = "name")
     private String name;
     @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 96)
     @Column(name = "description")
     private String description;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "sessionTypesId")
+    private Collection<SessionHistory> sessionHistoryCollection;
     
     public SessionTypes() {
     }
@@ -83,6 +93,7 @@ public class SessionTypes implements Serializable {
         this.description = description;
     }
 
+    @XmlTransient
     public Collection<SessionHistory> getSessionHistoryCollection() {
         return sessionHistoryCollection;
     }
@@ -115,7 +126,5 @@ public class SessionTypes implements Serializable {
     public String toString() {
         return name;
     }
-
-   
 
 }

@@ -1,7 +1,9 @@
 /*
- * To change this template, choose Tools | Templates
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
+
 package au.com.manlyit.fitnesscrm.stats.db;
 
 import java.io.Serializable;
@@ -23,6 +25,10 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 
 /**
  *
@@ -30,15 +36,12 @@ import javax.persistence.TemporalType;
  */
 @Entity
 @Table(name = "session_history")
+@XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "SessionHistory.findAll", query = "SELECT s FROM SessionHistory s"),
     @NamedQuery(name = "SessionHistory.findById", query = "SELECT s FROM SessionHistory s WHERE s.id = :id"),
     @NamedQuery(name = "SessionHistory.findBySessiondate", query = "SELECT s FROM SessionHistory s WHERE s.sessiondate = :sessiondate")})
 public class SessionHistory implements Serializable {
-
-    @JoinColumn(name = "trainer", referencedColumnName = "id")
-    @ManyToOne(optional = false)
-    private Customers customers;
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -46,17 +49,22 @@ public class SessionHistory implements Serializable {
     @Column(name = "id")
     private Integer id;
     @Basic(optional = false)
+    @NotNull
     @Column(name = "sessiondate")
     @Temporal(TemporalType.TIMESTAMP)
     private Date sessiondate;
     @Lob
+    @Size(max = 65535)
     @Column(name = "comments")
     private String comments;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "sessionHistoryId")
+    private Collection<Participants> participantsCollection;
+    @JoinColumn(name = "trainer", referencedColumnName = "id")
+    @ManyToOne(optional = false)
+    private Customers trainer;
     @JoinColumn(name = "session_types_id", referencedColumnName = "id")
     @ManyToOne(optional = false)
-    private SessionTypes sessionTypes;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "sessionHistory")
-    private Collection<Participants> participantsCollection;
+    private SessionTypes sessionTypesId;
 
     public SessionHistory() {
     }
@@ -94,20 +102,29 @@ public class SessionHistory implements Serializable {
         this.comments = comments;
     }
 
-    public SessionTypes getSessionTypes() {
-        return sessionTypes;
-    }
-
-    public void setSessionTypes(SessionTypes sessionTypes) {
-        this.sessionTypes = sessionTypes;
-    }
-
+    @XmlTransient
     public Collection<Participants> getParticipantsCollection() {
         return participantsCollection;
     }
 
     public void setParticipantsCollection(Collection<Participants> participantsCollection) {
         this.participantsCollection = participantsCollection;
+    }
+
+    public Customers getTrainer() {
+        return trainer;
+    }
+
+    public void setTrainer(Customers trainer) {
+        this.trainer = trainer;
+    }
+
+    public SessionTypes getSessionTypesId() {
+        return sessionTypesId;
+    }
+
+    public void setSessionTypesId(SessionTypes sessionTypesId) {
+        this.sessionTypesId = sessionTypesId;
     }
 
     @Override
@@ -132,14 +149,7 @@ public class SessionHistory implements Serializable {
 
     @Override
     public String toString() {
-        return "au.com.manlyit.fitnesscrm.stats.db.SessionHistory[id=" + id + "]";
+        return "au.com.manlyit.fitnesscrm.stats.db.SessionHistory[ id=" + id + " ]";
     }
-
-    public Customers getCustomers() {
-        return customers;
-    }
-
-    public void setCustomers(Customers customers) {
-        this.customers = customers;
-    }
+    
 }

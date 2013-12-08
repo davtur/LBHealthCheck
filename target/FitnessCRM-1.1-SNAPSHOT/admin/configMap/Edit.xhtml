@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" >
+
+    <ui:composition template="/template.xhtml">
+        <ui:define name="title">
+            <h:outputText value="#{configMapController.getKey('EditConfigMapTitle')}"></h:outputText>
+        </ui:define>
+        <ui:define name="body">
+            <h:panelGroup id="messagePanel" layout="block">
+                <h:messages errorStyle="color: red" infoStyle="color: green" layout="table"/>
+            </h:panelGroup>
+            <h:form>
+                <p:panel>
+                    <h:panelGrid columns="2">
+                         <h:outputLabel value="#{configMapController.getKey('EditConfigMapLabel_configkey')}" for="configkey" />
+                        <p:inputText id="configkey" value="#{configMapController.selected.configkey}" title="#{configMapController.getKey('EditConfigMapTitle_configkey')}" required="true" requiredMessage="#{configMapController.getKey('EditConfigMapRequiredMessage_configkey')}"/>
+                        <h:outputLabel value="#{configMapController.getKey('EditConfigMapLabel_configvalue')}" for="configvalue" />
+                        <p:inputTextarea rows="4" cols="30" id="configvalue" value="#{configMapController.selected.configvalue}" title="#{configMapController.getKey('EditConfigMapTitle_configvalue')}" required="true" requiredMessage="#{configMapController.getKey('EditConfigMapRequiredMessage_configvalue')}"/>
+                    </h:panelGrid>
+                </p:panel>
+                <p:commandButton   ajax="false"    action="#{configMapController.update}" value="#{configMapController.getKey('EditConfigMapSaveLink')}"/>
+                <br />
+                <br />
+                <p:commandButton   ajax="false"    action="View" value="#{configMapController.getKey('EditConfigMapViewLink')}" immediate="true"/>
+                <br />
+                <p:commandButton   ajax="false"    action="#{configMapController.prepareList}" value="#{configMapController.getKey('EditConfigMapShowAllLink')}" immediate="true"/>
+                <br />
+                <br />
+                <p:commandButton   ajax="false"    value="#{configMapController.getKey('EditConfigMapIndexLink')}" action="/EnvManager/landing.xhtml" immediate="true" />
+            </h:form>
+        </ui:define>
+    </ui:composition>
+
+</html>

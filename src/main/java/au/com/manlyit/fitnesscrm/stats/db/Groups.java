@@ -17,6 +17,9 @@ import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  *
@@ -24,6 +27,7 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name = "groups")
+@XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "Groups.findAll", query = "SELECT g FROM Groups g"),
     @NamedQuery(name = "Groups.findByGroupname", query = "SELECT g FROM Groups g WHERE g.groupname = :groupname"),
@@ -31,6 +35,8 @@ import javax.persistence.Table;
 public class Groups implements Serializable {
     private static final long serialVersionUID = 1L;
     @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 96)
     @Column(name = "groupname")
     private String groupname;
     @Id
@@ -40,7 +46,7 @@ public class Groups implements Serializable {
     private Integer id;
     @JoinColumn(name = "username", referencedColumnName = "username")
     @ManyToOne(optional = false)
-    private Customers customers;
+    private Customers username;
 
     public Groups() {
     }
@@ -70,12 +76,12 @@ public class Groups implements Serializable {
         this.id = id;
     }
 
-    public Customers getCustomers() {
-        return customers;
+    public Customers getUsername() {
+        return username;
     }
 
-    public void setCustomers(Customers customers) {
-        this.customers = customers;
+    public void setUsername(Customers username) {
+        this.username = username;
     }
 
     @Override

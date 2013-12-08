@@ -184,8 +184,8 @@ public class SessionHistoryController implements Serializable {
 
         for (Customers cust : targets) {
             Participants p = new Participants(0);
-            p.setCustomers(cust);
-            p.setSessionHistory(current);
+            p.setCustomerId(cust);
+            p.setSessionHistoryId(current);
             parts.add(p);
         }
         //current.getParticipantsCollection().clear();
@@ -199,7 +199,7 @@ public class SessionHistoryController implements Serializable {
         Collection<Participants> partic = current.getParticipantsCollection(); //ones already selected.
         if (partic != null) {
             for (Participants part : partic) {
-                selectedCustomers.add(part.getCustomers());
+                selectedCustomers.add(part.getCustomerId());
             }
             //remove any of the selected customers from the all customers list
             for (int i = allCustomers.size() - 1; i >= 0; i--) {

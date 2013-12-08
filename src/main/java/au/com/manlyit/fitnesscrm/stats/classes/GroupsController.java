@@ -84,7 +84,7 @@ public class GroupsController implements Serializable {
         if (o.getClass().equals(Customers.class)) {
             Customers cus = (Customers) o;
 
-            current.setCustomers(cus);
+            current.setUsername(cus);
 
         }
     }

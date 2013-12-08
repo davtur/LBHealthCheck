@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" >
+
+    <ui:composition template="/template.xhtml">
+        <ui:define name="title">
+            <h:outputText value="#{configMapController.getKey('CreateConfigMapTitle')}"></h:outputText>
+        </ui:define>
+        <ui:define name="body">
+            <h:form id="configForm">
+            <h:panelGroup id="messagePanel" layout="block">
+                <h:messages errorStyle="color: red" infoStyle="color: green" layout="table"/>
+            </h:panelGroup>
+            
+                <p:panel>
+                    <h:outputLabel value="#{configMapController.getKey('CreateConfigMapLabel_value')}"  />
+                </p:panel>
+                <p:panel>
+                    <h:panelGrid columns="1">
+                        <h:outputLabel value="Bulk Insert (key=value, one pair per line terminated by a carriage return! )" for="bulkvalue" />
+                        <p:inputTextarea rows="20" cols="300" id="bulkvalue" value="#{configMapController.bulkvalue}" title="#{configMapController.getKey('CreateConfigMapTitle_bulkvalue')}" >
+                            <p:ajax process="bulkvalue" event="keyup"/>
+                        </p:inputTextarea>
+                    </h:panelGrid>
+                </p:panel>
+
+                <p:panel>
+                    <h:panelGrid columns="1">
+                        <h:outputLabel value="Rejected Entries due to Duplicate Key Values Found" for="duplicatevalue" />
+                        <p:inputTextarea rows="10" cols="300" id="duplicatevalue" value="#{configMapController.duplicateValues}" title="#{configMapController.getKey('CreateConfigMapTitle_bulkvalue')}" />
+                    </h:panelGrid>
+                </p:panel>
+                <br />
+                <p:commandButton    update="messagePanel,configForm" process="@this" actionListener="#{configMapController.createBulk}" value="#{configMapController.getKey('CreateConfigMapSaveBulkLink')}" />
+                <br />
+
+                <br />
+                <p:commandButton   ajax="false"   action="#{configMapController.prepareList}" value="#{configMapController.getKey('CreateConfigMapShowAllLink')}" immediate="true"/>
+                <br />
+            </h:form>
+        </ui:define>
+    </ui:composition>
+
+</html>

@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" >
+
+    <ui:composition template="/template.xhtml">
+        <ui:define name="title">
+            <h:outputText value="#{configMapController.getKey('ListInvoiceLineTypeTitle')}"></h:outputText>
+        </ui:define>
+        <ui:define name="body">
+
+
+            <h:form id="formInvoiceLineTypeCreate1">
+                <p:confirmDialog id="confirmDialogInvoiceLineTypeCreate1" message="Add a Key/ Value Pair to the configuration table"  
+                                 header="#{configMapController.getKey('CreateInvoiceLineTypeTitle')}" severity="info" widgetVar="InvoiceLineTypeCreateDialogue"> 
+
+                    <p:panelGrid columns="2">
+                        <p:outputLabel value="#{configMapController.getKey('CreateInvoiceLineTypeLabel_id')}" for="id" />
+                        <p:inputText id="id" value="#{invoiceLineTypeController.selected.id}" title="#{configMapController.getKey('CreateInvoiceLineTypeTitle_id')}" required="true" requiredMessage="#{configMapController.getKey('CreateInvoiceLineTypeRequiredMessage_id')}"/>
+                        <p:outputLabel value="#{configMapController.getKey('CreateInvoiceLineTypeLabel_description')}" for="description" />
+                        <p:inputText id="description" value="#{invoiceLineTypeController.selected.description}" title="#{configMapController.getKey('CreateInvoiceLineTypeTitle_description')}" required="true" requiredMessage="#{configMapController.getKey('CreateInvoiceLineTypeRequiredMessage_description')}"/>
+                        <p:outputLabel value="#{configMapController.getKey('CreateInvoiceLineTypeLabel_orderPosition')}" for="orderPosition" />
+                        <p:inputText id="orderPosition" value="#{invoiceLineTypeController.selected.orderPosition}" title="#{configMapController.getKey('CreateInvoiceLineTypeTitle_orderPosition')}" required="true" requiredMessage="#{configMapController.getKey('CreateInvoiceLineTypeRequiredMessage_orderPosition')}"/>
+                        <p:commandButton oncomplete="InvoiceLineTypeCreateDialogue.hide();invoiceLineTypeControllerTable.filter()" actionListener="#{invoiceLineTypeController.createDialogue}" value="#{configMapController.getKey('CreateInvoiceLineTypeSaveLink')}" update=":menuForm:growl"/>                
+                    </p:panelGrid>
+                </p:confirmDialog>
+            </h:form>
+
+
+
+
+
+            <h:form id="InvoiceLineTypelistForm1">
+                <h:panelGroup >
+                    <p:commandButton id="showDialogButton"  value="#{configMapController.getKey('ListInvoiceLineTypeCreateLink')}" onclick="InvoiceLineTypeCreateDialogue.show()" type="button"/> 
+
+                </h:panelGroup>
+                <h:outputText escape="false" value="#{configMapController.getKey('ListInvoiceLineTypeEmpty')}" rendered="#{invoiceLineTypeController.items.rowCount == 0}"/>
+                <h:panelGroup rendered="#{invoiceLineTypeController.items.rowCount > 0}">
+                    <p:dataTable  editable="true" value="#{invoiceLineTypeController.items}"  widgetVar="invoiceLineTypeControllerTable" var="item"  paginator="true" rows="15"  paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  rowsPerPageTemplate="5,10,15,20,25,50,100" >
+                        <f:facet name="header">
+                            <p:outputPanel>
+                                <h:outputText value="Search all fields:" />
+                                <h:inputText id="globalFilter" onkeyup="invoiceLineTypeControllerTable.filter()" />
+                            </p:outputPanel>
+                        </f:facet>
+                        <p:ajax event="rowEdit" listener="#{invoiceLineTypeController.onEdit}" update=":menuForm:growl" oncomplete="invoiceLineTypeControllerTable.filter()" />  
+                        <p:ajax event="rowEditCancel" listener="#{invoiceLineTypeController.onCancel}" update=":menuForm:growl"  oncomplete="invoiceLineTypeControllerTable.filter()" />  
+
+                        <p:column sortBy="#{item.id}" filterBy="#{item.id}" headerText="#{configMapController.getKey('ListInvoiceLineTypeTitle_id')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.id}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.id}" label="#{configMapController.getKey('ListInvoiceLineTypeTitle_id')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.description}" filterBy="#{item.description}" headerText="#{configMapController.getKey('ListInvoiceLineTypeTitle_description')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.description}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.description}" label="#{configMapController.getKey('ListInvoiceLineTypeTitle_description')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.orderPosition}" filterBy="#{item.orderPosition}" headerText="#{configMapController.getKey('ListInvoiceLineTypeTitle_orderPosition')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.orderPosition}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.orderPosition}" label="#{configMapController.getKey('ListInvoiceLineTypeTitle_orderPosition')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column rendered="#{invoiceLineTypeController.isUserInRole('ADMIN')}"  headerText="Edit" style="width:50px">  
+                            <p:rowEditor />  
+                        </p:column>  
+
+                        <p:column>
+                            <p:commandButton rendered="#{invoiceLineTypeController.isUserInRole('ADMIN')}"  update=":InvoiceLineTypelistForm1 :menuForm:growl" action="#{invoiceLineTypeController.destroy}" value="#{configMapController.getKey('ListInvoiceLineTypeDestroyLink')}">
+                                <f:setPropertyActionListener value="#{item}" target="#{invoiceLineTypeController.selectedForDeletion}" />
+                            </p:commandButton>                        
+
+                        </p:column>
+                    </p:dataTable>
+                </h:panelGroup>
+            </h:form>
+        </ui:define>
+    </ui:composition>
+
+</html>

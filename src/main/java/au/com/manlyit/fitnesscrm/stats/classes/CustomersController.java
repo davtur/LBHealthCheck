@@ -43,7 +43,7 @@ public class CustomersController implements Serializable {
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.CustomersFacade ejbFacade;
     @Inject
-    private au.com.manlyit.fitnesscrm.stats.beans.DemograhicTypesFacade ejbDemoFacade;
+    private au.com.manlyit.fitnesscrm.stats.beans.DemographicTypesFacade ejbDemoFacade;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.GroupsFacade ejbGroupsFacade;
     @Inject
@@ -206,7 +206,7 @@ public class CustomersController implements Serializable {
             if (getFacade().find(current.getId()) == null) {
                 getFacade().create(current);
                 Groups grp = new Groups(0, "USER");
-                grp.setCustomers(current);
+                grp.setUsername(current);
                 ejbGroupsFacade.create(grp);
                 JsfUtil.addSuccessMessage(configMapFacade.getConfig("CustomersCreated"));
                 return prepareCreate();
@@ -438,7 +438,7 @@ public class CustomersController implements Serializable {
 
     private void updateDemographic(Date dob) {
         char gender = current.getGender();
-        int demograhic = 0;
+        int demographic = 0;
         GregorianCalendar dobCal = new GregorianCalendar();
         dobCal.setTime(dob);
         GregorianCalendar cal = new GregorianCalendar();
@@ -446,67 +446,67 @@ public class CustomersController implements Serializable {
         if (gender == 'M') {
             cal.add(Calendar.YEAR, -20);
             if (dobCal.compareTo(cal) > 0 && demographicFound == false) {//greater than 0 if this dob calender time after cal// dob < than 20 years ago
-                demograhic = 0;
+                demographic = 0;
                 demographicFound = true;
             }
             cal.add(Calendar.YEAR, -10);
             if (dobCal.compareTo(cal) > 0 && demographicFound == false) {// dob < than 30 years ago
-                demograhic = 1;
+                demographic = 1;
                 demographicFound = true;
             }
             cal.add(Calendar.YEAR, -10);
             if (dobCal.compareTo(cal) > 0 && demographicFound == false) {// dob < than 40 years ago
-                demograhic = 2;
+                demographic = 2;
                 demographicFound = true;
             }
             cal.add(Calendar.YEAR, -10);
             if (dobCal.compareTo(cal) > 0 && demographicFound == false) {// dob < than 50 years ago
-                demograhic = 3;
+                demographic = 3;
                 demographicFound = true;
             }
             cal.add(Calendar.YEAR, -10);
             if (dobCal.compareTo(cal) > 0 && demographicFound == false) {// dob < than 60 years ago
-                demograhic = 4;
+                demographic = 4;
                 demographicFound = true;
             }
             if (demographicFound == false) {// dob > than 60 years
-                demograhic = 5;
+                demographic = 5;
             }
 
         } else {
             cal.add(Calendar.YEAR, -20);
             if (dobCal.compareTo(cal) > 0 && demographicFound == false) {// dob < than 20 years ago
-                demograhic = 6;
+                demographic = 6;
                 demographicFound = true;
             }
             cal.add(Calendar.YEAR, -10);
             if (dobCal.compareTo(cal) > 0 && demographicFound == false) {// dob < than 30 years ago
-                demograhic = 7;
+                demographic = 7;
                 demographicFound = true;
             }
             cal.add(Calendar.YEAR, -10);
             if (dobCal.compareTo(cal) > 0 && demographicFound == false) {// dob < than 40 years ago
-                demograhic = 8;
+                demographic = 8;
                 demographicFound = true;
             }
             cal.add(Calendar.YEAR, -10);
             if (dobCal.compareTo(cal) > 0 && demographicFound == false) {// dob < than 50 years ago
-                demograhic = 9;
+                demographic = 9;
                 demographicFound = true;
             }
             cal.add(Calendar.YEAR, -10);
             if (dobCal.compareTo(cal) > 0 && demographicFound == false) {// dob < than 60 years ago
-                demograhic = 10;
+                demographic = 10;
                 demographicFound = true;
             }
             if (demographicFound == false) {// dob > than 60 years
-                demograhic = 11;
+                demographic = 11;
             }
         }
         try {
-            current.setDemograhicTypes(ejbDemoFacade.find(demograhic));
+            current.setDemographic(ejbDemoFacade.find(demographic));
         } catch (Exception e) {
-            JsfUtil.addErrorMessage(e, "Error setting demograhic");
+            JsfUtil.addErrorMessage(e, "Error setting demographic");
         }
     }
 

@@ -1,7 +1,9 @@
 /*
- * To change this template, choose Tools | Templates
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
+
 package au.com.manlyit.fitnesscrm.stats.db;
 
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
@@ -43,7 +45,6 @@ import org.primefaces.model.StreamedContent;
     @NamedQuery(name = "CustomerImages.findByImageType", query = "SELECT c FROM CustomerImages c WHERE c.imageType = :imageType"),
     @NamedQuery(name = "CustomerImages.findByDatetaken", query = "SELECT c FROM CustomerImages c WHERE c.datetaken = :datetaken")})
 public class CustomerImages implements Serializable {
-
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -101,7 +102,6 @@ public class CustomerImages implements Serializable {
         return fd;
     }
     public Date getDatetaken() {
-       
         return datetaken;
     }
 

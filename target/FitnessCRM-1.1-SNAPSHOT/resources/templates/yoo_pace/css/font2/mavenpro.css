@@ -1,0 +1,53 @@
+/* Copyright (C) YOOtheme GmbH, YOOtheme Proprietary Use License (http://www.yootheme.com/license) */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.wk-slideshow-pacetabs .nav li > span { font-family: "MavenProRegular"; }
+
+h1 { font-size: 42px; line-height: 42px; }
+h2 { font-size: 30px; line-height: 30px; }
+h3 { font-size: 24px; line-height: 24px; }
+h4, h5, h6 { font-size: 22px; line-height: 22px; }
+
+.wk-slideshow-pacetabs .nav li > span  { font-size: 22px; }
+
+/* Only Tablets (Portrait) */
+@media (min-width: 768px) and (max-width: 959px) {
+
+	.frontpage-tabs h1 { 
+		margin-top: 15px;
+		line-height: 32px;
+		font-size: 32px;
+	}
+
+	.wk-slideshow-pacetabs .nav li > span  { font-size: 17px; }
+
+}
+
+/* Only Phones (Landscape) */
+@media (min-width: 480px) and (max-width: 767px) {
+
+	.frontpage-tabs h1 { 
+		margin-top: 15px;
+		line-height: 22px;
+		font-size: 22px;
+	}
+
+	.wk-slideshow-pacetabs .nav li > span  { font-size: 16px; }
+
+}
+
+/* Only Phones (Portrait) */
+@media (max-width: 479px) {
+
+	.frontpage-tabs h1 { 
+			margin-top: 20px;
+			line-height: 16px;
+			font-size: 14px;
+	}
+
+}

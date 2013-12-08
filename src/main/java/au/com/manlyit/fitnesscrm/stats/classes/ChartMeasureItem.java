@@ -9,7 +9,7 @@ package au.com.manlyit.fitnesscrm.stats.classes;
  *
  * @author david
  */
-public class ChartMeasureItem {
+public class ChartMeasureItem  {
     
     
     private String timeTaken;

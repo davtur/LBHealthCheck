@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" >
+
+    <ui:composition template="/template.xhtml">
+        <ui:define name="title">
+            <h:outputText value="#{configMapController.getKey('ListInvoiceLineTitle')}"></h:outputText>
+        </ui:define>
+        <ui:define name="body">
+
+
+            <h:form id="formInvoiceLineCreate1">
+                <p:confirmDialog id="confirmDialogInvoiceLineCreate1" message="Add a Key/ Value Pair to the configuration table"  
+                                 header="#{configMapController.getKey('CreateInvoiceLineTitle')}" severity="info" widgetVar="InvoiceLineCreateDialogue"> 
+
+                    <p:panelGrid columns="2">
+                        <p:outputLabel value="#{configMapController.getKey('CreateInvoiceLineLabel_id')}" for="id" />
+                        <p:inputText id="id" value="#{invoiceLineController.selected.id}" title="#{configMapController.getKey('CreateInvoiceLineTitle_id')}" required="true" requiredMessage="#{configMapController.getKey('CreateInvoiceLineRequiredMessage_id')}"/>
+                        <p:outputLabel value="#{configMapController.getKey('CreateInvoiceLineLabel_amount')}" for="amount" />
+                        <p:inputText id="amount" value="#{invoiceLineController.selected.amount}" title="#{configMapController.getKey('CreateInvoiceLineTitle_amount')}" required="true" requiredMessage="#{configMapController.getKey('CreateInvoiceLineRequiredMessage_amount')}"/>
+                        <p:outputLabel value="#{configMapController.getKey('CreateInvoiceLineLabel_quantity')}" for="quantity" />
+                        <p:inputText id="quantity" value="#{invoiceLineController.selected.quantity}" title="#{configMapController.getKey('CreateInvoiceLineTitle_quantity')}" />
+                        <p:outputLabel value="#{configMapController.getKey('CreateInvoiceLineLabel_price')}" for="price" />
+                        <p:inputText id="price" value="#{invoiceLineController.selected.price}" title="#{configMapController.getKey('CreateInvoiceLineTitle_price')}" />
+                        <p:outputLabel value="#{configMapController.getKey('CreateInvoiceLineLabel_deleted')}" for="deleted" />
+                        <p:inputText id="deleted" value="#{invoiceLineController.selected.deleted}" title="#{configMapController.getKey('CreateInvoiceLineTitle_deleted')}" required="true" requiredMessage="#{configMapController.getKey('CreateInvoiceLineRequiredMessage_deleted')}"/>
+                        <p:outputLabel value="#{configMapController.getKey('CreateInvoiceLineLabel_description')}" for="description" />
+                        <p:inputText id="description" value="#{invoiceLineController.selected.description}" title="#{configMapController.getKey('CreateInvoiceLineTitle_description')}" />
+                        <p:outputLabel value="#{configMapController.getKey('CreateInvoiceLineLabel_sourceUserId')}" for="sourceUserId" />
+                        <p:inputText id="sourceUserId" value="#{invoiceLineController.selected.sourceUserId}" title="#{configMapController.getKey('CreateInvoiceLineTitle_sourceUserId')}" />
+                        <p:outputLabel value="#{configMapController.getKey('CreateInvoiceLineLabel_isPercentage')}" for="isPercentage" />
+                        <p:inputText id="isPercentage" value="#{invoiceLineController.selected.isPercentage}" title="#{configMapController.getKey('CreateInvoiceLineTitle_isPercentage')}" required="true" requiredMessage="#{configMapController.getKey('CreateInvoiceLineRequiredMessage_isPercentage')}"/>
+                        <p:outputLabel value="#{configMapController.getKey('CreateInvoiceLineLabel_itemId')}" for="itemId" />
+                        <p:selectOneMenu id="itemId" valueChangeListener="#{invoiceLineController.selectOneMenuValueChangeListener}" value="#{invoiceLineController.selected.Id}" label="#{configMapController.getKey('CreateInvoiceLineTitle_itemId')}" >
+                            <f:selectItems value="#{itemController.itemsAvailableSelectOne}"/>
+                            <p:ajax   update=":formInvoiceLineCreate1"  />
+                        </p:selectOneMenu>
+                        <p:outputLabel value="#{configMapController.getKey('CreateInvoiceLineLabel_invoiceId')}" for="invoiceId" />
+                        <p:selectOneMenu id="invoiceId" valueChangeListener="#{invoiceLineController.selectOneMenuValueChangeListener}" value="#{invoiceLineController.selected.invoiceId}" label="#{configMapController.getKey('CreateInvoiceLineTitle_invoiceId')}" >
+                            <f:selectItems value="#{invoiceController.itemsAvailableSelectOne}"/>
+                            <p:ajax   update=":formInvoiceLineCreate1"  />
+                        </p:selectOneMenu>
+                        <p:outputLabel value="#{configMapController.getKey('CreateInvoiceLineLabel_typeId')}" for="typeId" />
+                        <p:selectOneMenu id="typeId" valueChangeListener="#{invoiceLineController.selectOneMenuValueChangeListener}" value="#{invoiceLineController.selected.typeId}" label="#{configMapController.getKey('CreateInvoiceLineTitle_typeId')}" >
+                            <f:selectItems value="#{invoiceLineTypeController.itemsAvailableSelectOne}"/>
+                            <p:ajax   update=":formInvoiceLineCreate1"  />
+                        </p:selectOneMenu>
+                        <p:commandButton oncomplete="InvoiceLineCreateDialogue.hide();invoiceLineControllerTable.filter()" actionListener="#{invoiceLineController.createDialogue}" value="#{configMapController.getKey('CreateInvoiceLineSaveLink')}" update=":menuForm:growl"/>                
+                    </p:panelGrid>
+                </p:confirmDialog>
+            </h:form>
+
+
+
+
+
+            <h:form id="InvoiceLinelistForm1">
+                <h:panelGroup >
+                    <p:commandButton id="showDialogButton"  value="#{configMapController.getKey('ListInvoiceLineCreateLink')}" onclick="InvoiceLineCreateDialogue.show()" type="button"/> 
+
+                </h:panelGroup>
+                <h:outputText escape="false" value="#{configMapController.getKey('ListInvoiceLineEmpty')}" rendered="#{invoiceLineController.items.rowCount == 0}"/>
+                <h:panelGroup rendered="#{invoiceLineController.items.rowCount > 0}">
+                    <p:dataTable  editable="true" value="#{invoiceLineController.items}"  widgetVar="invoiceLineControllerTable" var="item"  paginator="true" rows="15"  paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  rowsPerPageTemplate="5,10,15,20,25,50,100" >
+                        <f:facet name="header">
+                            <p:outputPanel>
+                                <h:outputText value="Search all fields:" />
+                                <h:inputText id="globalFilter" onkeyup="invoiceLineControllerTable.filter()" />
+                            </p:outputPanel>
+                        </f:facet>
+                        <p:ajax event="rowEdit" listener="#{invoiceLineController.onEdit}" update=":menuForm:growl" oncomplete="invoiceLineControllerTable.filter()" />  
+                        <p:ajax event="rowEditCancel" listener="#{invoiceLineController.onCancel}" update=":menuForm:growl"  oncomplete="invoiceLineControllerTable.filter()" />  
+
+                        <p:column sortBy="#{item.id}" filterBy="#{item.id}" headerText="#{configMapController.getKey('ListInvoiceLineTitle_id')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.id}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.id}" label="#{configMapController.getKey('ListInvoiceLineTitle_id')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.amount}" filterBy="#{item.amount}" headerText="#{configMapController.getKey('ListInvoiceLineTitle_amount')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.amount}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.amount}" label="#{configMapController.getKey('ListInvoiceLineTitle_amount')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.quantity}" filterBy="#{item.quantity}" headerText="#{configMapController.getKey('ListInvoiceLineTitle_quantity')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.quantity}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.quantity}" label="#{configMapController.getKey('ListInvoiceLineTitle_quantity')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.price}" filterBy="#{item.price}" headerText="#{configMapController.getKey('ListInvoiceLineTitle_price')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.price}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.price}" label="#{configMapController.getKey('ListInvoiceLineTitle_price')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.deleted}" filterBy="#{item.deleted}" headerText="#{configMapController.getKey('ListInvoiceLineTitle_deleted')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.deleted}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.deleted}" label="#{configMapController.getKey('ListInvoiceLineTitle_deleted')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.description}" filterBy="#{item.description}" headerText="#{configMapController.getKey('ListInvoiceLineTitle_description')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.description}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.description}" label="#{configMapController.getKey('ListInvoiceLineTitle_description')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.sourceUserId}" filterBy="#{item.sourceUserId}" headerText="#{configMapController.getKey('ListInvoiceLineTitle_sourceUserId')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.sourceUserId}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.sourceUserId}" label="#{configMapController.getKey('ListInvoiceLineTitle_sourceUserId')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.isPercentage}" filterBy="#{item.isPercentage}" headerText="#{configMapController.getKey('ListInvoiceLineTitle_isPercentage')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.isPercentage}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.isPercentage}" label="#{configMapController.getKey('ListInvoiceLineTitle_isPercentage')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.itemId}" filterBy="#{item.itemId}" headerText="#{configMapController.getKey('ListInvoiceLineTitle_itemId')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.itemId}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.itemId}" label="#{configMapController.getKey('ListInvoiceLineTitle_itemId')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.invoiceId}" filterBy="#{item.invoiceId}" headerText="#{configMapController.getKey('ListInvoiceLineTitle_invoiceId')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.invoiceId}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.invoiceId}" label="#{configMapController.getKey('ListInvoiceLineTitle_invoiceId')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.typeId}" filterBy="#{item.typeId}" headerText="#{configMapController.getKey('ListInvoiceLineTitle_typeId')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.typeId}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.typeId}" label="#{configMapController.getKey('ListInvoiceLineTitle_typeId')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column rendered="#{invoiceLineController.isUserInRole('ADMIN')}"  headerText="Edit" style="width:50px">  
+                            <p:rowEditor />  
+                        </p:column>  
+
+                        <p:column>
+                            <p:commandButton rendered="#{invoiceLineController.isUserInRole('ADMIN')}"  update=":InvoiceLinelistForm1 :menuForm:growl" action="#{invoiceLineController.destroy}" value="#{configMapController.getKey('ListInvoiceLineDestroyLink')}">
+                                <f:setPropertyActionListener value="#{item}" target="#{invoiceLineController.selectedForDeletion}" />
+                            </p:commandButton>                        
+
+                        </p:column>
+                    </p:dataTable>
+                </h:panelGroup>
+            </h:form>
+        </ui:define>
+    </ui:composition>
+
+</html>

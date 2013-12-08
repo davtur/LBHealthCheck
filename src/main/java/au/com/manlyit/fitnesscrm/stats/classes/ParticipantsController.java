@@ -5,6 +5,7 @@ import au.com.manlyit.fitnesscrm.stats.db.Participants;
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PaginationHelper;
 import au.com.manlyit.fitnesscrm.stats.beans.ParticipantsFacade;
+import java.io.Serializable;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -19,7 +20,7 @@ import javax.faces.model.SelectItem;
 
 @Named("participantsController")
 @SessionScoped
-public class ParticipantsController {
+public class ParticipantsController implements Serializable {
 
     private Participants current;
     private DataModel items = null;

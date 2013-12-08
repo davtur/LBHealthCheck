@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" >
+
+    <ui:composition template="/template.xhtml">
+        <ui:define name="title">
+            <h:outputText value="#{configMapController.getKey('ListConfigMapTitle')}"></h:outputText>
+        </ui:define>
+        <ui:define name="body">
+            <h:form id="listForm4">
+                 <p:confirmDialog id="confirmDialog" message="Add a Key/ Value Pair to the configuration table"  
+                                 header="Create Key / Value" severity="info" widgetVar="confirmation"> 
+                    <h:panelGrid columns="2">
+                        <h:outputLabel value="#{configMapController.getKey('EditConfigMapLabel_configkey')}" for="configkey" />
+                        <p:inputText id="configkey" value="#{configMapController.selected.configkey}" title="#{configMapController.getKey('EditConfigMapTitle_configkey')}" required="true" requiredMessage="#{configMapController.getKey('EditConfigMapRequiredMessage_configkey')}"/>
+                        <h:outputLabel value="#{configMapController.getKey('EditConfigMapLabel_configvalue')}" for="configvalue" />
+                        <p:inputTextarea  rows="4" cols="30" id="configvalue" value="#{configMapController.selected.configvalue}" title="#{configMapController.getKey('EditConfigMapTitle_configvalue')}" required="true" requiredMessage="#{configMapController.getKey('EditConfigMapRequiredMessage_configvalue')}"/>
+                        <p:commandButton   id="confirm" value="Create" update=":menuForm:growl" oncomplete="confirmation.hide();configMapControllerTable.filter()"   
+                                           actionListener="#{configMapController.createDialogue}" /> 
+
+                    </h:panelGrid>
+
+
+                </p:confirmDialog> 
+              
+            </h:form>
+            <h:form id="listForm3">
+                <p:confirmDialog id="confirmDialog2" message="Add a Key/ Password Pair to the configuration table"  
+                                 header="Create Key / Password" severity="info" widgetVar="confirmation2"> 
+                    <h:panelGrid columns="2">
+                        <h:panelGrid   columns="2" id="matchGrid">    
+                            <h:outputLabel value="#{configMapController.getKey('EditConfigMapLabel_configkey')}" for="configkey2" />
+                            <p:inputText id="configkey2" value="#{configMapController.selected.configkey}" title="#{configMapController.getKey('EditConfigMapTitle_configkey')}" required="true" requiredMessage="#{configMapController.getKey('EditConfigMapRequiredMessage_configkey')}"/>
+
+
+                            <h:outputLabel for="pwd1" value="Enter Password : *" />  
+                            <p:password id="pwd1" value="#{configMapController.password1}" match="pwd2" label="Password 1" feedback="true" required="true"/>  
+
+                            <h:outputLabel for="pwd2" value="Confirm Password : *" />  
+                            <p:password id="pwd2" value="#{configMapController.password2}" label="Password 2" required="true"/>  
+                        </h:panelGrid>  
+                        <p:commandButton   id="confirm2" value="Create" update="matchGrid :menuForm:growl" oncomplete="confirmation2.hide();configMapControllerTable.filter()"  
+                                         actionListener="#{configMapController.createPasswordDialogue}" /> 
+
+                    </h:panelGrid>
+
+
+                </p:confirmDialog> 
+
+            </h:form>
+            <h:form id="listForm2">
+                <h:panelGroup style="float: left" >
+                    <p:commandButton id="createButton" ajax="false" action="#{configMapController.prepareCreate}" value="#{configMapController.getKey('ListConfigMapCreateLink')}"/>
+
+                </h:panelGroup>  
+            </h:form>
+            <h:form id="listForm1">
+                <h:panelGroup >
+                    <p:commandButton id="showDialogButton" value="#{configMapController.getKey('ListConfigMapCreateButton')}" onclick="confirmation.show()" type="button"/>  
+                    <p:commandButton id="showDialogButton2" value="#{configMapController.getKey('ListConfigMapCreatePassButton')}" onclick="confirmation2.show()" type="button"/>  
+
+                </h:panelGroup>
+ 
+                <h:outputText escape="false" value="#{configMapController.getKey('ListConfigMapEmpty')}" rendered="#{configMapController.items.rowCount == 0}"/>
+                <h:panelGroup rendered="#{configMapController.items.rowCount > 0}">
+                    <p:dataTable id="dt1" editable="true" value="#{configMapController.items}" filteredValue="#{configMapController.filteredItems}"  widgetVar="configMapControllerTable" var="item"  paginator="true" rows="15"  paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  rowsPerPageTemplate="5,10,15,20,25,50,100" >
+                        <f:facet name="header">
+                            <p:outputPanel>
+                                <h:outputText value="Search all fields:" />
+                                <p:inputText id="globalFilter" onkeyup="configMapControllerTable.filter()" />
+                            </p:outputPanel>
+                        </f:facet>
+                        <p:ajax event="rowEdit" listener="#{configMapController.onEdit}" update=":menuForm:growl" oncomplete="configMapControllerTable.filter()"/>  
+                        <p:ajax event="rowEditCancel" listener="#{configMapController.onCancel}" update=":menuForm:growl" oncomplete="configMapControllerTable.filter()"/>  
+
+                        <p:column sortBy="#{item.id}" filterBy="#{item.id}" headerText="#{configMapController.getKey('ListConfigMapTitle_id')}"   >
+                            <f:facet name="header">
+                                <h:outputText value="#{configMapController.getKey('ListConfigMapTitle_id')}"/>
+                            </f:facet>
+                            <h:outputText value="#{item.id}"/>
+                        </p:column>
+                        <p:column sortBy="#{item.configkey}" filterBy="#{item.configkey}" headerText="#{configMapController.getKey('ListConfigMapTitle_configkey')}"   >
+                            <f:facet name="header">
+                                <h:outputText value="#{configMapController.getKey('ListConfigMapTitle_configkey')}"/>
+                            </f:facet>
+                            <h:outputText value="#{item.configkey}"/>
+                        </p:column>
+                        <p:column sortBy="#{item.configvalue}" filterBy="#{item.configvalue}" headerText="#{configMapController.getKey('ListConfigMapTitle_configvalue')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.configvalue}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.configvalue}" label="#{configMapController.getKey('ListConfigMapTitle_configvalue')}"/>
+                                </f:facet>
+                            </p:cellEditor> 
+                        </p:column>
+                        <p:column headerText="Edit" style="width:50px">  
+                            <p:rowEditor />  
+                        </p:column>  
+
+                        <p:column>
+                            <!--     <f:facet name="header">
+                                     <h:outputText value="&nbsp;"/>
+                                 </f:facet>
+                                 <p:commandButton                                                            ajax="false" action="#{configMapController.prepareView}" value="#{configMapController.getKey('ListConfigMapViewLink')}">
+                                     <f:setPropertyActionListener value="#{item}" target="#{configMapController.selected}" />
+                                 </p:commandButton>                        
+                                 <h:outputText value=" "/>
+                                 <p:commandButton rendered="#{configMapController.isUserInRole('ADMIN')}"  ajax="false" action="#{configMapController.prepareEdit}" value="#{configMapController.getKey('ListConfigMapEditLink')}">
+                                     <f:setPropertyActionListener value="#{item}" target="#{configMapController.selected}" />
+                                 </p:commandButton>                        
+                                 <h:outputText value=" "/>-->
+                            <p:commandButton rendered="#{configMapController.isUserInRole('ADMIN')}"  oncomplete="configMapControllerTable.filter()" value="#{configMapController.getKey('ListConfigMapDestroyLink')}">
+                                <f:setPropertyActionListener value="#{item}" target="#{configMapController.selectedForDeletion}" />
+                               
+                            </p:commandButton>                        
+
+                        </p:column>
+
+                    </p:dataTable>
+                </h:panelGroup>
+            </h:form>
+        </ui:define>
+    </ui:composition>
+
+</html>

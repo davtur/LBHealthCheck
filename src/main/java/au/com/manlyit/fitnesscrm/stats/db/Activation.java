@@ -34,7 +34,7 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "Activation.findAll", query = "SELECT a FROM Activation a"),
     @NamedQuery(name = "Activation.findById", query = "SELECT a FROM Activation a WHERE a.id = :id"),
     @NamedQuery(name = "Activation.findByNonce", query = "SELECT a FROM Activation a WHERE a.nonce = :nonce"),
-    @NamedQuery(name = "Activation.findByTimestamp", query = "SELECT a FROM Activation a WHERE a.timestamp = :timestamp")})
+    @NamedQuery(name = "Activation.findByTimestamp", query = "SELECT a FROM Activation a WHERE a.act_timestamp = :act_timestamp")})
 public class Activation implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
@@ -50,9 +50,9 @@ public class Activation implements Serializable {
     private String nonce;
     @Basic(optional = false)
     @NotNull
-    @Column(name = "timestamp")
+    @Column(name = "act_timestamp")
     @Temporal(TemporalType.TIMESTAMP)
-    private Date timestamp;
+    private Date act_timestamp;
     @JoinColumn(name = "customer", referencedColumnName = "id")
     @ManyToOne(optional = false)
     private Customers customerId;
@@ -67,7 +67,7 @@ public class Activation implements Serializable {
     public Activation(Integer id, String nonce, Date timestamp) {
         this.id = id;
         this.nonce = nonce;
-        this.timestamp = timestamp;
+        this.act_timestamp = timestamp;
     }
 
     public Integer getId() {
@@ -86,12 +86,12 @@ public class Activation implements Serializable {
         this.nonce = nonce;
     }
 
-    public Date getTimestamp() {
-        return timestamp;
+    public Date getAct_timestamp() {
+        return act_timestamp;
     }
 
-    public void setTimestamp(Date timestamp) {
-        this.timestamp = timestamp;
+    public void setAct_timestamp(Date act_timestamp) {
+        this.act_timestamp = act_timestamp;
     }
 
     @Override

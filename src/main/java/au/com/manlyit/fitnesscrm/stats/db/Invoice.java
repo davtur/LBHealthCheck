@@ -38,7 +38,6 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Invoice.findAll", query = "SELECT i FROM Invoice i"),
     @NamedQuery(name = "Invoice.findById", query = "SELECT i FROM Invoice i WHERE i.id = :id"),
     @NamedQuery(name = "Invoice.findByCreateDatetime", query = "SELECT i FROM Invoice i WHERE i.createDatetime = :createDatetime"),
-    @NamedQuery(name = "Invoice.findByUserId", query = "SELECT i FROM Invoice i WHERE i.userId = :userId"),
     @NamedQuery(name = "Invoice.findByStatusId", query = "SELECT i FROM Invoice i WHERE i.statusId = :statusId"),
     @NamedQuery(name = "Invoice.findByDueDate", query = "SELECT i FROM Invoice i WHERE i.dueDate = :dueDate"),
     @NamedQuery(name = "Invoice.findByTotal", query = "SELECT i FROM Invoice i WHERE i.total = :total"),
@@ -65,8 +64,6 @@ public class Invoice implements Serializable {
     @Column(name = "create_datetime")
     @Temporal(TemporalType.TIMESTAMP)
     private Date createDatetime;
-    @Column(name = "user_id")
-    private Integer userId;
     @Basic(optional = false)
     @NotNull
     @Column(name = "status_id")
@@ -119,8 +116,6 @@ public class Invoice implements Serializable {
     @Column(name = "create_timestamp")
     @Temporal(TemporalType.TIMESTAMP)
     private Date createTimestamp;
-    @OneToMany(mappedBy = "invoiceId")
-    private Collection<InvoiceLine> invoiceLineCollection;
     @OneToMany(mappedBy = "delegatedInvoiceId")
     private Collection<Invoice> invoiceCollection;
     @JoinColumn(name = "delegated_invoice_id", referencedColumnName = "id")
@@ -129,6 +124,11 @@ public class Invoice implements Serializable {
     @JoinColumn(name = "currency_id", referencedColumnName = "id")
     @ManyToOne(optional = false)
     private Currency currencyId;
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    @ManyToOne
+    private Customers userId;
+    @OneToMany(mappedBy = "invoiceId")
+    private Collection<InvoiceLine> invoiceLineCollection;
 
     public Invoice() {
     }
@@ -165,14 +165,6 @@ public class Invoice implements Serializable {
 
     public void setCreateDatetime(Date createDatetime) {
         this.createDatetime = createDatetime;
-    }
-
-    public Integer getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Integer userId) {
-        this.userId = userId;
     }
 
     public int getStatusId() {
@@ -288,15 +280,6 @@ public class Invoice implements Serializable {
     }
 
     @XmlTransient
-    public Collection<InvoiceLine> getInvoiceLineCollection() {
-        return invoiceLineCollection;
-    }
-
-    public void setInvoiceLineCollection(Collection<InvoiceLine> invoiceLineCollection) {
-        this.invoiceLineCollection = invoiceLineCollection;
-    }
-
-    @XmlTransient
     public Collection<Invoice> getInvoiceCollection() {
         return invoiceCollection;
     }
@@ -321,6 +304,23 @@ public class Invoice implements Serializable {
         this.currencyId = currencyId;
     }
 
+    public Customers getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Customers userId) {
+        this.userId = userId;
+    }
+
+    @XmlTransient
+    public Collection<InvoiceLine> getInvoiceLineCollection() {
+        return invoiceLineCollection;
+    }
+
+    public void setInvoiceLineCollection(Collection<InvoiceLine> invoiceLineCollection) {
+        this.invoiceLineCollection = invoiceLineCollection;
+    }
+
     @Override
     public int hashCode() {
         int hash = 0;
@@ -343,7 +343,7 @@ public class Invoice implements Serializable {
 
     @Override
     public String toString() {
-        return "au.com.manlyit.fitnesscrm.db.Invoice[ id=" + id + " ]";
+        return "au.com.manlyit.fitnesscrm.stats.db.Invoice[ id=" + id + " ]";
     }
     
 }

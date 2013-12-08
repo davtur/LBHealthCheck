@@ -6,8 +6,8 @@
     <class>au.com.manlyit.fitnesscrm.stats.db.ConfigMap</class>
     <class>au.com.manlyit.fitnesscrm.stats.db.CustomerGoals</class>
     <class>au.com.manlyit.fitnesscrm.stats.db.CustomerImages</class>
-    <class>au.com.manlyit.fitnesscrm.stats.db.Customers</class>
-    <class>au.com.manlyit.fitnesscrm.stats.db.DemograhicTypes</class>
+    <class>au.com.manlyit.fitnesscrm.stats.db.Customers</class> 
+    <class>au.com.manlyit.fitnesscrm.stats.db.DemographicTypes</class>
     <class>au.com.manlyit.fitnesscrm.stats.db.EmailQueue</class>
     <class>au.com.manlyit.fitnesscrm.stats.db.Groups</class>
     <class>au.com.manlyit.fitnesscrm.stats.db.Monitoringcharts</class>

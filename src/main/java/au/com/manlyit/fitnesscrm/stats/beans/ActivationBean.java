@@ -68,7 +68,7 @@ public class ActivationBean {
                         }
                         GregorianCalendar sendTime = new GregorianCalendar();
                         GregorianCalendar now = new GregorianCalendar();
-                        sendTime.setTime(act2.getTimestamp());
+                        sendTime.setTime(act2.getAct_timestamp());
                         sendTime.add(Calendar.MINUTE, MINUTES_VALID);
                         if (now.compareTo(sendTime) < 0) {
                             // it is valid log them in

@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" >
+
+    <ui:composition template="/template.xhtml">
+        <ui:define name="title">
+            <h:outputText value="#{configMapController.getKey('ListItemTitle')}"></h:outputText>
+        </ui:define>
+        <ui:define name="body">
+
+
+            <h:form id="formItemCreate1">
+                <p:confirmDialog id="confirmDialogItemCreate1" message="Add a Key/ Value Pair to the configuration table"  
+                                 header="#{configMapController.getKey('CreateItemTitle')}" severity="info" widgetVar="ItemCreateDialogue"> 
+
+                    <p:panelGrid columns="2">
+                        <p:outputLabel value="#{configMapController.getKey('CreateItemLabel_id')}" for="id" />
+                        <p:inputText id="id" value="#{itemController.selected.id}" title="#{configMapController.getKey('CreateItemTitle_id')}" required="true" requiredMessage="#{configMapController.getKey('CreateItemRequiredMessage_id')}"/>
+                        <p:outputLabel value="#{configMapController.getKey('CreateItemLabel_price')}" for="price" />
+                        <p:inputText id="price" value="#{itemController.selected.price}" title="#{configMapController.getKey('CreateItemTitle_price')}" />
+                        <p:outputLabel value="#{configMapController.getKey('CreateItemLabel_description')}" for="description" />
+                        <p:inputText id="description" value="#{itemController.selected.description}" title="#{configMapController.getKey('CreateItemTitle_description')}" required="true" requiredMessage="#{configMapController.getKey('CreateItemRequiredMessage_description')}"/>
+                        <p:outputLabel value="#{configMapController.getKey('CreateItemLabel_deleted')}" for="deleted" />
+                        <p:inputText id="deleted" value="#{itemController.selected.deleted}" title="#{configMapController.getKey('CreateItemTitle_deleted')}" required="true" requiredMessage="#{configMapController.getKey('CreateItemRequiredMessage_deleted')}"/>
+                        <p:commandButton oncomplete="ItemCreateDialogue.hide();itemControllerTable.filter()" actionListener="#{itemController.createDialogue}" value="#{configMapController.getKey('CreateItemSaveLink')}" update=":menuForm:growl"/>                
+                    </p:panelGrid>
+                </p:confirmDialog>
+            </h:form>
+
+
+
+
+
+            <h:form id="ItemlistForm1">
+                <h:panelGroup >
+                    <p:commandButton id="showDialogButton"  value="#{configMapController.getKey('ListItemCreateLink')}" onclick="ItemCreateDialogue.show()" type="button"/> 
+
+                </h:panelGroup>
+                <h:outputText escape="false" value="#{configMapController.getKey('ListItemEmpty')}" rendered="#{itemController.items.rowCount == 0}"/>
+                <h:panelGroup rendered="#{itemController.items.rowCount > 0}">
+                    <p:dataTable  editable="true" value="#{itemController.items}"  widgetVar="itemControllerTable" var="item"  paginator="true" rows="15"  paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  rowsPerPageTemplate="5,10,15,20,25,50,100" >
+                        <f:facet name="header">
+                            <p:outputPanel>
+                                <h:outputText value="Search all fields:" />
+                                <h:inputText id="globalFilter" onkeyup="itemControllerTable.filter()" />
+                            </p:outputPanel>
+                        </f:facet>
+                        <p:ajax event="rowEdit" listener="#{itemController.onEdit}" update=":menuForm:growl" oncomplete="itemControllerTable.filter()" />  
+                        <p:ajax event="rowEditCancel" listener="#{itemController.onCancel}" update=":menuForm:growl"  oncomplete="itemControllerTable.filter()" />  
+
+                        <p:column sortBy="#{item.id}" filterBy="#{item.id}" headerText="#{configMapController.getKey('ListItemTitle_id')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.id}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.id}" label="#{configMapController.getKey('ListItemTitle_id')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.price}" filterBy="#{item.price}" headerText="#{configMapController.getKey('ListItemTitle_price')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.price}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.price}" label="#{configMapController.getKey('ListItemTitle_price')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.description}" filterBy="#{item.description}" headerText="#{configMapController.getKey('ListItemTitle_description')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.description}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.description}" label="#{configMapController.getKey('ListItemTitle_description')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.deleted}" filterBy="#{item.deleted}" headerText="#{configMapController.getKey('ListItemTitle_deleted')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.deleted}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.deleted}" label="#{configMapController.getKey('ListItemTitle_deleted')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column rendered="#{itemController.isUserInRole('ADMIN')}"  headerText="Edit" style="width:50px">  
+                            <p:rowEditor />  
+                        </p:column>  
+
+                        <p:column>
+                            <p:commandButton rendered="#{itemController.isUserInRole('ADMIN')}"  update=":ItemlistForm1 :menuForm:growl" action="#{itemController.destroy}" value="#{configMapController.getKey('ListItemDestroyLink')}">
+                                <f:setPropertyActionListener value="#{item}" target="#{itemController.selectedForDeletion}" />
+                            </p:commandButton>                        
+
+                        </p:column>
+                    </p:dataTable>
+                </h:panelGroup>
+            </h:form>
+        </ui:define>
+    </ui:composition>
+
+</html>

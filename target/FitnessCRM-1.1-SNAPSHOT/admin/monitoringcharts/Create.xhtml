@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" >
+
+    <ui:composition template="/template.xhtml">
+        <ui:define name="title">
+            <h:outputText value="#{configMapController.getKey('CreateMonitoringchartsTitle')}"></h:outputText>
+        </ui:define>
+        <ui:define name="body">
+            <h:panelGroup id="messagePanel" layout="block">
+                <h:messages errorStyle="color: red" infoStyle="color: green" layout="table"/>
+            </h:panelGroup>
+            <h:form>
+                <p:panel>
+                    <h:panelGrid columns="2">
+                        <h:outputLabel value="#{configMapController.getKey('CreateMonitoringchartsLabel_id')}" for="id" />
+                        <h:inputText id="id" value="#{monitoringchartsController.selected.id}" title="#{configMapController.getKey('CreateMonitoringchartsTitle_id')}" required="true" requiredMessage="#{configMapController.getKey('CreateMonitoringchartsRequiredMessage_id')}"/>
+                        <h:outputLabel value="#{configMapController.getKey('CreateMonitoringchartsLabel_type')}" for="type" />
+                        <h:inputText id="type" value="#{monitoringchartsController.selected.type}" title="#{configMapController.getKey('CreateMonitoringchartsTitle_type')}" required="true" requiredMessage="#{configMapController.getKey('CreateMonitoringchartsRequiredMessage_type')}"/>
+                        <h:outputLabel value="#{configMapController.getKey('CreateMonitoringchartsLabel_date')}" for="date" />
+                        <h:inputText id="date" value="#{monitoringchartsController.selected.date}" title="#{configMapController.getKey('CreateMonitoringchartsTitle_date')}" required="true" requiredMessage="#{configMapController.getKey('CreateMonitoringchartsRequiredMessage_date')}">
+                            <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                        </h:inputText>
+                        <h:outputLabel value="#{configMapController.getKey('CreateMonitoringchartsLabel_chart')}" for="chart" />
+                        <h:inputTextarea rows="4" cols="30" id="chart" value="#{monitoringchartsController.selected.chart}" title="#{configMapController.getKey('CreateMonitoringchartsTitle_chart')}" required="true" requiredMessage="#{configMapController.getKey('CreateMonitoringchartsRequiredMessage_chart')}"/>
+                    </h:panelGrid>
+                </p:panel>
+                <br />
+                <p:commandButton   ajax="false"   action="#{monitoringchartsController.create}" value="#{configMapController.getKey('CreateMonitoringchartsSaveLink')}" />
+                <br />
+                <br />
+                <p:commandButton   ajax="false"   action="#{monitoringchartsController.prepareList}" value="#{configMapController.getKey('CreateMonitoringchartsShowAllLink')}" immediate="true"/>
+                <br />
+                <br />
+                <p:commandButton  ajax="false"   value="#{configMapController.getKey('CreateMonitoringchartsIndexLink')}" action="/index" immediate="true" />
+            </h:form>
+        </ui:define>
+    </ui:composition>
+
+</html>

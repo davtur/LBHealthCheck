@@ -1,5 +1,6 @@
 /*
- * To change this template, choose Tools | Templates
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
 
@@ -17,6 +18,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
+import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  *
@@ -24,6 +26,7 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name = "participants")
+@XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "Participants.findAll", query = "SELECT p FROM Participants p"),
     @NamedQuery(name = "Participants.findById", query = "SELECT p FROM Participants p WHERE p.id = :id")})
@@ -34,12 +37,12 @@ public class Participants implements Serializable {
     @Basic(optional = false)
     @Column(name = "id")
     private Integer id;
-    @JoinColumn(name = "customer_id", referencedColumnName = "id")
-    @ManyToOne(optional = false)
-    private Customers customers;
     @JoinColumn(name = "session_history_id", referencedColumnName = "id")
     @ManyToOne(optional = false)
-    private SessionHistory sessionHistory;
+    private SessionHistory sessionHistoryId;
+    @JoinColumn(name = "customer_id", referencedColumnName = "id")
+    @ManyToOne(optional = false)
+    private Customers customerId;
 
     public Participants() {
     }
@@ -56,20 +59,20 @@ public class Participants implements Serializable {
         this.id = id;
     }
 
-    public Customers getCustomers() {
-        return customers;
+    public SessionHistory getSessionHistoryId() {
+        return sessionHistoryId;
     }
 
-    public void setCustomers(Customers customers) {
-        this.customers = customers;
+    public void setSessionHistoryId(SessionHistory sessionHistoryId) {
+        this.sessionHistoryId = sessionHistoryId;
     }
 
-    public SessionHistory getSessionHistory() {
-        return sessionHistory;
+    public Customers getCustomerId() {
+        return customerId;
     }
 
-    public void setSessionHistory(SessionHistory sessionHistory) {
-        this.sessionHistory = sessionHistory;
+    public void setCustomerId(Customers customerId) {
+        this.customerId = customerId;
     }
 
     @Override
@@ -94,7 +97,7 @@ public class Participants implements Serializable {
 
     @Override
     public String toString() {
-        return "au.com.manlyit.fitnesscrm.stats.db.Participants[id=" + id + "]";
+        return "au.com.manlyit.fitnesscrm.stats.db.Participants[ id=" + id + " ]";
     }
-
+    
 }

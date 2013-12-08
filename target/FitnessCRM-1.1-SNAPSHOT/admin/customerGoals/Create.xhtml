@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" >
+
+    <ui:composition template="/template.xhtml">
+        <ui:define name="title">
+            <h:outputText value="#{configMapController.getKey('CreateCustomerGoalsTitle')}"></h:outputText>
+        </ui:define>
+        <ui:define name="body">
+            <h:panelGroup id="messagePanel" layout="block">
+                <h:messages errorStyle="color: red" infoStyle="color: green" layout="table"/>
+            </h:panelGroup>
+            <h:form>
+               <p:panel>
+                <h:panelGrid columns="2">
+                      <h:outputLabel value="#{configMapController.getKey('CreateCustomerGoalsLabel_goal')}" for="goal" />
+                    <h:inputText id="goal" value="#{customerGoalsController.selected.goal}" title="#{configMapController.getKey('CreateCustomerGoalsTitle_goal')}" required="true" requiredMessage="#{configMapController.getKey('CreateCustomerGoalsRequiredMessage_goal')}"/>
+                    <h:outputLabel value="#{configMapController.getKey('CreateCustomerGoalsLabel_startdate')}" for="startdate" />
+                    <h:inputText id="startdate" value="#{customerGoalsController.selected.startdate}" title="#{configMapController.getKey('CreateCustomerGoalsTitle_startdate')}" required="true" requiredMessage="#{configMapController.getKey('CreateCustomerGoalsRequiredMessage_startdate')}">
+                        <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                    </h:inputText>
+                    <h:outputLabel value="#{configMapController.getKey('CreateCustomerGoalsLabel_finishdate')}" for="finishdate" />
+                    <h:inputText id="finishdate" value="#{customerGoalsController.selected.finishdate}" title="#{configMapController.getKey('CreateCustomerGoalsTitle_finishdate')}" required="true" requiredMessage="#{configMapController.getKey('CreateCustomerGoalsRequiredMessage_finishdate')}">
+                        <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                    </h:inputText>
+                    <h:outputLabel value="#{configMapController.getKey('CreateCustomerGoalsLabel_customerId')}" for="customerId" />
+                    <h:selectOneMenu id="customerId" value="#{customerGoalsController.selected.customerId}" title="#{configMapController.getKey('CreateCustomerGoalsTitle_customerId')}" required="true" requiredMessage="#{configMapController.getKey('CreateCustomerGoalsRequiredMessage_customerId')}">
+                        <f:selectItems value="#{customersController.itemsAvailableSelectOne}"/>
+                    </h:selectOneMenu>
+                </h:panelGrid>
+                 </p:panel>
+                <br />
+                <p:commandButton   ajax="false"   action="#{customerGoalsController.create}" value="#{configMapController.getKey('CreateCustomerGoalsSaveLink')}" />
+                <br />
+                <br />
+                <p:commandButton   ajax="false"   action="#{customerGoalsController.prepareList}" value="#{configMapController.getKey('CreateCustomerGoalsShowAllLink')}" immediate="true"/>
+                <br />
+                <br />
+                <p:commandButton  ajax="false"   value="#{configMapController.getKey('CreateCustomerGoalsIndexLink')}" action="/index" immediate="true" />
+            </h:form>
+        </ui:define>
+    </ui:composition>
+
+</html>

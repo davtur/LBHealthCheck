@@ -1,5 +1,6 @@
 /*
- * To change this template, choose Tools | Templates
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
 
@@ -16,6 +17,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
@@ -39,14 +41,12 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "StatsTaken.findAll", query = "SELECT s FROM StatsTaken s"),
     @NamedQuery(name = "StatsTaken.findById", query = "SELECT s FROM StatsTaken s WHERE s.id = :id"),
     @NamedQuery(name = "StatsTaken.findByDateRecorded", query = "SELECT s FROM StatsTaken s WHERE s.dateRecorded = :dateRecorded"),
-    @NamedQuery(name = "StatsTaken.findByTrainerComments", query = "SELECT s FROM StatsTaken s WHERE s.trainerComments = :trainerComments"),
     @NamedQuery(name = "StatsTaken.findByImageId", query = "SELECT s FROM StatsTaken s WHERE s.imageId = :imageId")})
 public class StatsTaken implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
-    @NotNull
     @Column(name = "id")
     private Integer id;
     @Basic(optional = false)
@@ -54,20 +54,17 @@ public class StatsTaken implements Serializable {
     @Column(name = "date_recorded")
     @Temporal(TemporalType.TIMESTAMP)
     private Date dateRecorded;
-    @Basic(optional = false)
-    @NotNull
-    @Size(min = 1, max = 256)
+    @Lob
+    @Size(max = 65535)
     @Column(name = "trainer_comments")
     private String trainerComments;
-    @Basic(optional = false)
-    @NotNull
     @Column(name = "image_id")
-    private int imageId;
+    private Integer imageId;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "statsTakenId")
+    private Collection<Stat> statCollection;
     @JoinColumn(name = "customer_id", referencedColumnName = "id")
     @ManyToOne(optional = false)
     private Customers customerId;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "statsTakenId")
-    private Collection<Stat> statCollection;
 
     public StatsTaken() {
     }
@@ -76,11 +73,9 @@ public class StatsTaken implements Serializable {
         this.id = id;
     }
 
-    public StatsTaken(Integer id, Date dateRecorded, String trainerComments, int imageId) {
+    public StatsTaken(Integer id, Date dateRecorded) {
         this.id = id;
         this.dateRecorded = dateRecorded;
-        this.trainerComments = trainerComments;
-        this.imageId = imageId;
     }
 
     public Integer getId() {
@@ -107,20 +102,12 @@ public class StatsTaken implements Serializable {
         this.trainerComments = trainerComments;
     }
 
-    public int getImageId() {
+    public Integer getImageId() {
         return imageId;
     }
 
-    public void setImageId(int imageId) {
+    public void setImageId(Integer imageId) {
         this.imageId = imageId;
-    }
-
-    public Customers getCustomerId() {
-        return customerId;
-    }
-
-    public void setCustomerId(Customers customerId) {
-        this.customerId = customerId;
     }
 
     @XmlTransient
@@ -130,6 +117,14 @@ public class StatsTaken implements Serializable {
 
     public void setStatCollection(Collection<Stat> statCollection) {
         this.statCollection = statCollection;
+    }
+
+    public Customers getCustomerId() {
+        return customerId;
+    }
+
+    public void setCustomerId(Customers customerId) {
+        this.customerId = customerId;
     }
 
     @Override
@@ -156,5 +151,5 @@ public class StatsTaken implements Serializable {
     public String toString() {
         return "au.com.manlyit.fitnesscrm.stats.db.StatsTaken[ id=" + id + " ]";
     }
-
+    
 }
