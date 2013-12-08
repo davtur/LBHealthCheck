@@ -54,7 +54,7 @@ public class StatController implements Serializable {
     }
 
     public static boolean isUserInRole(String roleName) {
-        boolean inRole = false;
+        boolean inRole ;
         inRole = FacesContext.getCurrentInstance().getExternalContext().isUserInRole(roleName);
         return inRole;
 
@@ -232,7 +232,7 @@ public class StatController implements Serializable {
 
     public void onEditRow2(RowEditEvent event) {
 
-        Stat obj = null;
+        Stat obj ;
         try {
             obj = (Stat) event.getObject();
             ejbFacade.edit(obj);
@@ -255,7 +255,7 @@ public class StatController implements Serializable {
     }
 
     public void onStatSelect(SelectEvent event) {
-        Stat obj = null;
+        Stat obj ;
         try {
             obj = (Stat) event.getObject();
             ejbFacade.edit(obj);
@@ -301,7 +301,8 @@ public class StatController implements Serializable {
     }
 
     /**
-     * @param SelectedStat the SelectedStat to set
+     * @param newStat
+     * 
      */
     public void setSelectedStat(Stat newStat) {
         if (selectedStat.getId() != null) {
@@ -323,7 +324,6 @@ public class StatController implements Serializable {
     //       return selectedCell;
     //   }
     /**
-     * @param selectedCell the selectedCell to set
      */
     //   public void setSelected(Stat selected) {
 //        this.current = selected;
@@ -331,6 +331,7 @@ public class StatController implements Serializable {
     @FacesConverter(forClass = Stat.class)
     public static class StatControllerConverter implements Converter {
 
+        @Override
         public Object getAsObject(FacesContext facesContext, UIComponent component, String value) {
             if (value == null || value.length() == 0) {
                 return null;
@@ -347,11 +348,12 @@ public class StatController implements Serializable {
         }
 
         String getStringKey(java.lang.Integer value) {
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
             sb.append(value);
             return sb.toString();
         }
 
+        @Override
         public String getAsString(FacesContext facesContext, UIComponent component, Object object) {
             if (object == null) {
                 return null;

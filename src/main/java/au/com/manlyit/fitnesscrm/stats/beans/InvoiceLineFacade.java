@@ -6,7 +6,6 @@
 
 package au.com.manlyit.fitnesscrm.stats.beans;
 
-
 import au.com.manlyit.fitnesscrm.stats.db.InvoiceLine;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;

@@ -1,12 +1,12 @@
 package au.com.manlyit.fitnesscrm.stats.classes;
 
-import au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade;
-import au.com.manlyit.fitnesscrm.stats.beans.InvoiceFacade;
+import au.com.manlyit.fitnesscrm.stats.db.Invoice;
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PaginationHelper;
-import au.com.manlyit.fitnesscrm.stats.db.Invoice;
+import au.com.manlyit.fitnesscrm.stats.beans.InvoiceFacade;
 
 import java.io.Serializable;
+import java.util.ResourceBundle;
 import javax.ejb.EJB;
 import java.util.Date;
 import javax.faces.bean.ManagedBean;
@@ -19,6 +19,7 @@ import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
 import javax.faces.event.ValueChangeEvent;
+import javax.faces.event.ActionEvent;
 import org.primefaces.event.SelectEvent;
 import org.primefaces.event.RowEditEvent;
 
@@ -31,8 +32,6 @@ public class InvoiceController implements Serializable {
     private DataModel items = null;
     @EJB
     private au.com.manlyit.fitnesscrm.stats.beans.InvoiceFacade ejbFacade;
-    @EJB
-    private ConfigMapFacade configMapFacade;
     private PaginationHelper pagination;
     private int selectedItemIndex;
 
@@ -110,6 +109,17 @@ public class InvoiceController implements Serializable {
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
             return null;
+        }
+    }
+
+    public void createDialogue(ActionEvent actionEvent) {
+        try {
+            current.setId(0);
+            getFacade().create(current);
+            recreateModel();
+            JsfUtil.addSuccessMessage(configMapFacade.getConfig("InvoiceCreated"));
+        } catch (Exception e) {
+            JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
         }
     }
 

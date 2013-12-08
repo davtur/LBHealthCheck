@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:ui="http://java.sun.com/jsf/facelets"
       xmlns:h="http://java.sun.com/jsf/html"
       xmlns:f="http://java.sun.com/jsf/core"
-      xmlns:p="http://primefaces.org/ui" >
+      xmlns:p="http://primefaces.org/ui" 
+      xmlns:ui="http://java.sun.com/jsf/facelets" >
 
     <ui:composition template="/template.xhtml">
         <ui:define name="title">
@@ -28,7 +28,7 @@
                     </h:panelGrid>
                 </p:panel>
                 <br />
-                <p:commandButton rendered="#{qrtzSimpleTriggersController.isUserInRole('ADMIN')}"  ajax="false"  action="#{qrtzSimpleTriggersController.destroyAndView}" value="#{configMapController.getKey('ViewQrtzSimpleTriggersDestroyLink')}"/>
+                <p:commandButton rendered="#{qrtzSimpleTriggersController.isUserInRole('ADMIN')}"  action="#{qrtzSimpleTriggersController.destroyAndView}" value="#{configMapController.getKey('ViewQrtzSimpleTriggersDestroyLink')}"/>
                 <br />
                 <br />
                 <p:commandButton rendered="#{qrtzSimpleTriggersController.isUserInRole('ADMIN')}"  ajax="false"  action="Edit" value="#{configMapController.getKey('ViewQrtzSimpleTriggersEditLink')}"/>
@@ -36,9 +36,6 @@
                 <p:commandButton rendered="#{qrtzSimpleTriggersController.isUserInRole('ADMIN')}"  ajax="false"  action="#{qrtzSimpleTriggersController.prepareCreate}" value="#{configMapController.getKey('ViewQrtzSimpleTriggersCreateLink')}" />
                 <br />
                 <p:commandButton                                                                 ajax="false"  action="#{qrtzSimpleTriggersController.prepareList}" value="#{configMapController.getKey('ViewQrtzSimpleTriggersShowAllLink')}"/>
-                <br />
-                <br />
-                <p:commandButton                                                                 ajax="false"  value="#{configMapController.getKey('ViewQrtzSimpleTriggersIndexLink')}" action="/index" immediate="true" />
 
             </h:form>
         </ui:define>

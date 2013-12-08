@@ -11,47 +11,93 @@
             <h:outputText value="#{configMapController.getKey('ListQrtzCronTriggersTitle')}"></h:outputText>
         </ui:define>
         <ui:define name="body">
-            <h:form id="listForm1">
+
+
+            <h:form id="formQrtzCronTriggersCreate1">
+                <p:confirmDialog id="confirmDialogQrtzCronTriggersCreate1" message="Add a Key/ Value Pair to the configuration table"  
+                                 header="#{configMapController.getKey('CreateQrtzCronTriggersTitle')}" severity="info" widgetVar="QrtzCronTriggersCreateDialogue"> 
+
+                    <p:panelGrid columns="2">
+                        <p:outputLabel value="#{configMapController.getKey('CreateQrtzCronTriggersLabel_cronExpression')}" for="cronExpression" />
+                        <p:inputText id="cronExpression" value="#{qrtzCronTriggersController.selected.cronExpression}" title="#{configMapController.getKey('CreateQrtzCronTriggersTitle_cronExpression')}" required="true" requiredMessage="#{configMapController.getKey('CreateQrtzCronTriggersRequiredMessage_cronExpression')}"/>
+                        <p:outputLabel value="#{configMapController.getKey('CreateQrtzCronTriggersLabel_timeZoneId')}" for="timeZoneId" />
+                        <p:inputText id="timeZoneId" value="#{qrtzCronTriggersController.selected.timeZoneId}" title="#{configMapController.getKey('CreateQrtzCronTriggersTitle_timeZoneId')}" />
+                        <p:outputLabel value="#{configMapController.getKey('CreateQrtzCronTriggersLabel_qrtzTriggers')}" for="qrtzTriggers" />
+                        <p:selectOneMenu id="qrtzTriggers" valueChangeListener="#{qrtzCronTriggersController.selectOneMenuValueChangeListener}" value="#{qrtzCronTriggersController.selected.qrtzTriggers}" label="#{configMapController.getKey('CreateQrtzCronTriggersTitle_qrtzTriggers')}" required="true" requiredMessage="#{configMapController.getKey('CreateQrtzCronTriggersRequiredMessage_qrtzTriggers')}">
+                            <f:selectItems value="#{qrtzTriggersController.itemsAvailableSelectOne}"/>
+                            <p:ajax   update=":formQrtzCronTriggersCreate1"  />
+                        </p:selectOneMenu>
+                        <p:commandButton oncomplete="QrtzCronTriggersCreateDialogue.hide();qrtzCronTriggersControllerTable.filter()" actionListener="#{qrtzCronTriggersController.createDialogue}" value="#{configMapController.getKey('CreateQrtzCronTriggersSaveLink')}" update=":menuForm:growl"/>                
+                    </p:panelGrid>
+                </p:confirmDialog>
+            </h:form>
+
+
+
+
+
+            <h:form id="QrtzCronTriggerslistForm1">
                 <h:panelGroup >
-                    <p:commandButton id="createButton" ajax="false" action="#{qrtzCronTriggersController.prepareCreate}" value="#{configMapController.getKey('ListQrtzCronTriggersCreateLink')}"/>
+                    <p:commandButton id="showDialogButton"  value="#{configMapController.getKey('ListQrtzCronTriggersCreateLink')}" onclick="QrtzCronTriggersCreateDialogue.show()" type="button"/> 
+
                 </h:panelGroup>
                 <h:outputText escape="false" value="#{configMapController.getKey('ListQrtzCronTriggersEmpty')}" rendered="#{qrtzCronTriggersController.items.rowCount == 0}"/>
                 <h:panelGroup rendered="#{qrtzCronTriggersController.items.rowCount > 0}">
-                    <p:dataTable value="#{qrtzCronTriggersController.items}"  widgetVar="qrtzCronTriggersTable" var="item"  paginator="true" rows="15"  paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  rowsPerPageTemplate="5,10,15,20,25,50,100" >
+                    <p:dataTable  editable="true" value="#{qrtzCronTriggersController.items}"  widgetVar="qrtzCronTriggersControllerTable" var="item"  paginator="true" rows="15"  paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  rowsPerPageTemplate="5,10,15,20,25,50,100" >
                         <f:facet name="header">
                             <p:outputPanel>
                                 <h:outputText value="Search all fields:" />
-                                <h:inputText id="globalFilter" onkeyup="qrtzCronTriggersTable.filter()" />
+                                <h:inputText id="globalFilter" onkeyup="qrtzCronTriggersControllerTable.filter()" />
                             </p:outputPanel>
                         </f:facet>
+                        <p:ajax event="rowEdit" listener="#{qrtzCronTriggersController.onEdit}" update=":menuForm:growl" oncomplete="qrtzCronTriggersControllerTable.filter()" />  
+                        <p:ajax event="rowEditCancel" listener="#{qrtzCronTriggersController.onCancel}" update=":menuForm:growl"  oncomplete="qrtzCronTriggersControllerTable.filter()" />  
 
                         <p:column sortBy="#{item.cronExpression}" filterBy="#{item.cronExpression}" headerText="#{configMapController.getKey('ListQrtzCronTriggersTitle_cronExpression')}"   >
-                            <f:facet name="header">
-                                <h:outputText value="#{configMapController.getKey('ListQrtzCronTriggersTitle_cronExpression')}"/>
-                            </f:facet>
-                            <h:outputText value="#{item.cronExpression}"/>
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.cronExpression}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.cronExpression}" label="#{configMapController.getKey('ListQrtzCronTriggersTitle_cronExpression')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
                         </p:column>
                         <p:column sortBy="#{item.timeZoneId}" filterBy="#{item.timeZoneId}" headerText="#{configMapController.getKey('ListQrtzCronTriggersTitle_timeZoneId')}"   >
-                            <f:facet name="header">
-                                <h:outputText value="#{configMapController.getKey('ListQrtzCronTriggersTitle_timeZoneId')}"/>
-                            </f:facet>
-                            <h:outputText value="#{item.timeZoneId}"/>
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.timeZoneId}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.timeZoneId}" label="#{configMapController.getKey('ListQrtzCronTriggersTitle_timeZoneId')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
                         </p:column>
                         <p:column sortBy="#{item.qrtzTriggers}" filterBy="#{item.qrtzTriggers}" headerText="#{configMapController.getKey('ListQrtzCronTriggersTitle_qrtzTriggers')}"   >
-                            <f:facet name="header">
-                                <h:outputText value="#{configMapController.getKey('ListQrtzCronTriggersTitle_qrtzTriggers')}"/>
-                            </f:facet>
-                            <h:outputText value="#{item.qrtzTriggers}"/>
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.qrtzTriggers}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.qrtzTriggers}" label="#{configMapController.getKey('ListQrtzCronTriggersTitle_qrtzTriggers')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
                         </p:column>
+                        <p:column rendered="#{qrtzCronTriggersController.isUserInRole('ADMIN')}"  headerText="Edit" style="width:50px">  
+                            <p:rowEditor />  
+                        </p:column>  
+
                         <p:column>
-                            <f:facet name="header">
-                                <h:outputText value="&nbsp;"/>
-                            </f:facet>
-                            <p:commandButton                                                            ajax="false" action="#{qrtzCronTriggersController.prepareView}" value="#{configMapController.getKey('ListQrtzCronTriggersViewLink')}"/>
-                            <h:outputText value=" "/>
-                            <p:commandButton rendered="#{qrtzCronTriggersController.isUserInRole('ADMIN')}"  ajax="false" action="#{qrtzCronTriggersController.prepareEdit}" value="#{configMapController.getKey('ListQrtzCronTriggersEditLink')}"/>
-                            <h:outputText value=" "/>
-                            <p:commandButton rendered="#{qrtzCronTriggersController.isUserInRole('ADMIN')}"  ajax="false" action="#{qrtzCronTriggersController.destroy}" value="#{configMapController.getKey('ListQrtzCronTriggersDestroyLink')}"/>
+                            <p:commandButton rendered="#{qrtzCronTriggersController.isUserInRole('ADMIN')}"  update=":QrtzCronTriggerslistForm1 :menuForm:growl" action="#{qrtzCronTriggersController.destroy}" value="#{configMapController.getKey('ListQrtzCronTriggersDestroyLink')}">
+                                <f:setPropertyActionListener value="#{item}" target="#{qrtzCronTriggersController.selectedForDeletion}" />
+                            </p:commandButton>                        
+
                         </p:column>
                     </p:dataTable>
                 </h:panelGroup>

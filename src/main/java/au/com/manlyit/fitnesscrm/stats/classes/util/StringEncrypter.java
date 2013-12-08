@@ -14,7 +14,10 @@ import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.PBEParameterSpec;
-import sun.misc.BASE64Encoder;
+//import sun.misc.BASE64Encoder;
+import javax.xml.bind.DatatypeConverter;
+
+
 
 /**
  *
@@ -61,7 +64,8 @@ import sun.misc.BASE64Encoder;
                 byte[] enc = ecipher.doFinal(utf8);
     
                 // Encode bytes to base64 to get a string
-                return new BASE64Encoder().encode(enc);
+                //return new BASE64Encoder().encode(enc);
+                return DatatypeConverter.printBase64Binary(enc);
             } catch (    javax.crypto.BadPaddingException | IllegalBlockSizeException | UnsupportedEncodingException e) {
             } 
             return null;
@@ -70,16 +74,14 @@ import sun.misc.BASE64Encoder;
         public String decrypt(String str) {
             try {
                 // Decode base64 to get bytes
-                byte[] dec = new sun.misc.BASE64Decoder().decodeBuffer(str);
-    
+                //byte[] dec = new sun.misc.BASE64Decoder().decodeBuffer(str);
+                byte[] dec = DatatypeConverter.parseBase64Binary(str);
                 // Decrypt
                 byte[] utf8 = dcipher.doFinal(dec);
     
                 // Decode using utf-8
                 return new String(utf8, "UTF8");
-            } catch (    javax.crypto.BadPaddingException | IllegalBlockSizeException e) {
-            } catch (UnsupportedEncodingException e) {
-            } catch (java.io.IOException e) {
+            } catch (    javax.crypto.BadPaddingException | IllegalBlockSizeException | UnsupportedEncodingException e) {             
             }
             return null;
         }

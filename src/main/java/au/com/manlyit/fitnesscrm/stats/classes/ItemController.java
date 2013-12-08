@@ -1,16 +1,15 @@
 package au.com.manlyit.fitnesscrm.stats.classes;
 
-import au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade;
-import au.com.manlyit.fitnesscrm.stats.beans.ItemFacade;
+import au.com.manlyit.fitnesscrm.stats.db.Item;
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PaginationHelper;
-import au.com.manlyit.fitnesscrm.stats.db.Item;
+import au.com.manlyit.fitnesscrm.stats.beans.ItemFacade;
 
 import java.io.Serializable;
-import javax.ejb.EJB;
+import java.util.ResourceBundle;
 import java.util.Date;
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.SessionScoped;
+import javax.enterprise.context.SessionScoped;
+
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 import javax.faces.convert.Converter;
@@ -19,20 +18,21 @@ import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
 import javax.faces.event.ValueChangeEvent;
+import javax.faces.event.ActionEvent;
+import javax.inject.Inject;
+import javax.inject.Named;
 import org.primefaces.event.SelectEvent;
 import org.primefaces.event.RowEditEvent;
 
-@ManagedBean(name = "itemController")
+@Named("itemController")
 @SessionScoped
 public class ItemController implements Serializable {
 
     private Item current;
     private Item selectedForDeletion;
     private DataModel items = null;
-    @EJB
+    @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.ItemFacade ejbFacade;
-    @EJB
-    private ConfigMapFacade configMapFacade;
     private PaginationHelper pagination;
     private int selectedItemIndex;
 
@@ -110,6 +110,17 @@ public class ItemController implements Serializable {
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
             return null;
+        }
+    }
+
+    public void createDialogue(ActionEvent actionEvent) {
+        try {
+            current.setId(0);
+            getFacade().create(current);
+            recreateModel();
+            JsfUtil.addSuccessMessage(configMapFacade.getConfig("ItemCreated"));
+        } catch (Exception e) {
+            JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
         }
     }
 
@@ -248,6 +259,7 @@ public class ItemController implements Serializable {
     @FacesConverter(forClass = Item.class)
     public static class ItemControllerConverter implements Converter {
 
+        @Override
         public Object getAsObject(FacesContext facesContext, UIComponent component, String value) {
             if (value == null || value.length() == 0) {
                 return null;
@@ -264,11 +276,12 @@ public class ItemController implements Serializable {
         }
 
         String getStringKey(java.lang.Integer value) {
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
             sb.append(value);
             return sb.toString();
         }
 
+        @Override
         public String getAsString(FacesContext facesContext, UIComponent component, Object object) {
             if (object == null) {
                 return null;

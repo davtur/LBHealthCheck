@@ -1,11 +1,12 @@
 package au.com.manlyit.fitnesscrm.stats.classes;
 
-import au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade;
-import au.com.manlyit.fitnesscrm.stats.beans.CurrencyFacade;
+import au.com.manlyit.fitnesscrm.stats.db.Currency;
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PaginationHelper;
+import au.com.manlyit.fitnesscrm.stats.beans.CurrencyFacade;
 
 import java.io.Serializable;
+import java.util.ResourceBundle;
 import javax.ejb.EJB;
 import java.util.Date;
 import javax.faces.bean.ManagedBean;
@@ -18,6 +19,7 @@ import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
 import javax.faces.event.ValueChangeEvent;
+import javax.faces.event.ActionEvent;
 import org.primefaces.event.SelectEvent;
 import org.primefaces.event.RowEditEvent;
 
@@ -25,13 +27,11 @@ import org.primefaces.event.RowEditEvent;
 @SessionScoped
 public class CurrencyController implements Serializable {
 
-    private au.com.manlyit.fitnesscrm.stats.db.Currency current;
-    private au.com.manlyit.fitnesscrm.stats.db.Currency selectedForDeletion;
+    private Currency current;
+    private Currency selectedForDeletion;
     private DataModel items = null;
     @EJB
     private au.com.manlyit.fitnesscrm.stats.beans.CurrencyFacade ejbFacade;
-    @EJB
-    private ConfigMapFacade configMapFacade;
     private PaginationHelper pagination;
     private int selectedItemIndex;
 
@@ -43,15 +43,15 @@ public class CurrencyController implements Serializable {
         return inRole;
     }
 
-    public au.com.manlyit.fitnesscrm.stats.db.Currency getSelected() {
+    public Currency getSelected() {
         if (current == null) {
-            current = new au.com.manlyit.fitnesscrm.stats.db.Currency();
+            current = new Currency();
             selectedItemIndex = -1;
         }
         return current;
     }
 
-    public void setSelected(au.com.manlyit.fitnesscrm.stats.db.Currency selected) {
+    public void setSelected(Currency selected) {
         if (selected != null) {
             current = selected;
             selectedItemIndex = -1;
@@ -93,7 +93,7 @@ public class CurrencyController implements Serializable {
     }
 
     public String prepareCreate() {
-        current = new au.com.manlyit.fitnesscrm.stats.db.Currency();
+        current = new Currency();
         selectedItemIndex = -1;
         return "Create";
     }
@@ -109,6 +109,17 @@ public class CurrencyController implements Serializable {
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
             return null;
+        }
+    }
+
+    public void createDialogue(ActionEvent actionEvent) {
+        try {
+            current.setId(0);
+            getFacade().create(current);
+            recreateModel();
+            JsfUtil.addSuccessMessage(configMapFacade.getConfig("CurrencyCreated"));
+        } catch (Exception e) {
+            JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
         }
     }
 
@@ -138,7 +149,7 @@ public class CurrencyController implements Serializable {
     }
 
     public String destroy() {
-        current = (au.com.manlyit.fitnesscrm.stats.db.Currency) getItems().getRowData();
+        current = (Currency) getItems().getRowData();
         selectedItemIndex = pagination.getPageFirstItem() + getItems().getRowIndex();
         performDestroy();
         recreateModel();
@@ -158,11 +169,11 @@ public class CurrencyController implements Serializable {
         }
     }
 
-    public au.com.manlyit.fitnesscrm.stats.db.Currency getSelectedForDeletion() {
+    public Currency getSelectedForDeletion() {
         return selectedForDeletion;
     }
 
-    public void setSelectedForDeletion(au.com.manlyit.fitnesscrm.stats.db.Currency selectedForDeletion) {
+    public void setSelectedForDeletion(Currency selectedForDeletion) {
         this.selectedForDeletion = selectedForDeletion;
         current = selectedForDeletion;
 
@@ -234,7 +245,7 @@ public class CurrencyController implements Serializable {
     }
 
     public void onEdit(RowEditEvent event) {
-        au.com.manlyit.fitnesscrm.stats.db.Currency cm = (au.com.manlyit.fitnesscrm.stats.db.Currency) event.getObject();
+        Currency cm = (Currency) event.getObject();
         getFacade().edit(cm);
         recreateModel();
         JsfUtil.addSuccessMessage("Row Edit Successful");
@@ -244,7 +255,7 @@ public class CurrencyController implements Serializable {
         JsfUtil.addErrorMessage("Row Edit Cancelled");
     }
 
-    @FacesConverter(forClass = au.com.manlyit.fitnesscrm.stats.db.Currency.class)
+    @FacesConverter(forClass = Currency.class)
     public static class CurrencyControllerConverter implements Converter {
 
         public Object getAsObject(FacesContext facesContext, UIComponent component, String value) {
@@ -272,8 +283,8 @@ public class CurrencyController implements Serializable {
             if (object == null) {
                 return null;
             }
-            if (object instanceof au.com.manlyit.fitnesscrm.stats.db.Currency) {
-                au.com.manlyit.fitnesscrm.stats.db.Currency o = (au.com.manlyit.fitnesscrm.stats.db.Currency) object;
+            if (object instanceof Currency) {
+                Currency o = (Currency) object;
                 return getStringKey(o.getId());
             } else {
                 throw new IllegalArgumentException("object " + object + " is of type " + object.getClass().getName() + "; expected type: " + CurrencyController.class.getName());

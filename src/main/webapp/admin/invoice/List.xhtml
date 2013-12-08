@@ -14,8 +14,8 @@
 
 
             <h:form id="formInvoiceCreate1">
-                <p:confirmDialog id="confirmDialogInvoiceCreate1" message="Add a Key/ Value Pair to the configuration table"  
-                                 header="#{configMapController.getKey('CreateInvoiceTitle')}" severity="info" widgetVar="InvoiceCreateDialogue"> 
+                <p:dialog id="confirmDialogInvoiceCreate1" 
+                                 header="#{configMapController.getKey('CreateInvoiceTitle')}"  widgetVar="InvoiceCreateDialogue"> 
 
                     <p:panelGrid columns="2">
                         <p:outputLabel value="#{configMapController.getKey('CreateInvoiceLabel_id')}" for="id" />
@@ -34,7 +34,7 @@
 
 
                         <p:calendar id="dueDate" pattern="MM/dd/yyyy HH:mm:ss" value="#{invoiceController.selected.dueDate}" title="#{configMapController.getKey('CreateInvoiceTitle_dueDate')}" required="true" requiredMessage="#{configMapController.getKey('CreateInvoiceRequiredMessage_dueDate')}">
-                            <p:ajax event="dateSelect" listener="#{invoiceController.handleDateSelect}" update=":formInvoiceCreate1" />
+                            <p:ajax event="dateSelect" listener="#{invoiceController.handleDateSelect}"  />
                         </p:calendar>
                         <p:outputLabel value="#{configMapController.getKey('CreateInvoiceLabel_total')}" for="total" />
                         <p:inputText id="total" value="#{invoiceController.selected.total}" title="#{configMapController.getKey('CreateInvoiceTitle_total')}" required="true" requiredMessage="#{configMapController.getKey('CreateInvoiceRequiredMessage_total')}"/>
@@ -80,7 +80,7 @@
                         </p:selectOneMenu>
                         <p:commandButton oncomplete="InvoiceCreateDialogue.hide();invoiceControllerTable.filter()" actionListener="#{invoiceController.createDialogue}" value="#{configMapController.getKey('CreateInvoiceSaveLink')}" update=":menuForm:growl"/>                
                     </p:panelGrid>
-                </p:confirmDialog>
+                </p:dialog>
             </h:form>
 
 

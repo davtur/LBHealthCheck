@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:ui="http://java.sun.com/jsf/facelets"
       xmlns:h="http://java.sun.com/jsf/html"
       xmlns:f="http://java.sun.com/jsf/core"
-      xmlns:p="http://primefaces.org/ui" >
+      xmlns:p="http://primefaces.org/ui" 
+      xmlns:ui="http://java.sun.com/jsf/facelets" >
 
     <ui:composition template="/template.xhtml">
         <ui:define name="title">
@@ -19,10 +19,10 @@
                     <h:panelGrid columns="2">
                         <h:outputText value="#{configMapController.getKey('ViewQrtzJobDetailsLabel_qrtzJobDetailsPK_schedName')}"/>
                         <h:outputText value="#{qrtzJobDetailsController.selected.qrtzJobDetailsPK.schedName}" title="#{configMapController.getKey('ViewQrtzJobDetailsTitle_qrtzJobDetailsPK_schedName')}"/>
-                        <h:outputText value="#{configMapController.getKey('ViewQrtzJobDetailsLabel_qrtzJobDetailsPK_jobName')}"/>
-                        <h:outputText value="#{qrtzJobDetailsController.selected.qrtzJobDetailsPK.jobName}" title="#{configMapController.getKey('ViewQrtzJobDetailsTitle_qrtzJobDetailsPK_jobName')}"/>
                         <h:outputText value="#{configMapController.getKey('ViewQrtzJobDetailsLabel_qrtzJobDetailsPK_jobGroup')}"/>
                         <h:outputText value="#{qrtzJobDetailsController.selected.qrtzJobDetailsPK.jobGroup}" title="#{configMapController.getKey('ViewQrtzJobDetailsTitle_qrtzJobDetailsPK_jobGroup')}"/>
+                        <h:outputText value="#{configMapController.getKey('ViewQrtzJobDetailsLabel_qrtzJobDetailsPK_jobName')}"/>
+                        <h:outputText value="#{qrtzJobDetailsController.selected.qrtzJobDetailsPK.jobName}" title="#{configMapController.getKey('ViewQrtzJobDetailsTitle_qrtzJobDetailsPK_jobName')}"/>
                         <h:outputText value="#{configMapController.getKey('ViewQrtzJobDetailsLabel_description')}"/>
                         <h:outputText value="#{qrtzJobDetailsController.selected.description}" title="#{configMapController.getKey('ViewQrtzJobDetailsTitle_description')}"/>
                         <h:outputText value="#{configMapController.getKey('ViewQrtzJobDetailsLabel_jobClassName')}"/>
@@ -40,7 +40,7 @@
                     </h:panelGrid>
                 </p:panel>
                 <br />
-                <p:commandButton rendered="#{qrtzJobDetailsController.isUserInRole('ADMIN')}"  ajax="false"  action="#{qrtzJobDetailsController.destroyAndView}" value="#{configMapController.getKey('ViewQrtzJobDetailsDestroyLink')}"/>
+                <p:commandButton rendered="#{qrtzJobDetailsController.isUserInRole('ADMIN')}"  action="#{qrtzJobDetailsController.destroyAndView}" value="#{configMapController.getKey('ViewQrtzJobDetailsDestroyLink')}"/>
                 <br />
                 <br />
                 <p:commandButton rendered="#{qrtzJobDetailsController.isUserInRole('ADMIN')}"  ajax="false"  action="Edit" value="#{configMapController.getKey('ViewQrtzJobDetailsEditLink')}"/>
@@ -48,9 +48,6 @@
                 <p:commandButton rendered="#{qrtzJobDetailsController.isUserInRole('ADMIN')}"  ajax="false"  action="#{qrtzJobDetailsController.prepareCreate}" value="#{configMapController.getKey('ViewQrtzJobDetailsCreateLink')}" />
                 <br />
                 <p:commandButton                                                                 ajax="false"  action="#{qrtzJobDetailsController.prepareList}" value="#{configMapController.getKey('ViewQrtzJobDetailsShowAllLink')}"/>
-                <br />
-                <br />
-                <p:commandButton                                                                 ajax="false"  value="#{configMapController.getKey('ViewQrtzJobDetailsIndexLink')}" action="/index" immediate="true" />
 
             </h:form>
         </ui:define>

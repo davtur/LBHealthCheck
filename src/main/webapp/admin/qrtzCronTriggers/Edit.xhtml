@@ -14,17 +14,18 @@
             <h:panelGroup id="messagePanel" layout="block">
                 <h:messages errorStyle="color: red" infoStyle="color: green" layout="table"/>
             </h:panelGroup>
-            <h:form>
-                <p:panel>
+            <h:form id="formQrtzCronTriggersEdit1">
+                <p:panel id="panelQrtzCronTriggersEdit1">
                     <h:panelGrid columns="2">
                         <h:outputLabel value="#{configMapController.getKey('EditQrtzCronTriggersLabel_cronExpression')}" for="cronExpression" />
-                        <h:inputText id="cronExpression" value="#{qrtzCronTriggersController.selected.cronExpression}" title="#{configMapController.getKey('EditQrtzCronTriggersTitle_cronExpression')}" required="true" requiredMessage="#{configMapController.getKey('EditQrtzCronTriggersRequiredMessage_cronExpression')}"/>
+                        <h:inputText id="cronExpression"  value="#{qrtzCronTriggersController.selected.cronExpression}" title="#{configMapController.getKey('EditQrtzCronTriggersTitle_cronExpression')}" required="true" requiredMessage="#{configMapController.getKey('EditQrtzCronTriggersRequiredMessage_cronExpression')}"/>
                         <h:outputLabel value="#{configMapController.getKey('EditQrtzCronTriggersLabel_timeZoneId')}" for="timeZoneId" />
-                        <h:inputText id="timeZoneId" value="#{qrtzCronTriggersController.selected.timeZoneId}" title="#{configMapController.getKey('EditQrtzCronTriggersTitle_timeZoneId')}" />
+                        <h:inputText id="timeZoneId"  value="#{qrtzCronTriggersController.selected.timeZoneId}" title="#{configMapController.getKey('EditQrtzCronTriggersTitle_timeZoneId')}" />
                         <h:outputLabel value="#{configMapController.getKey('EditQrtzCronTriggersLabel_qrtzTriggers')}" for="qrtzTriggers" />
-                        <h:selectOneMenu id="qrtzTriggers" value="#{qrtzCronTriggersController.selected.qrtzTriggers}" title="#{configMapController.getKey('EditQrtzCronTriggersTitle_qrtzTriggers')}" required="true" requiredMessage="#{configMapController.getKey('EditQrtzCronTriggersRequiredMessage_qrtzTriggers')}">
+                        <p:selectOneMenu id="qrtzTriggers" valueChangeListener="#{qrtzCronTriggersController.selectOneMenuValueChangeListener}" value="#{qrtzCronTriggersController.selected.qrtzTriggers}" label="#{configMapController.getKey('EditQrtzCronTriggersTitle_qrtzTriggers')}" required="true" requiredMessage="#{configMapController.getKey('EditQrtzCronTriggersRequiredMessage_qrtzTriggers')}">
                             <f:selectItems value="#{qrtzTriggersController.itemsAvailableSelectOne}"/>
-                        </h:selectOneMenu>
+                            <p:ajax   update=":formQrtzCronTriggersEdit1:panelQrtzCronTriggersEdit1"  />
+                        </p:selectOneMenu>
                     </h:panelGrid>
                 </p:panel>
                 <p:commandButton   ajax="false"    action="#{qrtzCronTriggersController.update}" value="#{configMapController.getKey('EditQrtzCronTriggersSaveLink')}"/>
@@ -33,9 +34,6 @@
                 <p:commandButton   ajax="false"    action="View" value="#{configMapController.getKey('EditQrtzCronTriggersViewLink')}" immediate="true"/>
                 <br />
                 <p:commandButton   ajax="false"    action="#{qrtzCronTriggersController.prepareList}" value="#{configMapController.getKey('EditQrtzCronTriggersShowAllLink')}" immediate="true"/>
-                <br />
-                <br />
-                <p:commandButton   ajax="false"    value="#{configMapController.getKey('EditQrtzCronTriggersIndexLink')}" action="/index" immediate="true" />
             </h:form>
         </ui:define>
     </ui:composition>
