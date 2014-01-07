@@ -68,13 +68,13 @@ public class ActivationBean {
                         }
                         GregorianCalendar sendTime = new GregorianCalendar();
                         GregorianCalendar now = new GregorianCalendar();
-                        sendTime.setTime(act2.getAct_timestamp());
+                        sendTime.setTime(act2.getActTimestamp());
                         sendTime.add(Calendar.MINUTE, MINUTES_VALID);
                         if (now.compareTo(sendTime) < 0) {
                             // it is valid log them in
                             //Authenticator 
                             HttpServletRequest req = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
-                            Customers cst = act2.getCustomerId();
+                            Customers cst = act2.getCustomer();
                             String user = cst.getUsername();
                             //Reset Password and log them in
                             String paswd = generateUniqueToken(10);
@@ -116,7 +116,7 @@ public class ActivationBean {
                     String timestamp = sdf.format(new Date());
                     String nonce = timestamp + uniquetoken;
                     Activation act = new Activation(0, nonce, new Date());
-                    act.setCustomerId(current);
+                    act.setCustomer(current);
                     String urlLink = configMapFacade.getConfig("PasswordResetURL");
 
                     urlLink += token + nonce;

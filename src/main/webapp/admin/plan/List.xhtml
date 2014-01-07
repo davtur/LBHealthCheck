@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" >
+
+    <ui:composition template="/template.xhtml">
+        <ui:define name="title">
+            <h:outputText value="#{configMapController.getKey('ListPlanTitle')}"></h:outputText>
+        </ui:define>
+        <ui:define name="body">
+
+
+            <h:form id="formPlanCreate1">
+                <p:confirmDialog id="confirmDialogPlanCreate1" message="Add a Key/ Value Pair to the configuration table"  
+                                 header="#{configMapController.getKey('CreatePlanTitle')}" severity="info" widgetVar="PlanCreateDialogue"> 
+
+                    <p:panelGrid columns="2">
+                        <p:outputLabel value="#{configMapController.getKey('CreatePlanLabel_id')}" for="id" />
+                        <p:inputText id="id" value="#{planController.selected.id}" title="#{configMapController.getKey('CreatePlanTitle_id')}" required="true" requiredMessage="#{configMapController.getKey('CreatePlanRequiredMessage_id')}"/>
+                        <p:outputLabel value="#{configMapController.getKey('CreatePlanLabel_planName')}" for="planName" />
+                        <p:inputText id="planName" value="#{planController.selected.planName}" title="#{configMapController.getKey('CreatePlanTitle_planName')}" required="true" requiredMessage="#{configMapController.getKey('CreatePlanRequiredMessage_planName')}"/>
+                        <p:outputLabel value="#{configMapController.getKey('CreatePlanLabel_planPrice')}" for="planPrice" />
+                        <p:inputText id="planPrice" value="#{planController.selected.planPrice}" title="#{configMapController.getKey('CreatePlanTitle_planPrice')}" required="true" requiredMessage="#{configMapController.getKey('CreatePlanRequiredMessage_planPrice')}"/>
+                        <p:outputLabel value="#{configMapController.getKey('CreatePlanLabel_planDescription')}" for="planDescription" />
+                        <p:inputTextarea rows="4" cols="30" id="planDescription" value="#{planController.selected.planDescription}" title="#{configMapController.getKey('CreatePlanTitle_planDescription')}" />
+                        <p:outputLabel value="#{configMapController.getKey('CreatePlanLabel_planActive')}" for="planActive" />
+                        <p:inputText id="planActive" value="#{planController.selected.planActive}" title="#{configMapController.getKey('CreatePlanTitle_planActive')}" required="true" requiredMessage="#{configMapController.getKey('CreatePlanRequiredMessage_planActive')}"/>
+                        <p:outputLabel value="#{configMapController.getKey('CreatePlanLabel_planDiscount')}" for="planDiscount" />
+                        <p:inputText id="planDiscount" value="#{planController.selected.planDiscount}" title="#{configMapController.getKey('CreatePlanTitle_planDiscount')}" />
+                        <p:commandButton oncomplete="PlanCreateDialogue.hide();planControllerTable.filter()" actionListener="#{planController.createDialogue}" value="#{configMapController.getKey('CreatePlanSaveLink')}" update=":menuForm:growl"/>                
+                    </p:panelGrid>
+                </p:confirmDialog>
+            </h:form>
+
+
+
+
+
+            <h:form id="PlanlistForm1">
+                <h:panelGroup >
+                    <p:commandButton id="showDialogButton"  value="#{configMapController.getKey('ListPlanCreateLink')}" onclick="PlanCreateDialogue.show()" type="button"/> 
+
+                </h:panelGroup>
+                <h:outputText escape="false" value="#{configMapController.getKey('ListPlanEmpty')}" rendered="#{planController.items.rowCount == 0}"/>
+                <h:panelGroup rendered="#{planController.items.rowCount > 0}">
+                    <p:dataTable  editable="true" value="#{planController.items}" filteredValue="#{planController.filteredItems}"  widgetVar="planControllerTable" var="item"  paginator="true" rows="15"  paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  rowsPerPageTemplate="5,10,15,20,25,50,100" >
+                        <f:facet name="header">
+                            <p:outputPanel>
+                                <h:outputText value="Search all fields:" />
+                                <h:inputText id="globalFilter" onkeyup="planControllerTable.filter()" />
+                            </p:outputPanel>
+                        </f:facet>
+                        <p:ajax event="rowEdit" listener="#{planController.onEdit}" update=":menuForm:growl" oncomplete="planControllerTable.filter()" />  
+                        <p:ajax event="rowEditCancel" listener="#{planController.onCancel}" update=":menuForm:growl"  oncomplete="planControllerTable.filter()" />  
+
+                        <p:column sortBy="#{item.id}" filterBy="#{item.id}" headerText="#{configMapController.getKey('ListPlanTitle_id')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.id}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.id}" label="#{configMapController.getKey('ListPlanTitle_id')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.planName}" filterBy="#{item.planName}" headerText="#{configMapController.getKey('ListPlanTitle_planName')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.planName}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.planName}" label="#{configMapController.getKey('ListPlanTitle_planName')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.planPrice}" filterBy="#{item.planPrice}" headerText="#{configMapController.getKey('ListPlanTitle_planPrice')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.planPrice}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.planPrice}" label="#{configMapController.getKey('ListPlanTitle_planPrice')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.planDescription}" filterBy="#{item.planDescription}" headerText="#{configMapController.getKey('ListPlanTitle_planDescription')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.planDescription}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.planDescription}" label="#{configMapController.getKey('ListPlanTitle_planDescription')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.planActive}" filterBy="#{item.planActive}" headerText="#{configMapController.getKey('ListPlanTitle_planActive')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.planActive}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.planActive}" label="#{configMapController.getKey('ListPlanTitle_planActive')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.planDiscount}" filterBy="#{item.planDiscount}" headerText="#{configMapController.getKey('ListPlanTitle_planDiscount')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.planDiscount}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.planDiscount}" label="#{configMapController.getKey('ListPlanTitle_planDiscount')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column rendered="#{planController.isUserInRole('ADMIN')}"  headerText="Edit" style="width:50px">  
+                            <p:rowEditor />  
+                        </p:column>  
+
+                        <p:column>
+                            <p:commandButton rendered="#{planController.isUserInRole('ADMIN')}"  oncomplete="planControllerTable.filter()" update=":menuForm:growl"  value="#{configMapController.getKey('ListPlanDestroyLink')}">
+                                <f:setPropertyActionListener value="#{item}" target="#{planController.selectedForDeletion}" />
+                            </p:commandButton>                        
+
+                        </p:column>
+                    </p:dataTable>
+                </h:panelGroup>
+            </h:form>
+        </ui:define>
+    </ui:composition>
+
+</html>

@@ -18,6 +18,8 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.faces.FacesException;
 import javax.inject.Named;
+import java.util.List;
+import java.util.ResourceBundle;
 import javax.enterprise.context.SessionScoped;
 import javax.faces.component.UIComponent;
 import javax.faces.context.ExternalContext;
@@ -31,6 +33,7 @@ import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import org.primefaces.event.RowEditEvent;
 import org.primefaces.event.SelectEvent;
 
 @Named("customersController")
@@ -50,6 +53,8 @@ public class CustomersController implements Serializable {
     private ConfigMapFacade configMapFacade;
     private PaginationHelper pagination;
     private int selectedItemIndex;
+    private List<Customers> filteredItems;
+    private Customers[] multiSelected;
     private String checkPass = "";
     private String checkPass2 = "";
     private Customers impersonate;
@@ -88,7 +93,6 @@ public class CustomersController implements Serializable {
         boolean inRole = false;
         inRole = FacesContext.getCurrentInstance().getExternalContext().isUserInRole(roleName);
         return inRole;
-
     }
 
     public void setSelected(Customers cust) {
@@ -141,6 +145,33 @@ public class CustomersController implements Serializable {
             };
         }
         return pagination;
+    }
+    /**
+     * @return the filteredItems
+     */
+    public List<Customers> getFilteredItems() {
+        return filteredItems;
+    }
+
+    /**
+     * @param filteredItems the filteredItems to set
+     */
+    public void setFilteredItems(List<Customers> filteredItems) {
+        this.filteredItems = filteredItems;
+    }
+
+    /**
+     * @return the multiSelected
+     */
+    public Customers[] getMultiSelected() {
+        return multiSelected;
+    }
+
+    /**
+     * @param multiSelected the multiSelected to set
+     */
+    public void setMultiSelected(Customers[] multiSelected) {
+        this.multiSelected = multiSelected;
     }
 
     public void impersonateUser(ActionEvent event) {
@@ -221,10 +252,30 @@ public class CustomersController implements Serializable {
         }
     }
 
+     public void createDialogue(ActionEvent actionEvent) {
+        try {
+            current.setId(0);
+            getFacade().create(current);
+            recreateModel();
+            JsfUtil.addSuccessMessage(ResourceBundle.getBundle("/Bundle").getString("CustomersCreated"));
+        } catch (Exception e) {
+            JsfUtil.addErrorMessage(e, ResourceBundle.getBundle("/Bundle").getString("PersistenceErrorOccured"));
+        }
+
+    }
+     
     public String prepareEdit() {
         //current = (Customers) getItems().getRowData();
         //selectedItemIndex = pagination.getPageFirstItem() + getItems().getRowIndex();
         return "Edit";
+    }
+
+        public void selectOneMenuValueChangeListener(ValueChangeEvent vce) {
+        Object o = vce.getNewValue();
+    }
+
+    public void selectManyMenuValueChangeListener(ValueChangeEvent vce) {
+        Object o = vce.getNewValue();
     }
 
     public String update() {
@@ -352,6 +403,13 @@ public class CustomersController implements Serializable {
         return "List";
     }
 
+    public void handleDateSelect(SelectEvent event) {
+
+        Date date = (Date) event.getObject();
+
+        //Add facesmessage
+    }
+
     public String previous() {
         getPagination().previousPage();
         recreateModel();
@@ -372,6 +430,17 @@ public class CustomersController implements Serializable {
 
     public SelectItem[] getCustomersByGroupSelectOne(String group, boolean sortAsc) {
         return JsfUtil.getSelectItems(ejbFacade.findAllByGroup(group, sortAsc), true);
+    }
+    
+     public void onEdit(RowEditEvent event) {
+        Customers cm = (Customers) event.getObject();
+        getFacade().edit(cm);
+        recreateModel();
+        JsfUtil.addSuccessMessage("Row Edit Successful");
+    }
+
+    public void onCancel(RowEditEvent event) {
+        JsfUtil.addErrorMessage("Row Edit Cancelled");
     }
 
     public void checkPassChange() {

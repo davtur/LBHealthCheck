@@ -205,11 +205,12 @@ public class ActivationController implements Serializable {
         }
 
         String getStringKey(java.lang.Integer value) {
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
             sb.append(value);
             return sb.toString();
         }
 
+        @Override
         public String getAsString(FacesContext facesContext, UIComponent component, Object object) {
             if (object == null) {
                 return null;

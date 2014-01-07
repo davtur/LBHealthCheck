@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" >
+
+    <ui:composition template="/template.xhtml">
+        <ui:define name="title">
+            <h:outputText value="#{configMapController.getKey('ListEmailFormatTitle')}"></h:outputText>
+        </ui:define>
+        <ui:define name="body">
+
+
+            <h:form id="formEmailFormatCreate1">
+                <p:confirmDialog id="confirmDialogEmailFormatCreate1" message="Add a Key/ Value Pair to the configuration table"  
+                                 header="#{configMapController.getKey('CreateEmailFormatTitle')}" severity="info" widgetVar="EmailFormatCreateDialogue"> 
+
+                    <p:panelGrid columns="2">
+                        <p:outputLabel value="#{configMapController.getKey('CreateEmailFormatLabel_id')}" for="id" />
+                        <p:inputText id="id" value="#{emailFormatController.selected.id}" title="#{configMapController.getKey('CreateEmailFormatTitle_id')}" required="true" requiredMessage="#{configMapController.getKey('CreateEmailFormatRequiredMessage_id')}"/>
+                        <p:outputLabel value="#{configMapController.getKey('CreateEmailFormatLabel_emailFormat')}" for="emailFormat" />
+                        <p:inputText id="emailFormat" value="#{emailFormatController.selected.emailFormat}" title="#{configMapController.getKey('CreateEmailFormatTitle_emailFormat')}" required="true" requiredMessage="#{configMapController.getKey('CreateEmailFormatRequiredMessage_emailFormat')}"/>
+                        <p:commandButton oncomplete="EmailFormatCreateDialogue.hide();emailFormatControllerTable.filter()" actionListener="#{emailFormatController.createDialogue}" value="#{configMapController.getKey('CreateEmailFormatSaveLink')}" update=":menuForm:growl"/>                
+                    </p:panelGrid>
+                </p:confirmDialog>
+            </h:form>
+
+
+
+
+
+            <h:form id="EmailFormatlistForm1">
+                <h:panelGroup >
+                    <p:commandButton id="showDialogButton"  value="#{configMapController.getKey('ListEmailFormatCreateLink')}" onclick="EmailFormatCreateDialogue.show()" type="button"/> 
+
+                </h:panelGroup>
+                <h:outputText escape="false" value="#{configMapController.getKey('ListEmailFormatEmpty')}" rendered="#{emailFormatController.items.rowCount == 0}"/>
+                <h:panelGroup rendered="#{emailFormatController.items.rowCount > 0}">
+                    <p:dataTable  editable="true" value="#{emailFormatController.items}" filteredValue="#{emailFormatController.filteredItems}"  widgetVar="emailFormatControllerTable" var="item"  paginator="true" rows="15"  paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  rowsPerPageTemplate="5,10,15,20,25,50,100" >
+                        <f:facet name="header">
+                            <p:outputPanel>
+                                <h:outputText value="Search all fields:" />
+                                <h:inputText id="globalFilter" onkeyup="emailFormatControllerTable.filter()" />
+                            </p:outputPanel>
+                        </f:facet>
+                        <p:ajax event="rowEdit" listener="#{emailFormatController.onEdit}" update=":menuForm:growl" oncomplete="emailFormatControllerTable.filter()" />  
+                        <p:ajax event="rowEditCancel" listener="#{emailFormatController.onCancel}" update=":menuForm:growl"  oncomplete="emailFormatControllerTable.filter()" />  
+
+                        <p:column sortBy="#{item.id}" filterBy="#{item.id}" headerText="#{configMapController.getKey('ListEmailFormatTitle_id')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.id}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.id}" label="#{configMapController.getKey('ListEmailFormatTitle_id')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.emailFormat}" filterBy="#{item.emailFormat}" headerText="#{configMapController.getKey('ListEmailFormatTitle_emailFormat')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.emailFormat}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.emailFormat}" label="#{configMapController.getKey('ListEmailFormatTitle_emailFormat')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column rendered="#{emailFormatController.isUserInRole('ADMIN')}"  headerText="Edit" style="width:50px">  
+                            <p:rowEditor />  
+                        </p:column>  
+
+                        <p:column>
+                            <p:commandButton rendered="#{emailFormatController.isUserInRole('ADMIN')}"  oncomplete="emailFormatControllerTable.filter()" update=":menuForm:growl"  value="#{configMapController.getKey('ListEmailFormatDestroyLink')}">
+                                <f:setPropertyActionListener value="#{item}" target="#{emailFormatController.selectedForDeletion}" />
+                            </p:commandButton>                        
+
+                        </p:column>
+                    </p:dataTable>
+                </h:panelGroup>
+            </h:form>
+        </ui:define>
+    </ui:composition>
+
+</html>

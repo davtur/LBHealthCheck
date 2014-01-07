@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" >
+
+    <ui:composition template="/template.xhtml">
+        <ui:define name="title">
+            <h:outputText value="#{configMapController.getKey('ListCustomerAuthTitle')}"></h:outputText>
+        </ui:define>
+        <ui:define name="body">
+
+
+            <h:form id="formCustomerAuthCreate1">
+                <p:confirmDialog id="confirmDialogCustomerAuthCreate1" message="Add a Key/ Value Pair to the configuration table"  
+                                 header="#{configMapController.getKey('CreateCustomerAuthTitle')}" severity="info" widgetVar="CustomerAuthCreateDialogue"> 
+
+                    <p:panelGrid columns="2">
+                        <p:outputLabel value="#{configMapController.getKey('CreateCustomerAuthLabel_id')}" for="id" />
+                        <p:inputText id="id" value="#{customerAuthController.selected.id}" title="#{configMapController.getKey('CreateCustomerAuthTitle_id')}" required="true" requiredMessage="#{configMapController.getKey('CreateCustomerAuthRequiredMessage_id')}"/>
+                        <p:outputLabel value="#{configMapController.getKey('CreateCustomerAuthLabel_customerAuthType')}" for="customerAuthType" />
+                        <p:inputText id="customerAuthType" value="#{customerAuthController.selected.customerAuthType}" title="#{configMapController.getKey('CreateCustomerAuthTitle_customerAuthType')}" required="true" requiredMessage="#{configMapController.getKey('CreateCustomerAuthRequiredMessage_customerAuthType')}"/>
+                        <p:commandButton oncomplete="CustomerAuthCreateDialogue.hide();customerAuthControllerTable.filter()" actionListener="#{customerAuthController.createDialogue}" value="#{configMapController.getKey('CreateCustomerAuthSaveLink')}" update=":menuForm:growl"/>                
+                    </p:panelGrid>
+                </p:confirmDialog>
+            </h:form>
+
+
+
+
+
+            <h:form id="CustomerAuthlistForm1">
+                <h:panelGroup >
+                    <p:commandButton id="showDialogButton"  value="#{configMapController.getKey('ListCustomerAuthCreateLink')}" onclick="CustomerAuthCreateDialogue.show()" type="button"/> 
+
+                </h:panelGroup>
+                <h:outputText escape="false" value="#{configMapController.getKey('ListCustomerAuthEmpty')}" rendered="#{customerAuthController.items.rowCount == 0}"/>
+                <h:panelGroup rendered="#{customerAuthController.items.rowCount > 0}">
+                    <p:dataTable  editable="true" value="#{customerAuthController.items}" filteredValue="#{customerAuthController.filteredItems}"  widgetVar="customerAuthControllerTable" var="item"  paginator="true" rows="15"  paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  rowsPerPageTemplate="5,10,15,20,25,50,100" >
+                        <f:facet name="header">
+                            <p:outputPanel>
+                                <h:outputText value="Search all fields:" />
+                                <h:inputText id="globalFilter" onkeyup="customerAuthControllerTable.filter()" />
+                            </p:outputPanel>
+                        </f:facet>
+                        <p:ajax event="rowEdit" listener="#{customerAuthController.onEdit}" update=":menuForm:growl" oncomplete="customerAuthControllerTable.filter()" />  
+                        <p:ajax event="rowEditCancel" listener="#{customerAuthController.onCancel}" update=":menuForm:growl"  oncomplete="customerAuthControllerTable.filter()" />  
+
+                        <p:column sortBy="#{item.id}" filterBy="#{item.id}" headerText="#{configMapController.getKey('ListCustomerAuthTitle_id')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.id}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.id}" label="#{configMapController.getKey('ListCustomerAuthTitle_id')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.customerAuthType}" filterBy="#{item.customerAuthType}" headerText="#{configMapController.getKey('ListCustomerAuthTitle_customerAuthType')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.customerAuthType}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.customerAuthType}" label="#{configMapController.getKey('ListCustomerAuthTitle_customerAuthType')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column rendered="#{customerAuthController.isUserInRole('ADMIN')}"  headerText="Edit" style="width:50px">  
+                            <p:rowEditor />  
+                        </p:column>  
+
+                        <p:column>
+                            <p:commandButton rendered="#{customerAuthController.isUserInRole('ADMIN')}"  oncomplete="customerAuthControllerTable.filter()" update=":menuForm:growl"  value="#{configMapController.getKey('ListCustomerAuthDestroyLink')}">
+                                <f:setPropertyActionListener value="#{item}" target="#{customerAuthController.selectedForDeletion}" />
+                            </p:commandButton>                        
+
+                        </p:column>
+                    </p:dataTable>
+                </h:panelGroup>
+            </h:form>
+        </ui:define>
+    </ui:composition>
+
+</html>

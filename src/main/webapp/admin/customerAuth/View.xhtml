@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" 
+      xmlns:ui="http://java.sun.com/jsf/facelets" >
+
+    <ui:composition template="/template.xhtml">
+        <ui:define name="title">
+            <h:outputText value="#{configMapController.getKey('ViewCustomerAuthTitle')}"></h:outputText>
+        </ui:define>
+        <ui:define name="body">
+            <h:panelGroup id="messagePanel" layout="block">
+                <h:messages errorStyle="color: red" infoStyle="color: green" layout="table"/>
+            </h:panelGroup>
+            <h:form>
+                <p:panel>
+                    <h:panelGrid columns="2">
+                        <h:outputText value="#{configMapController.getKey('ViewCustomerAuthLabel_id')}"/>
+                        <h:outputText value="#{customerAuthController.selected.id}" title="#{configMapController.getKey('ViewCustomerAuthTitle_id')}"/>
+                        <h:outputText value="#{configMapController.getKey('ViewCustomerAuthLabel_customerAuthType')}"/>
+                        <h:outputText value="#{customerAuthController.selected.customerAuthType}" title="#{configMapController.getKey('ViewCustomerAuthTitle_customerAuthType')}"/>
+                    </h:panelGrid>
+                </p:panel>
+                <br />
+                <p:commandButton rendered="#{customerAuthController.isUserInRole('ADMIN')}"  action="#{customerAuthController.destroyAndView}" value="#{configMapController.getKey('ViewCustomerAuthDestroyLink')}"/>
+                <br />
+                <br />
+                <p:commandButton rendered="#{customerAuthController.isUserInRole('ADMIN')}"  ajax="false"  action="Edit" value="#{configMapController.getKey('ViewCustomerAuthEditLink')}"/>
+                <br />
+                <p:commandButton rendered="#{customerAuthController.isUserInRole('ADMIN')}"  ajax="false"  action="#{customerAuthController.prepareCreate}" value="#{configMapController.getKey('ViewCustomerAuthCreateLink')}" />
+                <br />
+                <p:commandButton                                                                 ajax="false"  action="#{customerAuthController.prepareList}" value="#{configMapController.getKey('ViewCustomerAuthShowAllLink')}"/>
+
+            </h:form>
+        </ui:define>
+    </ui:composition>
+
+</html>

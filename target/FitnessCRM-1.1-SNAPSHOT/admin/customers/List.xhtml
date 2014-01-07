@@ -11,199 +11,410 @@
             <h:outputText value="#{configMapController.getKey('ListCustomersTitle')}"></h:outputText>
         </ui:define>
         <ui:define name="body">
-            <h:form id="buttonssForm1" >
-
-                <p:panel id="panel1" rendered="#{customersController.isUserInRole('ADMIN')}"  header="#{configMapController.getKey('ListCustomersLabel_impersonate')}">
 
 
-                    <h:selectOneMenu rendered="#{customersController.isUserInRole('ADMIN')}"  id="imperson" value="#{customersController.impersonate}" title="#{configMapController.getKey('ListCustomersTitle_impersonate')}" >
-                        <f:selectItems id="selectIt" value="#{customersController.itemsAvailableSelectOneObject}"/>
-                        <p:ajax update=":menuForm:growl"  listener="#{customersController.handleUserChange}" process="@this"  />
-                    </h:selectOneMenu>
-                    <p:commandButton id="impbut1" disabled="#{customersController.impersonating}" update=":menuForm:growl,:buttonssForm1:panel1"  immediate="true" ajax="true" rendered="#{customersController.isUserInRole('ADMIN')}"   actionListener="#{customersController.impersonateUser}" value="#{configMapController.getKey('ListCustomersImpersonateButton')}"/>
-                    <p:commandButton id="impbut2" disabled="#{!customersController.impersonating}" update=":menuForm:growl,imperson,:buttonssForm1:panel1"  ajax="true" rendered="#{customersController.isUserInRole('ADMIN')}"  actionListener="#{customersController.unimpersonateUser}" value="#{configMapController.getKey('ListCustomersUnImpersonateButton')}"/>
-                </p:panel>
+            <h:form id="formCustomersCreate1">
+                <p:confirmDialog id="confirmDialogCustomersCreate1" message="Add a Key/ Value Pair to the configuration table"  
+                                 header="#{configMapController.getKey('CreateCustomersTitle')}" severity="info" widgetVar="CustomersCreateDialogue"> 
 
+                    <p:panelGrid columns="2">
+                        <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_id')}" for="id" />
+                        <p:inputText id="id" value="#{customersController.selected.id}" title="#{configMapController.getKey('CreateCustomersTitle_id')}" required="true" requiredMessage="#{configMapController.getKey('CreateCustomersRequiredMessage_id')}"/>
+                        <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_gender')}" for="gender" />
+                        <p:inputText id="gender" value="#{customersController.selected.gender}" title="#{configMapController.getKey('CreateCustomersTitle_gender')}" required="true" requiredMessage="#{configMapController.getKey('CreateCustomersRequiredMessage_gender')}"/>
+                        <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_firstname')}" for="firstname" />
+                        <p:inputText id="firstname" value="#{customersController.selected.firstname}" title="#{configMapController.getKey('CreateCustomersTitle_firstname')}" required="true" requiredMessage="#{configMapController.getKey('CreateCustomersRequiredMessage_firstname')}"/>
+                        <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_lastname')}" for="lastname" />
+                        <p:inputText id="lastname" value="#{customersController.selected.lastname}" title="#{configMapController.getKey('CreateCustomersTitle_lastname')}" required="true" requiredMessage="#{configMapController.getKey('CreateCustomersRequiredMessage_lastname')}"/>
+                        <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_dob')}" for="dob" />
+
+
+                        <p:calendar id="dob" pattern="MM/dd/yyyy HH:mm:ss" value="#{customersController.selected.dob}" title="#{configMapController.getKey('CreateCustomersTitle_dob')}" required="true" requiredMessage="#{configMapController.getKey('CreateCustomersRequiredMessage_dob')}">
+                            <p:ajax event="dateSelect" listener="#{customersController.handleDateSelect}" update=":formCustomersCreate1" />
+                        </p:calendar>
+                        <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_emailAddress')}" for="emailAddress" />
+                        <p:inputText id="emailAddress" value="#{customersController.selected.emailAddress}" title="#{configMapController.getKey('CreateCustomersTitle_emailAddress')}" required="true" requiredMessage="#{configMapController.getKey('CreateCustomersRequiredMessage_emailAddress')}"/>
+                        <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_username')}" for="username" />
+                        <p:inputText id="username" value="#{customersController.selected.username}" title="#{configMapController.getKey('CreateCustomersTitle_username')}" required="true" requiredMessage="#{configMapController.getKey('CreateCustomersRequiredMessage_username')}"/>
+                        <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_streetAddress')}" for="streetAddress" />
+                        <p:inputText id="streetAddress" value="#{customersController.selected.streetAddress}" title="#{configMapController.getKey('CreateCustomersTitle_streetAddress')}" />
+                        <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_suburb')}" for="suburb" />
+                        <p:inputText id="suburb" value="#{customersController.selected.suburb}" title="#{configMapController.getKey('CreateCustomersTitle_suburb')}" />
+                        <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_postcode')}" for="postcode" />
+                        <p:inputText id="postcode" value="#{customersController.selected.postcode}" title="#{configMapController.getKey('CreateCustomersTitle_postcode')}" />
+                        <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_city')}" for="city" />
+                        <p:inputText id="city" value="#{customersController.selected.city}" title="#{configMapController.getKey('CreateCustomersTitle_city')}" />
+                        <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_addrState')}" for="addrState" />
+                        <p:inputText id="addrState" value="#{customersController.selected.addrState}" title="#{configMapController.getKey('CreateCustomersTitle_addrState')}" />
+                        <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_countryId')}" for="countryId" />
+                        <p:inputText id="countryId" value="#{customersController.selected.countryId}" title="#{configMapController.getKey('CreateCustomersTitle_countryId')}" />
+                        <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_telephone')}" for="telephone" />
+                        <p:inputText id="telephone" value="#{customersController.selected.telephone}" title="#{configMapController.getKey('CreateCustomersTitle_telephone')}" />
+                        <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_fax')}" for="fax" />
+                        <p:inputText id="fax" value="#{customersController.selected.fax}" title="#{configMapController.getKey('CreateCustomersTitle_fax')}" />
+                        <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_password')}" for="password" />
+                        <p:inputText id="password" value="#{customersController.selected.password}" title="#{configMapController.getKey('CreateCustomersTitle_password')}" required="true" requiredMessage="#{configMapController.getKey('CreateCustomersRequiredMessage_password')}"/>
+                        <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_newsletter')}" for="newsletter" />
+                        <p:inputText id="newsletter" value="#{customersController.selected.newsletter}" title="#{configMapController.getKey('CreateCustomersTitle_newsletter')}" />
+                        <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_referredby')}" for="referredby" />
+                        <p:inputText id="referredby" value="#{customersController.selected.referredby}" title="#{configMapController.getKey('CreateCustomersTitle_referredby')}" />
+                        <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_active')}" for="active" />
+                        <p:selectOneMenu id="active" valueChangeListener="#{customersController.selectOneMenuValueChangeListener}" value="#{customersController.selected.active}" label="#{configMapController.getKey('CreateCustomersTitle_active')}" >
+                            <f:selectItems value="#{customerStateController.itemsAvailableSelectOne}"/>
+                            <p:ajax   update=":formCustomersCreate1"  />
+                        </p:selectOneMenu>
+                        <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_groupPricing')}" for="groupPricing" />
+                        <p:selectOneMenu id="groupPricing" valueChangeListener="#{customersController.selectOneMenuValueChangeListener}" value="#{customersController.selected.groupPricing}" label="#{configMapController.getKey('CreateCustomersTitle_groupPricing')}" >
+                            <f:selectItems value="#{planController.itemsAvailableSelectOne}"/>
+                            <p:ajax   update=":formCustomersCreate1"  />
+                        </p:selectOneMenu>
+                        <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_emailFormat')}" for="emailFormat" />
+                        <p:selectOneMenu id="emailFormat" valueChangeListener="#{customersController.selectOneMenuValueChangeListener}" value="#{customersController.selected.emailFormat}" label="#{configMapController.getKey('CreateCustomersTitle_emailFormat')}" >
+                            <f:selectItems value="#{emailFormatController.itemsAvailableSelectOne}"/>
+                            <p:ajax   update=":formCustomersCreate1"  />
+                        </p:selectOneMenu>
+                        <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_auth')}" for="auth" />
+                        <p:selectOneMenu id="auth" valueChangeListener="#{customersController.selectOneMenuValueChangeListener}" value="#{customersController.selected.auth}" label="#{configMapController.getKey('CreateCustomersTitle_auth')}" >
+                            <f:selectItems value="#{customerAuthController.itemsAvailableSelectOne}"/>
+                            <p:ajax   update=":formCustomersCreate1"  />
+                        </p:selectOneMenu>
+                        <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_demographic')}" for="demographic" />
+                        <p:selectOneMenu id="demographic" valueChangeListener="#{customersController.selectOneMenuValueChangeListener}" value="#{customersController.selected.demographic}" label="#{configMapController.getKey('CreateCustomersTitle_demographic')}" >
+                            <f:selectItems value="#{demographicTypesController.itemsAvailableSelectOne}"/>
+                            <p:ajax   update=":formCustomersCreate1"  />
+                        </p:selectOneMenu>
+                        <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_preferredContact')}" for="preferredContact" />
+                        <p:selectOneMenu id="preferredContact" valueChangeListener="#{customersController.selectOneMenuValueChangeListener}" value="#{customersController.selected.preferredContact}" label="#{configMapController.getKey('CreateCustomersTitle_preferredContact')}" >
+                            <f:selectItems value="#{preferedContactController.itemsAvailableSelectOne}"/>
+                            <p:ajax   update=":formCustomersCreate1"  />
+                        </p:selectOneMenu>
+                        <p:commandButton oncomplete="CustomersCreateDialogue.hide();customersControllerTable.filter()" actionListener="#{customersController.createDialogue}" value="#{configMapController.getKey('CreateCustomersSaveLink')}" update=":menuForm:growl"/>                
+                    </p:panelGrid>
+                </p:confirmDialog>
             </h:form>
-            <h:form id="listCustomersForm1">
-                <p:panel id="panel2" header="#{configMapController.getKey('ListCustomersTableTitle')}">
-                    <p:commandButton id="createButton" ajax="false" action="#{customersController.prepareCreate}" value="#{configMapController.getKey('ListCustomersCreateLink')}"/>  
-                </p:panel>
+
+
+
+
+
+            <h:form id="CustomerslistForm1">
+                <h:panelGroup >
+                    <p:commandButton id="showDialogButton"  value="#{configMapController.getKey('ListCustomersCreateLink')}" onclick="CustomersCreateDialogue.show()" type="button"/> 
+
+                </h:panelGroup>
                 <h:outputText escape="false" value="#{configMapController.getKey('ListCustomersEmpty')}" rendered="#{customersController.items.rowCount == 0}"/>
                 <h:panelGroup rendered="#{customersController.items.rowCount > 0}">
-                    <p:dataTable value="#{customersController.items}" widgetVar="customersTable" var="item"  paginator="true" rows="15"  paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  rowsPerPageTemplate="5,10,15,20,25,50,100" >
+                    <p:dataTable  editable="true" value="#{customersController.items}" filteredValue="#{customersController.filteredItems}"  widgetVar="customersControllerTable" var="item"  paginator="true" rows="15"  paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  rowsPerPageTemplate="5,10,15,20,25,50,100" >
                         <f:facet name="header">
                             <p:outputPanel>
                                 <h:outputText value="Search all fields:" />
-                                <h:inputText id="globalFilter" onkeyup="customersTable.filter()" />
+                                <h:inputText id="globalFilter" onkeyup="customersControllerTable.filter()" />
                             </p:outputPanel>
                         </f:facet>
+                        <p:ajax event="rowEdit" listener="#{customersController.onEdit}" update=":menuForm:growl" oncomplete="customersControllerTable.filter()" />  
+                        <p:ajax event="rowEditCancel" listener="#{customersController.onCancel}" update=":menuForm:growl"  oncomplete="customersControllerTable.filter()" />  
+
+                        <p:column sortBy="#{item.id}" filterBy="#{item.id}" headerText="#{configMapController.getKey('ListCustomersTitle_id')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.id}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.id}" label="#{configMapController.getKey('ListCustomersTitle_id')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.gender}" filterBy="#{item.gender}" headerText="#{configMapController.getKey('ListCustomersTitle_gender')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.gender}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.gender}" label="#{configMapController.getKey('ListCustomersTitle_gender')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.firstname}" filterBy="#{item.firstname}" headerText="#{configMapController.getKey('ListCustomersTitle_firstname')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.firstname}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.firstname}" label="#{configMapController.getKey('ListCustomersTitle_firstname')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.lastname}" filterBy="#{item.lastname}" headerText="#{configMapController.getKey('ListCustomersTitle_lastname')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.lastname}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.lastname}" label="#{configMapController.getKey('ListCustomersTitle_lastname')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.dob}" filterBy="#{item.dob}" headerText="#{configMapController.getKey('ListCustomersTitle_dob')}"   >
+
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.dob}">
+                                        <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                                    </h:outputText>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:calendar value="#{item.dob}">	
+                                        <p:ajax event="dateSelect" listener= "#{customersController.handleDateSelect}" update=":menuForm:growl" />
+                                    </p:calendar>
+                                </f:facet>
+                            </p:cellEditor> 
+
+                        </p:column>
+                        <p:column sortBy="#{item.emailAddress}" filterBy="#{item.emailAddress}" headerText="#{configMapController.getKey('ListCustomersTitle_emailAddress')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.emailAddress}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.emailAddress}" label="#{configMapController.getKey('ListCustomersTitle_emailAddress')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.username}" filterBy="#{item.username}" headerText="#{configMapController.getKey('ListCustomersTitle_username')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.username}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.username}" label="#{configMapController.getKey('ListCustomersTitle_username')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.streetAddress}" filterBy="#{item.streetAddress}" headerText="#{configMapController.getKey('ListCustomersTitle_streetAddress')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.streetAddress}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.streetAddress}" label="#{configMapController.getKey('ListCustomersTitle_streetAddress')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.suburb}" filterBy="#{item.suburb}" headerText="#{configMapController.getKey('ListCustomersTitle_suburb')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.suburb}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.suburb}" label="#{configMapController.getKey('ListCustomersTitle_suburb')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.postcode}" filterBy="#{item.postcode}" headerText="#{configMapController.getKey('ListCustomersTitle_postcode')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.postcode}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.postcode}" label="#{configMapController.getKey('ListCustomersTitle_postcode')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.city}" filterBy="#{item.city}" headerText="#{configMapController.getKey('ListCustomersTitle_city')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.city}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.city}" label="#{configMapController.getKey('ListCustomersTitle_city')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.addrState}" filterBy="#{item.addrState}" headerText="#{configMapController.getKey('ListCustomersTitle_addrState')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.addrState}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.addrState}" label="#{configMapController.getKey('ListCustomersTitle_addrState')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.countryId}" filterBy="#{item.countryId}" headerText="#{configMapController.getKey('ListCustomersTitle_countryId')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.countryId}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.countryId}" label="#{configMapController.getKey('ListCustomersTitle_countryId')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.telephone}" filterBy="#{item.telephone}" headerText="#{configMapController.getKey('ListCustomersTitle_telephone')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.telephone}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.telephone}" label="#{configMapController.getKey('ListCustomersTitle_telephone')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.fax}" filterBy="#{item.fax}" headerText="#{configMapController.getKey('ListCustomersTitle_fax')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.fax}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.fax}" label="#{configMapController.getKey('ListCustomersTitle_fax')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.password}" filterBy="#{item.password}" headerText="#{configMapController.getKey('ListCustomersTitle_password')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.password}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.password}" label="#{configMapController.getKey('ListCustomersTitle_password')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.newsletter}" filterBy="#{item.newsletter}" headerText="#{configMapController.getKey('ListCustomersTitle_newsletter')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.newsletter}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.newsletter}" label="#{configMapController.getKey('ListCustomersTitle_newsletter')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.referredby}" filterBy="#{item.referredby}" headerText="#{configMapController.getKey('ListCustomersTitle_referredby')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.referredby}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.referredby}" label="#{configMapController.getKey('ListCustomersTitle_referredby')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.active}" filterBy="#{item.active}" headerText="#{configMapController.getKey('ListCustomersTitle_active')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.active}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.active}" label="#{configMapController.getKey('ListCustomersTitle_active')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.groupPricing}" filterBy="#{item.groupPricing}" headerText="#{configMapController.getKey('ListCustomersTitle_groupPricing')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.groupPricing}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.groupPricing}" label="#{configMapController.getKey('ListCustomersTitle_groupPricing')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.emailFormat}" filterBy="#{item.emailFormat}" headerText="#{configMapController.getKey('ListCustomersTitle_emailFormat')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.emailFormat}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.emailFormat}" label="#{configMapController.getKey('ListCustomersTitle_emailFormat')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.auth}" filterBy="#{item.auth}" headerText="#{configMapController.getKey('ListCustomersTitle_auth')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.auth}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.auth}" label="#{configMapController.getKey('ListCustomersTitle_auth')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.demographic}" filterBy="#{item.demographic}" headerText="#{configMapController.getKey('ListCustomersTitle_demographic')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.demographic}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.demographic}" label="#{configMapController.getKey('ListCustomersTitle_demographic')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.preferredContact}" filterBy="#{item.preferredContact}" headerText="#{configMapController.getKey('ListCustomersTitle_preferredContact')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.preferredContact}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.preferredContact}" label="#{configMapController.getKey('ListCustomersTitle_preferredContact')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column rendered="#{customersController.isUserInRole('ADMIN')}"  headerText="Edit" style="width:50px">  
+                            <p:rowEditor />  
+                        </p:column>  
+
                         <p:column>
-                            <f:facet name="header">
-                                <h:outputText value="&nbsp;"/>
-                            </f:facet>
-                            <p:panel>
-                                <p:commandButton    style="width:50px"                                                     ajax="false" action="#{customersController.prepareView}" value="#{configMapController.getKey('ListCustomersViewLink')}">
-                                    <f:setPropertyActionListener value="#{item}" target="#{customersController.selected}" />
-                                </p:commandButton>
-                                &nbsp;
-                                <p:commandButton style="width:50px" rendered="#{customersController.isUserInRole('ADMIN')}"  ajax="false" action="#{customersController.prepareEdit}" value="#{configMapController.getKey('ListCustomersEditLink')}">
-                                    <f:setPropertyActionListener value="#{item}" target="#{customersController.selected}" />
-                                </p:commandButton>
-                                <h:outputText value=" "/>
-                                <p:commandButton style="width:70px" rendered="#{customersController.isUserInRole('ADMIN')}"  ajax="false" action="#{customersController.destroy}" value="#{configMapController.getKey('ListCustomersDestroyLink')}">
-                                    <f:setPropertyActionListener value="#{item}" target="#{customersController.selectedForDeletion}" />
-                                </p:commandButton>
-                            </p:panel>
-                        </p:column>
+                            <p:commandButton rendered="#{customersController.isUserInRole('ADMIN')}"  oncomplete="customersControllerTable.filter()" update=":menuForm:growl"  value="#{configMapController.getKey('ListCustomersDestroyLink')}">
+                                <f:setPropertyActionListener value="#{item}" target="#{customersController.selectedForDeletion}" />
+                            </p:commandButton>                        
 
-                        <p:column sortBy="#{item.id}" >
-                            <f:facet name="header">
-                                <h:outputText value="#{configMapController.getKey('ListCustomersTitle_id')}"/>
-                            </f:facet>
-                            <h:outputText value="#{item.id}"/>
-                        </p:column>
-                        <p:column sortBy="#{item.firstname}" filterBy="#{item.firstname}" headerText="#{configMapController.getKey('ListCustomersTitle_firstname')}" >
-                            <f:facet name="header">
-                                <h:outputText value="#{configMapController.getKey('ListCustomersTitle_firstname')}"/>
-                            </f:facet>
-                            <h:outputText value="#{item.firstname}"/>
-                        </p:column>
-                        <p:column sortBy="#{item.lastname}" filterBy="#{item.lastname}" headerText="#{configMapController.getKey('ListCustomersTitle_lastname')}" >
-                            <f:facet name="header">
-                                <h:outputText value="#{configMapController.getKey('ListCustomersTitle_lastname')}"/>
-                            </f:facet>
-                            <h:outputText value="#{item.lastname}"/>
-                        </p:column>
-                        <p:column sortBy="#{item.emailAddress}"  filterBy="#{item.emailAddress}" headerText="#{configMapController.getKey('ListCustomersTitle_emailAddress')}">
-                            <f:facet name="header">
-                                <h:outputText value="#{configMapController.getKey('ListCustomersTitle_emailAddress')}"/>
-                            </f:facet>
-                            <h:outputText value="#{item.emailAddress}"/>
-                        </p:column>
-
-                        <p:column sortBy="#{item.dob}" >
-                            <f:facet name="header">
-                                <h:outputText value="#{configMapController.getKey('ListCustomersTitle_dob')}"/>
-                            </f:facet>
-                            <h:outputText value="#{item.dob}">
-                                <f:convertDateTime pattern="dd MMM yyyy" />
-                            </h:outputText>
-                        </p:column>
-                        <p:column sortBy="#{item.gender}" filterBy="#{item.gender}" headerText="#{configMapController.getKey('ListCustomersTitle_gender')}">
-                            <f:facet name="header">
-                                <h:outputText value="#{configMapController.getKey('ListCustomersTitle_gender')}"/>
-                            </f:facet>
-                            <h:outputText value="#{item.gender}"/>
-                        </p:column>
-
-                        <p:column sortBy="#{item.preferredContact}" >
-                            <f:facet name="header">
-                                <h:outputText value="#{configMapController.getKey('ListCustomersTitle_preferredContact')}"/>
-                            </f:facet>
-                            <h:outputText value="#{item.preferredContact}"/>
-                        </p:column>
-                        <p:column sortBy="#{item.username}" filterBy="#{item.username}" headerText="#{configMapController.getKey('ListCustomersTitle_username')}" >
-                            <f:facet name="header">
-                                <h:outputText value="#{configMapController.getKey('ListCustomersTitle_username')}" />
-                            </f:facet>
-                            <h:outputText value="#{item.username}"/>
-                        </p:column>
-                        <p:column sortBy="#{item.streetAddress}" filterBy="#{item.streetAddress}" headerText="#{configMapController.getKey('ListCustomersTitle_streetAddress')}" >
-                            <f:facet name="header">
-                                <h:outputText value="#{configMapController.getKey('ListCustomersTitle_streetAddress')}" />
-                            </f:facet>
-                            <h:outputText value="#{item.streetAddress}"/>
-                        </p:column>
-                        <p:column sortBy="#{item.suburb}" filterBy="#{item.suburb}" headerText="#{configMapController.getKey('ListCustomersTitle_suburb')}" >
-                            <f:facet name="header">
-                                <h:outputText value="#{configMapController.getKey('ListCustomersTitle_suburb')}"/>
-                            </f:facet>
-                            <h:outputText value="#{item.suburb}"/>
-                        </p:column>
-                        <p:column sortBy="#{item.postcode}" filterBy="#{item.postcode}" headerText="#{configMapController.getKey('ListCustomersTitle_postcode')}" >
-                            <f:facet name="header">
-                                <h:outputText value="#{configMapController.getKey('ListCustomersTitle_postcode')}"/>
-                            </f:facet>
-                            <h:outputText value="#{item.postcode}"/>
-                        </p:column>
-                        <p:column sortBy="#{item.city}" >
-                            <f:facet name="header">
-                                <h:outputText value="#{configMapController.getKey('ListCustomersTitle_city')}"/>
-                            </f:facet>
-                            <h:outputText value="#{item.city}"/>
-                        </p:column>
-                        <p:column sortBy="#{item.addrState}" >
-                            <f:facet name="header">
-                                <h:outputText value="#{configMapController.getKey('ListCustomersTitle_addrState')}"/>
-                            </f:facet>
-                            <h:outputText value="#{item.addrState}"/>
-                        </p:column>
-                        <p:column sortBy="#{item.countryId}" >
-                            <f:facet name="header">
-                                <h:outputText value="#{configMapController.getKey('ListCustomersTitle_countryId')}"/>
-                            </f:facet>
-                            <h:outputText value="#{item.countryId}"/>
-                        </p:column>
-                        <p:column sortBy="#{item.telephone}"  filterBy="#{item.telephone}" headerText="#{configMapController.getKey('ListCustomersTitle_telephone')}">
-                            <f:facet name="header">
-                                <h:outputText value="#{configMapController.getKey('ListCustomersTitle_telephone')}"/>
-                            </f:facet>
-                            <h:outputText value="#{item.telephone}"/>
-                        </p:column>
-                        <p:column sortBy="#{item.fax}" >
-                            <f:facet name="header">
-                                <h:outputText value="#{configMapController.getKey('ListCustomersTitle_fax')}"/>
-                            </f:facet>
-                            <h:outputText value="#{item.fax}"/>
-                        </p:column>
-                        <p:column sortBy="#{item.password}" >
-                            <f:facet name="header">
-                                <h:outputText value="#{configMapController.getKey('ListCustomersTitle_password')}"/>
-                            </f:facet>
-                            <h:outputText value="#{item.password}"/>
-                        </p:column>
-                        <p:column sortBy="#{item.newsletter}" >
-                            <f:facet name="header">
-                                <h:outputText value="#{configMapController.getKey('ListCustomersTitle_newsletter')}"/>
-                            </f:facet>
-                            <h:outputText value="#{item.newsletter}"/>
-                        </p:column>
-                        <p:column sortBy="#{item.groupPricing}" >
-                            <f:facet name="header">
-                                <h:outputText value="#{configMapController.getKey('ListCustomersTitle_groupPricing')}"/>
-                            </f:facet>
-                            <h:outputText value="#{item.groupPricing}"/>
-                        </p:column>
-                        <p:column sortBy="#{item.emailFormat}" >
-                            <f:facet name="header">
-                                <h:outputText value="#{configMapController.getKey('ListCustomersTitle_emailFormat')}"/>
-                            </f:facet>
-                            <h:outputText value="#{item.emailFormat}"/>
-                        </p:column>
-                        <p:column sortBy="#{item.auth}" >
-                            <f:facet name="header">
-                                <h:outputText value="#{configMapController.getKey('ListCustomersTitle_auth')}"/>
-                            </f:facet>
-                            <h:outputText value="#{item.auth}"/>
-                        </p:column>
-                        <p:column sortBy="#{item.active}" >
-                            <f:facet name="header">
-                                <h:outputText value="#{configMapController.getKey('ListCustomersTitle_active')}"/>
-                            </f:facet>
-                            <h:outputText value="#{item.active}"/>
-                        </p:column>
-                        <p:column sortBy="#{item.referredby}" >
-                            <f:facet name="header">
-                                <h:outputText value="#{configMapController.getKey('ListCustomersTitle_referredby')}"/>
-                            </f:facet>
-                            <h:outputText value="#{item.referredby}"/>
-                        </p:column>
-                        <p:column sortBy="#{item.demographic.name}" >
-                            <f:facet name="header">
-                                <h:outputText value="#{configMapController.getKey('ListCustomersTitle_demographic')}"/>
-                            </f:facet>
-                            <h:outputText value="#{item.demographic.name}"/>
                         </p:column>
                     </p:dataTable>
                 </h:panelGroup>

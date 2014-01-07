@@ -1,7 +1,9 @@
 /*
- * To change this template, choose Tools | Templates
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
+
 package au.com.manlyit.fitnesscrm.stats.db;
 
 import java.io.Serializable;
@@ -34,13 +36,12 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "Activation.findAll", query = "SELECT a FROM Activation a"),
     @NamedQuery(name = "Activation.findById", query = "SELECT a FROM Activation a WHERE a.id = :id"),
     @NamedQuery(name = "Activation.findByNonce", query = "SELECT a FROM Activation a WHERE a.nonce = :nonce"),
-    @NamedQuery(name = "Activation.findByTimestamp", query = "SELECT a FROM Activation a WHERE a.act_timestamp = :act_timestamp")})
+    @NamedQuery(name = "Activation.findByActTimestamp", query = "SELECT a FROM Activation a WHERE a.actTimestamp = :actTimestamp")})
 public class Activation implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
-    @NotNull
     @Column(name = "id")
     private Integer id;
     @Basic(optional = false)
@@ -52,10 +53,10 @@ public class Activation implements Serializable {
     @NotNull
     @Column(name = "act_timestamp")
     @Temporal(TemporalType.TIMESTAMP)
-    private Date act_timestamp;
+    private Date actTimestamp;
     @JoinColumn(name = "customer", referencedColumnName = "id")
     @ManyToOne(optional = false)
-    private Customers customerId;
+    private Customers customer;
 
     public Activation() {
     }
@@ -64,10 +65,10 @@ public class Activation implements Serializable {
         this.id = id;
     }
 
-    public Activation(Integer id, String nonce, Date timestamp) {
+    public Activation(Integer id, String nonce, Date actTimestamp) {
         this.id = id;
         this.nonce = nonce;
-        this.act_timestamp = timestamp;
+        this.actTimestamp = actTimestamp;
     }
 
     public Integer getId() {
@@ -86,12 +87,20 @@ public class Activation implements Serializable {
         this.nonce = nonce;
     }
 
-    public Date getAct_timestamp() {
-        return act_timestamp;
+    public Date getActTimestamp() {
+        return actTimestamp;
     }
 
-    public void setAct_timestamp(Date act_timestamp) {
-        this.act_timestamp = act_timestamp;
+    public void setActTimestamp(Date actTimestamp) {
+        this.actTimestamp = actTimestamp;
+    }
+
+    public Customers getCustomer() {
+        return customer;
+    }
+
+    public void setCustomer(Customers customer) {
+        this.customer = customer;
     }
 
     @Override
@@ -117,20 +126,6 @@ public class Activation implements Serializable {
     @Override
     public String toString() {
         return "au.com.manlyit.fitnesscrm.stats.db.Activation[ id=" + id + " ]";
-    }
-
-    /**
-     * @return the customerId
-     */
-    public Customers getCustomerId() {
-        return customerId;
-    }
-
-    /**
-     * @param customerId the customerId to set
-     */
-    public void setCustomerId(Customers customerId) {
-        this.customerId = customerId;
     }
     
 }

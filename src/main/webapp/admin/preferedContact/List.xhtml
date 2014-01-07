@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" >
+
+    <ui:composition template="/template.xhtml">
+        <ui:define name="title">
+            <h:outputText value="#{configMapController.getKey('ListPreferedContactTitle')}"></h:outputText>
+        </ui:define>
+        <ui:define name="body">
+
+
+            <h:form id="formPreferedContactCreate1">
+                <p:confirmDialog id="confirmDialogPreferedContactCreate1" message="Add a Key/ Value Pair to the configuration table"  
+                                 header="#{configMapController.getKey('CreatePreferedContactTitle')}" severity="info" widgetVar="PreferedContactCreateDialogue"> 
+
+                    <p:panelGrid columns="2">
+                        <p:outputLabel value="#{configMapController.getKey('CreatePreferedContactLabel_id')}" for="id" />
+                        <p:inputText id="id" value="#{preferedContactController.selected.id}" title="#{configMapController.getKey('CreatePreferedContactTitle_id')}" required="true" requiredMessage="#{configMapController.getKey('CreatePreferedContactRequiredMessage_id')}"/>
+                        <p:outputLabel value="#{configMapController.getKey('CreatePreferedContactLabel_preferedContactMethod')}" for="preferedContactMethod" />
+                        <p:inputText id="preferedContactMethod" value="#{preferedContactController.selected.preferedContactMethod}" title="#{configMapController.getKey('CreatePreferedContactTitle_preferedContactMethod')}" required="true" requiredMessage="#{configMapController.getKey('CreatePreferedContactRequiredMessage_preferedContactMethod')}"/>
+                        <p:commandButton oncomplete="PreferedContactCreateDialogue.hide();preferedContactControllerTable.filter()" actionListener="#{preferedContactController.createDialogue}" value="#{configMapController.getKey('CreatePreferedContactSaveLink')}" update=":menuForm:growl"/>                
+                    </p:panelGrid>
+                </p:confirmDialog>
+            </h:form>
+
+
+
+
+
+            <h:form id="PreferedContactlistForm1">
+                <h:panelGroup >
+                    <p:commandButton id="showDialogButton"  value="#{configMapController.getKey('ListPreferedContactCreateLink')}" onclick="PreferedContactCreateDialogue.show()" type="button"/> 
+
+                </h:panelGroup>
+                <h:outputText escape="false" value="#{configMapController.getKey('ListPreferedContactEmpty')}" rendered="#{preferedContactController.items.rowCount == 0}"/>
+                <h:panelGroup rendered="#{preferedContactController.items.rowCount > 0}">
+                    <p:dataTable  editable="true" value="#{preferedContactController.items}" filteredValue="#{preferedContactController.filteredItems}"  widgetVar="preferedContactControllerTable" var="item"  paginator="true" rows="15"  paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  rowsPerPageTemplate="5,10,15,20,25,50,100" >
+                        <f:facet name="header">
+                            <p:outputPanel>
+                                <h:outputText value="Search all fields:" />
+                                <h:inputText id="globalFilter" onkeyup="preferedContactControllerTable.filter()" />
+                            </p:outputPanel>
+                        </f:facet>
+                        <p:ajax event="rowEdit" listener="#{preferedContactController.onEdit}" update=":menuForm:growl" oncomplete="preferedContactControllerTable.filter()" />  
+                        <p:ajax event="rowEditCancel" listener="#{preferedContactController.onCancel}" update=":menuForm:growl"  oncomplete="preferedContactControllerTable.filter()" />  
+
+                        <p:column sortBy="#{item.id}" filterBy="#{item.id}" headerText="#{configMapController.getKey('ListPreferedContactTitle_id')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.id}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.id}" label="#{configMapController.getKey('ListPreferedContactTitle_id')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.preferedContactMethod}" filterBy="#{item.preferedContactMethod}" headerText="#{configMapController.getKey('ListPreferedContactTitle_preferedContactMethod')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.preferedContactMethod}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.preferedContactMethod}" label="#{configMapController.getKey('ListPreferedContactTitle_preferedContactMethod')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column rendered="#{preferedContactController.isUserInRole('ADMIN')}"  headerText="Edit" style="width:50px">  
+                            <p:rowEditor />  
+                        </p:column>  
+
+                        <p:column>
+                            <p:commandButton rendered="#{preferedContactController.isUserInRole('ADMIN')}"  oncomplete="preferedContactControllerTable.filter()" update=":menuForm:growl"  value="#{configMapController.getKey('ListPreferedContactDestroyLink')}">
+                                <f:setPropertyActionListener value="#{item}" target="#{preferedContactController.selectedForDeletion}" />
+                            </p:commandButton>                        
+
+                        </p:column>
+                    </p:dataTable>
+                </h:panelGroup>
+            </h:form>
+        </ui:define>
+    </ui:composition>
+
+</html>

@@ -240,7 +240,7 @@ public class EmailQueueController implements Serializable {
         //generate link and send
         String nonce = "7777" + generateUniqueToken(10);
         Activation act = new Activation(0, nonce, new Date());
-        act.setCustomerId(cust);
+        act.setCustomer(cust);
         String urlLink = configMapFacade.getConfig("PasswordResetURL");
         urlLink += nonce;
         ejbActivationFacade.create(act);

@@ -1,5 +1,6 @@
 /*
- * To change this template, choose Tools | Templates
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
 
@@ -43,7 +44,6 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Customers.findByLastname", query = "SELECT c FROM Customers c WHERE c.lastname = :lastname"),
     @NamedQuery(name = "Customers.findByDob", query = "SELECT c FROM Customers c WHERE c.dob = :dob"),
     @NamedQuery(name = "Customers.findByEmailAddress", query = "SELECT c FROM Customers c WHERE c.emailAddress = :emailAddress"),
-    @NamedQuery(name = "Customers.findByPreferredContact", query = "SELECT c FROM Customers c WHERE c.preferredContact = :preferredContact"),
     @NamedQuery(name = "Customers.findByUsername", query = "SELECT c FROM Customers c WHERE c.username = :username"),
     @NamedQuery(name = "Customers.findByStreetAddress", query = "SELECT c FROM Customers c WHERE c.streetAddress = :streetAddress"),
     @NamedQuery(name = "Customers.findBySuburb", query = "SELECT c FROM Customers c WHERE c.suburb = :suburb"),
@@ -55,10 +55,6 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Customers.findByFax", query = "SELECT c FROM Customers c WHERE c.fax = :fax"),
     @NamedQuery(name = "Customers.findByPassword", query = "SELECT c FROM Customers c WHERE c.password = :password"),
     @NamedQuery(name = "Customers.findByNewsletter", query = "SELECT c FROM Customers c WHERE c.newsletter = :newsletter"),
-    @NamedQuery(name = "Customers.findByGroupPricing", query = "SELECT c FROM Customers c WHERE c.groupPricing = :groupPricing"),
-    @NamedQuery(name = "Customers.findByEmailFormat", query = "SELECT c FROM Customers c WHERE c.emailFormat = :emailFormat"),
-    @NamedQuery(name = "Customers.findByAuth", query = "SELECT c FROM Customers c WHERE c.auth = :auth"),
-    @NamedQuery(name = "Customers.findByActive", query = "SELECT c FROM Customers c WHERE c.active = :active"),
     @NamedQuery(name = "Customers.findByReferredby", query = "SELECT c FROM Customers c WHERE c.referredby = :referredby")})
 public class Customers implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -91,8 +87,6 @@ public class Customers implements Serializable {
     @Size(min = 1, max = 255)
     @Column(name = "email_address")
     private String emailAddress;
-    @Column(name = "preferred_contact")
-    private Integer preferredContact;
     @Basic(optional = false)
     @NotNull
     @Size(min = 1, max = 96)
@@ -128,16 +122,7 @@ public class Customers implements Serializable {
     @Column(name = "password")
     private String password;
     @Column(name = "newsletter")
-    private Character newsletter;
-    @Column(name = "group_pricing")
-    private Integer groupPricing;
-    @Size(max = 4)
-    @Column(name = "email_format")
-    private String emailFormat;
-    @Column(name = "auth")
-    private Integer auth;
-    @Column(name = "active")
-    private Integer active;
+    private Boolean newsletter;
     @Column(name = "referredby")
     private Integer referredby;
     @OneToMany(mappedBy = "userId")
@@ -150,13 +135,28 @@ public class Customers implements Serializable {
     private Collection<Participants> participantsCollection;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "customerId")
     private Collection<CustomerImages> customerImagesCollection;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "customerId")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "customer")
     private Collection<Activation> activationCollection;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "username")
     private Collection<Groups> groupsCollection;
+    @JoinColumn(name = "active", referencedColumnName = "id")
+    @ManyToOne
+    private CustomerState active;
+    @JoinColumn(name = "group_pricing", referencedColumnName = "id")
+    @ManyToOne
+    private Plan groupPricing;
+    @JoinColumn(name = "email_format", referencedColumnName = "id")
+    @ManyToOne
+    private EmailFormat emailFormat;
+    @JoinColumn(name = "auth", referencedColumnName = "id")
+    @ManyToOne
+    private CustomerAuth auth;
     @JoinColumn(name = "demographic", referencedColumnName = "id")
     @ManyToOne
     private DemographicTypes demographic;
+    @JoinColumn(name = "preferred_contact", referencedColumnName = "id")
+    @ManyToOne
+    private PreferedContact preferredContact;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "customerId")
     private Collection<StatsTaken> statsTakenCollection;
     @OneToMany(mappedBy = "userId")
@@ -228,14 +228,6 @@ public class Customers implements Serializable {
 
     public void setEmailAddress(String emailAddress) {
         this.emailAddress = emailAddress;
-    }
-
-    public Integer getPreferredContact() {
-        return preferredContact;
-    }
-
-    public void setPreferredContact(Integer preferredContact) {
-        this.preferredContact = preferredContact;
     }
 
     public String getUsername() {
@@ -318,44 +310,12 @@ public class Customers implements Serializable {
         this.password = password;
     }
 
-    public Character getNewsletter() {
+    public Boolean getNewsletter() {
         return newsletter;
     }
 
-    public void setNewsletter(Character newsletter) {
+    public void setNewsletter(Boolean newsletter) {
         this.newsletter = newsletter;
-    }
-
-    public Integer getGroupPricing() {
-        return groupPricing;
-    }
-
-    public void setGroupPricing(Integer groupPricing) {
-        this.groupPricing = groupPricing;
-    }
-
-    public String getEmailFormat() {
-        return emailFormat;
-    }
-
-    public void setEmailFormat(String emailFormat) {
-        this.emailFormat = emailFormat;
-    }
-
-    public Integer getAuth() {
-        return auth;
-    }
-
-    public void setAuth(Integer auth) {
-        this.auth = auth;
-    }
-
-    public Integer getActive() {
-        return active;
-    }
-
-    public void setActive(Integer active) {
-        this.active = active;
     }
 
     public Integer getReferredby() {
@@ -429,12 +389,52 @@ public class Customers implements Serializable {
         this.groupsCollection = groupsCollection;
     }
 
+    public CustomerState getActive() {
+        return active;
+    }
+
+    public void setActive(CustomerState active) {
+        this.active = active;
+    }
+
+    public Plan getGroupPricing() {
+        return groupPricing;
+    }
+
+    public void setGroupPricing(Plan groupPricing) {
+        this.groupPricing = groupPricing;
+    }
+
+    public EmailFormat getEmailFormat() {
+        return emailFormat;
+    }
+
+    public void setEmailFormat(EmailFormat emailFormat) {
+        this.emailFormat = emailFormat;
+    }
+
+    public CustomerAuth getAuth() {
+        return auth;
+    }
+
+    public void setAuth(CustomerAuth auth) {
+        this.auth = auth;
+    }
+
     public DemographicTypes getDemographic() {
         return demographic;
     }
 
     public void setDemographic(DemographicTypes demographic) {
         this.demographic = demographic;
+    }
+
+    public PreferedContact getPreferredContact() {
+        return preferredContact;
+    }
+
+    public void setPreferredContact(PreferedContact preferredContact) {
+        this.preferredContact = preferredContact;
     }
 
     @XmlTransient
@@ -488,5 +488,5 @@ public class Customers implements Serializable {
     public String toString() {
         return  firstname +" "+ lastname;
     }
-
+    
 }

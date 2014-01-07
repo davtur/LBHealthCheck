@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" 
+      xmlns:ui="http://java.sun.com/jsf/facelets" >
+
+    <ui:composition template="/template.xhtml">
+        <ui:define name="title">
+            <h:outputText value="#{configMapController.getKey('ViewPlanTitle')}"></h:outputText>
+        </ui:define>
+        <ui:define name="body">
+            <h:panelGroup id="messagePanel" layout="block">
+                <h:messages errorStyle="color: red" infoStyle="color: green" layout="table"/>
+            </h:panelGroup>
+            <h:form>
+                <p:panel>
+                    <h:panelGrid columns="2">
+                        <h:outputText value="#{configMapController.getKey('ViewPlanLabel_id')}"/>
+                        <h:outputText value="#{planController.selected.id}" title="#{configMapController.getKey('ViewPlanTitle_id')}"/>
+                        <h:outputText value="#{configMapController.getKey('ViewPlanLabel_planName')}"/>
+                        <h:outputText value="#{planController.selected.planName}" title="#{configMapController.getKey('ViewPlanTitle_planName')}"/>
+                        <h:outputText value="#{configMapController.getKey('ViewPlanLabel_planPrice')}"/>
+                        <h:outputText value="#{planController.selected.planPrice}" title="#{configMapController.getKey('ViewPlanTitle_planPrice')}"/>
+                        <h:outputText value="#{configMapController.getKey('ViewPlanLabel_planDescription')}"/>
+                        <h:outputText value="#{planController.selected.planDescription}" title="#{configMapController.getKey('ViewPlanTitle_planDescription')}"/>
+                        <h:outputText value="#{configMapController.getKey('ViewPlanLabel_planActive')}"/>
+                        <h:outputText value="#{planController.selected.planActive}" title="#{configMapController.getKey('ViewPlanTitle_planActive')}"/>
+                        <h:outputText value="#{configMapController.getKey('ViewPlanLabel_planDiscount')}"/>
+                        <h:outputText value="#{planController.selected.planDiscount}" title="#{configMapController.getKey('ViewPlanTitle_planDiscount')}"/>
+                    </h:panelGrid>
+                </p:panel>
+                <br />
+                <p:commandButton rendered="#{planController.isUserInRole('ADMIN')}"  action="#{planController.destroyAndView}" value="#{configMapController.getKey('ViewPlanDestroyLink')}"/>
+                <br />
+                <br />
+                <p:commandButton rendered="#{planController.isUserInRole('ADMIN')}"  ajax="false"  action="Edit" value="#{configMapController.getKey('ViewPlanEditLink')}"/>
+                <br />
+                <p:commandButton rendered="#{planController.isUserInRole('ADMIN')}"  ajax="false"  action="#{planController.prepareCreate}" value="#{configMapController.getKey('ViewPlanCreateLink')}" />
+                <br />
+                <p:commandButton                                                                 ajax="false"  action="#{planController.prepareList}" value="#{configMapController.getKey('ViewPlanShowAllLink')}"/>
+
+            </h:form>
+        </ui:define>
+    </ui:composition>
+
+</html>

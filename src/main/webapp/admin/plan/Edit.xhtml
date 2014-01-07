@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" >
+
+    <ui:composition template="/template.xhtml">
+        <ui:define name="title">
+            <h:outputText value="#{configMapController.getKey('EditPlanTitle')}"></h:outputText>
+        </ui:define>
+        <ui:define name="body">
+            <h:panelGroup id="messagePanel" layout="block">
+                <h:messages errorStyle="color: red" infoStyle="color: green" layout="table"/>
+            </h:panelGroup>
+            <h:form id="formPlanEdit1">
+                <p:panel id="panelPlanEdit1">
+                    <h:panelGrid columns="2">
+                        <h:outputLabel value="#{configMapController.getKey('EditPlanLabel_id')}" for="id" />
+                        <h:inputText id="id"  value="#{planController.selected.id}" title="#{configMapController.getKey('EditPlanTitle_id')}" required="true" requiredMessage="#{configMapController.getKey('EditPlanRequiredMessage_id')}"/>
+                        <h:outputLabel value="#{configMapController.getKey('EditPlanLabel_planName')}" for="planName" />
+                        <h:inputText id="planName"  value="#{planController.selected.planName}" title="#{configMapController.getKey('EditPlanTitle_planName')}" required="true" requiredMessage="#{configMapController.getKey('EditPlanRequiredMessage_planName')}"/>
+                        <h:outputLabel value="#{configMapController.getKey('EditPlanLabel_planPrice')}" for="planPrice" />
+                        <h:inputText id="planPrice"  value="#{planController.selected.planPrice}" title="#{configMapController.getKey('EditPlanTitle_planPrice')}" required="true" requiredMessage="#{configMapController.getKey('EditPlanRequiredMessage_planPrice')}"/>
+                        <h:outputLabel value="#{configMapController.getKey('EditPlanLabel_planDescription')}" for="planDescription" />
+                        <h:inputTextarea rows="4" cols="30" id="planDescription" value="#{planController.selected.planDescription}" title="#{configMapController.getKey('EditPlanTitle_planDescription')}" />
+                        <h:outputLabel value="#{configMapController.getKey('EditPlanLabel_planActive')}" for="planActive" />
+                        <h:inputText id="planActive"  value="#{planController.selected.planActive}" title="#{configMapController.getKey('EditPlanTitle_planActive')}" required="true" requiredMessage="#{configMapController.getKey('EditPlanRequiredMessage_planActive')}"/>
+                        <h:outputLabel value="#{configMapController.getKey('EditPlanLabel_planDiscount')}" for="planDiscount" />
+                        <h:inputText id="planDiscount"  value="#{planController.selected.planDiscount}" title="#{configMapController.getKey('EditPlanTitle_planDiscount')}" />
+                    </h:panelGrid>
+                </p:panel>
+                <p:commandButton   ajax="false"    action="#{planController.update}" value="#{configMapController.getKey('EditPlanSaveLink')}"/>
+                <br />
+                <br />
+                <p:commandButton   ajax="false"    action="View" value="#{configMapController.getKey('EditPlanViewLink')}" immediate="true"/>
+                <br />
+                <p:commandButton   ajax="false"    action="#{planController.prepareList}" value="#{configMapController.getKey('EditPlanShowAllLink')}" immediate="true"/>
+            </h:form>
+        </ui:define>
+    </ui:composition>
+
+</html>
