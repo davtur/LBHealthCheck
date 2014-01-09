@@ -5,6 +5,7 @@
 package au.com.manlyit.fitnesscrm.stats.beans;
 
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
+import au.com.manlyit.fitnesscrm.stats.db.CustomerState;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import java.util.List;
 import java.util.logging.Level;
@@ -17,6 +18,7 @@ import javax.persistence.Query;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Root;
 
 /**
@@ -64,7 +66,34 @@ public class CustomersFacade extends AbstractFacade<Customers> {
        // Query q = em.createNativeQuery("SELECT * FROM customers where username = '" + username + "'", Customers.class);
         // return (Customers) q.getSingleResult();
     }
-
+ public List<Customers> findAllActiveCustomers(boolean sortAsc) {
+        List retList = null;
+        String state = "ACTIVE";//Active
+        try {
+            CriteriaBuilder cb = em.getCriteriaBuilder();
+            CriteriaQuery<Customers> cq = cb.createQuery(Customers.class);
+            Root<Customers> rt = cq.from(Customers.class);
+            
+            Join<Customers, CustomerState> jn = rt.join("active");// join customers.active to customer_state.id
+            Expression<String> custState = jn.get("customerState");
+            cq.where(cb.equal(custState,state ));
+            cq.select(rt);
+            
+            
+            
+            Expression<String> express = rt.get("firstname");
+            if (sortAsc) {
+                cq.orderBy(cb.asc(express));
+            } else {
+                cq.orderBy(cb.desc(express));
+            }
+            Query q = em.createQuery(cq);
+            retList = q.getResultList();
+        } catch (Exception e) {
+            JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
+        }
+        return retList;
+    }
     public List<Customers> findAll(boolean sortAsc) {
         List retList = null;
         try {

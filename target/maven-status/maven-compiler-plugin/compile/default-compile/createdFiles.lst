@@ -197,6 +197,7 @@ au/com/manlyit/fitnesscrm/stats/webservices/ChangeCustomerStatus.class
 au/com/manlyit/fitnesscrm/stats/beans/EmailFormatFacade.class
 au/com/manlyit/fitnesscrm/stats/webservices/GetPaymentDetailPlusNextPaymentInfoResponse.class
 au/com/manlyit/fitnesscrm/stats/classes/CurrencyController.class
+au/com/manlyit/fitnesscrm/stats/classes/util/SessionTypesConverter.class
 au/com/manlyit/fitnesscrm/stats/classes/QrtzCronTriggersController$QrtzCronTriggersControllerConverter.class
 au/com/manlyit/fitnesscrm/stats/beans/ConfigMapFacade.class
 au/com/manlyit/fitnesscrm/stats/callable/CronJobCallableThreadFactory.class

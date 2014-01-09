@@ -10,6 +10,7 @@ import java.io.IOException;
 
 import java.io.Serializable;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.logging.Level;
@@ -430,6 +431,10 @@ public class CustomersController implements Serializable {
 
     public SelectItem[] getCustomersByGroupSelectOne(String group, boolean sortAsc) {
         return JsfUtil.getSelectItems(ejbFacade.findAllByGroup(group, sortAsc), true);
+    }
+    
+     public Collection<Customers> getCustomersByGroupObject(String group, boolean sortAsc) {
+        return ejbFacade.findAllByGroup(group, sortAsc);
     }
     
      public void onEdit(RowEditEvent event) {

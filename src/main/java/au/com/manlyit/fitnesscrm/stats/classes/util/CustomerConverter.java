@@ -33,7 +33,7 @@ public class CustomerConverter implements Converter, Serializable{
 
     @Override
    public Object getAsObject(FacesContext context, UIComponent component, String value){
-        Customers cust = null;
+        Customers cust;
         int val = Integer.parseInt(value);
         cust = ejbFacade.find(val);
         return cust;

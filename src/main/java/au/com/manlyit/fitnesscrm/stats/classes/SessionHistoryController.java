@@ -51,6 +51,8 @@ public class SessionHistoryController implements Serializable {
     private PaginationHelper pagination;
     private int selectedItemIndex;
     private DualListModel<Customers> participants;
+    private List<Customers> activeCustomers; // all customers
+    private List<Customers> attendingCustomers;
 
     public SessionHistoryController() {
     }
@@ -66,6 +68,7 @@ public class SessionHistoryController implements Serializable {
         if (current == null) {
             current = new SessionHistory();
             current.setSessiondate(new Date());
+            current.setId(0);
             selectedItemIndex = -1;
         }
         return current;
@@ -152,7 +155,7 @@ public class SessionHistoryController implements Serializable {
     }
 
     public String prepareView() {
-       // current = (SessionHistory) getItems().getRowData();
+        // current = (SessionHistory) getItems().getRowData();
         // selectedItemIndex = pagination.getPageFirstItem() + getItems().getRowIndex();
         return "View";
     }
@@ -162,7 +165,7 @@ public class SessionHistoryController implements Serializable {
         current.setSessiondate(new Date());
         selectedItemIndex = -1;
         addParticipants();
-        return "Create";
+        return "CreateSessionInfo";
     }
 
     public String create() {
@@ -180,7 +183,7 @@ public class SessionHistoryController implements Serializable {
 
     private void updateCurrentParticipants() {
         List<Customers> targets = participants.getTarget();
-        List<Participants> parts = new ArrayList<Participants>();
+        List<Participants> parts = new ArrayList<>();
 
         for (Customers cust : targets) {
             Participants p = new Participants(0);
@@ -195,7 +198,7 @@ public class SessionHistoryController implements Serializable {
 
     private void populatePickerFromCurrentSessionHistory() {
         List<Customers> allCustomers = ejbCustomerFacade.findAll(); // all customers
-        List<Customers> selectedCustomers = new ArrayList<Customers>();
+        List<Customers> selectedCustomers = new ArrayList<>();
         Collection<Participants> partic = current.getParticipantsCollection(); //ones already selected.
         if (partic != null) {
             for (Participants part : partic) {
@@ -210,7 +213,7 @@ public class SessionHistoryController implements Serializable {
                     }
                 }
             }
-            participants = new DualListModel<Customers>(allCustomers, selectedCustomers);
+            participants = new DualListModel<>(allCustomers, selectedCustomers);
         } else {
             addParticipants();
         }
@@ -218,8 +221,8 @@ public class SessionHistoryController implements Serializable {
 
     private void addParticipants() {
         List<Customers> sourceParticipants = ejbCustomerFacade.findAll(true);
-        List<Customers> targetParticipants = new ArrayList<Customers>();
-        participants = new DualListModel<Customers>(sourceParticipants, targetParticipants);
+        List<Customers> targetParticipants = new ArrayList<>();
+        participants = new DualListModel<>(sourceParticipants, targetParticipants);
     }
 
     public String prepareEdit() {
@@ -372,6 +375,43 @@ public class SessionHistoryController implements Serializable {
 
     }
 
+    /**
+     * @return the activeCustomers
+     */
+    public Collection<Customers> getActiveCustomers() {
+      
+        if(activeCustomers == null){
+            activeCustomers =  ejbCustomerFacade.findAllActiveCustomers(true);
+        }
+       
+         return activeCustomers;
+      
+    }
+
+    /**
+     * @param activeCustomers the activeCustomers to set
+     */
+    /*public void setActiveCustomers(List<Customers> activeCustomers) {
+        this.activeCustomers = activeCustomers;
+    }*/
+
+    /**
+     * @return the attendingCustomers
+     */
+    public List<Customers> getAttendingCustomers() {
+        if(attendingCustomers == null){
+            attendingCustomers = new ArrayList<>();
+        }
+        return attendingCustomers;
+    }
+
+    /**
+     * @param attendingCustomers the attendingCustomers to set
+     */
+    public void setAttendingCustomers(List<Customers> attendingCustomers) {
+        this.attendingCustomers = attendingCustomers;
+    }
+
     @FacesConverter(forClass = SessionHistory.class)
     public static class SessionHistoryControllerConverter implements Converter {
 
@@ -392,11 +432,12 @@ public class SessionHistoryController implements Serializable {
         }
 
         String getStringKey(java.lang.Integer value) {
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
             sb.append(value);
             return sb.toString();
         }
 
+        @Override
         public String getAsString(FacesContext facesContext, UIComponent component, Object object) {
             if (object == null) {
                 return null;
