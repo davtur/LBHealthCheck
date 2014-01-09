@@ -33,10 +33,10 @@
                             <f:convertDateTime pattern="MM/dd/yyyy HH:mm" />
                         </h:outputText>
                         <h:outputLabel value="#{configMapController.getKey('ViewSessionHistoryLabel_sessionType')}"/>
-                        <h:outputText value="#{sessionHistoryController.selected.sessionTypes.name}" title="#{configMapController.getKey('ViewSessionHistoryTitle_sessionType')}"/>
+                        <h:outputText value="#{sessionHistoryController.selected.sessionTypesId.name}" title="#{configMapController.getKey('ViewSessionHistoryTitle_sessionType')}"/>
 
                         <h:outputLabel value="#{configMapController.getKey('ViewSessionHistoryLabel_trainer')}"/>
-                        <h:outputText value="#{sessionHistoryController.selected.customers.firstname} #{sessionHistoryController.selected.customers.lastname}" title="#{configMapController.getKey('ViewSessionHistoryTitle_trainer')}"/>
+                        <h:outputText value="#{sessionHistoryController.selected.trainer.firstname} #{sessionHistoryController.trainer.lastname}" title="#{configMapController.getKey('ViewSessionHistoryTitle_trainer')}"/>
 
                         <h:outputLabel value="#{configMapController.getKey('CreateSessionHistoryLabel_comments')}"/>
                         <h:outputText value="#{sessionHistoryController.selected.comments}" title="#{configMapController.getKey('CreateSessionHistoryTitle_comments')}"/>
@@ -49,11 +49,11 @@
                         </f:facet>
                         <h:outputText value="#{item.id}"/>
                     </p:column>
-                    <p:column sortBy="#{item.customers.lastname}" >
+                    <p:column sortBy="#{item.trainer.lastname}" >
                         <f:facet name="header">
-                            <h:outputText value="Customers That Attended"/>
+                            <h:outputText value="trainer That Attended"/>
                         </f:facet>
-                        <h:outputText value="#{item.customers.firstname} #{item.customers.lastname}">
+                        <h:outputText value="#{item.trainer.firstname} #{item.trainer.lastname}">
                             <f:convertDateTime pattern="dd/MM/yyyy" />
                         </h:outputText>
                     </p:column>

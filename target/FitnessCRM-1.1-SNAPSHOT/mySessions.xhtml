@@ -27,11 +27,11 @@
                                 <f:convertDateTime pattern="dd/MM/yyyy" />
                             </h:outputText>
                         </p:column>
-                        <p:column sortBy="#{item.sessionTypes.name}" >
+                        <p:column sortBy="#{item.sessionTypesId.name}" >
                             <f:facet name="header">
                                 <h:outputText value="#{configMapController.getKey('ListSessionHistoryTitle_sessionType')}"/>
                             </f:facet>
-                            <h:outputText value="#{item.sessionTypes.name}"/>
+                            <h:outputText value="#{item.sessionTypesId.name}"/>
                         </p:column>
                         <p:column sortBy="#{item.comments}" >
                             <f:facet name="header">
