@@ -32,17 +32,17 @@
                             <f:convertDateTime pattern="dd/MM/yyyy" />
                         </h:outputText>
                     </p:column>
-                     <p:column sortBy="#{item.sessionTypes.name}"  filterBy="#{item.sessionTypes.name}"  headerText="#{configMapController.getKey('ListSessionHistoryTitle_sessionType')}" >
+                     <p:column sortBy="#{item.sessionTypesId.name}"  filterBy="#{item.sessionTypesId.name}"  headerText="#{configMapController.getKey('ListSessionHistoryTitle_sessionType')}" >
                         <f:facet name="header">
                             <h:outputText value="#{configMapController.getKey('ListSessionHistoryTitle_sessionType')}" />
                         </f:facet>
-                        <h:outputText value="#{item.sessionTypes.name}"/>
+                        <h:outputText value="#{item.sessionTypesId.name}"/>
                     </p:column>
-                     <p:column sortBy="#{item.customers.firstname}"  filterBy="#{item.customers.firstname}"  headerText="#{configMapController.getKey('ListSessionHistoryTitle_trainer')}" >
+                     <p:column sortBy="#{item.trainer.firstname}"  filterBy="#{item.trainer.firstname}"  headerText="#{configMapController.getKey('ListSessionHistoryTitle_trainer')}" >
                         <f:facet name="header">
                             <h:outputText value="#{configMapController.getKey('ListSessionHistoryTitle_trainer')}"/>
                         </f:facet>
-                        <h:outputText value="#{item.customers.firstname} #{item.customers.lastname}"/>
+                        <h:outputText value="#{item.trainer.firstname} #{item.trainer.lastname}"/>
                     </p:column>
 
                     <p:column sortBy="#{item.comments}" filterBy="#{item.comments}"  headerText="#{configMapController.getKey('ListSessionHistoryTitle_comments')}" >

@@ -3,9 +3,9 @@
 <!-- =========== FULL CONFIGURATION FILE ================================== -->
 
 <faces-config version="2.0"
-    xmlns="http://java.sun.com/xml/ns/javaee" 
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-    xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-facesconfig_2_0.xsd">
+              xmlns="http://java.sun.com/xml/ns/javaee" 
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+              xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-facesconfig_2_0.xsd">
     <application>
         <resource-bundle>
             <base-name>/Bundle</base-name>
@@ -21,12 +21,16 @@
         <validator-id>au.com.manlyit.fitnesscrm.stats.classes.util.NoSpecialCharStringValidator</validator-id>
         <validator-class>au.com.manlyit.fitnesscrm.stats.classes.util.NoSpecialCharStringValidator</validator-class>
     </validator>
-     <converter>
+    <converter>
         <description>Image Converter</description>
         <converter-id>customConverter</converter-id>
         <converter-class>
-        javabeat.jsf.CustomConverter
+            au.com.manlyit.fitnesscrm.stats.classes.util.CustomImageConverter
         </converter-class>
     </converter>
-    
+    <factory>
+        <exception-handler-factory>
+            au.com.manlyit.fitnesscrm.stats.classes.util.ViewExpiredExceptionExceptionHandlerFactory
+        </exception-handler-factory>
+    </factory> 
 </faces-config>

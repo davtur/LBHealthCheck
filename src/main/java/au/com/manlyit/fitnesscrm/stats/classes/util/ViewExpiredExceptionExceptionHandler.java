@@ -63,19 +63,13 @@ public class ViewExpiredExceptionExceptionHandler extends ExceptionHandlerWrappe
         for (Iterator<ExceptionQueuedEvent> i = getUnhandledExceptionQueuedEvents().iterator(); i.hasNext();) {
 
             ExceptionQueuedEvent event = i.next();
-
             ExceptionQueuedEventContext context = (ExceptionQueuedEventContext) event.getSource();
-
             Throwable t = context.getException();
 
             if (t instanceof ViewExpiredException) {
-
                 ViewExpiredException vee = (ViewExpiredException) t;
-
                 FacesContext fc = FacesContext.getCurrentInstance();
-
                 Map<String, Object> requestMap = fc.getExternalContext().getRequestMap();
-
                 NavigationHandler nav =
 
                         fc.getApplication().getNavigationHandler();
@@ -90,7 +84,7 @@ public class ViewExpiredExceptionExceptionHandler extends ExceptionHandlerWrappe
 
 
 
-                    nav.handleNavigation(fc, null, "/viewExpired.html");
+                    nav.handleNavigation(fc, null, "/login.xhtml");
 
                     fc.renderResponse();
 

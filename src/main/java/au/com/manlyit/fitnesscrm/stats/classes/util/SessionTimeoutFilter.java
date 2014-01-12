@@ -2,10 +2,11 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package au.com.manlyit.fitnesscrm.stats.classes.util;
 
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -14,41 +15,43 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-
 
 /**
  *
  * @author tgiunipero
  */
-@WebFilter(servletNames = {"Controller"})
+//@WebFilter(servletNames = {"Controller"})
+@WebFilter("*.xhtml")
 public class SessionTimeoutFilter implements Filter {
+
+    private static final Logger logger = Logger.getLogger(SessionTimeoutFilter.class.getName());
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
 
         HttpServletRequest req = (HttpServletRequest) request;
-
+        HttpServletResponse res = (HttpServletResponse) response;
         HttpSession session = req.getSession(false);
+        //User user = (session != null) ? (User) session.getAttribute("user") : null;
+        String loginURL = req.getContextPath() + "/login.xhtml";
 
-        // if session doesn't exist, forward user to welcome page
-        if (session == null) {
-            try {
-                req.getRequestDispatcher("/login.html").forward(request, response);
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-            return;
+        if (session == null && !req.getRequestURI().equals(loginURL)) {
+            res.sendRedirect(loginURL);
+            logger.log(Level.INFO, "Redirecting to login page as the session has timed out");
+        } else {
+            chain.doFilter(req, res);
         }
-
-        chain.doFilter(request, response);
     }
 
     @Override
-    public void init(FilterConfig filterConfig) throws ServletException {}
+    public void init(FilterConfig filterConfig) throws ServletException {
+    }
 
     @Override
-    public void destroy() {}
+    public void destroy() {
+    }
 
 }

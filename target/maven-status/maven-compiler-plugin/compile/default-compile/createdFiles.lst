@@ -128,6 +128,7 @@ au/com/manlyit/fitnesscrm/stats/webservices/NewCustomer.class
 au/com/manlyit/fitnesscrm/stats/webservices/EziResponseOfNewCustomerXcXH3LiW.class
 au/com/manlyit/fitnesscrm/stats/beans/ParticipantsFacade.class
 au/com/manlyit/fitnesscrm/stats/classes/NotesController$NotesControllerConverter.class
+au/com/manlyit/fitnesscrm/stats/classes/util/SecurityServlet.class
 au/com/manlyit/fitnesscrm/stats/webservices/DeletePaymentResponse.class
 au/com/manlyit/fitnesscrm/stats/classes/GroupsController$GroupsControllerConverter.class
 au/com/manlyit/fitnesscrm/stats/classes/util/NoSpecialCharStringValidator.class
@@ -175,6 +176,7 @@ au/com/manlyit/fitnesscrm/stats/classes/StatTypesController$StatTypesControllerC
 au/com/manlyit/fitnesscrm/stats/classes/util/SessionTimeoutFilter.class
 au/com/manlyit/fitnesscrm/stats/classes/GroupsController$1.class
 au/com/manlyit/fitnesscrm/stats/webservices/EziResponseOfPaymentDetailTHgMB7OL.class
+au/com/manlyit/fitnesscrm/stats/classes/util/FacebookLoginBean.class
 au/com/manlyit/fitnesscrm/stats/classes/StatsTakenController$1.class
 au/com/manlyit/fitnesscrm/stats/classes/ActivationController$ActivationControllerConverter.class
 au/com/manlyit/fitnesscrm/stats/beans/QrtzCronTriggersFacade.class

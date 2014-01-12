@@ -38,13 +38,21 @@ public class CustomersFacade extends AbstractFacade<Customers> {
         return em;
     }
 
+    public void editAndFlush(Customers entity) {
+        getEntityManager().merge(entity);
+        getEntityManager().flush();
+        String message = "Entity Edited: " + entity.toString();
+        Logger.getLogger(getClass().getName()).log(Level.INFO, message);
+
+    }
+
     public CustomersFacade() {
         super(Customers.class);
     }
 
     public Customers findCustomerByUsername(String username) {
 
-       // CriteriaBuilder cb = em.getCriteriaBuilder();
+        // CriteriaBuilder cb = em.getCriteriaBuilder();
         //CriteriaQuery<Customers> cq = cb.createQuery(Customers.class);
         // Root<Customers> rt2 = cq.from(Customers.class);
         // EntityType<Customers> customers_Et = rt2.getModel();
@@ -63,24 +71,59 @@ public class CustomersFacade extends AbstractFacade<Customers> {
             logger.log(Level.INFO, "Customer not found:" + username, e);
         }
         return cm;
-       // Query q = em.createNativeQuery("SELECT * FROM customers where username = '" + username + "'", Customers.class);
+        // Query q = em.createNativeQuery("SELECT * FROM customers where username = '" + username + "'", Customers.class);
         // return (Customers) q.getSingleResult();
     }
- public List<Customers> findAllActiveCustomers(boolean sortAsc) {
+
+    public List<Customers> findCustomersByEmail(String email) {
+        List retList = null;
+        try {
+            CriteriaBuilder cb = em.getCriteriaBuilder();
+            CriteriaQuery<Customers> cq = cb.createQuery(Customers.class);
+            Root<Customers> rt = cq.from(Customers.class);
+
+            Expression<String> custEmail = rt.get("emailAddress");
+            cq.where(cb.equal(custEmail, email));
+
+            Query q = em.createQuery(cq);
+            retList = q.getResultList();
+        } catch (Exception e) {
+            JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
+        }
+        return retList;
+    }
+
+    public Customers findCustomerByFacebookId(String fbId) {
+        Customers cm = null;
+        try {
+            CriteriaBuilder cb = em.getCriteriaBuilder();
+            CriteriaQuery<Customers> cq = cb.createQuery(Customers.class);
+            Root<Customers> rt = cq.from(Customers.class);
+
+            Expression<String> facebookId = rt.get("facebookId");
+            cq.where(cb.equal(facebookId, fbId));
+
+            Query q = em.createQuery(cq);
+            cm = (Customers) q.getSingleResult();
+        } catch (Exception e) {
+            logger.log(Level.INFO, "Customer not found or duplicate facebookId  found :" + fbId, e);
+        }
+        return cm;
+    }
+
+    public List<Customers> findAllActiveCustomers(boolean sortAsc) {
         List retList = null;
         String state = "ACTIVE";//Active
         try {
             CriteriaBuilder cb = em.getCriteriaBuilder();
             CriteriaQuery<Customers> cq = cb.createQuery(Customers.class);
             Root<Customers> rt = cq.from(Customers.class);
-            
+
             Join<Customers, CustomerState> jn = rt.join("active");// join customers.active to customer_state.id
             Expression<String> custState = jn.get("customerState");
-            cq.where(cb.equal(custState,state ));
+            cq.where(cb.equal(custState, state));
             cq.select(rt);
-            
-            
-            
+
             Expression<String> express = rt.get("firstname");
             if (sortAsc) {
                 cq.orderBy(cb.asc(express));
@@ -94,6 +137,7 @@ public class CustomersFacade extends AbstractFacade<Customers> {
         }
         return retList;
     }
+
     public List<Customers> findAll(boolean sortAsc) {
         List retList = null;
         try {

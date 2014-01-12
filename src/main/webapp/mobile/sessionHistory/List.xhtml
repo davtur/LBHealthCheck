@@ -32,7 +32,7 @@
                             <f:convertDateTime pattern="dd/MM/yyyy" />
                         </h:outputText>
                     </p:column>
-                     <p:column sortBy="#{item.sessionTypes.name}"  filterBy="#{item.sessionTypesId.name}"  headerText="#{configMapController.getKey('ListSessionHistoryTitle_sessionType')}" >
+                     <p:column sortBy="#{item.sessionTypesId.name}"  filterBy="#{item.sessionTypesId.name}"  headerText="#{configMapController.getKey('ListSessionHistoryTitle_sessionType')}" >
                         <f:facet name="header">
                             <h:outputText value="#{configMapController.getKey('ListSessionHistoryTitle_sessionType')}" />
                         </f:facet>

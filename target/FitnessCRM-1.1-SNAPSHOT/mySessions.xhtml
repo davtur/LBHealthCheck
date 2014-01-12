@@ -13,7 +13,7 @@
         <ui:define name="body">
             <h:form id="listSessionHistoryForm1">
                 <p:panel header="My Sessions Chart (The number of times you have trained each week.)">
-                    <p:barChart  styleClass="chartClass" value="#{mySessionsChart1.model}" xaxisLabel="Week Ending On Date"  style="statsFlashChartStyle" />
+                    <p:barChart  styleClass="chartClass" value="#{mySessionsChart1.model}" xaxisLabel="Week Ending On Date" xaxisAngle="90"  style="statsFlashChartStyle" />
                 </p:panel>
 
                 <h:outputText escape="false" value="#{configMapController.getKey('ListSessionHistoryEmpty')}" rendered="#{sessionHistoryController.customerItems.rowCount == 0}"/>

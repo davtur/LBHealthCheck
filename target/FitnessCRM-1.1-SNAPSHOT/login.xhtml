@@ -22,16 +22,22 @@
                 <input name="j_password" size="15"  type="password"/>
                 <input  type="submit" value="Login"/>
             </FORM>
+            <h1>Facebook Login Page</h1>
+            <h:form id="loginForm">
+                <p:button value="Facebook Connect" href="#{facebookLoginBean.facebookUrlAuth}" />
+                <br/><br/>
+                <h:outputText value="#{facebookLoginBean.userFromSession}"></h:outputText>
+            </h:form>
             <script type="text/javascript">
 <!--
-function passReset(usernameObj){    
-    redirectURL = "http://localhost:26153/FitnessStats/faces/activation.xhtml?key=" + usernameObj;
-    window.location = redirectURL;
-}
+                function passReset(usernameObj) {
+                    redirectURL = "http://localhost:26153/FitnessStats/faces/activation.xhtml?key=" + usernameObj;
+                    window.location = redirectURL;
+                }
 //-->
             </script>
             <input type="button" value="Reset Password2" OnClick="passReset(j_username);"></input>
-  
+
 
         </ui:define>
     </ui:composition>

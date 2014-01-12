@@ -57,6 +57,12 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Customers.findByNewsletter", query = "SELECT c FROM Customers c WHERE c.newsletter = :newsletter"),
     @NamedQuery(name = "Customers.findByReferredby", query = "SELECT c FROM Customers c WHERE c.referredby = :referredby")})
 public class Customers implements Serializable {
+    @Size(max = 45)
+    @Column(name = "facebookId")
+    private String facebookId;
+    @Size(max = 45)
+    @Column(name = "googleId")
+    private String googleId;
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -487,6 +493,22 @@ public class Customers implements Serializable {
     @Override
     public String toString() {
         return  firstname +" "+ lastname;
+    }
+
+    public String getFacebookId() {
+        return facebookId;
+    }
+
+    public void setFacebookId(String facebookId) {
+        this.facebookId = facebookId;
+    }
+
+    public String getGoogleId() {
+        return googleId;
+    }
+
+    public void setGoogleId(String googleId) {
+        this.googleId = googleId;
     }
     
 }

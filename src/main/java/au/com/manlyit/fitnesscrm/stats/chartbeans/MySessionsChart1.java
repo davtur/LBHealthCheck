@@ -24,6 +24,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import javax.el.ELException;
 
 @Named("mySessionsChart1")
 @RequestScoped
@@ -52,7 +53,7 @@ public class MySessionsChart1 implements Serializable {
             CustomersController custController = (CustomersController) context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
             loggedInUser = custController.getSelected();
 
-        } catch (Exception e) {
+        } catch (ELException e) {
             JsfUtil.addErrorMessage(e, "My Sessions Chart Critical Error", "Couldn't find the customer in the database.");
         }
         LineChartSeries groupSessionSeries = new LineChartSeries();
@@ -80,6 +81,7 @@ public class MySessionsChart1 implements Serializable {
         model = new CartesianChartModel();
         model.addSeries(groupSessionSeries);
         model.addSeries(ptSessionSeries);
+        
     }
 
     public CartesianChartModel getModel() {
