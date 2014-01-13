@@ -15,13 +15,25 @@
 
             <h1 >Pure Fitness </h1>
             <h3 >Login Form</h3>
-            <FORM action="j_security_check" method="POST">
-                <h4> Name </h4>
-                <input name="j_username" size="15"  type="text"/>
-                <h4> Password </h4>
-                <input name="j_password" size="15"  type="password"/>
-                <input  type="submit" value="Login"/>
-            </FORM>
+            <h:form>
+                <p:outputLabel for="usernameInput">
+                    Username
+                </p:outputLabel>
+                <p:inputText id="usernameInput" value="#{loginBean.username}" 
+                             required="true" />
+                <br />
+                <p:outputLabel for="passwordInput">
+                    Password
+                </p:outputLabel>
+                <p:password id="passwordInput" value="#{loginBean.password}" 
+                            required="true" />
+                <br />
+                <p:commandButton value="Submit" 
+                                 action="#{loginBean.login}" /> 
+                <p:commandButton value="Reset Password" 
+                                 action="#{loginBean.resetPassword}" />
+            </h:form>
+
             <h1>Facebook Login Page</h1>
             <h:form id="loginForm">
                 <p:button value="Facebook Connect" href="#{facebookLoginBean.facebookUrlAuth}" />
@@ -29,8 +41,8 @@
                 <h:outputText value="#{facebookLoginBean.userFromSession}"></h:outputText>
             </h:form>
             <script type="text/javascript">
-<!--
-                function passReset(usernameObj) {
+                <!--
+            function passReset(usernameObj) {
                     redirectURL = "http://localhost:26153/FitnessStats/faces/activation.xhtml?key=" + usernameObj;
                     window.location = redirectURL;
                 }

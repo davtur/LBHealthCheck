@@ -37,9 +37,11 @@ public class SecurityServlet extends HttpServlet {
 
     private static final long serialVersionUID = 8071426090770097330L;
     private static final Logger logger = Logger.getLogger(SecurityServlet.class.getName());
-    private final StringEncrypter encrypter = new StringEncrypter("(lqKdh^Gr$2F^KJHG654)");
+    //private final StringEncrypter encrypter = new StringEncrypter("(lqKdh^Gr$2F^KJHG654)");
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.CustomersFacade ejbFacade;
+    @Inject
+    private au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade configMapFacade;
 
     public SecurityServlet() {
     }
@@ -104,7 +106,7 @@ public class SecurityServlet extends HttpServlet {
                 response.sendRedirect(request.getContextPath() + "/facebookError.html");
                 return;
             }
-            response.sendRedirect(request.getContextPath() + "/index.xhtml");
+            response.sendRedirect(request.getContextPath() + getValueFromKey("facebook.redirect.landingpage"));
         } else {
             logger.log(Level.WARNING, "CSRF protection validation");
         }
@@ -113,9 +115,9 @@ public class SecurityServlet extends HttpServlet {
     private String getFacebookAccessToken(String faceCode) {
         String token = null;
         if (faceCode != null && !"".equals(faceCode)) {
-            String appId = "247417342102284";
-            String redirectUrl = "http://localhost:8080/FitnessStats/index.sec";
-            String faceAppSecret = "33715d0844267d3ba11a24d44e90be80";
+            String appId = getValueFromKey("facebook.app.id");//"247417342102284";
+            String redirectUrl = getValueFromKey("facebook.redirect.url");//http://localhost:8080/FitnessStats/index.sec";
+            String faceAppSecret = getValueFromKey("facebook.app.secret");//"33715d0844267d3ba11a24d44e90be80";
             String newUrl = "https://graph.facebook.com/oauth/access_token?client_id="
                     + appId + "&redirect_uri=" + redirectUrl + "&client_secret="
                     + faceAppSecret + "&code=" + faceCode;
@@ -134,6 +136,11 @@ public class SecurityServlet extends HttpServlet {
             }
         }
         return token;
+    }
+    private String getValueFromKey(String key){
+        String val ;
+        val = configMapFacade.getConfig(key);
+        return val;
     }
 
     private Customers getUserMailAddressFromJsonResponse(String accessToken, HttpSession httpSession) {

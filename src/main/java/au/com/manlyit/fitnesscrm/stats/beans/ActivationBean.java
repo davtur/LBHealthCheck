@@ -8,6 +8,7 @@ import au.com.manlyit.fitnesscrm.stats.classes.CustomersController;
 import au.com.manlyit.fitnesscrm.stats.classes.PasswordService;
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.classes.util.SendHTMLEmailWithFileAttached;
+import au.com.manlyit.fitnesscrm.stats.classes.util.StringEncrypter;
 import au.com.manlyit.fitnesscrm.stats.db.Activation;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import java.io.IOException;
@@ -16,14 +17,15 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Random;
-import java.util.ResourceBundle;
 import javax.inject.Named;
 import javax.annotation.PostConstruct;
+import javax.el.ELException;
 import javax.inject.Inject;
 import javax.enterprise.context.RequestScoped;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
 /**
@@ -46,8 +48,7 @@ public class ActivationBean {
     private ConfigMapFacade configMapFacade;
     private boolean valid;
     private Customers current;
-    private static String token = "7777";
-    private static int MINUTES_VALID = 10;
+      private final StringEncrypter encrypter = new StringEncrypter("(lqKdh^Gr$2F^KJHG654)");
 
     @PostConstruct
     public void init() {
@@ -55,58 +56,66 @@ public class ActivationBean {
         // Get User based on activation key.
         if (getKey() != null) {
             String theKey = getKey();
-            if (theKey.matches("[0-9A-Z]*")) {//"[0-9A-Z]*"
+            String keyDecrypted = encrypter.decrypt(theKey); // decrypt nonce encrypted by login bean
+            String token = configMapFacade.getConfig("login.password.reset.token").trim();
+            if (keyDecrypted.matches("[0-9A-Z]*")) {//"[0-9A-Z]*"  - nonce 
                 try {
-                    if (getKey().indexOf(token) == 0) {
+                    
+                    
+                    if (keyDecrypted.indexOf(token) == 0) {
                         // we have a token , now check if it's valid
-                        String incomingNonce = getKey().substring(token.length());
-                        Activation act2 = null;
+                        String incomingNonce = keyDecrypted.substring(token.length());
+                        
+                        Activation act2 ;
                         try {
                             act2 = ejbActivationFacade.findToken(incomingNonce);
-                        } catch (Exception e2) {
-                            JsfUtil.addErrorMessage(e2, "Nonce does not exist. Possible hack attempt: " + getKey());
-                        }
-                        GregorianCalendar sendTime = new GregorianCalendar();
-                        GregorianCalendar now = new GregorianCalendar();
-                        sendTime.setTime(act2.getActTimestamp());
-                        sendTime.add(Calendar.MINUTE, MINUTES_VALID);
-                        if (now.compareTo(sendTime) < 0) {
+                            int minutesValid = Integer.parseInt(configMapFacade.getConfig("login.password.reset.minutes").trim());
+                            GregorianCalendar sendTime = new GregorianCalendar();
+                            GregorianCalendar now = new GregorianCalendar();
+                            sendTime.setTime(act2.getActTimestamp());
+                            sendTime.add(Calendar.MINUTE, minutesValid);
+                            if (now.compareTo(sendTime) < 0) {
                             // it is valid log them in
-                            //Authenticator 
-                            HttpServletRequest req = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
-                            Customers cst = act2.getCustomer();
-                            String user = cst.getUsername();
-                            //Reset Password and log them in
-                            String paswd = generateUniqueToken(10);
-                            //String paswd = "foooobar";
-                            String encryptedPass = PasswordService.getInstance().encrypt(paswd);
-                            cst.setPassword(encryptedPass);
-                            ejbCustomerFacade.edit(cst);
-                            req.login(user, paswd);
-                            //Redirect to the user details page
-                            FacesContext fc = FacesContext.getCurrentInstance();
-                            CustomersController custController = (CustomersController) fc.getApplication().evaluateExpressionGet(fc, "#{customersController}", CustomersController.class);
-                            custController.setSelected(cst);
+                                //Authenticator 
+                                HttpServletRequest req = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
+                                Customers cst = act2.getCustomer();
+                                String user = cst.getUsername();
+                                //Reset Password and log them in
+                                String paswd = generateUniqueToken(10);
+                                //String paswd = "foooobar";
+                                String encryptedPass = PasswordService.getInstance().encrypt(paswd);
+                                cst.setPassword(encryptedPass);
+                                ejbCustomerFacade.edit(cst);
+                                req.login(user, paswd);
+                                //Redirect to the user details page
+                                FacesContext fc = FacesContext.getCurrentInstance();
+                                CustomersController custController = (CustomersController) fc.getApplication().evaluateExpressionGet(fc, "#{customersController}", CustomersController.class);
+                                custController.setSelected(cst);
 
-                            ExternalContext ec = fc.getExternalContext();
+                                ExternalContext ec = fc.getExternalContext();
 
-                            try {
-                                ec.redirect("myDetails.xhtml");
-                                valid = true;
-                            } catch (IOException e) {
-                                JsfUtil.addErrorMessage(e, "Redirect to MyDetails failed");
+                                try {
+                                    ec.redirect("myDetails.xhtml");
+                                    valid = true;
+                                } catch (IOException e) {
+                                    JsfUtil.addErrorMessage(e, "Redirect to MyDetails failed");
+
+                                }
 
                             }
-
+                        } catch (ServletException | ELException e2) {
+                            JsfUtil.addErrorMessage(e2, "Nonce does not exist. Possible hack attempt: " + getKey());
                         }
                     }
 
-                } catch (Exception e) {
-                    JsfUtil.addErrorMessage(e, "Error processing password reset token ");
+                } catch (NumberFormatException e) {
+                    JsfUtil.addErrorMessage(e, "Error processing password reset token. login.password.reset.minutes in configmap may be null or non numeric. ");
 
                 }
 
-            } else {
+            } // moved to LoginBean . this is only if we have to use plain html to reset password
+            /*else {
+                theKey = getKey();
                 if (theKey.matches("^[a-zA-Z][\\w\\.-]*[a-zA-Z0-9]")) {// "^[a-zA-Z][\\w\\.-]*[a-zA-Z0-9]" regex for username
                     current = ejbFacade.findCustomerByUsername(getKey());
                     //valid user that wants the password reset
@@ -131,7 +140,7 @@ public class ActivationBean {
                 } else {
                     JsfUtil.addErrorMessage("Key is non-alphanumeric. Possible hack attempt: " + getKey());
                 }
-            }
+            }*/
 
             // Delete activation key from database.
             // Login user.

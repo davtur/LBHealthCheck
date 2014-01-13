@@ -251,6 +251,7 @@ au/com/manlyit/fitnesscrm/stats/webservices/ClearSchedule.class
 au/com/manlyit/fitnesscrm/stats/beans/JFreeChartWebMonBean.class
 au/com/manlyit/fitnesscrm/stats/beans/QrtzJobDetailsFacade.class
 au/com/manlyit/fitnesscrm/stats/beans/StatTypesFacade.class
+au/com/manlyit/fitnesscrm/stats/beans/LoginBean.class
 au/com/manlyit/fitnesscrm/stats/webservices/DeletePayment.class
 au/com/manlyit/fitnesscrm/stats/jobs/CallableExecutorWithTimeoutJob.class
 au/com/manlyit/fitnesscrm/stats/db/WebsiteMonitor.class
