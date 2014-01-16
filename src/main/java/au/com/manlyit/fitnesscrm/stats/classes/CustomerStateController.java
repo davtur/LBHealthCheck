@@ -278,7 +278,11 @@ public class CustomerStateController implements Serializable {
     public SelectItem[] getItemsAvailableSelectOne() {
         return JsfUtil.getSelectItems(ejbFacade.findAll(), true);
     }
-
+    
+    public List<CustomerState> getItemsAvailableAsObjects(){
+        return ejbFacade.findAll();
+    }
+    
     public void onEdit(RowEditEvent event) {
         CustomerState cm = (CustomerState) event.getObject();
         getFacade().edit(cm);

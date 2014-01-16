@@ -5,8 +5,10 @@ import au.com.manlyit.fitnesscrm.stats.db.DemographicTypes;
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PaginationHelper;
 import au.com.manlyit.fitnesscrm.stats.beans.DemographicTypesFacade;
+import au.com.manlyit.fitnesscrm.stats.db.CustomerState;
 
 import java.io.Serializable;
+import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.enterprise.context.SessionScoped;
@@ -191,6 +193,10 @@ public class DemographicTypesController implements Serializable {
 
     public SelectItem[] getItemsAvailableSelectOne() {
         return JsfUtil.getSelectItems(ejbFacade.findAll(), true);
+    }
+
+    public List<DemographicTypes> getItemsAvailableAsObjects() {
+        return ejbFacade.findAll();
     }
 
     @FacesConverter(forClass = DemographicTypes.class)

@@ -4,6 +4,7 @@ import au.com.manlyit.fitnesscrm.stats.db.Plan;
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PaginationHelper;
 import au.com.manlyit.fitnesscrm.stats.beans.PlanFacade;
+import au.com.manlyit.fitnesscrm.stats.db.CustomerState;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -278,7 +279,9 @@ public class PlanController implements Serializable {
     public SelectItem[] getItemsAvailableSelectOne() {
         return JsfUtil.getSelectItems(ejbFacade.findAll(), true);
     }
-
+public List<Plan> getItemsAvailableAsObjects(){
+        return ejbFacade.findAll();
+    }
     public void onEdit(RowEditEvent event) {
         Plan cm = (Plan) event.getObject();
         getFacade().edit(cm);

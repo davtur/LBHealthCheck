@@ -37,13 +37,13 @@
                             <p:panel>
                                 <h:panelGrid columns="1">
                                     <h:outputLabel value="#{configMapController.getKey('CreateSessionHistoryLabel_sessionType')}" for="sessionType" />
-                                    
+
                                     <p:selectOneMenu id="sessionType" value="#{sessionHistoryController.selected.sessionTypesId}" converter="#{sessTypesConverter}" label="#{configMapController.getKey('CreateSessionHistoryTitle_sessionType')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionHistoryRequiredMessage_sessionType')}">
                                         <f:selectItems value="#{sessionTypesController.itemsAvailableSelectOne}" var="sessionType" itemLabel="#{sessionType.name}" itemValue="#{sessionType}"/>
                                     </p:selectOneMenu>
-                                   
+
                                     <h:outputLabel value="#{configMapController.getKey('CreateSessionHistoryLabel_trainer')}" for="trainer" />
-                                   
+
                                     <p:selectOneMenu id="trainer" value="#{sessionHistoryController.selected.trainer}" converter="#{custConverter}" label="#{configMapController.getKey('CreateSessionHistoryTitle_trainer')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionHistoryRequiredMessage_trainer')}">
                                         <f:selectItems value="#{customersController.getCustomersByGroupObject('TRAINER',true)}" var="cust" itemLabel="#{cust.firstname} #{cust.lastname}" itemValue="#{cust}"/>
                                     </p:selectOneMenu>
@@ -55,34 +55,59 @@
                         </h:panelGrid>
                         <p:panel  header="#{configMapController.getKey('CreateSessionHistoryLabel_picker')}" >
 
-                            <p:selectManyMenu id="scroll" style="width:250px;height:600px" value="#{sessionHistoryController.attendingCustomers}" converter="customerConverter"  showCheckbox="true" widgetVar="smanymeny">  
-                                <f:selectItems value="#{sessionHistoryController.activeCustomers}" var="cust" itemLabel="#{cust.firstname} #{cust.lastname}" itemValue="#{cust}" />            
-                            </p:selectManyMenu>
+                         <!--   <p:selectCheckboxMenu id="scroll" style="width:250px;height:600px" value="#{sessionHistoryController.attendingCustomers}" label="Participants"  converter="customerConverter"  filterFunction="startsWith" filter="true" widgetVar="smanymeny">  
+                                <f:selectItems value="#{sessionHistoryController.activeCustomers}" var="cust"  itemLabel="#{cust.firstname} #{cust.lastname}" itemValue="#{cust}" />            
+                            </p:selectCheckboxMenu>-->
 
-                       <!--   
-                         <p:selectManyMenu id="scroll" value="#{sessionHistoryController.attendingCustomers}" converter="#{custConverter}" style="width:250px;height:600px" var="customer" showCheckbox="true">  
-                       <p:pickList id="picker"  value="#{sessionHistoryController.participants}"
-                                        var="cust"
+                            <p:dataTable id="tableList2" rowKey="#{item.id}" rowSelectMode="add" selection="#{sessionHistoryController.participantsArray}" value="#{customersController.items}" filteredValue="#{customersController.filteredItems}"  widgetVar="customersControllerTable" var="item"  paginator="true" rows="15"  paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  rowsPerPageTemplate="5,10,15,20,25,50,100" >
+                                <f:facet name="header">
+                                    <p:outputPanel>
+                                        <h:outputText value="Search all fields:" />
+                                        <h:inputText id="globalFilter" onkeyup="customersControllerTable.filter()" />
+                                    </p:outputPanel>
+                                </f:facet>
+                                <p:column selectionMode="multiple" />
+                                <p:column sortBy="#{item.firstname}" filterBy="#{item.firstname}" headerText="#{configMapController.getKey('ListCustomersTitle_firstname')}"   >
+                                    <f:facet name="header">
+                                        <h:outputText value="#{configMapController.getKey('ListCustomersTitle_firstname')}"/>
+                                    </f:facet>
+                                    <h:outputText value="#{item.firstname}"/>
 
-                                        itemLabel="#{cust.firstname} #{cust.lastname}"
-                                        itemValue="#{cust}" converter="#{custConverter}">
-                                <f:facet name="sourceCaption">Did not attend</f:facet>
-                                <f:facet name="targetCaption">Attended Session</f:facet>
-                            </p:pickList>
+                                </p:column>
+                                <p:column sortBy="#{item.lastname}" filterBy="#{item.lastname}" headerText="#{configMapController.getKey('ListCustomersTitle_lastname')}"   >
+                                    <f:facet name="header">
+                                        <h:outputText value="#{configMapController.getKey('ListCustomersTitle_lastname')}" />
+                                    </f:facet>
+                                    <h:outputText value="#{item.lastname}"/>
 
-                            <p:dialog  modal="true" showEffect="fade" hideEffect="fade" widgetVar="cityDialog">
-                                <h:panelGrid  id="displayCities" columns="2">
-                                    <h:outputText value="Source: " style="font-weight:bold"/>
-                                    <ui:repeat value="#{sessionHistoryController.participants.source}" var="item">
-                                        <h:outputText value="#{item}" style="margin-right:5px" />
-                                    </ui:repeat>
+                                </p:column>
+                            </p:dataTable>
 
-                                    <h:outputText value="Target: " style="font-weight:bold"/>
-                                    <ui:repeat  value="#{sessionHistoryController.participants.target}" var="item">
-                                        <h:outputText value="#{item}" style="margin-right:5px" />
-                                    </ui:repeat>
-                                </h:panelGrid>
-                            </p:dialog>-->
+
+                            <!--   
+                              <p:selectManyMenu id="scroll" value="#{sessionHistoryController.attendingCustomers}" converter="#{custConverter}" style="width:250px;height:600px" var="customer" showCheckbox="true">  
+                            <p:pickList id="picker"  value="#{sessionHistoryController.participants}"
+                                             var="cust"
+     
+                                             itemLabel="#{cust.firstname} #{cust.lastname}"
+                                             itemValue="#{cust}" converter="#{custConverter}">
+                                     <f:facet name="sourceCaption">Did not attend</f:facet>
+                                     <f:facet name="targetCaption">Attended Session</f:facet>
+                                 </p:pickList>
+     
+                                 <p:dialog  modal="true" showEffect="fade" hideEffect="fade" widgetVar="cityDialog">
+                                     <h:panelGrid  id="displayCities" columns="2">
+                                         <h:outputText value="Source: " style="font-weight:bold"/>
+                                         <ui:repeat value="#{sessionHistoryController.participants.source}" var="item">
+                                             <h:outputText value="#{item}" style="margin-right:5px" />
+                                         </ui:repeat>
+     
+                                         <h:outputText value="Target: " style="font-weight:bold"/>
+                                         <ui:repeat  value="#{sessionHistoryController.participants.target}" var="item">
+                                             <h:outputText value="#{item}" style="margin-right:5px" />
+                                         </ui:repeat>
+                                     </h:panelGrid>
+                                 </p:dialog>-->
                         </p:panel>
 
                     </h:panelGrid>

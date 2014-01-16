@@ -12,6 +12,7 @@ import java.awt.event.ActionEvent;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -40,6 +41,9 @@ public class SessionHistoryController implements Serializable {
 
     private DataModel items = null;
     private DataModel customerItems = null;
+    
+    private Customers[] participantsArray;
+
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.SessionHistoryFacade ejbFacade;
     @Inject
@@ -182,7 +186,8 @@ public class SessionHistoryController implements Serializable {
     }
 
     private void updateCurrentParticipants() {
-        List<Customers> targets = participants.getTarget();
+       // List<Customers> targets = participants.getTarget(); for the pick lIst
+         List<Customers> targets = Arrays.asList(participantsArray);// for the datatable
         List<Participants> parts = new ArrayList<>();
 
         for (Customers cust : targets) {
@@ -410,6 +415,20 @@ public class SessionHistoryController implements Serializable {
      */
     public void setAttendingCustomers(List<Customers> attendingCustomers) {
         this.attendingCustomers = attendingCustomers;
+    }
+
+    /**
+     * @return the participantsArray
+     */
+    public Customers[] getParticipantsArray() {
+        return participantsArray;
+    }
+
+    /**
+     * @param participantsArray the participantsArray to set
+     */
+    public void setParticipantsArray(Customers[] participantsArray) {
+        this.participantsArray = participantsArray;
     }
 
     @FacesConverter(forClass = SessionHistory.class)

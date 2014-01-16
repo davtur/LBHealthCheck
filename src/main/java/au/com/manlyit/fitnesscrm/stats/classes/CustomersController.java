@@ -42,7 +42,7 @@ import org.primefaces.event.SelectEvent;
 @Named("customersController")
 @SessionScoped
 public class CustomersController implements Serializable {
-    
+
     private Customers current;
     private Customers selectedForDeletion;
     private DataModel items = null;
@@ -63,13 +63,13 @@ public class CustomersController implements Serializable {
     private Customers impersonate;
     private boolean impersonating = false;
     private static final Logger logger = Logger.getLogger(CustomersController.class.getName());
-    
+
     public CustomersController() {
     }
-    
+
     @PostConstruct
     private void getLoggedInCustomer() {
-        
+
         String name = "Unknown";
         FacesContext facesContext = FacesContext.getCurrentInstance();
         try {
@@ -91,21 +91,22 @@ public class CustomersController implements Serializable {
 //resp.setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY);
 //resp.setHeader("Location", "/AppName/site/ie/home.jsp");
     }
-    
+
     public static boolean isUserInRole(String roleName) {
         boolean inRole = false;
         inRole = FacesContext.getCurrentInstance().getExternalContext().isUserInRole(roleName);
         return inRole;
     }
     
+
     public void setSelected(Customers cust) {
         if (cust != null) {
             current = cust;
             selectedItemIndex = -1;
+            checkPass = current.getPassword();
         }
-        
     }
-    
+
     public Customers getSelected() {
         if (current == null) {
             String message = "The Customer Object is Null. Setting it to the ID of the logged in user";
@@ -115,13 +116,14 @@ public class CustomersController implements Serializable {
         }
         return current;
     }
-    
+
     private Customers setCusomerDefaults(Customers current) {
         current.setCountryId(61);
         current.setCity("Sydney");
         current.setAddrState("NSW");
         current.setSuburb("Manly");
         current.setPostcode("2095");
+        current.setReferredby(2);
 
         //for debug
         current.setUsername("firstname.lastname");
@@ -129,26 +131,28 @@ public class CustomersController implements Serializable {
         current.setLastname("Lastname");
         current.setPassword("MyStr0ngP@ssw0rd");
         current.setEmailAddress("myname@myemail.com.au");
-        
+        current.setFax("0212345678");
+        current.setTelephone("0212345678");
+
         GregorianCalendar gc = new GregorianCalendar();
         gc.add(Calendar.YEAR, -30);
         current.setDob(gc.getTime());
         return current;
     }
-    
+
     private CustomersFacade getFacade() {
         return ejbFacade;
     }
-    
+
     public PaginationHelper getPagination() {
         if (pagination == null) {
             pagination = new PaginationHelper(1000000) {
-                
+
                 @Override
                 public int getItemsCount() {
                     return getFacade().count();
                 }
-                
+
                 @Override
                 public DataModel createPageDataModel() {
                     return new ListDataModel(getFacade().findAll());
@@ -185,7 +189,7 @@ public class CustomersController implements Serializable {
     public void setMultiSelected(Customers[] multiSelected) {
         this.multiSelected = multiSelected;
     }
-    
+
     public void impersonateUser(ActionEvent event) {
         String user = current.getUsername();
         current = impersonate;
@@ -194,24 +198,24 @@ public class CustomersController implements Serializable {
         JsfUtil.addSuccessMessage(configMapFacade.getConfig("ImpersonateCustomer") + current.getUsername());
         String message = "Impersonated User: " + current.getUsername() + " from  " + user;
         Logger.getLogger(getClass().getName()).log(Level.INFO, message);
-        
+
     }
-    
+
     private void recreateAllAffectedPageModels() {
         FacesContext context = FacesContext.getCurrentInstance();
         // recreate any datatables that have stale data after changing users
         String message = "Recreating data models for user : " + current.getUsername() + ". ";
         Logger.getLogger(getClass().getName()).log(Level.INFO, message);
-        
+
         SessionHistoryController shc = (SessionHistoryController) context.getApplication().evaluateExpressionGet(context, "#{sessionHistoryController}", SessionHistoryController.class);
         shc.recreateModel();
-        
+
     }
-    
+
     public void handleUserChange() {
         JsfUtil.addSuccessMessage("User Selected: " + impersonate);
     }
-    
+
     public void unimpersonateUser(ActionEvent event) {
         String user = current.getUsername();
         getLoggedInCustomer();
@@ -221,20 +225,20 @@ public class CustomersController implements Serializable {
         JsfUtil.addSuccessMessage(configMapFacade.getConfig("UnimpersonateCustomer") + current.getUsername());
         String message = "Unimpersonated User : " + user + " and changed back to " + current.getUsername();
         Logger.getLogger(getClass().getName()).log(Level.INFO, message);
-        
+
     }
-    
+
     public String prepareList() {
         recreateModel();
         return "List";
     }
-    
+
     public String prepareView() {
         // current = (Customers) getItems().getRowData();
         //selectedItemIndex = pagination.getPageFirstItem() + getItems().getRowIndex();
         return "View";
     }
-    
+
     public String prepareCreate() {
         current = setCusomerDefaults(new Customers());
         selectedItemIndex = -1;
@@ -244,14 +248,14 @@ public class CustomersController implements Serializable {
     public void prepareCreateAjax() {
         current = setCusomerDefaults(new Customers());
         selectedItemIndex = -1;
-        
+
     }
-    
+
     public String create() {
         try {
             current.setId(0);
             current.setPassword(PasswordService.getInstance().encrypt(current.getPassword()));
-            
+
             if (getFacade().find(current.getId()) == null) {
                 getFacade().create(current);
                 Groups grp = new Groups(0, "USER");
@@ -263,40 +267,70 @@ public class CustomersController implements Serializable {
                 JsfUtil.addErrorMessage("The user you are trying to create (" + current.getUsername() + ") already exists in the database.");
                 return null;
             }
-            
+
         } catch (Exception e) {
-            JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
-            return null;
+            String cause = e.getCause().getCause().getMessage();
+            if (cause.toLowerCase().indexOf("duplicate") != -1) {
+                JsfUtil.addErrorMessage("Error", configMapFacade.getConfig("DuplicateCustomerExists"));
+                return null;
+            } else {
+                JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
+                return null;
+            }
         }
     }
-    
+
     public void createDialogue(ActionEvent actionEvent) {
         
-        try {
-            current.setId(0);
-            getFacade().create(current);
-            recreateModel();
-            JsfUtil.addSuccessMessage(configMapFacade.getConfig("CustomersCreated"));
-        } catch (Exception e) {
-            JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
+        if (current.getId() == null || getFacade().find(current.getId()) == null) {
+            // does not exist so create a new customer
+            try {
+                current.setId(0);
+                getFacade().create(current);
+                Groups grp = new Groups(0, "USER");
+                grp.setUsername(current);
+                ejbGroupsFacade.create(grp);
+                JsfUtil.addSuccessMessage(configMapFacade.getConfig("CustomersCreated"));
+            } catch (Exception e) {
+                String cause = e.getCause().getCause().getMessage();
+                if (cause.toLowerCase().indexOf("duplicate") != -1) {
+                    JsfUtil.addErrorMessage("Error", configMapFacade.getConfig("DuplicateCustomerExists"));
+                } else {
+                    JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
+                }
+            }
+        } else {
+            // exists so update only
+            try {
+                getFacade().edit(current);
+                recreateModel();
+                JsfUtil.addSuccessMessage(configMapFacade.getConfig("ChangesSaved"));
+            } catch (Exception e) {
+                JsfUtil.addErrorMessage(e.getMessage(), configMapFacade.getConfig("PersistenceErrorOccured"));
+            }
+
         }
-        
+
     }
-    
+
+    public void editDialogue(ActionEvent actionEvent) {
+
+    }
+
     public String prepareEdit() {
         //current = (Customers) getItems().getRowData();
         //selectedItemIndex = pagination.getPageFirstItem() + getItems().getRowIndex();
         return "Edit";
     }
-    
+
     public void selectOneMenuValueChangeListener(ValueChangeEvent vce) {
         Object o = vce.getNewValue();
     }
-    
+
     public void selectManyMenuValueChangeListener(ValueChangeEvent vce) {
         Object o = vce.getNewValue();
     }
-    
+
     public String update() {
         try {
             getFacade().edit(current);
@@ -307,7 +341,7 @@ public class CustomersController implements Serializable {
             return null;
         }
     }
-    
+
     public String updatepass() {
         try {
             if (checkPass.length() >= 8) {
@@ -324,7 +358,7 @@ public class CustomersController implements Serializable {
             return null;
         }
     }
-    
+
     public String logout() {
         FacesContext fc = FacesContext.getCurrentInstance();
 
@@ -343,7 +377,7 @@ public class CustomersController implements Serializable {
             //LOG.error("Redirect to the login page failed");
             throw new FacesException(e);
         }
-        
+
         return null;
     }
     /*public String logout() {
@@ -359,7 +393,7 @@ public class CustomersController implements Serializable {
      return null;
      }
      }*/
-    
+
     public String destroy() {
         current = (Customers) getItems().getRowData();
         selectedItemIndex = pagination.getPageFirstItem() + getItems().getRowIndex();
@@ -367,7 +401,7 @@ public class CustomersController implements Serializable {
         recreateModel();
         return "List";
     }
-    
+
     public String destroyAndView() {
         performDestroy();
         recreateModel();
@@ -380,7 +414,7 @@ public class CustomersController implements Serializable {
             return "List";
         }
     }
-    
+
     private void performDestroy() {
         try {
             getFacade().remove(current);
@@ -389,7 +423,7 @@ public class CustomersController implements Serializable {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
         }
     }
-    
+
     private void updateCurrentItem() {
         int count = getFacade().count();
         if (selectedItemIndex >= count) {
@@ -404,70 +438,70 @@ public class CustomersController implements Serializable {
             current = getFacade().findRange(new int[]{selectedItemIndex, selectedItemIndex + 1}).get(0);
         }
     }
-    
+
     public DataModel getItems() {
         if (items == null) {
             items = getPagination().createPageDataModel();
         }
         return items;
     }
-    
+
     private void recreateModel() {
         items = null;
     }
-    
+
     public String next() {
         getPagination().nextPage();
         recreateModel();
         return "List";
     }
-    
+
     public void handleDateSelect(SelectEvent event) {
-        
+
         Date date = (Date) event.getObject();
 
         //Add facesmessage
     }
-    
+
     public String previous() {
         getPagination().previousPage();
         recreateModel();
         return "List";
     }
-    
+
     public SelectItem[] getItemsAvailableSelectMany() {
         return JsfUtil.getSelectItems(ejbFacade.findAll(true), false);
     }
-    
+
     public SelectItem[] getItemsAvailableSelectOne() {
         return JsfUtil.getSelectItemsCustomersById(ejbFacade.findAll(true), true);
     }
-    
+
     public SelectItem[] getItemsAvailableSelectOneObject() {
         return JsfUtil.getSelectItems(ejbFacade.findAll(true), true);
     }
-    
+
     public SelectItem[] getCustomersByGroupSelectOne(String group, boolean sortAsc) {
         return JsfUtil.getSelectItems(ejbFacade.findAllByGroup(group, sortAsc), true);
     }
-    
+
     public Collection<Customers> getCustomersByGroupObject(String group, boolean sortAsc) {
         return ejbFacade.findAllByGroup(group, sortAsc);
     }
-    
+
     public void onEdit(RowEditEvent event) {
         Customers cm = (Customers) event.getObject();
         getFacade().edit(cm);
         recreateModel();
         JsfUtil.addSuccessMessage("Row Edit Successful");
     }
-    
+
     public void onCancel(RowEditEvent event) {
         JsfUtil.addErrorMessage("Row Edit Cancelled");
     }
-    
+
     public void checkPassChange() {
-        
+
         String y = checkPass;
     }
 
@@ -491,7 +525,7 @@ public class CustomersController implements Serializable {
     public String getCheckPass2() {
         return checkPass2;
     }
-    
+
     public void firstNameListener(ValueChangeEvent vce) {
         Object o = vce.getNewValue();
         if (o.getClass().equals(String.class)) {
@@ -500,24 +534,24 @@ public class CustomersController implements Serializable {
             current.setUsername(updatedUsername.toLowerCase().replace(' ', '_'));
         }
     }
-    
+
     public void lastNameListener(ValueChangeEvent vce) {
         Object o = vce.getNewValue();
         if (o.getClass().equals(String.class)) {
             String newVAl = (String) o;
             String updatedUsername = current.getFirstname() + "." + newVAl;
-            
+
             current.setUsername(updatedUsername.toLowerCase().replace(' ', '_'));
         }
     }
-    
+
     public void dobChangeListener(SelectEvent event) {
         Date dob = (Date) event.getObject();
         current.setDob(dob);
         updateDemographic(dob);
-        
+
     }
-    
+
     public void genderChangeListener(ValueChangeEvent vce) {
         Object o = vce.getNewValue();
         if (o.getClass().equals(Character.class)) {
@@ -527,7 +561,7 @@ public class CustomersController implements Serializable {
             updateDemographic(dob);
         }
     }
-    
+
     private void updateDemographic(Date dob) {
         char gender = current.getGender();
         int demographic = 0;
@@ -564,7 +598,7 @@ public class CustomersController implements Serializable {
             if (demographicFound == false) {// dob > than 60 years
                 demographic = 5;
             }
-            
+
         } else {
             cal.add(Calendar.YEAR, -20);
             if (dobCal.compareTo(cal) > 0 && demographicFound == false) {// dob < than 20 years ago
@@ -653,15 +687,16 @@ public class CustomersController implements Serializable {
     public void setSelectedForDeletion(Customers selectedForDeletion) {
         this.selectedForDeletion = selectedForDeletion;
         current = selectedForDeletion;
-        
+
         performDestroy();
         recreateModel();
-        
+
     }
-    
+
     @FacesConverter(forClass = Customers.class)
     public static class CustomersControllerConverter implements Converter {
-        
+
+        @Override
         public Object getAsObject(FacesContext facesContext, UIComponent component, String value) {
             if (value == null || value.length() == 0) {
                 return null;
@@ -670,19 +705,20 @@ public class CustomersController implements Serializable {
                     getValue(facesContext.getELContext(), null, "customersController");
             return controller.ejbFacade.find(getKey(value));
         }
-        
+
         java.lang.Integer getKey(String value) {
             java.lang.Integer key;
             key = Integer.valueOf(value);
             return key;
         }
-        
+
         String getStringKey(java.lang.Integer value) {
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
             sb.append(value);
             return sb.toString();
         }
-        
+
+        @Override
         public String getAsString(FacesContext facesContext, UIComponent component, Object object) {
             if (object == null) {
                 return null;

@@ -4,6 +4,7 @@ import au.com.manlyit.fitnesscrm.stats.db.EmailFormat;
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PaginationHelper;
 import au.com.manlyit.fitnesscrm.stats.beans.EmailFormatFacade;
+import au.com.manlyit.fitnesscrm.stats.db.CustomerState;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -278,7 +279,9 @@ public class EmailFormatController implements Serializable {
     public SelectItem[] getItemsAvailableSelectOne() {
         return JsfUtil.getSelectItems(ejbFacade.findAll(), true);
     }
-
+public List<EmailFormat> getItemsAvailableAsObjects(){
+        return ejbFacade.findAll();
+    }
     public void onEdit(RowEditEvent event) {
         EmailFormat cm = (EmailFormat) event.getObject();
         getFacade().edit(cm);

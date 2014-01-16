@@ -12,6 +12,7 @@ au/com/manlyit/fitnesscrm/stats/db/Item.class
 au/com/manlyit/fitnesscrm/stats/classes/CustomerGoalsController$CustomerGoalsControllerConverter.class
 au/com/manlyit/fitnesscrm/stats/webservices/package-info.class
 au/com/manlyit/fitnesscrm/stats/classes/PlanController.class
+au/com/manlyit/fitnesscrm/stats/classes/util/DemographicTypesConverter.class
 au/com/manlyit/fitnesscrm/stats/classes/SessionTypesController.class
 au/com/manlyit/fitnesscrm/stats/webservices/ArrayOfPayment.class
 au/com/manlyit/fitnesscrm/stats/classes/ActivationController.class
@@ -45,6 +46,7 @@ au/com/manlyit/fitnesscrm/stats/classes/CustomerStateController.class
 au/com/manlyit/fitnesscrm/stats/beans/CustomerImagesFacade.class
 au/com/manlyit/fitnesscrm/stats/classes/QrtzJobDetailsController$1.class
 au/com/manlyit/fitnesscrm/stats/beans/ApplicationBean.class
+au/com/manlyit/fitnesscrm/stats/classes/util/EmailFormatConverter.class
 au/com/manlyit/fitnesscrm/stats/classes/SessionHistoryController$2.class
 au/com/manlyit/fitnesscrm/stats/chartbeans/FitnessTestsChart.class
 au/com/manlyit/fitnesscrm/stats/callable/renderMonitoringChartsCallable1.class
@@ -53,6 +55,7 @@ au/com/manlyit/fitnesscrm/stats/webservices/ChangeCustomerStatusResponse.class
 au/com/manlyit/fitnesscrm/stats/db/DemographicTypes.class
 au/com/manlyit/fitnesscrm/stats/webservices/ChangeScheduledAmountResponse.class
 au/com/manlyit/fitnesscrm/stats/db/InvoiceLine.class
+au/com/manlyit/fitnesscrm/stats/classes/util/CustomerStateConverter.class
 au/com/manlyit/fitnesscrm/stats/classes/MonitoringchartsController$1.class
 au/com/manlyit/fitnesscrm/stats/chartbeans/WeightChart.class
 au/com/manlyit/fitnesscrm/stats/chartbeans/websiteMonitorChart.class
@@ -222,6 +225,7 @@ au/com/manlyit/fitnesscrm/stats/webservices/ChangeScheduledAmount.class
 au/com/manlyit/fitnesscrm/stats/webservices/GetScheduledPaymentsResponse.class
 au/com/manlyit/fitnesscrm/stats/classes/util/GoogleTest.class
 au/com/manlyit/fitnesscrm/stats/classes/CustomerAuthController$1.class
+au/com/manlyit/fitnesscrm/stats/classes/util/PreferedContactConverter.class
 au/com/manlyit/fitnesscrm/stats/classes/MonitoringchartsController.class
 au/com/manlyit/fitnesscrm/stats/webservices/NonPCIService.class
 au/com/manlyit/fitnesscrm/stats/classes/CustomerAuthController$CustomerAuthControllerConverter.class
@@ -251,8 +255,10 @@ au/com/manlyit/fitnesscrm/stats/classes/util/CustomImageConverter.class
 au/com/manlyit/fitnesscrm/stats/webservices/ClearSchedule.class
 au/com/manlyit/fitnesscrm/stats/beans/JFreeChartWebMonBean.class
 au/com/manlyit/fitnesscrm/stats/beans/QrtzJobDetailsFacade.class
+au/com/manlyit/fitnesscrm/stats/classes/util/CustomerAuthConverter.class
 au/com/manlyit/fitnesscrm/stats/beans/StatTypesFacade.class
 au/com/manlyit/fitnesscrm/stats/beans/LoginBean.class
+au/com/manlyit/fitnesscrm/stats/classes/util/PlanConverter.class
 au/com/manlyit/fitnesscrm/stats/webservices/DeletePayment.class
 au/com/manlyit/fitnesscrm/stats/jobs/CallableExecutorWithTimeoutJob.class
 au/com/manlyit/fitnesscrm/stats/db/WebsiteMonitor.class

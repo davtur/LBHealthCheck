@@ -4,6 +4,7 @@ import au.com.manlyit.fitnesscrm.stats.db.CustomerAuth;
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PaginationHelper;
 import au.com.manlyit.fitnesscrm.stats.beans.CustomerAuthFacade;
+import au.com.manlyit.fitnesscrm.stats.db.CustomerState;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -277,6 +278,10 @@ public class CustomerAuthController implements Serializable {
 
     public SelectItem[] getItemsAvailableSelectOne() {
         return JsfUtil.getSelectItems(ejbFacade.findAll(), true);
+    }
+
+    public List<CustomerAuth> getItemsAvailableAsObjects() {
+        return ejbFacade.findAll();
     }
 
     public void onEdit(RowEditEvent event) {
