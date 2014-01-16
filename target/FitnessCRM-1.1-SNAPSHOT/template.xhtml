@@ -72,6 +72,10 @@
 
 
                                 <p:menubar id="mainmenubar1" autoDisplay="true">
+                                    <p:submenu  label="Dvveloper" rendered="#{customersController.isUserInRole('DEVELOPER')}"  id="devMenu1" >
+                                    
+                                    
+                                    </p:submenu>
 
                                     <p:submenu  label="Admin" rendered="#{customersController.isUserInRole('ADMIN')}"  id="adminMenu1" >
                                         <p:menuitem

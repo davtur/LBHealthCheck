@@ -5,6 +5,19 @@
   <security-role-mapping>
     <role-name>USER</role-name>
     <group-name>USER</group-name>
+    <group-name>DEVELOPER</group-name>
+    <group-name>TRAINER</group-name>
+    <group-name>ADMIN</group-name>
+  </security-role-mapping>
+  <security-role-mapping>
+    <role-name>TRAINER</role-name>
+    <group-name>TRAINER</group-name>
+    <group-name>ADMIN</group-name>
+    <group-name>DEVELOPER</group-name>
+  </security-role-mapping>
+  <security-role-mapping>
+    <role-name>DEVELOPER</role-name>
+    <group-name>DEVELOPER</group-name>
   </security-role-mapping>
   <class-loader delegate="true"/>
   <jsp-config>
@@ -15,6 +28,7 @@
   <security-role-mapping>
     <role-name>ADMIN</role-name>
     <group-name>ADMIN</group-name>
+    <group-name>DEVELOPER</group-name>
   </security-role-mapping>
 </sun-web-app>
 <!-- Glassfish config for server domain.xml file
