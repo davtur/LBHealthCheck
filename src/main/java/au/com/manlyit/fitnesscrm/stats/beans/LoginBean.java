@@ -6,14 +6,16 @@
 package au.com.manlyit.fitnesscrm.stats.beans;
 
 import static au.com.manlyit.fitnesscrm.stats.beans.ActivationBean.generateUniqueToken;
+import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.classes.util.SendHTMLEmailWithFileAttached;
 import au.com.manlyit.fitnesscrm.stats.classes.util.StringEncrypter;
 import au.com.manlyit.fitnesscrm.stats.db.Activation;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Random;
-import javax.ejb.Stateless;
+import javax.enterprise.context.RequestScoped;
 import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
@@ -25,15 +27,15 @@ import javax.servlet.http.HttpServletRequest;
  *
  * @author david
  */
-@Stateless
-@Named
-public class LoginBean {
+@Named("loginBean")
+@RequestScoped
+public class LoginBean implements Serializable {
 
     private String username;
     private String password;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade configMapFacade;
-   @Inject
+    @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.ActivationFacade ejbActivationFacade;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.CustomersFacade ejbCustomerFacade;
@@ -43,7 +45,7 @@ public class LoginBean {
         return this.username;
     }
 
-    public void setUserName(String username) {
+    public void setUsername(String username) {
         this.username = username;
     }
 
@@ -55,34 +57,39 @@ public class LoginBean {
         this.password = pass;
     }
 
-    public void resetPassword() {
-   /*     try {
-            String redirectUrl = configMapFacade.getConfig("login.password.reset.redirect.url") + this.username;
-            FacesContext.getCurrentInstance().getExternalContext().redirect(redirectUrl);
-        } catch (IOException ex) {
-            Logger.getLogger(LoginBean.class.getName()).log(Level.SEVERE, "Failed to redirect to password reset URL", ex);
-        }*/
-                    Customers  current = ejbCustomerFacade.findCustomerByUsername(username);
+    public String resetPassword() {
+        /*     try {
+         String redirectUrl = configMapFacade.getConfig("login.password.reset.redirect.url") + this.username;
+         FacesContext.getCurrentInstance().getExternalContext().redirect(redirectUrl);
+         } catch (IOException ex) {
+         Logger.getLogger(LoginBean.class.getName()).log(Level.SEVERE, "Failed to redirect to password reset URL", ex);
+         }*/
+        Customers current = ejbCustomerFacade.findCustomerByUsername(username);
                     //valid user that wants the password reset
-                    //generate link and send
-                    String uniquetoken = generateUniqueToken(10);
-                    SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmssSSS");
-                    String timestamp = sdf.format(new Date());
-                    String nonce = encrypter.encrypt(timestamp + uniquetoken);
-                    Activation act = new Activation(0, nonce, new Date());
-                    act.setCustomer(current);
-                    String urlLink = configMapFacade.getConfig("PasswordResetURL");
+        //generate link and send
+        if (current != null) {
+            String uniquetoken = generateUniqueToken(10);
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmssSSS");
+            String timestamp = sdf.format(new Date());
+            String nonce =  timestamp + uniquetoken;
+            Activation act = new Activation(0, nonce, new Date());
+            String nonceEncrypted = encrypter.encrypt(configMapFacade.getConfig("login.password.reset.token") + nonce);
+            act.setCustomer(current);
+            ejbActivationFacade.create(act);
+            String urlLink = configMapFacade.getConfig("login.password.reset.redirect.url") + nonceEncrypted;
 
-                    urlLink += configMapFacade.getConfig("login.password.reset.token") + nonce;
-                    ejbActivationFacade.create(act);
-                    //send email
-                    SendHTMLEmailWithFileAttached emailAgent = new SendHTMLEmailWithFileAttached();
-                    String htmlText = "<table width=\"600\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\">  <tr>    <td><img src=\"cid:logoimg_cid\"/></td>  </tr>  <tr>    <td height=\"220\"> <p>Pure Fitness Manly</p>      <p>Please click the following link to reset your password:</p><p>To reset your password click <a href=\"" + urlLink + "\">here</a>.</p></td>  </tr>  <tr>    <td height=\"50\" align=\"center\" valign=\"middle\" bgcolor=\"#CCCCCC\">www.purefitnessmanly.com.au | sarah@purefitnessmanly.com.au | +61433818067</td>  </tr></table>";
+            
+            //send email
+            SendHTMLEmailWithFileAttached emailAgent = new SendHTMLEmailWithFileAttached();
+            String htmlText = "<table width=\"600\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\">  <tr>    <td><img src=\"cid:logoimg_cid\"/></td>  </tr>  <tr>    <td height=\"220\"> <p>Pure Fitness Manly</p>      <p>Please click the following link to reset your password:</p><p>To reset your password click <a href=\"" + urlLink + "\">here</a>.</p></td>  </tr>  <tr>    <td height=\"50\" align=\"center\" valign=\"middle\" bgcolor=\"#CCCCCC\">www.purefitnessmanly.com.au | sarah@purefitnessmanly.com.au | +61433818067</td>  </tr></table>";
 
-                    //String host, String to, String ccAddress, String from, String emailSubject, String message, String theAttachedfileName, boolean debug
-                    emailAgent.send("david@manlyit.com.au", "", "noreply@purefitnessmanly.com.au", "Password Reset", htmlText, null, true);
-               
-   
+            //String host, String to, String ccAddress, String from, String emailSubject, String message, String theAttachedfileName, boolean debug
+            emailAgent.send("david@manlyit.com.au", "", "info@purefitnessmanly.com.au", "Password Reset", htmlText, null, true);
+            JsfUtil.addSuccessMessage(configMapFacade.getConfig("PasswordResetSuccessful"));
+        } else {
+            JsfUtil.addSuccessMessage(configMapFacade.getConfig("Please enter a valid username before resetting the password"));
+        }
+        return "/login";
 
     }
 
@@ -109,7 +116,8 @@ public class LoginBean {
             context.addMessage(null, new FacesMessage("Logout failed."));
         }
     }
-     public static synchronized String generateUniqueToken(Integer length) {
+
+    public static synchronized String generateUniqueToken(Integer length) {
 
         byte random[] = new byte[length];
         Random randomGenerator = new Random();

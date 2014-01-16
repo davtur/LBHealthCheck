@@ -38,8 +38,8 @@ public class SendHTMLEmailWithFileAttached {
     private static final String SMTP_HOST_NAME = "smtp.gmail.com";
     private static final String SMTP_PORT = "465";
     private static final String SSL_FACTORY = "javax.net.ssl.SSLSocketFactory";
-    private static final String SSL_USER = "noreply@purefitnessmanly.com.au";
-    private static final String SSL_PASS = "W*X6xh})F6)sKDwy";
+    private static final String SSL_USER = "info@purefitnessmanly.com.au";
+    private static final String SSL_PASS = "3Y!mXCPVv9";
 
     public  synchronized boolean send( String to, String ccAddress, String from, String emailSubject, String message, String theAttachedfileName, boolean debug) {
         boolean result = true;

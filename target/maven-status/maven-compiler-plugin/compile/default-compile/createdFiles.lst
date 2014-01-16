@@ -68,6 +68,7 @@ au/com/manlyit/fitnesscrm/stats/classes/InvoiceLineTypeController$1.class
 au/com/manlyit/fitnesscrm/stats/callable/HttpsLoginAndCheckWebpageCallable.class
 au/com/manlyit/fitnesscrm/stats/classes/StatController.class
 au/com/manlyit/fitnesscrm/stats/classes/PlanController$PlanControllerConverter.class
+au/com/manlyit/fitnesscrm/stats/classes/util/PasswordResetFilter.class
 au/com/manlyit/fitnesscrm/stats/classes/ContextListener1.class
 au/com/manlyit/fitnesscrm/stats/db/QrtzCronTriggers.class
 au/com/manlyit/fitnesscrm/stats/webservices/IsSystemLocked.class

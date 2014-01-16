@@ -54,7 +54,7 @@ public class ActivationBean {
     public void init() {
         //http://localhost:26153/FitnessStats/faces/activation.xhtml?key=david.turner
         // Get User based on activation key.
-        if (getKey() != null) {
+     /*   if (getKey() != null) {
             String theKey = getKey();
             String keyDecrypted = encrypter.decrypt(theKey); // decrypt nonce encrypted by login bean
             String token = configMapFacade.getConfig("login.password.reset.token").trim();
@@ -114,7 +114,7 @@ public class ActivationBean {
                 }
 
             } // moved to LoginBean . this is only if we have to use plain html to reset password
-            /*else {
+            else {
                 theKey = getKey();
                 if (theKey.matches("^[a-zA-Z][\\w\\.-]*[a-zA-Z0-9]")) {// "^[a-zA-Z][\\w\\.-]*[a-zA-Z0-9]" regex for username
                     current = ejbFacade.findCustomerByUsername(getKey());
@@ -140,13 +140,13 @@ public class ActivationBean {
                 } else {
                     JsfUtil.addErrorMessage("Key is non-alphanumeric. Possible hack attempt: " + getKey());
                 }
-            }*/
+            }
 
             // Delete activation key from database.
             // Login user.
             //if the key is a username then send an email with the link to reset the password
             //if the key is a valid nonce then log in the user rdirect to the myDetails  
-        }
+        }*/
 
         /**
          * Creates a new instance of ActivationBean
