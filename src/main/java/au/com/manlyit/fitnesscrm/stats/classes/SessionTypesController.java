@@ -150,9 +150,9 @@ public class SessionTypesController implements Serializable {
             current.setId(0);
             getFacade().create(current);
             recreateModel();
-            JsfUtil.addSuccessMessage(ResourceBundle.getBundle("/Bundle").getString("SessionTypesCreated"));
+            JsfUtil.addSuccessMessage(configMapFacade.getConfig("SessionTypesCreated"));
         } catch (Exception e) {
-            JsfUtil.addErrorMessage(e, ResourceBundle.getBundle("/Bundle").getString("PersistenceErrorOccured"));
+            JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
         }
 
     }

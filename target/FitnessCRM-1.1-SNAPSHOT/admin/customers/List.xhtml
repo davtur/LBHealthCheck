@@ -73,8 +73,8 @@
                             <f:selectItem itemValue="N" itemLabel="Dont Send" />
                         </h:selectOneMenu>
                         <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_referredby')}" for="referredby" />
-                        <h:selectOneMenu id="referredby" value="#{customersController.selected.referredby}" title="#{configMapController.getKey('EditCustomersTitle_referredby')}" >
-                            <f:selectItems value="#{customersController.itemsAvailableSelectOne}"/>
+                        <h:selectOneMenu id="referredby" value="#{customersController.selected.referredby}"    title="#{configMapController.getKey('EditCustomersTitle_referredby')}" >
+                            <f:selectItems value="#{customersController.itemsAvailableSelectOne}"  />
                         </h:selectOneMenu>
                         <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_active')}" for="active" />
                         <p:selectOneMenu id="active" valueChangeListener="#{customersController.selectOneMenuValueChangeListener}" value="#{customersController.selected.active}" label="#{configMapController.getKey('CreateCustomersTitle_active')}" >
@@ -108,7 +108,7 @@
                         </p:selectOneMenu>
                     </p:panelGrid>
                     <p:panel>
-                        <p:commandButton oncomplete="handleCreateRequest(xhr, status, args)" validateClient="true" actionListener="#{customersController.createDialogue}" value="#{configMapController.getKey('CreateCustomersSaveLink')}" update=":menuForm:growl"/>                
+                        <p:commandButton id="dilogueSave" oncomplete="handleCreateRequest(xhr, status, args)"  actionListener="#{customersController.createDialogue}" value="#{configMapController.getKey('CreateCustomersSaveLink')}" update=":menuForm:growl"/>                
                     </p:panel>
                 </p:confirmDialog>
             </h:form>
