@@ -108,7 +108,7 @@ public class PreferedContact implements Serializable {
 
     @Override
     public String toString() {
-        return "au.com.manlyit.fitnesscrm.stats.db.PreferedContact[ id=" + id + " ]";
+        return preferedContactMethod;
     }
     
 }

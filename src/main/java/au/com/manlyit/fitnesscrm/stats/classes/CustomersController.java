@@ -22,6 +22,7 @@ import javax.inject.Named;
 import java.util.List;
 import java.util.ResourceBundle;
 import javax.enterprise.context.SessionScoped;
+import javax.faces.application.FacesMessage;
 import javax.faces.component.UIComponent;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
@@ -34,6 +35,7 @@ import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import org.primefaces.context.RequestContext;
 import org.primefaces.event.RowEditEvent;
 import org.primefaces.event.SelectEvent;
 
@@ -229,6 +231,12 @@ public class CustomersController implements Serializable {
         selectedItemIndex = -1;
         return "Create";
     }
+     public void prepareCreateAjax() {
+        current = setCusomerDefaults(new Customers());
+        selectedItemIndex = -1;
+        
+    }
+
 
     public String create() {
         try {
@@ -254,6 +262,7 @@ public class CustomersController implements Serializable {
     }
 
      public void createDialogue(ActionEvent actionEvent) {
+      
         try {
             current.setId(0);
             getFacade().create(current);
