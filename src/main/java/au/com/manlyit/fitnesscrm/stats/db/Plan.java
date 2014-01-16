@@ -160,7 +160,7 @@ public class Plan implements Serializable {
 
     @Override
     public String toString() {
-        return "au.com.manlyit.fitnesscrm.stats.db.Plan[ id=" + id + " ]";
+        return planName;
     }
     
 }

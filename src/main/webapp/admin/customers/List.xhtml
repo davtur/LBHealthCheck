@@ -17,11 +17,15 @@
                 <p:confirmDialog id="confirmDialogCustomersCreate1" message="Add a Key/ Value Pair to the configuration table"  
                                  header="#{configMapController.getKey('CreateCustomersTitle')}" severity="info" widgetVar="CustomersCreateDialogue"> 
 
-                    <p:panelGrid columns="2">
-                        <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_id')}" for="id" />
+                    <p:panelGrid columns="4">
+                      <!--  <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_id')}" for="id" />
                         <p:inputText id="id" value="#{customersController.selected.id}" title="#{configMapController.getKey('CreateCustomersTitle_id')}" required="true" requiredMessage="#{configMapController.getKey('CreateCustomersRequiredMessage_id')}"/>
-                        <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_gender')}" for="gender" />
-                        <p:inputText id="gender" value="#{customersController.selected.gender}" title="#{configMapController.getKey('CreateCustomersTitle_gender')}" required="true" requiredMessage="#{configMapController.getKey('CreateCustomersRequiredMessage_gender')}"/>
+                     --><p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_gender')}" for="gender" />
+                        <h:selectOneMenu id="gender" value="#{customersController.selected.gender}" title="#{configMapController.getKey('EditCustomersTitle_gender')}" required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_gender')}">
+                            <f:selectItem itemValue="M" itemLabel="Male" />
+                            <f:selectItem itemValue="F" itemLabel="Female" />
+                            <p:ajax update=":formCustomersCreate1" event="change" />
+                        </h:selectOneMenu>
                         <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_firstname')}" for="firstname" />
                         <p:inputText id="firstname" value="#{customersController.selected.firstname}" title="#{configMapController.getKey('CreateCustomersTitle_firstname')}" required="true" requiredMessage="#{configMapController.getKey('CreateCustomersRequiredMessage_firstname')}"/>
                         <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_lastname')}" for="lastname" />
@@ -57,7 +61,9 @@
                         <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_newsletter')}" for="newsletter" />
                         <p:inputText id="newsletter" value="#{customersController.selected.newsletter}" title="#{configMapController.getKey('CreateCustomersTitle_newsletter')}" />
                         <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_referredby')}" for="referredby" />
-                        <p:inputText id="referredby" value="#{customersController.selected.referredby}" title="#{configMapController.getKey('CreateCustomersTitle_referredby')}" />
+                        <h:selectOneMenu id="referredby" value="#{customersController.selected.referredby}" title="#{configMapController.getKey('EditCustomersTitle_referredby')}" >
+                            <f:selectItems value="#{customersController.itemsAvailableSelectOne}"/>
+                        </h:selectOneMenu>
                         <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_active')}" for="active" />
                         <p:selectOneMenu id="active" valueChangeListener="#{customersController.selectOneMenuValueChangeListener}" value="#{customersController.selected.active}" label="#{configMapController.getKey('CreateCustomersTitle_active')}" >
                             <f:selectItems value="#{customerStateController.itemsAvailableSelectOne}"/>

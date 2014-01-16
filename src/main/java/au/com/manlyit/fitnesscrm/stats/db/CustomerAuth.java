@@ -108,7 +108,7 @@ public class CustomerAuth implements Serializable {
 
     @Override
     public String toString() {
-        return "au.com.manlyit.fitnesscrm.stats.db.CustomerAuth[ id=" + id + " ]";
+        return customerAuthType;
     }
     
 }

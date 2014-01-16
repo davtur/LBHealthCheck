@@ -72,9 +72,74 @@
 
 
                                 <p:menubar id="mainmenubar1" autoDisplay="true">
-                                    <p:submenu  label="Dvveloper" rendered="#{customersController.isUserInRole('DEVELOPER')}"  id="devMenu1" >
-                                    
-                                    
+                                    <p:submenu  label="Developer" rendered="#{customersController.isUserInRole('DEVELOPER')}"  id="devMenu1" >
+                                        <p:menuitem
+                                            id="currency"                              
+                                            action="/dev/currency/List.xhtml" ajax="false"  value="Currency"    >                       
+                                        </p:menuitem>
+                                        <p:menuitem
+                                            id="invoice"                              
+                                            action="/dev/invoice/List.xhtml" ajax="false"  value="Invoice"    >                       
+                                        </p:menuitem>
+                                        <p:menuitem
+                                            id="invoiceLine"                              
+                                            action="/dev/invoiceLine/List.xhtml" ajax="false"  value="InvoiceLine"    >                       
+                                        </p:menuitem>
+                                        <p:menuitem
+                                            id="invoiceLineType"                              
+                                            action="/dev/invoiceLineType/List.xhtml" ajax="false"  value="Invoice Line Type"    >                       
+                                        </p:menuitem>
+                                        <p:menuitem
+                                            id="item"                              
+                                            action="/dev/item/List.xhtml" ajax="false"  value="Item"    >                       
+                                        </p:menuitem>
+                                        <p:menuitem
+                                            id="demographic"                              
+                                            action="/dev/demographicTypes/List.xhtml"  ajax="false" value="Edit demographicTypes Items" >                         
+                                        </p:menuitem>
+                                        <p:menuitem
+                                            id="groups"                              
+                                            action="/dev/groups/List.xhtml"  ajax="false" value="Edit Groups Items"    >                       
+                                        </p:menuitem>
+
+                                        <p:menuitem
+                                            id="sessiontype"                              
+                                            action="/dev/sessionTypes/List.xhtml" ajax="false" value="Edit SessionTypes Items"    >                        
+                                        </p:menuitem>
+                                        <p:menuitem
+                                            id="stats"                              
+                                            action="/dev/stat/List.xhtml" ajax="false" value="Edit Statistics"   >                        
+                                        </p:menuitem>
+                                        <p:menuitem
+                                            id="stattypes"                              
+                                            action="/dev/statTypes/List.xhtml" ajax="false" value="Edit Stat Types"    >                        
+                                        </p:menuitem>
+                                        <p:menuitem
+                                            id="crontriggers"                              
+                                            action="/dev/qrtzCronTriggers/List.xhtml" ajax="false" value="Job Cron Triggers"    >                        
+                                        </p:menuitem>
+                                        <p:menuitem
+                                            id="simpleTriggers"                              
+                                            action="/dev/qrtzSimpleTriggers/List.xhtml" ajax="false" value="Job Simple Triggers"    >                        
+                                        </p:menuitem>
+                                        <p:menuitem
+                                            id="jobDetails"                              
+                                            action="/dev/qrtzJobDetails/List.xhtml" ajax="false" value="Job Details"    >                        
+                                        </p:menuitem>
+                                        <p:menuitem
+                                            id="webMonitor"                              
+                                            action="/dev/monitor/websiteMonitor/List.xhtml" ajax="false" value="Monitoring"    >                        
+                                        </p:menuitem>
+                                        <p:menuitem
+                                            id="configMap"                              
+                                            action="/dev/configMap/List.xhtml" ajax="false" value="Configuration"    >                        
+                                        </p:menuitem>
+                                        <p:menuitem
+                                            id="monitorCharts"                              
+                                            action="/dev/monitoringcharts/List.xhtml" ajax="false" value="Charts"    >                        
+                                        </p:menuitem>
+
+
                                     </p:submenu>
 
                                     <p:submenu  label="Admin" rendered="#{customersController.isUserInRole('ADMIN')}"  id="adminMenu1" >
@@ -106,82 +171,19 @@
                                             id="emails"                              
                                             action="/admin/emailQueue/CreateEmail.xhtml" ajax="false"  value="New Email"    >                       
                                         </p:menuitem>
-                                        <p:menuitem
-                                            id="currency"                              
-                                            action="/admin/currency/List.xhtml" ajax="false"  value="Currency"    >                       
-                                        </p:menuitem>
-                                        <p:menuitem
-                                            id="invoice"                              
-                                            action="/admin/invoice/List.xhtml" ajax="false"  value="Invoice"    >                       
-                                        </p:menuitem>
-                                        <p:menuitem
-                                            id="invoiceLine"                              
-                                            action="/admin/invoiceLine/List.xhtml" ajax="false"  value="InvoiceLine"    >                       
-                                        </p:menuitem>
-                                        <p:menuitem
-                                            id="invoiceLineType"                              
-                                            action="/admin/invoiceLineType/List.xhtml" ajax="false"  value="Invoice Line Type"    >                       
-                                        </p:menuitem>
-                                        <p:menuitem
-                                            id="item"                              
-                                            action="/admin/item/List.xhtml" ajax="false"  value="Item"    >                       
-                                        </p:menuitem>
 
                                     </p:submenu>
-                                    <p:submenu  label="Maintenence" rendered="#{customersController.isUserInRole('ADMIN')}"  id="adminMenu2" >
-                                        <p:menuitem
-                                            id="demographic"                              
-                                            action="/admin/demographicTypes/List.xhtml"  ajax="false" value="Edit demographicTypes Items" >                         
-                                        </p:menuitem>
-                                        <p:menuitem
-                                            id="groups"                              
-                                            action="/admin/groups/List.xhtml"  ajax="false" value="Edit Groups Items"    >                       
-                                        </p:menuitem>
 
-                                        <p:menuitem
-                                            id="sessiontype"                              
-                                            action="/admin/sessionTypes/List.xhtml" ajax="false" value="Edit SessionTypes Items"    >                        
-                                        </p:menuitem>
-                                        <p:menuitem
-                                            id="stats"                              
-                                            action="/admin/stat/List.xhtml" ajax="false" value="Edit Statistics"   >                        
-                                        </p:menuitem>
-                                        <p:menuitem
-                                            id="stattypes"                              
-                                            action="/admin/statTypes/List.xhtml" ajax="false" value="Edit Stat Types"    >                        
-                                        </p:menuitem>
-                                        <p:menuitem
-                                            id="crontriggers"                              
-                                            action="/admin/qrtzCronTriggers/List.xhtml" ajax="false" value="Job Cron Triggers"    >                        
-                                        </p:menuitem>
-                                        <p:menuitem
-                                            id="simpleTriggers"                              
-                                            action="/admin/qrtzSimpleTriggers/List.xhtml" ajax="false" value="Job Simple Triggers"    >                        
-                                        </p:menuitem>
-                                        <p:menuitem
-                                            id="jobDetails"                              
-                                            action="/admin/qrtzJobDetails/List.xhtml" ajax="false" value="Job Details"    >                        
-                                        </p:menuitem>
-                                        <p:menuitem
-                                            id="webMonitor"                              
-                                            action="/admin/monitor/websiteMonitor/List.xhtml" ajax="false" value="Monitoring"    >                        
-                                        </p:menuitem>
-                                        <p:menuitem
-                                            id="configMap"                              
-                                            action="/admin/configMap/List.xhtml" ajax="false" value="Configuration"    >                        
-                                        </p:menuitem>
-                                        <p:menuitem
-                                            id="monitorCharts"                              
-                                            action="/admin/monitoringcharts/List.xhtml" ajax="false" value="Charts"    >                        
-                                        </p:menuitem>
+
+                                    <p:submenu  label="Trainer" rendered="#{customersController.isUserInRole('TRAINER')}"  id="trainerMenu1" >
                                         <p:menuitem
                                             id="mobile"                              
-                                            action="/mobile/sessionHistory/List.xhtml" ajax="false"  value="Mobile"    >                       
+                                            action="/trainer/sessionHistory/List.xhtml" ajax="false"  value="Sessions"    >                       
                                         </p:menuitem>
 
-
-
                                     </p:submenu>
+
+
                                     <p:submenu label="User" rendered="#{customersController.isUserInRole('USER')}" id="logout1" >
                                         <p:menuitem
                                             id="myStats"

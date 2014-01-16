@@ -108,7 +108,7 @@ public class CustomerState implements Serializable {
 
     @Override
     public String toString() {
-        return "au.com.manlyit.fitnesscrm.stats.db.CustomerState[ id=" + id + " ]";
+        return customerState;
     }
     
 }

@@ -108,7 +108,7 @@ public class EmailFormat implements Serializable {
 
     @Override
     public String toString() {
-        return "au.com.manlyit.fitnesscrm.stats.db.EmailFormat[ id=" + id + " ]";
+        return emailFormat;
     }
     
 }
