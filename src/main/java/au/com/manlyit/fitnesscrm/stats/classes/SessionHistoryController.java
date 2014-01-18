@@ -171,6 +171,14 @@ public class SessionHistoryController implements Serializable {
         addParticipants();
         return "CreateSessionInfo";
     }
+    
+    public String prepareCreateMobile() {
+        current = new SessionHistory();
+        current.setSessiondate(new Date());
+        selectedItemIndex = -1;
+        addParticipants();
+        return "mobileMenu";
+    }
 
     public String create() {
         try {
@@ -186,8 +194,10 @@ public class SessionHistoryController implements Serializable {
     }
 
     private void updateCurrentParticipants() {
-       // List<Customers> targets = participants.getTarget(); for the pick lIst
-         List<Customers> targets = Arrays.asList(participantsArray);// for the datatable
+        List<Customers> targets = participants.getTarget(); //for the pick lIst
+        // List<Customers> targets = Arrays.asList(participantsArray);// for the datatable
+        // List<Customers> targets = activeCustomers; // for the selectMany  Menu
+         
         List<Participants> parts = new ArrayList<>();
 
         for (Customers cust : targets) {

@@ -1,0 +1,84 @@
+<f:view xmlns="http://www.w3.org/1999/xhtml"
+        xmlns:f="http://java.sun.com/jsf/core"
+        xmlns:h="http://java.sun.com/jsf/html"
+        xmlns:ui="http://java.sun.com/jsf/facelets"
+        xmlns:p="http://primefaces.org/ui"
+        xmlns:pm="http://primefaces.org/mobile"
+        contentType="text/html"
+        renderKitId="PRIMEFACES_MOBILE">
+
+    <pm:page title="Pure Fitness Session" >
+        <f:facet name="postinit">                        
+            <h:outputStylesheet library="primefaces-mobile" name="calendar/calendar.css"  />
+
+            <h:outputScript library="primefaces-mobile" name="calendar/calendar.js" />            
+
+            <script type="text/javascript">
+                (function($) {
+                    $.mobiscroll.i18n['en-UK'] = $.extend($.mobiscroll.i18n['en-UK'], {
+                        // Core
+                        setText: 'Set',
+                        cancelText: 'Cancel',
+                        // Datetime component
+                        dateFormat: 'dd/mm/yy',
+                        dateOrder: 'ddmmyy',
+                        dayNames: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+                        dayNamesShort: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+                        dayText: 'Day',
+                        hourText: 'Hours',
+                        minuteText: 'Minutes',
+                        monthNames: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+                        monthNamesShort: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                        monthText: 'Month',
+                        secText: 'Seconds',
+                        timeFormat: 'hh:ii A',
+                        timeWheels: 'hhiiA',
+                        yearText: 'Year',
+                        nowText: 'Now',
+                        // Measurement components
+                        wholeText: 'Whole',
+                        fractionText: 'Fraction',
+                        unitText: 'Unit',
+                        // Time / Timespan component
+                        labels: ['Years', 'Months', 'Days', 'Hours', 'Minutes', 'Seconds', ''],
+                        labelsShort: ['Yrs', 'Mths', 'Days', 'Hrs', 'Mins', 'Secs', ''],
+                        // Timer component
+                        startText: 'Start',
+                        stopText: 'Stop',
+                        resetText: 'Reset',
+                        lapText: 'Lap',
+                        hideText: 'Hide'
+                    });
+                })(jQuery);
+            </script>
+        </f:facet>   
+
+        <style>
+            .th-groups th {
+                text-align: center;
+                background-color: rgba(0,0,0,.1);
+                border-right: 1px solid #fff;
+            }
+            .ui-li-custom .ui-li-count {
+                right: 10px !important;
+            }                
+        </style>        
+        <!-- Main View  -->
+        <pm:view id="main" swatch="b" > 
+            <pm:header title="Pure Fitness Mobile" />
+            <pm:content >  
+                <h:form id="sessionsForm">  
+                    <p:growl/>
+
+                    <h3>Main Menu</h3>
+                    <p:dataList>
+                        <!--<h:outputLink value="#sessions?transition=pop">Training Sessions</h:outputLink>--> 
+                        <p:commandLink action="CreateSessionMobile?faces-redirect=true" ajax="false">Training Sessions <h:outputText styleClass="ui-li-count" value="New"/></p:commandLink> 
+                        <p:commandButton value="Logout" action="#{customersController.logout}" />
+                        <!--<h:outputLink value="#sessions?transition=pop">Logout</h:outputLink> -->
+                    </p:dataList>
+                </h:form>
+            </pm:content>
+        </pm:view>
+    </pm:page>
+</f:view>

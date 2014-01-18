@@ -14,6 +14,7 @@
         <h:form id="listSessionHistoryForm1">
             <h:panelGroup >
                 <p:commandButton id="createButton" ajax="false" action="#{sessionHistoryController.prepareCreate}" value="#{configMapController.getKey('ListSessionHistoryCreateLink')}"/>
+                <p:commandButton id="createButtonMobile" ajax="false" action="#{sessionHistoryController.prepareCreateMobile}" value="#{configMapController.getKey('ListSessionHistoryCreateMobileLink')}"/>
             </h:panelGroup>
             <h:outputText escape="false" value="#{configMapController.getKey('ListSessionHistoryEmpty')}" rendered="#{sessionHistoryController.items.rowCount == 0}"/>
             <h:panelGroup rendered="#{sessionHistoryController.items.rowCount > 0}">

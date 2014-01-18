@@ -38,13 +38,13 @@
                                 <h:panelGrid columns="1">
                                     <h:outputLabel value="#{configMapController.getKey('CreateSessionHistoryLabel_sessionType')}" for="sessionType" />
 
-                                    <p:selectOneMenu id="sessionType" value="#{sessionHistoryController.selected.sessionTypesId}" converter="#{sessTypesConverter}" label="#{configMapController.getKey('CreateSessionHistoryTitle_sessionType')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionHistoryRequiredMessage_sessionType')}">
+                                    <p:selectOneMenu id="sessionType" value="#{sessionHistoryController.selected.sessionTypesId}" filterFunction="startsWith" filter="true" editable="false" converter="#{sessTypesConverter}" label="#{configMapController.getKey('CreateSessionHistoryTitle_sessionType')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionHistoryRequiredMessage_sessionType')}">
                                         <f:selectItems value="#{sessionTypesController.itemsAvailableSelectOne}" var="sessionType" itemLabel="#{sessionType.name}" itemValue="#{sessionType}"/>
                                     </p:selectOneMenu>
 
                                     <h:outputLabel value="#{configMapController.getKey('CreateSessionHistoryLabel_trainer')}" for="trainer" />
 
-                                    <p:selectOneMenu id="trainer" value="#{sessionHistoryController.selected.trainer}" converter="#{custConverter}" label="#{configMapController.getKey('CreateSessionHistoryTitle_trainer')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionHistoryRequiredMessage_trainer')}">
+                                    <p:selectOneMenu id="trainer" filterFunction="startsWith" filter="true" value="#{sessionHistoryController.selected.trainer}" converter="#{custConverter}" editable="false" label="#{configMapController.getKey('CreateSessionHistoryTitle_trainer')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionHistoryRequiredMessage_trainer')}">
                                         <f:selectItems value="#{customersController.getCustomersByGroupObject('TRAINER',true)}" var="cust" itemLabel="#{cust.firstname} #{cust.lastname}" itemValue="#{cust}"/>
                                     </p:selectOneMenu>
 
@@ -55,11 +55,11 @@
                         </h:panelGrid>
                         <p:panel  header="#{configMapController.getKey('CreateSessionHistoryLabel_picker')}" >
 
-                         <!--   <p:selectCheckboxMenu id="scroll" style="width:250px;height:600px" value="#{sessionHistoryController.attendingCustomers}" label="Participants"  converter="customerConverter"  filterFunction="startsWith" filter="true" widgetVar="smanymeny">  
+                         <!--     <p:selectManyMenu id="scroll" style="width:250px;height:600px" value="#{sessionHistoryController.attendingCustomers}" label="Participants"  converter="customerConverter"  widgetVar="smanymeny">  
                                 <f:selectItems value="#{sessionHistoryController.activeCustomers}" var="cust"  itemLabel="#{cust.firstname} #{cust.lastname}" itemValue="#{cust}" />            
-                            </p:selectCheckboxMenu>-->
+                            </p:selectManyMenu>
 
-                            <p:dataTable id="tableList2" rowKey="#{item.id}" rowSelectMode="add" selection="#{sessionHistoryController.participantsArray}" value="#{customersController.items}" filteredValue="#{customersController.filteredItems}"  widgetVar="customersControllerTable" var="item"  paginator="true" rows="15"  paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  rowsPerPageTemplate="5,10,15,20,25,50,100" >
+                          <p:dataTable id="tableList2" rowKey="#{item.id}" rowSelectMode="add" selection="#{sessionHistoryController.participantsArray}" value="#{customersController.items}" filteredValue="#{customersController.filteredItems}"  widgetVar="customersControllerTable" var="item"  paginator="true" rows="15"  paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  rowsPerPageTemplate="5,10,15,20,25,50,100" >
                                 <f:facet name="header">
                                     <p:outputPanel>
                                         <h:outputText value="Search all fields:" />
@@ -81,11 +81,11 @@
                                     <h:outputText value="#{item.lastname}"/>
 
                                 </p:column>
-                            </p:dataTable>
+                            </p:dataTable>-->
 
 
                             <!--   
-                              <p:selectManyMenu id="scroll" value="#{sessionHistoryController.attendingCustomers}" converter="#{custConverter}" style="width:250px;height:600px" var="customer" showCheckbox="true">  
+                              <p:selectManyMenu id="scroll" value="#{sessionHistoryController.attendingCustomers}" converter="#{custConverter}" style="width:250px;height:600px" var="customer" showCheckbox="true"> --> 
                             <p:pickList id="picker"  value="#{sessionHistoryController.participants}"
                                              var="cust"
      

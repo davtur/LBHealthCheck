@@ -6,18 +6,16 @@
 package au.com.manlyit.fitnesscrm.stats.classes.util;
 
 import static au.com.manlyit.fitnesscrm.stats.beans.ActivationBean.generateUniqueToken;
-import au.com.manlyit.fitnesscrm.stats.classes.CustomersController;
 import au.com.manlyit.fitnesscrm.stats.classes.PasswordService;
 import au.com.manlyit.fitnesscrm.stats.db.Activation;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.el.ELException;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -84,7 +82,8 @@ public class PasswordResetFilter implements Filter {
                                     //Reset Password and log them in
                                     String paswd = generateUniqueToken(10);
                                     //String paswd = "foooobar";
-                                    String encryptedPass = PasswordService.getInstance().encrypt(paswd);
+                                    String encryptedPass = PasswordService.getInstance().encrypt(paswd); 
+                                   // String encodedEncryptedPass = URLEncoder.encode(encryptedPass,"UTF-8");
                                     cst.setPassword(encryptedPass);
                                     ejbCustomerFacade.edit(cst);
                                     req.login(user, paswd);

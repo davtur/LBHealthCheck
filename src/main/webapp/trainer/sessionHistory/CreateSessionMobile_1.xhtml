@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<f:view xmlns="http://www.w3.org/1999/xhtml"
+        xmlns:f="http://java.sun.com/jsf/core"
+        xmlns:h="http://java.sun.com/jsf/html"
+        xmlns:ui="http://java.sun.com/jsf/facelets"
+        xmlns:p="http://primefaces.org/ui"
+        xmlns:pm="http://primefaces.org/mobile"        
+        contentType="text/html"
+        renderKitId="PRIMEFACES_MOBILE">
+
+    <pm:page title="Components">
+
+        <style>
+            .th-groups th {
+                text-align: center;
+                background-color: rgba(0,0,0,.1);
+                border-right: 1px solid #fff;
+            }
+            .ui-li-custom .ui-li-count {
+                right: 10px !important;
+            }                
+        </style>        
+
+        <!-- Main View -->
+        <pm:view id="main">  
+
+            <pm:header title="Mobile" swatch="b"/>
+
+            <pm:content>                
+   <p:outputPanel>
+
+                <h:form id="historyForm">
+                 
+                        <h:panelGrid columns="1">
+
+                            <p:commandButton   ajax="false"   action="#{sessionHistoryController.create}" value="#{configMapController.getKey('CreateSessionHistorySaveLink')}" />
+
+                            <p:commandButton   ajax="false"   action="#{sessionHistoryController.prepareList}" value="#{configMapController.getKey('CreateSessionHistoryShowAllLink')}" immediate="true"/>
+
+
+                        </h:panelGrid>
+                    </p:outputPanel>
+                    <p:panel>
+                        <h:panelGrid columns="1">
+                            <h:panelGrid columns="1">
+                                <p:panel>
+                                    <h:outputLabel value="#{configMapController.getKey('CreateSessionHistoryLabel_sessiondate')}" for="sessiondate" />
+                                    <p:calendar id="sessiondate" value="#{sessionHistoryController.selected.sessiondate}"  pattern="dd/MM/YYYY HH:mm"/>
+                                    
+                                </p:panel>
+                                <p:panel>
+                                    <h:panelGrid columns="1">
+                                        <h:outputLabel value="#{configMapController.getKey('CreateSessionHistoryLabel_sessionType')}" for="sessionType" />
+                                        <p:selectOneMenu id="sessionType" value="#{sessionHistoryController.selected.sessionTypesId}"  editable="false" converter="#{sessTypesConverter}" label="#{configMapController.getKey('CreateSessionHistoryTitle_sessionType')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionHistoryRequiredMessage_sessionType')}">
+                                            <f:selectItems value="#{sessionTypesController.itemsAvailableSelectOne}" var="sessionType" itemLabel="#{sessionType.name}" itemValue="#{sessionType}"/>
+                                        </p:selectOneMenu>
+                                        <h:outputLabel value="#{configMapController.getKey('CreateSessionHistoryLabel_trainer')}" for="trainer" />
+                                        <p:selectOneMenu id="trainer"  value="#{sessionHistoryController.selected.trainer}" converter="#{custConverter}" editable="false" label="#{configMapController.getKey('CreateSessionHistoryTitle_trainer')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionHistoryRequiredMessage_trainer')}">
+                                            <f:selectItems value="#{customersController.getCustomersByGroupObject('TRAINER',true)}" var="cust" itemLabel="#{cust.firstname} #{cust.lastname}" itemValue="#{cust}"/>
+                                        </p:selectOneMenu>
+                                        <h:outputLabel value="#{configMapController.getKey('CreateSessionHistoryLabel_comments')}" for="comments" />
+                                        <p:inputTextarea id="comments" value="#{sessionHistoryController.selected.comments}" cols="35" rows="8" title="#{configMapController.getKey('CreateSessionHistoryTitle_comments')}"/>
+                                    </h:panelGrid>
+                                </p:panel>
+                            </h:panelGrid>
+                            <p:panel  header="#{configMapController.getKey('CreateSessionHistoryLabel_picker')}" >
+                                <p:selectManyMenu id="scroll" style="width:250px;height:600px" value="#{sessionHistoryController.attendingCustomers}" label="Participants"  converter="customerConverter"  widgetVar="smanymeny">  
+                                    <f:selectItems value="#{sessionHistoryController.activeCustomers}" var="cust"  itemLabel="#{cust.firstname} #{cust.lastname}" itemValue="#{cust}" />            
+                                </p:selectManyMenu>
+                            </p:panel>
+
+                        </h:panelGrid>
+                    </p:panel>
+                </h:form>
+            </pm:content>
+        </pm:view>
+
+    </pm:page>
+
+</f:view>

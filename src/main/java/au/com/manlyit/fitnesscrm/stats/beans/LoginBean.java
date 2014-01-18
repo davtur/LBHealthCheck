@@ -12,9 +12,13 @@ import au.com.manlyit.fitnesscrm.stats.classes.util.StringEncrypter;
 import au.com.manlyit.fitnesscrm.stats.db.Activation;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.enterprise.context.RequestScoped;
 import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
@@ -65,27 +69,34 @@ public class LoginBean implements Serializable {
          Logger.getLogger(LoginBean.class.getName()).log(Level.SEVERE, "Failed to redirect to password reset URL", ex);
          }*/
         Customers current = ejbCustomerFacade.findCustomerByUsername(username);
-                    //valid user that wants the password reset
+        //valid user that wants the password reset
         //generate link and send
         if (current != null) {
             String uniquetoken = generateUniqueToken(10);
             SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmssSSS");
             String timestamp = sdf.format(new Date());
-            String nonce =  timestamp + uniquetoken;
+            String nonce = timestamp + uniquetoken;
             Activation act = new Activation(0, nonce, new Date());
             String nonceEncrypted = encrypter.encrypt(configMapFacade.getConfig("login.password.reset.token") + nonce);
-            act.setCustomer(current);
-            ejbActivationFacade.create(act);
-            String urlLink = configMapFacade.getConfig("login.password.reset.redirect.url") + nonceEncrypted;
+            String encodedNonceEncrypted;
+            String urlLink;
+            try {
+                encodedNonceEncrypted = URLEncoder.encode(nonceEncrypted, "UTF-8");
+                act.setCustomer(current);
+                ejbActivationFacade.create(act);
+                urlLink = configMapFacade.getConfig("login.password.reset.redirect.url") + encodedNonceEncrypted;
 
-            
-            //send email
-            SendHTMLEmailWithFileAttached emailAgent = new SendHTMLEmailWithFileAttached();
-            String htmlText = "<table width=\"600\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\">  <tr>    <td><img src=\"cid:logoimg_cid\"/></td>  </tr>  <tr>    <td height=\"220\"> <p>Pure Fitness Manly</p>      <p>Please click the following link to reset your password:</p><p>To reset your password click <a href=\"" + urlLink + "\">here</a>.</p></td>  </tr>  <tr>    <td height=\"50\" align=\"center\" valign=\"middle\" bgcolor=\"#CCCCCC\">www.purefitnessmanly.com.au | sarah@purefitnessmanly.com.au | +61433818067</td>  </tr></table>";
+                //send email
+                SendHTMLEmailWithFileAttached emailAgent = new SendHTMLEmailWithFileAttached();
+                String htmlText = "<table width=\"600\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\">  <tr>    <td><img src=\"cid:logoimg_cid\"/></td>  </tr>  <tr>    <td height=\"220\"> <p>Pure Fitness Manly</p>      <p>Please click the following link to reset your password:</p><p>To reset your password click <a href=\"" + urlLink + "\">here</a>.</p></td>  </tr>  <tr>    <td height=\"50\" align=\"center\" valign=\"middle\" bgcolor=\"#CCCCCC\">www.purefitnessmanly.com.au | sarah@purefitnessmanly.com.au | +61433818067</td>  </tr></table>";
 
-            //String host, String to, String ccAddress, String from, String emailSubject, String message, String theAttachedfileName, boolean debug
-            emailAgent.send("david@manlyit.com.au", "", "info@purefitnessmanly.com.au", "Password Reset", htmlText, null, true);
-            JsfUtil.addSuccessMessage(configMapFacade.getConfig("PasswordResetSuccessful"));
+                //String host, String to, String ccAddress, String from, String emailSubject, String message, String theAttachedfileName, boolean debug
+                emailAgent.send("david@manlyit.com.au", "", "info@purefitnessmanly.com.au", "Password Reset", htmlText, null, true);
+                JsfUtil.addSuccessMessage(configMapFacade.getConfig("PasswordResetSuccessful"));
+            } catch (UnsupportedEncodingException ex) {
+                Logger.getLogger(LoginBean.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
         } else {
             JsfUtil.addSuccessMessage(configMapFacade.getConfig("Please enter a valid username before resetting the password"));
         }
