@@ -9,8 +9,10 @@ import static au.com.manlyit.fitnesscrm.stats.beans.ActivationBean.generateUniqu
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.classes.util.SendHTMLEmailWithFileAttached;
 import au.com.manlyit.fitnesscrm.stats.classes.util.StringEncrypter;
+import au.com.manlyit.fitnesscrm.stats.classes.util.UAgentInfo;
 import au.com.manlyit.fitnesscrm.stats.db.Activation;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
+import java.io.IOException;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -19,8 +21,10 @@ import java.util.Date;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.enterprise.context.RequestScoped;
+import javax.annotation.PostConstruct;
+import javax.enterprise.context.SessionScoped;
 import javax.faces.application.FacesMessage;
+import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -32,11 +36,12 @@ import javax.servlet.http.HttpServletRequest;
  * @author david
  */
 @Named("loginBean")
-@RequestScoped
+@SessionScoped
 public class LoginBean implements Serializable {
 
     private String username;
     private String password;
+    private boolean mobileDeviceUserAgent = false;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade configMapFacade;
     @Inject
@@ -100,8 +105,47 @@ public class LoginBean implements Serializable {
         } else {
             JsfUtil.addSuccessMessage(configMapFacade.getConfig("Please enter a valid username before resetting the password"));
         }
-        return "/login";
+        if (this.isMobileDeviceUserAgent() == true) {
+            return "/mobileMenu";
+        } else {
+            return "/index";
+        }
 
+    }
+
+    @PostConstruct
+    public void myPostConstruct() {
+        //String renderKitId = FacesContext.getCurrentInstance().getViewRoot().getRenderKitId();
+        // if (renderKitId.equalsIgnoreCase("PRIMEFACES_MOBILE")) {
+        if (mobileDevice() == true) {
+            //REDIRECT TO  MOBILE PAGE
+            ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
+
+            try {
+                this.setMobileDeviceUserAgent(true);
+                ec.redirect("mobileLogin.xhtml");
+            } catch (IOException e) {
+                JsfUtil.addErrorMessage(e, "Redirect to Mobile Login failed");
+
+            }
+
+        }
+    }
+
+    public boolean mobileDevice() {
+        FacesContext context = FacesContext.getCurrentInstance();
+        HttpServletRequest req = (HttpServletRequest) context.getExternalContext().getRequest();
+        String userAgent = req.getHeader("user-agent");
+        String accept = req.getHeader("Accept");
+
+        if (userAgent != null && accept != null) {
+            UAgentInfo agent = new UAgentInfo(userAgent, accept);
+            if (agent.detectMobileQuick()) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public String login() {
@@ -114,7 +158,12 @@ public class LoginBean implements Serializable {
             context.addMessage(null, new FacesMessage("Login failed."));
             return "error";
         }
-        return "/index";
+        if (this.isMobileDeviceUserAgent() == true) {
+            return "/mobileMenu";
+        } else {
+            return "/index";
+        }
+
     }
 
     public void logout() {
@@ -152,5 +201,19 @@ public class LoginBean implements Serializable {
         }
 
         return (buffer.toString());
+    }
+
+    /**
+     * @return the mobileDeviceUserAgent
+     */
+    public boolean isMobileDeviceUserAgent() {
+        return mobileDeviceUserAgent;
+    }
+
+    /**
+     * @param mobileDeviceUserAgent the mobileDeviceUserAgent to set
+     */
+    public void setMobileDeviceUserAgent(boolean mobileDeviceUserAgent) {
+        this.mobileDeviceUserAgent = mobileDeviceUserAgent;
     }
 }

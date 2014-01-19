@@ -130,6 +130,7 @@ au/com/manlyit/fitnesscrm/stats/webservices/PaymentDetailPlusNextPaymentInfo.cla
 au/com/manlyit/fitnesscrm/stats/classes/EmailFormatController.class
 au/com/manlyit/fitnesscrm/stats/webservices/NewCustomer.class
 au/com/manlyit/fitnesscrm/stats/webservices/EziResponseOfNewCustomerXcXH3LiW.class
+au/com/manlyit/fitnesscrm/stats/classes/util/UserAgentSwitchViewHandlerWrapper.class
 au/com/manlyit/fitnesscrm/stats/beans/ParticipantsFacade.class
 au/com/manlyit/fitnesscrm/stats/classes/NotesController$NotesControllerConverter.class
 au/com/manlyit/fitnesscrm/stats/classes/util/SecurityServlet.class
@@ -246,6 +247,7 @@ au/com/manlyit/fitnesscrm/stats/classes/QrtzSimpleTriggersController$QrtzSimpleT
 au/com/manlyit/fitnesscrm/stats/beans/ActivationBean.class
 au/com/manlyit/fitnesscrm/stats/db/StatTypes.class
 au/com/manlyit/fitnesscrm/stats/classes/QrtzJobDetailsController$QrtzJobDetailsControllerConverter.class
+au/com/manlyit/fitnesscrm/stats/classes/util/SessionListener.class
 au/com/manlyit/fitnesscrm/stats/classes/ParticipantsController$1.class
 au/com/manlyit/fitnesscrm/stats/classes/ItemController$ItemControllerConverter.class
 au/com/manlyit/fitnesscrm/stats/chartbeans/BodyFatChart.class
@@ -271,5 +273,6 @@ au/com/manlyit/fitnesscrm/stats/chartbeans/BeepTestAndVO2MaxChart.class
 au/com/manlyit/fitnesscrm/stats/webservices/NextPaymentInfo.class
 au/com/manlyit/fitnesscrm/stats/webservices/ScheduledPayment.class
 au/com/manlyit/fitnesscrm/stats/classes/ParticipantsController$ParticipantsControllerConverter.class
+au/com/manlyit/fitnesscrm/stats/classes/util/UAgentInfo.class
 au/com/manlyit/fitnesscrm/stats/webservices/GetScheduledPayments.class
 au/com/manlyit/fitnesscrm/stats/db/ConfigMap.class

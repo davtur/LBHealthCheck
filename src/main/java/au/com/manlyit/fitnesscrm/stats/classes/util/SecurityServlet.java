@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 
 import javax.servlet.ServletException;
@@ -59,6 +60,8 @@ public class SecurityServlet extends HttpServlet {
         HttpSession httpSession = request.getSession();
         String faceCode = request.getParameter("code");
         String state = request.getParameter("state");
+        //boolean mobileDevice = false;
+
         String accessToken = getFacebookAccessToken(faceCode);
         Customers facebookUser = getUserMailAddressFromJsonResponse(accessToken, httpSession);
         String sessionID = httpSession.getId();
@@ -95,10 +98,13 @@ public class SecurityServlet extends HttpServlet {
                         customer.setPassword(encPassword);
                         customer.setFacebookId(fbid);
                         ejbFacade.editAndFlush(customer);
-                        
+
                         request.login(customer.getUsername(), passwd);
                     }
                 }
+                // if(mobileDevice == true){
+                //     response.sendRedirect(request.getContextPath() + "/mobileMenu.xhtml");
+                // }
 
             } catch (ServletException e) {
                 logger.log(Level.WARNING, e.getMessage());
@@ -106,10 +112,32 @@ public class SecurityServlet extends HttpServlet {
                 response.sendRedirect(request.getContextPath() + "/facebookError.html");
                 return;
             }
-            response.sendRedirect(request.getContextPath() + getValueFromKey("facebook.redirect.landingpage"));
+            if (mobileDevice(request)) {
+                httpSession.setAttribute("MOBILE_DEVICE", "TRUE");
+                response.sendRedirect(request.getContextPath() + getValueFromKey("facebook.redirect.mobilelandingpage"));
+            } else {
+                response.sendRedirect(request.getContextPath() + getValueFromKey("facebook.redirect.landingpage"));
+            }
+
         } else {
             logger.log(Level.WARNING, "CSRF protection validation");
         }
+    }
+
+    private boolean mobileDevice(HttpServletRequest req) {
+        //FacesContext context = FacesContext.getCurrentInstance();
+        //HttpServletRequest req = (HttpServletRequest) context.getExternalContext().getRequest();
+        String userAgent = req.getHeader("user-agent");
+        String accept = req.getHeader("Accept");
+
+        if (userAgent != null && accept != null) {
+            UAgentInfo agent = new UAgentInfo(userAgent, accept);
+            if (agent.detectMobileQuick()) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private String getFacebookAccessToken(String faceCode) {
@@ -137,8 +165,9 @@ public class SecurityServlet extends HttpServlet {
         }
         return token;
     }
-    private String getValueFromKey(String key){
-        String val ;
+
+    private String getValueFromKey(String key) {
+        String val;
         val = configMapFacade.getConfig(key);
         return val;
     }

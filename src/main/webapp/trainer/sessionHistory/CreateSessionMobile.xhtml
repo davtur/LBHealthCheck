@@ -72,9 +72,7 @@
                 <p:outputPanel >
                     <h:form id="sessionsForm">  
                         <p:growl/>
-                        <p:commandButton   ajax="false"   action="#{sessionHistoryController.create}" value="#{configMapController.getKey('CreateSessionHistorySaveLink')}" />
-                        <p:spacer height="10em" />
-                        <p:commandButton   ajax="false"   action="#{sessionHistoryController.prepareList}" value="#{configMapController.getKey('CreateSessionHistoryShowAllLink')}" immediate="true"/>
+                        <p:commandButton   ajax="false"   action="#{sessionHistoryController.createMobile}" value="#{configMapController.getKey('CreateSessionHistorySaveLink')}" />
                         <p:spacer height="10em" />
 
                         <h4>#{configMapController.getKey('CreateSessionHistoryLabel_sessiondate')}</h4>
@@ -83,7 +81,7 @@
 
 
                         <h4>#{configMapController.getKey('CreateSessionHistoryLabel_sessionType')}*</h4>
-                        <p:selectOneRadio id="sessionType" value="#{sessionHistoryController.selected.sessionTypesId}"   required="true" requiredMessage="#{configMapController.getKey('CreateSessionHistoryRequiredMessage_sessionType')}">
+                        <p:selectOneRadio id="sessionType" value="#{sessionHistoryController.selected.sessionTypesId}"  converter="#{sessTypesConverter}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionHistoryRequiredMessage_sessionType')}">
                             <f:selectItems value="#{sessionTypesController.itemsAvailableSelectOne}" />
                         </p:selectOneRadio>
 
@@ -102,12 +100,12 @@
                         <p:spacer height="10em" />
 
                         <h4>#{configMapController.getKey('CreateSessionHistoryLabel_picker')}</h4>
-                        <p:selectManyMenu id="scroll" value="#{sessionHistoryController.attendingCustomers}"  converter="customerConverter"  >  
+                        <p:selectManyMenu id="scroll" value="#{sessionHistoryController.attendingCustomers}"  converter="#{custConverter}"  >  
                             <f:selectItems value="#{sessionHistoryController.activeCustomers}" var="cust"  itemLabel="#{cust.firstname} #{cust.lastname}" itemValue="#{cust}" />  
                         </p:selectManyMenu>
 
                         <p:spacer height="10em" />
-                        <p:commandButton   ajax="false"   action="#{sessionHistoryController.create}" value="#{configMapController.getKey('CreateSessionHistorySaveLink')}" />
+                        <p:commandButton   ajax="false"   action="#{sessionHistoryController.createMobile}" value="#{configMapController.getKey('CreateSessionHistorySaveLink')}" />
                     </h:form>
                 </p:outputPanel>
             </pm:content>

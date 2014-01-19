@@ -139,6 +139,7 @@
 /home/david/NetBeansProjects/FitnessCRM/target/generated-sources/jaxws-wsimport/au/com/manlyit/fitnesscrm/stats/webservices/GetPaymentStatus.java
 /home/david/NetBeansProjects/FitnessCRM/src/main/java/au/com/manlyit/fitnesscrm/stats/db/CustomerAuth.java
 /home/david/NetBeansProjects/FitnessCRM/src/main/java/au/com/manlyit/fitnesscrm/stats/db/PreferedContact.java
+/home/david/NetBeansProjects/FitnessCRM/src/main/java/au/com/manlyit/fitnesscrm/stats/classes/util/SessionListener.java
 /home/david/NetBeansProjects/FitnessCRM/src/main/java/au/com/manlyit/fitnesscrm/stats/classes/ContextListener1.java
 /home/david/NetBeansProjects/FitnessCRM/src/main/java/au/com/manlyit/fitnesscrm/stats/classes/util/SecurityServlet.java
 /home/david/NetBeansProjects/FitnessCRM/src/main/java/au/com/manlyit/fitnesscrm/stats/classes/PlanController.java
@@ -187,6 +188,7 @@
 /home/david/NetBeansProjects/FitnessCRM/src/main/java/au/com/manlyit/fitnesscrm/stats/beans/ParticipantsFacade.java
 /home/david/NetBeansProjects/FitnessCRM/src/main/java/au/com/manlyit/fitnesscrm/stats/db/StatTypes.java
 /home/david/NetBeansProjects/FitnessCRM/src/main/java/au/com/manlyit/fitnesscrm/stats/db/EmailQueue.java
+/home/david/NetBeansProjects/FitnessCRM/src/main/java/au/com/manlyit/fitnesscrm/stats/classes/util/UAgentInfo.java
 /home/david/NetBeansProjects/FitnessCRM/src/main/java/au/com/manlyit/fitnesscrm/stats/chartbeans/BeepTestAndVO2MaxChart.java
 /home/david/NetBeansProjects/FitnessCRM/src/main/java/au/com/manlyit/fitnesscrm/stats/beans/WebsiteMonitorFacade.java
 /home/david/NetBeansProjects/FitnessCRM/target/generated-sources/jaxws-wsimport/au/com/manlyit/fitnesscrm/stats/webservices/ClearScheduleResponse.java
@@ -204,6 +206,7 @@
 /home/david/NetBeansProjects/FitnessCRM/target/generated-sources/jaxws-wsimport/au/com/manlyit/fitnesscrm/stats/webservices/GetPaymentDetailResponse.java
 /home/david/NetBeansProjects/FitnessCRM/target/generated-sources/jaxws-wsimport/au/com/manlyit/fitnesscrm/stats/webservices/AddPaymentResponse.java
 /home/david/NetBeansProjects/FitnessCRM/src/main/java/au/com/manlyit/fitnesscrm/stats/chartbeans/MySessionsChart1.java
+/home/david/NetBeansProjects/FitnessCRM/src/main/java/au/com/manlyit/fitnesscrm/stats/classes/util/UserAgentSwitchViewHandlerWrapper.java
 /home/david/NetBeansProjects/FitnessCRM/src/main/java/au/com/manlyit/fitnesscrm/stats/chartbeans/FitnessTestsChart.java
 /home/david/NetBeansProjects/FitnessCRM/src/main/java/au/com/manlyit/fitnesscrm/stats/db/QrtzCronTriggersPK.java
 /home/david/NetBeansProjects/FitnessCRM/src/main/java/au/com/manlyit/fitnesscrm/stats/beans/ActivationBean.java

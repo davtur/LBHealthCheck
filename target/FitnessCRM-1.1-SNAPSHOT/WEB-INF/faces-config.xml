@@ -11,7 +11,7 @@
             <base-name>/Bundle</base-name>
             <var>bundle</var>
         </resource-bundle>
-        
+        <!--<view-handler>au.com.manlyit.fitnesscrm.stats.classes.util.UserAgentSwitchViewHandlerWrapper</view-handler>-->
     </application>
     <validator>
         <validator-id>au.com.manlyit.fitnesscrm.stats.classes.util.EmailValidator</validator-id>
@@ -21,6 +21,8 @@
         <validator-id>au.com.manlyit.fitnesscrm.stats.classes.util.NoSpecialCharStringValidator</validator-id>
         <validator-class>au.com.manlyit.fitnesscrm.stats.classes.util.NoSpecialCharStringValidator</validator-class>
     </validator>
+
+
     <converter>
         <description>Image Converter</description>
         <converter-id>customConverter</converter-id>
