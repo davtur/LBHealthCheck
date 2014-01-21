@@ -42,6 +42,9 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "SessionHistory.findById", query = "SELECT s FROM SessionHistory s WHERE s.id = :id"),
     @NamedQuery(name = "SessionHistory.findBySessiondate", query = "SELECT s FROM SessionHistory s WHERE s.sessiondate = :sessiondate")})
 public class SessionHistory implements Serializable {
+    
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "sessionHistoryId")
+    private Collection<SessionTrainers> sessionTrainersCollection;
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -59,9 +62,7 @@ public class SessionHistory implements Serializable {
     private String comments;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "sessionHistoryId")
     private Collection<Participants> participantsCollection;
-    @JoinColumn(name = "trainer", referencedColumnName = "id")
-    @ManyToOne(optional = false)
-    private Customers trainer;
+   
     @JoinColumn(name = "session_types_id", referencedColumnName = "id")
     @ManyToOne(optional = false)
     private SessionTypes sessionTypesId;
@@ -111,13 +112,7 @@ public class SessionHistory implements Serializable {
         this.participantsCollection = participantsCollection;
     }
 
-    public Customers getTrainer() {
-        return trainer;
-    }
-
-    public void setTrainer(Customers trainer) {
-        this.trainer = trainer;
-    }
+  
 
     public SessionTypes getSessionTypesId() {
         return sessionTypesId;
@@ -150,6 +145,17 @@ public class SessionHistory implements Serializable {
     @Override
     public String toString() {
         return "au.com.manlyit.fitnesscrm.stats.db.SessionHistory[ id=" + id + " ]";
+    }
+    
+    
+
+    @XmlTransient
+    public Collection<SessionTrainers> getSessionTrainersCollection() {
+        return sessionTrainersCollection;
+    }
+
+    public void setSessionTrainersCollection(Collection<SessionTrainers> sessionTrainersCollection) {
+        this.sessionTrainersCollection = sessionTrainersCollection;
     }
     
 }

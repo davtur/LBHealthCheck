@@ -38,12 +38,12 @@
                         </f:facet>
                         <h:outputText value="#{item.sessionTypesId.name}"/>
                     </p:column>
-                     <p:column sortBy="#{item.trainer.firstname}"  filterBy="#{item.trainer.firstname}"  headerText="#{configMapController.getKey('ListSessionHistoryTitle_trainer')}" >
+                  <!--   <p:column sortBy="#{item.trainer.firstname}"  filterBy="#{item.trainer.firstname}"  headerText="#{configMapController.getKey('ListSessionHistoryTitle_trainer')}" >
                         <f:facet name="header">
                             <h:outputText value="#{configMapController.getKey('ListSessionHistoryTitle_trainer')}"/>
                         </f:facet>
                         <h:outputText value="#{item.trainer.firstname} #{item.trainer.lastname}"/>
-                    </p:column>
+                    </p:column>-->
 
                     <p:column sortBy="#{item.comments}" filterBy="#{item.comments}"  headerText="#{configMapController.getKey('ListSessionHistoryTitle_comments')}" >
                         <f:facet name="header">

@@ -24,11 +24,11 @@
                         </f:facet>
                         <h:outputText value="#{item.id}"/>
                     </p:column>
-                     <p:column sortBy="#{item.customers.username.lastname}" >
+                     <p:column sortBy="#{item.username.lastname}" >
                         <f:facet name="header">
                             <h:outputText value="#{configMapController.getKey('ListGroupsTitle_username')}"/>
                         </f:facet>
-                        <h:outputText value="#{item.customers.firstname} #{item.customers.lastname}"/>
+                        <h:outputText value="#{item.username.firstname} #{item.username.lastname}"/>
                     </p:column>
 
                     <p:column sortBy="#{item.groupname}" >

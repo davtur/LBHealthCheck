@@ -88,9 +88,11 @@
                         <p:spacer height="10em" />
 
                         <h4>#{configMapController.getKey('CreateSessionHistoryLabel_trainer')}*</h4>
-                        <p:selectOneRadio id="trainer"   value="#{sessionHistoryController.selected.trainer}" converter="#{custConverter}"   required="true" requiredMessage="#{configMapController.getKey('CreateSessionHistoryRequiredMessage_trainer')}">
+                     <!--   <p:selectOneMenu id="trainer"   value="#{sessionHistoryController.selected.trainer}" converter="#{custConverter}"   required="true" requiredMessage="#{configMapController.getKey('CreateSessionHistoryRequiredMessage_trainer')}">-->
+                         <p:selectManyMenu id="trainer"   value="#{sessionHistoryController.trainers}" converter="#{custConverter}"   >
+ 
                             <f:selectItems value="#{customersController.getCustomersByGroupObject('TRAINER',true)}" var="cust" itemLabel="#{cust.firstname} #{cust.lastname}" itemValue="#{cust}"/>
-                        </p:selectOneRadio>
+                        </p:selectManyMenu>
 
                         <p:spacer height="10em" />
 

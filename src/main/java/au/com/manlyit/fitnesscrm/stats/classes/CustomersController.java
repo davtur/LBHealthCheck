@@ -261,6 +261,7 @@ public class CustomersController implements Serializable {
                 Groups grp = new Groups(0, "USER");
                 grp.setUsername(current);
                 ejbGroupsFacade.create(grp);
+                recreateModel();
                 JsfUtil.addSuccessMessage(configMapFacade.getConfig("CustomersCreated"));
                 return prepareCreate();
             } else {

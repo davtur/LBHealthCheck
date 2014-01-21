@@ -35,8 +35,8 @@
                         <h:outputLabel value="#{configMapController.getKey('ViewSessionHistoryLabel_sessionType')}"/>
                         <h:outputText value="#{sessionHistoryController.selected.sessionTypesId.name}" title="#{configMapController.getKey('ViewSessionHistoryTitle_sessionType')}"/>
 
-                        <h:outputLabel value="#{configMapController.getKey('ViewSessionHistoryLabel_trainer')}"/>
-                        <h:outputText value="#{sessionHistoryController.selected.trainer.firstname} #{sessionHistoryController.trainer.lastname}" title="#{configMapController.getKey('ViewSessionHistoryTitle_trainer')}"/>
+                  <!--      <h:outputLabel value="#{configMapController.getKey('ViewSessionHistoryLabel_trainer')}"/>
+                        <h:outputText value="#{sessionHistoryController.selected.trainer.firstname} #{sessionHistoryController.trainer.lastname}" title="#{configMapController.getKey('ViewSessionHistoryTitle_trainer')}"/>-->
 
                         <h:outputLabel value="#{configMapController.getKey('CreateSessionHistoryLabel_comments')}"/>
                         <h:outputText value="#{sessionHistoryController.selected.comments}" title="#{configMapController.getKey('CreateSessionHistoryTitle_comments')}"/>
@@ -49,18 +49,35 @@
                         </f:facet>
                         <h:outputText value="#{item.id}"/>
                     </p:column>
-                    <p:column sortBy="#{item.trainer.lastname}" >
+                    <p:column sortBy="#{item.customerId.lastname}" >
                         <f:facet name="header">
-                            <h:outputText value="trainer That Attended"/>
+                            <h:outputText value="customer_id That Attended"/>
                         </f:facet>
-                        <h:outputText value="#{item.trainer.firstname} #{item.trainer.lastname}">
+                        <h:outputText value="#{item.customerId.firstname} #{item.customerId.lastname}">
                             <f:convertDateTime pattern="dd/MM/yyyy" />
                         </h:outputText>
                     </p:column>
 
 
                 </p:dataTable>
+                <p:dataTable value="#{sessionHistoryController.selected.sessionTrainersCollection}" var="item"  paginator="true" rows="15"  paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  rowsPerPageTemplate="5,10,15,20,25,50,100" >
+                    <p:column sortBy="#{item.id}" >
+                        <f:facet name="header">
+                            <h:outputText value="#{configMapController.getKey('ListSessionHistoryTitle_id')}"/>
+                        </f:facet>
+                        <h:outputText value="#{item.id}"/>
+                    </p:column>
+                    <p:column sortBy="#{item.customerId.lastname}" >
+                        <f:facet name="header">
+                            <h:outputText value="trainer That Attended"/>
+                        </f:facet>
+                        <h:outputText value="#{item.customerId.firstname} #{item.customerId.lastname}">
+                            <f:convertDateTime pattern="dd/MM/yyyy" />
+                        </h:outputText>
+                    </p:column>
 
+
+                </p:dataTable>
             </h:form>
         </ui:define>
     </ui:composition>

@@ -18,7 +18,7 @@
                <p:panel id="panel1">
                 <h:panelGrid columns="2">
                     <h:outputLabel value="#{configMapController.getKey('CreateGroupsLabel_username')}" for="username" />
-                    <h:selectOneMenu id="username" value="#{groupsController.selected.customers}" valueChangeListener="#{groupsController.userChangeListener}" title="#{configMapController.getKey('CreateGroupsTitle_username')}" required="true" requiredMessage="#{configMapController.getKey('CreateGroupsRequiredMessage_username')}">
+                    <h:selectOneMenu id="username" value="#{groupsController.selected.username}" valueChangeListener="#{groupsController.userChangeListener}" title="#{configMapController.getKey('CreateGroupsTitle_username')}" required="true" requiredMessage="#{configMapController.getKey('CreateGroupsRequiredMessage_username')}">
                         <f:selectItems value="#{customersController.itemsAvailableSelectMany}"/>
                         <p:ajax update=":groupsForm:panel1" event="change" />
                     </h:selectOneMenu>
@@ -27,6 +27,8 @@
                         <f:selectItem itemLabel="Normal User" itemValue="USER"/>
                         <f:selectItem itemLabel="Trainer" itemValue="TRAINER"/>
                         <f:selectItem itemLabel="Administrator" itemValue="ADMIN"/>
+                        <f:selectItem itemLabel="Cancelled" itemValue="CANCELLED"/>
+                        <f:selectItem itemLabel="Developer" itemValue="DEVELOPER"/>
                     </h:selectOneMenu>
 
                 </h:panelGrid>

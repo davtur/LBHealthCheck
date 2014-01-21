@@ -79,11 +79,11 @@
         </session-timeout>
     </session-config>
     <welcome-file-list>
-        <welcome-file>/index.xhtml</welcome-file>
+        <welcome-file>index.xhtml</welcome-file>
     </welcome-file-list>
     <error-page>
         <error-code>403</error-code>
-        <location>/error403.html</location>
+        <location>error403.html</location>
     </error-page>
     <security-constraint>
         <display-name>Constraint1</display-name>
@@ -109,6 +109,11 @@
             <web-resource-name>My Sessions</web-resource-name>
             <description/>
             <url-pattern>/mySessions.xhtml</url-pattern>
+        </web-resource-collection>
+        <web-resource-collection>
+            <web-resource-name>Mobile Menu</web-resource-name>
+            <description/>
+            <url-pattern>/mobileMenu.xhtml</url-pattern>
         </web-resource-collection>
         <web-resource-collection>
             <web-resource-name>Index</web-resource-name>

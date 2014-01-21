@@ -28,21 +28,22 @@
                             <h:outputLabel value="#{configMapController.getKey('EditSessionHistoryLabel_sessiondate')}" for="sessiondate" />
                             <p:calendar id="sessiondate" value="#{sessionHistoryController.selected.sessiondate}" mode="inline"
                                         title="#{configMapController.getKey('CreateSessionHistoryTitle_sessiondate')}" >
-                                 <p:ajax event="dateSelect" listener="#{sessionHistoryController.handleDateSelect}" update=":menuForm:growl"  />
+                                <p:ajax event="dateSelect" listener="#{sessionHistoryController.handleDateSelect}" update=":menuForm:growl"  />
 
-                                </p:calendar>
+                            </p:calendar>
                         </p:panel>
                         <p:panel>
                             <h:panelGrid columns="1">
                                 <h:outputLabel value="#{configMapController.getKey('EditSessionHistoryLabel_sessionType')}" for="sessionType" />
-                                <h:selectOneMenu id="sessionType" value="#{sessionHistoryController.selected.sessionTypesId}" title="#{configMapController.getKey('EditSessionHistoryTitle_sessionType')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionHistoryRequiredMessage_sessionType')}">
+                                <h:selectOneMenu id="sessionType" value="#{sessionHistoryController.selected.sessionTypesId}"  converter="#{sessTypesConverter}" title="#{configMapController.getKey('EditSessionHistoryTitle_sessionType')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionHistoryRequiredMessage_sessionType')}">
                                     <f:selectItems value="#{sessionTypesController.itemsAvailableSelectOne}"/>
                                 </h:selectOneMenu>
-                                
+
                                 <h:outputLabel value="#{configMapController.getKey('CreateSessionHistoryLabel_trainer')}" for="trainer" />
-                                <h:selectOneMenu id="trainer" value="#{sessionHistoryController.selected.trainer}" title="#{configMapController.getKey('CreateSessionHistoryTitle_trainer')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionHistoryRequiredMessage_trainer')}">
-                                    <f:selectItems value="#{customersController.getCustomersByGroupSelectOne('TRAINER',true)}"/>
-                                </h:selectOneMenu>
+                                <p:selectManyMenu id="trainer"   value="#{sessionHistoryController.trainers}" converter="#{custConverter}"   >
+
+                                    <f:selectItems value="#{customersController.getCustomersByGroupObject('TRAINER',true)}" var="cust" itemLabel="#{cust.firstname} #{cust.lastname}" itemValue="#{cust}"/>
+                                </p:selectManyMenu>
 
                                 <h:outputLabel value="#{configMapController.getKey('EditSessionHistoryLabel_comments')}" for="comments" />
                                 <p:inputTextarea id="comments" value="#{sessionHistoryController.selected.comments}" cols="40" rows="8" title="#{configMapController.getKey('EditSessionHistoryTitle_comments')}"/>

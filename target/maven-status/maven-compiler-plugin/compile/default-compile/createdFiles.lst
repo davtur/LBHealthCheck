@@ -198,6 +198,7 @@ au/com/manlyit/fitnesscrm/stats/classes/ChartMeasureItem.class
 au/com/manlyit/fitnesscrm/stats/classes/ActivationController$1.class
 au/com/manlyit/fitnesscrm/stats/classes/CustomersController$1.class
 au/com/manlyit/fitnesscrm/stats/webservices/AddPayment.class
+au/com/manlyit/fitnesscrm/stats/db/SessionTrainers.class
 au/com/manlyit/fitnesscrm/stats/db/CustomerImages.class
 au/com/manlyit/fitnesscrm/stats/classes/util/PaginationHelper.class
 au/com/manlyit/fitnesscrm/stats/webservices/ChangeCustomerStatus.class

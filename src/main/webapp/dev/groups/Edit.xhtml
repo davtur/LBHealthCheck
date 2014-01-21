@@ -18,13 +18,15 @@
                 <p:panel>
                     <h:panelGrid columns="2">
                          <h:outputLabel value="#{configMapController.getKey('EditGroupsLabel_username')}" for="username" />
-                         <h:outputText id="username" value="#{groupsController.selected.customers.username}" title="#{configMapController.getKey('EditGroupsTitle_username')}" />
+                         <h:outputText id="username" value="#{groupsController.selected.username.username}" title="#{configMapController.getKey('EditGroupsTitle_username')}" />
                         
                         <h:outputLabel value="#{configMapController.getKey('CreateGroupsLabel_groupname')}" for="groupName" />
                         <h:selectOneMenu id="groupName" value="#{groupsController.selected.groupname}" title="#{configMapController.getKey('CreateGroupsLabel_groupname')}" required="true" requiredMessage="#{configMapController.getKey('CreateGroupsLabel_groupname')}">
-                            <f:selectItem itemLabel="Normal User" itemValue="USER"/>
-                            <f:selectItem itemLabel="Trainer" itemValue="TRAINER"/>
-                            <f:selectItem itemLabel="Administrator" itemValue="ADMIN"/>
+                        <f:selectItem itemLabel="Normal User" itemValue="USER"/>
+                        <f:selectItem itemLabel="Trainer" itemValue="TRAINER"/>
+                        <f:selectItem itemLabel="Administrator" itemValue="ADMIN"/>
+                        <f:selectItem itemLabel="Cancelled" itemValue="CANCELLED"/>
+                        <f:selectItem itemLabel="Developer" itemValue="DEVELOPER"/>
                         </h:selectOneMenu>
 
                     </h:panelGrid>

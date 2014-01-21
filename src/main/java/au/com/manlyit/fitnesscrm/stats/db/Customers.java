@@ -3,7 +3,6 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package au.com.manlyit.fitnesscrm.stats.db;
 
 import java.io.Serializable;
@@ -57,12 +56,7 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Customers.findByNewsletter", query = "SELECT c FROM Customers c WHERE c.newsletter = :newsletter"),
     @NamedQuery(name = "Customers.findByReferredby", query = "SELECT c FROM Customers c WHERE c.referredby = :referredby")})
 public class Customers implements Serializable {
-    @Size(max = 45)
-    @Column(name = "facebookId")
-    private String facebookId;
-    @Size(max = 45)
-    @Column(name = "googleId")
-    private String googleId;
+
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -133,8 +127,9 @@ public class Customers implements Serializable {
     private Integer referredby;
     @OneToMany(mappedBy = "userId")
     private Collection<Invoice> invoiceCollection;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "trainer")
-    private Collection<SessionHistory> sessionRegisterCollection;
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "customerId")
+    private Collection<SessionTrainers> sessionTrainersCollection;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "customerId")
     private Collection<CustomerGoals> customerGoalsCollection;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "customerId")
@@ -167,8 +162,13 @@ public class Customers implements Serializable {
     private Collection<StatsTaken> statsTakenCollection;
     @OneToMany(mappedBy = "userId")
     private Collection<Notes> notesCollection;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "trainer")
-    private Collection<SessionHistory> sessionHistoryCollection;
+    
+    @Size(max = 45)
+    @Column(name = "facebookId")
+    private String facebookId;
+    @Size(max = 45)
+    @Column(name = "googleId")
+    private String googleId;
 
     public Customers() {
     }
@@ -341,14 +341,7 @@ public class Customers implements Serializable {
         this.invoiceCollection = invoiceCollection;
     }
 
-    @XmlTransient
-    public Collection<SessionHistory> getSessionRegisterCollection() {
-        return sessionRegisterCollection;
-    }
-
-    public void setSessionRegisterCollection(Collection<SessionHistory> sessionRegisterCollection) {
-        this.sessionRegisterCollection = sessionRegisterCollection;
-    }
+   
 
     @XmlTransient
     public Collection<CustomerGoals> getCustomerGoalsCollection() {
@@ -461,14 +454,7 @@ public class Customers implements Serializable {
         this.notesCollection = notesCollection;
     }
 
-    @XmlTransient
-    public Collection<SessionHistory> getSessionHistoryCollection() {
-        return sessionHistoryCollection;
-    }
-
-    public void setSessionHistoryCollection(Collection<SessionHistory> sessionHistoryCollection) {
-        this.sessionHistoryCollection = sessionHistoryCollection;
-    }
+ 
 
     @Override
     public int hashCode() {
@@ -492,7 +478,7 @@ public class Customers implements Serializable {
 
     @Override
     public String toString() {
-        return  firstname +" "+ lastname;
+        return firstname + " " + lastname;
     }
 
     public String getFacebookId() {
@@ -510,5 +496,14 @@ public class Customers implements Serializable {
     public void setGoogleId(String googleId) {
         this.googleId = googleId;
     }
-    
+
+    @XmlTransient
+    public Collection<SessionTrainers> getSessionTrainersCollection() {
+        return sessionTrainersCollection;
+    }
+
+    public void setSessionTrainersCollection(Collection<SessionTrainers> sessionTrainersCollection) {
+        this.sessionTrainersCollection = sessionTrainersCollection;
+    }
+
 }

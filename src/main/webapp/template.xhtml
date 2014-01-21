@@ -74,6 +74,11 @@
                                 <p:menubar id="mainmenubar1" autoDisplay="true">
                                     <p:submenu  label="Developer" rendered="#{customersController.isUserInRole('DEVELOPER')}"  id="devMenu1" >
                                         <p:menuitem
+                                            id="configMap"                              
+                                            action="/dev/configMap/List.xhtml" ajax="false" value="Configuration"    >                        
+                                        </p:menuitem>
+
+                                        <p:menuitem
                                             id="currency"                              
                                             action="/dev/currency/List.xhtml" ajax="false"  value="Currency"    >                       
                                         </p:menuitem>
@@ -130,10 +135,7 @@
                                             id="webMonitor"                              
                                             action="/dev/monitor/websiteMonitor/List.xhtml" ajax="false" value="Monitoring"    >                        
                                         </p:menuitem>
-                                        <p:menuitem
-                                            id="configMap"                              
-                                            action="/dev/configMap/List.xhtml" ajax="false" value="Configuration"    >                        
-                                        </p:menuitem>
+
                                         <p:menuitem
                                             id="monitorCharts"                              
                                             action="/dev/monitoringcharts/List.xhtml" ajax="false" value="Charts"    >                        

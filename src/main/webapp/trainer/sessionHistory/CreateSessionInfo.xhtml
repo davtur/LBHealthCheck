@@ -44,9 +44,9 @@
 
                                     <h:outputLabel value="#{configMapController.getKey('CreateSessionHistoryLabel_trainer')}" for="trainer" />
 
-                                    <p:selectOneMenu id="trainer" filterFunction="startsWith" filter="true" value="#{sessionHistoryController.selected.trainer}" converter="#{custConverter}" editable="false" label="#{configMapController.getKey('CreateSessionHistoryTitle_trainer')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionHistoryRequiredMessage_trainer')}">
+                                    <p:selectManyMenu id="trainer"  value="#{sessionHistoryController.trainers}" converter="#{custConverter}"  label="#{configMapController.getKey('CreateSessionHistoryTitle_trainer')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionHistoryRequiredMessage_trainer')}">
                                         <f:selectItems value="#{customersController.getCustomersByGroupObject('TRAINER',true)}" var="cust" itemLabel="#{cust.firstname} #{cust.lastname}" itemValue="#{cust}"/>
-                                    </p:selectOneMenu>
+                                    </p:selectManyMenu>
 
                                     <h:outputLabel value="#{configMapController.getKey('CreateSessionHistoryLabel_comments')}" for="comments" />
                                     <p:inputTextarea id="comments" value="#{sessionHistoryController.selected.comments}" cols="35" rows="8" title="#{configMapController.getKey('CreateSessionHistoryTitle_comments')}"/>
