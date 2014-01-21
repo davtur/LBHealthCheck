@@ -83,7 +83,7 @@
     </welcome-file-list>
     <error-page>
         <error-code>403</error-code>
-        <location>error403.html</location>
+        <location>/error403.html</location>
     </error-page>
     <security-constraint>
         <display-name>Constraint1</display-name>
