@@ -134,12 +134,14 @@ public class ConfigMapController implements Serializable {
 
         
         current.setId(0);
-       
-
+       if(getPassword1().compareTo(getPassword2()) == 0){
+        current.setConfigvalue(password1);
         getFacade().createEncrypted(current);
         recreateModel();
         JsfUtil.addSuccessMessage(configMapFacade.getConfig("ConfigMapCreated"));
-
+       }else{
+          JsfUtil.addSuccessMessage(configMapFacade.getConfig("The Passwords Dont Match!")); 
+       }
 
 
     }

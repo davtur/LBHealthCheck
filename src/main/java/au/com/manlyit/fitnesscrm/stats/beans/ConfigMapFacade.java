@@ -45,16 +45,19 @@ public class ConfigMapFacade extends AbstractFacade<ConfigMap> {
     }
 
     public void createEncrypted(ConfigMap cm) {
-        cm.setConfigvalue(ETAG + encrypter.encrypt(cm.getConfigvalue()));
+        String valueToEncrypt = cm.getConfigvalue();
+        String taggedVal = ETAG + encrypter.encrypt(valueToEncrypt);
+        cm.setConfigvalue(taggedVal);
         create(cm);
     }
 
-    public String getConfig(String key) {
+    public synchronized String getConfig(String key) {
         String val = getValueFromKey(key);
         if (val.indexOf(ETAG) == 0) {
             // its encrypted so decrypt
             val = val.substring(ETAG.length());
-            val = encrypter.decrypt(val);
+            String decVal = encrypter.decrypt(val);
+            return decVal;
         }
         return val;
     }

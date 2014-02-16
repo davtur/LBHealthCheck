@@ -8,6 +8,8 @@ package au.com.manlyit.fitnesscrm.stats.classes.util;
 import java.io.UnsupportedEncodingException;
 import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.KeySpec;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.SecretKey;
@@ -24,6 +26,7 @@ import javax.xml.bind.DatatypeConverter;
  * @author dturner
  */
     public class StringEncrypter {
+        private static final Logger logger = Logger.getLogger(StringEncrypter.class.getName());
         Cipher ecipher;
         Cipher dcipher;
     
@@ -58,15 +61,17 @@ import javax.xml.bind.DatatypeConverter;
         public String encrypt(String str) {
             try {
                 // Encode the string into bytes using utf-8
-                byte[] utf8 = str.getBytes("UTF8");
+                byte[] utf8 = str.getBytes("UTF-8");
     
                 // Encrypt
                 byte[] enc = ecipher.doFinal(utf8);
     
                 // Encode bytes to base64 to get a string
                 //return new BASE64Encoder().encode(enc);
-                return DatatypeConverter.printBase64Binary(enc);
+                String encoded = DatatypeConverter.printBase64Binary(enc);
+                return encoded;
             } catch (    javax.crypto.BadPaddingException | IllegalBlockSizeException | UnsupportedEncodingException e) {
+                logger.log(Level.WARNING, "Encryption Exception",e);
             } 
             return null;
         }
@@ -80,8 +85,10 @@ import javax.xml.bind.DatatypeConverter;
                 byte[] utf8 = dcipher.doFinal(dec);
     
                 // Decode using utf-8
-                return new String(utf8, "UTF8");
-            } catch (    javax.crypto.BadPaddingException | IllegalBlockSizeException | UnsupportedEncodingException e) {             
+                String decoded = new String(utf8, "UTF-8");
+                return decoded;
+            } catch (    javax.crypto.BadPaddingException | IllegalBlockSizeException | UnsupportedEncodingException e) {  
+                  logger.log(Level.WARNING, "Encryption Exception",e);
             }
             return null;
         }
