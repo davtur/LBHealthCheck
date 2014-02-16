@@ -9,12 +9,20 @@ import au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade;
 import au.com.manlyit.fitnesscrm.stats.beans.CustomersFacade;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import au.com.manlyit.fitnesscrm.stats.db.PaymentParameters;
+import au.com.manlyit.fitnesscrm.stats.webservices.ArrayOfPayment;
+import au.com.manlyit.fitnesscrm.stats.webservices.ArrayOfScheduledPayment;
 import au.com.manlyit.fitnesscrm.stats.webservices.CustomerDetails;
+import au.com.manlyit.fitnesscrm.stats.webservices.EziResponseOfArrayOfPaymentTHgMB7OL;
+import au.com.manlyit.fitnesscrm.stats.webservices.EziResponseOfArrayOfScheduledPaymentTHgMB7OL;
 import au.com.manlyit.fitnesscrm.stats.webservices.EziResponseOfCustomerDetailsTHgMB7OL;
 import au.com.manlyit.fitnesscrm.stats.webservices.EziResponseOfNewCustomerXcXH3LiW;
+import au.com.manlyit.fitnesscrm.stats.webservices.EziResponseOfPaymentDetailPlusNextPaymentInfoTHgMB7OL;
+import au.com.manlyit.fitnesscrm.stats.webservices.EziResponseOfPaymentDetailTHgMB7OL;
 import au.com.manlyit.fitnesscrm.stats.webservices.EziResponseOfstring;
 import au.com.manlyit.fitnesscrm.stats.webservices.INonPCIService;
 import au.com.manlyit.fitnesscrm.stats.webservices.NonPCIService;
+import au.com.manlyit.fitnesscrm.stats.webservices.PaymentDetail;
+import au.com.manlyit.fitnesscrm.stats.webservices.PaymentDetailPlusNextPaymentInfo;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
@@ -176,30 +184,155 @@ public class EziDebitPaymentGateway implements Serializable {
         return result;
     }
 
+    private PaymentDetail getPaymentDetail(String paymentReference) {
+        //  This method retrieves details about the given payment. It can only be used to retrieve
+        //  information about payments where Ezidebit was provided with a PaymentReference.
+        //  It is important to note the following when querying payment details:
+        //  
+        //  This method can be used to retrieve information about payments that have been
+        //  scheduled by you. It cannot access information about real-time payments. Other
+        //  methods are provided for retrieving real-time payment information.
+        PaymentDetail result = null;
+        INonPCIService ws = new NonPCIService().getBasicHttpBindingINonPCIService();
+
+        if (paymentReference == null) {
+
+            logger.log(Level.WARNING, "getPaymentDetail paymentReference is required but it is NULL");
+            return result;
+        }
+
+        if (paymentReference.length() > 50) {
+            paymentReference = paymentReference.substring(0, 50);
+            logger.log(Level.WARNING, "getPaymentDetail paymentReference is greater than the allowed 50 characters. Truncating! to 50 chars");
+        }
+
+        EziResponseOfPaymentDetailTHgMB7OL eziResponse = ws.getPaymentDetail(digitalKey, paymentReference);
+        logger.log(Level.INFO, "getPaymentDetail Response: Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
+        if (eziResponse.getError().intValue() == 0) {// any errors will be a non zero value
+            result = eziResponse.getData().getValue();
+
+        } else {
+            logger.log(Level.WARNING, "getPaymentDetail Response: Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
+
+        }
+
+        return result;
+    }
+
+    private boolean getPaymentStatus(String paymentReference) {
+        //  Description
+        //  This method allows you to retrieve the status of a particular payment from the direct
+        //  debit system where a PaymentReference has been provided.
+        //  It is important to note the following when querying Payment details:
+        //  • This method cannot be used to retrieve the status of BPAY or real-time credit card
+        //  payments;
+        //  • This method will only return the status of one payment at a time;
+        //  • To use this method, you must have provided a PaymentReference when adding
+        //  the payment to the Customer's schedule.
+        //  
+        //  Response
+        //  The <Data> field in the GetPaymentStatus response will contain either:
+        //  • A status of which the possible values are:
+        //  - 'W' (waiting) - Payment is scheduled waiting to be sent to the bank;
+        //  - 'P' (pending) - Payment request has been sent to the bank for processing
+        //  and Ezidebit is waiting on a success or fail response before completing
+        //  settlement;
+        //  - 'S' (successful) - Payment has been successfully debited from the
+        //  Customer and deposited to the client's settlement bank account;
+        //  - 'D' (dishonoured) - Payment has been dishonoured by the Customer's
+        //  financial institution due to insufficient funds;
+        //  - 'F' (fatal dishonour) - Payment has been dishonoured by the Customer's
+        //  financial institution;
+        boolean result = false;
+        INonPCIService ws = new NonPCIService().getBasicHttpBindingINonPCIService();
+
+        if (paymentReference == null) {
+
+            logger.log(Level.WARNING, "getPaymentStatus paymentReference is required but it is NULL");
+            return result;
+        }
+
+        if (paymentReference.length() > 50) {
+            paymentReference = paymentReference.substring(0, 50);
+            logger.log(Level.WARNING, "getPaymentStatus paymentReference is greater than the allowed 50 characters. Truncating! to 50 chars");
+        }
+
+        EziResponseOfstring eziResponse = ws.getPaymentStatus(digitalKey, paymentReference);
+        logger.log(Level.INFO, "getPaymentStatus Response: Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
+        if (eziResponse.getError().intValue() == 0) {// any errors will be a non zero value
+
+            if (eziResponse.getData().getValue().compareTo("S") == 0) {
+                result = true;
+            } else {
+                logger.log(Level.WARNING, "getPaymentStatus Response Data value should be S ( Successful ) : Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
+            }
+        } else {
+            logger.log(Level.WARNING, "getPaymentStatus Response: Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
+
+        }
+
+        return result;
+    }
+
+    private PaymentDetailPlusNextPaymentInfo getPaymentDetailPlusNextPaymentInfo(String paymentReference) {
+        //  This method retrieves details about the given payment. It can only be used to retrieve
+        //  information about payments where Ezidebit was provided with a PaymentReference.
+        //  It is important to note the following when querying payment details:
+        //  
+        //  This method can be used to retrieve information about payments that have been
+        //  scheduled by you. It cannot access information about real-time payments. Other
+        //  methods are provided for retrieving real-time payment information.
+        PaymentDetailPlusNextPaymentInfo result = null;
+        INonPCIService ws = new NonPCIService().getBasicHttpBindingINonPCIService();
+
+        if (paymentReference == null) {
+
+            logger.log(Level.WARNING, "getPaymentDetailPlusNextPaymentInfo paymentReference is required but it is NULL");
+            return result;
+        }
+
+        if (paymentReference.length() > 50) {
+            paymentReference = paymentReference.substring(0, 50);
+            logger.log(Level.WARNING, "getPaymentDetailPlusNextPaymentInfo paymentReference is greater than the allowed 50 characters. Truncating! to 50 chars");
+        }
+
+        EziResponseOfPaymentDetailPlusNextPaymentInfoTHgMB7OL eziResponse = ws.getPaymentDetailPlusNextPaymentInfo(digitalKey, paymentReference);
+        logger.log(Level.INFO, "getPaymentDetailPlusNextPaymentInfo Response: Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
+        if (eziResponse.getError().intValue() == 0) {// any errors will be a non zero value
+            result = eziResponse.getData().getValue();
+
+        } else {
+            logger.log(Level.WARNING, "getPaymentDetailPlusNextPaymentInfo Response: Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
+
+        }
+
+        return result;
+    }
+
     private boolean deletePayment(Customers cust, Date debitDate, Long paymentAmountInCents, String paymentReference, String loggedInUser) {
         	//  This method will delete a single payment from the Customer's payment schedule.
-		//  It is important to note the following when deleting a payment:
-		
-		//  Only scheduled payments with a PaymentStatus of 'W' can be deleted;
-		//  A specified PaymentReference value will override the debit date and payment
-		//  amount when identifying the payment to be deleted;
-		//  Values for both DebitDate and PaymentAmountInCents must be provided in order
-		//  to identify a payment;
-		//  If you provide values for DebitDate and PaymentAmountInCents and there is more
-		//  than one payment for PaymentAmountInCents scheduled on DebitDate, then only
-		//  one of the payments will be deleted.
+        //  It is important to note the following when deleting a payment:
+
+        //  Only scheduled payments with a PaymentStatus of 'W' can be deleted;
+        //  A specified PaymentReference value will override the debit date and payment
+        //  amount when identifying the payment to be deleted;
+        //  Values for both DebitDate and PaymentAmountInCents must be provided in order
+        //  to identify a payment;
+        //  If you provide values for DebitDate and PaymentAmountInCents and there is more
+        //  than one payment for PaymentAmountInCents scheduled on DebitDate, then only
+        //  one of the payments will be deleted.
         boolean result = false;
         String eziDebitCustomerId = ""; // use our reference instead. THis must be an empty string.
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         String debitDateString = sdf.format(debitDate);
         String ourSystemCustomerReference = cust.getId().toString();
         INonPCIService ws = new NonPCIService().getBasicHttpBindingINonPCIService();
-        
-        if(paymentReference != null && paymentAmountInCents != new Long(0)){
+
+        if (paymentReference != null && paymentAmountInCents != new Long(0)) {
             paymentAmountInCents = new Long(0);
-             logger.log(Level.WARNING, "deletePayment paymentReference is not NULL and paymentAmount is also set.It should be 0 if using payment reference. Setting Amount to zero and using paymentReference to identify the payment");
+            logger.log(Level.WARNING, "deletePayment paymentReference is not NULL and paymentAmount is also set.It should be 0 if using payment reference. Setting Amount to zero and using paymentReference to identify the payment");
         }
-        if(paymentReference == null){
+        if (paymentReference == null) {
             paymentReference = "";
         }
         if (paymentReference.length() > 50) {
@@ -210,14 +343,14 @@ public class EziDebitPaymentGateway implements Serializable {
             loggedInUser = loggedInUser.substring(0, 50);
             logger.log(Level.WARNING, "deletePayment loggedInUser is greater than the allowed 50 characters. Truncating! to 50 chars");
         }
-        EziResponseOfstring eziResponse = ws.deletePayment(digitalKey, eziDebitCustomerId, ourSystemCustomerReference,paymentReference, debitDateString, paymentAmountInCents,  loggedInUser);
+        EziResponseOfstring eziResponse = ws.deletePayment(digitalKey, eziDebitCustomerId, ourSystemCustomerReference, paymentReference, debitDateString, paymentAmountInCents, loggedInUser);
         logger.log(Level.INFO, "deletePayment Response: Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
         if (eziResponse.getError().intValue() == 0) {// any errors will be a non zero value
 
             if (eziResponse.getData().getValue().compareTo("S") == 0) {
                 result = true;
             } else {
-                logger.log(Level.WARNING, "deletePayment Response Data value should be S ( Scheduled ) : Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
+                logger.log(Level.WARNING, "deletePayment Response Data value should be S ( Successful ) : Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
             }
         } else {
             logger.log(Level.WARNING, "deletePayment Response: Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
@@ -250,7 +383,7 @@ public class EziDebitPaymentGateway implements Serializable {
             if (eziResponse.getData().getValue().compareTo("S") == 0) {
                 result = true;
             } else {
-                logger.log(Level.WARNING, "addPayment Response Data value should be S ( Scheduled ) : Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
+                logger.log(Level.WARNING, "addPayment Response Data value should be S ( Successful ) : Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
             }
         } else {
             logger.log(Level.WARNING, "addPayment Response: Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
@@ -555,6 +688,185 @@ public class EziDebitPaymentGateway implements Serializable {
         } else {
             logger.log(Level.WARNING, "editCustomerDetail Response: Error - {0}, Data - {1}", new Object[]{editCustomerDetail.getErrorMessage().getValue(), editCustomerDetail.getData().getValue()});
 
+        }
+        return result;
+    }
+
+    private ArrayOfPayment getPayments(Customers cust, String paymentType, String paymentMethod, String paymentSource, String paymentReference, Date fromDate, Date toDate, boolean useSettlementDate) {
+        //  Description
+        //  	  
+        //  This method allows you to retrieve payment information from across Ezidebit's various
+        //  payment systems. It provides you with access to scheduled, pending and completed
+        //  payments made through all payment channels.
+        //  It is important to note the following when querying Payment details:
+        //  • This method can be used to retrieve information about payments that have been
+        //  made by your Customer through any means;
+        //  • This is the recommended method for retrieving a set of payment results in a
+        //  single call as most other methods are designed to provide detail about a single
+        //  transaction. This method will return a full set of transactions matching the
+        //  supplied criteria;
+        //  • The flexibility of using a wildcard in the PaymentReference search value means
+        //  that if you are adding payments with the AddPayment method as they become
+        //  due, you can provide structured PaymentReferences that will allow you to group
+        //  or batch payments in a way that you see fit;
+        //  • Ezidebit only processes settlement deposits to clients once a day. Since the
+        //  "SUCCESS" criteria for a scheduled direct debit payment is set when the payment
+        //  is deposited to the client, the combination of
+        //  PaymentType=ALL
+        //  DateField=SETTLEMENT
+        //  DateFrom={LastSuccessfulPaymentDate + 1}
+        //  DateTo={currentDate}
+        //  will provide you with all payments that have been made to the client since the
+        //  last time your system received payment information.
+        if(paymentType.compareTo("ALL") != 0 && paymentType.compareTo("PENDING") != 0 && paymentType.compareTo("FAILED") != 0 && paymentType.compareTo("SUCCESSFUL") != 0 ){
+            logger.log(Level.WARNING, "getPayments: payment Type is required and should be either ALL,PENDING,FAILED,SUCCESSFUL.  Returning null as this parameter is required.");
+            return null;
+        }
+        if(paymentMethod.compareTo("ALL") != 0 && paymentMethod.compareTo("CR") != 0 && paymentMethod.compareTo("DR") != 0  ){
+            logger.log(Level.WARNING, "getPayments: payment Method is required and should be either ALL,CR,DR.  Returning null as this parameter is required.");
+            return null;
+        }
+        if(paymentSource.compareTo("ALL") != 0 && paymentSource.compareTo("SCHEDULED") != 0 && paymentSource.compareTo("WEB") != 0 && paymentSource.compareTo("PHONE") != 0 && paymentSource.compareTo("BPAY") != 0){
+            logger.log(Level.WARNING, "getPayments: paymentSource is required and should be either ALL,SCHEDULED,WEB,PHONE,BPAY.  Returning null as this parameter is required.");
+            return null;
+        }
+        if (paymentReference == null) {
+            paymentReference = "";
+        }
+        if (paymentReference.length() > 50) {
+            paymentReference = paymentReference.substring(0, 50);
+            logger.log(Level.WARNING, "getPayments paymentReference is greater than the allowed 50 characters. Truncating! to 50 chars");
+        }
+
+        ArrayOfPayment result = null;
+        String dateField = "PAYMENT";
+        if (useSettlementDate == true) {
+            dateField = "SETTLEMENT";
+        }
+        String eziDebitCustomerId = ""; // use our reference instead. THis must be an empty string.
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        String fromDateString = ""; // The exact date on which the payment that you wish to move is scheduled to be deducted from your Customer's bank account or credit card.
+        if(fromDate != null){
+            fromDateString = sdf.format(fromDate);
+        }
+        String toDateString ="";
+        if(toDate != null){
+            toDateString = sdf.format(toDate);
+        }
+       
+        String ourSystemCustomerReference = cust.getId().toString();
+
+        INonPCIService ws = new NonPCIService().getBasicHttpBindingINonPCIService();
+
+        EziResponseOfArrayOfPaymentTHgMB7OL eziResponse = ws.getPayments(digitalKey, paymentType, paymentMethod, paymentSource, paymentReference, fromDateString, toDateString, dateField, eziDebitCustomerId, ourSystemCustomerReference);
+        logger.log(Level.INFO, "getPayments Response: Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
+        if (eziResponse.getError().intValue() == 0) {// any errors will be a non zero value
+            result = eziResponse.getData().getValue();
+
+        } else {
+            logger.log(Level.WARNING, "getPayments Response: Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
+
+        }
+
+        return result;
+    }
+
+    private ArrayOfScheduledPayment getScheduledPayments(Customers cust, Date fromDate, Date toDate) {
+        //  Description
+        //  This method allows you to retrieve information about payments that are scheduled for a
+        //  given Customer in the Ezidebit direct debit system.
+        //  It is important to note the following when querying Payment details:
+        //  • This method can be used to retrieve information about payments that are
+        //  scheduled to be debited, but have not yet been sent to the bank for processing;
+        //  • This method provides access only to payments that have been added to a payer's
+        //  schedule through the integrated web services, Ezidebit Online website or by
+        //  Ezidebit client support.
+        //  Payment information about real-time credit card or BPAY payments cannot be accessed
+        //  through this method.
+        ArrayOfScheduledPayment result = null;
+
+        String eziDebitCustomerId = ""; // use our reference instead. THis must be an empty string.
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        String fromDateString = ""; // The exact date on which the payment that you wish to move is scheduled to be deducted from your Customer's bank account or credit card.
+        String toDateString = sdf.format(toDate); // The new date that you wish for this payment to be deducted from your Customer's bank account or credit card.
+        String ourSystemCustomerReference = cust.getId().toString();
+
+        INonPCIService ws = new NonPCIService().getBasicHttpBindingINonPCIService();
+
+        EziResponseOfArrayOfScheduledPaymentTHgMB7OL eziResponse = ws.getScheduledPayments(digitalKey, fromDateString, toDateString, eziDebitCustomerId, ourSystemCustomerReference);
+        logger.log(Level.INFO, "getScheduledPayments Response: Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
+        if (eziResponse.getError().intValue() == 0) {// any errors will be a non zero value
+            result = eziResponse.getData().getValue();
+
+        } else {
+            logger.log(Level.WARNING, "getScheduledPayments Response: Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
+
+        }
+
+        return result;
+    }
+
+    private boolean isBsbValid(String bsb) {
+        //  Description
+        //  check that the BSB is valid
+        boolean result = false;
+
+        INonPCIService ws = new NonPCIService().getBasicHttpBindingINonPCIService();
+
+        EziResponseOfstring eziResponse = ws.isBsbValid(digitalKey, bsb);
+        logger.log(Level.INFO, "isBsbValid Response: Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
+        if (eziResponse.getError().intValue() == 0) {// any errors will be a non zero value
+            String valid = eziResponse.getData().getValue();
+            if (valid.compareTo("YES") == 0) {
+                return true;
+            }
+
+        } else {
+            logger.log(Level.WARNING, "isBsbValid Response: Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
+
+        }
+
+        return result;
+    }
+
+    private boolean isSystemLocked() {
+        //  Description
+        //  check that the BSB is valid
+        boolean result = false;
+
+        INonPCIService ws = new NonPCIService().getBasicHttpBindingINonPCIService();
+
+        EziResponseOfstring eziResponse = ws.isSystemLocked(digitalKey);
+        logger.log(Level.INFO, "isSystemLocked Response: Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
+        if (eziResponse.getError().intValue() == 0) {// any errors will be a non zero value
+            String valid = eziResponse.getData().getValue();
+            if (valid.compareTo("YES") == 0) {
+                return true;
+            }
+
+        } else {
+            logger.log(Level.WARNING, "isSystemLocked Response: Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
+
+        }
+
+        return result;
+    }
+
+    private String getPaymentExchangeVersion() {
+        //  Description
+        //  
+        //  This method returns the version of our web services and API that you are connecting to.
+        //  This can be used as a check to ensure that you're connecting to the web services that
+        //  you expect to, based on the API document that you have.
+
+        String result = "ERROR Getting version";
+        INonPCIService ws = new NonPCIService().getBasicHttpBindingINonPCIService();
+        EziResponseOfstring eziResponse = ws.paymentExchangeVersion();
+        logger.log(Level.INFO, "getPaymentExchangeVersion Response: Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
+        if (eziResponse.getError().intValue() == 0) {// any errors will be a non zero value
+            result = eziResponse.getData().getValue();
+        } else {
+            logger.log(Level.WARNING, "getPaymentExchangeVersion Response: Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
         }
         return result;
     }
