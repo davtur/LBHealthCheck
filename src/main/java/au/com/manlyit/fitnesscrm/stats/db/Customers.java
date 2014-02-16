@@ -54,9 +54,10 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Customers.findByFax", query = "SELECT c FROM Customers c WHERE c.fax = :fax"),
     @NamedQuery(name = "Customers.findByPassword", query = "SELECT c FROM Customers c WHERE c.password = :password"),
     @NamedQuery(name = "Customers.findByNewsletter", query = "SELECT c FROM Customers c WHERE c.newsletter = :newsletter"),
-    @NamedQuery(name = "Customers.findByReferredby", query = "SELECT c FROM Customers c WHERE c.referredby = :referredby")})
+    @NamedQuery(name = "Customers.findByReferredby", query = "SELECT c FROM Customers c WHERE c.referredby = :referredby"),
+    @NamedQuery(name = "Customers.findByFacebookId", query = "SELECT c FROM Customers c WHERE c.facebookId = :facebookId"),
+    @NamedQuery(name = "Customers.findByGoogleId", query = "SELECT c FROM Customers c WHERE c.googleId = :googleId")})
 public class Customers implements Serializable {
-
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -140,6 +141,8 @@ public class Customers implements Serializable {
     private Collection<Activation> activationCollection;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "username")
     private Collection<Groups> groupsCollection;
+    @OneToMany(mappedBy = "loggedInUser")
+    private Collection<PaymentParameters> paymentParametersCollection;
     @JoinColumn(name = "active", referencedColumnName = "id")
     @ManyToOne
     private CustomerState active;
@@ -454,8 +457,17 @@ public class Customers implements Serializable {
         this.notesCollection = notesCollection;
     }
 
- 
+  @XmlTransient
+    public Collection<PaymentParameters> getPaymentParametersCollection() {
+        return paymentParametersCollection;
+    }
 
+    public void setPaymentParametersCollection(Collection<PaymentParameters> paymentParametersCollection) {
+        this.paymentParametersCollection = paymentParametersCollection;
+    }
+
+   
+    
     @Override
     public int hashCode() {
         int hash = 0;

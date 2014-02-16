@@ -149,6 +149,7 @@ au/com/manlyit/fitnesscrm/stats/classes/util/ViewExpiredExceptionExceptionHandle
 au/com/manlyit/fitnesscrm/stats/db/CustomerGoals.class
 au/com/manlyit/fitnesscrm/stats/classes/NotesController$1.class
 au/com/manlyit/fitnesscrm/stats/classes/StatTypesController$1.class
+au/com/manlyit/fitnesscrm/stats/classes/EziDebitPaymentGateway.class
 au/com/manlyit/fitnesscrm/stats/webservices/IsBsbValidResponse.class
 au/com/manlyit/fitnesscrm/stats/beans/EmailQueueFacade.class
 au/com/manlyit/fitnesscrm/stats/classes/util/CustomerConverter.class
@@ -260,6 +261,7 @@ au/com/manlyit/fitnesscrm/stats/beans/JFreeChartWebMonBean.class
 au/com/manlyit/fitnesscrm/stats/beans/QrtzJobDetailsFacade.class
 au/com/manlyit/fitnesscrm/stats/classes/util/CustomerAuthConverter.class
 au/com/manlyit/fitnesscrm/stats/beans/StatTypesFacade.class
+au/com/manlyit/fitnesscrm/stats/classes/util/TestEziDebitModule.class
 au/com/manlyit/fitnesscrm/stats/beans/LoginBean.class
 au/com/manlyit/fitnesscrm/stats/classes/util/PlanConverter.class
 au/com/manlyit/fitnesscrm/stats/webservices/DeletePayment.class
@@ -272,6 +274,7 @@ au/com/manlyit/fitnesscrm/stats/db/Activation.class
 au/com/manlyit/fitnesscrm/stats/classes/InvoiceLineController.class
 au/com/manlyit/fitnesscrm/stats/chartbeans/BeepTestAndVO2MaxChart.class
 au/com/manlyit/fitnesscrm/stats/webservices/NextPaymentInfo.class
+au/com/manlyit/fitnesscrm/stats/db/PaymentParameters.class
 au/com/manlyit/fitnesscrm/stats/webservices/ScheduledPayment.class
 au/com/manlyit/fitnesscrm/stats/classes/ParticipantsController$ParticipantsControllerConverter.class
 au/com/manlyit/fitnesscrm/stats/classes/util/UAgentInfo.class

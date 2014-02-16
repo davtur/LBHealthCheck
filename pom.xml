@@ -217,10 +217,10 @@
                         </goals>
                         <configuration>
                             <wsdlFiles>
-                                <wsdlFile>api.ezidebit.com.au/v3-3/nonpci.wsdl</wsdlFile>
+                                <wsdlFile>api.demo.ezidebit.com.au/v3-3/nonpci.wsdl</wsdlFile>
                             </wsdlFiles>
                             <packageName>au.com.manlyit.fitnesscrm.stats.webservices</packageName>
-                            <wsdlLocation>https://api.ezidebit.com.au/v3-3/nonpci</wsdlLocation>
+                            <wsdlLocation>https://api.demo.ezidebit.com.au/v3-3/nonpci</wsdlLocation>
                             <staleFile>${project.build.directory}/jaxws/stale/nonpci.stale</staleFile>
                         </configuration>
                         <id>wsimport-generate-nonpci</id>

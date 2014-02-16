@@ -108,6 +108,9 @@
 
                         <p:commandButton  id="passButton" ajax="true" actionListener="#{customersController.updatepass}" update=":menuForm:growl"   value="#{configMapController.getKey('EditCustomersUpdatePassword')}" immediate="true"/>
                         <p:outputLabel value=" " for="passButton" />
+                        <p:commandButton  id="paymentsButton" ajax="true" actionListener="#{ezidebit.createCustomerRecord()}" update=":menuForm:growl"   value="#{configMapController.getKey('EditCustomersUpdatePayment')}" immediate="true"/>
+                        <p:outputLabel value=" " for="paymentsButton" />
+
                     </p:panelGrid>
                     <p:panel>
                         <p:commandButton id="dialogueSave" oncomplete="handleCreateRequest(xhr, status, args)"  actionListener="#{customersController.createDialogue}" value="#{configMapController.getKey('CreateCustomersSaveLink')}" update=":CustomerslistForm1:tableList :menuForm:growl"/>                
