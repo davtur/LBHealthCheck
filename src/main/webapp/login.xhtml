@@ -13,25 +13,24 @@
         <ui:define name="body">
 
 
-            <h1 >Pure Fitness Manly</h1>
-            <h3 >Login</h3>
             <h:form>
-                <p:outputLabel for="usernameInput">
-                    Username
-                </p:outputLabel>
+                <p:panel>
+                    <br />
+                <p:outputLabel  value="Username:  "/>
+                
                 <p:inputText id="usernameInput" value="#{loginBean.username}" 
                              required="true" requiredMessage="Please enter your username"/>
-                <br />
-                <p:outputLabel for="passwordInput">
-                    Password
-                </p:outputLabel>
-                <p:password id="passwordInput" value="#{loginBean.password}" 
-                             />
+                <br /><br />
+                <p:outputLabel  value="Password:   " />
+               
+                <p:password id="passwordInput" value="#{loginBean.password}" /><br />
+                 </p:panel>
                 <br />
                 <p:commandButton value="Submit" 
                                  action="#{loginBean.login}" /> 
                 <p:commandButton value="Reset Password" ajax="false"
                                  action="#{loginBean.resetPassword}" update=":menuForm:growl"/>
+               
             </h:form>
 
             <h1>Or Login with Facebook</h1>

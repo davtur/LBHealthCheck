@@ -9,8 +9,6 @@ import au.com.manlyit.fitnesscrm.stats.db.Groups;
 import java.io.IOException;
 
 import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
@@ -23,6 +21,7 @@ import javax.faces.FacesException;
 import javax.inject.Named;
 import java.util.List;
 import javax.enterprise.context.SessionScoped;
+import javax.faces.application.FacesMessage;
 import javax.faces.component.UIComponent;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
@@ -37,6 +36,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import org.primefaces.event.RowEditEvent;
 import org.primefaces.event.SelectEvent;
+import org.primefaces.event.TabChangeEvent;
 
 @Named("customersController")
 @SessionScoped
@@ -55,11 +55,11 @@ public class CustomersController implements Serializable {
     private ConfigMapFacade configMapFacade;
     private PaginationHelper pagination;
     private int selectedItemIndex;
-    private String eziDebitWidgetUrl ="";
+
     private List<Customers> filteredItems;
     private Customers[] multiSelected;
     private String checkPass = "";
-   
+
     private String checkPass2 = "";
     private Customers impersonate;
     private boolean impersonating = false;
@@ -104,6 +104,9 @@ public class CustomersController implements Serializable {
             current = cust;
             selectedItemIndex = -1;
             checkPass = current.getPassword();
+            FacesContext context = FacesContext.getCurrentInstance();
+            EziDebitPaymentGateway controller = (EziDebitPaymentGateway) context.getApplication().getELResolver().getValue(context.getELContext(), null, "ezidebit");
+            controller.setSelectedCustomer(cust);
         }
     }
 
@@ -482,6 +485,10 @@ public class CustomersController implements Serializable {
         return JsfUtil.getSelectItems(ejbFacade.findAll(true), true);
     }
 
+    public Collection<Customers> getCustomersAvailableSelectOneObject() {
+        return ejbFacade.findAll(true);
+    }
+
     public SelectItem[] getCustomersByGroupSelectOne(String group, boolean sortAsc) {
         return JsfUtil.getSelectItems(ejbFacade.findAllByGroup(group, sortAsc), true);
     }
@@ -561,6 +568,17 @@ public class CustomersController implements Serializable {
             current.setGender(gen);
             updateDemographic(dob);
         }
+    }
+
+    public void onTabChange(TabChangeEvent event) {
+
+        String tabName = event.getTab().getTitle();
+        if (tabName == null) {
+            tabName = "unknown";
+        }
+        FacesMessage msg = new FacesMessage("Tab Changed", "Active Tab: " + tabName);
+
+        FacesContext.getCurrentInstance().addMessage(null, msg);
     }
 
     private void updateDemographic(Date dob) {
@@ -698,38 +716,6 @@ public class CustomersController implements Serializable {
         return configMapFacade.getConfig("payment.ezidebit.widget.digitalkey");
     }
 
-    /**
-     * @return the eziDebitWidgetUrl
-     */
-    public String getEziDebitWidgetUrl() {
-        String amp = "&";
-        String encodedUrl = "";
-
-        String widgetUrl = configMapFacade.getConfig("payment.ezidebit.widget.baseurl") + "edit?";
-        widgetUrl +=       "dk=" + getDigitalKey();
-        widgetUrl += amp + "cr=" + getSelected().getId().toString();
-        widgetUrl += amp + "e=0"; // dont allow customer to edit
-        widgetUrl += amp + "template=win7";//template name
-        widgetUrl += amp + "f=Arial";//font
-        widgetUrl += amp + "h1c=FF5595";//header colour
-        widgetUrl += amp + "h1s=20";//header size in pixels
-        widgetUrl += amp + "lblc=EB7636"; // label colour
-        widgetUrl += amp + "lbls=14";//label size in pixels
-        widgetUrl += amp + "bgc=FFFFFF";//background
-        widgetUrl += amp + "hgl=1892CD";// highlight
-        widgetUrl += amp + "txtc=333333";//text
-        widgetUrl += amp + "txtbgc=FFFFFF";//text background
-        widgetUrl += amp + "txtbc=EB7636";//Textbox Focus Border Colour
-        eziDebitWidgetUrl = widgetUrl;
-        /*try {
-            eziDebitWidgetUrl = URLEncoder.encode(widgetUrl,"UTF-8");
-        } catch (UnsupportedEncodingException ex) {
-            Logger.getLogger(CustomersController.class.getName()).log(Level.SEVERE, "UTF-8 unsupported. This shouldn't happen!", ex);
-        }*/
-        return eziDebitWidgetUrl;
-    }
-
-   
     @FacesConverter(forClass = Customers.class)
     public static class CustomersControllerConverter implements Converter {
 

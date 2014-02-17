@@ -239,6 +239,7 @@ au/com/manlyit/fitnesscrm/stats/classes/PasswordService.class
 au/com/manlyit/fitnesscrm/stats/classes/PreferedContactController.class
 au/com/manlyit/fitnesscrm/stats/beans/DemographicTypesFacade.class
 au/com/manlyit/fitnesscrm/stats/classes/EmailQueueController.class
+au/com/manlyit/fitnesscrm/stats/classes/util/CustomerNotesConverter.class
 au/com/manlyit/fitnesscrm/stats/webservices/EditCustomerDetails.class
 au/com/manlyit/fitnesscrm/stats/classes/SessionTypesController$SessionTypesControllerConverter.class
 au/com/manlyit/fitnesscrm/stats/classes/DemographicTypesController.class

@@ -11,6 +11,30 @@
             <h:outputText value="#{configMapController.getKey('ListCustomersTitle')}"></h:outputText>
         </ui:define>
         <ui:define name="body">
+            <h:form id="paymentsForm"> 
+                <p:confirmDialog id="confirmDialogCustomersPayments" message="Payment Information."  
+                                 header="#{configMapController.getKey('CreateCustomersPaymentsTitle')}" severity="info" widgetVar="customersPaymentsDialogue">
+                    <p:outputPanel id="mainPanel">
+                        <p:selectBooleanButton value="#{ezidebit.editPaymentDetails}" onLabel="Edit Payment Details" offLabel="Edit Payment Details" rendered="#{ezidebit.customerExistsInPaymentGateway}" >
+                            <p:ajax update=":paymentsForm:viewPaymentsGrid  :paymentsForm:editPaymentsGrid  :menuForm:growl" process=":paymentsForm:viewPaymentsGrid  :paymentsForm:editPaymentsGrid "/>  
+                        </p:selectBooleanButton>  
+                        <p:panel id="dialoguePaymenstGrid2" rendered="#{ezidebit.customerExistsInPaymentGateway}" >
+                            <p:panel id="viewPaymentsGrid"  rendered="#{!ezidebit.editPaymentDetails}" >
+                                <iframe id="ezidebitIframeView"  style="width:450px;height:600px" src="#{ezidebit.getEziDebitWidgetUrl(false)}" />
+                            </p:panel>
+                            <p:panel id="editPaymentsGrid"  rendered="#{ezidebit.editPaymentDetails}">
+                                <p:outputLabel value="Edit Payment Details"/> <br/>
+                                <iframe id="ezidebitIframeEdit"  style="width:450px;height:600px" src="#{ezidebit.getEziDebitWidgetUrl(true)}" />
+                            </p:panel>
+                        </p:panel>
+                        <p:panelGrid id="dialoguePaymenstGrid1" columns="2" rendered="#{!ezidebit.customerExistsInPaymentGateway}">
+                            <p:commandButton  id="paymentsButton" ajax="true" actionListener="#{ezidebit.createCustomerRecord}" update=":menuForm:growl"   value="#{configMapController.getKey('EditCustomersUpdatePayment')}" immediate="true"/>
+                            <p:outputLabel value=" " for="paymentsButton" />
+
+                        </p:panelGrid>
+                    </p:outputPanel>
+                </p:confirmDialog>
+            </h:form>   
 
 
             <h:form id="formCustomersCreate1">    
@@ -108,7 +132,7 @@
 
                         <p:commandButton  id="passButton" ajax="true" actionListener="#{customersController.updatepass}" update=":menuForm:growl"   value="#{configMapController.getKey('EditCustomersUpdatePassword')}" immediate="true"/>
                         <p:outputLabel value=" " for="passButton" />
-                        <p:commandButton  id="paymentsButton" ajax="true" actionListener="#{ezidebit.createCustomerRecord}" update=":menuForm:growl"   value="#{configMapController.getKey('EditCustomersUpdatePayment')}" immediate="true"/>
+                        <p:commandButton  id="paymentsButton" ajax="true" actionListener="#{ezidebit.createCustomerRecord()}" update=":menuForm:growl"   value="#{configMapController.getKey('EditCustomersUpdatePayment')}" immediate="true"/>
                         <p:outputLabel value=" " for="paymentsButton" />
 
                     </p:panelGrid>
@@ -125,12 +149,8 @@
             <h:form id="CustomerslistForm1">
                 <h:panelGroup >
                     <p:commandButton id="showDialogButton"  immediate="true" actionListener="#{customersController.prepareCreateAjax}" value="#{configMapController.getKey('ListCustomersCreateLink')}" onclick="customersCreateDialogue.show()" update=":formCustomersCreate1:dialogueGrid1" /> 
- 
+
                 </h:panelGroup>
-                <p:panel id="ezidebitWidget" >
-                    <iframe id="ezidebitIframe"  style="width:100%;height:100%" src="#{customersController.eziDebitWidgetUrl(true)}" />
-                    
-                </p:panel>
                 <h:outputText escape="false" value="#{configMapController.getKey('ListCustomersEmpty')}" rendered="#{customersController.items.rowCount == 0}"/>
                 <h:panelGroup rendered="#{customersController.items.rowCount > 0}">
                     <p:dataTable id="tableList" editable="true" value="#{customersController.items}" filteredValue="#{customersController.filteredItems}"  widgetVar="customersControllerTable" var="item"  paginator="true" rows="15"  paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  rowsPerPageTemplate="5,10,15,20,25,50,100" >
@@ -448,6 +468,13 @@
                             </p:commandButton>                        
 
                         </p:column>
+                        <p:column>
+                            <p:commandButton id="paymentButton"  rendered="#{customersController.isUserInRole('ADMIN')}"    oncomplete="customersPaymentsDialogue.show()" update=":paymentsForm:mainPanel :menuForm:growl"  value="#{configMapController.getKey('ListCustomersEditPaymentLink')}">
+                                <f:setPropertyActionListener value="#{item}" target="#{ezidebit.selectedCustomer}"  />
+                            </p:commandButton>                        
+
+                        </p:column>
+
                     </p:dataTable>
                 </h:panelGroup>
             </h:form>
