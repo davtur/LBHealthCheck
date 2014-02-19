@@ -12,7 +12,7 @@
         </ui:define>
         <ui:define name="body">
             <p:tabView id="tabView" widgetVar="tabViewWidget" dynamic="true"> 
-  <p:ajax event="tabChange" listener="#{customersController.onTabChange}" update=":menuForm:growl"/>  
+                <p:ajax event="tabChange" listener="#{customersController.onTabChange}" update=":menuForm:growl"/>  
 
                 <p:tab id="tab1" title="Customer List">  
                     <h:form id="CustomerslistForm1">
@@ -332,7 +332,7 @@
                                 </p:column>  
 
                                 <p:column>
-                                    <p:commandButton rendered="#{customersController.isUserInRole('ADMIN')}"   oncomplete="tabViewWidget.select(1)" update=":tabView:tab1 :tabView:tab2 :menuForm:growl"  value="#{configMapController.getKey('ListCustomersEditLink')}">
+                                    <p:commandButton rendered="#{customersController.isUserInRole('ADMIN')}"   oncomplete="PF('tabViewWidget').select(1)" update=":tabView:tab1 :tabView:tab2 :menuForm:growl"  value="#{configMapController.getKey('ListCustomersEditLink')}">
                                         <f:setPropertyActionListener value="#{item}" target="#{customersController.selected}" />
                                     </p:commandButton>                        
 
@@ -487,133 +487,133 @@
                     </h:form>  
                 </p:tab>
                 <p:tab id="tab4" title="Customer Notes">  
-                    
-            <h:form id="formNotesCreate1">
-                <p:confirmDialog id="confirmDialogNotesCreate1" message="Add Customer Natoes"  
-                                 header="#{configMapController.getKey('CreateNotesTitle')}" severity="info" widgetVar="NotesCreateDialogue"> 
 
-                    <p:panelGrid columns="2">
-                        <p:outputLabel value="#{configMapController.getKey('CreateNotesLabel_id')}" for="id" />
-                        <p:inputText id="id" value="#{notesController.selected.id}" title="#{configMapController.getKey('CreateNotesTitle_id')}" required="true" requiredMessage="#{configMapController.getKey('CreateNotesRequiredMessage_id')}"/>
-                        <p:outputLabel value="#{configMapController.getKey('CreateNotesLabel_note')}" for="note" />
-                        <p:inputTextarea rows="4" cols="30" id="note" value="#{notesController.selected.note}" title="#{configMapController.getKey('CreateNotesTitle_note')}" />
-                        <p:outputLabel value="#{configMapController.getKey('CreateNotesLabel_createTimestamp')}" for="createTimestamp" />
+                    <h:form id="formNotesCreate1">
+                        <p:confirmDialog id="confirmDialogNotesCreate1" message="Add Customer Natoes"  
+                                         header="#{configMapController.getKey('CreateNotesTitle')}" severity="info" widgetVar="NotesCreateDialogue"> 
 
-
-                        <p:calendar id="createTimestamp" pattern="MM/dd/yyyy HH:mm:ss" value="#{notesController.selected.createTimestamp}" title="#{configMapController.getKey('CreateNotesTitle_createTimestamp')}" required="true" requiredMessage="#{configMapController.getKey('CreateNotesRequiredMessage_createTimestamp')}">
-                            <p:ajax event="dateSelect" listener="#{notesController.handleDateSelect}" update=":tabView:formNotesCreate1" />
-                        </p:calendar>
-                        <p:outputLabel value="#{configMapController.getKey('CreateNotesLabel_deleted')}" for="deleted" />
-                        <p:inputText id="deleted" value="#{notesController.selected.deleted}" title="#{configMapController.getKey('CreateNotesTitle_deleted')}" required="true" requiredMessage="#{configMapController.getKey('CreateNotesRequiredMessage_deleted')}"/>
-                        <p:outputLabel value="#{configMapController.getKey('CreateNotesLabel_userId')}" for="userId" />
-                        <p:selectOneMenu id="userId" valueChangeListener="#{notesController.selectOneMenuValueChangeListener}" filter="true"  converter="customerConverter" value="#{notesController.selected.userId}" label="#{configMapController.getKey('CreateNotesTitle_userId')}" >
-                            <f:selectItems value="#{customersController.customersAvailableSelectOneObject}" var="cust" itemLabel="#{cust.firstname} #{cust.lastname}" itemValue="#{cust}"/>
-                            <p:ajax   update=":tabView:formNotesCreate1"  />
-                        </p:selectOneMenu>
-                        <p:commandButton oncomplete="NotesCreateDialogue.hide();notesControllerTable.filter()" actionListener="#{notesController.createDialogue}" value="#{configMapController.getKey('CreateNotesSaveLink')}" update=":menuForm:growl"/>                
-                    </p:panelGrid>
-                </p:confirmDialog>
-            </h:form>
+                            <p:panelGrid columns="2">
+                                <p:outputLabel value="#{configMapController.getKey('CreateNotesLabel_id')}" for="id" />
+                                <p:inputText id="id" value="#{notesController.selected.id}" title="#{configMapController.getKey('CreateNotesTitle_id')}" required="true" requiredMessage="#{configMapController.getKey('CreateNotesRequiredMessage_id')}"/>
+                                <p:outputLabel value="#{configMapController.getKey('CreateNotesLabel_note')}" for="note" />
+                                <p:inputTextarea rows="4" cols="30" id="note" value="#{notesController.selected.note}" title="#{configMapController.getKey('CreateNotesTitle_note')}" />
+                                <p:outputLabel value="#{configMapController.getKey('CreateNotesLabel_createTimestamp')}" for="createTimestamp" />
 
 
+                                <p:calendar id="createTimestamp" pattern="MM/dd/yyyy HH:mm:ss" value="#{notesController.selected.createTimestamp}" title="#{configMapController.getKey('CreateNotesTitle_createTimestamp')}" required="true" requiredMessage="#{configMapController.getKey('CreateNotesRequiredMessage_createTimestamp')}">
+                                    <p:ajax event="dateSelect" listener="#{notesController.handleDateSelect}" update=":tabView:formNotesCreate1" />
+                                </p:calendar>
+                                <p:outputLabel value="#{configMapController.getKey('CreateNotesLabel_deleted')}" for="deleted" />
+                                <p:inputText id="deleted" value="#{notesController.selected.deleted}" title="#{configMapController.getKey('CreateNotesTitle_deleted')}" required="true" requiredMessage="#{configMapController.getKey('CreateNotesRequiredMessage_deleted')}"/>
+                                <p:outputLabel value="#{configMapController.getKey('CreateNotesLabel_userId')}" for="userId" />
+                                <p:selectOneMenu id="userId" valueChangeListener="#{notesController.selectOneMenuValueChangeListener}" filter="true"  converter="customerConverter" value="#{notesController.selected.userId}" label="#{configMapController.getKey('CreateNotesTitle_userId')}" >
+                                    <f:selectItems value="#{customersController.customersAvailableSelectOneObject}" var="cust" itemLabel="#{cust.firstname} #{cust.lastname}" itemValue="#{cust}"/>
+                                    <p:ajax   update=":tabView:formNotesCreate1"  />
+                                </p:selectOneMenu>
+                                <p:commandButton oncomplete="NotesCreateDialogue.hide();notesControllerTable.filter()" actionListener="#{notesController.createDialogue}" value="#{configMapController.getKey('CreateNotesSaveLink')}" update=":menuForm:growl"/>                
+                            </p:panelGrid>
+                        </p:confirmDialog>
+                    </h:form>
 
 
 
-            <h:form id="NoteslistForm1">
-                <h:panelGroup >
-                    <p:commandButton id="showDialogButton"  value="#{configMapController.getKey('ListNotesCreateLink')}" onclick="NotesCreateDialogue.show()" type="button"/> 
 
-                </h:panelGroup>
-                <h:outputText escape="false" value="#{configMapController.getKey('ListNotesEmpty')}" rendered="#{notesController.items.rowCount == 0}"/>
-                <h:panelGroup rendered="#{notesController.items.rowCount > 0}">
-                    <p:dataTable  editable="true" value="#{notesController.items}" filteredValue="#{notesController.filteredItems}"  widgetVar="notesControllerTable" var="item"  paginator="true" rows="15"  paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  rowsPerPageTemplate="5,10,15,20,25,50,100" >
-                        <f:facet name="header">
-                            <p:outputPanel>
-                                <h:outputText value="Search all fields:" />
-                                <h:inputText id="globalFilter" onkeyup="notesControllerTable.filter()" />
-                            </p:outputPanel>
-                        </f:facet>
-                        <p:ajax event="rowEdit" listener="#{notesController.onEdit}" update=":menuForm:growl" oncomplete="notesControllerTable.filter()" />  
-                        <p:ajax event="rowEditCancel" listener="#{notesController.onCancel}" update=":menuForm:growl"  oncomplete="notesControllerTable.filter()" />  
 
-                        <p:column sortBy="#{item.id}" filterBy="#{item.id}" headerText="#{configMapController.getKey('ListNotesTitle_id')}"   >
-                            <p:cellEditor> 
-                                <f:facet name="output">
-                                    <h:outputText value="#{item.id}"/>
+                    <h:form id="NoteslistForm1">
+                        <h:panelGroup >
+                            <p:commandButton id="showDialogButton"  value="#{configMapController.getKey('ListNotesCreateLink')}" onclick="NotesCreateDialogue.show()" type="button"/> 
+
+                        </h:panelGroup>
+                        <h:outputText escape="false" value="#{configMapController.getKey('ListNotesEmpty')}" rendered="#{notesController.items.rowCount == 0}"/>
+                        <h:panelGroup rendered="#{notesController.items.rowCount > 0}">
+                            <p:dataTable  editable="true" value="#{notesController.items}" filteredValue="#{notesController.filteredItems}"  widgetVar="notesControllerTable" var="item"  paginator="true" rows="15"  paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  rowsPerPageTemplate="5,10,15,20,25,50,100" >
+                                <f:facet name="header">
+                                    <p:outputPanel>
+                                        <h:outputText value="Search all fields:" />
+                                        <h:inputText id="globalFilter" onkeyup="notesControllerTable.filter()" />
+                                    </p:outputPanel>
                                 </f:facet>
-                                <f:facet name="input">
-                                    <p:inputText value="#{item.id}" label="#{configMapController.getKey('ListNotesTitle_id')}" />
-                                </f:facet>
-                            </p:cellEditor> 
+                                <p:ajax event="rowEdit" listener="#{notesController.onEdit}" update=":menuForm:growl" oncomplete="notesControllerTable.filter()" />  
+                                <p:ajax event="rowEditCancel" listener="#{notesController.onCancel}" update=":menuForm:growl"  oncomplete="notesControllerTable.filter()" />  
+
+                                <p:column sortBy="#{item.id}" filterBy="#{item.id}" headerText="#{configMapController.getKey('ListNotesTitle_id')}"   >
+                                    <p:cellEditor> 
+                                        <f:facet name="output">
+                                            <h:outputText value="#{item.id}"/>
+                                        </f:facet>
+                                        <f:facet name="input">
+                                            <p:inputText value="#{item.id}" label="#{configMapController.getKey('ListNotesTitle_id')}" />
+                                        </f:facet>
+                                    </p:cellEditor> 
 
 
-                        </p:column>
-                        <p:column sortBy="#{item.note}" filterBy="#{item.note}" headerText="#{configMapController.getKey('ListNotesTitle_note')}"   >
-                            <p:cellEditor> 
-                                <f:facet name="output">
-                                    <h:outputText value="#{item.note}"/>
-                                </f:facet>
-                                <f:facet name="input">
-                                    <p:inputText value="#{item.note}" label="#{configMapController.getKey('ListNotesTitle_note')}" />
-                                </f:facet>
-                            </p:cellEditor> 
+                                </p:column>
+                                <p:column sortBy="#{item.note}" filterBy="#{item.note}" headerText="#{configMapController.getKey('ListNotesTitle_note')}"   >
+                                    <p:cellEditor> 
+                                        <f:facet name="output">
+                                            <h:outputText value="#{item.note}"/>
+                                        </f:facet>
+                                        <f:facet name="input">
+                                            <p:inputText value="#{item.note}" label="#{configMapController.getKey('ListNotesTitle_note')}" />
+                                        </f:facet>
+                                    </p:cellEditor> 
 
 
-                        </p:column>
-                        <p:column sortBy="#{item.createTimestamp}" filterBy="#{item.createTimestamp}" headerText="#{configMapController.getKey('ListNotesTitle_createTimestamp')}"   >
+                                </p:column>
+                                <p:column sortBy="#{item.createTimestamp}" filterBy="#{item.createTimestamp}" headerText="#{configMapController.getKey('ListNotesTitle_createTimestamp')}"   >
 
-                            <p:cellEditor> 
-                                <f:facet name="output">
-                                    <h:outputText value="#{item.createTimestamp}">
-                                        <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
-                                    </h:outputText>
-                                </f:facet>
-                                <f:facet name="input">
-                                    <p:calendar value="#{item.createTimestamp}">	
-                                        <p:ajax event="dateSelect" listener= "#{notesController.handleDateSelect}" update=":menuForm:growl" />
-                                    </p:calendar>
-                                </f:facet>
-                            </p:cellEditor> 
+                                    <p:cellEditor> 
+                                        <f:facet name="output">
+                                            <h:outputText value="#{item.createTimestamp}">
+                                                <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                                            </h:outputText>
+                                        </f:facet>
+                                        <f:facet name="input">
+                                            <p:calendar value="#{item.createTimestamp}">	
+                                                <p:ajax event="dateSelect" listener= "#{notesController.handleDateSelect}" update=":menuForm:growl" />
+                                            </p:calendar>
+                                        </f:facet>
+                                    </p:cellEditor> 
 
-                        </p:column>
-                        <p:column sortBy="#{item.deleted}" filterBy="#{item.deleted}" headerText="#{configMapController.getKey('ListNotesTitle_deleted')}"   >
-                            <p:cellEditor> 
-                                <f:facet name="output">
-                                    <h:outputText value="#{item.deleted}"/>
-                                </f:facet>
-                                <f:facet name="input">
-                                    <p:inputText value="#{item.deleted}" label="#{configMapController.getKey('ListNotesTitle_deleted')}" />
-                                </f:facet>
-                            </p:cellEditor> 
-
-
-                        </p:column>
-                        <p:column sortBy="#{item.userId}" filterBy="#{item.userId}" headerText="#{configMapController.getKey('ListNotesTitle_userId')}"   >
-                            <p:cellEditor> 
-                                <f:facet name="output">
-                                    <h:outputText value="#{item.userId}"/>
-                                </f:facet>
-                                <f:facet name="input">
-                                    <p:inputText value="#{item.userId}" label="#{configMapController.getKey('ListNotesTitle_userId')}" />
-                                </f:facet>
-                            </p:cellEditor> 
+                                </p:column>
+                                <p:column sortBy="#{item.deleted}" filterBy="#{item.deleted}" headerText="#{configMapController.getKey('ListNotesTitle_deleted')}"   >
+                                    <p:cellEditor> 
+                                        <f:facet name="output">
+                                            <h:outputText value="#{item.deleted}"/>
+                                        </f:facet>
+                                        <f:facet name="input">
+                                            <p:inputText value="#{item.deleted}" label="#{configMapController.getKey('ListNotesTitle_deleted')}" />
+                                        </f:facet>
+                                    </p:cellEditor> 
 
 
-                        </p:column>
-                        <p:column rendered="#{notesController.isUserInRole('ADMIN')}"  headerText="Edit" style="width:50px">  
-                            <p:rowEditor />  
-                        </p:column>  
+                                </p:column>
+                                <p:column sortBy="#{item.userId}" filterBy="#{item.userId}" headerText="#{configMapController.getKey('ListNotesTitle_userId')}"   >
+                                    <p:cellEditor> 
+                                        <f:facet name="output">
+                                            <h:outputText value="#{item.userId}"/>
+                                        </f:facet>
+                                        <f:facet name="input">
+                                            <p:inputText value="#{item.userId}" label="#{configMapController.getKey('ListNotesTitle_userId')}" />
+                                        </f:facet>
+                                    </p:cellEditor> 
 
-                        <p:column>
-                            <p:commandButton rendered="#{notesController.isUserInRole('ADMIN')}"  oncomplete="notesControllerTable.filter()" update=":menuForm:growl"  value="#{configMapController.getKey('ListNotesDestroyLink')}">
-                                <f:setPropertyActionListener value="#{item}" target="#{notesController.selectedForDeletion}" />
-                            </p:commandButton>                        
 
-                        </p:column>
-                    </p:dataTable>
-                </h:panelGroup>
-            </h:form>
- 
+                                </p:column>
+                                <p:column rendered="#{notesController.isUserInRole('ADMIN')}"  headerText="Edit" style="width:50px">  
+                                    <p:rowEditor />  
+                                </p:column>  
+
+                                <p:column>
+                                    <p:commandButton rendered="#{notesController.isUserInRole('ADMIN')}"  oncomplete="notesControllerTable.filter()" update=":menuForm:growl"  value="#{configMapController.getKey('ListNotesDestroyLink')}">
+                                        <f:setPropertyActionListener value="#{item}" target="#{notesController.selectedForDeletion}" />
+                                    </p:commandButton>                        
+
+                                </p:column>
+                            </p:dataTable>
+                        </h:panelGroup>
+                    </h:form>
+
                 </p:tab>
             </p:tabView>  
             <script type="text/javascript">
