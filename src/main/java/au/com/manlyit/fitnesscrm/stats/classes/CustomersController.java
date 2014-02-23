@@ -3,9 +3,11 @@ package au.com.manlyit.fitnesscrm.stats.classes;
 import au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
-import au.com.manlyit.fitnesscrm.stats.classes.util.PaginationHelper;
 import au.com.manlyit.fitnesscrm.stats.beans.CustomersFacade;
+import au.com.manlyit.fitnesscrm.stats.classes.util.DatatableSelectionHelper;
+import au.com.manlyit.fitnesscrm.stats.classes.util.PfSelectableDataModel;
 import au.com.manlyit.fitnesscrm.stats.db.Groups;
+import au.com.manlyit.fitnesscrm.stats.db.Notes;
 import java.io.IOException;
 
 import java.io.Serializable;
@@ -29,14 +31,14 @@ import javax.faces.convert.Converter;
 import javax.faces.convert.FacesConverter;
 import javax.faces.event.ActionEvent;
 import javax.faces.event.ValueChangeEvent;
-import javax.faces.model.DataModel;
-import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import org.primefaces.component.tabview.Tab;
 import org.primefaces.event.RowEditEvent;
 import org.primefaces.event.SelectEvent;
 import org.primefaces.event.TabChangeEvent;
+import org.primefaces.model.SelectableDataModel;
 
 @Named("customersController")
 @SessionScoped
@@ -44,7 +46,9 @@ public class CustomersController implements Serializable {
 
     private Customers current;
     private Customers selectedForDeletion;
-    private DataModel items = null;
+    private Notes selectedNoteForDeletion;
+    private PfSelectableDataModel<Customers> items = null;
+    private PfSelectableDataModel<Notes> notesItems = null;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.CustomersFacade ejbFacade;
     @Inject
@@ -52,11 +56,15 @@ public class CustomersController implements Serializable {
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.GroupsFacade ejbGroupsFacade;
     @Inject
+    private au.com.manlyit.fitnesscrm.stats.beans.NotesFacade ejbNotesFacade;
+    @Inject
     private ConfigMapFacade configMapFacade;
-    private PaginationHelper pagination;
+    private DatatableSelectionHelper pagination;
+    private DatatableSelectionHelper notesPagination;
     private int selectedItemIndex;
 
     private List<Customers> filteredItems;
+    private List<Notes> notesFilteredItems;
     private Customers[] multiSelected;
     private String checkPass = "";
 
@@ -147,9 +155,9 @@ public class CustomersController implements Serializable {
         return ejbFacade;
     }
 
-    public PaginationHelper getPagination() {
+    public DatatableSelectionHelper getPagination() {
         if (pagination == null) {
-            pagination = new PaginationHelper(1000000) {
+            pagination = new DatatableSelectionHelper() {
 
                 @Override
                 public int getItemsCount() {
@@ -157,15 +165,37 @@ public class CustomersController implements Serializable {
                 }
 
                 @Override
-                public DataModel createPageDataModel() {
-                    return new ListDataModel(getFacade().findAll());
+                public PfSelectableDataModel createPageDataModel() {
+                    return new PfSelectableDataModel<>(ejbFacade.findAll());
                 }
+
             };
         }
         return pagination;
     }
 
+    public DatatableSelectionHelper getNotesPagination() {
+        if (notesPagination == null) {
+            notesPagination = new DatatableSelectionHelper() {
+
+                @Override
+                public int getItemsCount() {
+                    return ejbNotesFacade.countNotesByCustomer(current);
+                }
+
+                @Override
+                public PfSelectableDataModel createPageDataModel() {
+                    return new PfSelectableDataModel<>(ejbNotesFacade.findNotesByCustomer(current));
+                }
+
+            };
+        }
+        return notesPagination;
+    }
+
     /**
+     * ListDataModel(getFacade().findAll());
+     *
      * @return the filteredItems
      */
     public List<Customers> getFilteredItems() {
@@ -399,8 +429,8 @@ public class CustomersController implements Serializable {
      }*/
 
     public String destroy() {
-        current = (Customers) getItems().getRowData();
-        selectedItemIndex = pagination.getPageFirstItem() + getItems().getRowIndex();
+        //current = (Customers) getItems().getRowData();
+        // selectedItemIndex = pagination.getPageFirstItem() + getItems().getRowIndex();
         performDestroy();
         recreateModel();
         return "List";
@@ -434,20 +464,31 @@ public class CustomersController implements Serializable {
             // selected index cannot be bigger than number of items:
             selectedItemIndex = count - 1;
             // go to previous page if last page disappeared:
-            if (pagination.getPageFirstItem() >= count) {
-                pagination.previousPage();
-            }
+
         }
         if (selectedItemIndex >= 0) {
             current = getFacade().findRange(new int[]{selectedItemIndex, selectedItemIndex + 1}).get(0);
         }
     }
 
-    public DataModel getItems() {
+    /*  public List<Customers> getItems(){
+     if (items == null) {
+     items = ejbFacade.findAll();
+     }
+     return items;
+     }*/
+    public SelectableDataModel<Customers> getItems() {
         if (items == null) {
             items = getPagination().createPageDataModel();
         }
         return items;
+    }
+
+    public SelectableDataModel<Notes> getNotesItems() {
+        if (notesItems == null) {
+            notesItems = getNotesPagination().createPageDataModel();
+        }
+        return notesItems;
     }
 
     private void recreateModel() {
@@ -455,7 +496,6 @@ public class CustomersController implements Serializable {
     }
 
     public String next() {
-        getPagination().nextPage();
         recreateModel();
         return "List";
     }
@@ -468,7 +508,7 @@ public class CustomersController implements Serializable {
     }
 
     public String previous() {
-        getPagination().previousPage();
+
         recreateModel();
         return "List";
     }
@@ -560,6 +600,15 @@ public class CustomersController implements Serializable {
 
     }
 
+    public void rowSelectEvent(SelectEvent event) {
+        Object o = event.getObject();
+        if (o.getClass().equals(Customers.class)) {
+            Customers cust = (Customers) o;
+            setSelected(current);
+        }
+
+    }
+
     public void genderChangeListener(ValueChangeEvent vce) {
         Object o = vce.getNewValue();
         if (o.getClass().equals(Character.class)) {
@@ -571,11 +620,12 @@ public class CustomersController implements Serializable {
     }
 
     public void onTabChange(TabChangeEvent event) {
-
-        String tabName = event.getTab().getTitle();
-        if (tabName == null) {
-            tabName = "unknown";
+        Tab tb = event.getTab();
+        String tabName = "unknown";
+        if (tb != null) {
+            tabName = tb.getTitle();
         }
+
         FacesMessage msg = new FacesMessage("Tab Changed", "Active Tab: " + tabName);
 
         FacesContext.getCurrentInstance().addMessage(null, msg);
@@ -714,6 +764,45 @@ public class CustomersController implements Serializable {
 
     private String getDigitalKey() {
         return configMapFacade.getConfig("payment.ezidebit.widget.digitalkey");
+    }
+
+    /**
+     * @return the notesFilteredItems
+     */
+    public List<Notes> getNotesFilteredItems() {
+        return notesFilteredItems;
+    }
+
+    /**
+     * @param notesFilteredItems the notesFilteredItems to set
+     */
+    public void setNotesFilteredItems(List<Notes> notesFilteredItems) {
+        this.notesFilteredItems = notesFilteredItems;
+    }
+    
+    public void onNotesEdit(RowEditEvent event) {
+        Notes cm = (Notes) event.getObject();
+        ejbNotesFacade.edit(cm);
+        recreateModel();
+        JsfUtil.addSuccessMessage("Row Edit Successful");
+    }
+
+    public void onNotesCancel(RowEditEvent event) {
+        JsfUtil.addErrorMessage("Row Edit Cancelled");
+    }
+
+    /**
+     * @return the selectedNoteForDeletion
+     */
+    public Notes getSelectedNoteForDeletion() {
+        return selectedNoteForDeletion;
+    }
+
+    /**
+     * @param selectedNoteForDeletion the selectedNoteForDeletion to set
+     */
+    public void setSelectedNoteForDeletion(Notes selectedNoteForDeletion) {
+        this.selectedNoteForDeletion = selectedNoteForDeletion;
     }
 
     @FacesConverter(forClass = Customers.class)

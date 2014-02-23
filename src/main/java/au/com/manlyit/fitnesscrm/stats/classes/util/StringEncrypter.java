@@ -5,6 +5,7 @@
 
 package au.com.manlyit.fitnesscrm.stats.classes.util;
 
+import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.KeySpec;
@@ -25,7 +26,7 @@ import javax.xml.bind.DatatypeConverter;
  *
  * @author dturner
  */
-    public class StringEncrypter {
+    public class StringEncrypter  implements Serializable {
         private static final Logger logger = Logger.getLogger(StringEncrypter.class.getName());
         Cipher ecipher;
         Cipher dcipher;

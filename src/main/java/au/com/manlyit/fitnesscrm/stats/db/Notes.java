@@ -6,6 +6,7 @@
 
 package au.com.manlyit.fitnesscrm.stats.db;
 
+import au.com.manlyit.fitnesscrm.stats.classes.util.BaseEntity;
 import java.io.Serializable;
 import java.util.Date;
 import javax.persistence.Basic;
@@ -36,7 +37,7 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "Notes.findById", query = "SELECT n FROM Notes n WHERE n.id = :id"),
     @NamedQuery(name = "Notes.findByCreateTimestamp", query = "SELECT n FROM Notes n WHERE n.createTimestamp = :createTimestamp"),
     @NamedQuery(name = "Notes.findByDeleted", query = "SELECT n FROM Notes n WHERE n.deleted = :deleted")})
-public class Notes implements Serializable {
+public class Notes implements BaseEntity,Serializable {
     private static final long serialVersionUID = 1L;
     @Id
     @Basic(optional = false)
