@@ -8,7 +8,6 @@ import au.com.manlyit.fitnesscrm.stats.beans.NotesFacade;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
-import java.util.ResourceBundle;
 import javax.enterprise.context.SessionScoped;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
@@ -148,6 +147,12 @@ public class NotesController implements Serializable {
     public void createDialogue(ActionEvent actionEvent) {
         try {
             current.setId(0);
+            current.setCreateTimestamp(new Date());
+            current.setDeleted(new Short("0"));
+            FacesContext context = FacesContext.getCurrentInstance();
+            CustomersController controller = (CustomersController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "customersController");
+
+            current.setUserId(controller.getLoggedInUser());
             getFacade().create(current);
             recreateModel();
             JsfUtil.addSuccessMessage(configMapFacade.getConfig("NotesCreated"));

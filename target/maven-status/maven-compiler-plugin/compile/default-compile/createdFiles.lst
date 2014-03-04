@@ -12,6 +12,7 @@ au/com/manlyit/fitnesscrm/stats/db/Item.class
 au/com/manlyit/fitnesscrm/stats/classes/CustomerGoalsController$CustomerGoalsControllerConverter.class
 au/com/manlyit/fitnesscrm/stats/webservices/package-info.class
 au/com/manlyit/fitnesscrm/stats/classes/PlanController.class
+au/com/manlyit/fitnesscrm/stats/classes/util/BaseEntity.class
 au/com/manlyit/fitnesscrm/stats/classes/util/DemographicTypesConverter.class
 au/com/manlyit/fitnesscrm/stats/classes/SessionTypesController.class
 au/com/manlyit/fitnesscrm/stats/webservices/ArrayOfPayment.class
@@ -25,6 +26,7 @@ au/com/manlyit/fitnesscrm/stats/webservices/GetPayments.class
 au/com/manlyit/fitnesscrm/stats/webservices/IsSystemLockedResponse.class
 au/com/manlyit/fitnesscrm/stats/classes/SessionHistoryController$1.class
 au/com/manlyit/fitnesscrm/stats/beans/QrtzSimpleTriggersFacade.class
+au/com/manlyit/fitnesscrm/stats/classes/util/DatatableSelectionHelper.class
 au/com/manlyit/fitnesscrm/stats/callable/HttpSimpleWebpageCheckCallable.class
 au/com/manlyit/fitnesscrm/stats/classes/MonitoringchartsController$MonitoringchartsControllerConverter.class
 au/com/manlyit/fitnesscrm/stats/classes/util/ParticpantConverter.class
@@ -68,6 +70,7 @@ au/com/manlyit/fitnesscrm/stats/webservices/ChangeScheduledDateResponse.class
 au/com/manlyit/fitnesscrm/stats/classes/GroupsController.class
 au/com/manlyit/fitnesscrm/stats/db/QrtzJobDetails.class
 au/com/manlyit/fitnesscrm/stats/classes/InvoiceLineTypeController$1.class
+au/com/manlyit/fitnesscrm/stats/classes/util/PfSelectableDataModel.class
 au/com/manlyit/fitnesscrm/stats/callable/HttpsLoginAndCheckWebpageCallable.class
 au/com/manlyit/fitnesscrm/stats/classes/StatController.class
 au/com/manlyit/fitnesscrm/stats/classes/PlanController$PlanControllerConverter.class
@@ -171,6 +174,7 @@ au/com/manlyit/fitnesscrm/stats/db/Groups.class
 au/com/manlyit/fitnesscrm/stats/callable/renderMonitoringChartsCallable1_old.class
 au/com/manlyit/fitnesscrm/stats/chartbeans/MeasurementsChart.class
 au/com/manlyit/fitnesscrm/stats/webservices/CreateSchedule.class
+au/com/manlyit/fitnesscrm/stats/classes/CustomersController$2.class
 au/com/manlyit/fitnesscrm/stats/classes/InvoiceLineController$1.class
 au/com/manlyit/fitnesscrm/stats/webservices/EditCustomerDetailsResponse.class
 au/com/manlyit/fitnesscrm/stats/classes/ConfigMapController$1.class

@@ -13,7 +13,7 @@
         <ui:define name="body">
             <p:log/>
             <p:tabView id="tabView" widgetVar="tabViewWidget" > 
-                <p:ajax event="tabChange" listener="#{customersController.onTabChange}" update=":menuForm:growl"/>  
+                <p:ajax event="tabChange" listener="#{customersController.onTabChange}" update=":menuForm:growl "/>  
 
                 <p:tab id="tab1" title="Customer List">  
                     <h:form id="CustomerslistForm1">
@@ -33,7 +33,7 @@
                                 </f:facet>
                                 <p:ajax event="rowEdit" listener="#{customersController.onEdit}" update=":menuForm:growl" oncomplete="customersControllerTable.filter()" />  
                                 <p:ajax event="rowEditCancel" listener="#{customersController.onCancel}" update=":menuForm:growl"  oncomplete="customersControllerTable.filter()" /> 
-                                <p:ajax event="rowSelect" update=":tabView:CustomerslistForm1:selectedUser :tabView:formCustomersCreate1 :tabView:paymentsForm :tabView:NoteslistForm1"  process="@this"/>  
+                                <p:ajax event="rowSelect" update=":tabView:CustomerslistForm1:selectedUser :tabView:formCustomersCreate1 :tabView:paymentsForm :tabView:NoteslistForm1"  />  
 
 
                                 <p:column sortBy="#{item.firstname}" filterBy="#{item.firstname}" headerText="#{configMapController.getKey('ListCustomersTitle_firstname')}"   >
@@ -105,10 +105,10 @@
                                 </p:column>
 
 
-                                  <!--  <p:column rendered="#{customersController.isUserInRole('ADMIN')}"  headerText="Edit" style="width:50px">  
+                                  <p:column rendered="#{customersController.isUserInRole('ADMIN')}"  headerText="Edit" style="width:50px">  
                                     <p:rowEditor />  
                                 </p:column>  
-
+ <!-- 
                              <p:column>
                                     <p:commandButton rendered="#{customersController.isUserInRole('ADMIN')}"   oncomplete="tabViewWidget.select(1)" update=":tabView:tab1 :tabView:tab2 :menuForm:growl"  value="#{configMapController.getKey('ListCustomersEditLink')}">
                                         <f:setPropertyActionListener value="#{item}" target="#{customersController.selected}" />
@@ -121,12 +121,17 @@
                                     </p:commandButton>                       
 
                                 </p:column> -->
+                                <p:column>
+                                    <p:commandButton id="paymentButton"  rendered="#{customersController.isUserInRole('ADMIN')}"    oncomplete="tabViewWidget.select(1)" update=":tabView:CustomerslistForm1 :tabView:formCustomersCreate1 :tabView:paymentsForm :tabView:NoteslistForm1"  value="#{configMapController.getKey('ListCustomersEditPaymentLink')}">
+                                        <f:setPropertyActionListener value="#{item}" target="#{customersController.selected}"  />
+                                    </p:commandButton>                       
 
+                                </p:column>
                             </p:dataTable>
                         </h:panelGroup>
                     </h:form>
                 </p:tab>
-                <p:tab id="tab2" title="Edit Customer Details">  
+                <p:tab id="tab2" title="Edit Customer Details"  >  
                     <h:form id="formCustomersCreate1">    
                         <!-- <p:log />-->
                         <!--  <p:confirmDialog id="confirmDialogCustomersCreate1" message="Add a new customer to the database."  
@@ -234,7 +239,7 @@
                     </h:form>
 
                 </p:tab>
-                <p:tab id="tab3" title="Payment Information">  
+                <p:tab id="tab3" title="Payment Information"  >  
                     <h:form id="paymentsForm"> 
 
 
@@ -246,6 +251,7 @@
                             <p:selectBooleanButton value="#{ezidebit.editPaymentDetails}" onLabel="Refresh View" offLabel="Refresh View" rendered="#{ezidebit.customerExistsInPaymentGateway}" >
                                 <p:ajax update=":tabView:paymentsForm:viewPaymentsGrid  :tabView:paymentsForm:editPaymentsGrid  :menuForm:growl" process=":tabView:paymentsForm:viewPaymentsGrid  :tabView:paymentsForm:editPaymentsGrid "/>  
                             </p:selectBooleanButton>  
+                            <h:outputText id="selectedUser" value="#{customersController.selected.firstname} #{customersController.selected.lastname}" />
                             <p:panelGrid id="dialoguePaymenstGrid2" columns="2" rendered="#{ezidebit.customerExistsInPaymentGateway}" >
                                 <p:panel id="viewPaymentsGrid"  >
                                     <iframe id="ezidebitIframeView"  style="width:400px;height:600px" src="#{ezidebit.getEziDebitWidgetUrl(false)}" />
@@ -256,7 +262,7 @@
                                 </p:panel>
                             </p:panelGrid>
                             <p:panelGrid id="dialoguePaymenstGrid1" columns="2" rendered="#{!ezidebit.customerExistsInPaymentGateway}">
-                                <p:commandButton  id="paymentsButton" ajax="true" actionListener="#{ezidebit.createCustomerRecord}" update=":menuForm:growl"   value="#{configMapController.getKey('EditCustomersUpdatePayment')}" immediate="true"/>
+                                <p:commandButton  id="paymentsButton" ajax="true" actionListener="#{ezidebit.createCustomerRecord}" update=":menuForm:growl :tabView:paymentsForm"   value="#{configMapController.getKey('EditCustomersUpdatePayment')}" immediate="true"/>
                                 <p:outputLabel value=" " for="paymentsButton" />
 
                             </p:panelGrid>
@@ -264,31 +270,16 @@
                         <!-- </p:confirmDialog>-->
                     </h:form>  
                 </p:tab>
-                <p:tab id="tab4" title="Customer Notes">  
+                <p:tab id="tab4" title="Customer Notes"  >  
 
                     <h:form id="formNotesCreate1">
                         <p:confirmDialog id="confirmDialogNotesCreate1" message="Add Customer Natoes"  
                                          header="#{configMapController.getKey('CreateNotesTitle')}" severity="info" widgetVar="NotesCreateDialogue"> 
 
                             <p:panelGrid columns="2">
-                                <p:outputLabel value="#{configMapController.getKey('CreateNotesLabel_id')}" for="id" />
-                                <p:inputText id="id" value="#{notesController.selected.id}" title="#{configMapController.getKey('CreateNotesTitle_id')}" required="true" requiredMessage="#{configMapController.getKey('CreateNotesRequiredMessage_id')}"/>
-                                <p:outputLabel value="#{configMapController.getKey('CreateNotesLabel_note')}" for="note" />
+                                 <p:outputLabel value="#{configMapController.getKey('CreateNotesLabel_note')}" for="note" />
                                 <p:inputTextarea rows="4" cols="30" id="note" value="#{notesController.selected.note}" title="#{configMapController.getKey('CreateNotesTitle_note')}" />
-                                <p:outputLabel value="#{configMapController.getKey('CreateNotesLabel_createTimestamp')}" for="createTimestamp" />
-
-
-                                <p:calendar id="createTimestamp" pattern="MM/dd/yyyy HH:mm:ss" value="#{notesController.selected.createTimestamp}" title="#{configMapController.getKey('CreateNotesTitle_createTimestamp')}" required="true" requiredMessage="#{configMapController.getKey('CreateNotesRequiredMessage_createTimestamp')}">
-                                    <p:ajax event="dateSelect" listener="#{notesController.handleDateSelect}" update=":tabView:formNotesCreate1" />
-                                </p:calendar>
-                                <p:outputLabel value="#{configMapController.getKey('CreateNotesLabel_deleted')}" for="deleted" />
-                                <p:inputText id="deleted" value="#{notesController.selected.deleted}" title="#{configMapController.getKey('CreateNotesTitle_deleted')}" required="true" requiredMessage="#{configMapController.getKey('CreateNotesRequiredMessage_deleted')}"/>
-                                <p:outputLabel value="#{configMapController.getKey('CreateNotesLabel_userId')}" for="userId" />
-                                <p:selectOneMenu id="userId" valueChangeListener="#{notesController.selectOneMenuValueChangeListener}" filter="true"  converter="customerConverter" value="#{notesController.selected.userId}" label="#{configMapController.getKey('CreateNotesTitle_userId')}" >
-                                    <f:selectItems value="#{customersController.customersAvailableSelectOneObject}" var="cust" itemLabel="#{cust.firstname} #{cust.lastname}" itemValue="#{cust}"/>
-                                    <p:ajax   update=":tabView:formNotesCreate1"  />
-                                </p:selectOneMenu>
-                                <p:commandButton oncomplete="NotesCreateDialogue.hide();notesControllerTable.filter()" actionListener="#{notesController.createDialogue}" value="#{configMapController.getKey('CreateNotesSaveLink')}" update=":menuForm:growl"/>                
+                                          <p:commandButton oncomplete="NotesCreateDialogue.hide();notesControllerTable.filter()" actionListener="#{notesController.createDialogue}" value="#{configMapController.getKey('CreateNotesSaveLink')}" update=":menuForm:growl"/>                
                             </p:panelGrid>
                         </p:confirmDialog>
                     </h:form>

@@ -164,10 +164,12 @@ public class EziDebitPaymentGateway implements Serializable {
     }
     
     public void createCustomerRecord() {
-        JsfUtil.addErrorMessage("Error setting demographic");
+        
         boolean res = addCustomer(getSelectedCustomer(), paymentGateway);
         if (res == true) {
             JsfUtil.addSuccessMessage("Add Customer", "");
+        }else{
+            JsfUtil.addErrorMessage("Couldn't add Customer To Payment Gateway. Check logs");
         }
     }
     
@@ -987,14 +989,19 @@ public class EziDebitPaymentGateway implements Serializable {
         this.selectedCustomer = selectedCustomer;
        /* FacesContext context = FacesContext.getCurrentInstance();
         CustomersController controller = (CustomersController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "customersController");
-        controller.setSelected(selectedCustomer);
-        CustomerDetails cd = getCustomerDetails(selectedCustomer);*/
-        int pp = selectedCustomer.getPaymentParametersCollection().size();
+        controller.setSelected(selectedCustomer);*/
+        CustomerDetails cd = getCustomerDetails(selectedCustomer);
+        if(cd ==null){
+            customerExistsInPaymentGateway = false;
+        }else{
+            customerExistsInPaymentGateway = true;
+        }
+        /*int pp = selectedCustomer.getPaymentParametersCollection().size();
         if( pp > 0) {
             customerExistsInPaymentGateway = false;
         } else {
             customerExistsInPaymentGateway = true;
-        }
+        }*/
     }
     
 }

@@ -70,7 +70,9 @@ public class CustomersController implements Serializable {
 
     private String checkPass2 = "";
     private Customers impersonate;
+    private Customers loggedInUser;
     private boolean impersonating = false;
+    private boolean customerTabsEnabled = false;
     private static final Logger logger = Logger.getLogger(CustomersController.class.getName());
 
     public CustomersController() {
@@ -85,6 +87,7 @@ public class CustomersController implements Serializable {
             name = facesContext.getExternalContext().getRemoteUser();
             if (name != null) {
                 current = ejbFacade.findCustomerByUsername(name);
+                loggedInUser = current;
             } else {
                 JsfUtil.addErrorMessage("Couldn't get customer not logged in yet!");
             }
@@ -112,9 +115,14 @@ public class CustomersController implements Serializable {
             current = cust;
             selectedItemIndex = -1;
             checkPass = current.getPassword();
+            notesItems = null;
+            notesFilteredItems = null;
+            recreateAllAffectedPageModels();
+            setCustomerTabsEnabled(true);
             FacesContext context = FacesContext.getCurrentInstance();
             EziDebitPaymentGateway controller = (EziDebitPaymentGateway) context.getApplication().getELResolver().getValue(context.getELContext(), null, "ezidebit");
             controller.setSelectedCustomer(cust);
+            
         }
     }
 
@@ -803,6 +811,34 @@ public class CustomersController implements Serializable {
      */
     public void setSelectedNoteForDeletion(Notes selectedNoteForDeletion) {
         this.selectedNoteForDeletion = selectedNoteForDeletion;
+    }
+
+    /**
+     * @return the customerTabsEnabled
+     */
+    public boolean isCustomerTabsEnabled() {
+        return customerTabsEnabled;
+    }
+
+    /**
+     * @param customerTabsEnabled the customerTabsEnabled to set
+     */
+    public void setCustomerTabsEnabled(boolean customerTabsEnabled) {
+        this.customerTabsEnabled = customerTabsEnabled;
+    }
+
+    /**
+     * @return the loggedInUser
+     */
+    public Customers getLoggedInUser() {
+        return loggedInUser;
+    }
+
+    /**
+     * @param loggedInUser the loggedInUser to set
+     */
+    public void setLoggedInUser(Customers loggedInUser) {
+        this.loggedInUser = loggedInUser;
     }
 
     @FacesConverter(forClass = Customers.class)
