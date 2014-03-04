@@ -115,7 +115,7 @@ public class CustomersController implements Serializable {
             current = cust;
             selectedItemIndex = -1;
             checkPass = current.getPassword();
-            notesItems = null;
+            setNotesItems(null);
             notesFilteredItems = null;
             recreateAllAffectedPageModels();
             setCustomerTabsEnabled(true);
@@ -494,7 +494,7 @@ public class CustomersController implements Serializable {
 
     public SelectableDataModel<Notes> getNotesItems() {
         if (notesItems == null) {
-            notesItems = getNotesPagination().createPageDataModel();
+            setNotesItems((PfSelectableDataModel<Notes>) getNotesPagination().createPageDataModel());
         }
         return notesItems;
     }
@@ -839,6 +839,13 @@ public class CustomersController implements Serializable {
      */
     public void setLoggedInUser(Customers loggedInUser) {
         this.loggedInUser = loggedInUser;
+    }
+
+    /**
+     * @param notesItems the notesItems to set
+     */
+    public void setNotesItems(PfSelectableDataModel<Notes> notesItems) {
+        this.notesItems = notesItems;
     }
 
     @FacesConverter(forClass = Customers.class)

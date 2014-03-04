@@ -8,6 +8,8 @@ import au.com.manlyit.fitnesscrm.stats.beans.NotesFacade;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.enterprise.context.SessionScoped;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
@@ -151,9 +153,11 @@ public class NotesController implements Serializable {
             current.setDeleted(new Short("0"));
             FacesContext context = FacesContext.getCurrentInstance();
             CustomersController controller = (CustomersController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "customersController");
-
-            current.setUserId(controller.getLoggedInUser());
+            current.setUserId(controller.getSelected());
             getFacade().create(current);
+            controller.setNotesFilteredItems(null);
+            controller.setNotesItems(null);
+            Logger.getLogger(NotesController.class.getName()).log(Level.INFO, "Note added for customer {0} by {1}.", new Object[]{controller.getSelected().toString(), controller.getLoggedInUser().toString()});
             recreateModel();
             JsfUtil.addSuccessMessage(configMapFacade.getConfig("NotesCreated"));
         } catch (Exception e) {

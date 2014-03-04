@@ -11,7 +11,7 @@
             <h:outputText value="#{configMapController.getKey('ListCustomersTitle')}"></h:outputText>
         </ui:define>
         <ui:define name="body">
-            <p:log/>
+            <!--<p:log/>-->
             <p:tabView id="tabView" widgetVar="tabViewWidget" > 
                 <p:ajax event="tabChange" listener="#{customersController.onTabChange}" update=":menuForm:growl "/>  
 
@@ -105,22 +105,22 @@
                                 </p:column>
 
 
-                                  <p:column rendered="#{customersController.isUserInRole('ADMIN')}"  headerText="Edit" style="width:50px">  
+                                <p:column rendered="#{customersController.isUserInRole('ADMIN')}"  headerText="Edit" style="width:50px">  
                                     <p:rowEditor />  
                                 </p:column>  
- <!-- 
-                             <p:column>
-                                    <p:commandButton rendered="#{customersController.isUserInRole('ADMIN')}"   oncomplete="tabViewWidget.select(1)" update=":tabView:tab1 :tabView:tab2 :menuForm:growl"  value="#{configMapController.getKey('ListCustomersEditLink')}">
-                                        <f:setPropertyActionListener value="#{item}" target="#{customersController.selected}" />
-                                    </p:commandButton>                        
-
-                                </p:column>
-                               <p:column>
-                                    <p:commandButton id="paymentButton"  rendered="#{customersController.isUserInRole('ADMIN')}"    oncomplete="tabViewWidget.select(2)" update=":tabView :menuForm:growl"  value="#{configMapController.getKey('ListCustomersEditPaymentLink')}">
-                                        <f:setPropertyActionListener value="#{item}" target="#{ezidebit.selectedCustomer}"  />
-                                    </p:commandButton>                       
-
-                                </p:column> -->
+                                <!-- 
+                                                            <p:column>
+                                                                   <p:commandButton rendered="#{customersController.isUserInRole('ADMIN')}"   oncomplete="tabViewWidget.select(1)" update=":tabView:tab1 :tabView:tab2 :menuForm:growl"  value="#{configMapController.getKey('ListCustomersEditLink')}">
+                                                                       <f:setPropertyActionListener value="#{item}" target="#{customersController.selected}" />
+                                                                   </p:commandButton>                        
+                               
+                                                               </p:column>
+                                                              <p:column>
+                                                                   <p:commandButton id="paymentButton"  rendered="#{customersController.isUserInRole('ADMIN')}"    oncomplete="tabViewWidget.select(2)" update=":tabView :menuForm:growl"  value="#{configMapController.getKey('ListCustomersEditPaymentLink')}">
+                                                                       <f:setPropertyActionListener value="#{item}" target="#{ezidebit.selectedCustomer}"  />
+                                                                   </p:commandButton>                       
+                               
+                                                               </p:column> -->
                                 <p:column>
                                     <p:commandButton id="paymentButton"  rendered="#{customersController.isUserInRole('ADMIN')}"    oncomplete="tabViewWidget.select(1)" update=":tabView:CustomerslistForm1 :tabView:formCustomersCreate1 :tabView:paymentsForm :tabView:NoteslistForm1"  value="#{configMapController.getKey('ListCustomersEditPaymentLink')}">
                                         <f:setPropertyActionListener value="#{item}" target="#{customersController.selected}"  />
@@ -277,9 +277,9 @@
                                          header="#{configMapController.getKey('CreateNotesTitle')}" severity="info" widgetVar="NotesCreateDialogue"> 
 
                             <p:panelGrid columns="2">
-                                 <p:outputLabel value="#{configMapController.getKey('CreateNotesLabel_note')}" for="note" />
+                                <p:outputLabel value="#{configMapController.getKey('CreateNotesLabel_note')}" for="note" />
                                 <p:inputTextarea rows="4" cols="30" id="note" value="#{notesController.selected.note}" title="#{configMapController.getKey('CreateNotesTitle_note')}" />
-                                          <p:commandButton oncomplete="NotesCreateDialogue.hide();notesControllerTable.filter()" actionListener="#{notesController.createDialogue}" value="#{configMapController.getKey('CreateNotesSaveLink')}" update=":menuForm:growl"/>                
+                                <p:commandButton oncomplete="NotesCreateDialogue.hide();notesControllerTable.filter()" actionListener="#{notesController.createDialogue}" value="#{configMapController.getKey('CreateNotesSaveLink')}" update=":menuForm:growl :tabView:NoteslistForm1 :tabView:formNotesCreate1"/>                
                             </p:panelGrid>
                         </p:confirmDialog>
                     </h:form>
