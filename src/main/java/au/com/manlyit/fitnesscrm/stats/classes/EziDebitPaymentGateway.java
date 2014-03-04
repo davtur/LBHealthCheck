@@ -167,7 +167,8 @@ public class EziDebitPaymentGateway implements Serializable {
         
         boolean res = addCustomer(getSelectedCustomer(), paymentGateway);
         if (res == true) {
-            JsfUtil.addSuccessMessage("Add Customer", "");
+            JsfUtil.addSuccessMessage("Customer Added to Payment Gateway Successfully.", "");
+            customerExistsInPaymentGateway = true;
         }else{
             JsfUtil.addErrorMessage("Couldn't add Customer To Payment Gateway. Check logs");
         }

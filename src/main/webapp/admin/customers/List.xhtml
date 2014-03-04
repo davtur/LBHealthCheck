@@ -292,7 +292,8 @@
                         <h:panelGroup >
                             <p:commandButton id="showDialogButton"  value="#{configMapController.getKey('ListNotesCreateLink')}" onclick="NotesCreateDialogue.show()" type="button"/> 
 
-                        </h:panelGroup>
+                        </h:panelGroup> 
+                        <h:outputText id="selectedUser" value="#{customersController.selected.firstname} #{customersController.selected.lastname}" />
                         <h:outputText escape="false" value="#{configMapController.getKey('ListNotesEmpty')}" rendered="#{customersController.notesItems.rowCount == 0}"/>
                         <h:panelGroup rendered="#{customersController.notesItems.rowCount > 0}">
                             <p:dataTable  editable="true" value="#{customersController.notesItems}" filteredValue="#{customersController.notesFilteredItems}"  widgetVar="notesControllerTable" var="item"  paginator="true" rows="15"  paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  rowsPerPageTemplate="5,10,15,20,25,50,100" >
@@ -305,7 +306,7 @@
                                 <p:ajax event="rowEdit" listener="#{customersController.onNotesEdit}" update=":menuForm:growl" oncomplete="notesControllerTable.filter()" />  
                                 <p:ajax event="rowEditCancel" listener="#{customersController.onNotesCancel}" update=":menuForm:growl"  oncomplete="notesControllerTable.filter()" />  
 
-                                <p:column sortBy="#{item.id}" filterBy="#{item.id}" headerText="#{configMapController.getKey('ListNotesTitle_id')}"   >
+                               <!-- <p:column sortBy="#{item.id}" filterBy="#{item.id}" headerText="#{configMapController.getKey('ListNotesTitle_id')}"   >
                                     <p:cellEditor> 
                                         <f:facet name="output">
                                             <h:outputText value="#{item.id}"/>
@@ -316,19 +317,7 @@
                                     </p:cellEditor> 
 
 
-                                </p:column>
-                                <p:column sortBy="#{item.note}" filterBy="#{item.note}" headerText="#{configMapController.getKey('ListNotesTitle_note')}"   >
-                                    <p:cellEditor> 
-                                        <f:facet name="output">
-                                            <h:outputText value="#{item.note}"/>
-                                        </f:facet>
-                                        <f:facet name="input">
-                                            <p:inputText value="#{item.note}" label="#{configMapController.getKey('ListNotesTitle_note')}" />
-                                        </f:facet>
-                                    </p:cellEditor> 
-
-
-                                </p:column>
+                                </p:column>-->
                                 <p:column sortBy="#{item.createTimestamp}" filterBy="#{item.createTimestamp}" headerText="#{configMapController.getKey('ListNotesTitle_createTimestamp')}"   >
 
                                     <p:cellEditor> 
@@ -345,30 +334,43 @@
                                     </p:cellEditor> 
 
                                 </p:column>
-                                <p:column sortBy="#{item.deleted}" filterBy="#{item.deleted}" headerText="#{configMapController.getKey('ListNotesTitle_deleted')}"   >
+
+                                <p:column sortBy="#{item.note}" filterBy="#{item.note}" headerText="#{configMapController.getKey('ListNotesTitle_note')}"   >
                                     <p:cellEditor> 
                                         <f:facet name="output">
-                                            <h:outputText value="#{item.deleted}"/>
+                                            <h:outputText value="#{item.note}"/>
                                         </f:facet>
                                         <f:facet name="input">
-                                            <p:inputText value="#{item.deleted}" label="#{configMapController.getKey('ListNotesTitle_deleted')}" />
+                                            <p:inputText value="#{item.note}" label="#{configMapController.getKey('ListNotesTitle_note')}" />
                                         </f:facet>
                                     </p:cellEditor> 
 
 
                                 </p:column>
-                                <p:column sortBy="#{item.userId}" filterBy="#{item.userId}" headerText="#{configMapController.getKey('ListNotesTitle_userId')}"   >
-                                    <p:cellEditor> 
-                                        <f:facet name="output">
-                                            <h:outputText value="#{item.userId.firstname} #{item.userId.lastname}"/>
-                                        </f:facet>
-                                        <f:facet name="input">
-                                            <p:inputText value="#{item.userId}" label="#{configMapController.getKey('ListNotesTitle_userId')}" />
-                                        </f:facet>
-                                    </p:cellEditor> 
-
-
-                                </p:column>
+                                <!--         <p:column sortBy="#{item.deleted}" filterBy="#{item.deleted}" headerText="#{configMapController.getKey('ListNotesTitle_deleted')}"   >
+                                       <p:cellEditor> 
+                                           <f:facet name="output">
+                                               <h:outputText value="#{item.deleted}"/>
+                                           </f:facet>
+                                           <f:facet name="input">
+                                               <p:inputText value="#{item.deleted}" label="#{configMapController.getKey('ListNotesTitle_deleted')}" />
+                                           </f:facet>
+                                       </p:cellEditor> 
+   
+   
+                                   </p:column>
+                                   <p:column sortBy="#{item.userId}" filterBy="#{item.userId}" headerText="#{configMapController.getKey('ListNotesTitle_userId')}"   >
+                                       <p:cellEditor> 
+                                           <f:facet name="output">
+                                               <h:outputText value="#{item.userId.firstname} #{item.userId.lastname}"/>
+                                           </f:facet>
+                                           <f:facet name="input">
+                                               <p:inputText value="#{item.userId}" label="#{configMapController.getKey('ListNotesTitle_userId')}" />
+                                           </f:facet>
+                                       </p:cellEditor> 
+   
+   
+                                   </p:column>-->
                                 <p:column rendered="#{notesController.isUserInRole('ADMIN')}"  headerText="Edit" style="width:50px">  
                                     <p:rowEditor />  
                                 </p:column>  
