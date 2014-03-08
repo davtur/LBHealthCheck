@@ -36,7 +36,7 @@
                         <p:panel>
                             <h:panelGrid columns="1">
                                 <h:outputLabel value="#{configMapController.getKey('EditSessionHistoryLabel_sessionType')}" for="sessionType" />
-                                <h:selectOneMenu id="sessionType" value="#{sessionHistoryController.selected.sessionTypes}" title="#{configMapController.getKey('EditSessionHistoryTitle_sessionType')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionHistoryRequiredMessage_sessionType')}">
+                                <h:selectOneMenu id="sessionType" value="#{sessionHistoryController.selected.sessionTypesId}" title="#{configMapController.getKey('EditSessionHistoryTitle_sessionType')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionHistoryRequiredMessage_sessionType')}">
                                     <f:selectItems value="#{sessionTypesController.itemsAvailableSelectOne}"/>
                                 </h:selectOneMenu>
                                 

@@ -14,13 +14,14 @@
             <h:panelGroup id="messagePanel" layout="block">
                 <h:messages errorStyle="color: red" infoStyle="color: green" layout="table"/>
             </h:panelGroup>
-            <h:form id="photoCreate">
+            <h:form id="photoCreate" >
+                <p:log/>
                 <p:panel>
                     <h:panelGrid columns="2">
                         <h:outputLabel value="#{configMapController.getKey('CreateCustomerImagesLabel_customerId')}" for="customerId" />
                         <h:outputLabel value="#{configMapController.getKey('CreateCustomerImagesLabel_imageType')}" for="imageType" />
-                        <h:selectOneMenu  valueChangeListener="#{customerImagesController.handleCustomerChange}" id="customerId" value="#{customerImagesController.selected.customerId}" title="#{configMapController.getKey('CreateCustomerImagesTitle_customerId')}" required="true" requiredMessage="#{configMapController.getKey('CreateCustomerImagesRequiredMessage_customerId')}">
-                            <f:selectItems  value="#{customersController.itemsAvailableSelectOneObject}"/>
+                        <h:selectOneMenu  valueChangeListener="#{customerImagesController.handleCustomerChange}" id="customerId" converter="customerConverter" value="#{customerImagesController.selected.customerId}" title="#{configMapController.getKey('CreateCustomerImagesTitle_customerId')}" required="true" requiredMessage="#{configMapController.getKey('CreateCustomerImagesRequiredMessage_customerId')}">
+                            <f:selectItems  value="#{customersController.customersAvailableSelectOneObject}"/>
                             <p:ajax update=":menuForm:growl" />
 
                         </h:selectOneMenu>
@@ -36,7 +37,7 @@
                         <h:outputLabel value="#{configMapController.getKey('CreateCustomerImagesLabel_datetaken')}" for="datetaken" />
                         <p:panel id="photoPanel3" header="Select a photo to upload (jpeg)">
                             <h:panelGrid columns="2" width="400px">
-                                <p:fileUpload  fileUploadListener="#{customerImagesController.handleFileUpload}" auto="true" update=":photoCreate:photoPanel3,:photoCreate:datetaken,:menuForm:growl,:photoCreate:saveButton" allowTypes="*.jpg;*.JPG;*.jpeg;*.JPEG" sizeLimit="10000000" />
+                                <p:fileUpload fileLimitMessage="The size of the picture is too big! ( > 10MB )" fileUploadListener="#{customerImagesController.handleFileUpload}" auto="true" update=":photoCreate:photoPanel3 :photoCreate:datetaken :menuForm:growl :photoCreate:saveButton" allowTypes="/(\.|\/)(gif|jpe?g|png)$/" sizeLimit="10000000" />
                                 <p:graphicImage  value="#{customerImagesController.uploadedImage}" width="180px" cache="false" id="photo1"/>
                             </h:panelGrid>
                         </p:panel>
@@ -53,7 +54,7 @@
                     <p:panel id="saveButton">
 
                         <h:panelGrid  columns="2">
-                            <p:commandButton  disabled="#{customerImagesController.saveButtonDisabled}" update=":photoCreate:photoPanel3,:photoCreate:datetaken,:menuForm:growl,:photoCreate:saveButton"   actionListener="#{customerImagesController.create}" value="#{configMapController.getKey('CreateCustomerImagesSaveLink')}" />
+                            <p:commandButton  disabled="#{customerImagesController.saveButtonDisabled}" update=":photoCreate:photoPanel3 :photoCreate:datetaken :menuForm:growl :photoCreate:saveButton"   actionListener="#{customerImagesController.createFromDialogue}" value="#{configMapController.getKey('CreateCustomerImagesSaveLink')}" />
 
 
                             <p:commandButton   ajax="false"   action="#{customerImagesController.prepareList}" value="#{configMapController.getKey('CreateCustomerImagesShowAllLink')}" immediate="true"/>

@@ -20,89 +20,37 @@
                             <h:outputLabel value="#{configMapController.getKey('CreateStatsTakenLabel_trainerComments')}" for="trainerComments" />
                             <h:outputLabel value="#{configMapController.getKey('CreateStatsTakenLabel_customerId')} #{statsTakenController.selected.customerId}" for="customerId" />
                             <p:calendar id="dateRecorded" value="#{statsTakenController.selected.dateRecorded}" mode="inline" >
-                                        
-                                        
-                            <p:ajax event="dateSelect" listener="#{statsTakenController.handleDateSelect}" update=":menuForm:growl"  />
 
-                        </p:calendar> 
+
+                                <p:ajax event="dateSelect" listener="#{statsTakenController.handleDateSelect}" update=":menuForm:growl"  />
+
+                            </p:calendar> 
                             <h:inputTextarea id="trainerComments" cols="32" rows="12" value="#{statsTakenController.selected.trainerComments}" title="#{configMapController.getKey('CreateStatsTakenTitle_trainerComments')}" required="true" requiredMessage="#{configMapController.getKey('CreateStatsTakenRequiredMessage_trainerComments')}"/>
                             <h:panelGrid>
-                                <h:selectOneMenu id="customerId" value="#{statsTakenController.selected.customerId}" title="#{configMapController.getKey('CreateStatsTakenTitle_customerId')}" required="true" requiredMessage="#{configMapController.getKey('CreateStatsTakenRequiredMessage_customerId')}">
-                                    <f:selectItems  itemLabel="#{listItem.label}" itemValue="#{listItem.value}" value="#{customersController.itemsAvailableSelectMany}" var="listItem"/>
+                                <h:selectOneMenu id="customerId" value="#{statsTakenController.selected.customerId}" title="#{configMapController.getKey('CreateStatsTakenTitle_customerId')}" required="true" converter="customerConverter" requiredMessage="#{configMapController.getKey('CreateStatsTakenRequiredMessage_customerId')}">
+                                    <f:selectItems  itemLabel="#{listItem.firstname} #{listItem.lastname}" itemValue="#{listItem}" value="#{customersController.customersAvailableSelectOneObject}" var="listItem"/>
                                     <p:ajax update=":statsTakenForm1:statsTakenPanel1"  listener="#{statsTakenController.handleUserChange}" />
                                 </h:selectOneMenu>
                                 <h:outputLabel value="Actions" />
-                               <h:commandButton action="#{statsTakenController.create}" value="#{configMapController.getKey('CreateStatsTakenSaveLink')}" style="width:100%"/>
+                                <h:commandButton action="#{statsTakenController.create}" value="#{configMapController.getKey('CreateStatsTakenSaveLink')}" style="width:100%"/>
 
                                 <h:commandButton action="#{statsTakenController.createAndReturnToList}" value="#{configMapController.getKey('CreateStatsTakenSaveAndReturnLink')}" style="width:100%"/>
-                                 <h:commandButton action="#{statsTakenController.discard}" value="Discard" style="width:100%"/>
+                                <h:commandButton action="#{statsTakenController.discard}" value="Discard" style="width:100%"/>
                             </h:panelGrid>
                         </h:panelGrid>
-                        
+
                     </p:panel>
                     <p:panel id="statsPanel2">
-                        <h:panelGrid columns="2">
-                            <h:outputLabel value="#{statsTakenController.selected.statCollection[0].statType.name}" for="value" />
-                            <h:inputText onfocus="this.select()" id="value" value="#{statsTakenController.selected.statCollection[0].value}" title="#{statsTakenController.selected.statCollection[0].statType.description}" required="true" requiredMessage="#{configMapController.getKey('CreateStatRequiredMessage_value')}">
 
 
-                            </h:inputText>
-
-                            <h:outputLabel value="#{statsTakenController.selected.statCollection[1].statType.name}" for="value1" />
-                            <h:inputText id="value1" value="#{statsTakenController.selected.statCollection[1].value}" title="#{statsTakenController.selected.statCollection[1].statType.description}" required="true" requiredMessage="#{configMapController.getKey('CreateStatRequiredMessage_value')}">
-
-                            </h:inputText>
-                            <h:outputLabel value="#{statsTakenController.selected.statCollection[2].statType.name}" for="value2" />
-                            <h:inputText id="value2" value="#{statsTakenController.selected.statCollection[2].value}" title="#{statsTakenController.selected.statCollection[2].statType.description}" required="true" requiredMessage="#{configMapController.getKey('CreateStatRequiredMessage_value')}">
-
-                            </h:inputText>
-                            <h:outputLabel value="#{statsTakenController.selected.statCollection[3].statType.name}" for="value3" />
-                            <h:inputText id="value3" value="#{statsTakenController.selected.statCollection[3].value}" title="#{statsTakenController.selected.statCollection[3].statType.description}" required="true" requiredMessage="#{configMapController.getKey('CreateStatRequiredMessage_value')}">
-
-                            </h:inputText>
-                            <h:outputLabel value="#{statsTakenController.selected.statCollection[4].statType.name}" for="value4" />
-                            <h:inputText id="value4" value="#{statsTakenController.selected.statCollection[4].value}" title="#{statsTakenController.selected.statCollection[4].statType.description}" required="true" requiredMessage="#{configMapController.getKey('CreateStatRequiredMessage_value')}">
-
-                            </h:inputText>
-                            <h:outputLabel value="#{statsTakenController.selected.statCollection[5].statType.name}" for="value5" />
-                            <h:inputText id="value5" value="#{statsTakenController.selected.statCollection[5].value}" title="#{statsTakenController.selected.statCollection[5].statType.description}" required="true" requiredMessage="#{configMapController.getKey('CreateStatRequiredMessage_value')}">
-
-                            </h:inputText>
-                            <h:outputLabel value="#{statsTakenController.selected.statCollection[6].statType.name}" for="value6" />
-                            <h:inputText id="value6" value="#{statsTakenController.selected.statCollection[6].value}" title="#{statsTakenController.selected.statCollection[6].statType.description}" required="true" requiredMessage="#{configMapController.getKey('CreateStatRequiredMessage_value')}">
-
-                            </h:inputText>
-                            <h:outputLabel value="#{statsTakenController.selected.statCollection[7].statType.name}" for="value7" />
-                            <h:inputText id="value7" value="#{statsTakenController.selected.statCollection[7].value}" title="#{statsTakenController.selected.statCollection[7].statType.description}" required="true" requiredMessage="#{configMapController.getKey('CreateStatRequiredMessage_value')}">
-
-                            </h:inputText>
-                            <h:outputLabel value="#{statsTakenController.selected.statCollection[8].statType.name}" for="value8" />
-                            <h:inputText id="value8" value="#{statsTakenController.selected.statCollection[8].value}" title="#{statsTakenController.selected.statCollection[8].statType.description}" required="true" requiredMessage="#{configMapController.getKey('CreateStatRequiredMessage_value')}">
-
-                            </h:inputText>
-                            <h:outputLabel value="#{statsTakenController.selected.statCollection[9].statType.name}" for="value9" />
-                            <h:inputText id="value9" value="#{statsTakenController.selected.statCollection[9].value}" title="#{statsTakenController.selected.statCollection[9].statType.description}" required="true" requiredMessage="#{configMapController.getKey('CreateStatRequiredMessage_value')}">
-
-                            </h:inputText>
-                            <h:outputLabel value="#{statsTakenController.selected.statCollection[10].statType.name}" for="value10" />
-                            <h:inputText id="value10" value="#{statsTakenController.selected.statCollection[10].value}" title="#{statsTakenController.selected.statCollection[10].statType.description}" required="true" requiredMessage="#{configMapController.getKey('CreateStatRequiredMessage_value')}">
-
-                            </h:inputText>
-                            <h:outputLabel value="#{statsTakenController.selected.statCollection[11].statType.name}" for="value11" />
-                            <h:inputText id="value11" value="#{statsTakenController.selected.statCollection[11].value}" title="#{statsTakenController.selected.statCollection[11].statType.description}" required="true" requiredMessage="#{configMapController.getKey('CreateStatRequiredMessage_value')}">
-
-                            </h:inputText>
-                            <h:outputLabel value="#{statsTakenController.selected.statCollection[12].statType.name}" for="value12" />
-                            <h:inputText id="value12" value="#{statsTakenController.selected.statCollection[12].value}" title="#{statsTakenController.selected.statCollection[12].statType.description}" required="true" requiredMessage="#{configMapController.getKey('CreateStatRequiredMessage_value')}">
-
-                            </h:inputText>
-                            <h:outputLabel value="#{statsTakenController.selected.statCollection[13].statType.name}" for="value13" />
-                            <h:inputText id="value13" value="#{statsTakenController.selected.statCollection[13].value}" title="#{statsTakenController.selected.statCollection[13].statType.description}" required="true" requiredMessage="#{configMapController.getKey('CreateStatRequiredMessage_value')}">
-
-                            </h:inputText>
+                        <p:dataList value="#{statsTakenController.selected.statCollection}" var="stats" itemType="disc">
+                            <p:panelGrid columns="2">
+                                <p:outputLabel value="#{stats.statType.name}"  />
+                                <p:inputText  value="#{stats.value}" title="#{stats.statType.description}" required="true" requiredMessage="#{configMapController.getKey('CreateStatRequiredMessage_value')}"/>
+                            </p:panelGrid>
+                        </p:dataList>
 
 
-                        </h:panelGrid>
 
                     </p:panel>
                 </h:form>
