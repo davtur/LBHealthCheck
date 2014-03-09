@@ -7,7 +7,7 @@
         contentType="text/html"
         renderKitId="PRIMEFACES_MOBILE">
 
-    <pm:page title="Pure Fitness Session" >
+    <pm:page title="Customer Notes" >
         <f:facet name="postinit">                        
             <h:outputStylesheet library="primefaces-mobile" name="calendar/calendar.css"  />
 
@@ -64,26 +64,35 @@
             }                
         </style>        
         <!-- Main View  -->
-        <pm:view id="main" swatch="b" > 
-            <pm:header title="Pure Fitness Mobile" />
-            <pm:content >  
-                <h:form id="sessionsForm">  
-                    <p:growl/>
-
-                    <h3>Main Menu</h3>
-                    <p:dataList>
-                        <!--<h:outputLink value="#sessions?transition=pop">Training Sessions</h:outputLink>--> 
-                        <p:commandLink action="#{sessionHistoryController.prepareCreateMobileReturnCreate}" ajax="false">Log Training Sessions <h:outputText styleClass="ui-li-count" value="New"/></p:commandLink> 
-                        <p:commandLink action="/trainer/sessionHistory/EditSessionMobile?faces-redirect=true" ajax="false">Edit Training Sessions <h:outputText styleClass="ui-li-count" value="New"/></p:commandLink> 
-                       <!-- <p:commandLink action="#{notesController.prepareCreateFromMobile}" ajax="false">Add Customer Notes<h:outputText styleClass="ui-li-count" value="New"/></p:commandLink> 
-
-                        <p:commandLink action="/trainer/sessionHistory/EditCustomerNotes?faces-redirect=true" ajax="false">Edit Customer Notes<h:outputText styleClass="ui-li-count" value="New"/></p:commandLink> -->
-                        <p:commandLink action="/trainer/sessionHistory/ListCustomerNotes?faces-redirect=true" ajax="false">Customer Notes<h:outputText styleClass="ui-li-count" value="New"/></p:commandLink> 
-
-                        <p:commandButton value="Logout" action="#{customersController.logout}" />
-                        <!--<h:outputLink value="#sessions?transition=pop">Logout</h:outputLink> -->
-                    </p:dataList>
+        <pm:view id="editNotes" swatch="b" > 
+            <pm:header title="Edit Notes">
+                
+                <f:facet name="left">
+                    <h:form id="notesForm2">  
+                        <p:commandButton value="Back" style="width:100px" icon="back" action="/mobileMenu?faces-redirect=true" ajax="false"/>
                 </h:form>
+                </f:facet>
+                
+            </pm:header>
+            <pm:content >                
+                <p:outputPanel >
+                    <h:form id="notesForm">  
+                        <p:growl/>
+                        <p:dataList    value="#{notesController.items}" var="notes">
+                            <p:column>
+                                <p:commandLink action="/trainer/sessionHistory/CreateCustomerNotes?faces-redirect=true" ajax="false" >
+                                    <h:outputText value="#{notes.createTimestamp}">
+                                        <f:convertDateTime pattern="dd MMM yyyy  HH:mm" />
+                                    </h:outputText> 
+                                    <h:outputText value="#{notes.userId.firstname} #{notes.userId.lastname}"/>
+                                     <h:outputText styleClass="ui-li-count" value="Edit"/>           
+                                  
+                                    <f:setPropertyActionListener value="#{notes}" target="#{notesController.selected}"  />
+                                </p:commandLink> 
+                            </p:column>
+                        </p:dataList>
+                    </h:form>
+                </p:outputPanel>
             </pm:content>
         </pm:view>
     </pm:page>

@@ -7,7 +7,7 @@
         contentType="text/html"
         renderKitId="PRIMEFACES_MOBILE">
 
-    <pm:page title="Pure Fitness Session" >
+    <pm:page title="Customer  Notes" >
         <f:facet name="postinit">                        
             <h:outputStylesheet library="primefaces-mobile" name="calendar/calendar.css"  />
 
@@ -64,26 +64,53 @@
             }                
         </style>        
         <!-- Main View  -->
-        <pm:view id="main" swatch="b" > 
-            <pm:header title="Pure Fitness Mobile" />
+        <pm:view id="createCustomerNotes" swatch="b" > 
+            <pm:header title="Create Notes">
+                <f:facet name="left"><p:button value="Back" icon="back" onclick="PrimeFaces.back()"/></f:facet>
+            </pm:header>
             <pm:content >  
-                <h:form id="sessionsForm">  
-                    <p:growl/>
+                <p:dialog id="createNotesDialog" widgetVar="createNotesDlg">
+                    <h:form id="dlgForm">  
+                        <h4>#{configMapController.getKey('CreateNotesLabel_comments')}</h4>
+                        <p:inputTextarea id="comments"  value="#{notesController.selected.note}"  />
 
-                    <h3>Main Menu</h3>
-                    <p:dataList>
-                        <!--<h:outputLink value="#sessions?transition=pop">Training Sessions</h:outputLink>--> 
-                        <p:commandLink action="#{sessionHistoryController.prepareCreateMobileReturnCreate}" ajax="false">Log Training Sessions <h:outputText styleClass="ui-li-count" value="New"/></p:commandLink> 
-                        <p:commandLink action="/trainer/sessionHistory/EditSessionMobile?faces-redirect=true" ajax="false">Edit Training Sessions <h:outputText styleClass="ui-li-count" value="New"/></p:commandLink> 
-                       <!-- <p:commandLink action="#{notesController.prepareCreateFromMobile}" ajax="false">Add Customer Notes<h:outputText styleClass="ui-li-count" value="New"/></p:commandLink> 
+                        <p:spacer height="10em" />
+                        <p:commandButton oncomplete="PF('createNotesDlg').hide()" action="#{notesController.createFromMobile()}" value="#{configMapController.getKey('CreateNotesSaveLink')}" update=":notesForm:notesList,:dlgForm:comments"/>
+                    </h:form>
+                </p:dialog> 
+                <p:outputPanel >
+                    <h:form id="notesForm">  
+                        <p:growl/>
+                        <h:outputText value="#{notesController.selectedUser.firstname} #{notesController.selectedUser.lastname}"/>
+                        <p:spacer height="10em" /><br/>
+                       <!-- <h:outputText value="Email: #{notesController.selectedUser.emailAddress}"/>-->
+                       <h:outputLink value="mailto:#{notesController.selectedUser.emailAddress}">
+                            <h:outputText value="Email: #{notesController.selectedUser.emailAddress}" />
+                        </h:outputLink>
+                        <p:spacer height="10em" /><br/> 
+                        <h:outputLink value="tel:#{notesController.selectedUser.telephone}">
+                            <h:outputText value="Phone: #{notesController.selectedUser.telephone}" />
+                        </h:outputLink>
+                        <!--<p:commandLink  value="Phone: #{notesController.selectedUser.telephone} "/>-->
+                        <p:spacer height="10em" />
 
-                        <p:commandLink action="/trainer/sessionHistory/EditCustomerNotes?faces-redirect=true" ajax="false">Edit Customer Notes<h:outputText styleClass="ui-li-count" value="New"/></p:commandLink> -->
-                        <p:commandLink action="/trainer/sessionHistory/ListCustomerNotes?faces-redirect=true" ajax="false">Customer Notes<h:outputText styleClass="ui-li-count" value="New"/></p:commandLink> 
 
-                        <p:commandButton value="Logout" action="#{customersController.logout}" />
-                        <!--<h:outputLink value="#sessions?transition=pop">Logout</h:outputLink> -->
-                    </p:dataList>
-                </h:form>
+                        <p:commandButton   type="button"   onclick="PF('createNotesDlg').show()"  value="#{configMapController.getKey('CreateNotesCreateLink')}" />
+
+
+                        <p:spacer height="10em" />
+                        <p:dataList  id="notesList" widgetVar="notesDataList" value="#{notesController.customerNoteItems}" var="notes">
+                            <p:column>
+                                <h3><p:outputLabel value="#{notes.createTimestamp}">
+                                        <f:convertDateTime pattern="dd MMM yyyy  HH:mm" />
+                                    </p:outputLabel></h3> <br/>
+                                <h:outputText value="#{notes.note}"/>
+
+                            </p:column>
+                        </p:dataList>
+
+                    </h:form>
+                </p:outputPanel>
             </pm:content>
         </pm:view>
     </pm:page>

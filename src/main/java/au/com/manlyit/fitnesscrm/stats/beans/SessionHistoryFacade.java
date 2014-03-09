@@ -5,7 +5,9 @@
 package au.com.manlyit.fitnesscrm.stats.beans;
 
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
+import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import au.com.manlyit.fitnesscrm.stats.db.SessionHistory;
+import au.com.manlyit.fitnesscrm.stats.db.SessionTrainers;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -17,6 +19,8 @@ import javax.persistence.Query;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 /**
@@ -84,6 +88,37 @@ public class SessionHistoryFacade extends AbstractFacade<SessionHistory> {
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
         }
+        return retList;
+    }
+      public List<SessionHistory> findSessionsByTrainerAndDateRange(Customers trainer, Date startDate, Date endDate, boolean sortAsc) {
+        List retList = null;
+        
+        try {
+            CriteriaBuilder cb = em.getCriteriaBuilder();
+            CriteriaQuery<SessionHistory> cq = cb.createQuery(SessionHistory.class);
+            Root<SessionHistory> rt = cq.from(SessionHistory.class);
+
+            Join<SessionTrainers, SessionHistory> jn = rt.join("sessionTrainersCollection");
+            Expression<Customers> sessionTrainer = jn.get("customerId");
+            Expression<Date> stime = rt.get("sessiondate");
+
+            Predicate condition1 = cb.between(stime, startDate,endDate);
+            Predicate condition2 = cb.equal(sessionTrainer, trainer);
+            cq.where(cb.and(condition1, condition2));
+            cq.select(rt);
+
+            
+            if (sortAsc) {
+                cq.orderBy(cb.asc(stime));
+            } else {
+                cq.orderBy(cb.desc(stime));
+            }
+            Query q = em.createQuery(cq);
+            retList = q.getResultList();
+        } catch (Exception e) {
+            JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
+        }
+        
         return retList;
     }
 }

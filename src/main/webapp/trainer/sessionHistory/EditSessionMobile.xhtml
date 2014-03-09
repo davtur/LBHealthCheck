@@ -64,26 +64,36 @@
             }                
         </style>        
         <!-- Main View  -->
-        <pm:view id="main" swatch="b" > 
-            <pm:header title="Pure Fitness Mobile" />
-            <pm:content >  
-                <h:form id="sessionsForm">  
-                    <p:growl/>
-
-                    <h3>Main Menu</h3>
-                    <p:dataList>
-                        <!--<h:outputLink value="#sessions?transition=pop">Training Sessions</h:outputLink>--> 
-                        <p:commandLink action="#{sessionHistoryController.prepareCreateMobileReturnCreate}" ajax="false">Log Training Sessions <h:outputText styleClass="ui-li-count" value="New"/></p:commandLink> 
-                        <p:commandLink action="/trainer/sessionHistory/EditSessionMobile?faces-redirect=true" ajax="false">Edit Training Sessions <h:outputText styleClass="ui-li-count" value="New"/></p:commandLink> 
-                       <!-- <p:commandLink action="#{notesController.prepareCreateFromMobile}" ajax="false">Add Customer Notes<h:outputText styleClass="ui-li-count" value="New"/></p:commandLink> 
-
-                        <p:commandLink action="/trainer/sessionHistory/EditCustomerNotes?faces-redirect=true" ajax="false">Edit Customer Notes<h:outputText styleClass="ui-li-count" value="New"/></p:commandLink> -->
-                        <p:commandLink action="/trainer/sessionHistory/ListCustomerNotes?faces-redirect=true" ajax="false">Customer Notes<h:outputText styleClass="ui-li-count" value="New"/></p:commandLink> 
-
-                        <p:commandButton value="Logout" action="#{customersController.logout}" />
-                        <!--<h:outputLink value="#sessions?transition=pop">Logout</h:outputLink> -->
-                    </p:dataList>
+        <pm:view id="sessions" swatch="b" > 
+            <pm:header title="Edit Sessions">
+                
+                <f:facet name="left">
+                    <h:form id="sessionsForm2">  
+                        <p:commandButton value="Back" style="width:100px" icon="back" action="/mobileMenu?faces-redirect=true" ajax="false"/>
                 </h:form>
+                </f:facet>
+                
+            </pm:header>
+            <pm:content >                
+                <p:outputPanel >
+                    <h:form id="sessionsForm">  
+                        <p:growl/>
+                        <p:dataList    value="#{sessionHistoryController.sessionHistoryItems}" var="sess">
+                            <p:column>
+                                <p:commandLink action="/trainer/sessionHistory/CreateSessionMobile?faces-redirect=true" ajax="false" >
+                                    <h:outputText value="#{sess.sessiondate}">
+                                        <f:convertDateTime pattern="dd MMM yyyy  HH:mm" />
+                                    </h:outputText> 
+                                    <h:outputText styleClass="ui-li-count" value="Edit"/>
+                                    <!--<h:outputText styleClass="ui-li-count" value="#{sess.participantsCollection.size}" converter="#{javax.faces.convert.IntegerConverter}" />-->
+                                       
+                                  
+                                    <f:setPropertyActionListener value="#{sess}" target="#{sessionHistoryController.selected}"  />
+                                </p:commandLink> 
+                            </p:column>
+                        </p:dataList>
+                    </h:form>
+                </p:outputPanel>
             </pm:content>
         </pm:view>
     </pm:page>

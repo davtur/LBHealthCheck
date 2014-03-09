@@ -499,7 +499,7 @@ public class CustomersController implements Serializable {
         return notesItems;
     }
 
-    private void recreateModel() {
+    public void recreateModel() {
         items = null;
     }
 
@@ -543,6 +543,10 @@ public class CustomersController implements Serializable {
 
     public Collection<Customers> getCustomersByGroupObject(String group, boolean sortAsc) {
         return ejbFacade.findAllByGroup(group, sortAsc);
+    }
+
+    public Collection<Customers> getActiveCustomersByGroupObject( boolean sortAsc) {
+        return ejbFacade.findAllActiveCustomers(sortAsc);
     }
 
     public void onEdit(RowEditEvent event) {

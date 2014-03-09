@@ -13,11 +13,14 @@ import java.awt.event.ActionEvent;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.el.ELException;
 import javax.inject.Inject;
 import javax.faces.application.FacesMessage;
 import javax.inject.Named;
@@ -36,6 +39,7 @@ import org.primefaces.model.DualListModel;
 @SessionScoped
 public class SessionHistoryController implements Serializable {
 
+    private static final Logger logger = Logger.getLogger(SessionHistoryController.class.getName());
     private SessionHistory current;
     private SessionHistory selectedForDeletion;
 
@@ -43,13 +47,15 @@ public class SessionHistoryController implements Serializable {
     private DataModel customerItems = null;
 
     private Customers[] participantsArray;
-
+    private SessionHistory[] sessionHistoryItems;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.SessionHistoryFacade ejbFacade;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.CustomersFacade ejbCustomerFacade;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.ParticipantsFacade ejbParticipantsFacade;
+    @Inject
+    private au.com.manlyit.fitnesscrm.stats.beans.SessionTrainersFacade ejbSessionTrainersFacade;
     @Inject
     private ConfigMapFacade configMapFacade;
     private PaginationHelper pagination;
@@ -71,21 +77,39 @@ public class SessionHistoryController implements Serializable {
 
     public SessionHistory getSelected() {
         if (current == null) {
-            current = new SessionHistory();
-            current.setSessiondate(new Date());
-            current.setId(0);
-            selectedItemIndex = -1;
+            createNewSessionHistory();
         }
         return current;
     }
 
+    private void createNewSessionHistory() {
+        current = new SessionHistory();
+        current.setSessiondate(new Date());
+
+        selectedItemIndex = -1;
+        addParticipants();
+        addTrainer();
+        sessionHistoryItems = null;
+
+    }
+
     public void setSelected(SessionHistory selected) {
         this.current = selected;
+        this.trainers = new ArrayList<>();
+        this.attendingCustomers = new ArrayList<>();
+        Collection<SessionTrainers> st = current.getSessionTrainersCollection();
+        Collection<Participants> p = current.getParticipantsCollection();
+        for (Participants part : p) {
+            attendingCustomers.add(part.getCustomerId());
+        }
+        for (SessionTrainers train : st) {
+            trainers.add(train.getCustomerId());
+        }
     }
 
     public static boolean isUserInRole(String roleName) {
-        boolean inRole = false;
-        inRole = FacesContext.getCurrentInstance().getExternalContext().isUserInRole(roleName);
+
+        boolean inRole = FacesContext.getCurrentInstance().getExternalContext().isUserInRole(roleName);
         return inRole;
 
     }
@@ -125,7 +149,7 @@ public class SessionHistoryController implements Serializable {
                         CustomersController custController = (CustomersController) context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
                         loggedInUser = custController.getSelected();
                         return ejbFacade.countByCustId(loggedInUser.getId());
-                    } catch (Exception e) {
+                    } catch (ELException e) {
                         JsfUtil.addErrorMessage(e, "Couldn't get customer i Session History controller");
                     }
 
@@ -137,13 +161,11 @@ public class SessionHistoryController implements Serializable {
                     Customers loggedInUser = null;
                     try {
                         //loggedInUser = ejbCustomerFacade.findCustomerByUsername(FacesContext.getCurrentInstance().getExternalContext().getRemoteUser());
-                        FacesContext context = FacesContext.getCurrentInstance();
-                        CustomersController custController = (CustomersController) context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
-                        loggedInUser = custController.getSelected();
+                        loggedInUser = getLoggedInUser();
                         String msg = "CreatingDataModel for user: " + loggedInUser.getUsername();
                         Logger.getLogger(getClass().getName()).log(Level.INFO, msg);
                         return new ListDataModel(ejbFacade.findAllByCustId(loggedInUser.getId(), true));
-                    } catch (Exception e) {
+                    } catch (ELException e) {
                         JsfUtil.addErrorMessage(e, "Couldn't get customer i Session History controller");
                     }
 
@@ -152,6 +174,13 @@ public class SessionHistoryController implements Serializable {
             };
         }
         return pagination;
+    }
+
+    private Customers getLoggedInUser() {
+        FacesContext context = FacesContext.getCurrentInstance();
+        CustomersController custController = (CustomersController) context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
+        return custController.getSelected();
+
     }
 
     public String prepareList() {
@@ -166,29 +195,46 @@ public class SessionHistoryController implements Serializable {
     }
 
     public String prepareCreate() {
-        current = new SessionHistory();
-        current.setSessiondate(new Date());
-        selectedItemIndex = -1;
-        addParticipants();
+        createNewSessionHistory();
         return "CreateSessionInfo";
     }
 
-    public String prepareCreateMobile() {
-        current = new SessionHistory();
-        current.setSessiondate(new Date());
-        selectedItemIndex = -1;
-        addParticipants();
+    private void addTrainer() {
+        List<SessionTrainers> parts = new ArrayList<>();
+
+        SessionTrainers p = new SessionTrainers(0);
+        p.setCustomerId(getLoggedInUser());
+        p.setSessionHistoryId(current);
+        parts.add(p);
+        current.setSessionTrainersCollection(parts);
+    }
+
+    public String prepareCreateMobileReturnMainMenu() {
+        createNewSessionHistory();
+
         return "/mobileMenu";
+    }
+
+    public String prepareCreateMobileReturnCreate() {
+        createNewSessionHistory();
+
+        return "/trainer/sessionHistory/CreateSessionMobile";
     }
 
     public String createMobile() {
         try {
-            current.setId(0); // auto generated by DB , but cannot be null
             updateCurrentParticipants(getAttendingCustomers());
             updateCurrentTrainers(getTrainers());
-            getFacade().create(current);
+            setSessionHistoryItems(null);
+
+            if (current.getId() == null) {
+                current.setId(0); // auto generated by DB , but cannot be null
+                getFacade().create(current);
+            } else {
+                getFacade().edit(current); 
+            }
             JsfUtil.addSuccessMessage(configMapFacade.getConfig("SessionHistoryCreated"));
-            return prepareCreateMobile();
+            return prepareCreateMobileReturnMainMenu();
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
             return null;
@@ -212,7 +258,12 @@ public class SessionHistoryController implements Serializable {
     private void updateCurrentTrainers(List<Customers> trainerList) {
 
         List<SessionTrainers> parts = new ArrayList<>();
-
+        Collection<SessionTrainers> oldList = current.getSessionTrainersCollection();
+        if (oldList != null) {
+            for (SessionTrainers st : oldList) {
+                ejbSessionTrainersFacade.remove(st);
+            }
+        }
         for (Customers cust : trainerList) {
             SessionTrainers p = new SessionTrainers(0);
             p.setCustomerId(cust);
@@ -228,14 +279,18 @@ public class SessionHistoryController implements Serializable {
         // List<Customers> targets = participants.getTarget(); //for the pick lIst
         // List<Customers> targets = Arrays.asList(participantsArray);// for the datatable
         // List<Customers> targets = activeCustomers; // for the selectMany  Menu
-
         List<Participants> parts = new ArrayList<>();
-
+        Collection<Participants> pc = current.getParticipantsCollection();
+        if (pc != null) {
+            for (Participants p : pc) {
+                ejbParticipantsFacade.remove(p);
+            }
+        }
         for (Customers cust : targets) {
-            Participants p = new Participants(0);
-            p.setCustomerId(cust);
-            p.setSessionHistoryId(current);
-            parts.add(p);
+            Participants newPart = new Participants(0);
+            newPart.setCustomerId(cust);
+            newPart.setSessionHistoryId(current);
+            parts.add(newPart);
         }
         //current.getParticipantsCollection().clear();
         current.setParticipantsCollection(parts);
@@ -484,6 +539,41 @@ public class SessionHistoryController implements Serializable {
      */
     public void setTrainers(List<Customers> trainers) {
         this.trainers = trainers;
+    }
+
+    /**
+     * @return the sessionHistoryItems
+     */
+    public SessionHistory[] getSessionHistoryItems() {
+        if (sessionHistoryItems == null) {
+            String user = FacesContext.getCurrentInstance().getExternalContext().getUserPrincipal().getName();
+            Customers cust = ejbCustomerFacade.findCustomerByUsername(user);
+            GregorianCalendar startDate = new GregorianCalendar();
+
+            GregorianCalendar endDate = new GregorianCalendar();
+
+            startDate.set(Calendar.HOUR_OF_DAY, 0);
+            startDate.set(Calendar.MINUTE, 0);
+            startDate.set(Calendar.SECOND, 0);
+            startDate.set(Calendar.MILLISECOND, 0);
+            endDate.setTime(startDate.getTime());
+            endDate.add(Calendar.HOUR_OF_DAY, 24);
+            endDate.add(Calendar.MILLISECOND, -1);
+            List<SessionHistory> sessionItems = getFacade().findSessionsByTrainerAndDateRange(cust, startDate.getTime(), endDate.getTime(), true);
+            SessionHistory[] sha = new SessionHistory[sessionItems.size()];
+            sessionHistoryItems = sessionItems.toArray(sha);
+            if (sessionHistoryItems == null) {
+                logger.log(Level.WARNING, "getSessionHistoryItems() sessionHistoryItems are null ");
+            }
+        }
+        return sessionHistoryItems;
+    }
+
+    /**
+     * @param sessionHistoryItems the sessionHistoryItems to set
+     */
+    public void setSessionHistoryItems(SessionHistory[] sessionHistoryItems) {
+        this.sessionHistoryItems = sessionHistoryItems;
     }
 
     @FacesConverter(forClass = SessionHistory.class)

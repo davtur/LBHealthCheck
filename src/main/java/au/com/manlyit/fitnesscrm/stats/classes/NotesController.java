@@ -4,7 +4,7 @@ import au.com.manlyit.fitnesscrm.stats.db.Notes;
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PaginationHelper;
 import au.com.manlyit.fitnesscrm.stats.beans.NotesFacade;
-
+import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
@@ -35,11 +35,15 @@ public class NotesController implements Serializable {
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.NotesFacade ejbFacade;
     @Inject
+    private au.com.manlyit.fitnesscrm.stats.beans.CustomersFacade ejbCustomersFacade;
+    @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade configMapFacade;
     private PaginationHelper pagination;
     private int selectedItemIndex;
     private List<Notes> filteredItems;
+    private List<Notes> customerNoteItems;
     private Notes[] multiSelected;
+    private Customers selectedUser;
 
     public NotesController() {
     }
@@ -52,6 +56,9 @@ public class NotesController implements Serializable {
     public Notes getSelected() {
         if (current == null) {
             current = new Notes();
+            if (selectedUser != null) {
+                current.setUserId(selectedUser);
+            }
             selectedItemIndex = -1;
         }
         return current;
@@ -60,6 +67,10 @@ public class NotesController implements Serializable {
     public void setSelected(Notes selected) {
         if (selected != null) {
             current = selected;
+            if (selectedUser != null) {
+                current.setUserId(selectedUser);
+            }
+
             selectedItemIndex = -1;
         }
 
@@ -126,10 +137,38 @@ public class NotesController implements Serializable {
         return "View";
     }
 
+    public String prepareCreateFromMobile() {
+        current = new Notes();
+        if (selectedUser != null) {
+            current.setUserId(selectedUser);
+        }
+        selectedItemIndex = -1;
+        return "pm:createCustomerNotes";
+    }
+
     public String prepareCreate() {
         current = new Notes();
         selectedItemIndex = -1;
         return "Create";
+    }
+
+    public String createFromMobile() {
+        try {
+            if (current.getId() == null) {
+                current.setId(0);
+            }
+            current.setCreateTimestamp(new Date());
+            current.setDeleted(new Short("0"));
+            getFacade().create(current);
+            //Customers cust = current.getUserId();
+            //current.setUserId(ejbCustomersFacade.find(cust.getId()));
+            recreateModel();
+            JsfUtil.addSuccessMessage(configMapFacade.getConfig("NotesCreated"));
+            return prepareCreateFromMobile();
+        } catch (NumberFormatException e) {
+            JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
+            return null;
+        }
     }
 
     public String create() {
@@ -137,7 +176,11 @@ public class NotesController implements Serializable {
             if (current.getId() == null) {
                 current.setId(0);
             }
+            current.setCreateTimestamp(new Date());
+            current.setDeleted(new Short("0"));
+
             getFacade().create(current);
+            recreateModel();
             JsfUtil.addSuccessMessage(configMapFacade.getConfig("NotesCreated"));
             return prepareCreate();
         } catch (Exception e) {
@@ -174,6 +217,14 @@ public class NotesController implements Serializable {
 
     public void selectOneMenuValueChangeListener(ValueChangeEvent vce) {
         Object o = vce.getNewValue();
+    }
+
+    public void updateNotesValueChangeListener(ValueChangeEvent vce) {
+        Object o = vce.getNewValue();
+        if (o.getClass() == String.class) {
+            String text = (String) o;
+            current.setNote(text);
+        }
     }
 
     public void selectManyMenuValueChangeListener(ValueChangeEvent vce) {
@@ -259,6 +310,7 @@ public class NotesController implements Serializable {
     private void recreateModel() {
         items = null;
         filteredItems = null;
+        customerNoteItems = null;
     }
 
     public String next() {
@@ -297,6 +349,44 @@ public class NotesController implements Serializable {
 
     public void onCancel(RowEditEvent event) {
         JsfUtil.addErrorMessage("Row Edit Cancelled");
+    }
+
+    /**
+     * @return the customerNoteItems
+     */
+    public List<Notes> getCustomerNoteItems() {
+        if (customerNoteItems == null) {
+            customerNoteItems = ejbFacade.findByUserId(getSelectedUser(), false);
+        }
+        return customerNoteItems;
+    }
+
+    /**
+     * @param customerNoteItems the customerNoteItems to set
+     */
+    public void setCustomerNoteItems(List<Notes> customerNoteItems) {
+        this.customerNoteItems = customerNoteItems;
+    }
+
+    /**
+     * @return the selectedUser
+     */
+    public Customers getSelectedUser() {
+        if (selectedUser == null) {
+            selectedUser = current.getUserId();
+        }
+        return selectedUser;
+    }
+
+    /**
+     * @param selectedUser the selectedUser to set
+     */
+    public void setSelectedUser(Customers selectedUser) {
+        this.customerNoteItems = null;
+        if (current != null) {
+            current.setUserId(selectedUser);
+        }
+        this.selectedUser = selectedUser;
     }
 
     @FacesConverter(forClass = Notes.class)

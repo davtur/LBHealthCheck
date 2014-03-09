@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE sun-web-app PUBLIC "-//Sun Microsystems, Inc.//DTD GlassFish Application Server 3.0 Servlet 3.0//EN" "http://www.sun.com/software/appserver/dtds/sun-web-app_3_0-0.dtd">
-<sun-web-app error-url="/loginError.html">
+<!DOCTYPE glassfish-web-app PUBLIC "-//GlassFish.org//DTD GlassFish Application Server 3.1 Servlet 3.0//EN" "http://glassfish.org/dtds/glassfish-web-app_3_0-1.dtd">
+<glassfish-web-app error-url="/loginError.html">
   <context-root>/FitnessStats</context-root>
   <security-role-mapping>
     <role-name>USER</role-name>
@@ -30,7 +30,7 @@
     <group-name>ADMIN</group-name>
     <group-name>DEVELOPER</group-name>
   </security-role-mapping>
-</sun-web-app>
+</glassfish-web-app>
 <!-- Glassfish config for server domain.xml file
 
 <security-service>
