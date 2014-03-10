@@ -6,11 +6,14 @@ package au.com.manlyit.fitnesscrm.stats.beans;
 
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
+import au.com.manlyit.fitnesscrm.stats.db.Participants;
 import au.com.manlyit.fitnesscrm.stats.db.SessionHistory;
 import au.com.manlyit.fitnesscrm.stats.db.SessionTrainers;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -29,6 +32,8 @@ import javax.persistence.criteria.Root;
  */
 @Stateless
 public class SessionHistoryFacade extends AbstractFacade<SessionHistory> {
+
+    private static final Logger logger = Logger.getLogger(SessionHistoryFacade.class.getName());
     @Inject
     private ConfigMapFacade configMapFacade;
     @PersistenceContext(unitName = "FitnessStatsPU")
@@ -43,11 +48,13 @@ public class SessionHistoryFacade extends AbstractFacade<SessionHistory> {
     public SessionHistoryFacade() {
         super(SessionHistory.class);
     }
- public int countByCustId(int customer_id) {
-        
+
+    public int countByCustId(int customer_id) {
+
         Query q = em.createNativeQuery("SELECT sh.id,sh.sessiondate,sh.session_types_id,sh.comments FROM participants p ,session_history sh WHERE p.session_history_id = sh.id  AND p.customer_id= '" + customer_id + "'");
         return ((Long) q.getSingleResult()).intValue();
     }
+
     public List<SessionHistory> findAllByCustId(int customer_id, boolean sortAsc) {
 
         String sort = "ASC";
@@ -66,9 +73,9 @@ public class SessionHistoryFacade extends AbstractFacade<SessionHistory> {
 
         return ((Long) q.getSingleResult()).intValue();
     }
-    
+
     public List<SessionHistory> findAll(boolean sortAsc) {
-        List retList = null;
+        List<SessionHistory> retList = null;
         try {
             CriteriaBuilder cb = em.getCriteriaBuilder();
             CriteriaQuery<SessionHistory> cq = cb.createQuery(SessionHistory.class);
@@ -84,41 +91,166 @@ public class SessionHistoryFacade extends AbstractFacade<SessionHistory> {
                 cq.orderBy(cb.desc(express));
             }
             Query q = em.createQuery(cq);
-            retList = q.getResultList();
+            retList = (List<SessionHistory>) q.getResultList();
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
         }
         return retList;
     }
-      public List<SessionHistory> findSessionsByTrainerAndDateRange(Customers trainer, Date startDate, Date endDate, boolean sortAsc) {
-        List retList = null;
-        
+
+    public List<SessionHistory> findSessionsByParticipantAndDateRange(Customers participant, Date startDate, Date endDate, boolean sortAsc) {
+        List<SessionHistory> retList = null;
+
         try {
             CriteriaBuilder cb = em.getCriteriaBuilder();
             CriteriaQuery<SessionHistory> cq = cb.createQuery(SessionHistory.class);
             Root<SessionHistory> rt = cq.from(SessionHistory.class);
 
-            Join<SessionTrainers, SessionHistory> jn = rt.join("sessionTrainersCollection");
-            Expression<Customers> sessionTrainer = jn.get("customerId");
+            Join<SessionHistory, Participants> jn = rt.joinCollection("participantsCollection");
+            Expression<Customers> sessionParticipant = jn.get("customerId");
             Expression<Date> stime = rt.get("sessiondate");
 
-            Predicate condition1 = cb.between(stime, startDate,endDate);
-            Predicate condition2 = cb.equal(sessionTrainer, trainer);
+            Predicate condition1 = cb.between(stime, startDate, endDate);
+            Predicate condition2 = cb.equal(sessionParticipant, participant);
             cq.where(cb.and(condition1, condition2));
             cq.select(rt);
-
-            
             if (sortAsc) {
                 cq.orderBy(cb.asc(stime));
             } else {
                 cq.orderBy(cb.desc(stime));
             }
             Query q = em.createQuery(cq);
-            retList = q.getResultList();
+            retList = (List<SessionHistory>) q.getResultList();
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
         }
-        
+
+        return retList;
+    }
+
+    public List<SessionHistory> findSessionsByParticipant(Customers participant, boolean sortAsc) {
+        List<SessionHistory> retList = null;
+
+        try {
+            CriteriaBuilder cb = em.getCriteriaBuilder();
+            CriteriaQuery<SessionHistory> cq = cb.createQuery(SessionHistory.class);
+            Root<SessionHistory> rt = cq.from(SessionHistory.class);
+
+            Join<SessionHistory, Participants> jn = rt.joinCollection("participantsCollection");
+            Expression<Customers> sessionParticipant = jn.get("customerId");
+            Expression<Date> stime = rt.get("sessiondate");
+
+            Predicate condition2 = cb.equal(sessionParticipant, participant);
+            cq.where(cb.and(condition2));
+            cq.select(rt);
+
+            if (sortAsc) {
+                cq.orderBy(cb.asc(stime));
+            } else {
+                cq.orderBy(cb.desc(stime));
+            }
+            Query q = em.createQuery(cq);
+            retList = (List<SessionHistory>) q.getResultList();
+        } catch (Exception e) {
+            JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
+        }
+
+        return retList;
+    }
+
+    public int countSessionsByParticipant(Customers participant) {
+
+        try {
+            CriteriaBuilder cb = em.getCriteriaBuilder();
+            CriteriaQuery<Long> cq = cb.createQuery(Long.class);
+            Root<Long> rt = cq.from(Long.class);
+
+            Join<SessionHistory, Participants> jn = rt.joinCollection("participantsCollection");
+            Expression<Customers> sessionParticipant = jn.get("customerId");
+            Predicate condition = cb.equal(sessionParticipant, participant);
+            cq.where(cb.and(condition));
+            cq.select(cb.count(rt));
+
+            Query q = em.createQuery(cq);
+            return ((Long) q.getSingleResult()).intValue();
+        } catch (Exception e) {
+            logger.log(Level.INFO, "Participant not found:" + participant.toString(), e);
+        }
+        return -1;
+    }
+
+    public List<SessionHistory> findSessionsByTrainerAndDateRange(Customers trainer, Date startDate, Date endDate, boolean sortAsc) {
+        List<SessionHistory> retList = null;
+
+        try {
+            CriteriaBuilder cb = em.getCriteriaBuilder();
+            CriteriaQuery<SessionHistory> cq = cb.createQuery(SessionHistory.class);
+            Root<SessionHistory> rt = cq.from(SessionHistory.class);
+
+            Join<SessionHistory, SessionTrainers> jn = rt.joinCollection("sessionTrainersCollection");
+            Expression<Customers> sessionTrainer = jn.get("customerId");
+            Expression<Date> stime = rt.get("sessiondate");
+
+            Predicate condition1 = cb.between(stime, startDate, endDate);
+            Predicate condition2 = cb.equal(sessionTrainer, trainer);
+            cq.where(cb.and(condition1, condition2));
+            cq.select(rt);
+
+            if (sortAsc) {
+                cq.orderBy(cb.asc(stime));
+            } else {
+                cq.orderBy(cb.desc(stime));
+            }
+            Query q = em.createQuery(cq);
+            retList = (List<SessionHistory>) q.getResultList();
+        } catch (Exception e) {
+            JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
+        }
+
+        return retList;
+    }
+
+    public int countSessionsByTrainer(Customers trainer) {
+
+        try {
+            CriteriaBuilder cb = em.getCriteriaBuilder();
+            CriteriaQuery<Long> cq = cb.createQuery(Long.class);
+            Root<Long> rt = cq.from(Long.class);
+
+            Join<SessionHistory, SessionTrainers> jn = rt.joinCollection("sessionTrainersCollection");
+            Expression<Customers> sessionTrainer = jn.get("customerId");
+            Predicate condition = cb.equal(sessionTrainer, trainer);
+            cq.where(cb.and(condition));
+            cq.select(cb.count(rt));
+
+            Query q = em.createQuery(cq);
+            return ((Long) q.getSingleResult()).intValue();
+        } catch (Exception e) {
+            logger.log(Level.INFO, "Customer not found:" + trainer.toString(), e);
+        }
+        return -1;
+    }
+
+    public List<SessionHistory> findSessionsByTrainer(Customers trainer, boolean sortAsc) {
+        List<SessionHistory> retList = null;
+
+        try {
+            CriteriaBuilder cb = em.getCriteriaBuilder();
+            CriteriaQuery<SessionHistory> cq = cb.createQuery(SessionHistory.class);
+            Root<SessionHistory> rt = cq.from(SessionHistory.class);
+
+            Join<SessionHistory, SessionTrainers> jn = rt.joinCollection("sessionTrainersCollection");
+            Expression<Customers> sessionTrainer = jn.get("customerId");
+            Predicate condition = cb.equal(sessionTrainer, trainer);
+            cq.where(cb.and(condition));
+            cq.select(rt);
+
+            Query q = em.createQuery(cq);
+            retList = (List<SessionHistory>) q.getResultList();
+        } catch (Exception e) {
+            JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
+        }
+
         return retList;
     }
 }

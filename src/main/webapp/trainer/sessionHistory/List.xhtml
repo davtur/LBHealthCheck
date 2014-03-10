@@ -11,67 +11,82 @@
             <h:outputText value="#{configMapController.getKey('ListSessionHistoryTitle')}"></h:outputText>
         </ui:define>
         <ui:define name="body">
-        <h:form id="listSessionHistoryForm1">
-            <h:panelGroup >
-                <p:commandButton id="createButton" ajax="false" action="#{sessionHistoryController.prepareCreate}" value="#{configMapController.getKey('ListSessionHistoryCreateLink')}"/>
-                <p:commandButton id="createButtonMobile" ajax="false" action="#{sessionHistoryController.prepareCreateMobileReturnCreate()}" value="#{configMapController.getKey('ListSessionHistoryCreateMobileLink')}"/>
-            </h:panelGroup>
-            <h:outputText escape="false" value="#{configMapController.getKey('ListSessionHistoryEmpty')}" rendered="#{sessionHistoryController.items.rowCount == 0}"/>
-            <h:panelGroup rendered="#{sessionHistoryController.items.rowCount > 0}">
-                <p:dataTable value="#{sessionHistoryController.items}" var="item" widgetVar="sessionsTable"  paginator="true" rows="15"  paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  rowsPerPageTemplate="5,10,15,20,25,50,100" >
-                    <p:column sortBy="#{item.id}" >
-                        <f:facet name="header">
-                            <h:outputText value="#{configMapController.getKey('ListSessionHistoryTitle_id')}"/>
+            <h:form id="listSessionHistoryForm1">
+                <h:panelGroup >
+                    <p:commandButton id="createButton" ajax="false" action="#{sessionHistoryController.prepareCreate}" value="#{configMapController.getKey('ListSessionHistoryCreateLink')}"/>
+                    <p:commandButton id="createButtonMobile" ajax="false" action="#{sessionHistoryController.prepareCreateMobileReturnCreate()}" value="#{configMapController.getKey('ListSessionHistoryCreateMobileLink')}"/>
+                </h:panelGroup>
+                <h:outputText escape="false" value="#{configMapController.getKey('ListSessionHistoryEmpty')}" rendered="#{sessionHistoryController.customerItems.rowCount == 0}"/>
+                <h:panelGroup rendered="#{sessionHistoryController.customerItems.rowCount > 0}">
+                    <p:dataTable value="#{sessionHistoryController.customerItems}" filteredValue="#{sessionHistoryController.filteredItems}"  var="item" widgetVar="sessionsTable"  paginator="true" rows="15"  paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  rowsPerPageTemplate="5,10,15,20,25,50,100" >
+                         <f:facet name="header">
+                            <p:outputPanel>
+                                <h:outputText value="Search all fields:" />
+                                <p:inputText id="globalFilter" onkeyup="sessionsTable.filter()" />
+                            </p:outputPanel>
                         </f:facet>
-                        <h:outputText value="#{item.id}"/>
-                    </p:column>
-                    <p:column sortBy="#{item.sessiondate}" >
-                        <f:facet name="header">
-                            <h:outputText value="#{configMapController.getKey('ListSessionHistoryTitle_sessiondate')}"/>
-                        </f:facet>
-                        <h:outputText value="#{item.sessiondate}">
-                            <f:convertDateTime pattern="dd/MM/yyyy" />
-                        </h:outputText>
-                    </p:column>
-                     <p:column sortBy="#{item.sessionTypesId.name}"  filterBy="#{item.sessionTypesId.name}"  headerText="#{configMapController.getKey('ListSessionHistoryTitle_sessionType')}" >
-                        <f:facet name="header">
-                            <h:outputText value="#{configMapController.getKey('ListSessionHistoryTitle_sessionType')}" />
-                        </f:facet>
-                        <h:outputText value="#{item.sessionTypesId.name}"/>
-                    </p:column>
-                   <!--  <p:column sortBy="#{item.trainer.firstname}"  filterBy="#{item.trainer.firstname}"  headerText="#{configMapController.getKey('ListSessionHistoryTitle_trainer')}" >
-                        <f:facet name="header">
-                            <h:outputText value="#{configMapController.getKey('ListSessionHistoryTitle_trainer')}"/>
-                        </f:facet>
-                        <h:outputText value="#{item.trainer.firstname} #{item.trainer.lastname}"/>
-                    </p:column>-->
+                        <!--<p:column sortBy="#{item.id}" >
+                            <f:facet name="header">
+                                <h:outputText value="#{configMapController.getKey('ListSessionHistoryTitle_id')}"/>
+                            </f:facet>
+                            <h:outputText value="#{item.id}"/>
+                        </p:column>-->
+                        <p:column sortBy="#{item.sessiondate}" >
+                            <f:facet name="header">
+                                <h:outputText value="#{configMapController.getKey('ListSessionHistoryTitle_sessiondate')}"/>
+                            </f:facet>
+                            <h:outputText value="#{item.sessiondate}">
+                                <f:convertDateTime pattern="dd/MM/yyyy" />
+                            </h:outputText>
+                        </p:column>
+                        <p:column sortBy="#{item.sessionTrainersCollection[0].customerId.firstname}" >
+                            <f:facet name="header">
+                                <h:outputText value="Trainer(s)"/>
+                            </f:facet>
+                            <p:dataList    value="#{item.sessionTrainersCollection}" var="trainers">
+                                <h:outputText value="#{trainers.customerId.firstname} #{trainers.customerId.lastname}"/>
+                            </p:dataList>
 
-                    <p:column sortBy="#{item.comments}" filterBy="#{item.comments}"  headerText="#{configMapController.getKey('ListSessionHistoryTitle_comments')}" >
-                        <f:facet name="header">
-                            <h:outputText value="#{configMapController.getKey('ListSessionHistoryTitle_comments')}"/>
-                        </f:facet>
-                        <h:outputText value="#{item.comments}"/>
-                    </p:column>
+                        </p:column>
+                        <p:column sortBy="#{item.sessionTypesId.name}"  filterBy="#{item.sessionTypesId.name}"  headerText="#{configMapController.getKey('ListSessionHistoryTitle_sessionType')}" >
+                            <f:facet name="header">
+                                <h:outputText value="#{configMapController.getKey('ListSessionHistoryTitle_sessionType')}" />
+                            </f:facet>
+                            <h:outputText value="#{item.sessionTypesId.name}"/>
+                        </p:column>
+                       <!--  <p:column sortBy="#{item.trainer.firstname}"  filterBy="#{item.trainer.firstname}"  headerText="#{configMapController.getKey('ListSessionHistoryTitle_trainer')}" >
+                            <f:facet name="header">
+                                <h:outputText value="#{configMapController.getKey('ListSessionHistoryTitle_trainer')}"/>
+                            </f:facet>
+                            <h:outputText value="#{item.trainer.firstname} #{item.trainer.lastname}"/>
+                        </p:column>-->
 
-                    <p:column>
-                        <f:facet name="header">
-                            <h:outputText value="&nbsp;"/>
-                        </f:facet>
-                        <p:commandButton                                                            ajax="false" action="#{sessionHistoryController.prepareView}" value="#{configMapController.getKey('ListSessionHistoryViewLink')}">
-                         <f:setPropertyActionListener value="#{item}" target="#{sessionHistoryController.selected}" />
-                        </p:commandButton>
-                        <h:outputText value=" "/>
-                        <p:commandButton rendered="#{sessionHistoryController.isUserInRole('ADMIN')}"  ajax="false" action="#{sessionHistoryController.prepareEdit}" value="#{configMapController.getKey('ListSessionHistoryEditLink')}">
-                         <f:setPropertyActionListener value="#{item}" target="#{sessionHistoryController.selected}" />
-                        </p:commandButton>
-                        <h:outputText value=" "/>
-                        <p:commandButton rendered="#{sessionHistoryController.isUserInRole('ADMIN')}" update=":listSessionHistoryForm1"   value="#{configMapController.getKey('ListSessionHistoryDestroyLink')}">
-                            <f:setPropertyActionListener value="#{item}" target="#{sessionHistoryController.selectedForDeletion}" />
-                        </p:commandButton>
-                    </p:column>
-                </p:dataTable>
-            </h:panelGroup>
-        </h:form>
+                        <p:column sortBy="#{item.comments}" filterBy="#{item.comments}"  headerText="#{configMapController.getKey('ListSessionHistoryTitle_comments')}" >
+                            <f:facet name="header">
+                                <h:outputText value="#{configMapController.getKey('ListSessionHistoryTitle_comments')}"/>
+                            </f:facet>
+                            <h:outputText value="#{item.comments}"/>
+                        </p:column>
+
+                        <p:column>
+                            <f:facet name="header">
+                                <h:outputText value="&nbsp;"/>
+                            </f:facet>
+                            <p:commandButton                                                            ajax="false" action="#{sessionHistoryController.prepareView}" value="#{configMapController.getKey('ListSessionHistoryViewLink')}">
+                                <f:setPropertyActionListener value="#{item}" target="#{sessionHistoryController.selected}" />
+                            </p:commandButton>
+                            <h:outputText value=" "/>
+                            <p:commandButton rendered="#{sessionHistoryController.isUserInRole('ADMIN')}"  ajax="false" action="#{sessionHistoryController.prepareEdit}" value="#{configMapController.getKey('ListSessionHistoryEditLink')}">
+                                <f:setPropertyActionListener value="#{item}" target="#{sessionHistoryController.selected}" />
+                            </p:commandButton>
+                            <h:outputText value=" "/>
+                            <p:commandButton rendered="#{sessionHistoryController.isUserInRole('ADMIN')}" update=":listSessionHistoryForm1"   value="#{configMapController.getKey('ListSessionHistoryDestroyLink')}">
+                                <f:setPropertyActionListener value="#{item}" target="#{sessionHistoryController.selectedForDeletion}" />
+                            </p:commandButton>
+                        </p:column>
+                    </p:dataTable>
+                </h:panelGroup>
+            </h:form>
         </ui:define>
     </ui:composition>
 

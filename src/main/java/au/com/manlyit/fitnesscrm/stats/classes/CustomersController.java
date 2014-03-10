@@ -4,6 +4,7 @@ import au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.beans.CustomersFacade;
+import au.com.manlyit.fitnesscrm.stats.chartbeans.MySessionsChart1;
 import au.com.manlyit.fitnesscrm.stats.classes.util.DatatableSelectionHelper;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PfSelectableDataModel;
 import au.com.manlyit.fitnesscrm.stats.db.Groups;
@@ -122,7 +123,7 @@ public class CustomersController implements Serializable {
             FacesContext context = FacesContext.getCurrentInstance();
             EziDebitPaymentGateway controller = (EziDebitPaymentGateway) context.getApplication().getELResolver().getValue(context.getELContext(), null, "ezidebit");
             controller.setSelectedCustomer(cust);
-            
+
         }
     }
 
@@ -248,8 +249,10 @@ public class CustomersController implements Serializable {
         String message = "Recreating data models for user : " + current.getUsername() + ". ";
         Logger.getLogger(getClass().getName()).log(Level.INFO, message);
 
-        SessionHistoryController shc = (SessionHistoryController) context.getApplication().evaluateExpressionGet(context, "#{sessionHistoryController}", SessionHistoryController.class);
-        shc.recreateModel();
+        SessionHistoryController controller = (SessionHistoryController) context.getApplication().evaluateExpressionGet(context, "#{sessionHistoryController}", SessionHistoryController.class);
+        controller.recreateModel();
+        MySessionsChart1 c2 = (MySessionsChart1) context.getApplication().evaluateExpressionGet(context, "#{mySessionsChart1}", MySessionsChart1.class);
+        c2.recreateModel();
 
     }
 
@@ -545,7 +548,7 @@ public class CustomersController implements Serializable {
         return ejbFacade.findAllByGroup(group, sortAsc);
     }
 
-    public Collection<Customers> getActiveCustomersByGroupObject( boolean sortAsc) {
+    public Collection<Customers> getActiveCustomersByGroupObject(boolean sortAsc) {
         return ejbFacade.findAllActiveCustomers(sortAsc);
     }
 
@@ -791,7 +794,7 @@ public class CustomersController implements Serializable {
     public void setNotesFilteredItems(List<Notes> notesFilteredItems) {
         this.notesFilteredItems = notesFilteredItems;
     }
-    
+
     public void onNotesEdit(RowEditEvent event) {
         Notes cm = (Notes) event.getObject();
         ejbNotesFacade.edit(cm);

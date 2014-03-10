@@ -6,6 +6,7 @@
 
 package au.com.manlyit.fitnesscrm.stats.db;
 
+import au.com.manlyit.fitnesscrm.stats.classes.util.BaseEntity;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
@@ -41,7 +42,7 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "SessionHistory.findAll", query = "SELECT s FROM SessionHistory s"),
     @NamedQuery(name = "SessionHistory.findById", query = "SELECT s FROM SessionHistory s WHERE s.id = :id"),
     @NamedQuery(name = "SessionHistory.findBySessiondate", query = "SELECT s FROM SessionHistory s WHERE s.sessiondate = :sessiondate")})
-public class SessionHistory implements Serializable {
+public class SessionHistory implements BaseEntity,Serializable {
     
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "sessionHistoryId")
     private Collection<SessionTrainers> sessionTrainersCollection;

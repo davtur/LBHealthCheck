@@ -3,9 +3,10 @@ package au.com.manlyit.fitnesscrm.stats.classes;
 import au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade;
 import au.com.manlyit.fitnesscrm.stats.db.SessionHistory;
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
-import au.com.manlyit.fitnesscrm.stats.classes.util.PaginationHelper;
 import au.com.manlyit.fitnesscrm.stats.beans.SessionHistoryFacade;
 import au.com.manlyit.fitnesscrm.stats.chartbeans.MySessionsChart1;
+import au.com.manlyit.fitnesscrm.stats.classes.util.DatatableSelectionHelper;
+import au.com.manlyit.fitnesscrm.stats.classes.util.PfSelectableDataModel;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import au.com.manlyit.fitnesscrm.stats.db.Participants;
 import au.com.manlyit.fitnesscrm.stats.db.SessionTrainers;
@@ -30,11 +31,10 @@ import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 import javax.faces.convert.Converter;
 import javax.faces.convert.FacesConverter;
-import javax.faces.model.DataModel;
-import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
 import org.primefaces.event.SelectEvent;
 import org.primefaces.model.DualListModel;
+import org.primefaces.model.SelectableDataModel;
 
 @Named("sessionHistoryController")
 @SessionScoped
@@ -44,9 +44,11 @@ public class SessionHistoryController implements Serializable {
     private SessionHistory current;
     private SessionHistory selectedForDeletion;
 
-    private DataModel items = null;
-    private DataModel customerItems = null;
-
+    private PfSelectableDataModel<SessionHistory>  items = null;
+    private PfSelectableDataModel<SessionHistory>  customerItems = null;
+    private PfSelectableDataModel<SessionHistory>  participantItems = null;
+    private List<SessionHistory> filteredItems;
+    private List<SessionHistory> participantFilteredItems;
     private Customers[] participantsArray;
     private SessionHistory[] sessionHistoryItems;
     @Inject
@@ -59,7 +61,7 @@ public class SessionHistoryController implements Serializable {
     private au.com.manlyit.fitnesscrm.stats.beans.SessionTrainersFacade ejbSessionTrainersFacade;
     @Inject
     private ConfigMapFacade configMapFacade;
-    private PaginationHelper pagination;
+    private DatatableSelectionHelper pagination;
     private int selectedItemIndex;
     private DualListModel<Customers> participants;
     private List<Customers> activeCustomers; // all customers
@@ -118,8 +120,26 @@ public class SessionHistoryController implements Serializable {
     private SessionHistoryFacade getFacade() {
         return ejbFacade;
     }
+    
+  public DatatableSelectionHelper getPagination() {
+        if (pagination == null) {
+            pagination = new DatatableSelectionHelper() {
 
-    public PaginationHelper getPagination() {
+                @Override
+                public int getItemsCount() {
+                    return getFacade().count();
+                }
+
+                @Override
+                public PfSelectableDataModel createPageDataModel() {
+                    return new PfSelectableDataModel<>(ejbFacade.findAll());
+                }
+
+            };
+        }
+        return pagination;
+    }
+   /* public PaginationHelper getPagination() {
         if (pagination == null) {
             pagination = new PaginationHelper(1000000) {
 
@@ -135,9 +155,45 @@ public class SessionHistoryController implements Serializable {
             };
         }
         return pagination;
-    }
+    }*/
+ public DatatableSelectionHelper getCustomerPagination() {
+        if (pagination == null) {
+            pagination = new DatatableSelectionHelper() {
 
-    public PaginationHelper getCustomerPagination() {
+                @Override
+                public int getItemsCount() {
+                    return getFacade().countSessionsByTrainer(getLoggedInUser());
+                }
+
+                @Override
+                public PfSelectableDataModel createPageDataModel() {
+                    return new PfSelectableDataModel<>(ejbFacade.findSessionsByTrainer(getLoggedInUser(), true));
+                }
+
+            }; 
+        }
+        return pagination;
+    }
+ public DatatableSelectionHelper getParticipantPagination() {
+        if (pagination == null) {
+            pagination = new DatatableSelectionHelper() {
+
+                @Override
+                public int getItemsCount() {
+                    return getFacade().countSessionsByParticipant(getLoggedInUser());
+                }
+
+                @Override
+                public PfSelectableDataModel createPageDataModel() {
+                    return new PfSelectableDataModel<>(ejbFacade.findSessionsByParticipant(getLoggedInUser(), true));
+                }
+
+            }; 
+        }
+        return pagination;
+    }
+ 
+  /*  public PaginationHelper getCustomerPagination() {
         if (pagination == null) {
             pagination = new PaginationHelper(1000000) {
 
@@ -145,11 +201,7 @@ public class SessionHistoryController implements Serializable {
                 public int getItemsCount() {
                     Customers loggedInUser = null;
                     try {
-                        //loggedInUser = ejbCustomerFacade.findCustomerByUsername(FacesContext.getCurrentInstance().getExternalContext().getRemoteUser());
-                        FacesContext context = FacesContext.getCurrentInstance();
-                        CustomersController custController = (CustomersController) context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
-                        loggedInUser = custController.getSelected();
-                        return ejbFacade.countByCustId(loggedInUser.getId());
+                         return ejbFacade.countByCustId(getLoggedInUser().getId());
                     } catch (ELException e) {
                         JsfUtil.addErrorMessage(e, "Couldn't get customer i Session History controller");
                     }
@@ -175,7 +227,7 @@ public class SessionHistoryController implements Serializable {
             };
         }
         return pagination;
-    }
+    }*/
 
     private Customers getLoggedInUser() {
         FacesContext context = FacesContext.getCurrentInstance();
@@ -348,8 +400,9 @@ public class SessionHistoryController implements Serializable {
     }
 
     public String destroy() {
-        current = (SessionHistory) getItems().getRowData();
-        selectedItemIndex = pagination.getPageFirstItem() + getItems().getRowIndex();
+        //current = (SessionHistory) getItems().getRowData();
+       // selectedItemIndex = pagination.getPageFirstItem() + getItems().getRowIndex();
+            selectedItemIndex = -1;
         performDestroy();
         recreateModel();
         return "List";
@@ -394,32 +447,42 @@ public class SessionHistoryController implements Serializable {
             // selected index cannot be bigger than number of items:
             selectedItemIndex = count - 1;
             // go to previous page if last page disappeared:
-            if (pagination.getPageFirstItem() >= count) {
-                pagination.previousPage();
-            }
+          //  if (pagination.getPageFirstItem() >= count) {
+          //      pagination.previousPage();
+           // }
         }
         if (selectedItemIndex >= 0) {
             current = getFacade().findRange(new int[]{selectedItemIndex, selectedItemIndex + 1}).get(0);
         }
     }
 
-    public DataModel getItems() {
+    public SelectableDataModel<SessionHistory> getItems() {
         if (items == null) {
             items = getPagination().createPageDataModel();
         }
         return items;
     }
 
-    public DataModel getCustomerItems() {
+    public SelectableDataModel<SessionHistory>  getCustomerItems() {
         if (customerItems == null) {
             customerItems = getCustomerPagination().createPageDataModel();
         }
         return customerItems;
     }
+    
+     public SelectableDataModel<SessionHistory>  getParticipantItems() {
+        if (participantItems == null) {
+            participantItems = getParticipantPagination().createPageDataModel();
+        }
+        return participantItems;
+    }
 
     public void recreateModel() {
         items = null;
         customerItems = null;
+        filteredItems = null;
+        participantItems = null;
+        participantFilteredItems = null;
 
         FacesContext context = FacesContext.getCurrentInstance();
 
@@ -432,7 +495,7 @@ public class SessionHistoryController implements Serializable {
 
     }
 
-    public String next() {
+  /*  public String next() {
         getPagination().nextPage();
         recreateModel();
         return "List";
@@ -442,7 +505,7 @@ public class SessionHistoryController implements Serializable {
         getPagination().previousPage();
         recreateModel();
         return "List";
-    }
+    }*/
 
     public SelectItem[] getItemsAvailableSelectMany() {
         return JsfUtil.getSelectItems(ejbFacade.findAll(), false);
@@ -585,6 +648,34 @@ public class SessionHistoryController implements Serializable {
      */
     public void setSessionHistoryItems(SessionHistory[] sessionHistoryItems) {
         this.sessionHistoryItems = sessionHistoryItems;
+    }
+
+    /**
+     * @return the filteredItems
+     */
+    public List<SessionHistory> getFilteredItems() {
+        return filteredItems;
+    }
+
+    /**
+     * @param filteredItems the filteredItems to set
+     */
+    public void setFilteredItems(List<SessionHistory> filteredItems) {
+        this.filteredItems = filteredItems;
+    }
+
+    /**
+     * @return the participantFilteredItems
+     */
+    public List<SessionHistory> getParticipantFilteredItems() {
+        return participantFilteredItems;
+    }
+
+    /**
+     * @param participantFilteredItems the participantFilteredItems to set
+     */
+    public void setParticipantFilteredItems(List<SessionHistory> participantFilteredItems) {
+        this.participantFilteredItems = participantFilteredItems;
     }
 
     @FacesConverter(forClass = SessionHistory.class)

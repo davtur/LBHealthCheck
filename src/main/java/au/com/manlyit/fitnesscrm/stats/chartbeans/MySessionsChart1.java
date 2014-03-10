@@ -8,7 +8,7 @@ import au.com.manlyit.fitnesscrm.stats.classes.CustomersController;
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import au.com.manlyit.fitnesscrm.stats.db.SessionHistory;
-import javax.annotation.PostConstruct;
+import au.com.manlyit.fitnesscrm.stats.db.SessionTypes;
 import javax.inject.Inject;
 import javax.faces.context.FacesContext;
 import org.primefaces.model.chart.LineChartSeries;
@@ -22,6 +22,7 @@ import javax.enterprise.context.RequestScoped;
 import javax.inject.Named;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -42,6 +43,8 @@ public class MySessionsChart1 implements Serializable {
     }
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.ParticipantsFacade ejbParticipantsFacade;
+    @Inject
+    private au.com.manlyit.fitnesscrm.stats.beans.SessionTypesFacade ejbSessionTypesFacade;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.CustomersFacade ejbCustomerFacade;
     @Inject
@@ -101,44 +104,71 @@ public class MySessionsChart1 implements Serializable {
         } catch (ELException e) {
             JsfUtil.addErrorMessage(e, "My Sessions Chart Critical Error", "Couldn't find the customer in the database.");
         }
-        LineChartSeries groupSessionSeries = new LineChartSeries();
-        groupSessionSeries.setLabel("Group Sessions");
-        LineChartSeries ptSessionSeries = new LineChartSeries();
-        ptSessionSeries.setLabel("PT Sessions");
-        int weeksToDisplay = 26;
-        GregorianCalendar cal = new GregorianCalendar();
+        int weeksToDisplay = 12;
+        GregorianCalendar startCal = new GregorianCalendar();
+        GregorianCalendar endCal = new GregorianCalendar();
+        startCal.set(Calendar.HOUR, 0);
+        startCal.set(Calendar.SECOND, 0);
+        startCal.set(Calendar.MINUTE, 0);
+        startCal.set(Calendar.MILLISECOND, 0);
+        endCal.setTime(startCal.getTime());
+        endCal.add(Calendar.MILLISECOND, -1);
+        endCal.add(Calendar.DAY_OF_YEAR, 1);
+        startCal.add(Calendar.WEEK_OF_YEAR, -1);
+        startCal.add(Calendar.WEEK_OF_YEAR, 0 - weeksToDisplay);
+        endCal.add(Calendar.WEEK_OF_YEAR, 0 - weeksToDisplay);
+
+        List<LineChartSeries> seriesList = new ArrayList<>();
         List<SessionHistory> sessions = null;//ejbSessionHistoryFacade.findSessionsByTrainerAndDateRange(loggedInUser.getId(), top, bottom, ptSessionIDs);
+        List<SessionTypes> sessionTypesList = ejbSessionTypesFacade.findAll();
+        LineChartSeries legend = new LineChartSeries();
+        legend.setLabel("");
+        seriesList.add(legend);
+        for (SessionTypes st : sessionTypesList) {
+            LineChartSeries lcs = new LineChartSeries();
+            lcs.setLabel(st.getName());
+            seriesList.add(lcs);
+        }
         try {
             for (int x = 0; x < weeksToDisplay; x++) {
-                Date top = cal.getTime();
-                cal.add(Calendar.WEEK_OF_YEAR, -1);
-                Date bottom = cal.getTime();
-                String xAxixValue = sdf.format(top);
-                sessions = ejbSessionHistoryFacade.findSessionsByTrainerAndDateRange(loggedInUser, top, bottom, true);
-                int ptCount = 0;
-                int groupCount = 0;
+                startCal.add(Calendar.WEEK_OF_YEAR, 1);
+                endCal.add(Calendar.WEEK_OF_YEAR, 1);
+                String xAxixValue = sdf.format(startCal.getTime());
+                legend.set(xAxixValue, 0);
+                sessions = ejbSessionHistoryFacade.findSessionsByParticipantAndDateRange(loggedInUser, startCal.getTime(), endCal.getTime(), true);
                 for (SessionHistory sess : sessions) {
-                    switch (sess.getId()) {
-                        case 1:// PT Sessions
-                        case 2:
-                        case 8:
-                            ptCount++;
-                            break;
-                        default:// other types
-                            groupCount++;
-                            break;
+                    String type = sess.getSessionTypesId().getName();
+                    for (LineChartSeries lcs : seriesList) {
+                        if (lcs.getLabel().compareTo(type) == 0) {
+                            Double c = (Double) lcs.getData().get(xAxixValue);
+                            if (c == null) {
+                                c = new Double(1);
+                            } else {
+                                c = c + new Double(1);
+                            }
+
+                            lcs.set(xAxixValue, c);
+                            int index = seriesList.indexOf(lcs);
+                            seriesList.set(index, lcs);
+                        }
                     }
                 }
-                ptSessionSeries.set(xAxixValue, ptCount);
-                groupSessionSeries.set(xAxixValue, groupCount);
             }
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, "My Sessions Chart Critical Error", "Couldn't get customer session data from the database.");
         }
         model = new CartesianChartModel();
-        model.addSeries(groupSessionSeries);
-        model.addSeries(ptSessionSeries);
 
+        for (LineChartSeries lcs : seriesList) {
+            if (lcs.getData().isEmpty() == false) {
+                model.addSeries(lcs);
+            }
+        }
+
+    }
+
+    public void recreateModel() {
+        model = null;
     }
 
     public CartesianChartModel getModel() {
