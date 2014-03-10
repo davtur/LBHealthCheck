@@ -121,9 +121,7 @@ public class MySessionsChart1 implements Serializable {
         List<LineChartSeries> seriesList = new ArrayList<>();
         List<SessionHistory> sessions = null;//ejbSessionHistoryFacade.findSessionsByTrainerAndDateRange(loggedInUser.getId(), top, bottom, ptSessionIDs);
         List<SessionTypes> sessionTypesList = ejbSessionTypesFacade.findAll();
-        LineChartSeries legend = new LineChartSeries();
-        legend.setLabel("");
-        seriesList.add(legend);
+       
         for (SessionTypes st : sessionTypesList) {
             LineChartSeries lcs = new LineChartSeries();
             lcs.setLabel(st.getName());
@@ -134,7 +132,9 @@ public class MySessionsChart1 implements Serializable {
                 startCal.add(Calendar.WEEK_OF_YEAR, 1);
                 endCal.add(Calendar.WEEK_OF_YEAR, 1);
                 String xAxixValue = sdf.format(startCal.getTime());
-                legend.set(xAxixValue, 0);
+                for (LineChartSeries lcs : seriesList) {
+                    lcs.set(xAxixValue, new Double(0));
+                }
                 sessions = ejbSessionHistoryFacade.findSessionsByParticipantAndDateRange(loggedInUser, startCal.getTime(), endCal.getTime(), true);
                 for (SessionHistory sess : sessions) {
                     String type = sess.getSessionTypesId().getName();
@@ -146,7 +146,6 @@ public class MySessionsChart1 implements Serializable {
                             } else {
                                 c = c + new Double(1);
                             }
-
                             lcs.set(xAxixValue, c);
                             int index = seriesList.indexOf(lcs);
                             seriesList.set(index, lcs);
