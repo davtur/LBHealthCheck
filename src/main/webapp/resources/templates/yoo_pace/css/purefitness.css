@@ -1,5 +1,65 @@
 /*custom css for the purefitness manly website */
 
+
+.ui-picklist{
+    height:500px;
+}
+.ui-picklist .ui-picklist-list{
+    height:460px;
+}
+.ui-picklist td {
+      list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow:auto;
+    vertical-align: top;
+    border:none;
+    
+}
+
+.ui-picklist-list {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow:auto;
+    
+   
+  
+}
+
+.ui-picklist .ui-picklist-list li {
+    margin: 1px;
+    padding: 2px;
+    
+}
+
+.ui-picklist .ui-picklist-button {
+    display:block;
+    margin-bottom:0.3em;
+}
+
+.ui-picklist .ui-picklist-button.ui-button-text-icon-primary {
+    width:100%;
+}
+
+.ui-picklist .ui-picklist-item {
+    cursor:pointer;
+}
+
+.ui-picklist .ui-picklist-caption {
+    text-align: center;
+    padding:4px 10px 4px 10px;
+    border-bottom:0px none;
+}
+.emailEditorInput {
+    width:600px;
+}
+.ui-galleria-container 
+{
+    background-color: #000000;
+}
+
+
 a#logo p {
 
 margin: 1px 0;

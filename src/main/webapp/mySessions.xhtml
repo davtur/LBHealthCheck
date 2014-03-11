@@ -13,13 +13,24 @@
         <ui:define name="body">
             <h:form id="listSessionHistoryForm1">
                 <p:panel header="My Sessions Chart (The number of times you have trained each week.)"><h:outputText id="selectedUser" value="#{customersController.selected.firstname} #{customersController.selected.lastname}" />
-                    <p:barChart  styleClass="chartClass" value="#{mySessionsChart1.model}" xaxisLabel="Week Ending On Date" xaxisAngle="90"  style="statsFlashChartStyle" />
+                    <p:barChart legendPosition="ne"  extender="chartExtender" styleClass="chartClass" value="#{mySessionsChart1.model}" xaxisLabel="Week Ending On Date" xaxisAngle="90"  style="statsFlashChartStyle" stacked="true"/>
                 </p:panel>
+
+                <script >
+                    function chartExtender() {
+
+                        this.cfg.legend = {
+                            show: true,
+                            location: 'ne',
+                            placement: 'outsideGrid'
+                        };
+                    }
+                </script>
 
                 <h:outputText escape="false" value="#{configMapController.getKey('ListSessionHistoryEmpty')}" rendered="#{sessionHistoryController.participantItems.rowCount == 0}"/>
                 <h:panelGroup rendered="#{sessionHistoryController.participantItems.rowCount > 0}">
                     <p:dataTable value="#{sessionHistoryController.participantItems}" var="item"  filteredValue="#{sessionHistoryController.participantFilteredItems}" widgetVar="sessionsTable" paginator="true" rows="15"  paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  rowsPerPageTemplate="5,10,15,20,25,50,100" >
-                         <p:column sortBy="#{item.sessiondate}" >
+                        <p:column sortBy="#{item.sessiondate}" >
                             <f:facet name="header">
                                 <h:outputText value="#{configMapController.getKey('ListSessionHistoryTitle_sessiondate')}"/>
                             </f:facet>

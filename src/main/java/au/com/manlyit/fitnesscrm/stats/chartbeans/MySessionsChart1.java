@@ -24,10 +24,13 @@ import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.Iterator;
 import java.util.List;
 import javax.el.ELException;
+import org.primefaces.model.chart.BarChartSeries;
 
 @Named("mySessionsChart1")
 @RequestScoped
@@ -118,12 +121,12 @@ public class MySessionsChart1 implements Serializable {
         startCal.add(Calendar.WEEK_OF_YEAR, 0 - weeksToDisplay);
         endCal.add(Calendar.WEEK_OF_YEAR, 0 - weeksToDisplay);
 
-        List<LineChartSeries> seriesList = new ArrayList<>();
+        List<BarChartSeries> seriesList = new ArrayList<>();
         List<SessionHistory> sessions = null;//ejbSessionHistoryFacade.findSessionsByTrainerAndDateRange(loggedInUser.getId(), top, bottom, ptSessionIDs);
         List<SessionTypes> sessionTypesList = ejbSessionTypesFacade.findAll();
        
         for (SessionTypes st : sessionTypesList) {
-            LineChartSeries lcs = new LineChartSeries();
+            BarChartSeries lcs = new BarChartSeries();
             lcs.setLabel(st.getName());
             seriesList.add(lcs);
         }
@@ -132,13 +135,13 @@ public class MySessionsChart1 implements Serializable {
                 startCal.add(Calendar.WEEK_OF_YEAR, 1);
                 endCal.add(Calendar.WEEK_OF_YEAR, 1);
                 String xAxixValue = sdf.format(startCal.getTime());
-                for (LineChartSeries lcs : seriesList) {
+                for (BarChartSeries lcs : seriesList) {
                     lcs.set(xAxixValue, new Double(0));
                 }
                 sessions = ejbSessionHistoryFacade.findSessionsByParticipantAndDateRange(loggedInUser, startCal.getTime(), endCal.getTime(), true);
                 for (SessionHistory sess : sessions) {
                     String type = sess.getSessionTypesId().getName();
-                    for (LineChartSeries lcs : seriesList) {
+                    for (BarChartSeries lcs : seriesList) {
                         if (lcs.getLabel().compareTo(type) == 0) {
                             Double c = (Double) lcs.getData().get(xAxixValue);
                             if (c == null) {
@@ -158,9 +161,16 @@ public class MySessionsChart1 implements Serializable {
         }
         model = new CartesianChartModel();
 
-        for (LineChartSeries lcs : seriesList) {
-            if (lcs.getData().isEmpty() == false) {
-                model.addSeries(lcs);
+        for (BarChartSeries bcs : seriesList) {
+            Collection<Number> values = bcs.getData().values();
+            Double totalSessions = new Double(0);
+            Iterator i = values.iterator();
+            while(i.hasNext()){
+                totalSessions = totalSessions + (Double) i.next();
+            }
+           
+            if(totalSessions.compareTo(new Double(0)) > 0) {
+                model.addSeries(bcs);
             }
         }
 

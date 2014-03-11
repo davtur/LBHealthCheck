@@ -44,9 +44,9 @@ public class SessionHistoryController implements Serializable {
     private SessionHistory current;
     private SessionHistory selectedForDeletion;
 
-    private PfSelectableDataModel<SessionHistory>  items = null;
-    private PfSelectableDataModel<SessionHistory>  customerItems = null;
-    private PfSelectableDataModel<SessionHistory>  participantItems = null;
+    private PfSelectableDataModel<SessionHistory> items = null;
+    private PfSelectableDataModel<SessionHistory> customerItems = null;
+    private PfSelectableDataModel<SessionHistory> participantItems = null;
     private List<SessionHistory> filteredItems;
     private List<SessionHistory> participantFilteredItems;
     private Customers[] participantsArray;
@@ -62,6 +62,8 @@ public class SessionHistoryController implements Serializable {
     @Inject
     private ConfigMapFacade configMapFacade;
     private DatatableSelectionHelper pagination;
+    private DatatableSelectionHelper customerPagination;
+    private DatatableSelectionHelper participantPagination;
     private int selectedItemIndex;
     private DualListModel<Customers> participants;
     private List<Customers> activeCustomers; // all customers
@@ -72,10 +74,15 @@ public class SessionHistoryController implements Serializable {
     }
 
     public void handleDateSelect(SelectEvent event) {
-        SimpleDateFormat format = new SimpleDateFormat("dd MMM yyyy");
-        Date date = (Date) event.getObject();
-        FacesContext facesContext = FacesContext.getCurrentInstance();
-        facesContext.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO, "Date Selected", format.format(date)));
+        
+        Object o = event.getObject();
+        if (o.getClass() == Date.class) {
+            SimpleDateFormat format = new SimpleDateFormat("dd MMM yyyy HH:mm");
+            Date date = (Date) event.getObject();
+            FacesContext facesContext = FacesContext.getCurrentInstance();
+            facesContext.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO, "Date Selected", format.format(date)));
+        }
+
     }
 
     public SessionHistory getSelected() {
@@ -92,7 +99,8 @@ public class SessionHistoryController implements Serializable {
         selectedItemIndex = -1;
         addParticipants();
         addTrainer();
-        sessionHistoryItems = null;
+
+        recreateModel();
 
     }
 
@@ -120,8 +128,8 @@ public class SessionHistoryController implements Serializable {
     private SessionHistoryFacade getFacade() {
         return ejbFacade;
     }
-    
-  public DatatableSelectionHelper getPagination() {
+
+    public DatatableSelectionHelper getPagination() {
         if (pagination == null) {
             pagination = new DatatableSelectionHelper() {
 
@@ -139,26 +147,27 @@ public class SessionHistoryController implements Serializable {
         }
         return pagination;
     }
-   /* public PaginationHelper getPagination() {
-        if (pagination == null) {
-            pagination = new PaginationHelper(1000000) {
+    /* public PaginationHelper getPagination() {
+     if (pagination == null) {
+     pagination = new PaginationHelper(1000000) {
 
-                @Override
-                public int getItemsCount() {
-                    return getFacade().count();
-                }
+     @Override
+     public int getItemsCount() {
+     return getFacade().count();
+     }
 
-                @Override
-                public DataModel createPageDataModel() {
-                    return new ListDataModel(getFacade().findAll(false));
-                }
-            };
-        }
-        return pagination;
-    }*/
- public DatatableSelectionHelper getCustomerPagination() {
-        if (pagination == null) {
-            pagination = new DatatableSelectionHelper() {
+     @Override
+     public DataModel createPageDataModel() {
+     return new ListDataModel(getFacade().findAll(false));
+     }
+     };
+     }
+     return pagination;
+     }*/
+
+    public DatatableSelectionHelper getCustomerPagination() {
+        if (customerPagination == null) {
+            customerPagination = new DatatableSelectionHelper() {
 
                 @Override
                 public int getItemsCount() {
@@ -170,13 +179,14 @@ public class SessionHistoryController implements Serializable {
                     return new PfSelectableDataModel<>(ejbFacade.findSessionsByTrainer(getLoggedInUser(), true));
                 }
 
-            }; 
+            };
         }
-        return pagination;
+        return customerPagination;
     }
- public DatatableSelectionHelper getParticipantPagination() {
-        if (pagination == null) {
-            pagination = new DatatableSelectionHelper() {
+
+    public DatatableSelectionHelper getParticipantPagination() {
+        if (participantPagination == null) {
+            participantPagination = new DatatableSelectionHelper() {
 
                 @Override
                 public int getItemsCount() {
@@ -188,47 +198,46 @@ public class SessionHistoryController implements Serializable {
                     return new PfSelectableDataModel<>(ejbFacade.findSessionsByParticipant(getLoggedInUser(), true));
                 }
 
-            }; 
-        }
-        return pagination;
-    }
- 
-  /*  public PaginationHelper getCustomerPagination() {
-        if (pagination == null) {
-            pagination = new PaginationHelper(1000000) {
-
-                @Override
-                public int getItemsCount() {
-                    Customers loggedInUser = null;
-                    try {
-                         return ejbFacade.countByCustId(getLoggedInUser().getId());
-                    } catch (ELException e) {
-                        JsfUtil.addErrorMessage(e, "Couldn't get customer i Session History controller");
-                    }
-
-                    return 0;
-                }
-
-                @Override
-                public DataModel createPageDataModel() {
-                    Customers loggedInUser = null;
-                    try {
-                        //loggedInUser = ejbCustomerFacade.findCustomerByUsername(FacesContext.getCurrentInstance().getExternalContext().getRemoteUser());
-                        loggedInUser = getLoggedInUser();
-                        String msg = "CreatingDataModel for user: " + loggedInUser.getUsername();
-                        Logger.getLogger(getClass().getName()).log(Level.INFO, msg);
-                        return new ListDataModel(ejbFacade.findAllByCustId(loggedInUser.getId(), true));
-                    } catch (ELException e) {
-                        JsfUtil.addErrorMessage(e, "Couldn't get customer i Session History controller");
-                    }
-
-                    return null;
-                }
             };
         }
-        return pagination;
-    }*/
+        return participantPagination;
+    }
 
+    /*  public PaginationHelper getCustomerPagination() {
+     if (pagination == null) {
+     pagination = new PaginationHelper(1000000) {
+
+     @Override
+     public int getItemsCount() {
+     Customers loggedInUser = null;
+     try {
+     return ejbFacade.countByCustId(getLoggedInUser().getId());
+     } catch (ELException e) {
+     JsfUtil.addErrorMessage(e, "Couldn't get customer i Session History controller");
+     }
+
+     return 0;
+     }
+
+     @Override
+     public DataModel createPageDataModel() {
+     Customers loggedInUser = null;
+     try {
+     //loggedInUser = ejbCustomerFacade.findCustomerByUsername(FacesContext.getCurrentInstance().getExternalContext().getRemoteUser());
+     loggedInUser = getLoggedInUser();
+     String msg = "CreatingDataModel for user: " + loggedInUser.getUsername();
+     Logger.getLogger(getClass().getName()).log(Level.INFO, msg);
+     return new ListDataModel(ejbFacade.findAllByCustId(loggedInUser.getId(), true));
+     } catch (ELException e) {
+     JsfUtil.addErrorMessage(e, "Couldn't get customer i Session History controller");
+     }
+
+     return null;
+     }
+     };
+     }
+     return pagination;
+     }*/
     private Customers getLoggedInUser() {
         FacesContext context = FacesContext.getCurrentInstance();
         CustomersController custController = (CustomersController) context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
@@ -248,6 +257,11 @@ public class SessionHistoryController implements Serializable {
     }
 
     public String prepareCreate() {
+        createNewSessionHistory();
+        return "Create";
+    }
+
+    public String prepareCreateTrainers() {
         createNewSessionHistory();
         return "CreateSessionInfo";
     }
@@ -401,8 +415,8 @@ public class SessionHistoryController implements Serializable {
 
     public String destroy() {
         //current = (SessionHistory) getItems().getRowData();
-       // selectedItemIndex = pagination.getPageFirstItem() + getItems().getRowIndex();
-            selectedItemIndex = -1;
+        // selectedItemIndex = pagination.getPageFirstItem() + getItems().getRowIndex();
+        selectedItemIndex = -1;
         performDestroy();
         recreateModel();
         return "List";
@@ -447,9 +461,9 @@ public class SessionHistoryController implements Serializable {
             // selected index cannot be bigger than number of items:
             selectedItemIndex = count - 1;
             // go to previous page if last page disappeared:
-          //  if (pagination.getPageFirstItem() >= count) {
-          //      pagination.previousPage();
-           // }
+            //  if (pagination.getPageFirstItem() >= count) {
+            //      pagination.previousPage();
+            // }
         }
         if (selectedItemIndex >= 0) {
             current = getFacade().findRange(new int[]{selectedItemIndex, selectedItemIndex + 1}).get(0);
@@ -463,14 +477,14 @@ public class SessionHistoryController implements Serializable {
         return items;
     }
 
-    public SelectableDataModel<SessionHistory>  getCustomerItems() {
+    public SelectableDataModel<SessionHistory> getCustomerItems() {
         if (customerItems == null) {
             customerItems = getCustomerPagination().createPageDataModel();
         }
         return customerItems;
     }
-    
-     public SelectableDataModel<SessionHistory>  getParticipantItems() {
+
+    public SelectableDataModel<SessionHistory> getParticipantItems() {
         if (participantItems == null) {
             participantItems = getParticipantPagination().createPageDataModel();
         }
@@ -483,6 +497,7 @@ public class SessionHistoryController implements Serializable {
         filteredItems = null;
         participantItems = null;
         participantFilteredItems = null;
+        sessionHistoryItems = null;
 
         FacesContext context = FacesContext.getCurrentInstance();
 
@@ -495,18 +510,17 @@ public class SessionHistoryController implements Serializable {
 
     }
 
-  /*  public String next() {
-        getPagination().nextPage();
-        recreateModel();
-        return "List";
-    }
+    /*  public String next() {
+     getPagination().nextPage();
+     recreateModel();
+     return "List";
+     }
 
-    public String previous() {
-        getPagination().previousPage();
-        recreateModel();
-        return "List";
-    }*/
-
+     public String previous() {
+     getPagination().previousPage();
+     recreateModel();
+     return "List";
+     }*/
     public SelectItem[] getItemsAvailableSelectMany() {
         return JsfUtil.getSelectItems(ejbFacade.findAll(), false);
     }
