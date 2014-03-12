@@ -12,6 +12,21 @@
         </ui:define>
         <ui:define name="body">
             <h:form id="listSessionHistoryForm1">
+                <p:panel header="My Sessions Chart (The number of sessions conducted each week.)"><h:outputText id="selectedUser" value="#{customersController.selected.firstname} #{customersController.selected.lastname}" />
+                    <p:barChart legendPosition="ne"  extender="chartExtender" styleClass="chartClass" value="#{mySessionsChart1.model2}" xaxisLabel="Week Ending On Date" xaxisAngle="90"  style="statsFlashChartStyle" stacked="true"/>
+                </p:panel>
+
+                <script >
+                    function chartExtender() {
+
+                        this.cfg.legend = {
+                            show: true,
+                            location: 'ne',
+                            placement: 'outsideGrid'
+                        };
+                    }
+                </script>
+
                 <h:panelGroup >
                     <p:commandButton id="createButton" ajax="false" action="#{sessionHistoryController.prepareCreateTrainers}" value="#{configMapController.getKey('ListSessionHistoryCreateLink')}"/>
                     <p:commandButton id="createButtonMobile" ajax="false" action="#{sessionHistoryController.prepareCreateMobileReturnCreate}" value="#{configMapController.getKey('ListSessionHistoryCreateMobileLink')}"/>
@@ -19,7 +34,7 @@
                 <h:outputText escape="false" value="#{configMapController.getKey('ListSessionHistoryEmpty')}" rendered="#{sessionHistoryController.customerItems.rowCount == 0}"/>
                 <h:panelGroup rendered="#{sessionHistoryController.customerItems.rowCount > 0}">
                     <p:dataTable value="#{sessionHistoryController.customerItems}" filteredValue="#{sessionHistoryController.filteredItems}"  var="item" widgetVar="sessionsTable"  paginator="true" rows="15"  paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  rowsPerPageTemplate="5,10,15,20,25,50,100" >
-                         <f:facet name="header">
+                        <f:facet name="header">
                             <p:outputPanel>
                                 <h:outputText value="Search all fields:" />
                                 <p:inputText id="globalFilter" onkeyup="sessionsTable.filter()" />

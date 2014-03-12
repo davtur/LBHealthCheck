@@ -37,6 +37,7 @@ import org.primefaces.model.chart.BarChartSeries;
 public class MySessionsChart1 implements Serializable {
 
     private CartesianChartModel model;
+    private CartesianChartModel model2;
     private SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yy");
 
     /**
@@ -94,8 +95,8 @@ public class MySessionsChart1 implements Serializable {
 
     }
 
-    private void createSessionsChart() {
-
+    private CartesianChartModel createSessionsChart(boolean isTrainer) {
+        CartesianChartModel ccModel = null;
         FacesContext context = FacesContext.getCurrentInstance();
         Customers loggedInUser = null;
         try {
@@ -124,7 +125,7 @@ public class MySessionsChart1 implements Serializable {
         List<BarChartSeries> seriesList = new ArrayList<>();
         List<SessionHistory> sessions = null;//ejbSessionHistoryFacade.findSessionsByTrainerAndDateRange(loggedInUser.getId(), top, bottom, ptSessionIDs);
         List<SessionTypes> sessionTypesList = ejbSessionTypesFacade.findAll();
-       
+
         for (SessionTypes st : sessionTypesList) {
             BarChartSeries lcs = new BarChartSeries();
             lcs.setLabel(st.getName());
@@ -138,7 +139,12 @@ public class MySessionsChart1 implements Serializable {
                 for (BarChartSeries lcs : seriesList) {
                     lcs.set(xAxixValue, new Double(0));
                 }
-                sessions = ejbSessionHistoryFacade.findSessionsByParticipantAndDateRange(loggedInUser, startCal.getTime(), endCal.getTime(), true);
+                if (isTrainer == false) {
+                    sessions = ejbSessionHistoryFacade.findSessionsByParticipantAndDateRange(loggedInUser, startCal.getTime(), endCal.getTime(), true);
+                } else {
+                    sessions = ejbSessionHistoryFacade.findSessionsByTrainerAndDateRange(loggedInUser, startCal.getTime(), endCal.getTime(), true);
+                }
+
                 for (SessionHistory sess : sessions) {
                     String type = sess.getSessionTypesId().getName();
                     for (BarChartSeries lcs : seriesList) {
@@ -159,31 +165,40 @@ public class MySessionsChart1 implements Serializable {
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, "My Sessions Chart Critical Error", "Couldn't get customer session data from the database.");
         }
-        model = new CartesianChartModel();
+        ccModel = new CartesianChartModel();
 
         for (BarChartSeries bcs : seriesList) {
             Collection<Number> values = bcs.getData().values();
             Double totalSessions = new Double(0);
             Iterator i = values.iterator();
-            while(i.hasNext()){
+            while (i.hasNext()) {
                 totalSessions = totalSessions + (Double) i.next();
             }
-           
-            if(totalSessions.compareTo(new Double(0)) > 0) {
-                model.addSeries(bcs);
+
+            if (totalSessions.compareTo(new Double(0)) > 0) {
+                ccModel.addSeries(bcs);
             }
         }
-
+        return ccModel;
     }
 
     public void recreateModel() {
         model = null;
+        model2 = null;
     }
 
     public CartesianChartModel getModel() {
         if (model == null) {
-            createSessionsChart();
+            model = createSessionsChart(false);
         }
         return model;
     }
+
+    public CartesianChartModel getModel2() {
+        if (model2 == null) {
+            model2 = createSessionsChart(true);
+        }
+        return model2;
+    }
 }
+ 
