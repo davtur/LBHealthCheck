@@ -75,7 +75,7 @@ public class JsfUtil {
     }
 
     public static void addErrorMessage(String msg) {
-        FacesMessage facesMsg = new FacesMessage(FacesMessage.SEVERITY_ERROR, msg, msg);
+        FacesMessage facesMsg = new FacesMessage(FacesMessage.SEVERITY_ERROR, msg, null);
         FacesContext.getCurrentInstance().addMessage(null, facesMsg);
         Logger.getLogger(JsfUtil.class.getName()).severe(msg);
     }
@@ -86,7 +86,7 @@ public class JsfUtil {
         Logger.getLogger(JsfUtil.class.getName()).severe(msg);
     }
     public static void addSuccessMessage(String msg) {
-        FacesMessage facesMsg = new FacesMessage(FacesMessage.SEVERITY_INFO, msg, msg);
+        FacesMessage facesMsg = new FacesMessage(FacesMessage.SEVERITY_INFO, msg,null);
         FacesContext.getCurrentInstance().addMessage("successInfo", facesMsg);
     }
     public static void addSuccessMessage(String summary,String message) {

@@ -119,15 +119,19 @@ public class EziDebitPaymentGateway implements Serializable {
      * @return the eziDebitWidgetUrl
      */
     public String getEziDebitWidgetUrl(boolean isEditable) {
+        Customers cust = getSelectedCustomer();
+        if(cust == null || cust.getId() == null){
+            return "";
+        }
         String amp = "&";
         String viewOrEdit = "view";
         if (isEditable == true) {
             viewOrEdit = "edit";
         }
-        
+         
         String widgetUrl = configMapFacade.getConfig("payment.ezidebit.widget.baseurl") + viewOrEdit;
         widgetUrl += "?" + "dk=" + getDigitalKey();
-        widgetUrl += amp + "cr=" + getSelectedCustomer().getId().toString();
+        widgetUrl += amp + "cr=" + cust.getId().toString();
         widgetUrl += amp + "e=" + configMapFacade.getConfig("payment.ezidebit.widget.e"); // 0 = dont allow customer to edit
         widgetUrl += amp + "template=" + configMapFacade.getConfig("payment.ezidebit.widget.template");//template name win7
         widgetUrl += amp + "f=" + configMapFacade.getConfig("payment.ezidebit.widget.f");//font Arial
@@ -196,6 +200,9 @@ public class EziDebitPaymentGateway implements Serializable {
     }
     
     private CustomerDetails getCustomerDetails(Customers cust) {
+        if(cust.getId() == null){
+            return null;
+        }
         
         CustomerDetails cd = null;
         logger.log(Level.INFO, "Getting Customer Details {0}", cust.getUsername());
