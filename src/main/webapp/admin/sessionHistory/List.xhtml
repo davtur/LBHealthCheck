@@ -12,6 +12,47 @@
         </ui:define>
         <ui:define name="body">
             <h:form id="listSessionHistoryForm1">
+                <p:panelGrid columns="6" style="width:100%"  >
+                   <!-- <p:outputLabel value="#{configMapController.getKey('SelectCustomerForSessionHistory_Label')}" for="sessionstart" />-->
+                    <p:selectOneMenu id="custForChart"   value="#{mySessionsChart1.selectedCustomer}" filter="true" converter="#{custConverter}"  label="#{configMapController.getKey('SelectCustomerForSessionHistory_Title')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionHistoryRequiredMessage_trainer')}">
+                        <f:selectItems value="#{customersController.customersAvailableSelectOneObject}"   var="cust" itemLabel="#{cust.firstname} #{cust.lastname}" itemValue="#{cust}"/>
+                        <p:ajax   update="customChart" />
+                    </p:selectOneMenu>
+
+
+                    <p:outputLabel value="#{configMapController.getKey('SelectStartDateForSessionHistory_Label')}" for="sessionstart" />
+                    <p:calendar id="sessionstart" value="#{mySessionsChart1.startDate}" pattern="dd MMMM yyyy"
+                                title="#{configMapController.getKey('SelectStartDateForSessionHistory_Title')}"    >
+                        <p:ajax event="dateSelect"  update="customChart"  />
+                    </p:calendar> 
+                    <p:outputLabel value="#{configMapController.getKey('SelectEndDateForSessionHistory_Label')}" for="sessionend" />
+                    <p:calendar id="sessionend" value="#{mySessionsChart1.endDate}"  pattern="dd MMMM yyyy"
+                                title="#{configMapController.getKey('SelectEndDateForSessionHistory_Title')}"    >
+                        <p:ajax event="dateSelect"  update="customChart"  />
+                    </p:calendar> 
+                   <!-- <p:outputLabel value="#{configMapController.getKey('SelectDateIntervalForSessionHistory_Label')}" for="chartInterval" />-->
+                    <p:selectOneMenu id="chartInterval"   value="#{mySessionsChart1.dateInterval}"   label="#{configMapController.getKey('CreateSessionHistoryTitle_trainer')}" >
+                        <f:selectItems value="#{mySessionsChart1.dateIntervalItems}" />                         
+                        <p:ajax   update="customChart" />
+                    </p:selectOneMenu>
+                </p:panelGrid>
+
+                <p:panel id="customChart" widgetVar="customChartWidget" header="My Sessions Chart (The number of times you have trained each week.)">
+                    <p:barChart legendPosition="ne" title="#{mySessionsChart1.selectedCustomer.firstname} #{mySessionsChart1.selectedCustomer.lastname}" extender="chartExtender" styleClass="chartClass" value="#{mySessionsChart1.customChartModel}" xaxisLabel="#{mySessionsChart1.xaxisLabel}" xaxisAngle="65"   stacked="true"/>
+                </p:panel>
+
+                <script >
+                    function chartExtender() {
+
+                        this.cfg.legend = {
+                            show: true,
+                            location: 'ne',
+                            placement: 'outsideGrid'
+                        };
+                    }
+                </script>
+
+
                 <h:panelGroup >
                     <p:commandButton id="createButton" ajax="false" action="#{sessionHistoryController.prepareCreate}" value="#{configMapController.getKey('ListSessionHistoryCreateLink')}"/>
                 </h:panelGroup>

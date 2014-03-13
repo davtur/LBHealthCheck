@@ -68,7 +68,7 @@ public class CustomersFacade extends AbstractFacade<Customers> {
             Query q = em.createQuery(cq);
             cm = (Customers) q.getSingleResult();
         } catch (Exception e) {
-            logger.log(Level.INFO, "Customer not found:" + username, e);
+            logger.log(Level.INFO, "Customer not found:{0}", username);
         }
         return cm;
         // Query q = em.createNativeQuery("SELECT * FROM customers where username = '" + username + "'", Customers.class);

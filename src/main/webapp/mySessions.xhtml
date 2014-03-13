@@ -12,8 +12,30 @@
         </ui:define>
         <ui:define name="body">
             <h:form id="listSessionHistoryForm1">
-                <p:panel header="My Sessions Chart (The number of times you have trained each week.)"><h:outputText id="selectedUser" value="#{customersController.selected.firstname} #{customersController.selected.lastname}" />
-                    <p:barChart legendPosition="ne"  extender="chartExtender" styleClass="chartClass" value="#{mySessionsChart1.model}" xaxisLabel="Week Ending On Date" xaxisAngle="90"  style="statsFlashChartStyle" stacked="true"/>
+                <p:panel header="My Sessions Chart (Training Session History.)">
+
+                    <p:panelGrid columns="6" style="width:100%"  >
+                        <p:outputLabel value="#{configMapController.getKey('SelectStartDateForSessionHistory_Label')}" for="sessionstart" />
+                        <p:calendar id="sessionstart" value="#{mySessionsChart1.startDate}" pattern="dd MMMM yyyy"
+                                    title="#{configMapController.getKey('SelectStartDateForSessionHistory_Title')}"    >
+                            <p:ajax event="dateSelect"  update="sessionChart"  />
+                        </p:calendar> 
+                        <p:outputLabel value="#{configMapController.getKey('SelectEndDateForSessionHistory_Label')}" for="sessionend" />
+                        <p:calendar id="sessionend" value="#{mySessionsChart1.endDate}"  pattern="dd MMMM yyyy"
+                                    title="#{configMapController.getKey('SelectEndDateForSessionHistory_Title')}"    >
+                            <p:ajax event="dateSelect"  update="sessionChart"  />
+                        </p:calendar> 
+                        <p:outputLabel value="#{configMapController.getKey('SelectDateIntervalForSessionHistory_Label')}" for="chartInterval" />
+                        <p:selectOneMenu id="chartInterval"   value="#{mySessionsChart1.dateInterval}"   label="#{configMapController.getKey('CreateSessionHistoryTitle_trainer')}" >
+                            <f:selectItems value="#{mySessionsChart1.dateIntervalItems}" />                         
+                            <p:ajax   update="sessionChart" />
+                        </p:selectOneMenu>
+                    </p:panelGrid>
+
+
+
+                    <p:barChart id="sessionChart" legendPosition="ne" title="#{customersController.selected.firstname} #{customersController.selected.lastname}" 
+                                extender="chartExtender" styleClass="chartClass" value="#{mySessionsChart1.model}" xaxisLabel="#{mySessionsChart1.xaxisLabel}" xaxisAngle="65"  stacked="true"/>
                 </p:panel>
 
                 <script >
