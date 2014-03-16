@@ -12,7 +12,7 @@
         </ui:define>
         <ui:define name="body">
             <h:form id="formCustomersCreate1">    
-                <!-- <p:log />-->
+                <!--<p:log />--> 
                 <p:confirmDialog id="confirmDialogCustomersCreate1" message="Add a new customer to the database."  closable="false"
                                  header="#{configMapController.getKey('CreateCustomersTitle')}" severity="info" widgetVar="customersCreateDialogue"> 
 
@@ -111,11 +111,13 @@
 
                     </p:panel>
                 </p:confirmDialog>
-            </h:form>
+                <p:poll  id="poller1" widgetVar="paymentPoller" interval="3" stop="#{ezidebit.paymentRequestStatusIdle}" update=":tabView:paymentsForm :menuForm:growl"  />
 
+            </h:form>
+  
             <!--<p:log/>-->
             <p:tabView id="tabView" widgetVar="tabViewWidget" > 
-                <p:ajax event="tabChange" listener="#{customersController.onTabChange}" update=":menuForm:growl "/>  
+                <p:ajax event="tabChange" listener="#{customersController.onTabChange}"  update=":menuForm:growl "/>  
 
                 <p:tab id="tab1" title="Customer List">  
                     <h:form id="CustomerslistForm1">
@@ -224,7 +226,7 @@
                                
                                                                </p:column> -->
                                 <p:column>
-                                    <p:commandButton id="paymentButton"  rendered="#{customersController.isUserInRole('ADMIN')}"    oncomplete="tabViewWidget.select(1)" update=":tabView:CustomerslistForm1 :tabView:formCustomersEdit1 :formCustomersCreate1 :tabView:paymentsForm :tabView:NoteslistForm1"  value="#{configMapController.getKey('ListCustomersEditPaymentLink')}">
+                                    <p:commandButton id="paymentButton"  rendered="#{customersController.isUserInRole('ADMIN')}"    oncomplete="tabViewWidget.select(1);PF('paymentPoller').start()"  update=":menuForm:growl :tabView:CustomerslistForm1 :tabView:formCustomersEdit1 :formCustomersCreate1 :tabView:paymentsForm :tabView:NoteslistForm1" value="#{configMapController.getKey('ListCustomersEditPaymentLink')}">
                                         <f:setPropertyActionListener value="#{item}" target="#{customersController.selected}"  />
                                     </p:commandButton>                       
 
@@ -340,14 +342,21 @@
 
                 </p:tab>
                 <p:tab id="tab3" title="Payment Information"  >  
-                    <h:form id="paymentsForm"> 
+                    <h:form id="paymentsForm" > 
 
+ 
+                        <p:panel id="progressBarPanel" rendered="#{!ezidebit.paymentRequestStatusIdle}" >
 
+<!--<p:progressBar id="progressBar1" widgetVar="pbAjax" ajax="true" value="#{ezidebit.progress}" labelTemplate="{value}%" styleClass="animated"  interval="2000">  
+    <p:ajax event="complete" listener="#{ezidebit.onComplete}" update="@form, :menuForm:growl" oncomplete="pbAjax.cancel()" process="@form"/>  
+</p:progressBar>  -->
+                            <h:outputText id="statusText" value="Please wait while the data for #{customersController.selected.firstname} #{customersController.selected.lastname} is loaded..." />
+                        </p:panel>
                         <!--  <p:confirmDialog id="confirmDialogCustomersPayments" message="Payment Information."  
                                            header="#{configMapController.getKey('CreateCustomersPaymentsTitle')}" severity="info" widgetVar="customersPaymentsDialogue">-->
 
 
-                        <p:outputPanel id="mainPanel">
+                        <p:outputPanel id="mainPanel" rendered="#{ezidebit.paymentRequestStatusIdle}" >
                             <p:selectBooleanButton value="#{ezidebit.editPaymentDetails}" onLabel="Refresh View" offLabel="Refresh View" rendered="#{ezidebit.customerExistsInPaymentGateway}" >
                                 <p:ajax update=":tabView:paymentsForm:viewPaymentsGrid  :tabView:paymentsForm:editPaymentsGrid  :menuForm:growl" process=":tabView:paymentsForm:viewPaymentsGrid  :tabView:paymentsForm:editPaymentsGrid "/>  
                             </p:selectBooleanButton>  

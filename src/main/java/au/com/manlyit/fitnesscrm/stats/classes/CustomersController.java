@@ -116,15 +116,16 @@ public class CustomersController implements Serializable {
         if (cust != null) {
             lastSelected = current;
             current = cust;
+            FacesContext context = FacesContext.getCurrentInstance();
+            EziDebitPaymentGateway controller = (EziDebitPaymentGateway) context.getApplication().getELResolver().getValue(context.getELContext(), null, "ezidebit");
+            controller.setSelectedCustomer(cust);
             selectedItemIndex = -1;
             checkPass = current.getPassword();
             setNotesItems(null);
             notesFilteredItems = null;
             recreateAllAffectedPageModels();
             setCustomerTabsEnabled(true);
-            FacesContext context = FacesContext.getCurrentInstance();
-            EziDebitPaymentGateway controller = (EziDebitPaymentGateway) context.getApplication().getELResolver().getValue(context.getELContext(), null, "ezidebit");
-            controller.setSelectedCustomer(cust);
+            
 
         }
     }
@@ -505,14 +506,14 @@ public class CustomersController implements Serializable {
      }
      return items;
      }*/
-    public SelectableDataModel<Customers> getItems() {
+    public PfSelectableDataModel<Customers> getItems() {
         if (items == null) {
             items = getPagination().createPageDataModel();
         }
         return items;
     }
 
-    public SelectableDataModel<Notes> getNotesItems() {
+    public PfSelectableDataModel<Notes> getNotesItems() {
         if (notesItems == null) {
             setNotesItems((PfSelectableDataModel<Notes>) getNotesPagination().createPageDataModel());
         }
@@ -659,6 +660,9 @@ public class CustomersController implements Serializable {
         String tabName = "unknown";
         if (tb != null) {
             tabName = tb.getTitle();
+            if(tb.getId().compareTo("tab3")==0){
+                
+            }
         }
 
         // FacesMessage msg = new FacesMessage("Tab Changed", "Active Tab: " + tabName);

@@ -40,5 +40,10 @@ public class PfSelectableDataModel<T extends BaseEntity> extends ListDataModel<T
     public Object getRowKey(T item) {
         return item.getId();
     }
+    @Override
+    public int getRowCount(){
+        return super.getRowCount();
+        
+    }
 }
 

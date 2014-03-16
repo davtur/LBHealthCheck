@@ -4,6 +4,7 @@ import au.com.manlyit.fitnesscrm.stats.db.ConfigMap;
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PaginationHelper;
 import au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade;
+import au.com.manlyit.fitnesscrm.stats.classes.util.LazyLoadingDataModel;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -27,6 +28,7 @@ import javax.faces.model.SelectItem;
 import javax.persistence.EntityExistsException;
 import javax.persistence.PersistenceException;
 import org.primefaces.event.RowEditEvent;
+import org.primefaces.model.LazyDataModel;
 
 @Named("configMapController")
 @SessionScoped
@@ -38,6 +40,7 @@ public class ConfigMapController implements Serializable {
     private String password1 = "";
     private String password2 = "";
     private boolean password = false;
+    private LazyDataModel lazyModel;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade ejbFacade;
     @Inject
@@ -75,7 +78,13 @@ public class ConfigMapController implements Serializable {
         }
 
     }
-
+   
+    public LazyDataModel<ConfigMap> getLazyModel() {
+        if(lazyModel == null){
+            lazyModel = new LazyLoadingDataModel(ejbFacade);
+        }
+        return lazyModel;
+    }
     public String getKey(String key) {
         return ejbFacade.getConfig(key);
     }
