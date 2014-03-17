@@ -19,8 +19,8 @@
                     <p:commandButton   ajax="false"    action="#{ezidebit.createCustomerRecord()}" value="Bulk Upload Customers"/>
                 </p:panel>
                 <p:panel>
-                                                  <h:outputLabel value="#{configMapController.getKey('EziDebitImportCustomers')}" for="eziSync" />
-                                                  <p:inputText id="eziSync"  value="#{ezidebit.listOfIdsToImport}" title="#{configMapController.getKey('EziDebitImportCustomersTitle')}"  required="true" requiredMessage="#{configMapController.getKey('EziDebitImportCustomersRequired')}"/>
+                    <h:outputLabel value="#{configMapController.getKey('EziDebitImportCustomers')}" for="eziSync" />
+                    <p:inputText id="eziSync"  value="#{ezidebit.listOfIdsToImport}" title="#{configMapController.getKey('EziDebitImportCustomersTitle')}"  required="true" requiredMessage="#{configMapController.getKey('EziDebitImportCustomersRequired')}"/>
 
                     <p:commandButton   ajax="false"    action="#{ezidebit.syncEziDebitIds}" value="Bulk Upload Customers"/>
                 </p:panel>

@@ -75,10 +75,25 @@ public class EziDebitPaymentGateway implements Serializable {
     private String listOfIdsToImport;
     private boolean customerExistsInPaymentGateway = false;
     private boolean editPaymentDetails = false;
+    private boolean autoStartPoller = true;
     private String eziDebitWidgetUrl = "";
     private Customers selectedCustomer;
 
     ThreadFactory tf1 = new eziDebitThreadFactory();
+
+    /**
+     * @return the autoStartPoller
+     */
+    public boolean isAutoStartPoller() {
+        return autoStartPoller;
+    }
+
+    /**
+     * @param autoStartPoller the autoStartPoller to set
+     */
+    public void setAutoStartPoller(boolean autoStartPoller) {
+        this.autoStartPoller = autoStartPoller;
+    }
 
     private class eziDebitThreadFactory implements ThreadFactory {
 
@@ -1064,6 +1079,7 @@ public class EziDebitPaymentGateway implements Serializable {
         if (custDetailsOperationBusy.get() == true) {
             if (getCustDetailsFuture.isDone()) {
                 custDetailsOperationBusy.set(false);
+                setAutoStartPoller(false);
                 try {
                     cd = getCustDetailsFuture.get();
                     customerExistsInPaymentGateway = cd != null;
