@@ -5,12 +5,14 @@
  */
 package au.com.manlyit.fitnesscrm.stats.beans;
 
+import au.com.manlyit.fitnesscrm.stats.classes.util.SendHTMLEmailWithFileAttached;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import au.com.manlyit.fitnesscrm.stats.webservices.CustomerDetails;
 import au.com.manlyit.fitnesscrm.stats.webservices.EziResponseOfCustomerDetailsTHgMB7OL;
 import au.com.manlyit.fitnesscrm.stats.webservices.INonPCIService;
 import au.com.manlyit.fitnesscrm.stats.webservices.NonPCIService;
 import java.io.Serializable;
+import java.util.Properties;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -54,6 +56,17 @@ public class PaymentBean implements Serializable {
         }
         return new AsyncResult<>(cd);
 
+    }
+  @Asynchronous
+    public Future<String> sendAsynchEmail(String to, String ccAddress, String from, String emailSubject, String message, String theAttachedfileName, Properties serverProperties, boolean debug) {
+        SendHTMLEmailWithFileAttached emailAgent = new SendHTMLEmailWithFileAttached();
+        try {
+            emailAgent.send(to, ccAddress, from, emailSubject, message, theAttachedfileName, serverProperties, debug);
+        } catch (Exception e) {
+            String error = "Email Send Failed :" + e.getMessage();
+            return new AsyncResult<>(error);
+        }
+        return new AsyncResult<>("Email Sent");
     }
 
 }

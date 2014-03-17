@@ -4,7 +4,9 @@
  */
 package au.com.manlyit.fitnesscrm.stats.classes.util;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.util.Date;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -29,19 +31,16 @@ import javax.mail.util.ByteArrayDataSource;
  *
  * @author dturner
  */
-public class SendHTMLEmailWithFileAttached {
+public class SendHTMLEmailWithFileAttached implements Serializable {
+
+    private static final Logger logger = Logger.getLogger(SendHTMLEmailWithFileAttached.class.getName());
 
     public SendHTMLEmailWithFileAttached() {
     }
     //@Resource(name = "mail/pureFitnessMail")
     //private Session pureFitnessEmail;
-    private static final String SMTP_HOST_NAME = "smtp.gmail.com";
-    private static final String SMTP_PORT = "465";
-    private static final String SSL_FACTORY = "javax.net.ssl.SSLSocketFactory";
-    private static final String SSL_USER = "info@purefitnessmanly.com.au";
-    private static final String SSL_PASS = "3Y!mXCPVv9";
 
-    public  synchronized boolean send( String to, String ccAddress, String from, String emailSubject, String message, String theAttachedfileName, boolean debug) {
+    public synchronized boolean send(String to, String ccAddress, String from, String emailSubject, String message, String theAttachedfileName, Properties serverProperties, boolean debug) {
         boolean result = true;
         //boolean debug = Boolean.valueOf(args[4]).booleanValue();
         String msgText1 = message + "\n";
@@ -55,33 +54,32 @@ public class SendHTMLEmailWithFileAttached {
         boolean ssl = true;
         /*Properties props = System.getProperties();
         
-        if (host != null) {
-        props.put("mail.smtp.host", host);
-        }
-        if (auth) {
-        props.put("mail.smtp.auth", "true");
-        }*/
+         if (host != null) {
+         props.put("mail.smtp.host", host);
+         }
+         if (auth) {
+         props.put("mail.smtp.auth", "true");
+         }*/
 
         //Session session = Session.getInstance(props, null);
-
-
-        Properties props = new Properties();
-        props.put("mail.smtp.host", SMTP_HOST_NAME);
-        props.put("mail.smtp.auth", "true");
-        props.put("mail.debug", "true");
-        props.put("mail.smtp.port", SMTP_PORT);
-        props.put("mail.smtp.socketFactory.port", SMTP_PORT);
-        props.put("mail.smtp.socketFactory.class", SSL_FACTORY);
-        props.put("mail.smtp.socketFactory.fallback", "false");
-
+       /* Properties props = new Properties();
+         props.put("mail.smtp.host", SMTP_HOST_NAME);
+         props.put("mail.smtp.auth", "true");
+         props.put("mail.debug", "true");
+         props.put("mail.smtp.port", SMTP_PORT);
+         props.put("mail.smtp.socketFactory.port", SMTP_PORT);
+         props.put("mail.smtp.socketFactory.class", SSL_FACTORY);
+         props.put("mail.smtp.socketFactory.fallback", "false");*/
         Session session = null;
+        final String sslUser = serverProperties.getProperty("mail.smtp.ssluser");
+        final String sslPass = serverProperties.getProperty("mail.smtp.sslpass");
         try {
-            session = Session.getInstance(props,
+            session = Session.getInstance(serverProperties,
                     new javax.mail.Authenticator() {
-                        
+
                         @Override
                         protected PasswordAuthentication getPasswordAuthentication() {
-                            return new PasswordAuthentication(SSL_USER, SSL_PASS);
+                            return new PasswordAuthentication(sslUser, sslPass);
                         }
                     });
         } catch (Exception e) {
@@ -90,16 +88,9 @@ public class SendHTMLEmailWithFileAttached {
             JsfUtil.addErrorMessage(e, "Couldn't get a session \r\n");
         }
 
-
-
-
-
-
-
-
-
-
-
+        if (session == null) {
+            return false;
+        }
 
         session.setDebug(debug);
         MimeMessage msg = new MimeMessage(session);
@@ -107,13 +98,7 @@ public class SendHTMLEmailWithFileAttached {
         // You only need to add the email host default user and default return address
         //Session session = pureFitnessEmail;
         //MimeMessage msg = new MimeMessage(session);
-
-
-
-
-       
         MimeBodyPart mimeBodyPart2 = new MimeBodyPart();
-
 
         try {
             // create a message
@@ -123,8 +108,6 @@ public class SendHTMLEmailWithFileAttached {
             //InternetAddress[] address2 = {new InternetAddress(ccAddress)};
             //msg.setRecipients(Message.RecipientType.TO, address);
             //msg.setRecipients(Message.RecipientType.CC, address2);
-
-
             msg.setRecipients(Message.RecipientType.TO, iterateEmailAddressesIntoArray(to));
             if (ccAddress != null) {
                 ccAddress = ccAddress.trim();
@@ -151,47 +134,43 @@ public class SendHTMLEmailWithFileAttached {
 
             // PREPARE THE IMAGE
             BodyPart imgPart = new MimeBodyPart();
-
-            String fileName = "/resources/images/headerimg.jpg";
+            final String fileName = serverProperties.getProperty("mail.smtp.headerimage.url");
+            // String fileName = "/resources/images/headerimg.jpg";
             //String fileName = "http://www.purefitnessmanly.com.au/FitnessStats/resources/images/pure_fitness_manly_group_and_personal_training.jpg";
 
-       InputStream stream = null;
-               // getServletContext().getResourceAsStream(fileName); //or null if you can't obtain a ServletContext
+            InputStream stream = null;
+            // getServletContext().getResourceAsStream(fileName); //or null if you can't obtain a ServletContext
 
-        if (stream == null) {
-            ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-            if (classLoader == null) {
-                classLoader = this.getClass().getClassLoader();
+            if (fileName != null) {
+                ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+                if (classLoader == null) {
+                    classLoader = this.getClass().getClassLoader();
+                }
+
+                stream = classLoader.getResourceAsStream(fileName);
             }
+            if (stream != null) {
+                try {
+                    DataSource ds = new ByteArrayDataSource(stream, "image/*");
 
-            stream = classLoader.getResourceAsStream(fileName);
-        }
+                    imgPart.setDataHandler(new DataHandler(ds));
+                    imgPart.setHeader("Content-ID", "<logoimg_cid>");
+                    imgPart.setDisposition(MimeBodyPart.INLINE);
+                    imgPart.setFileName(fileName);
+                    multipart.addBodyPart(imgPart);
+                } catch (IOException | MessagingException exception) {
+                    System.out.println("Image ERROR:" + exception.getMessage());
+                }
+            } else {
+                logger.log(Level.WARNING, "Email Header filename not found {0}", fileName);
+            }
+            // Set the message content!
 
-       
+            multipart.addBodyPart(htmlPart);
 
-        try {
-             DataSource ds = new ByteArrayDataSource(stream, "image/*");
+            msg.setContent(multipart);
 
-
-            imgPart.setDataHandler(new DataHandler(ds));
-            imgPart.setHeader("Content-ID", "<logoimg_cid>");
-            imgPart.setDisposition(MimeBodyPart.INLINE);
-            imgPart.setFileName(fileName);
-            multipart.addBodyPart(imgPart);
-        } catch (Exception exception) {
-            System.out.println("Image ERROR:" + exception.getMessage());
-        }
-        // Set the message content!
-
-        multipart.addBodyPart(htmlPart);
-
-
-
-
-        msg.setContent(multipart);
-            
-            
-             if (theAttachedfileName != null) {
+            if (theAttachedfileName != null) {
 
                 mimeBodyPart2.attachFile(theAttachedfileName);
                 //mimeBodyPart2.addHeaderLine(theAttachedfileName);
@@ -199,9 +178,7 @@ public class SendHTMLEmailWithFileAttached {
                 multipart.addBodyPart(mimeBodyPart2);
 
             }
-           
-            
-            
+
             msg.setContent(multipart);
 
             /*
@@ -209,23 +186,20 @@ public class SendHTMLEmailWithFileAttached {
              * you want to control the MIME type of the attached file.
              * Normally you should never need to do this.
              *
-            FileDataSource fds = new FileDataSource(filename) {
-            public String getContentType() {
-            //return    "text/html;charset=UTF-8";
-            return "application/octet-stream";
+             FileDataSource fds = new FileDataSource(filename) {
+             public String getContentType() {
+             //return    "text/html;charset=UTF-8";
+             return "application/octet-stream";
             
-            }
-            };
-            mbp2.setDataHandler(new DataHandler(fds));
-            mbp2.setFileName(fds.getName());
+             }
+             };
+             mbp2.setDataHandler(new DataHandler(fds));
+             mbp2.setFileName(fds.getName());
              */
-
             // create the Multipart and add its parts to it
-
             //mp.addBodyPart(mbp1);
             // add the Multipart to the message
             //msg.setContent(mp);
-
             // set the Date: header
             msg.setSentDate(new Date());
 
@@ -234,57 +208,54 @@ public class SendHTMLEmailWithFileAttached {
              * of the attached file, do the following.  Normally you
              * should never need to do this.
              *
-            msg.saveChanges();
-            mbp2.setHeader("Content-Transfer-Encoding", "base64");
+             msg.saveChanges();
+             mbp2.setHeader("Content-Transfer-Encoding", "base64");
              */
-
             // send the message
             msg.setHeader("X-Priority", "1");  //1 means high, 5 means low
-
 
             msg.setHeader("Priority", "Urgent");
 
             msg.setHeader("Importance", "high");
             msg.setHeader("X-MSMail-Priority", "High");// high or low
 
-             Transport.send(msg);
+            Transport.send(msg);
 
-           /* SMTPTransport t = (SMTPTransport) session.getTransport(ssl ? "smtps" : "smtp");
-            try {
-                if (auth) {
-                    t.connect(host, user, password);
-                } else {
-                    t.connect();
-                }
+            /* SMTPTransport t = (SMTPTransport) session.getTransport(ssl ? "smtps" : "smtp");
+             try {
+             if (auth) {
+             t.connect(host, user, password);
+             } else {
+             t.connect();
+             }
 
-                t.sendMessage(msg, msg.getAllRecipients());
-            } finally {
-                t.close();
-            }*/
+             t.sendMessage(msg, msg.getAllRecipients());
+             } finally {
+             t.close();
+             }*/
 
             /* SMTPTransport t = (SMTPTransport) optusEmail.getTransport(ssl ? "smtps" : "smtp");
-            try {
-            if (auth) {
-            t.connect(host, user, password);
-            } else {
-            t.connect();
-            }
+             try {
+             if (auth) {
+             t.connect(host, user, password);
+             } else {
+             t.connect();
+             }
             
-            t.sendMessage(msg, msg.getAllRecipients());
-            } finally {
-            t.close();
-            }*/
-
+             t.sendMessage(msg, msg.getAllRecipients());
+             } finally {
+             t.close();
+             }*/
         } catch (MessagingException mex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, "Send Email Messaging Exception: \r\n" + msg.toString(), mex);
             JsfUtil.addErrorMessage(mex, mex.getMessage());
-            Exception ex = null;
+            Exception ex;
             result = false;
             if ((ex = mex.getNextException()) != null) {
                 Logger.getLogger(getClass().getName()).log(Level.SEVERE, "Send Email 2nd Messaging Exception: \r\n" + msg.toString(), ex);
                 JsfUtil.addErrorMessage(ex, ex.getMessage());
             }
-        } catch (Exception ioex) {
+        } catch (IOException ioex) {
             result = false;
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, "Send Email IO Exception: \r\n" + msg.toString(), ioex);
             JsfUtil.addErrorMessage(ioex, ioex.getMessage());
@@ -315,7 +286,9 @@ public class SendHTMLEmailWithFileAttached {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, message, e);
 
         }
-
+        if (addresses == null) {
+            return null;
+        }
         InternetAddress[] InetAddresses = new InternetAddress[addresses.length];
         for (int i = 0; i < addresses.length; i++) {
             try {

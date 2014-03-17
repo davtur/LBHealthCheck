@@ -44,13 +44,13 @@ import static org.quartz.CronScheduleBuilder.*;
  * 
  *
  * import static org.quartz.TriggerBuilder.*;
-import static org.quartz.JobBuilder.*;
-import static org.quartz.CronScheduleBuilder.*;
-import static org.quartz.TriggerKey.*;
-import static org.quartz.JobKey.*;
-import static org.quartz.SimpleScheduleBuilder.*;
-import static org.quartz.DateBuilder.*;
-import static org.quartz.impl.matchers.GroupMatcher.*;
+ import static org.quartz.JobBuilder.*;
+ import static org.quartz.CronScheduleBuilder.*;
+ import static org.quartz.TriggerKey.*;
+ import static org.quartz.JobKey.*;
+ import static org.quartz.SimpleScheduleBuilder.*;
+ import static org.quartz.DateBuilder.*;
+ import static org.quartz.impl.matchers.GroupMatcher.*;
 
  * 
  */
@@ -106,6 +106,16 @@ public class QrtzJobDetailsController implements Serializable {
         jdm.put("dbUsername", configMapFacade.getConfig("db.fitness.username"));
         jdm.put("dbPassword", configMapFacade.getConfig("db.fitness.password"));
         jdm.put("dbConnectURL", configMapFacade.getConfig("db.fitness.url"));
+        jdm.put("mail.smtp.host", configMapFacade.getConfig("mail.smtp.host"));
+        jdm.put("mail.smtp.auth", configMapFacade.getConfig("mail.smtp.auth"));
+        jdm.put("mail.debug", configMapFacade.getConfig("mail.debug"));
+        jdm.put("mail.smtp.port", configMapFacade.getConfig("mail.smtp.port"));
+        jdm.put("mail.smtp.socketFactory.port", configMapFacade.getConfig("mail.smtp.socketFactory.port"));
+        jdm.put("mail.smtp.socketFactory.class", configMapFacade.getConfig("mail.smtp.socketFactory.class"));
+        jdm.put("mail.smtp.socketFactory.fallback", configMapFacade.getConfig("mail.smtp.socketFactory.fallback"));
+        jdm.put("mail.smtp.ssluser", configMapFacade.getConfig("mail.smtp.ssluser"));
+        jdm.put("mail.smtp.sslpass", configMapFacade.getConfig("mail.smtp.sslpass"));
+
         scheduleJob("0 0/5 * * * ?", "Emailer", jdm, EmailerJob.class); // fire every 5 minutes
 
         JobDataMap jdm2 = new JobDataMap();
@@ -136,10 +146,10 @@ public class QrtzJobDetailsController implements Serializable {
         jdm3.put("testOKCriteria2", "<!--- PLAN NAME SECTION --->");
         jdm3.put("logoutURL1", "https://memberservices.optuszoo.com.au/?logout=1");
         jdm3.put("userAgent", "Mozilla/5.0 (X11; Linux x86_64; rv:7.0.1) Gecko/20100101 Firefox/7.0.1");
-
+        jdm3.put("mail.smtp.ssluser", configMapFacade.getConfig("mail.smtp.ssluser"));
+        jdm3.put("mail.smtp.sslpass", configMapFacade.getConfig("mail.smtp.sslpass"));
 
         scheduleJob("0 0/2 * * * ?", "Login-and-webcheck", jdm3, CallableExecutorWithTimeoutJob.class); // fire every 2 minutes
-
 
         JobDataMap jdm4 = new JobDataMap();
         jdm4.put("dbUsername", configMapFacade.getConfig("db.fitness.username"));
@@ -148,6 +158,15 @@ public class QrtzJobDetailsController implements Serializable {
         jdm4.put("jobClassToRun", renderMonitoringChartsCallable1.class);
         jdm4.put("jobTimeoutInMilli", "60000");
         jdm4.put("jobType", "2");
+        jdm4.put("mail.smtp.host", configMapFacade.getConfig("mail.smtp.host"));
+        jdm4.put("mail.smtp.auth", configMapFacade.getConfig("mail.smtp.auth"));
+        jdm4.put("mail.debug", configMapFacade.getConfig("mail.debug"));
+        jdm4.put("mail.smtp.port", configMapFacade.getConfig("mail.smtp.port"));
+        jdm4.put("mail.smtp.socketFactory.port", configMapFacade.getConfig("mail.smtp.socketFactory.port"));
+        jdm4.put("mail.smtp.socketFactory.class", configMapFacade.getConfig("mail.smtp.socketFactory.class"));
+        jdm4.put("mail.smtp.socketFactory.fallback", configMapFacade.getConfig("mail.smtp.socketFactory.fallback"));
+        jdm4.put("mail.smtp.ssluser", configMapFacade.getConfig("mail.smtp.ssluser"));
+        jdm4.put("mail.smtp.sslpass", configMapFacade.getConfig("mail.smtp.sslpass"));
 
         scheduleJob("0 0/2 * * * ?", "render-Charts", jdm4, CallableExecutorWithTimeoutJob.class); // fire every 2 minute
         JobDataMap jdm5 = new JobDataMap();
@@ -159,6 +178,15 @@ public class QrtzJobDetailsController implements Serializable {
         jdm5.put("jobType", "3");
         jdm5.put("successIfFound", "<html>");
         jdm5.put("url1", "http://www.google.com.au");
+        jdm5.put("mail.smtp.host", configMapFacade.getConfig("mail.smtp.host"));
+        jdm5.put("mail.smtp.auth", configMapFacade.getConfig("mail.smtp.auth"));
+        jdm5.put("mail.debug", configMapFacade.getConfig("mail.debug"));
+        jdm5.put("mail.smtp.port", configMapFacade.getConfig("mail.smtp.port"));
+        jdm5.put("mail.smtp.socketFactory.port", configMapFacade.getConfig("mail.smtp.socketFactory.port"));
+        jdm5.put("mail.smtp.socketFactory.class", configMapFacade.getConfig("mail.smtp.socketFactory.class"));
+        jdm5.put("mail.smtp.socketFactory.fallback", configMapFacade.getConfig("mail.smtp.socketFactory.fallback"));
+        jdm5.put("mail.smtp.ssluser", configMapFacade.getConfig("mail.smtp.ssluser"));
+        jdm5.put("mail.smtp.sslpass", configMapFacade.getConfig("mail.smtp.sslpass"));
 
         scheduleJob("0 0/2 * * * ?", "google-check", jdm5, CallableExecutorWithTimeoutJob.class); // fire every 2 minute
 

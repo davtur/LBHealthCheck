@@ -16,6 +16,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.GregorianCalendar;
+import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 import org.quartz.Job;
@@ -72,6 +73,17 @@ public class CallableExecutorWithTimeoutJob implements Job {
         JobDataMap dataMap = context.getJobDetail().getJobDataMap();
         CallableTaskResults taskResults = new CallableTaskResults();
 
+        Properties props = new Properties();
+
+        props.put("mail.smtp.host", dataMap.get("mail.smtp.host"));
+        props.put("mail.smtp.auth", dataMap.get("mail.smtp.auth"));
+        props.put("mail.debug", dataMap.get("mail.debug"));
+        props.put("mail.smtp.port", dataMap.get("mail.smtp.port"));
+        props.put("mail.smtp.socketFactory.port", dataMap.get("mail.smtp.socketFactory.port"));
+        props.put("mail.smtp.socketFactory.class", dataMap.get("mail.smtp.socketFactory.class"));
+        props.put("mail.smtp.socketFactory.fallback", dataMap.get("mail.smtp.socketFactory.fallback"));
+        props.put("mail.smtp.ssluser", dataMap.get("mail.smtp.ssluser"));
+        props.put("mail.smtp.sslpass", dataMap.get("mail.smtp.sslpass"));
 
         Class cl = (Class) jobClassToRun;
         //try {
@@ -100,10 +112,7 @@ public class CallableExecutorWithTimeoutJob implements Job {
             Logger.getLogger(CallableExecutorWithTimeoutJob.class.getName()).log(Level.SEVERE, "Invocation Target Exception", ex);
         }
 
-
-
         //HttpsLoginAndCheckWebpageCallable jobToExec = new HttpsLoginAndCheckWebpageCallable(dataMap);      // execute the job
-
         Future<CallableTaskResults> future1 = exec.submit(callableClass);
         int errorCode = 0;
         String errorMessage = "OK";
@@ -148,16 +157,16 @@ public class CallableExecutorWithTimeoutJob implements Job {
             msg = " SUCCESSFULL : duration = " + duration + "ms\r\n\r\n";
             Logger.getLogger(getClass().getName()).log(Level.INFO, msg);
             /*SendHTMLEmailWithFileAttached emailAgent = new SendHTMLEmailWithFileAttached();
-            if (cc.trim().length() == 0) {
-            cc = null;
-            }
-            try {
-            emailAgent.send(to, cc, from, subject, msg, null, false);
-            Logger.getLogger(getClass().getName()).log(Level.INFO, "Message Sent");
-            } catch (Exception e) {
-            String message = "There was a problem sending the email , to: " + to + ", cc: " + cc + ", from: " + from + ", subject: " + subject + ".The exception is: \r\n" + e.getMessage();
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, message);
-            }*/
+             if (cc.trim().length() == 0) {
+             cc = null;
+             }
+             try {
+             emailAgent.send(to, cc, from, subject, msg, null, false);
+             Logger.getLogger(getClass().getName()).log(Level.INFO, "Message Sent");
+             } catch (Exception e) {
+             String message = "There was a problem sending the email , to: " + to + ", cc: " + cc + ", from: " + from + ", subject: " + subject + ".The exception is: \r\n" + e.getMessage();
+             Logger.getLogger(getClass().getName()).log(Level.SEVERE, message);
+             }*/
 
         } else {
 
@@ -168,7 +177,7 @@ public class CallableExecutorWithTimeoutJob implements Job {
                 cc = null;
             }
             try {
-                emailAgent.send(to, cc, from, subject, msg, null, false);
+                emailAgent.send(to, cc, from, subject, msg, null,props, false);
                 Logger.getLogger(getClass().getName()).log(Level.INFO, "Message Sent");
             } catch (Exception e) {
                 String message = "There was a problem sending the email , to: " + to + ", cc: " + cc + ", from: " + from + ", subject: " + subject + ".The exception is: \r\n" + e.getMessage();
@@ -200,21 +209,20 @@ public class CallableExecutorWithTimeoutJob implements Job {
             getEntityManager().getTransaction().commit();
 
             /* con = getAMySqlDBConnection(dbConnectURL, dbUsername, dbPassword);
-            prepStmt = con.prepareStatement(insertQuery);
-            prepStmt.setInt(1, wsm.getId());
-            prepStmt.setInt(2, wsm.getTestType());
-            prepStmt.setInt(3, wsm.getResult());
-            prepStmt.setInt(4, wsm.getDuration());
-            prepStmt.setTimestamp(5, new Timestamp(wsm.getStartTime().getTime()));
-            prepStmt.setInt(6, wsm.getNotify());
-            prepStmt.setInt(7, wsm.getJobToRunOnFail());
-            prepStmt.setString(8, wsm.getDescription());
-            prepStmt.executeUpdate();
+             prepStmt = con.prepareStatement(insertQuery);
+             prepStmt.setInt(1, wsm.getId());
+             prepStmt.setInt(2, wsm.getTestType());
+             prepStmt.setInt(3, wsm.getResult());
+             prepStmt.setInt(4, wsm.getDuration());
+             prepStmt.setTimestamp(5, new Timestamp(wsm.getStartTime().getTime()));
+             prepStmt.setInt(6, wsm.getNotify());
+             prepStmt.setInt(7, wsm.getJobToRunOnFail());
+             prepStmt.setString(8, wsm.getDescription());
+             prepStmt.executeUpdate();
             
-            } catch (SQLException e) {
-            java.util.logging.Logger.getLogger(getClass().getName()).log(java.util.logging.Level.SEVERE, "Could not persist Test results", e);
+             } catch (SQLException e) {
+             java.util.logging.Logger.getLogger(getClass().getName()).log(java.util.logging.Level.SEVERE, "Could not persist Test results", e);
              */
-
         } catch (Exception ex) {
             String message = "Attempting to persist WebsiteMonitor , exception: \r\n" + ex.getMessage();
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, message);
@@ -245,10 +253,6 @@ public class CallableExecutorWithTimeoutJob implements Job {
                     }
                 }
 
-
-
-
-
                 String msg2 = "Finished  cronjob callable with classname " + jobClassToRun + " with timeout set to " + jobTimeoutInMilli + " milliseconds ";
                 if (success) {
                     msg2 = msg2 + " -- SUCCESSFULL : duration = " + duration + "ms";
@@ -268,7 +272,6 @@ public class CallableExecutorWithTimeoutJob implements Job {
 
     private void persist(WebsiteMonitor wsm) {
         try {
-
 
             getEntityManager().getTransaction().begin();
             WebsiteMonitor wm = wsm;

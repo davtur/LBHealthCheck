@@ -82,12 +82,12 @@ public class PasswordResetFilter implements Filter {
                                     //Reset Password and log them in
                                     String paswd = generateUniqueToken(10);
                                     //String paswd = "foooobar";
-                                    String encryptedPass = PasswordService.getInstance().encrypt(paswd); 
-                                   // String encodedEncryptedPass = URLEncoder.encode(encryptedPass,"UTF-8");
+                                    String encryptedPass = PasswordService.getInstance().encrypt(paswd);
+                                    // String encodedEncryptedPass = URLEncoder.encode(encryptedPass,"UTF-8");
                                     cst.setPassword(encryptedPass);
                                     ejbCustomerFacade.edit(cst);
                                     req.login(user, paswd);
-                                //Redirect to the user details page
+                                    //Redirect to the user details page
                                     // FacesContext fc = FacesContext.getCurrentInstance();
                                     //CustomersController custController = (CustomersController) fc.getApplication().evaluateExpressionGet(fc, "#{customersController}", CustomersController.class);
                                     // custController.setSelected(cst);
@@ -98,10 +98,15 @@ public class PasswordResetFilter implements Filter {
                                         res.sendRedirect(detailsURL);
 
                                     } catch (IOException e) {
-                                        JsfUtil.addErrorMessage(e, "Redirect to MyDetails failed");
+                                        logger.log(Level.SEVERE, "Redirect to MyDetails failed",e);
+                                        //JsfUtil.addErrorMessage(e, "Redirect to MyDetails failed");
 
                                     }
 
+                                } else {
+                                     String detailsURL = req.getContextPath() + "/login.xhtml";
+                                    res.sendRedirect(detailsURL);
+                                     logger.log(Level.INFO, "The reset password link has expired");
                                 }
                             } catch (ServletException | ELException e2) {
                                 JsfUtil.addErrorMessage(e2, "Nonce does not exist. Possible hack attempt: " + key);

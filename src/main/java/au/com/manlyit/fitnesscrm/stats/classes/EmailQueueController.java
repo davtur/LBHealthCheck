@@ -13,6 +13,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Properties;
 import java.util.Random;
 
 import javax.inject.Inject;
@@ -66,6 +67,23 @@ public class EmailQueueController implements Serializable {
         boolean inRole = false;
         inRole = FacesContext.getCurrentInstance().getExternalContext().isUserInRole(roleName);
         return inRole;
+
+    }
+
+    protected Properties emailServerProperties() {
+        Properties props = new Properties();
+        
+        props.put("mail.smtp.host", configMapFacade.getConfig("mail.smtp.host"));
+        props.put("mail.smtp.auth", configMapFacade.getConfig("mail.smtp.auth"));
+        props.put("mail.debug", configMapFacade.getConfig("mail.debug"));
+        props.put("mail.smtp.port", configMapFacade.getConfig("mail.smtp.port"));
+        props.put("mail.smtp.socketFactory.port", configMapFacade.getConfig("mail.smtp.socketFactory.port"));
+        props.put("mail.smtp.socketFactory.class", configMapFacade.getConfig("mail.smtp.socketFactory.class"));
+        props.put("mail.smtp.socketFactory.fallback", configMapFacade.getConfig("mail.smtp.socketFactory.fallback"));
+        props.put("mail.smtp.ssluser", configMapFacade.getConfig("mail.smtp.ssluser"));
+        props.put("mail.smtp.sslpass", configMapFacade.getConfig("mail.smtp.sslpass"));
+
+        return props;
 
     }
 
@@ -217,7 +235,7 @@ public class EmailQueueController implements Serializable {
         getFacade().create(current);
 
         SendHTMLEmailWithFileAttached emailAgent = new SendHTMLEmailWithFileAttached();
-        emailAgent.send(current.getToaddresses(), current.getCcaddresses(), current.getFromaddress(), current.getSubject(), current.getMessage(), null, false);
+        emailAgent.send(current.getToaddresses(), current.getCcaddresses(), current.getFromaddress(), current.getSubject(), current.getMessage(), null,emailServerProperties(), false);
 
     }
 
@@ -249,7 +267,7 @@ public class EmailQueueController implements Serializable {
         String htmlText = "<table width=\"600\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\">  <tr>    <td><img src=\"cid:logoimg_cid\"/></td>  </tr>  <tr>    <td height=\"220\"> <p>Pure Fitness Manly</p>      <p>Please click the following link to reset your password:</p><p>To reset your password click <a href=\"" + urlLink + "\">here</a>.</p></td>  </tr>  <tr>    <td height=\"50\" align=\"center\" valign=\"middle\" bgcolor=\"#CCCCCC\">www.purefitnessmanly.com.au | sarah@purefitnessmanly.com.au | +61433818067</td>  </tr></table>";
 
         //String host, String to, String ccAddress, String from, String emailSubject, String message, String theAttachedfileName, boolean debug
-        emailAgent.send("david@manlyit.com.au", "", "noreply@purefitnessmanly.com.au", "Password Reset", htmlText, null, true);
+        emailAgent.send("david@manlyit.com.au", "", "noreply@purefitnessmanly.com.au", "Password Reset", htmlText, null,emailServerProperties(), true);
 
     }
 

@@ -18,10 +18,14 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Properties;
 import java.util.Random;
+import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
+import javax.ejb.AsyncResult;
+import javax.ejb.Asynchronous;
 import javax.enterprise.context.SessionScoped;
 import javax.faces.application.FacesMessage;
 import javax.faces.context.ExternalContext;
@@ -42,12 +46,15 @@ public class LoginBean implements Serializable {
     private String username;
     private String password;
     private boolean mobileDeviceUserAgent = false;
+    private Future<String> emailSendResult;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade configMapFacade;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.ActivationFacade ejbActivationFacade;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.CustomersFacade ejbCustomerFacade;
+    @Inject
+    private au.com.manlyit.fitnesscrm.stats.beans.PaymentBean ejbPaymentBean;
     private final StringEncrypter encrypter = new StringEncrypter("(lqKdh^Gr$2F^KJHG654)");
 
     public String getUsername() {
@@ -66,6 +73,24 @@ public class LoginBean implements Serializable {
         this.password = pass;
     }
 
+    private Properties emailServerProperties() {
+        Properties props = new Properties();
+
+        props.put("mail.smtp.host", configMapFacade.getConfig("mail.smtp.host"));
+        props.put("mail.smtp.auth", configMapFacade.getConfig("mail.smtp.auth"));
+        props.put("mail.debug", configMapFacade.getConfig("mail.debug"));
+        props.put("mail.smtp.port", configMapFacade.getConfig("mail.smtp.port"));
+        props.put("mail.smtp.socketFactory.port", configMapFacade.getConfig("mail.smtp.socketFactory.port"));
+        props.put("mail.smtp.socketFactory.class", configMapFacade.getConfig("mail.smtp.socketFactory.class"));
+        props.put("mail.smtp.socketFactory.fallback", configMapFacade.getConfig("mail.smtp.socketFactory.fallback"));
+        props.put("mail.smtp.ssluser", configMapFacade.getConfig("mail.smtp.ssluser"));
+        props.put("mail.smtp.sslpass", configMapFacade.getConfig("mail.smtp.sslpass"));
+
+        return props;
+
+    }
+
+  
     public String resetPassword() {
         /*     try {
          String redirectUrl = configMapFacade.getConfig("login.password.reset.redirect.url") + this.username;
@@ -92,24 +117,28 @@ public class LoginBean implements Serializable {
                 urlLink = configMapFacade.getConfig("login.password.reset.redirect.url") + encodedNonceEncrypted;
 
                 //send email
-                SendHTMLEmailWithFileAttached emailAgent = new SendHTMLEmailWithFileAttached();
                 String htmlText = "<table width=\"600\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\">  <tr>    <td><img src=\"cid:logoimg_cid\"/></td>  </tr>  <tr>    <td height=\"220\"> <p>Pure Fitness Manly</p>      <p>Please click the following link to reset your password:</p><p>To reset your password click <a href=\"" + urlLink + "\">here</a>.</p></td>  </tr>  <tr>    <td height=\"50\" align=\"center\" valign=\"middle\" bgcolor=\"#CCCCCC\">www.purefitnessmanly.com.au | sarah@purefitnessmanly.com.au | +61433818067</td>  </tr></table>";
 
                 //String host, String to, String ccAddress, String from, String emailSubject, String message, String theAttachedfileName, boolean debug
-                emailAgent.send("david@manlyit.com.au", "", "info@purefitnessmanly.com.au", "Password Reset", htmlText, null, true);
-                JsfUtil.addSuccessMessage(configMapFacade.getConfig("PasswordResetSuccessful"));
+                //emailAgent.send("david@manlyit.com.au", "", "info@purefitnessmanly.com.au", "Password Reset", htmlText, null, true);
+                emailSendResult = ejbPaymentBean.sendAsynchEmail(current.getEmailAddress(), configMapFacade.getConfig("PasswordResetCCEmailAddress"), configMapFacade.getConfig("PasswordResetFromEmailAddress"), configMapFacade.getConfig("PasswordResetEmailSubject"), htmlText, null, emailServerProperties(), false);
+                JsfUtil.addSuccessMessage("Password Reset Successful!", configMapFacade.getConfig("PasswordResetSuccessful"));
+                FacesContext context = FacesContext.getCurrentInstance();
+                ActivationBean controller = (ActivationBean) context.getApplication().evaluateExpressionGet(context, "#{activationBean}", ActivationBean.class);
+                controller.setValid(true);
             } catch (UnsupportedEncodingException ex) {
                 Logger.getLogger(LoginBean.class.getName()).log(Level.SEVERE, null, ex);
             }
 
         } else {
-            JsfUtil.addSuccessMessage(configMapFacade.getConfig("Please enter a valid username before resetting the password"));
+            JsfUtil.addErrorMessage("Error", configMapFacade.getConfig("PasswordResetErrorValidUsernameRequired"));
         }
-        if (this.isMobileDeviceUserAgent() == true) {
-            return "/mobileMenu";
-        } else {
-            return "/index";
-        }
+        return "activation";
+        /* if (this.isMobileDeviceUserAgent() == true) {
+         return "/mobileMenu";
+         } else {
+         return "/index";
+         }*/
 
     }
 

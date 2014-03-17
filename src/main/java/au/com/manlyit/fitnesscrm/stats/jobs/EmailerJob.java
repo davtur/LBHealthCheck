@@ -16,6 +16,7 @@ import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.quartz.Job;
@@ -31,38 +32,48 @@ public class EmailerJob implements Job {
 
     public EmailerJob() {
     }
-      private  String dbUsername = null;
-      private  String dbPassword = null;
-      private String dbConnectURL = null;
+    private String dbUsername = null;
+    private String dbPassword = null;
+    private String dbConnectURL = null;
 
     @Override
     public void execute(JobExecutionContext context)
             throws JobExecutionException {
 
-
         java.util.logging.Logger.getLogger(getClass().getName()).log(java.util.logging.Level.INFO, "Executing Emailer Job");
         // this section is entered once per day
        /* String mailHost = null;
-        String toEmailAddress = null;
-        String ccEmailAddress = null;
-        String fromEmailAddress = null;
+         String toEmailAddress = null;
+         String ccEmailAddress = null;
+         String fromEmailAddress = null;
  
-        try {
+         try {
 
-            JobDataMap dataMap = context.getJobDetail().getJobDataMap(); ; // Note the difference from the previous example
+         JobDataMap dataMap = context.getJobDetail().getJobDataMap(); ; // Note the difference from the previous example
 
-            setDbUsername(dataMap.getString("Username"));
-            setDbPassword(dataMap.getString("Password"));
-            //mailHost = dataMap.getString("MailHost");
-            //fromEmailAddress = dataMap.getString("FromEmailAddress");
-            //toEmailAddress = dataMap.getString("ToEmailAddress");
-            //ccEmailAddress = dataMap.getString("CCEmailAddress");
-            setDbConnectURL(dataMap.getString("dbConnectURL"));
+         setDbUsername(dataMap.getString("Username"));
+         setDbPassword(dataMap.getString("Password"));
+         //mailHost = dataMap.getString("MailHost");
+         //fromEmailAddress = dataMap.getString("FromEmailAddress");
+         //toEmailAddress = dataMap.getString("ToEmailAddress");
+         //ccEmailAddress = dataMap.getString("CCEmailAddress");
+         setDbConnectURL(dataMap.getString("dbConnectURL"));
 
-        } catch (Exception e) {
-            Logger.getLogger(getClass().getName()).log(Level.WARNING, "An exception occurred getting data from the merged trigger datamap", e);
+         } catch (Exception e) {
+         Logger.getLogger(getClass().getName()).log(Level.WARNING, "An exception occurred getting data from the merged trigger datamap", e);
 
-        }*/
+         }*/
+        Properties props = new Properties();
+        JobDataMap dataMap = context.getJobDetail().getJobDataMap();
+        props.put("mail.smtp.host", dataMap.get("mail.smtp.host"));
+        props.put("mail.smtp.auth", dataMap.get("mail.smtp.auth"));
+        props.put("mail.debug", dataMap.get("mail.debug"));
+        props.put("mail.smtp.port", dataMap.get("mail.smtp.port"));
+        props.put("mail.smtp.socketFactory.port", dataMap.get("mail.smtp.socketFactory.port"));
+        props.put("mail.smtp.socketFactory.class", dataMap.get("mail.smtp.socketFactory.class"));
+        props.put("mail.smtp.socketFactory.fallback", dataMap.get("mail.smtp.socketFactory.fallback"));
+        props.put("mail.smtp.ssluser", dataMap.get("mail.smtp.ssluser"));
+        props.put("mail.smtp.sslpass", dataMap.get("mail.smtp.sslpass"));
 
         GregorianCalendar calender1 = new GregorianCalendar();
         GregorianCalendar calender2 = new GregorianCalendar();
@@ -86,7 +97,7 @@ public class EmailerJob implements Job {
             try {
                 prepStmt = con.prepareStatement(sqlQuery);
                 prepStmt2 = con.prepareStatement(updateQuery);
-                
+
                 //Timestamp ts2 = new Timestamp(calender1.getTime().getTime());
                 // prepStmt.setTimestamp(1, ts2);
                 Logger.getLogger(getClass().getName()).log(Level.INFO, "Getting emails for sending from the queue.");
@@ -113,13 +124,13 @@ public class EmailerJob implements Job {
                     if (status == 0) {
                         if (calender2.compareTo(calender1) <= 0) {
                             //send the email 
-                            if(cc.trim().length() == 0){
+                            if (cc.trim().length() == 0) {
                                 cc = null;
                             }
                             try {
-                                emailAgent.send(to, cc, from, subject, msg, null, false);
+                                emailAgent.send(to, cc, from, subject, msg, null, props, false);
                             } catch (Exception e) {
-                                String message = "There was a problem sending the email id: "+Integer.toString(id) +", to: "+to+", cc: "+cc+", from: "+from+", subject: "+subject+".The exception is: " + updateQuery + "\r\n" + e.getMessage();
+                                String message = "There was a problem sending the email id: " + Integer.toString(id) + ", to: " + to + ", cc: " + cc + ", from: " + from + ", subject: " + subject + ".The exception is: " + updateQuery + "\r\n" + e.getMessage();
                                 Logger.getLogger(getClass().getName()).log(Level.SEVERE, message);
 
                             }
@@ -149,7 +160,7 @@ public class EmailerJob implements Job {
                     prepStmt.close();
                 }
                 prepStmt = null;
-                 if (prepStmt2 != null) {
+                if (prepStmt2 != null) {
                     prepStmt2.close();
                 }
                 prepStmt2 = null;
