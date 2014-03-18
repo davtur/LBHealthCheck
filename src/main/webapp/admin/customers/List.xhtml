@@ -316,7 +316,7 @@
                 </p:tab>
 
 
-                <p:tab id="tab3" title="Payment Information"  >  
+                <p:tab id="tab3" title="Payment Information" rendered="#{ezidebit.paymentGatewayEnabled}" >  
                     <h:form id="paymentsForm" > 
                         <p:panel id="progressBarPanel" rendered="#{!ezidebit.paymentRequestStatusIdle}" >
 

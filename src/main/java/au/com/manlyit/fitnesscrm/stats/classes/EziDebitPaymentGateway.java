@@ -23,25 +23,26 @@ import au.com.manlyit.fitnesscrm.stats.webservices.EziResponseOfPaymentDetailTHg
 import au.com.manlyit.fitnesscrm.stats.webservices.EziResponseOfstring;
 import au.com.manlyit.fitnesscrm.stats.webservices.INonPCIService;
 import au.com.manlyit.fitnesscrm.stats.webservices.NonPCIService;
+import au.com.manlyit.fitnesscrm.stats.webservices.Payment;
 import au.com.manlyit.fitnesscrm.stats.webservices.PaymentDetail;
 import au.com.manlyit.fitnesscrm.stats.webservices.PaymentDetailPlusNextPaymentInfo;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.annotation.PostConstruct;
 import javax.enterprise.context.SessionScoped;
-import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
 import javax.faces.event.ActionEvent;
 import javax.inject.Inject;
@@ -59,13 +60,16 @@ public class EziDebitPaymentGateway implements Serializable {
     private static final Logger logger = Logger.getLogger(EziDebitPaymentGateway.class.getName());
     //private static final String digitalKey = "78F14D92-76F1-45B0-815B-C3F0F239F624";// test
     private static final String paymentGateway = "EZIDEBIT";
-    private static final int THREAD_POOL_SIZE = 5;
+   
+
     private Future<CustomerDetails> getCustDetailsFuture = null;
+    private Map<String, Future> futureMap = new HashMap<>();
     private AtomicBoolean custDetailsOperationBusy = new AtomicBoolean(false);
     private final ThreadGroup tGroup1 = new ThreadGroup("EziDebitOps");
-    private ExecutorService executor1;
+    private List<Payment> paymentsList;
+    private boolean paymentGatewayEnabled = true;
     private Integer progress;
-    private AtomicBoolean shutdownAllThreads = new AtomicBoolean(false);
+    private AtomicBoolean pageLoaded = new AtomicBoolean(false);
     @Inject
     private PaymentBean paymentBean;
     @Inject
@@ -76,6 +80,7 @@ public class EziDebitPaymentGateway implements Serializable {
     private boolean customerExistsInPaymentGateway = false;
     private boolean editPaymentDetails = false;
     private boolean autoStartPoller = true;
+
     private String eziDebitWidgetUrl = "";
     private Customers selectedCustomer;
 
@@ -93,6 +98,50 @@ public class EziDebitPaymentGateway implements Serializable {
      */
     public void setAutoStartPoller(boolean autoStartPoller) {
         this.autoStartPoller = autoStartPoller;
+    }
+
+    /**
+     * @return the paymentGatewayEnabled
+     */
+    public boolean isPaymentGatewayEnabled() {
+        String val = configMapFacade.getConfig("payment.ezidebit.enabled");
+        if (val == null) {
+            setPaymentGatewayEnabled(false);
+        } else {
+            if (val.trim().compareToIgnoreCase("true") == 0) {
+                setPaymentGatewayEnabled(true);
+            } else {
+                setPaymentGatewayEnabled(false);
+            }
+        }
+        return paymentGatewayEnabled;
+    }
+
+    /**
+     * @param paymentGatewayEnabled the paymentGatewayEnabled to set
+     */
+    public void setPaymentGatewayEnabled(boolean paymentGatewayEnabled) {
+        this.paymentGatewayEnabled = paymentGatewayEnabled;
+    }
+
+    /**
+     * @return the paymentsList
+     */
+    public List<Payment> getPaymentsList() {
+        if (paymentsList == null) {
+            GregorianCalendar cal = new GregorianCalendar();
+            Date endDate = cal.getTime();
+            cal.add(Calendar.MONTH, -6);
+            futureMap.put("GetPayments",paymentBean.getPayments(selectedCustomer, "ALL", "ALL", "ALL", "", cal.getTime(), endDate, false, getDigitalKey()));
+        }
+        return paymentsList;
+    }
+
+    /**
+     * @param paymentsList the paymentsList to set
+     */
+    public void setPaymentsList(List<Payment> paymentsList) {
+        this.paymentsList = paymentsList;
     }
 
     private class eziDebitThreadFactory implements ThreadFactory {
@@ -1053,7 +1102,7 @@ public class EziDebitPaymentGateway implements Serializable {
         if (isPaymentRequestStatusIdle()) {
             this.progress = 101;
         }
-        progress = progress +1;
+        progress = progress + 1;
         return progress;
     }
 
@@ -1065,7 +1114,8 @@ public class EziDebitPaymentGateway implements Serializable {
     }
 
     public void onComplete() {
-        FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO, "Payment Details", "Successfully retireved from payment gateway."));
+        //FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO, "Payment Details", "Successfully retireved from payment gateway."));
+        JsfUtil.addSuccessMessage("Payment Details", "Successfully retireved from payment gateway.");
         this.progress = 0;
     }
 
@@ -1076,27 +1126,91 @@ public class EziDebitPaymentGateway implements Serializable {
     public boolean isPaymentRequestStatusIdle() {
 
         CustomerDetails cd;
-        if (custDetailsOperationBusy.get() == true) {
-            if (getCustDetailsFuture.isDone()) {
-                custDetailsOperationBusy.set(false);
-                setAutoStartPoller(false);
-                try {
-                    cd = getCustDetailsFuture.get();
-                    customerExistsInPaymentGateway = cd != null;
-                } catch (ExecutionException | CancellationException | InterruptedException ex) {
-                    logger.log(Level.WARNING, "checkPaymentRequestStatus:", ex);
-                    return true;
+        String key = "";
+
+        try {
+            if (futureMap.size() > 0) {
+
+                key = "GetCustomerDetails";
+                if (futureMap.containsKey(key)) {
+                    Future ft = (Future) futureMap.get(key);
+                    if (ft.isDone()) {
+                        futureMap.remove(key);
+                        setAutoStartPoller(false);
+                        cd = (CustomerDetails)ft.get();
+                        customerExistsInPaymentGateway = cd != null;
+                    }
+                }
+                /// process next op
+
+                key = "AddPayment";
+                if (futureMap.containsKey(key)) {
+                    Future ft = (Future) futureMap.get(key);
+                    if (ft.isDone()) {
+                        futureMap.remove(key);
+                        processAddPaymentResult(ft);
+                    }
+                }
+                // process next op
+
+                key = "GetPayments";
+                if (futureMap.containsKey(key)) {
+                    Future ft = (Future) futureMap.get(key);
+                    if (ft.isDone()) {
+                        futureMap.remove(key);
+                        processGetPayments(ft);
+                    }
                 }
             }
+        } catch (ExecutionException | CancellationException | InterruptedException ex) {
+            logger.log(Level.WARNING, key + ":", ex);
+            return true;
+        }
+
+        if (pageLoaded.get() == false) {// if its null we havn't retrieved the details for the customer
+            pageLoaded.set(true);
+            FacesContext context = FacesContext.getCurrentInstance();
+            CustomersController controller = (CustomersController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "customersController");
+            this.setSelectedCustomer(controller.getSelected());
+        }
+        if (futureMap.size() > 0) {
+            return false;
         } else {
-            if (getCustDetailsFuture == null) {// if its null we havn't retrieved the details for the customer
-                FacesContext context = FacesContext.getCurrentInstance();
-                CustomersController controller = (CustomersController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "customersController");
-                this.setSelectedCustomer(controller.getSelected());
+            return true;
+        }
+
+    }
+
+    private void processGetPayments(Future ft) {
+        ArrayOfPayment result = null;
+        try {
+            result = (ArrayOfPayment) ft.get();
+        } catch (InterruptedException | ExecutionException ex) {
+            Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        if (result != null) {
+            List<Payment> payList = result.getPayment();
+            if (payList != null) {
+                paymentsList = payList;
             }
         }
-        boolean returnVal = !custDetailsOperationBusy.get();
-        return returnVal;
+
+    }
+
+    private void processAddPaymentResult(Future ft) {
+        boolean result = false;
+        try {
+            result = (boolean) ft.get();
+        } catch (InterruptedException | ExecutionException ex) {
+            Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        if (result == true) {
+            JsfUtil.addSuccessMessage("Payment", "Successfully added payment.");
+            paymentsList = null;
+        } else {
+            JsfUtil.addErrorMessage("Payment", "The operation failed!.");
+        }
+
     }
 
     /**
@@ -1104,7 +1218,7 @@ public class EziDebitPaymentGateway implements Serializable {
      */
     public void setSelectedCustomer(Customers selectedCustomer) {
         this.selectedCustomer = selectedCustomer;
-        getCustDetailsFuture = paymentBean.getCustomerDetails(selectedCustomer, getDigitalKey());
+        futureMap.put("GetCustomerDetails",paymentBean.getCustomerDetails(selectedCustomer, getDigitalKey()));
         custDetailsOperationBusy.set(true);
         this.progress = 0;
 
