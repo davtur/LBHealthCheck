@@ -1,0 +1,16 @@
+AddPaymentTitle=Add A Single Payment
+AddPaymentLabel_debitdate=Debit Date
+AddPaymentTitle_debitdate=Debit Date
+AddPaymentRequiredMessage_debitdate=The debit date is required
+AddPaymentLabel_paymentAmount=Amount
+AddPaymentTitle_paymentAmount=Amount of payment
+AddPaymentRequiredMessage_paymentAmount=The payment Amount is required
+AddPaymentSaveLink=Add
+AddPaymentDiscardLink=Discard
+AddPaymentButtonLink=Add Payment
+
+ListPaymentsTitle_customerName=Customer Name
+ListPaymentsTitle_paymentReference=Reference
+ListPaymentsTitle_paymentAmount=Amount
+ListPaymentsTitle_paymentStatus=Status
+ListPaymentsTitle_debitDate=Debit Date

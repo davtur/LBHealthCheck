@@ -8,8 +8,10 @@ package au.com.manlyit.fitnesscrm.stats.beans;
 import au.com.manlyit.fitnesscrm.stats.classes.util.SendHTMLEmailWithFileAttached;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import au.com.manlyit.fitnesscrm.stats.webservices.ArrayOfPayment;
+import au.com.manlyit.fitnesscrm.stats.webservices.ArrayOfScheduledPayment;
 import au.com.manlyit.fitnesscrm.stats.webservices.CustomerDetails;
 import au.com.manlyit.fitnesscrm.stats.webservices.EziResponseOfArrayOfPaymentTHgMB7OL;
+import au.com.manlyit.fitnesscrm.stats.webservices.EziResponseOfArrayOfScheduledPaymentTHgMB7OL;
 import au.com.manlyit.fitnesscrm.stats.webservices.EziResponseOfCustomerDetailsTHgMB7OL;
 import au.com.manlyit.fitnesscrm.stats.webservices.EziResponseOfstring;
 import au.com.manlyit.fitnesscrm.stats.webservices.INonPCIService;
@@ -61,6 +63,39 @@ public class PaymentBean implements Serializable {
         }
         return new AsyncResult<>(cd);
 
+    }
+
+    @Asynchronous
+    public Future<ArrayOfScheduledPayment> getScheduledPayments(Customers cust, Date fromDate, Date toDate, String digitalKey) {
+
+        ArrayOfScheduledPayment result = null;
+
+        String eziDebitCustomerId = ""; // use our reference instead. THis must be an empty string.
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        String fromDateString = ""; // The exact date on which the payment that you wish to move is scheduled to be deducted from your Customer's bank account or credit card.
+        if (fromDate != null) {
+            fromDateString = sdf.format(fromDate);
+        }
+        String toDateString = "";
+        if (toDate != null) {
+            toDateString = sdf.format(toDate);
+        }
+
+        String ourSystemCustomerReference = cust.getId().toString();
+
+        INonPCIService ws = new NonPCIService().getBasicHttpBindingINonPCIService();
+
+        EziResponseOfArrayOfScheduledPaymentTHgMB7OL eziResponse = ws.getScheduledPayments(digitalKey, fromDateString, toDateString, eziDebitCustomerId, ourSystemCustomerReference);
+        logger.log(Level.INFO, "getPayments Response: Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
+        if (eziResponse.getError().intValue() == 0) {// any errors will be a non zero value
+            result = eziResponse.getData().getValue();
+
+        } else {
+            logger.log(Level.WARNING, "getPayments Response: Error - {0}, ", eziResponse.getErrorMessage().getValue());
+
+        }
+
+        return new AsyncResult<>(result);
     }
 
     @Asynchronous
@@ -142,7 +177,7 @@ public class PaymentBean implements Serializable {
 
         return new AsyncResult<>(result);
     }
-    
+
     @Asynchronous
     public Future<Boolean> addPayment(Customers cust, Date debitDate, Long paymentAmountInCents, String paymentReference, String loggedInUser, String digitalKey) {
         // paymentReference Max 50 chars. It can be search with with a wildcard in other methods. Use invoice number or other payment identifier
@@ -171,6 +206,191 @@ public class PaymentBean implements Serializable {
             }
         } else {
             logger.log(Level.WARNING, "addPayment Response: Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
+
+        }
+
+        return new AsyncResult<>(result);
+    }
+
+    @Asynchronous
+    public Future<Boolean> createSchedule(Customers cust, Date scheduleStartDate, char schedulePeriodType, String dayOfWeek, int dayOfMonth, boolean firstWeekOfMonth, boolean secondWeekOfMonth, boolean thirdWeekOfMonth, boolean fourthWeekOfMonth, long paymentAmountInCents, int limitToNumberOfPayments, long limitToTotalAmountInCent, boolean keepManualPayments, String loggedInUser, String digitalKey) {
+        //This method allows you to create a new schedule for the given Customer. It will create a
+        //schedule for on-going debits (up to one year’s worth of payments will exist at a point in
+        //time), or will calculate a schedule to fulfil a required total payment amount, or number of
+        //payments.
+        //It is important to note the following when creating a payment schedule:
+        //• This function will first remove an existing payment schedule and then create a
+        //new payment schedule in accordance with your parameters;
+        //• You can choose whether to maintain or delete any payments that were manually
+        //added to the payment schedule with the AddPayment method by specifying "YES"
+        //or "NO" respectively in the KeepManualPayments parameter;
+        //• When creating a new schedule for a fixed amount or fixed number of payments,
+        //the calculation will not consider any payments already made by the Customer;
+        //• When a schedule is created, a series of individual payment records are created in
+        //the Ezidebit system, which can be altered independently of each other;
+        //• For on-going Customers, when a debit is processed (or removed from the
+        //schedule for Customers in a non-processing status), a new debit is added to the
+        //end of their existing schedules, at the frequency specified when the schedule was
+        //created;
+        //• For Customers on a fixed number of payments, or total amount owing, if a
+        //payment is unsuccessful, it will cause a new debit to be scheduled at the end of
+        //the existing schedule for the correct amount, at the frequency specified when the
+        //schedule was created;
+        //• Ezidebit will not schedule payments for weekend days, instead updating the
+        //scheduled debit record to reflect the fact that it will be drawn from the
+        //Customer's payment method on the next business-banking day.
+        boolean result = false;
+        String keepManualPaymentsString = "NO";// update all specified payments for customer 
+        if (keepManualPayments) {
+            keepManualPaymentsString = "YES";// maintain any one off or ad-hoc payment amounts
+        }
+        String firstWeekOfMonthString = "NO";
+        if (firstWeekOfMonth) {
+            firstWeekOfMonthString = "YES";
+        }
+        String secondWeekOfMonthString = "NO";
+        if (secondWeekOfMonth) {
+            secondWeekOfMonthString = "YES";
+        }
+        String thirdWeekOfMonthString = "NO";
+        if (thirdWeekOfMonth) {
+            thirdWeekOfMonthString = "YES";
+        }
+        String fourthWeekOfMonthString = "NO";
+        if (fourthWeekOfMonth) {
+            fourthWeekOfMonthString = "YES";
+        }
+
+        String eziDebitCustomerId = ""; // use our reference instead. THis must be an empty string.
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        String scheduleStartDateString = sdf.format(scheduleStartDate);
+        String ourSystemCustomerReference = cust.getId().toString();
+        if (schedulePeriodType == 'W' || schedulePeriodType == 'F' || schedulePeriodType == 'N' || schedulePeriodType == '4') {
+            if (dayOfWeek == null || dayOfWeek.trim().isEmpty()) {
+                logger.log(Level.WARNING, "createSchedule A value must be provided for dayOfWeek \n" + " when the\n" + "SchedulePeriodType is in\n" + "W,F,4,N");
+                return new AsyncResult<>(false);
+            }
+        }
+        if (schedulePeriodType == 'M') {
+            if (dayOfMonth < 1 || dayOfMonth > 31) {
+                logger.log(Level.WARNING, "createSchedule: A value must be provided for dayOfMonth (1..31 )\n" + " when the\n" + "SchedulePeriodType is in\n" + "M");
+                return new AsyncResult<>(false);
+            }
+        }
+        String schedulePeriodTypeString = "";
+        schedulePeriodTypeString = schedulePeriodTypeString + schedulePeriodType;
+        INonPCIService ws = new NonPCIService().getBasicHttpBindingINonPCIService();
+
+        if (loggedInUser.length() > 50) {
+            loggedInUser = loggedInUser.substring(0, 50);
+            logger.log(Level.WARNING, "createSchedule loggedInUser is greater than the allowed 50 characters. Truncating! to 50 chars");
+        }
+        if (schedulePeriodType == 'W' || schedulePeriodType == 'F' || schedulePeriodType == 'M' || schedulePeriodType == '4' || schedulePeriodType == 'N' || schedulePeriodType == 'Q' || schedulePeriodType == 'H' || schedulePeriodType == 'Y') {
+
+            EziResponseOfstring eziResponse = ws.createSchedule(digitalKey, eziDebitCustomerId, ourSystemCustomerReference, scheduleStartDateString, schedulePeriodTypeString, dayOfWeek, dayOfMonth, firstWeekOfMonthString, secondWeekOfMonthString, thirdWeekOfMonthString, fourthWeekOfMonthString, paymentAmountInCents, limitToNumberOfPayments, limitToTotalAmountInCent, keepManualPaymentsString, loggedInUser);
+            logger.log(Level.INFO, "createSchedule Response: Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
+            if (eziResponse.getError().intValue() == 0) {// any errors will be a non zero value
+
+                if (eziResponse.getData().getValue().compareTo("S") == 0) {
+                    result = true;
+                } else {
+                    logger.log(Level.WARNING, "createSchedule Response Data value should be S ( Successful ) : Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
+                }
+            } else {
+                logger.log(Level.WARNING, "createSchedule Response: Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
+
+            }
+        } else {
+            logger.log(Level.WARNING, "createSchedule : schedulePeriodType Possible values are:\\n'W' - Weekly\\n'F' - Fortnightly\\n'M' - Monthly\\n'4' - 4 Weekly\\n'N' - Weekday in month (e.g.\\nMonday in the third week of\\nevery month)\\n'Q' - Quarterly\\n'H' - Half Yearly (6 Monthly)\\n'Y' - Yearly\\nThe frequency is applied to the\\npayment scheduled beginning\\nfrom the date defined in\\nScheduledStartDate\\n Incorect value that was submitted = ", schedulePeriodType);
+
+        }
+
+        return new AsyncResult<>(result);
+    }
+
+    @Asynchronous
+    public Future<Boolean> changeScheduledAmount(Customers cust, Date changeFromDate, Long newPaymentAmountInCents, int changeFromPaymentNumber, boolean applyToAllFuturePayments, boolean keepManualPayments, String loggedInUser, String digitalKey) {
+        // Only scheduled payments with a status of 'W' can have their scheduled debit amounts changed;
+        // This method will only change the debit amounts of scheduled payments - the debit dates will still remain the same.
+
+        boolean result = false;
+        String applyToAllFuturePaymentsString = "NO";// apply to earliest payment
+        if (applyToAllFuturePayments) {
+            applyToAllFuturePaymentsString = "YES"; //applied to all (YES) payments that occur on or after the position identified by the ChangeFromPaymentNumber or ChangeFromPaymentDate
+        }
+        String keepManualPaymentsString = "NO";// update all specified payments for customer 
+        if (keepManualPayments) {
+            keepManualPaymentsString = "YES";// maintain any one off or ad-hoc payment amounts
+        }
+
+        String eziDebitCustomerId = ""; // use our reference instead. THis must be an empty string.
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        String changeFromDateString = sdf.format(changeFromDate);
+        String ourSystemCustomerReference = cust.getId().toString();
+        INonPCIService ws = new NonPCIService().getBasicHttpBindingINonPCIService();
+
+        if (loggedInUser.length() > 50) {
+            loggedInUser = loggedInUser.substring(0, 50);
+            logger.log(Level.WARNING, "changeScheduledAmount loggedInUser is greater than the allowed 50 characters. Truncating! to 50 chars");
+        }
+        EziResponseOfstring eziResponse = ws.changeScheduledAmount(digitalKey, eziDebitCustomerId, ourSystemCustomerReference, changeFromPaymentNumber, changeFromDateString, newPaymentAmountInCents, applyToAllFuturePaymentsString, keepManualPaymentsString, loggedInUser);
+        logger.log(Level.INFO, "changeScheduledAmount Response: Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
+        if (eziResponse.getError().intValue() == 0) {// any errors will be a non zero value
+
+            if (eziResponse.getData().getValue().compareTo("S") == 0) {
+                result = true;
+            } else {
+                logger.log(Level.WARNING, "changeScheduledAmount Response Data value should be S ( Successful ) : Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
+            }
+        } else {
+            logger.log(Level.WARNING, "changeScheduledAmount Response: Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
+
+        }
+
+        return new AsyncResult<>(result);
+    }
+
+    @Asynchronous
+    public Future<Boolean> changeScheduledDate(Customers cust, Date changeFromDate, Date changeToDate, String paymentReference, boolean keepManualPayments, String loggedInUser, String digitalKey) {
+        // PaymentReference - If you used a specific PaymentReference when adding a payment using the AddPayment Method, then you can use that value here to exactly identify that payment within the Customer's schedule.
+        // NB - You must provide a value for either ChangeFromDate or PaymentReference to identify the payment.
+        boolean result = false;
+        if (paymentReference.trim().isEmpty()) {
+            paymentReference = null;
+        }
+        String keepManualPaymentsString = "NO";// update all specified payments for customer 
+        if (keepManualPayments) {
+            keepManualPaymentsString = "YES";// maintain any one off or ad-hoc payment amounts
+        }
+
+        String eziDebitCustomerId = ""; // use our reference instead. THis must be an empty string.
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        String changeFromDateString = ""; // The exact date on which the payment that you wish to move is scheduled to be deducted from your Customer's bank account or credit card.
+        String changeToDateString = sdf.format(changeToDate); // The new date that you wish for this payment to be deducted from your Customer's bank account or credit card.
+        String ourSystemCustomerReference = cust.getId().toString();
+
+        if (changeFromDate != null && paymentReference == null) {
+            changeFromDateString = sdf.format(changeFromDate);
+            paymentReference = "";
+        }
+
+        INonPCIService ws = new NonPCIService().getBasicHttpBindingINonPCIService();
+
+        if (loggedInUser.length() > 50) {
+            loggedInUser = loggedInUser.substring(0, 50);
+            logger.log(Level.WARNING, "changeScheduledDate loggedInUser is greater than the allowed 50 characters. Truncating! to 50 chars");
+        }
+        EziResponseOfstring eziResponse = ws.changeScheduledDate(digitalKey, eziDebitCustomerId, ourSystemCustomerReference, changeFromDateString, paymentReference, changeToDateString, keepManualPaymentsString, loggedInUser);
+        logger.log(Level.INFO, "changeScheduledDate Response: Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
+        if (eziResponse.getError().intValue() == 0) {// any errors will be a non zero value
+
+            if (eziResponse.getData().getValue().compareTo("S") == 0) {
+                result = true;
+            } else {
+                logger.log(Level.WARNING, "changeScheduledDate Response Data value should be S ( Successful ) : Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
+            }
+        } else {
+            logger.log(Level.WARNING, "changeScheduledDate Response: Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
 
         }
 

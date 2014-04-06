@@ -121,11 +121,8 @@ public class CustomersController implements Serializable {
             controller.setSelectedCustomer(cust);
             selectedItemIndex = -1;
             checkPass = current.getPassword();
-            setNotesItems(null);
-            notesFilteredItems = null;
             recreateAllAffectedPageModels();
             setCustomerTabsEnabled(true);
-            
 
         }
     }
@@ -253,12 +250,13 @@ public class CustomersController implements Serializable {
         // recreate any datatables that have stale data after changing users
         String message = "Recreating data models for user : " + getSelected().getUsername() + ". ";
         Logger.getLogger(getClass().getName()).log(Level.INFO, message);
-
-        SessionHistoryController controller = (SessionHistoryController) context.getApplication().evaluateExpressionGet(context, "#{sessionHistoryController}", SessionHistoryController.class);
-        controller.recreateModel();
+        recreateModel();
+        SessionHistoryController c1 = (SessionHistoryController) context.getApplication().evaluateExpressionGet(context, "#{sessionHistoryController}", SessionHistoryController.class);
+        c1.recreateModel();
         MySessionsChart1 c2 = (MySessionsChart1) context.getApplication().evaluateExpressionGet(context, "#{mySessionsChart1}", MySessionsChart1.class);
         c2.recreateModel();
-
+        EziDebitPaymentGateway c3 = (EziDebitPaymentGateway) context.getApplication().evaluateExpressionGet(context, "#{eziDebit}", EziDebitPaymentGateway.class);
+        c3.recreateModels();
     }
 
     public void handleUserChange() {
@@ -349,7 +347,6 @@ public class CustomersController implements Serializable {
                 Groups grp = new Groups(0, "USER");
                 grp.setUsername(c);
                 ejbGroupsFacade.create(grp);
-                recreateModel();
                 recreateAllAffectedPageModels();
                 JsfUtil.addSuccessMessage(configMapFacade.getConfig("CustomersCreated"));
             } catch (Exception e) {
@@ -364,7 +361,6 @@ public class CustomersController implements Serializable {
             // exists so update only
             try {
                 getFacade().edit(c);
-                recreateModel();
                 recreateAllAffectedPageModels();
                 JsfUtil.addSuccessMessage(configMapFacade.getConfig("ChangesSaved"));
             } catch (Exception e) {
@@ -660,8 +656,8 @@ public class CustomersController implements Serializable {
         String tabName = "unknown";
         if (tb != null) {
             tabName = tb.getTitle();
-            if(tb.getId().compareTo("tab3")==0){
-                
+            if (tb.getId().compareTo("tab3") == 0) {
+
             }
         }
 

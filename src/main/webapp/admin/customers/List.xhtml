@@ -59,11 +59,11 @@
                             <f:selectItem itemValue="Y" itemLabel="Send Newsletter" />
                             <f:selectItem itemValue="N" itemLabel="Dont Send" />
                         </p:selectOneMenu>
-                       <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_referredby')}"  title="#{configMapController.getKey('EditCustomersTitle_referredby')}"  for="referredby" />
+                        <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_referredby')}"  title="#{configMapController.getKey('EditCustomersTitle_referredby')}"  for="referredby" />
                         <p:selectOneMenu id="referredby" value="#{customersController.selected.referredby}"   >
                             <f:selectItems value="#{customersController.itemsAvailableSelectOne}"  />
                         </p:selectOneMenu>
-                       <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_active')}" for="active" />
+                        <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_active')}" for="active" />
                         <p:selectOneMenu id="active" valueChangeListener="#{customersController.selectOneMenuValueChangeListener}" converter="customerStateConverter" value="#{customersController.selected.active}" label="#{configMapController.getKey('CreateCustomersTitle_active')}" >
                             <f:selectItems value="#{customerStateController.itemsAvailableAsObjects}"  var="custState" itemLabel="#{custState.customerState}" itemValue="#{custState}"/>                           
                         </p:selectOneMenu>
@@ -98,7 +98,33 @@
 
                     </p:panel>
                 </p:confirmDialog>
-                <p:poll  id="poller1" widgetVar="paymentPoller" interval="3" autoStart="#{ezidebit.autoStartPoller}" stop="#{ezidebit.paymentRequestStatusIdle}" update=":tabView:paymentsForm :menuForm:growl"  />
+
+            </h:form>
+            <h:form id="createPayment">    
+                <!--<p:log />--> 
+                <p:confirmDialog id="createPaymentDialogue" message="Add a Payment."  closable="false"
+                                 header="#{configMapController.getKey('AddPaymentTitle')}" severity="info" widgetVar="createPaymentDialogueWidget"> 
+                    <p:panelGrid id="addPaymentGrid1" columns="4">
+
+                        <p:outputLabel value="#{configMapController.getKey('AddPaymentLabel_debitdate')}" for="debitDate" />
+                        <p:calendar id="debitDate" pattern="MM/dd/yyyy" value="#{ezidebit.paymentDebitDate}" title="#{configMapController.getKey('AddPaymentTitle_debitdate')}" required="true" requiredMessage="#{configMapController.getKey('AddPaymentRequiredMessage_debitdate')}" />
+                        <p:outputLabel value="#{configMapController.getKey('AddPaymentLabel_paymentAmount')}" for="payAmount" />
+                        <p:inputText id="payAmount" value="#{ezidebit.paymentAmountInCents}" title="#{configMapController.getKey('AddPaymentTitle_paymentAmount')}" required="true" requiredMessage="#{configMapController.getKey('AddPaymentRequiredMessage_paymentAmount')}">
+                            <f:convertNumber minFractionDigits="2"/>
+                        </p:inputText>
+                    </p:panelGrid>
+                    <p:panel>
+                        <p:commandButton id="createPaymentdialogueSave" oncomplete="PF('createPaymentDialogueWidget').hide()"  actionListener="#{ezidebit.addSinglePayment}" value="#{configMapController.getKey('AddPaymentSaveLink')}" update=":menuForm:growl :pollForm:poller1 :tabView:CustomerslistForm1:selectedUser :tabView:formCustomersEdit1 :createPayment :tabView:paymentsForm :tabView:NoteslistForm1"/>                
+                        <p:commandButton id="createPaymentdialogueDiscard" onclick="PF('createPaymentDialogueWidget').hide()"  value="#{configMapController.getKey('AddPaymentDiscardLink')}" update=":menuForm:growl"/>                
+
+                    </p:panel>
+                </p:confirmDialog>
+
+            </h:form>
+
+            <h:form id="pollForm">
+              <!--  <p:poll  id="poller1" widgetVar="paymentPoller" interval="3" listener="#{ezidebit.pollerListener}" autoStart="#{ezidebit.autoStartPoller}" stop="#{ezidebit.paymentRequestStatusIdle}" update=":tabView:paymentsForm :menuForm:growl"  />-->
+              <p:poll  id="poller1" widgetVar="paymentPoller" interval="5" listener="#{ezidebit.pollerListener}" autoStart="#{ezidebit.autoStartPoller}" stop="#{ezidebit.paymentRequestStatusIdle}" update=":tabView:paymentsForm:scheduledPaymentsTablePanel :tabView:paymentsForm:paymentsTablePanel :tabView:paymentsForm:progressBarPanel :tabView:paymentsForm:selectedUser :menuForm:growl"  />
 
             </h:form>
 
@@ -329,6 +355,8 @@
                             <p:selectBooleanButton value="#{ezidebit.editPaymentDetails}" onLabel="Refresh View" offLabel="Refresh View" rendered="#{ezidebit.customerExistsInPaymentGateway}" >
                                 <p:ajax update=":tabView:paymentsForm:viewPaymentsGrid  :tabView:paymentsForm:editPaymentsGrid  :menuForm:growl" process=":tabView:paymentsForm:viewPaymentsGrid  :tabView:paymentsForm:editPaymentsGrid "/>  
                             </p:selectBooleanButton>  
+                            <p:commandButton id="showAddPaymentButton"  oncomplete="PF('createPaymentDialogueWidget').show()"    value="#{configMapController.getKey('AddPaymentButtonLink')}"  update=":createPayment:addPaymentGrid1" /> 
+
                             <h:outputText id="selectedUser" value="#{customersController.selected.firstname} #{customersController.selected.lastname}" />
                             <p:panelGrid id="dialoguePaymenstGrid2" columns="2" rendered="#{ezidebit.customerExistsInPaymentGateway}" >
                                 <p:panel id="viewPaymentsGrid"  >
@@ -344,6 +372,119 @@
                                 <p:outputLabel value="#{configMapController.getKey('EditCustomersAddToPaymentGatewayLabel')}" for="paymentsButton" />
                             </p:panelGrid>
                         </p:outputPanel>
+                        <h:panelGroup  id="paymentsTablePanel" rendered="#{ezidebit.paymentsList != null}">
+                            <p:dataTable  editable="true" value="#{ezidebit.paymentsList}" filteredValue="#{ezidebit.paymentsListFilteredItems}"  widgetVar="paymentsListControllerTable" var="payment"  paginator="true" rows="15"  paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  rowsPerPageTemplate="5,10,15,20,25,50,100" >
+                                <f:facet name="header">
+                                    <p:outputPanel>
+                                        <h:outputText value="Payments            --          Search all fields:" />
+                                        <h:inputText id="globalFilter" onkeyup="paymentsListControllerTable.filter()" />
+                                    </p:outputPanel>
+                                </f:facet>
+                                <p:column sortBy="#{payment.customerName.value}" filterBy="#{payment.customerName.value}" headerText="#{configMapController.getKey('ListPaymentsTitle_customerName')}"   >
+                                    <p:cellEditor> 
+                                        <f:facet name="output">
+                                            <h:outputText value="#{payment.customerName.value}"/>
+                                        </f:facet>
+                                        <f:facet name="input">
+                                            <p:inputText value="#{payment.customerName.value}" label="#{configMapController.getKey('ListPaymentsTitle_customerName')}" />
+                                        </f:facet>
+                                    </p:cellEditor> 
+                                </p:column>
+                                <p:column sortBy="#{payment.paymentReference.value}" filterBy="#{payment.paymentReference.value}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentReference')}"   >
+                                    <p:cellEditor> 
+                                        <f:facet name="output">
+                                            <h:outputText value="#{payment.paymentReference.value}"/>
+                                        </f:facet>
+                                        <f:facet name="input">
+                                            <p:inputText value="#{payment.paymentReference.value}" label="#{configMapController.getKey('ListPaymentsTitle_paymentReference')}" />
+                                        </f:facet>
+                                    </p:cellEditor> 
+                                </p:column>
+                                <p:column sortBy="#{payment.paymentAmount}" filterBy="#{payment.paymentAmount}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentAmount')}"   >
+                                    <p:cellEditor> 
+                                        <f:facet name="output">
+                                            <h:outputText value="#{payment.paymentAmount}"/>
+                                        </f:facet>
+                                        <f:facet name="input">
+                                            <p:inputText value="#{payment.paymentAmount}" label="#{configMapController.getKey('ListPaymentsTitle_paymentAmount')}" />
+                                        </f:facet>
+                                    </p:cellEditor> 
+                                </p:column>
+                                <p:column sortBy="#{payment.paymentStatus.value}" filterBy="#{payment.paymentStatus.value}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentStatus')}"   >
+                                    <p:cellEditor> 
+                                        <f:facet name="output">
+                                            <h:outputText value="#{payment.paymentStatus.value}"/>
+                                        </f:facet>
+                                        <f:facet name="input">
+                                            <p:inputText value="#{payment.paymentStatus.value}" label="#{configMapController.getKey('ListPaymentsTitle_paymentStatus')}" />
+                                        </f:facet>
+                                    </p:cellEditor> 
+                                </p:column>
+                                <p:column sortBy="#{payment.debitDate.value}" filterBy="#{payment.debitDate.value}" headerText="#{configMapController.getKey('ListPaymentsTitle_debitDate')}"   >
+                                    <p:cellEditor> 
+                                        <f:facet name="output">
+                                            <h:outputText value="#{payment.debitDate.value}"/>
+                                        </f:facet>
+                                        <f:facet name="input">
+                                            <p:inputText value="#{payment.debitDate.value}" label="#{configMapController.getKey('ListPaymentsTitle_debitDate')}" />
+                                        </f:facet>
+                                    </p:cellEditor> 
+                                </p:column>
+
+                            </p:dataTable>
+                        </h:panelGroup>
+                        <h:panelGroup id="scheduledPaymentsTablePanel" rendered="#{ezidebit.scheduledPaymentsList != null}">
+                            <p:dataTable  editable="true" value="#{ezidebit.scheduledPaymentsList}" filteredValue="#{ezidebit.scheduledPaymentsListFilteredItems}"  widgetVar="scheduledPaymentsListControllerTable" var="payment"  paginator="true" rows="15"  paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  rowsPerPageTemplate="5,10,15,20,25,50,100" >
+                                <f:facet name="header">
+                                    <p:outputPanel>
+                                        <h:outputText value="    Scheduled Payments               --               Search all fields:" />
+                                        <h:inputText id="globalFilter" onkeyup="scheduledPaymentsListControllerTable.filter()" />
+                                    </p:outputPanel>
+                                </f:facet>
+                                <p:column sortBy="#{payment.yourGeneralReference.value}" filterBy="#{payment.yourGeneralReference.value}" headerText="#{configMapController.getKey('ListPaymentsTitle_customerName')}"   >
+                                    <p:cellEditor> 
+                                        <f:facet name="output">
+                                            <h:outputText value="#{payment.yourGeneralReference.value}"/>
+                                        </f:facet>
+                                        <f:facet name="input">
+                                            <p:inputText value="#{payment.yourGeneralReference.value}" label="#{configMapController.getKey('ListPaymentsTitle_customerName')}" />
+                                        </f:facet>
+                                    </p:cellEditor> 
+                                </p:column>
+                                <p:column sortBy="#{payment.paymentReference.value}" filterBy="#{payment.paymentReference.value}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentReference')}"   >
+                                    <p:cellEditor> 
+                                        <f:facet name="output">
+                                            <h:outputText value="#{payment.paymentReference.value}"/>
+                                        </f:facet>
+                                        <f:facet name="input">
+                                            <p:inputText value="#{payment.paymentReference.value}" label="#{configMapController.getKey('ListPaymentsTitle_paymentReference')}" />
+                                        </f:facet>
+                                    </p:cellEditor> 
+                                </p:column>
+                                <p:column sortBy="#{payment.paymentAmount}" filterBy="#{payment.paymentAmount}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentAmount')}"   >
+                                    <p:cellEditor> 
+                                        <f:facet name="output">
+                                            <h:outputText value="#{payment.paymentAmount}"/>
+                                        </f:facet>
+                                        <f:facet name="input">
+                                            <p:inputText value="#{payment.paymentAmount}" label="#{configMapController.getKey('ListPaymentsTitle_paymentAmount')}" />
+                                        </f:facet>
+                                    </p:cellEditor> 
+                                </p:column>
+                                <p:column sortBy="#{payment.paymentDate}" filterBy="#{payment.paymentDate}" headerText="#{configMapController.getKey('ListPaymentsTitle_debitDate')}"   >
+                                    <p:cellEditor> 
+                                        <f:facet name="output">
+                                            <h:outputText value="#{payment.paymentDate}"/>
+                                        </f:facet>
+                                        <f:facet name="input">
+                                            <p:inputText value="#{payment.paymentDate}" label="#{configMapController.getKey('ListPaymentsTitle_debitDate')}" />
+                                        </f:facet>
+                                    </p:cellEditor> 
+                                </p:column>
+
+                            </p:dataTable>
+                        </h:panelGroup>
+
                     </h:form>  
                 </p:tab>
 
