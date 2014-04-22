@@ -9,6 +9,7 @@ import au.com.manlyit.fitnesscrm.stats.classes.util.DatatableSelectionHelper;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PfSelectableDataModel;
 import au.com.manlyit.fitnesscrm.stats.db.Groups;
 import au.com.manlyit.fitnesscrm.stats.db.Notes;
+import au.com.manlyit.fitnesscrm.stats.webservices.GetPayments;
 import java.io.IOException;
 
 import java.io.Serializable;
@@ -123,7 +124,7 @@ public class CustomersController implements Serializable {
             checkPass = current.getPassword();
             recreateAllAffectedPageModels();
             setCustomerTabsEnabled(true);
-
+            
         }
     }
 
@@ -255,7 +256,7 @@ public class CustomersController implements Serializable {
         c1.recreateModel();
         MySessionsChart1 c2 = (MySessionsChart1) context.getApplication().evaluateExpressionGet(context, "#{mySessionsChart1}", MySessionsChart1.class);
         c2.recreateModel();
-        EziDebitPaymentGateway c3 = (EziDebitPaymentGateway) context.getApplication().evaluateExpressionGet(context, "#{eziDebit}", EziDebitPaymentGateway.class);
+        EziDebitPaymentGateway c3 = (EziDebitPaymentGateway) context.getApplication().evaluateExpressionGet(context, "#{ezidebit}", EziDebitPaymentGateway.class);
         c3.recreateModels();
     }
 

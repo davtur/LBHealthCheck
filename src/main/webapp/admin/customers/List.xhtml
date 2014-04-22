@@ -93,13 +93,98 @@
                         </p:password>
                     </p:panelGrid>
                     <p:panel>
-                        <p:commandButton id="dialogueSave" oncomplete="handleCreateRequest(xhr, status, args)"  actionListener="#{customersController.createDialogue}" value="#{configMapController.getKey('CreateCustomersSaveLink')}" update=":menuForm:growl :tabView:CustomerslistForm1:selectedUser :tabView:formCustomersEdit1 :formCustomersCreate1 :tabView:paymentsForm :tabView:NoteslistForm1"/>                
+                        <p:commandButton id="dialogueSave" oncomplete="handleCreateRequest(xhr, status, args)"  actionListener="#{customersController.createDialogue}" value="#{configMapController.getKey('CreateCustomersSaveLink')}" update=":menuForm:growl :tabView:CustomerslistForm1:selectedUser :tabView:formCustomersEdit1 :formCustomersCreate1 :tabView:paymentsForm :pollForm:poller1 :tabView:NoteslistForm1"/>                
                         <p:commandButton id="dialogueDiscard" onclick="PF('customersCreateDialogue').hide()"  actionListener="#{customersController.cancelCreateDialogue}" value="#{configMapController.getKey('CreateCustomersDiscardLink')}" update=":menuForm:growl"/>                
 
                     </p:panel>
                 </p:confirmDialog>
 
             </h:form>
+            <h:form id="createSchedule">    
+                <!--<p:log />--> 
+                <p:confirmDialog id="createPaymentScheduleDialogue" message="Add a Payment Schedule."  closable="false"
+                                 header="#{configMapController.getKey('AddPaymentScheduleTitle')}" severity="info" widgetVar="createPaymentScheduleDialogueWidget"> 
+                    <p:panelGrid id="addPaymentScheduleGrid1" columns="4">
+
+                        <p:outputLabel value="#{configMapController.getKey('AddPaymentScheduleLabel_debitdate')}" for="debitDate" />
+                        <p:calendar id="debitDate" pattern="MM/dd/yyyy" value="#{ezidebit.paymentDebitDate}" title="#{configMapController.getKey('AddPaymentScheduleTitle_debitdate')}" required="true" requiredMessage="#{configMapController.getKey('AddPaymentScheduleRequiredMessage_debitdate')}" />
+                        <p:outputLabel value="#{configMapController.getKey('AddPaymentScheduleLabel_paymentAmount')}" for="payAmount" />
+                        <p:inputText id="payAmount" value="#{ezidebit.paymentAmountInCents}" title="#{configMapController.getKey('AddPaymentScheduleTitle_paymentAmount')}" required="true" requiredMessage="#{configMapController.getKey('AddPaymentScheduleRequiredMessage_paymentAmount')}">
+                            <f:convertNumber minFractionDigits="2"/>
+                        </p:inputText>
+                        <p:outputLabel value="#{configMapController.getKey('AddPaymentScheduleLabel_limitPayAmount')}" for="limitPayAmount" />
+                       <p:inputText id="limitPayAmount" value="#{ezidebit.paymentLimitAmountInCents}" title="#{configMapController.getKey('AddPaymentScheduleTitle_paymentLimitAmount')}" >
+                            <f:convertNumber minFractionDigits="2"/>
+                        </p:inputText>
+                       <p:outputLabel value="#{configMapController.getKey('AddPaymentScheduleLabel_limitNumberPayments')}" for="limitNumberPayments" />
+                       <p:inputText id="limitNumberPayments" value="#{ezidebit.paymentLimitToNumberOfPayments}" title="#{configMapController.getKey('AddPaymentScheduleTitle_limitNumberPayments')}" >
+                            <f:convertNumber minFractionDigits="0"/>
+                        </p:inputText>
+
+                        
+                        
+                        <p:outputLabel value="#{configMapController.getKey('AddPaymentScheduleLabel_paymentPeriodType')}" for="periodType" />
+
+                        <p:selectOneMenu id="periodType" value="#{ezidebit.paymentSchedulePeriodType}"  >
+                            <f:selectItem itemValue="W" itemLabel="Weekly" />
+                            <f:selectItem itemValue="F" itemLabel="Fortnightly" />
+                            <f:selectItem itemValue="M" itemLabel="Monthly" />
+                            <f:selectItem itemValue="4" itemLabel="4 Weekly" />
+                            <f:selectItem itemValue="N" itemLabel="Weekday in Month" />
+                            <f:selectItem itemValue="Q" itemLabel="Quarterly" />
+                            <f:selectItem itemValue="H" itemLabel="Half Yearly" />
+                            <f:selectItem itemValue="Y" itemLabel="Annually" />
+                        </p:selectOneMenu>
+
+                        <p:outputLabel value="#{configMapController.getKey('AddPaymentScheduleLabel_paymentDayOfWeek')}" for="dayOfWeek" />
+
+                        <p:selectOneMenu id="dayOfWeek" value="#{ezidebit.paymentDayOfWeek}"  >
+                            <f:selectItem itemValue="MON" itemLabel="Monday" />
+                            <f:selectItem itemValue="TUE" itemLabel="Tuesday" />
+                            <f:selectItem itemValue="WED" itemLabel="Wednesday" />
+                            <f:selectItem itemValue="THU" itemLabel="Thursday" />
+                            <f:selectItem itemValue="FRI" itemLabel="Friday" />
+
+                        </p:selectOneMenu>
+
+                        <p:outputLabel value="#{configMapController.getKey('AddPaymentScheduleLabel_paymentDayOfMonth')}" for="dayOfMonth" />
+
+                        <p:selectOneMenu id="dayOfMonth" value="#{ezidebit.paymentDayOfMonth}"  >
+                            <f:selectItems itemValue="#{ezidebit.daysInMonth}"  />                        
+                        </p:selectOneMenu> 
+
+                        <p:outputLabel value="#{configMapController.getKey('AddPaymentScheduleLabel_paymentFirstWeekOfMonth')}" for="firstWeekOfMonth" />
+                        <p:selectBooleanCheckbox id="firstWeekOfMonth" value="#{ezidebit.paymentFirstWeekOfMonth}">  
+                            <p:ajax update="createPaymentScheduleDialogue" />  
+                        </p:selectBooleanCheckbox> 
+                        <p:outputLabel value="#{configMapController.getKey('AddPaymentScheduleLabel_paymentSecondWeekOfMonth')}" for="secondWeekOfMonth" />
+                        <p:selectBooleanCheckbox id="secondWeekOfMonth" value="#{ezidebit.paymentSecondWeekOfMonth}">  
+                            <p:ajax update="createPaymentScheduleDialogue" />  
+                        </p:selectBooleanCheckbox>  
+                        <p:outputLabel value="#{configMapController.getKey('AddPaymentScheduleLabel_paymentThirdWeekOfMonth')}" for="thirdWeekOfMonth" />
+                        <p:selectBooleanCheckbox id="thirdWeekOfMonth" value="#{ezidebit.paymentThirdWeekOfMonth}">  
+                            <p:ajax update="createPaymentScheduleDialogue" />  
+                        </p:selectBooleanCheckbox>  
+                        <p:outputLabel value="#{configMapController.getKey('AddPaymentScheduleLabel_paymentFourthWeekOfMonth')}" for="fourthWeekOfMonth" />
+                        <p:selectBooleanCheckbox id="fourthWeekOfMonth" value="#{ezidebit.paymentFourthWeekOfMonth}">  
+                            <p:ajax update="createPaymentScheduleDialogue" />  
+                        </p:selectBooleanCheckbox>  
+                        <p:outputLabel value="#{configMapController.getKey('AddPaymentScheduleLabel_paymentKeepManualPayments')}" for="paymentKeepManualPayments" />
+                        <p:selectBooleanCheckbox id="paymentKeepManualPayments" value="#{ezidebit.paymentKeepManualPayments}">  
+                            <p:ajax update="createPaymentScheduleDialogue" />  
+                        </p:selectBooleanCheckbox>  
+
+
+                    </p:panelGrid>
+                    <p:panel>
+                        <p:commandButton id="createPaymentdialogueScheduleSave" oncomplete="PF('createPaymentDialogueScheduleWidget').hide()"  actionListener="#{ezidebit.addSinglePayment}" value="#{configMapController.getKey('AddPaymentScheduleSaveLink')}" update=":menuForm:growl :pollForm:poller1 "/>                
+                        <p:commandButton id="createPaymentdialogueScheduleDiscard" onclick="PF('createPaymentDialogueScheduleWidget').hide()"  value="#{configMapController.getKey('AddPaymentScheduleDiscardLink')}" update=":menuForm:growl"/>                
+
+                    </p:panel>
+                </p:confirmDialog>
+
+            </h:form>
+
             <h:form id="createPayment">    
                 <!--<p:log />--> 
                 <p:confirmDialog id="createPaymentDialogue" message="Add a Payment."  closable="false"
@@ -114,7 +199,7 @@
                         </p:inputText>
                     </p:panelGrid>
                     <p:panel>
-                        <p:commandButton id="createPaymentdialogueSave" oncomplete="PF('createPaymentDialogueWidget').hide()"  actionListener="#{ezidebit.addSinglePayment}" value="#{configMapController.getKey('AddPaymentSaveLink')}" update=":menuForm:growl :pollForm:poller1 :tabView:CustomerslistForm1:selectedUser :tabView:formCustomersEdit1 :createPayment :tabView:paymentsForm :tabView:NoteslistForm1"/>                
+                        <p:commandButton id="createPaymentdialogueSave" oncomplete="PF('createPaymentDialogueWidget').hide()"  actionListener="#{ezidebit.addSinglePayment}" value="#{configMapController.getKey('AddPaymentSaveLink')}" update=":menuForm:growl :pollForm:poller1 "/>                
                         <p:commandButton id="createPaymentdialogueDiscard" onclick="PF('createPaymentDialogueWidget').hide()"  value="#{configMapController.getKey('AddPaymentDiscardLink')}" update=":menuForm:growl"/>                
 
                     </p:panel>
@@ -124,13 +209,13 @@
 
             <h:form id="pollForm">
               <!--  <p:poll  id="poller1" widgetVar="paymentPoller" interval="3" listener="#{ezidebit.pollerListener}" autoStart="#{ezidebit.autoStartPoller}" stop="#{ezidebit.paymentRequestStatusIdle}" update=":tabView:paymentsForm :menuForm:growl"  />-->
-              <p:poll  id="poller1" widgetVar="paymentPoller" interval="5" listener="#{ezidebit.pollerListener}" autoStart="#{ezidebit.autoStartPoller}" stop="#{ezidebit.paymentRequestStatusIdle}" update=":tabView:paymentsForm:scheduledPaymentsTablePanel :tabView:paymentsForm:paymentsTablePanel :tabView:paymentsForm:progressBarPanel :tabView:paymentsForm:selectedUser :menuForm:growl"  />
+                <p:poll  id="poller1" immediate="true"  widgetVar="paymentPoller" interval="5" stop="#{ezidebit.paymentRequestStatusIdle}" listener="#{ezidebit.pollerListener}" autoStart="#{ezidebit.autoStartPoller}"  update=":tabView:paymentsForm :menuForm:growl"  />
 
             </h:form>
 
             <!--<p:log/>-->
             <p:tabView id="tabView" widgetVar="tabViewWidget" > 
-                <p:ajax event="tabChange" listener="#{customersController.onTabChange}"  update=":menuForm:growl "/>  
+                <p:ajax event="tabChange" listener="#{customersController.onTabChange}"  update=":menuForm:growl :pollForm:poller1"/>  
 
                 <p:tab id="tab1" title="Customer List">  
                     <h:form id="CustomerslistForm1">
@@ -150,7 +235,7 @@
                                 </f:facet>
                                 <p:ajax event="rowEdit"   listener="#{customersController.onEdit}" update=":menuForm:growl" oncomplete="PF('paymentPoller').start();customersControllerTable.filter()" />  
                                 <p:ajax event="rowEditCancel" listener="#{customersController.onCancel}" update=":menuForm:growl"   /> 
-                                <p:ajax event="rowSelect" oncomplete="PF('paymentPoller').start()" update=":menuForm:growl :tabView:CustomerslistForm1:selectedUser :tabView:formCustomersEdit1 :formCustomersCreate1 :tabView:paymentsForm :tabView:NoteslistForm1"  />  
+                                <p:ajax event="rowSelect" oncomplete="PF('paymentPoller').start()" update=":menuForm:growl :tabView:CustomerslistForm1:selectedUser :tabView:formCustomersEdit1 :formCustomersCreate1 :pollForm:poller1 :tabView:paymentsForm :tabView:NoteslistForm1"  />  
 
 
                                 <p:column sortBy="#{item.firstname}" filterBy="#{item.firstname}" headerText="#{configMapController.getKey('ListCustomersTitle_firstname')}"   >
@@ -239,7 +324,7 @@
                                
                                                                </p:column> -->
                                 <p:column>
-                                    <p:commandButton id="paymentButton"  rendered="#{customersController.isUserInRole('ADMIN')}"    oncomplete="tabViewWidget.select(1);PF('paymentPoller').start()"  update=":menuForm:growl :tabView:CustomerslistForm1 :tabView:formCustomersEdit1 :formCustomersCreate1 :tabView:paymentsForm :tabView:NoteslistForm1" value="#{configMapController.getKey('ListCustomersEditPaymentLink')}">
+                                    <p:commandButton id="paymentButton"  rendered="#{customersController.isUserInRole('ADMIN')}"    oncomplete="tabViewWidget.select(1);PF('paymentPoller').start()"  update=":menuForm:growl :tabView:CustomerslistForm1 :pollForm:poller1 :tabView:formCustomersEdit1 :formCustomersCreate1 :tabView:paymentsForm :tabView:NoteslistForm1" value="#{configMapController.getKey('ListCustomersEditPaymentLink')}">
                                         <f:setPropertyActionListener value="#{item}" target="#{customersController.selected}"  />
                                     </p:commandButton>                       
 
@@ -353,24 +438,28 @@
                         </p:panel>
                         <p:outputPanel id="mainPanel" rendered="#{ezidebit.paymentRequestStatusIdle}" >
                             <p:selectBooleanButton value="#{ezidebit.editPaymentDetails}" onLabel="Refresh View" offLabel="Refresh View" rendered="#{ezidebit.customerExistsInPaymentGateway}" >
-                                <p:ajax update=":tabView:paymentsForm:viewPaymentsGrid  :tabView:paymentsForm:editPaymentsGrid  :menuForm:growl" process=":tabView:paymentsForm:viewPaymentsGrid  :tabView:paymentsForm:editPaymentsGrid "/>  
+                                <p:ajax update=":tabView:paymentsForm:viewPaymentsGrid  :tabView:paymentsForm:editPaymentsGrid  :menuForm:growl" process=":tabView:paymentsForm:viewPaymentsGrid  :tabView:paymentsForm:editPaymentsGrid :pollForm:poller1"/>  
                             </p:selectBooleanButton>  
-                            <p:commandButton id="showAddPaymentButton"  oncomplete="PF('createPaymentDialogueWidget').show()"    value="#{configMapController.getKey('AddPaymentButtonLink')}"  update=":createPayment:addPaymentGrid1" /> 
+                            <p:commandButton id="showAddPaymentButton"  oncomplete="PF('createPaymentDialogueWidget').show()"    value="#{configMapController.getKey('AddPaymentButtonLink')}"   /> 
+                           <p:commandButton id="showAddPaymentScheduleButton"  oncomplete="PF('createPaymentScheduleDialogueWidget').show()"    value="#{configMapController.getKey('AddPaymentScheduleButtonLink')}"   /> 
 
+                        </p:outputPanel>
+                        <p:outputPanel id="iFramePanel" >
+                            <p:panelGrid id="dialoguePaymenstGrid1" columns="2" rendered="#{!ezidebit.customerExistsInPaymentGateway}">
+                                <p:commandButton  id="paymentsButton" ajax="true" actionListener="#{ezidebit.createCustomerRecord}" update=":menuForm:growl :tabView:paymentsForm :pollForm:poller1"   value="#{configMapController.getKey('EditCustomersUpdatePayment')}" immediate="true"/>
+                                <p:outputLabel value="#{configMapController.getKey('EditCustomersAddToPaymentGatewayLabel')}" for="paymentsButton" />
+                            </p:panelGrid>
                             <h:outputText id="selectedUser" value="#{customersController.selected.firstname} #{customersController.selected.lastname}" />
                             <p:panelGrid id="dialoguePaymenstGrid2" columns="2" rendered="#{ezidebit.customerExistsInPaymentGateway}" >
                                 <p:panel id="viewPaymentsGrid"  >
-                                    <iframe id="ezidebitIframeView"  style="width:400px;height:600px" src="#{ezidebit.getEziDebitWidgetUrl(false)}" />
+                                    <iframe id="ezidebitIframeView"  style="width:400px;height:400px" src="#{ezidebit.getEziDebitWidgetUrl(false)}" />
                                 </p:panel>
                                 <p:panel id="editPaymentsGrid" >
                                     <p:outputLabel value="Edit Payment Details"/> <br/>
-                                    <iframe id="ezidebitIframeEdit"  style="width:400px;height:600px" src="#{ezidebit.getEziDebitWidgetUrl(true)}" />
+                                    <iframe id="ezidebitIframeEdit"  style="width:400px;height:400px" src="#{ezidebit.getEziDebitWidgetUrl(true)}" />
                                 </p:panel>
                             </p:panelGrid>
-                            <p:panelGrid id="dialoguePaymenstGrid1" columns="2" rendered="#{!ezidebit.customerExistsInPaymentGateway}">
-                                <p:commandButton  id="paymentsButton" ajax="true" actionListener="#{ezidebit.createCustomerRecord}" update=":menuForm:growl :tabView:paymentsForm"   value="#{configMapController.getKey('EditCustomersUpdatePayment')}" immediate="true"/>
-                                <p:outputLabel value="#{configMapController.getKey('EditCustomersAddToPaymentGatewayLabel')}" for="paymentsButton" />
-                            </p:panelGrid>
+
                         </p:outputPanel>
                         <h:panelGroup  id="paymentsTablePanel" rendered="#{ezidebit.paymentsList != null}">
                             <p:dataTable  editable="true" value="#{ezidebit.paymentsList}" filteredValue="#{ezidebit.paymentsListFilteredItems}"  widgetVar="paymentsListControllerTable" var="payment"  paginator="true" rows="15"  paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  rowsPerPageTemplate="5,10,15,20,25,50,100" >

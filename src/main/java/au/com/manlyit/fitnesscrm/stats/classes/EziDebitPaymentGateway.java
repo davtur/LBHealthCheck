@@ -14,8 +14,6 @@ import au.com.manlyit.fitnesscrm.stats.db.PaymentParameters;
 import au.com.manlyit.fitnesscrm.stats.webservices.ArrayOfPayment;
 import au.com.manlyit.fitnesscrm.stats.webservices.ArrayOfScheduledPayment;
 import au.com.manlyit.fitnesscrm.stats.webservices.CustomerDetails;
-import au.com.manlyit.fitnesscrm.stats.webservices.EziResponseOfArrayOfPaymentTHgMB7OL;
-import au.com.manlyit.fitnesscrm.stats.webservices.EziResponseOfArrayOfScheduledPaymentTHgMB7OL;
 import au.com.manlyit.fitnesscrm.stats.webservices.EziResponseOfCustomerDetailsTHgMB7OL;
 import au.com.manlyit.fitnesscrm.stats.webservices.EziResponseOfNewCustomerXcXH3LiW;
 import au.com.manlyit.fitnesscrm.stats.webservices.EziResponseOfPaymentDetailPlusNextPaymentInfoTHgMB7OL;
@@ -34,6 +32,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CancellationException;
@@ -73,7 +72,18 @@ public class EziDebitPaymentGateway implements Serializable {
     private Payment payment;
     private Date paymentDebitDate = new Date();
     private Long paymentAmountInCents = new Long("0");
-
+    private Long paymentLimitAmountInCents = new Long("0");
+    private String  paymentSchedulePeriodType = "W";
+    private String  paymentDayOfWeek = "MON";// required when Period Type is W, F, 4, N
+    private int     paymentDayOfMonth = 0; // required when Period Type is M
+    private int     paymentLimitToNumberOfPayments = 0; 
+    private final int[]   daysInMonth = new int[]{1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31};
+    private boolean paymentFirstWeekOfMonth = false;
+    private boolean paymentSecondWeekOfMonth = false;
+    private boolean paymentThirdWeekOfMonth = false;
+    private boolean paymentFourthWeekOfMonth = false;
+    private boolean paymentKeepManualPayments = false;
+    
     private boolean paymentGatewayEnabled = true;
     private Integer progress;
     private AtomicBoolean pageLoaded = new AtomicBoolean(false);
@@ -87,7 +97,7 @@ public class EziDebitPaymentGateway implements Serializable {
     private boolean customerExistsInPaymentGateway = false;
     private boolean editPaymentDetails = false;
     private boolean autoStartPoller = true;
-
+    private boolean stopPoller = false;
     private String eziDebitWidgetUrl = "";
     private Customers selectedCustomer;
 
@@ -135,9 +145,9 @@ public class EziDebitPaymentGateway implements Serializable {
      * @return the paymentsList
      */
     public List<Payment> getPaymentsList() {
-        if (paymentsList == null) {
-            getPayments();
-        }
+       // if (paymentsList == null) {
+       //     getPayments();
+      //  }
         return paymentsList;
     }
 
@@ -240,6 +250,153 @@ public class EziDebitPaymentGateway implements Serializable {
      */
     public void setScheduledPaymentsListFilteredItems(List<ScheduledPayment> scheduledPaymentsListFilteredItems) {
         this.scheduledPaymentsListFilteredItems = scheduledPaymentsListFilteredItems;
+    }
+
+    /**
+     * @return the paymentLimitAmountInCents
+     */
+    public Long getPaymentLimitAmountInCents() {
+        return paymentLimitAmountInCents;
+    }
+
+    /**
+     * @param paymentLimitAmountInCents the paymentLimitAmountInCents to set
+     */
+    public void setPaymentLimitAmountInCents(Long paymentLimitAmountInCents) {
+        this.paymentLimitAmountInCents = paymentLimitAmountInCents;
+    }
+
+    /**
+     * @return the paymentSchedulePeriodType
+     */
+    public String getPaymentSchedulePeriodType() {
+        return paymentSchedulePeriodType;
+    }
+
+    /**
+     * @param paymentSchedulePeriodType the paymentSchedulePeriodType to set
+     */
+    public void setPaymentSchedulePeriodType(String paymentSchedulePeriodType) {
+        this.paymentSchedulePeriodType = paymentSchedulePeriodType;
+    }
+
+    /**
+     * @return the paymentDayOfWeek
+     */
+    public String getPaymentDayOfWeek() {
+        return paymentDayOfWeek;
+    }
+
+    /**
+     * @param paymentDayOfWeek the paymentDayOfWeek to set
+     */
+    public void setPaymentDayOfWeek(String paymentDayOfWeek) {
+        this.paymentDayOfWeek = paymentDayOfWeek;
+    }
+
+    /**
+     * @return the paymentDayOfMonth
+     */
+    public int getPaymentDayOfMonth() {
+        return paymentDayOfMonth;
+    }
+
+    /**
+     * @param paymentDayOfMonth the paymentDayOfMonth to set
+     */
+    public void setPaymentDayOfMonth(int paymentDayOfMonth) {
+        this.paymentDayOfMonth = paymentDayOfMonth;
+    }
+
+    /**
+     * @return the paymentLimitToNumberOfPayments
+     */
+    public int getPaymentLimitToNumberOfPayments() {
+        return paymentLimitToNumberOfPayments;
+    }
+
+    /**
+     * @param paymentLimitToNumberOfPayments the paymentLimitToNumberOfPayments to set
+     */
+    public void setPaymentLimitToNumberOfPayments(int paymentLimitToNumberOfPayments) {
+        this.paymentLimitToNumberOfPayments = paymentLimitToNumberOfPayments;
+    }
+
+    /**
+     * @return the paymentFirstWeekOfMonth
+     */
+    public boolean isPaymentFirstWeekOfMonth() {
+        return paymentFirstWeekOfMonth;
+    }
+
+    /**
+     * @param paymentFirstWeekOfMonth the paymentFirstWeekOfMonth to set
+     */
+    public void setPaymentFirstWeekOfMonth(boolean paymentFirstWeekOfMonth) {
+        this.paymentFirstWeekOfMonth = paymentFirstWeekOfMonth;
+    }
+
+    /**
+     * @return the paymentSecondWeekOfMonth
+     */
+    public boolean isPaymentSecondWeekOfMonth() {
+        return paymentSecondWeekOfMonth;
+    }
+
+    /**
+     * @param paymentSecondWeekOfMonth the paymentSecondWeekOfMonth to set
+     */
+    public void setPaymentSecondWeekOfMonth(boolean paymentSecondWeekOfMonth) {
+        this.paymentSecondWeekOfMonth = paymentSecondWeekOfMonth;
+    }
+
+    /**
+     * @return the paymentThirdWeekOfMonth
+     */
+    public boolean isPaymentThirdWeekOfMonth() {
+        return paymentThirdWeekOfMonth;
+    }
+
+    /**
+     * @param paymentThirdWeekOfMonth the paymentThirdWeekOfMonth to set
+     */
+    public void setPaymentThirdWeekOfMonth(boolean paymentThirdWeekOfMonth) {
+        this.paymentThirdWeekOfMonth = paymentThirdWeekOfMonth;
+    }
+
+    /**
+     * @return the paymentFourthWeekOfMonth
+     */
+    public boolean isPaymentFourthWeekOfMonth() {
+        return paymentFourthWeekOfMonth;
+    }
+
+    /**
+     * @param paymentFourthWeekOfMonth the paymentFourthWeekOfMonth to set
+     */
+    public void setPaymentFourthWeekOfMonth(boolean paymentFourthWeekOfMonth) {
+        this.paymentFourthWeekOfMonth = paymentFourthWeekOfMonth;
+    }
+
+    /**
+     * @return the paymentKeepManualPayments
+     */
+    public boolean isPaymentKeepManualPayments() {
+        return paymentKeepManualPayments;
+    }
+
+    /**
+     * @param paymentKeepManualPayments the paymentKeepManualPayments to set
+     */
+    public void setPaymentKeepManualPayments(boolean paymentKeepManualPayments) {
+        this.paymentKeepManualPayments = paymentKeepManualPayments;
+    }
+
+    /**
+     * @return the daysInMonth
+     */
+    public int[] getDaysInMonth() {
+        return daysInMonth;
     }
 
     private class eziDebitThreadFactory implements ThreadFactory {
@@ -1037,15 +1194,22 @@ public class EziDebitPaymentGateway implements Serializable {
 
     public boolean isPaymentRequestStatusIdle() {
 
-        return futureMap.size() <= 0;
+        int k = futureMap.size();
+        if (k <= 0) {
+            if (stopPoller) {
+                return true;
+            } else {
+                stopPoller = true;
+                return false;
+            }
+        } else {
+            stopPoller = false;
+            return false;
+        }
 
     }
 
     public void pollerListener() {
-        if (futureMap.size() > 0) {
-            checkIfAsyncJobsHaveFinishedAndUpdate();
-        }
-
         if (pageLoaded.get() == false) {// if its null we havn't retrieved the details for the customer
             pageLoaded.set(true);
             FacesContext context = FacesContext.getCurrentInstance();
@@ -1053,12 +1217,32 @@ public class EziDebitPaymentGateway implements Serializable {
             this.setSelectedCustomer(controller.getSelected());
             getPayments();
         }
+        int k = futureMap.size();
+        if (k > 0) {
+            logger.log(Level.INFO, "{0} jobs are running. Checking to see if asych jobs have finished so their results can be processed.", k);
+            checkIfAsyncJobsHaveFinishedAndUpdate();
+        } else {
+            logger.log(Level.INFO, "All asych jobs have finished.");
+        }
+
+    }
+
+    private void cancelAllAsyncJobs() {
+
+        Iterator it = futureMap.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry pairs = (Map.Entry) it.next();
+            Future ft = (Future) pairs.getValue();
+            ft.cancel(false);
+            it.remove(); // avoids a ConcurrentModificationException
+        }
+        futureMap.clear();
     }
 
     public void checkIfAsyncJobsHaveFinishedAndUpdate() {
         CustomerDetails cd;
         String key = "";
-        logger.log(Level.FINE, "Polling to see if asych jobs have finished");
+
         try {
 
             key = "GetCustomerDetails";
@@ -1098,6 +1282,14 @@ public class EziDebitPaymentGateway implements Serializable {
                 if (ft.isDone()) {
                     futureMap.remove(key);
                     processGetScheduledPayments(ft);
+                }
+            }
+             key = "CreateSchedule";
+            if (futureMap.containsKey(key)) {
+                Future ft = (Future) futureMap.get(key);
+                if (ft.isDone()) {
+                    futureMap.remove(key);
+                    processCreateSchedule(ft);
                 }
             }
 
@@ -1154,6 +1346,21 @@ public class EziDebitPaymentGateway implements Serializable {
         }
 
     }
+      private void processCreateSchedule(Future ft) {
+        boolean result = false;
+        try {
+            result = (boolean) ft.get();
+        } catch (InterruptedException | ExecutionException ex) {
+            Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        if (result == true) {
+            JsfUtil.addSuccessMessage("Payment", "Successfully Created Schedule.");
+            recreateModels();
+        } else {
+            JsfUtil.addErrorMessage("Payment", "The Create Schedule operation failed!.");
+        }
+
+    }
 
     public void recreateModels() {
         // clear all arrays and reload from DB
@@ -1161,6 +1368,7 @@ public class EziDebitPaymentGateway implements Serializable {
         setPaymentsListFilteredItems(null);
         setScheduledPaymentsList(null);
         setScheduledPaymentsListFilteredItems(null);
+        getPayments();
     }
 
     /**
@@ -1168,6 +1376,7 @@ public class EziDebitPaymentGateway implements Serializable {
      */
     public void setSelectedCustomer(Customers selectedCustomer) {
         this.selectedCustomer = selectedCustomer;
+        cancelAllAsyncJobs();
         futureMap.put("GetCustomerDetails", paymentBean.getCustomerDetails(selectedCustomer, getDigitalKey()));
         custDetailsOperationBusy.set(true);
         this.progress = 0;
@@ -1196,5 +1405,21 @@ public class EziDebitPaymentGateway implements Serializable {
         } else {
             logger.log(Level.WARNING, "Logged in user is null. Add Single Payment aborted.");
         }
+        
+    }
+    public void createPaymentSchedule(ActionEvent actionEvent) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddhhmmss");
+        String paymentReference = selectedCustomer.getId().toString() + "-" + sdf.format(new Date());
+        String loggedInUser = FacesContext.getCurrentInstance().getExternalContext().getRemoteUser();
+        Long amount = paymentAmountInCents * new Long(100);
+        Long amountLimit = paymentLimitAmountInCents * new Long(100);
+        char spt = paymentSchedulePeriodType.charAt(0);
+        if (loggedInUser != null) {
+            futureMap.put("AddPayment", paymentBean.addPayment(selectedCustomer, paymentDebitDate, amount, paymentReference, loggedInUser, getDigitalKey()));
+            futureMap.put("CreateSchedule", paymentBean.createSchedule(selectedCustomer, paymentDebitDate,spt , paymentDayOfWeek, paymentDayOfMonth, paymentFirstWeekOfMonth, paymentSecondWeekOfMonth, paymentThirdWeekOfMonth, paymentFourthWeekOfMonth, amount, paymentLimitToNumberOfPayments, amountLimit, paymentKeepManualPayments, loggedInUser, loggedInUser));
+        } else {
+            logger.log(Level.WARNING, "Logged in user is null. Add Single Payment aborted.");
+        }
+        
     }
 }

@@ -49,7 +49,7 @@ public class PaymentBean implements Serializable {
             return new AsyncResult<>(cd);
         }
 
-        logger.log(Level.INFO, "Getting Customer Details {0}", cust.getUsername());
+        logger.log(Level.INFO, "Running async task - Getting Customer Details {0}", cust.getUsername());
         INonPCIService ws = new NonPCIService().getBasicHttpBindingINonPCIService();
         EziResponseOfCustomerDetailsTHgMB7OL customerdetails = ws.getCustomerDetails(digitalKey, "", cust.getId().toString());
         if (customerdetails.getError().intValue() == 0) {// any errors will be a non zero value
@@ -66,10 +66,14 @@ public class PaymentBean implements Serializable {
     }
 
     @Asynchronous
-    public Future<ArrayOfScheduledPayment> getScheduledPayments(Customers cust, Date fromDate, Date toDate, String digitalKey) {
+    public synchronized Future<ArrayOfScheduledPayment> getScheduledPayments(Customers cust, Date fromDate, Date toDate, String digitalKey) {
 
-        ArrayOfScheduledPayment result = null;
-
+        ArrayOfScheduledPayment result = new ArrayOfScheduledPayment();
+        if (cust == null) {
+            logger.log(Level.WARNING, "getScheduledPayments: The customer object passed to this method is NULL.This parameter is required.Returning empty array!!");
+            return new AsyncResult<>(result);
+        }
+        logger.log(Level.INFO, "Running asychronous task getScheduledPayments Customer {0}, From Date {1}, to Date {2}", new Object[]{cust, fromDate, toDate});
         String eziDebitCustomerId = ""; // use our reference instead. THis must be an empty string.
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         String fromDateString = ""; // The exact date on which the payment that you wish to move is scheduled to be deducted from your Customer's bank account or credit card.
@@ -86,12 +90,12 @@ public class PaymentBean implements Serializable {
         INonPCIService ws = new NonPCIService().getBasicHttpBindingINonPCIService();
 
         EziResponseOfArrayOfScheduledPaymentTHgMB7OL eziResponse = ws.getScheduledPayments(digitalKey, fromDateString, toDateString, eziDebitCustomerId, ourSystemCustomerReference);
-        logger.log(Level.INFO, "getPayments Response: Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
+        logger.log(Level.INFO, "getScheduledPayments Response: Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
         if (eziResponse.getError().intValue() == 0) {// any errors will be a non zero value
             result = eziResponse.getData().getValue();
 
         } else {
-            logger.log(Level.WARNING, "getPayments Response: Error - {0}, ", eziResponse.getErrorMessage().getValue());
+            logger.log(Level.WARNING, "getScheduledPayments Response: Error - {0}, ", eziResponse.getErrorMessage().getValue());
 
         }
 
@@ -99,7 +103,7 @@ public class PaymentBean implements Serializable {
     }
 
     @Asynchronous
-    public Future<ArrayOfPayment> getPayments(Customers cust, String paymentType, String paymentMethod, String paymentSource, String paymentReference, Date fromDate, Date toDate, boolean useSettlementDate, String digitalKey) {
+    public synchronized Future<ArrayOfPayment> getPayments(Customers cust, String paymentType, String paymentMethod, String paymentSource, String paymentReference, Date fromDate, Date toDate, boolean useSettlementDate, String digitalKey) {
         //  Description
         //  	  
         //  This method allows you to retrieve payment information from across Ezidebit's various
@@ -125,17 +129,24 @@ public class PaymentBean implements Serializable {
         //  DateTo={currentDate}
         //  will provide you with all payments that have been made to the client since the
         //  last time your system received payment information.
+
+        ArrayOfPayment result = new ArrayOfPayment();
+        if (cust == null) {
+            logger.log(Level.WARNING, "getPayments: The customer object passed to this method is NULL.This parameter is required.Returning empty array!!");
+            return new AsyncResult<>(result);
+        }
+        logger.log(Level.INFO, "Running asychronous task getPayments Customer {0}, From Date {1}, to Date {2}", new Object[]{cust, fromDate, toDate});
         if (paymentType.compareTo("ALL") != 0 && paymentType.compareTo("PENDING") != 0 && paymentType.compareTo("FAILED") != 0 && paymentType.compareTo("SUCCESSFUL") != 0) {
             logger.log(Level.WARNING, "getPayments: payment Type is required and should be either ALL,PENDING,FAILED,SUCCESSFUL.  Returning null as this parameter is required.");
-            return null;
+            return new AsyncResult<>(result);
         }
         if (paymentMethod.compareTo("ALL") != 0 && paymentMethod.compareTo("CR") != 0 && paymentMethod.compareTo("DR") != 0) {
             logger.log(Level.WARNING, "getPayments: payment Method is required and should be either ALL,CR,DR.  Returning null as this parameter is required.");
-            return null;
+            return new AsyncResult<>(result);
         }
         if (paymentSource.compareTo("ALL") != 0 && paymentSource.compareTo("SCHEDULED") != 0 && paymentSource.compareTo("WEB") != 0 && paymentSource.compareTo("PHONE") != 0 && paymentSource.compareTo("BPAY") != 0) {
             logger.log(Level.WARNING, "getPayments: paymentSource is required and should be either ALL,SCHEDULED,WEB,PHONE,BPAY.  Returning null as this parameter is required.");
-            return null;
+            return new AsyncResult<>(result);
         }
         if (paymentReference == null) {
             paymentReference = "";
@@ -145,7 +156,6 @@ public class PaymentBean implements Serializable {
             logger.log(Level.WARNING, "getPayments paymentReference is greater than the allowed 50 characters. Truncating! to 50 chars");
         }
 
-        ArrayOfPayment result = null;
         String dateField = "PAYMENT";
         if (useSettlementDate == true) {
             dateField = "SETTLEMENT";
@@ -181,6 +191,7 @@ public class PaymentBean implements Serializable {
     @Asynchronous
     public Future<Boolean> addPayment(Customers cust, Date debitDate, Long paymentAmountInCents, String paymentReference, String loggedInUser, String digitalKey) {
         // paymentReference Max 50 chars. It can be search with with a wildcard in other methods. Use invoice number or other payment identifier
+        logger.log(Level.INFO, "running asychronous task addPayment Customer {0}, debitDate {1}, paymentAmountInCents {2}", new Object[]{cust, debitDate, paymentAmountInCents});
         boolean result = false;
         String eziDebitCustomerId = ""; // use our reference instead. THis must be an empty string.
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");

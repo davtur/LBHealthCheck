@@ -14,3 +14,26 @@ ListPaymentsTitle_paymentReference=Reference
 ListPaymentsTitle_paymentAmount=Amount
 ListPaymentsTitle_paymentStatus=Status
 ListPaymentsTitle_debitDate=Debit Date
+
+
+AddPaymentScheduleButtonLink=Create Payment Schedule
+AddPaymentScheduleTitle=Create Payment Schedule
+AddPaymentScheduleLabel_debitdate=Schedule Start Date
+AddPaymentScheduleTitle_debitdate=The date the first payment will be scheduled for
+AddPaymentScheduleRequiredMessage_debitdate= The schedule start date is required
+AddPaymentScheduleTitle_paymentAmount=Amount
+AddPaymentScheduleRequiredMessage_paymentAmount=The amount of the payment is required
+AddPaymentScheduleLabel_limitPayAmount=Amount Limit
+AddPaymentScheduleTitle_paymentLimitAmount=A non-zero value will limit the cumulative payments to this amount.
+AddPaymentScheduleLabel_limitNumberPayments=No. Payments Limit
+AddPaymentScheduleTitle_limitNumberPayments=A non-zero value will limit the number of payments.
+AddPaymentScheduleLabel_paymentPeriodType=Payment Period
+AddPaymentScheduleLabel_paymentDayOfWeek=Day Of Week
+AddPaymentScheduleLabel_paymentDayOfMonth=Day Of Month
+AddPaymentScheduleLabel_paymentFirstWeekOfMonth=First Week Of The Month
+AddPaymentScheduleLabel_paymentSecondWeekOfMonth=Second Week Of The Month
+AddPaymentScheduleLabel_paymentThirdWeekOfMonth=Third Week Of The Month
+AddPaymentScheduleLabel_paymentFourthWeekOfMonth=Fourth Week Of The Month
+AddPaymentScheduleLabel_paymentKeepManualPayments=Keep Manual Payments
+AddPaymentScheduleSaveLink=Save
+AddPaymentScheduleDiscardLink=Discard
