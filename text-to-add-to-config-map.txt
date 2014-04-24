@@ -37,3 +37,6 @@ AddPaymentScheduleLabel_paymentFourthWeekOfMonth=Fourth Week Of The Month
 AddPaymentScheduleLabel_paymentKeepManualPayments=Keep Manual Payments
 AddPaymentScheduleSaveLink=Save
 AddPaymentScheduleDiscardLink=Discard
+AddPaymentScheduleLabel_paymentAmount=Payment Amount
+ListPaymentsTitle_manualPayment=Type
+

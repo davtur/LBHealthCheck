@@ -71,19 +71,21 @@ public class EziDebitPaymentGateway implements Serializable {
     private List<ScheduledPayment> scheduledPaymentsListFilteredItems;
     private Payment payment;
     private Date paymentDebitDate = new Date();
+    private Date changeFromDate = new Date();
     private Long paymentAmountInCents = new Long("0");
     private Long paymentLimitAmountInCents = new Long("0");
-    private String  paymentSchedulePeriodType = "W";
-    private String  paymentDayOfWeek = "MON";// required when Period Type is W, F, 4, N
-    private int     paymentDayOfMonth = 0; // required when Period Type is M
-    private int     paymentLimitToNumberOfPayments = 0; 
-    private final int[]   daysInMonth = new int[]{1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31};
+    private String paymentSchedulePeriodType = "W";
+    private String paymentDayOfWeek = "MON";// required when Period Type is W, F, 4, N
+    private int paymentDayOfMonth = 0; // required when Period Type is M
+    private int paymentLimitToNumberOfPayments = 0;
+    private Integer[] daysInMonth;
     private boolean paymentFirstWeekOfMonth = false;
+    private boolean applyToAllFuturePayments = true;
     private boolean paymentSecondWeekOfMonth = false;
     private boolean paymentThirdWeekOfMonth = false;
     private boolean paymentFourthWeekOfMonth = false;
     private boolean paymentKeepManualPayments = false;
-    
+
     private boolean paymentGatewayEnabled = true;
     private Integer progress;
     private AtomicBoolean pageLoaded = new AtomicBoolean(false);
@@ -145,17 +147,17 @@ public class EziDebitPaymentGateway implements Serializable {
      * @return the paymentsList
      */
     public List<Payment> getPaymentsList() {
-       // if (paymentsList == null) {
-       //     getPayments();
-      //  }
+        // if (paymentsList == null) {
+        //     getPayments();
+        //  }
         return paymentsList;
     }
 
     private void getPayments() {
         GregorianCalendar cal = new GregorianCalendar();
-        cal.add(Calendar.MONTH, 6);
+        cal.add(Calendar.MONTH, 12);
         Date endDate = cal.getTime();
-        cal.add(Calendar.MONTH, -12);
+        cal.add(Calendar.MONTH, -24);
         futureMap.put("GetPayments", paymentBean.getPayments(selectedCustomer, "ALL", "ALL", "ALL", "", cal.getTime(), endDate, false, getDigitalKey()));
         futureMap.put("GetScheduledPayments", paymentBean.getScheduledPayments(selectedCustomer, cal.getTime(), endDate, getDigitalKey()));
     }
@@ -316,7 +318,8 @@ public class EziDebitPaymentGateway implements Serializable {
     }
 
     /**
-     * @param paymentLimitToNumberOfPayments the paymentLimitToNumberOfPayments to set
+     * @param paymentLimitToNumberOfPayments the paymentLimitToNumberOfPayments
+     * to set
      */
     public void setPaymentLimitToNumberOfPayments(int paymentLimitToNumberOfPayments) {
         this.paymentLimitToNumberOfPayments = paymentLimitToNumberOfPayments;
@@ -395,8 +398,39 @@ public class EziDebitPaymentGateway implements Serializable {
     /**
      * @return the daysInMonth
      */
-    public int[] getDaysInMonth() {
+    public Integer[] getDaysInMonth() {
+        if (daysInMonth == null) {
+            daysInMonth = new Integer[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31};
+        }
         return daysInMonth;
+    }
+
+    /**
+     * @return the changeFromDate
+     */
+    public Date getChangeFromDate() {
+        return changeFromDate;
+    }
+
+    /**
+     * @param changeFromDate the changeFromDate to set
+     */
+    public void setChangeFromDate(Date changeFromDate) {
+        this.changeFromDate = changeFromDate;
+    }
+
+    /**
+     * @return the applyToAllFuturePayments
+     */
+    public boolean isApplyToAllFuturePayments() {
+        return applyToAllFuturePayments;
+    }
+
+    /**
+     * @param applyToAllFuturePayments the applyToAllFuturePayments to set
+     */
+    public void setApplyToAllFuturePayments(boolean applyToAllFuturePayments) {
+        this.applyToAllFuturePayments = applyToAllFuturePayments;
     }
 
     private class eziDebitThreadFactory implements ThreadFactory {
@@ -1284,7 +1318,7 @@ public class EziDebitPaymentGateway implements Serializable {
                     processGetScheduledPayments(ft);
                 }
             }
-             key = "CreateSchedule";
+            key = "CreateSchedule";
             if (futureMap.containsKey(key)) {
                 Future ft = (Future) futureMap.get(key);
                 if (ft.isDone()) {
@@ -1310,6 +1344,7 @@ public class EziDebitPaymentGateway implements Serializable {
             List<Payment> payList = result.getPayment();
             if (payList != null) {
                 setPaymentsList(payList);
+                setPaymentsListFilteredItems(null);
             }
         }
 
@@ -1326,6 +1361,7 @@ public class EziDebitPaymentGateway implements Serializable {
             List<ScheduledPayment> payList = result.getScheduledPayment();
             if (payList != null) {
                 setScheduledPaymentsList(payList);
+                setScheduledPaymentsListFilteredItems(null);
             }
         }
 
@@ -1340,13 +1376,14 @@ public class EziDebitPaymentGateway implements Serializable {
         }
         if (result == true) {
             JsfUtil.addSuccessMessage("Payment", "Successfully added payment.");
-            recreateModels();
+            getPayments();
         } else {
             JsfUtil.addErrorMessage("Payment", "The operation failed!.");
         }
 
     }
-      private void processCreateSchedule(Future ft) {
+
+    private void processCreateSchedule(Future ft) {
         boolean result = false;
         try {
             result = (boolean) ft.get();
@@ -1355,7 +1392,8 @@ public class EziDebitPaymentGateway implements Serializable {
         }
         if (result == true) {
             JsfUtil.addSuccessMessage("Payment", "Successfully Created Schedule.");
-            recreateModels();
+            getPayments();
+
         } else {
             JsfUtil.addErrorMessage("Payment", "The Create Schedule operation failed!.");
         }
@@ -1368,7 +1406,7 @@ public class EziDebitPaymentGateway implements Serializable {
         setPaymentsListFilteredItems(null);
         setScheduledPaymentsList(null);
         setScheduledPaymentsListFilteredItems(null);
-        getPayments();
+
     }
 
     /**
@@ -1405,21 +1443,39 @@ public class EziDebitPaymentGateway implements Serializable {
         } else {
             logger.log(Level.WARNING, "Logged in user is null. Add Single Payment aborted.");
         }
-        
+
     }
+
     public void createPaymentSchedule(ActionEvent actionEvent) {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddhhmmss");
-        String paymentReference = selectedCustomer.getId().toString() + "-" + sdf.format(new Date());
         String loggedInUser = FacesContext.getCurrentInstance().getExternalContext().getRemoteUser();
         Long amount = paymentAmountInCents * new Long(100);
         Long amountLimit = paymentLimitAmountInCents * new Long(100);
         char spt = paymentSchedulePeriodType.charAt(0);
         if (loggedInUser != null) {
-            futureMap.put("AddPayment", paymentBean.addPayment(selectedCustomer, paymentDebitDate, amount, paymentReference, loggedInUser, getDigitalKey()));
-            futureMap.put("CreateSchedule", paymentBean.createSchedule(selectedCustomer, paymentDebitDate,spt , paymentDayOfWeek, paymentDayOfMonth, paymentFirstWeekOfMonth, paymentSecondWeekOfMonth, paymentThirdWeekOfMonth, paymentFourthWeekOfMonth, amount, paymentLimitToNumberOfPayments, amountLimit, paymentKeepManualPayments, loggedInUser, loggedInUser));
+            futureMap.put("CreateSchedule", paymentBean.createSchedule(selectedCustomer, paymentDebitDate, spt, paymentDayOfWeek, paymentDayOfMonth, paymentFirstWeekOfMonth, paymentSecondWeekOfMonth, paymentThirdWeekOfMonth, paymentFourthWeekOfMonth, amount, paymentLimitToNumberOfPayments, amountLimit, paymentKeepManualPayments, loggedInUser, getDigitalKey()));
         } else {
             logger.log(Level.WARNING, "Logged in user is null. Add Single Payment aborted.");
         }
-        
+    }
+
+    public void changeScheduledAmount(ActionEvent actionEvent) {
+        String loggedInUser = FacesContext.getCurrentInstance().getExternalContext().getRemoteUser();
+        Long amount = paymentAmountInCents * new Long(100);
+        if (loggedInUser != null) {
+            futureMap.put("ChangeScheduledAmount", paymentBean.changeScheduledAmount(selectedCustomer, paymentDebitDate, amount, paymentLimitToNumberOfPayments, applyToAllFuturePayments, paymentKeepManualPayments, loggedInUser, getDigitalKey()));
+        } else {
+            logger.log(Level.WARNING, "Logged in user is null. Add Single Payment aborted.");
+        }
+    }
+
+    public void changeScheduledDate(ActionEvent actionEvent) {
+        String loggedInUser = FacesContext.getCurrentInstance().getExternalContext().getRemoteUser();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddhhmmss");
+        String paymentReference = selectedCustomer.getId().toString() + "-" + sdf.format(new Date());
+        if (loggedInUser != null) {
+            futureMap.put("ChangeScheduledDate", paymentBean.changeScheduledDate(selectedCustomer, changeFromDate, paymentDebitDate, paymentReference, paymentKeepManualPayments, loggedInUser, getDigitalKey()));
+        } else {
+            logger.log(Level.WARNING, "Logged in user is null. Add Single Payment aborted.");
+        }
     }
 }

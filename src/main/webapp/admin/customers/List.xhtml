@@ -113,16 +113,16 @@
                             <f:convertNumber minFractionDigits="2"/>
                         </p:inputText>
                         <p:outputLabel value="#{configMapController.getKey('AddPaymentScheduleLabel_limitPayAmount')}" for="limitPayAmount" />
-                       <p:inputText id="limitPayAmount" value="#{ezidebit.paymentLimitAmountInCents}" title="#{configMapController.getKey('AddPaymentScheduleTitle_paymentLimitAmount')}" >
+                        <p:inputText id="limitPayAmount" value="#{ezidebit.paymentLimitAmountInCents}" title="#{configMapController.getKey('AddPaymentScheduleTitle_paymentLimitAmount')}" >
                             <f:convertNumber minFractionDigits="2"/>
                         </p:inputText>
-                       <p:outputLabel value="#{configMapController.getKey('AddPaymentScheduleLabel_limitNumberPayments')}" for="limitNumberPayments" />
-                       <p:inputText id="limitNumberPayments" value="#{ezidebit.paymentLimitToNumberOfPayments}" title="#{configMapController.getKey('AddPaymentScheduleTitle_limitNumberPayments')}" >
+                        <p:outputLabel value="#{configMapController.getKey('AddPaymentScheduleLabel_limitNumberPayments')}" for="limitNumberPayments" />
+                        <p:inputText id="limitNumberPayments" value="#{ezidebit.paymentLimitToNumberOfPayments}" title="#{configMapController.getKey('AddPaymentScheduleTitle_limitNumberPayments')}" >
                             <f:convertNumber minFractionDigits="0"/>
                         </p:inputText>
+                    </p:panelGrid>
+                    <p:panelGrid id="addPaymentScheduleGrid2" columns="4"> 
 
-                        
-                        
                         <p:outputLabel value="#{configMapController.getKey('AddPaymentScheduleLabel_paymentPeriodType')}" for="periodType" />
 
                         <p:selectOneMenu id="periodType" value="#{ezidebit.paymentSchedulePeriodType}"  >
@@ -134,51 +134,54 @@
                             <f:selectItem itemValue="Q" itemLabel="Quarterly" />
                             <f:selectItem itemValue="H" itemLabel="Half Yearly" />
                             <f:selectItem itemValue="Y" itemLabel="Annually" />
+                            <p:ajax update="addPaymentScheduleGrid2" /> 
                         </p:selectOneMenu>
 
-                        <p:outputLabel value="#{configMapController.getKey('AddPaymentScheduleLabel_paymentDayOfWeek')}" for="dayOfWeek" />
+                        <p:outputLabel rendered="#{ezidebit.paymentSchedulePeriodType == 'W' ||ezidebit.paymentSchedulePeriodType == 'F' || ezidebit.paymentSchedulePeriodType == '4' || ezidebit.paymentSchedulePeriodType == 'N'}" value="#{configMapController.getKey('AddPaymentScheduleLabel_paymentDayOfWeek')}" for="dayOfWeek" />
 
-                        <p:selectOneMenu id="dayOfWeek" value="#{ezidebit.paymentDayOfWeek}"  >
+                        <p:selectOneMenu rendered="#{ezidebit.paymentSchedulePeriodType == 'W' ||ezidebit.paymentSchedulePeriodType == 'F' || ezidebit.paymentSchedulePeriodType == '4' || ezidebit.paymentSchedulePeriodType == 'N'}" id="dayOfWeek" value="#{ezidebit.paymentDayOfWeek}"  >
                             <f:selectItem itemValue="MON" itemLabel="Monday" />
                             <f:selectItem itemValue="TUE" itemLabel="Tuesday" />
                             <f:selectItem itemValue="WED" itemLabel="Wednesday" />
                             <f:selectItem itemValue="THU" itemLabel="Thursday" />
                             <f:selectItem itemValue="FRI" itemLabel="Friday" />
-
+                            <p:ajax update="addPaymentScheduleGrid2" /> 
                         </p:selectOneMenu>
 
-                        <p:outputLabel value="#{configMapController.getKey('AddPaymentScheduleLabel_paymentDayOfMonth')}" for="dayOfMonth" />
+                        <p:outputLabel  rendered="#{ezidebit.paymentSchedulePeriodType == 'M'}" value="#{configMapController.getKey('AddPaymentScheduleLabel_paymentDayOfMonth')}" for="dayOfMonth" />
 
-                        <p:selectOneMenu id="dayOfMonth" value="#{ezidebit.paymentDayOfMonth}"  >
-                            <f:selectItems itemValue="#{ezidebit.daysInMonth}"  />                        
+                        <p:selectOneMenu  rendered="#{ezidebit.paymentSchedulePeriodType == 'M'}" id="dayOfMonth" value="#{ezidebit.paymentDayOfMonth}"  >
+                            <f:selectItems value="#{ezidebit.daysInMonth}" var="num" itemValue="#{num}" /> 
+
                         </p:selectOneMenu> 
 
-                        <p:outputLabel value="#{configMapController.getKey('AddPaymentScheduleLabel_paymentFirstWeekOfMonth')}" for="firstWeekOfMonth" />
-                        <p:selectBooleanCheckbox id="firstWeekOfMonth" value="#{ezidebit.paymentFirstWeekOfMonth}">  
-                            <p:ajax update="createPaymentScheduleDialogue" />  
+                        <p:outputLabel  rendered="#{ezidebit.paymentSchedulePeriodType == 'N'}" value="#{configMapController.getKey('AddPaymentScheduleLabel_paymentFirstWeekOfMonth')}" for="firstWeekOfMonth" />
+                        <p:selectBooleanCheckbox id="firstWeekOfMonth"  rendered="#{ezidebit.paymentSchedulePeriodType == 'N'}" value="#{ezidebit.paymentFirstWeekOfMonth}">  
+                            <p:ajax update="addPaymentScheduleGrid2" />  
                         </p:selectBooleanCheckbox> 
-                        <p:outputLabel value="#{configMapController.getKey('AddPaymentScheduleLabel_paymentSecondWeekOfMonth')}" for="secondWeekOfMonth" />
-                        <p:selectBooleanCheckbox id="secondWeekOfMonth" value="#{ezidebit.paymentSecondWeekOfMonth}">  
-                            <p:ajax update="createPaymentScheduleDialogue" />  
+                        <p:outputLabel  rendered="#{ezidebit.paymentSchedulePeriodType == 'N'}" value="#{configMapController.getKey('AddPaymentScheduleLabel_paymentSecondWeekOfMonth')}" for="secondWeekOfMonth" />
+                        <p:selectBooleanCheckbox id="secondWeekOfMonth"  rendered="#{ezidebit.paymentSchedulePeriodType == 'N'}" value="#{ezidebit.paymentSecondWeekOfMonth}">  
+                            <p:ajax update="addPaymentScheduleGrid2" />  
                         </p:selectBooleanCheckbox>  
-                        <p:outputLabel value="#{configMapController.getKey('AddPaymentScheduleLabel_paymentThirdWeekOfMonth')}" for="thirdWeekOfMonth" />
-                        <p:selectBooleanCheckbox id="thirdWeekOfMonth" value="#{ezidebit.paymentThirdWeekOfMonth}">  
-                            <p:ajax update="createPaymentScheduleDialogue" />  
+                        <p:outputLabel  rendered="#{ezidebit.paymentSchedulePeriodType == 'N'}" value="#{configMapController.getKey('AddPaymentScheduleLabel_paymentThirdWeekOfMonth')}" for="thirdWeekOfMonth" />
+                        <p:selectBooleanCheckbox id="thirdWeekOfMonth"  rendered="#{ezidebit.paymentSchedulePeriodType == 'N'}" value="#{ezidebit.paymentThirdWeekOfMonth}">  
+                            <p:ajax update="addPaymentScheduleGrid2" />  
                         </p:selectBooleanCheckbox>  
-                        <p:outputLabel value="#{configMapController.getKey('AddPaymentScheduleLabel_paymentFourthWeekOfMonth')}" for="fourthWeekOfMonth" />
-                        <p:selectBooleanCheckbox id="fourthWeekOfMonth" value="#{ezidebit.paymentFourthWeekOfMonth}">  
-                            <p:ajax update="createPaymentScheduleDialogue" />  
+                        <p:outputLabel rendered="#{ezidebit.paymentSchedulePeriodType == 'N'}" value="#{configMapController.getKey('AddPaymentScheduleLabel_paymentFourthWeekOfMonth')}" for="fourthWeekOfMonth" />
+                        <p:selectBooleanCheckbox  rendered="#{ezidebit.paymentSchedulePeriodType == 'N'}" id="fourthWeekOfMonth" value="#{ezidebit.paymentFourthWeekOfMonth}">  
+                            <p:ajax update="addPaymentScheduleGrid2" />  
                         </p:selectBooleanCheckbox>  
+
                         <p:outputLabel value="#{configMapController.getKey('AddPaymentScheduleLabel_paymentKeepManualPayments')}" for="paymentKeepManualPayments" />
                         <p:selectBooleanCheckbox id="paymentKeepManualPayments" value="#{ezidebit.paymentKeepManualPayments}">  
-                            <p:ajax update="createPaymentScheduleDialogue" />  
+                            <p:ajax update="addPaymentScheduleGrid2" />  
                         </p:selectBooleanCheckbox>  
 
 
                     </p:panelGrid>
                     <p:panel>
-                        <p:commandButton id="createPaymentdialogueScheduleSave" oncomplete="PF('createPaymentDialogueScheduleWidget').hide()"  actionListener="#{ezidebit.addSinglePayment}" value="#{configMapController.getKey('AddPaymentScheduleSaveLink')}" update=":menuForm:growl :pollForm:poller1 "/>                
-                        <p:commandButton id="createPaymentdialogueScheduleDiscard" onclick="PF('createPaymentDialogueScheduleWidget').hide()"  value="#{configMapController.getKey('AddPaymentScheduleDiscardLink')}" update=":menuForm:growl"/>                
+                        <p:commandButton id="createPaymentdialogueScheduleSave" oncomplete="PF('createPaymentScheduleDialogueWidget').hide()"  actionListener="#{ezidebit.createPaymentSchedule}" value="#{configMapController.getKey('AddPaymentScheduleSaveLink')}" update=":menuForm:growl :pollForm:poller1 "/>                
+                        <p:commandButton id="createPaymentdialogueScheduleDiscard" onclick="PF('createPaymentScheduleDialogueWidget').hide()"  value="#{configMapController.getKey('AddPaymentScheduleDiscardLink')}" update=":menuForm:growl"/>                
 
                     </p:panel>
                 </p:confirmDialog>
@@ -441,7 +444,7 @@
                                 <p:ajax update=":tabView:paymentsForm:viewPaymentsGrid  :tabView:paymentsForm:editPaymentsGrid  :menuForm:growl" process=":tabView:paymentsForm:viewPaymentsGrid  :tabView:paymentsForm:editPaymentsGrid :pollForm:poller1"/>  
                             </p:selectBooleanButton>  
                             <p:commandButton id="showAddPaymentButton"  oncomplete="PF('createPaymentDialogueWidget').show()"    value="#{configMapController.getKey('AddPaymentButtonLink')}"   /> 
-                           <p:commandButton id="showAddPaymentScheduleButton"  oncomplete="PF('createPaymentScheduleDialogueWidget').show()"    value="#{configMapController.getKey('AddPaymentScheduleButtonLink')}"   /> 
+                            <p:commandButton id="showAddPaymentScheduleButton"  oncomplete="PF('createPaymentScheduleDialogueWidget').show()"    value="#{configMapController.getKey('AddPaymentScheduleButtonLink')}"   /> 
 
                         </p:outputPanel>
                         <p:outputPanel id="iFramePanel" >
@@ -462,60 +465,65 @@
 
                         </p:outputPanel>
                         <h:panelGroup  id="paymentsTablePanel" rendered="#{ezidebit.paymentsList != null}">
-                            <p:dataTable  editable="true" value="#{ezidebit.paymentsList}" filteredValue="#{ezidebit.paymentsListFilteredItems}"  widgetVar="paymentsListControllerTable" var="payment"  paginator="true" rows="15"  paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  rowsPerPageTemplate="5,10,15,20,25,50,100" >
+                            <p:dataTable  editable="true" value="#{ezidebit.paymentsList}" filteredValue="#{ezidebit.paymentsListFilteredItems}"  widgetVar="paymentsListControllerTable" var="pay"  paginator="true" rows="15"  paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  rowsPerPageTemplate="5,10,15,20,25,50,100" >
                                 <f:facet name="header">
                                     <p:outputPanel>
                                         <h:outputText value="Payments            --          Search all fields:" />
                                         <h:inputText id="globalFilter" onkeyup="paymentsListControllerTable.filter()" />
                                     </p:outputPanel>
                                 </f:facet>
-                                <p:column sortBy="#{payment.customerName.value}" filterBy="#{payment.customerName.value}" headerText="#{configMapController.getKey('ListPaymentsTitle_customerName')}"   >
+                                <p:column sortBy="#{pay.customerName.value}" filterBy="#{pay.customerName.value}" headerText="#{configMapController.getKey('ListPaymentsTitle_customerName')}"   >
                                     <p:cellEditor> 
                                         <f:facet name="output">
-                                            <h:outputText value="#{payment.customerName.value}"/>
+                                            <h:outputText value="#{pay.customerName.value}"/>
                                         </f:facet>
                                         <f:facet name="input">
-                                            <p:inputText value="#{payment.customerName.value}" label="#{configMapController.getKey('ListPaymentsTitle_customerName')}" />
+                                            <p:inputText value="#{pay.customerName.value}" label="#{configMapController.getKey('ListPaymentsTitle_customerName')}" />
                                         </f:facet>
                                     </p:cellEditor> 
                                 </p:column>
-                                <p:column sortBy="#{payment.paymentReference.value}" filterBy="#{payment.paymentReference.value}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentReference')}"   >
+                                <p:column sortBy="#{pay.paymentReference.value}" filterBy="#{pay.paymentReference.value}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentReference')}"   >
                                     <p:cellEditor> 
                                         <f:facet name="output">
-                                            <h:outputText value="#{payment.paymentReference.value}"/>
+                                            <h:outputText value="#{pay.paymentReference.value}"/>
                                         </f:facet>
                                         <f:facet name="input">
-                                            <p:inputText value="#{payment.paymentReference.value}" label="#{configMapController.getKey('ListPaymentsTitle_paymentReference')}" />
+                                            <p:inputText value="#{pay.paymentReference.value}" label="#{configMapController.getKey('ListPaymentsTitle_paymentReference')}" />
                                         </f:facet>
                                     </p:cellEditor> 
                                 </p:column>
-                                <p:column sortBy="#{payment.paymentAmount}" filterBy="#{payment.paymentAmount}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentAmount')}"   >
+                                <p:column sortBy="#{pay.paymentAmount}" filterBy="#{pay.paymentAmount}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentAmount')}"   >
                                     <p:cellEditor> 
                                         <f:facet name="output">
-                                            <h:outputText value="#{payment.paymentAmount}"/>
+                                            <h:outputText value="#{pay.paymentAmount}">
+                                                <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
+                                            </h:outputText>
                                         </f:facet>
                                         <f:facet name="input">
-                                            <p:inputText value="#{payment.paymentAmount}" label="#{configMapController.getKey('ListPaymentsTitle_paymentAmount')}" />
+                                            <p:inputText value="#{pay.paymentAmount}" label="#{configMapController.getKey('ListPaymentsTitle_paymentAmount')}" />
                                         </f:facet>
                                     </p:cellEditor> 
                                 </p:column>
-                                <p:column sortBy="#{payment.paymentStatus.value}" filterBy="#{payment.paymentStatus.value}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentStatus')}"   >
-                                    <p:cellEditor> 
-                                        <f:facet name="output">
-                                            <h:outputText value="#{payment.paymentStatus.value}"/>
-                                        </f:facet>
-                                        <f:facet name="input">
-                                            <p:inputText value="#{payment.paymentStatus.value}" label="#{configMapController.getKey('ListPaymentsTitle_paymentStatus')}" />
-                                        </f:facet>
-                                    </p:cellEditor> 
+                                <p:column sortBy="#{pay.paymentStatus.value}" filterBy="#{pay.paymentStatus.value}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentStatus')}"   >
+                                    
+                                            <h:outputText  rendered="#{pay.paymentStatus.value == 'W'}"  value="Waiting"/>
+                                            <h:outputText  rendered="#{pay.paymentStatus.value == 'P'}"  value="Pending"/>
+                                            <h:outputText  rendered="#{pay.paymentStatus.value == 'S'}"  value="Successful"/>
+                                            <h:outputText  rendered="#{pay.paymentStatus.value == 'D'}"  value="Dis.Insufficient Funds"/>
+                                            <h:outputText  rendered="#{pay.paymentStatus.value == 'F'}"  value="Dishonoured"/>
+                                         
                                 </p:column>
-                                <p:column sortBy="#{payment.debitDate.value}" filterBy="#{payment.debitDate.value}" headerText="#{configMapController.getKey('ListPaymentsTitle_debitDate')}"   >
+                                <p:column sortBy="#{pay.debitDate.value.toGregorianCalendar().time}" filterBy="#{pay.debitDate.value.toGregorianCalendar().time}" headerText="#{configMapController.getKey('ListPaymentsTitle_debitDate')}"   >
                                     <p:cellEditor> 
                                         <f:facet name="output">
-                                            <h:outputText value="#{payment.debitDate.value}"/>
+                                            <h:outputText value="#{pay.debitDate.value.toGregorianCalendar().time}">
+                                                <f:convertDateTime pattern="dd MMM yyyy" />
+                                            </h:outputText>
                                         </f:facet>
                                         <f:facet name="input">
-                                            <p:inputText value="#{payment.debitDate.value}" label="#{configMapController.getKey('ListPaymentsTitle_debitDate')}" />
+                                            <p:inputText value="#{pay.debitDate.value.toGregorianCalendar().time}" label="#{configMapController.getKey('ListPaymentsTitle_debitDate')}" >
+                                                <f:convertDateTime pattern="dd MMM yyyy" />
+                                            </p:inputText>
                                         </f:facet>
                                     </p:cellEditor> 
                                 </p:column>
@@ -531,16 +539,9 @@
                                     </p:outputPanel>
                                 </f:facet>
                                 <p:column sortBy="#{payment.yourGeneralReference.value}" filterBy="#{payment.yourGeneralReference.value}" headerText="#{configMapController.getKey('ListPaymentsTitle_customerName')}"   >
-                                    <p:cellEditor> 
-                                        <f:facet name="output">
-                                            <h:outputText value="#{payment.yourGeneralReference.value}"/>
-                                        </f:facet>
-                                        <f:facet name="input">
-                                            <p:inputText value="#{payment.yourGeneralReference.value}" label="#{configMapController.getKey('ListPaymentsTitle_customerName')}" />
-                                        </f:facet>
-                                    </p:cellEditor> 
+                                    <h:outputText value="#{payment.yourGeneralReference.value}"/>
                                 </p:column>
-                                <p:column sortBy="#{payment.paymentReference.value}" filterBy="#{payment.paymentReference.value}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentReference')}"   >
+                                <p:column sortBy="#{payment.paymentReference.value}" filterBy="#{payment.paymentReference.value}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentReference')}"   >                                 
                                     <p:cellEditor> 
                                         <f:facet name="output">
                                             <h:outputText value="#{payment.paymentReference.value}"/>
@@ -553,22 +554,32 @@
                                 <p:column sortBy="#{payment.paymentAmount}" filterBy="#{payment.paymentAmount}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentAmount')}"   >
                                     <p:cellEditor> 
                                         <f:facet name="output">
-                                            <h:outputText value="#{payment.paymentAmount}"/>
+                                            <h:outputText value="#{payment.paymentAmount}">
+                                                <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
+                                            </h:outputText>
                                         </f:facet>
                                         <f:facet name="input">
                                             <p:inputText value="#{payment.paymentAmount}" label="#{configMapController.getKey('ListPaymentsTitle_paymentAmount')}" />
                                         </f:facet>
                                     </p:cellEditor> 
                                 </p:column>
-                                <p:column sortBy="#{payment.paymentDate}" filterBy="#{payment.paymentDate}" headerText="#{configMapController.getKey('ListPaymentsTitle_debitDate')}"   >
+                                <p:column sortBy="#{payment.paymentDate.toGregorianCalendar().time}" filterBy="#{payment.paymentDate.toGregorianCalendar().time}" headerText="#{configMapController.getKey('ListPaymentsTitle_debitDate')}"   >
                                     <p:cellEditor> 
                                         <f:facet name="output">
-                                            <h:outputText value="#{payment.paymentDate}"/>
+                                            <h:outputText value="#{payment.paymentDate.toGregorianCalendar().time}" >
+                                                <f:convertDateTime pattern="dd MMM yyyy" />
+                                            </h:outputText>
                                         </f:facet>
                                         <f:facet name="input">
-                                            <p:inputText value="#{payment.paymentDate}" label="#{configMapController.getKey('ListPaymentsTitle_debitDate')}" />
+                                            <p:inputText value="#{payment.paymentDate.toGregorianCalendar().time}" label="#{configMapController.getKey('ListPaymentsTitle_debitDate')}" >
+                                                <f:convertDateTime pattern="dd MMM yyyy" />
+                                            </p:inputText>
                                         </f:facet>
                                     </p:cellEditor> 
+                                </p:column>
+                                <p:column sortBy="#{payment.isManuallyAddedPayment()}" filterBy="#{payment.isManuallyAddedPayment()}" headerText="#{configMapController.getKey('ListPaymentsTitle_manualPayment')}"   >
+                                    <h:outputText rendered="#{payment.isManuallyAddedPayment()}" value="Manual"/>
+                                    <h:outputText rendered="#{!payment.isManuallyAddedPayment()}" value="Auto"/>
                                 </p:column>
 
                             </p:dataTable>

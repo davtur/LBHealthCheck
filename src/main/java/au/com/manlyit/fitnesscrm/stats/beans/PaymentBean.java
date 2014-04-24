@@ -206,7 +206,13 @@ public class PaymentBean implements Serializable {
             loggedInUser = loggedInUser.substring(0, 50);
             logger.log(Level.WARNING, "addPayment loggedInUser is greater than the allowed 50 characters. Truncating! to 50 chars");
         }
-        EziResponseOfstring eziResponse = ws.addPayment(digitalKey, eziDebitCustomerId, ourSystemCustomerReference, debitDateString, paymentAmountInCents, paymentReference, loggedInUser);
+        EziResponseOfstring eziResponse ;
+        try {
+            eziResponse = ws.addPayment(digitalKey, eziDebitCustomerId, ourSystemCustomerReference, debitDateString, paymentAmountInCents, paymentReference, loggedInUser);
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "addPayment Method Response: Exception - {0}", e);
+            return new AsyncResult<>(false);
+        }
         logger.log(Level.INFO, "addPayment Response: Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
         if (eziResponse.getError().intValue() == 0) {// any errors will be a non zero value
 
@@ -287,6 +293,8 @@ public class PaymentBean implements Serializable {
                 logger.log(Level.WARNING, "createSchedule: A value must be provided for dayOfMonth (1..31 )\n" + " when the\n" + "SchedulePeriodType is in\n" + "M");
                 return new AsyncResult<>(false);
             }
+        }else{
+            dayOfMonth = 0;
         }
         String schedulePeriodTypeString = "";
         schedulePeriodTypeString = schedulePeriodTypeString + schedulePeriodType;
