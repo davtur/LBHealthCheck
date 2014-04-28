@@ -85,9 +85,8 @@ public class CustomerImagesController implements Serializable {
 
     private int getUser() {
         FacesContext context = FacesContext.getCurrentInstance();
-        ChartController cc = (ChartController) context.getApplication().evaluateExpressionGet(context, "#{chartController}", ChartController.class);
-        return cc.getUser();
-
+        CustomersController custController = (CustomersController) context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
+        return custController.getSelected().getId();
     }
 
     public CustomerImages getSelected() {
@@ -545,7 +544,7 @@ public class CustomerImagesController implements Serializable {
         return items;
     }
 
-    private void recreateModel() {
+    public void recreateModel() {
         items = null;
         filteredItems = null;
         images = null;

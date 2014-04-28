@@ -258,6 +258,10 @@ public class CustomersController implements Serializable {
         c2.recreateModel();
         EziDebitPaymentGateway c3 = (EziDebitPaymentGateway) context.getApplication().evaluateExpressionGet(context, "#{ezidebit}", EziDebitPaymentGateway.class);
         c3.recreateModels();
+        CustomerImagesController c4 = (CustomerImagesController) context.getApplication().evaluateExpressionGet(context, "#{customerImagesController}", CustomerImagesController.class);
+        c4.recreateModel();
+        ChartController c5 = (ChartController) context.getApplication().evaluateExpressionGet(context, "#{chartController}", ChartController.class);
+        c5.recreateModel();
     }
 
     public void handleUserChange() {

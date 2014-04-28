@@ -49,32 +49,25 @@ public class ChartController implements Serializable {
     private ArrayList<FitnessCartesianChartModel> modelList;
 
     public int getUser() {
-        int cust_id = 0;
         FacesContext context = FacesContext.getCurrentInstance();
         CustomersController custController = (CustomersController) context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
-        String name = custController.getSelected().getUsername();
-        Customers cust = ejbCustomerFacade.findCustomerByUsername(name);
-        cust_id = cust.getId();
-        return cust_id;
+        return custController.getSelected().getId();
     }
 
     public Customers getCustomer() {
-        Customers cust = null;
         String passCheck = PasswordService.getInstance().encrypt("1234567890");
         System.out.println("\n\ne-check:" + passCheck + "\n\n");
         FacesContext context = FacesContext.getCurrentInstance();
         CustomersController custController = (CustomersController) context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
-        String name = custController.getSelected().getUsername();
-        cust = ejbCustomerFacade.findCustomerByUsername(name);
-
-        return cust;
+        return custController.getSelected();
     }
 
     /**
+     * @param stypes
      * @return the chartData
      */
     public List<LineChartPointsVertical> getChartData(List<StatTypes> stypes) {
-        List<LineChartPointsVertical> chartMeasurements = new ArrayList<LineChartPointsVertical>();
+        List<LineChartPointsVertical> chartMeasurements = new ArrayList<>();
         List<StatsTaken> statsTakenList = ejbStatsTakenFacade.findAllByCustId(getUser());
         for (StatsTaken st : statsTakenList) {
             List<Stat> stats = ejbStatsFacade.findAll(st.getId());
@@ -100,7 +93,7 @@ public class ChartController implements Serializable {
 
     public List<LineChartSeries> getChartDataForModel(List<StatTypes> stypes) {
 
-        List<LineChartSeries> chartMeasurements = new ArrayList<LineChartSeries>();
+        List<LineChartSeries> chartMeasurements = new ArrayList<>();
         for (StatTypes stype : stypes) {
             chartMeasurements.add(new LineChartSeries());
         }
@@ -139,9 +132,9 @@ public class ChartController implements Serializable {
      */
     public ArrayList<FitnessCartesianChartModel> getModelList() {
         if (modelList == null) {
-           modelList = new ArrayList<>(); 
+            modelList = new ArrayList<>();
             //get list of charts types that customer has
-           //for each chart type creat a chart and add to list
+            //for each chart type creat a chart and add to list
             ArrayList<StatTypes> stypes = new ArrayList<>();
             stypes.add(ejbStatTypesFacade.find(1));//waist
             stypes.add(ejbStatTypesFacade.find(2));//hips
@@ -179,12 +172,13 @@ public class ChartController implements Serializable {
         }
         return modelList;
     }
-    public void recreateModel(){
-        if(modelList != null){
-             modelList.clear();
+
+    public void recreateModel() {
+        if (modelList != null) {
+            modelList.clear();
         }
         modelList = null;
-       
+
     }
 
     private FitnessCartesianChartModel createModel(String name, ArrayList<StatTypes> stypes) {
