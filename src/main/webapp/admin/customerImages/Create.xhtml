@@ -15,7 +15,7 @@
                 <h:messages errorStyle="color: red" infoStyle="color: green" layout="table"/>
             </h:panelGroup>
             <h:form id="photoCreate" >
-                <p:log/>
+                <!--<p:log/>-->
                 <p:panel>
                     <h:panelGrid columns="2">
                         <h:outputLabel value="#{configMapController.getKey('CreateCustomerImagesLabel_customerId')}" for="customerId" />
@@ -37,9 +37,24 @@
                         <h:outputLabel value="#{configMapController.getKey('CreateCustomerImagesLabel_datetaken')}" for="datetaken" />
                         <p:panel id="photoPanel3" header="Select a photo to upload (jpeg)">
                             <h:panelGrid columns="2" width="400px">
-                                <p:fileUpload fileLimitMessage="The size of the picture is too big! ( > 10MB )" fileUploadListener="#{customerImagesController.handleFileUpload}" auto="true" update=":photoCreate:photoPanel3 :photoCreate:datetaken :menuForm:growl :photoCreate:saveButton" allowTypes="/(\.|\/)(gif|jpe?g|png)$/" sizeLimit="10000000" />
+                                <p:fileUpload fileLimitMessage="The size of the picture is too big! ( > 10MB )" fileUploadListener="#{customerImagesController.handleFileUpload}" auto="true" update=":photoCreate:photoPanel3  :photoCreate:datetaken :menuForm:growl :photoCreate:saveButton" allowTypes="/(\.|\/)(gif|jpe?g|png)$/" sizeLimit="10000000" />
                                 <p:graphicImage  value="#{customerImagesController.uploadedImage}" width="180px" cache="false" id="photo1"/>
                             </h:panelGrid>
+                           <!-- <p:panel id="imageCropperPanel" header="Uploaded Image">
+                                <h:panelGrid columns="2">  
+                                    <p:imageCropper value="#{customerImagesController.cropperImage}"  
+                                                    image="#{customerImagesController.uploadedImage}"  
+                                                    initialCoords="225,75,300,125"/>  
+
+                                    <p:graphicImage id="localCroppedImage"  
+                                                    value="#{customerImagesController.croppedImage}" />  
+                                </h:panelGrid>  
+
+                                <p:commandButton value="Crop"  
+                                                 
+                                                 update=":photoCreate:photoPanel3"/> 
+                            </p:panel> -->
+                           
                         </p:panel>
 
 

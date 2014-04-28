@@ -13,42 +13,30 @@
         <ui:define name="body">
             <h:form>
                 <p:panel header="Welcome #{chartController.customer.firstname}">
-                    <p:galleria var="image" value="#{customerImagesController.images}" effect="#{customerImagesController.effect}" effectSpeed="1000">
-                  
-                        
+                    <p:panel header="Photos">
+                        <p:galleria var="image" value="#{customerImagesController.images}" panelWidth="667" panelHeight="500" showCaption="true" effect="#{customerImagesController.effect}" effectSpeed="1000">
+
                             <p:graphicImage value="#{customerImagesController.dynamicImage}"  title="This photo was taken on #{image.formattedDate}" alt="#{customerImagesController.dynamicTitle}">
                                 <f:param name="imageid" value="#{image.id}"/>
                                 <f:param name="imagedescid" value="#{image.id}"/>
                                 <f:param name="imagetitleid" value="#{image.id}"/>
                             </p:graphicImage>
-                            
-                 
-                    </p:galleria>
+
+                        </p:galleria>
+                    </p:panel>
                 </p:panel>
-                <p:panel header="Body Measurements (cm)">
-                    <p:lineChart  styleClass="chartClass"  value="#{measurementsChart.model}"   style="statsFlashChartStyle" />
-                </p:panel>
-                <p:panel header="Body Weight (Kg) ">
-                    <p:lineChart  styleClass="chartClass" value="#{weightChart.model}"   style="statsFlashChartStyle" />
-                </p:panel>
-               <p:panel header="Body Fat  (Percentage)">
-                    <p:lineChart  styleClass="chartClass" value="#{bodyFatChart.model}"   style="statsFlashChartStyle" />
-                </p:panel>
-                <p:panel header="Plank Test (Seconds)">
-                    <p:lineChart  styleClass="chartClass" value="#{plankTestChart.model}"   style="statsFlashChartStyle" />
-                </p:panel>
-                <p:panel header=" Fitness tests (Reps Per Minute)">
-                    <p:lineChart  styleClass="chartClass" value="#{fitnessTestsChart.model}"   style="statsFlashChartStyle" />
-                </p:panel>
-                <p:panel header="Beep Test and VO2 Max (Score)">
-                    <p:lineChart  styleClass="chartClass" value="#{beepTestAndVO2MaxChart.model}"   style="statsFlashChartStyle" />
-                </p:panel>
-                <p:panel header="Fitness Test  (No. Laps in 2 Minutes)">
-                    <p:lineChart  styleClass="chartClass" value="#{runTimeChart.model}"   style="statsFlashChartStyle" />
-                </p:panel>
-                <!--<p:panel header="Maximum Heart Rate (Beats per Minute)">
-                    <p:lineChart  styleClass="chartClass" model="#{maxHeartRateChart.model}"   style="statsFlashChartStyle" />
-                </p:panel>-->
+
+
+                <p:dataList  value="#{chartController.modelList}"  var="chart" id="chartsList"  
+                             paginator="true" rows="5"  
+                             paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink} {RowsPerPageDropdown}"  
+                             rowsPerPageTemplate="5,10,15" type="none">
+
+                    <p:panel header="#{chart.chartName}">
+                        <p:lineChart  styleClass="chartClass" value="#{chart}"   />
+                    </p:panel>
+
+                </p:dataList>
             </h:form>
         </ui:define>
     </ui:composition>

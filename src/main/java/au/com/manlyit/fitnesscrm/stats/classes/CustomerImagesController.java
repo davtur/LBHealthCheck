@@ -31,6 +31,7 @@ import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 import javax.faces.convert.Converter;
 import javax.faces.convert.FacesConverter;
+import javax.faces.event.ActionEvent;
 import javax.faces.event.ValueChangeEvent;
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
@@ -44,6 +45,7 @@ import org.apache.sanselan.formats.tiff.constants.TagInfo;
 import org.apache.sanselan.formats.tiff.constants.TiffConstants;
 import org.primefaces.event.SelectEvent;
 import org.primefaces.event.FileUploadEvent;
+import org.primefaces.model.CroppedImage;
 import org.primefaces.model.DefaultStreamedContent;
 import org.primefaces.model.StreamedContent;
 import org.primefaces.model.UploadedFile;
@@ -53,6 +55,8 @@ import org.primefaces.model.UploadedFile;
 public class CustomerImagesController implements Serializable {
 
     private CustomerImages current;
+    private StreamedContent croppedImage;
+    private CroppedImage cropperImage;
     private CustomerImages selectedForDeletion;
     private DataModel items = null;
     @Inject
@@ -64,7 +68,7 @@ public class CustomerImagesController implements Serializable {
     private PaginationHelper pagination;
     private int selectedItemIndex;
     private StreamedContent uploadedImage;
-    private List<CustomerImages> images; 
+    private List<CustomerImages> images;
     private List<CustomerImages> filteredItems;
     private String effect = "fade";
     private boolean saveButtonDisabled = true;
@@ -108,15 +112,29 @@ public class CustomerImagesController implements Serializable {
         }
     }
 
-    private static BufferedImage resizeImageWithHintKeepAspect(BufferedImage originalImage, int newWidth) {
+    private static BufferedImage resizeImageWithHintKeepAspect(BufferedImage originalImage, int newWidth, int newHeight) {
         int type = originalImage.getType() == 0 ? BufferedImage.TYPE_INT_ARGB : originalImage.getType();
         float w = originalImage.getWidth();
         float h = originalImage.getHeight();
-        float newHeight = (new Float(newWidth) / w) * h;
-        int nheight = Math.round(newHeight);
-        BufferedImage resizedImage = new BufferedImage(newWidth, nheight, type);
-        Graphics2D g = resizedImage.createGraphics();
+        int height = newHeight;
+        int width = newWidth;
 
+        if (newWidth == 0 && newHeight == 0) {
+            return originalImage;
+        }
+        // if we want to keep aspect we can only use height or width - the one not used should be set to 0
+        if (newWidth == 0 && newHeight > 0) {
+            float aspectWidth = (new Float(newHeight) / h) * w;
+            width = Math.round(aspectWidth);
+        }
+        if (newWidth > 0 && newHeight == 0) {
+            float aspectHeight = (new Float(newWidth) / w) * h;
+            height = Math.round(aspectHeight);
+            width = newWidth;
+        }
+
+        BufferedImage resizedImage = new BufferedImage(width, height, type);
+        Graphics2D g = resizedImage.createGraphics();
         g.setComposite(AlphaComposite.Src);
         g.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
                 RenderingHints.VALUE_INTERPOLATION_BILINEAR);
@@ -124,8 +142,9 @@ public class CustomerImagesController implements Serializable {
                 RenderingHints.VALUE_RENDER_QUALITY);
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                 RenderingHints.VALUE_ANTIALIAS_ON);
-        g.drawImage(originalImage, 0, 0, newWidth, nheight, null);
+        g.drawImage(originalImage, 0, 0, width, height, null);
         g.dispose();
+
         return resizedImage;
     }
 
@@ -164,7 +183,8 @@ public class CustomerImagesController implements Serializable {
 
     public void handleFileUpload(FileUploadEvent event) {
 //Barefoot-image_100_by_100.jpg
-        int new_width = 800;
+        int new_width = 800;// must match panelheight on gallery component
+        int new_height = 500;// must match panelheight on gallery component
         UploadedFile file = event.getFile();
         BufferedImage img = null;
         try {
@@ -175,7 +195,7 @@ public class CustomerImagesController implements Serializable {
         InputStream stream = null;
 
         //BufferedImage scaledImg = resizeImageKeepAspect(img, new_width);
-        BufferedImage scaledImg = resizeImageWithHintKeepAspect(img, new_width);
+        BufferedImage scaledImg = resizeImageWithHintKeepAspect(img, 0, new_height);// use a 0 for heigh or width to keep aspect
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         try {
             ImageIO.write(scaledImg, "jpeg", os);
@@ -254,6 +274,7 @@ public class CustomerImagesController implements Serializable {
         try {
 
             setUploadedImage(new DefaultStreamedContent(stream, "image/jpeg"));
+            setCroppedImage(getUploadedImage());
         } catch (Exception ex) {
             Logger.getLogger(CustomerImagesController.class.getName()).log(Level.SEVERE, null, ex);
             JsfUtil.addErrorMessage(ex, "Uploading image error!!");
@@ -372,6 +393,26 @@ public class CustomerImagesController implements Serializable {
     }
 
     public void createFromDialogue() {
+        /*  if (croppedImage != null) {
+         BufferedImage img = null;
+         try {
+         img = ImageIO.read(croppedImage.getStream());
+         } catch (IOException e) {
+         JsfUtil.addErrorMessage(e, "Loading image into buffer error!!");
+         }
+
+         ByteArrayOutputStream os = new ByteArrayOutputStream();
+         try {
+         ImageIO.write(img, "jpeg", os);
+
+         } catch (IOException ex) {
+         Logger.getLogger(CustomerImagesController.class.getName()).log(Level.SEVERE, null, ex);
+
+         }
+
+         current.setImage(os.toByteArray());
+
+         }*/
         create();
         clearPhoto();
         recreateModel();
@@ -507,7 +548,8 @@ public class CustomerImagesController implements Serializable {
     private void recreateModel() {
         items = null;
         filteredItems = null;
-       
+        images = null;
+
     }
 
     public String next() {
@@ -617,8 +659,9 @@ public class CustomerImagesController implements Serializable {
      * @return the images
      */
     public List<CustomerImages> getImages() {
-
-        createGallery(getUser());
+        if (images == null) {
+            createGallery(getUser());
+        }
 
         return images;
     }
@@ -691,6 +734,34 @@ public class CustomerImagesController implements Serializable {
      */
     public void setFilteredItems(List<CustomerImages> filteredItems) {
         this.filteredItems = filteredItems;
+    }
+
+    /**
+     * @return the croppedImage
+     */
+    public StreamedContent getCroppedImage() {
+        return croppedImage;
+    }
+
+    /**
+     * @param croppedImage the croppedImage to set
+     */
+    public void setCroppedImage(StreamedContent croppedImage) {
+        this.croppedImage = croppedImage;
+    }
+
+    /**
+     * @return the cropperImage
+     */
+    public CroppedImage getCropperImage() {
+        return cropperImage;
+    }
+
+    /**
+     * @param cropperImage the cropperImage to set
+     */
+    public void setCropperImage(CroppedImage cropperImage) {
+        this.cropperImage = cropperImage;
     }
 
     @FacesConverter(forClass = CustomerImages.class)
