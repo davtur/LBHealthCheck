@@ -141,33 +141,33 @@ public class ChartController implements Serializable {
             stypes.add(ejbStatTypesFacade.find(3));//thighs
             stypes.add(ejbStatTypesFacade.find(4));//chest
             stypes.add(ejbStatTypesFacade.find(5));//arms
-            modelList.add(createModel("Body Measurements (cm)", stypes));
+            modelList.add(createModel("Body Measurements (cm)", stypes));//chart1
 
             stypes = new ArrayList<>();
             stypes.add(ejbStatTypesFacade.find(13)); //weight
-            modelList.add(createModel("Body Weight (Kg)", stypes));
+            modelList.add(createModel("Body Weight (Kg)", stypes));//chart 3
 
             stypes = new ArrayList<>();
             stypes.add(ejbStatTypesFacade.find(12));
-            modelList.add(createModel("Body Fat  (Percentage)", stypes));
+            modelList.add(createModel("Body Fat  (Percentage)", stypes));//chart 4
 
             stypes = new ArrayList<>();
             stypes.add(ejbStatTypesFacade.find(8));
-            modelList.add(createModel("Plank Test (Seconds)", stypes));
+            modelList.add(createModel("Plank Test (Seconds)", stypes));//chart 5
 
             stypes = new ArrayList<>();
             stypes.add(ejbStatTypesFacade.find(7)); //push up
             stypes.add(ejbStatTypesFacade.find(9)); //Situp
-            modelList.add(createModel("Fitness tests (Reps Per Minute)", stypes));
+            modelList.add(createModel("Fitness tests (Reps Per Minute)", stypes));//chart 6
 
             stypes = new ArrayList<>();
             stypes.add(ejbStatTypesFacade.find(6));
             stypes.add(ejbStatTypesFacade.find(11));
-            modelList.add(createModel("Beep Test and VO2 Max (Score)", stypes));
+            modelList.add(createModel("Beep Test and VO2 Max (Score)", stypes));//chart 2
 
             stypes = new ArrayList<>();
             stypes.add(ejbStatTypesFacade.find(14));// 5km run
-            modelList.add(createModel("5km Distance Run  (Time in Minutes)", stypes));
+            modelList.add(createModel("5km Distance Run  (Time in Minutes)", stypes));//chart 7
 
         }
         return modelList;

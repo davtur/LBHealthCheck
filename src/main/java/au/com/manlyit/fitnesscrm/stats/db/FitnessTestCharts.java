@@ -15,8 +15,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.Lob;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
@@ -31,17 +30,14 @@ import javax.xml.bind.annotation.XmlTransient;
  * @author david
  */
 @Entity
-@Table(name = "stat_types")
+@Table(name = "fitness_test_charts")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "StatTypes.findAll", query = "SELECT s FROM StatTypes s"),
-    @NamedQuery(name = "StatTypes.findById", query = "SELECT s FROM StatTypes s WHERE s.id = :id"),
-    @NamedQuery(name = "StatTypes.findByName", query = "SELECT s FROM StatTypes s WHERE s.name = :name"),
-    @NamedQuery(name = "StatTypes.findByDescription", query = "SELECT s FROM StatTypes s WHERE s.description = :description")})
-public class StatTypes implements Serializable {
-    @JoinColumn(name = "chart", referencedColumnName = "id")
-    @ManyToOne(optional = false)
-    private FitnessTestCharts chart;
+    @NamedQuery(name = "FitnessTestCharts.findAll", query = "SELECT f FROM FitnessTestCharts f"),
+    @NamedQuery(name = "FitnessTestCharts.findById", query = "SELECT f FROM FitnessTestCharts f WHERE f.id = :id"),
+    @NamedQuery(name = "FitnessTestCharts.findByName", query = "SELECT f FROM FitnessTestCharts f WHERE f.name = :name"),
+    @NamedQuery(name = "FitnessTestCharts.findByYaxisLabel", query = "SELECT f FROM FitnessTestCharts f WHERE f.yaxisLabel = :yaxisLabel")})
+public class FitnessTestCharts implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -50,28 +46,35 @@ public class StatTypes implements Serializable {
     private Integer id;
     @Basic(optional = false)
     @NotNull
-    @Size(min = 1, max = 32)
+    @Size(min = 1, max = 256)
     @Column(name = "name")
     private String name;
     @Basic(optional = false)
     @NotNull
-    @Size(min = 1, max = 96)
+    @Lob
+    @Size(min = 1, max = 65535)
     @Column(name = "description")
     private String description;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "statType")
-    private Collection<Stat> statCollection;
+    @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 255)
+    @Column(name = "yaxis_label")
+    private String yaxisLabel;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "chart")
+    private Collection<StatTypes> statTypesCollection;
 
-    public StatTypes() {
+    public FitnessTestCharts() {
     }
 
-    public StatTypes(Integer id) {
+    public FitnessTestCharts(Integer id) {
         this.id = id;
     }
 
-    public StatTypes(Integer id, String name, String description) {
+    public FitnessTestCharts(Integer id, String name, String description, String yaxisLabel) {
         this.id = id;
         this.name = name;
         this.description = description;
+        this.yaxisLabel = yaxisLabel;
     }
 
     public Integer getId() {
@@ -98,13 +101,21 @@ public class StatTypes implements Serializable {
         this.description = description;
     }
 
-    @XmlTransient
-    public Collection<Stat> getStatCollection() {
-        return statCollection;
+    public String getYaxisLabel() {
+        return yaxisLabel;
     }
 
-    public void setStatCollection(Collection<Stat> statCollection) {
-        this.statCollection = statCollection;
+    public void setYaxisLabel(String yaxisLabel) {
+        this.yaxisLabel = yaxisLabel;
+    }
+
+    @XmlTransient
+    public Collection<StatTypes> getStatTypesCollection() {
+        return statTypesCollection;
+    }
+
+    public void setStatTypesCollection(Collection<StatTypes> statTypesCollection) {
+        this.statTypesCollection = statTypesCollection;
     }
 
     @Override
@@ -117,10 +128,10 @@ public class StatTypes implements Serializable {
     @Override
     public boolean equals(Object object) {
         // TODO: Warning - this method won't work in the case the id fields are not set
-        if (!(object instanceof StatTypes)) {
+        if (!(object instanceof FitnessTestCharts)) {
             return false;
         }
-        StatTypes other = (StatTypes) object;
+        FitnessTestCharts other = (FitnessTestCharts) object;
         if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
             return false;
         }
@@ -129,15 +140,7 @@ public class StatTypes implements Serializable {
 
     @Override
     public String toString() {
-        return "au.com.manlyit.fitnesscrm.stats.db.StatTypes[ id=" + id + " ]";
-    }
-
-    public FitnessTestCharts getChart() {
-        return chart;
-    }
-
-    public void setChart(FitnessTestCharts chart) {
-        this.chart = chart;
+        return "au.com.manlyit.fitnesscrm.stats.db.FitnessTestCharts[ id=" + id + " ]";
     }
     
 }
