@@ -59,16 +59,16 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Customers.findByFacebookId", query = "SELECT c FROM Customers c WHERE c.facebookId = :facebookId"),
     @NamedQuery(name = "Customers.findByGoogleId", query = "SELECT c FROM Customers c WHERE c.googleId = :googleId")})
 public class Customers implements BaseEntity, Serializable {
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "gender")
+    private Character gender;
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "id")
     private Integer id;
-    @Basic(optional = false)
-    @NotNull
-    @Column(name = "gender")
-    private char gender;
     @Basic(optional = false)
     @NotNull
     @Size(min = 1, max = 127)
@@ -200,13 +200,6 @@ public class Customers implements BaseEntity, Serializable {
         this.id = id;
     }
 
-    public char getGender() {
-        return gender;
-    }
-
-    public void setGender(char gender) {
-        this.gender = gender;
-    }
 
     public String getFirstname() {
         return firstname;
@@ -517,6 +510,14 @@ public class Customers implements BaseEntity, Serializable {
 
     public void setSessionTrainersCollection(Collection<SessionTrainers> sessionTrainersCollection) {
         this.sessionTrainersCollection = sessionTrainersCollection;
+    }
+
+    public Character getGender() {
+        return gender;
+    }
+
+    public void setGender(Character gender) {
+        this.gender = gender;
     }
 
 }
