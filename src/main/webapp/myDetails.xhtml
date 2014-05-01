@@ -16,7 +16,7 @@
             </h:panelGroup>
             <h:form id="createCustomerForm">
                 <p:panel>
-                    <p:commandButton   ajax="false"    action="#{customersController.update}" value="#{configMapController.getKey('EditCustomersSaveLink')}"/>
+                    <p:commandButton  actionListener="#{customersController.update}" value="#{configMapController.getKey('EditCustomersSaveLink')}"/>
                 </p:panel>
                 <h:panelGrid columns="1">
                     <h:panelGrid columns="2">
@@ -43,7 +43,7 @@
                                 </p:inputText>
                                 <h:outputLabel value="#{configMapController.getKey('EditCustomersLabel_dob')}" for="dob" />
                                 <p:calendar id="dob" value="#{customersController.selected.dob}" pattern="MM/dd/yyyy"   title="#{configMapController.getKey('EditCustomersTitle_dob')}"  required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_dob')}">
-<p:ajax event="dateSelect" listener="#{customersController.dobChangeListener}" update=":menuForm:growl,:createCustomerForm:panel3"  />
+                                    <p:ajax event="dateSelect" listener="#{customersController.dobChangeListener}" update=":menuForm:growl,:createCustomerForm:panel3"  />
                                 </p:calendar>
 
                                 <h:outputLabel value="#{configMapController.getKey('EditCustomersLabel_password')}" for="password" />
@@ -61,7 +61,7 @@
                                 <p:inputText id="suburb" value="#{customersController.selected.suburb}" title="#{configMapController.getKey('EditCustomersTitle_suburb')}" required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_suburb')}"/>
                                 <h:outputLabel value="#{configMapController.getKey('EditCustomersLabel_postcode')}" for="postcode" />
                                 <p:inputText id="postcode" value="#{customersController.selected.postcode}" title="#{configMapController.getKey('EditCustomersTitle_postcode')}" required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_postcode')}"/>
-                                 <h:outputLabel value="#{configMapController.getKey('EditCustomersLabel_telephone')}" for="telephone" />
+                                <h:outputLabel value="#{configMapController.getKey('EditCustomersLabel_telephone')}" for="telephone" />
                                 <p:inputText id="telephone" value="#{customersController.selected.telephone}" title="#{configMapController.getKey('EditCustomersTitle_telephone')}" required="false" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_telephone')}"/>
                                 <h:outputLabel value="#{configMapController.getKey('EditCustomersLabel_fax')}" for="fax" />
                                 <p:inputText id="fax" value="#{customersController.selected.fax}" title="#{configMapController.getKey('EditCustomersTitle_fax')}" />
@@ -70,25 +70,23 @@
                     </h:panelGrid>
                     <p:panel id="panel3">
                         <h:panelGrid columns="2">
-                            <h:outputLabel value="#{configMapController.getKey('EditCustomersLabel_preferredContact')}" for="preferredContact" />
-                            <h:selectOneMenu id="preferredContact" value="#{customersController.selected.preferredContact}" title="#{configMapController.getKey('EditCustomersTitle_preferredContact')}" >
-                                <f:selectItem itemValue="0" itemLabel="Email" />
-                                <f:selectItem itemValue="1" itemLabel="Mobile" />
-                                <f:selectItem itemValue="2" itemLabel="HomePhone" />
-                                <f:selectItem itemValue="3" itemLabel="Any" />
-                                <f:selectItem itemValue="4" itemLabel="None" />
-                            </h:selectOneMenu>
+                            <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_preferredContact')}" for="preferredContact1" />
+                            <p:selectOneMenu id="preferredContact1" valueChangeListener="#{customersController.selectOneMenuValueChangeListener}" converter="preferedContactConverter" value="#{customersController.selected.preferredContact}" label="#{configMapController.getKey('CreateCustomersTitle_preferredContact')}" >
+                                <f:selectItems value="#{preferedContactController.itemsAvailableAsObjects}"  var="prefContact" itemLabel="#{prefContact.preferedContactMethod}" itemValue="#{prefContact}"/>
+                                <p:ajax update=":createCustomerForm:panel3" event="change" />
+                            </p:selectOneMenu>
 
-                            <h:outputLabel value="#{configMapController.getKey('EditCustomersLabel_newsletter')}" for="newsletter" />
-                            <h:selectOneMenu id="newsletter" value="#{customersController.selected.newsletter}" title="#{configMapController.getKey('EditCustomersTitle_newsletter')}" >
-                                <f:selectItem itemValue="Y" itemLabel="Send Newsletter" />
-                                <f:selectItem itemValue="N" itemLabel="Dont Send" />
-                            </h:selectOneMenu>
-                            <h:outputLabel value="#{configMapController.getKey('EditCustomersLabel_emailFormat')}" for="emailFormat" />
-                            <h:selectOneMenu id="emailFormat" value="#{customersController.selected.emailFormat}" title="#{configMapController.getKey('EditCustomersTitle_emailFormat')}" required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_emailFormat')}">
-                                <f:selectItem itemValue="HTML" itemLabel="Use HTML" />
-                                <f:selectItem itemValue="TEXT" itemLabel="Plain Text" />
-                            </h:selectOneMenu>
+                            <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_newsletter')}" title="#{configMapController.getKey('EditCustomersTitle_newsletter')}" for="newsletter1" />
+                            <p:selectOneMenu id="newsletter1" value="#{customersController.selected.newsletter}"  >
+                                <f:selectItem itemValue="true" itemLabel="Send Newsletter" />
+                                <f:selectItem itemValue="false" itemLabel="Dont Send" />
+                                <p:ajax update=":createCustomerForm:panel3" event="change" />
+                            </p:selectOneMenu>
+                            <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_emailFormat')}" for="emailFormat1" />
+                            <p:selectOneMenu id="emailFormat1" valueChangeListener="#{customersController.selectOneMenuValueChangeListener}" converter="emailFormatConverter" value="#{customersController.selected.emailFormat}" label="#{configMapController.getKey('CreateCustomersTitle_emailFormat')}" >
+                                <f:selectItems value="#{emailFormatController.itemsAvailableAsObjects}"  var="emailFormat" itemLabel="#{emailFormat.emailFormat}" itemValue="#{emailFormat}"/>
+                                <p:ajax update=":createCustomerForm:panel3" event="change" />
+                            </p:selectOneMenu>
                         </h:panelGrid>
                     </p:panel>
                 </h:panelGrid>

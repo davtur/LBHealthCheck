@@ -16,6 +16,8 @@ public class FitnessCartesianChartModel extends CartesianChartModel{
     
 
     private String chartName;
+    private String yAxisLabel;
+    private String xAxisLabel;
 
     /**
      * @return the chartName
@@ -29,6 +31,34 @@ public class FitnessCartesianChartModel extends CartesianChartModel{
      */
     public void setChartName(String chartName) {
         this.chartName = chartName;
+    }
+
+    /**
+     * @return the yAxisLabel
+     */
+    public String getyAxisLabel() {
+        return yAxisLabel;
+    }
+
+    /**
+     * @param yAxisLabel the yAxisLabel to set
+     */
+    public void setyAxisLabel(String yAxisLabel) {
+        this.yAxisLabel = yAxisLabel;
+    }
+
+    /**
+     * @return the xAxisLabel
+     */
+    public String getxAxisLabel() {
+        return xAxisLabel;
+    }
+
+    /**
+     * @param xAxisLabel the xAxisLabel to set
+     */
+    public void setxAxisLabel(String xAxisLabel) {
+        this.xAxisLabel = xAxisLabel;
     }
     
 }

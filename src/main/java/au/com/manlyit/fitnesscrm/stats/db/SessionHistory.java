@@ -44,8 +44,7 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "SessionHistory.findBySessiondate", query = "SELECT s FROM SessionHistory s WHERE s.sessiondate = :sessiondate")})
 public class SessionHistory implements BaseEntity,Serializable {
     
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "sessionHistoryId")
-    private Collection<SessionTrainers> sessionTrainersCollection;
+    
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -68,6 +67,8 @@ public class SessionHistory implements BaseEntity,Serializable {
     @ManyToOne(optional = false)
     private SessionTypes sessionTypesId;
 
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "sessionHistoryId")
+    private Collection<SessionTrainers> sessionTrainersCollection;
     public SessionHistory() {
     }
 

@@ -37,6 +37,7 @@ import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
 import javax.imageio.ImageIO;
+import org.apache.sanselan.ImageReadException;
 import org.apache.sanselan.Sanselan;
 import org.apache.sanselan.common.IImageMetadata;
 import org.apache.sanselan.formats.jpeg.JpegImageMetadata;
@@ -55,6 +56,8 @@ import org.primefaces.model.UploadedFile;
 public class CustomerImagesController implements Serializable {
 
     private CustomerImages current;
+    private static final int new_width = 800;// must match panelheight on gallery component
+    private static final int new_height = 500;// must match panelheight on gallery component
     private StreamedContent croppedImage;
     private CroppedImage cropperImage;
     private CustomerImages selectedForDeletion;
@@ -111,7 +114,7 @@ public class CustomerImagesController implements Serializable {
         }
     }
 
-    private static BufferedImage resizeImageWithHintKeepAspect(BufferedImage originalImage, int newWidth, int newHeight) {
+    private BufferedImage resizeImageWithHintKeepAspect(BufferedImage originalImage, int newWidth, int newHeight) {
         int type = originalImage.getType() == 0 ? BufferedImage.TYPE_INT_ARGB : originalImage.getType();
         float w = originalImage.getWidth();
         float h = originalImage.getHeight();
@@ -123,11 +126,11 @@ public class CustomerImagesController implements Serializable {
         }
         // if we want to keep aspect we can only use height or width - the one not used should be set to 0
         if (newWidth == 0 && newHeight > 0) {
-            float aspectWidth = (new Float(newHeight) / h) * w;
+            float aspectWidth = ((float) newHeight / h) * w;
             width = Math.round(aspectWidth);
         }
         if (newWidth > 0 && newHeight == 0) {
-            float aspectHeight = (new Float(newWidth) / w) * h;
+            float aspectHeight = ((float) newWidth / w) * h;
             height = Math.round(aspectHeight);
             width = newWidth;
         }
@@ -152,7 +155,7 @@ public class CustomerImagesController implements Serializable {
 
         float w = originalImage.getWidth();
         float h = originalImage.getHeight();
-        float newHeight = (new Float(newWidth) / w) * h;
+        float newHeight = ((float) newWidth / w) * h;
         int nheight = Math.round(newHeight);
 
         BufferedImage resizedImage = new BufferedImage(newWidth, nheight, type);
@@ -182,8 +185,7 @@ public class CustomerImagesController implements Serializable {
 
     public void handleFileUpload(FileUploadEvent event) {
 //Barefoot-image_100_by_100.jpg
-        int new_width = 800;// must match panelheight on gallery component
-        int new_height = 500;// must match panelheight on gallery component
+
         UploadedFile file = event.getFile();
         BufferedImage img = null;
         try {
@@ -191,23 +193,9 @@ public class CustomerImagesController implements Serializable {
         } catch (IOException e) {
             JsfUtil.addErrorMessage(e, "Loading image into buffer error!!");
         }
-        InputStream stream = null;
-
         //BufferedImage scaledImg = resizeImageKeepAspect(img, new_width);
         BufferedImage scaledImg = resizeImageWithHintKeepAspect(img, 0, new_height);// use a 0 for heigh or width to keep aspect
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-        try {
-            ImageIO.write(scaledImg, "jpeg", os);
-
-        } catch (IOException ex) {
-            Logger.getLogger(CustomerImagesController.class.getName()).log(Level.SEVERE, null, ex);
-            JsfUtil.addErrorMessage(ex, "Scaling image  error!!");
-        }
-
-        current.setImage(os.toByteArray());
-        current.setImageType(2);
-        stream = new ByteArrayInputStream(os.toByteArray());
-
+        updateImages(scaledImg);
         //BufferedImage data = null;
         //Iterator readers = ImageIO.getImageReadersByFormatName("jpeg");
         // ImageReader reader = (ImageReader) readers.next();
@@ -266,9 +254,29 @@ public class CustomerImagesController implements Serializable {
              String st = tagNode.getTextContent();
             
              data = reader.read(0);*/
-        } catch (Exception e) {
+        } catch (IOException | ImageReadException e) {
             JsfUtil.addErrorMessage(e, "Couldnt get the date the photo was taken from the image file! No EXIF data in the photo.");
         }
+
+        setSaveButtonDisabled(false);
+
+    }
+
+    private void updateImages(BufferedImage img) {
+
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        try {
+
+            ImageIO.write(img, "jpeg", os);
+
+        } catch (IOException ex) {
+            Logger.getLogger(CustomerImagesController.class.getName()).log(Level.SEVERE, null, ex);
+            JsfUtil.addErrorMessage(ex, "Scaling image  error!!");
+        }
+
+        current.setImage(os.toByteArray());
+        current.setImageType(2);//jpeg
+        InputStream stream = new ByteArrayInputStream(os.toByteArray());
 
         try {
 
@@ -276,18 +284,20 @@ public class CustomerImagesController implements Serializable {
             setCroppedImage(getUploadedImage());
         } catch (Exception ex) {
             Logger.getLogger(CustomerImagesController.class.getName()).log(Level.SEVERE, null, ex);
-            JsfUtil.addErrorMessage(ex, "Uploading image error!!");
+            JsfUtil.addErrorMessage(ex, "Update image error!!");
         }
-        setSaveButtonDisabled(false);
-        /* try {
-         getFacade().edit(current);
-         JsfUtil.addSuccessMessage(configMapFacade.getConfig("PhotoUploaded"));
-        
-         } catch (Exception e) {
-         JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
-        
-         }*/
-//application code
+
+    }
+
+    private BufferedImage rotateImage(int degrees, BufferedImage oldImage) {
+
+        BufferedImage newImage = new BufferedImage(oldImage.getHeight(), oldImage.getWidth(), oldImage.getType());
+        Graphics2D graphics = (Graphics2D) newImage.getGraphics();
+        graphics.rotate(Math.toRadians(degrees), newImage.getWidth() / 2, newImage.getHeight() / 2);
+        graphics.translate((newImage.getWidth() - oldImage.getWidth()) / 2, (newImage.getHeight() - oldImage.getHeight()) / 2);
+        graphics.drawImage(oldImage, 0, 0, oldImage.getWidth(), oldImage.getHeight(), null);
+
+        return newImage;
     }
 
     private static void printTagValue(JpegImageMetadata jpegMetadata,
@@ -333,6 +343,24 @@ public class CustomerImagesController implements Serializable {
     public String prepareList() {
         recreateModel();
         return "List";
+    }
+
+    public void rotate90degrees(ActionEvent event) {
+        BufferedImage oldImage;
+        try {
+            ByteArrayInputStream is = new ByteArrayInputStream(current.getImage());
+            oldImage = ImageIO.read(is);
+        } catch (IOException ex) {
+            Logger.getLogger(CustomerImagesController.class.getName()).log(Level.SEVERE, null, ex);
+            return;
+        }
+        BufferedImage img = rotateImage(90, oldImage);
+        int newWidth = 0;
+        int newHeight = new_height;
+
+        BufferedImage scaledImg = resizeImageWithHintKeepAspect(img, newWidth, newHeight);
+        updateImages(scaledImg);
+        JsfUtil.addSuccessMessage(configMapFacade.getConfig("IMageRotateSuccessful"));
     }
 
     public void prepareViewFromStatTakenController() {

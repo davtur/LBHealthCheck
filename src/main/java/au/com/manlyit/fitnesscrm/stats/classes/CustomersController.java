@@ -394,14 +394,14 @@ public class CustomersController implements Serializable {
         Object o = vce.getNewValue();
     }
 
-    public String update() {
+    public void update(ActionEvent event) {
         try {
             getFacade().edit(getSelected());
             JsfUtil.addSuccessMessage(configMapFacade.getConfig("CustomersUpdated"));
-            return "View";
+           
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
-            return null;
+            
         }
     }
 

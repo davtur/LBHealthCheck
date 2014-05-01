@@ -33,7 +33,7 @@
                              rowsPerPageTemplate="5,10,15" type="none">
 
                     <p:panel header="#{chart.chartName}">
-                        <p:lineChart  styleClass="chartClass" value="#{chart}"   />
+                        <p:lineChart  styleClass="chartClass" value="#{chart}" yaxisLabel="#{chart.getyAxisLabel()}" legendPosition="ne"  />
                     </p:panel>
 
                 </p:dataList>

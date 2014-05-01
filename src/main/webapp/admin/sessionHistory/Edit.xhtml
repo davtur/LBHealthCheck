@@ -23,60 +23,47 @@
                     </h:panelGrid>
                 </p:panel>
                 <p:panel>
-                    <h:panelGrid columns="3">
+                    <h:panelGrid columns="2">
                         <p:panel>
-                            <h:outputLabel value="#{configMapController.getKey('EditSessionHistoryLabel_sessiondate')}" for="sessiondate" />
-                            <p:calendar id="sessiondate" value="#{sessionHistoryController.selected.sessiondate}" mode="inline"
-                                        title="#{configMapController.getKey('CreateSessionHistoryTitle_sessiondate')}"    >
-                                       
-                                 <p:ajax event="dateSelect" listener="#{sessionHistoryController.handleDateSelect}" update=":menuForm:growl"  />
+                            <p:panel >
+                                <p:outputLabel value="#{configMapController.getKey('CreateSessionHistoryLabel_sessiondate')}" for="sessiondate" />
+                                <p:calendar id="sessiondate" value="#{sessionHistoryController.selected.sessiondate}"  style="width:100%;height:100%" pattern="dd MMM yyyy HH:mm a" stepMinute="15" 
+                                            title="#{configMapController.getKey('CreateSessionHistoryTitle_sessiondate')}" >
+                                    <p:ajax event="dateSelect" listener="#{sessionHistoryController.handleDateSelect}" update=":menuForm:growl"  />
+                                </p:calendar>
+                            </p:panel>
 
-                        </p:calendar>  
+                            <p:pickList id="sessionPicker"  value="#{sessionHistoryController.participants}"
+                                        var="cust" showSourceFilter="true" showTargetFilter="true" showCheckbox="true"
+                                       itemLabel="#{cust.firstname} #{cust.lastname}"
+                                        itemValue="#{cust}" converter="#{custConverter}">
+                                <f:facet name="sourceCaption">Did not attend</f:facet>
+                                <f:facet name="targetCaption">Attended Session</f:facet>
+                            </p:pickList>
                         </p:panel>
-                        <p:panel>
-                            <h:panelGrid columns="1">
-                                <h:outputLabel value="#{configMapController.getKey('EditSessionHistoryLabel_sessionType')}" for="sessionType" />
-                                <h:selectOneMenu id="sessionType" value="#{sessionHistoryController.selected.sessionTypesId}" title="#{configMapController.getKey('EditSessionHistoryTitle_sessionType')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionHistoryRequiredMessage_sessionType')}">
-                                    <f:selectItems value="#{sessionTypesController.itemsAvailableSelectOne}"/>
-                                </h:selectOneMenu>
-                                
-                                <h:outputLabel value="#{configMapController.getKey('CreateSessionHistoryLabel_trainer')}" for="trainer" />
-                                <h:selectOneMenu id="trainer" value="#{sessionHistoryController.selected.customers}" title="#{configMapController.getKey('CreateSessionHistoryTitle_trainer')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionHistoryRequiredMessage_trainer')}">
-                                    <f:selectItems value="#{customersController.getCustomersByGroupSelectOne('TRAINER',true)}"/>
-                                </h:selectOneMenu>
-
-                                <h:outputLabel value="#{configMapController.getKey('EditSessionHistoryLabel_comments')}" for="comments" />
-                                <p:inputTextarea id="comments" value="#{sessionHistoryController.selected.comments}" cols="40" rows="8" title="#{configMapController.getKey('EditSessionHistoryTitle_comments')}"/>
-                            </h:panelGrid>
-                        </p:panel>
+                       <p:panel>
+                             <p:panel>
+                                <p:panel>
+                                    <p:outputLabel value="#{configMapController.getKey('CreateSessionHistoryLabel_sessionType')}" for="sessionType" />
+                                  <p:selectOneMenu id="sessionType" style="width:100%;height:100%" value="#{sessionHistoryController.selected.sessionTypesId}" filterFunction="startsWith" filter="true" editable="false" converter="#{sessTypesConverter}" label="#{configMapController.getKey('CreateSessionHistoryTitle_sessionType')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionHistoryRequiredMessage_sessionType')}">
+                                        <f:selectItems value="#{sessionTypesController.itemsAvailableSelectOne}" var="sessionType" itemLabel="#{sessionType.name}" itemValue="#{sessionType}"/>
+                                    </p:selectOneMenu>
+                               </p:panel>
+                                <p:outputLabel value="#{configMapController.getKey('CreateSessionHistoryLabel_trainer')}" for="trainer" />
+                               <p:selectManyMenu id="trainer" style="width:100%;height:100%" showCheckbox="true" value="#{sessionHistoryController.trainers}" converter="#{custConverter}"  label="#{configMapController.getKey('CreateSessionHistoryTitle_trainer')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionHistoryRequiredMessage_trainer')}">
+                                    <f:selectItems value="#{customersController.getCustomersByGroupObject('TRAINER',true)}" var="cust" itemLabel="#{cust.firstname} #{cust.lastname}" itemValue="#{cust}"/>
+                                </p:selectManyMenu>
+                            </p:panel>
+                            <p:panel >
+                               <p:outputLabel value="#{configMapController.getKey('CreateSessionHistoryLabel_comments')}" for="comments" />
+                                <p:inputTextarea id="comments" style="width:100%;height:100%" value="#{sessionHistoryController.selected.comments}" cols="35" rows="8" title="#{configMapController.getKey('CreateSessionHistoryTitle_comments')}"/>
+                           </p:panel>
+                       </p:panel>
                     </h:panelGrid>
 
 
 
-                    <p:panel header="#{configMapController.getKey('CreateSessionHistoryLabel_picker')}">
-                        <p:pickList id="picker" value="#{sessionHistoryController.participants}"
-                                    var="cust"
-                                    itemLabel="#{cust.firstname} #{cust.lastname}"
-                                    itemValue="#{cust}" converter="#{custConverter}">
-                            <f:facet name="sourceCaption">Did not attend</f:facet>
-                            <f:facet name="targetCaption">Attended Session</f:facet>
-                        </p:pickList>
-
-                        <p:dialog modal="true" showEffect="fade" hideEffect="fade" widgetVar="participantDialog">
-                            <h:panelGrid id="displayParticipants" columns="2">
-                                <h:outputText value="Source: " style="font-weight:bold"/>
-                                <ui:repeat value="#{sessionHistoryController.participants.source}" var="item">
-                                    <h:outputText value="#{item}" style="margin-right:5px" />
-                                </ui:repeat>
-
-                                <h:outputText value="Target: " style="font-weight:bold"/>
-                                <ui:repeat value="#{sessionHistoryController.participants.target}" var="item">
-                                    <h:outputText value="#{item}" style="margin-right:5px" />
-                                </ui:repeat>
-                            </h:panelGrid>
-                        </p:dialog>
-                    </p:panel>
-
+    
 
                 </p:panel>
             </h:form>

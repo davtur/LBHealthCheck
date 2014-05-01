@@ -12,6 +12,10 @@
             <var>bundle</var>
         </resource-bundle>
         <!--<view-handler>au.com.manlyit.fitnesscrm.stats.classes.util.UserAgentSwitchViewHandlerWrapper</view-handler>-->
+        <resource-bundle>
+            <base-name>/Bundle2</base-name>
+            <var>bundle2</var>
+        </resource-bundle>
     </application>
     <validator>
         <validator-id>au.com.manlyit.fitnesscrm.stats.classes.util.EmailValidator</validator-id>

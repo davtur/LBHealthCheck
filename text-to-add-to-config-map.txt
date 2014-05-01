@@ -39,4 +39,6 @@ AddPaymentScheduleSaveLink=Save
 AddPaymentScheduleDiscardLink=Discard
 AddPaymentScheduleLabel_paymentAmount=Payment Amount
 ListPaymentsTitle_manualPayment=Type
+CreateCustomerImagesRotateImage90Link=Rotate 90
+IMageRotateSuccessful=The image was rotated successfully.
 

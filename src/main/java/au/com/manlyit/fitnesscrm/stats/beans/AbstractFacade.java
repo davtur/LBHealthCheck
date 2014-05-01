@@ -35,22 +35,22 @@ public abstract class AbstractFacade<T> {
     public void create(T entity) {
         getEntityManager().persist(entity);
         String message = "Entity Created: " + entity.toString();
-        Logger.getLogger(getClass().getName()).log(Level.INFO, message);
+        logger.log(Level.INFO, message);
 
     }
 
     public void edit(T entity) {
         getEntityManager().merge(entity);
-        String message = "Entity Edited: " + entity.toString();
-        Logger.getLogger(getClass().getName()).log(Level.INFO, message);
+        String message = "Entity Merged: " + entity.toString();
+        logger.log(Level.INFO, message);
 
     }
 
     public void remove(T entity) {
 
         getEntityManager().remove(getEntityManager().merge(entity));
-        String message = "Entity Deleted: " + entity.toString();
-        Logger.getLogger(getClass().getName()).log(Level.INFO, message);
+        String message = "Entity Removed: " + entity.toString();
+        logger.log(Level.INFO, message);
     }
 
     public T find(Object id) {

@@ -38,7 +38,7 @@
                         <p:panel id="photoPanel3" header="Select a photo to upload (jpeg)">
                             <h:panelGrid columns="2" width="400px">
                                 <p:fileUpload fileLimitMessage="The size of the picture is too big! ( > 10MB )" fileUploadListener="#{customerImagesController.handleFileUpload}" auto="true" update=":photoCreate:photoPanel3  :photoCreate:datetaken :menuForm:growl :photoCreate:saveButton" allowTypes="/(\.|\/)(gif|jpe?g|png)$/" sizeLimit="10000000" />
-                                <p:graphicImage  value="#{customerImagesController.uploadedImage}" width="180px" cache="false" id="photo1"/>
+                                <p:graphicImage id="photo1" value="#{customerImagesController.uploadedImage}" width="300px" cache="false" />
                             </h:panelGrid>
                            <!-- <p:panel id="imageCropperPanel" header="Uploaded Image">
                                 <h:panelGrid columns="2">  
@@ -73,6 +73,8 @@
 
 
                             <p:commandButton   ajax="false"   action="#{customerImagesController.prepareList}" value="#{configMapController.getKey('CreateCustomerImagesShowAllLink')}" immediate="true"/>
+                           <p:commandButton      actionListener="#{customerImagesController.rotate90degrees}" process="photo1" update=":photoCreate:photoPanel3 :photoCreate:datetaken :menuForm:growl :photoCreate:saveButton"  value="#{configMapController.getKey('CreateCustomerImagesRotateImage90Link')}" />
+
                         </h:panelGrid>
                     </p:panel>
                 </p:panel>

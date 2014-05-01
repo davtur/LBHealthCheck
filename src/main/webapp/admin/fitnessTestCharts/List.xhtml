@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <ui:composition template="/template.xhtml">
+        <ui:define name="title">
+            <h:outputText value="#{bundle2.ListFitnessTestChartsTitle}"></h:outputText>
+        </ui:define>
+        <ui:define name="body">
+            <h:form styleClass="jsfcrud_list_form">
+                
+                <h:outputText escape="false" value="#{bundle2.ListFitnessTestChartsEmpty}" rendered="#{fitnessTestChartsController.items.rowCount == 0}"/>
+                <h:panelGroup rendered="#{fitnessTestChartsController.items.rowCount > 0}">
+                    <h:outputText value="#{fitnessTestChartsController.pagination.pageFirstItem + 1}..#{fitnessTestChartsController.pagination.pageLastItem + 1}/#{fitnessTestChartsController.pagination.itemsCount}"/>
+                    <h:commandLink action="#{fitnessTestChartsController.previous}" value="#{bundle2.Previous} #{fitnessTestChartsController.pagination.pageSize}" rendered="#{fitnessTestChartsController.pagination.hasPreviousPage}"/>
+                    <h:commandLink action="#{fitnessTestChartsController.next}" value="#{bundle2.Next} #{fitnessTestChartsController.pagination.pageSize}" rendered="#{fitnessTestChartsController.pagination.hasNextPage}"/>
+                    <h:dataTable value="#{fitnessTestChartsController.items}" var="item"  >
+                        <h:column>
+                            <f:facet name="header">
+                                <h:outputText value="#{bundle2.ListFitnessTestChartsTitle_id}"/>
+                            </f:facet>
+                            <h:outputText value="#{item.id}"/>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">
+                                <h:outputText value="#{bundle2.ListFitnessTestChartsTitle_name}"/>
+                            </f:facet>
+                            <h:outputText value="#{item.name}"/>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">
+                                <h:outputText value="#{bundle2.ListFitnessTestChartsTitle_description}"/>
+                            </f:facet>
+                            <h:outputText value="#{item.description}"/>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">
+                                <h:outputText value="#{bundle2.ListFitnessTestChartsTitle_yaxisLabel}"/>
+                            </f:facet>
+                            <h:outputText value="#{item.yaxisLabel}"/>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">
+                                <h:outputText value="&nbsp;"/>
+                            </f:facet>
+                            <h:commandLink action="#{fitnessTestChartsController.prepareView}" value="#{bundle2.ListFitnessTestChartsViewLink}"/>
+                            <h:outputText value=" "/>
+                            <h:commandLink action="#{fitnessTestChartsController.prepareEdit}" value="#{bundle2.ListFitnessTestChartsEditLink}"/>
+                            <h:outputText value=" "/>
+                            <h:commandLink action="#{fitnessTestChartsController.destroy}" value="#{bundle2.ListFitnessTestChartsDestroyLink}"/>
+                        </h:column>
+                    </h:dataTable>
+                </h:panelGroup>
+                <br />
+                <h:commandLink action="#{fitnessTestChartsController.prepareCreate}" value="#{bundle2.ListFitnessTestChartsCreateLink}"/>
+                <br />
+                <br />
+                <h:link outcome="/index" value="#{bundle2.ListFitnessTestChartsIndexLink}"/>
+            </h:form>
+        </ui:define>
+    </ui:composition>
+
+</html>

@@ -324,21 +324,21 @@ public class SessionHistoryController implements Serializable {
 
     private void updateCurrentTrainers(List<Customers> trainerList) {
 
-        List<SessionTrainers> parts = new ArrayList<>();
-        Collection<SessionTrainers> oldList = current.getSessionTrainersCollection();
+        List<SessionTrainers> sessionTrainersList = new ArrayList<>();
+       /* Collection<SessionTrainers> oldList = current.getSessionTrainersCollection();
         if (oldList != null) {
             for (SessionTrainers st : oldList) {
                 ejbSessionTrainersFacade.remove(st);
             }
-        }
+        }*/
         for (Customers cust : trainerList) {
             SessionTrainers p = new SessionTrainers(0);
             p.setCustomerId(cust);
             p.setSessionHistoryId(current);
-            parts.add(p);
+            sessionTrainersList.add(p);
         }
         //current.getParticipantsCollection().clear();
-        current.setSessionTrainersCollection(parts);
+        current.setSessionTrainersCollection(sessionTrainersList);
 
     }
 
@@ -639,7 +639,7 @@ public class SessionHistoryController implements Serializable {
             GregorianCalendar startDate = new GregorianCalendar();
 
             GregorianCalendar endDate = new GregorianCalendar();
-
+            // pull up sessions for the last week on the mobile menu, they can log in to teh desktop version for older dates.
             startDate.set(Calendar.HOUR_OF_DAY, 0);
             startDate.set(Calendar.MINUTE, 0);
             startDate.set(Calendar.SECOND, 0);
@@ -647,6 +647,7 @@ public class SessionHistoryController implements Serializable {
             endDate.setTime(startDate.getTime());
             endDate.add(Calendar.HOUR_OF_DAY, 24);
             endDate.add(Calendar.MILLISECOND, -1);
+            startDate.add(Calendar.DAY_OF_MONTH, -6);
             List<SessionHistory> sessionItems = getFacade().findSessionsByTrainerAndDateRange(cust, startDate.getTime(), endDate.getTime(), true);
             SessionHistory[] sha = new SessionHistory[sessionItems.size()];
             sessionHistoryItems = sessionItems.toArray(sha);

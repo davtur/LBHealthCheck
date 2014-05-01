@@ -7,19 +7,20 @@ package au.com.manlyit.fitnesscrm.stats.classes;
 import au.com.manlyit.fitnesscrm.stats.chartbeans.FitnessCartesianChartModel;
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
+import au.com.manlyit.fitnesscrm.stats.db.FitnessTestCharts;
 import au.com.manlyit.fitnesscrm.stats.db.Stat;
 import au.com.manlyit.fitnesscrm.stats.db.StatTypes;
 import au.com.manlyit.fitnesscrm.stats.db.StatsTaken;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import javax.inject.Inject;
 import javax.enterprise.context.SessionScoped;
 import javax.inject.Named;
 import javax.faces.context.FacesContext;
-import org.primefaces.model.chart.CartesianChartModel;
 import org.primefaces.model.chart.LineChartSeries;
 
 /**
@@ -37,6 +38,8 @@ public class ChartController implements Serializable {
     }
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.StatsFacade ejbStatsFacade;
+        @Inject
+    private au.com.manlyit.fitnesscrm.stats.beans.FitnessTestChartsFacade ejbFitnessTestChartsFacade;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.StatTypesFacade ejbStatTypesFacade;
     @Inject
@@ -91,7 +94,7 @@ public class ChartController implements Serializable {
         return chartMeasurements;
     }
 
-    public List<LineChartSeries> getChartDataForModel(List<StatTypes> stypes) {
+    public List<LineChartSeries> getChartDataForModel(ArrayList<StatTypes> stypes) {
 
         List<LineChartSeries> chartMeasurements = new ArrayList<>();
         for (StatTypes stype : stypes) {
@@ -134,42 +137,16 @@ public class ChartController implements Serializable {
         if (modelList == null) {
             modelList = new ArrayList<>();
             //get list of charts types that customer has
-            //for each chart type creat a chart and add to list
-            ArrayList<StatTypes> stypes = new ArrayList<>();
-            stypes.add(ejbStatTypesFacade.find(1));//waist
-            stypes.add(ejbStatTypesFacade.find(2));//hips
-            stypes.add(ejbStatTypesFacade.find(3));//thighs
-            stypes.add(ejbStatTypesFacade.find(4));//chest
-            stypes.add(ejbStatTypesFacade.find(5));//arms
-            modelList.add(createModel("Body Measurements (cm)", stypes));//chart1
-
-            stypes = new ArrayList<>();
-            stypes.add(ejbStatTypesFacade.find(13)); //weight
-            modelList.add(createModel("Body Weight (Kg)", stypes));//chart 3
-
-            stypes = new ArrayList<>();
-            stypes.add(ejbStatTypesFacade.find(12));
-            modelList.add(createModel("Body Fat  (Percentage)", stypes));//chart 4
-
-            stypes = new ArrayList<>();
-            stypes.add(ejbStatTypesFacade.find(8));
-            modelList.add(createModel("Plank Test (Seconds)", stypes));//chart 5
-
-            stypes = new ArrayList<>();
-            stypes.add(ejbStatTypesFacade.find(7)); //push up
-            stypes.add(ejbStatTypesFacade.find(9)); //Situp
-            modelList.add(createModel("Fitness tests (Reps Per Minute)", stypes));//chart 6
-
-            stypes = new ArrayList<>();
-            stypes.add(ejbStatTypesFacade.find(6));
-            stypes.add(ejbStatTypesFacade.find(11));
-            modelList.add(createModel("Beep Test and VO2 Max (Score)", stypes));//chart 2
-
-            stypes = new ArrayList<>();
-            stypes.add(ejbStatTypesFacade.find(14));// 5km run
-            modelList.add(createModel("5km Distance Run  (Time in Minutes)", stypes));//chart 7
-
-        }
+            List<FitnessTestCharts> chartsList = ejbFitnessTestChartsFacade.findAll();
+             for(FitnessTestCharts chrt:chartsList){
+                 Collection<StatTypes> stypes = chrt.getStatTypesCollection();
+                 FitnessCartesianChartModel mod = createModel(chrt, stypes);
+                 if(mod.getSeries().isEmpty() == false){
+                    modelList.add(mod); 
+                 }
+                 
+             }
+          }
         return modelList;
     }
 
@@ -181,12 +158,17 @@ public class ChartController implements Serializable {
 
     }
 
-    private FitnessCartesianChartModel createModel(String name, ArrayList<StatTypes> stypes) {
-        List<LineChartSeries> seriesList = getChartDataForModel(stypes);
+    private FitnessCartesianChartModel createModel(FitnessTestCharts chrt, Collection<StatTypes> stypes) {
+        List<LineChartSeries> seriesList = getChartDataForModel(new ArrayList<>(stypes));
         FitnessCartesianChartModel model = new FitnessCartesianChartModel();
-        model.setChartName(name);
+        model.setChartName(chrt.getName());
+        model.setyAxisLabel(chrt.getYaxisLabel());
+       
         for (LineChartSeries cs : seriesList) {
-            model.addSeries(cs);
+            if(cs.getData().isEmpty()== false){
+                 model.addSeries(cs);
+            }
+           
         }
         return model;
     }
@@ -198,63 +180,3 @@ public class ChartController implements Serializable {
         this.modelList = modelList;
     }
 }
-/*  public List<LineChartPointsVertical> getChartMeasurements() {
-
- ArrayList<StatTypes> stypes = new ArrayList<StatTypes>();
- stypes.add(ejbStatTypesFacade.find(1));
- stypes.add(ejbStatTypesFacade.find(2));
- stypes.add(ejbStatTypesFacade.find(3));
- stypes.add(ejbStatTypesFacade.find(4));
- stypes.add(ejbStatTypesFacade.find(5));
- return getChartData(stypes);
- }
-
- public List<LineChartPointsVertical> getChartPerMInuteTests() {
-
- ArrayList<StatTypes> stypes = new ArrayList<StatTypes>();
- stypes.add(ejbStatTypesFacade.find(7));
- stypes.add(ejbStatTypesFacade.find(8));
- stypes.add(ejbStatTypesFacade.find(9));
- return getChartData(stypes);
- }
-
- public List<LineChartPointsVertical> getChartBeepAndVo2Test() {
-
- ArrayList<StatTypes> stypes = new ArrayList<StatTypes>();
- stypes.add(ejbStatTypesFacade.find(6));
- stypes.add(ejbStatTypesFacade.find(11));
-
- return getChartData(stypes);
- }
-
- public List<LineChartPointsVertical> getChartMaxHeartrate() {
-
- ArrayList<StatTypes> stypes = new ArrayList<StatTypes>();
- stypes.add(ejbStatTypesFacade.find(10));
-
- return getChartData(stypes);
- }
-
- public List<LineChartPointsVertical> getChartBodyFat() {
-
- ArrayList<StatTypes> stypes = new ArrayList<StatTypes>();
- stypes.add(ejbStatTypesFacade.find(12));
-
- return getChartData(stypes);
- }
-
- public List<LineChartPointsVertical> getChartWeight() {
-
- ArrayList<StatTypes> stypes = new ArrayList<StatTypes>();
- stypes.add(ejbStatTypesFacade.find(13));
-
- return getChartData(stypes);
- }
-
- public List<LineChartPointsVertical> getChart2kRun() {
-
- ArrayList<StatTypes> stypes = new ArrayList<StatTypes>();
- stypes.add(ejbStatTypesFacade.find(14));
-
- return getChartData(stypes);
- }*/
