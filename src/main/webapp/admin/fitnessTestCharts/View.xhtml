@@ -1,44 +1,30 @@
-<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="ISO-8859-1" ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
-      xmlns:h="http://xmlns.jcp.org/jsf/html"
-      xmlns:f="http://xmlns.jcp.org/jsf/core">
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" 
+      xmlns:ui="http://java.sun.com/jsf/facelets" >
 
-    <ui:composition template="/template.xhtml">
-        <ui:define name="title">
-            <h:outputText value="#{bundle2.ViewFitnessTestChartsTitle}"></h:outputText>
-        </ui:define>
-        <ui:define name="body">
-            <h:panelGroup id="messagePanel" layout="block">
-                <h:messages errorStyle="color: red" infoStyle="color: green" layout="table"/>
-            </h:panelGroup>
-            <h:form>
-                <h:panelGrid columns="2">
-                    <h:outputText value="#{bundle2.ViewFitnessTestChartsLabel_id}"/>
-                    <h:outputText value="#{fitnessTestChartsController.selected.id}" title="#{bundle2.ViewFitnessTestChartsTitle_id}"/>
-                    <h:outputText value="#{bundle2.ViewFitnessTestChartsLabel_name}"/>
-                    <h:outputText value="#{fitnessTestChartsController.selected.name}" title="#{bundle2.ViewFitnessTestChartsTitle_name}"/>
-                    <h:outputText value="#{bundle2.ViewFitnessTestChartsLabel_description}"/>
-                    <h:outputText value="#{fitnessTestChartsController.selected.description}" title="#{bundle2.ViewFitnessTestChartsTitle_description}"/>
-                    <h:outputText value="#{bundle2.ViewFitnessTestChartsLabel_yaxisLabel}"/>
-                    <h:outputText value="#{fitnessTestChartsController.selected.yaxisLabel}" title="#{bundle2.ViewFitnessTestChartsTitle_yaxisLabel}"/>
-                </h:panelGrid>
-                <br />
-                <h:commandLink action="#{fitnessTestChartsController.destroyAndView}" value="#{bundle2.ViewFitnessTestChartsDestroyLink}"/>
-                <br />
-                <br />
-                <h:link outcome="Edit" value="#{bundle2.ViewFitnessTestChartsEditLink}"/>
-                <br />
-                <h:commandLink action="#{fitnessTestChartsController.prepareCreate}" value="#{bundle2.ViewFitnessTestChartsCreateLink}" />
-                <br />
-                <h:commandLink action="#{fitnessTestChartsController.prepareList}" value="#{bundle2.ViewFitnessTestChartsShowAllLink}"/>
-                <br />
-                <br />
-                <h:link outcome="/index" value="#{bundle2.ViewFitnessTestChartsIndexLink}"/>
+    <ui:composition>
 
+        <p:dialog id="FitnessTestChartsViewDlg" widgetVar="FitnessTestChartsViewDialog" modal="true" resizable="false" appendTo="@(body)" header="#{bundle.ViewFitnessTestChartsTitle}">
+            <h:form id="FitnessTestChartsViewForm">
+                <h:panelGroup id="display">
+                    <p:panelGrid columns="2" rendered="#{fitnessTestChartsController.selected != null}">
+                        <h:outputText value="#{bundle.ViewFitnessTestChartsLabel_id}"/>
+                        <h:outputText value="#{fitnessTestChartsController.selected.id}" title="#{bundle.ViewFitnessTestChartsTitle_id}"/>
+                        <h:outputText value="#{bundle.ViewFitnessTestChartsLabel_name}"/>
+                        <h:outputText value="#{fitnessTestChartsController.selected.name}" title="#{bundle.ViewFitnessTestChartsTitle_name}"/>
+                        <h:outputText value="#{bundle.ViewFitnessTestChartsLabel_description}"/>
+                        <h:outputText value="#{fitnessTestChartsController.selected.description}" title="#{bundle.ViewFitnessTestChartsTitle_description}"/>
+                        <h:outputText value="#{bundle.ViewFitnessTestChartsLabel_yaxisLabel}"/>
+                        <h:outputText value="#{fitnessTestChartsController.selected.yaxisLabel}" title="#{bundle.ViewFitnessTestChartsTitle_yaxisLabel}"/>
+                    </p:panelGrid>
+                    <p:commandButton value="#{bundle.Close}" onclick="FitnessTestChartsViewDialog.hide()"/>
+                </h:panelGroup>
             </h:form>
-        </ui:define>
-    </ui:composition>
+        </p:dialog>
 
+    </ui:composition>
 </html>

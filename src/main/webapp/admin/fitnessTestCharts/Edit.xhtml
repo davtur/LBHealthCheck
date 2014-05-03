@@ -1,40 +1,30 @@
-<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="ISO-8859-1" ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
-      xmlns:h="http://xmlns.jcp.org/jsf/html"
-      xmlns:f="http://xmlns.jcp.org/jsf/core">
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" >
 
-    <ui:composition template="/template.xhtml">
-        <ui:define name="title">
-            <h:outputText value="#{bundle2.EditFitnessTestChartsTitle}"></h:outputText>
-        </ui:define>
-        <ui:define name="body">
-            <h:panelGroup id="messagePanel" layout="block">
-                <h:messages errorStyle="color: red" infoStyle="color: green" layout="table"/>
-            </h:panelGroup>
-            <h:form>
-                <h:panelGrid columns="2">
-                    <h:outputLabel value="#{bundle2.EditFitnessTestChartsLabel_id}" for="id" />
-                    <h:inputText id="id" value="#{fitnessTestChartsController.selected.id}" title="#{bundle2.EditFitnessTestChartsTitle_id}" required="true" requiredMessage="#{bundle2.EditFitnessTestChartsRequiredMessage_id}"/>
-                    <h:outputLabel value="#{bundle2.EditFitnessTestChartsLabel_name}" for="name" />
-                    <h:inputText id="name" value="#{fitnessTestChartsController.selected.name}" title="#{bundle2.EditFitnessTestChartsTitle_name}" required="true" requiredMessage="#{bundle2.EditFitnessTestChartsRequiredMessage_name}"/>
-                    <h:outputLabel value="#{bundle2.EditFitnessTestChartsLabel_description}" for="description" />
-                    <h:inputTextarea rows="4" cols="30" id="description" value="#{fitnessTestChartsController.selected.description}" title="#{bundle2.EditFitnessTestChartsTitle_description}" required="true" requiredMessage="#{bundle2.EditFitnessTestChartsRequiredMessage_description}"/>
-                    <h:outputLabel value="#{bundle2.EditFitnessTestChartsLabel_yaxisLabel}" for="yaxisLabel" />
-                    <h:inputText id="yaxisLabel" value="#{fitnessTestChartsController.selected.yaxisLabel}" title="#{bundle2.EditFitnessTestChartsTitle_yaxisLabel}" required="true" requiredMessage="#{bundle2.EditFitnessTestChartsRequiredMessage_yaxisLabel}"/>
-                </h:panelGrid>
-                <h:commandLink action="#{fitnessTestChartsController.update}" value="#{bundle2.EditFitnessTestChartsSaveLink}"/>
-                <br />
-                <br />
-                <h:link outcome="View" value="#{bundle2.EditFitnessTestChartsViewLink}"/>
-                <br />
-                <h:commandLink action="#{fitnessTestChartsController.prepareList}" value="#{bundle2.EditFitnessTestChartsShowAllLink}" immediate="true"/>
-                <br />
-                <br />
-                <h:link outcome="/index" value="#{bundle2.EditFitnessTestChartsIndexLink}" />
+    <ui:composition>
+        <p:dialog id="FitnessTestChartsEditDlg" widgetVar="FitnessTestChartsEditDialog" modal="true" resizable="false" appendTo="@(body)" header="#{bundle.EditFitnessTestChartsTitle}">
+            <h:form id="FitnessTestChartsEditForm">
+                <h:panelGroup id="display">
+                    <p:panelGrid columns="2" rendered="#{fitnessTestChartsController.selected != null}">
+                        <h:outputLabel value="#{bundle.EditFitnessTestChartsLabel_id}" for="id" />
+                        <h:inputText id="id"  value="#{fitnessTestChartsController.selected.id}" title="#{bundle.EditFitnessTestChartsTitle_id}" required="true" requiredMessage="#{bundle.EditFitnessTestChartsRequiredMessage_id}"/>
+                        <h:outputLabel value="#{bundle.EditFitnessTestChartsLabel_name}" for="name" />
+                        <h:inputText id="name"  value="#{fitnessTestChartsController.selected.name}" title="#{bundle.EditFitnessTestChartsTitle_name}" required="true" requiredMessage="#{bundle.EditFitnessTestChartsRequiredMessage_name}"/>
+                        <h:outputLabel value="#{bundle.EditFitnessTestChartsLabel_description}" for="description" />
+                        <h:inputTextarea rows="4" cols="30" id="description" value="#{fitnessTestChartsController.selected.description}" title="#{bundle.EditFitnessTestChartsTitle_description}" required="true" requiredMessage="#{bundle.EditFitnessTestChartsRequiredMessage_description}"/>
+                        <h:outputLabel value="#{bundle.EditFitnessTestChartsLabel_yaxisLabel}" for="yaxisLabel" />
+                        <h:inputText id="yaxisLabel"  value="#{fitnessTestChartsController.selected.yaxisLabel}" title="#{bundle.EditFitnessTestChartsTitle_yaxisLabel}" required="true" requiredMessage="#{bundle.EditFitnessTestChartsRequiredMessage_yaxisLabel}"/>
+                    </p:panelGrid>
+                    <p:commandButton actionListener="#{fitnessTestChartsController.update}" value="#{bundle.Save}" update="display,:FitnessTestChartsListForm:datalist,:menuForm:growl" oncomplete="handleSubmit(args, 'FitnessTestChartsEditDialog');fitnessTestChartsControllerTable.filter()"/>
+                    <p:commandButton value="#{bundle.Cancel}" onclick="FitnessTestChartsEditDialog.hide()"/>
+                </h:panelGroup>
             </h:form>
-        </ui:define>
-    </ui:composition>
+        </p:dialog>
 
+    </ui:composition>
 </html>

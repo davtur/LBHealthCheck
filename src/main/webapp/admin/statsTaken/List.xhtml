@@ -62,7 +62,7 @@
                                    <f:setPropertyActionListener value="#{item}" target="#{statsTakenController.selected}" />
                                 </p:commandButton>
                                         <h:outputText value=" "/>
-                                    <p:commandButton id="btn345" ajax="true" update=":listStatsTakenForm1:p1" async="true" actionListener="#{statsTakenController.destroy}" value="#{configMapController.getKey('ListStatsTakenDestroyLink')}">
+                                    <p:commandButton id="btn345" ajax="true" update=":listStatsTakenForm1:p1" async="true"  value="#{configMapController.getKey('ListStatsTakenDestroyLink')}">
                                     <f:setPropertyActionListener value="#{item}" target="#{statsTakenController.selectedForDeletion}" />
                                 </p:commandButton>   
                                   

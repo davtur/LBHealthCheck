@@ -73,7 +73,7 @@
 
 
                             <p:commandButton   ajax="false"   action="#{customerImagesController.prepareList}" value="#{configMapController.getKey('CreateCustomerImagesShowAllLink')}" immediate="true"/>
-                           <p:commandButton      actionListener="#{customerImagesController.rotate90degrees}" process="photo1" update=":photoCreate:photoPanel3 :photoCreate:datetaken :menuForm:growl :photoCreate:saveButton"  value="#{configMapController.getKey('CreateCustomerImagesRotateImage90Link')}" />
+                           <p:commandButton      actionListener="#{customerImagesController.rotate90degrees}" update=":photoCreate:photoPanel3 :photoCreate:datetaken :menuForm:growl :photoCreate:saveButton"  value="#{configMapController.getKey('CreateCustomerImagesRotateImage90Link')}" />
 
                         </h:panelGrid>
                     </p:panel>
