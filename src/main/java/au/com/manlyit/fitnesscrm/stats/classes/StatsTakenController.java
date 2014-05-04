@@ -140,7 +140,7 @@ public class StatsTakenController implements Serializable {
         return "View";
     }
 
-    public String prepareCreate() {
+    public void prepareCreate() {
         current = new StatsTaken();
         current.setDateRecorded(new Date());
         current.setCustomerId(getCustomer());
@@ -171,7 +171,7 @@ public class StatsTakenController implements Serializable {
         selectedItemIndex = -1;
         // set the parent of the list of stats 
 
-        return "Create";
+        
     }
 
     public String create() {
@@ -186,15 +186,13 @@ public class StatsTakenController implements Serializable {
         }
     }
 
-    public String createAndReturnToList() {
+    public void createAndReturnToList(ActionEvent event) {
         try {
             getFacade().edit(current);
             JsfUtil.addSuccessMessage(configMapFacade.getConfig("StatsTakenUpdated"));
-
-            return "List";
+            recreateModel();
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
-            return "List";
         }
     }
 
@@ -248,10 +246,11 @@ public class StatsTakenController implements Serializable {
 
     public void createDialogue(ActionEvent actionEvent) {
         try {
-            current.setId(0);
-            getFacade().create(current);
+           getFacade().edit(current);
+            JsfUtil.addSuccessMessage(configMapFacade.getConfig("StatsTakenUpdated"));
+            prepareCreate();
             recreateModel();
-            JsfUtil.addSuccessMessage(configMapFacade.getConfig("StatsTakenCreated"));
+             JsfUtil.addSuccessMessage(configMapFacade.getConfig("StatsTakenCreated"));
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
         }
@@ -282,24 +281,24 @@ public class StatsTakenController implements Serializable {
         Object o = vce.getNewValue();
     }
 
-    public String update() {
+    public void update(ActionEvent event) {
         try {
             getFacade().edit(current);
             JsfUtil.addSuccessMessage(configMapFacade.getConfig("StatsTakenUpdated"));
-            return "List";
+           
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
-            return null;
+           
         }
     }
 
-    public void destroy() {
+    public void destroy(ActionEvent event) {
         performDestroy();
         recreateModel();
         current = null;
     }
 
-    public String discard() {
+    public void discard(ActionEvent event) {
         try {
             destroyStats();
             destroyImage();
@@ -310,7 +309,7 @@ public class StatsTakenController implements Serializable {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
         }
         recreateModel();
-        return "List";
+        
     }
 
     public String destroyAndView() {

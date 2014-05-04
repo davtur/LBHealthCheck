@@ -11,22 +11,32 @@
         <p:dialog id="StatsTakenViewDlg" widgetVar="StatsTakenViewDialog" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('ViewStatsTakenTitle')}">
             <h:form id="StatsTakenViewForm">
                 <h:panelGroup id="display">
-                    <p:panelGrid columns="2" rendered="#{statsTakenController.selected != null}">
+                    <h:panelGrid columns="4" width="600px">
                         <h:outputText value="#{configMapController.getKey('ViewStatsTakenLabel_id')}"/>
-                        <h:outputText value="#{statsTakenController.selected.id}" title="#{configMapController.getKey('ViewStatsTakenTitle_id')}"/>
                         <h:outputText value="#{configMapController.getKey('ViewStatsTakenLabel_dateRecorded')}"/>
-                        <h:outputText value="#{statsTakenController.selected.dateRecorded}" title="#{configMapController.getKey('ViewStatsTakenTitle_dateRecorded')}">
-                            <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
-                        </h:outputText>
                         <h:outputText value="#{configMapController.getKey('ViewStatsTakenLabel_trainerComments')}"/>
-                        <h:outputText value="#{statsTakenController.selected.trainerComments}" title="#{configMapController.getKey('ViewStatsTakenTitle_trainerComments')}"/>
-                        <h:outputText value="#{configMapController.getKey('ViewStatsTakenLabel_imageId')}"/>
-                        <h:outputText value="#{statsTakenController.selected.imageId}" title="#{configMapController.getKey('ViewStatsTakenTitle_imageId')}"/>
                         <h:outputText value="#{configMapController.getKey('ViewStatsTakenLabel_customerId')}"/>
-                        <h:outputText value="#{statsTakenController.selected.customerId}" title="#{configMapController.getKey('ViewStatsTakenTitle_customerId')}"/>
-                    </p:panelGrid>
-                    <p:commandButton value="#{configMapController.getKey('Close')}" onclick="StatsTakenViewDialog.hide()"/>
+
+                        <h:outputText value="#{statsTakenController.selected.id}" title="#{configMapController.getKey('ViewStatsTakenTitle_id')}"/>
+                        <h:outputText value="#{statsTakenController.selected.dateRecorded}" title="#{configMapController.getKey('ViewStatsTakenTitle_dateRecorded')}">
+                            <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
+                        </h:outputText>
+                        <h:outputText value="#{statsTakenController.selected.trainerComments}" title="#{configMapController.getKey('ViewStatsTakenTitle_trainerComments')}"/>
+                        <h:outputText value="#{statsTakenController.selected.customerId.firstname} #{statsTakenController.selected.customerId.lastname}" title="#{configMapController.getKey('ViewStatsTakenTitle_customerId')}"/>   
+                    </h:panelGrid>
                 </h:panelGroup>
+            
+                <h:panelGrid rendered="#{statsTakenController.selected.statCollection.size() > 0}" width="600px" >
+                    <p:dataTable value="#{statsTakenController.selected.statCollection}" var="item"  >
+                        <p:column sortBy="#{item.statType}"  headerText="#{configMapController.getKey('ListStatTitle_statType')}" >
+                            <h:outputText value="#{item.statType.name}"/>
+                        </p:column>
+                        <p:column sortBy="#{item.value}" headerText="#{configMapController.getKey('ListStatTitle_value')}" >
+                            <h:outputText value="#{item.value}" />  
+                        </p:column>
+                    </p:dataTable>
+                </h:panelGrid>
+                <p:commandButton value="#{configMapController.getKey('Close')}" onclick="StatsTakenViewDialog.hide()"/>
             </h:form>
         </p:dialog>
 

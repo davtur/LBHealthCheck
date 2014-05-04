@@ -23,4 +23,4 @@ pre {
 }
 
 ::-moz-selection { color: #fff; }
-::selection { color: #fff; }
+::selection { /* color: #fff; */ }

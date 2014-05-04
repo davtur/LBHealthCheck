@@ -11,11 +11,6 @@
             <h:outputText value="#{configMapController.getKey('ListFitnessTestChartsTitle')}"></h:outputText>
         </ui:define>
         <ui:define name="body">
-
-
-
-
-
             <h:form id="FitnessTestChartsListForm">
                 <h:outputText escape="false" value="#{configMapController.getKey('ListFitnessTestChartsEmpty')}" rendered="#{fitnessTestChartsController.items.rowCount == 0}"/>
                 <h:panelGroup rendered="#{fitnessTestChartsController.items.rowCount > 0}">

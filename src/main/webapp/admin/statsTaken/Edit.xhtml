@@ -9,26 +9,49 @@
     <ui:composition>
         <p:dialog id="StatsTakenEditDlg" widgetVar="StatsTakenEditDialog" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('EditStatsTakenTitle')}">
             <h:form id="StatsTakenEditForm">
-                <h:panelGroup id="display">
-                    <p:panelGrid columns="2" rendered="#{statsTakenController.selected != null}">
-                        <h:outputLabel value="#{configMapController.getKey('EditStatsTakenLabel_id')}" for="id" />
-                        <h:inputText id="id"  value="#{statsTakenController.selected.id}" title="#{configMapController.getKey('EditStatsTakenTitle_id')}" required="true" requiredMessage="#{configMapController.getKey('EditStatsTakenRequiredMessage_id')}"/>
-                        <h:outputLabel value="#{configMapController.getKey('EditStatsTakenLabel_dateRecorded')}" for="dateRecorded" />
-                        <h:inputText id="dateRecorded" value="#{statsTakenController.selected.dateRecorded}" title="#{configMapController.getKey('EditStatsTakenTitle_dateRecorded')}" required="true" requiredMessage="#{configMapController.getKey('EditStatsTakenRequiredMessage_dateRecorded')}">
-                            <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
-                        </h:inputText>
-                        <h:outputLabel value="#{configMapController.getKey('EditStatsTakenLabel_trainerComments')}" for="trainerComments" />
-                        <h:inputTextarea rows="4" cols="30" id="trainerComments" value="#{statsTakenController.selected.trainerComments}" title="#{configMapController.getKey('EditStatsTakenTitle_trainerComments')}" />
-                        <h:outputLabel value="#{configMapController.getKey('EditStatsTakenLabel_imageId')}" for="imageId" />
-                        <h:inputText id="imageId"  value="#{statsTakenController.selected.imageId}" title="#{configMapController.getKey('EditStatsTakenTitle_imageId')}" />
-                        <h:outputLabel value="#{configMapController.getKey('EditStatsTakenLabel_customerId')}" for="customerId" />
-                        <p:selectOneMenu id="customerId" valueChangeListener="#{statsTakenController.selectOneMenuValueChangeListener}" value="#{statsTakenController.selected.customerId}" label="#{configMapController.getKey('EditStatsTakenTitle_customerId')}" required="true" requiredMessage="#{configMapController.getKey('EditStatsTakenRequiredMessage_customerId')}">
-                            <f:selectItems value="#{customersController.itemsAvailableSelectOne}"/>
-                            <p:ajax   update=":StatsTakenEditForm"  />
-                        </p:selectOneMenu>
-                    </p:panelGrid>
-                    <p:commandButton actionListener="#{statsTakenController.update}" value="#{configMapController.getKey('Save')}" update="display,:StatsTakenListForm:datalist,:menuForm:growl" oncomplete="handleSubmit(args, 'StatsTakenEditDialog');statsTakenControllerTable.filter()"/>
-                    <p:commandButton value="#{configMapController.getKey('Cancel')}" onclick="StatsTakenEditDialog.hide()"/>
+                 <h:panelGroup id="editDisplay">
+                    <p:panel id="editStatsTakenPanel">
+                        <h:panelGrid columns="3" style="width:600px;" >
+                            <h:outputLabel value="#{configMapController.getKey('EditStatsTakenLabel_dateRecorded')}" for="editDateRecorded" />
+                            <h:outputLabel value="#{configMapController.getKey('EditStatsTakenLabel_trainerComments')}" for="editTrainerComments" />
+                            <h:outputLabel value="#{configMapController.getKey('EditStatsTakenLabel_customerId')} #{statsTakenController.selected.customerId}" for="editCustomerId" />
+                            <p:calendar id="editDateRecorded" value="#{statsTakenController.selected.dateRecorded}" mode="inline" >
+                                <p:ajax event="dateSelect" listener="#{statsTakenController.handleDateSelect}" update=":growl"  />
+                            </p:calendar> 
+                            <p:inputTextarea id="editTrainerComments" cols="32" rows="12" value="#{statsTakenController.selected.trainerComments}" title="#{configMapController.getKey('EditStatsTakenTitle_trainerComments')}" required="true" requiredMessage="#{configMapController.getKey('EditStatsTakenRequiredMessage_trainerComments')}">
+                                <p:ajax update=":StatsTakenEditForm:editStatsTakenPanel" />
+                            </p:inputTextarea>
+                            <h:panelGrid >
+                                <p:selectOneMenu id="editCustomerId" value="#{statsTakenController.selected.customerId}" required="true" converter="customerConverter" requiredMessage="#{configMapController.getKey('EditStatsTakenRequiredMessage_customerId')}">
+                                    <f:selectItems var="listItem"  itemLabel="#{listItem.firstname} #{listItem.lastname}" itemValue="#{listItem}" value="#{customersController.customersAvailableSelectOneObject}" />
+                                    <p:ajax update=":StatsTakenEditForm:editStatsTakenPanel"  listener="#{statsTakenController.handleUserChange}" />
+                                </p:selectOneMenu>
+                            </h:panelGrid>
+                        </h:panelGrid>
+                       <!-- <p:panel id="editStatsTakenPanel3" header="Select a photo to upload (jpeg)">
+                            <h:panelGrid columns="2" width="400px">
+                                <p:fileUpload fileUploadListener="#{customerImagesController.handleFileUpload}" update=":StatsTakenEditForm:editStatsTakenPanel3, :growl" allowTypes="*.jpg"  sizeLimit="2000000"/>
+
+                                <p:graphicImage value="#{customerImagesController.uploadedImage}" width="180px" cache="false" id="editPhoto1"/>
+                            </h:panelGrid>
+                        </p:panel>-->
+
+                    </p:panel>
+                    <p:panel id="editStatsPanel2" >
+
+                        <p:dataGrid value="#{statsTakenController.selected.statCollection}" var="stats" columns="4" >
+                            <p:panel style="width:200px;">
+                                <p:outputLabel value="#{stats.statType.name}"  /><br/>
+                                <p:inputText style="width:50px;" value="#{stats.value}" title="#{stats.statType.description}" required="true" requiredMessage="#{configMapController.getKey('CreateStatRequiredMessage_value')}">
+                                    <p:ajax update=":StatsTakenEditForm:editStatsPanel2"/>
+                                </p:inputText>
+                            </p:panel>
+                        </p:dataGrid>
+
+                    </p:panel>
+                    <p:commandButton actionListener="#{statsTakenController.update}" value="#{configMapController.getKey('EditStatsTakenSaveLink')}"  update="editDisplay,:StatsTakenListForm:datalist, :growl" oncomplete="handleSubmit(args,'StatsTakenEditDialog');statsTakenControllerTable.filter()"/>
+                     <p:commandButton  value="Cancel" oncomplete="StatsTakenEditDialog.hide()"/>
+
                 </h:panelGroup>
             </h:form>
         </p:dialog>

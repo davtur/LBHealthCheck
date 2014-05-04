@@ -71,7 +71,7 @@ public class ChartController implements Serializable {
      */
     public List<LineChartPointsVertical> getChartData(List<StatTypes> stypes) {
         List<LineChartPointsVertical> chartMeasurements = new ArrayList<>();
-        List<StatsTaken> statsTakenList = ejbStatsTakenFacade.findAllByCustId(getUser());
+        List<StatsTaken> statsTakenList = ejbStatsTakenFacade.findAllByCustomer(getCustomer());
         for (StatsTaken st : statsTakenList) {
             List<Stat> stats = ejbStatsFacade.findAll(st.getId());
             int numberOfStats = stats.size();
@@ -100,7 +100,7 @@ public class ChartController implements Serializable {
         for (StatTypes stype : stypes) {
             chartMeasurements.add(new LineChartSeries());
         }
-        List<StatsTaken> statsTakenList = ejbStatsTakenFacade.findAllByCustId(getUser());
+        List<StatsTaken> statsTakenList = ejbStatsTakenFacade.findAllByCustomer(getCustomer());
         for (StatsTaken statTaken : statsTakenList) {
             List<Stat> stats = ejbStatsFacade.findAll(statTaken.getId());
             int numberOfStats = stats.size();

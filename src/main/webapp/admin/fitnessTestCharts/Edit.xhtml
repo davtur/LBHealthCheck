@@ -18,7 +18,7 @@
                         <h:outputLabel value="#{configMapController.getKey('EditFitnessTestChartsLabel_yaxisLabel')}" for="yaxisLabel" />
                         <h:inputText id="yaxisLabel"  value="#{fitnessTestChartsController.selected.yaxisLabel}" title="#{configMapController.getKey('EditFitnessTestChartsTitle_yaxisLabel')}" required="true" requiredMessage="#{configMapController.getKey('EditFitnessTestChartsRequiredMessage_yaxisLabel')}"/>
                     </p:panelGrid>
-                    <p:commandButton actionListener="#{fitnessTestChartsController.update}" value="#{configMapController.getKey('Save')}" update="display,:FitnessTestChartsListForm:datalist,:growl" oncomplete="handleSubmit(args, 'FitnessTestChartsEditDialog');fitnessTestChartsControllerTable.filter()"/>
+                    <p:commandButton actionListener="#{fitnessTestChartsController.update}" value="#{configMapController.getKey('Save')}" update="display,:FitnessTestChartsListForm:datalist, :growl" oncomplete="handleSubmit(args, 'FitnessTestChartsEditDialog');fitnessTestChartsControllerTable.filter()"/>
                     <p:commandButton value="#{configMapController.getKey('Cancel')}" onclick="FitnessTestChartsEditDialog.hide()"/>
                 </h:panelGroup>
             </h:form>

@@ -17,6 +17,7 @@
 
 
             <h:form id="StatsTakenListForm">
+                
                 <h:outputText escape="false" value="#{configMapController.getKey('ListStatsTakenEmpty')}" rendered="#{statsTakenController.items.rowCount == 0}"/>
                 <h:panelGroup rendered="#{statsTakenController.items.rowCount > 0}">
                     <p:dataTable  
@@ -38,85 +39,45 @@
                                 <h:inputText id="globalFilter" onkeyup="statsTakenControllerTable.filter()" />
                             </p:outputPanel>
                         </f:facet>
-                        <p:ajax event="rowEdit" listener="#{statsTakenController.onEdit}" update=":menuForm:growl" oncomplete="statsTakenControllerTable.filter()" />  
-                        <p:ajax event="rowEditCancel" listener="#{statsTakenController.onCancel}" update=":menuForm:growl"  oncomplete="statsTakenControllerTable.filter()" />  
+                        <p:ajax event="rowEdit" listener="#{statsTakenController.onEdit}" update=":growl" oncomplete="statsTakenControllerTable.filter()" />  
+                        <p:ajax event="rowEditCancel" listener="#{statsTakenController.onCancel}" update=":growl"  oncomplete="statsTakenControllerTable.filter()" />  
                         <p:ajax event="rowSelect"   update="createButton viewButton editButton deleteButton"/>
                         <p:ajax event="rowUnselect" update="createButton viewButton editButton deleteButton"/>
                         <p:column selectionMode="single"/>
-                        <p:column sortBy="#{item.id}" filterBy="#{item.id}" headerText="#{configMapController.getKey('ListStatsTakenTitle_id')}"   >
-                            <p:cellEditor> 
-                                <f:facet name="output">
-                                    <h:outputText value="#{item.id}"/>
-                                </f:facet>
-                                <f:facet name="input">
-                                    <p:inputText value="#{item.id}" label="#{configMapController.getKey('ListStatsTakenTitle_id')}" />
-                                </f:facet>
-                            </p:cellEditor> 
-
-
+                        <p:column sortBy="#{item.id}">
+                            <f:facet name="header">
+                                <h:outputText value="#{configMapController.getKey('ListStatsTakenTitle_id')}"/>
+                            </f:facet>
+                            <h:outputText value="#{item.id}"/>
                         </p:column>
-                        <p:column sortBy="#{item.dateRecorded}" filterBy="#{item.dateRecorded}" headerText="#{configMapController.getKey('ListStatsTakenTitle_dateRecorded')}"   >
-
-                            <p:cellEditor> 
-                                <f:facet name="output">
-                                    <h:outputText value="#{item.dateRecorded}">
-                                        <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
-                                    </h:outputText>
-                                </f:facet>
-                                <f:facet name="input">
-                                    <p:calendar value="#{item.dateRecorded}">	
-                                        <p:ajax event="dateSelect" listener= "#{statsTakenController.handleDateSelect}" update=":menuForm:growl" />
-                                    </p:calendar>
-                                </f:facet>
-                            </p:cellEditor> 
-
+                        <p:column sortBy="#{item.dateRecorded}">
+                            <f:facet name="header">
+                                <h:outputText value="#{configMapController.getKey('ListStatsTakenTitle_dateRecorded')}"/>
+                            </f:facet>
+                            <h:outputText value="#{item.dateRecorded}">
+                                <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
+                            </h:outputText>
                         </p:column>
-                        <p:column sortBy="#{item.trainerComments}" filterBy="#{item.trainerComments}" headerText="#{configMapController.getKey('ListStatsTakenTitle_trainerComments')}"   >
-                            <p:cellEditor> 
-                                <f:facet name="output">
-                                    <h:outputText value="#{item.trainerComments}"/>
-                                </f:facet>
-                                <f:facet name="input">
-                                    <p:inputText value="#{item.trainerComments}" label="#{configMapController.getKey('ListStatsTakenTitle_trainerComments')}" />
-                                </f:facet>
-                            </p:cellEditor> 
-
-
+                        <p:column sortBy="#{item.trainerComments}">
+                            <f:facet name="header">
+                                <h:outputText value="#{configMapController.getKey('ListStatsTakenTitle_trainerComments')}"/>
+                            </f:facet>
+                            <h:outputText value="#{item.trainerComments}"/>
                         </p:column>
-                        <p:column sortBy="#{item.imageId}" filterBy="#{item.imageId}" headerText="#{configMapController.getKey('ListStatsTakenTitle_imageId')}"   >
-                            <p:cellEditor> 
-                                <f:facet name="output">
-                                    <h:outputText value="#{item.imageId}"/>
-                                </f:facet>
-                                <f:facet name="input">
-                                    <p:inputText value="#{item.imageId}" label="#{configMapController.getKey('ListStatsTakenTitle_imageId')}" />
-                                </f:facet>
-                            </p:cellEditor> 
-
-
+                        <p:column sortBy="#{item.customerId.username}"  filterBy="#{item.customerId.username}"  headerText="#{configMapController.getKey('ListStatsTakenTitle_customerId')}" >
+                            <f:facet name="header">
+                                <h:outputText value="#{configMapController.getKey('ListStatsTakenTitle_customerId')}"/>
+                            </f:facet>
+                            <h:outputText value="#{item.customerId.username}"/>
                         </p:column>
-                        <p:column sortBy="#{item.customerId}" filterBy="#{item.customerId}" headerText="#{configMapController.getKey('ListStatsTakenTitle_customerId')}"   >
-                            <p:cellEditor> 
-                                <f:facet name="output">
-                                    <h:outputText value="#{item.customerId}"/>
-                                </f:facet>
-                                <f:facet name="input">
-                                    <p:inputText value="#{item.customerId}" label="#{configMapController.getKey('ListStatsTakenTitle_customerId')}" />
-                                </f:facet>
-                            </p:cellEditor> 
 
-
-                        </p:column>
-                        <p:column rendered="#{statsTakenController.isUserInRole('ADMIN')}"  headerText="Edit" style="width:50px">  
-                            <p:rowEditor />  
-                        </p:column>  
 
 
                         <f:facet name="footer">
                             <p:commandButton rendered="#{statsTakenController.isUserInRole('ADMIN')}" id="createButton" icon="ui-icon-plus"   value="#{configMapController.getKey('Create')}" actionListener="#{statsTakenController.prepareCreate}" update=":StatsTakenCreateForm" oncomplete="PF('StatsTakenCreateDialog').show()"/>
                             <p:commandButton id="viewButton"   icon="ui-icon-search" value="#{configMapController.getKey('View')}" update=":StatsTakenViewForm" oncomplete="PF('StatsTakenViewDialog').show()" disabled="#{empty statsTakenController.selected}"/>
                             <p:commandButton rendered="#{statsTakenController.isUserInRole('ADMIN')}" id="editButton"   icon="ui-icon-pencil" value="#{configMapController.getKey('Edit')}" update=":StatsTakenEditForm" oncomplete="PF('StatsTakenEditDialog').show()" disabled="#{empty statsTakenController.selected}"/>
-                            <p:commandButton rendered="#{statsTakenController.isUserInRole('ADMIN')}" id="deleteButton" icon="ui-icon-trash"  value="#{configMapController.getKey('Delete')}" actionListener="#{statsTakenController.destroy}" update=":menuForm:growl,datalist" disabled="#{empty statsTakenController.selected}"/>
+                            <p:commandButton rendered="#{statsTakenController.isUserInRole('ADMIN')}" id="deleteButton" icon="ui-icon-trash"  value="#{configMapController.getKey('Delete')}" actionListener="#{statsTakenController.destroy}" update=":growl,datalist" disabled="#{empty statsTakenController.selected}"/>
                         </f:facet>
 
                     </p:dataTable>
@@ -124,8 +85,9 @@
             </h:form>
 
             <ui:include src="Create.xhtml"/>
-            <ui:include src="Edit.xhtml"/>
             <ui:include src="View.xhtml"/>
+            <ui:include src="Edit.xhtml"/>
+
 
         </ui:define>
     </ui:composition>

@@ -40,14 +40,14 @@ public class StatsTakenFacade extends AbstractFacade<StatsTaken> {
         super(StatsTaken.class);
     }
 
-    public List<StatsTaken> findAllByCustId(int customer_id) {
+    public List<StatsTaken> findAllByCustomer(Customers customer) {
         List retList = null;
         try {
             CriteriaBuilder cb = em.getCriteriaBuilder();
             CriteriaQuery<StatsTaken> cq = cb.createQuery(StatsTaken.class);
             Root<StatsTaken> rt = cq.from(StatsTaken.class);
-            Expression<String> custId = rt.get("customerId");
-            cq.where(cb.equal(custId, customer_id));
+            Expression<Integer> custId = rt.get("customerId");
+            cq.where(cb.equal(custId, customer));
             Query q = em.createQuery(cq);
             retList = q.getResultList();
         } catch (Exception e) {
@@ -56,4 +56,24 @@ public class StatsTakenFacade extends AbstractFacade<StatsTaken> {
         return retList;
     }
 
+    public int countByCustId(Customers customer) {
+        if (customer == null) {
+            return count();
+        }
+        CriteriaBuilder cb = em.getCriteriaBuilder();
+        CriteriaQuery cq = cb.createQuery();
+        Root<StatsTaken> rt = cq.from(StatsTaken.class);
+        Expression<Customers> custId = rt.get("customerId");
+
+        cq.where(cb.equal(custId, customer));
+        cq.select(cb.count(rt));
+        Query q = em.createQuery(cq);
+        //Query q = em.createNativeQuery("SELECT count(*) FROM stats_taken t where  customer_id  = '" + customer_id + "'");
+        return ((Long) q.getSingleResult()).intValue();
+    }
+
+    public void synch() {
+
+        em.flush();
+    }
 }
