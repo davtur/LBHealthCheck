@@ -26,7 +26,7 @@
                         <p:inputText id="code" value="#{currencyController.selected.code}" title="#{configMapController.getKey('CreateCurrencyTitle_code')}" required="true" requiredMessage="#{configMapController.getKey('CreateCurrencyRequiredMessage_code')}"/>
                         <p:outputLabel value="#{configMapController.getKey('CreateCurrencyLabel_countryCode')}" for="countryCode" />
                         <p:inputText id="countryCode" value="#{currencyController.selected.countryCode}" title="#{configMapController.getKey('CreateCurrencyTitle_countryCode')}" required="true" requiredMessage="#{configMapController.getKey('CreateCurrencyRequiredMessage_countryCode')}"/>
-                        <p:commandButton oncomplete="CurrencyCreateDialogue.hide();currencyControllerTable.filter()" actionListener="#{currencyController.createDialogue}" value="#{configMapController.getKey('CreateCurrencySaveLink')}" update=":menuForm:growl"/>                
+                        <p:commandButton oncomplete="CurrencyCreateDialogue.hide();currencyControllerTable.filter()" actionListener="#{currencyController.createDialogue}" value="#{configMapController.getKey('CreateCurrencySaveLink')}" update=":growl"/>                
                     </p:panelGrid>
                 </p:confirmDialog>
             </h:form>
@@ -49,8 +49,8 @@
                                 <h:inputText id="globalFilter" onkeyup="currencyControllerTable.filter()" />
                             </p:outputPanel>
                         </f:facet>
-                        <p:ajax event="rowEdit" listener="#{currencyController.onEdit}" update=":menuForm:growl" oncomplete="currencyControllerTable.filter()" />  
-                        <p:ajax event="rowEditCancel" listener="#{currencyController.onCancel}" update=":menuForm:growl"  oncomplete="currencyControllerTable.filter()" />  
+                        <p:ajax event="rowEdit" listener="#{currencyController.onEdit}" update=":growl" oncomplete="currencyControllerTable.filter()" />  
+                        <p:ajax event="rowEditCancel" listener="#{currencyController.onCancel}" update=":growl"  oncomplete="currencyControllerTable.filter()" />  
 
                         <p:column sortBy="#{item.id}" filterBy="#{item.id}" headerText="#{configMapController.getKey('ListCurrencyTitle_id')}"   >
                             <p:cellEditor> 
@@ -105,7 +105,7 @@
                         </p:column>  
 
                         <p:column>
-                            <p:commandButton rendered="#{currencyController.isUserInRole('ADMIN')}"  oncomplete="currencyControllerTable.filter()" update=":menuForm:growl"  value="#{configMapController.getKey('ListCurrencyDestroyLink')}">
+                            <p:commandButton rendered="#{currencyController.isUserInRole('ADMIN')}"  oncomplete="currencyControllerTable.filter()" update=":growl"  value="#{configMapController.getKey('ListCurrencyDestroyLink')}">
                                 <f:setPropertyActionListener value="#{item}" target="#{currencyController.selectedForDeletion}" />
                             </p:commandButton>                        
 

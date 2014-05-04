@@ -9,7 +9,7 @@
     <f:view contentType="text/html">
         <h:head>
             <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" ></meta>
-            <title><ui:insert name="title">Default Title</ui:insert></title>
+            <title><ui:insert name="title">Pure Fitness Manly</ui:insert></title>
             <link rel="stylesheet" href="/FitnessStats/resources/templates/yoo_pace/css/base.css" />
             <link rel="stylesheet" href="/FitnessStats/resources/templates/yoo_pace/css/layout.css" />
             <link rel="stylesheet" href="/FitnessStats/resources/templates/yoo_pace/css/menus.css" />
@@ -26,10 +26,12 @@
             <link rel="stylesheet" href="/FitnessStats/resources/templates/yoo_pace/css/system.css" />
             <link rel="stylesheet" href="/FitnessStats/resources/templates/yoo_pace/css/extensions.css" />
              <link rel="stylesheet" href="/FitnessStats/resources/templates/yoo_pace/css/purefitness.css" />
-           
+           <h:outputScript library="js" name="jsfcrud.js"/>
+           <!--<h:outputStylesheet library="css" name="template.css"/>-->
         </h:head>
 
         <h:body id="page" class="page  isblog ">
+             <p:growl id="growl"  redisplay="true" life="7000" showDetail="true"/>
             <div id="page-bg">
                 <div class="wrapper clearfix">
                     <div id="top">
@@ -59,7 +61,7 @@
                         <div class="clr"></div>
                         <div id="pillmenu">
                             <h:form id="menuForm">
-                                <p:growl id="growl" autoUpdate="true"  redisplay="true" life="7000" showDetail="true"/>
+                               
 
 
                                 <p:menubar id="mainmenubar1" autoDisplay="true">

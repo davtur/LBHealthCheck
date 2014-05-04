@@ -18,10 +18,10 @@
 
                     <h:selectOneMenu rendered="#{customersController.isUserInRole('ADMIN')}"  id="imperson" value="#{customersController.impersonate}" title="#{configMapController.getKey('ListCustomersTitle_impersonate')}" >
                         <f:selectItems id="selectIt" value="#{customersController.itemsAvailableSelectOneObject}"/>
-                        <p:ajax update=":menuForm:growl"  listener="#{customersController.handleUserChange}" process="@this"  />
+                        <p:ajax update=":growl"  listener="#{customersController.handleUserChange}" process="@this"  />
                     </h:selectOneMenu>
-                    <p:commandButton id="impbut1" disabled="#{customersController.impersonating}" update=":menuForm:growl,:buttonssForm1:panel1"  immediate="true" ajax="true" rendered="#{customersController.isUserInRole('ADMIN')}"   actionListener="#{customersController.impersonateUser}" value="#{configMapController.getKey('ListCustomersImpersonateButton')}"/>
-                    <p:commandButton id="impbut2" disabled="#{!customersController.impersonating}" update=":menuForm:growl,imperson,:buttonssForm1:panel1"  ajax="true" rendered="#{customersController.isUserInRole('ADMIN')}"  actionListener="#{customersController.unimpersonateUser}" value="#{configMapController.getKey('ListCustomersUnImpersonateButton')}"/>
+                    <p:commandButton id="impbut1" disabled="#{customersController.impersonating}" update=":growl,:buttonssForm1:panel1"  immediate="true" ajax="true" rendered="#{customersController.isUserInRole('ADMIN')}"   actionListener="#{customersController.impersonateUser}" value="#{configMapController.getKey('ListCustomersImpersonateButton')}"/>
+                    <p:commandButton id="impbut2" disabled="#{!customersController.impersonating}" update=":growl,imperson,:buttonssForm1:panel1"  ajax="true" rendered="#{customersController.isUserInRole('ADMIN')}"  actionListener="#{customersController.unimpersonateUser}" value="#{configMapController.getKey('ListCustomersUnImpersonateButton')}"/>
                 </p:panel>
 
             </h:form>

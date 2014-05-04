@@ -24,7 +24,7 @@
                         <p:inputText id="description" value="#{invoiceLineTypeController.selected.description}" title="#{configMapController.getKey('CreateInvoiceLineTypeTitle_description')}" required="true" requiredMessage="#{configMapController.getKey('CreateInvoiceLineTypeRequiredMessage_description')}"/>
                         <p:outputLabel value="#{configMapController.getKey('CreateInvoiceLineTypeLabel_orderPosition')}" for="orderPosition" />
                         <p:inputText id="orderPosition" value="#{invoiceLineTypeController.selected.orderPosition}" title="#{configMapController.getKey('CreateInvoiceLineTypeTitle_orderPosition')}" required="true" requiredMessage="#{configMapController.getKey('CreateInvoiceLineTypeRequiredMessage_orderPosition')}"/>
-                        <p:commandButton oncomplete="InvoiceLineTypeCreateDialogue.hide();invoiceLineTypeControllerTable.filter()" actionListener="#{invoiceLineTypeController.createDialogue}" value="#{configMapController.getKey('CreateInvoiceLineTypeSaveLink')}" update=":menuForm:growl"/>                
+                        <p:commandButton oncomplete="InvoiceLineTypeCreateDialogue.hide();invoiceLineTypeControllerTable.filter()" actionListener="#{invoiceLineTypeController.createDialogue}" value="#{configMapController.getKey('CreateInvoiceLineTypeSaveLink')}" update=":growl"/>                
                     </p:panelGrid>
                 </p:confirmDialog>
             </h:form>
@@ -47,8 +47,8 @@
                                 <h:inputText id="globalFilter" onkeyup="invoiceLineTypeControllerTable.filter()" />
                             </p:outputPanel>
                         </f:facet>
-                        <p:ajax event="rowEdit" listener="#{invoiceLineTypeController.onEdit}" update=":menuForm:growl" oncomplete="invoiceLineTypeControllerTable.filter()" />  
-                        <p:ajax event="rowEditCancel" listener="#{invoiceLineTypeController.onCancel}" update=":menuForm:growl"  oncomplete="invoiceLineTypeControllerTable.filter()" />  
+                        <p:ajax event="rowEdit" listener="#{invoiceLineTypeController.onEdit}" update=":growl" oncomplete="invoiceLineTypeControllerTable.filter()" />  
+                        <p:ajax event="rowEditCancel" listener="#{invoiceLineTypeController.onCancel}" update=":growl"  oncomplete="invoiceLineTypeControllerTable.filter()" />  
 
                         <p:column sortBy="#{item.id}" filterBy="#{item.id}" headerText="#{configMapController.getKey('ListInvoiceLineTypeTitle_id')}"   >
                             <p:cellEditor> 
@@ -91,7 +91,7 @@
                         </p:column>  
 
                         <p:column>
-                            <p:commandButton rendered="#{invoiceLineTypeController.isUserInRole('ADMIN')}"  update=":InvoiceLineTypelistForm1 :menuForm:growl" action="#{invoiceLineTypeController.destroy}" value="#{configMapController.getKey('ListInvoiceLineTypeDestroyLink')}">
+                            <p:commandButton rendered="#{invoiceLineTypeController.isUserInRole('ADMIN')}"  update=":InvoiceLineTypelistForm1 :growl" action="#{invoiceLineTypeController.destroy}" value="#{configMapController.getKey('ListInvoiceLineTypeDestroyLink')}">
                                 <f:setPropertyActionListener value="#{item}" target="#{invoiceLineTypeController.selectedForDeletion}" />
                             </p:commandButton>                        
 

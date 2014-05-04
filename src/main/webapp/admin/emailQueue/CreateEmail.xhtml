@@ -58,7 +58,7 @@
                                     <p:calendar id="senddate" value="#{emailQueueController.selected.sendDate}" mode="inline"
                                                 title="#{configMapController.getKey('CreateEmailTitle_senddate')}">
                                                 
-                                        <p:ajax event="dateSelect" listener="#{emailQueueController.handleDateSelect}" update=":menuForm:growl"  />
+                                        <p:ajax event="dateSelect" listener="#{emailQueueController.handleDateSelect}" update=":growl"  />
 
                                     </p:calendar>   
                                 </h:panelGrid>

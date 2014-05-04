@@ -30,7 +30,7 @@
                         <p:inputText id="planActive" value="#{planController.selected.planActive}" title="#{configMapController.getKey('CreatePlanTitle_planActive')}" required="true" requiredMessage="#{configMapController.getKey('CreatePlanRequiredMessage_planActive')}"/>
                         <p:outputLabel value="#{configMapController.getKey('CreatePlanLabel_planDiscount')}" for="planDiscount" />
                         <p:inputText id="planDiscount" value="#{planController.selected.planDiscount}" title="#{configMapController.getKey('CreatePlanTitle_planDiscount')}" />
-                        <p:commandButton oncomplete="PlanCreateDialogue.hide();planControllerTable.filter()" actionListener="#{planController.createDialogue}" value="#{configMapController.getKey('CreatePlanSaveLink')}" update=":menuForm:growl"/>                
+                        <p:commandButton oncomplete="PlanCreateDialogue.hide();planControllerTable.filter()" actionListener="#{planController.createDialogue}" value="#{configMapController.getKey('CreatePlanSaveLink')}" update=":growl"/>                
                     </p:panelGrid>
                 </p:confirmDialog>
             </h:form>
@@ -53,8 +53,8 @@
                                 <h:inputText id="globalFilter" onkeyup="planControllerTable.filter()" />
                             </p:outputPanel>
                         </f:facet>
-                        <p:ajax event="rowEdit" listener="#{planController.onEdit}" update=":menuForm:growl" oncomplete="planControllerTable.filter()" />  
-                        <p:ajax event="rowEditCancel" listener="#{planController.onCancel}" update=":menuForm:growl"  oncomplete="planControllerTable.filter()" />  
+                        <p:ajax event="rowEdit" listener="#{planController.onEdit}" update=":growl" oncomplete="planControllerTable.filter()" />  
+                        <p:ajax event="rowEditCancel" listener="#{planController.onCancel}" update=":growl"  oncomplete="planControllerTable.filter()" />  
 
                         <p:column sortBy="#{item.id}" filterBy="#{item.id}" headerText="#{configMapController.getKey('ListPlanTitle_id')}"   >
                             <p:cellEditor> 
@@ -133,7 +133,7 @@
                         </p:column>  
 
                         <p:column>
-                            <p:commandButton rendered="#{planController.isUserInRole('ADMIN')}"  oncomplete="planControllerTable.filter()" update=":menuForm:growl"  value="#{configMapController.getKey('ListPlanDestroyLink')}">
+                            <p:commandButton rendered="#{planController.isUserInRole('ADMIN')}"  oncomplete="planControllerTable.filter()" update=":growl"  value="#{configMapController.getKey('ListPlanDestroyLink')}">
                                 <f:setPropertyActionListener value="#{item}" target="#{planController.selectedForDeletion}" />
                             </p:commandButton>                        
 

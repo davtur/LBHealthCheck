@@ -17,7 +17,7 @@
                 <h:panelGrid columns="1">
                     <h:outputLabel value="Chart Date" for="chartDate0" />
                     <p:calendar id="chartDate0"   value="#{jFreeChartWebMonBean.latestChartDates[0]}" pattern="MM/dd/yyyy"  title="Chart Date"  >
-               <p:ajax event="dateSelect" listener="#{jFreeChartWebMonBean.chartDateChangeListener}" update=":menuForm:growl,:listForm1:panel1,:listForm1:latestChart"  />
+               <p:ajax event="dateSelect" listener="#{jFreeChartWebMonBean.chartDateChangeListener}" update=":growl,:listForm1:panel1,:listForm1:latestChart"  />
 
                         </p:calendar>   
 

@@ -38,7 +38,7 @@
                         <p:inputText id="requestsRecovery" value="#{qrtzJobDetailsController.selected.requestsRecovery}" title="#{configMapController.getKey('CreateQrtzJobDetailsTitle_requestsRecovery')}" required="true" requiredMessage="#{configMapController.getKey('CreateQrtzJobDetailsRequiredMessage_requestsRecovery')}"/>
                         <p:outputLabel value="#{configMapController.getKey('CreateQrtzJobDetailsLabel_jobData')}" for="jobData" />
                         <p:inputTextarea rows="4" cols="30" id="jobData" value="#{qrtzJobDetailsController.selected.jobData}" title="#{configMapController.getKey('CreateQrtzJobDetailsTitle_jobData')}" />
-                        <p:commandButton oncomplete="QrtzJobDetailsCreateDialogue.hide();qrtzJobDetailsControllerTable.filter()" actionListener="#{qrtzJobDetailsController.createDialogue}" value="#{configMapController.getKey('CreateQrtzJobDetailsSaveLink')}" update=":menuForm:growl"/>                
+                        <p:commandButton oncomplete="QrtzJobDetailsCreateDialogue.hide();qrtzJobDetailsControllerTable.filter()" actionListener="#{qrtzJobDetailsController.createDialogue}" value="#{configMapController.getKey('CreateQrtzJobDetailsSaveLink')}" update=":growl"/>                
                     </p:panelGrid>
                 </p:confirmDialog>
             </h:form>
@@ -61,8 +61,8 @@
                                 <h:inputText id="globalFilter" onkeyup="qrtzJobDetailsControllerTable.filter()" />
                             </p:outputPanel>
                         </f:facet>
-                        <p:ajax event="rowEdit" listener="#{qrtzJobDetailsController.onEdit}" update=":menuForm:growl" oncomplete="qrtzJobDetailsControllerTable.filter()" />  
-                        <p:ajax event="rowEditCancel" listener="#{qrtzJobDetailsController.onCancel}" update=":menuForm:growl"  oncomplete="qrtzJobDetailsControllerTable.filter()" />  
+                        <p:ajax event="rowEdit" listener="#{qrtzJobDetailsController.onEdit}" update=":growl" oncomplete="qrtzJobDetailsControllerTable.filter()" />  
+                        <p:ajax event="rowEditCancel" listener="#{qrtzJobDetailsController.onCancel}" update=":growl"  oncomplete="qrtzJobDetailsControllerTable.filter()" />  
 
                         <p:column sortBy="#{item.qrtzJobDetailsPK.jobName}" filterBy="#{item.qrtzJobDetailsPK.jobName}" headerText="#{configMapController.getKey('ListQrtzJobDetailsTitle_qrtzJobDetailsPK_jobName')}"   >
                             <p:cellEditor> 
@@ -189,7 +189,7 @@
                         </p:column>  
 
                         <p:column>
-                            <p:commandButton rendered="#{qrtzJobDetailsController.isUserInRole('ADMIN')}"  update=":QrtzJobDetailslistForm1 :menuForm:growl" action="#{qrtzJobDetailsController.destroy}" value="#{configMapController.getKey('ListQrtzJobDetailsDestroyLink')}">
+                            <p:commandButton rendered="#{qrtzJobDetailsController.isUserInRole('ADMIN')}"  update=":QrtzJobDetailslistForm1 :growl" action="#{qrtzJobDetailsController.destroy}" value="#{configMapController.getKey('ListQrtzJobDetailsDestroyLink')}">
                                 <f:setPropertyActionListener value="#{item}" target="#{qrtzJobDetailsController.selectedForDeletion}" />
                             </p:commandButton>                        
 

@@ -49,7 +49,7 @@
                             <f:selectItems value="#{invoiceLineTypeController.itemsAvailableSelectOne}"/>
                             <p:ajax   update=":formInvoiceLineCreate1"  />
                         </p:selectOneMenu>
-                        <p:commandButton oncomplete="InvoiceLineCreateDialogue.hide();invoiceLineControllerTable.filter()" actionListener="#{invoiceLineController.createDialogue}" value="#{configMapController.getKey('CreateInvoiceLineSaveLink')}" update=":menuForm:growl"/>                
+                        <p:commandButton oncomplete="InvoiceLineCreateDialogue.hide();invoiceLineControllerTable.filter()" actionListener="#{invoiceLineController.createDialogue}" value="#{configMapController.getKey('CreateInvoiceLineSaveLink')}" update=":growl"/>                
                     </p:panelGrid>
                 </p:confirmDialog>
             </h:form>
@@ -72,8 +72,8 @@
                                 <h:inputText id="globalFilter" onkeyup="invoiceLineControllerTable.filter()" />
                             </p:outputPanel>
                         </f:facet>
-                        <p:ajax event="rowEdit" listener="#{invoiceLineController.onEdit}" update=":menuForm:growl" oncomplete="invoiceLineControllerTable.filter()" />  
-                        <p:ajax event="rowEditCancel" listener="#{invoiceLineController.onCancel}" update=":menuForm:growl"  oncomplete="invoiceLineControllerTable.filter()" />  
+                        <p:ajax event="rowEdit" listener="#{invoiceLineController.onEdit}" update=":growl" oncomplete="invoiceLineControllerTable.filter()" />  
+                        <p:ajax event="rowEditCancel" listener="#{invoiceLineController.onCancel}" update=":growl"  oncomplete="invoiceLineControllerTable.filter()" />  
 
                         <p:column sortBy="#{item.id}" filterBy="#{item.id}" headerText="#{configMapController.getKey('ListInvoiceLineTitle_id')}"   >
                             <p:cellEditor> 
@@ -212,7 +212,7 @@
                         </p:column>  
 
                         <p:column>
-                            <p:commandButton rendered="#{invoiceLineController.isUserInRole('ADMIN')}"  update=":InvoiceLinelistForm1 :menuForm:growl" action="#{invoiceLineController.destroy}" value="#{configMapController.getKey('ListInvoiceLineDestroyLink')}">
+                            <p:commandButton rendered="#{invoiceLineController.isUserInRole('ADMIN')}"  update=":InvoiceLinelistForm1 :growl" action="#{invoiceLineController.destroy}" value="#{configMapController.getKey('ListInvoiceLineDestroyLink')}">
                                 <f:setPropertyActionListener value="#{item}" target="#{invoiceLineController.selectedForDeletion}" />
                             </p:commandButton>                        
 

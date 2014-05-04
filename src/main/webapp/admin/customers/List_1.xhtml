@@ -16,7 +16,7 @@
                                  header="#{configMapController.getKey('CreateCustomersPaymentsTitle')}" severity="info" widgetVar="customersPaymentsDialogue">
                     <p:outputPanel id="mainPanel">
                         <p:selectBooleanButton value="#{ezidebit.editPaymentDetails}" onLabel="Edit Payment Details" offLabel="Edit Payment Details" rendered="#{ezidebit.customerExistsInPaymentGateway}" >
-                            <p:ajax update=":paymentsForm:viewPaymentsGrid  :paymentsForm:editPaymentsGrid  :menuForm:growl" process=":paymentsForm:viewPaymentsGrid  :paymentsForm:editPaymentsGrid "/>  
+                            <p:ajax update=":paymentsForm:viewPaymentsGrid  :paymentsForm:editPaymentsGrid  :growl" process=":paymentsForm:viewPaymentsGrid  :paymentsForm:editPaymentsGrid "/>  
                         </p:selectBooleanButton>  
                         <p:panel id="dialoguePaymenstGrid2" rendered="#{ezidebit.customerExistsInPaymentGateway}" >
                             <p:panel id="viewPaymentsGrid"  rendered="#{!ezidebit.editPaymentDetails}" >
@@ -28,7 +28,7 @@
                             </p:panel>
                         </p:panel>
                         <p:panelGrid id="dialoguePaymenstGrid1" columns="2" rendered="#{!ezidebit.customerExistsInPaymentGateway}">
-                            <p:commandButton  id="paymentsButton" ajax="true" actionListener="#{ezidebit.createCustomerRecord}" update=":menuForm:growl"   value="#{configMapController.getKey('EditCustomersUpdatePayment')}" immediate="true"/>
+                            <p:commandButton  id="paymentsButton" ajax="true" actionListener="#{ezidebit.createCustomerRecord}" update=":growl"   value="#{configMapController.getKey('EditCustomersUpdatePayment')}" immediate="true"/>
                             <p:outputLabel value=" " for="paymentsButton" />
 
                         </p:panelGrid>
@@ -130,14 +130,14 @@
                             <p:ajax listener="#{customersController.checkPassChange}" event="keyup" />
                         </p:password>
 
-                        <p:commandButton  id="passButton" ajax="true" actionListener="#{customersController.updatepass}" update=":menuForm:growl"   value="#{configMapController.getKey('EditCustomersUpdatePassword')}" immediate="true"/>
+                        <p:commandButton  id="passButton" ajax="true" actionListener="#{customersController.updatepass}" update=":growl"   value="#{configMapController.getKey('EditCustomersUpdatePassword')}" immediate="true"/>
                         <p:outputLabel value=" " for="passButton" />
-                        <p:commandButton  id="paymentsButton" ajax="true" actionListener="#{ezidebit.createCustomerRecord()}" update=":menuForm:growl"   value="#{configMapController.getKey('EditCustomersUpdatePayment')}" immediate="true"/>
+                        <p:commandButton  id="paymentsButton" ajax="true" actionListener="#{ezidebit.createCustomerRecord()}" update=":growl"   value="#{configMapController.getKey('EditCustomersUpdatePayment')}" immediate="true"/>
                         <p:outputLabel value=" " for="paymentsButton" />
 
                     </p:panelGrid>
                     <p:panel>
-                        <p:commandButton id="dialogueSave" oncomplete="handleCreateRequest(xhr, status, args)"  actionListener="#{customersController.createDialogue}" value="#{configMapController.getKey('CreateCustomersSaveLink')}" update=":CustomerslistForm1:tableList :menuForm:growl"/>                
+                        <p:commandButton id="dialogueSave" oncomplete="handleCreateRequest(xhr, status, args)"  actionListener="#{customersController.createDialogue}" value="#{configMapController.getKey('CreateCustomersSaveLink')}" update=":CustomerslistForm1:tableList :growl"/>                
 
                     </p:panel>
                 </p:confirmDialog>
@@ -160,8 +160,8 @@
                                 <h:inputText id="globalFilter" onkeyup="customersControllerTable.filter()" />
                             </p:outputPanel>
                         </f:facet>
-                        <p:ajax event="rowEdit" listener="#{customersController.onEdit}" update=":menuForm:growl" oncomplete="customersControllerTable.filter()" />  
-                        <p:ajax event="rowEditCancel" listener="#{customersController.onCancel}" update=":menuForm:growl"  oncomplete="customersControllerTable.filter()" />  
+                        <p:ajax event="rowEdit" listener="#{customersController.onEdit}" update=":growl" oncomplete="customersControllerTable.filter()" />  
+                        <p:ajax event="rowEditCancel" listener="#{customersController.onCancel}" update=":growl"  oncomplete="customersControllerTable.filter()" />  
 
                      <!--   <p:column sortBy="#{item.id}" filterBy="#{item.id}" headerText="#{configMapController.getKey('ListCustomersTitle_id')}"   >
                             <p:cellEditor> 
@@ -221,7 +221,7 @@
                                 </f:facet>
                                 <f:facet name="input">
                                     <p:calendar value="#{item.dob}">	
-                                        <p:ajax event="dateSelect" listener= "#{customersController.handleDateSelect}" update=":menuForm:growl" />
+                                        <p:ajax event="dateSelect" listener= "#{customersController.handleDateSelect}" update=":growl" />
                                     </p:calendar>
                                 </f:facet>
                             </p:cellEditor> 
@@ -463,13 +463,13 @@
                         </p:column>  
 
                         <p:column>
-                            <p:commandButton rendered="#{customersController.isUserInRole('ADMIN')}"   oncomplete="customersCreateDialogue.show()" update=":formCustomersCreate1:dialogueGrid1 :menuForm:growl"  value="#{configMapController.getKey('ListCustomersEditLink')}">
+                            <p:commandButton rendered="#{customersController.isUserInRole('ADMIN')}"   oncomplete="customersCreateDialogue.show()" update=":formCustomersCreate1:dialogueGrid1 :growl"  value="#{configMapController.getKey('ListCustomersEditLink')}">
                                 <f:setPropertyActionListener value="#{item}" target="#{customersController.selected}" />
                             </p:commandButton>                        
 
                         </p:column>
                         <p:column>
-                            <p:commandButton id="paymentButton"  rendered="#{customersController.isUserInRole('ADMIN')}"    oncomplete="customersPaymentsDialogue.show()" update=":paymentsForm:mainPanel :menuForm:growl"  value="#{configMapController.getKey('ListCustomersEditPaymentLink')}">
+                            <p:commandButton id="paymentButton"  rendered="#{customersController.isUserInRole('ADMIN')}"    oncomplete="customersPaymentsDialogue.show()" update=":paymentsForm:mainPanel :growl"  value="#{configMapController.getKey('ListCustomersEditPaymentLink')}">
                                 <f:setPropertyActionListener value="#{item}" target="#{ezidebit.selectedCustomer}"  />
                             </p:commandButton>                        
 

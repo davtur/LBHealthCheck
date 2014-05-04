@@ -17,10 +17,6 @@
 
 
             <h:form id="FitnessTestChartsListForm">
-                <h:panelGroup >
-                    <p:commandButton id="showDialogButton"  value="#{configMapController.getKey('ListFitnessTestChartsCreateLink')}" onclick="FitnessTestChartsCreateDialogue.show()" type="button"/> 
-
-                </h:panelGroup>
                 <h:outputText escape="false" value="#{configMapController.getKey('ListFitnessTestChartsEmpty')}" rendered="#{fitnessTestChartsController.items.rowCount == 0}"/>
                 <h:panelGroup rendered="#{fitnessTestChartsController.items.rowCount > 0}">
                     <p:dataTable  
@@ -42,23 +38,11 @@
                                 <h:inputText id="globalFilter" onkeyup="fitnessTestChartsControllerTable.filter()" />
                             </p:outputPanel>
                         </f:facet>
-                        <p:ajax event="rowEdit" listener="#{fitnessTestChartsController.onEdit}" update=":menuForm:growl" oncomplete="fitnessTestChartsControllerTable.filter()" />  
-                        <p:ajax event="rowEditCancel" listener="#{fitnessTestChartsController.onCancel}" update=":menuForm:growl"  oncomplete="fitnessTestChartsControllerTable.filter()" />  
+                        <p:ajax event="rowEdit" listener="#{fitnessTestChartsController.onEdit}" update=":growl" oncomplete="fitnessTestChartsControllerTable.filter()" />  
+                        <p:ajax event="rowEditCancel" listener="#{fitnessTestChartsController.onCancel}" update=":growl"  oncomplete="fitnessTestChartsControllerTable.filter()" />  
                         <p:ajax event="rowSelect"   update="createButton viewButton editButton deleteButton"/>
                         <p:ajax event="rowUnselect" update="createButton viewButton editButton deleteButton"/>
-
-                        <p:column sortBy="#{item.id}" filterBy="#{item.id}" headerText="#{configMapController.getKey('ListFitnessTestChartsTitle_id')}"   >
-                            <p:cellEditor> 
-                                <f:facet name="output">
-                                    <h:outputText value="#{item.id}"/>
-                                </f:facet>
-                                <f:facet name="input">
-                                    <p:inputText value="#{item.id}" label="#{configMapController.getKey('ListFitnessTestChartsTitle_id')}" />
-                                </f:facet>
-                            </p:cellEditor> 
-
-
-                        </p:column>
+                        <p:column selectionMode="single"/>
                         <p:column sortBy="#{item.name}" filterBy="#{item.name}" headerText="#{configMapController.getKey('ListFitnessTestChartsTitle_name')}"   >
                             <p:cellEditor> 
                                 <f:facet name="output">
@@ -98,13 +82,13 @@
                         <p:column rendered="#{fitnessTestChartsController.isUserInRole('ADMIN')}"  headerText="Edit" style="width:50px">  
                             <p:rowEditor />  
                         </p:column>  
-                        <p:column selectionMode="single"/>
+
 
                         <f:facet name="footer">
                             <p:commandButton rendered="#{fitnessTestChartsController.isUserInRole('ADMIN')}" id="createButton" icon="ui-icon-plus"   value="#{configMapController.getKey('Create')}" actionListener="#{fitnessTestChartsController.prepareCreate}" update=":FitnessTestChartsCreateForm" oncomplete="PF('FitnessTestChartsCreateDialog').show()"/>
                             <p:commandButton id="viewButton"   icon="ui-icon-search" value="#{configMapController.getKey('View')}" update=":FitnessTestChartsViewForm" oncomplete="PF('FitnessTestChartsViewDialog').show()" disabled="#{empty fitnessTestChartsController.selected}"/>
                             <p:commandButton rendered="#{fitnessTestChartsController.isUserInRole('ADMIN')}" id="editButton"   icon="ui-icon-pencil" value="#{configMapController.getKey('Edit')}" update=":FitnessTestChartsEditForm" oncomplete="PF('FitnessTestChartsEditDialog').show()" disabled="#{empty fitnessTestChartsController.selected}"/>
-                            <p:commandButton rendered="#{fitnessTestChartsController.isUserInRole('ADMIN')}" id="deleteButton" icon="ui-icon-trash"  value="#{configMapController.getKey('Delete')}" actionListener="#{fitnessTestChartsController.destroy}" update=":menuForm:growl,datalist" disabled="#{empty fitnessTestChartsController.selected}"/>
+                            <p:commandButton rendered="#{fitnessTestChartsController.isUserInRole('ADMIN')}" id="deleteButton" icon="ui-icon-trash"  value="#{configMapController.getKey('Delete')}" actionListener="#{fitnessTestChartsController.destroy}" update=":growl,datalist" disabled="#{empty fitnessTestChartsController.selected}"/>
                         </f:facet>
 
                     </p:dataTable>

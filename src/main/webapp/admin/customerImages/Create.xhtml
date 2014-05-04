@@ -22,7 +22,7 @@
                         <h:outputLabel value="#{configMapController.getKey('CreateCustomerImagesLabel_imageType')}" for="imageType" />
                         <h:selectOneMenu  valueChangeListener="#{customerImagesController.handleCustomerChange}" id="customerId" converter="customerConverter" value="#{customerImagesController.selected.customerId}" title="#{configMapController.getKey('CreateCustomerImagesTitle_customerId')}" required="true" requiredMessage="#{configMapController.getKey('CreateCustomerImagesRequiredMessage_customerId')}">
                             <f:selectItems  value="#{customersController.customersAvailableSelectOneObject}"/>
-                            <p:ajax update=":menuForm:growl" />
+                            <p:ajax update=":growl" />
 
                         </h:selectOneMenu>
 
@@ -37,7 +37,7 @@
                         <h:outputLabel value="#{configMapController.getKey('CreateCustomerImagesLabel_datetaken')}" for="datetaken" />
                         <p:panel id="photoPanel3" header="Select a photo to upload (jpeg)">
                             <h:panelGrid columns="2" width="400px">
-                                <p:fileUpload fileLimitMessage="The size of the picture is too big! ( > 10MB )" fileUploadListener="#{customerImagesController.handleFileUpload}" auto="true" update=":photoCreate:photoPanel3  :photoCreate:datetaken :menuForm:growl :photoCreate:saveButton" allowTypes="/(\.|\/)(gif|jpe?g|png)$/" sizeLimit="10000000" />
+                                <p:fileUpload fileLimitMessage="The size of the picture is too big! ( > 10MB )" fileUploadListener="#{customerImagesController.handleFileUpload}" auto="true" update=":photoCreate:photoPanel3  :photoCreate:datetaken :growl :photoCreate:saveButton" allowTypes="/(\.|\/)(gif|jpe?g|png)$/" sizeLimit="10000000" />
                                 <p:graphicImage id="photo1" value="#{customerImagesController.uploadedImage}" width="300px" cache="false" />
                             </h:panelGrid>
                            <!-- <p:panel id="imageCropperPanel" header="Uploaded Image">
@@ -61,7 +61,7 @@
                         <p:calendar id="datetaken" value="#{customerImagesController.selected.datetaken}" mode="inline">
 
 
-                            <p:ajax event="dateSelect" listener="#{customerImagesController.handleDateSelect}" update=":menuForm:growl"  />
+                            <p:ajax event="dateSelect" listener="#{customerImagesController.handleDateSelect}" update=":growl"  />
 
                         </p:calendar>
 
@@ -69,11 +69,11 @@
                     <p:panel id="saveButton">
 
                         <h:panelGrid  columns="2">
-                            <p:commandButton  disabled="#{customerImagesController.saveButtonDisabled}" update=":photoCreate:photoPanel3 :photoCreate:datetaken :menuForm:growl :photoCreate:saveButton"   actionListener="#{customerImagesController.createFromDialogue}" value="#{configMapController.getKey('CreateCustomerImagesSaveLink')}" />
+                            <p:commandButton  disabled="#{customerImagesController.saveButtonDisabled}" update=":photoCreate:photoPanel3 :photoCreate:datetaken :growl :photoCreate:saveButton"   actionListener="#{customerImagesController.createFromDialogue}" value="#{configMapController.getKey('CreateCustomerImagesSaveLink')}" />
 
 
                             <p:commandButton   ajax="false"   action="#{customerImagesController.prepareList}" value="#{configMapController.getKey('CreateCustomerImagesShowAllLink')}" immediate="true"/>
-                           <p:commandButton      actionListener="#{customerImagesController.rotate90degrees}" update=":photoCreate:photoPanel3 :photoCreate:datetaken :menuForm:growl :photoCreate:saveButton"  value="#{configMapController.getKey('CreateCustomerImagesRotateImage90Link')}" />
+                           <p:commandButton      actionListener="#{customerImagesController.rotate90degrees}" update=":photoCreate:photoPanel3 :photoCreate:datetaken :growl :photoCreate:saveButton"  value="#{configMapController.getKey('CreateCustomerImagesRotateImage90Link')}" />
 
                         </h:panelGrid>
                     </p:panel>

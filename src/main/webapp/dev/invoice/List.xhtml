@@ -78,7 +78,7 @@
                             <f:selectItems value="#{currencyController.itemsAvailableSelectOne}"/>
                             <p:ajax   update=":formInvoiceCreate1"  />
                         </p:selectOneMenu>
-                        <p:commandButton oncomplete="InvoiceCreateDialogue.hide();invoiceControllerTable.filter()" actionListener="#{invoiceController.createDialogue}" value="#{configMapController.getKey('CreateInvoiceSaveLink')}" update=":menuForm:growl"/>                
+                        <p:commandButton oncomplete="InvoiceCreateDialogue.hide();invoiceControllerTable.filter()" actionListener="#{invoiceController.createDialogue}" value="#{configMapController.getKey('CreateInvoiceSaveLink')}" update=":growl"/>                
                     </p:panelGrid>
                 </p:dialog>
             </h:form>
@@ -101,8 +101,8 @@
                                 <h:inputText id="globalFilter" onkeyup="invoiceControllerTable.filter()" />
                             </p:outputPanel>
                         </f:facet>
-                        <p:ajax event="rowEdit" listener="#{invoiceController.onEdit}" update=":menuForm:growl" oncomplete="invoiceControllerTable.filter()" />  
-                        <p:ajax event="rowEditCancel" listener="#{invoiceController.onCancel}" update=":menuForm:growl"  oncomplete="invoiceControllerTable.filter()" />  
+                        <p:ajax event="rowEdit" listener="#{invoiceController.onEdit}" update=":growl" oncomplete="invoiceControllerTable.filter()" />  
+                        <p:ajax event="rowEditCancel" listener="#{invoiceController.onCancel}" update=":growl"  oncomplete="invoiceControllerTable.filter()" />  
 
                         <p:column sortBy="#{item.id}" filterBy="#{item.id}" headerText="#{configMapController.getKey('ListInvoiceTitle_id')}"   >
                             <p:cellEditor> 
@@ -126,7 +126,7 @@
                                 </f:facet>
                                 <f:facet name="input">
                                     <p:calendar value="#{item.createDatetime}">	
-                                        <p:ajax event="dateSelect" listener= "#{invoiceController.handleDateSelect}" update=":menuForm:growl" />
+                                        <p:ajax event="dateSelect" listener= "#{invoiceController.handleDateSelect}" update=":growl" />
                                     </p:calendar>
                                 </f:facet>
                             </p:cellEditor> 
@@ -166,7 +166,7 @@
                                 </f:facet>
                                 <f:facet name="input">
                                     <p:calendar value="#{item.dueDate}">	
-                                        <p:ajax event="dateSelect" listener= "#{invoiceController.handleDateSelect}" update=":menuForm:growl" />
+                                        <p:ajax event="dateSelect" listener= "#{invoiceController.handleDateSelect}" update=":growl" />
                                     </p:calendar>
                                 </f:facet>
                             </p:cellEditor> 
@@ -290,7 +290,7 @@
                                 </f:facet>
                                 <f:facet name="input">
                                     <p:calendar value="#{item.lastReminder}">	
-                                        <p:ajax event="dateSelect" listener= "#{invoiceController.handleDateSelect}" update=":menuForm:growl" />
+                                        <p:ajax event="dateSelect" listener= "#{invoiceController.handleDateSelect}" update=":growl" />
                                     </p:calendar>
                                 </f:facet>
                             </p:cellEditor> 
@@ -318,7 +318,7 @@
                                 </f:facet>
                                 <f:facet name="input">
                                     <p:calendar value="#{item.createTimestamp}">	
-                                        <p:ajax event="dateSelect" listener= "#{invoiceController.handleDateSelect}" update=":menuForm:growl" />
+                                        <p:ajax event="dateSelect" listener= "#{invoiceController.handleDateSelect}" update=":growl" />
                                     </p:calendar>
                                 </f:facet>
                             </p:cellEditor> 
@@ -353,7 +353,7 @@
                         </p:column>  
 
                         <p:column>
-                            <p:commandButton rendered="#{invoiceController.isUserInRole('ADMIN')}"  update=":InvoicelistForm1 :menuForm:growl" action="#{invoiceController.destroy}" value="#{configMapController.getKey('ListInvoiceDestroyLink')}">
+                            <p:commandButton rendered="#{invoiceController.isUserInRole('ADMIN')}"  update=":InvoicelistForm1 :growl" action="#{invoiceController.destroy}" value="#{configMapController.getKey('ListInvoiceDestroyLink')}">
                                 <f:setPropertyActionListener value="#{item}" target="#{invoiceController.selectedForDeletion}" />
                             </p:commandButton>                        
 

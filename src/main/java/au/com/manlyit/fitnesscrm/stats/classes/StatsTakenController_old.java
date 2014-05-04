@@ -13,7 +13,6 @@ import au.com.manlyit.fitnesscrm.stats.db.StatTypes;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import javax.inject.Inject;
@@ -24,17 +23,15 @@ import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 import javax.faces.convert.Converter;
 import javax.faces.convert.FacesConverter;
-import javax.faces.event.ActionEvent;
-import javax.faces.event.ValueChangeEvent;
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
-import org.primefaces.event.RowEditEvent;
+
 import org.primefaces.event.SelectEvent;
 
-@Named("statsTakenController")
+@Named("statsTakenController_old")
 @SessionScoped
-public class StatsTakenController implements Serializable {
+public class StatsTakenController_old implements Serializable {
 
     private StatsTaken current;
     private StatsTaken selectedForDeletion;
@@ -54,10 +51,9 @@ public class StatsTakenController implements Serializable {
     private ConfigMapFacade configMapFacade;
     private PaginationHelper pagination;
     private int selectedItemIndex;
-    private List<StatsTaken> filteredItems;
-    private StatsTaken[] multiSelected;
+    private int rows = 1000000;
 
-    public StatsTakenController() {
+    public StatsTakenController_old() {
     }
 
     public StatsTaken getSelected() {
@@ -83,7 +79,8 @@ public class StatsTakenController implements Serializable {
     }
 
     public static boolean isUserInRole(String roleName) {
-        boolean inRole = FacesContext.getCurrentInstance().getExternalContext().isUserInRole(roleName);
+        boolean inRole = false;
+        inRole = FacesContext.getCurrentInstance().getExternalContext().isUserInRole(roleName);
         return inRole;
 
     }
@@ -111,7 +108,7 @@ public class StatsTakenController implements Serializable {
 
     public PaginationHelper getPagination() {
         if (pagination == null) {
-            pagination = new PaginationHelper(1000000) {
+            pagination = new PaginationHelper(rows) {
 
                 @Override
                 public int getItemsCount() {
@@ -182,7 +179,7 @@ public class StatsTakenController implements Serializable {
             return "Create";
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
-            return null;
+            return "List";
         }
     }
 
@@ -206,6 +203,18 @@ public class StatsTakenController implements Serializable {
 
     }
 
+    /*  public void prepareCreateStat() {
+     // add each stat type to the table;
+     ArrayList<Stat> stats = new  ArrayList<Stat>();
+     List<StatTypes> statTypesList = ejbStatTypesFacade.findAll();
+     for (StatTypes st : statTypesList) {
+     Stat stat = new Stat();
+     stat.setId(-1);
+     stat.setStatsTakenId(current);
+     stat.setStatType(st);
+     current.getStatCollection().add(stat);
+     }
+     }*/
     public CustomerImages prepareCreateCustomerImage() {
         CustomerImages ci = new CustomerImages();
         ci.setId(-1);
@@ -246,20 +255,8 @@ public class StatsTakenController implements Serializable {
         // statController.recreateModel();
     }
 
-    public void createDialogue(ActionEvent actionEvent) {
-        try {
-            current.setId(0);
-            getFacade().create(current);
-            recreateModel();
-            JsfUtil.addSuccessMessage(configMapFacade.getConfig("StatsTakenCreated"));
-        } catch (Exception e) {
-            JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
-        }
-
-    }
-
     public String prepareEdit() {
-        //current = (StatsTaken)getItems().getRowData();
+        //current = (StatsTaken) getItems().getRowData();
         //selectedItemIndex = pagination.getPageFirstItem() + getItems().getRowIndex();
         recreateStatModel();
         updateCustomerImage(current.getImageId());
@@ -274,14 +271,6 @@ public class StatsTakenController implements Serializable {
         facesContext.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO, "Date Selected", format.format(date)));
     }
 
-    public void selectOneMenuValueChangeListener(ValueChangeEvent vce) {
-        Object o = vce.getNewValue();
-    }
-
-    public void selectManyMenuValueChangeListener(ValueChangeEvent vce) {
-        Object o = vce.getNewValue();
-    }
-
     public String update() {
         try {
             getFacade().edit(current);
@@ -294,9 +283,11 @@ public class StatsTakenController implements Serializable {
     }
 
     public void destroy() {
+        current = (StatsTaken) getItems().getRowData();
+        selectedItemIndex = pagination.getPageFirstItem() + getItems().getRowIndex();
         performDestroy();
         recreateModel();
-        current = null;
+        JsfUtil.addSuccessMessage(configMapFacade.getConfig("FitnessAssessmentDetailsDeleted"));
     }
 
     public String discard() {
@@ -324,19 +315,6 @@ public class StatsTakenController implements Serializable {
             recreateModel();
             return "List";
         }
-    }
-
-    public StatsTaken getSelectedForDeletion() {
-        return selectedForDeletion;
-    }
-
-    public void setSelectedForDeletion(StatsTaken selectedForDeletion) {
-        this.selectedForDeletion = selectedForDeletion;
-        current = selectedForDeletion;
-
-        performDestroy();
-        recreateModel();
-
     }
 
     private void performDestroy() {
@@ -373,7 +351,6 @@ public class StatsTakenController implements Serializable {
 
     private void recreateModel() {
         items = null;
-        filteredItems = null;
     }
 
     public String next() {
@@ -396,15 +373,18 @@ public class StatsTakenController implements Serializable {
         return JsfUtil.getSelectItems(ejbFacade.findAll(), true);
     }
 
-    public Collection<StatsTaken> getItemsAvailable() {
-        return ejbFacade.findAll();
+    /**
+     * @return the ejbStatFacade
+     */
+    public au.com.manlyit.fitnesscrm.stats.beans.StatsFacade getEjbStatFacade() {
+        return ejbStatFacade;
     }
 
-    public void onEdit(RowEditEvent event) {
-        StatsTaken cm = (StatsTaken) event.getObject();
-        getFacade().edit(cm);
-        recreateModel();
-        JsfUtil.addSuccessMessage("Row Edit Successful");
+    /**
+     * @param ejbStatFacade the ejbStatFacade to set
+     */
+    public void setEjbStatFacade(au.com.manlyit.fitnesscrm.stats.beans.StatsFacade ejbStatFacade) {
+        this.ejbStatFacade = ejbStatFacade;
     }
 
     public void handleUserChange() {
@@ -412,35 +392,36 @@ public class StatsTakenController implements Serializable {
     }
 
     /**
-     * @return the filteredItems
+     * @return the rows
      */
-    public List<StatsTaken> getFilteredItems() {
-        return filteredItems;
+    public int getRows() {
+        return rows;
     }
 
     /**
-     * @param filteredItems the filteredItems to set
+     * @param rows the rows to set
      */
-    public void setFilteredItems(List<StatsTaken> filteredItems) {
-        this.filteredItems = filteredItems;
+    public void setRows(int rows) {
+        this.rows = rows;
     }
 
     /**
-     * @return the multiSelected
+     * @return the selectedForDeletion
      */
-    public StatsTaken[] getMultiSelected() {
-        return multiSelected;
+    public StatsTaken getSelectedForDeletion() {
+        return selectedForDeletion;
     }
 
     /**
-     * @param multiSelected the multiSelected to set
+     * @param selectedForDeletion the selectedForDeletion to set
      */
-    public void setMultiSelected(StatsTaken[] multiSelected) {
-        this.multiSelected = multiSelected;
-    }
+    public void setSelectedForDeletion(StatsTaken selectedForDeletion) {
+        this.selectedForDeletion = selectedForDeletion;
+        current = selectedForDeletion;
 
-    public void onCancel(RowEditEvent event) {
-        JsfUtil.addErrorMessage("Row Edit Cancelled");
+        performDestroy();
+        recreateModel();
+
     }
 
     @FacesConverter(forClass = StatsTaken.class)
@@ -450,7 +431,7 @@ public class StatsTakenController implements Serializable {
             if (value == null || value.length() == 0) {
                 return null;
             }
-            StatsTakenController controller = (StatsTakenController) facesContext.getApplication().getELResolver().
+            StatsTakenController_old controller = (StatsTakenController_old) facesContext.getApplication().getELResolver().
                     getValue(facesContext.getELContext(), null, "statsTakenController");
             return controller.ejbFacade.find(getKey(value));
         }
@@ -462,12 +443,11 @@ public class StatsTakenController implements Serializable {
         }
 
         String getStringKey(java.lang.Integer value) {
-            StringBuilder sb = new StringBuilder();
+            StringBuffer sb = new StringBuffer();
             sb.append(value);
             return sb.toString();
         }
 
-        @Override
         public String getAsString(FacesContext facesContext, UIComponent component, Object object) {
             if (object == null) {
                 return null;
@@ -476,10 +456,324 @@ public class StatsTakenController implements Serializable {
                 StatsTaken o = (StatsTaken) object;
                 return getStringKey(o.getId());
             } else {
-                throw new IllegalArgumentException("object " + object + " is of type " + object.getClass().getName() + "; expected type: " + StatsTakenController.class.getName());
+                throw new IllegalArgumentException("object " + object + " is of type " + object.getClass().getName() + "; expected type: " + StatsTakenController_old.class.getName());
             }
         }
-
     }
-
 }
+/* old version without editable table
+
+
+ import au.com.manlyit.fitnesscrm.stats.db.StatsTaken;
+ import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
+ import au.com.manlyit.fitnesscrm.stats.classes.util.PaginationHelper;
+ import au.com.manlyit.fitnesscrm.stats.beans.StatsTakenFacade;
+ import au.com.manlyit.fitnesscrm.stats.db.Customers;
+ import au.com.manlyit.fitnesscrm.stats.db.Stat;
+
+ import java.io.Serializable;
+ import java.text.SimpleDateFormat;
+ import java.util.Date;
+ import java.util.ResourceBundle;
+ import javax.inject.Inject;
+ import javax.faces.application.FacesMessage;
+ import javax.inject.Named;
+ import javax.enterprise.context.SessionScoped;
+ import javax.faces.component.UIComponent;
+ import javax.faces.context.FacesContext;
+ import javax.faces.convert.Converter;
+ import javax.faces.convert.FacesConverter;
+ import javax.faces.model.DataModel;
+ import javax.faces.model.ListDataModel;
+ import javax.faces.model.SelectItem;
+ import org.primefaces.event.DateSelectEvent;
+
+ @Named("statsTakenController")
+ @SessionScoped
+ public class StatsTakenController_old implements Serializable {
+
+ private StatsTaken current;
+ private Stat currentStat;
+ private DataModel items = null;
+ @Inject
+ private au.com.manlyit.fitnesscrm.stats.beans.StatsTakenFacade ejbFacade;
+ @Inject
+ private au.com.manlyit.fitnesscrm.stats.beans.StatsFacade ejbStatFacade;
+ @Inject
+ private au.com.manlyit.fitnesscrm.stats.beans.StatTypesFacade ejbStatTypesFacade;
+ @Inject
+ private au.com.manlyit.fitnesscrm.stats.beans.CustomersFacade ejbCustomerFacade;
+ private PaginationHelper pagination;
+ private int selectedItemIndex;
+
+ public StatsTakenController_old() {
+ }
+
+ public StatsTaken getSelected() {
+ if (current == null) {
+ current = new StatsTaken();
+ selectedItemIndex = -1;
+ }
+ return current;
+ }
+
+ public Customers getCustomer() {
+ Customers cust = null;
+ FacesContext facesContext = FacesContext.getCurrentInstance();
+ String name = facesContext.getExternalContext().getRemoteUser();
+ cust = ejbCustomerFacade.findCustomerByUsername(name);
+
+ return cust;
+ }
+
+ public Stat getSelectedStat() {
+ if (currentStat == null) {
+ currentStat = new Stat();
+ //selectedItemIndex = -1;
+ }
+ return currentStat;
+ }
+
+ private StatsTakenFacade getFacade() {
+ return ejbFacade;
+ }
+
+ public PaginationHelper getPagination() {
+ if (pagination == null) {
+ pagination = new PaginationHelper(1000000) {
+
+ @Override
+ public int getItemsCount() {
+ return getFacade().count();
+ }
+
+ @Override
+ public DataModel createPageDataModel() {
+ return new ListDataModel(getFacade().findRange(new int[]{getPageFirstItem(), getPageFirstItem() + getPageSize()}));
+ }
+ };
+ }
+ return pagination;
+ }
+
+ public String prepareList() {
+ recreateModel();
+ return "List";
+ }
+
+ public String prepareView() {
+ current = (StatsTaken) getItems().getRowData();
+ selectedItemIndex = pagination.getPageFirstItem() + getItems().getRowIndex();
+ return "View";
+ }
+
+ public String prepareCreate() {
+ current = new StatsTaken();
+ current.setId(0);
+ current.setDateRecorded(new Date());
+ current.setCustomerId(getCustomer());
+ current.setTrainerComments(" ");
+ current.setId(0); // auto generated by DB , but cannot be null    \n         getFacade().create(current); 
+ prepareCreateStat();
+
+ selectedItemIndex = -1;
+ // set the parent of the list of stats 
+
+ return "Create";
+ }
+
+ public String create() {
+ try {
+ getFacade().edit(current);
+ JsfUtil.addSuccessMessage(configMapFacade.getConfig("StatsTakenCreated"));
+ return prepareCreate();
+ } catch (Exception e) {
+ JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
+ return null;
+ }
+ }
+
+ public void prepareCreateStat() {
+ currentStat = new Stat();
+ currentStat.setId(0);
+ currentStat.setStatsTakenId(current);
+ FacesContext context = FacesContext.getCurrentInstance();
+ StatController statController = (StatController) context.getApplication().evaluateExpressionGet(context, "#{statController}", StatController.class);
+ statController.setParent(current);
+ statController.recreateModel();
+
+
+ }
+
+ public void createStat() {
+ try {
+ getEjbStatFacade().create(currentStat);
+ JsfUtil.addSuccessMessage(configMapFacade.getConfig("StatCreated"));
+ prepareCreateStat();
+ } catch (Exception e) {
+ JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
+
+ }
+ }
+
+ public void destroyStat() {
+ FacesContext context = FacesContext.getCurrentInstance();
+ StatController statController = (StatController) context.getApplication().evaluateExpressionGet(context, "#{statController}", StatController.class);
+ statController.destroy();
+ statController.recreateModel();
+ }
+
+ public String prepareEdit() {
+ current = (StatsTaken) getItems().getRowData();
+ selectedItemIndex = pagination.getPageFirstItem() + getItems().getRowIndex();
+ return "Edit";
+ }
+
+ public void handleDateSelect(DateSelectEvent event) {
+ SimpleDateFormat format = new SimpleDateFormat("MM/dd/yyyy");
+
+ FacesContext facesContext = FacesContext.getCurrentInstance();
+ facesContext.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO, "Date Selected", format.format(event.getDate())));
+ }
+
+ public String update() {
+ try {
+ getFacade().edit(current);
+ JsfUtil.addSuccessMessage(configMapFacade.getConfig("StatsTakenUpdated"));
+ return "View";
+ } catch (Exception e) {
+ JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
+ return null;
+ }
+ }
+
+ public String destroy() {
+ current = (StatsTaken) getItems().getRowData();
+ selectedItemIndex = pagination.getPageFirstItem() + getItems().getRowIndex();
+ performDestroy();
+ recreateModel();
+ return "List";
+ }
+
+ public String destroyAndView() {
+ performDestroy();
+ recreateModel();
+ updateCurrentItem();
+ if (selectedItemIndex >= 0) {
+ return "View";
+ } else {
+ // all items were removed - go back to list
+ recreateModel();
+ return "List";
+ }
+ }
+
+ private void performDestroy() {
+ try {
+ getFacade().remove(current);
+ JsfUtil.addSuccessMessage(configMapFacade.getConfig("StatsTakenDeleted"));
+ } catch (Exception e) {
+ JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
+ }
+ }
+
+ private void updateCurrentItem() {
+ int count = getFacade().count();
+ if (selectedItemIndex >= count) {
+ // selected index cannot be bigger than number of items:
+ selectedItemIndex = count - 1;
+ // go to previous page if last page disappeared:
+ if (pagination.getPageFirstItem() >= count) {
+ pagination.previousPage();
+ }
+ }
+ if (selectedItemIndex >= 0) {
+ current = getFacade().findRange(new int[]{selectedItemIndex, selectedItemIndex + 1}).get(0);
+ }
+ }
+
+ public DataModel getItems() {
+ if (items == null) {
+ items = getPagination().createPageDataModel();
+ }
+ return items;
+ }
+
+ private void recreateModel() {
+ items = null;
+ }
+
+ public String next() {
+ getPagination().nextPage();
+ recreateModel();
+ return "List";
+ }
+
+ public String previous() {
+ getPagination().previousPage();
+ recreateModel();
+ return "List";
+ }
+
+ public SelectItem[] getItemsAvailableSelectMany() {
+ return JsfUtil.getSelectItems(ejbFacade.findAll(), false);
+ }
+
+ public SelectItem[] getItemsAvailableSelectOne() {
+ return JsfUtil.getSelectItems(ejbFacade.findAll(), true);
+ }
+
+ **
+ * @return the ejbStatFacade
+ *
+ public au.com.manlyit.fitnesscrm.stats.beans.StatsFacade getEjbStatFacade() {
+ return ejbStatFacade;
+ }
+
+ **
+ * @param ejbStatFacade the ejbStatFacade to set
+ *
+ public void setEjbStatFacade(au.com.manlyit.fitnesscrm.stats.beans.StatsFacade ejbStatFacade) {
+ this.ejbStatFacade = ejbStatFacade;
+ }
+
+ @FacesConverter(forClass = StatsTaken.class)
+ public static class StatsTakenControllerConverter implements Converter {
+
+ public Object getAsObject(FacesContext facesContext, UIComponent component, String value) {
+ if (value == null || value.length() == 0) {
+ return null;
+ }
+ StatsTakenController controller = (StatsTakenController) facesContext.getApplication().getELResolver().
+ getValue(facesContext.getELContext(), null, "statsTakenController");
+ return controller.ejbFacade.find(getKey(value));
+ }
+
+ java.lang.Integer getKey(String value) {
+ java.lang.Integer key;
+ key = Integer.valueOf(value);
+ return key;
+ }
+
+ String getStringKey(java.lang.Integer value) {
+ StringBuffer sb = new StringBuffer();
+ sb.append(value);
+ return sb.toString();
+ }
+
+ public String getAsString(FacesContext facesContext, UIComponent component, Object object) {
+ if (object == null) {
+ return null;
+ }
+ if (object instanceof StatsTaken) {
+ StatsTaken o = (StatsTaken) object;
+ return getStringKey(o.getId());
+ } else {
+ throw new IllegalArgumentException("object " + object + " is of type " + object.getClass().getName() + "; expected type: " + StatsTakenController.class.getName());
+ }
+ }
+ }
+ }
+
+
+ */

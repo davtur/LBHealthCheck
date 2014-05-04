@@ -22,7 +22,7 @@
                         <p:inputText id="id" value="#{customerStateController.selected.id}" title="#{configMapController.getKey('CreateCustomerStateTitle_id')}" required="true" requiredMessage="#{configMapController.getKey('CreateCustomerStateRequiredMessage_id')}"/>
                         <p:outputLabel value="#{configMapController.getKey('CreateCustomerStateLabel_customerState')}" for="customerState" />
                         <p:inputText id="customerState" value="#{customerStateController.selected.customerState}" title="#{configMapController.getKey('CreateCustomerStateTitle_customerState')}" required="true" requiredMessage="#{configMapController.getKey('CreateCustomerStateRequiredMessage_customerState')}"/>
-                        <p:commandButton oncomplete="CustomerStateCreateDialogue.hide();customerStateControllerTable.filter()" actionListener="#{customerStateController.createDialogue}" value="#{configMapController.getKey('CreateCustomerStateSaveLink')}" update=":menuForm:growl"/>                
+                        <p:commandButton oncomplete="CustomerStateCreateDialogue.hide();customerStateControllerTable.filter()" actionListener="#{customerStateController.createDialogue}" value="#{configMapController.getKey('CreateCustomerStateSaveLink')}" update=":growl"/>                
                     </p:panelGrid>
                 </p:confirmDialog>
             </h:form>
@@ -45,8 +45,8 @@
                                 <h:inputText id="globalFilter" onkeyup="customerStateControllerTable.filter()" />
                             </p:outputPanel>
                         </f:facet>
-                        <p:ajax event="rowEdit" listener="#{customerStateController.onEdit}" update=":menuForm:growl" oncomplete="customerStateControllerTable.filter()" />  
-                        <p:ajax event="rowEditCancel" listener="#{customerStateController.onCancel}" update=":menuForm:growl"  oncomplete="customerStateControllerTable.filter()" />  
+                        <p:ajax event="rowEdit" listener="#{customerStateController.onEdit}" update=":growl" oncomplete="customerStateControllerTable.filter()" />  
+                        <p:ajax event="rowEditCancel" listener="#{customerStateController.onCancel}" update=":growl"  oncomplete="customerStateControllerTable.filter()" />  
 
                         <p:column sortBy="#{item.id}" filterBy="#{item.id}" headerText="#{configMapController.getKey('ListCustomerStateTitle_id')}"   >
                             <p:cellEditor> 
@@ -77,7 +77,7 @@
                         </p:column>  
 
                         <p:column>
-                            <p:commandButton rendered="#{customerStateController.isUserInRole('ADMIN')}"  oncomplete="customerStateControllerTable.filter()" update=":menuForm:growl"  value="#{configMapController.getKey('ListCustomerStateDestroyLink')}">
+                            <p:commandButton rendered="#{customerStateController.isUserInRole('ADMIN')}"  oncomplete="customerStateControllerTable.filter()" update=":growl"  value="#{configMapController.getKey('ListCustomerStateDestroyLink')}">
                                 <f:setPropertyActionListener value="#{item}" target="#{customerStateController.selectedForDeletion}" />
                             </p:commandButton>                        
 

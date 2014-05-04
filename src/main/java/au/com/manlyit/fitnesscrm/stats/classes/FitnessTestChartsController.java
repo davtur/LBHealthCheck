@@ -6,6 +6,7 @@ import au.com.manlyit.fitnesscrm.stats.classes.util.PaginationHelper;
 import au.com.manlyit.fitnesscrm.stats.beans.FitnessTestChartsFacade;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -137,10 +138,10 @@ public class FitnessTestChartsController implements Serializable {
                 current.setId(0);
             }
             getFacade().create(current);
-            JsfUtil.addSuccessMessage(ResourceBundle.getBundle("/Bundle").getString("FitnessTestChartsCreated"));
+            JsfUtil.addSuccessMessage(configMapFacade.getConfig("FitnessTestChartsCreated"));
             return prepareCreate();
         } catch (Exception e) {
-            JsfUtil.addErrorMessage(e, ResourceBundle.getBundle("/Bundle").getString("PersistenceErrorOccured"));
+            JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
             return null;
         }
     }
@@ -150,9 +151,9 @@ public class FitnessTestChartsController implements Serializable {
             current.setId(0);
             getFacade().create(current);
             recreateModel();
-            JsfUtil.addSuccessMessage(ResourceBundle.getBundle("/Bundle").getString("FitnessTestChartsCreated"));
+            JsfUtil.addSuccessMessage(configMapFacade.getConfig("FitnessTestChartsCreated"));
         } catch (Exception e) {
-            JsfUtil.addErrorMessage(e, ResourceBundle.getBundle("/Bundle").getString("PersistenceErrorOccured"));
+            JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
         }
 
     }
@@ -174,19 +175,18 @@ public class FitnessTestChartsController implements Serializable {
     public String update() {
         try {
             getFacade().edit(current);
-            JsfUtil.addSuccessMessage(ResourceBundle.getBundle("/Bundle").getString("FitnessTestChartsUpdated"));
+            JsfUtil.addSuccessMessage(configMapFacade.getConfig("FitnessTestChartsUpdated"));
             return "View";
         } catch (Exception e) {
-            JsfUtil.addErrorMessage(e, ResourceBundle.getBundle("/Bundle").getString("PersistenceErrorOccured"));
+            JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
             return null;
         }
     }
 
-    public String destroy() {
-       
+    public void destroy() {
         performDestroy();
         recreateModel();
-        return "List";
+        current = null;
     }
 
     public String destroyAndView() {
@@ -218,9 +218,9 @@ public class FitnessTestChartsController implements Serializable {
     private void performDestroy() {
         try {
             getFacade().remove(current);
-            JsfUtil.addSuccessMessage(ResourceBundle.getBundle("/Bundle").getString("FitnessTestChartsDeleted"));
+            JsfUtil.addSuccessMessage(configMapFacade.getConfig("FitnessTestChartsDeleted"));
         } catch (Exception e) {
-            JsfUtil.addErrorMessage(e, ResourceBundle.getBundle("/Bundle").getString("PersistenceErrorOccured"));
+            JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
         }
     }
 
@@ -271,11 +271,17 @@ public class FitnessTestChartsController implements Serializable {
     }
 
     public SelectItem[] getItemsAvailableSelectMany() {
+        file:///home/david/.netbeans/8.0/config/Templates/JSF/JSF_From_Entity_Wizard/StandardJSF/create.ftl
+
         return JsfUtil.getSelectItems(ejbFacade.findAll(), false);
     }
 
     public SelectItem[] getItemsAvailableSelectOne() {
         return JsfUtil.getSelectItems(ejbFacade.findAll(), true);
+    }
+
+    public Collection<FitnessTestCharts> getItemsAvailable() {
+        return ejbFacade.findAll();
     }
 
     public void onEdit(RowEditEvent event) {

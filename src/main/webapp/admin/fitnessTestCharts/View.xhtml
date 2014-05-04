@@ -8,20 +8,20 @@
 
     <ui:composition>
 
-        <p:dialog id="FitnessTestChartsViewDlg" widgetVar="FitnessTestChartsViewDialog" modal="true" resizable="false" appendTo="@(body)" header="#{bundle.ViewFitnessTestChartsTitle}">
+        <p:dialog id="FitnessTestChartsViewDlg" widgetVar="FitnessTestChartsViewDialog" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('ViewFitnessTestChartsTitle')}">
             <h:form id="FitnessTestChartsViewForm">
                 <h:panelGroup id="display">
                     <p:panelGrid columns="2" rendered="#{fitnessTestChartsController.selected != null}">
-                        <h:outputText value="#{bundle.ViewFitnessTestChartsLabel_id}"/>
-                        <h:outputText value="#{fitnessTestChartsController.selected.id}" title="#{bundle.ViewFitnessTestChartsTitle_id}"/>
-                        <h:outputText value="#{bundle.ViewFitnessTestChartsLabel_name}"/>
-                        <h:outputText value="#{fitnessTestChartsController.selected.name}" title="#{bundle.ViewFitnessTestChartsTitle_name}"/>
-                        <h:outputText value="#{bundle.ViewFitnessTestChartsLabel_description}"/>
-                        <h:outputText value="#{fitnessTestChartsController.selected.description}" title="#{bundle.ViewFitnessTestChartsTitle_description}"/>
-                        <h:outputText value="#{bundle.ViewFitnessTestChartsLabel_yaxisLabel}"/>
-                        <h:outputText value="#{fitnessTestChartsController.selected.yaxisLabel}" title="#{bundle.ViewFitnessTestChartsTitle_yaxisLabel}"/>
+                        <h:outputText value="#{configMapController.getKey('ViewFitnessTestChartsLabel_id')}"/>
+                        <h:outputText value="#{fitnessTestChartsController.selected.id}" title="#{configMapController.getKey('ViewFitnessTestChartsTitle_id')}"/>
+                        <h:outputText value="#{configMapController.getKey('ViewFitnessTestChartsLabel_name')}"/>
+                        <h:outputText value="#{fitnessTestChartsController.selected.name}" title="#{configMapController.getKey('ViewFitnessTestChartsTitle_name')}"/>
+                        <h:outputText value="#{configMapController.getKey('ViewFitnessTestChartsLabel_description')}"/>
+                        <h:outputText value="#{fitnessTestChartsController.selected.description}" title="#{configMapController.getKey('ViewFitnessTestChartsTitle_description')}"/>
+                        <h:outputText value="#{configMapController.getKey('ViewFitnessTestChartsLabel_yaxisLabel')}"/>
+                        <h:outputText value="#{fitnessTestChartsController.selected.yaxisLabel}" title="#{configMapController.getKey('ViewFitnessTestChartsTitle_yaxisLabel')}"/>
                     </p:panelGrid>
-                    <p:commandButton value="#{bundle.Close}" onclick="FitnessTestChartsViewDialog.hide()"/>
+                    <p:commandButton value="#{configMapController.getKey('Close')}" onclick="FitnessTestChartsViewDialog.hide()"/>
                 </h:panelGroup>
             </h:form>
         </p:dialog>

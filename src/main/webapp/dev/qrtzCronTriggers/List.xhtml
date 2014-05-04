@@ -27,7 +27,7 @@
                             <f:selectItems value="#{qrtzTriggersController.itemsAvailableSelectOne}"/>
                             <p:ajax   update=":formQrtzCronTriggersCreate1"  />
                         </p:selectOneMenu>
-                        <p:commandButton oncomplete="QrtzCronTriggersCreateDialogue.hide();qrtzCronTriggersControllerTable.filter()" actionListener="#{qrtzCronTriggersController.createDialogue}" value="#{configMapController.getKey('CreateQrtzCronTriggersSaveLink')}" update=":menuForm:growl"/>                
+                        <p:commandButton oncomplete="QrtzCronTriggersCreateDialogue.hide();qrtzCronTriggersControllerTable.filter()" actionListener="#{qrtzCronTriggersController.createDialogue}" value="#{configMapController.getKey('CreateQrtzCronTriggersSaveLink')}" update=":growl"/>                
                     </p:panelGrid>
                 </p:confirmDialog>
             </h:form>
@@ -50,8 +50,8 @@
                                 <h:inputText id="globalFilter" onkeyup="qrtzCronTriggersControllerTable.filter()" />
                             </p:outputPanel>
                         </f:facet>
-                        <p:ajax event="rowEdit" listener="#{qrtzCronTriggersController.onEdit}" update=":menuForm:growl" oncomplete="qrtzCronTriggersControllerTable.filter()" />  
-                        <p:ajax event="rowEditCancel" listener="#{qrtzCronTriggersController.onCancel}" update=":menuForm:growl"  oncomplete="qrtzCronTriggersControllerTable.filter()" />  
+                        <p:ajax event="rowEdit" listener="#{qrtzCronTriggersController.onEdit}" update=":growl" oncomplete="qrtzCronTriggersControllerTable.filter()" />  
+                        <p:ajax event="rowEditCancel" listener="#{qrtzCronTriggersController.onCancel}" update=":growl"  oncomplete="qrtzCronTriggersControllerTable.filter()" />  
 
                         <p:column sortBy="#{item.cronExpression}" filterBy="#{item.cronExpression}" headerText="#{configMapController.getKey('ListQrtzCronTriggersTitle_cronExpression')}"   >
                             <p:cellEditor> 
@@ -94,7 +94,7 @@
                         </p:column>  
 
                         <p:column>
-                            <p:commandButton rendered="#{qrtzCronTriggersController.isUserInRole('ADMIN')}"  update=":QrtzCronTriggerslistForm1 :menuForm:growl" action="#{qrtzCronTriggersController.destroy}" value="#{configMapController.getKey('ListQrtzCronTriggersDestroyLink')}">
+                            <p:commandButton rendered="#{qrtzCronTriggersController.isUserInRole('ADMIN')}"  update=":QrtzCronTriggerslistForm1 :growl" action="#{qrtzCronTriggersController.destroy}" value="#{configMapController.getKey('ListQrtzCronTriggersDestroyLink')}">
                                 <f:setPropertyActionListener value="#{item}" target="#{qrtzCronTriggersController.selectedForDeletion}" />
                             </p:commandButton>                        
 

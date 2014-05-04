@@ -29,7 +29,7 @@
                             <f:selectItems value="#{qrtzTriggersController.itemsAvailableSelectOne}"/>
                             <p:ajax   update=":formQrtzSimpleTriggersCreate1"  />
                         </p:selectOneMenu>
-                        <p:commandButton oncomplete="QrtzSimpleTriggersCreateDialogue.hide();qrtzSimpleTriggersControllerTable.filter()" actionListener="#{qrtzSimpleTriggersController.createDialogue}" value="#{configMapController.getKey('CreateQrtzSimpleTriggersSaveLink')}" update=":menuForm:growl"/>                
+                        <p:commandButton oncomplete="QrtzSimpleTriggersCreateDialogue.hide();qrtzSimpleTriggersControllerTable.filter()" actionListener="#{qrtzSimpleTriggersController.createDialogue}" value="#{configMapController.getKey('CreateQrtzSimpleTriggersSaveLink')}" update=":growl"/>                
                     </p:panelGrid>
                 </p:confirmDialog>
             </h:form>
@@ -52,8 +52,8 @@
                                 <h:inputText id="globalFilter" onkeyup="qrtzSimpleTriggersControllerTable.filter()" />
                             </p:outputPanel>
                         </f:facet>
-                        <p:ajax event="rowEdit" listener="#{qrtzSimpleTriggersController.onEdit}" update=":menuForm:growl" oncomplete="qrtzSimpleTriggersControllerTable.filter()" />  
-                        <p:ajax event="rowEditCancel" listener="#{qrtzSimpleTriggersController.onCancel}" update=":menuForm:growl"  oncomplete="qrtzSimpleTriggersControllerTable.filter()" />  
+                        <p:ajax event="rowEdit" listener="#{qrtzSimpleTriggersController.onEdit}" update=":growl" oncomplete="qrtzSimpleTriggersControllerTable.filter()" />  
+                        <p:ajax event="rowEditCancel" listener="#{qrtzSimpleTriggersController.onCancel}" update=":growl"  oncomplete="qrtzSimpleTriggersControllerTable.filter()" />  
 
                         <p:column sortBy="#{item.repeatCount}" filterBy="#{item.repeatCount}" headerText="#{configMapController.getKey('ListQrtzSimpleTriggersTitle_repeatCount')}"   >
                             <p:cellEditor> 
@@ -108,7 +108,7 @@
                         </p:column>  
 
                         <p:column>
-                            <p:commandButton rendered="#{qrtzSimpleTriggersController.isUserInRole('ADMIN')}"  update=":QrtzSimpleTriggerslistForm1 :menuForm:growl" action="#{qrtzSimpleTriggersController.destroy}" value="#{configMapController.getKey('ListQrtzSimpleTriggersDestroyLink')}">
+                            <p:commandButton rendered="#{qrtzSimpleTriggersController.isUserInRole('ADMIN')}"  update=":QrtzSimpleTriggerslistForm1 :growl" action="#{qrtzSimpleTriggersController.destroy}" value="#{configMapController.getKey('ListQrtzSimpleTriggersDestroyLink')}">
                                 <f:setPropertyActionListener value="#{item}" target="#{qrtzSimpleTriggersController.selectedForDeletion}" />
                             </p:commandButton>                        
 

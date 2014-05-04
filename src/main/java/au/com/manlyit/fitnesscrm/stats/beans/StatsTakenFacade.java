@@ -1,22 +1,24 @@
 /*
- * To change this template, choose Tools | Templates
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package au.com.manlyit.fitnesscrm.stats.beans;
 
-import au.com.manlyit.fitnesscrm.stats.db.StatsTaken;
-import au.com.manlyit.fitnesscrm.stats.db.Stat;
+import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
+import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import au.com.manlyit.fitnesscrm.stats.db.StatsTaken;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Root;
-import javax.persistence.metamodel.EntityType;
 
 /**
  *
@@ -24,9 +26,12 @@ import javax.persistence.metamodel.EntityType;
  */
 @Stateless
 public class StatsTakenFacade extends AbstractFacade<StatsTaken> {
+
     @PersistenceContext(unitName = "FitnessStatsPU")
     private EntityManager em;
+    private static final Logger logger = Logger.getLogger(StatsTakenFacade.class.getName());
 
+    @Override
     protected EntityManager getEntityManager() {
         return em;
     }
@@ -34,30 +39,21 @@ public class StatsTakenFacade extends AbstractFacade<StatsTaken> {
     public StatsTakenFacade() {
         super(StatsTaken.class);
     }
- public List<StatsTaken> findAllByCustId( int customer_id) {
-        if (customer_id == 0) {
-            return this.findAll();
+
+    public List<StatsTaken> findAllByCustId(int customer_id) {
+        List retList = null;
+        try {
+            CriteriaBuilder cb = em.getCriteriaBuilder();
+            CriteriaQuery<StatsTaken> cq = cb.createQuery(StatsTaken.class);
+            Root<StatsTaken> rt = cq.from(StatsTaken.class);
+            Expression<String> custId = rt.get("customerId");
+            cq.where(cb.equal(custId, customer_id));
+            Query q = em.createQuery(cq);
+            retList = q.getResultList();
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "findAllByCustId: ", e);
         }
-        CriteriaBuilder cb = em.getCriteriaBuilder();
-
-        CriteriaQuery<StatsTaken> cq = cb.createQuery(StatsTaken.class);
-        Root<StatsTaken> rt2 = cq.from(StatsTaken.class);
-        EntityType<StatsTaken> Stats_Et = rt2.getModel();
-
-        Query q = em.createNativeQuery("SELECT * FROM stats_taken t where  customer_id  = '" + customer_id + "' order by date_recorded", StatsTaken.class);
-        return q.getResultList();
+        return retList;
     }
 
-    public int countByCustId( int customer_id) {
-        if (customer_id == 0) {
-            return count();
-        }
-        Query q = em.createNativeQuery("SELECT count(*) FROM stats_taken t where  customer_id  = '" + customer_id + "'");
-        return ((Long) q.getSingleResult()).intValue();
-    }
-    public void synch(){
-
-        em.flush();
-    }
-  
 }

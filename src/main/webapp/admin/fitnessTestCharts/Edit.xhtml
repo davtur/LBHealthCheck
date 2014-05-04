@@ -7,21 +7,19 @@
       xmlns:p="http://primefaces.org/ui" >
 
     <ui:composition>
-        <p:dialog id="FitnessTestChartsEditDlg" widgetVar="FitnessTestChartsEditDialog" modal="true" resizable="false" appendTo="@(body)" header="#{bundle.EditFitnessTestChartsTitle}">
+        <p:dialog id="FitnessTestChartsEditDlg" widgetVar="FitnessTestChartsEditDialog" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('EditFitnessTestChartsTitle')}">
             <h:form id="FitnessTestChartsEditForm">
                 <h:panelGroup id="display">
                     <p:panelGrid columns="2" rendered="#{fitnessTestChartsController.selected != null}">
-                        <h:outputLabel value="#{bundle.EditFitnessTestChartsLabel_id}" for="id" />
-                        <h:inputText id="id"  value="#{fitnessTestChartsController.selected.id}" title="#{bundle.EditFitnessTestChartsTitle_id}" required="true" requiredMessage="#{bundle.EditFitnessTestChartsRequiredMessage_id}"/>
-                        <h:outputLabel value="#{bundle.EditFitnessTestChartsLabel_name}" for="name" />
-                        <h:inputText id="name"  value="#{fitnessTestChartsController.selected.name}" title="#{bundle.EditFitnessTestChartsTitle_name}" required="true" requiredMessage="#{bundle.EditFitnessTestChartsRequiredMessage_name}"/>
-                        <h:outputLabel value="#{bundle.EditFitnessTestChartsLabel_description}" for="description" />
-                        <h:inputTextarea rows="4" cols="30" id="description" value="#{fitnessTestChartsController.selected.description}" title="#{bundle.EditFitnessTestChartsTitle_description}" required="true" requiredMessage="#{bundle.EditFitnessTestChartsRequiredMessage_description}"/>
-                        <h:outputLabel value="#{bundle.EditFitnessTestChartsLabel_yaxisLabel}" for="yaxisLabel" />
-                        <h:inputText id="yaxisLabel"  value="#{fitnessTestChartsController.selected.yaxisLabel}" title="#{bundle.EditFitnessTestChartsTitle_yaxisLabel}" required="true" requiredMessage="#{bundle.EditFitnessTestChartsRequiredMessage_yaxisLabel}"/>
+                        <h:outputLabel value="#{configMapController.getKey('EditFitnessTestChartsLabel_name')}" for="name" />
+                        <h:inputText id="name"  value="#{fitnessTestChartsController.selected.name}" title="#{configMapController.getKey('EditFitnessTestChartsTitle_name')}" required="true" requiredMessage="#{configMapController.getKey('EditFitnessTestChartsRequiredMessage_name')}"/>
+                        <h:outputLabel value="#{configMapController.getKey('EditFitnessTestChartsLabel_description')}" for="description" />
+                        <h:inputTextarea rows="4" cols="30" id="description" value="#{fitnessTestChartsController.selected.description}" title="#{configMapController.getKey('EditFitnessTestChartsTitle_description')}" required="true" requiredMessage="#{configMapController.getKey('EditFitnessTestChartsRequiredMessage_description')}"/>
+                        <h:outputLabel value="#{configMapController.getKey('EditFitnessTestChartsLabel_yaxisLabel')}" for="yaxisLabel" />
+                        <h:inputText id="yaxisLabel"  value="#{fitnessTestChartsController.selected.yaxisLabel}" title="#{configMapController.getKey('EditFitnessTestChartsTitle_yaxisLabel')}" required="true" requiredMessage="#{configMapController.getKey('EditFitnessTestChartsRequiredMessage_yaxisLabel')}"/>
                     </p:panelGrid>
-                    <p:commandButton actionListener="#{fitnessTestChartsController.update}" value="#{bundle.Save}" update="display,:FitnessTestChartsListForm:datalist,:menuForm:growl" oncomplete="handleSubmit(args, 'FitnessTestChartsEditDialog');fitnessTestChartsControllerTable.filter()"/>
-                    <p:commandButton value="#{bundle.Cancel}" onclick="FitnessTestChartsEditDialog.hide()"/>
+                    <p:commandButton actionListener="#{fitnessTestChartsController.update}" value="#{configMapController.getKey('Save')}" update="display,:FitnessTestChartsListForm:datalist,:growl" oncomplete="handleSubmit(args, 'FitnessTestChartsEditDialog');fitnessTestChartsControllerTable.filter()"/>
+                    <p:commandButton value="#{configMapController.getKey('Cancel')}" onclick="FitnessTestChartsEditDialog.hide()"/>
                 </h:panelGroup>
             </h:form>
         </p:dialog>

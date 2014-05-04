@@ -51,7 +51,7 @@
                                 </p:inputText>
                                 <h:outputLabel value="#{configMapController.getKey('EditCustomersLabel_dob')}" for="dob" />
                                 <p:calendar id="dob" value="#{customersController.selected.dob}" pattern="MM/dd/yyyy"  title="#{configMapController.getKey('EditCustomersTitle_dob')}"  required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_dob')}">
-  <p:ajax event="dateSelect" listener="#{customersController.dobChangeListener}" update=":menuForm:growl :createCustomerForm:panel3"  />
+  <p:ajax event="dateSelect" listener="#{customersController.dobChangeListener}" update=":growl :createCustomerForm:panel3"  />
 
                                 </p:calendar>   
 
@@ -60,7 +60,7 @@
                                 <p:password id="password"  value="#{customersController.checkPass}" onfocus="this.select()" feedback="true" title="#{configMapController.getKey('EditCustomersTitle_password')}" required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_password')}">
                                     <p:ajax listener="#{customersController.checkPassChange}" event="keyup" />
                                 </p:password>
-                                <p:commandButton   ajax="true" actionListener="#{customersController.updatepass}" update=":menuForm:growl"   value="#{configMapController.getKey('EditCustomersUpdatePassword')}" immediate="true"/>
+                                <p:commandButton   ajax="true" actionListener="#{customersController.updatepass}" update=":growl"   value="#{configMapController.getKey('EditCustomersUpdatePassword')}" immediate="true"/>
                             </h:panelGrid>
                         </p:panel>
                         <p:panel id="panel2">

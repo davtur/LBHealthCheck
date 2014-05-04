@@ -30,7 +30,7 @@
                                 <h:outputLabel value="#{configMapController.getKey('CreateSessionHistoryLabel_sessiondate')}" for="sessiondate" />
                                 <p:calendar id="sessiondate" value="#{sessionHistoryController.selected.sessiondate}" mode="inline" 
                                             title="#{configMapController.getKey('CreateSessionHistoryTitle_sessiondate')}" >
-                                    <p:ajax event="dateSelect" listener="#{sessionHistoryController.handleDateSelect}" update=":menuForm:growl"  />
+                                    <p:ajax event="dateSelect" listener="#{sessionHistoryController.handleDateSelect}" update=":growl"  />
 
                                 </p:calendar>
                             </p:panel>

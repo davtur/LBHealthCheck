@@ -26,7 +26,7 @@
                         <p:inputText id="description" value="#{itemController.selected.description}" title="#{configMapController.getKey('CreateItemTitle_description')}" required="true" requiredMessage="#{configMapController.getKey('CreateItemRequiredMessage_description')}"/>
                         <p:outputLabel value="#{configMapController.getKey('CreateItemLabel_deleted')}" for="deleted" />
                         <p:inputText id="deleted" value="#{itemController.selected.deleted}" title="#{configMapController.getKey('CreateItemTitle_deleted')}" required="true" requiredMessage="#{configMapController.getKey('CreateItemRequiredMessage_deleted')}"/>
-                        <p:commandButton oncomplete="ItemCreateDialogue.hide();itemControllerTable.filter()" actionListener="#{itemController.createDialogue}" value="#{configMapController.getKey('CreateItemSaveLink')}" update=":menuForm:growl"/>                
+                        <p:commandButton oncomplete="ItemCreateDialogue.hide();itemControllerTable.filter()" actionListener="#{itemController.createDialogue}" value="#{configMapController.getKey('CreateItemSaveLink')}" update=":growl"/>                
                     </p:panelGrid>
                 </p:confirmDialog>
             </h:form>
@@ -49,8 +49,8 @@
                                 <h:inputText id="globalFilter" onkeyup="itemControllerTable.filter()" />
                             </p:outputPanel>
                         </f:facet>
-                        <p:ajax event="rowEdit" listener="#{itemController.onEdit}" update=":menuForm:growl" oncomplete="itemControllerTable.filter()" />  
-                        <p:ajax event="rowEditCancel" listener="#{itemController.onCancel}" update=":menuForm:growl"  oncomplete="itemControllerTable.filter()" />  
+                        <p:ajax event="rowEdit" listener="#{itemController.onEdit}" update=":growl" oncomplete="itemControllerTable.filter()" />  
+                        <p:ajax event="rowEditCancel" listener="#{itemController.onCancel}" update=":growl"  oncomplete="itemControllerTable.filter()" />  
 
                         <p:column sortBy="#{item.id}" filterBy="#{item.id}" headerText="#{configMapController.getKey('ListItemTitle_id')}"   >
                             <p:cellEditor> 
@@ -105,7 +105,7 @@
                         </p:column>  
 
                         <p:column>
-                            <p:commandButton rendered="#{itemController.isUserInRole('ADMIN')}"  update=":ItemlistForm1 :menuForm:growl" action="#{itemController.destroy}" value="#{configMapController.getKey('ListItemDestroyLink')}">
+                            <p:commandButton rendered="#{itemController.isUserInRole('ADMIN')}"  update=":ItemlistForm1 :growl" action="#{itemController.destroy}" value="#{configMapController.getKey('ListItemDestroyLink')}">
                                 <f:setPropertyActionListener value="#{item}" target="#{itemController.selectedForDeletion}" />
                             </p:commandButton>                        
 
