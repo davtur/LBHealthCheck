@@ -58,8 +58,8 @@ public class ChartController implements Serializable {
     }
 
     public Customers getCustomer() {
-        String passCheck = PasswordService.getInstance().encrypt("1234567890");
-        System.out.println("\n\ne-check:" + passCheck + "\n\n");
+       // String passCheck = PasswordService.getInstance().encrypt("1234567890");
+      //  System.out.println("\n\ne-check:" + passCheck + "\n\n");
         FacesContext context = FacesContext.getCurrentInstance();
         CustomersController custController = (CustomersController) context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
         return custController.getSelected();

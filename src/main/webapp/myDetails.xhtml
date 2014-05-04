@@ -16,7 +16,7 @@
             </h:panelGroup>
             <h:form id="createCustomerForm">
                 <p:panel>
-                    <p:commandButton  actionListener="#{customersController.update}" value="#{configMapController.getKey('EditCustomersSaveLink')}"/>
+                    <p:commandButton  actionListener="#{customersController.update}" value="#{configMapController.getKey('EditCustomersSaveLink')}" update=":growl"/>
                 </p:panel>
                 <h:panelGrid columns="1">
                     <h:panelGrid columns="2">
