@@ -20,6 +20,8 @@
 
 #page-bg { background: url(/FitnessStats/resources/images/background/ocean_img.jpg) 50% 0 no-repeat; }
 
+.loginPanel { background: url(/FitnessStats/resources/images/ptlogin2.png) 50% 0 no-repeat;  }
+
 #block-main { 
     border-color: #c8dfe6;
     border-color: rgba(35,130,160,0.07);
@@ -35,7 +37,16 @@
 font-family:  Arial,Lucida Grande, Lucida Sans, sans-serif;
 font-size: 0.9em;
 }
-
-
+.social-icons span a {
+display: block;
+float:left;
+width: 37px;
+height: 37px;
+background: url(/FitnessStats/resources/templates/yoo_pace/images/tools/icons_social.png) 0 0 no-repeat;
+}
+.loginButtonFacebook {
+ margin-left: 5px;   
+ padding-right: 15px;  
+}
 												
 					

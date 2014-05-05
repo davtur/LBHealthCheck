@@ -16,14 +16,14 @@
             <h:form>
                 <p:panel>
                     <h3>Pure Fitness Manly Account</h3>
-                    <p:panel>
+                    <p:panel  styleClass="loginPanel">
                         <br />
                         <p:outputLabel  value="Username:  "/>
 
                         <p:inputText id="usernameInput" value="#{loginBean.username}" 
                                      required="true" requiredMessage="Please enter your username"/>
                         <br /><br />
-                        <p:outputLabel  value="Password:   " />
+                        <p:outputLabel  value="    Password :   " />
 
                         <p:password id="passwordInput" value="#{loginBean.password}" /><br />
                     </p:panel>
@@ -41,11 +41,18 @@
             <h:form id="loginForm">
                 <p:panel>
                     <h3>Facebook Account</h3>
-                    <p:panel>
-                        <p:button value="Facebook Connect" href="#{facebookLoginBean.facebookUrlAuth}" />
-                        <h:outputText value="You can use your facebook account to log into Pure Fitness Manly Member Services if you find it easier."></h:outputText>
-                        <br/><br/>
+                    <p:panel >
+                       <div class="social-icons">
+                            <span class="facebook"><a target="_blank" href="https://www.facebook.com/PureFitnessManly"></a></span>
+                        </div>
+                        <p:button styleClass="loginButtonFacebook" value="Facebook Connect" href="#{facebookLoginBean.facebookUrlAuth}" />
+                        
+
+                        <h:outputText value="   You can use your facebook account to log into Pure Fitness Manly Member Services if you find it easier."></h:outputText>
+
+                        
                         <h:outputText value="#{facebookLoginBean.userFromSession}"></h:outputText>
+                      
                     </p:panel></p:panel>
             </h:form>
         </ui:define>
