@@ -31,7 +31,7 @@ public class FacebookLoginBean implements Serializable {
         String sessionId = session.getId();
         String appId = configMapFacade.getConfig("facebook.app.id");//"247417342102284";
         String redirectUrl = configMapFacade.getConfig("facebook.redirect.url");//"http://localhost:8080/FitnessStats/index.sec";
-        String returnValue = "https://www.facebook.com/dialog/oauth?client_id="
+        String returnValue = configMapFacade.getConfig("facebook.app.oauth.url") + "client_id="
                 + appId + "&redirect_uri=" + redirectUrl
                 + "&scope=email,user_birthday&state=" + sessionId;
         return returnValue;
@@ -42,7 +42,7 @@ public class FacebookLoginBean implements Serializable {
                 = (HttpSession) FacesContext.getCurrentInstance().getExternalContext().getSession(false);
         String userName = (String) session.getAttribute("FACEBOOK_USER");
         if (userName != null) {
-            return "Hello " + userName + ". We couldn't find you in the Pure Fitness Manly system. Please contact us to enable your login. http://www.purefitnessmanly.com.au/contact-the-pure-fitness-team/manly-boot-camp-and-personal-training-contact-form";
+            return "Hello " + userName + ". " + configMapFacade.getConfig("facebook.app.login.disabled.message");
         } else {
             return "";
         }
