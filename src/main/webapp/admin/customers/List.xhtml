@@ -418,7 +418,7 @@
                                 <f:selectItems value="#{preferedContactController.itemsAvailableAsObjects}"  var="prefContact" itemLabel="#{prefContact.preferedContactMethod}" itemValue="#{prefContact}"/>
                             </p:selectOneMenu>
                             <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_password')}" for="password1" />
-                            <p:password id="password1"  value="#{customersController.checkPass}" onfocus="this.select()" feedback="true" title="#{configMapController.getKey('EditCustomersTitle_password')}" required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_password')}">
+                            <p:password id="password1"  value="#{customersController.checkPass}" onfocus="this.select()" feedback="true" title="#{configMapController.getKey('EditCustomersTitle_password')}">
                                 <p:ajax listener="#{customersController.checkPassChange}" event="keyup" />
                             </p:password>
                             <p:commandButton  id="passButton" ajax="true" actionListener="#{customersController.updatepass}" update=":growl"   value="#{configMapController.getKey('EditCustomersUpdatePassword')}" immediate="true"/>

@@ -151,6 +151,7 @@ public class LoginBean implements Serializable {
 
             try {
                 this.setMobileDeviceUserAgent(true);
+                logger.log(Level.INFO, "Mobile Device user agent detected. Redirecting to the mobile login page.");
                 ec.redirect("mobileLogin.xhtml");
             } catch (IOException e) {
                 JsfUtil.addErrorMessage(e, "Redirect to Mobile Login failed");
@@ -171,6 +172,8 @@ public class LoginBean implements Serializable {
             if (agent.detectMobileQuick()) {
                 return true;
             }
+        }else{
+           logger.log(Level.WARNING, "Can't detect mobile device as the user agent or accept header is null!"); 
         }
 
         return false;
@@ -183,21 +186,21 @@ public class LoginBean implements Serializable {
 
         try {
             request.login(this.username, this.password);
-             HttpSession httpSession = request.getSession();
+            HttpSession httpSession = request.getSession();
+            String landingPage;
             if (mobileDevice(request)) {
                 httpSession.setAttribute("MOBILE_DEVICE", "TRUE");
-                ec.redirect(request.getContextPath() + getValueFromKey("facebook.redirect.mobilelandingpage"));
+                logger.log(Level.INFO, "Mobile Device user agent detected. Redirecting to the mobile landing page.");
+                landingPage = request.getContextPath() + getValueFromKey("facebook.redirect.mobilelandingpage");
             } else {
-                ec.redirect(request.getContextPath() + getValueFromKey("facebook.redirect.landingpage"));
+                landingPage = getValueFromKey("facebook.redirect.landingpage");
             }
-
+            ec.redirect(request.getContextPath() + landingPage);
+            logger.log(Level.INFO, "Redirecting to Landing Page:", landingPage);
         } catch (ServletException | IOException e) {
-
             context.addMessage(null, new FacesMessage("Login failed."));
             logger.log(Level.WARNING, "Login Failed", e);
-
         }
-
     }
 
     private String getValueFromKey(String key) {

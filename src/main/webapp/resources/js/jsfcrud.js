@@ -6,3 +6,13 @@ function handleSubmit(args, dialog) {
         PF(dialog).hide();
     }
 }
+function handleCreateRequest(xhr, status, args, dialog, listTable) {
+    var jqDialog = jQuery('#' + dialog);
+    if (args.validationFailed) {
+        jqDialog.jq.effect("shake", {times: 5}, 100);
+    }
+    else {
+        PF('dialog').hide();
+        PF('listTable').filter();
+    }
+}

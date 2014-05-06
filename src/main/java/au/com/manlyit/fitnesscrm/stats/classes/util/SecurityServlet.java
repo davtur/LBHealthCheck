@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 
@@ -31,7 +32,9 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.BasicResponseHandler;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 
 @WebServlet("*.sec")
 public class SecurityServlet extends HttpServlet {
@@ -61,11 +64,12 @@ public class SecurityServlet extends HttpServlet {
         String faceCode = request.getParameter("code");
         String state = request.getParameter("state");
         //boolean mobileDevice = false;
-
+        FacesContext context = FacesContext.getCurrentInstance();
         String accessToken = getFacebookAccessToken(faceCode);
         Customers facebookUser = getUserMailAddressFromJsonResponse(accessToken, httpSession);
         String sessionID = httpSession.getId();
         if (state.equals(sessionID)) {
+            String pfmEncrptedPassword = null;
             try {
                 //do some specific user data operation like saving to DB or login user
                 //request.login(email, "somedefaultpassword");
@@ -79,27 +83,43 @@ public class SecurityServlet extends HttpServlet {
                     if (customer == null) {
                         //customer has not logged in with facebook before
                         //see if we can match on email and name
-                        List<Customers> clist = ejbFacade.findCustomersByEmail(facebookUser.getEmailAddress());
-                        for (Customers c : clist) {
+                        if (facebookUser.getEmailAddress() != null) {
+                            List<Customers> clist = ejbFacade.findCustomersByEmail(facebookUser.getEmailAddress());
+                            for (Customers c : clist) {
 
-                            if (c != null) {
+                                if (c != null) {
 
-                                if (c.getFirstname().toLowerCase().compareTo(facebookUser.getFirstname().toLowerCase()) == 0 && c.getLastname().toLowerCase().compareTo(facebookUser.getLastname().toLowerCase()) == 0) { // matched facebook username to local user
-                                    // we have not matched names to email address... Should probably do dob as well                                
-                                    customer = c;
+                                    if (c.getFirstname().toLowerCase().compareTo(facebookUser.getFirstname().toLowerCase()) == 0 && c.getLastname().toLowerCase().compareTo(facebookUser.getLastname().toLowerCase()) == 0) { // matched facebook username to local user
+                                        // we have not matched names to email address... Should probably do dob as well                                
+                                        customer = c;
+                                    }
                                 }
                             }
+                        } else {
+                            logger.log(Level.WARNING, "Facebook Email address is null for customer. ");
                         }
                     }
                     if (customer != null) {
                         // login facebook user with random password that is changed each login
                         String passwd = RandomStringUtils.random(20);
                         String encPassword = PasswordService.getInstance().encrypt(passwd);
+                        pfmEncrptedPassword = customer.getPassword();
                         customer.setPassword(encPassword);
                         customer.setFacebookId(fbid);
                         ejbFacade.editAndFlush(customer);
 
-                        request.login(customer.getUsername(), passwd);
+                        try {
+                            request.login(customer.getUsername(), passwd);
+                            customer.setPassword(pfmEncrptedPassword);
+                            ejbFacade.editAndFlush(customer);
+                        } catch (ServletException servletException) {
+                            logger.log(Level.INFO, "Login failed!");
+                            customer.setPassword(pfmEncrptedPassword);
+                            ejbFacade.editAndFlush(customer);
+                            throw servletException;
+                        }
+                    } else {
+                        context.addMessage(null, new FacesMessage("Login failed."));
                     }
                 }
                 // if(mobileDevice == true){
@@ -173,28 +193,51 @@ public class SecurityServlet extends HttpServlet {
     }
 
     private Customers getUserMailAddressFromJsonResponse(String accessToken, HttpSession httpSession) {
-        String email;
+        String email = null;
         Customers cust = new Customers();
         //deprecated use HttpClientBuilder
-        HttpClient httpclient = new DefaultHttpClient();
+        CloseableHttpClient httpclient = HttpClientBuilder.create().build();
         try {
             if (accessToken != null && !"".equals(accessToken)) {
                 String newUrl = "https://graph.facebook.com/me?access_token=" + accessToken;
-                httpclient = new DefaultHttpClient();
+                httpclient = HttpClientBuilder.create().build();
                 HttpGet httpget = new HttpGet(newUrl);
                 logger.log(Level.WARNING, "Get info from face --> executing request: {0}", httpget.getURI());
                 ResponseHandler<String> responseHandler = new BasicResponseHandler();
                 String responseBody = httpclient.execute(httpget, responseHandler);
-                JSONObject json = (JSONObject) JSONSerializer.toJSON(responseBody);
-                String facebookId = json.getString("id");
+                String firstName = null;
+                String lastName = null;
+                String facebookId = null;
+                try {
+                    JSONObject json = (JSONObject) JSONSerializer.toJSON(responseBody);
+                    facebookId = json.getString("id");
 
-                String firstName = json.getString("first_name");
-                String lastName = json.getString("last_name");
-                email = json.getString("email");
-                //put user data in session
-                httpSession.setAttribute("FACEBOOK_USER", firstName + " "
-                        + lastName + ", facebookId:" + facebookId);
+                    firstName = json.getString("first_name");
+                    lastName = json.getString("last_name");
+                    httpSession.setAttribute("FACEBOOK_USER", firstName + " "
+                            + lastName + ", facebookId:" + facebookId);
+                    
+                    email = json.getString("email");
+                    //put user data in session
 
+                    if (facebookId == null || firstName == null || lastName == null || email == null) {
+                        if (facebookId == null) {
+                            logger.log(Level.WARNING, "Error getting JSON objects from facebook: Facebook ID is NULL");
+                        }
+                        if (firstName == null) {
+                            logger.log(Level.WARNING, "Error getting JSON objects from facebook: firstName is NULL");
+                        }
+                        if (lastName == null) {
+                            logger.log(Level.WARNING, "Error getting JSON objects from facebook: lastName is NULL");
+                        }
+                        if (email == null) {
+                            logger.log(Level.WARNING, "Error getting JSON objects from facebook: email is NULL");
+                        }
+                    }
+
+                } catch (Exception e) {
+                    logger.log(Level.WARNING, "Error getting JSON objects from facebook}", e);
+                }
                 cust.setFirstname(firstName);
                 cust.setLastname(lastName);
                 cust.setEmailAddress(email);
@@ -208,7 +251,11 @@ public class SecurityServlet extends HttpServlet {
         } catch (IOException e) {
             logger.log(Level.WARNING, e.getMessage());
         } finally {
-            httpclient.getConnectionManager().shutdown();
+            try {
+                httpclient.close();
+            } catch (IOException ex) {
+                logger.log(Level.WARNING, "Error closing httpclient in facebook security servlet}", ex);
+            }
         }
         return cust;
     }

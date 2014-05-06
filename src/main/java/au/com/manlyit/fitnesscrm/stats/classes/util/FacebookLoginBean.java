@@ -42,7 +42,7 @@ public class FacebookLoginBean implements Serializable {
                 = (HttpSession) FacesContext.getCurrentInstance().getExternalContext().getSession(false);
         String userName = (String) session.getAttribute("FACEBOOK_USER");
         if (userName != null) {
-            return "Hello " + userName;
+            return "Hello " + userName + ". We couldn't find you in the Pure Fitness Manly system. Please contact us to enable your login. http://www.purefitnessmanly.com.au/contact-the-pure-fitness-team/manly-boot-camp-and-personal-training-contact-form";
         } else {
             return "";
         }

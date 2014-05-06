@@ -326,7 +326,7 @@ public class CustomersController implements Serializable {
 
         } catch (Exception e) {
             String cause = e.getCause().getCause().getMessage();
-            if (cause.toLowerCase().indexOf("duplicate") != -1) {
+            if (cause.toLowerCase().contains("duplicate")) {
                 JsfUtil.addErrorMessage("Error", configMapFacade.getConfig("DuplicateCustomerExists"));
                 return null;
             } else {
@@ -356,7 +356,7 @@ public class CustomersController implements Serializable {
                 JsfUtil.addSuccessMessage(configMapFacade.getConfig("CustomersCreated"));
             } catch (Exception e) {
                 String cause = e.getCause().getCause().getMessage();
-                if (cause.toLowerCase().indexOf("duplicate") != -1) {
+                if (cause.toLowerCase().contains("duplicate")) {
                     JsfUtil.addErrorMessage("Error", configMapFacade.getConfig("DuplicateCustomerExists"));
                 } else {
                     JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
