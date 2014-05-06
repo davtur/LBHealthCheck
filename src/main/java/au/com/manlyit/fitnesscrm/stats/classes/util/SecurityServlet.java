@@ -116,16 +116,17 @@ public class SecurityServlet extends HttpServlet {
                             logger.log(Level.INFO, "Login failed!");
                             customer.setPassword(pfmEncrptedPassword);
                             ejbFacade.editAndFlush(customer);
-                            throw servletException;
+                            if (servletException.getMessage().contains("Login failed") == false) {
+                                throw servletException;
+                            }else{
+                               context.addMessage(null, new FacesMessage("Login failed."));
+                               return;
+                            }
                         }
                     } else {
                         context.addMessage(null, new FacesMessage("Login failed."));
                     }
                 }
-                // if(mobileDevice == true){
-                //     response.sendRedirect(request.getContextPath() + "/mobileMenu.xhtml");
-                // }
-
             } catch (ServletException e) {
                 logger.log(Level.WARNING, e.getMessage());
 
@@ -169,7 +170,7 @@ public class SecurityServlet extends HttpServlet {
             String newUrl = "https://graph.facebook.com/oauth/access_token?client_id="
                     + appId + "&redirect_uri=" + redirectUrl + "&client_secret="
                     + faceAppSecret + "&code=" + faceCode;
-            HttpClient httpclient = new DefaultHttpClient();
+            CloseableHttpClient httpclient = HttpClientBuilder.create().build();
             try {
                 HttpGet httpget = new HttpGet(newUrl);
                 ResponseHandler<String> responseHandler = new BasicResponseHandler();
@@ -180,7 +181,11 @@ public class SecurityServlet extends HttpServlet {
             } catch (IOException e) {
                 logger.log(Level.WARNING, e.getMessage());
             } finally {
-                httpclient.getConnectionManager().shutdown();
+                try {
+                    httpclient.close();
+                } catch (IOException ex) {
+                    logger.log(Level.SEVERE, null, ex);
+                }
             }
         }
         return token;
@@ -216,7 +221,7 @@ public class SecurityServlet extends HttpServlet {
                     lastName = json.getString("last_name");
                     httpSession.setAttribute("FACEBOOK_USER", firstName + " "
                             + lastName + ", facebookId:" + facebookId);
-                    
+
                     email = json.getString("email");
                     //put user data in session
 

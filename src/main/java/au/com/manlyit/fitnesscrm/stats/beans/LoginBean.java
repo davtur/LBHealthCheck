@@ -172,8 +172,8 @@ public class LoginBean implements Serializable {
             if (agent.detectMobileQuick()) {
                 return true;
             }
-        }else{
-           logger.log(Level.WARNING, "Can't detect mobile device as the user agent or accept header is null!"); 
+        } else {
+            logger.log(Level.WARNING, "Can't detect mobile device as the user agent or accept header is null!");
         }
 
         return false;
@@ -185,7 +185,17 @@ public class LoginBean implements Serializable {
         HttpServletRequest request = (HttpServletRequest) context.getExternalContext().getRequest();
 
         try {
-            request.login(this.username, this.password);
+            try {
+                request.login(this.username, this.password);
+            } catch (ServletException servletException) {
+                 if (servletException.getMessage().contains("Login failed") == false) {
+                    throw servletException;
+                } else {
+                    logger.log(Level.INFO, "Login Failed - Bad username or Password");
+                    context.addMessage(null, new FacesMessage("Login Failed. Username or Password is incorrect!"));
+                    return;
+                }
+            }
             HttpSession httpSession = request.getSession();
             String landingPage;
             if (mobileDevice(request)) {
