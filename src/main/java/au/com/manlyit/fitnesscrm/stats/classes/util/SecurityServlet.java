@@ -142,6 +142,13 @@ public class SecurityServlet extends HttpServlet {
 
         } else {
             logger.log(Level.WARNING, "CSRF protection validation");
+             if (mobileDevice(request)) {
+                httpSession.setAttribute("MOBILE_DEVICE", "TRUE");
+                response.sendRedirect(request.getContextPath() + getValueFromKey("facebook.redirect.mobilelandingpage"));
+            } else {
+                response.sendRedirect(request.getContextPath() + getValueFromKey("facebook.redirect.landingpage"));
+            }
+
         }
     }
 

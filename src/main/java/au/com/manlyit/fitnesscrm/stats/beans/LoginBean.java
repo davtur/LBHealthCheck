@@ -46,7 +46,7 @@ public class LoginBean implements Serializable {
     private String username;
     private String password;
     private boolean mobileDeviceUserAgent = false;
-    private Future<String> emailSendResult;
+    private Future<Boolean> emailSendResult;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade configMapFacade;
     @Inject
