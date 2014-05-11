@@ -637,11 +637,11 @@ public class CustomersController implements Serializable {
 
     }
 
-    public void rowSelectEvent(SelectEvent event) {
+    public void onRowSelectEvent(SelectEvent event) {
         Object o = event.getObject();
         if (o.getClass().equals(Customers.class)) {
             Customers cust = (Customers) o;
-            setSelected(current);
+            setSelected(cust);
         }
 
     }

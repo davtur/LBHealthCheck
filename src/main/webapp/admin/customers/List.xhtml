@@ -11,17 +11,17 @@
             <h:outputText value="#{configMapController.getKey('ListCustomersTitle')}"></h:outputText>
         </ui:define>
         <ui:define name="body">
- 
-   
+
+
             <h:form id="pollForm">
               <!--  <p:poll  id="poller1" widgetVar="paymentPoller" interval="3" listener="#{ezidebit.pollerListener}" autoStart="#{ezidebit.autoStartPoller}" stop="#{ezidebit.paymentRequestStatusIdle}" update=":tabView:paymentsForm :growl"  />-->
                 <p:poll  id="poller1" immediate="true"  widgetVar="paymentPoller" interval="5" stop="#{ezidebit.paymentRequestStatusIdle}" listener="#{ezidebit.pollerListener}" autoStart="#{ezidebit.autoStartPoller}"  update=":tabView:paymentsForm :growl"  />
 
             </h:form>
 
-            <!--<p:log/>-->
-            <p:tabView id="tabView" widgetVar="tabViewWidget" > 
-                <p:ajax event="tabChange" listener="#{customersController.onTabChange}"  update=":growl :pollForm:poller1"/>  
+          
+            <p:tabView id="tabView" widgetVar="tabViewWidget" onTabChange=""> 
+                <p:ajax event="tabChange" listener="#{customersController.onTabChange}"  update=":growl :pollForm:poller1" oncomplete="PF('paymentPoller').start();"/>  
 
                 <p:tab id="tab1" title="Customer List">  
                     <h:form id="CustomerslistForm1">
@@ -32,18 +32,18 @@
                         <h:outputText id="selectedUser" value="#{customersController.selected.firstname} #{customersController.selected.lastname}" />
                         <h:outputText escape="false" value="#{configMapController.getKey('ListCustomersEmpty')}" rendered="#{customersController.items.rowCount == 0}"/>
                         <h:panelGroup rendered="#{customersController.items.rowCount > 0}">
-                            <p:dataTable id="tableList" editable="true" selectionMode="single"  rowKey="#{item.id}" selection="#{customersController.selected}" value="#{customersController.items}" filteredValue="#{customersController.filteredItems}"  widgetVar="customersControllerTable" var="item"  paginator="true" rows="15"  paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  rowsPerPageTemplate="5,10,15,20,25,50,100" >
+                            <p:dataTable id="customersTableList" editable="true"   rowKey="#{item.id}" selection="#{customersController.selected}" value="#{customersController.items}" filteredValue="#{customersController.filteredItems}"  widgetVar="customersControllerTable" var="item"  paginator="true" rows="15"  paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  rowsPerPageTemplate="5,10,15,20,25,50,100" >
                                 <f:facet name="header">
                                     <p:outputPanel>
                                         <h:outputText value="Search all fields:" />
                                         <h:inputText id="globalFilter4" onkeyup="customersControllerTable.filter()" />
                                     </p:outputPanel>
                                 </f:facet>
-                                <p:ajax event="rowEdit"   listener="#{customersController.onEdit}" update=":growl" oncomplete="PF('paymentPoller').start();customersControllerTable.filter()" />  
+                                <p:ajax event="rowEdit"   listener="#{customersController.onEdit}" update=":growl"  />  
                                 <p:ajax event="rowEditCancel" listener="#{customersController.onCancel}" update=":growl"   /> 
-                                <p:ajax event="rowSelect" oncomplete="PF('paymentPoller').start()" update=":growl :tabView:CustomerslistForm1:selectedUser :tabView:formCustomersEdit1 :formCustomersCreate1 :pollForm:poller1 :tabView:paymentsForm :tabView:NoteslistForm1"  />  
-
-
+                                <p:ajax event="rowSelectRadio"   update=":growl :tabView:CustomerslistForm1:selectedUser :tabView:formCustomersEdit1 :formCustomersCreate1 :pollForm:poller1 :tabView:paymentsForm :tabView:NoteslistForm1"  />  
+                                
+                                <p:column selectionMode="single"/>
                                 <p:column sortBy="#{item.firstname}" filterBy="#{item.firstname}" headerText="#{configMapController.getKey('ListCustomersTitle_firstname')}"   >
                                     <p:cellEditor> 
                                         <f:facet name="output">
@@ -53,8 +53,6 @@
                                             <p:inputText value="#{item.firstname}" label="#{configMapController.getKey('ListCustomersTitle_firstname')}" />
                                         </f:facet>
                                     </p:cellEditor> 
-
-
                                 </p:column>
                                 <p:column sortBy="#{item.lastname}" filterBy="#{item.lastname}" headerText="#{configMapController.getKey('ListCustomersTitle_lastname')}"   >
                                     <p:cellEditor> 
@@ -129,12 +127,12 @@
                                                                    </p:commandButton>                       
                                
                                                                </p:column> -->
-                                <p:column>
-                                    <p:commandButton id="paymentButton"  rendered="#{customersController.isUserInRole('ADMIN')}"    oncomplete="tabViewWidget.select(1);PF('paymentPoller').start()"  update=":growl :tabView:CustomerslistForm1 :pollForm:poller1 :tabView:formCustomersEdit1 :formCustomersCreate1 :tabView:paymentsForm :tabView:NoteslistForm1" value="#{configMapController.getKey('ListCustomersEditPaymentLink')}">
-                                        <f:setPropertyActionListener value="#{item}" target="#{customersController.selected}"  />
-                                    </p:commandButton>                       
+                                <!--  <p:column>
+                                    <p:commandButton id="paymentButton"  rendered="#{customersController.isUserInRole('ADMIN')}"    oncomplete="tabViewWidget.select(1);"  update=":growl :tabView:CustomerslistForm1 :pollForm:poller1 :tabView:formCustomersEdit1 :formCustomersCreate1 :tabView:paymentsForm :tabView:NoteslistForm1" value="#{configMapController.getKey('ListCustomersEditPaymentLink')}"/>
+                                      <f:setPropertyActionListener value="#{item}" target="#{customersController.selected}"  />
+                                    </p:commandButton>                    
 
-                                </p:column>
+                                </p:column> -->  
                             </p:dataTable>
                         </h:panelGroup>
                     </h:form>
@@ -226,7 +224,7 @@
                             </p:password>
                             <p:commandButton  id="passButton" ajax="true" actionListener="#{customersController.updatepass}" update=":growl"   value="#{configMapController.getKey('EditCustomersUpdatePassword')}" immediate="true"/>
                             <p:panel>
-                                <p:commandButton id="dialogueSave1" oncomplete="tabViewWidget.select(1)"  actionListener="#{customersController.createDialogue}" value="#{configMapController.getKey('CreateCustomersSaveLink')}" update=":tabView:CustomerslistForm1:tableList :growl"/>                
+                                <p:commandButton id="dialogueSave1" oncomplete="tabViewWidget.select(1)"  actionListener="#{customersController.createDialogue}" value="#{configMapController.getKey('CreateCustomersSaveLink')}" update=":tabView:CustomerslistForm1:customersTableList :growl"/>                
                             </p:panel>
                         </p:panelGrid>
                     </h:form>
@@ -504,7 +502,7 @@
 
                 </p:tab>
             </p:tabView>  
-             <ui:include src="Create.xhtml"/>
+            <ui:include src="Create.xhtml"/>
             <ui:include src="CreateSchedule.xhtml"/>
             <ui:include src="CreatePayment.xhtml"/>
         </ui:define>
