@@ -11,205 +11,8 @@
             <h:outputText value="#{configMapController.getKey('ListCustomersTitle')}"></h:outputText>
         </ui:define>
         <ui:define name="body">
-            <h:form id="formCustomersCreate1">    
-                <!--<p:log />--> 
-                <p:confirmDialog id="confirmDialogCustomersCreate1" message="Add a new customer to the database."  closable="false"
-                                 header="#{configMapController.getKey('CreateCustomersTitle')}" severity="info" widgetVar="customersCreateDialogue"> 
-                    <p:panelGrid id="dialogueGrid" columns="4">
-
-                        <p:outputLabel value="#{configMapController.getKey('EditCustomersLabel_firstname')}" for="firstname" />
-                        <p:inputText id="firstname"  value="#{customersController.selected.firstname}" title="#{configMapController.getKey('EditCustomersTitle_firstname')}" valueChangeListener="#{customersController.firstNameListener}" required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_firstname')}">
-                            <p:ajax update=":formCustomersCreate1:username" event="keyup"/>
-                        </p:inputText>
-                        <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_gender')}" title="#{configMapController.getKey('EditCustomersTitle_gender')}" for="gender" />
-                        <p:selectOneMenu id="gender" value="#{customersController.selected.gender}"   required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_gender')}">
-                            <f:selectItem itemValue="M" itemLabel="Male" />
-                            <f:selectItem itemValue="F" itemLabel="Female" />
-                        </p:selectOneMenu>
-                        <p:outputLabel value="#{configMapController.getKey('EditCustomersLabel_lastname')}" for="lastname" />
-                        <p:inputText id="lastname" value="#{customersController.selected.lastname}" title="#{configMapController.getKey('EditCustomersTitle_lastname')}" valueChangeListener="#{customersController.lastNameListener}" required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_lastname')}">
-                            <p:ajax update=":formCustomersCreate1:username" event="keyup" />
-                        </p:inputText>
-                        <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_dob')}" for="dob" />
-                        <p:calendar id="dob" pattern="MM/dd/yyyy" value="#{customersController.selected.dob}" title="#{configMapController.getKey('CreateCustomersTitle_dob')}" required="true" requiredMessage="#{configMapController.getKey('CreateCustomersRequiredMessage_dob')}" />
-                        <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_emailAddress')}" for="emailAddress" />
-                        <p:inputText id="emailAddress" value="#{customersController.selected.emailAddress}" title="#{configMapController.getKey('EditCustomersTitle_emailAddress')}" required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_emailAddress')}">
-                            <f:validator validatorId="au.com.manlyit.fitnesscrm.stats.classes.util.EmailValidator" />
-                        </p:inputText>
-                        <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_username')}" for="username" />
-                        <p:inputText id="username" value="#{customersController.selected.username}" title="#{configMapController.getKey('CreateCustomersTitle_username')}" required="true" requiredMessage="#{configMapController.getKey('CreateCustomersRequiredMessage_username')}"/>
-                        <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_streetAddress')}" for="streetAddress" />
-                        <p:inputText id="streetAddress" value="#{customersController.selected.streetAddress}" title="#{configMapController.getKey('CreateCustomersTitle_streetAddress')}" />
-                        <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_suburb')}" for="suburb" />
-                        <p:inputText id="suburb" value="#{customersController.selected.suburb}" title="#{configMapController.getKey('CreateCustomersTitle_suburb')}" />
-                        <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_postcode')}" for="postcode" />
-                        <p:inputText id="postcode" value="#{customersController.selected.postcode}" title="#{configMapController.getKey('CreateCustomersTitle_postcode')}" />
-                        <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_city')}" for="city" />
-                        <p:inputText id="city" value="#{customersController.selected.city}" title="#{configMapController.getKey('CreateCustomersTitle_city')}" />
-                        <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_addrState')}" for="addrState" />
-                        <p:inputText id="addrState" value="#{customersController.selected.addrState}" title="#{configMapController.getKey('CreateCustomersTitle_addrState')}" />
-                        <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_countryId')}" for="countryId" />
-                        <p:inputText id="countryId" value="#{customersController.selected.countryId}" title="#{configMapController.getKey('CreateCustomersTitle_countryId')}" />
-                        <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_telephone')}" for="telephone" />
-                        <p:inputText id="telephone" value="#{customersController.selected.telephone}" title="#{configMapController.getKey('CreateCustomersTitle_telephone')}" />
-                        <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_fax')}" for="fax" />
-                        <p:inputText id="fax" value="#{customersController.selected.fax}" title="#{configMapController.getKey('CreateCustomersTitle_fax')}" />
-                        <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_newsletter')}" title="#{configMapController.getKey('EditCustomersTitle_newsletter')}" for="newsletter" />
-                        <p:selectOneMenu id="newsletter" value="#{customersController.selected.newsletter}"  >
-                            <f:selectItem itemValue="Y" itemLabel="Send Newsletter" />
-                            <f:selectItem itemValue="N" itemLabel="Dont Send" />
-                        </p:selectOneMenu>
-                        <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_referredby')}"  title="#{configMapController.getKey('EditCustomersTitle_referredby')}"  for="referredby" />
-                        <p:selectOneMenu id="referredby" value="#{customersController.selected.referredby}"   >
-                            <f:selectItems value="#{customersController.itemsAvailableSelectOne}"  />
-                        </p:selectOneMenu>
-                        <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_active')}" for="active2" />
-                        <p:selectOneMenu id="active2" valueChangeListener="#{customersController.selectOneMenuValueChangeListener}" converter="customerStateConverter" value="#{customersController.selected.active}" label="#{configMapController.getKey('CreateCustomersTitle_active')}" >
-                            <f:selectItems value="#{customerStateController.itemsAvailableAsObjects}"  var="custState" itemLabel="#{custState.customerState}" itemValue="#{custState}"/>                           
-                        </p:selectOneMenu>
-                        <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_groupPricing')}" for="groupPricing" />
-                        <p:selectOneMenu id="groupPricing" valueChangeListener="#{customersController.selectOneMenuValueChangeListener}" converter="planConverter" value="#{customersController.selected.groupPricing}" label="#{configMapController.getKey('CreateCustomersTitle_groupPricing')}" >
-                            <f:selectItems value="#{planController.itemsAvailableAsObjects}"  var="plan" itemLabel="#{plan.planName}" itemValue="#{plan}"/>
-                        </p:selectOneMenu>
-                        <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_emailFormat')}" for="emailFormat" />
-                        <p:selectOneMenu id="emailFormat" valueChangeListener="#{customersController.selectOneMenuValueChangeListener}" converter="emailFormatConverter" value="#{customersController.selected.emailFormat}" label="#{configMapController.getKey('CreateCustomersTitle_emailFormat')}" >
-                            <f:selectItems value="#{emailFormatController.itemsAvailableAsObjects}"  var="emailFormat" itemLabel="#{emailFormat.emailFormat}" itemValue="#{emailFormat}"/>
-                        </p:selectOneMenu>
-                        <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_auth')}" for="auth" />
-                        <p:selectOneMenu id="auth" valueChangeListener="#{customersController.selectOneMenuValueChangeListener}" converter="customerAuthConverter" value="#{customersController.selected.auth}" label="#{configMapController.getKey('CreateCustomersTitle_auth')}" >
-                            <f:selectItems value="#{customerAuthController.itemsAvailableAsObjects}"  var="custAuth" itemLabel="#{custAuth.customerAuthType}" itemValue="#{custAuth}"/>
-                        </p:selectOneMenu>
-                        <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_demographic')}" for="demographic" />
-                        <p:selectOneMenu id="demographic" valueChangeListener="#{customersController.selectOneMenuValueChangeListener}" converter="demographicTypesConverter" value="#{customersController.selected.demographic}" label="#{configMapController.getKey('CreateCustomersTitle_demographic')}" >
-                            <f:selectItems value="#{demographicTypesController.itemsAvailableAsObjects}"  var="demo" itemLabel="#{demo.name}" itemValue="#{demo}"/>
-                        </p:selectOneMenu>
-                        <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_preferredContact')}" for="preferredContact" />
-                        <p:selectOneMenu id="preferredContact" valueChangeListener="#{customersController.selectOneMenuValueChangeListener}" converter="preferedContactConverter" value="#{customersController.selected.preferredContact}" label="#{configMapController.getKey('CreateCustomersTitle_preferredContact')}" >
-                            <f:selectItems value="#{preferedContactController.itemsAvailableAsObjects}"  var="prefContact" itemLabel="#{prefContact.preferedContactMethod}" itemValue="#{prefContact}"/>
-                        </p:selectOneMenu>
-                        <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_password')}" for="password" />
-                        <p:password id="password"  value="#{customersController.checkPass}" onfocus="this.select()" feedback="true" title="#{configMapController.getKey('EditCustomersTitle_password')}" required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_password')}">
-                            <p:ajax listener="#{customersController.checkPassChange}" event="keyup" />
-                        </p:password>
-                    </p:panelGrid>
-                    <p:panel>
-                        <p:commandButton id="dialogueSave" oncomplete="handleCreateRequest(xhr, status, args)"  actionListener="#{customersController.createDialogue}" value="#{configMapController.getKey('CreateCustomersSaveLink')}" update=":growl :tabView:CustomerslistForm1:selectedUser :tabView:formCustomersEdit1 :formCustomersCreate1 :tabView:paymentsForm :pollForm:poller1 :tabView:NoteslistForm1"/>                
-                        <p:commandButton id="dialogueDiscard" onclick="PF('customersCreateDialogue').hide()"  actionListener="#{customersController.cancelCreateDialogue}" value="#{configMapController.getKey('CreateCustomersDiscardLink')}" update=":growl"/>                
-
-                    </p:panel>
-                </p:confirmDialog>
-
-            </h:form>
-            <h:form id="createSchedule">    
-                <!--<p:log />--> 
-                <p:confirmDialog id="createPaymentScheduleDialogue" message="Add a Payment Schedule."  closable="false"
-                                 header="#{configMapController.getKey('AddPaymentScheduleTitle')}" severity="info" widgetVar="createPaymentScheduleDialogueWidget"> 
-                    <p:panelGrid id="addPaymentScheduleGrid1" columns="4">
-
-                        <p:outputLabel value="#{configMapController.getKey('AddPaymentScheduleLabel_debitdate')}" for="debitDate2" />
-                        <p:calendar id="debitDate2" pattern="MM/dd/yyyy" value="#{ezidebit.paymentDebitDate}" title="#{configMapController.getKey('AddPaymentScheduleTitle_debitdate')}" required="true" requiredMessage="#{configMapController.getKey('AddPaymentScheduleRequiredMessage_debitdate')}" />
-                        <p:outputLabel value="#{configMapController.getKey('AddPaymentScheduleLabel_paymentAmount')}" for="payAmount2" />
-                        <p:inputText id="payAmount2" value="#{ezidebit.paymentAmountInCents}" title="#{configMapController.getKey('AddPaymentScheduleTitle_paymentAmount')}" required="true" requiredMessage="#{configMapController.getKey('AddPaymentScheduleRequiredMessage_paymentAmount')}">
-                            <f:convertNumber minFractionDigits="2"/>
-                        </p:inputText>
-                        <p:outputLabel value="#{configMapController.getKey('AddPaymentScheduleLabel_limitPayAmount')}" for="limitPayAmount" />
-                        <p:inputText id="limitPayAmount" value="#{ezidebit.paymentLimitAmountInCents}" title="#{configMapController.getKey('AddPaymentScheduleTitle_paymentLimitAmount')}" >
-                            <f:convertNumber minFractionDigits="2"/>
-                        </p:inputText>
-                        <p:outputLabel value="#{configMapController.getKey('AddPaymentScheduleLabel_limitNumberPayments')}" for="limitNumberPayments" />
-                        <p:inputText id="limitNumberPayments" value="#{ezidebit.paymentLimitToNumberOfPayments}" title="#{configMapController.getKey('AddPaymentScheduleTitle_limitNumberPayments')}" >
-                            <f:convertNumber minFractionDigits="0"/>
-                        </p:inputText>
-                    </p:panelGrid>
-                    <p:panelGrid id="addPaymentScheduleGrid2" columns="4"> 
-
-                        <p:outputLabel value="#{configMapController.getKey('AddPaymentScheduleLabel_paymentPeriodType')}" for="periodType" />
-
-                        <p:selectOneMenu id="periodType" value="#{ezidebit.paymentSchedulePeriodType}"  >
-                            <f:selectItem itemValue="W" itemLabel="Weekly" />
-                            <f:selectItem itemValue="F" itemLabel="Fortnightly" />
-                            <f:selectItem itemValue="M" itemLabel="Monthly" />
-                            <f:selectItem itemValue="4" itemLabel="4 Weekly" />
-                            <f:selectItem itemValue="N" itemLabel="Weekday in Month" />
-                            <f:selectItem itemValue="Q" itemLabel="Quarterly" />
-                            <f:selectItem itemValue="H" itemLabel="Half Yearly" />
-                            <f:selectItem itemValue="Y" itemLabel="Annually" />
-                            <p:ajax update="addPaymentScheduleGrid2" /> 
-                        </p:selectOneMenu>
-
-                        <p:outputLabel rendered="#{ezidebit.paymentSchedulePeriodType == 'W' ||ezidebit.paymentSchedulePeriodType == 'F' || ezidebit.paymentSchedulePeriodType == '4' || ezidebit.paymentSchedulePeriodType == 'N'}" value="#{configMapController.getKey('AddPaymentScheduleLabel_paymentDayOfWeek')}" for="dayOfWeek" />
-
-                        <p:selectOneMenu rendered="#{ezidebit.paymentSchedulePeriodType == 'W' ||ezidebit.paymentSchedulePeriodType == 'F' || ezidebit.paymentSchedulePeriodType == '4' || ezidebit.paymentSchedulePeriodType == 'N'}" id="dayOfWeek" value="#{ezidebit.paymentDayOfWeek}"  >
-                            <f:selectItem itemValue="MON" itemLabel="Monday" />
-                            <f:selectItem itemValue="TUE" itemLabel="Tuesday" />
-                            <f:selectItem itemValue="WED" itemLabel="Wednesday" />
-                            <f:selectItem itemValue="THU" itemLabel="Thursday" />
-                            <f:selectItem itemValue="FRI" itemLabel="Friday" />
-                            <p:ajax update="addPaymentScheduleGrid2" /> 
-                        </p:selectOneMenu>
-
-                        <p:outputLabel  rendered="#{ezidebit.paymentSchedulePeriodType == 'M'}" value="#{configMapController.getKey('AddPaymentScheduleLabel_paymentDayOfMonth')}" for="dayOfMonth" />
-
-                        <p:selectOneMenu  rendered="#{ezidebit.paymentSchedulePeriodType == 'M'}" id="dayOfMonth" value="#{ezidebit.paymentDayOfMonth}"  >
-                            <f:selectItems value="#{ezidebit.daysInMonth}" var="num" itemValue="#{num}" /> 
-
-                        </p:selectOneMenu> 
-
-                        <p:outputLabel  rendered="#{ezidebit.paymentSchedulePeriodType == 'N'}" value="#{configMapController.getKey('AddPaymentScheduleLabel_paymentFirstWeekOfMonth')}" for="firstWeekOfMonth" />
-                        <p:selectBooleanCheckbox id="firstWeekOfMonth"  rendered="#{ezidebit.paymentSchedulePeriodType == 'N'}" value="#{ezidebit.paymentFirstWeekOfMonth}">  
-                            <p:ajax update="addPaymentScheduleGrid2" />  
-                        </p:selectBooleanCheckbox> 
-                        <p:outputLabel  rendered="#{ezidebit.paymentSchedulePeriodType == 'N'}" value="#{configMapController.getKey('AddPaymentScheduleLabel_paymentSecondWeekOfMonth')}" for="secondWeekOfMonth" />
-                        <p:selectBooleanCheckbox id="secondWeekOfMonth"  rendered="#{ezidebit.paymentSchedulePeriodType == 'N'}" value="#{ezidebit.paymentSecondWeekOfMonth}">  
-                            <p:ajax update="addPaymentScheduleGrid2" />  
-                        </p:selectBooleanCheckbox>  
-                        <p:outputLabel  rendered="#{ezidebit.paymentSchedulePeriodType == 'N'}" value="#{configMapController.getKey('AddPaymentScheduleLabel_paymentThirdWeekOfMonth')}" for="thirdWeekOfMonth" />
-                        <p:selectBooleanCheckbox id="thirdWeekOfMonth"  rendered="#{ezidebit.paymentSchedulePeriodType == 'N'}" value="#{ezidebit.paymentThirdWeekOfMonth}">  
-                            <p:ajax update="addPaymentScheduleGrid2" />  
-                        </p:selectBooleanCheckbox>  
-                        <p:outputLabel rendered="#{ezidebit.paymentSchedulePeriodType == 'N'}" value="#{configMapController.getKey('AddPaymentScheduleLabel_paymentFourthWeekOfMonth')}" for="fourthWeekOfMonth" />
-                        <p:selectBooleanCheckbox  rendered="#{ezidebit.paymentSchedulePeriodType == 'N'}" id="fourthWeekOfMonth" value="#{ezidebit.paymentFourthWeekOfMonth}">  
-                            <p:ajax update="addPaymentScheduleGrid2" />  
-                        </p:selectBooleanCheckbox>  
-
-                        <p:outputLabel value="#{configMapController.getKey('AddPaymentScheduleLabel_paymentKeepManualPayments')}" for="paymentKeepManualPayments" />
-                        <p:selectBooleanCheckbox id="paymentKeepManualPayments" value="#{ezidebit.paymentKeepManualPayments}">  
-                            <p:ajax update="addPaymentScheduleGrid2" />  
-                        </p:selectBooleanCheckbox>  
-
-
-                    </p:panelGrid>
-                    <p:panel>
-                        <p:commandButton id="createPaymentdialogueScheduleSave" oncomplete="PF('createPaymentScheduleDialogueWidget').hide()"  actionListener="#{ezidebit.createPaymentSchedule}" value="#{configMapController.getKey('AddPaymentScheduleSaveLink')}" update=":growl :pollForm:poller1 "/>                
-                        <p:commandButton id="createPaymentdialogueScheduleDiscard" onclick="PF('createPaymentScheduleDialogueWidget').hide()"  value="#{configMapController.getKey('AddPaymentScheduleDiscardLink')}" update=":growl"/>                
-
-                    </p:panel>
-                </p:confirmDialog>
-
-            </h:form>
-
-            <h:form id="createPayment">    
-                <!--<p:log />--> 
-                <p:confirmDialog id="createPaymentDialogue" message="Add a Payment."  closable="false"
-                                 header="#{configMapController.getKey('AddPaymentTitle')}" severity="info" widgetVar="createPaymentDialogueWidget"> 
-                    <p:panelGrid id="addPaymentGrid1" columns="4">
-
-                        <p:outputLabel value="#{configMapController.getKey('AddPaymentLabel_debitdate')}" for="debitDate" />
-                        <p:calendar id="debitDate" pattern="MM/dd/yyyy" value="#{ezidebit.paymentDebitDate}" title="#{configMapController.getKey('AddPaymentTitle_debitdate')}" required="true" requiredMessage="#{configMapController.getKey('AddPaymentRequiredMessage_debitdate')}" />
-                        <p:outputLabel value="#{configMapController.getKey('AddPaymentLabel_paymentAmount')}" for="payAmount" />
-                        <p:inputText id="payAmount" value="#{ezidebit.paymentAmountInCents}" title="#{configMapController.getKey('AddPaymentTitle_paymentAmount')}" required="true" requiredMessage="#{configMapController.getKey('AddPaymentRequiredMessage_paymentAmount')}">
-                            <f:convertNumber minFractionDigits="2"/>
-                        </p:inputText>
-                    </p:panelGrid>
-                    <p:panel>
-                        <p:commandButton id="createPaymentdialogueSave" oncomplete="PF('createPaymentDialogueWidget').hide()"  actionListener="#{ezidebit.addSinglePayment}" value="#{configMapController.getKey('AddPaymentSaveLink')}" update=":growl :pollForm:poller1 "/>                
-                        <p:commandButton id="createPaymentdialogueDiscard" onclick="PF('createPaymentDialogueWidget').hide()"  value="#{configMapController.getKey('AddPaymentDiscardLink')}" update=":growl"/>                
-
-                    </p:panel>
-                </p:confirmDialog>
-
-            </h:form>
-
+ 
+   
             <h:form id="pollForm">
               <!--  <p:poll  id="poller1" widgetVar="paymentPoller" interval="3" listener="#{ezidebit.pollerListener}" autoStart="#{ezidebit.autoStartPoller}" stop="#{ezidebit.paymentRequestStatusIdle}" update=":tabView:paymentsForm :growl"  />-->
                 <p:poll  id="poller1" immediate="true"  widgetVar="paymentPoller" interval="5" stop="#{ezidebit.paymentRequestStatusIdle}" listener="#{ezidebit.pollerListener}" autoStart="#{ezidebit.autoStartPoller}"  update=":tabView:paymentsForm :growl"  />
@@ -505,13 +308,13 @@
                                     </p:cellEditor> 
                                 </p:column>
                                 <p:column sortBy="#{pay.paymentStatus.value}" filterBy="#{pay.paymentStatus.value}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentStatus')}"   >
-                                    
-                                            <h:outputText  rendered="#{pay.paymentStatus.value == 'W'}"  value="Waiting"/>
-                                            <h:outputText  rendered="#{pay.paymentStatus.value == 'P'}"  value="Pending"/>
-                                            <h:outputText  rendered="#{pay.paymentStatus.value == 'S'}"  value="Successful"/>
-                                            <h:outputText  rendered="#{pay.paymentStatus.value == 'D'}"  value="Dis.Insufficient Funds"/>
-                                            <h:outputText  rendered="#{pay.paymentStatus.value == 'F'}"  value="Dishonoured"/>
-                                         
+
+                                    <h:outputText  rendered="#{pay.paymentStatus.value == 'W'}"  value="Waiting"/>
+                                    <h:outputText  rendered="#{pay.paymentStatus.value == 'P'}"  value="Pending"/>
+                                    <h:outputText  rendered="#{pay.paymentStatus.value == 'S'}"  value="Successful"/>
+                                    <h:outputText  rendered="#{pay.paymentStatus.value == 'D'}"  value="Dis.Insufficient Funds"/>
+                                    <h:outputText  rendered="#{pay.paymentStatus.value == 'F'}"  value="Dishonoured"/>
+
                                 </p:column>
                                 <p:column sortBy="#{pay.debitDate.value.toGregorianCalendar().time}" filterBy="#{pay.debitDate.value.toGregorianCalendar().time}" headerText="#{configMapController.getKey('ListPaymentsTitle_debitDate')}"   >
                                     <p:cellEditor> 
@@ -701,19 +504,9 @@
 
                 </p:tab>
             </p:tabView>  
-            <script type="text/javascript">
-                function handleCreateRequest(xhr, status, args) {
-                    if (args.validationFailed) {
-                        PF('customersCreateDialogue').jq.effect("shake", {times: 5}, 100);
-
-                    }
-                    else {
-                        PF('customersCreateDialogue').hide();
-                        PF('customersControllerTable').filter();
-                    }
-                }
-            </script> 
-
+             <ui:include src="Create.xhtml"/>
+            <ui:include src="CreateSchedule.xhtml"/>
+            <ui:include src="CreatePayment.xhtml"/>
         </ui:define>
     </ui:composition>
 

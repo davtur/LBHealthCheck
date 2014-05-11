@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" >
+
+    <ui:composition >
+        <!--<p:log />--> 
+        <p:confirmDialog id="createPaymentScheduleDialogue" message="Add a Payment Schedule."  closable="false"
+                         header="#{configMapController.getKey('AddPaymentScheduleTitle')}" severity="info" widgetVar="createPaymentScheduleDialogueWidget"> 
+            <h:form id="createSchedule">    
+                <p:panelGrid id="addPaymentScheduleGrid1" columns="4">
+
+                    <p:outputLabel value="#{configMapController.getKey('AddPaymentScheduleLabel_debitdate')}" for="debitDate2" />
+                    <p:calendar id="debitDate2" pattern="MM/dd/yyyy" value="#{ezidebit.paymentDebitDate}" title="#{configMapController.getKey('AddPaymentScheduleTitle_debitdate')}" required="true" requiredMessage="#{configMapController.getKey('AddPaymentScheduleRequiredMessage_debitdate')}" />
+                    <p:outputLabel value="#{configMapController.getKey('AddPaymentScheduleLabel_paymentAmount')}" for="payAmount2" />
+                    <p:inputText id="payAmount2" value="#{ezidebit.paymentAmountInCents}" title="#{configMapController.getKey('AddPaymentScheduleTitle_paymentAmount')}" required="true" requiredMessage="#{configMapController.getKey('AddPaymentScheduleRequiredMessage_paymentAmount')}">
+                        <f:convertNumber minFractionDigits="2"/>
+                    </p:inputText>
+                    <p:outputLabel value="#{configMapController.getKey('AddPaymentScheduleLabel_limitPayAmount')}" for="limitPayAmount" />
+                    <p:inputText id="limitPayAmount" value="#{ezidebit.paymentLimitAmountInCents}" title="#{configMapController.getKey('AddPaymentScheduleTitle_paymentLimitAmount')}" >
+                        <f:convertNumber minFractionDigits="2"/>
+                    </p:inputText>
+                    <p:outputLabel value="#{configMapController.getKey('AddPaymentScheduleLabel_limitNumberPayments')}" for="limitNumberPayments" />
+                    <p:inputText id="limitNumberPayments" value="#{ezidebit.paymentLimitToNumberOfPayments}" title="#{configMapController.getKey('AddPaymentScheduleTitle_limitNumberPayments')}" >
+                        <f:convertNumber minFractionDigits="0"/>
+                    </p:inputText>
+                </p:panelGrid>
+                <p:panelGrid id="addPaymentScheduleGrid2" columns="4"> 
+
+                    <p:outputLabel value="#{configMapController.getKey('AddPaymentScheduleLabel_paymentPeriodType')}" for="periodType" />
+
+                    <p:selectOneMenu id="periodType" value="#{ezidebit.paymentSchedulePeriodType}"  >
+                        <f:selectItem itemValue="W" itemLabel="Weekly" />
+                        <f:selectItem itemValue="F" itemLabel="Fortnightly" />
+                        <f:selectItem itemValue="M" itemLabel="Monthly" />
+                        <f:selectItem itemValue="4" itemLabel="4 Weekly" />
+                        <f:selectItem itemValue="N" itemLabel="Weekday in Month" />
+                        <f:selectItem itemValue="Q" itemLabel="Quarterly" />
+                        <f:selectItem itemValue="H" itemLabel="Half Yearly" />
+                        <f:selectItem itemValue="Y" itemLabel="Annually" />
+                        <p:ajax update="addPaymentScheduleGrid2" /> 
+                    </p:selectOneMenu>
+
+                    <p:outputLabel rendered="#{ezidebit.paymentSchedulePeriodType == 'W' ||ezidebit.paymentSchedulePeriodType == 'F' || ezidebit.paymentSchedulePeriodType == '4' || ezidebit.paymentSchedulePeriodType == 'N'}" value="#{configMapController.getKey('AddPaymentScheduleLabel_paymentDayOfWeek')}" for="dayOfWeek" />
+
+                    <p:selectOneMenu rendered="#{ezidebit.paymentSchedulePeriodType == 'W' ||ezidebit.paymentSchedulePeriodType == 'F' || ezidebit.paymentSchedulePeriodType == '4' || ezidebit.paymentSchedulePeriodType == 'N'}" id="dayOfWeek" value="#{ezidebit.paymentDayOfWeek}"  >
+                        <f:selectItem itemValue="MON" itemLabel="Monday" />
+                        <f:selectItem itemValue="TUE" itemLabel="Tuesday" />
+                        <f:selectItem itemValue="WED" itemLabel="Wednesday" />
+                        <f:selectItem itemValue="THU" itemLabel="Thursday" />
+                        <f:selectItem itemValue="FRI" itemLabel="Friday" />
+                        <p:ajax update="addPaymentScheduleGrid2" /> 
+                    </p:selectOneMenu>
+
+                    <p:outputLabel  rendered="#{ezidebit.paymentSchedulePeriodType == 'M'}" value="#{configMapController.getKey('AddPaymentScheduleLabel_paymentDayOfMonth')}" for="dayOfMonth" />
+
+                    <p:selectOneMenu  rendered="#{ezidebit.paymentSchedulePeriodType == 'M'}" id="dayOfMonth" value="#{ezidebit.paymentDayOfMonth}"  >
+                        <f:selectItems value="#{ezidebit.daysInMonth}" var="num" itemValue="#{num}" /> 
+
+                    </p:selectOneMenu> 
+
+                    <p:outputLabel  rendered="#{ezidebit.paymentSchedulePeriodType == 'N'}" value="#{configMapController.getKey('AddPaymentScheduleLabel_paymentFirstWeekOfMonth')}" for="firstWeekOfMonth" />
+                    <p:selectBooleanCheckbox id="firstWeekOfMonth"  rendered="#{ezidebit.paymentSchedulePeriodType == 'N'}" value="#{ezidebit.paymentFirstWeekOfMonth}">  
+                        <p:ajax update="addPaymentScheduleGrid2" />  
+                    </p:selectBooleanCheckbox> 
+                    <p:outputLabel  rendered="#{ezidebit.paymentSchedulePeriodType == 'N'}" value="#{configMapController.getKey('AddPaymentScheduleLabel_paymentSecondWeekOfMonth')}" for="secondWeekOfMonth" />
+                    <p:selectBooleanCheckbox id="secondWeekOfMonth"  rendered="#{ezidebit.paymentSchedulePeriodType == 'N'}" value="#{ezidebit.paymentSecondWeekOfMonth}">  
+                        <p:ajax update="addPaymentScheduleGrid2" />  
+                    </p:selectBooleanCheckbox>  
+                    <p:outputLabel  rendered="#{ezidebit.paymentSchedulePeriodType == 'N'}" value="#{configMapController.getKey('AddPaymentScheduleLabel_paymentThirdWeekOfMonth')}" for="thirdWeekOfMonth" />
+                    <p:selectBooleanCheckbox id="thirdWeekOfMonth"  rendered="#{ezidebit.paymentSchedulePeriodType == 'N'}" value="#{ezidebit.paymentThirdWeekOfMonth}">  
+                        <p:ajax update="addPaymentScheduleGrid2" />  
+                    </p:selectBooleanCheckbox>  
+                    <p:outputLabel rendered="#{ezidebit.paymentSchedulePeriodType == 'N'}" value="#{configMapController.getKey('AddPaymentScheduleLabel_paymentFourthWeekOfMonth')}" for="fourthWeekOfMonth" />
+                    <p:selectBooleanCheckbox  rendered="#{ezidebit.paymentSchedulePeriodType == 'N'}" id="fourthWeekOfMonth" value="#{ezidebit.paymentFourthWeekOfMonth}">  
+                        <p:ajax update="addPaymentScheduleGrid2" />  
+                    </p:selectBooleanCheckbox>  
+
+                    <p:outputLabel value="#{configMapController.getKey('AddPaymentScheduleLabel_paymentKeepManualPayments')}" for="paymentKeepManualPayments" />
+                    <p:selectBooleanCheckbox id="paymentKeepManualPayments" value="#{ezidebit.paymentKeepManualPayments}">  
+                        <p:ajax update="addPaymentScheduleGrid2" />  
+                    </p:selectBooleanCheckbox>  
+
+
+                </p:panelGrid>
+                <p:panel>
+                    <p:commandButton id="createPaymentdialogueScheduleSave" oncomplete="PF('createPaymentScheduleDialogueWidget').hide()"  actionListener="#{ezidebit.createPaymentSchedule}" value="#{configMapController.getKey('AddPaymentScheduleSaveLink')}" update=":growl :pollForm:poller1 "/>                
+                    <p:commandButton id="createPaymentdialogueScheduleDiscard" onclick="PF('createPaymentScheduleDialogueWidget').hide()"  value="#{configMapController.getKey('AddPaymentScheduleDiscardLink')}" update=":growl"/>                
+
+                </p:panel>
+            </h:form>
+        </p:confirmDialog>
+
+
+    </ui:composition>
+
+</html>

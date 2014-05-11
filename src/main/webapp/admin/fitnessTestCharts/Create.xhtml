@@ -18,7 +18,7 @@
                         <p:outputLabel value="#{configMapController.getKey('CreateFitnessTestChartsLabel_yaxisLabel')}" for="yaxisLabel" />
                         <p:inputText id="yaxisLabel" value="#{fitnessTestChartsController.selected.yaxisLabel}" title="#{configMapController.getKey('CreateFitnessTestChartsTitle_yaxisLabel')}" required="true" requiredMessage="#{configMapController.getKey('CreateFitnessTestChartsRequiredMessage_yaxisLabel')}"/>
                     </p:panelGrid>
-                    <p:commandButton actionListener="#{fitnessTestChartsController.createDialogue}" value="#{configMapController.getKey('Save')}" update="display,:FitnessTestChartsListForm:datalist, :growl" oncomplete="handleSubmit(args,'FitnessTestChartsCreateDialog');fitnessTestChartsControllerTable.filter();FitnessTestChartsCreateDialog.hide()"/>
+                    <p:commandButton actionListener="#{fitnessTestChartsController.createDialogue}" value="#{configMapController.getKey('Save')}" update="display,:FitnessTestChartsListForm:datalist, :growl" onclick="handleSubmit(args,'FitnessTestChartsCreateDialog');" oncomplete="fitnessTestChartsControllerTable.filter()"/>
                     <p:commandButton value="#{configMapController.getKey('Cancel')}" onclick="FitnessTestChartsCreateDialog.hide()"/>
                 </h:panelGroup>
             </h:form>
