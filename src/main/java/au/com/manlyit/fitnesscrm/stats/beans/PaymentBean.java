@@ -209,7 +209,7 @@ public class PaymentBean implements Serializable {
         String ourSystemCustomerReference = cust.getId().toString();
         INonPCIService ws = new NonPCIService().getBasicHttpBindingINonPCIService();
 
-        if (paymentReference != null && paymentAmountInCents.compareTo(new Long(0)) > 0) {
+        if ((paymentReference != null && paymentReference.trim().isEmpty() == false) && paymentAmountInCents.compareTo(new Long(0)) > 0) {
             paymentAmountInCents = new Long(0);
             logger.log(Level.WARNING, "deletePayment paymentReference is not NULL and paymentAmount is also set.It should be 0 if using payment reference. Setting Amount to zero and using paymentReference to identify the payment");
         }

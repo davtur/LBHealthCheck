@@ -9,6 +9,7 @@ import au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade;
 import au.com.manlyit.fitnesscrm.stats.beans.CustomersFacade;
 import au.com.manlyit.fitnesscrm.stats.beans.PaymentBean;
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
+import au.com.manlyit.fitnesscrm.stats.classes.util.ScheduledPaymentPojo;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import au.com.manlyit.fitnesscrm.stats.webservices.ArrayOfPayment;
 import au.com.manlyit.fitnesscrm.stats.webservices.ArrayOfScheduledPayment;
@@ -19,6 +20,7 @@ import au.com.manlyit.fitnesscrm.stats.webservices.PaymentDetailPlusNextPaymentI
 import au.com.manlyit.fitnesscrm.stats.webservices.ScheduledPayment;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -38,6 +40,7 @@ import javax.faces.context.FacesContext;
 import javax.faces.event.ActionEvent;
 import javax.inject.Inject;
 import javax.inject.Named;
+import org.primefaces.context.RequestContext;
 
 /**
  *
@@ -58,8 +61,9 @@ public class EziDebitPaymentGateway implements Serializable {
     private final ThreadGroup tGroup1 = new ThreadGroup("EziDebitOps");
     private List<Payment> paymentsList;
     private List<Payment> paymentsListFilteredItems;
-    private List<ScheduledPayment> scheduledPaymentsList;
-    private List<ScheduledPayment> scheduledPaymentsListFilteredItems;
+    private List<ScheduledPaymentPojo> scheduledPaymentsList;
+     private ScheduledPaymentPojo selectedScheduledPayment;
+    private List<ScheduledPaymentPojo> scheduledPaymentsListFilteredItems;
     private Payment payment;
     private Date paymentDebitDate = new Date();
     private Date changeFromDate = new Date();
@@ -89,8 +93,9 @@ public class EziDebitPaymentGateway implements Serializable {
     private String listOfIdsToImport;
     private boolean customerExistsInPaymentGateway = false;
     private boolean editPaymentDetails = false;
-    private boolean autoStartPoller = true;
+    private boolean autoStartPoller = false;
     private boolean stopPoller = false;
+    private boolean customerDetailsHaveBeenRetrieved = false;
     private String eziDebitWidgetUrl = "";
     private Customers selectedCustomer;
 
@@ -219,21 +224,21 @@ public class EziDebitPaymentGateway implements Serializable {
     /**
      * @return the scheduledPaymentsList
      */
-    public List<ScheduledPayment> getScheduledPaymentsList() {
+    public List<ScheduledPaymentPojo> getScheduledPaymentsList() {
         return scheduledPaymentsList;
     }
 
     /**
      * @param scheduledPaymentsList the scheduledPaymentsList to set
      */
-    public void setScheduledPaymentsList(List<ScheduledPayment> scheduledPaymentsList) {
+    public void setScheduledPaymentsList(List<ScheduledPaymentPojo> scheduledPaymentsList) {
         this.scheduledPaymentsList = scheduledPaymentsList;
     }
 
     /**
      * @return the scheduledPaymentsListFilteredItems
      */
-    public List<ScheduledPayment> getScheduledPaymentsListFilteredItems() {
+    public List<ScheduledPaymentPojo> getScheduledPaymentsListFilteredItems() {
         return scheduledPaymentsListFilteredItems;
     }
 
@@ -241,7 +246,7 @@ public class EziDebitPaymentGateway implements Serializable {
      * @param scheduledPaymentsListFilteredItems the
      * scheduledPaymentsListFilteredItems to set
      */
-    public void setScheduledPaymentsListFilteredItems(List<ScheduledPayment> scheduledPaymentsListFilteredItems) {
+    public void setScheduledPaymentsListFilteredItems(List<ScheduledPaymentPojo> scheduledPaymentsListFilteredItems) {
         this.scheduledPaymentsListFilteredItems = scheduledPaymentsListFilteredItems;
     }
 
@@ -422,6 +427,37 @@ public class EziDebitPaymentGateway implements Serializable {
      */
     public void setApplyToAllFuturePayments(boolean applyToAllFuturePayments) {
         this.applyToAllFuturePayments = applyToAllFuturePayments;
+    }
+
+    /**
+     * @return the selectedScheduledPayment
+     */
+    public ScheduledPaymentPojo getSelectedScheduledPayment() {
+        return selectedScheduledPayment;
+    }
+
+    /**
+     * @param selectedScheduledPayment the selectedScheduledPayment to set
+     */
+    public void setSelectedScheduledPayment(ScheduledPaymentPojo selectedScheduledPayment) {
+        this.selectedScheduledPayment = selectedScheduledPayment;
+    }
+
+    
+
+    /**
+     * @return the customerDetailsHaveBeenRetrieved
+     */
+    public boolean isCustomerDetailsHaveBeenRetrieved() {
+        return customerDetailsHaveBeenRetrieved;
+    }
+
+    /**
+     * @param customerDetailsHaveBeenRetrieved the
+     * customerDetailsHaveBeenRetrieved to set
+     */
+    public void setCustomerDetailsHaveBeenRetrieved(boolean customerDetailsHaveBeenRetrieved) {
+        this.customerDetailsHaveBeenRetrieved = customerDetailsHaveBeenRetrieved;
     }
 
     private class eziDebitThreadFactory implements ThreadFactory {
@@ -634,7 +670,9 @@ public class EziDebitPaymentGateway implements Serializable {
         int k = futureMap.size();
         if (k <= 0) {
             if (stopPoller) {
+                stopPoller();
                 return true;
+                
             } else {
                 stopPoller = true;
                 return false;
@@ -690,6 +728,7 @@ public class EziDebitPaymentGateway implements Serializable {
                     setAutoStartPoller(false);
                     cd = (CustomerDetails) ft.get();
                     customerExistsInPaymentGateway = cd != null;
+                    setCustomerDetailsHaveBeenRetrieved(true);
                 }
             }
             /// process next op
@@ -876,7 +915,14 @@ public class EziDebitPaymentGateway implements Serializable {
         if (result != null) {
             List<ScheduledPayment> payList = result.getScheduledPayment();
             if (payList != null) {
-                setScheduledPaymentsList(payList);
+                // 
+                List<ScheduledPaymentPojo> pojoList = new ArrayList<>();
+                int id = 1;
+                for (ScheduledPayment sp : payList) {
+                    pojoList.add(new ScheduledPaymentPojo(id, sp.getEzidebitCustomerID().getValue(), sp.isManuallyAddedPayment(), sp.getPaymentAmount(), sp.getPaymentDate().toGregorianCalendar().getTime(), sp.getPaymentReference().getValue(), sp.getYourGeneralReference().getValue(), sp.getYourSystemReference().getValue()));
+                    id++;
+                }
+                setScheduledPaymentsList(pojoList);
                 setScheduledPaymentsListFilteredItems(null);
             }
         }
@@ -1100,6 +1146,9 @@ public class EziDebitPaymentGateway implements Serializable {
             // do something with result
         }
     }
+    private void stopPoller(){
+        RequestContext.getCurrentInstance().addCallbackParam("stopPolling", true);
+    }
 
     public void recreateModels() {
         // clear all arrays and reload from DB
@@ -1107,6 +1156,7 @@ public class EziDebitPaymentGateway implements Serializable {
         setPaymentsListFilteredItems(null);
         setScheduledPaymentsList(null);
         setScheduledPaymentsListFilteredItems(null);
+        setCustomerDetailsHaveBeenRetrieved(false);
 
     }
 
@@ -1149,8 +1199,8 @@ public class EziDebitPaymentGateway implements Serializable {
 
     public void createPaymentSchedule(ActionEvent actionEvent) {
         String loggedInUser = FacesContext.getCurrentInstance().getExternalContext().getRemoteUser();
-        Long amount = paymentAmountInCents * new Long(100);
-        Long amountLimit = paymentLimitAmountInCents * new Long(100);
+        Long amount = paymentAmountInCents * (long) 100;
+        Long amountLimit = paymentLimitAmountInCents * (long) 100;
         char spt = paymentSchedulePeriodType.charAt(0);
         if (loggedInUser != null) {
             futureMap.put("CreateSchedule", paymentBean.createSchedule(selectedCustomer, paymentDebitDate, spt, paymentDayOfWeek, paymentDayOfMonth, paymentFirstWeekOfMonth, paymentSecondWeekOfMonth, paymentThirdWeekOfMonth, paymentFourthWeekOfMonth, amount, paymentLimitToNumberOfPayments, amountLimit, paymentKeepManualPayments, loggedInUser, getDigitalKey()));
@@ -1159,9 +1209,21 @@ public class EziDebitPaymentGateway implements Serializable {
         }
     }
 
+    public void deleteScheduledPayment(ActionEvent actionEvent) {
+
+        String loggedInUser = FacesContext.getCurrentInstance().getExternalContext().getRemoteUser();
+        Double amount = selectedScheduledPayment.getPaymentAmount() * (double) 100;
+        if (loggedInUser != null) {
+            futureMap.put("DeletePayment", paymentBean.deletePayment(selectedCustomer, selectedScheduledPayment.getPaymentDate(), amount.longValue(), selectedScheduledPayment.getPaymentReference(), loggedInUser, getDigitalKey()));
+        } else {
+            logger.log(Level.WARNING, "Logged in user is null. Delete Payment aborted.");
+        }
+
+    }
+
     public void changeScheduledAmount(ActionEvent actionEvent) {
         String loggedInUser = FacesContext.getCurrentInstance().getExternalContext().getRemoteUser();
-        Long amount = paymentAmountInCents * new Long(100);
+        Long amount = paymentAmountInCents * (long) 100;
         if (loggedInUser != null) {
             futureMap.put("ChangeScheduledAmount", paymentBean.changeScheduledAmount(selectedCustomer, paymentDebitDate, amount, paymentLimitToNumberOfPayments, applyToAllFuturePayments, paymentKeepManualPayments, loggedInUser, getDigitalKey()));
         } else {

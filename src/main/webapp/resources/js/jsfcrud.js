@@ -17,3 +17,9 @@ function handleCreateRequest(xhr, status, args, dialog, listTable) {
         PF(listTable).filter();
     }
 }
+
+function handlePollComplete(xhr, status, args, poller) {
+    if (args.stopPolling) {
+        PF(poller).stop();
+    }
+}
