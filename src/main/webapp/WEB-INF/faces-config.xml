@@ -7,51 +7,7 @@
               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
               xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-facesconfig_2_0.xsd">
     <application>
-        <resource-bundle>
-            <base-name>/Bundle</base-name>
-            <var>bundle</var>
-        </resource-bundle>
         <!--<view-handler>au.com.manlyit.fitnesscrm.stats.classes.util.UserAgentSwitchViewHandlerWrapper</view-handler>-->
-        <resource-bundle>
-            <base-name>/Bundle2</base-name>
-            <var>bundle2</var>
-        </resource-bundle>
-        <resource-bundle>
-            <base-name>/Bundle</base-name>
-            <var>bundle</var>
-        </resource-bundle>
-        <resource-bundle>
-            <base-name>/Bundle</base-name>
-            <var>bundle</var>
-        </resource-bundle>
-        <resource-bundle>
-            <base-name>/Bundle</base-name>
-            <var>bundle</var>
-        </resource-bundle>
-        <resource-bundle>
-            <base-name>/Bundle</base-name>
-            <var>bundle</var>
-        </resource-bundle>
-        <resource-bundle>
-            <base-name>/Bundle</base-name>
-            <var>bundle</var>
-        </resource-bundle>
-        <resource-bundle>
-            <base-name>/Bundle</base-name>
-            <var>bundle</var>
-        </resource-bundle>
-        <resource-bundle>
-            <base-name>/Bundle</base-name>
-            <var>bundle</var>
-        </resource-bundle>
-        <resource-bundle>
-            <base-name>/Bundle</base-name>
-            <var>bundle</var>
-        </resource-bundle>
-        <resource-bundle>
-            <base-name>/Bundle</base-name>
-            <var>bundle</var>
-        </resource-bundle>
     </application>
     <validator>
         <validator-id>au.com.manlyit.fitnesscrm.stats.classes.util.EmailValidator</validator-id>
@@ -75,11 +31,12 @@
             au.com.manlyit.fitnesscrm.stats.classes.util.ViewExpiredExceptionExceptionHandlerFactory
         </exception-handler-factory>
     </factory> 
+    
     <render-kit>
-    <renderer>
-        <component-family>org.primefaces.component</component-family>
-        <renderer-type>org.primefaces.component.FileUploadRenderer</renderer-type>
-        <renderer-class>au.com.manlyit.fitnesscrm.stats.classes.util.Primefaces4BugfixFileUploadRenderer</renderer-class>
-    </renderer>
-</render-kit>
+        <renderer>
+            <component-family>org.primefaces.component</component-family>
+            <renderer-type>org.primefaces.component.FileUploadRenderer</renderer-type>
+            <renderer-class>au.com.manlyit.fitnesscrm.stats.classes.util.Primefaces4BugfixFileUploadRenderer</renderer-class>
+        </renderer>
+    </render-kit>
 </faces-config>

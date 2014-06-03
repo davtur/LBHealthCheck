@@ -10,50 +10,52 @@
         <h:head>
             <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" ></meta>
             <title><ui:insert name="title">Pure Fitness Manly</ui:insert></title>
-            <!--<link rel="stylesheet" href="/FitnessStats/resources/templates/yoo_pace/css/base.css" />
-          <link rel="stylesheet" href="/FitnessStats/resources/templates/yoo_pace/css/layout.css" />
-           <link rel="stylesheet" href="/FitnessStats/resources/templates/yoo_pace/css/menus.css" />
-           
-           <link rel="stylesheet" href="/FitnessStats/resources/templates/yoo_pace/css/modules.css" />
-           <link rel="stylesheet" href="/FitnessStats/resources/templates/yoo_pace/css/tools.css" />
-           <link rel="stylesheet" href="/FitnessStats/resources/templates/yoo_pace/css/system.css" />
-           <link rel="stylesheet" href="/FitnessStats/resources/templates/yoo_pace/css/extensions.css" />
-            <link rel="stylesheet" href="/FitnessStats/resources/templates/yoo_pace/css/purefitness.css" />-->
+
             <h:outputScript library="js" name="jsfcrud.js"/>
             <h:outputStylesheet library="css" name="template.css"/>
         </h:head>
 
         <h:body id="page" class="page  isblog ">
-            <p:growl id="growl"  redisplay="true" life="7000" showDetail="false"/>
+            <p:growl id="growl" widgetVar="growlWidget" redisplay="true" life="7000" showDetail="true" sticky="true"  />
             <div id="page-bg">
                 <div class="wrapper clearfix">
 
                     <div id="header">
                         <div id="headerbar" class="clearfix" >					
-                            <a id="logo" href="http://www.purefitnessmanly.com.au">	
+                            <a id="pfmlogo" href="http://www.purefitnessmanly.com.au">	
                                 <img alt="Logo for Pure Fitness Manly Bootcamps and Personal Training" class="size-auto" src="/FitnessStats/resources/images/logo.png"/>
                             </a>
 
                             <div class="newsflash">
                                 <div id="ajaxStatus">
-
-                                    <p:ajaxStatus>
-                                        <f:facet name="prestart">
-                                            <h:outputText value="Working..." />
-                                        </f:facet>
-                                        <f:facet name="error">
-                                            <h:outputText value="Error!" />
-                                        </f:facet>
-                                        <f:facet name="success">
-                                            <h:outputText value="" />
-                                        </f:facet>
-                                    </p:ajaxStatus></div>
+                                    <p:ajaxStatus id="statusOfAjax">
+                                        <f:facet name="start">Loading...</f:facet>
+                                        <f:facet name="success"><h:outputText value="Success" /></f:facet>
+                                        <f:facet name="error">An error has occurred!</f:facet>
+                                    </p:ajaxStatus>
+                                </div>
                             </div>
 
 
                             <h:form id="menuForm">
 
+                                <p:ajaxExceptionHandler type="javax.faces.application.ViewExpiredException"
+                                                        update="exceptionDialog"
+                                                        onexception="PF('exceptionDialog').show();" />
 
+                                <p:ajaxExceptionHandler type="java.lang.NullPointerException"
+                                                        update="exceptionDialog"
+                                                        onexception="PF('exceptionDialog').show();" />
+
+                                <p:dialog id="exceptionDialog" header="Exception '#{pfExceptionHandler.type}' occured!" widgetVar="exceptionDialog"
+                                          height="500px">
+                                    Message: #{pfExceptionHandler.message} <br/>
+                                    StackTrace: <h:outputText value="#{pfExceptionHandler.formattedStackTrace}" escape="false" /> <br />
+
+                                    <p:button onclick="document.location.href = document.location.href;"
+                                              value="Reload!"
+                                              rendered="#{pfExceptionHandler.type == 'javax.faces.application.ViewExpiredException'}" />
+                                </p:dialog>
 
                                 <p:menubar id="mainmenubar1" autoDisplay="true">
                                     <p:submenu  label="Developer" rendered="#{customersController.isUserInRole('DEVELOPER')}"  id="devMenu1" >

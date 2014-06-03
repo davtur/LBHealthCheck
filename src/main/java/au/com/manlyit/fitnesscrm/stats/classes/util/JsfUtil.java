@@ -111,7 +111,7 @@ public class JsfUtil {
     }
 
     public int getUser() {
-        int cust_id = 0;
+        int cust_id ;
         FacesContext facesContext = FacesContext.getCurrentInstance();
         String name = facesContext.getExternalContext().getRemoteUser();
         Customers cust = ejbCustomerFacade.findCustomerByUsername(name);
@@ -120,7 +120,7 @@ public class JsfUtil {
     }
 
     public Customers getCustomer() {
-        Customers cust = null;
+        Customers cust ;
         FacesContext context = FacesContext.getCurrentInstance();
         CustomersController custController = (CustomersController) context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
         String name = custController.getSelected().getUsername();

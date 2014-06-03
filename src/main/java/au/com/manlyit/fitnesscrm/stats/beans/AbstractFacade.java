@@ -87,7 +87,7 @@ public abstract class AbstractFacade<T> {
 // This method provides a bridge
     // between the session beans and my LazyDataModel.
 
-    public List<T> load(int first, int count, String sortField, SortOrder sortOrder, Map<String, String> filters) {
+    public List<T> load(int first, int count, String sortField, SortOrder sortOrder, Map<String, Object> filters) {
         CriteriaBuilder builder = getEntityManager().getCriteriaBuilder();
         CriteriaQuery cq = builder.createQuery();
         Root root = cq.from(entityClass);
@@ -100,10 +100,10 @@ public abstract class AbstractFacade<T> {
 }
         }
         if (filters != null) {
-            Set<Map.Entry<String, String>> entries = filters.entrySet();
+            Set<Map.Entry<String, Object>> entries = filters.entrySet();
             ArrayList<Predicate> predicatesList
                     = new ArrayList<>(entries.size());
-            for (Map.Entry<String, String> filter : entries) {
+            for (Map.Entry<String, Object> filter : entries) {
                 predicatesList.add(builder.like(root.get(filter.getKey()),
                         filter.getValue() + "%"));
             }

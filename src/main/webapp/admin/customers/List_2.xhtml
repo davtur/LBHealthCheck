@@ -11,15 +11,19 @@
             <h:outputText  value="#{configMapController.getKey('ListCustomersTitle')}"></h:outputText>
         </ui:define>
         <ui:define name="body">
-<!--  <p:poll  id="poller1" widgetVar="paymentPoller" interval="3" listener="#{ezidebit.pollerListener}" autoStart="#{ezidebit.autoStartPoller}" stop="#{ezidebit.asyncOperationRunning}" update=":paymentsForm :growl"  />-->
+<!--  <p:poll  id="poller1" widgetVar="paymentPoller" interval="3" listener="#{ezidebit.pollerListener}" autoStart="#{ezidebit.autoStartPoller}" stop="#{ezidebit.asyncOperationRunning}" update=":tabView:paymentsForm :growl"  />-->
+            <p:ajaxStatus>
+                <f:facet name="start">Loading...</f:facet>
+                <f:facet name="success"><h:outputText value="Success" /></f:facet>
+                <f:facet name="error">An error has occurred!</f:facet>
+            </p:ajaxStatus>
+
+            <p:tabView id="tabView" widgetVar="tabViewWidget" cache="false"> 
+                <p:ajax  event="tabChange"  listener="#{ezidebit.onTabChange}" oncomplete="PF('paymentPoller').start();"  />  
 
 
-            <p:tabView id="tv"  prependId="false"> 
-                <p:ajax  event="tabChange"  listener="#{ezidebit.onTabChange}"  />  
-
-
-                <p:tab id="tab1" title="Customer List" >  
-                    <h:form id="customerslistForm1">
+                <p:tab id="tab1" title="Customer List">  
+                    <h:form id="CustomerslistForm1">
                         <h:panelGroup >
                             <p:commandButton id="showDialogButton"  oncomplete="PF('customersCreateDialogue').show()"   actionListener="#{customersController.prepareCreateAjax}" value="#{configMapController.getKey('ListCustomersCreateLink')}"  update=":formCustomersCreate1:dialogueGrid" /> 
 
@@ -48,7 +52,7 @@
                                 </f:facet>
                                 <!--<p:ajax event="rowEdit"   listener="#{customersController.onEdit}" update=":growl"  />  
                                 <p:ajax event="rowEditCancel" listener="#{customersController.onCancel}" update=":growl"   /> -->
-                                <p:ajax event="rowSelect"   update=":growl :tv:customerslistForm1:selectedUser :tv:formCustomersEdit1 :formCustomersCreate1 :tv:paymentsForm :tv:NoteslistForm1"  />  
+                                <p:ajax event="rowSelect" oncomplete="PF('paymentPoller').start();"  update=":growl :tabView:CustomerslistForm1:selectedUser :tabView:formCustomersEdit1 :formCustomersCreate1 :tabView:paymentsForm :tabView:NoteslistForm1"  />  
 
                                 <p:column sortBy="#{item.firstname}" filterBy="#{item.firstname}" headerText="#{configMapController.getKey('ListCustomersTitle_firstname')}"   >
                                     <h:outputText value="#{item.firstname}"/>
@@ -79,7 +83,7 @@
                         <p:panelGrid id="dialogueGrid1" columns="4">
                             <p:outputLabel value="#{configMapController.getKey('EditCustomersLabel_firstname')}" for="firstname1" />
                             <p:inputText id="firstname1"  value="#{customersController.selected.firstname}" title="#{configMapController.getKey('EditCustomersTitle_firstname')}" valueChangeListener="#{customersController.firstNameListener}" required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_firstname')}">
-                                <p:ajax update=":tv:formCustomersEdit1:username1" event="keyup"/>
+                                <p:ajax update=":tabView:formCustomersEdit1:username1" event="keyup"/>
                             </p:inputText>
                             <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_gender')}" title="#{configMapController.getKey('EditCustomersTitle_gender')}" for="gender1" />
                             <p:selectOneMenu id="gender1" value="#{customersController.selected.gender}"   required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_gender')}">
@@ -88,7 +92,7 @@
                             </p:selectOneMenu>
                             <p:outputLabel value="#{configMapController.getKey('EditCustomersLabel_lastname')}" for="lastname1" />
                             <p:inputText id="lastname1" value="#{customersController.selected.lastname}" title="#{configMapController.getKey('EditCustomersTitle_lastname')}" valueChangeListener="#{customersController.lastNameListener}" required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_lastname')}">
-                                <p:ajax update=":tv:formCustomersEdit1:username1" event="keyup" />
+                                <p:ajax update=":tabView:formCustomersEdit1:username1" event="keyup" />
                             </p:inputText>
                             <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_dob')}" for="dob1" />
                             <p:calendar id="dob1" pattern="MM/dd/yyyy" value="#{customersController.selected.dob}" title="#{configMapController.getKey('CreateCustomersTitle_dob')}" required="true" requiredMessage="#{configMapController.getKey('CreateCustomersRequiredMessage_dob')}">
@@ -158,7 +162,7 @@
                             </p:password>
                             <p:commandButton  id="passButton" ajax="true" actionListener="#{customersController.updatepass}" update=":growl"   value="#{configMapController.getKey('EditCustomersUpdatePassword')}" immediate="true"/>
                             <p:panel>
-                                <p:commandButton id="dialogueSave1" oncomplete="tabViewWidget.select(1)"  actionListener="#{customersController.createDialogue}" value="#{configMapController.getKey('CreateCustomersSaveLink')}" update=":tv:customerslistForm1:customersTableList :growl"/>                
+                                <p:commandButton id="dialogueSave1" oncomplete="tabViewWidget.select(1)"  actionListener="#{customersController.createDialogue}" value="#{configMapController.getKey('CreateCustomersSaveLink')}" update=":tabView:CustomerslistForm1:customersTableList :growl"/>                
                             </p:panel>
                         </p:panelGrid>
                     </h:form>
@@ -186,32 +190,44 @@
 
                 <p:tab id="tab3" title="Payment Information" rendered="#{ezidebit.paymentGatewayEnabled}" >  
                     <h:form id="paymentsForm" > 
-                       <!-- <p:poll id="poll1" widgetVar="paymentPoller" interval="1"  listener="#{ezidebit.pollerListener}" stop="#{!ezidebit.asyncOperationRunning}"  autoStart="true"  />-->
+                        <p:poll  widgetVar="paymentPoller"  delay="1000"  listener="#{ezidebit.pollerListener}"    />
+                        <!--           <p:log/>
+
+             <p:panel >
+                  <p:commandButton id="testButton" partialSubmit="true" actionListener="#{ezidebit.testAjax}"    value="Test"   /> 
+                  <h:outputText id="testComponent1" value="#{ezidebit.testAjaxCounter}" />
+              </p:panel>
+             
+              <p:outputPanel  rendered="#{!ezidebit.asyncOperationRunning}">
+                  <script type="text/javascript">paymentPoller.stop();</script>  stop="#{!ezidebit.asyncOperationRunning}"  update=":tabView:paymentsForm :growl "
+              </p:outputPanel>-->
+ 
                         <p:panel id="progressBarPanel" rendered="#{ezidebit.asyncOperationRunning}" >
- <!--<p:progressBar id="progressBar1" widgetVar="pbAjax" ajax="true" value="#{ezidebit.progress}" labelTemplate="{value}%" styleClass="animated"  interval="2000">  
-     <p:ajax event="complete" listener="#{ezidebit.onComplete}" update="@form, :growl" oncomplete="pbAjax.cancel()" process="@form"/>  
- </p:progressBar>  -->
+
+<!--<p:progressBar id="progressBar1" widgetVar="pbAjax" ajax="true" value="#{ezidebit.progress}" labelTemplate="{value}%" styleClass="animated"  interval="2000">  
+    <p:ajax event="complete" listener="#{ezidebit.onComplete}" update="@form, :growl" oncomplete="pbAjax.cancel()" process="@form"/>  
+</p:progressBar>  -->
                             <h:outputText id="statusText" value="Please wait while the payment data for #{customersController.selected.firstname} #{customersController.selected.lastname} is loaded..." />
                         </p:panel>
-
+                        
                         <p:outputPanel id="mainPanel" rendered="#{ezidebit.asyncOperationRunning == false and ezidebit.customerDetailsHaveBeenRetrieved == true}" >
                             <p:selectBooleanButton value="#{ezidebit.editPaymentDetails}" onLabel="Refresh View" offLabel="Refresh View" rendered="#{ezidebit.customerExistsInPaymentGateway}" >
-                                <p:ajax update=":tv:paymentsForm:viewPaymentsGrid  :tv:paymentsForm:editPaymentsGrid  :growl" process=":tv:paymentsForm:viewPaymentsGrid  :tv:paymentsForm:editPaymentsGrid "/>  
+                                <p:ajax update=":tabView:paymentsForm:viewPaymentsGrid  :tabView:paymentsForm:editPaymentsGrid  :growl" process=":tabView:paymentsForm:viewPaymentsGrid  :tabView:paymentsForm:editPaymentsGrid "/>  
                             </p:selectBooleanButton>  
                             <p:commandButton id="showAddPaymentButton"  oncomplete="PF('createPaymentDialogueWidget').show();"    value="#{configMapController.getKey('AddPaymentButtonLink')}"  update=":growl " /> 
                             <p:commandButton id="showAddPaymentScheduleButton"  oncomplete="PF('createPaymentScheduleDialogueWidget').show();"    value="#{configMapController.getKey('AddPaymentScheduleButtonLink')}" update=":growl "  /> 
                             <h:outputText rendered="#{!ezidebit.asyncOperationRunning}" value="Idle"/>
                             <h:outputText rendered="#{ezidebit.asyncOperationRunning}" value="Busy"/>
                         </p:outputPanel>
-
+                        
                         <p:outputPanel id="iFrameHeaderPanel" >
                             <p:panelGrid id="dialoguePaymenstGrid1" columns="2" rendered="#{ezidebit.customerExistsInPaymentGateway == false and ezidebit.customerDetailsHaveBeenRetrieved == true}" >
-                                <p:commandButton  id="paymentsButton" ajax="true"   actionListener="#{ezidebit.createCustomerRecord}" update=":growl :tv:paymentsForm "   value="#{configMapController.getKey('EditCustomersUpdatePayment')}" immediate="true"/>
+                                <p:commandButton  id="paymentsButton" ajax="true"  oncomplete="PF('paymentPoller').start();"  actionListener="#{ezidebit.createCustomerRecord}" update=":growl :tabView:paymentsForm "   value="#{configMapController.getKey('EditCustomersUpdatePayment')}" immediate="true"/>
                                 <p:outputLabel value="#{configMapController.getKey('EditCustomersAddToPaymentGatewayLabel')}" for="paymentsButton" />
                             </p:panelGrid>
                             <h:outputText id="selectedUser2" value="#{customersController.selected.firstname} #{customersController.selected.lastname}" />
                         </p:outputPanel>
-
+                        
                         <p:outputPanel id="iFramePanel" >
                             <p:panelGrid id="dialoguePaymenstGrid2" columns="2" rendered="#{ezidebit.customerExistsInPaymentGateway and ezidebit.customerDetailsHaveBeenRetrieved == true}" >
                                 <p:panel id="viewPaymentsGrid"  >
@@ -223,7 +239,7 @@
                                 </p:panel>
                             </p:panelGrid>
                         </p:outputPanel>
-
+                        
                         <p:panel  id="paymentsTablePanel" rendered="#{ezidebit.paymentsList != null}">
                             <p:dataTable  id="paymentsTable"
                                           value="#{ezidebit.paymentsList}" 
@@ -311,12 +327,12 @@
                                     <h:outputText rendered="#{!payment.isManuallyAddedPayment()}" value="Auto"/>
                                 </p:column>
                                 <f:facet name="footer">
-                                    <p:commandButton  process="scheduledPaymentsTable" rendered="#{fitnessTestChartsController.isUserInRole('ADMIN')}" id="deleteButton" icon="ui-icon-trash"  value="#{configMapController.getKey('Delete')}" actionListener="#{ezidebit.deleteScheduledPayment}" update=":growl " disabled="#{empty fitnessTestChartsController.selected}"/>
+                                    <p:commandButton  process="scheduledPaymentsTable" rendered="#{fitnessTestChartsController.isUserInRole('ADMIN')}" id="deleteButton" icon="ui-icon-trash" oncomplete="PF('paymentPoller').start();" value="#{configMapController.getKey('Delete')}" actionListener="#{ezidebit.deleteScheduledPayment}" update=":growl " disabled="#{empty fitnessTestChartsController.selected}"/>
                                 </f:facet>
 
                             </p:dataTable>
                         </p:panel>
-                        <p:remoteCommand name="taskCompleted" actionListener="#{ezidebit.pollerListener}"/>
+
                     </h:form>  
                 </p:tab>
 
@@ -351,7 +367,7 @@
                             <p:panelGrid columns="2">
                                 <p:outputLabel value="#{configMapController.getKey('CreateNotesLabel_note')}" for="note" />
                                 <p:inputTextarea rows="4" cols="30" id="note" value="#{notesController.selected.note}" title="#{configMapController.getKey('CreateNotesTitle_note')}" />
-                                <p:commandButton oncomplete="PF('NotesCreateDialogue').hide();notesControllerTable.filter()" actionListener="#{notesController.createDialogue}" value="#{configMapController.getKey('CreateNotesSaveLink')}" update=":growl :tv:NoteslistForm1 :tv:formNotesCreate1"/>                
+                                <p:commandButton oncomplete="PF('NotesCreateDialogue').hide();notesControllerTable.filter()" actionListener="#{notesController.createDialogue}" value="#{configMapController.getKey('CreateNotesSaveLink')}" update=":growl :tabView:NoteslistForm1 :tabView:formNotesCreate1"/>                
                             </p:panelGrid>
                         </p:confirmDialog>
                     </h:form>
@@ -442,16 +458,15 @@
 
                 </p:tab>
             </p:tabView>  
-            <p:log/>
-            <p:socket onMessage="handleMessage" channel="/test" />
-  
-              <script type="text/javascript">
-                  function handleMessage(facesmessage) {
-                      facesmessage.severity = 'info';
-                       taskCompleted();
-                      PF('growlWidget').show([facesmessage]);
-                  }
-              </script>
+            <p:socket onMessage="handleMessage" channel="/{user}" />
+
+            <script type="text/javascript">
+                function handleMessage(facesmessage) {
+                    facesmessage.severity = 'info';
+
+                    PF('growl').show([facesmessage]);
+                }
+            </script>
             <ui:include src="Create.xhtml"/>
             <ui:include src="CreateSchedule.xhtml"/>
             <ui:include src="CreatePayment.xhtml"/>

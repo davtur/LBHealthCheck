@@ -1,7 +1,7 @@
 
-@import url(../templates/yoo_pace/css/base.css);
-@import url(../templates/yoo_pace/css/layout.css);
-@import url(../templates/yoo_pace/css/arial.css);
+@import url(/FitnessStats/resources/templates/yoo_pace/css/base.css);
+@import url(/FitnessStats/resources/templates/yoo_pace/css/layout.css);
+@import url(/FitnessStats/resources/templates/yoo_pace/css/font1/arial.css);
 .wrapper { 
     max-width: 980px; 
     -moz-box-sizing: border-box;
@@ -12,9 +12,9 @@
 .menu-dropdown a.level1 > span, .menu-dropdown span.level1 > span { width: 70px; }
 #header, #block-main { margin-left: 0px; }
 #maininner { width: 100%; }
-#headerbar {
-   background:  url(../images/logo.png) 50% 0 repeat-x; 
-}
+//#headerbar {
+////   background:  url(/FitnessStats/resources/images/logo.png) 50% 0 repeat-x; 
+//}
 
 #page { background: #0e446a url(/FitnessStats/resources/images/background/ocean_bg.jpg) 50% 0 repeat-x; margin-top: 0px;}
 
@@ -22,6 +22,10 @@
 
 .loginPanel { background: url(/FitnessStats/resources/images/ptlogin2.png) 50% 0 no-repeat;  }
 
+.newsflash {
+    display:block;
+    float:right ;
+}
 #block-main { 
     border-color: #c8dfe6;
     border-color: rgba(35,130,160,0.07);

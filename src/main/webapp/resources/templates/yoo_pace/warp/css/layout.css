@@ -96,7 +96,7 @@
 }
 
 #logo, #logo > img,
-#menu { float: left; }
+#menu { /* float: left; */ }
 #search { float: right; }
 
 #banner {

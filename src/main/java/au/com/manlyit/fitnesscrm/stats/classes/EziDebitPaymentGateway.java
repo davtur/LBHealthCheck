@@ -8,7 +8,9 @@ package au.com.manlyit.fitnesscrm.stats.classes;
 import au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade;
 import au.com.manlyit.fitnesscrm.stats.beans.CustomersFacade;
 import au.com.manlyit.fitnesscrm.stats.beans.PaymentBean;
+import au.com.manlyit.fitnesscrm.stats.classes.util.FutureMapEJB;
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
+import au.com.manlyit.fitnesscrm.stats.classes.util.PushComponentUpdateBean;
 import au.com.manlyit.fitnesscrm.stats.classes.util.ScheduledPaymentPojo;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import au.com.manlyit.fitnesscrm.stats.webservices.ArrayOfPayment;
@@ -24,10 +26,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -35,12 +34,18 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.annotation.PostConstruct;
+import javax.ejb.Schedule;
+import javax.ejb.Timer;
 import javax.enterprise.context.SessionScoped;
 import javax.faces.context.FacesContext;
 import javax.faces.event.ActionEvent;
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.servlet.http.HttpSession;
+import org.primefaces.component.tabview.Tab;
 import org.primefaces.context.RequestContext;
+import org.primefaces.event.TabChangeEvent;
 
 /**
  *
@@ -54,15 +59,16 @@ public class EziDebitPaymentGateway implements Serializable {
     private static final Logger logger = Logger.getLogger(EziDebitPaymentGateway.class.getName());
     //private static final String digitalKey = "78F14D92-76F1-45B0-815B-C3F0F239F624";// test
     private static final String paymentGateway = "EZIDEBIT";
-
-    private Future<CustomerDetails> getCustDetailsFuture = null;
-    private Map<String, Future> futureMap = new HashMap<>();
-    private AtomicBoolean custDetailsOperationBusy = new AtomicBoolean(false);
+    private int testAjaxCounter = 0;
+    @Inject
+    private FutureMapEJB futureMap;
+    // private final Map<String, Future> futureMap = new HashMap<>();
+    private boolean asyncOperationRunning = false;
     private final ThreadGroup tGroup1 = new ThreadGroup("EziDebitOps");
     private List<Payment> paymentsList;
     private List<Payment> paymentsListFilteredItems;
     private List<ScheduledPaymentPojo> scheduledPaymentsList;
-     private ScheduledPaymentPojo selectedScheduledPayment;
+    private ScheduledPaymentPojo selectedScheduledPayment;
     private List<ScheduledPaymentPojo> scheduledPaymentsListFilteredItems;
     private Payment payment;
     private Date paymentDebitDate = new Date();
@@ -87,19 +93,28 @@ public class EziDebitPaymentGateway implements Serializable {
     @Inject
     private PaymentBean paymentBean;
     @Inject
+    private PushComponentUpdateBean pushComponentUpdateBean;
+    @Inject
     private ConfigMapFacade configMapFacade;
     @Inject
     private CustomersFacade customersFacade;
     private String listOfIdsToImport;
     private boolean customerExistsInPaymentGateway = false;
     private boolean editPaymentDetails = false;
-    private boolean autoStartPoller = false;
+    private boolean autoStartPoller = true;
     private boolean stopPoller = false;
     private boolean customerDetailsHaveBeenRetrieved = false;
     private String eziDebitWidgetUrl = "";
     private Customers selectedCustomer;
 
     ThreadFactory tf1 = new eziDebitThreadFactory();
+    private String sessionId;
+
+    @PostConstruct
+    private void setSessionId() {
+        FacesContext facesContext = FacesContext.getCurrentInstance();
+        this.sessionId = ((HttpSession) facesContext.getExternalContext().getSession(false)).getId();
+    }
 
     /**
      * @return the autoStartPoller
@@ -154,8 +169,8 @@ public class EziDebitPaymentGateway implements Serializable {
         cal.add(Calendar.MONTH, 12);
         Date endDate = cal.getTime();
         cal.add(Calendar.MONTH, -24);
-        futureMap.put("GetPayments", paymentBean.getPayments(selectedCustomer, "ALL", "ALL", "ALL", "", cal.getTime(), endDate, false, getDigitalKey()));
-        futureMap.put("GetScheduledPayments", paymentBean.getScheduledPayments(selectedCustomer, cal.getTime(), endDate, getDigitalKey()));
+        startAsynchJob("GetPayments", paymentBean.getPayments(selectedCustomer, "ALL", "ALL", "ALL", "", cal.getTime(), endDate, false, getDigitalKey()));
+        startAsynchJob("GetScheduledPayments", paymentBean.getScheduledPayments(selectedCustomer, cal.getTime(), endDate, getDigitalKey()));
     }
 
     /**
@@ -443,8 +458,6 @@ public class EziDebitPaymentGateway implements Serializable {
         this.selectedScheduledPayment = selectedScheduledPayment;
     }
 
-    
-
     /**
      * @return the customerDetailsHaveBeenRetrieved
      */
@@ -460,6 +473,34 @@ public class EziDebitPaymentGateway implements Serializable {
         this.customerDetailsHaveBeenRetrieved = customerDetailsHaveBeenRetrieved;
     }
 
+    /**
+     * @return the asyncOperationRunning
+     */
+    public boolean isAsyncOperationRunning() {
+        return asyncOperationRunning;
+    }
+
+    /**
+     * @param asyncOperationRunning the asyncOperationRunning to set
+     */
+    public void setAsyncOperationRunning(boolean asyncOperationRunning) {
+        this.asyncOperationRunning = asyncOperationRunning;
+    }
+
+    /**
+     * @return the testAjaxCounter
+     */
+    public int getTestAjaxCounter() {
+        return testAjaxCounter;
+    }
+
+    /**
+     * @param testAjaxCounter the testAjaxCounter to set
+     */
+    public void setTestAjaxCounter(int testAjaxCounter) {
+        this.testAjaxCounter = testAjaxCounter;
+    }
+
     private class eziDebitThreadFactory implements ThreadFactory {
 
         @Override
@@ -472,7 +513,7 @@ public class EziDebitPaymentGateway implements Serializable {
      private void init() {
      executor1 = Executors.newFixedThreadPool(THREAD_POOL_SIZE, tf1);
      getCustDetailsFuture = paymentBean.getCustomerDetails(selectedCustomer, getDigitalKey());
-     custDetailsOperationBusy.set(true);
+     asyncOperationRunning.set(true);
 
      }*/
     /**
@@ -574,6 +615,21 @@ public class EziDebitPaymentGateway implements Serializable {
         return editPaymentDetails;
     }
 
+    public void onTabChange(TabChangeEvent event) {
+        Tab tb = event.getTab();
+
+        String tabName = "unknown";
+        if (tb != null) {
+            tabName = tb.getTitle();
+            if (tb.getId().compareTo("tab3") == 0) {
+
+            }
+        }
+
+        // FacesMessage msg = new FacesMessage("Tab Changed", "Active Tab: " + tabName);
+        // FacesContext.getCurrentInstance().addMessage(null, msg);
+    }
+
     /**
      * @param editPaymentDeatils the editPaymentDetails to set
      */
@@ -583,8 +639,17 @@ public class EziDebitPaymentGateway implements Serializable {
 
     public void createCustomerRecord() {
 
-        futureMap.put("AddCustomer", paymentBean.addCustomer(getSelectedCustomer(), paymentGateway, getDigitalKey()));
+        startAsynchJob("AddCustomer", paymentBean.addCustomer(getSelectedCustomer(), paymentGateway, getDigitalKey()));
         JsfUtil.addSuccessMessage("Processing Add Customer to Payment Gateway Request.", "");
+
+    }
+
+    public void testAjax(ActionEvent event) {
+        testAjaxCounter++;
+        RequestContext context = RequestContext.getCurrentInstance();
+        context.update("tabView");
+
+        JsfUtil.addSuccessMessage("Testing Ajax");
 
     }
 
@@ -641,7 +706,7 @@ public class EziDebitPaymentGateway implements Serializable {
      * @return the progress
      */
     public Integer getProgress() {
-        if (isPaymentRequestStatusIdle()) {
+        if (isAsyncOperationRunning()) {
             this.progress = 101;
         }
         progress = progress + 1;
@@ -661,30 +726,31 @@ public class EziDebitPaymentGateway implements Serializable {
         this.progress = 0;
     }
 
-    public void checkPaymentRequestStatusListener() {
-        isPaymentRequestStatusIdle();
-    }
+    /*public void checkPaymentRequestStatusListener() {
+     isAsyncOperationRunning();
+     }
 
-    public boolean isPaymentRequestStatusIdle() {
+     public boolean isPaymentRequestStatusIdle() {
 
-        int k = futureMap.size();
-        if (k <= 0) {
-            if (stopPoller) {
-                stopPoller();
-                return true;
+     int k = futureMap.size();
+     if (k <= 0) {
+     if (stopPoller) {
+     stopPoller();
+     return true;
                 
-            } else {
-                stopPoller = true;
-                return false;
-            }
-        } else {
-            stopPoller = false;
-            return false;
-        }
+     } else {
+     stopPoller = true;
+     return false;
+     }
+     } else {
+     stopPoller = false;
+     return false;
+     }
 
-    }
-
-    public void pollerListener() {
+     }*/
+   
+    public void pollerListener() {  
+        logger.log(Level.INFO, "Poller called backing bean listener method.");
         if (pageLoaded.get() == false) {// if its null we havn't retrieved the details for the customer
             pageLoaded.set(true);
             FacesContext context = FacesContext.getCurrentInstance();
@@ -692,26 +758,52 @@ public class EziDebitPaymentGateway implements Serializable {
             this.setSelectedCustomer(controller.getSelected());
             getPayments();
         }
-        int k = futureMap.size();
+        int k = futureMap.size(sessionId);
         if (k > 0) {
             logger.log(Level.INFO, "{0} jobs are running. Checking to see if asych jobs have finished so their results can be processed.", k);
+            if (isAsyncOperationRunning() == false) {
+                logger.log(Level.WARNING, "{0} jobs are running but asychOperationRunning flag is false!!", k);
+                setAsyncOperationRunning(true);
+            }
             checkIfAsyncJobsHaveFinishedAndUpdate();
-        } else {
+        } else if (isAsyncOperationRunning()) {
+            setAsyncOperationRunning(false);
             logger.log(Level.INFO, "All asych jobs have finished.");
-        }
+            RequestContext requestContext = RequestContext.getCurrentInstance();
+            ArrayList<String> componentsToUpdate = new ArrayList<>();
+            //componentsToUpdate.add(":paymentsForm:progressBarPanel");
+            //componentsToUpdate.add(":paymentsForm:mainPanel");
+            // componentsToUpdate.add(":paymentsForm:iFrameHeaderPanel");
+            //componentsToUpdate.add(":paymentsForm:paymentsTablePanel");
+            // componentsToUpdate.add(":paymentsForm:scheduledPaymentsTablePanel");
+             componentsToUpdate.add("paymentsForm");
+             requestContext.update(componentsToUpdate);
+            // requestContext.execute("PF('paymentPoller').stop();");
+            //pushComponentUpdateBean.sendMessage("Notification", "Payment Gateway Request Completed");
 
+        }
     }
 
-    private void cancelAllAsyncJobs() {
+    /* private void cancelAllAsyncJobs() {
 
-        Iterator it = futureMap.entrySet().iterator();
-        while (it.hasNext()) {
-            Map.Entry pairs = (Map.Entry) it.next();
-            Future ft = (Future) pairs.getValue();
-            ft.cancel(false);
-            it.remove(); // avoids a ConcurrentModificationException
-        }
-        futureMap.clear();
+     Iterator it = futureMap.entrySet().iterator();
+     while (it.hasNext()) {
+     Map.Entry pairs = (Map.Entry) it.next();
+     Future ft = (Future) pairs.getValue();
+     ft.cancel(false);
+     it.remove(); // avoids a ConcurrentModificationException
+     }
+     futureMap.clear();
+     }*/
+    private boolean futureMapContainsKey(String key) {
+        return futureMap.containsKey(sessionId, key);
+    }
+
+    private Future futureMapGetKey(String key) {
+        return futureMap.get(sessionId, key);
+    }
+     private void futureMapRemoveKey(String key) {
+         futureMap.remove(sessionId, key);
     }
 
     public void checkIfAsyncJobsHaveFinishedAndUpdate() {
@@ -721,10 +813,10 @@ public class EziDebitPaymentGateway implements Serializable {
         try {
 
             key = "GetCustomerDetails";
-            if (futureMap.containsKey(key)) {
-                Future ft = (Future) futureMap.get(key);
+            if (futureMapContainsKey(key)) {
+                Future ft = (Future) futureMapGetKey(key);
                 if (ft.isDone()) {
-                    futureMap.remove(key);
+                    futureMapContainsKey(key);
                     setAutoStartPoller(false);
                     cd = (CustomerDetails) ft.get();
                     customerExistsInPaymentGateway = cd != null;
@@ -734,150 +826,150 @@ public class EziDebitPaymentGateway implements Serializable {
             /// process next op
 
             key = "AddPayment";
-            if (futureMap.containsKey(key)) {
-                Future ft = (Future) futureMap.get(key);
+            if (futureMapContainsKey(key)) {
+                Future ft = (Future) futureMapGetKey(key);
                 if (ft.isDone()) {
-                    futureMap.remove(key);
+                    futureMapRemoveKey(key);
                     processAddPaymentResult(ft);
                 }
             }
             // process next op
 
             key = "GetPayments";
-            if (futureMap.containsKey(key)) {
-                Future ft = (Future) futureMap.get(key);
+            if (futureMapContainsKey(key)) {
+                Future ft = (Future) futureMapGetKey(key);
                 if (ft.isDone()) {
-                    futureMap.remove(key);
+                    futureMapRemoveKey(key);
                     processGetPayments(ft);
                 }
             }
 
             key = "GetScheduledPayments";
-            if (futureMap.containsKey(key)) {
-                Future ft = (Future) futureMap.get(key);
+            if (futureMapContainsKey(key)) {
+                Future ft = (Future) futureMapGetKey(key);
                 if (ft.isDone()) {
-                    futureMap.remove(key);
+                    futureMapRemoveKey(key);
                     processGetScheduledPayments(ft);
                 }
             }
             key = "CreateSchedule";
-            if (futureMap.containsKey(key)) {
-                Future ft = (Future) futureMap.get(key);
+            if (futureMapContainsKey(key)) {
+                Future ft = (Future) futureMapGetKey(key);
                 if (ft.isDone()) {
-                    futureMap.remove(key);
+                    futureMapRemoveKey(key);
                     processCreateSchedule(ft);
                 }
             }
             key = "AddCustomer";
-            if (futureMap.containsKey(key)) {
-                Future ft = (Future) futureMap.get(key);
+            if (futureMapContainsKey(key)) {
+                Future ft = (Future) futureMapGetKey(key);
                 if (ft.isDone()) {
-                    futureMap.remove(key);
+                    futureMapRemoveKey(key);
                     processAddCustomer(ft);
                 }
             }
 
             key = "EditCustomerDetails";
-            if (futureMap.containsKey(key)) {
-                Future ft = (Future) futureMap.get(key);
+            if (futureMapContainsKey(key)) {
+                Future ft = (Future) futureMapGetKey(key);
                 if (ft.isDone()) {
-                    futureMap.remove(key);
+                    futureMapRemoveKey(key);
                     processEditCustomerDetails(ft);
                 }
             }
             key = "ClearSchedule";
-            if (futureMap.containsKey(key)) {
-                Future ft = (Future) futureMap.get(key);
+            if (futureMapContainsKey(key)) {
+                Future ft = (Future) futureMapGetKey(key);
                 if (ft.isDone()) {
-                    futureMap.remove(key);
+                    futureMapRemoveKey(key);
                     processClearSchedule(ft);
                 }
             }
             key = "DeletePayment";
-            if (futureMap.containsKey(key)) {
-                Future ft = (Future) futureMap.get(key);
+            if (futureMapContainsKey(key)) {
+                Future ft = (Future) futureMapGetKey(key);
                 if (ft.isDone()) {
-                    futureMap.remove(key);
+                    futureMapRemoveKey(key);
                     processDeletePayment(ft);
                 }
             }
             key = "ChangeCustomerStatus";
-            if (futureMap.containsKey(key)) {
-                Future ft = (Future) futureMap.get(key);
+            if (futureMapContainsKey(key)) {
+                Future ft = (Future) futureMapGetKey(key);
                 if (ft.isDone()) {
-                    futureMap.remove(key);
+                    futureMapRemoveKey(key);
                     processChangeCustomerStatus(ft);
                 }
             }
             key = "GetPaymentStatus";
-            if (futureMap.containsKey(key)) {
-                Future ft = (Future) futureMap.get(key);
+            if (futureMapContainsKey(key)) {
+                Future ft = (Future) futureMapGetKey(key);
                 if (ft.isDone()) {
-                    futureMap.remove(key);
+                    futureMapRemoveKey(key);
                     processGetPaymentStatus(ft);
                 }
             }
             key = "ChangeScheduledAmount";
-            if (futureMap.containsKey(key)) {
-                Future ft = (Future) futureMap.get(key);
+            if (futureMapContainsKey(key)) {
+                Future ft = (Future) futureMapGetKey(key);
                 if (ft.isDone()) {
-                    futureMap.remove(key);
+                    futureMapRemoveKey(key);
                     processChangeScheduledAmount(ft);
                 }
             }
             key = "ChangeScheduledDate";
-            if (futureMap.containsKey(key)) {
-                Future ft = (Future) futureMap.get(key);
+            if (futureMapContainsKey(key)) {
+                Future ft = (Future) futureMapGetKey(key);
                 if (ft.isDone()) {
-                    futureMap.remove(key);
+                    futureMapRemoveKey(key);
                     processChangeScheduledDate(ft);
                 }
             }
             key = "IsBsbValid";
-            if (futureMap.containsKey(key)) {
-                Future ft = (Future) futureMap.get(key);
+            if (futureMapContainsKey(key)) {
+                Future ft = (Future) futureMapGetKey(key);
                 if (ft.isDone()) {
-                    futureMap.remove(key);
+                    futureMapRemoveKey(key);
                     processIsBsbValid(ft);
                 }
             }
             key = "IsSystemLocked";
-            if (futureMap.containsKey(key)) {
-                Future ft = (Future) futureMap.get(key);
+            if (futureMapContainsKey(key)) {
+                Future ft = (Future) futureMapGetKey(key);
                 if (ft.isDone()) {
-                    futureMap.remove(key);
+                    futureMapRemoveKey(key);
                     processIsSystemLocked(ft);
                 }
             }
             key = "GetPaymentExchangeVersion";
-            if (futureMap.containsKey(key)) {
-                Future ft = (Future) futureMap.get(key);
+            if (futureMapContainsKey(key)) {
+                Future ft = (Future) futureMapGetKey(key);
                 if (ft.isDone()) {
-                    futureMap.remove(key);
+                    futureMapRemoveKey(key);
                     processGetPaymentExchangeVersion(ft);
                 }
             }
             key = "GetCustomerDetailsFromEziDebitId";
-            if (futureMap.containsKey(key)) {
-                Future ft = (Future) futureMap.get(key);
+            if (futureMapContainsKey(key)) {
+                Future ft = (Future) futureMapGetKey(key);
                 if (ft.isDone()) {
-                    futureMap.remove(key);
+                    futureMapRemoveKey(key);
                     processGetCustomerDetailsFromEziDebitId(ft);
                 }
             }
             key = "GetPaymentDetail";
-            if (futureMap.containsKey(key)) {
-                Future ft = (Future) futureMap.get(key);
+            if (futureMapContainsKey(key)) {
+                Future ft = (Future) futureMapGetKey(key);
                 if (ft.isDone()) {
-                    futureMap.remove(key);
+                    futureMapRemoveKey(key);
                     processGetPaymentDetail(ft);
                 }
             }
             key = "GetPaymentDetailPlusNextPaymentInfo";
-            if (futureMap.containsKey(key)) {
-                Future ft = (Future) futureMap.get(key);
+            if (futureMapContainsKey(key)) {
+                Future ft = (Future) futureMapGetKey(key);
                 if (ft.isDone()) {
-                    futureMap.remove(key);
+                    futureMapRemoveKey(key);
                     processGetPaymentDetailPlusNextPaymentInfo(ft);
                 }
             }
@@ -903,6 +995,7 @@ public class EziDebitPaymentGateway implements Serializable {
             }
         }
 
+        logger.log(Level.INFO, "processGetPayments completed");
     }
 
     private void processGetScheduledPayments(Future ft) {
@@ -927,6 +1020,7 @@ public class EziDebitPaymentGateway implements Serializable {
             }
         }
 
+        logger.log(Level.INFO, "processGetScheduledPayments completed");
     }
 
     private void processAddPaymentResult(Future ft) {
@@ -942,6 +1036,7 @@ public class EziDebitPaymentGateway implements Serializable {
         } else {
             JsfUtil.addErrorMessage("Payment", "The operation failed!.");
         }
+        logger.log(Level.INFO, "processAddPaymentResult completed");
     }
 
     private void processCreateSchedule(Future ft) {
@@ -958,7 +1053,7 @@ public class EziDebitPaymentGateway implements Serializable {
         } else {
             JsfUtil.addErrorMessage("Payment", "The Create Schedule operation failed!.");
         }
-
+        logger.log(Level.INFO, "processCreateSchedule completed");
     }
 
     private void processEditCustomerDetails(Future ft) {
@@ -974,6 +1069,7 @@ public class EziDebitPaymentGateway implements Serializable {
         } else {
             JsfUtil.addErrorMessage("Payment Gateway", "The operation failed!.");
         }
+        logger.log(Level.INFO, "processEditCustomerDetails completed");
     }
 
     private void processClearSchedule(Future ft) {
@@ -989,6 +1085,7 @@ public class EziDebitPaymentGateway implements Serializable {
         } else {
             JsfUtil.addErrorMessage("Payment Gateway", "The operation failed!.");
         }
+        logger.log(Level.INFO, "processClearSchedule completed");
     }
 
     private void processDeletePayment(Future ft) {
@@ -999,11 +1096,13 @@ public class EziDebitPaymentGateway implements Serializable {
             Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, "Processing Async Results", ex);
         }
         if (result == true) {
+            setSelectedScheduledPayment(null);
             JsfUtil.addSuccessMessage("Payment Gateway", "Successfully Deleted Payment  .");
             getPayments();
         } else {
             JsfUtil.addErrorMessage("Payment Gateway", "The operation failed!.");
         }
+        logger.log(Level.INFO, "processDeletePayment completed");
     }
 
     private void processChangeCustomerStatus(Future ft) {
@@ -1019,6 +1118,7 @@ public class EziDebitPaymentGateway implements Serializable {
         } else {
             JsfUtil.addErrorMessage("Payment Gateway", "The operation failed!.");
         }
+        logger.log(Level.INFO, "processChangeCustomerStatus completed");
     }
 
     private void processGetPaymentStatus(Future ft) {
@@ -1034,6 +1134,7 @@ public class EziDebitPaymentGateway implements Serializable {
         } else {
             JsfUtil.addErrorMessage("Payment Gateway", "The operation failed!.");
         }
+        logger.log(Level.INFO, "processGetPaymentStatus completed");
     }
 
     private void processChangeScheduledAmount(Future ft) {
@@ -1049,6 +1150,7 @@ public class EziDebitPaymentGateway implements Serializable {
         } else {
             JsfUtil.addErrorMessage("Payment Gateway", "The operation failed!.");
         }
+        logger.log(Level.INFO, "processChangeScheduledAmount completed");
     }
 
     private void processChangeScheduledDate(Future ft) {
@@ -1064,6 +1166,7 @@ public class EziDebitPaymentGateway implements Serializable {
         } else {
             JsfUtil.addErrorMessage("Payment Gateway", "The operation failed!.");
         }
+        logger.log(Level.INFO, "processChangeScheduledDate completed");
     }
 
     private void processIsBsbValid(Future ft) {
@@ -1079,6 +1182,7 @@ public class EziDebitPaymentGateway implements Serializable {
         } else {
             JsfUtil.addErrorMessage("Payment Gateway", "The operation failed!.");
         }
+        logger.log(Level.INFO, "processIsBsbValid completed");
     }
 
     private void processIsSystemLocked(Future ft) {
@@ -1094,6 +1198,7 @@ public class EziDebitPaymentGateway implements Serializable {
         } else {
             JsfUtil.addErrorMessage("Payment Gateway", "The operation failed!.");
         }
+        logger.log(Level.INFO, "processIsSystemLocked completed");
     }
 
     private void processGetPaymentExchangeVersion(Future ft) {
@@ -1109,6 +1214,7 @@ public class EziDebitPaymentGateway implements Serializable {
         } else {
             JsfUtil.addErrorMessage("Payment Gateway", "The operation failed!.");
         }
+        logger.log(Level.INFO, "processGetPaymentExchangeVersion completed");
     }
 
     private void processGetCustomerDetailsFromEziDebitId(Future ft) {
@@ -1121,6 +1227,7 @@ public class EziDebitPaymentGateway implements Serializable {
         if (result != null) {
             // do something with result
         }
+        logger.log(Level.INFO, "processGetCustomerDetailsFromEziDebitId completed");
     }
 
     private void processGetPaymentDetail(Future ft) {
@@ -1133,6 +1240,7 @@ public class EziDebitPaymentGateway implements Serializable {
         if (result != null) {
             // do something with result
         }
+        logger.log(Level.INFO, "processGetPaymentDetail completed");
     }
 
     private void processGetPaymentDetailPlusNextPaymentInfo(Future ft) {
@@ -1145,8 +1253,11 @@ public class EziDebitPaymentGateway implements Serializable {
         if (result != null) {
             // do something with result
         }
+        logger.log(Level.INFO, "processGetPaymentDetailPlusNextPaymentInfo completed");
     }
-    private void stopPoller(){
+
+    private void stopPoller() {
+        Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.INFO, "Stopping poller on customers page");
         RequestContext.getCurrentInstance().addCallbackParam("stopPolling", true);
     }
 
@@ -1165,9 +1276,9 @@ public class EziDebitPaymentGateway implements Serializable {
      */
     public void setSelectedCustomer(Customers selectedCustomer) {
         this.selectedCustomer = selectedCustomer;
-        cancelAllAsyncJobs();
-        futureMap.put("GetCustomerDetails", paymentBean.getCustomerDetails(selectedCustomer, getDigitalKey()));
-        custDetailsOperationBusy.set(true);
+        futureMap.cancelFutures(sessionId);
+        startAsynchJob("GetCustomerDetails", paymentBean.getCustomerDetails(selectedCustomer, getDigitalKey()));
+        getPayments();
         this.progress = 0;
 
         /*CustomerDetails cd = getCustomerDetails(selectedCustomer);
@@ -1188,13 +1299,18 @@ public class EziDebitPaymentGateway implements Serializable {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddhhmmss");
         String paymentReference = selectedCustomer.getId().toString() + "-" + sdf.format(new Date());
         String loggedInUser = FacesContext.getCurrentInstance().getExternalContext().getRemoteUser();
-        Long amount = paymentAmountInCents * new Long(100);
+        Long amount = paymentAmountInCents * (long) 100;
         if (loggedInUser != null) {
-            futureMap.put("AddPayment", paymentBean.addPayment(selectedCustomer, paymentDebitDate, amount, paymentReference, loggedInUser, getDigitalKey()));
+            startAsynchJob("AddPayment", paymentBean.addPayment(selectedCustomer, paymentDebitDate, amount, paymentReference, loggedInUser, getDigitalKey()));
         } else {
             logger.log(Level.WARNING, "Logged in user is null. Add Single Payment aborted.");
         }
 
+    }
+
+    private void startAsynchJob(String key, Future future) {
+        setAsyncOperationRunning(true);
+        futureMap.put(sessionId, key, future);
     }
 
     public void createPaymentSchedule(ActionEvent actionEvent) {
@@ -1203,7 +1319,7 @@ public class EziDebitPaymentGateway implements Serializable {
         Long amountLimit = paymentLimitAmountInCents * (long) 100;
         char spt = paymentSchedulePeriodType.charAt(0);
         if (loggedInUser != null) {
-            futureMap.put("CreateSchedule", paymentBean.createSchedule(selectedCustomer, paymentDebitDate, spt, paymentDayOfWeek, paymentDayOfMonth, paymentFirstWeekOfMonth, paymentSecondWeekOfMonth, paymentThirdWeekOfMonth, paymentFourthWeekOfMonth, amount, paymentLimitToNumberOfPayments, amountLimit, paymentKeepManualPayments, loggedInUser, getDigitalKey()));
+            startAsynchJob("CreateSchedule", paymentBean.createSchedule(selectedCustomer, paymentDebitDate, spt, paymentDayOfWeek, paymentDayOfMonth, paymentFirstWeekOfMonth, paymentSecondWeekOfMonth, paymentThirdWeekOfMonth, paymentFourthWeekOfMonth, amount, paymentLimitToNumberOfPayments, amountLimit, paymentKeepManualPayments, loggedInUser, getDigitalKey()));
         } else {
             logger.log(Level.WARNING, "Logged in user is null. Add Single Payment aborted.");
         }
@@ -1214,7 +1330,7 @@ public class EziDebitPaymentGateway implements Serializable {
         String loggedInUser = FacesContext.getCurrentInstance().getExternalContext().getRemoteUser();
         Double amount = selectedScheduledPayment.getPaymentAmount() * (double) 100;
         if (loggedInUser != null) {
-            futureMap.put("DeletePayment", paymentBean.deletePayment(selectedCustomer, selectedScheduledPayment.getPaymentDate(), amount.longValue(), selectedScheduledPayment.getPaymentReference(), loggedInUser, getDigitalKey()));
+            startAsynchJob("DeletePayment", paymentBean.deletePayment(selectedCustomer, selectedScheduledPayment.getPaymentDate(), amount.longValue(), selectedScheduledPayment.getPaymentReference(), loggedInUser, getDigitalKey()));
         } else {
             logger.log(Level.WARNING, "Logged in user is null. Delete Payment aborted.");
         }
@@ -1225,7 +1341,7 @@ public class EziDebitPaymentGateway implements Serializable {
         String loggedInUser = FacesContext.getCurrentInstance().getExternalContext().getRemoteUser();
         Long amount = paymentAmountInCents * (long) 100;
         if (loggedInUser != null) {
-            futureMap.put("ChangeScheduledAmount", paymentBean.changeScheduledAmount(selectedCustomer, paymentDebitDate, amount, paymentLimitToNumberOfPayments, applyToAllFuturePayments, paymentKeepManualPayments, loggedInUser, getDigitalKey()));
+            startAsynchJob("ChangeScheduledAmount", paymentBean.changeScheduledAmount(selectedCustomer, paymentDebitDate, amount, paymentLimitToNumberOfPayments, applyToAllFuturePayments, paymentKeepManualPayments, loggedInUser, getDigitalKey()));
         } else {
             logger.log(Level.WARNING, "Logged in user is null. Add Single Payment aborted.");
         }
@@ -1236,7 +1352,7 @@ public class EziDebitPaymentGateway implements Serializable {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddhhmmss");
         String paymentReference = selectedCustomer.getId().toString() + "-" + sdf.format(new Date());
         if (loggedInUser != null) {
-            futureMap.put("ChangeScheduledDate", paymentBean.changeScheduledDate(selectedCustomer, changeFromDate, paymentDebitDate, paymentReference, paymentKeepManualPayments, loggedInUser, getDigitalKey()));
+            startAsynchJob("ChangeScheduledDate", paymentBean.changeScheduledDate(selectedCustomer, changeFromDate, paymentDebitDate, paymentReference, paymentKeepManualPayments, loggedInUser, getDigitalKey()));
         } else {
             logger.log(Level.WARNING, "Logged in user is null. Add Single Payment aborted.");
         }

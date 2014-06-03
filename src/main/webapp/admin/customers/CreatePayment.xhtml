@@ -16,15 +16,16 @@
                     <p:calendar id="debitDate" pattern="MM/dd/yyyy" value="#{ezidebit.paymentDebitDate}" title="#{configMapController.getKey('AddPaymentTitle_debitdate')}" required="true" requiredMessage="#{configMapController.getKey('AddPaymentRequiredMessage_debitdate')}" />
                     <p:outputLabel value="#{configMapController.getKey('AddPaymentLabel_paymentAmount')}" for="payAmount" />
                     <p:inputText id="payAmount" value="#{ezidebit.paymentAmountInCents}" title="#{configMapController.getKey('AddPaymentTitle_paymentAmount')}" required="true" requiredMessage="#{configMapController.getKey('AddPaymentRequiredMessage_paymentAmount')}">
-                        <f:convertNumber minFractionDigits="2"/>
+                        <f:convertNumber  minFractionDigits="2"/>
                     </p:inputText>
                 </p:panelGrid>
                 <p:panel>
-                    <p:commandButton id="createPaymentdialogueSave" oncomplete="PF('createPaymentDialogueWidget').hide()"  actionListener="#{ezidebit.addSinglePayment}" value="#{configMapController.getKey('AddPaymentSaveLink')}" update=":growl :pollForm:poller1 "/>                
+                    <p:commandButton id="createPaymentdialogueSave"  oncomplete="PF('createPaymentDialogueWidget').hide();"  actionListener="#{ezidebit.addSinglePayment}" value="#{configMapController.getKey('AddPaymentSaveLink')}" update=":growl  "/>                
                     <p:commandButton id="createPaymentdialogueDiscard" onclick="PF('createPaymentDialogueWidget').hide()"  value="#{configMapController.getKey('AddPaymentDiscardLink')}" update=":growl"/>                
                 </p:panel>     
             </h:form>
         </p:confirmDialog>
-    </ui:composition>
+    </ui:composition> 
+
 
 </html>

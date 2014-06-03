@@ -43,8 +43,7 @@ public class LazyLoadingDataModel<T extends BaseEntity>  extends LazyDataModel<T
     }
 
     @Override
-    public List<T> load(int first, int pageSize, String sortField,
-            SortOrder sortOrder, Map<String,String> filters) {
+    public List<T> load(int first, int pageSize, String sortField,SortOrder sortOrder, Map<String,Object> filters) {
         List<T> list = facade.load(first, pageSize,
             sortField, sortOrder, filters);
         if (list == null) {

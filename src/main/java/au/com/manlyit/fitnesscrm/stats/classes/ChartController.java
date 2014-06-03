@@ -46,9 +46,9 @@ public class ChartController implements Serializable {
     private au.com.manlyit.fitnesscrm.stats.beans.StatsTakenFacade ejbStatsTakenFacade;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.CustomersFacade ejbCustomerFacade;
-    private JsfUtil jsfUtil = new JsfUtil();
-    private SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yy");
-    private int numberOfStatisticTypes = 14;
+    private final JsfUtil jsfUtil = new JsfUtil();
+    private final SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yy");
+    private final int numberOfStatisticTypes = 14;
     private ArrayList<FitnessCartesianChartModel> modelList;
 
     public int getUser() {
