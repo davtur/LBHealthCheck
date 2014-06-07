@@ -35,8 +35,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
-import javax.ejb.Schedule;
-import javax.ejb.Timer;
+import javax.annotation.PreDestroy;
 import javax.enterprise.context.SessionScoped;
 import javax.faces.context.FacesContext;
 import javax.faces.event.ActionEvent;
@@ -477,6 +476,15 @@ public class EziDebitPaymentGateway implements Serializable {
      * @return the asyncOperationRunning
      */
     public boolean isAsyncOperationRunning() {
+        if (pageLoaded.get() == false) {// if its null we havn't retrieved the details for the customer
+            pageLoaded.set(true);
+            loginToPushServer();
+            FacesContext context = FacesContext.getCurrentInstance();
+            CustomersController controller = (CustomersController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "customersController");
+            this.setSelectedCustomer(controller.getSelected());
+            getPayments();
+            RequestContext.getCurrentInstance().update("iFrameForm");
+        }
         return asyncOperationRunning;
     }
 
@@ -615,9 +623,27 @@ public class EziDebitPaymentGateway implements Serializable {
         return editPaymentDetails;
     }
 
-    public void onTabChange(TabChangeEvent event) {
+    public void onTabShow(TabChangeEvent event) {
         Tab tb = event.getTab();
 
+        String tabName = "unknown";
+        if (tb != null) {
+            tabName = tb.getTitle();
+            if (tb.getId().compareTo("tab3") == 0) {
+
+            }
+        }
+
+        // FacesMessage msg = new FacesMessage("Tab Changed", "Active Tab: " + tabName);
+        // FacesContext.getCurrentInstance().addMessage(null, msg);
+    }
+
+    public void onTabChange(TabChangeEvent event) {
+        Tab tb = event.getTab();
+       // String compId =   event.getTab().getClientId();
+        //logger.log(Level.INFO, "Request Context update of {0} actioned",compId);
+        //RequestContext.getCurrentInstance().update(compId);
+        
         String tabName = "unknown";
         if (tb != null) {
             tabName = tb.getTitle();
@@ -748,16 +774,18 @@ public class EziDebitPaymentGateway implements Serializable {
      }
 
      }*/
-   
-    public void pollerListener() {  
+    public void loginToPushServer() {
+
+        // Connect to the push channel based on sessionId
+        RequestContext requestContext = RequestContext.getCurrentInstance();
+
+        requestContext.execute("PF('subscriber').connect('/" + sessionId + "')");
+        logger.log(Level.INFO, "Adding connect request to primefaces requestcontext. PF(\'subscriber\').connect(\'/{0}\')", sessionId);
+    }
+
+    public void pollerListener() {
         logger.log(Level.INFO, "Poller called backing bean listener method.");
-        if (pageLoaded.get() == false) {// if its null we havn't retrieved the details for the customer
-            pageLoaded.set(true);
-            FacesContext context = FacesContext.getCurrentInstance();
-            CustomersController controller = (CustomersController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "customersController");
-            this.setSelectedCustomer(controller.getSelected());
-            getPayments();
-        }
+
         int k = futureMap.size(sessionId);
         if (k > 0) {
             logger.log(Level.INFO, "{0} jobs are running. Checking to see if asych jobs have finished so their results can be processed.", k);
@@ -766,24 +794,30 @@ public class EziDebitPaymentGateway implements Serializable {
                 setAsyncOperationRunning(true);
             }
             checkIfAsyncJobsHaveFinishedAndUpdate();
-        } else if (isAsyncOperationRunning()) {
+        } 
+        k = futureMap.size(sessionId);
+        if (k == 0) {
             setAsyncOperationRunning(false);
-            logger.log(Level.INFO, "All asych jobs have finished.");
-            RequestContext requestContext = RequestContext.getCurrentInstance();
-            ArrayList<String> componentsToUpdate = new ArrayList<>();
-            //componentsToUpdate.add(":paymentsForm:progressBarPanel");
-            //componentsToUpdate.add(":paymentsForm:mainPanel");
-            // componentsToUpdate.add(":paymentsForm:iFrameHeaderPanel");
-            //componentsToUpdate.add(":paymentsForm:paymentsTablePanel");
-            // componentsToUpdate.add(":paymentsForm:scheduledPaymentsTablePanel");
-             componentsToUpdate.add("paymentsForm");
-             requestContext.update(componentsToUpdate);
+            logger.log(Level.INFO, "Asking request context to update components.");
+       
+            //ArrayList<String> componentsToUpdate = new ArrayList<>();
+            //componentsToUpdate.add(":tv:paymentsForm:progressBarPanel");
+            //componentsToUpdate.add("paymentsForm:mainPanel");
+            //componentsToUpdate.add("tv:paymentsForm:iFrameHeaderPanel");
+            //componentsToUpdate.add("paymentsTablePanel");
+            //componentsToUpdate.add("scheduledPaymentsTablePanel");
+            //componentsToUpdate.add("tv:paymentsForm");
+            RequestContext.getCurrentInstance().update("paymentsForm");
             // requestContext.execute("PF('paymentPoller').stop();");
             //pushComponentUpdateBean.sendMessage("Notification", "Payment Gateway Request Completed");
-
+          logger.log(Level.INFO, "All asych jobs have finished.");
         }
     }
-
+    
+    @PreDestroy
+    private void cleanUp(){
+        futureMap.cancelFutures(sessionId);
+    }
     /* private void cancelAllAsyncJobs() {
 
      Iterator it = futureMap.entrySet().iterator();
@@ -802,8 +836,9 @@ public class EziDebitPaymentGateway implements Serializable {
     private Future futureMapGetKey(String key) {
         return futureMap.get(sessionId, key);
     }
-     private void futureMapRemoveKey(String key) {
-         futureMap.remove(sessionId, key);
+
+    private void futureMapRemoveKey(String key) {
+        futureMap.remove(sessionId, key);
     }
 
     public void checkIfAsyncJobsHaveFinishedAndUpdate() {
@@ -816,7 +851,7 @@ public class EziDebitPaymentGateway implements Serializable {
             if (futureMapContainsKey(key)) {
                 Future ft = (Future) futureMapGetKey(key);
                 if (ft.isDone()) {
-                    futureMapContainsKey(key);
+                    futureMapRemoveKey(key);
                     setAutoStartPoller(false);
                     cd = (CustomerDetails) ft.get();
                     customerExistsInPaymentGateway = cd != null;

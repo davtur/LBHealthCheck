@@ -124,6 +124,7 @@ public class CustomersController implements Serializable {
             checkPass = current.getPassword();
             recreateAllAffectedPageModels();
             setCustomerTabsEnabled(true);
+            RequestContext.getCurrentInstance().update("iFrameForm");
             
         }
     }

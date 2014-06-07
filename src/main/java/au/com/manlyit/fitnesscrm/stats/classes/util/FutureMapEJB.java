@@ -5,7 +5,6 @@
  */
 package au.com.manlyit.fitnesscrm.stats.classes.util;
 
-import au.com.manlyit.fitnesscrm.stats.classes.CustomersController;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -19,7 +18,6 @@ import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.ejb.Timer;
 import javax.faces.application.FacesMessage;
-import javax.faces.context.FacesContext;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.primefaces.push.EventBus;
 import org.primefaces.push.EventBusFactory;
@@ -32,7 +30,7 @@ import org.primefaces.push.impl.JSONEncoder;
  *
  * @author david
  */
-@PushEndpoint("/{user}")
+@PushEndpoint("/payments/{user}")
 
 @Singleton
 @LocalBean
@@ -41,9 +39,10 @@ public class FutureMapEJB {
 
     private static final Logger logger = Logger.getLogger(FutureMapEJB.class.getName());
     private final HashMap<String, HashMap<String, Future>> futureMap = new HashMap<>();
+    private final static String CHANNEL = "/payments/";
 
     @PathParam("user")
-    private String username = "test";
+    private String username;
 
     @OnMessage(encoders = {JSONEncoder.class})
     public FacesMessage onMessage(FacesMessage message) {
@@ -57,7 +56,7 @@ public class FutureMapEJB {
     public HashMap<String, Future> getFutureMap(String userSessionId) {
         //return a map of future tasks that belong to a sessionid
         HashMap<String, Future> fmap = futureMap.get(userSessionId);
-        if(fmap == null){
+        if (fmap == null) {
             futureMap.put(userSessionId, new HashMap<String, Future>());
         }
         return fmap;
@@ -90,15 +89,15 @@ public class FutureMapEJB {
     }
 
     public void cancelFutures(String userSessionId) {
-        if(getFutureMap(userSessionId) != null){
-        Iterator it = getFutureMap(userSessionId).entrySet().iterator();
-        while (it.hasNext()) {
-            Map.Entry pairs = (Map.Entry) it.next();
-            Future ft = (Future) pairs.getValue();
-            ft.cancel(false);
-            it.remove(); // avoids a ConcurrentModificationException
-        }
-        getFutureMap(userSessionId).clear();
+        if (getFutureMap(userSessionId) != null) {
+            Iterator it = getFutureMap(userSessionId).entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry pairs = (Map.Entry) it.next();
+                Future ft = (Future) pairs.getValue();
+                ft.cancel(false);
+                it.remove(); // avoids a ConcurrentModificationException
+            }
+            getFutureMap(userSessionId).clear();
         }
     }
 
@@ -113,31 +112,47 @@ public class FutureMapEJB {
 
     public void sendMessage(String sessionChannel, String summary, String detail) {
         //TODO
-       sessionChannel = "/test";// remove this once the channel is dynamically set by session id
-       
+        // sessionChannel = "/test";// remove this once the channel is dynamically set by session id
+
         EventBus eventBus = EventBusFactory.getDefault().eventBus();
         // eventBus.publish(channels.getChannel(getUser()), new FacesMessage(StringEscapeUtils.escapeHtml(summary), StringEscapeUtils.escapeHtml(detail)));
-        eventBus.publish(sessionChannel, new FacesMessage(StringEscapeUtils.escapeHtml(summary), StringEscapeUtils.escapeHtml(detail)));
+        eventBus.publish(CHANNEL + sessionChannel, new FacesMessage(StringEscapeUtils.escapeHtml(summary), StringEscapeUtils.escapeHtml(detail)));
     }
 
-    @Schedule(hour = "*", minute = "*", second = "0/5")
+    @Schedule(hour = "*", minute = "*", second = "0/1")
     public void checkRunningJobsAndNotifyIfComplete(Timer t) {  // run every 2 seconds
-        logger.log(Level.INFO, "Checking Future Map for completed jobs.");
+
+        logger.log(Level.FINE, "Checking Future Map for completed jobs.");
 
         for (Map.Entry pairs : futureMap.entrySet()) {
             String sessionId = (String) pairs.getKey();
             HashMap<String, Future> fmap = (HashMap<String, Future>) pairs.getValue();
             int k = fmap.size();
             if (k > 0) {
+
                 logger.log(Level.INFO, "{0} jobs are running. Checking to see if asych jobs have finished so their results can be processed.", k);
+                /*for (Map.Entry pairsFut : fmap.entrySet()) {
+                 Future ft = (Future) pairsFut.getValue();
+                 String key = (String) pairsFut.getKey();
+                 if (ft.isDone()) {
+                 sendMessage(sessionId, "Asynchronous Task Completed", key);
+                 logger.log(Level.INFO, "Notifying sessionId {0} that async job {1} has finished.", new Object[]{key, sessionId});
+                 }
+                 }*/
+                int y = 0;
                 for (Map.Entry pairsFut : fmap.entrySet()) {
                     Future ft = (Future) pairsFut.getValue();
-                    String key = (String)pairsFut.getKey();
-                    if(ft.isDone()){
-                        sendMessage(sessionId, "Async Job Completed", key);
-                        logger.log(Level.INFO, "Notifying sessionId {0} that async job {1} has finished.",new Object[]{ key,sessionId});
+                    String key = (String) pairsFut.getKey();
+                    if (ft.isDone()) {
+                        y++;
+                        logger.log(Level.INFO, "SessionId {0} async job {1} has finished.", new Object[]{key, sessionId});
                     }
                 }
+                if (y > 0) {
+                    sendMessage(sessionId, "Asynchronous Tasks Completed", Integer.toString(y));
+                    logger.log(Level.INFO, "Notifying that {0} async jobs for sessionId {1} have finished.", new Object[]{Integer.toString(y), sessionId});
+                }
+
             }
 
         }

@@ -38,7 +38,7 @@ public class ChartController implements Serializable {
     }
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.StatsFacade ejbStatsFacade;
-        @Inject
+    @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.FitnessTestChartsFacade ejbFitnessTestChartsFacade;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.StatTypesFacade ejbStatTypesFacade;
@@ -46,7 +46,7 @@ public class ChartController implements Serializable {
     private au.com.manlyit.fitnesscrm.stats.beans.StatsTakenFacade ejbStatsTakenFacade;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.CustomersFacade ejbCustomerFacade;
-    private final JsfUtil jsfUtil = new JsfUtil();
+
     private final SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yy");
     private final int numberOfStatisticTypes = 14;
     private ArrayList<FitnessCartesianChartModel> modelList;
@@ -59,7 +59,7 @@ public class ChartController implements Serializable {
 
     public Customers getCustomer() {
        // String passCheck = PasswordService.getInstance().encrypt("1234567890");
-      //  System.out.println("\n\ne-check:" + passCheck + "\n\n");
+        //  System.out.println("\n\ne-check:" + passCheck + "\n\n");
         FacesContext context = FacesContext.getCurrentInstance();
         CustomersController custController = (CustomersController) context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
         return custController.getSelected();
@@ -138,15 +138,15 @@ public class ChartController implements Serializable {
             modelList = new ArrayList<>();
             //get list of charts types that customer has
             List<FitnessTestCharts> chartsList = ejbFitnessTestChartsFacade.findAll();
-             for(FitnessTestCharts chrt:chartsList){
-                 Collection<StatTypes> stypes = chrt.getStatTypesCollection();
-                 FitnessCartesianChartModel mod = createModel(chrt, stypes);
-                 if(mod.getSeries().isEmpty() == false){
-                    modelList.add(mod); 
-                 }
-                 
-             }
-          }
+            for (FitnessTestCharts chrt : chartsList) {
+                Collection<StatTypes> stypes = chrt.getStatTypesCollection();
+                FitnessCartesianChartModel mod = createModel(chrt, stypes);
+                if (mod.getSeries().isEmpty() == false) {
+                    modelList.add(mod);
+                }
+
+            }
+        }
         return modelList;
     }
 
@@ -163,12 +163,12 @@ public class ChartController implements Serializable {
         FitnessCartesianChartModel model = new FitnessCartesianChartModel();
         model.setChartName(chrt.getName());
         model.setyAxisLabel(chrt.getYaxisLabel());
-       
+
         for (LineChartSeries cs : seriesList) {
-            if(cs.getData().isEmpty()== false){
-                 model.addSeries(cs);
+            if (cs.getData().isEmpty() == false) {
+                model.addSeries(cs);
             }
-           
+
         }
         return model;
     }
