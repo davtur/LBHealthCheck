@@ -9,6 +9,7 @@ import au.com.manlyit.fitnesscrm.stats.db.CustomerImages;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import au.com.manlyit.fitnesscrm.stats.db.Stat;
 import au.com.manlyit.fitnesscrm.stats.db.StatTypes;
+import java.io.IOException;
 
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
@@ -16,11 +17,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.inject.Inject;
 import javax.faces.application.FacesMessage;
 import javax.inject.Named;
 import javax.enterprise.context.SessionScoped;
 import javax.faces.component.UIComponent;
+import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.faces.convert.Converter;
 import javax.faces.convert.FacesConverter;
@@ -29,6 +33,7 @@ import javax.faces.event.ValueChangeEvent;
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
+import javax.servlet.http.HttpServletRequest;
 import org.primefaces.event.RowEditEvent;
 import org.primefaces.event.SelectEvent;
 
@@ -139,6 +144,23 @@ public class StatsTakenController implements Serializable {
         updateCustomerImage(current.getImageId());
         return "View";
     }
+    
+    public void prepareCreateMobile() {
+        prepareCreate() ;
+        navigateMobile("/trainer/sessionHistory/CreateStatsMobile.xhtml");
+        
+    }
+    
+    private void navigateMobile(String location){
+         FacesContext context = FacesContext.getCurrentInstance();
+        ExternalContext ec = context.getExternalContext();
+        HttpServletRequest request = (HttpServletRequest) context.getExternalContext().getRequest();
+        try {
+            ec.redirect(request.getContextPath() + location);
+        } catch (IOException ex) {
+            Logger.getLogger(SessionHistoryController.class.getName()).log(Level.SEVERE, "prepareCreateMobileReturnCreate", ex);
+        }
+    }
 
     public void prepareCreate() {
         current = new StatsTaken();
@@ -174,6 +196,15 @@ public class StatsTakenController implements Serializable {
         
     }
 
+    public void createMobile(){
+         try {
+            getFacade().edit(current);
+            JsfUtil.addSuccessMessage(configMapFacade.getConfig("StatsTakenUpdated"));
+            prepareCreateMobile();            
+        } catch (Exception e) {
+            JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
+        }
+    }
     public String create() {
         try {
             getFacade().edit(current);
@@ -298,6 +329,20 @@ public class StatsTakenController implements Serializable {
         current = null;
     }
 
+    
+    public void discardMobile(ActionEvent event) {
+        try {
+            destroyStats();
+            destroyImage();
+            getFacade().remove(current);
+            JsfUtil.addSuccessMessage(configMapFacade.getConfig("StatsTakenDiscarded"));
+            recreateModel();
+            navigateMobile("/mobileMenu.xhtml");
+        } catch (Exception e) {
+            JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
+        }
+  
+    }
     public void discard(ActionEvent event) {
         try {
             destroyStats();

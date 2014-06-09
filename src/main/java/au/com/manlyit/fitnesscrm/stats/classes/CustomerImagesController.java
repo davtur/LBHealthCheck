@@ -28,6 +28,7 @@ import javax.faces.application.FacesMessage;
 import javax.inject.Named;
 import javax.enterprise.context.SessionScoped;
 import javax.faces.component.UIComponent;
+import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.faces.convert.Converter;
 import javax.faces.convert.FacesConverter;
@@ -37,6 +38,7 @@ import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
 import javax.imageio.ImageIO;
+import javax.servlet.http.HttpServletRequest;
 import org.apache.sanselan.ImageReadException;
 import org.apache.sanselan.Sanselan;
 import org.apache.sanselan.common.IImageMetadata;
@@ -75,6 +77,7 @@ public class CustomerImagesController implements Serializable {
     private List<CustomerImages> filteredItems;
     private String effect = "fade";
     private boolean saveButtonDisabled = true;
+    private UploadedFile uploadedFile;
 
     public CustomerImagesController() {
     }
@@ -112,6 +115,15 @@ public class CustomerImagesController implements Serializable {
                 images.remove(i);
             }
         }
+    }
+    
+
+    public UploadedFile getUploadedFile() {
+        return uploadedFile;
+    }
+
+    public void setUploadedFile(UploadedFile file) {
+        this.uploadedFile = file;
     }
 
     private BufferedImage resizeImageWithHintKeepAspect(BufferedImage originalImage, int newWidth, int newHeight) {
@@ -183,11 +195,8 @@ public class CustomerImagesController implements Serializable {
 
     }
 
-    public void handleFileUpload(FileUploadEvent event) {
-//Barefoot-image_100_by_100.jpg
-
-        UploadedFile file = event.getFile();
-        BufferedImage img = null;
+    private void processUploadedFile(UploadedFile file ){
+             BufferedImage img = null;
         try {
             img = ImageIO.read(file.getInputstream());
         } catch (IOException e) {
@@ -239,6 +248,7 @@ public class CustomerImagesController implements Serializable {
                         current.setDatetaken(dateThePhotoWasTaken);
                     } else {
                         JsfUtil.addErrorMessage("Couldnt get the date the photo was taken from the image file!. The Date is Null!");
+                       
                     }
                     JsfUtil.addSuccessMessage("Modifying the photo taken date to the date extracted from the photo: " + dateString);
 
@@ -247,7 +257,7 @@ public class CustomerImagesController implements Serializable {
             } else {
                 JsfUtil.addErrorMessage("Couldnt get the date the photo was taken from the image file! No EXIF data in the photo.");
             }
-            /* ImageInputStream iis = ImageIO.createImageInputStream(file.getInputstream());
+            /* ImageInputStream iis = ImageIO.createImageInputStream(uploadedFile.getInputstream());
              reader.setInput(iis, true);
              IIOMetadata tags = reader.getImageMetadata(0);
              Node tagNode = tags.getAsTree(tags.getNativeMetadataFormatName());
@@ -257,7 +267,14 @@ public class CustomerImagesController implements Serializable {
         } catch (IOException | ImageReadException e) {
             JsfUtil.addErrorMessage(e, "Couldnt get the date the photo was taken from the image file! No EXIF data in the photo.");
         }
+  
+    }
+    
+    public void handleFileUpload(FileUploadEvent event) {
+//Barefoot-image_100_by_100.jpg
 
+        UploadedFile file = event.getFile();
+        processUploadedFile(file);
         setSaveButtonDisabled(false);
 
     }
@@ -400,6 +417,18 @@ public class CustomerImagesController implements Serializable {
         return "View";
     }
 
+    public void prepareCreateMobile() {
+        clearPhoto();
+        FacesContext context = FacesContext.getCurrentInstance();
+        ExternalContext ec = context.getExternalContext();
+        HttpServletRequest request = (HttpServletRequest) context.getExternalContext().getRequest();
+        try {
+            ec.redirect(request.getContextPath() + "/trainer/sessionHistory/CreatePhotoMobile.xhtml");
+        } catch (IOException ex) {
+            Logger.getLogger(SessionHistoryController.class.getName()).log(Level.SEVERE, "prepareCreateMobileReturnCreate", ex);
+        }
+    }
+
     public String prepareCreate() {
         clearPhoto();
         return "Create";
@@ -419,6 +448,12 @@ public class CustomerImagesController implements Serializable {
         return "Edit";
     }
 
+     public void createFromMobile() {
+         
+         createFromDialogue();
+         
+     }
+    
     public void createFromDialogue() {
         /*  if (croppedImage != null) {
          BufferedImage img = null;

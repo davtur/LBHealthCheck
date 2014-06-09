@@ -311,7 +311,7 @@
                     <h:form id="iFrameForm" > 
 
                         <p:outputPanel id="iFramePanel" >
-                            <p:panelGrid id="dialoguePaymenstGrid2" columns="2" rendered="#{ezidebit.customerExistsInPaymentGateway and ezidebit.customerDetailsHaveBeenRetrieved == true}" >
+                            <p:panelGrid id="dialoguePaymenstGrid2" columns="2" rendered="#{ezidebit.customerExistsInPaymentGateway == true and ezidebit.customerDetailsHaveBeenRetrieved == true}" >
                                 <p:panel id="viewPaymentsGrid"  >
                                     <iframe id="ezidebitIframeView"  style="width:400px;height:400px" src="#{ezidebit.getEziDebitWidgetUrl(false)}" />
                                 </p:panel>

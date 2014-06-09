@@ -1,90 +1,100 @@
-<f:view xmlns="http://www.w3.org/1999/xhtml"
-        xmlns:f="http://java.sun.com/jsf/core"
-        xmlns:h="http://java.sun.com/jsf/html"
-        xmlns:ui="http://java.sun.com/jsf/facelets"
-        xmlns:p="http://primefaces.org/ui"
-        xmlns:pm="http://primefaces.org/mobile"
-        contentType="text/html"
-        renderKitId="PRIMEFACES_MOBILE">
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:pm="http://primefaces.org/mobile">
 
-    <pm:page title="Pure Fitness Session" >
-        <f:facet name="postinit">                        
-            <h:outputStylesheet library="primefaces-mobile" name="calendar/calendar.css"  />
+    <f:view renderKitId="PRIMEFACES_MOBILE" />
+    <h:head>
+    </h:head>
 
-            <h:outputScript library="primefaces-mobile" name="calendar/calendar.js" />            
+    <h:body>
+        <pm:page id="main" title="Pure Fitness Session" >
 
-            <script type="text/javascript">
-                (function($) {
-                    $.mobiscroll.i18n['en-UK'] = $.extend($.mobiscroll.i18n['en-UK'], {
-                        // Core
-                        setText: 'Set',
-                        cancelText: 'Cancel',
-                        // Datetime component
-                        dateFormat: 'dd/mm/yy',
-                        dateOrder: 'ddmmyy',
-                        dayNames: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
-                        dayNamesShort: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-                        dayText: 'Day',
-                        hourText: 'Hours',
-                        minuteText: 'Minutes',
-                        monthNames: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
-                        monthNamesShort: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-                        monthText: 'Month',
-                        secText: 'Seconds',
-                        timeFormat: 'hh:ii A',
-                        timeWheels: 'hhiiA',
-                        yearText: 'Year',
-                        nowText: 'Now',
-                        // Measurement components
-                        wholeText: 'Whole',
-                        fractionText: 'Fraction',
-                        unitText: 'Unit',
-                        // Time / Timespan component
-                        labels: ['Years', 'Months', 'Days', 'Hours', 'Minutes', 'Seconds', ''],
-                        labelsShort: ['Yrs', 'Mths', 'Days', 'Hrs', 'Mins', 'Secs', ''],
-                        // Timer component
-                        startText: 'Start',
-                        stopText: 'Stop',
-                        resetText: 'Reset',
-                        lapText: 'Lap',
-                        hideText: 'Hide'
-                    });
-                })(jQuery);
-            </script>
-        </f:facet>   
-
-        <style>
-            .th-groups th {
-                text-align: center;
-                background-color: rgba(0,0,0,.1);
-                border-right: 1px solid #fff;
-            }
-            .ui-li-custom .ui-li-count {
-                right: 10px !important;
-            }                
-        </style>        
-        <!-- Main View  -->
-        <pm:view id="main" swatch="b" > 
-            <pm:header title="Pure Fitness Mobile" />
+            <!-- Main View  -->
+            <pm:header title="Pure Fitness Mobile"  swatch="b"/>
             <pm:content >  
-                <h:form id="sessionsForm">  
+                <h:form id="menuForm">  
                     <p:growl/>
-
                     <h3>Main Menu</h3>
-                    <p:dataList>
-                        <!--<h:outputLink value="#sessions?transition=pop">Training Sessions</h:outputLink>--> 
-                        <p:commandLink action="#{sessionHistoryController.prepareCreateMobileReturnCreate}" ajax="false">Log Training Sessions <h:outputText styleClass="ui-li-count" value="New"/></p:commandLink> 
-                        <p:commandLink action="/trainer/sessionHistory/EditSessionMobile?faces-redirect=true" ajax="false">Edit Training Sessions <h:outputText styleClass="ui-li-count" value="New"/></p:commandLink> 
-                       <!-- <p:commandLink action="#{notesController.prepareCreateFromMobile}" ajax="false">Add Customer Notes<h:outputText styleClass="ui-li-count" value="New"/></p:commandLink> 
-
-                        <p:commandLink action="/trainer/sessionHistory/EditCustomerNotes?faces-redirect=true" ajax="false">Edit Customer Notes<h:outputText styleClass="ui-li-count" value="New"/></p:commandLink> -->
-                        <p:commandLink action="/trainer/sessionHistory/ListCustomerNotes?faces-redirect=true" ajax="false">Customer Notes<h:outputText styleClass="ui-li-count" value="New"/></p:commandLink> 
-
-                        <p:commandButton value="Logout" action="#{customersController.logout}" />
-                        <!--<h:outputLink value="#sessions?transition=pop">Logout</h:outputLink> -->
-                    </p:dataList>
+                    <p:menu styleClass="ui-listview-inset ui-corner-all ui-group-theme-b">
+                        <p:submenu label="Trainer">
+                            <p:menuitem value="Log Training Sessions " action="#{sessionHistoryController.prepareCreateMobileReturnCreate}" icon="ui-icon-gear"/>
+                            <p:menuitem value="Edit Training Sessions " url="/trainer/sessionHistory/EditSessionMobile.xhtml?faces-redirect=true" icon="ui-icon-gear"/>
+                            <p:menuitem value="Log Customer Stats " action="#{statsTakenController.prepareCreateMobile}" icon="ui-icon-gear"/>
+                            <p:menuitem value="Upload Photos" action="#{customerImagesController.prepareCreateMobile}" icon="ui-icon-gear"/>                           
+                            <p:menuitem value="Customer Notes" action="/trainer/sessionHistory/ListCustomerNotes?faces-redirect=true" icon="ui-icon-info"/>
+                            <p:menuitem  value="Logout" action="#{customersController.logout}"  icon="ui-icon-action"/>
+                        </p:submenu>
+                    </p:menu>
                 </h:form>
             </pm:content>
-        </pm:view>
-    </pm:page>
-</f:view>
+        </pm:page>
+
+        <pm:page id="sessions"  title="Training Session" >
+
+            <pm:header  swatch="b" title="Pure Fitness Mobile">
+                <f:facet name="left"><p:button value="Back" icon="back" onclick="PrimeFaces.back()"/></f:facet>
+            </pm:header> 
+            <pm:content >            
+
+                <h:form id="sessionsForm">  
+                    <p:growl/>
+                    <p:commandButton   ajax="false"   action="#{sessionHistoryController.createMobile}" value="#{configMapController.getKey('CreateSessionHistorySaveLink')}" />
+
+                    <p:spacer height="10em" />
+
+                    <pm:field>
+                        <p:outputLabel for="sessiondate" value="#{configMapController.getKey('CreateSessionHistoryLabel_sessiondate')}" />
+                        <p:calendar id="sessiondate" value="#{sessionHistoryController.selected.sessiondate}"  pattern="dd/MM/yyyy"/>
+                    </pm:field>  
+                    <pm:field>
+                        <p:outputLabel for="sessiontime" value="Session Start Time:" />
+                        <p:inputText id="sessiontime" value="#{sessionHistoryController.selectedSessionTime}" >
+                            <f:convertDateTime  pattern="hhmm" />
+                        </p:inputText>
+                    </pm:field>  
+
+
+                    <p:spacer height="10em" />
+
+                    <pm:field>
+                        <p:outputLabel for="sessionType" value="#{configMapController.getKey('CreateSessionHistoryLabel_sessionType')}" />
+                        <p:selectOneMenu id="sessionType" value="#{sessionHistoryController.selected.sessionTypesId}" label="#{configMapController.getKey('CreateSessionHistoryLabel_sessionType')}"  converter="#{sessTypesConverter}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionHistoryRequiredMessage_sessionType')}">
+                            <f:selectItems value="#{sessionTypesController.itemsAvailableSelectOne}" />
+                        </p:selectOneMenu>
+                    </pm:field>
+
+                    <p:spacer height="10em" />
+
+                    <pm:field>
+                        <p:outputLabel for="sessionType" value="#{configMapController.getKey('CreateSessionHistoryLabel_trainer')}" />
+                        <p:selectCheckboxMenu id="trainer" filter="true" filterMatchMode="startsWith"  value="#{sessionHistoryController.trainers}" converter="#{custConverter}" label="#{configMapController.getKey('CreateSessionHistoryLabel_trainer')}"  >
+                            <f:selectItems value="#{sessionHistoryController.activeTrainers}" var="cust" itemLabel="#{cust.firstname} #{cust.lastname}" itemValue="#{cust}"/>
+                        </p:selectCheckboxMenu>
+                    </pm:field>
+
+                    <p:spacer height="10em" />
+                    <pm:field>
+                        <p:outputLabel for="comments" value="#{configMapController.getKey('CreateSessionHistoryLabel_comments')}" />
+                        <p:inputTextarea id="comments" value="#{sessionHistoryController.selected.comments}"  />
+                    </pm:field>
+                    <p:spacer height="10em" />
+                    <pm:field>
+                        <p:outputLabel for="scroll" value="#{configMapController.getKey('CreateSessionHistoryLabel_picker')}" />
+                        <p:selectCheckboxMenu  id="scroll" value="#{sessionHistoryController.attendingCustomers}"  converter="#{custConverter}" label="#{configMapController.getKey('CreateSessionHistoryLabel_picker')}">  
+                            <f:selectItems value="#{sessionHistoryController.activeCustomers}" var="cust"  itemLabel="#{cust.firstname} #{cust.lastname}" itemValue="#{cust}" />  
+                        </p:selectCheckboxMenu>
+                    </pm:field>
+                    <p:spacer height="10em" />
+                    <p:spacer height="10em" />
+                    <p:commandButton   ajax="false"   action="#{sessionHistoryController.createMobile}" value="#{configMapController.getKey('CreateSessionHistorySaveLink')}" />
+                </h:form>
+             
+            </pm:content>
+
+        </pm:page>
+
+    </h:body>
+</html>

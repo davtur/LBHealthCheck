@@ -1,71 +1,23 @@
-<f:view xmlns="http://www.w3.org/1999/xhtml"
-        xmlns:f="http://java.sun.com/jsf/core"
-        xmlns:h="http://java.sun.com/jsf/html"
-        xmlns:ui="http://java.sun.com/jsf/facelets"
-        xmlns:p="http://primefaces.org/ui"
-        xmlns:pm="http://primefaces.org/mobile"
-        contentType="text/html"
-        renderKitId="PRIMEFACES_MOBILE">
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:pm="http://primefaces.org/mobile">
 
-    <pm:page title="Customer Notes" >
-        <f:facet name="postinit">                        
-            <h:outputStylesheet library="primefaces-mobile" name="calendar/calendar.css"  />
+    <f:view renderKitId="PRIMEFACES_MOBILE" />
 
-            <h:outputScript library="primefaces-mobile" name="calendar/calendar.js" />            
 
-            <script type="text/javascript">
-                (function($) {
-                    $.mobiscroll.i18n['en-UK'] = $.extend($.mobiscroll.i18n['en-UK'], {
-                        // Core
-                        setText: 'Set',
-                        cancelText: 'Cancel',
-                        // Datetime component
-                        dateFormat: 'dd/mm/yy',
-                        dateOrder: 'ddmmyy',
-                        dayNames: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
-                        dayNamesShort: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-                        dayText: 'Day',
-                        hourText: 'Hours',
-                        minuteText: 'Minutes',
-                        monthNames: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
-                        monthNamesShort: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-                        monthText: 'Month',
-                        secText: 'Seconds',
-                        timeFormat: 'hh:ii A',
-                        timeWheels: 'hhiiA',
-                        yearText: 'Year',
-                        nowText: 'Now',
-                        // Measurement components
-                        wholeText: 'Whole',
-                        fractionText: 'Fraction',
-                        unitText: 'Unit',
-                        // Time / Timespan component
-                        labels: ['Years', 'Months', 'Days', 'Hours', 'Minutes', 'Seconds', ''],
-                        labelsShort: ['Yrs', 'Mths', 'Days', 'Hrs', 'Mins', 'Secs', ''],
-                        // Timer component
-                        startText: 'Start',
-                        stopText: 'Stop',
-                        resetText: 'Reset',
-                        lapText: 'Lap',
-                        hideText: 'Hide'
-                    });
-                })(jQuery);
-            </script>
-        </f:facet>   
+    <h:head>
+  
+    </h:head>
 
-        <style>
-            .th-groups th {
-                text-align: center;
-                background-color: rgba(0,0,0,.1);
-                border-right: 1px solid #fff;
-            }
-            .ui-li-custom .ui-li-count {
-                right: 10px !important;
-            }                
-        </style>        
-        <!-- Main View  -->
-        <pm:view id="editNotes" swatch="b" > 
-            <pm:header title="Edit Notes">
+    <h:body>
+
+          <!-- Main View  -->
+           <pm:page id="editNotes"  title="Customer Notes" >
+
+            <pm:header title="Edit Notes"  swatch="b" >
                 
                 <f:facet name="left">
                     <h:form id="notesForm2">  
@@ -78,7 +30,8 @@
                 <p:outputPanel >
                     <h:form id="notesForm">  
                         <p:growl/>
-                        <p:dataList    value="#{notesController.items}" var="notes">
+                        <p:dataList    value="#{sessionHistoryController.activeCustomers}" var="notes">
+                            <f:attribute name="filter" value="true" />
                             <p:column>
                                 <p:commandLink action="/trainer/sessionHistory/CreateCustomerNotes?faces-redirect=true" ajax="false" >
                                     <h:outputText value="#{notes.createTimestamp}">
@@ -94,6 +47,7 @@
                     </h:form>
                 </p:outputPanel>
             </pm:content>
-        </pm:view>
+     
     </pm:page>
-</f:view>
+</h:body>
+</html>

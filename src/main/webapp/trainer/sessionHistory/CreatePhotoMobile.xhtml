@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:pm="http://primefaces.org/mobile">
+
+    <f:view renderKitId="PRIMEFACES_MOBILE" />
+
+
+    <h:head>
+
+    </h:head>
+
+    <h:body>
+
+
+        <!-- Main View  -->
+        <pm:page id="photos"  title="Upload Photos" >
+
+            <pm:header  swatch="b" title="Upload Photo">
+
+                <f:facet name="left">
+                    <h:form>
+                        <p:commandButton value="Back" style="width:100px" icon="back" action="/mobileMenu?faces-redirect=true" ajax="false"/>
+                    </h:form>
+                </f:facet>
+            </pm:header>  
+            <pm:content >            
+                <p:growl id="growl"/>
+                <h:form id="photoCreate" enctype="multipart/form-data">
+                    <p:outputLabel value="#{configMapController.getKey('CreateCustomerImagesLabel_customerId')}" for="customerId" />
+                    <p:selectOneMenu  valueChangeListener="#{customerImagesController.handleCustomerChange}" id="customerId" converter="customerConverter" value="#{customerImagesController.selected.customerId}"  required="true" requiredMessage="#{configMapController.getKey('CreateCustomerImagesRequiredMessage_customerId')}">
+                        <f:selectItems  value="#{customersController.customersAvailableSelectOneObject}"/>                              
+                    </p:selectOneMenu>
+                    <h:outputLabel value="#{configMapController.getKey('CreateCustomerImagesLabel_datetaken')}" for="datetaken" />
+                    <p:calendar id="datetaken" value="#{customerImagesController.selected.datetaken}" >
+
+
+                        <p:ajax event="dateSelect" listener="#{customerImagesController.handleDateSelect}" update=":photos:growl"  />
+
+                    </p:calendar>
+                </h:form>
+                <h:form id="photoCreate2" enctype="multipart/form-data">
+                    <p:fileUpload  id="uploader" fileLimitMessage="The size of the picture is too big! ( > 10MB )" mode="advanced" fileUploadListener="#{customerImagesController.handleFileUpload}" auto="true" update=":photos:photoCreate:datetaken :photos:growl" allowTypes="/(\.|\/)(gif|jpe?g|png)$/" sizeLimit="10000000" required="true"  requiredMessage="You need to upload a photo."/>
+                </h:form>
+
+                <h:form>
+                    <h:commandButton    actionListener="#{customerImagesController.createFromMobile}" value="#{configMapController.getKey('CreateCustomerImagesSaveLink')}" />
+
+                </h:form>
+            </pm:content>
+        </pm:page>
+    </h:body>
+</html>

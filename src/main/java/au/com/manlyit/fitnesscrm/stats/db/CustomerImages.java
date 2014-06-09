@@ -102,6 +102,9 @@ public class CustomerImages implements Serializable {
         return fd;
     }
     public Date getDatetaken() {
+        if(datetaken == null){
+            datetaken = new Date();
+        }
         return datetaken;
     }
 

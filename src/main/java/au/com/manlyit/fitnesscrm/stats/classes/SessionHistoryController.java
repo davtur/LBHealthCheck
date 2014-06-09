@@ -11,6 +11,7 @@ import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import au.com.manlyit.fitnesscrm.stats.db.Participants;
 import au.com.manlyit.fitnesscrm.stats.db.SessionTrainers;
 import java.awt.event.ActionEvent;
+import java.io.IOException;
 
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
@@ -28,10 +29,12 @@ import javax.faces.application.FacesMessage;
 import javax.inject.Named;
 import javax.enterprise.context.SessionScoped;
 import javax.faces.component.UIComponent;
+import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.faces.convert.Converter;
 import javax.faces.convert.FacesConverter;
 import javax.faces.model.SelectItem;
+import javax.servlet.http.HttpServletRequest;
 import org.primefaces.event.SelectEvent;
 import org.primefaces.model.DualListModel;
 import org.primefaces.model.SelectableDataModel;
@@ -43,7 +46,7 @@ public class SessionHistoryController implements Serializable {
     private static final Logger logger = Logger.getLogger(SessionHistoryController.class.getName());
     private SessionHistory current;
     private SessionHistory selectedForDeletion;
-
+    private Date selectedSessionTime;
     private PfSelectableDataModel<SessionHistory> items = null;
     private PfSelectableDataModel<SessionHistory> customerItems = null;
     private PfSelectableDataModel<SessionHistory> participantItems = null;
@@ -284,8 +287,15 @@ public class SessionHistoryController implements Serializable {
 
     public String prepareCreateMobileReturnCreate() {
         createNewSessionHistory();
-
-        return "/trainer/sessionHistory/CreateSessionMobile";
+        FacesContext context = FacesContext.getCurrentInstance();
+        ExternalContext ec = context.getExternalContext();
+        HttpServletRequest request = (HttpServletRequest) context.getExternalContext().getRequest();
+        try {
+            ec.redirect(request.getContextPath() + "/trainer/sessionHistory/CreateSessionMobile.xhtml");
+        } catch (IOException ex) {
+            Logger.getLogger(SessionHistoryController.class.getName()).log(Level.SEVERE, "prepareCreateMobileReturnCreate", ex);
+        }
+        return "pm:sessions";
     }
 
     public String createMobile() {
@@ -570,6 +580,10 @@ public class SessionHistoryController implements Serializable {
     /**
      * @return the activeCustomers
      */
+    public Collection<Customers> getActiveTrainers() {
+        return ejbCustomerFacade.findAllByGroup("TRAINER", true);
+    }
+
     public Collection<Customers> getActiveCustomers() {
 
         if (activeCustomers == null) {
@@ -693,6 +707,23 @@ public class SessionHistoryController implements Serializable {
      */
     public void setParticipantFilteredItems(List<SessionHistory> participantFilteredItems) {
         this.participantFilteredItems = participantFilteredItems;
+    }
+
+    /**
+     * @return the selectedSessionTime
+     */
+    public Date getSelectedSessionTime() {
+        if (selectedSessionTime == null) {
+            selectedSessionTime = new Date();
+        }
+        return selectedSessionTime;
+    }
+
+    /**
+     * @param selectedSessionTime the selectedSessionTime to set
+     */
+    public void setSelectedSessionTime(Date selectedSessionTime) {
+        this.selectedSessionTime = selectedSessionTime;
     }
 
     @FacesConverter(forClass = SessionHistory.class)

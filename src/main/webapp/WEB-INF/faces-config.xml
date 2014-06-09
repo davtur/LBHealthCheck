@@ -9,6 +9,11 @@
     <application>
         <!--<view-handler>au.com.manlyit.fitnesscrm.stats.classes.util.UserAgentSwitchViewHandlerWrapper</view-handler>-->
     </application>
+    <application>
+        <navigation-handler>
+            org.primefaces.mobile.application.MobileNavigationHandler
+        </navigation-handler>
+    </application>
     <validator>
         <validator-id>au.com.manlyit.fitnesscrm.stats.classes.util.EmailValidator</validator-id>
         <validator-class>au.com.manlyit.fitnesscrm.stats.classes.util.EmailValidator</validator-class>
@@ -32,11 +37,11 @@
         </exception-handler-factory>
     </factory> 
     
-    <render-kit>
+ <!--   <render-kit>
         <renderer>
             <component-family>org.primefaces.component</component-family>
             <renderer-type>org.primefaces.component.FileUploadRenderer</renderer-type>
             <renderer-class>au.com.manlyit.fitnesscrm.stats.classes.util.Primefaces4BugfixFileUploadRenderer</renderer-class>
         </renderer>
-    </render-kit>
+    </render-kit>-->
 </faces-config>

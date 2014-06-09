@@ -81,6 +81,7 @@ public class EziDebitPaymentGateway implements Serializable {
     private Integer[] daysInMonth;
     private boolean paymentFirstWeekOfMonth = false;
     private boolean applyToAllFuturePayments = true;
+    private boolean refreshIFrames = false;
     private boolean paymentSecondWeekOfMonth = false;
     private boolean paymentThirdWeekOfMonth = false;
     private boolean paymentFourthWeekOfMonth = false;
@@ -509,6 +510,20 @@ public class EziDebitPaymentGateway implements Serializable {
         this.testAjaxCounter = testAjaxCounter;
     }
 
+    /**
+     * @return the refreshIFrames
+     */
+    public boolean isRefreshIFrames() {
+        return refreshIFrames;
+    }
+
+    /**
+     * @param refreshIFrames the refreshIFrames to set
+     */
+    public void setRefreshIFrames(boolean refreshIFrames) {
+        this.refreshIFrames = refreshIFrames;
+    }
+
     private class eziDebitThreadFactory implements ThreadFactory {
 
         @Override
@@ -643,7 +658,7 @@ public class EziDebitPaymentGateway implements Serializable {
        // String compId =   event.getTab().getClientId();
         //logger.log(Level.INFO, "Request Context update of {0} actioned",compId);
         //RequestContext.getCurrentInstance().update(compId);
-        
+
         String tabName = "unknown";
         if (tb != null) {
             tabName = tb.getTitle();
@@ -794,12 +809,12 @@ public class EziDebitPaymentGateway implements Serializable {
                 setAsyncOperationRunning(true);
             }
             checkIfAsyncJobsHaveFinishedAndUpdate();
-        } 
+        }
         k = futureMap.size(sessionId);
         if (k == 0) {
             setAsyncOperationRunning(false);
             logger.log(Level.INFO, "Asking request context to update components.");
-       
+
             //ArrayList<String> componentsToUpdate = new ArrayList<>();
             //componentsToUpdate.add(":tv:paymentsForm:progressBarPanel");
             //componentsToUpdate.add("paymentsForm:mainPanel");
@@ -807,15 +822,21 @@ public class EziDebitPaymentGateway implements Serializable {
             //componentsToUpdate.add("paymentsTablePanel");
             //componentsToUpdate.add("scheduledPaymentsTablePanel");
             //componentsToUpdate.add("tv:paymentsForm");
-            RequestContext.getCurrentInstance().update("paymentsForm");
             // requestContext.execute("PF('paymentPoller').stop();");
             //pushComponentUpdateBean.sendMessage("Notification", "Payment Gateway Request Completed");
-          logger.log(Level.INFO, "All asych jobs have finished.");
+            logger.log(Level.INFO, "All asych jobs have finished.");
         }
+
+        if (isRefreshIFrames() == true) {
+            RequestContext.getCurrentInstance().update("iFrameForm");
+            logger.log(Level.INFO, "Asking Request Context to update IFrame forms.");
+            setRefreshIFrames(false);
+        }
+        RequestContext.getCurrentInstance().update("paymentsForm");
     }
-    
+
     @PreDestroy
-    private void cleanUp(){
+    private void cleanUp() {
         futureMap.cancelFutures(sessionId);
     }
     /* private void cancelAllAsyncJobs() {
@@ -829,6 +850,7 @@ public class EziDebitPaymentGateway implements Serializable {
      }
      futureMap.clear();
      }*/
+
     private boolean futureMapContainsKey(String key) {
         return futureMap.containsKey(sessionId, key);
     }
@@ -1311,6 +1333,7 @@ public class EziDebitPaymentGateway implements Serializable {
      */
     public void setSelectedCustomer(Customers selectedCustomer) {
         this.selectedCustomer = selectedCustomer;
+        refreshIFrames = true;
         futureMap.cancelFutures(sessionId);
         startAsynchJob("GetCustomerDetails", paymentBean.getCustomerDetails(selectedCustomer, getDigitalKey()));
         getPayments();

@@ -179,7 +179,7 @@ public class LoginBean implements Serializable {
         return false;
     }
 
-    public void login(ActionEvent event) {
+    public void login() {
         FacesContext context = FacesContext.getCurrentInstance();
         ExternalContext ec = context.getExternalContext();
         HttpServletRequest request = (HttpServletRequest) context.getExternalContext().getRequest();
@@ -201,7 +201,7 @@ public class LoginBean implements Serializable {
             if (mobileDevice(request)) {
                 httpSession.setAttribute("MOBILE_DEVICE", "TRUE");
                 logger.log(Level.INFO, "Mobile Device user agent detected. Redirecting to the mobile landing page.");
-                landingPage = request.getContextPath() + getValueFromKey("facebook.redirect.mobilelandingpage");
+                landingPage =  getValueFromKey("facebook.redirect.mobilelandingpage");
             } else {
                 landingPage = getValueFromKey("facebook.redirect.landingpage");
             }
