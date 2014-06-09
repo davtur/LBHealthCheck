@@ -18,7 +18,7 @@
         <!-- Main View  -->
         <pm:page id="sessions"  title="Training Session" >
 
-            <pm:header  swatch="b" title="Pure Fitness Mobile">
+            <pm:header  swatch="b" title="Log Training Session">
 
                 <f:facet name="left"><h:form><p:commandButton value="Back" style="width:100px" icon="back" action="/mobileMenu?faces-redirect=true" ajax="false"/></h:form></f:facet>
             </pm:header>  
@@ -32,14 +32,19 @@
 
                     <pm:field>
                         <p:outputLabel for="sessiondate" value="#{configMapController.getKey('CreateSessionHistoryLabel_sessiondate')}" />
-                        <p:calendar id="sessiondate" value="#{sessionHistoryController.selected.sessiondate}"  pattern="dd/MM/yyyy" mode="inline"/>
+                        <p:calendar id="sessiondate" value="#{sessionHistoryController.selected.sessiondate}"  pattern="dd/MM/yyyy" >
+                           
+                        </p:calendar>
                     </pm:field>  
                     <pm:field>
-                        <p:outputLabel for="sessiontime" value="Session Start Time:" />
-                        <p:inputText id="sessiontime" value="#{sessionHistoryController.selectedSessionTime}" >
-                            <f:convertDateTime  pattern="hhmm" />
-                        </p:inputText>
+
+                        <h:outputLabel for="ajaxSpinner" value="Hour: " />
+                        <pm:inputSlider id="ajaxSpinner" minValue="0" maxValue="24" valueChangeListener="#{sessionHistoryController.hourSpinnerChange}"  value="#{sessionHistoryController.hourSpinner}"/>
                     </pm:field>  
+                    <pm:field>   
+                        <h:outputLabel for="ajaxSpinner2" value="Minute: " />
+                        <pm:inputSlider id="ajaxSpinner2" minValue="0" maxValue="60"  valueChangeListener="#{sessionHistoryController.minuteSpinnerChange}"  step="15" value="#{sessionHistoryController.minuteSpinner}"/>
+                  </pm:field>  
 
 
                     <p:spacer height="10em" />
