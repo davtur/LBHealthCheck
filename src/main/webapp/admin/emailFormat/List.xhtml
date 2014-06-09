@@ -22,7 +22,7 @@
                         <p:inputText id="id" value="#{emailFormatController.selected.id}" title="#{configMapController.getKey('CreateEmailFormatTitle_id')}" required="true" requiredMessage="#{configMapController.getKey('CreateEmailFormatRequiredMessage_id')}"/>
                         <p:outputLabel value="#{configMapController.getKey('CreateEmailFormatLabel_emailFormat')}" for="emailFormat" />
                         <p:inputText id="emailFormat" value="#{emailFormatController.selected.emailFormat}" title="#{configMapController.getKey('CreateEmailFormatTitle_emailFormat')}" required="true" requiredMessage="#{configMapController.getKey('CreateEmailFormatRequiredMessage_emailFormat')}"/>
-                        <p:commandButton oncomplete="EmailFormatCreateDialogue.hide();emailFormatControllerTable.filter()" actionListener="#{emailFormatController.createDialogue}" value="#{configMapController.getKey('CreateEmailFormatSaveLink')}" update=":growl"/>                
+                        <p:commandButton oncomplete="PF('EmailFormatCreateDialogue').hide();PF('emailFormatControllerTable').filter()" actionListener="#{emailFormatController.createDialogue}" value="#{configMapController.getKey('CreateEmailFormatSaveLink')}" update=":growl"/>                
                     </p:panelGrid>
                 </p:confirmDialog>
             </h:form>
@@ -33,7 +33,7 @@
 
             <h:form id="EmailFormatlistForm1">
                 <h:panelGroup >
-                    <p:commandButton id="showDialogButton"  value="#{configMapController.getKey('ListEmailFormatCreateLink')}" onclick="EmailFormatCreateDialogue.show()" type="button"/> 
+                    <p:commandButton id="showDialogButton"  value="#{configMapController.getKey('ListEmailFormatCreateLink')}" onclick="PF('EmailFormatCreateDialogue').show()" type="button"/> 
 
                 </h:panelGroup>
                 <h:outputText escape="false" value="#{configMapController.getKey('ListEmailFormatEmpty')}" rendered="#{emailFormatController.items.rowCount == 0}"/>
@@ -42,11 +42,11 @@
                         <f:facet name="header">
                             <p:outputPanel>
                                 <h:outputText value="Search all fields:" />
-                                <h:inputText id="globalFilter" onkeyup="emailFormatControllerTable.filter()" />
+                                <h:inputText id="globalFilter" onkeyup="PF('emailFormatControllerTable').filter()" />
                             </p:outputPanel>
                         </f:facet>
-                        <p:ajax event="rowEdit" listener="#{emailFormatController.onEdit}" update=":growl" oncomplete="emailFormatControllerTable.filter()" />  
-                        <p:ajax event="rowEditCancel" listener="#{emailFormatController.onCancel}" update=":growl"  oncomplete="emailFormatControllerTable.filter()" />  
+                        <p:ajax event="rowEdit" listener="#{emailFormatController.onEdit}" update=":growl" oncomplete="PF('emailFormatControllerTable').filter()" />  
+                        <p:ajax event="rowEditCancel" listener="#{emailFormatController.onCancel}" update=":growl"   />  
 
                         <p:column sortBy="#{item.id}" filterBy="#{item.id}" headerText="#{configMapController.getKey('ListEmailFormatTitle_id')}"   >
                             <p:cellEditor> 
@@ -77,7 +77,7 @@
                         </p:column>  
 
                         <p:column>
-                            <p:commandButton rendered="#{emailFormatController.isUserInRole('ADMIN')}"  oncomplete="emailFormatControllerTable.filter()" update=":growl"  value="#{configMapController.getKey('ListEmailFormatDestroyLink')}">
+                            <p:commandButton rendered="#{emailFormatController.isUserInRole('ADMIN')}"  oncomplete="PF('emailFormatControllerTable').filter()" update=":growl"  value="#{configMapController.getKey('ListEmailFormatDestroyLink')}">
                                 <f:setPropertyActionListener value="#{item}" target="#{emailFormatController.selectedForDeletion}" />
                             </p:commandButton>                        
 

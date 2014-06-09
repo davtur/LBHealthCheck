@@ -22,7 +22,7 @@
                         <p:inputText id="id" value="#{customerStateController.selected.id}" title="#{configMapController.getKey('CreateCustomerStateTitle_id')}" required="true" requiredMessage="#{configMapController.getKey('CreateCustomerStateRequiredMessage_id')}"/>
                         <p:outputLabel value="#{configMapController.getKey('CreateCustomerStateLabel_customerState')}" for="customerState" />
                         <p:inputText id="customerState" value="#{customerStateController.selected.customerState}" title="#{configMapController.getKey('CreateCustomerStateTitle_customerState')}" required="true" requiredMessage="#{configMapController.getKey('CreateCustomerStateRequiredMessage_customerState')}"/>
-                        <p:commandButton oncomplete="CustomerStateCreateDialogue.hide();customerStateControllerTable.filter()" actionListener="#{customerStateController.createDialogue}" value="#{configMapController.getKey('CreateCustomerStateSaveLink')}" update=":growl"/>                
+                        <p:commandButton oncomplete="PF('CustomerStateCreateDialogue').hide();PF('customerStateControllerTable').filter()" actionListener="#{customerStateController.createDialogue}" value="#{configMapController.getKey('CreateCustomerStateSaveLink')}" update=":growl"/>                
                     </p:panelGrid>
                 </p:confirmDialog>
             </h:form>
@@ -33,7 +33,7 @@
 
             <h:form id="CustomerStatelistForm1">
                 <h:panelGroup >
-                    <p:commandButton id="showDialogButton"  value="#{configMapController.getKey('ListCustomerStateCreateLink')}" onclick="CustomerStateCreateDialogue.show()" type="button"/> 
+                    <p:commandButton id="showDialogButton"  value="#{configMapController.getKey('ListCustomerStateCreateLink')}" onclick="PF('CustomerStateCreateDialogue').show()" type="button"/> 
 
                 </h:panelGroup>
                 <h:outputText escape="false" value="#{configMapController.getKey('ListCustomerStateEmpty')}" rendered="#{customerStateController.items.rowCount == 0}"/>
@@ -42,11 +42,11 @@
                         <f:facet name="header">
                             <p:outputPanel>
                                 <h:outputText value="Search all fields:" />
-                                <h:inputText id="globalFilter" onkeyup="customerStateControllerTable.filter()" />
+                                <h:inputText id="globalFilter" onkeyup="PF('customerStateControllerTable').filter()" />
                             </p:outputPanel>
                         </f:facet>
-                        <p:ajax event="rowEdit" listener="#{customerStateController.onEdit}" update=":growl" oncomplete="customerStateControllerTable.filter()" />  
-                        <p:ajax event="rowEditCancel" listener="#{customerStateController.onCancel}" update=":growl"  oncomplete="customerStateControllerTable.filter()" />  
+                        <p:ajax event="rowEdit" listener="#{customerStateController.onEdit}" update=":growl" oncomplete="PF('customerStateControllerTable').filter()" />  
+                        <p:ajax event="rowEditCancel" listener="#{customerStateController.onCancel}" update=":growl"  />  
 
                         <p:column sortBy="#{item.id}" filterBy="#{item.id}" headerText="#{configMapController.getKey('ListCustomerStateTitle_id')}"   >
                             <p:cellEditor> 
@@ -77,7 +77,7 @@
                         </p:column>  
 
                         <p:column>
-                            <p:commandButton rendered="#{customerStateController.isUserInRole('ADMIN')}"  oncomplete="customerStateControllerTable.filter()" update=":growl"  value="#{configMapController.getKey('ListCustomerStateDestroyLink')}">
+                            <p:commandButton rendered="#{customerStateController.isUserInRole('ADMIN')}"  oncomplete="PF('customerStateControllerTable').filter()" update=":growl"  value="#{configMapController.getKey('ListCustomerStateDestroyLink')}">
                                 <f:setPropertyActionListener value="#{item}" target="#{customerStateController.selectedForDeletion}" />
                             </p:commandButton>                        
 

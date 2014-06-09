@@ -35,7 +35,7 @@
 
             <h:form id="InvoiceLineTypelistForm1">
                 <h:panelGroup >
-                    <p:commandButton id="showDialogButton"  value="#{configMapController.getKey('ListInvoiceLineTypeCreateLink')}" onclick="InvoiceLineTypeCreateDialogue.show()" type="button"/> 
+                    <p:commandButton id="showDialogButton"  value="#{configMapController.getKey('ListInvoiceLineTypeCreateLink')}" onclick="PF('InvoiceLineTypeCreateDialogue').show()" type="button"/> 
 
                 </h:panelGroup>
                 <h:outputText escape="false" value="#{configMapController.getKey('ListInvoiceLineTypeEmpty')}" rendered="#{invoiceLineTypeController.items.rowCount == 0}"/>
@@ -44,11 +44,11 @@
                         <f:facet name="header">
                             <p:outputPanel>
                                 <h:outputText value="Search all fields:" />
-                                <h:inputText id="globalFilter" onkeyup="invoiceLineTypeControllerTable.filter()" />
+                                <h:inputText id="globalFilter" onkeyup="PF('invoiceLineTypeControllerTable').filter()" />
                             </p:outputPanel>
                         </f:facet>
-                        <p:ajax event="rowEdit" listener="#{invoiceLineTypeController.onEdit}" update=":growl" oncomplete="invoiceLineTypeControllerTable.filter()" />  
-                        <p:ajax event="rowEditCancel" listener="#{invoiceLineTypeController.onCancel}" update=":growl"  oncomplete="invoiceLineTypeControllerTable.filter()" />  
+                        <p:ajax event="rowEdit" listener="#{invoiceLineTypeController.onEdit}" update=":growl" oncomplete="PF('invoiceLineTypeControllerTable').filter()" />  
+                        <p:ajax event="rowEditCancel" listener="#{invoiceLineTypeController.onCancel}" update=":growl"  oncomplete="PF('invoiceLineTypeControllerTable').filter()" />  
 
                         <p:column sortBy="#{item.id}" filterBy="#{item.id}" headerText="#{configMapController.getKey('ListInvoiceLineTypeTitle_id')}"   >
                             <p:cellEditor> 

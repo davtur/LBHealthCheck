@@ -49,7 +49,7 @@
                             <f:selectItems value="#{invoiceLineTypeController.itemsAvailableSelectOne}"/>
                             <p:ajax   update=":formInvoiceLineCreate1"  />
                         </p:selectOneMenu>
-                        <p:commandButton oncomplete="InvoiceLineCreateDialogue.hide();invoiceLineControllerTable.filter()" actionListener="#{invoiceLineController.createDialogue}" value="#{configMapController.getKey('CreateInvoiceLineSaveLink')}" update=":growl"/>                
+                        <p:commandButton oncomplete="PF('InvoiceLineCreateDialogue').hide();PF('invoiceLineControllerTable').filter()" actionListener="#{invoiceLineController.createDialogue}" value="#{configMapController.getKey('CreateInvoiceLineSaveLink')}" update=":growl"/>                
                     </p:panelGrid>
                 </p:confirmDialog>
             </h:form>
@@ -60,7 +60,7 @@
 
             <h:form id="InvoiceLinelistForm1">
                 <h:panelGroup >
-                    <p:commandButton id="showDialogButton"  value="#{configMapController.getKey('ListInvoiceLineCreateLink')}" onclick="InvoiceLineCreateDialogue.show()" type="button"/> 
+                    <p:commandButton id="showDialogButton"  value="#{configMapController.getKey('ListInvoiceLineCreateLink')}" onclick="PF('InvoiceLineCreateDialogue').show()" type="button"/> 
 
                 </h:panelGroup>
                 <h:outputText escape="false" value="#{configMapController.getKey('ListInvoiceLineEmpty')}" rendered="#{invoiceLineController.items.rowCount == 0}"/>
@@ -69,11 +69,11 @@
                         <f:facet name="header">
                             <p:outputPanel>
                                 <h:outputText value="Search all fields:" />
-                                <h:inputText id="globalFilter" onkeyup="invoiceLineControllerTable.filter()" />
+                                <h:inputText id="globalFilter" onkeyup="PF('invoiceLineControllerTable').filter()" />
                             </p:outputPanel>
                         </f:facet>
-                        <p:ajax event="rowEdit" listener="#{invoiceLineController.onEdit}" update=":growl" oncomplete="invoiceLineControllerTable.filter()" />  
-                        <p:ajax event="rowEditCancel" listener="#{invoiceLineController.onCancel}" update=":growl"  oncomplete="invoiceLineControllerTable.filter()" />  
+                        <p:ajax event="rowEdit" listener="#{invoiceLineController.onEdit}" update=":growl" oncomplete="PF('invoiceLineControllerTable').filter()" />  
+                        <p:ajax event="rowEditCancel" listener="#{invoiceLineController.onCancel}" update=":growl" />  
 
                         <p:column sortBy="#{item.id}" filterBy="#{item.id}" headerText="#{configMapController.getKey('ListInvoiceLineTitle_id')}"   >
                             <p:cellEditor> 

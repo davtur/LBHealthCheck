@@ -22,7 +22,7 @@
                         <f:facet name="header">
                             <p:outputPanel>
                                 <h:outputText value="Search all fields:" />
-                                <h:inputText id="globalFilter" onkeyup="photosTable.filter()" />
+                                <h:inputText id="globalFilter" onkeyup="PF('photosTable').filter()" />
                             </p:outputPanel>
                         </f:facet>
 
@@ -71,7 +71,7 @@
                             </p:commandButton>
 
                             <h:outputText value=" "/>
-                            <p:commandButton rendered="#{customerImagesController.isUserInRole('ADMIN')}" update=":listCustomerImagesForm1" oncomplete="photosTable.filter()" value="#{configMapController.getKey('ListCustomerImagesDestroyLink')}">
+                            <p:commandButton rendered="#{customerImagesController.isUserInRole('ADMIN')}" update="@form"  value="#{configMapController.getKey('ListCustomerImagesDestroyLink')}">
                                 <f:setPropertyActionListener value="#{item}" target="#{customerImagesController.selectedForDeletion}" />
                             </p:commandButton>
                         </p:column>

@@ -49,8 +49,8 @@
                         </p:dataGrid>
 
                     </p:panel>
-                    <p:commandButton actionListener="#{statsTakenController.update}" value="#{configMapController.getKey('EditStatsTakenSaveLink')}"  update="editDisplay,:StatsTakenListForm:datalist, :growl" oncomplete="handleSubmit(args,'StatsTakenEditDialog');statsTakenControllerTable.filter()"/>
-                     <p:commandButton  value="Cancel" oncomplete="StatsTakenEditDialog.hide()"/>
+                    <p:commandButton actionListener="#{statsTakenController.update}" value="#{configMapController.getKey('EditStatsTakenSaveLink')}"  update="editDisplay,:StatsTakenListForm:datalist, :growl" oncomplete="handleSubmit(args,'StatsTakenEditDialog');PF('statsTakenControllerTable').filter()"/>
+                     <p:commandButton  value="Cancel" oncomplete="PF('StatsTakenEditDialog').hide()"/>
 
                 </h:panelGroup>
             </h:form>

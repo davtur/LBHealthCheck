@@ -386,8 +386,8 @@
                                         <h:inputText id="globalFilter2" onkeyup="PF('notesControllerTable').filter()" />
                                     </p:outputPanel>
                                 </f:facet>
-                                <p:ajax event="rowEdit" listener="#{customersController.onNotesEdit}" update=":growl" oncomplete="notesControllerTable.filter()" />  
-                                <p:ajax event="rowEditCancel" listener="#{customersController.onNotesCancel}" update=":growl"  oncomplete="notesControllerTable.filter()" />  
+                                <p:ajax event="rowEdit" listener="#{customersController.onNotesEdit}" update=":growl" oncomplete="PF('notesControllerTable').filter()" />  
+                                <p:ajax event="rowEditCancel" listener="#{customersController.onNotesCancel}" update=":growl"  oncomplete="PF('notesControllerTable').filter()" />  
 
                                 <p:column sortBy="#{item.createTimestamp}" filterBy="#{item.createTimestamp}" headerText="#{configMapController.getKey('ListNotesTitle_createTimestamp')}"   >
 

@@ -42,7 +42,7 @@
                                 <p:editor id="editor1" value="#{emailQueueController.selected.message}" widgetVar="editor" />  
 
                                 <h:panelGrid columns="2" style="margin-top:10px">  
-                                    <p:commandButton value="View" update="display" oncomplete="dlg.show()"  
+                                    <p:commandButton value="View" update="display" oncomplete="PF('dlg').show()"  
                                                      image="ui-icon ui-icon-disk" />  
                                     <p:commandButton type="button" value="Clear" onclick="editor.clear()"  
                                                      image="ui-icon ui-icon-close" />  

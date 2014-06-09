@@ -38,7 +38,7 @@
 
             <h:form id="QrtzCronTriggerslistForm1">
                 <h:panelGroup >
-                    <p:commandButton id="showDialogButton"  value="#{configMapController.getKey('ListQrtzCronTriggersCreateLink')}" onclick="QrtzCronTriggersCreateDialogue.show()" type="button"/> 
+                    <p:commandButton id="showDialogButton"  value="#{configMapController.getKey('ListQrtzCronTriggersCreateLink')}" onclick="PF('QrtzCronTriggersCreateDialogue').show()" type="button"/> 
 
                 </h:panelGroup>
                 <h:outputText escape="false" value="#{configMapController.getKey('ListQrtzCronTriggersEmpty')}" rendered="#{qrtzCronTriggersController.items.rowCount == 0}"/>
@@ -47,11 +47,11 @@
                         <f:facet name="header">
                             <p:outputPanel>
                                 <h:outputText value="Search all fields:" />
-                                <h:inputText id="globalFilter" onkeyup="qrtzCronTriggersControllerTable.filter()" />
+                                <h:inputText id="globalFilter" onkeyup="PF('qrtzCronTriggersControllerTable').filter()" />
                             </p:outputPanel>
                         </f:facet>
-                        <p:ajax event="rowEdit" listener="#{qrtzCronTriggersController.onEdit}" update=":growl" oncomplete="qrtzCronTriggersControllerTable.filter()" />  
-                        <p:ajax event="rowEditCancel" listener="#{qrtzCronTriggersController.onCancel}" update=":growl"  oncomplete="qrtzCronTriggersControllerTable.filter()" />  
+                        <p:ajax event="rowEdit" listener="#{qrtzCronTriggersController.onEdit}" update=":growl" oncomplete="PF('qrtzCronTriggersControllerTable').filter()" />  
+                        <p:ajax event="rowEditCancel" listener="#{qrtzCronTriggersController.onCancel}" update=":growl"  oncomplete="PF('qrtzCronTriggersControllerTable').filter()" />  
 
                         <p:column sortBy="#{item.cronExpression}" filterBy="#{item.cronExpression}" headerText="#{configMapController.getKey('ListQrtzCronTriggersTitle_cronExpression')}"   >
                             <p:cellEditor> 

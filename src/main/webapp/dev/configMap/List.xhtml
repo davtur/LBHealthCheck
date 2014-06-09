@@ -19,7 +19,7 @@
                         <p:inputText id="configkey" value="#{configMapController.selected.configkey}" title="#{configMapController.getKey('EditConfigMapTitle_configkey')}" required="true" requiredMessage="#{configMapController.getKey('EditConfigMapRequiredMessage_configkey')}"/>
                         <h:outputLabel value="#{configMapController.getKey('EditConfigMapLabel_configvalue')}" for="configvalue" />
                         <p:inputTextarea  rows="4" cols="30" id="configvalue" value="#{configMapController.selected.configvalue}" title="#{configMapController.getKey('EditConfigMapTitle_configvalue')}" required="true" requiredMessage="#{configMapController.getKey('EditConfigMapRequiredMessage_configvalue')}"/>
-                        <p:commandButton   id="confirm" value="Create" update=":growl" oncomplete="confirmation.hide();configMapControllerTable.filter()"   
+                        <p:commandButton   id="confirm" value="Create" update=":growl" oncomplete="PF('confirmation').hide();PF('configMapControllerTable').filter()"   
                                            actionListener="#{configMapController.createDialogue}" /> 
 
                     </h:panelGrid>
@@ -43,7 +43,7 @@
                             <h:outputLabel for="pwd2" value="Confirm Password : *" />  
                             <p:password id="pwd2" value="#{configMapController.password2}" label="Password 2" required="true"/>  
                         </h:panelGrid>  
-                        <p:commandButton   id="confirm2" value="Create" update="matchGrid :growl" oncomplete="confirmation2.hide();configMapControllerTable.filter()"  
+                        <p:commandButton   id="confirm2" value="Create" update="matchGrid :growl" oncomplete="PF('confirmation2').hide();PF('configMapControllerTable').filter()"  
                                          actionListener="#{configMapController.createPasswordDialogue}" /> 
 
                     </h:panelGrid>
@@ -60,8 +60,8 @@
             </h:form>
             <h:form id="listForm1">
                 <h:panelGroup >
-                    <p:commandButton id="showDialogButton" value="#{configMapController.getKey('ListConfigMapCreateButton')}" onclick="confirmation.show()" type="button"/>  
-                    <p:commandButton id="showDialogButton2" value="#{configMapController.getKey('ListConfigMapCreatePassButton')}" onclick="confirmation2.show()" type="button"/>  
+                    <p:commandButton id="showDialogButton" value="#{configMapController.getKey('ListConfigMapCreateButton')}" onclick="PF('confirmation').show()" type="button"/>  
+                    <p:commandButton id="showDialogButton2" value="#{configMapController.getKey('ListConfigMapCreatePassButton')}" onclick="PF('confirmation2').show()" type="button"/>  
 
                 </h:panelGroup>
  
@@ -71,11 +71,11 @@
                         <f:facet name="header">
                             <p:outputPanel>
                                 <h:outputText value="Search all fields:" />
-                                <p:inputText id="globalFilter" onkeyup="configMapControllerTable.filter()" />
+                                <p:inputText id="globalFilter" onkeyup="PF('configMapControllerTable').filter()" />
                             </p:outputPanel>
                         </f:facet>
-                        <p:ajax event="rowEdit" listener="#{configMapController.onEdit}" update=":growl" oncomplete="configMapControllerTable.filter()"/>  
-                        <p:ajax event="rowEditCancel" listener="#{configMapController.onCancel}" update=":growl" oncomplete="configMapControllerTable.filter()"/>  
+                        <p:ajax event="rowEdit" listener="#{configMapController.onEdit}" update=":growl" oncomplete="PF('configMapControllerTable').filter()"/>  
+                        <p:ajax event="rowEditCancel" listener="#{configMapController.onCancel}" update=":growl" />  
 
                         <p:column sortBy="#{item.id}" filterBy="#{item.id}" headerText="#{configMapController.getKey('ListConfigMapTitle_id')}"   >
                             <f:facet name="header">
@@ -115,7 +115,7 @@
                                      <f:setPropertyActionListener value="#{item}" target="#{configMapController.selected}" />
                                  </p:commandButton>                        
                                  <h:outputText value=" "/>-->
-                            <p:commandButton rendered="#{configMapController.isUserInRole('ADMIN')}"  oncomplete="configMapControllerTable.filter()" value="#{configMapController.getKey('ListConfigMapDestroyLink')}">
+                            <p:commandButton rendered="#{configMapController.isUserInRole('ADMIN')}"  update="@form" value="#{configMapController.getKey('ListConfigMapDestroyLink')}">
                                 <f:setPropertyActionListener value="#{item}" target="#{configMapController.selectedForDeletion}" />
                                
                             </p:commandButton>                        

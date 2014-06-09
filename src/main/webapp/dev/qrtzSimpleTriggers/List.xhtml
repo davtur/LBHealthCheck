@@ -40,7 +40,7 @@
 
             <h:form id="QrtzSimpleTriggerslistForm1">
                 <h:panelGroup >
-                    <p:commandButton id="showDialogButton"  value="#{configMapController.getKey('ListQrtzSimpleTriggersCreateLink')}" onclick="QrtzSimpleTriggersCreateDialogue.show()" type="button"/> 
+                    <p:commandButton id="showDialogButton"  value="#{configMapController.getKey('ListQrtzSimpleTriggersCreateLink')}" onclick="PF('QrtzSimpleTriggersCreateDialogue').show()" type="button"/> 
 
                 </h:panelGroup>
                 <h:outputText escape="false" value="#{configMapController.getKey('ListQrtzSimpleTriggersEmpty')}" rendered="#{qrtzSimpleTriggersController.items.rowCount == 0}"/>
@@ -49,11 +49,11 @@
                         <f:facet name="header">
                             <p:outputPanel>
                                 <h:outputText value="Search all fields:" />
-                                <h:inputText id="globalFilter" onkeyup="qrtzSimpleTriggersControllerTable.filter()" />
+                                <h:inputText id="globalFilter" onkeyup="PF('qrtzSimpleTriggersControllerTable').filter()" />
                             </p:outputPanel>
                         </f:facet>
-                        <p:ajax event="rowEdit" listener="#{qrtzSimpleTriggersController.onEdit}" update=":growl" oncomplete="qrtzSimpleTriggersControllerTable.filter()" />  
-                        <p:ajax event="rowEditCancel" listener="#{qrtzSimpleTriggersController.onCancel}" update=":growl"  oncomplete="qrtzSimpleTriggersControllerTable.filter()" />  
+                        <p:ajax event="rowEdit" listener="#{qrtzSimpleTriggersController.onEdit}" update=":growl" oncomplete="PF('qrtzSimpleTriggersControllerTable').filter()" />  
+                        <p:ajax event="rowEditCancel" listener="#{qrtzSimpleTriggersController.onCancel}" update=":growl"  oncomplete="PF('qrtzSimpleTriggersControllerTable').filter()" />  
 
                         <p:column sortBy="#{item.repeatCount}" filterBy="#{item.repeatCount}" headerText="#{configMapController.getKey('ListQrtzSimpleTriggersTitle_repeatCount')}"   >
                             <p:cellEditor> 

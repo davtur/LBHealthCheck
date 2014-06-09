@@ -50,9 +50,9 @@
                         </p:dataGrid>
 
                     </p:panel>
-                    <p:commandButton actionListener="#{statsTakenController.createDialogue}" value="#{configMapController.getKey('CreateStatsTakenSaveLink')}"  update="display,:StatsTakenListForm:datalist, :growl" oncomplete="handleSubmit(args,'StatsTakenCreateDialog');statsTakenControllerTable.filter()"/>
-                    <p:commandButton actionListener="#{statsTakenController.createAndReturnToList}" value="#{configMapController.getKey('CreateStatsTakenSaveAndReturnLink')}"  update="display,:StatsTakenListForm:datalist, :growl" oncomplete="handleSubmit(args,'StatsTakenCreateDialog');statsTakenControllerTable.filter()"/>
-                    <p:commandButton actionListener="#{statsTakenController.discard}" value="Discard" oncomplete="StatsTakenCreateDialog.hide()"/>
+                    <p:commandButton actionListener="#{statsTakenController.createDialogue}" value="#{configMapController.getKey('CreateStatsTakenSaveLink')}"  update="display,:StatsTakenListForm:datalist, :growl" oncomplete="handleSubmit(args,'StatsTakenCreateDialog');PF('statsTakenControllerTable').filter()"/>
+                    <p:commandButton actionListener="#{statsTakenController.createAndReturnToList}" value="#{configMapController.getKey('CreateStatsTakenSaveAndReturnLink')}"  update="display,:StatsTakenListForm:datalist, :growl" oncomplete="handleSubmit(args,'StatsTakenCreateDialog');PF('statsTakenControllerTable').filter()"/>
+                    <p:commandButton actionListener="#{statsTakenController.discard}" value="Discard" oncomplete="PF('StatsTakenCreateDialog').hide()"/>
 
                 </h:panelGroup>
             </h:form>

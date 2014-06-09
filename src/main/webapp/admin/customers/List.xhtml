@@ -355,7 +355,7 @@
                             <p:panelGrid columns="2">
                                 <p:outputLabel value="#{configMapController.getKey('CreateNotesLabel_note')}" for="note" />
                                 <p:inputTextarea rows="4" cols="30" id="note" value="#{notesController.selected.note}" title="#{configMapController.getKey('CreateNotesTitle_note')}" />
-                                <p:commandButton oncomplete="PF('NotesCreateDialogue').hide();notesControllerTable.filter()" actionListener="#{notesController.createDialogue}" value="#{configMapController.getKey('CreateNotesSaveLink')}" update=":growl :tv:NoteslistForm1 :tv:formNotesCreate1"/>                
+                                <p:commandButton oncomplete="PF('NotesCreateDialogue').hide();PF('notesControllerTable').filter()" actionListener="#{notesController.createDialogue}" value="#{configMapController.getKey('CreateNotesSaveLink')}" update=":growl :tv:NoteslistForm1 :tv:formNotesCreate1"/>                
                             </p:panelGrid>
                         </p:confirmDialog>
                     </h:form>
@@ -374,8 +374,8 @@
                                         <h:inputText id="globalFilter2" onkeyup="PF('notesControllerTable').filter()" />
                                     </p:outputPanel>
                                 </f:facet>
-                                <p:ajax event="rowEdit" listener="#{customersController.onNotesEdit}" update=":growl" oncomplete="notesControllerTable.filter()" />  
-                                <p:ajax event="rowEditCancel" listener="#{customersController.onNotesCancel}" update=":growl"  oncomplete="notesControllerTable.filter()" />  
+                                <p:ajax event="rowEdit" listener="#{customersController.onNotesEdit}" update=":growl" oncomplete="PF('notesControllerTable').filter()" />  
+                                <p:ajax event="rowEditCancel" listener="#{customersController.onNotesCancel}" update=":growl" />  
 
                                 <p:column sortBy="#{item.createTimestamp}" filterBy="#{item.createTimestamp}" headerText="#{configMapController.getKey('ListNotesTitle_createTimestamp')}"   >
 

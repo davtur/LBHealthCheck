@@ -148,7 +148,7 @@
 
             <h:form id="CustomerslistForm1">
                 <h:panelGroup >
-                    <p:commandButton id="showDialogButton"  immediate="true" actionListener="#{customersController.prepareCreateAjax}" value="#{configMapController.getKey('ListCustomersCreateLink')}" onclick="customersCreateDialogue.show()" update=":formCustomersCreate1:dialogueGrid1" /> 
+                    <p:commandButton id="showDialogButton"  immediate="true" actionListener="#{customersController.prepareCreateAjax}" value="#{configMapController.getKey('ListCustomersCreateLink')}" onclick="PF('customersCreateDialogue').show()" update=":formCustomersCreate1:dialogueGrid1" /> 
 
                 </h:panelGroup>
                 <h:outputText escape="false" value="#{configMapController.getKey('ListCustomersEmpty')}" rendered="#{customersController.items.rowCount == 0}"/>
@@ -157,11 +157,11 @@
                         <f:facet name="header">
                             <p:outputPanel>
                                 <h:outputText value="Search all fields:" />
-                                <h:inputText id="globalFilter" onkeyup="customersControllerTable.filter()" />
+                                <h:inputText id="globalFilter" onkeyup="PF('customersControllerTable').filter()" />
                             </p:outputPanel>
                         </f:facet>
-                        <p:ajax event="rowEdit" listener="#{customersController.onEdit}" update=":growl" oncomplete="customersControllerTable.filter()" />  
-                        <p:ajax event="rowEditCancel" listener="#{customersController.onCancel}" update=":growl"  oncomplete="customersControllerTable.filter()" />  
+                        <p:ajax event="rowEdit" listener="#{customersController.onEdit}" update=":growl" oncomplete="PF('customersControllerTable').filter()" />  
+                        <p:ajax event="rowEditCancel" listener="#{customersController.onCancel}" update=":growl"  oncomplete="PF('customersControllerTable').filter()" />  
 
                      <!--   <p:column sortBy="#{item.id}" filterBy="#{item.id}" headerText="#{configMapController.getKey('ListCustomersTitle_id')}"   >
                             <p:cellEditor> 
@@ -463,13 +463,13 @@
                         </p:column>  
 
                         <p:column>
-                            <p:commandButton rendered="#{customersController.isUserInRole('ADMIN')}"   oncomplete="customersCreateDialogue.show()" update=":formCustomersCreate1:dialogueGrid1 :growl"  value="#{configMapController.getKey('ListCustomersEditLink')}">
+                            <p:commandButton rendered="#{customersController.isUserInRole('ADMIN')}"   oncomplete="PF('customersCreateDialogue').show()" update=":formCustomersCreate1:dialogueGrid1 :growl"  value="#{configMapController.getKey('ListCustomersEditLink')}">
                                 <f:setPropertyActionListener value="#{item}" target="#{customersController.selected}" />
                             </p:commandButton>                        
 
                         </p:column>
                         <p:column>
-                            <p:commandButton id="paymentButton"  rendered="#{customersController.isUserInRole('ADMIN')}"    oncomplete="customersPaymentsDialogue.show()" update=":paymentsForm:mainPanel :growl"  value="#{configMapController.getKey('ListCustomersEditPaymentLink')}">
+                            <p:commandButton id="paymentButton"  rendered="#{customersController.isUserInRole('ADMIN')}"    oncomplete="PF('customersPaymentsDialogue').show()" update=":paymentsForm:mainPanel :growl"  value="#{configMapController.getKey('ListCustomersEditPaymentLink')}">
                                 <f:setPropertyActionListener value="#{item}" target="#{ezidebit.selectedCustomer}"  />
                             </p:commandButton>                        
 

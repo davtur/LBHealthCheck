@@ -78,7 +78,7 @@
                             <f:selectItems value="#{currencyController.itemsAvailableSelectOne}"/>
                             <p:ajax   update=":formInvoiceCreate1"  />
                         </p:selectOneMenu>
-                        <p:commandButton oncomplete="InvoiceCreateDialogue.hide();invoiceControllerTable.filter()" actionListener="#{invoiceController.createDialogue}" value="#{configMapController.getKey('CreateInvoiceSaveLink')}" update=":growl"/>                
+                        <p:commandButton oncomplete="PF('InvoiceCreateDialogue').hide();PF('invoiceControllerTable').filter()" actionListener="#{invoiceController.createDialogue}" value="#{configMapController.getKey('CreateInvoiceSaveLink')}" update=":growl"/>                
                     </p:panelGrid>
                 </p:dialog>
             </h:form>
@@ -89,7 +89,7 @@
 
             <h:form id="InvoicelistForm1">
                 <h:panelGroup >
-                    <p:commandButton id="showDialogButton"  value="#{configMapController.getKey('ListInvoiceCreateLink')}" onclick="InvoiceCreateDialogue.show()" type="button"/> 
+                    <p:commandButton id="showDialogButton"  value="#{configMapController.getKey('ListInvoiceCreateLink')}" onclick="PF('InvoiceCreateDialogue').show()" type="button"/> 
 
                 </h:panelGroup>
                 <h:outputText escape="false" value="#{configMapController.getKey('ListInvoiceEmpty')}" rendered="#{invoiceController.items.rowCount == 0}"/>
@@ -98,11 +98,11 @@
                         <f:facet name="header">
                             <p:outputPanel>
                                 <h:outputText value="Search all fields:" />
-                                <h:inputText id="globalFilter" onkeyup="invoiceControllerTable.filter()" />
+                                <h:inputText id="globalFilter" onkeyup="PF('invoiceControllerTable').filter()" />
                             </p:outputPanel>
                         </f:facet>
-                        <p:ajax event="rowEdit" listener="#{invoiceController.onEdit}" update=":growl" oncomplete="invoiceControllerTable.filter()" />  
-                        <p:ajax event="rowEditCancel" listener="#{invoiceController.onCancel}" update=":growl"  oncomplete="invoiceControllerTable.filter()" />  
+                        <p:ajax event="rowEdit" listener="#{invoiceController.onEdit}" update=":growl" oncomplete="PF('invoiceControllerTable').filter()" />  
+                        <p:ajax event="rowEditCancel" listener="#{invoiceController.onCancel}" update=":growl"  />  
 
                         <p:column sortBy="#{item.id}" filterBy="#{item.id}" headerText="#{configMapController.getKey('ListInvoiceTitle_id')}"   >
                             <p:cellEditor> 

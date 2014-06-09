@@ -46,7 +46,7 @@
                     </h:panelGrid>
                 </p:panel>
                 <p:dataTable value="#{sessionHistoryController.selected.participantsCollection}" var="item"  paginator="true" rows="15"  paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  rowsPerPageTemplate="5,10,15,20,25,50,100" >
-                    
+
                     <p:column sortBy="#{item.customerId.lastname}" >
                         <f:facet name="header">
                             <h:outputText value="Customers That Attended"/>

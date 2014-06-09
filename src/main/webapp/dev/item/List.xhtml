@@ -37,7 +37,7 @@
 
             <h:form id="ItemlistForm1">
                 <h:panelGroup >
-                    <p:commandButton id="showDialogButton"  value="#{configMapController.getKey('ListItemCreateLink')}" onclick="ItemCreateDialogue.show()" type="button"/> 
+                    <p:commandButton id="showDialogButton"  value="#{configMapController.getKey('ListItemCreateLink')}" onclick="PF('ItemCreateDialogue').show()" type="button"/> 
 
                 </h:panelGroup>
                 <h:outputText escape="false" value="#{configMapController.getKey('ListItemEmpty')}" rendered="#{itemController.items.rowCount == 0}"/>
@@ -46,11 +46,11 @@
                         <f:facet name="header">
                             <p:outputPanel>
                                 <h:outputText value="Search all fields:" />
-                                <h:inputText id="globalFilter" onkeyup="itemControllerTable.filter()" />
+                                <h:inputText id="globalFilter" onkeyup="PF('itemControllerTable').filter()" />
                             </p:outputPanel>
                         </f:facet>
-                        <p:ajax event="rowEdit" listener="#{itemController.onEdit}" update=":growl" oncomplete="itemControllerTable.filter()" />  
-                        <p:ajax event="rowEditCancel" listener="#{itemController.onCancel}" update=":growl"  oncomplete="itemControllerTable.filter()" />  
+                        <p:ajax event="rowEdit" listener="#{itemController.onEdit}" update=":growl" oncomplete="PF('itemControllerTable').filter()" />  
+                        <p:ajax event="rowEditCancel" listener="#{itemController.onCancel}" update=":growl"  oncomplete="PF('itemControllerTable').filter()" />  
 
                         <p:column sortBy="#{item.id}" filterBy="#{item.id}" headerText="#{configMapController.getKey('ListItemTitle_id')}"   >
                             <p:cellEditor> 

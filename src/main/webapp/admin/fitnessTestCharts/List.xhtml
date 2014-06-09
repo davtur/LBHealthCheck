@@ -30,11 +30,11 @@
                         <f:facet name="header">
                             <p:outputPanel>
                                 <h:outputText value="Search all fields:" />
-                                <h:inputText id="globalFilter" onkeyup="fitnessTestChartsControllerTable.filter()" />
+                                <h:inputText id="globalFilter" onkeyup="PF('fitnessTestChartsControllerTable').filter()" />
                             </p:outputPanel>
                         </f:facet>
-                        <p:ajax event="rowEdit" listener="#{fitnessTestChartsController.onEdit}" update=":growl" oncomplete="fitnessTestChartsControllerTable.filter()" />  
-                        <p:ajax event="rowEditCancel" listener="#{fitnessTestChartsController.onCancel}" update=":growl"  oncomplete="fitnessTestChartsControllerTable.filter()" />  
+                        <p:ajax event="rowEdit" listener="#{fitnessTestChartsController.onEdit}" update=":growl" oncomplete="PF('fitnessTestChartsControllerTable')" />  
+                        <p:ajax event="rowEditCancel" listener="#{fitnessTestChartsController.onCancel}" update=":growl"  oncomplete="PF('fitnessTestChartsControllerTable')" />  
                         <p:ajax event="rowSelect"   update="createButton viewButton editButton deleteButton"/>
                         <p:ajax event="rowUnselect" update="createButton viewButton editButton deleteButton"/>
                         <p:column selectionMode="single"/>
