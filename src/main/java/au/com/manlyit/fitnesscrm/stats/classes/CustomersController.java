@@ -442,7 +442,7 @@ public class CustomersController implements Serializable {
         session.invalidate();
 
         // redirect to the login / home page
-        try {
+       /* try {
             //ec.redirect(ec.getRequestContextPath());
 
             ec.redirect(configMapFacade.getConfig("WebsiteURL"));
@@ -450,9 +450,9 @@ public class CustomersController implements Serializable {
             JsfUtil.addErrorMessage(e, "Log out Failed");
             //LOG.error("Redirect to the login page failed");
             throw new FacesException(e);
-        }
+        }*/
 
-        return null;
+        return "/index.xhtml?faces-redirect=true";
     }
     /*public String logout() {
      try {
