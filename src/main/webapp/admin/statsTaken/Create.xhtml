@@ -43,7 +43,7 @@
                         <p:dataGrid value="#{statsTakenController.selected.statCollection}" var="stats" columns="4" >
                             <p:panel style="width:200px;">
                                 <p:outputLabel value="#{stats.statType.name}"  /><br/>
-                                <p:inputText style="width:50px;" value="#{stats.value}" title="#{stats.statType.description}" required="true" requiredMessage="#{configMapController.getKey('CreateStatRequiredMessage_value')}">
+                                <p:inputText style="width:50px;" value="#{stats.value}" onfocus="this.select()" title="#{stats.statType.description}" required="true" requiredMessage="#{configMapController.getKey('CreateStatRequiredMessage_value')}">
                                     <p:ajax update=":StatsTakenCreateForm:statsPanel2"/>
                                 </p:inputText>
                             </p:panel>

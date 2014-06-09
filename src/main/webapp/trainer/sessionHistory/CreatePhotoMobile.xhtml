@@ -31,7 +31,7 @@
                 <h:form id="photoCreate" enctype="multipart/form-data">
                     <p:outputLabel value="#{configMapController.getKey('CreateCustomerImagesLabel_customerId')}" for="customerId" />
                     <p:selectOneMenu  valueChangeListener="#{customerImagesController.handleCustomerChange}" id="customerId" converter="customerConverter" value="#{customerImagesController.selected.customerId}"  required="true" requiredMessage="#{configMapController.getKey('CreateCustomerImagesRequiredMessage_customerId')}">
-                        <f:selectItems  value="#{customersController.customersAvailableSelectOneObject}"/>  
+                        <f:selectItems  value="#{sessionHistoryController.activeCustomers}"/>  
                         <p:ajax update=":photos:growl" />
                     </p:selectOneMenu>
                     <h:outputLabel value="#{configMapController.getKey('CreateCustomerImagesLabel_datetaken')}" for="datetaken" />

@@ -42,7 +42,7 @@
                             <h:panelGrid >
                                 <h:outputLabel value="#{configMapController.getKey('CreateStatsTakenLabel_customerId')} #{statsTakenController.selected.customerId}" for="customerId" />
                                 <p:selectOneMenu id="customerId" value="#{statsTakenController.selected.customerId}" required="true" converter="customerConverter" requiredMessage="#{configMapController.getKey('CreateStatsTakenRequiredMessage_customerId')}">
-                                    <f:selectItems var="listItem"  itemLabel="#{listItem.firstname} #{listItem.lastname}" itemValue="#{listItem}" value="#{customersController.customersAvailableSelectOneObject}" />
+                                    <f:selectItems var="listItem"  itemLabel="#{listItem.firstname} #{listItem.lastname}" itemValue="#{listItem}" value="#{sessionHistoryController.activeCustomers}" />
                                 </p:selectOneMenu>
                             </h:panelGrid>
 
@@ -51,15 +51,15 @@
                         <p:panel id="statsPanel2" >
 
                             <p:dataGrid value="#{statsTakenController.selected.statCollection}" var="stats" columns="1" >
-
-                                <p:outputLabel value="#{stats.statType.name}"  /><br/>
-                                <p:inputText  value="#{stats.value}" title="#{stats.statType.description}" required="true" requiredMessage="#{configMapController.getKey('CreateStatRequiredMessage_value')}"/>
-                                    
+                                <pm:field>
+                                    <p:outputLabel value="#{stats.statType.name}"  />
+                                    <p:inputText  value="#{stats.value}" title="#{stats.statType.description}"  required="true" requiredMessage="#{configMapController.getKey('CreateStatRequiredMessage_value')}"/>
+                                </pm:field> 
                             </p:dataGrid>
 
                         </p:panel>
                         <p:commandButton actionListener="#{statsTakenController.createMobile}" value="#{configMapController.getKey('CreateStatsTakenSaveLink')}"  update=":stats:growl" />
-                         <p:commandButton actionListener="#{statsTakenController.discardMobile}" value="Cancel" />
+                        <p:commandButton actionListener="#{statsTakenController.discardMobile}" value="Cancel" />
 
                     </h:panelGroup>
                 </h:form>

@@ -28,7 +28,7 @@
                 
                     <h:form id="notesForm">  
                    
-                        <p:dataList    value="#{customersController.items}" var="cust">
+                        <p:dataList    value="#{sessionHistoryController.activeCustomers}" var="cust">
                             <f:attribute name="filter" value="true" />
                             <p:column>
                                 <p:commandLink action="/trainer/sessionHistory/CreateCustomerNotes?faces-redirect=true" ajax="false" >

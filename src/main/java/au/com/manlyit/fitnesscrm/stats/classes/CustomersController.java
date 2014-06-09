@@ -125,7 +125,7 @@ public class CustomersController implements Serializable {
             recreateAllAffectedPageModels();
             setCustomerTabsEnabled(true);
             RequestContext.getCurrentInstance().update("iFrameForm");
-            
+
         }
     }
 
@@ -399,10 +399,10 @@ public class CustomersController implements Serializable {
         try {
             getFacade().edit(getSelected());
             JsfUtil.addSuccessMessage(configMapFacade.getConfig("CustomersUpdated"));
-           
+
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
-            
+
         }
     }
 
@@ -422,6 +422,15 @@ public class CustomersController implements Serializable {
             JsfUtil.addErrorMessage(e, "Password Update Error", "Password Updated Failed");
             return null;
         }
+    }
+
+    public String logoutMobile() {
+        FacesContext fc = FacesContext.getCurrentInstance();
+        ExternalContext ec = fc.getExternalContext();
+        HttpSession session = (HttpSession) ec.getSession(false);
+        session.invalidate();
+
+        return "/mobileMenu.xhtml?faces-redirect=true";
     }
 
     public String logout() {
