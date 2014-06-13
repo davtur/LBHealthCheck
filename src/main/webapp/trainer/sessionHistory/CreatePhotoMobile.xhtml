@@ -43,13 +43,11 @@
                     </p:calendar>
                 </h:form>
                 <h:form id="photoCreate2" enctype="multipart/form-data">
-                    <p:fileUpload  id="uploader" fileLimitMessage="The size of the picture is too big! ( > 10MB )" mode="advanced" fileUploadListener="#{customerImagesController.handleFileUpload}" auto="true" update=":photos:photoCreate:datetaken :photos:growl" allowTypes="/(\.|\/)(gif|jpe?g|png)$/" sizeLimit="10000000" required="true"  requiredMessage="You need to upload a photo."/>
+                    <p:fileUpload  id="uploader" fileLimitMessage="The size of the picture is too big! ( > 10MB )" mode="simple" value="#{customerImagesController.uploadedFile}" auto="true" update=":photos:photoCreate:datetaken :photos:growl" allowTypes="/(\.|\/)(gif|jpe?g|png)$/" sizeLimit="10000000" required="true"  requiredMessage="You need to upload a photo."/>
+                <p:commandButton  ajax="false"  actionListener="#{customerImagesController.createFromMobile}" value="#{configMapController.getKey('CreateCustomerImagesSaveLink')}" />
                 </h:form>
 
-                <h:form>
-                    <h:commandButton    actionListener="#{customerImagesController.createFromMobile}" value="#{configMapController.getKey('CreateCustomerImagesSaveLink')}" />
-
-                </h:form>
+                
             </pm:content>
         </pm:page>
     </h:body>

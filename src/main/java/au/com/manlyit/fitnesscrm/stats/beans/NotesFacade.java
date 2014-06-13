@@ -22,7 +22,6 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Root;
 
-
 /**
  *
  * @author david
@@ -56,7 +55,9 @@ public class NotesFacade extends AbstractFacade<Notes> {
 
             Expression<Customers> custUsername = rt.get("userId");
             cq.where(cb.equal(custUsername, cust));
+            Expression<Date> express = rt.get("createTimestamp");
 
+            cq.orderBy(cb.desc(express));
             Query q = em.createQuery(cq);
             notes = (List<Notes>) q.getResultList();
         } catch (Exception e) {

@@ -56,7 +56,7 @@ import org.primefaces.model.UploadedFile;
 @Named("customerImagesController")
 @SessionScoped
 public class CustomerImagesController implements Serializable {
-
+    private static final Logger logger = Logger.getLogger(CustomerImagesController.class.getName());
     private CustomerImages current;
     private static final int new_width = 800;// must match panelheight on gallery component
     private static final int new_height = 500;// must match panelheight on gallery component
@@ -449,8 +449,13 @@ public class CustomerImagesController implements Serializable {
     }
 
      public void createFromMobile() {
-         
+         if(uploadedFile != null){
+         processUploadedFile(uploadedFile);
          createFromDialogue();
+         logger.log(Level.INFO, "Photo upload successfully from mobile device.");
+         }else{
+             logger.log(Level.WARNING, "The uploaded photo is NULL. Photo upload from mobile device failed.");
+         }
          
      }
     

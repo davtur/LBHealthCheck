@@ -20,11 +20,18 @@
 
                 <p:tab id="tab1" title="Customer List" >  
                     <h:form id="customerslistForm1">
-                        <h:panelGroup >
+                        <p:panelGrid columns="3" style="width:100%;">
                             <p:commandButton id="showDialogButton"  oncomplete="PF('customersCreateDialogue').show()"   actionListener="#{customersController.prepareCreateAjax}" value="#{configMapController.getKey('ListCustomersCreateLink')}"  update=":formCustomersCreate1:dialogueGrid" /> 
 
-                        </h:panelGroup>
-                        <h:outputText id="selectedUser" value="#{customersController.selected.firstname} #{customersController.selected.lastname}" />
+
+                            <h:outputText id="selectedUser" value="#{customersController.selected.firstname} #{customersController.selected.lastname}" />
+                            <h:panelGroup>
+                                <h:outputText  value="Show Cancelled and On Hold: "/>
+                            <p:selectBooleanCheckbox value="#{customersController.showCancelledCustomers}" label="Show Cancelled and On Hold" valueChangeListener="#{customersController.selectShowCancelledBooleanChangeListener}" >
+                                <p:ajax event="change"   update=":tv:customerslistForm1:customersTableList"  /> 
+                            </p:selectBooleanCheckbox>
+                            </h:panelGroup>
+                        </p:panelGrid>
                         <h:outputText escape="false" value="#{configMapController.getKey('ListCustomersEmpty')}" rendered="#{customersController.items.rowCount == 0}"/>
                         <h:panelGroup rendered="#{customersController.items.rowCount > 0}">
                             <p:dataTable id="customersTableList" 
@@ -35,6 +42,7 @@
                                          value="#{customersController.items}" 
                                          filteredValue="#{customersController.filteredItems}" 
                                          widgetVar="customersControllerTable" 
+                                         
                                          var="item"  
                                          paginator="true" 
                                          rows="15"  
@@ -43,7 +51,7 @@
                                 <f:facet name="header">
                                     <p:outputPanel>
                                         <h:outputText value="Search all fields:" />
-                                        <h:inputText id="globalFilter4" onkeyup="PF('customersControllerTable').filter()" />
+                                        <p:inputText id="globalFilter" onkeyup="PF('customersControllerTable').filter();" />
                                     </p:outputPanel>
                                 </f:facet>
                                 <!--<p:ajax event="rowEdit"   listener="#{customersController.onEdit}" update=":growl"  />  
@@ -158,7 +166,7 @@
                             </p:password>
                             <p:commandButton  id="passButton" ajax="true" actionListener="#{customersController.updatepass}" update=":growl"   value="#{configMapController.getKey('EditCustomersUpdatePassword')}" immediate="true"/>
                             <p:panel>
-                                <p:commandButton id="dialogueSave1" oncomplete="tabViewWidget.select(1)"  actionListener="#{customersController.createDialogue}" value="#{configMapController.getKey('CreateCustomersSaveLink')}" update=":tv:customerslistForm1:customersTableList :growl"/>                
+                                <p:commandButton id="dialogueSave1" oncomplete="PF('tabViewWidget').select(1)"  actionListener="#{customersController.createDialogue}" value="#{configMapController.getKey('CreateCustomersSaveLink')}" update=":tv:customerslistForm1:customersTableList :growl"/>                
                             </p:panel>
                         </p:panelGrid>
                     </h:form>
@@ -194,7 +202,7 @@
                             </p:selectBooleanButton>  
                         </p:panel>
 
-                        <p:outputPanel id="mainPanel" rendered="#{ezidebit.asyncOperationRunning == false and ezidebit.customerDetailsHaveBeenRetrieved == true}" >
+                        <p:outputPanel id="mainPanel" rendered="#{ezidebit.asyncOperationRunning == false and ezidebit.customerDetailsHaveBeenRetrieved == true  and ezidebit.customerExistsInPaymentGateway == true}" >
                             <p:selectBooleanButton value="#{ezidebit.editPaymentDetails}" onLabel="Refresh View" offLabel="Refresh View" rendered="#{ezidebit.customerExistsInPaymentGateway}" >
                                 <p:ajax update=":tv:iFrameForm :tv:paymentsForm  :growl" process=":tv:iFrameForm "/>  
                             </p:selectBooleanButton>  
@@ -205,7 +213,7 @@
                         </p:outputPanel>
 
 
-                        <p:panel  id="paymentsTablePanel" rendered="#{ezidebit.paymentsList != null}">
+                        <p:panel  id="paymentsTablePanel" rendered="#{ezidebit.paymentsList != null and ezidebit.customerExistsInPaymentGateway == true}">
                             <p:dataTable  id="paymentsTable"
                                           value="#{ezidebit.paymentsList}" 
                                           filteredValue="#{ezidebit.paymentsListFilteredItems}"  
@@ -216,8 +224,8 @@
                                           rowsPerPageTemplate="5,10,15,20,25,50,100" >
                                 <f:facet name="header">
                                     <p:outputPanel>
-                                        <h:outputText value="Payments            --          Search all fields:" />
-                                        <h:inputText id="globalFilter3" onkeyup="PF('paymentsListControllerTable').filter()" />
+                                        <h:outputText value="Payments" />
+                                        
                                     </p:outputPanel>
                                 </f:facet>
                                 <p:column sortBy="#{pay.customerName.value}" filterBy="#{pay.customerName.value}" headerText="#{configMapController.getKey('ListPaymentsTitle_customerName')}"   >
@@ -246,7 +254,7 @@
                             </p:dataTable>
                         </p:panel>
 
-                        <p:panel id="scheduledPaymentsTablePanel" rendered="#{ezidebit.scheduledPaymentsList != null}">
+                        <p:panel id="scheduledPaymentsTablePanel" rendered="#{ezidebit.scheduledPaymentsList != null and ezidebit.customerExistsInPaymentGateway == true}">
                             <p:dataTable id="scheduledPaymentsTable"
                                          selectionMode="single"
                                          selection="#{ezidebit.selectedScheduledPayment}" 
@@ -260,8 +268,8 @@
                                          rowsPerPageTemplate="5,10,15,20,25,50,100" >
                                 <f:facet name="header">
                                     <p:outputPanel>
-                                        <h:outputText value="    Scheduled Payments               --               Search all fields:" />
-                                        <h:inputText id="globalFilter7" onkeyup="PF('scheduledPaymentsListControllerTable').filter()" />
+                                        <h:outputText value="Scheduled Payments" />
+                                        
                                     </p:outputPanel>
                                 </f:facet>
                                 <p:ajax event="rowSelect"   update="deleteButton"/>
@@ -370,14 +378,14 @@
                             <p:dataTable  editable="true" value="#{customersController.notesItems}" filteredValue="#{customersController.notesFilteredItems}"  widgetVar="notesControllerTable" var="item"  paginator="true" rows="15"  paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  rowsPerPageTemplate="5,10,15,20,25,50,100" >
                                 <f:facet name="header">
                                     <p:outputPanel>
-                                        <h:outputText value="Search all fields:" />
-                                        <h:inputText id="globalFilter2" onkeyup="PF('notesControllerTable').filter()" />
+                                        <h:outputText value="Notes" />
+                                       
                                     </p:outputPanel>
                                 </f:facet>
                                 <p:ajax event="rowEdit" listener="#{customersController.onNotesEdit}" update=":growl" oncomplete="PF('notesControllerTable').filter()" />  
                                 <p:ajax event="rowEditCancel" listener="#{customersController.onNotesCancel}" update=":growl" />  
 
-                                <p:column sortBy="#{item.createTimestamp}" filterBy="#{item.createTimestamp}" headerText="#{configMapController.getKey('ListNotesTitle_createTimestamp')}"   >
+                                <p:column sortBy="#{item.createTimestamp}" filterOptions="" filterBy="#{item.createTimestamp}" headerText="#{configMapController.getKey('ListNotesTitle_createTimestamp')}"   >
 
                                     <p:cellEditor> 
                                         <f:facet name="output">
@@ -394,7 +402,7 @@
 
                                 </p:column>
 
-                                <p:column sortBy="#{item.note}" filterBy="#{item.note}" headerText="#{configMapController.getKey('ListNotesTitle_note')}"   >
+                                <p:column sortBy="#{item.note}" filterBy="#{item.note}"  filterMatchMode="contains" headerText="#{configMapController.getKey('ListNotesTitle_note')}"   >
                                     <p:cellEditor> 
                                         <f:facet name="output">
                                             <h:outputText value="#{item.note}"/>

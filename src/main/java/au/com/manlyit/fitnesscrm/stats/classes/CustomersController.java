@@ -50,6 +50,7 @@ public class CustomersController implements Serializable {
     private Customers lastSelected;
     private Customers selectedForDeletion;
     private Notes selectedNoteForDeletion;
+    private boolean showCancelledCustomers = false;
     private PfSelectableDataModel<Customers> items = null;
     private PfSelectableDataModel<Notes> notesItems = null;
     @Inject
@@ -179,7 +180,12 @@ public class CustomersController implements Serializable {
 
                 @Override
                 public PfSelectableDataModel createPageDataModel() {
-                    return new PfSelectableDataModel<>(ejbFacade.findAll());
+                    if(showCancelledCustomers == true){
+                     return new PfSelectableDataModel<>(ejbFacade.findAll());   
+                    }else{
+                       return new PfSelectableDataModel<>(ejbFacade.findAllActiveCustomers(true)); 
+                    }
+                    
                 }
 
             };
@@ -385,6 +391,10 @@ public class CustomersController implements Serializable {
         //current = (Customers) getItems().getRowData();
         //selectedItemIndex = pagination.getPageFirstItem() + getItems().getRowIndex();
         return "Edit";
+    }
+    
+    public void selectShowCancelledBooleanChangeListener(ValueChangeEvent vce) {
+        recreateModel();
     }
 
     public void selectOneMenuValueChangeListener(ValueChangeEvent vce) {
@@ -901,6 +911,20 @@ public class CustomersController implements Serializable {
      */
     public void setLastSelected(Customers lastSelected) {
         this.lastSelected = lastSelected;
+    }
+
+    /**
+     * @return the showCancelledCustomers
+     */
+    public boolean isShowCancelledCustomers() {
+        return showCancelledCustomers;
+    }
+
+    /**
+     * @param showCancelledCustomers the showCancelledCustomers to set
+     */
+    public void setShowCancelledCustomers(boolean showCancelledCustomers) {
+        this.showCancelledCustomers = showCancelledCustomers;
     }
 
     @FacesConverter(forClass = Customers.class)
