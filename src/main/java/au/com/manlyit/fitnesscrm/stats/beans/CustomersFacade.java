@@ -10,6 +10,7 @@ import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.ejb.DuplicateKeyException;
 import javax.inject.Inject;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
@@ -19,6 +20,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 /**
@@ -69,6 +71,37 @@ public class CustomersFacade extends AbstractFacade<Customers> {
             cm = (Customers) q.getSingleResult();
         } catch (Exception e) {
             logger.log(Level.INFO, "Customer not found:{0}", username);
+        }
+        return cm;
+        // Query q = em.createNativeQuery("SELECT * FROM customers where username = '" + username + "'", Customers.class);
+        // return (Customers) q.getSingleResult();
+    }
+
+    public Customers findCustomerByName(String firstname, String lastname) {
+
+        // compare as uppcase and spaces trimmed
+        // CriteriaBuilder cb = em.getCriteriaBuilder();
+        //CriteriaQuery<Customers> cq = cb.createQuery(Customers.class);
+        // Root<Customers> rt2 = cq.from(Customers.class);
+        // EntityType<Customers> customers_Et = rt2.getModel();
+        Customers cm = null;
+        try {
+            CriteriaBuilder cb = em.getCriteriaBuilder();
+            CriteriaQuery<Customers> cq = cb.createQuery(Customers.class);
+            Root<Customers> rt = cq.from(Customers.class);
+
+            Expression<String> custFirstname = rt.get("firstname");
+            Expression<String> custLastname = rt.get("lastname");
+            Predicate condition1 = cb.equal(cb.trim(cb.upper(custFirstname)), firstname.toUpperCase().trim());
+            Predicate condition2 = cb.equal(cb.trim(cb.upper(custLastname)), lastname.toUpperCase().trim());
+            cq.where(cb.and(condition1, condition2));
+          
+
+            Query q = em.createQuery(cq);
+            //Query q = em.createNativeQuery("SELECT * FROM customers where firstname = upper('" + firstname.trim() + "') and lastname = upper('" + lastname.trim() + "') ", Customers.class);
+            cm = (Customers) q.getSingleResult();
+        }catch (Exception e) {
+            logger.log(Level.INFO, "Customer not found:{0} {1} , {2}", new Object[]{firstname, lastname,e.getMessage()});
         }
         return cm;
         // Query q = em.createNativeQuery("SELECT * FROM customers where username = '" + username + "'", Customers.class);

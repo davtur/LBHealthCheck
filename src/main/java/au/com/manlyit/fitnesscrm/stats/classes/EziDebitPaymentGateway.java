@@ -6,21 +6,27 @@
 package au.com.manlyit.fitnesscrm.stats.classes;
 
 import au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade;
+import au.com.manlyit.fitnesscrm.stats.beans.CustomerStateFacade;
 import au.com.manlyit.fitnesscrm.stats.beans.CustomersFacade;
 import au.com.manlyit.fitnesscrm.stats.beans.PaymentBean;
 import au.com.manlyit.fitnesscrm.stats.classes.util.FutureMapEJB;
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PushComponentUpdateBean;
 import au.com.manlyit.fitnesscrm.stats.classes.util.ScheduledPaymentPojo;
+import au.com.manlyit.fitnesscrm.stats.db.CustomerState;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import au.com.manlyit.fitnesscrm.stats.webservices.ArrayOfPayment;
 import au.com.manlyit.fitnesscrm.stats.webservices.ArrayOfScheduledPayment;
 import au.com.manlyit.fitnesscrm.stats.webservices.CustomerDetails;
+import au.com.manlyit.fitnesscrm.stats.webservices.EziResponseOfCustomerDetailsTHgMB7OL;
+import au.com.manlyit.fitnesscrm.stats.webservices.INonPCIService;
+import au.com.manlyit.fitnesscrm.stats.webservices.NonPCIService;
 import au.com.manlyit.fitnesscrm.stats.webservices.Payment;
 import au.com.manlyit.fitnesscrm.stats.webservices.PaymentDetail;
 import au.com.manlyit.fitnesscrm.stats.webservices.PaymentDetailPlusNextPaymentInfo;
 import au.com.manlyit.fitnesscrm.stats.webservices.ScheduledPayment;
 import java.io.Serializable;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -31,6 +37,8 @@ import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -98,6 +106,10 @@ public class EziDebitPaymentGateway implements Serializable {
     private ConfigMapFacade configMapFacade;
     @Inject
     private CustomersFacade customersFacade;
+    @Inject
+    private CustomerStateFacade customerStateFacade;
+    private String bulkvalue = "";
+    private String duplicateValues = "";
     private String listOfIdsToImport;
     private boolean customerExistsInPaymentGateway = false;
     private boolean editPaymentDetails = false;
@@ -524,6 +536,34 @@ public class EziDebitPaymentGateway implements Serializable {
         this.refreshIFrames = refreshIFrames;
     }
 
+    /**
+     * @return the bulkvalue
+     */
+    public String getBulkvalue() {
+        return bulkvalue;
+    }
+
+    /**
+     * @param bulkvalue the bulkvalue to set
+     */
+    public void setBulkvalue(String bulkvalue) {
+        this.bulkvalue = bulkvalue;
+    }
+
+    /**
+     * @return the duplicateValues
+     */
+    public String getDuplicateValues() {
+        return duplicateValues;
+    }
+
+    /**
+     * @param duplicateValues the duplicateValues to set
+     */
+    public void setDuplicateValues(String duplicateValues) {
+        this.duplicateValues = duplicateValues;
+    }
+
     private class eziDebitThreadFactory implements ThreadFactory {
 
         @Override
@@ -655,7 +695,7 @@ public class EziDebitPaymentGateway implements Serializable {
 
     public void onTabChange(TabChangeEvent event) {
         Tab tb = event.getTab();
-       // String compId =   event.getTab().getClientId();
+        // String compId =   event.getTab().getClientId();
         //logger.log(Level.INFO, "Request Context update of {0} actioned",compId);
         //RequestContext.getCurrentInstance().update(compId);
 
@@ -1415,6 +1455,132 @@ public class EziDebitPaymentGateway implements Serializable {
             logger.log(Level.WARNING, "Logged in user is null. Add Single Payment aborted.");
         }
     }
+
+    public String createBulk() {
+
+        // delimiter is semi colon as ezidebit puts commas in the report
+        int count = 0;
+        try {
+            String[] st = bulkvalue.split("\r\n");
+            String duplicateLines = "";
+            CustomerDetails cd = null;
+            for (int x = 0; x < st.length; x++) {
+                String line = st[x];
+                int d = line.indexOf(";");
+                if (d > 1) {
+                    String[] cells = line.split(";");
+                    if (cells.length > 3) {
+
+                        count++;
+
+                        String references[] = cells[0].split("\t");
+                        if (references.length == 3) {
+                            String status = cells[1];
+                            String startDateText = cells[3];
+                            String lastname = references[0];
+                            String firstname = "";
+                            String name[] = references[0].split(",");
+                            if (name.length > 1) {
+                                lastname = name[0].trim();
+                                firstname = name[1].trim();
+ 
+                            } else {
+                                logger.log(Level.INFO, "No firstname for {0}", references[0]);
+                            }
+                            String ezidebitRef = references[1].substring(references[1].indexOf(":") + 1);
+                            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yy");
+                            Date contractStartDate = sdf.parse(startDateText);
+
+                            // check for existing customer in our database
+                            Customers localCustomer = customersFacade.findCustomerByName(firstname, lastname);
+
+                            if (localCustomer != null) {
+
+                                INonPCIService ws = new NonPCIService().getBasicHttpBindingINonPCIService();
+                                EziResponseOfCustomerDetailsTHgMB7OL customerdetails = ws.getCustomerDetails(getDigitalKey(), ezidebitRef, "");
+                                if (customerdetails.getError() == 0) {// any errors will be a non zero value
+                                    logger.log(Level.INFO, "Get Customer (EziId) Details Response: Name - {0}", customerdetails.getData().getValue().getCustomerName().getValue());
+
+                                    cd = customerdetails.getData().getValue();
+
+                                } else {
+                                    logger.log(Level.WARNING, "Get Customer (EziId) Details Response: Error - {0}", customerdetails.getErrorMessage().getValue());
+                                }
+                                if (cd != null) {
+                                    boolean updateSystemRefInEzidebit = false;
+                                    // found the customer in ezidebit. check the system reference and update it to our customers primary key
+                                    int key = localCustomer.getId();
+                                    String eziSysRef = cd.getYourSystemReference().getValue();
+                                    logger.log(Level.INFO, "Customer {0}, Our primary Key: {1}, Ezidebit Ref: {2}", new Object[]{references[0], key, eziSysRef});
+                                    try {
+                                        int eziRef = Integer.parseInt(eziSysRef);
+                                        if (eziRef == key) {
+                                            logger.log(Level.INFO, "Keys already match. Nothing to do.", new Object[]{references[0], key, eziSysRef});
+                                        } else {
+                                            logger.log(Level.SEVERE, "The system references don't match!  Possible Duplicate!");
+                                            duplicateLines += "The system references don't match! Possible Duplicate! Customer " + references[0] + ", Our primary Key:" + key + ", Ezidebit Ref: " + eziSysRef + "\r\n";
+                                            updateSystemRefInEzidebit = true;
+                                        }
+
+                                    } catch (NumberFormatException numberFormatException) {
+                                        updateSystemRefInEzidebit = true;
+                                    }
+                                    if (updateSystemRefInEzidebit == true) {
+
+                                        Future<Boolean> res = paymentBean.editCustomerDetails(localCustomer, null, getDigitalKey());
+                                        try {
+                                            if (res.get(180, TimeUnit.SECONDS) == true) {
+                                                logger.log(Level.INFO, "System reference updated");
+                                            } else {
+                                                logger.log(Level.WARNING, "System reference update Failed");
+                                                duplicateLines += "The System reference update Failed ! Customer " + references[0] + ", Our primary Key:" + key + ", Ezidebit Ref: " + eziSysRef + "\r\n";
+
+                                            }
+                                        } catch (InterruptedException | ExecutionException | TimeoutException interruptedException) {
+                                            logger.log(Level.WARNING, "System reference update Failed due to timeout, execution or interuption exception!");
+                                            duplicateLines += "The System reference update Failed ! Customer " + references[0] + ", Our primary Key:" + key + ", Ezidebit Ref: " + eziSysRef + "\r\n";
+
+                                        }
+                                    }
+                                    status = status.toUpperCase().trim();
+                                    if(status.contains("HOLD")) status = "ON HOLD";
+                                    List<CustomerState> csa = customerStateFacade.findAll();
+                                    for (CustomerState cs : csa) {
+                                        if (status.toUpperCase().contains(cs.getCustomerState())) {
+                                            if (localCustomer.getActive().getCustomerState().contains(cs.getCustomerState()) == false) {
+                                                localCustomer.setActive(cs);
+                                                logger.log(Level.INFO, "Updating Status to: {0}", cs.getCustomerState());
+                                            }
+                                        }
+                                    }
+
+                                } else {
+
+                                    logger.log(Level.WARNING, "Could not find the customer in ezidebit {0}", line);
+
+                                }
+                            } else {
+                                logger.log(Level.WARNING, "Customer does not exist in local system! Customer {0}\r\n", references[0]);
+                                duplicateLines += "Customer does not exist in local system! Customer " + references[0] + "\r\n";
+
+                            }
+
+                        }
+
+                    }
+                }
+            }
+            setDuplicateValues(duplicateLines);
+
+            logger.log(Level.INFO, "Customer sync with Ezidebit completed. Updated or created count={0}", count);
+            JsfUtil.addSuccessMessage(count + ", " + configMapFacade.getConfig("EzidebitImportCreated"));
+            return "/admin/customers/List";
+        } catch (ParseException e) {
+            JsfUtil.addErrorMessage(e, e.getMessage());
+            return null;
+        }
+    }
+
 }
 
 // old stuff that was moved to asych methods in paymentBean

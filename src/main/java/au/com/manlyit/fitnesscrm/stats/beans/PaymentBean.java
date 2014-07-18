@@ -50,7 +50,7 @@ public class PaymentBean implements Serializable {
     @Inject
     private CustomersFacade customersFacade;
 
-    @Asynchronous
+      @Asynchronous
     public Future<CustomerDetails> getCustomerDetails(Customers cust, String digitalKey) {
 
         CustomerDetails cd = null;
@@ -87,19 +87,73 @@ public class PaymentBean implements Serializable {
         if (eziDebitId.trim().isEmpty() || digitalKey.trim().isEmpty()) {
             return new AsyncResult<>(cd);
         }
-        logger.log(Level.INFO, "Getting Customer Details {0}", eziDebitId);
+        logger.log(Level.INFO, "Getting Customer (EziId) Details {0}", eziDebitId);
         INonPCIService ws = new NonPCIService().getBasicHttpBindingINonPCIService();
         EziResponseOfCustomerDetailsTHgMB7OL customerdetails = ws.getCustomerDetails(digitalKey, eziDebitId, "");
         if (customerdetails.getError() == 0) {// any errors will be a non zero value
-            logger.log(Level.INFO, "Get Customer Details Response: Name - {0}", customerdetails.getData().getValue().getCustomerName().getValue());
+            logger.log(Level.INFO, "Get Customer (EziId) Details Response: Name - {0}", customerdetails.getData().getValue().getCustomerName().getValue());
 
             cd = customerdetails.getData().getValue();
 
         } else {
-            logger.log(Level.WARNING, "Get Customer Details Response: Error - {0}", customerdetails.getErrorMessage().getValue());
+            logger.log(Level.WARNING, "Get Customer (EziId) Details Response: Error - {0}", customerdetails.getErrorMessage().getValue());
         }
         return new AsyncResult<>(cd);
     }
+    
+  /*  
+    pci compliant version only
+    
+    @Asynchronous
+    public Future<CustomerDetails> getCustomerAccountDetails(Customers cust, String digitalKey) {
+
+        CustomerDetails cd = null;
+        if (cust == null || digitalKey == null) {
+            return new AsyncResult<>(cd);
+        }
+        if (cust.getId() == null || digitalKey.trim().isEmpty()) {
+            return new AsyncResult<>(cd);
+        }
+
+        logger.log(Level.INFO, "Running async task - Getting Customer Account Details {0}", cust.getUsername());
+        INonPCIService ws = new NonPCIService().getBasicHttpBindingINonPCIService();
+        EziResponseOfCustomerAccountDetails customerdetails = ws.getCustomerAccountDetails(digitalKey, "", cust.getId().toString());
+        if (customerdetails.getError() == 0) {// any errors will be a non zero value
+            logger.log(Level.INFO, "Get Customer Account Details Response: Name - {0}", customerdetails.getData().getValue().getCustomerName().getValue());
+
+            cd = customerdetails.getData().getValue();
+
+        } else {
+            logger.log(Level.WARNING, "Get Customer Account Details Response: Error - {0}", customerdetails.getErrorMessage().getValue());
+
+        }
+        return new AsyncResult<>(cd);
+
+    }
+
+    @Asynchronous
+    public Future<CustomerDetails> getCustomerAccountDetailsFromEziDebitId(String eziDebitId, String digitalKey) {
+
+        CustomerDetails cd = null;
+        if (eziDebitId == null || digitalKey == null) {
+            return new AsyncResult<>(cd);
+        }
+        if (eziDebitId.trim().isEmpty() || digitalKey.trim().isEmpty()) {
+            return new AsyncResult<>(cd);
+        }
+        logger.log(Level.INFO, "Getting Customer (EziId) Account Details {0}", eziDebitId);
+        INonPCIService ws = new NonPCIService().getBasicHttpBindingINonPCIService();
+        EziResponseOfCustomerDetailsTHgMB7OL customerdetails = ws.getCustomerAccountDetails(digitalKey, eziDebitId, "");
+        if (customerdetails.getError() == 0) {// any errors will be a non zero value
+            logger.log(Level.INFO, "Get Customer (EziId) Account Details Response: Name - {0}", customerdetails.getData().getValue().getCustomerName().getValue());
+
+            cd = customerdetails.getData().getValue();
+
+        } else {
+            logger.log(Level.WARNING, "Get Customer (EziId) Account Details Response: Error - {0}", customerdetails.getErrorMessage().getValue());
+        }
+        return new AsyncResult<>(cd);
+    }*/
 
     @Asynchronous
     public Future<Boolean> editCustomerDetails(Customers cust, String eziDebitRef, String digitalKey) {
@@ -326,8 +380,8 @@ public class PaymentBean implements Serializable {
         String humanFriendlyReference = cust.getLastname().toUpperCase() + " " + cust.getFirstname().toUpperCase(); // existing customers use this type of reference by default
         if (pay.isEmpty() && paymentGatewayName.toUpperCase().contains(paymentGateway)) {
             payParams = new PaymentParameters(0, new Date(), cust.getTelephone(), "NO", "NO", "NO", paymentGateway);
-            Customers loggedInUser = customersFacade.findCustomerByUsername(FacesContext.getCurrentInstance().getExternalContext().getRemoteUser());
-            payParams.setLoggedInUser(loggedInUser);
+            //Customers loggedInUser = customersFacade.findCustomerByUsername(FacesContext.getCurrentInstance().getExternalContext().getRemoteUser());
+            payParams.setLoggedInUser(cust);
 
             cust.getPaymentParametersCollection().add(payParams);
             customersFacade.editAndFlush(cust);
