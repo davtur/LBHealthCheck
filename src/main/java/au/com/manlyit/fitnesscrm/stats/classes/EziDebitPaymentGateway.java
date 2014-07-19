@@ -1435,6 +1435,28 @@ public class EziDebitPaymentGateway implements Serializable {
 
     }
 
+    public void changeCustomerStatus(Customers cust, CustomerState cs) {
+        String loggedInUser = FacesContext.getCurrentInstance().getExternalContext().getRemoteUser();
+        String newStatus = cs.getCustomerState();
+        String eziStatus;
+        if (cs.getCustomerState().contains("ACTIVE")) {
+            eziStatus = "A";
+        } else if (cs.getCustomerState().contains("ON HOLD")) {
+            eziStatus = "H";
+        } else if (cs.getCustomerState().contains("CANCELLED")) {
+            eziStatus = "C";
+        } else {
+            logger.log(Level.WARNING, "Customer status is not one of ACTIVE,ON HOLD or CANCELLED. changeCustomerStatus aborted.");
+            return;
+        }
+
+        if (loggedInUser != null) {
+            startAsynchJob("ChangeCustomerStatus", paymentBean.changeCustomerStatus(cust, eziStatus, loggedInUser, getDigitalKey()));
+        } else {
+            logger.log(Level.WARNING, "Logged in user is null. changeCustomerStatus aborted.");
+        }
+    }
+
     public void changeScheduledAmount(ActionEvent actionEvent) {
         String loggedInUser = FacesContext.getCurrentInstance().getExternalContext().getRemoteUser();
         Long amount = paymentAmountInCents * (long) 100;
@@ -1483,7 +1505,7 @@ public class EziDebitPaymentGateway implements Serializable {
                             if (name.length > 1) {
                                 lastname = name[0].trim();
                                 firstname = name[1].trim();
- 
+
                             } else {
                                 logger.log(Level.INFO, "No firstname for {0}", references[0]);
                             }
@@ -1543,7 +1565,9 @@ public class EziDebitPaymentGateway implements Serializable {
                                         }
                                     }
                                     status = status.toUpperCase().trim();
-                                    if(status.contains("HOLD")) status = "ON HOLD";
+                                    if (status.contains("HOLD")) {
+                                        status = "ON HOLD";
+                                    }
                                     List<CustomerState> csa = customerStateFacade.findAll();
                                     for (CustomerState cs : csa) {
                                         if (status.toUpperCase().contains(cs.getCustomerState())) {

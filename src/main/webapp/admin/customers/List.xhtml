@@ -20,24 +20,37 @@
 
                 <p:tab id="tab1" title="Customer List" >  
                     <h:form id="customerslistForm1">
-                        <p:panelGrid columns="3" style="width:100%;">
-                            <p:commandButton id="showDialogButton"  oncomplete="PF('customersCreateDialogue').show()"   actionListener="#{customersController.prepareCreateAjax}" value="#{configMapController.getKey('ListCustomersCreateLink')}"  update=":formCustomersCreate1:dialogueGrid" /> 
+                        <p:panelGrid columns="2" style="width:100%;">
+                            <p:commandButton id="showDialogButton"  oncomplete="PF('customersCreateDialogue').show()"   actionListener="#{customersController.prepareCreateAjax}" value="#{configMapController.getKey('ListCustomersCreateLink')}"  update=":formCustomersCreate1:dialogueGrid  :growl" /> 
+
+                            <h:panelGroup id="customerChangeStatusPanel">
+                                <p:commandButton id="changeStateButton"     actionListener="#{customersController.changeCustomersState}" value="#{configMapController.getKey('ListCustomersChangeStateButton')}"  update=":tv:customerslistForm1:customersTableList :growl" /> 
+
+                                <p:selectOneMenu id="active" valueChangeListener="#{customersController.selectOneMenuValueChangeListener}" converter="customerStateConverter" value="#{customersController.selectedState}" label="#{configMapController.getKey('CreateCustomersTitle_active')}" >
+                                    <f:selectItems value="#{customerStateController.itemsAvailableAsObjects}"  var="custState" itemLabel="#{custState.customerState}" itemValue="#{custState}"/>                           
+                                </p:selectOneMenu>
+
+                            </h:panelGroup >
+                            <h:panelGroup id="selectedUserPanel">
+                                <h:outputText id="selectedUser" value="Selected: #{customersController.selected.firstname} #{customersController.selected.lastname}" />
+                                <p:commandButton id="selectCustomerButton"   actionListener="#{customersController.setSelectedCustomer}" value="#{configMapController.getKey('ListCustomersSelectCustomersButton')}"  update=":tv:customerslistForm1  :growl" /> 
+                            </h:panelGroup >
+                            <h:panelGrid columns="2">
+                                <p:outputLabel  value="Filter:    " for="selectedStateCheckbox"/>
+                                <p:selectManyCheckbox id="selectedStateCheckbox" value="#{customersController.selectedCustomerStates}" label="Show Cancelled" valueChangeListener="#{customersController.selectShowCancelledBooleanChangeListener}"  converter="customerStateConverter">
+                                    <f:selectItems value="#{customersController.customerStateList}" var="custState" itemLabel="#{custState.customerState}" itemValue="#{custState}" />
+                                    <p:ajax event="change"   update=":tv:customerslistForm1"  /> 
+                                </p:selectManyCheckbox>
+                            </h:panelGrid>
 
 
-                            <h:outputText id="selectedUser" value="#{customersController.selected.firstname} #{customersController.selected.lastname}" />
-                            <h:panelGroup>
-                                <h:outputText  value="Show Cancelled and On Hold: "/>
-                                <p:selectBooleanCheckbox value="#{customersController.showCancelledCustomers}" label="Show Cancelled and On Hold" valueChangeListener="#{customersController.selectShowCancelledBooleanChangeListener}" >
-                                    <p:ajax event="change"   update=":tv:customerslistForm1:customersTableList"  /> 
-                                </p:selectBooleanCheckbox>
-                            </h:panelGroup>
                         </p:panelGrid>
                         <h:outputText escape="false" value="#{configMapController.getKey('ListCustomersEmpty')}" rendered="#{customersController.items.rowCount == 0}"/>
                         <h:panelGroup rendered="#{customersController.items.rowCount > 0}">
                             <p:dataTable id="customersTableList" 
 
-                                         selectionMode="single" 
-                                         selection="#{customersController.selected}" 
+
+                                         selection="#{customersController.multiSelected}" 
                                          rowKey="#{item.id}" 
                                          value="#{customersController.items}" 
                                          filteredValue="#{customersController.filteredItems}" 
@@ -57,7 +70,7 @@
                                 <!--<p:ajax event="rowEdit"   listener="#{customersController.onEdit}" update=":growl"  />  
                                 <p:ajax event="rowEditCancel" listener="#{customersController.onCancel}" update=":growl"   /> -->
                                 <p:ajax event="rowSelect"   update=":growl :tv:customerslistForm1:selectedUser :tv:formCustomersEdit1 :formCustomersCreate1 :tv:paymentsForm :tv:NoteslistForm1 :tv:iFrameForm"  />  
-                                <p:column selectionMode="multiple"/>
+                                <p:column selectionMode="multiple" />
                                 <p:column sortBy="#{item.firstname}" filterBy="#{item.firstname}" headerText="#{configMapController.getKey('ListCustomersTitle_firstname')}"   >
                                     <h:outputText value="#{item.firstname}"/>
                                 </p:column>

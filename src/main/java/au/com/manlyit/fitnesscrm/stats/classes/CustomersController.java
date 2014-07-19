@@ -7,12 +7,12 @@ import au.com.manlyit.fitnesscrm.stats.beans.CustomersFacade;
 import au.com.manlyit.fitnesscrm.stats.chartbeans.MySessionsChart1;
 import au.com.manlyit.fitnesscrm.stats.classes.util.DatatableSelectionHelper;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PfSelectableDataModel;
+import au.com.manlyit.fitnesscrm.stats.db.CustomerState;
 import au.com.manlyit.fitnesscrm.stats.db.Groups;
 import au.com.manlyit.fitnesscrm.stats.db.Notes;
-import au.com.manlyit.fitnesscrm.stats.webservices.GetPayments;
-import java.io.IOException;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
@@ -21,7 +21,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
-import javax.faces.FacesException;
 import javax.inject.Named;
 import java.util.List;
 import javax.enterprise.context.SessionScoped;
@@ -40,7 +39,6 @@ import org.primefaces.context.RequestContext;
 import org.primefaces.event.RowEditEvent;
 import org.primefaces.event.SelectEvent;
 import org.primefaces.event.TabChangeEvent;
-import org.primefaces.model.SelectableDataModel;
 
 @Named("customersController")
 @SessionScoped
@@ -49,8 +47,11 @@ public class CustomersController implements Serializable {
     private Customers current;
     private Customers lastSelected;
     private Customers selectedForDeletion;
+    private CustomerState selectedState;
     private Notes selectedNoteForDeletion;
-    private boolean showCancelledCustomers = false;
+
+    private CustomerState[] selectedCustomerStates;
+    private List<CustomerState> customerStateList;
     private PfSelectableDataModel<Customers> items = null;
     private PfSelectableDataModel<Notes> notesItems = null;
     @Inject
@@ -59,6 +60,8 @@ public class CustomersController implements Serializable {
     private au.com.manlyit.fitnesscrm.stats.beans.DemographicTypesFacade ejbDemoFacade;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.GroupsFacade ejbGroupsFacade;
+    @Inject
+    private au.com.manlyit.fitnesscrm.stats.beans.CustomerStateFacade ejbCustomerStateFacade;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.NotesFacade ejbNotesFacade;
     @Inject
@@ -112,6 +115,18 @@ public class CustomersController implements Serializable {
         boolean inRole = false;
         inRole = FacesContext.getCurrentInstance().getExternalContext().isUserInRole(roleName);
         return inRole;
+    }
+    
+    public void setSelectedCustomer(ActionEvent event){
+        if(multiSelected.length == 1){
+            Customers c = multiSelected[0];
+            setSelected(c);
+            JsfUtil.addSuccessMessage(configMapFacade.getConfig("setSelectedCustomer") + " " + c.getFirstname() + " " + c.getLastname() + ".");
+        }else if(multiSelected.length > 1){
+            JsfUtil.addErrorMessage(configMapFacade.getConfig("setSelectedCustomerTooManySelected"));
+        }else if(multiSelected.length == 0){
+            JsfUtil.addErrorMessage(configMapFacade.getConfig("setSelectedCustomerNoneSelected"));
+        }
     }
 
     public void setSelected(Customers cust) {
@@ -180,12 +195,9 @@ public class CustomersController implements Serializable {
 
                 @Override
                 public PfSelectableDataModel createPageDataModel() {
-                    if(showCancelledCustomers == true){
-                     return new PfSelectableDataModel<>(ejbFacade.findAll());   
-                    }else{
-                       return new PfSelectableDataModel<>(ejbFacade.findAllActiveCustomers(true)); 
-                    }
-                    
+
+                    return new PfSelectableDataModel<>(ejbFacade.findFilteredCustomers(true, selectedCustomerStates));
+
                 }
 
             };
@@ -392,7 +404,7 @@ public class CustomersController implements Serializable {
         //selectedItemIndex = pagination.getPageFirstItem() + getItems().getRowIndex();
         return "Edit";
     }
-    
+
     public void selectShowCancelledBooleanChangeListener(ValueChangeEvent vce) {
         recreateModel();
     }
@@ -414,6 +426,31 @@ public class CustomersController implements Serializable {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
 
         }
+    }
+
+    public void changeCustomersState(ActionEvent actionEvent) {
+        int count = 0;
+        int cancelledCount = 0;
+        for (Customers cust : multiSelected) {
+
+            if (cust.getActive().getCustomerState().contains("CANCELLED")) {
+                cancelledCount++;
+            } else {
+
+                FacesContext context = FacesContext.getCurrentInstance();
+                EziDebitPaymentGateway controller = (EziDebitPaymentGateway) context.getApplication().getELResolver().getValue(context.getELContext(), null, "ezidebit");
+                controller.changeCustomerStatus(cust, selectedState);
+                cust.setActive(selectedState);
+                getFacade().edit(cust);
+                count++;
+                recreateModel();
+            }
+        }
+        String message = count + " " + configMapFacade.getConfig("CustomersStateChanged") + " " + selectedState.getCustomerState() + ".";
+        if (cancelledCount > 0) {
+            message += " WARNING:" + cancelledCount + " cancelled customers could not be changed.";
+        }
+        JsfUtil.addSuccessMessage(message);
     }
 
     public String updatepass() {
@@ -453,15 +490,14 @@ public class CustomersController implements Serializable {
 
         // redirect to the login / home page
        /* try {
-            //ec.redirect(ec.getRequestContextPath());
+         //ec.redirect(ec.getRequestContextPath());
 
-            ec.redirect(configMapFacade.getConfig("WebsiteURL"));
-        } catch (IOException e) {
-            JsfUtil.addErrorMessage(e, "Log out Failed");
-            //LOG.error("Redirect to the login page failed");
-            throw new FacesException(e);
-        }*/
-
+         ec.redirect(configMapFacade.getConfig("WebsiteURL"));
+         } catch (IOException e) {
+         JsfUtil.addErrorMessage(e, "Log out Failed");
+         //LOG.error("Redirect to the login page failed");
+         throw new FacesException(e);
+         }*/
         return "/index.xhtml?faces-redirect=true";
     }
     /*public String logout() {
@@ -914,17 +950,49 @@ public class CustomersController implements Serializable {
     }
 
     /**
-     * @return the showCancelledCustomers
+     * @return the selectedState
      */
-    public boolean isShowCancelledCustomers() {
-        return showCancelledCustomers;
+    public CustomerState getSelectedState() {
+        return selectedState;
     }
 
     /**
-     * @param showCancelledCustomers the showCancelledCustomers to set
+     * @param selectedState the selectedState to set
      */
-    public void setShowCancelledCustomers(boolean showCancelledCustomers) {
-        this.showCancelledCustomers = showCancelledCustomers;
+    public void setSelectedState(CustomerState selectedState) {
+        this.selectedState = selectedState;
+    }
+
+    /**
+     * @return the customerStateList
+     */
+    public List<CustomerState> getCustomerStateList() {
+        if (customerStateList == null) {
+
+            customerStateList = ejbCustomerStateFacade.findAll();
+            selectedCustomerStates = new CustomerState[1];
+            for (CustomerState cs : customerStateList) {
+                if (cs.getCustomerState().contains("ACTIVE")) {
+                    selectedCustomerStates[0] = cs;
+                }
+            }
+
+        }
+        return customerStateList;
+    }
+
+    /**
+     * @return the selectedCustomerStates
+     */
+    public CustomerState[] getSelectedCustomerStates() {
+        return selectedCustomerStates;
+    }
+
+    /**
+     * @param selectedCustomerStates the selectedCustomerStates to set
+     */
+    public void setSelectedCustomerStates(CustomerState[] selectedCustomerStates) {
+        this.selectedCustomerStates = selectedCustomerStates;
     }
 
     @FacesConverter(forClass = Customers.class)

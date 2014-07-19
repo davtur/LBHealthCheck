@@ -7,6 +7,7 @@ package au.com.manlyit.fitnesscrm.stats.beans;
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.db.CustomerState;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -95,13 +96,12 @@ public class CustomersFacade extends AbstractFacade<Customers> {
             Predicate condition1 = cb.equal(cb.trim(cb.upper(custFirstname)), firstname.toUpperCase().trim());
             Predicate condition2 = cb.equal(cb.trim(cb.upper(custLastname)), lastname.toUpperCase().trim());
             cq.where(cb.and(condition1, condition2));
-          
 
             Query q = em.createQuery(cq);
             //Query q = em.createNativeQuery("SELECT * FROM customers where firstname = upper('" + firstname.trim() + "') and lastname = upper('" + lastname.trim() + "') ", Customers.class);
             cm = (Customers) q.getSingleResult();
-        }catch (Exception e) {
-            logger.log(Level.INFO, "Customer not found:{0} {1} , {2}", new Object[]{firstname, lastname,e.getMessage()});
+        } catch (Exception e) {
+            logger.log(Level.INFO, "Customer not found:{0} {1} , {2}", new Object[]{firstname, lastname, e.getMessage()});
         }
         return cm;
         // Query q = em.createNativeQuery("SELECT * FROM customers where username = '" + username + "'", Customers.class);
@@ -155,6 +155,44 @@ public class CustomersFacade extends AbstractFacade<Customers> {
             Join<Customers, CustomerState> jn = rt.join("active");// join customers.active to customer_state.id
             Expression<String> custState = jn.get("customerState");
             cq.where(cb.equal(custState, state));
+            cq.select(rt);
+
+            Expression<String> express = rt.get("firstname");
+            if (sortAsc) {
+                cq.orderBy(cb.asc(express));
+            } else {
+                cq.orderBy(cb.desc(express));
+            }
+            Query q = em.createQuery(cq);
+            retList = q.getResultList();
+        } catch (Exception e) {
+            JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
+        }
+        return retList;
+    }
+
+    public List<Customers> findFilteredCustomers(boolean sortAsc, CustomerState[] selectedCustomerStates) {
+        List retList = null;
+        if (selectedCustomerStates == null || selectedCustomerStates.length == 0) {
+            return new ArrayList<>();
+        }
+        // String state = "ACTIVE";//Active
+        try {
+            ArrayList<Predicate> predicatesList = new ArrayList<>();
+            CriteriaBuilder cb = em.getCriteriaBuilder();
+            CriteriaQuery<Customers> cq = cb.createQuery(Customers.class);
+            Root<Customers> rt = cq.from(Customers.class);
+
+            Join<Customers, CustomerState> jn = rt.join("active");// join customers.active to customer_state.id
+            Expression<String> custState = jn.get("customerState");
+
+            for (CustomerState cs : selectedCustomerStates) {
+                predicatesList.add(cb.equal(custState, cs.getCustomerState()));
+            }
+
+            cq.where(cb.or(predicatesList.<Predicate>toArray(
+                    new Predicate[predicatesList.size()])));
+
             cq.select(rt);
 
             Expression<String> express = rt.get("firstname");
