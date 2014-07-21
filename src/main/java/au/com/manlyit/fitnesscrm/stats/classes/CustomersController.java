@@ -116,15 +116,15 @@ public class CustomersController implements Serializable {
         inRole = FacesContext.getCurrentInstance().getExternalContext().isUserInRole(roleName);
         return inRole;
     }
-    
-    public void setSelectedCustomer(ActionEvent event){
-        if(multiSelected.length == 1){
+
+    public void setSelectedCustomer(ActionEvent event) {
+        if (multiSelected.length == 1) {
             Customers c = multiSelected[0];
             setSelected(c);
             JsfUtil.addSuccessMessage(configMapFacade.getConfig("setSelectedCustomer") + " " + c.getFirstname() + " " + c.getLastname() + ".");
-        }else if(multiSelected.length > 1){
+        } else if (multiSelected.length > 1) {
             JsfUtil.addErrorMessage(configMapFacade.getConfig("setSelectedCustomerTooManySelected"));
-        }else if(multiSelected.length == 0){
+        } else if (multiSelected.length == 0) {
             JsfUtil.addErrorMessage(configMapFacade.getConfig("setSelectedCustomerNoneSelected"));
         }
     }
@@ -386,6 +386,10 @@ public class CustomersController implements Serializable {
             try {
                 getFacade().edit(c);
                 recreateAllAffectedPageModels();
+                FacesContext context = FacesContext.getCurrentInstance();
+                EziDebitPaymentGateway ezi = (EziDebitPaymentGateway) context.getApplication().evaluateExpressionGet(context, "#{ezidebit}", EziDebitPaymentGateway.class);
+
+                ezi.editCustomerDetailsInEziDebit(c);
                 JsfUtil.addSuccessMessage(configMapFacade.getConfig("ChangesSaved"));
             } catch (Exception e) {
                 JsfUtil.addErrorMessage(e.getMessage(), configMapFacade.getConfig("PersistenceErrorOccured"));

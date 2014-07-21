@@ -319,6 +319,31 @@
 
                             </p:dataTable>
                         </p:panel>
+                        <p:panel id="ezidebitCustomerDetailsPanel" rendered="#{ezidebit.currentCustomerDetails != null }" header="EziDebit Customer Record">
+                            <p:panelGrid columns="2" style="width:100%">
+                                <p:outputLabel value="Customer Name:" /> <h:outputText value="#{ezidebit.currentCustomerDetails.customerFirstName.value} #{ezidebit.currentCustomerDetails.customerName.value}"/>
+                                <p:outputLabel value="Customer Address:" /> <h:outputText value="#{ezidebit.currentCustomerDetails.addressLine2.value} #{ezidebit.currentCustomerDetails.addressLine1.value}, #{ezidebit.currentCustomerDetails.addressSuburb.value} #{ezidebit.currentCustomerDetails.addressState.value} #{ezidebit.currentCustomerDetails.addressPostCode.value}"/>
+                                <p:outputLabel value="Contract Start:" /> <h:outputText value="#{ezidebit.currentCustomerDetails.contractStartDate.value}"/>
+                                <p:outputLabel value="Email Address:" /> <h:outputText value="#{ezidebit.currentCustomerDetails.email.value}"/>
+                                <p:outputLabel value="Mobile Phone:" /> <h:outputText value="#{ezidebit.currentCustomerDetails.mobilePhone.value}"/>
+                                <p:outputLabel value="Ezidebit ID:" /> <h:outputText value="#{ezidebit.currentCustomerDetails.ezidebitCustomerID.value}"/>
+                                <p:outputLabel value="General  ID:" /> <h:outputText value="#{ezidebit.currentCustomerDetails.yourGeneralReference.value}"/>
+                                <p:outputLabel value="System   ID:" /> <h:outputText value="#{ezidebit.currentCustomerDetails.yourSystemReference.value}"/>
+                                <p:outputLabel value="Status:" /> <h:outputText value="#{ezidebit.currentCustomerDetails.statusDescription.value}"/>
+                                <p:outputLabel value="Payment Method:" /> <h:outputText value="#{ezidebit.currentCustomerDetails.paymentMethod.value}"/>
+                                <p:outputLabel value="Payment Period" /> <h:outputText value="#{ezidebit.currentCustomerDetails.paymentPeriod.value}"/>
+                                <p:outputLabel value="Payment Day Of Month" /> <h:outputText value="#{ezidebit.currentCustomerDetails.paymentPeriodDayOfMonth.value}"/>
+                                <p:outputLabel value="Payment Day of Week" /> <h:outputText value="#{ezidebit.currentCustomerDetails.paymentPeriodDayOfWeek.value}"/>
+                                <p:outputLabel value="Successful Payments" /> <h:outputText value="#{ezidebit.currentCustomerDetails.totalPaymentsSuccessful}"/>
+                                <p:outputLabel value="Amount Paid" /> <h:outputText value="#{ezidebit.currentCustomerDetails.totalPaymentsSuccessfulAmount}"/>
+                                <p:outputLabel value="Failed Payments" /> <h:outputText value="#{ezidebit.currentCustomerDetails.totalPaymentsFailed}"/>
+                                <p:outputLabel value="Failed Amount" /> <h:outputText value="#{ezidebit.currentCustomerDetails.totalPaymentsFailedAmount}"/>
+                                <p:outputLabel value="Send Expired Card SMS" /> <h:outputText value="#{ezidebit.currentCustomerDetails.smsExpiredCard.value}"/>
+                                <p:outputLabel value="Send Failed Payment SMS" /> <h:outputText value="#{ezidebit.currentCustomerDetails.smsFailedNotification.value}"/>
+                                <p:outputLabel value="Send Payment Reminder SMS" /> <h:outputText value="#{ezidebit.currentCustomerDetails.smsPaymentReminder.value}"/>
+                                
+                            </p:panelGrid>
+                        </p:panel>
                         <p:outputPanel id="iFrameHeaderPanel" >
                             <p:panelGrid id="dialoguePaymenstGrid1" columns="2" rendered="#{ezidebit.customerExistsInPaymentGateway == false and ezidebit.customerDetailsHaveBeenRetrieved == true}" >
                                 <p:commandButton  id="paymentsButton" ajax="true"   actionListener="#{ezidebit.createCustomerRecord}" update=":growl :tv:paymentsForm "   value="#{configMapController.getKey('EditCustomersUpdatePayment')}" immediate="true"/>
@@ -332,13 +357,13 @@
                     </h:form>  
                     <h:form id="iFrameForm" > 
 
-                        <p:outputPanel id="iFramePanel" >
-                            <p:panelGrid id="dialoguePaymenstGrid2" columns="2" rendered="#{ezidebit.customerExistsInPaymentGateway == true and ezidebit.customerDetailsHaveBeenRetrieved == true}" >
-                                <p:panel id="viewPaymentsGrid"  >
+                      <!--  <p:panel id="iFramePanel" header="Edit The Payment Method for Customer #{customersController.selected.firstname} #{customersController.selected.lastname}" >-->
+                            <p:outputPanel id="iFramePanel" >
+                            <p:panelGrid id="dialoguePaymenstGrid2" columns="2" rendered="#{ezidebit.customerExistsInPaymentGateway == true and ezidebit.customerDetailsHaveBeenRetrieved == true}"  >
+                                <p:panel id="viewPaymentsGrid" header="View Payment Method for Customer #{customersController.selected.firstname} #{customersController.selected.lastname}" >
                                     <iframe id="ezidebitIframeView"  style="width:400px;height:400px" src="#{ezidebit.getEziDebitWidgetUrl(false)}" />
                                 </p:panel>
-                                <p:panel id="editPaymentsGrid" >
-                                    <p:outputLabel value="Edit Payment Details"/> <br/>
+                                <p:panel id="editPaymentsGrid" header="Edit The Payment Method for Customer #{customersController.selected.firstname} #{customersController.selected.lastname}">
                                     <iframe id="ezidebitIframeEdit"  style="width:400px;height:400px" src="#{ezidebit.getEziDebitWidgetUrl(true)}" />
                                 </p:panel>
                             </p:panelGrid>

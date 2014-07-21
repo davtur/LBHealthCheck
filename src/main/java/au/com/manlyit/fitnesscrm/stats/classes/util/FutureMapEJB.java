@@ -140,16 +140,18 @@ public class FutureMapEJB {
                  }
                  }*/
                 int y = 0;
+                String details = "";
                 for (Map.Entry pairsFut : fmap.entrySet()) {
                     Future ft = (Future) pairsFut.getValue();
                     String key = (String) pairsFut.getKey();
                     if (ft.isDone()) {
                         y++;
                         logger.log(Level.INFO, "SessionId {0} async job {1} has finished.", new Object[]{key, sessionId});
+                        details += key + " ";
                     }
                 }
                 if (y > 0) {
-                    sendMessage(sessionId, "Asynchronous Tasks Completed", Integer.toString(y));
+                    sendMessage(sessionId, "Asynchronous Tasks Completed", details);
                     logger.log(Level.INFO, "Notifying that {0} async jobs for sessionId {1} have finished.", new Object[]{Integer.toString(y), sessionId});
                 }
 

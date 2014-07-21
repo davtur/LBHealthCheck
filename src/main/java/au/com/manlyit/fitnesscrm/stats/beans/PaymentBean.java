@@ -27,13 +27,13 @@ import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Properties;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ejb.AsyncResult;
 import javax.ejb.Asynchronous;
 import javax.ejb.Stateless;
-import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -196,7 +196,7 @@ public class PaymentBean implements Serializable {
 //New Zealand Customers the mobile
 //phone number must be 10 digits
 //long and begin with '02'
-        EziResponseOfstring editCustomerDetail = ws.editCustomerDetails(digitalKey, eziDebitRef, ourSystemRef, cust.getId().toString(), humanFriendlyReference, cust.getLastname(), cust.getFirstname(), cust.getStreetAddress(), addresssLine2, cust.getSuburb(), cust.getPostcode(), cust.getAddrState(), cust.getEmailAddress(), payParams.getMobilePhoneNumber(), payParams.getSmsPaymentReminder(), payParams.getSmsFailedNotification(), payParams.getSmsExpiredCard(), payParams.getLoggedInUser().getUsername());
+        EziResponseOfstring editCustomerDetail = ws.editCustomerDetails(digitalKey, eziDebitRef, ourSystemRef, cust.getId().toString(), humanFriendlyReference, cust.getLastname(), cust.getFirstname(), cust.getStreetAddress(), addresssLine2, cust.getSuburb(), cust.getPostcode(), cust.getAddrState(), cust.getEmailAddress(), cust.getTelephone(), payParams.getSmsPaymentReminder(), payParams.getSmsFailedNotification(), payParams.getSmsExpiredCard(), payParams.getLoggedInUser().getUsername());
         logger.log(Level.INFO, "editCustomerDetail Response: Error - {0}, Data - {1}", new Object[]{editCustomerDetail.getErrorMessage().getValue(), editCustomerDetail.getData().getValue()});
         if (editCustomerDetail.getError() == 0) {// any errors will be a non zero value
             result = true;
@@ -307,7 +307,13 @@ public class PaymentBean implements Serializable {
                 loggedInUser = loggedInUser.substring(0, 50);
                 logger.log(Level.WARNING, "addPayment loggedInUser is greater than the allowed 50 characters. Truncating! to 50 chars");
             }
-            EziResponseOfstring eziResponse = ws.changeCustomerStatus(digitalKey, eziDebitCustomerId, ourSystemCustomerReference, newStatus, loggedInUser);
+            EziResponseOfstring eziResponse = null;
+            try {
+                eziResponse = ws.changeCustomerStatus(digitalKey, eziDebitCustomerId, ourSystemCustomerReference, newStatus, loggedInUser);
+            } catch (Exception e) {
+                logger.log(Level.INFO, "changeCustomerStatus Response: Error - {0}, Data - {1}", e);
+                return new AsyncResult<>(result);
+            }
             logger.log(Level.INFO, "changeCustomerStatus Response: Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
             if (eziResponse.getError() == 0) {// any errors will be a non zero value
                 if (eziResponse.getData().getValue().compareTo("S") == 0) {

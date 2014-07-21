@@ -77,6 +77,7 @@ public class EziDebitPaymentGateway implements Serializable {
     private List<ScheduledPaymentPojo> scheduledPaymentsList;
     private ScheduledPaymentPojo selectedScheduledPayment;
     private List<ScheduledPaymentPojo> scheduledPaymentsListFilteredItems;
+    private CustomerDetails currentCustomerDetails;
     private Payment payment;
     private Date paymentDebitDate = new Date();
     private Date changeFromDate = new Date();
@@ -175,6 +176,9 @@ public class EziDebitPaymentGateway implements Serializable {
         //  }
         return paymentsList;
     }
+    private void getCustDetailsFromEzi(){
+       startAsynchJob("GetCustomerDetails", paymentBean.getCustomerDetails(selectedCustomer, getDigitalKey()));
+    }
 
     private void getPayments() {
         GregorianCalendar cal = new GregorianCalendar();
@@ -183,6 +187,13 @@ public class EziDebitPaymentGateway implements Serializable {
         cal.add(Calendar.MONTH, -24);
         startAsynchJob("GetPayments", paymentBean.getPayments(selectedCustomer, "ALL", "ALL", "ALL", "", cal.getTime(), endDate, false, getDigitalKey()));
         startAsynchJob("GetScheduledPayments", paymentBean.getScheduledPayments(selectedCustomer, cal.getTime(), endDate, getDigitalKey()));
+    }
+    
+    public void editCustomerDetailsInEziDebit(Customers cust){
+        if(customerExistsInPaymentGateway){
+             startAsynchJob("EditCustomerDetails", paymentBean.editCustomerDetails(cust, null, getDigitalKey()));
+        }
+       
     }
 
     /**
@@ -564,6 +575,20 @@ public class EziDebitPaymentGateway implements Serializable {
         this.duplicateValues = duplicateValues;
     }
 
+    /**
+     * @return the currentCustomerDetails
+     */
+    public CustomerDetails getCurrentCustomerDetails() {
+        return currentCustomerDetails;
+    }
+
+    /**
+     * @param currentCustomerDetails the currentCustomerDetails to set
+     */
+    public void setCurrentCustomerDetails(CustomerDetails currentCustomerDetails) {
+        this.currentCustomerDetails = currentCustomerDetails;
+    }
+
     private class eziDebitThreadFactory implements ThreadFactory {
 
         @Override
@@ -904,7 +929,7 @@ public class EziDebitPaymentGateway implements Serializable {
     }
 
     public void checkIfAsyncJobsHaveFinishedAndUpdate() {
-        CustomerDetails cd;
+
         String key = "";
 
         try {
@@ -914,10 +939,8 @@ public class EziDebitPaymentGateway implements Serializable {
                 Future ft = (Future) futureMapGetKey(key);
                 if (ft.isDone()) {
                     futureMapRemoveKey(key);
-                    setAutoStartPoller(false);
-                    cd = (CustomerDetails) ft.get();
-                    customerExistsInPaymentGateway = cd != null;
-                    setCustomerDetailsHaveBeenRetrieved(true);
+                    processGetCustomerDetails(ft);
+
                 }
             }
             /// process next op
@@ -1071,7 +1094,7 @@ public class EziDebitPaymentGateway implements Serializable {
                 }
             }
 
-        } catch (ExecutionException | CancellationException | InterruptedException ex) {
+        } catch (CancellationException ex) {
             logger.log(Level.WARNING, key + ":", ex);
 
         }
@@ -1162,6 +1185,7 @@ public class EziDebitPaymentGateway implements Serializable {
         }
         if (result == true) {
             JsfUtil.addSuccessMessage("Payment Gateway", "Successfully Edited Customer Details  .");
+            getCustDetailsFromEzi();
             getPayments();
         } else {
             JsfUtil.addErrorMessage("Payment Gateway", "The operation failed!.");
@@ -1211,6 +1235,7 @@ public class EziDebitPaymentGateway implements Serializable {
         }
         if (result == true) {
             JsfUtil.addSuccessMessage("Payment Gateway", "Successfully Changed Customer Status  .");
+            startAsynchJob("GetCustomerDetails", paymentBean.getCustomerDetails(selectedCustomer, getDigitalKey()));
             getPayments();
         } else {
             JsfUtil.addErrorMessage("Payment Gateway", "The operation failed!.");
@@ -1314,6 +1339,36 @@ public class EziDebitPaymentGateway implements Serializable {
         logger.log(Level.INFO, "processGetPaymentExchangeVersion completed");
     }
 
+    private void processGetCustomerDetails(Future ft) {
+        CustomerDetails result = null;
+        setCustomerDetailsHaveBeenRetrieved(true);
+        try {
+            result = (CustomerDetails) ft.get();
+        } catch (InterruptedException | ExecutionException ex) {
+            Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, "GetCustomerDetails", ex);
+        }
+        if (result != null) {
+            // do something with result
+            setAutoStartPoller(false);
+            customerExistsInPaymentGateway = true;
+            
+            setCurrentCustomerDetails(result);
+            String eziStatusCode = result.getStatusDescription().getValue().toUpperCase().trim();
+            String ourStatus = getSelectedCustomer().getActive().getCustomerState().toUpperCase().trim();
+            if (ourStatus.contains(eziStatusCode) == false) {
+                // status codes don't match
+                String cust = getSelectedCustomer().getUsername();
+                String message = "Customer Status codes dont match. Customer: " + cust + ", ezidebit status:" + eziStatusCode + ", Crm Status:" + ourStatus + "";
+                logger.log(Level.WARNING, message);
+                JsfUtil.addErrorMessage(message);
+            }
+
+        } else {
+            customerExistsInPaymentGateway = false;
+        }
+        logger.log(Level.INFO, "processGetCustomerDetails completed");
+    }
+
     private void processGetCustomerDetailsFromEziDebitId(Future ft) {
         CustomerDetails result = null;
         try {
@@ -1365,6 +1420,7 @@ public class EziDebitPaymentGateway implements Serializable {
         setScheduledPaymentsList(null);
         setScheduledPaymentsListFilteredItems(null);
         setCustomerDetailsHaveBeenRetrieved(false);
+        
 
     }
 
@@ -1373,9 +1429,11 @@ public class EziDebitPaymentGateway implements Serializable {
      */
     public void setSelectedCustomer(Customers selectedCustomer) {
         this.selectedCustomer = selectedCustomer;
+        this.currentCustomerDetails = null;
         refreshIFrames = true;
         futureMap.cancelFutures(sessionId);
-        startAsynchJob("GetCustomerDetails", paymentBean.getCustomerDetails(selectedCustomer, getDigitalKey()));
+        getCustDetailsFromEzi();
+        
         getPayments();
         this.progress = 0;
 
