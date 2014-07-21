@@ -97,8 +97,9 @@ public class CustomersFacade extends AbstractFacade<Customers> {
             Predicate condition2 = cb.equal(cb.trim(cb.upper(custLastname)), lastname.toUpperCase().trim());
             cq.where(cb.and(condition1, condition2));
 
-            Query q = em.createQuery(cq);
-            //Query q = em.createNativeQuery("SELECT * FROM customers where firstname = upper('" + firstname.trim() + "') and lastname = upper('" + lastname.trim() + "') ", Customers.class);
+            //Query q = em.createQuery(cq);
+           
+            Query q = em.createNativeQuery("SELECT * FROM customers where upper(firstname) = upper('" + firstname.trim() + "') and upper(lastname) = upper('" + lastname.trim() + "') ", Customers.class);
             cm = (Customers) q.getSingleResult();
         } catch (Exception e) {
             logger.log(Level.INFO, "Customer not found:{0} {1} , {2}", new Object[]{firstname, lastname, e.getMessage()});
