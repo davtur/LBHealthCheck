@@ -33,7 +33,7 @@
                             </h:panelGroup >
                             <h:panelGroup id="selectedUserPanel">
                                 <h:outputText id="selectedUser" value="Selected: #{customersController.selected.firstname} #{customersController.selected.lastname}" />
-                                <p:commandButton id="selectCustomerButton"   actionListener="#{customersController.setSelectedCustomer}" value="#{configMapController.getKey('ListCustomersSelectCustomersButton')}"  update=":tv:customerslistForm1  :growl" /> 
+                                <p:commandButton id="selectCustomerButton"   actionListener="#{customersController.setSelectedCustomer}" value="#{configMapController.getKey('ListCustomersSelectCustomersButton')}"  update=":tv:customerslistForm1 :tv:formCustomersEdit1 :tv:paymentsForm :growl" /> 
                             </h:panelGroup >
                             <h:panelGrid columns="2">
                                 <p:outputLabel  value="Filter:    " for="selectedStateCheckbox"/>

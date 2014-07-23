@@ -170,7 +170,7 @@ public class PaymentBean implements Serializable {
         Collection<PaymentParameters> pay = cust.getPaymentParametersCollection();
         PaymentParameters payParams = null;
         String addresssLine2 = ""; // not used
-        String humanFriendlyReference = cust.getLastname().toUpperCase() + " " + cust.getFirstname().toUpperCase(); // existing customers use this type of reference by default
+        String humanFriendlyReference = cust.getId() +" "+cust.getLastname().toUpperCase() + " " + cust.getFirstname().toUpperCase(); // existing customers use this type of reference by default
 
         if (pay != null) {
             for (PaymentParameters pp : pay) {

@@ -15,6 +15,7 @@ import au.com.manlyit.fitnesscrm.stats.classes.util.PushComponentUpdateBean;
 import au.com.manlyit.fitnesscrm.stats.classes.util.ScheduledPaymentPojo;
 import au.com.manlyit.fitnesscrm.stats.db.CustomerState;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
+import au.com.manlyit.fitnesscrm.stats.db.PaymentParameters;
 import au.com.manlyit.fitnesscrm.stats.webservices.ArrayOfPayment;
 import au.com.manlyit.fitnesscrm.stats.webservices.ArrayOfScheduledPayment;
 import au.com.manlyit.fitnesscrm.stats.webservices.CustomerDetails;
@@ -29,7 +30,9 @@ import java.io.Serializable;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
@@ -44,6 +47,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.ejb.AsyncResult;
+import javax.ejb.EJBException;
 import javax.enterprise.context.SessionScoped;
 import javax.faces.context.FacesContext;
 import javax.faces.event.ActionEvent;
@@ -109,6 +114,7 @@ public class EziDebitPaymentGateway implements Serializable {
     private CustomersFacade customersFacade;
     @Inject
     private CustomerStateFacade customerStateFacade;
+
     private String bulkvalue = "";
     private String duplicateValues = "";
     private String listOfIdsToImport;
@@ -176,8 +182,9 @@ public class EziDebitPaymentGateway implements Serializable {
         //  }
         return paymentsList;
     }
-    private void getCustDetailsFromEzi(){
-       startAsynchJob("GetCustomerDetails", paymentBean.getCustomerDetails(selectedCustomer, getDigitalKey()));
+
+    private void getCustDetailsFromEzi() {
+        startAsynchJob("GetCustomerDetails", paymentBean.getCustomerDetails(selectedCustomer, getDigitalKey()));
     }
 
     private void getPayments() {
@@ -188,12 +195,12 @@ public class EziDebitPaymentGateway implements Serializable {
         startAsynchJob("GetPayments", paymentBean.getPayments(selectedCustomer, "ALL", "ALL", "ALL", "", cal.getTime(), endDate, false, getDigitalKey()));
         startAsynchJob("GetScheduledPayments", paymentBean.getScheduledPayments(selectedCustomer, cal.getTime(), endDate, getDigitalKey()));
     }
-    
-    public void editCustomerDetailsInEziDebit(Customers cust){
-        if(customerExistsInPaymentGateway){
-             startAsynchJob("EditCustomerDetails", paymentBean.editCustomerDetails(cust, null, getDigitalKey()));
+
+    public void editCustomerDetailsInEziDebit(Customers cust) {
+        if (customerExistsInPaymentGateway) {
+            startAsynchJob("EditCustomerDetails", paymentBean.editCustomerDetails(cust, null, getDigitalKey()));
         }
-       
+
     }
 
     /**
@@ -741,6 +748,39 @@ public class EziDebitPaymentGateway implements Serializable {
      */
     public void setEditPaymentDetails(boolean editPaymentDeatils) {
         this.editPaymentDetails = editPaymentDeatils;
+    }
+
+    private void addDefaultPaymentParametersIfEmpty(Customers cust,Date contractStartDate) {
+        if (cust == null) {
+            logger.log(Level.WARNING, "Customer is null: addDefaultPaymentParametersIfEmpty(Customers cust)");
+            return;
+        }
+        Collection<PaymentParameters> pay = cust.getPaymentParametersCollection();
+        if (pay == null) {
+            logger.log(Level.WARNING, "Payment Parameters are null");
+            cust.setPaymentParametersCollection(new ArrayList<PaymentParameters>());
+            pay = cust.getPaymentParametersCollection();
+        }
+        PaymentParameters payParams = null;
+        if (pay.isEmpty()) {
+            payParams = new PaymentParameters(0, contractStartDate, cust.getTelephone(), "NO", "NO", "NO", paymentGateway);
+            payParams.setLoggedInUser(cust);
+            cust.getPaymentParametersCollection().add(payParams);
+            logger.log(Level.INFO, "Adding default payment gateway parameters for this customer as they don't have any.");
+            customersFacade.editAndFlush(cust);
+        } else {
+            for (PaymentParameters pp : pay) {
+                if (pp.getPaymentGatewayName().compareTo(paymentGateway) == 0) {
+                    payParams = pp;
+                }
+            }
+        }
+
+        if (payParams == null) {
+            logger.log(Level.WARNING, "Payment gateway EZIDEBIT parameters were not saved or incorrect payment gateway name!");
+
+        }
+
     }
 
     public void createCustomerRecord() {
@@ -1351,7 +1391,7 @@ public class EziDebitPaymentGateway implements Serializable {
             // do something with result
             setAutoStartPoller(false);
             customerExistsInPaymentGateway = true;
-            
+
             setCurrentCustomerDetails(result);
             String eziStatusCode = result.getStatusDescription().getValue().toUpperCase().trim();
             String ourStatus = getSelectedCustomer().getActive().getCustomerState().toUpperCase().trim();
@@ -1420,7 +1460,6 @@ public class EziDebitPaymentGateway implements Serializable {
         setScheduledPaymentsList(null);
         setScheduledPaymentsListFilteredItems(null);
         setCustomerDetailsHaveBeenRetrieved(false);
-        
 
     }
 
@@ -1433,7 +1472,7 @@ public class EziDebitPaymentGateway implements Serializable {
         refreshIFrames = true;
         futureMap.cancelFutures(sessionId);
         getCustDetailsFromEzi();
-        
+
         getPayments();
         this.progress = 0;
 
@@ -1537,15 +1576,78 @@ public class EziDebitPaymentGateway implements Serializable {
     }
 
     public String createBulk() {
-
+        // this script doea a bulk inport from the payment gateway
         // delimiter is semi colon as ezidebit puts commas in the report
+        // example line from csv file -Note: delimter is semicolon and line feeds replaced with tabs in column1
+        //
+        //"LASTNAME, TEST66\t  Our Ref: 664898\t  Your Ref: LASTNAME TEST66";Incorrect BSB or A/C;$795.00;15/07/14;22/07/14;0;1;
         int count = 0;
         try {
             String[] st = bulkvalue.split("\r\n");
+            ArrayList<Integer> duplicaterows = new ArrayList<>();
+            //sort the array and remove duplicates
+            for (int x = 0; x < st.length; x++) {
+                String line = st[x];
+                // remove any non apha chars that will break the name search
+                line = line.replaceAll("[^;:,a-zA-Z0-9\\s\t/]", "");
+                int d = line.indexOf(";");
+                if (d > 1) {// make sure we have a valid row
+                    String[] cells = line.split(";");
+                    String references[] = cells[0].split("\t");
+                    if (references.length == 3) {
+                        String status = cells[1];
+                        String startDateText = cells[3];
+                        String name = references[0];
+                        if (status.contains("Cancelled") == false) {// we only want to check non cancelled customers for duplicates
+                            for (int y = 0; y < st.length; y++) {
+                                if (y != x) {
+                                    String line2 = st[y];
+                                    line2 = line2.replaceAll("[^;:,a-zA-Z0-9\\s\t/]", "");
+                                    int d2 = line.indexOf(";");
+                                    if (d2 > 1) {// make sure we have a valid row
+                                        String[] cells2 = line2.split(";");
+                                        String references2[] = cells2[0].split("\t");
+                                        if (references2.length == 3) {
+                                            if (name.contains(references2[0])) {
+                                                // duplicate found
+                                                if (cells2[1].contains("Cancelled") == true) {
+                                                    duplicaterows.add(y);
+                                                    logger.log(Level.INFO, "Duplicate Found: {0}", line2);
+                                                } else {
+                                                    logger.log(Level.WARNING, "Non Cancelled Duplicate Found: {0}", line2);
+                                                }
+                                            }
+                                        }
+                                        // String status2 = cells2[1];
+                                        // String startDateText2 = cells2[3];
+                                        // String name2 = references[0];
+                                    }
+
+                                }
+                            }
+                        }
+                    }
+                }
+            }
             String duplicateLines = "";
+            List<String> sta = new ArrayList<>(Arrays.asList(st));
+            for (int z = sta.size() - 1; z >= 0; z--) {
+                if (duplicaterows.contains(z)) {
+                    String message = "REMOVING DUPLICATE: " + sta.get(z);
+                    logger.log(Level.INFO, message);
+                    duplicateLines += message + "\r\n";
+                    sta.remove(z);
+                }
+            }
+
+            st = new String[sta.size()];
+            st = sta.toArray(st);
+
             CustomerDetails cd = null;
             for (int x = 0; x < st.length; x++) {
                 String line = st[x];
+                // remove any non apha chars that will break the name search
+                line = line.replaceAll("[^;:,a-zA-Z0-9\\s\t/]", "");
                 int d = line.indexOf(";");
                 if (d > 1) {
                     String[] cells = line.split(";");
@@ -1561,8 +1663,8 @@ public class EziDebitPaymentGateway implements Serializable {
                             String firstname = "";
                             String name[] = references[0].split(",");
                             if (name.length > 1) {
-                                lastname = name[0].trim();
-                                firstname = name[1].trim();
+                                lastname = name[0].replaceAll("[^a-zA-Z0-9\\s]", "").trim();
+                                firstname = name[1].replaceAll("[^a-zA-Z0-9\\s]", "").trim();
 
                             } else {
                                 logger.log(Level.INFO, "No firstname for {0}", references[0]);
@@ -1573,14 +1675,17 @@ public class EziDebitPaymentGateway implements Serializable {
 
                             // check for existing customer in our database
                             Customers localCustomer = customersFacade.findCustomerByName(firstname, lastname);
+                            logger.log(Level.INFO, "Looking for {0} {1} in the local CRM database", new Object[]{firstname, lastname});
 
                             if (localCustomer != null) {
-
+                                logger.log(Level.INFO, "Found {0} {1} in the local CRM database with CRM id:{2}", new Object[]{firstname, lastname, localCustomer.getId()});
+                                addDefaultPaymentParametersIfEmpty(localCustomer,contractStartDate);
+                                logger.log(Level.INFO, "Looking for {0} {1} in the payment Gateway database using Ezidebit reference:{2} database", new Object[]{firstname, lastname, ezidebitRef});
                                 INonPCIService ws = new NonPCIService().getBasicHttpBindingINonPCIService();
                                 EziResponseOfCustomerDetailsTHgMB7OL customerdetails = ws.getCustomerDetails(getDigitalKey(), ezidebitRef, "");
                                 if (customerdetails.getError() == 0) {// any errors will be a non zero value
                                     logger.log(Level.INFO, "Get Customer (EziId) Details Response: Name - {0}", customerdetails.getData().getValue().getCustomerName().getValue());
-
+                                    logger.log(Level.INFO, "Found {0} {1} in the Payment Gateway database with Ezidebit id:{2}", new Object[]{firstname, lastname, ezidebitRef});
                                     cd = customerdetails.getData().getValue();
 
                                 } else {
@@ -1590,12 +1695,13 @@ public class EziDebitPaymentGateway implements Serializable {
                                     boolean updateSystemRefInEzidebit = false;
                                     // found the customer in ezidebit. check the system reference and update it to our customers primary key
                                     int key = localCustomer.getId();
-                                    String eziSysRef = cd.getYourSystemReference().getValue();
-                                    logger.log(Level.INFO, "Customer {0}, Our primary Key: {1}, Ezidebit Ref: {2}", new Object[]{references[0], key, eziSysRef});
+                                    String eziYourSysRef = cd.getYourSystemReference().getValue();
+                                    String eziSysRef = cd.getEzidebitCustomerID().getValue();
+                                    logger.log(Level.INFO, "Customer {0}, Our primary Key: {1},EziYourSysRef {3}, Ezidebit Ref: {2}", new Object[]{references[0], key, eziSysRef,eziYourSysRef});
                                     try {
-                                        int eziRef = Integer.parseInt(eziSysRef);
+                                        int eziRef = Integer.parseInt(eziYourSysRef);
                                         if (eziRef == key) {
-                                            logger.log(Level.INFO, "Keys already match. Nothing to do.", new Object[]{references[0], key, eziSysRef});
+                                            logger.log(Level.INFO, "Keys already match. Nothing to do.", new Object[]{references[0], key, eziYourSysRef});
                                         } else {
                                             logger.log(Level.SEVERE, "The system references don't match!  Possible Duplicate!");
                                             duplicateLines += "The system references don't match! Possible Duplicate! Customer " + references[0] + ", Our primary Key:" + key + ", Ezidebit Ref: " + eziSysRef + "\r\n";
@@ -1606,9 +1712,9 @@ public class EziDebitPaymentGateway implements Serializable {
                                         updateSystemRefInEzidebit = true;
                                     }
                                     if (updateSystemRefInEzidebit == true) {
-
-                                        Future<Boolean> res = paymentBean.editCustomerDetails(localCustomer, null, getDigitalKey());
                                         try {
+                                            Future<Boolean> res = paymentBean.editCustomerDetails(localCustomer, eziSysRef, getDigitalKey());
+
                                             if (res.get(180, TimeUnit.SECONDS) == true) {
                                                 logger.log(Level.INFO, "System reference updated");
                                             } else {
@@ -1620,18 +1726,29 @@ public class EziDebitPaymentGateway implements Serializable {
                                             logger.log(Level.WARNING, "System reference update Failed due to timeout, execution or interuption exception!");
                                             duplicateLines += "The System reference update Failed ! Customer " + references[0] + ", Our primary Key:" + key + ", Ezidebit Ref: " + eziSysRef + "\r\n";
 
+                                        } catch (EJBException ex) {
+                                            Exception causedByEx = ex.getCausedByException();
+                                            logger.log(Level.WARNING, "System reference update Failed due to EJB Excpetion:", causedByEx.getMessage());
+                                            duplicateLines += "The System reference update Failed ! System Error " + causedByEx.getMessage() + "\r\n";
+
                                         }
+
                                     }
+
                                     status = status.toUpperCase().trim();
                                     if (status.contains("HOLD")) {
                                         status = "ON HOLD";
+                                    }
+                                    if (status.contains("NEW") || status.contains("WAITING BANK DETAILS") || status.contains("INCORRECT BSB")) {
+                                        status = "ACTIVE";
                                     }
                                     List<CustomerState> csa = customerStateFacade.findAll();
                                     for (CustomerState cs : csa) {
                                         if (status.toUpperCase().contains(cs.getCustomerState())) {
                                             if (localCustomer.getActive().getCustomerState().contains(cs.getCustomerState()) == false) {
                                                 localCustomer.setActive(cs);
-                                                logger.log(Level.INFO, "Updating Status to: {0}", cs.getCustomerState());
+                                                customersFacade.editAndFlush(localCustomer);
+                                                logger.log(Level.INFO, "Updating CRM Status to: {0}. EziDebit Status: {1}", new Object[]{cs.getCustomerState(), status});
                                             }
                                         }
                                     }

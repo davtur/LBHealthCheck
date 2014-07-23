@@ -12,16 +12,18 @@
         </ui:define>
         <ui:define name="body">
             <h:form id="configForm">
-            <h:panelGroup id="messagePanel" layout="block">
-                <h:messages errorStyle="color: red" infoStyle="color: green" layout="table"/>
-            </h:panelGroup>
-            
+                <h:panelGroup id="messagePanel" layout="block">
+                    <h:messages errorStyle="color: red" infoStyle="color: green" layout="table"/>
+                </h:panelGroup>
+
                 <p:panel>
                     <h:outputLabel value="#{configMapController.getKey('CreateEzidebitImportLabel_value')}"  />
                 </p:panel>
                 <p:panel>
                     <h:panelGrid columns="1">
-                        <h:outputLabel value="Copy and paste the ezidebit customer report printable version into a spreadsheet and save it as a csv file with a semicolon as the delimeter.Open wit a text editer,replace line feeds in column 1 with tabs, remove any special characters and paste it into the text box below." for="bulkvalue" />
+                        <h:outputLabel value="1. Copy and paste the ezidebit customer report printable version into a spreadsheet and replace line feeds (\n)  in column 1 with tabs." />
+                        <h:outputLabel value="2. Save it as a csv file with a semicolon as the delimeter." />
+                        <h:outputLabel value="3. Open with a text editer,and copy all and paste it into the text box below." for="bulkvalue" />
                         <p:inputTextarea rows="20" cols="300" id="bulkvalue" value="#{ezidebit.bulkvalue}" title="#{configMapController.getKey('CreateEzidebitImportTitle_bulkvalue')}" >
                             <p:ajax process="bulkvalue" event="keyup"/>
                         </p:inputTextarea>
