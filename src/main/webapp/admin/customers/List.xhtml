@@ -25,15 +25,13 @@
 
                             <h:panelGroup id="customerChangeStatusPanel">
                                 <p:commandButton id="changeStateButton"     actionListener="#{customersController.changeCustomersState}" value="#{configMapController.getKey('ListCustomersChangeStateButton')}"  update=":tv:customerslistForm1:customersTableList :growl" /> 
-
                                 <p:selectOneMenu id="active" valueChangeListener="#{customersController.selectOneMenuValueChangeListener}" converter="customerStateConverter" value="#{customersController.selectedState}" label="#{configMapController.getKey('CreateCustomersTitle_active')}" >
                                     <f:selectItems value="#{customerStateController.itemsAvailableAsObjects}"  var="custState" itemLabel="#{custState.customerState}" itemValue="#{custState}"/>                           
                                 </p:selectOneMenu>
-
                             </h:panelGroup >
-                            <h:panelGroup id="selectedUserPanel">
-                                <h:outputText id="selectedUser" value="Selected: #{customersController.selected.firstname} #{customersController.selected.lastname}" />
-                                <p:commandButton id="selectCustomerButton"   actionListener="#{customersController.setSelectedCustomer}" value="#{configMapController.getKey('ListCustomersSelectCustomersButton')}"  update=":tv:customerslistForm1 :tv:formCustomersEdit1 :tv:paymentsForm :growl" /> 
+                            <h:panelGroup id="selectedUserPanel">                 
+                                <p:commandButton id="selectCustomerButton"   actionListener="#{customersController.setSelectedCustomer}" value="#{configMapController.getKey('ListCustomersSelectCustomersButton')}" title="#{configMapController.getKey('ListCustomersSelectCustomersButtonHelp')}" update=":tv:customerslistForm1 :tv:formCustomersEdit1 :tv:paymentsForm :growl" /> 
+                            <h:outputText id="selectedUser" value="Selected: #{customersController.selected.firstname} #{customersController.selected.lastname}" />
                             </h:panelGroup >
                             <h:panelGrid columns="2">
                                 <p:outputLabel  value="Filter:    " for="selectedStateCheckbox"/>
