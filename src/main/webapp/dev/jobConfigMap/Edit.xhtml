@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" >
+
+    <ui:composition template="/template.xhtml">
+        <ui:define name="title">
+            <h:outputText value="#{configMapController.getKey('EditJobConfigMapTitle')}"></h:outputText>
+        </ui:define>
+        <ui:define name="body">
+            <h:panelGroup id="messagePanel" layout="block">
+                <h:messages errorStyle="color: red" infoStyle="color: green" layout="table"/>
+            </h:panelGroup>
+            <h:form>
+                <p:panel>
+                    <h:panelGrid columns="2">
+                        <h:outputLabel value="#{configMapController.getKey('EditJobConfigMapLabel_idjobConfigMap')}" for="idjobConfigMap" />
+                        <p:inputText id="idjobConfigMap" value="#{jobConfigMapController.selected.idjobConfigMap}" title="#{configMapController.getKey('EditJobConfigMapTitle_idjobConfigMap')}" required="true" requiredMessage="#{configMapController.getKey('EditJobConfigMapRequiredMessage_idjobConfigMap')}"/>
+                        <h:outputLabel value="#{configMapController.getKey('EditJobConfigMapLabel_configMapKey')}" for="configMapKey" />
+                        <h:selectOneMenu id="configMapKey" value="#{jobConfigMapController.selected.configMapKey}" title="#{configMapController.getKey('EditJobConfigMapTitle_configMapKey')}" >
+                            <f:selectItems value="#{configMapController.getKey('itemsAvailableSelectOne')}"/>
+                        </h:selectOneMenu>
+                        <h:outputLabel value="#{configMapController.getKey('EditJobConfigMapLabel_parentTask')}" for="parentTask" />
+                        <h:selectOneMenu id="parentTask" value="#{jobConfigMapController.selected.parentTask}" title="#{configMapController.getKey('EditJobConfigMapTitle_parentTask')}" required="true" requiredMessage="#{configMapController.getKey('EditJobConfigMapRequiredMessage_parentTask')}">
+                            <f:selectItems value="#{tasksController.itemsAvailableSelectOne}"/>
+                        </h:selectOneMenu>
+                        <h:outputLabel value="#{configMapController.getKey('EditJobConfigMapLabel_basicKey')}" for="basicKey" />
+                        <p:inputText id="basicKey" value="#{jobConfigMapController.selected.basicKey}" title="#{configMapController.getKey('EditJobConfigMapTitle_basicKey')}" required="true" requiredMessage="#{configMapController.getKey('EditJobConfigMapRequiredMessage_basicKey')}"/>
+                        <h:outputLabel value="#{configMapController.getKey('EditJobConfigMapLabel_basicValue')}" for="basicValue" />
+                        <p:inputTextarea rows="4" cols="30" id="basicValue" value="#{jobConfigMapController.selected.basicValue}" title="#{configMapController.getKey('EditJobConfigMapTitle_basicValue')}" />
+                    </h:panelGrid>
+                </p:panel>
+                <p:commandButton   ajax="false"    action="#{jobConfigMapController.update}" value="#{configMapController.getKey('EditJobConfigMapSaveLink')}"/>
+                <br />
+                <br />
+                <p:commandButton   ajax="false"    action="View" value="#{configMapController.getKey('EditJobConfigMapViewLink')}" immediate="true"/>
+                <br />
+                <p:commandButton   ajax="false"    action="#{jobConfigMapController.prepareList}" value="#{configMapController.getKey('EditJobConfigMapShowAllLink')}" immediate="true"/>
+                <br />
+                <br />
+                <p:commandButton   ajax="false"    value="#{configMapController.getKey('EditJobConfigMapIndexLink')}" action="/EnvManager/landing.xhtml" immediate="true" />
+            </h:form>
+        </ui:define>
+    </ui:composition>
+
+</html>

@@ -13,9 +13,13 @@ import au.com.manlyit.fitnesscrm.stats.db.QrtzJobDetails;
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PaginationHelper;
 import au.com.manlyit.fitnesscrm.stats.beans.QrtzJobDetailsFacade;
+import au.com.manlyit.fitnesscrm.stats.db.ConfigMap;
+import au.com.manlyit.fitnesscrm.stats.db.JobConfigMap;
+import au.com.manlyit.fitnesscrm.stats.db.Tasks;
 
 import java.io.Serializable;
-import java.util.ResourceBundle;
+import java.util.Collection;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Inject;
@@ -39,6 +43,7 @@ import org.quartz.impl.StdSchedulerFactory;
 import static org.quartz.TriggerBuilder.*;
 import static org.quartz.JobBuilder.*;
 import static org.quartz.CronScheduleBuilder.*;
+import org.quartz.JobKey;
 
 /*
  * 
@@ -59,6 +64,9 @@ import static org.quartz.CronScheduleBuilder.*;
 public class QrtzJobDetailsController implements Serializable {
 
     private QrtzJobDetails current;
+    private QrtzJobDetails[] multiSelected;
+    private List<QrtzJobDetails> filteredItems;
+    private QrtzJobDetails selectedForDeletion;
     private DataModel items = null;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.QrtzJobDetailsFacade ejbFacade;
@@ -100,9 +108,7 @@ public class QrtzJobDetailsController implements Serializable {
         return pagination;
     }
 
-    public void scheduleAllJobs() {
-        //emailer job - checks the emailQueue for emails that have been scheduled to be sent
-        JobDataMap jdm = new JobDataMap();
+    public JobDataMap addEmailParametersToJdm(JobDataMap jdm) {
         jdm.put("dbUsername", configMapFacade.getConfig("db.fitness.username"));
         jdm.put("dbPassword", configMapFacade.getConfig("db.fitness.password"));
         jdm.put("dbConnectURL", configMapFacade.getConfig("db.fitness.url"));
@@ -115,6 +121,79 @@ public class QrtzJobDetailsController implements Serializable {
         jdm.put("mail.smtp.socketFactory.fallback", configMapFacade.getConfig("mail.smtp.socketFactory.fallback"));
         jdm.put("mail.smtp.ssluser", configMapFacade.getConfig("mail.smtp.ssluser"));
         jdm.put("mail.smtp.sslpass", configMapFacade.getConfig("mail.smtp.sslpass"));
+
+        return jdm;
+    }
+
+    public void rescheduleAllJobs() {
+        removeAllJobs();
+
+        scheduleAllJobs();
+    }
+
+    public String scheduleTask(Tasks tsk, boolean runImmediately) {
+        String mess = tsk.getName() + " task scheduled successfully";
+        JobDataMap jdm = new JobDataMap();
+        Thread t = Thread.currentThread();
+        ClassLoader cl = t.getContextClassLoader();
+//Class toRun = cl.loadClass(args[0]);
+
+        Class jobClass;
+        Class callableJobClassToRun;
+        try {
+            jobClass = cl.loadClass(tsk.getTaskClassName());
+        } catch (Exception ex) {
+
+            String m = tsk.getName() + ". Error : Class not found. ClassName:" + tsk.getTaskClassName() + "Classpath = " + System.getProperty("java.class.path");
+            Logger.getLogger(QrtzJobDetailsController.class.getName()).log(Level.SEVERE, m, ex);
+            return m;
+        }
+        Collection<JobConfigMap> params = tsk.getJobConfigMapCollection();
+        for (JobConfigMap jcm : params) {
+            String k = "";
+            String v = "";
+            ConfigMap cm = jcm.getConfigMapKey();
+            if (cm == null) {
+                k = jcm.getBasicKey();
+                v = jcm.getBasicValue();
+            } else {
+                k = jcm.getBasicKey();
+                v = cm.getConfigvalue();
+            }
+            if (k.indexOf("jobClassToRun") != -1) {
+
+                try {
+                    callableJobClassToRun = cl.loadClass(v);
+                } catch (Exception ex) {
+
+                    String m = tsk.getName() + ". Error : jobClassToRun Callable Class not found. ClassName:" + v + ", Classpath = " + System.getProperty("java.class.path");
+                    Logger.getLogger(QrtzJobDetailsController.class.getName()).log(Level.SEVERE, null, ex);
+                    return m;
+                }
+                jdm.put(k, callableJobClassToRun);
+            } else {
+                jdm.put(k, v);
+            }
+
+        }
+        boolean result;
+        if (runImmediately == true) {
+            result = scheduleJob(null, tsk.getName(), jdm, jobClass);
+        } else {
+            result = scheduleJob(tsk.getCronEntry(), tsk.getName(), jdm, jobClass);
+        }
+        if (result == false)// something broke
+        {
+            mess = tsk.getName() + " task !! FAILED !! to be scheduled! Check the log for details.";
+        }
+        return mess;
+    }
+
+    public void scheduleAllJobs() {
+        //emailer job - checks the emailQueue for emails that have been scheduled to be sent
+        JobDataMap jdm = new JobDataMap();
+
+        jdm = addEmailParametersToJdm(jdm);
 
         scheduleJob("0 0/5 * * * ?", "Emailer", jdm, EmailerJob.class); // fire every 5 minutes
 
@@ -131,9 +210,6 @@ public class QrtzJobDetailsController implements Serializable {
         scheduleJob("0 0/2 * * * ?", "SSH", jdm2, sshJob1.class); // fire every 5 minutes
         JobDataMap jdm3 = new JobDataMap();
 
-        jdm3.put("dbUsername", configMapFacade.getConfig("db.fitness.username"));
-        jdm3.put("dbPassword", configMapFacade.getConfig("db.fitness.password"));
-        jdm3.put("dbConnectURL", configMapFacade.getConfig("db.fitness.url"));
         jdm3.put("jobClassToRun", HttpsLoginAndCheckWebpageCallable.class);
         jdm3.put("jobTimeoutInMilli", "60000");
         jdm3.put("jobType", "1");
@@ -146,48 +222,26 @@ public class QrtzJobDetailsController implements Serializable {
         jdm3.put("testOKCriteria2", "<!--- PLAN NAME SECTION --->");
         jdm3.put("logoutURL1", "https://memberservices.optuszoo.com.au/?logout=1");
         jdm3.put("userAgent", "Mozilla/5.0 (X11; Linux x86_64; rv:7.0.1) Gecko/20100101 Firefox/7.0.1");
-        jdm3.put("mail.smtp.ssluser", configMapFacade.getConfig("mail.smtp.ssluser"));
-        jdm3.put("mail.smtp.sslpass", configMapFacade.getConfig("mail.smtp.sslpass"));
 
+        jdm3 = addEmailParametersToJdm(jdm3);
         scheduleJob("0 0/2 * * * ?", "Login-and-webcheck", jdm3, CallableExecutorWithTimeoutJob.class); // fire every 2 minutes
 
         JobDataMap jdm4 = new JobDataMap();
-        jdm4.put("dbUsername", configMapFacade.getConfig("db.fitness.username"));
-        jdm4.put("dbPassword", configMapFacade.getConfig("db.fitness.password"));
-        jdm4.put("dbConnectURL", configMapFacade.getConfig("db.fitness.url"));
+
         jdm4.put("jobClassToRun", renderMonitoringChartsCallable1.class);
         jdm4.put("jobTimeoutInMilli", "60000");
         jdm4.put("jobType", "2");
-        jdm4.put("mail.smtp.host", configMapFacade.getConfig("mail.smtp.host"));
-        jdm4.put("mail.smtp.auth", configMapFacade.getConfig("mail.smtp.auth"));
-        jdm4.put("mail.debug", configMapFacade.getConfig("mail.debug"));
-        jdm4.put("mail.smtp.port", configMapFacade.getConfig("mail.smtp.port"));
-        jdm4.put("mail.smtp.socketFactory.port", configMapFacade.getConfig("mail.smtp.socketFactory.port"));
-        jdm4.put("mail.smtp.socketFactory.class", configMapFacade.getConfig("mail.smtp.socketFactory.class"));
-        jdm4.put("mail.smtp.socketFactory.fallback", configMapFacade.getConfig("mail.smtp.socketFactory.fallback"));
-        jdm4.put("mail.smtp.ssluser", configMapFacade.getConfig("mail.smtp.ssluser"));
-        jdm4.put("mail.smtp.sslpass", configMapFacade.getConfig("mail.smtp.sslpass"));
 
+        jdm4 = addEmailParametersToJdm(jdm4);
         scheduleJob("0 0/2 * * * ?", "render-Charts", jdm4, CallableExecutorWithTimeoutJob.class); // fire every 2 minute
+
         JobDataMap jdm5 = new JobDataMap();
-        jdm5.put("dbUsername", configMapFacade.getConfig("db.fitness.username"));
-        jdm5.put("dbPassword", configMapFacade.getConfig("db.fitness.password"));
-        jdm5.put("dbConnectURL", configMapFacade.getConfig("db.fitness.url"));
         jdm5.put("jobClassToRun", HttpSimpleWebpageCheckCallable.class);
         jdm5.put("jobTimeoutInMilli", "60000");
         jdm5.put("jobType", "3");
         jdm5.put("successIfFound", "<html>");
         jdm5.put("url1", "http://www.google.com.au");
-        jdm5.put("mail.smtp.host", configMapFacade.getConfig("mail.smtp.host"));
-        jdm5.put("mail.smtp.auth", configMapFacade.getConfig("mail.smtp.auth"));
-        jdm5.put("mail.debug", configMapFacade.getConfig("mail.debug"));
-        jdm5.put("mail.smtp.port", configMapFacade.getConfig("mail.smtp.port"));
-        jdm5.put("mail.smtp.socketFactory.port", configMapFacade.getConfig("mail.smtp.socketFactory.port"));
-        jdm5.put("mail.smtp.socketFactory.class", configMapFacade.getConfig("mail.smtp.socketFactory.class"));
-        jdm5.put("mail.smtp.socketFactory.fallback", configMapFacade.getConfig("mail.smtp.socketFactory.fallback"));
-        jdm5.put("mail.smtp.ssluser", configMapFacade.getConfig("mail.smtp.ssluser"));
-        jdm5.put("mail.smtp.sslpass", configMapFacade.getConfig("mail.smtp.sslpass"));
-
+        jdm5 = addEmailParametersToJdm(jdm5);
         scheduleJob("0 0/2 * * * ?", "google-check", jdm5, CallableExecutorWithTimeoutJob.class); // fire every 2 minute
 
     }
@@ -224,7 +278,213 @@ public class QrtzJobDetailsController implements Serializable {
         recreateModel();
     }
 
-    private void scheduleJob(String cronString, String jobName, JobDataMap jdm, Class jobClass) {
+    public void pauseSelected() {
+        int c = 0;
+        int e = 0;
+        String responseMessage = "An Error occurred pausing the job. Check logs for details!";
+
+        for (QrtzJobDetails tsk : getMultiSelected()) {
+
+
+            boolean ret = pauseJob(tsk.getQrtzJobDetailsPK().getJobName(), tsk.getQrtzJobDetailsPK().getJobGroup());
+            if (ret == false) {
+                Logger.getLogger(getClass().getName()).log(Level.INFO, "Task failed to pause!");
+
+                e++;
+            } else {
+                c++;
+            }
+
+        }
+        String m = "Paused " + c + " tasks successfully. ";
+        if (e > 0) {
+            m += " " + e + " Failed." + responseMessage;
+        }
+        JsfUtil.addSuccessMessage(m);
+    }
+
+    public void cancelSelected() {
+        int c = 0;
+        int e = 0;
+        String responseMessage = "An Error occurred cancelling the job. Check logs for details!";
+
+        for (QrtzJobDetails tsk : getMultiSelected()) {
+
+
+            boolean ret = cancelJob(tsk.getQrtzJobDetailsPK().getJobName(), tsk.getQrtzJobDetailsPK().getJobGroup());
+            if (ret == false) {
+                Logger.getLogger(getClass().getName()).log(Level.INFO, "Task failed to cancel!");
+
+                e++;
+            } else {
+                c++;
+            }
+
+        }
+        String m = "Cancelled " + c + " tasks successfully. ";
+        if (e > 0) {
+            m += " " + e + " Failed." + responseMessage;
+        }
+        JsfUtil.addSuccessMessage(m);
+    }
+
+    public void resumeSelected() {
+        int c = 0;
+        int e = 0;
+        String responseMessage = "An Error occurred resuming the job. Check logs for details!";
+
+        for (QrtzJobDetails tsk : getMultiSelected()) {
+
+
+            boolean ret = resumeJob(tsk.getQrtzJobDetailsPK().getJobName(), tsk.getQrtzJobDetailsPK().getJobGroup());
+            if (ret == false) {
+                Logger.getLogger(getClass().getName()).log(Level.INFO, "Task failed to resume!");
+
+                e++;
+            } else {
+                c++;
+            }
+
+        }
+        String m = "Resumed " + c + " tasks successfully. ";
+        if (e > 0) {
+            m += " " + e + " Failed." + responseMessage;
+        }
+        JsfUtil.addSuccessMessage(m);
+    }
+
+    private boolean cancelJob(String jobName, String jobGroup) {
+        boolean retValue = false;
+
+        JsfUtil.addSuccessMessage("Removing job named: " + jobName);
+        ServletContext sc = (ServletContext) FacesContext.getCurrentInstance().getExternalContext().getContext();
+
+        Logger.getLogger(getClass().getName()).log(Level.INFO, "Cancelling Generic SQL Executor Quartz Job!");
+
+        StdSchedulerFactory factory = null;
+        String QUARTZ_FACTORY_KEY = "org.quartz.impl.StdSchedulerFactory.KEY";
+        try {
+            //FacesContext.getCurrentInstance().getExternalContext();
+            factory = (StdSchedulerFactory) sc.getAttribute(QUARTZ_FACTORY_KEY);
+        } catch (Exception e) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, "Could not get the QUARTZ_FACTORY_KEY from the servlet context OR the context is null ", e);
+
+        }
+        Scheduler sched = null;
+        try {
+            sched = factory.getScheduler();
+        } catch (SchedulerException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, "Could not obtain the quartz scheduler from the SchedulerFactory or the factory is null!", ex);
+        }
+
+        try {
+            JobKey job = new JobKey(jobName, jobGroup);
+            List<Trigger> jobTriggers = (List<Trigger>) sched.getTriggersOfJob(job);
+            for (Trigger tr : jobTriggers) {
+                sched.unscheduleJob(tr.getKey());
+            }
+            retValue = true;
+        } catch (SchedulerException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, "Couldn't cancel job all jobs", ex);
+            JsfUtil.addErrorMessage(ex, "An error occurred trying to cancel the job!");
+        }
+        //ejbFacade.synchDBwithJPA();
+        recreateModel();
+
+
+        return retValue;
+
+    }
+
+    private boolean resumeJob(String jobName, String jobGroup) {
+        boolean retValue = false;
+
+        JsfUtil.addSuccessMessage("Resuming job named: " + jobName);
+        ServletContext sc = (ServletContext) FacesContext.getCurrentInstance().getExternalContext().getContext();
+
+        Logger.getLogger(getClass().getName()).log(Level.INFO, "Resume Generic SQL Executor Quartz Job!");
+
+        StdSchedulerFactory factory = null;
+        String QUARTZ_FACTORY_KEY = "org.quartz.impl.StdSchedulerFactory.KEY";
+        try {
+            //FacesContext.getCurrentInstance().getExternalContext();
+            factory = (StdSchedulerFactory) sc.getAttribute(QUARTZ_FACTORY_KEY);
+        } catch (Exception e) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, "Could not get the QUARTZ_FACTORY_KEY from the servlet context OR the context is null ", e);
+
+        }
+        Scheduler sched = null;
+        try {
+            sched = factory.getScheduler();
+        } catch (SchedulerException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, "Could not obtain the quartz scheduler from the SchedulerFactory or the factory is null!", ex);
+        }
+
+        try {
+            JobKey job = new JobKey(jobName, jobGroup);
+            List<Trigger> jobTriggers = (List<Trigger>) sched.getTriggersOfJob(job);
+            for (Trigger tr : jobTriggers) {
+                sched.resumeTrigger(tr.getKey());
+            }
+            retValue = true;
+
+        } catch (SchedulerException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, "Couldn't resume job all jobs", ex);
+            JsfUtil.addErrorMessage(ex, "An error occurred trying to resume the job!");
+        }
+        //ejbFacade.synchDBwithJPA();
+        recreateModel();
+
+
+        return retValue;
+
+    }
+
+    private boolean pauseJob(String jobName, String jobGroup) {
+        boolean retValue = false;
+
+        JsfUtil.addSuccessMessage("Paused job named: " + jobName + " in group " + jobGroup + " .");
+        ServletContext sc = (ServletContext) FacesContext.getCurrentInstance().getExternalContext().getContext();
+
+        Logger.getLogger(getClass().getName()).log(Level.INFO, "Paused Generic SQL Executor Quartz Job!");
+
+        StdSchedulerFactory factory = null;
+        String QUARTZ_FACTORY_KEY = "org.quartz.impl.StdSchedulerFactory.KEY";
+        try {
+            //FacesContext.getCurrentInstance().getExternalContext();
+            factory = (StdSchedulerFactory) sc.getAttribute(QUARTZ_FACTORY_KEY);
+        } catch (Exception e) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, "Could not get the QUARTZ_FACTORY_KEY from the servlet context OR the context is null ", e);
+
+        }
+        Scheduler sched = null;
+        try {
+            sched = factory.getScheduler();
+        } catch (SchedulerException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, "Could not obtain the quartz scheduler from the SchedulerFactory or the factory is null!", ex);
+        }
+
+        try {
+            JobKey job = new JobKey(jobName, jobGroup);
+            List<Trigger> jobTriggers = (List<Trigger>) sched.getTriggersOfJob(job);
+            for (Trigger tr : jobTriggers) {
+                sched.pauseTrigger(tr.getKey());
+            }
+            retValue = true;
+        } catch (SchedulerException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, "Couldn't Pause job ", ex);
+            JsfUtil.addErrorMessage(ex, "An error occurred trying to Pause the job!");
+        }
+        //ejbFacade.synchDBwithJPA();
+        recreateModel();
+
+
+        return retValue;
+
+    }
+    
+    private boolean scheduleJob(String cronString, String jobName, JobDataMap jdm, Class jobClass) {
+        boolean result = true;
         ServletContext sc = (ServletContext) FacesContext.getCurrentInstance().getExternalContext().getContext();
         Logger.getLogger(getClass().getName()).log(Level.INFO, "Scheduling Quartz Jobs!");
         StdSchedulerFactory factory = null;
@@ -234,12 +494,17 @@ public class QrtzJobDetailsController implements Serializable {
         } catch (Exception e) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, "Could not get the QUARTZ_FACTORY_KEY from the servlet context OR the context is null ", e);
         }
+        if (factory == null) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, "Quartz factory is NULL. Quartz may not have initialised due to DB issues. Check the server log for more info!");
+            return false;
+        }
         try {
-            Scheduler sched = null;
+            Scheduler sched;
             try {
                 sched = factory.getScheduler();
             } catch (SchedulerException ex) {
                 Logger.getLogger(getClass().getName()).log(Level.SEVERE, "Could not obtain the quartz scheduler from the SchedulerFactory or the factory is null!", ex);
+                return false;
             }
             String jn = "Job_" + jobName;
             JobDetail jobDetail = null;
@@ -247,18 +512,77 @@ public class QrtzJobDetailsController implements Serializable {
                 jobDetail = newJob(jobClass).withIdentity(jn, sched.DEFAULT_GROUP).usingJobData(jdm).build();
             } catch (Exception e) {
                 Logger.getLogger(getClass().getName()).log(Level.SEVERE, "Job Detail creation failed !", e);
+                result = false;
             }
-            CronTrigger trigger = newTrigger().withIdentity("Trigger_" + jobName, sched.DEFAULT_GROUP).withSchedule(cronSchedule(cronString)).usingJobData(jdm).build();
-            sched.scheduleJob(jobDetail, trigger);
+            CronTrigger cronTrigger = null;
+            Trigger trigger = null;
+            if (cronString != null && cronString.trim().isEmpty() == false) {
+                cronTrigger = newTrigger().withIdentity("Trigger_" + jobName, sched.DEFAULT_GROUP).withSchedule(cronSchedule(cronString)).usingJobData(jdm).build();
+                sched.scheduleJob(jobDetail, cronTrigger);
+            } else {
+                long startTime = System.currentTimeMillis() + 2000L;
+                trigger = newTrigger().withIdentity("trigger1", "group1").startAt(new Date(startTime)).build();
+                sched.scheduleJob(jobDetail, trigger);
+
+            }
+
+
             //addSuccessMessage("Added job: " + jobDetail.getName());
         } catch (SchedulerException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, "Scheduler Exception Occurred when scheduling quartz jobs:", ex);
+            result = false;
         } catch (Exception ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, "An Exception Occurred when when scheduling quartz jobs:", ex);
+            result = false;
         }
         Logger.getLogger(getClass().getName()).log(Level.INFO, "FINISHED Scheduling Quartz Jobs!");
         //ejbFacade.synchDBwithJPA();
         recreateModel();
+        return result;
+    }
+
+
+    public void scheduledFireOnce(String jobName, Date fireDate, JobDataMap jdm, Class jobClass) {
+        ServletContext sc = (ServletContext) FacesContext.getCurrentInstance().getExternalContext().getContext();
+        Logger.getLogger(getClass().getName()).log(Level.INFO, "Scheduling Quartz Jobs!");
+        StdSchedulerFactory factory = null;
+        String QUARTZ_FACTORY_KEY = "org.quartz.impl.StdSchedulerFactory.KEY";
+        try {
+            factory = (StdSchedulerFactory) sc.getAttribute(QUARTZ_FACTORY_KEY);
+        } catch (Exception e) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, "Could not get the QUARTZ_FACTORY_KEY from the servlet context OR the context is null ", e);
+        }
+        if (factory != null) {
+            try {
+                Scheduler sched = null;
+                try {
+                    sched = factory.getScheduler();
+                } catch (SchedulerException ex) {
+                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, "Could not obtain the quartz scheduler from the SchedulerFactory or the factory is null!", ex);
+                }
+                if (sched != null) {
+                    String jn = "Job_" + jobName;
+                    JobDetail jobDetail = null;
+                    try {
+                        jobDetail = newJob(jobClass).withIdentity(jn, "DEFAULT").usingJobData(jdm).build();
+                    } catch (Exception e) {
+                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, "Job Detail creation failed !", e);
+                    }
+                    Trigger trigger = newTrigger().withIdentity("trigger1", "group1").startAt(fireDate).build();
+                    sched.scheduleJob(jobDetail, trigger);
+                    //addSuccessMessage("Added job: " + jobDetail.getName());
+                } else {
+                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, "Scheduler is NULL:");
+                }
+            } catch (SchedulerException ex) {
+                Logger.getLogger(getClass().getName()).log(Level.SEVERE, "Scheduler Exception Occurred when scheduling quartz jobs:", ex);
+            } catch (Exception ex) {
+                Logger.getLogger(getClass().getName()).log(Level.SEVERE, "An Exception Occurred when when scheduling quartz jobs:", ex);
+            }
+        } else {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, "Factory is NULL:");
+        }
+        Logger.getLogger(getClass().getName()).log(Level.INFO, "FINISHED Scheduling Quartz Jobs!");
     }
 
     private void immediateJob(String jobName, JobDataMap jdm, Class jobClass) {
@@ -405,6 +729,7 @@ public class QrtzJobDetailsController implements Serializable {
 
     private void recreateModel() {
         items = null;
+        filteredItems = null;
     }
 
     public String next() {
@@ -425,6 +750,52 @@ public class QrtzJobDetailsController implements Serializable {
 
     public SelectItem[] getItemsAvailableSelectOne() {
         return JsfUtil.getSelectItems(ejbFacade.findAll(), true);
+    }
+
+    /**
+     * @return the multiSelected
+     */
+    public QrtzJobDetails[] getMultiSelected() {
+        return multiSelected;
+    }
+
+    /**
+     * @param multiSelected the multiSelected to set
+     */
+    public void setMultiSelected(QrtzJobDetails[] multiSelected) {
+        this.multiSelected = multiSelected;
+    }
+
+    /**
+     * @return the filteredItems
+     */
+    public List<QrtzJobDetails> getFilteredItems() {
+        return filteredItems;
+    }
+
+    /**
+     * @param filteredItems the filteredItems to set
+     */
+    public void setFilteredItems(List<QrtzJobDetails> filteredItems) {
+        this.filteredItems = filteredItems;
+    }
+
+    /**
+     * @return the selectedForDeletion
+     */
+    public QrtzJobDetails getSelectedForDeletion() {
+        return selectedForDeletion;
+    }
+
+    /**
+     * @param selectedForDeletion the selectedForDeletion to set
+     */
+    public void setSelectedForDeletion(QrtzJobDetails selectedForDeletion) {
+        this.selectedForDeletion = selectedForDeletion;     
+        current = selectedForDeletion;
+
+        performDestroy();
+        recreateModel();
     }
 
     @FacesConverter(forClass = QrtzJobDetails.class)

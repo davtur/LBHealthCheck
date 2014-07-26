@@ -5,6 +5,12 @@ import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.classes.util.CrmScheduleEvent;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PaginationHelper;
 import au.com.manlyit.fitnesscrm.stats.beans.ScheduleFacade;
+import au.com.manlyit.fitnesscrm.stats.db.EmailQueue;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -40,6 +46,8 @@ public class ScheduleController implements Serializable {
     private au.com.manlyit.fitnesscrm.stats.beans.ScheduleFacade ejbFacade;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade configMapFacade;
+    @Inject
+    private au.com.manlyit.fitnesscrm.stats.beans.EmailQueueFacade emailQueueFacade;
     private PaginationHelper pagination;
     private int selectedItemIndex;
     private List<Schedule> filteredItems;
@@ -59,6 +67,7 @@ public class ScheduleController implements Serializable {
                     CrmScheduleEvent ev = new CrmScheduleEvent(ss.getShedTitle(), ss.getShedStartdate(), ss.getShedEnddate(), ss.getShedAllday());
                     ev.setDatabasePK(ss.getId());
                     ev.setStyleClass(ss.getShedstyleClass());
+                    ev.setData(ss.getDataObject());
 
                     addEvent(ev);
                 }
@@ -81,6 +90,22 @@ public class ScheduleController implements Serializable {
         }
     }
 
+    private void addReminder(CrmScheduleEvent crmEvent) {
+        FacesContext context = FacesContext.getCurrentInstance();
+        CustomersController customersController = (CustomersController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "customersController");
+        EmailQueue email = new EmailQueue();
+        email.setId(0);
+        email.setStatus(0);
+        email.setSendDate(crmEvent.getReminderDate());
+        email.setCreateDate(new Date());
+        email.setSubject(configMapFacade.getConfig("ScheduleReminderEmailMessageSubject") + crmEvent.getTitle());
+        email.setToaddresses(customersController.getLoggedInUser().getEmailAddress());
+        email.setMessage(crmEvent.getStringData());
+        email.setFromaddress(configMapFacade.getConfig("email.from.address"));
+
+        emailQueueFacade.create(email);
+    }
+
     public void addEvent(ActionEvent actionEvent) {
         if (getEvent().getId() == null) {
             getEventModel().addEvent(getEvent());
@@ -89,14 +114,30 @@ public class ScheduleController implements Serializable {
             getEventModel().updateEvent(getEvent());
             editEvent(getEvent());
         }
-
+        if (getEvent().isAddReminder()) {
+            addReminder(getEvent());
+        }
         setEvent(new CrmScheduleEvent());
+    }
+
+    public static byte[] serialize(Object obj) throws IOException {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        ObjectOutputStream os = new ObjectOutputStream(out);
+        os.writeObject(obj);
+        return out.toByteArray();
+    }
+
+    public static Object deserialize(byte[] data) throws IOException, ClassNotFoundException {
+        ByteArrayInputStream in = new ByteArrayInputStream(data);
+        ObjectInputStream is = new ObjectInputStream(in);
+        return is.readObject();
     }
 
     private void persistEvent(CrmScheduleEvent event) {
         CrmScheduleEvent ssievent = (CrmScheduleEvent) event;
         Schedule ss = new Schedule(0, ssievent.getTitle(), ssievent.getStartDate(), ssievent.getEndDate());
         ss.setShedAllday(ssievent.isAllDay());
+        ss.setDataObject(ssievent.getData());
         current = ss;
         try {
             getFacade().create(current);
@@ -107,6 +148,7 @@ public class ScheduleController implements Serializable {
 
         }
         ssievent.setDatabasePK(current.getId());
+        current = null;
     }
 
     private void deleteEvent(CrmScheduleEvent event) {
@@ -129,6 +171,9 @@ public class ScheduleController implements Serializable {
         ss.setShedStartdate(ssievent.getStartDate());
         ss.setShedTitle(ssievent.getTitle());
         ss.setShedAllday(ssievent.isAllDay());
+
+        ss.setDataObject(ssievent.getData());
+
         current = ss;
         try {
             getFacade().edit(current);
@@ -138,6 +183,7 @@ public class ScheduleController implements Serializable {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
 
         }
+        current = null;
     }
 
     public void onEventSelect(SelectEvent selectEvent) {
@@ -377,11 +423,16 @@ public class ScheduleController implements Serializable {
         return "List";
     }
 
+    public void handleReminderDateSelect(SelectEvent event) {
+        Date date = (Date) event.getObject();
+        //Add facesmessage
+    }
+
     public void handleEndDateSelect(SelectEvent event) {
 
         Date date = (Date) event.getObject();
-        if (date.after(current.getShedEnddate())) {
-            current.setShedEnddate(date);
+        if (date.after(getSelected().getShedEnddate())) {
+            getSelected().setShedEnddate(date);
         }
 
         //Add facesmessage
@@ -390,8 +441,8 @@ public class ScheduleController implements Serializable {
     public void handleStartDateSelect(SelectEvent event) {
 
         Date date = (Date) event.getObject();
-        if (date.before(current.getShedStartdate())) {
-            current.setShedStartdate(date);
+        if (date.before(getSelected().getShedStartdate())) {
+            getSelected().setShedStartdate(date);
         }
         //Add facesmessage
     }

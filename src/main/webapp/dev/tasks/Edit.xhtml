@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" >
+
+    <ui:composition template="/template.xhtml">
+        <ui:define name="title">
+            <h:outputText value="#{configMapController.getKey('EditTasksTitle')}"></h:outputText>
+        </ui:define>
+        <ui:define name="body">
+            <h:panelGroup id="messagePanel" layout="block">
+                <h:messages errorStyle="color: red" infoStyle="color: green" layout="table"/>
+            </h:panelGroup>
+            <h:form id="tasksListForm1">
+                <p:panel>
+                    <h:panelGrid columns="5">
+                        <h:panelGrid columns="2">
+                            <h:outputLabel value="#{configMapController.getKey('EditTasksLabel_name')}" for="name" />
+                            <p:inputText id="name" value="#{tasksController.selected.name}" title="#{configMapController.getKey('EditTasksTitle_name')}" />
+                        </h:panelGrid>
+                        <h:panelGrid columns="2">
+
+                            <h:outputLabel value="#{configMapController.getKey('EditTasksLabel_description')}" for="description" />
+                            <p:inputText id="description" value="#{tasksController.selected.description}" title="#{configMapController.getKey('EditTasksTitle_description')}" />
+                        </h:panelGrid>
+                        <h:panelGrid columns="2">
+
+                            <h:outputLabel value="#{configMapController.getKey('EditTasksLabel_cronEntry')}" for="cronEntry" />
+                            <p:inputText id="cronEntry" value="#{tasksController.selected.cronEntry}" title="#{configMapController.getKey('EditTasksTitle_cronEntry')}" />
+                        </h:panelGrid>
+                        <h:panelGrid columns="2">
+
+                            <h:outputLabel value="#{configMapController.getKey('EditTasksLabel_taskClassName')}" for="taskClassName" />
+                            <h:selectOneMenu id="taskClassName" value="#{tasksController.selected.taskClassName}" title="#{configMapController.getKey('EditTasksTitle_taskClassName')}" required="true" requiredMessage="#{configMapController.getKey('EditTasksRequiredMessage_taskClassName')}">
+                                <f:selectItems value="#{configMapController.getConfigJobClassesAvailableSelectOne()}"/>
+                            </h:selectOneMenu>
+
+                        </h:panelGrid>
+                    </h:panelGrid>
+                </p:panel>
+                <h:panelGrid columns="3">
+                    <p:commandButton   ajax="false"    action="#{tasksController.update}" value="#{configMapController.getKey('EditTasksSaveLink')}"/>
+
+                    <p:commandButton   ajax="false"    action="View" value="#{configMapController.getKey('EditTasksViewLink')}" immediate="true"/>
+
+                    <p:commandButton   ajax="false"    action="#{tasksController.prepareList}" value="#{configMapController.getKey('EditTasksShowAllLink')}" immediate="true"/>
+                </h:panelGrid>
+            </h:form>
+            <h:form id="tasksListForm2">
+                <p:panel>
+                    <h:panelGrid columns="4">
+                        <h:panelGrid columns="2">
+                            <h:outputLabel value="#{configMapController.getKey('CreateJobConfigMapLabel_configMapKey')}" for="configMapKey" />
+                            <p:selectOneMenu id="configMapKey" value="#{jobConfigMapController.selected.configMapKey}" filter="true" filterMatchMode="startsWith" label="#{configMapController.getKey('CreateJobConfigMapTitle_configMapKey')}" > 
+                                <f:selectItems value="#{configMapController.itemsAvailableSelectOne}"/>
+                            </p:selectOneMenu>
+                            
+                        </h:panelGrid>
+                        <h:panelGrid columns="2">
+                            <h:outputLabel value="#{configMapController.getKey('CreateJobConfigMapLabel_basicKey')}" for="basicKey" />
+                            <p:inputText id="basicKey" value="#{jobConfigMapController.selected.basicKey}" title="#{configMapController.getKey('CreateJobConfigMapTitle_basicKey')}"  />
+                        </h:panelGrid>
+                        <h:panelGrid columns="2">
+                            <h:outputLabel value="#{configMapController.getKey('CreateJobConfigMapLabel_basicValue')}" for="basicValue" />
+                            <p:inputText id="basicValue" value="#{jobConfigMapController.selected.basicValue}" title="#{configMapController.getKey('CreateJobConfigMapTitle_basicValue')}" />
+                        </h:panelGrid>
+                        <p:commandButton   update=":tasksListForm2 :tasksListForm3 :menuForm:growl"   actionListener="#{jobConfigMapController.createFromTasksEditor()}" value="#{configMapController.getKey('CreateJobConfigMapSaveLink')}" />
+                    </h:panelGrid>
+                </p:panel>
+            </h:form>
+            <h:form id="tasksListForm3">
+                <h:outputText escape="false" value="#{configMapController.getKey('ListJobConfigMapEmpty')}" rendered="#{tasksController.getRowsReturnedByTaskQuery() == 0}"/>
+                <h:panelGroup rendered="#{tasksController.getRowsReturnedByTaskQuery() > 0}">
+                    <p:dataTable id="table2" editable="true"  value="#{tasksController.getItemsFilteredByTaskId()}"  widgetVar="getconfigFortaskTable" var="item2"  paginator="true" rows="15"  paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  rowsPerPageTemplate="5,10,15,20,25,50,100" >
+                        <f:facet name="header">
+                            <p:outputPanel>
+                                <h:outputText value="Search all fields:" />
+                                <p:inputText id="globalFilter" onkeyup="getconfigFortaskTable.filter()" />
+                            </p:outputPanel>
+                        </f:facet>
+                        <p:column headerText="Edit" style="width:50px">  
+                            <p:rowEditor />  
+                        </p:column>  
+                      <p:ajax event="rowEdit" listener="#{tasksController.onEdit}" update=":menuForm:growl" />  
+                        <p:ajax event="rowEditCancel" listener="#{tasksController.onCancel}" update=":menuForm:growl" />  
+
+                        <p:column headerText="Remove"  style="width:200px">
+                            <p:commandButton rendered="#{jobConfigMapController.isUserInRole('ADMIN')}"  update=":tasksListForm3:table2 :menuForm:growl"  value="#{configMapController.getKey('ListJobConfigMapDestroyLink')}">
+                                <f:setPropertyActionListener value="#{item2}"  target="#{jobConfigMapController.selectedForDeletion}" />
+                            </p:commandButton>                        
+
+                        </p:column>
+
+                        <p:column  style="width:400px" sortBy="#{item2.configMapKey.configkey}" filterBy="#{item2.configMapKey.configkey}" headerText="#{configMapController.getKey('ListJobConfigMapTitle_configMapKey')}"   >
+
+
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText rendered="#{ not empty item2.configMapKey.configkey}" value="#{item2.configMapKey.configkey}"/>
+                                    <h:outputText rendered="#{  empty item2.configMapKey.configkey}" value=" "/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:selectOneMenu rendered="#{ not empty item2.configMapKey.configkey}" style="width:360px" value="#{item2.configMapKey.configkey}" filter="true" filterMatchMode="startsWith" label="#{configMapController.getKey('CreateJobConfigMapTitle_configMapKey')}" >
+                                        <f:selectItems value="#{configMapController.itemsAvailableSelectOne}"/>
+                                    </p:selectOneMenu>
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item2.basicKey}" filterBy="#{item2.basicKey}" headerText="#{configMapController.getKey('ListJobConfigMapTitle_basicKey')}"   >
+
+
+
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item2.basicKey}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item2.basicKey}" label="#{configMapController.getKey('ListJobConfigMapTitle_basicKey')}"/>
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column   sortBy="#{item2.basicValue}" filterBy="#{item2.basicValue}" headerText="#{configMapController.getKey('ListJobConfigMapTitle_basicValue')}"   >
+
+
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item2.basicValue}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item2.basicValue}" label="#{configMapController.getKey('ListJobConfigMapTitle_basicValue')}"/>
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+
+
+                    </p:dataTable>
+                </h:panelGroup>
+
+            </h:form>
+        </ui:define>
+    </ui:composition>
+
+</html>

@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" >
+
+    <ui:composition template="/template.xhtml">
+        <ui:define name="title">
+            <h:outputText value="#{configMapController.getKey('ListTasksTitle')}"></h:outputText>
+        </ui:define>
+        <ui:define name="body">
+            <h:form id="listForm1">
+                <h:panelGroup >
+                    <p:commandButton id="createButton" ajax="false" action="#{tasksController.prepareCreate}" value="#{configMapController.getKey('ListTasksCreateLink')}"/>
+                    <p:commandButton id="scheduleButton" ajax="false" action="#{tasksController.scheduleSelected}" value="Schedule Selected"/>
+                    <p:commandButton id="runNowButton" ajax="false" action="#{tasksController.runSelectedNow()}" value="Run Selected Now"/>
+                    <p:commandButton id="cloneButton" ajax="false" actionListener="#{tasksController.cloneSelected()}" value="Clone Selected"/>
+
+                </h:panelGroup>
+                <h:outputText escape="false" value="#{configMapController.getKey('ListTasksEmpty')}" rendered="#{tasksController.items.rowCount == 0}"/>
+                <h:panelGroup rendered="#{tasksController.items.rowCount > 0}">
+                    <p:dataTable selection="#{tasksController.multiSelected}" rowKey="#{item.idtasks}" value="#{tasksController.items}"  widgetVar="tasksControllerTable" var="item"  paginator="true" rows="15"  paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  rowsPerPageTemplate="5,10,15,20,25,50,100" >
+                        <f:facet name="header">
+                            <p:outputPanel>
+                                <h:outputText value="Search all fields:" />
+                                <p:inputText id="globalFilter" onkeyup="tasksControllerTable.filter()" />
+                            </p:outputPanel>
+                        </f:facet>
+                        <p:column selectionMode="multiple"/>
+
+                        <p:column sortBy="#{item.idtasks}" filterBy="#{item.idtasks}" headerText="#{configMapController.getKey('ListTasksTitle_idtasks')}"   >
+                            <f:facet name="header">
+                                <h:outputText value="#{configMapController.getKey('ListTasksTitle_idtasks')}"/>
+                            </f:facet>
+                            <h:outputText value="#{item.idtasks}"/>
+                        </p:column>
+                        <p:column sortBy="#{item.name}" filterBy="#{item.name}" headerText="#{configMapController.getKey('ListTasksTitle_name')}"   >
+                            <f:facet name="header">
+                                <h:outputText value="#{configMapController.getKey('ListTasksTitle_name')}"/>
+                            </f:facet>
+                            <h:outputText value="#{item.name}"/>
+                        </p:column>
+                        <p:column sortBy="#{item.description}" filterBy="#{item.description}" headerText="#{configMapController.getKey('ListTasksTitle_description')}"   >
+                            <f:facet name="header">
+                                <h:outputText value="#{configMapController.getKey('ListTasksTitle_description')}"/>
+                            </f:facet>
+                            <h:outputText value="#{item.description}"/>
+                        </p:column>
+                        <p:column sortBy="#{item.cronEntry}" filterBy="#{item.cronEntry}" headerText="#{configMapController.getKey('ListTasksTitle_cronEntry')}"   >
+                            <f:facet name="header">
+                                <h:outputText value="#{configMapController.getKey('ListTasksTitle_cronEntry')}"/>
+                            </f:facet>
+                            <h:outputText value="#{item.cronEntry}"/>
+                        </p:column>
+                        <p:column sortBy="#{item.taskClassName}" filterBy="#{item.taskClassName}" headerText="#{configMapController.getKey('ListTasksTitle_taskClassName')}"   >
+                            <f:facet name="header">
+                                <h:outputText value="#{configMapController.getKey('ListTasksTitle_taskClassName')}"/>
+                            </f:facet>
+                            <h:outputText value="#{item.taskClassName}"/>
+                        </p:column>
+                        <p:column>
+                            <f:facet name="header">
+                                <h:outputText value="&nbsp;"/>
+                            </f:facet>
+                            <p:commandButton                                                            ajax="false" action="#{tasksController.prepareView}" value="#{configMapController.getKey('ListTasksViewLink')}">
+                                <f:setPropertyActionListener value="#{item}" target="#{tasksController.selected}" />
+                            </p:commandButton>                        
+                            <h:outputText value=" "/>
+                            <p:commandButton rendered="#{tasksController.isUserInRole('ADMIN')}"  ajax="false" action="#{tasksController.prepareEdit}" value="#{configMapController.getKey('ListTasksEditLink')}">
+                                <f:setPropertyActionListener value="#{item}" target="#{tasksController.selected}" />
+                            </p:commandButton>                        
+                            <h:outputText value=" "/>
+                            <p:commandButton rendered="#{tasksController.isUserInRole('ADMIN')}"  update=":listForm1 :menuForm:growl"  value="#{configMapController.getKey('ListTasksDestroyLink')}">
+                                <f:setPropertyActionListener value="#{item}" target="#{tasksController.selectedForDeletion}" />
+                            </p:commandButton>                        
+
+                        </p:column>
+                    </p:dataTable>
+                </h:panelGroup>
+            </h:form>
+        </ui:define>
+    </ui:composition>
+
+</html>

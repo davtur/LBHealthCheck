@@ -3,11 +3,17 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package au.com.manlyit.fitnesscrm.stats.db;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -40,6 +46,7 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "Schedule.findByShedstyleClass", query = "SELECT s FROM Schedule s WHERE s.shedstyleClass = :shedstyleClass"),
     @NamedQuery(name = "Schedule.findBySchedEditable", query = "SELECT s FROM Schedule s WHERE s.schedEditable = :schedEditable")})
 public class Schedule implements Serializable {
+
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -143,12 +150,45 @@ public class Schedule implements Serializable {
         this.schedData = schedData;
     }
 
+    public Object getDataObject() {
+        if (schedData == null) {
+            return null;
+        }
+        try {
+            return deserialize(schedData);
+        } catch (IOException | ClassNotFoundException ex) {
+            Logger.getLogger(Schedule.class.getName()).log(Level.SEVERE, null, ex);
+            return null;
+        }
+    }
+
+    public void setDataObject(Object obj) {
+        try {
+            this.schedData = serialize(obj);
+        } catch (IOException ex) {
+            Logger.getLogger(Schedule.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
     public Boolean getSchedEditable() {
         return schedEditable;
     }
 
     public void setSchedEditable(Boolean schedEditable) {
         this.schedEditable = schedEditable;
+    }
+
+    public static byte[] serialize(Object obj) throws IOException {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        ObjectOutputStream os = new ObjectOutputStream(out);
+        os.writeObject(obj);
+        return out.toByteArray();
+    }
+
+    public static Object deserialize(byte[] data) throws IOException, ClassNotFoundException {
+        ByteArrayInputStream in = new ByteArrayInputStream(data);
+        ObjectInputStream is = new ObjectInputStream(in);
+        return is.readObject();
     }
 
     @Override
@@ -175,5 +215,5 @@ public class Schedule implements Serializable {
     public String toString() {
         return "au.com.manlyit.fitnesscrm.stats.db.Schedule[ idSchedule=" + idSchedule + " ]";
     }
-    
+
 }

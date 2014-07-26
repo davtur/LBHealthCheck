@@ -3,22 +3,31 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package au.com.manlyit.fitnesscrm.stats.classes.util;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.primefaces.model.DefaultScheduleEvent;
 
-public class CrmScheduleEvent extends DefaultScheduleEvent  {
+public class CrmScheduleEvent extends DefaultScheduleEvent {
 
     private String id;
     private String title;
     private Date startDate;
     private Date endDate;
+    private Date reminderDate ;
     private boolean allDay = false;
     private String styleClass;
     private Object data;
     private boolean editable = true;
+    private boolean addReminder = false;
     private int databasePK = 0;
 
     public CrmScheduleEvent() {
@@ -121,6 +130,25 @@ public class CrmScheduleEvent extends DefaultScheduleEvent  {
         this.data = data;
     }
 
+    public String getStringData() {
+        if (data == null) {
+            return "";
+        } else {           
+            if (data.getClass() == String.class) {
+                return (String) data;
+            } else {
+                return "Not a Text Value";
+            }
+        }
+    }
+
+    public void setStringData(String sData) {
+   
+            // byte[] ba = data.getBytes("UTF-8");
+            this.data = sData;
+       
+    }
+
     @Override
     public boolean isEditable() {
         return editable;
@@ -178,5 +206,33 @@ public class CrmScheduleEvent extends DefaultScheduleEvent  {
      */
     public void setDatabasePK(int databasePK) {
         this.databasePK = databasePK;
+    }
+
+    /**
+     * @return the addReminder
+     */
+    public boolean isAddReminder() {
+        return addReminder;
+    }
+
+    /**
+     * @param addReminder the addReminder to set
+     */
+    public void setAddReminder(boolean addReminder) {
+        this.addReminder = addReminder;
+    }
+
+    /**
+     * @return the reminderDate
+     */
+    public Date getReminderDate() {
+        return reminderDate;
+    }
+
+    /**
+     * @param reminderDate the reminderDate to set
+     */
+    public void setReminderDate(Date reminderDate) {
+        this.reminderDate = reminderDate;
     }
 }

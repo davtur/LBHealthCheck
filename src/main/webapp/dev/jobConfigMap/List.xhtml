@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" >
+
+    <ui:composition template="/template.xhtml">
+        <ui:define name="title">
+            <h:outputText value="#{configMapController.getKey('ListJobConfigMapTitle')}"></h:outputText>
+        </ui:define>
+        <ui:define name="body">
+            <h:form id="listForm1">
+                <h:panelGroup >
+                    <p:commandButton id="createButton" ajax="false" action="#{jobConfigMapController.prepareCreate}" value="#{configMapController.getKey('ListJobConfigMapCreateLink')}"/>
+                </h:panelGroup>
+                <h:outputText escape="false" value="#{configMapController.getKey('ListJobConfigMapEmpty')}" rendered="#{jobConfigMapController.items.rowCount == 0}"/>
+                <h:panelGroup rendered="#{jobConfigMapController.items.rowCount > 0}">
+                    <p:dataTable value="#{jobConfigMapController.items}"  widgetVar="#{jobConfigMapController}Table" var="item"  paginator="true" rows="15"  paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  rowsPerPageTemplate="5,10,15,20,25,50,100" >
+                        <f:facet name="header">
+                            <p:outputPanel>
+                                <h:outputText value="Search all fields:" />
+                                <p:inputText id="globalFilter" onkeyup="jobConfigMapController.itemsTable.filter()" />
+                            </p:outputPanel>
+                        </f:facet>
+
+                        <p:column sortBy="#{item.idjobConfigMap}" filterBy="#{item.idjobConfigMap}" headerText="#{configMapController.getKey('ListJobConfigMapTitle_idjobConfigMap')}"   >
+                            <f:facet name="header">
+                                <h:outputText value="#{configMapController.getKey('ListJobConfigMapTitle_idjobConfigMap')}"/>
+                            </f:facet>
+                            <h:outputText value="#{item.idjobConfigMap}"/>
+                        </p:column>
+                        <p:column sortBy="#{item.configMapKey}" filterBy="#{item.configMapKey}" headerText="#{configMapController.getKey('ListJobConfigMapTitle_configMapKey')}"   >
+                            <f:facet name="header">
+                                <h:outputText value="#{configMapController.getKey('ListJobConfigMapTitle_configMapKey')}"/>
+                            </f:facet>
+                            <h:outputText value="#{item.configMapKey}"/>
+                        </p:column>
+                        <p:column sortBy="#{item.parentTask}" filterBy="#{item.parentTask}" headerText="#{configMapController.getKey('ListJobConfigMapTitle_parentTask')}"   >
+                            <f:facet name="header">
+                                <h:outputText value="#{configMapController.getKey('ListJobConfigMapTitle_parentTask')}"/>
+                            </f:facet>
+                            <h:outputText value="#{item.parentTask}"/>
+                        </p:column>
+                        <p:column sortBy="#{item.basicKey}" filterBy="#{item.basicKey}" headerText="#{configMapController.getKey('ListJobConfigMapTitle_basicKey')}"   >
+                            <f:facet name="header">
+                                <h:outputText value="#{configMapController.getKey('ListJobConfigMapTitle_basicKey')}"/>
+                            </f:facet>
+                            <h:outputText value="#{item.basicKey}"/>
+                        </p:column>
+                        <p:column sortBy="#{item.basicValue}" filterBy="#{item.basicValue}" headerText="#{configMapController.getKey('ListJobConfigMapTitle_basicValue')}"   >
+                            <f:facet name="header">
+                                <h:outputText value="#{configMapController.getKey('ListJobConfigMapTitle_basicValue')}"/>
+                            </f:facet>
+                            <h:outputText value="#{item.basicValue}"/>
+                        </p:column>
+                        <p:column>
+                            <f:facet name="header">
+                                <h:outputText value="&nbsp;"/>
+                            </f:facet>
+                            <p:commandButton                                                            ajax="false" action="#{jobConfigMapController.prepareView}" value="#{configMapController.getKey('ListJobConfigMapViewLink')}">
+                                <f:setPropertyActionListener value="#{item}" target="#{jobConfigMapController.selected}" />
+                            </p:commandButton>                        
+                            <h:outputText value=" "/>
+                            <p:commandButton rendered="#{jobConfigMapController.isUserInRole('ADMIN')}"  ajax="false" action="#{jobConfigMapController.prepareEdit}" value="#{configMapController.getKey('ListJobConfigMapEditLink')}">
+                                <f:setPropertyActionListener value="#{item}" target="#{jobConfigMapController.selected}" />
+                            </p:commandButton>                        
+                            <h:outputText value=" "/>
+                            <p:commandButton rendered="#{jobConfigMapController.isUserInRole('ADMIN')}"  ajax="false"   value="#{configMapController.getKey('ListJobConfigMapDestroyLink')}">
+                                <f:setPropertyActionListener value="#{item}" target="#{jobConfigMapController.selectedForDeletion}" />
+                            </p:commandButton>                        
+
+                        </p:column>
+                    </p:dataTable>
+                </h:panelGroup>
+            </h:form>
+        </ui:define>
+    </ui:composition>
+
+</html>

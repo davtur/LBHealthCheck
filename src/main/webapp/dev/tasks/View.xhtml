@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" >
+
+    <ui:composition template="/template.xhtml">
+        <ui:define name="title">
+            <h:outputText value="#{configMapController.getKey('ViewTasksTitle')}"></h:outputText>
+        </ui:define>
+        <ui:define name="body">
+            <h:panelGroup id="messagePanel" layout="block">
+                <h:messages errorStyle="color: red" infoStyle="color: green" layout="table"/>
+            </h:panelGroup>
+            <h:form>
+                <p:panel>
+                    <h:panelGrid columns="2">
+                        <h:outputText value="#{configMapController.getKey('ViewTasksLabel_idtasks')}"/>
+                        <h:outputText value="#{tasksController.selected.idtasks}" title="#{configMapController.getKey('ViewTasksTitle_idtasks')}"/>
+                        <h:outputText value="#{configMapController.getKey('ViewTasksLabel_name')}"/>
+                        <h:outputText value="#{tasksController.selected.name}" title="#{configMapController.getKey('ViewTasksTitle_name')}"/>
+                        <h:outputText value="#{configMapController.getKey('ViewTasksLabel_description')}"/>
+                        <h:outputText value="#{tasksController.selected.description}" title="#{configMapController.getKey('ViewTasksTitle_description')}"/>
+                        
+                        <h:outputText value="#{configMapController.getKey('ViewTasksLabel_cronEntry')}"/>
+                        <h:outputText value="#{tasksController.selected.cronEntry}" title="#{configMapController.getKey('ViewTasksTitle_cronEntry')}"/>
+                        <h:outputText value="#{configMapController.getKey('ViewTasksLabel_taskClassName')}"/>
+                        <h:outputText value="#{tasksController.selected.taskClassName}" title="#{configMapController.getKey('ViewTasksTitle_taskClassName')}"/>
+                    </h:panelGrid>
+                </p:panel>
+                <br />
+                <p:commandButton rendered="#{tasksController.isUserInRole('ADMIN')}"  ajax="false"  action="#{tasksController.destroyAndView}" value="#{configMapController.getKey('ViewTasksDestroyLink')}"/>
+                <br />
+                <br />
+                <p:commandButton rendered="#{tasksController.isUserInRole('ADMIN')}"  ajax="false"  action="Edit" value="#{configMapController.getKey('ViewTasksEditLink')}"/>
+                <br />
+                <p:commandButton rendered="#{tasksController.isUserInRole('ADMIN')}"  ajax="false"  action="#{tasksController.prepareCreate}" value="#{configMapController.getKey('ViewTasksCreateLink')}" />
+                <br />
+                <p:commandButton                                                                 ajax="false"  action="#{tasksController.prepareList}" value="#{configMapController.getKey('ViewTasksShowAllLink')}"/>
+  
+            </h:form>
+        </ui:define>
+    </ui:composition>
+
+</html>
