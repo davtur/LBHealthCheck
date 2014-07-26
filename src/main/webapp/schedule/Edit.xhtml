@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" >
+
+    <ui:composition>
+        <p:dialog id="ScheduleEditDlg" widgetVar="ScheduleEditDialog" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('EditScheduleTitle')}">
+            <h:form id="ScheduleEditForm">
+                <h:panelGroup id="display">
+                    <p:panelGrid columns="2" rendered="#{scheduleController.selected != null}">
+                        <h:outputLabel value="#{configMapController.getKey('EditScheduleLabel_idSchedule')}" for="idSchedule" />
+                        <h:inputText id="idSchedule"  value="#{scheduleController.selected.idSchedule}" title="#{configMapController.getKey('EditScheduleTitle_idSchedule')}" required="true" requiredMessage="#{configMapController.getKey('EditScheduleRequiredMessage_idSchedule')}"/>
+                        <h:outputLabel value="#{configMapController.getKey('EditScheduleLabel_shedTitle')}" for="shedTitle" />
+                        <h:inputTextarea rows="4" cols="30" id="shedTitle" value="#{scheduleController.selected.shedTitle}" title="#{configMapController.getKey('EditScheduleTitle_shedTitle')}" required="true" requiredMessage="#{configMapController.getKey('EditScheduleRequiredMessage_shedTitle')}"/>
+                        <h:outputLabel value="#{configMapController.getKey('EditScheduleLabel_shedStartdate')}" for="shedStartdate" />
+                        <h:inputText id="shedStartdate" value="#{scheduleController.selected.shedStartdate}" title="#{configMapController.getKey('EditScheduleTitle_shedStartdate')}" required="true" requiredMessage="#{configMapController.getKey('EditScheduleRequiredMessage_shedStartdate')}">
+                            <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                        </h:inputText>
+                        <h:outputLabel value="#{configMapController.getKey('EditScheduleLabel_shedEnddate')}" for="shedEnddate" />
+                        <h:inputText id="shedEnddate" value="#{scheduleController.selected.shedEnddate}" title="#{configMapController.getKey('EditScheduleTitle_shedEnddate')}" required="true" requiredMessage="#{configMapController.getKey('EditScheduleRequiredMessage_shedEnddate')}">
+                            <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                        </h:inputText>
+                        <h:outputLabel value="#{configMapController.getKey('EditScheduleLabel_shedAllday')}" for="shedAllday" />
+                        <h:inputText id="shedAllday"  value="#{scheduleController.selected.shedAllday}" title="#{configMapController.getKey('EditScheduleTitle_shedAllday')}" />
+                        <h:outputLabel value="#{configMapController.getKey('EditScheduleLabel_shedstyleClass')}" for="shedstyleClass" />
+                        <h:inputText id="shedstyleClass"  value="#{scheduleController.selected.shedstyleClass}" title="#{configMapController.getKey('EditScheduleTitle_shedstyleClass')}" />
+                        <h:outputLabel value="#{configMapController.getKey('EditScheduleLabel_schedData')}" for="schedData" />
+                        <h:inputTextarea rows="4" cols="30" id="schedData" value="#{scheduleController.selected.schedData}" title="#{configMapController.getKey('EditScheduleTitle_schedData')}" />
+                        <h:outputLabel value="#{configMapController.getKey('EditScheduleLabel_schedEditable')}" for="schedEditable" />
+                        <h:inputText id="schedEditable"  value="#{scheduleController.selected.schedEditable}" title="#{configMapController.getKey('EditScheduleTitle_schedEditable')}" />
+                    </p:panelGrid>
+                    <p:commandButton actionListener="#{scheduleController.update}" value="#{configMapController.getKey('Save')}" update="display,:ScheduleListForm:datalist,:growl" oncomplete="handleSubmit(args, 'ScheduleEditDialog');scheduleControllerTable.filter()"/>
+                    <p:commandButton value="#{configMapController.getKey('Cancel')}" onclick="ScheduleEditDialog.hide()"/>
+                </h:panelGroup>
+            </h:form>
+        </p:dialog>
+
+    </ui:composition>
+</html>

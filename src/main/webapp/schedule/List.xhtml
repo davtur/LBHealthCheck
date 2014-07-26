@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" >
+
+    <ui:composition template="/template.xhtml">
+        <ui:define name="title">
+            <h:outputText value="#{configMapController.getKey('ListScheduleTitle')}"></h:outputText>
+        </ui:define>
+        <ui:define name="body">
+
+
+
+
+
+            <h:form id="ScheduleListForm">
+                <h:outputText escape="false" value="#{configMapController.getKey('ListScheduleEmpty')}" rendered="#{scheduleController.items.rowCount == 0}"/>
+                <h:panelGroup rendered="#{scheduleController.items.rowCount > 0}">
+                    <p:dataTable  
+                        id="datalist"  
+                        editable="true" 
+                        value="#{scheduleController.items}" 
+                        selection="#{scheduleController.selected}" 
+                        rowKey="#{item.idSchedule}" 
+                        filteredValue="#{scheduleController.filteredItems}"  
+                        widgetVar="scheduleControllerTable" 
+                        var="item"  
+                        paginator="true" 
+                        rows="15"  
+                        paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  
+                        rowsPerPageTemplate="5,10,15,20,25,50,100" >
+                        <f:facet name="header">
+                            <p:outputPanel>
+                                <h:outputText value="Search all fields:" />
+                                <h:inputText id="globalFilter" onkeyup="scheduleControllerTable.filter()" />
+                            </p:outputPanel>
+                        </f:facet>
+                        <p:ajax event="rowEdit" listener="#{scheduleController.onEdit}" update=":growl" oncomplete="scheduleControllerTable.filter()" />  
+                        <p:ajax event="rowEditCancel" listener="#{scheduleController.onCancel}" update=":growl"  oncomplete="scheduleControllerTable.filter()" />  
+                        <p:ajax event="rowSelect"   update="createButton viewButton editButton deleteButton"/>
+                        <p:ajax event="rowUnselect" update="createButton viewButton editButton deleteButton"/>
+                        <p:column selectionMode="single"/>
+                        <p:column sortBy="#{item.idSchedule}" filterBy="#{item.idSchedule}" headerText="#{configMapController.getKey('ListScheduleTitle_idSchedule')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.idSchedule}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.idSchedule}" label="#{configMapController.getKey('ListScheduleTitle_idSchedule')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.shedTitle}" filterBy="#{item.shedTitle}" headerText="#{configMapController.getKey('ListScheduleTitle_shedTitle')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.shedTitle}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.shedTitle}" label="#{configMapController.getKey('ListScheduleTitle_shedTitle')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.shedStartdate}" filterBy="#{item.shedStartdate}" headerText="#{configMapController.getKey('ListScheduleTitle_shedStartdate')}"   >
+
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.shedStartdate}">
+                                        <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                                    </h:outputText>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:calendar value="#{item.shedStartdate}">	
+                                        <p:ajax event="dateSelect" listener= "#{scheduleController.handleDateSelect}" update=":growl" />
+                                    </p:calendar>
+                                </f:facet>
+                            </p:cellEditor> 
+
+                        </p:column>
+                        <p:column sortBy="#{item.shedEnddate}" filterBy="#{item.shedEnddate}" headerText="#{configMapController.getKey('ListScheduleTitle_shedEnddate')}"   >
+
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.shedEnddate}">
+                                        <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                                    </h:outputText>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:calendar value="#{item.shedEnddate}">	
+                                        <p:ajax event="dateSelect" listener= "#{scheduleController.handleDateSelect}" update=":growl" />
+                                    </p:calendar>
+                                </f:facet>
+                            </p:cellEditor> 
+
+                        </p:column>
+                        <p:column sortBy="#{item.shedAllday}" filterBy="#{item.shedAllday}" headerText="#{configMapController.getKey('ListScheduleTitle_shedAllday')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.shedAllday}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.shedAllday}" label="#{configMapController.getKey('ListScheduleTitle_shedAllday')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.shedstyleClass}" filterBy="#{item.shedstyleClass}" headerText="#{configMapController.getKey('ListScheduleTitle_shedstyleClass')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.shedstyleClass}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.shedstyleClass}" label="#{configMapController.getKey('ListScheduleTitle_shedstyleClass')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.schedData}" filterBy="#{item.schedData}" headerText="#{configMapController.getKey('ListScheduleTitle_schedData')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.schedData}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.schedData}" label="#{configMapController.getKey('ListScheduleTitle_schedData')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.schedEditable}" filterBy="#{item.schedEditable}" headerText="#{configMapController.getKey('ListScheduleTitle_schedEditable')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.schedEditable}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.schedEditable}" label="#{configMapController.getKey('ListScheduleTitle_schedEditable')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column rendered="#{scheduleController.isUserInRole('ADMIN')}"  headerText="Edit" style="width:50px">  
+                            <p:rowEditor />  
+                        </p:column>  
+
+
+                        <f:facet name="footer">
+                            <p:commandButton rendered="#{scheduleController.isUserInRole('ADMIN')}" id="createButton" icon="ui-icon-plus"   value="#{configMapController.getKey('Create')}" actionListener="#{scheduleController.prepareCreate}" update=":ScheduleCreateForm" oncomplete="PF('ScheduleCreateDialog').show()"/>
+                            <p:commandButton id="viewButton"   icon="ui-icon-search" value="#{configMapController.getKey('View')}" update=":ScheduleViewForm" oncomplete="PF('ScheduleViewDialog').show()" disabled="#{empty scheduleController.selected}"/>
+                            <p:commandButton rendered="#{scheduleController.isUserInRole('ADMIN')}" id="editButton"   icon="ui-icon-pencil" value="#{configMapController.getKey('Edit')}" update=":ScheduleEditForm" oncomplete="PF('ScheduleEditDialog').show()" disabled="#{empty scheduleController.selected}"/>
+                            <p:commandButton rendered="#{scheduleController.isUserInRole('ADMIN')}" id="deleteButton" icon="ui-icon-trash"  value="#{configMapController.getKey('Delete')}" actionListener="#{scheduleController.destroy}" update=":growl,datalist" disabled="#{empty scheduleController.selected}"/>
+                        </f:facet>
+
+                    </p:dataTable>
+                </h:panelGroup>
+            </h:form>
+
+            <ui:include src="Create.xhtml"/>
+            <ui:include src="Edit.xhtml"/>
+            <ui:include src="View.xhtml"/>
+
+        </ui:define>
+    </ui:composition>
+
+</html>

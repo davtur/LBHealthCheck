@@ -122,6 +122,7 @@ public class CustomersController implements Serializable {
             Customers c = multiSelected[0];
             setSelected(c);
             JsfUtil.addSuccessMessage(configMapFacade.getConfig("setSelectedCustomer") + " " + c.getFirstname() + " " + c.getLastname() + ".");
+            multiSelected = null;
         } else if (multiSelected.length > 1) {
             JsfUtil.addErrorMessage(configMapFacade.getConfig("setSelectedCustomerTooManySelected"));
         } else if (multiSelected.length == 0) {
@@ -974,11 +975,18 @@ public class CustomersController implements Serializable {
         if (customerStateList == null) {
 
             customerStateList = ejbCustomerStateFacade.findAll();
-            selectedCustomerStates = new CustomerState[1];
+            //selectedCustomerStates = new CustomerState[customerStateList.size()];
+            //selectedCustomerStates = customerStateList.toArray(selectedCustomerStates);
+            
+            selectedCustomerStates = new CustomerState[2];
             for (CustomerState cs : customerStateList) {
                 if (cs.getCustomerState().contains("ACTIVE")) {
                     selectedCustomerStates[0] = cs;
                 }
+                if (cs.getCustomerState().contains("ON HOLD")) {
+                    selectedCustomerStates[1] = cs;
+                }
+               
             }
 
         }

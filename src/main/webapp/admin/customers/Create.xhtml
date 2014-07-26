@@ -90,8 +90,8 @@
                         <p:ajax listener="#{customersController.checkPassChange}" event="keyup" />
                     </p:password>
                 </p:panelGrid>
-                <p:panel>
-                    <p:commandButton id="dialogueSave" oncomplete="PF('fitnessTestChartsControllerTable').filter()"  onclick="handleSubmit(args,'customersCreateDialogue');" actionListener="#{customersController.createDialogue}" value="#{configMapController.getKey('CreateCustomersSaveLink')}" update=":growl :tv:customerslistForm1:selectedUser :tv:formCustomersEdit1 :formCustomersCreate1 :tv:paymentsForm  :tv:NoteslistForm1"/>                
+                <p:panel><!--  onclick="handleSubmit(args,'customersCreateDialogue');"-->
+                    <p:commandButton id="dialogueSave" oncomplete="PF('customersCreateDialogue').hide()"  actionListener="#{customersController.createDialogue}" value="#{configMapController.getKey('CreateCustomersSaveLink')}" update=":growl :tv:customerslistForm1 :tv:formCustomersEdit1 :formCustomersCreate1 :tv:paymentsForm  :tv:NoteslistForm1"/>                
                     <p:commandButton id="dialogueDiscard" onclick="PF('customersCreateDialogue').hide()"  actionListener="#{customersController.cancelCreateDialogue}" value="#{configMapController.getKey('CreateCustomersDiscardLink')}" update=":growl"/>                
 
                 </p:panel>

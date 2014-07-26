@@ -30,7 +30,7 @@
                                 </p:selectOneMenu>
                             </h:panelGroup >
                             <h:panelGroup id="selectedUserPanel">                 
-                                <p:commandButton id="selectCustomerButton"   actionListener="#{customersController.setSelectedCustomer}" value="#{configMapController.getKey('ListCustomersSelectCustomersButton')}" title="#{configMapController.getKey('ListCustomersSelectCustomersButtonHelp')}" update=":tv:customerslistForm1 :tv:formCustomersEdit1 :tv:paymentsForm :growl" /> 
+                                <p:commandButton id="selectCustomerButton"   actionListener="#{customersController.setSelectedCustomer}" value="#{configMapController.getKey('ListCustomersSelectCustomersButton')}" title="#{configMapController.getKey('ListCustomersSelectCustomersButtonHelp')}" update=":tv:customerslistForm1 :tv:formCustomersEdit1 :tv:NoteslistForm1 :tv:paymentsForm :growl" /> 
                             <h:outputText id="selectedUser" value="Selected: #{customersController.selected.firstname} #{customersController.selected.lastname}" />
                             </h:panelGroup >
                             <h:panelGrid columns="2">
@@ -344,7 +344,7 @@
                         </p:panel>
                         <p:outputPanel id="iFrameHeaderPanel" >
                             <p:panelGrid id="dialoguePaymenstGrid1" columns="2" rendered="#{ezidebit.customerExistsInPaymentGateway == false and ezidebit.customerDetailsHaveBeenRetrieved == true}" >
-                                <p:commandButton  id="paymentsButton" ajax="true"   actionListener="#{ezidebit.createCustomerRecord}" update=":growl :tv:paymentsForm "   value="#{configMapController.getKey('EditCustomersUpdatePayment')}" immediate="true"/>
+                                <p:commandButton  id="paymentsButton" ajax="true"   actionListener="#{ezidebit.createCustomerRecord}" update=":growl :tv:paymentsForm "   value="#{configMapController.getKey('EditCustomersUpdatePayment')}" />
                                 <p:outputLabel value="#{configMapController.getKey('EditCustomersAddToPaymentGatewayLabel')}" for="paymentsButton" />
                             </p:panelGrid>
                             <h:outputText id="selectedUser2" value="#{customersController.selected.firstname} #{customersController.selected.lastname}" />
@@ -492,7 +492,7 @@
                 </p:tab>
             </p:tabView>  
 
-            <p:socket onMessage="handleMessage" channel="/payments" transport="long-polling" autoConnect="false" widgetVar="subscriber"/>
+            <p:socket onMessage="handleMessage"  channel="/payments" transport="long-polling" autoConnect="false" widgetVar="subscriber"/>
                 <!--<p:socket widgetVar="mySocket" channel="/#{session.id}"   
 onMessage="myHandler" autoConnect="false"/> -->
             <script type="text/javascript">

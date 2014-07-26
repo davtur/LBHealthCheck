@@ -85,7 +85,13 @@ public class JsfUtil {
     }
 
     public static void addErrorMessage(String summary, String message) {
-        FacesMessage facesMsg = new FacesMessage(FacesMessage.SEVERITY_ERROR, summary, message);
+        FacesMessage facesMsg;
+        if (summary.contains(message)) {
+            facesMsg = new FacesMessage(FacesMessage.SEVERITY_ERROR, message, null);
+        } else {
+            facesMsg = new FacesMessage(FacesMessage.SEVERITY_ERROR, message, summary);
+        }
+
         FacesContext.getCurrentInstance().addMessage(null, facesMsg);
         String msg = summary + "; " + message;
         Logger.getLogger(JsfUtil.class.getName()).severe(msg);
@@ -97,7 +103,12 @@ public class JsfUtil {
     }
 
     public static void addSuccessMessage(String summary, String message) {
-        FacesMessage facesMsg = new FacesMessage(FacesMessage.SEVERITY_INFO, summary, message);
+        FacesMessage facesMsg;
+        if (summary.contains(message)) {
+            facesMsg = new FacesMessage(FacesMessage.SEVERITY_INFO, message, null);
+        } else {
+            facesMsg = new FacesMessage(FacesMessage.SEVERITY_INFO, message, summary);
+        }
         FacesContext.getCurrentInstance().addMessage("successInfo", facesMsg);
     }
 
@@ -111,7 +122,7 @@ public class JsfUtil {
     }
 
     public int getUser() {
-        int cust_id ;
+        int cust_id;
         FacesContext facesContext = FacesContext.getCurrentInstance();
         String name = facesContext.getExternalContext().getRemoteUser();
         Customers cust = ejbCustomerFacade.findCustomerByUsername(name);
@@ -120,7 +131,7 @@ public class JsfUtil {
     }
 
     public Customers getCustomer() {
-        Customers cust ;
+        Customers cust;
         FacesContext context = FacesContext.getCurrentInstance();
         CustomersController custController = (CustomersController) context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
         String name = custController.getSelected().getUsername();
