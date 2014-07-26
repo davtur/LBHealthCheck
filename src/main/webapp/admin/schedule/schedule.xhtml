@@ -31,11 +31,11 @@
 
                         <h:outputLabel for="from" value="From:" />
                         <p:calendar id="from" value="#{scheduleController.event.startDate}" pattern="dd/MM/yyyy HH:mm">  
-                           <p:ajax event="dateSelect" listener="#{scheduleController.handleDateSelect}" update=":growl :scheduleForm:eventDetails"  /> 
+                           <p:ajax event="dateSelect" listener="#{scheduleController.handleStartDateSelect}" update=":growl :scheduleForm:eventDetails"  /> 
                         </p:calendar>
                         <h:outputLabel for="to" value="To:" />
                         <p:calendar id="to" value="#{scheduleController.event.endDate}"  pattern="dd/MM/yyyy HH:mm">  
-                                <p:ajax event="dateSelect" listener="#{scheduleController.handleDateSelect}" update=":growl :scheduleForm:eventDetails"  />
+                                <p:ajax event="dateSelect" listener="#{scheduleController.handleEndDateSelect}" update=":growl :scheduleForm:eventDetails"  />
                        
                         </p:calendar>
 
