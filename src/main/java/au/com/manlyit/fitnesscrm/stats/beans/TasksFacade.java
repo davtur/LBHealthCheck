@@ -15,7 +15,7 @@ import javax.persistence.PersistenceContext;
  */
 @Stateless
 public class TasksFacade extends AbstractFacade<Tasks> {
-    @PersistenceContext(unitName = "McasPU")
+    @PersistenceContext(unitName = "FitnessStatsPU")
     private EntityManager em;
 
     @Override

@@ -22,7 +22,7 @@ import javax.persistence.criteria.*;
 @Stateless
 public class JobConfigMapFacade extends AbstractFacade<JobConfigMap> {
 
-    @PersistenceContext(unitName = "McasPU")
+    @PersistenceContext(unitName = "FitnessStatsPU")
     private EntityManager em;
     private static final Logger logger = Logger.getLogger(JobConfigMapFacade.class.getName());
 

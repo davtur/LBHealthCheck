@@ -17,11 +17,9 @@
             <h:form>
                 <p:panel>
                     <h:panelGrid columns="2">
-                        <h:outputLabel value="#{configMapController.getKey('CreateJobConfigMapLabel_idjobConfigMap')}" for="idjobConfigMap" />
-                        <p:inputText id="idjobConfigMap" value="#{jobConfigMapController.selected.idjobConfigMap}" title="#{configMapController.getKey('CreateJobConfigMapTitle_idjobConfigMap')}" required="true" requiredMessage="#{configMapController.getKey('CreateJobConfigMapRequiredMessage_idjobConfigMap')}"/>
-                        <h:outputLabel value="#{configMapController.getKey('CreateJobConfigMapLabel_configMapKey')}" for="configMapKey" />
+                          <h:outputLabel value="#{configMapController.getKey('CreateJobConfigMapLabel_configMapKey')}" for="configMapKey" />
                         <h:selectOneMenu id="configMapKey" value="#{jobConfigMapController.selected.configMapKey}" title="#{configMapController.getKey('CreateJobConfigMapTitle_configMapKey')}" >
-                            <f:selectItems value="#{configMapController.getKey('itemsAvailableSelectOne')}"/>
+                            <f:selectItems value="#{configMapController.itemsAvailableSelectOne}"/>
                         </h:selectOneMenu>
                         <h:outputLabel value="#{configMapController.getKey('CreateJobConfigMapLabel_parentTask')}" for="parentTask" />
                         <h:selectOneMenu id="parentTask" value="#{jobConfigMapController.selected.parentTask}" title="#{configMapController.getKey('CreateJobConfigMapTitle_parentTask')}" required="true" requiredMessage="#{configMapController.getKey('CreateJobConfigMapRequiredMessage_parentTask')}">
@@ -38,9 +36,7 @@
                 <br />
                 <br />
                 <p:commandButton   ajax="false"   action="#{jobConfigMapController.prepareList}" value="#{configMapController.getKey('CreateJobConfigMapShowAllLink')}" immediate="true"/>
-                <br />
-                <br />
-                <p:commandButton  ajax="false"   value="#{configMapController.getKey('CreateJobConfigMapIndexLink')}" action="/EnvManager/landing.xhtml" immediate="true" />
+                
             </h:form>
         </ui:define>
     </ui:composition>

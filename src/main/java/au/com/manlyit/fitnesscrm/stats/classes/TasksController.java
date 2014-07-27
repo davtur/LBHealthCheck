@@ -5,6 +5,7 @@ import au.com.manlyit.fitnesscrm.stats.beans.JobConfigMapFacade;
 import au.com.manlyit.fitnesscrm.stats.beans.TasksFacade;
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PaginationHelper;
+import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import au.com.manlyit.fitnesscrm.stats.db.JobConfigMap;
 import au.com.manlyit.fitnesscrm.stats.db.Tasks;
 
@@ -372,7 +373,10 @@ public class TasksController implements Serializable {
     public SelectItem[] getItemsAvailableSelectOne() {
         return JsfUtil.getSelectItems(ejbFacade.findAll(), true);
     }
-    
+   
+    public Collection<Tasks> getCustomersAvailableSelectOneObject() {
+        return ejbFacade.findAll();
+    } 
     private void updateJobClassNames() {
         ArrayList<String> al = new ArrayList<String>();
         al.add("CronJobCallableThreadFactory");
