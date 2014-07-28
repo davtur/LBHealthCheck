@@ -348,6 +348,10 @@ public class ConfigMapController implements Serializable {
     public SelectItem[] getItemsAvailableSelectOne() {
         return JsfUtil.getSelectItems(ejbFacade.findAll(), true);
     }
+    
+     public List<ConfigMap> getItemsAvailableSelectObjects() {
+        return ejbFacade.findAll();
+    }
 
     public SelectItem[] getConfigJobClassesAvailableSelectOne() {
 

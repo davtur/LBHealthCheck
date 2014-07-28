@@ -5,7 +5,6 @@ import au.com.manlyit.fitnesscrm.stats.beans.JobConfigMapFacade;
 import au.com.manlyit.fitnesscrm.stats.beans.TasksFacade;
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PaginationHelper;
-import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import au.com.manlyit.fitnesscrm.stats.db.JobConfigMap;
 import au.com.manlyit.fitnesscrm.stats.db.Tasks;
 
@@ -27,6 +26,7 @@ import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 import javax.faces.convert.Converter;
 import javax.faces.convert.FacesConverter;
+import javax.faces.event.ActionEvent;
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
@@ -64,15 +64,15 @@ public class TasksController implements Serializable {
         
     }
     
-    public void scheduleSelected() {
+    public void scheduleSelected(ActionEvent actionEvent) {
         scheduleSelectedTask(false);
     }
     
-    public void runSelectedNow() {
+    public void runSelectedNow(ActionEvent actionEvent) {
         scheduleSelectedTask(true);
     }
 
-    public void cloneSelected() {
+    public void cloneSelected(ActionEvent actionEvent) {
         int c = 0;
         int e = 0;
         for (Tasks tsk : getMultiSelected()) {

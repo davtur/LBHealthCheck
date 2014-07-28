@@ -13,15 +13,15 @@
         <ui:define name="body">
             <h:form id="listForm1">
                 <h:panelGroup >
-                    <p:commandButton id="createButton" ajax="false" action="#{tasksController.prepareCreate}" value="#{configMapController.getKey('ListTasksCreateLink')}"/>
-                    <p:commandButton id="scheduleButton" ajax="false" action="#{tasksController.scheduleSelected}" value="Schedule Selected"/>
-                    <p:commandButton id="runNowButton" ajax="false" action="#{tasksController.runSelectedNow()}" value="Run Selected Now"/>
-                    <p:commandButton id="cloneButton" ajax="false" actionListener="#{tasksController.cloneSelected()}" value="Clone Selected"/>
+                    <p:commandButton id="createButton" ajax="false" action="#{tasksController.prepareCreate}" value="#{configMapController.getKey('ListTasksCreateButton')}"/>
+                    <p:commandButton id="scheduleButton"  actionListener="#{tasksController.scheduleSelected}" value="#{configMapController.getKey('ListTasksScheduleButton')}"/>
+                    <p:commandButton id="runNowButton"  actionListener="#{tasksController.runSelectedNow}" value="#{configMapController.getKey('ListTasksRunSelectedNowButton')}"/>
+                    <p:commandButton id="cloneButton"  actionListener="#{tasksController.cloneSelected}" value="#{configMapController.getKey('ListTasksCloneSelectedButton')}" update=":listForm1:tasksTable"/>
 
                 </h:panelGroup>
                 <h:outputText escape="false" value="#{configMapController.getKey('ListTasksEmpty')}" rendered="#{tasksController.items.rowCount == 0}"/>
                 <h:panelGroup rendered="#{tasksController.items.rowCount > 0}">
-                    <p:dataTable selection="#{tasksController.multiSelected}" rowKey="#{item.idtasks}" value="#{tasksController.items}"  widgetVar="tasksControllerTable" var="item"  paginator="true" rows="15"  paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  rowsPerPageTemplate="5,10,15,20,25,50,100" >
+                    <p:dataTable id="tasksTable" selection="#{tasksController.multiSelected}" rowKey="#{item.idtasks}" value="#{tasksController.items}"  widgetVar="tasksControllerTable" var="item"  paginator="true" rows="15"  paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  rowsPerPageTemplate="5,10,15,20,25,50,100" >
                         <f:facet name="header">
                             <p:outputPanel>
                                 <h:outputText value="Search all fields:" />
@@ -72,7 +72,7 @@
                                 <f:setPropertyActionListener value="#{item}" target="#{tasksController.selected}" />
                             </p:commandButton>                        
                             <h:outputText value=" "/>
-                            <p:commandButton rendered="#{tasksController.isUserInRole('ADMIN')}"  update=":listForm1 :menuForm:growl"  value="#{configMapController.getKey('ListTasksDestroyLink')}">
+                            <p:commandButton rendered="#{tasksController.isUserInRole('ADMIN')}"  update=":listForm1 :growl"  value="#{configMapController.getKey('ListTasksDestroyLink')}">
                                 <f:setPropertyActionListener value="#{item}" target="#{tasksController.selectedForDeletion}" />
                             </p:commandButton>                        
 

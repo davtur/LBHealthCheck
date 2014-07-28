@@ -63,6 +63,7 @@ import org.quartz.JobKey;
 @SessionScoped
 public class QrtzJobDetailsController implements Serializable {
 
+    private static final String ETAG = "{!-ENCRYPT-!}";
     private QrtzJobDetails current;
     private QrtzJobDetails[] multiSelected;
     private List<QrtzJobDetails> filteredItems;
@@ -142,7 +143,7 @@ public class QrtzJobDetailsController implements Serializable {
         Class callableJobClassToRun;
         try {
             jobClass = cl.loadClass(tsk.getTaskClassName());
-        } catch (Exception ex) {
+        } catch (ClassNotFoundException ex) {
 
             String m = tsk.getName() + ". Error : Class not found. ClassName:" + tsk.getTaskClassName() + "Classpath = " + System.getProperty("java.class.path");
             Logger.getLogger(QrtzJobDetailsController.class.getName()).log(Level.SEVERE, m, ex);
@@ -150,22 +151,29 @@ public class QrtzJobDetailsController implements Serializable {
         }
         Collection<JobConfigMap> params = tsk.getJobConfigMapCollection();
         for (JobConfigMap jcm : params) {
-            String k = "";
-            String v = "";
+            String k;
+            String v;
             ConfigMap cm = jcm.getConfigMapKey();
             if (cm == null) {
                 k = jcm.getBasicKey();
                 v = jcm.getBasicValue();
             } else {
                 k = jcm.getBasicKey();
+                if (k.matches("configKey")) {
+                    k = cm.getConfigkey();
+                }
                 v = cm.getConfigvalue();
+                // check for encrypted value
+                if (v.indexOf(ETAG) == 0) {
+                    v = configMapFacade.getConfig(k);
+                }
             }
-            if (k.indexOf("jobClassToRun") != -1) {
+
+            if (k.contains("jobClassToRun")) {
 
                 try {
                     callableJobClassToRun = cl.loadClass(v);
-                } catch (Exception ex) {
-
+                } catch (ClassNotFoundException ex) {
                     String m = tsk.getName() + ". Error : jobClassToRun Callable Class not found. ClassName:" + v + ", Classpath = " + System.getProperty("java.class.path");
                     Logger.getLogger(QrtzJobDetailsController.class.getName()).log(Level.SEVERE, null, ex);
                     return m;
@@ -174,7 +182,6 @@ public class QrtzJobDetailsController implements Serializable {
             } else {
                 jdm.put(k, v);
             }
-
         }
         boolean result;
         if (runImmediately == true) {
@@ -285,7 +292,6 @@ public class QrtzJobDetailsController implements Serializable {
 
         for (QrtzJobDetails tsk : getMultiSelected()) {
 
-
             boolean ret = pauseJob(tsk.getQrtzJobDetailsPK().getJobName(), tsk.getQrtzJobDetailsPK().getJobGroup());
             if (ret == false) {
                 Logger.getLogger(getClass().getName()).log(Level.INFO, "Task failed to pause!");
@@ -310,7 +316,6 @@ public class QrtzJobDetailsController implements Serializable {
 
         for (QrtzJobDetails tsk : getMultiSelected()) {
 
-
             boolean ret = cancelJob(tsk.getQrtzJobDetailsPK().getJobName(), tsk.getQrtzJobDetailsPK().getJobGroup());
             if (ret == false) {
                 Logger.getLogger(getClass().getName()).log(Level.INFO, "Task failed to cancel!");
@@ -334,7 +339,6 @@ public class QrtzJobDetailsController implements Serializable {
         String responseMessage = "An Error occurred resuming the job. Check logs for details!";
 
         for (QrtzJobDetails tsk : getMultiSelected()) {
-
 
             boolean ret = resumeJob(tsk.getQrtzJobDetailsPK().getJobName(), tsk.getQrtzJobDetailsPK().getJobGroup());
             if (ret == false) {
@@ -391,7 +395,6 @@ public class QrtzJobDetailsController implements Serializable {
         //ejbFacade.synchDBwithJPA();
         recreateModel();
 
-
         return retValue;
 
     }
@@ -435,7 +438,6 @@ public class QrtzJobDetailsController implements Serializable {
         //ejbFacade.synchDBwithJPA();
         recreateModel();
 
-
         return retValue;
 
     }
@@ -478,11 +480,10 @@ public class QrtzJobDetailsController implements Serializable {
         //ejbFacade.synchDBwithJPA();
         recreateModel();
 
-
         return retValue;
 
     }
-    
+
     private boolean scheduleJob(String cronString, String jobName, JobDataMap jdm, Class jobClass) {
         boolean result = true;
         ServletContext sc = (ServletContext) FacesContext.getCurrentInstance().getExternalContext().getContext();
@@ -526,7 +527,6 @@ public class QrtzJobDetailsController implements Serializable {
 
             }
 
-
             //addSuccessMessage("Added job: " + jobDetail.getName());
         } catch (SchedulerException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, "Scheduler Exception Occurred when scheduling quartz jobs:", ex);
@@ -540,7 +540,6 @@ public class QrtzJobDetailsController implements Serializable {
         recreateModel();
         return result;
     }
-
 
     public void scheduledFireOnce(String jobName, Date fireDate, JobDataMap jdm, Class jobClass) {
         ServletContext sc = (ServletContext) FacesContext.getCurrentInstance().getExternalContext().getContext();
@@ -791,7 +790,7 @@ public class QrtzJobDetailsController implements Serializable {
      * @param selectedForDeletion the selectedForDeletion to set
      */
     public void setSelectedForDeletion(QrtzJobDetails selectedForDeletion) {
-        this.selectedForDeletion = selectedForDeletion;     
+        this.selectedForDeletion = selectedForDeletion;
         current = selectedForDeletion;
 
         performDestroy();

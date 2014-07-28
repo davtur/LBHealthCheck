@@ -23,6 +23,7 @@ import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 import javax.faces.convert.Converter;
 import javax.faces.convert.FacesConverter;
+import javax.faces.event.ActionEvent;
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 
@@ -98,7 +99,7 @@ public class JobConfigMapController implements Serializable {
                         }
                         for (ConfigMap cm : cml) {
                             JobConfigMap cm1 = new JobConfigMap(0, cm, task);
-                            cm1.setBasicKey("configKey");
+                            cm1.setBasicKey(configKey);
                             cm1.setBasicValue("*** INHERITED FROM CONFIGMAP ***");
                             try {
                                 getFacade().create(cm1);
@@ -106,7 +107,7 @@ public class JobConfigMapController implements Serializable {
                                 Exception e1 = ejbe.getCausedByException();
                                 Exception e = (Exception) e1.getCause();
                                 String mess = e.getMessage();
-                                if (mess.indexOf("Duplicate entry") != -1) {
+                                if (mess.contains("Duplicate entry")) {
                                     count--;
                                     duplicateLines += line + "\r\n";
                                 } else {
@@ -127,7 +128,7 @@ public class JobConfigMapController implements Serializable {
                             Exception e1 = ejbe.getCausedByException();
                             Exception e = (Exception) e1.getCause();
                             String mess = e.getMessage();
-                            if (mess.indexOf("Duplicate entry") != -1) {
+                            if (mess.contains("Duplicate entry")) {
                                 count--;
                                 duplicateLines += line + "\r\n";
                             } else {
@@ -190,9 +191,16 @@ public class JobConfigMapController implements Serializable {
         selectedItemIndex = -1;
         return "Create";
     }
-    
+     
     public String create() {
         try {
+            if(current.getBasicKey().trim().isEmpty() && current.getConfigMapKey() == null){
+                return null;
+            }
+            if(current.getBasicKey().trim().isEmpty() && current.getConfigMapKey() != null){
+                 current.setBasicKey(current.getConfigMapKey().getConfigkey());
+                            current.setBasicValue("*** INHERITED FROM CONFIGMAP ***");
+            }
             
             getFacade().create(current);
             
@@ -204,7 +212,7 @@ public class JobConfigMapController implements Serializable {
         }
     }
     
-    public void createFromTasksEditor() {
+    public void createFromTasksEditor(ActionEvent event) {
         try {
             
             if (current.getBasicKey().trim().isEmpty()) {

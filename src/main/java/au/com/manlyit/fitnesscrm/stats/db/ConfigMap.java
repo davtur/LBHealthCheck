@@ -109,7 +109,7 @@ public class ConfigMap implements Serializable {
 
     @Override
     public String toString() {
-        return "au.com.manlyit.fitnesscrm.stats.db.ConfigMap[ id=" + id + " ]";
+        return configkey;
     }
     
 }

@@ -10,9 +10,9 @@ package au.com.manlyit.fitnesscrm.stats.classes;
  */
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextAttributeEvent;
 import javax.servlet.ServletContextAttributeListener;
@@ -20,6 +20,7 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
 import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
 import org.quartz.impl.StdSchedulerFactory;
 
 /**
@@ -31,9 +32,9 @@ import org.quartz.impl.StdSchedulerFactory;
  * @author Craig R. McClanahan
  * @version $Revision: 1.3 $ $Date: 2006/10/12 14:31:30 $
  */
-public final class ContextListener1
+public final class CrmContextListener
         implements ServletContextAttributeListener, ServletContextListener {
-
+    private static final Logger logger = Logger.getLogger(CrmContextListener.class.getName());
 
     // ----------------------------------------------------- Instance Variables
     /**
@@ -45,6 +46,7 @@ public final class ContextListener1
 
     private class SimpleThreadFactory implements ThreadFactory {
 
+        @Override
         public Thread newThread(Runnable r) {
             return new Thread(tGroup, r, "Operations Main Thread");
         }
@@ -64,6 +66,7 @@ public final class ContextListener1
      *
      * @param event The servlet context attribute event
      */
+    @Override
     public void attributeAdded(ServletContextAttributeEvent event) {
 
         log("attributeAdded('" + event.getName() + "', '" +
@@ -76,6 +79,7 @@ public final class ContextListener1
      *
      * @param event The servlet context attribute event
      */
+    @Override
     public void attributeRemoved(ServletContextAttributeEvent event) {
 
         log("attributeRemoved('" + event.getName() + "', '" +
@@ -88,6 +92,7 @@ public final class ContextListener1
      *
      * @param event The servlet context attribute event
      */
+    @Override
     public void attributeReplaced(ServletContextAttributeEvent event) {
 
         log("attributeReplaced('" + event.getName() + "', '" +
@@ -100,6 +105,7 @@ public final class ContextListener1
      *
      * @param event The servlet context event
      */
+    @Override
     public void contextDestroyed(ServletContextEvent event) {
 
         /*  EntityManagerFactory emf = (EntityManagerFactory) this.context.getAttribute("emf");
@@ -129,9 +135,9 @@ public final class ContextListener1
             if (scheduler != null) {
                 scheduler.shutdown();
             }
-        } catch (Exception e) {
-            System.out.println("Quartz Scheduler failed to shutdown cleanly: " + e.toString());
-            e.printStackTrace();
+        } catch (SchedulerException e) {
+            logger.log(Level.INFO, "Quartz Scheduler failed to shutdown cleanly: {0}", e.toString());
+           
         }
 
         System.out.println("Quartz Scheduler successful shutdown.");
@@ -141,8 +147,8 @@ public final class ContextListener1
         this.context.removeAttribute("Operations.Group");
         this.context.removeAttribute("MainThread");
         this.context = null;
-        System.out.println("contextDestroyed()");
-        System.out.println("CONTEXT DESTROYED -  class contextListener1");
+        logger.log(Level.INFO, "contextDestroyed()");
+        logger.log(Level.INFO, "CONTEXT DESTROYED -  class contextListener1");
     }
 
     /**
@@ -150,10 +156,11 @@ public final class ContextListener1
      *
      * @param event The servlet context event
      */
+    @Override
     public void contextInitialized(ServletContextEvent event) {
-        System.out.println("INITIALISING CONTEXT with class contextListener1");
+        logger.log(Level.INFO, "INITIALISING CONTEXT with class contextListener1");
         this.context = event.getServletContext();
-        System.out.println("contextInitialized()");
+        logger.log(Level.INFO, "contextInitialized()");
         this.context.setAttribute("Operations.Group", tGroup);
 
 
@@ -199,8 +206,8 @@ public final class ContextListener1
                 if (startDelayS != null && startDelayS.trim().length() > 0) {
                     startDelay = Integer.parseInt(startDelayS);
                 }
-            } catch (Exception e) {
-                System.out.println("Cannot parse value of 'start-delay-seconds' to an integer: " + startDelayS + ", defaulting to 5 seconds.");
+            } catch (NumberFormatException e) {
+                logger.log(Level.INFO, "Cannot parse value of ''start-delay-seconds'' to an integer: {0}, defaulting to 5 seconds.", startDelayS);
                 startDelay = 5;
             }
 
@@ -213,11 +220,11 @@ public final class ContextListener1
                 if (startDelay <= 0) {
                     // Start now
                     scheduler.start();
-                    System.out.println("Scheduler has been started...");
+                    logger.log(Level.INFO, "Scheduler has been started...");
                 } else {
                     // Start delayed
                     scheduler.startDelayed(startDelay);
-                    System.out.println("Scheduler will start in " + startDelay + " seconds.");
+                    logger.log(Level.INFO, "Scheduler will start in {0} seconds.", startDelay);
                 }
             } else {
                 System.out.println("Scheduler has not been started. Use scheduler.start()");
@@ -229,14 +236,13 @@ public final class ContextListener1
                 factoryKey = QUARTZ_FACTORY_KEY;
             }
 
-            System.out.println("Storing the Quartz Scheduler Factory in the servlet context at key: " + factoryKey);
+            logger.log(Level.INFO, "Storing the Quartz Scheduler Factory in the servlet context at key: {0}", factoryKey);
             context.setAttribute(factoryKey, factory);
 
-        } catch (Exception e) {
-            System.out.println("Quartz Scheduler failed to initialize: " + e.toString());
-            e.printStackTrace();
+        } catch (SchedulerException e) {
+            logger.log(Level.WARNING, "Quartz Scheduler failed to initialize: {0}", e.toString());
         }
-        System.out.println("INITIALISING CONTEXT FINISHED with class contextListener1");
+        logger.log(Level.INFO, "INITIALISING CONTEXT FINISHED with class contextListener1");
     }
 
 
@@ -251,7 +257,7 @@ public final class ContextListener1
         if (context != null) {
             context.log("ContextListener: " + message);
         } else {
-            System.out.println("ContextListener: " + message);
+            logger.log(Level.INFO, "ContextListener: {0}", message);
 
         }
 
@@ -269,8 +275,7 @@ public final class ContextListener1
         if (context != null) {
             context.log("ContextListener: " + message, throwable);
         } else {
-            System.out.println("ContextListener: " + message);
-            throwable.printStackTrace(System.out);
+            logger.log(Level.INFO, "ContextListener: {0}",new Object[]{ message,throwable});
         }
 
     }

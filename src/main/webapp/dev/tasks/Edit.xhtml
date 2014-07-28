@@ -16,59 +16,59 @@
             </h:panelGroup>
             <h:form id="tasksListForm1">
                 <p:panel>
-                    <h:panelGrid columns="5">
-                        <h:panelGrid columns="2">
-                            <h:outputLabel value="#{configMapController.getKey('EditTasksLabel_name')}" for="name" />
+                    <p:panelGrid columns="5">
+                        <p:panelGrid columns="2">
+                            <p:outputLabel value="#{configMapController.getKey('EditTasksLabel_name')}" for="name" />
                             <p:inputText id="name" value="#{tasksController.selected.name}" title="#{configMapController.getKey('EditTasksTitle_name')}" />
-                        </h:panelGrid>
-                        <h:panelGrid columns="2">
+                        </p:panelGrid>
+                        <p:panelGrid columns="2">
 
-                            <h:outputLabel value="#{configMapController.getKey('EditTasksLabel_description')}" for="description" />
+                            <p:outputLabel value="#{configMapController.getKey('EditTasksLabel_description')}" for="description" />
                             <p:inputText id="description" value="#{tasksController.selected.description}" title="#{configMapController.getKey('EditTasksTitle_description')}" />
-                        </h:panelGrid>
-                        <h:panelGrid columns="2">
+                        </p:panelGrid>
+                        <p:panelGrid columns="2">
 
-                            <h:outputLabel value="#{configMapController.getKey('EditTasksLabel_cronEntry')}" for="cronEntry" />
+                            <p:outputLabel value="#{configMapController.getKey('EditTasksLabel_cronEntry')}" for="cronEntry" />
                             <p:inputText id="cronEntry" value="#{tasksController.selected.cronEntry}" title="#{configMapController.getKey('EditTasksTitle_cronEntry')}" />
-                        </h:panelGrid>
-                        <h:panelGrid columns="2">
+                        </p:panelGrid>
+                        <p:panelGrid columns="2">
 
-                            <h:outputLabel value="#{configMapController.getKey('EditTasksLabel_taskClassName')}" for="taskClassName" />
+                            <p:outputLabel value="#{configMapController.getKey('EditTasksLabel_taskClassName')}" for="taskClassName" />
                             <h:selectOneMenu id="taskClassName" value="#{tasksController.selected.taskClassName}" title="#{configMapController.getKey('EditTasksTitle_taskClassName')}" required="true" requiredMessage="#{configMapController.getKey('EditTasksRequiredMessage_taskClassName')}">
                                 <f:selectItems value="#{configMapController.getConfigJobClassesAvailableSelectOne()}"/>
                             </h:selectOneMenu>
 
-                        </h:panelGrid>
-                    </h:panelGrid>
+                        </p:panelGrid>
+                    </p:panelGrid>
                 </p:panel>
-                <h:panelGrid columns="3">
+                <p:panelGrid columns="3">
                     <p:commandButton   ajax="false"    action="#{tasksController.update}" value="#{configMapController.getKey('EditTasksSaveLink')}"/>
 
                     <p:commandButton   ajax="false"    action="View" value="#{configMapController.getKey('EditTasksViewLink')}" immediate="true"/>
 
                     <p:commandButton   ajax="false"    action="#{tasksController.prepareList}" value="#{configMapController.getKey('EditTasksShowAllLink')}" immediate="true"/>
-                </h:panelGrid>
+                </p:panelGrid>
             </h:form>
             <h:form id="tasksListForm2">
                 <p:panel>
-                    <h:panelGrid columns="4">
-                        <h:panelGrid columns="2">
-                            <h:outputLabel value="#{configMapController.getKey('CreateJobConfigMapLabel_configMapKey')}" for="configMapKey" />
+                    <p:panelGrid columns="4">
+                        <p:panelGrid columns="2">
+                            <p:outputLabel value="#{configMapController.getKey('CreateJobConfigMapLabel_configMapKey')}" for="configMapKey" />
                             <p:selectOneMenu id="configMapKey" value="#{jobConfigMapController.selected.configMapKey}" filter="true" filterMatchMode="startsWith" label="#{configMapController.getKey('CreateJobConfigMapTitle_configMapKey')}" > 
                                 <f:selectItems value="#{configMapController.itemsAvailableSelectOne}"/>
                             </p:selectOneMenu>
                             
-                        </h:panelGrid>
-                        <h:panelGrid columns="2">
-                            <h:outputLabel value="#{configMapController.getKey('CreateJobConfigMapLabel_basicKey')}" for="basicKey" />
+                        </p:panelGrid>
+                        <p:panelGrid columns="2">
+                            <p:outputLabel value="#{configMapController.getKey('CreateJobConfigMapLabel_basicKey')}" for="basicKey" />
                             <p:inputText id="basicKey" value="#{jobConfigMapController.selected.basicKey}" title="#{configMapController.getKey('CreateJobConfigMapTitle_basicKey')}"  />
-                        </h:panelGrid>
-                        <h:panelGrid columns="2">
-                            <h:outputLabel value="#{configMapController.getKey('CreateJobConfigMapLabel_basicValue')}" for="basicValue" />
+                        </p:panelGrid>
+                        <p:panelGrid columns="2">
+                            <p:outputLabel value="#{configMapController.getKey('CreateJobConfigMapLabel_basicValue')}" for="basicValue" />
                             <p:inputText id="basicValue" value="#{jobConfigMapController.selected.basicValue}" title="#{configMapController.getKey('CreateJobConfigMapTitle_basicValue')}" />
-                        </h:panelGrid>
-                        <p:commandButton   update=":tasksListForm2 :tasksListForm3 :menuForm:growl"   actionListener="#{jobConfigMapController.createFromTasksEditor()}" value="#{configMapController.getKey('CreateJobConfigMapSaveLink')}" />
-                    </h:panelGrid>
+                        </p:panelGrid>
+                        <p:commandButton   update=":tasksListForm2 :tasksListForm3 :growl"   actionListener="#{jobConfigMapController.createFromTasksEditor}" value="#{configMapController.getKey('CreateJobConfigMapSaveLink')}" />
+                    </p:panelGrid>
                 </p:panel>
             </h:form>
             <h:form id="tasksListForm3">
@@ -78,17 +78,17 @@
                         <f:facet name="header">
                             <p:outputPanel>
                                 <h:outputText value="Search all fields:" />
-                                <p:inputText id="globalFilter" onkeyup="getconfigFortaskTable.filter()" />
+                                <p:inputText id="globalFilter" onkeyup="PF('getconfigFortaskTable').filter()" />
                             </p:outputPanel>
                         </f:facet>
                         <p:column headerText="Edit" style="width:50px">  
                             <p:rowEditor />  
                         </p:column>  
-                      <p:ajax event="rowEdit" listener="#{tasksController.onEdit}" update=":menuForm:growl" />  
-                        <p:ajax event="rowEditCancel" listener="#{tasksController.onCancel}" update=":menuForm:growl" />  
+                      <p:ajax event="rowEdit" listener="#{tasksController.onEdit}" update=":growl" />  
+                        <p:ajax event="rowEditCancel" listener="#{tasksController.onCancel}" update=":growl" />  
 
                         <p:column headerText="Remove"  style="width:200px">
-                            <p:commandButton rendered="#{jobConfigMapController.isUserInRole('ADMIN')}"  update=":tasksListForm3:table2 :menuForm:growl"  value="#{configMapController.getKey('ListJobConfigMapDestroyLink')}">
+                            <p:commandButton rendered="#{jobConfigMapController.isUserInRole('ADMIN')}"  update=":tasksListForm3:table2 :growl"  value="#{configMapController.getKey('ListJobConfigMapDestroyLink')}">
                                 <f:setPropertyActionListener value="#{item2}"  target="#{jobConfigMapController.selectedForDeletion}" />
                             </p:commandButton>                        
 
