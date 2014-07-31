@@ -142,6 +142,9 @@ public class EmailQueue implements Serializable {
     }
 
     public String getMessage() {
+        if(message == null){
+            message = "";
+        }
         return message;
     }
 

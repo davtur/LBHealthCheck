@@ -141,10 +141,10 @@ public class EmailQueueController implements Serializable {
             return null;
         }
     }
-
+ 
     public void handleDateSelect(SelectEvent event) {
         Date date = (Date) event.getObject();
-        SimpleDateFormat format = new SimpleDateFormat("dd MMM yyyy");
+        SimpleDateFormat format = new SimpleDateFormat("dd MMM yyyy HH:mm");
 
         FacesContext facesContext = FacesContext.getCurrentInstance();
         facesContext.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO, "Date Selected", format.format(date)));

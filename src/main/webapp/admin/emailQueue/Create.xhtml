@@ -51,16 +51,17 @@
                         <h:outputLabel value="#{configMapController.getKey('CreateEmailQueueLabel_message')}" for="message" />
                         <p:panel>
                             <h:outputLabel value="#{configMapController.getKey('CreateSessionHistoryLabel_sessiondate')}" for="sessiondate" />
-                            <p:editor id="message" value="#{emailQueueController.selected.message}" widgetVar="editor" width="800" height="400"/>  
+                            <p:editor id="message" value="#{emailQueueController.selected.message}" widgetVar="editorWidget" width="800" height="400"/>  
 
                             <h:panelGrid columns="2" style="margin-top:10px">  
                                 <p:commandButton value="Submit" update="display" oncomplete="PF('dlg').show()"  
                                                  image="ui-icon ui-icon-disk" />  
-                                <p:commandButton type="button" value="Clear" onclick="editor.clear()"  
+                                <p:commandButton type="button" value="Clear" onclick="PF('editorWidget').clear()"  
                                                  image="ui-icon ui-icon-close" />  
                             </h:panelGrid>  
 
-                            <p:dialog header="Content" widgetVar="dlg" showEffect="fade" hideEffect="fade" modal="true">           <h:outputText id="display" value="#{editorBean.value}" escape="false" />  
+                            <p:dialog header="Content" widgetVar="dlg" showEffect="fade" hideEffect="fade" modal="true">          
+                                <h:outputText id="display" value="#{emailQueueController.selected.message}" escape="false" />  
                             </p:dialog>  
                         </p:panel>
 

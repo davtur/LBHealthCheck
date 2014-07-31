@@ -31,6 +31,7 @@ public class CrmScheduleEvent extends DefaultScheduleEvent {
     private int databasePK = 0;
 
     public CrmScheduleEvent() {
+        
     }
 
     public CrmScheduleEvent(String title, Date start, Date end) {

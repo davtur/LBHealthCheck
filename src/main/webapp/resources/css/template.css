@@ -15,7 +15,9 @@
 //#headerbar {
 ////   background:  url(/FitnessStats/resources/images/logo.png) 50% 0 repeat-x; 
 //}
-
+.emailEditorInput{
+  width:600px;  
+}
 #page { background: #0e446a url(/FitnessStats/resources/images/background/ocean_bg.jpg) 50% 0 repeat-x; margin-top: 0px;}
 
 #page-bg { background: url(/FitnessStats/resources/images/background/ocean_img.jpg) 50% 0 no-repeat; }

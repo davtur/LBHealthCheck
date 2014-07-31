@@ -510,15 +510,15 @@ public class QrtzJobDetailsController implements Serializable {
             String jn = "Job_" + jobName;
             JobDetail jobDetail = null;
             try {
-                jobDetail = newJob(jobClass).withIdentity(jn, sched.DEFAULT_GROUP).usingJobData(jdm).build();
+                jobDetail = newJob(jobClass).withIdentity(jn, Scheduler.DEFAULT_GROUP).usingJobData(jdm).build();
             } catch (Exception e) {
                 Logger.getLogger(getClass().getName()).log(Level.SEVERE, "Job Detail creation failed !", e);
                 result = false;
             }
-            CronTrigger cronTrigger = null;
-            Trigger trigger = null;
+            CronTrigger cronTrigger ;
+            Trigger trigger ;
             if (cronString != null && cronString.trim().isEmpty() == false) {
-                cronTrigger = newTrigger().withIdentity("Trigger_" + jobName, sched.DEFAULT_GROUP).withSchedule(cronSchedule(cronString)).usingJobData(jdm).build();
+                cronTrigger = newTrigger().withIdentity("Trigger_" + jobName, Scheduler.DEFAULT_GROUP).withSchedule(cronSchedule(cronString)).usingJobData(jdm).build();
                 sched.scheduleJob(jobDetail, cronTrigger);
             } else {
                 long startTime = System.currentTimeMillis() + 2000L;
@@ -530,6 +530,9 @@ public class QrtzJobDetailsController implements Serializable {
             //addSuccessMessage("Added job: " + jobDetail.getName());
         } catch (SchedulerException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, "Scheduler Exception Occurred when scheduling quartz jobs:", ex);
+            if(ex.getMessage().contains("one already exists with this identification")){
+                JsfUtil.addErrorMessage("A job with this name is already scheduled!");
+            }
             result = false;
         } catch (Exception ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, "An Exception Occurred when when scheduling quartz jobs:", ex);

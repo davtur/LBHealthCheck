@@ -21,75 +21,82 @@
                         <p:commandButton   ajax="false"   action="#{emailQueueController.prepareList}" value="#{configMapController.getKey('CreateEmailShowAllLink')}" immediate="true"/>
 
 
+
                     </h:panelGrid>
                 </p:panel>
-                <p:panel>
-                    <h:panelGrid columns="1">
-                        <h:outputLabel value="#{configMapController.getKey('CreateEmailLabel_fromaddress')}" for="EmailFromAddress" />
-                        <h:inputText styleClass="emailEditorInput" onfocus="this.select()" id="EmailFromAddress" value="#{emailQueueController.selected.fromaddress}" title="#{configMapController.getKey('CreateEmailTitle_EmailFromAddress')}" required="true" requiredMessage="#{configMapController.getKey('CreateEmailRequiredMessage_EmailFromAddress')}">
-                        </h:inputText>
-                        <h:outputLabel value="#{configMapController.getKey('CreateEmailLabel_ccaddress')}" for="EmailCCAddress" />
-                        <h:inputText styleClass="emailEditorInput" onfocus="this.select()" id="EmailCCAddress" value="#{emailQueueController.selected.ccaddresses}" title="#{configMapController.getKey('CreateEmailTitle_EmailCCAddress')}" >
-                        </h:inputText>
-                        <h:outputLabel value="#{configMapController.getKey('CreateEmailLabel_subject')}" for="emailSubject" />
-                        <h:inputText styleClass="emailEditorInput" onfocus="this.select()" id="emailSubject" value="#{emailQueueController.selected.subject}" title="#{configMapController.getKey('CreateEmailTitle_subject')}" required="true" requiredMessage="#{configMapController.getKey('CreateEmailRequiredMessage_subject')}">
-                        </h:inputText>
-                    </h:panelGrid>
-                    <h:panelGrid columns="1">
-                        <h:panelGrid columns="2">
-                            <p:panel >
-                                <h:outputLabel value="#{configMapController.getKey('CreateEmailLabel_editorbox')}" for="editor1" />
-                                <p:editor id="editor1" value="#{emailQueueController.selected.message}" widgetVar="editor" />  
+                <p:panel  header="#{configMapController.getKey('CreateEmailLabel_picker')}" >
+                    <p:pickList id="picker"  value="#{emailQueueController.participants}"
+                                var="cust"
 
-                                <h:panelGrid columns="2" style="margin-top:10px">  
-                                    <p:commandButton value="View" update="display" oncomplete="PF('dlg').show()"  
-                                                     image="ui-icon ui-icon-disk" />  
-                                    <p:commandButton type="button" value="Clear" onclick="editor.clear()"  
-                                                     image="ui-icon ui-icon-close" />  
-                                </h:panelGrid>  
+                                itemLabel="#{cust.firstname} #{cust.lastname}"
+                                itemValue="#{cust}" converter="#{custConverter}">
+                        <f:facet name="sourceCaption">Customers</f:facet>
+                        <f:facet name="targetCaption">Email Recipients List</f:facet>
+                    </p:pickList>
 
-                                <p:dialog header="Content" widgetVar="dlg" showEffect="fade" hideEffect="fade" modal="true">          
-                                    <h:outputText id="display" value="#{emailQueueController.selected.message}" escape="false" />  
-                                </p:dialog>  
-                            </p:panel>
-                            <p:panel>
-                                <h:panelGrid columns="1">
-                                    <h:outputLabel value="#{configMapController.getKey('CreateEmailLabel_senddate')}" for="senddate" />
-                                    <p:calendar id="senddate" value="#{emailQueueController.selected.sendDate}" mode="inline"
-                                                title="#{configMapController.getKey('CreateEmailTitle_senddate')}">
-                                                
-                                        <p:ajax event="dateSelect" listener="#{emailQueueController.handleDateSelect}" update=":growl"  />
+                    <p:dialog  modal="true" showEffect="fade" hideEffect="fade" widgetVar="cityDialog">
+                        <h:panelGrid  id="displayCities" columns="2">
+                            <h:outputText value="Source: " style="font-weight:bold"/>
+                            <ui:repeat value="#{emailQueueController.participants.source}" var="item">
+                                <h:outputText value="#{item}" style="margin-right:5px" />
+                            </ui:repeat>
 
-                                    </p:calendar>   
-                                </h:panelGrid>
-                            </p:panel>
+                            <h:outputText value="Target: " style="font-weight:bold"/>
+                            <ui:repeat  value="#{emailQueueController.participants.target}" var="item">
+                                <h:outputText value="#{item}" style="margin-right:5px" />
+                            </ui:repeat>
                         </h:panelGrid>
-                        <p:panel  header="#{configMapController.getKey('CreateEmailLabel_picker')}" >
-                            <p:pickList id="picker"  value="#{emailQueueController.participants}"
-                                        var="cust"
+                    </p:dialog>
+                </p:panel>
 
-                                        itemLabel="#{cust.firstname} #{cust.lastname}"
-                                        itemValue="#{cust}" converter="#{custConverter}">
-                                <f:facet name="sourceCaption">Customers</f:facet>
-                                <f:facet name="targetCaption">Email Recipients List</f:facet>
-                            </p:pickList>
 
-                            <p:dialog  modal="true" showEffect="fade" hideEffect="fade" widgetVar="cityDialog">
-                                <h:panelGrid  id="displayCities" columns="2">
-                                    <h:outputText value="Source: " style="font-weight:bold"/>
-                                    <ui:repeat value="#{emailQueueController.participants.source}" var="item">
-                                        <h:outputText value="#{item}" style="margin-right:5px" />
-                                    </ui:repeat>
+                <p:panel>
+                    <h:panelGrid columns="2">
+                        <h:panelGrid columns="1">
+                            <h:outputLabel value="#{configMapController.getKey('CreateEmailLabel_fromaddress')}" for="EmailFromAddress" />
+                            <h:inputText styleClass="emailEditorInput" onfocus="this.select()" id="EmailFromAddress" value="#{emailQueueController.selected.fromaddress}" title="#{configMapController.getKey('CreateEmailTitle_EmailFromAddress')}" required="true" requiredMessage="#{configMapController.getKey('CreateEmailRequiredMessage_EmailFromAddress')}">
+                                <f:validator validatorId="au.com.manlyit.fitnesscrm.stats.classes.util.EmailValidator" />
+                            </h:inputText>
+                            <h:outputLabel value="#{configMapController.getKey('CreateEmailLabel_ccaddress')}" for="EmailCCAddress" />
+                            <h:inputText styleClass="emailEditorInput" onfocus="this.select()" id="EmailCCAddress" value="#{emailQueueController.selected.ccaddresses}" title="#{configMapController.getKey('CreateEmailTitle_EmailCCAddress')}" >
+                                <f:validator validatorId="au.com.manlyit.fitnesscrm.stats.classes.util.EmailValidator"  />
+                            </h:inputText>
+                            <h:outputLabel value="#{configMapController.getKey('CreateEmailLabel_subject')}" for="emailSubject" />
+                            <h:inputText styleClass="emailEditorInput" onfocus="this.select()" id="emailSubject" value="#{emailQueueController.selected.subject}" title="#{configMapController.getKey('CreateEmailTitle_subject')}" required="true" requiredMessage="#{configMapController.getKey('CreateEmailRequiredMessage_subject')}">
+                            </h:inputText>
+                            <p:panel>
+                                <h:outputLabel value="#{configMapController.getKey('CreateEmailLabel_senddate')}" for="sd" />
+                                <p:calendar id="sd"  value="#{emailQueueController.selected.sendDate}"  pattern="dd/MM/yyyy HH:mm"  title="#{configMapController.getKey('CreateEmailTitle_senddate')}"  >
+                                    <p:ajax event="dateSelect"  listener="#{emailQueueController.handleDateSelect}" update=":growl " />
+                                </p:calendar>   
+                            </p:panel>
 
-                                    <h:outputText value="Target: " style="font-weight:bold"/>
-                                    <ui:repeat  value="#{emailQueueController.participants.target}" var="item">
-                                        <h:outputText value="#{item}" style="margin-right:5px" />
-                                    </ui:repeat>
-                                </h:panelGrid>
-                            </p:dialog>
-                        </p:panel>
+                        </h:panelGrid>
 
                     </h:panelGrid>
+
+
+
+                    <p:panel >
+                        <h:outputLabel value="#{configMapController.getKey('CreateEmailLabel_editorbox')}" for="editor1" />
+                        <p:editor id="editor1" value="#{emailQueueController.selected.message}" widgetVar="editor" />  
+
+                        <h:panelGrid columns="2" style="margin-top:10px">  
+                            <p:commandButton value="View" update="display" oncomplete="PF('dlg').show()"  
+                                             icon="ui-icon ui-icon-disk" />  
+                            <p:commandButton type="button" value="Clear" onclick="PF('editor').clear()"  
+                                             icon="ui-icon ui-icon-close" />  
+                        </h:panelGrid>  
+
+                        <p:dialog header="Content" widgetVar="dlg" showEffect="fade" hideEffect="fade" modal="true">          
+                            <h:outputText id="display" value="#{emailQueueController.selected.message}" escape="false" />  
+                        </p:dialog>  
+                    </p:panel>
+
+
+
+
+
                 </p:panel>
             </h:form>
         </ui:define>

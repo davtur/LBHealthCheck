@@ -429,22 +429,27 @@ public class ScheduleController implements Serializable {
     }
 
     public void handleEndDateSelect(SelectEvent event) {
+        Object o = event.getObject();
+        if (o.getClass() == Date.class) {
+            Date date = (Date) event.getObject();
 
-        Date date = (Date) event.getObject();
-        if (date.after(getSelected().getShedEnddate())) {
-            getSelected().setShedEnddate(date);
+            if (date.after(getEvent().getEndDate())) {
+                getEvent().setEndDate(date);
+            }
+
+            //Add facesmessage
         }
-
-        //Add facesmessage
     }
 
     public void handleStartDateSelect(SelectEvent event) {
-
-        Date date = (Date) event.getObject();
-        if (date.before(getSelected().getShedStartdate())) {
-            getSelected().setShedStartdate(date);
+        Object o = event.getObject();
+        if (o.getClass() == Date.class) {
+            Date date = (Date) event.getObject();
+            if (date.before(getEvent().getStartDate())) {
+                getEvent().setStartDate(date);
+            }
+            //Add facesmessage
         }
-        //Add facesmessage
     }
 
     public String previous() {
