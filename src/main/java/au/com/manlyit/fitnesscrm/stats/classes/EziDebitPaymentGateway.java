@@ -190,7 +190,7 @@ public class EziDebitPaymentGateway implements Serializable {
         startAsynchJob("GetCustomerDetails", paymentBean.getCustomerDetails(selectedCustomer, getDigitalKey()));
     }
 
-    private void getPayments() {
+    protected void getPayments() {
         GregorianCalendar cal = new GregorianCalendar();
         cal.add(Calendar.MONTH, 12);
         Date endDate = cal.getTime();
@@ -1463,6 +1463,7 @@ public class EziDebitPaymentGateway implements Serializable {
         setScheduledPaymentsList(null);
         setScheduledPaymentsListFilteredItems(null);
         setCustomerDetailsHaveBeenRetrieved(false);
+        setCurrentCustomerDetails(null);
 
     }
 

@@ -278,6 +278,7 @@ public class CustomersController implements Serializable {
         c2.recreateModel();
         EziDebitPaymentGateway c3 = (EziDebitPaymentGateway) context.getApplication().evaluateExpressionGet(context, "#{ezidebit}", EziDebitPaymentGateway.class);
         c3.recreateModels();
+        
         CustomerImagesController c4 = (CustomerImagesController) context.getApplication().evaluateExpressionGet(context, "#{customerImagesController}", CustomerImagesController.class);
         c4.recreateModel();
         ChartController c5 = (ChartController) context.getApplication().evaluateExpressionGet(context, "#{chartController}", ChartController.class);
@@ -362,8 +363,9 @@ public class CustomersController implements Serializable {
     }
 
     public void createDialogue(ActionEvent actionEvent) {
+         FacesContext context = FacesContext.getCurrentInstance();
         Customers c = getSelected();
-
+        EziDebitPaymentGateway ezi = (EziDebitPaymentGateway) context.getApplication().evaluateExpressionGet(context, "#{ezidebit}", EziDebitPaymentGateway.class);
         if (c.getId() == null || getFacade().find(c.getId()) == null) {
             // does not exist so create a new customer
             try {
@@ -373,6 +375,8 @@ public class CustomersController implements Serializable {
                 grp.setUsername(c);
                 ejbGroupsFacade.create(grp);
                 recreateAllAffectedPageModels();
+                setSelected(c);
+               
                 JsfUtil.addSuccessMessage(configMapFacade.getConfig("CustomersCreated"));
             } catch (Exception e) {
                 String cause = e.getCause().getCause().getMessage();
@@ -387,10 +391,7 @@ public class CustomersController implements Serializable {
             try {
                 getFacade().edit(c);
                 recreateAllAffectedPageModels();
-                FacesContext context = FacesContext.getCurrentInstance();
-                EziDebitPaymentGateway ezi = (EziDebitPaymentGateway) context.getApplication().evaluateExpressionGet(context, "#{ezidebit}", EziDebitPaymentGateway.class);
-
-                ezi.editCustomerDetailsInEziDebit(c);
+                 ezi.editCustomerDetailsInEziDebit(c);
                 JsfUtil.addSuccessMessage(configMapFacade.getConfig("ChangesSaved"));
             } catch (Exception e) {
                 JsfUtil.addErrorMessage(e.getMessage(), configMapFacade.getConfig("PersistenceErrorOccured"));
