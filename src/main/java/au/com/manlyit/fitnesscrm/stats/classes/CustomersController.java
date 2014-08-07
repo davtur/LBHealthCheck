@@ -160,7 +160,7 @@ public class CustomersController implements Serializable {
 
         c.setCountryId(61);
         c.setCity("Sydney");
-        c.setStreetAddress("1 two street");
+        c.setStreetAddress("<Street Address>");
         c.setAddrState("NSW");
         c.setSuburb("Manly");
         c.setPostcode("2095");
@@ -171,9 +171,9 @@ public class CustomersController implements Serializable {
         c.setFirstname("Firstname");
         c.setLastname("Lastname");
         c.setPassword("MyStr0ngP@ssw0rd");
-        c.setEmailAddress("david@manlyit.com.au");
-        c.setFax("0212345678");
-        c.setTelephone("0212345678");
+        c.setEmailAddress("<email Address>");
+        c.setFax("<fax number>");
+        c.setTelephone("<mobile number>");
 
         GregorianCalendar gc = new GregorianCalendar();
         gc.add(Calendar.YEAR, -30);

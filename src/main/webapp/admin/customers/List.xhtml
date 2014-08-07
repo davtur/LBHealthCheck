@@ -31,7 +31,7 @@
                             </h:panelGroup >
                             <h:panelGroup id="selectedUserPanel">                 
                                 <p:commandButton id="selectCustomerButton"   actionListener="#{customersController.setSelectedCustomer}" value="#{configMapController.getKey('ListCustomersSelectCustomersButton')}" title="#{configMapController.getKey('ListCustomersSelectCustomersButtonHelp')}" update=":tv:customerslistForm1 :tv:formCustomersEdit1 :tv:NoteslistForm1 :tv:paymentsForm :growl" /> 
-                            <h:outputText id="selectedUser" value="Selected: #{customersController.selected.firstname} #{customersController.selected.lastname}" />
+                                <h:outputText id="selectedUser" value="Selected: #{customersController.selected.firstname} #{customersController.selected.lastname}" />
                             </h:panelGroup >
                             <h:panelGrid columns="2">
                                 <p:outputLabel  value="Filter:    " for="selectedStateCheckbox"/>
@@ -339,7 +339,7 @@
                                 <p:outputLabel value="Send Expired Card SMS" /> <h:outputText value="#{ezidebit.currentCustomerDetails.smsExpiredCard.value}"/>
                                 <p:outputLabel value="Send Failed Payment SMS" /> <h:outputText value="#{ezidebit.currentCustomerDetails.smsFailedNotification.value}"/>
                                 <p:outputLabel value="Send Payment Reminder SMS" /> <h:outputText value="#{ezidebit.currentCustomerDetails.smsPaymentReminder.value}"/>
-                                
+
                             </p:panelGrid>
                         </p:panel>
                         <p:outputPanel id="iFrameHeaderPanel" >
@@ -356,7 +356,7 @@
                     <h:form id="iFrameForm" > 
 
                       <!--  <p:panel id="iFramePanel" header="Edit The Payment Method for Customer #{customersController.selected.firstname} #{customersController.selected.lastname}" >-->
-                            <p:outputPanel id="iFramePanel" >
+                        <p:outputPanel id="iFramePanel" >
                             <p:panelGrid id="dialoguePaymenstGrid2" columns="2" rendered="#{ezidebit.customerExistsInPaymentGateway == true and ezidebit.customerDetailsHaveBeenRetrieved == true}"  >
                                 <p:panel id="viewPaymentsGrid" header="View Payment Method for Customer #{customersController.selected.firstname} #{customersController.selected.lastname}" >
                                     <iframe id="ezidebitIframeView"  style="width:400px;height:400px" src="#{ezidebit.getEziDebitWidgetUrl(false)}" />
@@ -491,29 +491,17 @@
 
                 </p:tab>
             </p:tabView>  
+            <p:socket onMessage="handleMessage"  channel="/payments"  autoConnect="false"  widgetVar="subscriber"/>
+            <!-- <p:socket onMessage="handleMessage"  channel="/payments" autoConnect="false" transport="long-polling"  widgetVar="subscriber"/>-->
 
-            <p:socket onMessage="handleMessage"  channel="/payments" transport="long-polling" autoConnect="false" widgetVar="subscriber"/>
-                <!--<p:socket widgetVar="mySocket" channel="/#{session.id}"   
-onMessage="myHandler" autoConnect="false"/> -->
             <script type="text/javascript">
-                //   <![CDATA[
-                $(document).ready(function() {
-                    // this is needed to modify request parameters 
-                    // as PrimeFaces does not transfer the attributes correctly 
-                    // and does not expose all the parameters as tag attributes 
-                    PF('subscriber').cfg.request.trackMessageLength = true;
-                    //PF('subscriber').connect(); 
-                });
                 function handleMessage(facesmessage) {
+                   
                     facesmessage.severity = 'info';
                     taskCompleted();
                     PF('growlWidget').show([facesmessage]);
-                    // this is needed for long-polling, bug in atmosphere...
-                    if (PF('subscriber').connection.response.status === 200) {
-                        PF('subscriber').connection.response.request.requestCount--;
-                    }
+                   
                 }
-                // ]]>
             </script>
             <ui:include src="Create.xhtml"/>
             <ui:include src="CreateSchedule.xhtml"/>
@@ -522,3 +510,29 @@ onMessage="myHandler" autoConnect="false"/> -->
     </ui:composition>
 
 </html>
+<!--
+
+           <script type="text/javascript">
+                //   <![CDATA[
+              $(document).ready(function() {
+                    // this is needed to modify request parameters 
+                    // as PrimeFaces does not transfer the attributes correctly 
+                    // and does not expose all the parameters as tag attributes 
+                  PF('subscriber').cfg.request.trackMessageLength = true;
+                    //PF('subscriber').connect(); 
+                });
+                function handleMessage(facesmessage) {
+                    facesmessage.severity = 'info';
+                    taskCompleted();
+                    PF('growlWidget').show([facesmessage]);
+                    // this is needed for long-polling, bug in atmosphere...
+                    if (PF('subscriber').connection.response.status === 200) {
+                        PF('subscriber').connection.response.request.requestCount-;
+                    }
+                }
+                // ]]>
+            </script>
+
+
+
+-->
