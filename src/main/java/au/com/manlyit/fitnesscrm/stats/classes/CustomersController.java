@@ -158,22 +158,30 @@ public class CustomersController implements Serializable {
 
     private Customers setCusomerDefaults(Customers c) {
 
-        c.setCountryId(61);
-        c.setCity("Sydney");
-        c.setStreetAddress("<Street Address>");
-        c.setAddrState("NSW");
-        c.setSuburb("Manly");
-        c.setPostcode("2095");
-        c.setReferredby(2);
+        try {
+            c.setCountryId(Integer.parseInt(configMapFacade.getConfig("default.customer.details.countryId")));
+        } catch (NumberFormatException e) {
+            logger.log(Level.SEVERE, "Number Format Exception for Country ID in customer deaults.Check config map entry for default.customer.details.countryId and value {0}", configMapFacade.getConfig("default.customer.details.countryId"));
+        }
+        c.setCity(configMapFacade.getConfig("default.customer.details.city"));
+        c.setStreetAddress(configMapFacade.getConfig("default.customer.details.street"));
+        c.setAddrState(configMapFacade.getConfig("default.customer.details.state"));
+        c.setSuburb(configMapFacade.getConfig("default.customer.details.suburb"));
+        c.setPostcode(configMapFacade.getConfig("default.customer.details.postcode"));
+        try {
+            c.setReferredby(Integer.parseInt(configMapFacade.getConfig("default.customer.details.referredby")));
+        } catch (NumberFormatException e) {
+            logger.log(Level.SEVERE, "Number Format Exception for Referred by customer ID in customer deaults.Check config map entry for default.customer.details.referredby and value {0}", configMapFacade.getConfig("default.customer.details.referredby"));
+        }
 
         //for debug
-        c.setUsername("firstname.lastname");
-        c.setFirstname("Firstname");
-        c.setLastname("Lastname");
-        c.setPassword("MyStr0ngP@ssw0rd");
-        c.setEmailAddress("<email Address>");
-        c.setFax("<fax number>");
-        c.setTelephone("<mobile number>");
+        c.setUsername(configMapFacade.getConfig("default.customer.details.username"));
+        c.setFirstname(configMapFacade.getConfig("default.customer.details.firstname"));
+        c.setLastname(configMapFacade.getConfig("default.customer.details.lastname"));
+        c.setPassword(configMapFacade.getConfig("default.customer.details.password"));
+        c.setEmailAddress(configMapFacade.getConfig("default.customer.details.email"));
+        c.setFax(configMapFacade.getConfig("default.customer.details.fax"));
+        c.setTelephone(configMapFacade.getConfig("default.customer.details.mobile"));
 
         GregorianCalendar gc = new GregorianCalendar();
         gc.add(Calendar.YEAR, -30);
@@ -278,7 +286,7 @@ public class CustomersController implements Serializable {
         c2.recreateModel();
         EziDebitPaymentGateway c3 = (EziDebitPaymentGateway) context.getApplication().evaluateExpressionGet(context, "#{ezidebit}", EziDebitPaymentGateway.class);
         c3.recreateModels();
-        
+
         CustomerImagesController c4 = (CustomerImagesController) context.getApplication().evaluateExpressionGet(context, "#{customerImagesController}", CustomerImagesController.class);
         c4.recreateModel();
         ChartController c5 = (ChartController) context.getApplication().evaluateExpressionGet(context, "#{chartController}", ChartController.class);
@@ -363,7 +371,7 @@ public class CustomersController implements Serializable {
     }
 
     public void createDialogue(ActionEvent actionEvent) {
-         FacesContext context = FacesContext.getCurrentInstance();
+        FacesContext context = FacesContext.getCurrentInstance();
         Customers c = getSelected();
         EziDebitPaymentGateway ezi = (EziDebitPaymentGateway) context.getApplication().evaluateExpressionGet(context, "#{ezidebit}", EziDebitPaymentGateway.class);
         if (c.getId() == null || getFacade().find(c.getId()) == null) {
@@ -376,7 +384,7 @@ public class CustomersController implements Serializable {
                 ejbGroupsFacade.create(grp);
                 recreateAllAffectedPageModels();
                 setSelected(c);
-               
+
                 JsfUtil.addSuccessMessage(configMapFacade.getConfig("CustomersCreated"));
             } catch (Exception e) {
                 String cause = e.getCause().getCause().getMessage();
@@ -391,7 +399,7 @@ public class CustomersController implements Serializable {
             try {
                 getFacade().edit(c);
                 recreateAllAffectedPageModels();
-                 ezi.editCustomerDetailsInEziDebit(c);
+                ezi.editCustomerDetailsInEziDebit(c);
                 JsfUtil.addSuccessMessage(configMapFacade.getConfig("ChangesSaved"));
             } catch (Exception e) {
                 JsfUtil.addErrorMessage(e.getMessage(), configMapFacade.getConfig("PersistenceErrorOccured"));
@@ -978,7 +986,7 @@ public class CustomersController implements Serializable {
             customerStateList = ejbCustomerStateFacade.findAll();
             //selectedCustomerStates = new CustomerState[customerStateList.size()];
             //selectedCustomerStates = customerStateList.toArray(selectedCustomerStates);
-            
+
             selectedCustomerStates = new CustomerState[2];
             for (CustomerState cs : customerStateList) {
                 if (cs.getCustomerState().contains("ACTIVE")) {
@@ -987,7 +995,7 @@ public class CustomersController implements Serializable {
                 if (cs.getCustomerState().contains("ON HOLD")) {
                     selectedCustomerStates[1] = cs;
                 }
-               
+
             }
 
         }

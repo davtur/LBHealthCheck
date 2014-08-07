@@ -49,11 +49,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import javax.ejb.AsyncResult;
 import javax.ejb.EJBException;
 import javax.enterprise.context.SessionScoped;
 import javax.faces.context.FacesContext;
 import javax.faces.event.ActionEvent;
+import javax.faces.event.ValueChangeEvent;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.servlet.http.HttpSession;
@@ -103,7 +103,7 @@ public class EziDebitPaymentGateway implements Serializable {
     private boolean paymentThirdWeekOfMonth = false;
     private boolean paymentFourthWeekOfMonth = false;
     private boolean paymentKeepManualPayments = false;
-
+    private boolean waitingForPaymentDetails = false;
     private boolean paymentGatewayEnabled = true;
     private Integer progress;
     private AtomicBoolean pageLoaded = new AtomicBoolean(false);
@@ -599,6 +599,20 @@ public class EziDebitPaymentGateway implements Serializable {
         this.currentCustomerDetails = currentCustomerDetails;
     }
 
+    /**
+     * @return the waitingForPaymentDetails
+     */
+    public boolean isWaitingForPaymentDetails() {
+        return waitingForPaymentDetails;
+    }
+
+    /**
+     * @param waitingForPaymentDetails the waitingForPaymentDetails to set
+     */
+    public void setWaitingForPaymentDetails(boolean waitingForPaymentDetails) {
+        this.waitingForPaymentDetails = waitingForPaymentDetails;
+    }
+
     private class eziDebitThreadFactory implements ThreadFactory {
 
         @Override
@@ -753,7 +767,7 @@ public class EziDebitPaymentGateway implements Serializable {
         this.editPaymentDetails = editPaymentDeatils;
     }
 
-    private void addDefaultPaymentParametersIfEmpty(Customers cust,Date contractStartDate) {
+    private void addDefaultPaymentParametersIfEmpty(Customers cust, Date contractStartDate) {
         if (cust == null) {
             logger.log(Level.WARNING, "Customer is null: addDefaultPaymentParametersIfEmpty(Customers cust)");
             return;
@@ -812,6 +826,9 @@ public class EziDebitPaymentGateway implements Serializable {
         if (result == true) {
             JsfUtil.addSuccessMessage("Customer Added to Payment Gateway Successfully.", "");
             customerExistsInPaymentGateway = true;
+            startAsynchJob("GetCustomerDetails", paymentBean.getCustomerDetails(selectedCustomer, getDigitalKey()));
+            getPayments();
+
         } else {
             JsfUtil.addErrorMessage("Couldn't add Customer To Payment Gateway. Check logs");
         }
@@ -1402,14 +1419,28 @@ public class EziDebitPaymentGateway implements Serializable {
                 // status codes don't match
                 String cust = getSelectedCustomer().getUsername();
                 String message = "Customer Status codes dont match. Customer: " + cust + ", ezidebit status:" + eziStatusCode + ", Crm Status:" + ourStatus + "";
-                logger.log(Level.WARNING, message);
-                JsfUtil.addErrorMessage(message);
+                if (eziStatusCode.contains("WAITING BANK DETAILS")) {
+                    message = "Customer does not have any banking details. Customer: " + cust + ", ezidebit status:" + eziStatusCode + ", Crm Status:" + ourStatus + "";
+                    logger.log(Level.INFO, message);
+                    setWaitingForPaymentDetails(true);
+                    JsfUtil.addSuccessMessage("You must enter customer banking details before payments can be set up!");
+                } else {
+                    logger.log(Level.WARNING, message);
+                    JsfUtil.addErrorMessage(message);
+                }
+            } else {
+                setWaitingForPaymentDetails(false);
             }
 
         } else {
             customerExistsInPaymentGateway = false;
         }
         logger.log(Level.INFO, "processGetCustomerDetails completed");
+    }
+
+    public void refreshPaymentsPage(ActionEvent actionEvent) {
+        setSelectedCustomer(selectedCustomer);
+
     }
 
     private void processGetCustomerDetailsFromEziDebitId(Future ft) {
@@ -1578,7 +1609,8 @@ public class EziDebitPaymentGateway implements Serializable {
             logger.log(Level.WARNING, "Logged in user is null. Add Single Payment aborted.");
         }
     }
-private INonPCIService getWs(){
+
+    private INonPCIService getWs() {
         URL url = null;
         WebServiceException e = null;
         try {
@@ -1588,6 +1620,7 @@ private INonPCIService getWs(){
         }
         return new NonPCIService(url).getBasicHttpBindingINonPCIService();
     }
+
     public String createBulk() {
         // this script doea a bulk inport from the payment gateway
         // delimiter is semi colon as ezidebit puts commas in the report
@@ -1692,9 +1725,9 @@ private INonPCIService getWs(){
 
                             if (localCustomer != null) {
                                 logger.log(Level.INFO, "Found {0} {1} in the local CRM database with CRM id:{2}", new Object[]{firstname, lastname, localCustomer.getId()});
-                                addDefaultPaymentParametersIfEmpty(localCustomer,contractStartDate);
+                                addDefaultPaymentParametersIfEmpty(localCustomer, contractStartDate);
                                 logger.log(Level.INFO, "Looking for {0} {1} in the payment Gateway database using Ezidebit reference:{2} database", new Object[]{firstname, lastname, ezidebitRef});
-                                
+
                                 EziResponseOfCustomerDetailsTHgMB7OL customerdetails = getWs().getCustomerDetails(getDigitalKey(), ezidebitRef, "");
                                 if (customerdetails.getError() == 0) {// any errors will be a non zero value
                                     logger.log(Level.INFO, "Get Customer (EziId) Details Response: Name - {0}", customerdetails.getData().getValue().getCustomerName().getValue());
@@ -1710,7 +1743,7 @@ private INonPCIService getWs(){
                                     int key = localCustomer.getId();
                                     String eziYourSysRef = cd.getYourSystemReference().getValue();
                                     String eziSysRef = cd.getEzidebitCustomerID().getValue();
-                                    logger.log(Level.INFO, "Customer {0}, Our primary Key: {1},EziYourSysRef {3}, Ezidebit Ref: {2}", new Object[]{references[0], key, eziSysRef,eziYourSysRef});
+                                    logger.log(Level.INFO, "Customer {0}, Our primary Key: {1},EziYourSysRef {3}, Ezidebit Ref: {2}", new Object[]{references[0], key, eziSysRef, eziYourSysRef});
                                     try {
                                         int eziRef = Integer.parseInt(eziYourSysRef);
                                         if (eziRef == key) {

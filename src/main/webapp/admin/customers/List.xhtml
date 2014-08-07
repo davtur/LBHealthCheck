@@ -202,8 +202,6 @@
 
 
 
-
-
                 <p:tab id="tab3" title="Payment Information" rendered="#{ezidebit.paymentGatewayEnabled}" >  
                     <h:form id="paymentsForm" > 
 
@@ -215,11 +213,11 @@
                         </p:panel>
 
                         <p:outputPanel id="mainPanel" rendered="#{ezidebit.asyncOperationRunning == false and ezidebit.customerDetailsHaveBeenRetrieved == true  and ezidebit.customerExistsInPaymentGateway == true}" >
-                            <p:selectBooleanButton value="#{ezidebit.editPaymentDetails}" onLabel="Refresh View" offLabel="Refresh View" rendered="#{ezidebit.customerExistsInPaymentGateway}" >
-                                <p:ajax update=":tv:iFrameForm :tv:paymentsForm  :growl" process=":tv:iFrameForm "/>  
-                            </p:selectBooleanButton>  
-                            <p:commandButton id="showAddPaymentButton"  oncomplete="PF('createPaymentDialogueWidget').show();"    value="#{configMapController.getKey('AddPaymentButtonLink')}"  update=":growl " /> 
-                            <p:commandButton id="showAddPaymentScheduleButton"  oncomplete="PF('createPaymentScheduleDialogueWidget').show();"    value="#{configMapController.getKey('AddPaymentScheduleButtonLink')}" update=":growl "  /> 
+                            <p:commandButton id="reloadPageButton" value="Reload Page" actionListener="#{ezidebit.refreshPaymentsPage}" rendered="#{ezidebit.customerExistsInPaymentGateway}" update=":tv:iFrameForm :tv:paymentsForm  :growl" />
+                                
+                            <p:commandButton id="showAddPaymentButton" rendered="#{ezidebit.waitingForPaymentDetails == false}" oncomplete="PF('createPaymentDialogueWidget').show();"    value="#{configMapController.getKey('AddPaymentButtonLink')}"  update=":growl " /> 
+                            <p:commandButton id="showAddPaymentScheduleButton" rendered="#{ezidebit.waitingForPaymentDetails == false}" oncomplete="PF('createPaymentScheduleDialogueWidget').show();"    value="#{configMapController.getKey('AddPaymentScheduleButtonLink')}" update=":growl "  /> 
+                            <h:outputText rendered="#{ezidebit.waitingForPaymentDetails}" value="WAITING FOR BANK DETAILS - "/>
                             <h:outputText rendered="#{!ezidebit.asyncOperationRunning}" value="Idle"/>
                             <h:outputText rendered="#{ezidebit.asyncOperationRunning}" value="Busy"/>
                         </p:outputPanel>
