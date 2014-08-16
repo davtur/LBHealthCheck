@@ -489,7 +489,7 @@
 
                 </p:tab>
             </p:tabView>  
-            <p:socket onMessage="handleMessage"  channel="/payments"  autoConnect="false"  widgetVar="subscriber"/>
+            <p:socket onMessage="handleMessage" onError="handleError" onTransportFailure="handleTransportFailure"  onClose="handleClose" channel="/payments"  autoConnect="false"  widgetVar="subscriber"/>
             <!-- <p:socket onMessage="handleMessage"  channel="/payments" autoConnect="false" transport="long-polling"  widgetVar="subscriber"/>-->
 
             <script type="text/javascript">
@@ -499,6 +499,17 @@
                     taskCompleted();
                     PF('growlWidget').show([facesmessage]);
                    
+                }
+                function handleError(){
+                    alert("Error");
+                }
+                function handleClose(){
+                    alert("ConnectionClosed");
+                    PF('growlWidget').connect();
+                }
+                function handleTransportFailure(){
+                    alert("Transport Failure");
+                    PF('growlWidget').connect();
                 }
             </script>
             <ui:include src="Create.xhtml"/>

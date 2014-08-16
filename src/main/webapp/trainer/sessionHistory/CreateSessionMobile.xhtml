@@ -39,11 +39,11 @@
                     <pm:field>
 
                         <h:outputLabel for="ajaxSpinner" value="Hour: " />
-                        <pm:inputSlider id="ajaxSpinner" minValue="0" maxValue="24" valueChangeListener="#{sessionHistoryController.hourSpinnerChange}"  value="#{sessionHistoryController.hourSpinner}"/>
+                        <pm:inputSlider id="ajaxSpinner" minValue="0" maxValue="23" valueChangeListener="#{sessionHistoryController.hourSpinnerChange}"  value="#{sessionHistoryController.hourSpinner}"/>
                     </pm:field>  
                     <pm:field>   
                         <h:outputLabel for="ajaxSpinner2" value="Minute: " />
-                        <pm:inputSlider id="ajaxSpinner2" minValue="0" maxValue="60"  valueChangeListener="#{sessionHistoryController.minuteSpinnerChange}"  step="15" value="#{sessionHistoryController.minuteSpinner}"/>
+                        <pm:inputSlider id="ajaxSpinner2" minValue="0" maxValue="59"  valueChangeListener="#{sessionHistoryController.minuteSpinnerChange}"  step="15" value="#{sessionHistoryController.minuteSpinner}"/>
                   </pm:field>  
 
 
