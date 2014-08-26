@@ -17,6 +17,9 @@
 
             <pm:header title="Pure Fitness Manly" swatch="b" />
             <pm:content >  
+                <f:metadata>
+                    <f:event type="preRenderView" listener="#{loginBean.checkAlreadyLoggedin}" />
+                </f:metadata>
                 <h:form id="mobileLoginForm">  
                     <p:growl/>
                     <h3>Login with Facebook</h3>
