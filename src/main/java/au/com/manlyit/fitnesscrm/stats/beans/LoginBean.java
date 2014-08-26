@@ -188,12 +188,17 @@ public class LoginBean implements Serializable {
             try {
                 request.login(this.username, this.password);
             } catch (ServletException servletException) {
-                 if (servletException.getMessage().contains("Login failed") == false) {
-                    throw servletException;
-                } else {
+                String errorMessage = servletException.getMessage();
+                if (errorMessage.contains("already been authenticated")) {
+                    logger.log(Level.INFO, "User Aleady Authenticated - redirecting to landing page.");
+                } else if (errorMessage.contains("Login failed")) {
                     logger.log(Level.INFO, "Login Failed - Bad username or Password");
-                    context.addMessage(null, new FacesMessage("Login Failed. Username or Password is incorrect!"));
+                    JsfUtil.addErrorMessage("Login Failed","Username or Password is incorrect!");
                     return;
+                } else {
+                    // unhandled exception 
+
+                    throw servletException;
                 }
             }
             HttpSession httpSession = request.getSession();
@@ -201,14 +206,14 @@ public class LoginBean implements Serializable {
             if (mobileDevice(request)) {
                 httpSession.setAttribute("MOBILE_DEVICE", "TRUE");
                 logger.log(Level.INFO, "Mobile Device user agent detected. Redirecting to the mobile landing page.");
-                landingPage =  getValueFromKey("facebook.redirect.mobilelandingpage");
+                landingPage = getValueFromKey("facebook.redirect.mobilelandingpage");
             } else {
                 landingPage = getValueFromKey("facebook.redirect.landingpage");
             }
             ec.redirect(request.getContextPath() + landingPage);
             logger.log(Level.INFO, "Redirecting to Landing Page:", landingPage);
         } catch (ServletException | IOException e) {
-            context.addMessage(null, new FacesMessage("Login failed."));
+            JsfUtil.addErrorMessage(e,"Login Failed.");
             logger.log(Level.WARNING, "Login Failed", e);
         }
     }
@@ -225,8 +230,7 @@ public class LoginBean implements Serializable {
         try {
             request.logout();
         } catch (ServletException e) {
-
-            context.addMessage(null, new FacesMessage("Logout failed."));
+            JsfUtil.addErrorMessage("Logout failed.",e.getMessage());
         }
     }
 

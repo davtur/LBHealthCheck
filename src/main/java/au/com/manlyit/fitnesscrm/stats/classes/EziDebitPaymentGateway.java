@@ -74,6 +74,7 @@ public class EziDebitPaymentGateway implements Serializable {
     private static final Logger logger = Logger.getLogger(EziDebitPaymentGateway.class.getName());
     //private static final String digitalKey = "78F14D92-76F1-45B0-815B-C3F0F239F624";// test
     private static final String paymentGateway = "EZIDEBIT";
+    private final static String CHANNEL = "/payments/";
     private int testAjaxCounter = 0;
     @Inject
     private FutureMapEJB futureMap;
@@ -1211,11 +1212,11 @@ public class EziDebitPaymentGateway implements Serializable {
             Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, null, ex);
         }
         if (result == true) {
-            JsfUtil.addSuccessMessage("Payment", "Successfully added payment.");
-            getPayments();
+            JsfUtil.pushSuccessMessage(CHANNEL + sessionId,"Add Payment", "Payment submitted successfully.");
         } else {
-            JsfUtil.addErrorMessage("Payment", "The operation failed!.");
+            JsfUtil.pushErrorMessage(CHANNEL + sessionId,"Add Payment","Payment Failed! Is the customer active with valid account/card details?");        
         }
+        getPayments();
         logger.log(Level.INFO, "processAddPaymentResult completed");
     }
 
@@ -1227,11 +1228,11 @@ public class EziDebitPaymentGateway implements Serializable {
             Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, null, ex);
         }
         if (result == true) {
-            JsfUtil.addSuccessMessage("Payment", "Successfully Created Schedule.");
+            JsfUtil.pushSuccessMessage(CHANNEL + sessionId,"Payment", "Successfully Created Schedule.");
             getPayments();
 
         } else {
-            JsfUtil.addErrorMessage("Payment", "The Create Schedule operation failed!.");
+            JsfUtil.pushErrorMessage(CHANNEL + sessionId,"Payment", "The Create Schedule operation failed!.");
         }
         logger.log(Level.INFO, "processCreateSchedule completed");
     }
@@ -1244,11 +1245,11 @@ public class EziDebitPaymentGateway implements Serializable {
             Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, "Processing Async Results", ex);
         }
         if (result == true) {
-            JsfUtil.addSuccessMessage("Payment Gateway", "Successfully Edited Customer Details  .");
+            JsfUtil.pushSuccessMessage(CHANNEL + sessionId,"Payment Gateway", "Successfully Edited Customer Details  .");
             getCustDetailsFromEzi();
             getPayments();
         } else {
-            JsfUtil.addErrorMessage("Payment Gateway", "The operation failed!.");
+            JsfUtil.pushErrorMessage(CHANNEL + sessionId,"Payment Gateway", "The operation failed!.");
         }
         logger.log(Level.INFO, "processEditCustomerDetails completed");
     }
@@ -1261,10 +1262,10 @@ public class EziDebitPaymentGateway implements Serializable {
             Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, "Processing Async Results", ex);
         }
         if (result == true) {
-            JsfUtil.addSuccessMessage("Payment Gateway", "Successfully Cleared Schedule .");
+            JsfUtil.pushSuccessMessage(CHANNEL + sessionId,"Payment Gateway", "Successfully Cleared Schedule .");
             getPayments();
         } else {
-            JsfUtil.addErrorMessage("Payment Gateway", "The operation failed!.");
+            JsfUtil.pushErrorMessage(CHANNEL + sessionId,"Payment Gateway", "The operation failed!.");
         }
         logger.log(Level.INFO, "processClearSchedule completed");
     }
@@ -1278,10 +1279,10 @@ public class EziDebitPaymentGateway implements Serializable {
         }
         if (result == true) {
             setSelectedScheduledPayment(null);
-            JsfUtil.addSuccessMessage("Payment Gateway", "Successfully Deleted Payment  .");
+            JsfUtil.pushSuccessMessage(CHANNEL + sessionId,"Payment Gateway", "Successfully Deleted Payment  .");
             getPayments();
         } else {
-            JsfUtil.addErrorMessage("Payment Gateway", "The operation failed!.");
+            JsfUtil.pushErrorMessage(CHANNEL + sessionId,"Payment Gateway", "The delete payment operation failed!.");
         }
         logger.log(Level.INFO, "processDeletePayment completed");
     }
@@ -1294,11 +1295,11 @@ public class EziDebitPaymentGateway implements Serializable {
             Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, "Processing Async Results", ex);
         }
         if (result == true) {
-            JsfUtil.addSuccessMessage("Payment Gateway", "Successfully Changed Customer Status  .");
+            JsfUtil.pushSuccessMessage(CHANNEL + sessionId,"Payment Gateway", "Successfully Changed Customer Status  .");
             startAsynchJob("GetCustomerDetails", paymentBean.getCustomerDetails(selectedCustomer, getDigitalKey()));
             getPayments();
         } else {
-            JsfUtil.addErrorMessage("Payment Gateway", "The operation failed!.");
+            JsfUtil.pushErrorMessage(CHANNEL + sessionId,"Payment Gateway", "The change status operation failed!.");
         }
         logger.log(Level.INFO, "processChangeCustomerStatus completed");
     }
@@ -1311,10 +1312,10 @@ public class EziDebitPaymentGateway implements Serializable {
             Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, "Processing Async Results", ex);
         }
         if (result == true) {
-            JsfUtil.addSuccessMessage("Payment Gateway", "Successfully Retrieved Payment Status  .");
+            JsfUtil.pushSuccessMessage(CHANNEL + sessionId,"Payment Gateway", "Successfully Retrieved Payment Status  .");
 
         } else {
-            JsfUtil.addErrorMessage("Payment Gateway", "The operation failed!.");
+            JsfUtil.pushErrorMessage(CHANNEL + sessionId,"Payment Gateway", "The getPayment status operation failed!.");
         }
         logger.log(Level.INFO, "processGetPaymentStatus completed");
     }
@@ -1327,10 +1328,10 @@ public class EziDebitPaymentGateway implements Serializable {
             Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, "Processing Async Results", ex);
         }
         if (result == true) {
-            JsfUtil.addSuccessMessage("Payment Gateway", "Successfully  Changed Scheduled Amount .");
+            JsfUtil.pushSuccessMessage(CHANNEL + sessionId,"Payment Gateway", "Successfully  Changed Scheduled Amount .");
             getPayments();
         } else {
-            JsfUtil.addErrorMessage("Payment Gateway", "The operation failed!.");
+            JsfUtil.pushErrorMessage(CHANNEL + sessionId,"Payment Gateway", "The operation failed!.");
         }
         logger.log(Level.INFO, "processChangeScheduledAmount completed");
     }
@@ -1343,10 +1344,10 @@ public class EziDebitPaymentGateway implements Serializable {
             Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, "Processing Async Results", ex);
         }
         if (result == true) {
-            JsfUtil.addSuccessMessage("Payment Gateway", "Successfully Changed Scheduled Date  .");
+            JsfUtil.pushSuccessMessage(CHANNEL + sessionId,"Payment Gateway", "Successfully Changed Scheduled Date  .");
             getPayments();
         } else {
-            JsfUtil.addErrorMessage("Payment Gateway", "The operation failed!.");
+            JsfUtil.pushErrorMessage(CHANNEL + sessionId,"Payment Gateway", "The operation failed!.");
         }
         logger.log(Level.INFO, "processChangeScheduledDate completed");
     }
@@ -1359,10 +1360,10 @@ public class EziDebitPaymentGateway implements Serializable {
             Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, "Processing Async Results", ex);
         }
         if (result == true) {
-            JsfUtil.addSuccessMessage("Payment Gateway", "Successfully Checked BSB  .");
+            JsfUtil.pushSuccessMessage(CHANNEL + sessionId,"Payment Gateway", "Successfully Checked BSB  .");
 
         } else {
-            JsfUtil.addErrorMessage("Payment Gateway", "The operation failed!.");
+            JsfUtil.pushErrorMessage(CHANNEL + sessionId,"Payment Gateway", "The operation failed!.");
         }
         logger.log(Level.INFO, "processIsBsbValid completed");
     }
@@ -1375,10 +1376,10 @@ public class EziDebitPaymentGateway implements Serializable {
             Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, "Processing Async Results", ex);
         }
         if (result == true) {
-            JsfUtil.addSuccessMessage("Payment Gateway", "Successfully checked if System is Locked  .");
+            JsfUtil.pushSuccessMessage(CHANNEL + sessionId,"Payment Gateway", "Successfully checked if System is Locked  .");
 
         } else {
-            JsfUtil.addErrorMessage("Payment Gateway", "The operation failed!.");
+            JsfUtil.pushErrorMessage(CHANNEL + sessionId,"Payment Gateway", "The operation failed!.");
         }
         logger.log(Level.INFO, "processIsSystemLocked completed");
     }
@@ -1391,10 +1392,10 @@ public class EziDebitPaymentGateway implements Serializable {
             Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, "Processing Async Results", ex);
         }
         if (result != null && result.trim().isEmpty() == false) {
-            JsfUtil.addSuccessMessage("Payment Gateway", "Payment Exchange Version: " + result);
+            JsfUtil.pushSuccessMessage(CHANNEL + sessionId,"Payment Gateway", "Payment Exchange Version: " + result);
 
         } else {
-            JsfUtil.addErrorMessage("Payment Gateway", "The operation failed!.");
+            JsfUtil.pushErrorMessage(CHANNEL + sessionId,"Payment Gateway", "The operation failed!.");
         }
         logger.log(Level.INFO, "processGetPaymentExchangeVersion completed");
     }
@@ -1423,10 +1424,10 @@ public class EziDebitPaymentGateway implements Serializable {
                     message = "Customer does not have any banking details. Customer: " + cust + ", ezidebit status:" + eziStatusCode + ", Crm Status:" + ourStatus + "";
                     logger.log(Level.INFO, message);
                     setWaitingForPaymentDetails(true);
-                    JsfUtil.addSuccessMessage("You must enter customer banking details before payments can be set up!");
+                    JsfUtil.pushSuccessMessage(CHANNEL + sessionId,"Important!","You must enter customer banking details before payments can be set up.");
                 } else {
                     logger.log(Level.WARNING, message);
-                    JsfUtil.addErrorMessage(message);
+                    JsfUtil.pushErrorMessage(CHANNEL + sessionId,message,"");
                 }
             } else {
                 setWaitingForPaymentDetails(false);

@@ -10,6 +10,9 @@ import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 import javax.faces.convert.Converter;
 import javax.faces.model.SelectItem;
+import org.apache.commons.lang.StringEscapeUtils;
+import org.primefaces.push.EventBus;
+import org.primefaces.push.EventBusFactory;
 
 public class JsfUtil {
 
@@ -79,7 +82,7 @@ public class JsfUtil {
     }
 
     public static void addErrorMessage(String msg) {
-        FacesMessage facesMsg = new FacesMessage(FacesMessage.SEVERITY_ERROR, msg, null);
+        FacesMessage facesMsg = new FacesMessage(FacesMessage.SEVERITY_ERROR, msg, "");
         FacesContext.getCurrentInstance().addMessage(null, facesMsg);
         Logger.getLogger(JsfUtil.class.getName()).severe(msg);
     }
@@ -89,7 +92,7 @@ public class JsfUtil {
         if (summary.contains(message)) {
             facesMsg = new FacesMessage(FacesMessage.SEVERITY_ERROR, message, null);
         } else {
-            facesMsg = new FacesMessage(FacesMessage.SEVERITY_ERROR, message, summary);
+            facesMsg = new FacesMessage(FacesMessage.SEVERITY_ERROR, summary, message);
         }
 
         FacesContext.getCurrentInstance().addMessage(null, facesMsg);
@@ -107,9 +110,19 @@ public class JsfUtil {
         if (summary.contains(message)) {
             facesMsg = new FacesMessage(FacesMessage.SEVERITY_INFO, message, null);
         } else {
-            facesMsg = new FacesMessage(FacesMessage.SEVERITY_INFO, message, summary);
+            facesMsg = new FacesMessage(FacesMessage.SEVERITY_INFO, summary, message);
         }
         FacesContext.getCurrentInstance().addMessage("successInfo", facesMsg);
+    }
+
+    public static void pushSuccessMessage(String channel, String summary, String detail) {
+        EventBus eventBus = EventBusFactory.getDefault().eventBus();
+        eventBus.publish(channel, new FacesMessage(FacesMessage.SEVERITY_INFO, StringEscapeUtils.escapeHtml(summary), StringEscapeUtils.escapeHtml(detail)));
+    }
+
+    public static void pushErrorMessage(String channel, String summary, String detail) {
+        EventBus eventBus = EventBusFactory.getDefault().eventBus();
+        eventBus.publish(channel, new FacesMessage(FacesMessage.SEVERITY_ERROR, StringEscapeUtils.escapeHtml(summary), StringEscapeUtils.escapeHtml(detail)));
     }
 
     public static String getRequestParameter(String key) {
