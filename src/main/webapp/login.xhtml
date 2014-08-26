@@ -12,8 +12,11 @@
         </ui:define>
         <ui:define name="body">
 
-
+            <f:metadata>
+                <f:event type="preRenderView" listener="#{loginBean.checkAlreadyLoggedin}" />
+            </f:metadata>
             <h:form>
+
                 <p:panel>
                     <h3>Pure Fitness Manly Account</h3>
                     <p:panel  styleClass="loginPanel">
@@ -42,17 +45,17 @@
                 <p:panel>
                     <h3>Facebook Account</h3>
                     <p:panel >
-                       <div class="social-icons">
+                        <div class="social-icons">
                             <span class="facebook"><a target="_blank" href="https://www.facebook.com/PureFitnessManly"></a></span>
                         </div>
                         <p:button styleClass="loginButtonFacebook" value="Facebook Connect" href="#{facebookLoginBean.facebookUrlAuth}" />
-                        
+
 
                         <h:outputText value="   You can use your facebook account to log into Pure Fitness Manly Member Services if you find it easier."></h:outputText>
 
-                        
+
                         <h:outputText value="#{facebookLoginBean.userFromSession}"></h:outputText>
-                      
+
                     </p:panel></p:panel>
             </h:form>
         </ui:define>

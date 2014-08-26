@@ -58,6 +58,7 @@ public class LoginBean implements Serializable {
     private final StringEncrypter encrypter = new StringEncrypter("(lqKdh^Gr$2F^KJHG654)");
 
     public String getUsername() {
+       
         return this.username;
     }
 
@@ -179,6 +180,41 @@ public class LoginBean implements Serializable {
         return false;
     }
 
+    public void checkAlreadyLoggedin() throws IOException {
+        FacesContext context = FacesContext.getCurrentInstance();
+        HttpServletRequest request = (HttpServletRequest) context.getExternalContext().getRequest();
+        
+        String authenticatedUser = request.getRemoteUser();
+        if(authenticatedUser != null){
+            logger.log(Level.INFO, "Authenticated user accessing login page. Redirecting to the landing page.");
+            redirectToLandingPage();           
+        }
+        
+    }
+
+    private void redirectToLandingPage() {
+        FacesContext context = FacesContext.getCurrentInstance();
+        ExternalContext ec = context.getExternalContext();
+        HttpServletRequest request = (HttpServletRequest) context.getExternalContext().getRequest();
+        try {
+
+            HttpSession httpSession = request.getSession();
+            String landingPage;
+            if (mobileDevice(request)) {
+                httpSession.setAttribute("MOBILE_DEVICE", "TRUE");
+                logger.log(Level.INFO, "Mobile Device user agent detected. Redirecting to the mobile landing page.");
+                landingPage = getValueFromKey("facebook.redirect.mobilelandingpage");
+            } else {
+                landingPage = getValueFromKey("facebook.redirect.landingpage");
+            }
+            ec.redirect(request.getContextPath() + landingPage);
+            logger.log(Level.INFO, "Redirecting to Landing Page:", landingPage);
+        } catch (IOException e) {
+            JsfUtil.addErrorMessage(e, "Login Failed.");
+            logger.log(Level.WARNING, "Login Failed", e);
+        }
+    }
+
     public void login() {
         FacesContext context = FacesContext.getCurrentInstance();
         ExternalContext ec = context.getExternalContext();
@@ -193,7 +229,7 @@ public class LoginBean implements Serializable {
                     logger.log(Level.INFO, "User Aleady Authenticated - redirecting to landing page.");
                 } else if (errorMessage.contains("Login failed")) {
                     logger.log(Level.INFO, "Login Failed - Bad username or Password");
-                    JsfUtil.addErrorMessage("Login Failed","Username or Password is incorrect!");
+                    JsfUtil.addErrorMessage("Login Failed", "Username or Password is incorrect!");
                     return;
                 } else {
                     // unhandled exception 
@@ -201,19 +237,9 @@ public class LoginBean implements Serializable {
                     throw servletException;
                 }
             }
-            HttpSession httpSession = request.getSession();
-            String landingPage;
-            if (mobileDevice(request)) {
-                httpSession.setAttribute("MOBILE_DEVICE", "TRUE");
-                logger.log(Level.INFO, "Mobile Device user agent detected. Redirecting to the mobile landing page.");
-                landingPage = getValueFromKey("facebook.redirect.mobilelandingpage");
-            } else {
-                landingPage = getValueFromKey("facebook.redirect.landingpage");
-            }
-            ec.redirect(request.getContextPath() + landingPage);
-            logger.log(Level.INFO, "Redirecting to Landing Page:", landingPage);
-        } catch (ServletException | IOException e) {
-            JsfUtil.addErrorMessage(e,"Login Failed.");
+            redirectToLandingPage();
+        } catch (ServletException e) {
+            JsfUtil.addErrorMessage(e, "Login Failed.");
             logger.log(Level.WARNING, "Login Failed", e);
         }
     }
@@ -230,7 +256,7 @@ public class LoginBean implements Serializable {
         try {
             request.logout();
         } catch (ServletException e) {
-            JsfUtil.addErrorMessage("Logout failed.",e.getMessage());
+            JsfUtil.addErrorMessage("Logout failed.", e.getMessage());
         }
     }
 
