@@ -9,6 +9,7 @@ import au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade;
 import au.com.manlyit.fitnesscrm.stats.beans.CustomerStateFacade;
 import au.com.manlyit.fitnesscrm.stats.beans.CustomersFacade;
 import au.com.manlyit.fitnesscrm.stats.beans.PaymentBean;
+import au.com.manlyit.fitnesscrm.stats.classes.util.AsyncJob;
 import au.com.manlyit.fitnesscrm.stats.classes.util.FutureMapEJB;
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PushComponentUpdateBean;
@@ -53,7 +54,6 @@ import javax.ejb.EJBException;
 import javax.enterprise.context.SessionScoped;
 import javax.faces.context.FacesContext;
 import javax.faces.event.ActionEvent;
-import javax.faces.event.ValueChangeEvent;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.servlet.http.HttpSession;
@@ -61,6 +61,9 @@ import javax.xml.ws.WebServiceException;
 import org.primefaces.component.tabview.Tab;
 import org.primefaces.context.RequestContext;
 import org.primefaces.event.TabChangeEvent;
+import org.primefaces.push.EventBus;
+import org.primefaces.push.EventBusFactory;
+import org.primefaces.push.impl.RemoteEndpointImpl;
 
 /**
  *
@@ -513,7 +516,7 @@ public class EziDebitPaymentGateway implements Serializable {
     public boolean isAsyncOperationRunning() {
         if (pageLoaded.get() == false) {// if its null we havn't retrieved the details for the customer
             pageLoaded.set(true);
-            loginToPushServer();
+            //loginToPushServer();
             FacesContext context = FacesContext.getCurrentInstance();
             CustomersController controller = (CustomersController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "customersController");
             this.setSelectedCustomer(controller.getSelected());
@@ -915,6 +918,14 @@ public class EziDebitPaymentGateway implements Serializable {
      }
 
      }*/
+    public void checkPushChannelIsOpen(){
+        logger.log(Level.INFO, "Checking if push channel is open. sessionID {0}", sessionId);       
+        loginToPushServer();
+    }
+     public void loginToPushServerAction(ActionEvent event) {
+         loginToPushServer();
+     }
+    
     public void loginToPushServer() {
 
         // Connect to the push channel based on sessionId
@@ -982,7 +993,8 @@ public class EziDebitPaymentGateway implements Serializable {
     }
 
     private Future futureMapGetKey(String key) {
-        return futureMap.get(sessionId, key);
+        AsyncJob aj = futureMap.get(sessionId, key);
+        return aj.getFuture();
     }
 
     private void futureMapRemoveKey(String key) {
@@ -1440,6 +1452,7 @@ public class EziDebitPaymentGateway implements Serializable {
     }
 
     public void refreshPaymentsPage(ActionEvent actionEvent) {
+        loginToPushServer();
         setSelectedCustomer(selectedCustomer);
 
     }
@@ -1541,7 +1554,8 @@ public class EziDebitPaymentGateway implements Serializable {
 
     private void startAsynchJob(String key, Future future) {
         setAsyncOperationRunning(true);
-        futureMap.put(sessionId, key, future);
+        AsyncJob aj = new AsyncJob(key, future);
+        futureMap.put(sessionId,aj );
     }
 
     public void createPaymentSchedule(ActionEvent actionEvent) {

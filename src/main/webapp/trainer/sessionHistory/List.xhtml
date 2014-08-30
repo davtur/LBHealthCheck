@@ -47,7 +47,8 @@
                 </script>
 
                 <h:panelGroup >
-                    <p:commandButton id="createButton" ajax="false" action="#{sessionHistoryController.prepareCreateTrainers}" value="#{configMapController.getKey('ListSessionHistoryCreateLink')}"/>
+                    <p:commandButton id="createButtonDialogue"  onclick="PF('createSessionDialogueWidget').show()" type="button" value="#{configMapController.getKey('ListSessionHistoryCreateLink')}"/>
+                    
                     <p:commandButton id="createButtonMobile" ajax="false" action="#{sessionHistoryController.prepareCreateMobileReturnCreate}" value="#{configMapController.getKey('ListSessionHistoryCreateMobileLink')}"/>
                 </h:panelGroup>
                 <h:outputText escape="false" value="#{configMapController.getKey('ListSessionHistoryEmpty')}" rendered="#{sessionHistoryController.customerItems.rowCount == 0}"/>
@@ -121,6 +122,7 @@
                     </p:dataTable>
                 </h:panelGroup>
             </h:form>
+            <ui:include src="CreateSessionInfo.xhtml"/>
         </ui:define>
     </ui:composition>
 

@@ -6,99 +6,68 @@
       xmlns:f="http://java.sun.com/jsf/core"
       xmlns:p="http://primefaces.org/ui" >
 
-    <ui:composition template="/template.xhtml">
-        <ui:define name="title">
-            <h:outputText value="#{configMapController.getKey('CreateSessionHistoryTitle')}"></h:outputText>
-        </ui:define>
-        <ui:define name="body">
+    <ui:composition >
 
-            <h:form id="historyForm">
+        <p:confirmDialog id="createSessionDialogue" message="Log A Session"  closable="false"
+                         header="#{configMapController.getKey('CreateSessionHistoryTitle')}" severity="info" widgetVar="createSessionDialogueWidget"> 
+            <h:form id="createSessionHistoryForm">
                 <p:panel>
                     <h:panelGrid columns="3">
 
-                        <p:commandButton   ajax="false"   action="#{sessionHistoryController.create}" value="#{configMapController.getKey('CreateSessionHistorySaveLink')}" />
-
-                        <p:commandButton   ajax="false"   action="List" value="#{configMapController.getKey('CreateSessionHistoryShowAllLink')}" immediate="true"/>
+                        <p:commandButton  id="createSessiondialogueSave"  oncomplete="PF('createSessionDialogueWidget').hide();"  actionListener="#{sessionHistoryController.createDialogue}" value="#{configMapController.getKey('CreateSessionHistorySaveLink')}" />
+                        <p:commandButton id="createSessiondialogueDiscard" onclick="PF('createSessionDialogueWidget').hide()"  value="#{configMapController.getKey('AddPaymentDiscardLink')}" update=":growl"/>                
 
 
                     </h:panelGrid>
                 </p:panel>
-              <p:panel>
+                <p:panel>
+                    <p:panel >
+                        <p:outputLabel value="#{configMapController.getKey('CreateSessionHistoryLabel_sessiondate')}" for="sessiondate" />
+                        <p:calendar id="sessiondate" value="#{sessionHistoryController.selected.sessiondate}"  style="width:100%;height:100%" pattern="dd MMM yyyy HH:mm a" stepMinute="15" 
+                                    title="#{configMapController.getKey('CreateSessionHistoryTitle_sessiondate')}" >
+                            <p:ajax event="dateSelect" listener="#{sessionHistoryController.handleDateSelect}" update=" :growl"  />
+                        </p:calendar>
+                    </p:panel>
+
                     <h:panelGrid columns="2">
                         <p:panel>
+
                             <p:panel >
-                                <p:outputLabel value="#{configMapController.getKey('CreateSessionHistoryLabel_sessiondate')}" for="sessiondate" />
-                                <p:calendar id="sessiondate" value="#{sessionHistoryController.selected.sessiondate}"  style="width:100%;height:100%" pattern="dd MMM yyyy HH:mm a" stepMinute="15" 
-                                            title="#{configMapController.getKey('CreateSessionHistoryTitle_sessiondate')}" >
-                                    <p:ajax event="dateSelect" listener="#{sessionHistoryController.handleDateSelect}" update=":growl"  />
-                                </p:calendar>
+                                <p:outputLabel value="#{configMapController.getKey('CreateSessionHistoryLabel_sessionType')}" for="sessionType" />
+                                <p:selectOneMenu id="sessionType" style="width:100%;height:100%" value="#{sessionHistoryController.selected.sessionTypesId}" filterMatchMode="startsWith" filter="true" editable="false" converter="#{sessTypesConverter}" label="#{configMapController.getKey('CreateSessionHistoryTitle_sessionType')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionHistoryRequiredMessage_sessionType')}">
+                                    <f:selectItems value="#{sessionTypesController.itemsAvailableSelectOne}" var="sessionType" itemLabel="#{sessionType.name}" itemValue="#{sessionType}"/>
+                                </p:selectOneMenu>
                             </p:panel>
+                            <p:panel >
+                                <p:outputLabel value="#{configMapController.getKey('CreateSessionHistoryLabel_trainer')}" for="trainer" />
+                                <p:selectCheckboxMenu id="trainer" style="width:100%;height:100%" value="#{sessionHistoryController.trainers}" converter="#{custConverter}" filterMatchMode="startsWith" filter="true"  label="#{configMapController.getKey('CreateSessionHistoryTitle_trainer')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionHistoryRequiredMessage_trainer')}">
+                                    <f:selectItems value="#{customersController.getCustomersByGroupObject('TRAINER',true)}" var="cust" itemLabel="#{cust.firstname} #{cust.lastname}" itemValue="#{cust}"/>
+                                </p:selectCheckboxMenu>
+                            </p:panel>
+                            <p:panel >
+                                <p:outputLabel value="#{configMapController.getKey('CreateSessionHistoryLabel_comments')}" for="comments" />
+                                <p:inputTextarea id="comments" style="width:100%;height:100%" value="#{sessionHistoryController.selected.comments}" cols="35" rows="8" title="#{configMapController.getKey('CreateSessionHistoryTitle_comments')}"/>
+                            </p:panel>
+
+                        </p:panel>
+
+                        <p:panel>
 
                             <p:pickList id="sessionPicker"  value="#{sessionHistoryController.participants}"
                                         var="cust" showSourceFilter="true" showTargetFilter="true" showCheckbox="true"
-                                       itemLabel="#{cust.firstname} #{cust.lastname}"
+                                        itemLabel="#{cust.firstname} #{cust.lastname}"
                                         itemValue="#{cust}" converter="#{custConverter}">
                                 <f:facet name="sourceCaption">Did not attend</f:facet>
                                 <f:facet name="targetCaption">Attended Session</f:facet>
                             </p:pickList>
+
+
                         </p:panel>
-                       <p:panel>
-                             <p:panel>
-                                <p:panel>
-                                    <p:outputLabel value="#{configMapController.getKey('CreateSessionHistoryLabel_sessionType')}" for="sessionType" />
-                                  <p:selectOneMenu id="sessionType" style="width:100%;height:100%" value="#{sessionHistoryController.selected.sessionTypesId}" filterFunction="startsWith" filter="true" editable="false" converter="#{sessTypesConverter}" label="#{configMapController.getKey('CreateSessionHistoryTitle_sessionType')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionHistoryRequiredMessage_sessionType')}">
-                                        <f:selectItems value="#{sessionTypesController.itemsAvailableSelectOne}" var="sessionType" itemLabel="#{sessionType.name}" itemValue="#{sessionType}"/>
-                                    </p:selectOneMenu>
-                               </p:panel>
-                                <p:outputLabel value="#{configMapController.getKey('CreateSessionHistoryLabel_trainer')}" for="trainer" />
-                               <p:selectManyMenu id="trainer" style="width:100%;height:100%" showCheckbox="true" value="#{sessionHistoryController.trainers}" converter="#{custConverter}"  label="#{configMapController.getKey('CreateSessionHistoryTitle_trainer')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionHistoryRequiredMessage_trainer')}">
-                                    <f:selectItems value="#{customersController.getCustomersByGroupObject('TRAINER',true)}" var="cust" itemLabel="#{cust.firstname} #{cust.lastname}" itemValue="#{cust}"/>
-                                </p:selectManyMenu>
-                            </p:panel>
-                            <p:panel >
-                               <p:outputLabel value="#{configMapController.getKey('CreateSessionHistoryLabel_comments')}" for="comments" />
-                                <p:inputTextarea id="comments" style="width:100%;height:100%" value="#{sessionHistoryController.selected.comments}" cols="35" rows="8" title="#{configMapController.getKey('CreateSessionHistoryTitle_comments')}"/>
-                           </p:panel>
-                       </p:panel>
                     </h:panelGrid>
 
-                       <!--  <p:panel  header="#{configMapController.getKey('CreateSessionHistoryLabel_picker')}" >
-
-                           <p:selectManyMenu id="scroll" style="width:250px;height:600px" value="#{sessionHistoryController.attendingCustomers}" label="Participants"  converter="customerConverter"  widgetVar="smanymeny">  
-                               <f:selectItems value="#{sessionHistoryController.activeCustomers}" var="cust"  itemLabel="#{cust.firstname} #{cust.lastname}" itemValue="#{cust}" />            
-                           </p:selectManyMenu>
-
-                         <p:dataTable id="tableList2" rowKey="#{item.id}" rowSelectMode="add" selection="#{sessionHistoryController.participantsArray}" value="#{customersController.items}" filteredValue="#{customersController.filteredItems}"  widgetVar="customersControllerTable" var="item"  paginator="true" rows="15"  paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  rowsPerPageTemplate="5,10,15,20,25,50,100" >
-                               <f:facet name="header">
-                                   <p:outputPanel>
-                                       <h:outputText value="Search all fields:" />
-                                       <h:inputText id="globalFilter" onkeyup="PF('customersControllerTable').filter()" />
-                                   </p:outputPanel>
-                               </f:facet>
-                               <p:column selectionMode="multiple" />
-                               <p:column sortBy="#{item.firstname}" filterBy="#{item.firstname}" headerText="#{configMapController.getKey('ListCustomersTitle_firstname')}"   >
-                                   <f:facet name="header">
-                                       <h:outputText value="#{configMapController.getKey('ListCustomersTitle_firstname')}"/>
-                                   </f:facet>
-                                   <h:outputText value="#{item.firstname}"/>
-
-                               </p:column>
-                               <p:column sortBy="#{item.lastname}" filterBy="#{item.lastname}" headerText="#{configMapController.getKey('ListCustomersTitle_lastname')}"   >
-                                   <f:facet name="header">
-                                       <h:outputText value="#{configMapController.getKey('ListCustomersTitle_lastname')}" />
-                                   </f:facet>
-                                   <h:outputText value="#{item.lastname}"/>
-
-                               </p:column>
-                           </p:dataTable>-->
-
-
-                            <!--   
-                              <p:selectManyMenu id="scroll" value="#{sessionHistoryController.attendingCustomers}" converter="#{custConverter}" style="width:250px;height:600px" var="customer" showCheckbox="true">  
-                        </p:panel> -->
-                 </p:panel>
+                </p:panel>
             </h:form>
-        </ui:define>
+        </p:confirmDialog>
     </ui:composition>
-</h:body>
+
 </html>

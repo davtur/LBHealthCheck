@@ -5,9 +5,12 @@
  */
 package au.com.manlyit.fitnesscrm.stats.classes.util;
 
-import java.util.HashMap;
-import java.util.Iterator;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -20,8 +23,12 @@ import javax.ejb.Timer;
 import javax.faces.application.FacesMessage;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.primefaces.push.EventBus;
+import org.primefaces.push.EventBus.Reply;
 import org.primefaces.push.EventBusFactory;
+import org.primefaces.push.RemoteEndpoint;
+import org.primefaces.push.annotation.OnClose;
 import org.primefaces.push.annotation.OnMessage;
+import org.primefaces.push.annotation.OnOpen;
 import org.primefaces.push.annotation.PathParam;
 import org.primefaces.push.annotation.PushEndpoint;
 import org.primefaces.push.impl.JSONEncoder;
@@ -38,7 +45,8 @@ import org.primefaces.push.impl.JSONEncoder;
 public class FutureMapEJB {
 
     private static final Logger logger = Logger.getLogger(FutureMapEJB.class.getName());
-    private final HashMap<String, HashMap<String, Future>> futureMap = new HashMap<>();
+    private static final int TIMEOUT_SECONDS = 30;
+    private final ConcurrentHashMap<String, List<AsyncJob>> futureMap = new ConcurrentHashMap<>();
     private final static String CHANNEL = "/payments/";
 
     @PathParam("user")
@@ -49,53 +57,89 @@ public class FutureMapEJB {
         return message;
     }
 
+    @OnOpen
+    public void onOpen(RemoteEndpoint r, EventBus e) {
+        r.transport().toString();
+        logger.log(Level.INFO, "Atmosphere Push Connection Opened. Transport Type = {0}", r.transport().toString());
+    }
+
+    @OnClose
+    public void onClose(RemoteEndpoint r, EventBus e) {
+        logger.log(Level.INFO, "Atmosphere Push Connection Closed.");
+
+    }
+
     /**
      * @param userSessionId
      * @return the futureMap
      */
-    public HashMap<String, Future> getFutureMap(String userSessionId) {
+    public List<AsyncJob> getFutureMap(String userSessionId) {
         //return a map of future tasks that belong to a sessionid
-        HashMap<String, Future> fmap = futureMap.get(userSessionId);
+        List<AsyncJob> fmap = futureMap.get(userSessionId);
         if (fmap == null) {
-            futureMap.put(userSessionId, new HashMap<String, Future>());
+            futureMap.put(userSessionId, new ArrayList<AsyncJob>());
         }
         return fmap;
     }
 
     public void remove(String userSessionId, String key) {
-        getFutureMap(userSessionId).remove(key);
+        List<AsyncJob> fmap = getFutureMap(userSessionId);
+        for (int x = fmap.size(); x > 0; x--) {
+            AsyncJob aj = fmap.get(x - 1);
+            if (aj.getJobName().contentEquals(key)) {
+                fmap.remove(x - 1);
+            }
+        }
     }
 
     public int size(String userSessionId) {
         return getFutureMap(userSessionId).size();
     }
 
-    public Future get(String userSessionId, String key) {
-        return (Future) getFutureMap(userSessionId).get(key);
+    public AsyncJob get(String userSessionId, String key) {
+        List<AsyncJob> fmap = getFutureMap(userSessionId);
+        for (int x = fmap.size(); x > 0; x--) {
+            AsyncJob aj = fmap.get(x - 1);
+            if (aj.getJobName().contentEquals(key)) {
+                return aj;
+            }
+        }
+        return null;
     }
 
     public boolean containsKey(String userSessionId, String key) {
-        return getFutureMap(userSessionId).containsKey(key);
+        List<AsyncJob> fmap = getFutureMap(userSessionId);
+        try {
+            for (int x = fmap.size(); x > 0; x--) {
+                AsyncJob aj = fmap.get(x - 1);
+                if (aj.getJobName().contentEquals(key)) {
+                    return true;
+                }
+            }
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "futureMap.containsKey", e);
+        }
+        return false;
+
     }
 
     /**
      * @param userSessionId
-     * @param key
-     * @param future
+     *
+     *
+     * @param aj
      *
      */
-    public void put(String userSessionId, String key, Future future) {
-        getFutureMap(userSessionId).put(key, future);
+    public void put(String userSessionId, AsyncJob aj) {
+        getFutureMap(userSessionId).add(aj);
     }
 
     public void cancelFutures(String userSessionId) {
         if (getFutureMap(userSessionId) != null) {
-            Iterator it = getFutureMap(userSessionId).entrySet().iterator();
-            while (it.hasNext()) {
-                Map.Entry pairs = (Map.Entry) it.next();
-                Future ft = (Future) pairs.getValue();
+            List<AsyncJob> fmap = getFutureMap(userSessionId);
+            for (AsyncJob aj : fmap) {
+                Future ft = (Future) aj.getFuture();
                 ft.cancel(false);
-                it.remove(); // avoids a ConcurrentModificationException
             }
             getFutureMap(userSessionId).clear();
         }
@@ -113,20 +157,28 @@ public class FutureMapEJB {
     public void sendMessage(String sessionChannel, String summary, String detail) {
         //TODO
         // sessionChannel = "/test";// remove this once the channel is dynamically set by session id
-
+        final String broadcastChannel = CHANNEL + sessionChannel;
+        final String summ = summary;
         EventBus eventBus = EventBusFactory.getDefault().eventBus();
+       /* Reply rep = new EventBus.Reply() {
+            @Override
+            public void completed(String message) {
+
+                logger.log(Level.INFO, "Message Delivered:Channel={0}, Summary={1}.", new Object[]{broadcastChannel, summ});
+            }
+        };*/
         // eventBus.publish(channels.getChannel(getUser()), new FacesMessage(StringEscapeUtils.escapeHtml(summary), StringEscapeUtils.escapeHtml(detail)));
-        eventBus.publish(CHANNEL + sessionChannel, new FacesMessage(StringEscapeUtils.escapeHtml(summary), StringEscapeUtils.escapeHtml(detail)));
+        eventBus.publish(broadcastChannel, new FacesMessage(StringEscapeUtils.escapeHtml(summary), StringEscapeUtils.escapeHtml(detail)));
     }
 
-    @Schedule(hour = "*", minute = "*", second = "0/1")
+    @Schedule(hour = "*", minute = "*", second = "*")
     public void checkRunningJobsAndNotifyIfComplete(Timer t) {  // run every 2 seconds
 
         logger.log(Level.FINE, "Checking Future Map for completed jobs.");
 
         for (Map.Entry pairs : futureMap.entrySet()) {
             String sessionId = (String) pairs.getKey();
-            HashMap<String, Future> fmap = (HashMap<String, Future>) pairs.getValue();
+            ArrayList<AsyncJob> fmap = (ArrayList<AsyncJob>) pairs.getValue();
             int k = fmap.size();
             if (k > 0) {
 
@@ -141,14 +193,24 @@ public class FutureMapEJB {
                  }*/
                 int y = 0;
                 String details = "";
-                for (Map.Entry pairsFut : fmap.entrySet()) {
-                    Future ft = (Future) pairsFut.getValue();
-                    String key = (String) pairsFut.getKey();
+                for (AsyncJob aj : fmap) {
+                    Future ft = aj.getFuture();
+                    String key = aj.getJobName();
                     if (ft.isDone()) {
                         y++;
                         logger.log(Level.INFO, "SessionId {0} async job {1} has finished.", new Object[]{key, sessionId});
                         details += key + " ";
                     }
+                    GregorianCalendar jobStartTime = new GregorianCalendar();
+                    GregorianCalendar currentTime = new GregorianCalendar();
+
+                    jobStartTime.setTime(aj.getStartTime());
+                    jobStartTime.add(Calendar.SECOND, TIMEOUT_SECONDS);
+                    if (jobStartTime.compareTo(currentTime) < 0) {
+                        ft.cancel(true);
+                        logger.log(Level.INFO, "SessionId {0} async job {1} has timed out ({2} seconds )  and been cancelled.", new Object[]{key, sessionId, TIMEOUT_SECONDS});
+                    }
+
                 }
                 if (y > 0) {
                     sendMessage(sessionId, "Asynchronous Tasks Completed", details);
