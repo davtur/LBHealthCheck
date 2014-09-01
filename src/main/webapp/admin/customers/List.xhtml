@@ -71,7 +71,7 @@
                                 </f:facet>
                                 <!--<p:ajax event="rowEdit"   listener="#{customersController.onEdit}" update=":growl"  />  
                                 <p:ajax event="rowEditCancel" listener="#{customersController.onCancel}" update=":growl"   /> -->
-                                <p:ajax event="rowSelect"   update=":growl :tv:customerslistForm1:selectedUser :tv:formCustomersEdit1 :formCustomersCreate1 :tv:paymentsForm :tv:NoteslistForm1 :tv:iFrameForm"  />  
+                                <p:ajax event="rowSelect"   update=":growl :tv:customerslistForm1:selectedUser :tv:formCustomersEdit1 :formCustomersCreate1 :tv:paymentsForm :tv:NoteslistForm1 "  />  
                                 <p:column selectionMode="multiple" />
                                 <p:column sortBy="#{item.firstname}" filterBy="#{item.firstname}" headerText="#{configMapController.getKey('ListCustomersTitle_firstname')}"   >
                                     <h:outputText value="#{item.firstname}"/>
@@ -211,15 +211,17 @@
 
                         <p:panel id="progressBarPanel" rendered="#{ezidebit.asyncOperationRunning}" >
                             <h:outputText id="statusText" value="Please wait while the payment data for #{customersController.selected.firstname} #{customersController.selected.lastname} is loaded..." />
-                            <p:commandButton id="reloadPageButton2" value="Reload Page" actionListener="#{ezidebit.refreshPaymentsPage}"  update=":tv:iFrameForm :tv:paymentsForm  :growl" />
+                            <p:commandButton id="reloadPageButton2" value="Reload Page" actionListener="#{ezidebit.refreshPaymentsPage}"  update=":tv:paymentsForm  :growl" />
 
                         </p:panel>
 
                         <p:outputPanel id="mainPanel" rendered="#{ezidebit.asyncOperationRunning == false and ezidebit.customerDetailsHaveBeenRetrieved == true  and ezidebit.customerExistsInPaymentGateway == true}" >
-                            <p:commandButton id="reloadPageButton" value="Reload Page" actionListener="#{ezidebit.refreshPaymentsPage}" rendered="#{ezidebit.customerExistsInPaymentGateway}" update=":tv:iFrameForm :tv:paymentsForm  :growl" />
+                            <p:commandButton id="reloadPageButton" value="Reload Page" actionListener="#{ezidebit.refreshPaymentsPage}" rendered="#{ezidebit.customerExistsInPaymentGateway}" update=":tv:paymentsForm  :growl" />
 
                             <p:commandButton id="showAddPaymentButton" rendered="#{ezidebit.waitingForPaymentDetails == false}" oncomplete="PF('createPaymentDialogueWidget').show();"    value="#{configMapController.getKey('AddPaymentButtonLink')}"  update=":growl " /> 
                             <p:commandButton id="showAddPaymentScheduleButton" rendered="#{ezidebit.waitingForPaymentDetails == false}" oncomplete="PF('createPaymentScheduleDialogueWidget').show();"    value="#{configMapController.getKey('AddPaymentScheduleButtonLink')}" update=":growl "  /> 
+                             <p:commandButton id="editPaymentMethodButton" rendered="#{ezidebit.customerExistsInPaymentGateway == true and ezidebit.customerDetailsHaveBeenRetrieved == true}"  oncomplete="PF('editPaymentMethodDialogueWidget').show();"    value="#{configMapController.getKey('editPaymentMethodButtonLink')}" update=":growl :iFrameForm"  /> 
+                          
                             <h:outputText rendered="#{ezidebit.waitingForPaymentDetails}" value="WAITING FOR BANK DETAILS - "/>
                             <h:outputText rendered="#{!ezidebit.asyncOperationRunning}" value="Idle"/>
                             <h:outputText rendered="#{ezidebit.asyncOperationRunning}" value="Busy"/>
@@ -345,18 +347,16 @@
                         </p:panel>
                         <p:outputPanel id="iFrameHeaderPanel" >
                             <p:panelGrid id="dialoguePaymenstGrid1" columns="2" rendered="#{ezidebit.customerExistsInPaymentGateway == false and ezidebit.customerDetailsHaveBeenRetrieved == true}" >
-                                <p:commandButton  id="paymentsButton" ajax="true"   actionListener="#{ezidebit.createCustomerRecord}" update=":growl :tv:paymentsForm :tv:iFrameForm "   value="#{configMapController.getKey('EditCustomersUpdatePayment')}" />
+                                <p:commandButton  id="paymentsButton" ajax="true"   actionListener="#{ezidebit.createCustomerRecord}" update=":growl :tv:paymentsForm "   value="#{configMapController.getKey('EditCustomersUpdatePayment')}" />
                                 <p:outputLabel value="#{configMapController.getKey('EditCustomersAddToPaymentGatewayLabel')}" for="paymentsButton" />
                             </p:panelGrid>
-                            <h:outputText id="selectedUser2" value="#{customersController.selected.firstname} #{customersController.selected.lastname}" />
+                            
                         </p:outputPanel>
 
 
                         <p:remoteCommand name="taskCompleted" actionListener="#{ezidebit.pollerListener}" />
                     </h:form>  
-                    <h:form id="iFrameForm" > 
-
-                      <!--  <p:panel id="iFramePanel" header="Edit The Payment Method for Customer #{customersController.selected.firstname} #{customersController.selected.lastname}" >-->
+                   <!-- <h:form id="iFrameForm" > 
                         <p:outputPanel id="iFramePanel" >
                             <p:panelGrid id="dialoguePaymenstGrid2" columns="2" rendered="#{ezidebit.customerExistsInPaymentGateway == true and ezidebit.customerDetailsHaveBeenRetrieved == true}"  >
                                 <p:panel id="viewPaymentsGrid" header="View Payment Method for Customer #{customersController.selected.firstname} #{customersController.selected.lastname}" >
@@ -367,7 +367,7 @@
                                 </p:panel>
                             </p:panelGrid>
                         </p:outputPanel>
-                    </h:form>    
+                    </h:form>    -->
                 </p:tab>
 
 
@@ -522,6 +522,7 @@
             <ui:include src="Create.xhtml"/>
             <ui:include src="CreateSchedule.xhtml"/>
             <ui:include src="CreatePayment.xhtml"/>
+            <ui:include src="EditPaymentMethod.xhtml"/>
         </ui:define>
     </ui:composition>
 

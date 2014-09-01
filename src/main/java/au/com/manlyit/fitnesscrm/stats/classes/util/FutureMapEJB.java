@@ -208,6 +208,7 @@ public class FutureMapEJB {
                     jobStartTime.add(Calendar.SECOND, TIMEOUT_SECONDS);
                     if (jobStartTime.compareTo(currentTime) < 0) {
                         ft.cancel(true);
+                        remove(sessionId,key);
                         logger.log(Level.INFO, "SessionId {0} async job {1} has timed out ({2} seconds )  and been cancelled.", new Object[]{key, sessionId, TIMEOUT_SECONDS});
                     }
 
