@@ -1,9 +1,9 @@
 package au.com.manlyit.fitnesscrm.stats.classes;
 
-import au.com.manlyit.fitnesscrm.stats.db.SessionTypes;
+import au.com.manlyit.fitnesscrm.stats.db.PaymentParameters;
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PaginationHelper;
-import au.com.manlyit.fitnesscrm.stats.beans.SessionTypesFacade;
+import au.com.manlyit.fitnesscrm.stats.beans.PaymentParametersFacade;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -25,22 +25,23 @@ import javax.inject.Named;
 import org.primefaces.event.RowEditEvent;
 import org.primefaces.event.SelectEvent;
 
-@Named("sessionTypesController")
+@Named("paymentParametersController")
 @SessionScoped
-public class SessionTypesController implements Serializable {
+public class PaymentParametersController implements Serializable {
 
-    private SessionTypes current;
+    private PaymentParameters current;
+    private PaymentParameters selectedForDeletion;
     private DataModel items = null;
     @Inject
-    private au.com.manlyit.fitnesscrm.stats.beans.SessionTypesFacade ejbFacade;
+    private au.com.manlyit.fitnesscrm.stats.beans.PaymentParametersFacade ejbFacade;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade configMapFacade;
     private PaginationHelper pagination;
     private int selectedItemIndex;
-    private List<SessionTypes> filteredItems;
-    private SessionTypes[] multiSelected;
+    private List<PaymentParameters> filteredItems;
+    private PaymentParameters[] multiSelected;
 
-    public SessionTypesController() {
+    public PaymentParametersController() {
     }
 
     public static boolean isUserInRole(String roleName) {
@@ -48,15 +49,15 @@ public class SessionTypesController implements Serializable {
         return inRole;
     }
 
-    public SessionTypes getSelected() {
+    public PaymentParameters getSelected() {
         if (current == null) {
-            current = new SessionTypes();
+            current = new PaymentParameters();
             selectedItemIndex = -1;
         }
         return current;
     }
 
-    public void setSelected(SessionTypes selected) {
+    public void setSelected(PaymentParameters selected) {
         if (selected != null) {
             current = selected;
             selectedItemIndex = -1;
@@ -64,7 +65,7 @@ public class SessionTypesController implements Serializable {
 
     }
 
-    private SessionTypesFacade getFacade() {
+    private PaymentParametersFacade getFacade() {
         return ejbFacade;
     }
 
@@ -89,28 +90,28 @@ public class SessionTypesController implements Serializable {
     /**
      * @return the filteredItems
      */
-    public List<SessionTypes> getFilteredItems() {
+    public List<PaymentParameters> getFilteredItems() {
         return filteredItems;
     }
 
     /**
      * @param filteredItems the filteredItems to set
      */
-    public void setFilteredItems(List<SessionTypes> filteredItems) {
+    public void setFilteredItems(List<PaymentParameters> filteredItems) {
         this.filteredItems = filteredItems;
     }
 
     /**
      * @return the multiSelected
      */
-    public SessionTypes[] getMultiSelected() {
+    public PaymentParameters[] getMultiSelected() {
         return multiSelected;
     }
 
     /**
      * @param multiSelected the multiSelected to set
      */
-    public void setMultiSelected(SessionTypes[] multiSelected) {
+    public void setMultiSelected(PaymentParameters[] multiSelected) {
         this.multiSelected = multiSelected;
     }
 
@@ -120,13 +121,13 @@ public class SessionTypesController implements Serializable {
     }
 
     public String prepareView() {
-        current = (SessionTypes) getItems().getRowData();
-        selectedItemIndex = pagination.getPageFirstItem() + getItems().getRowIndex();
+        //current = (PaymentParameters)getItems().getRowData();
+        //selectedItemIndex = pagination.getPageFirstItem() + getItems().getRowIndex();
         return "View";
     }
 
     public String prepareCreate() {
-        current = new SessionTypes();
+        current = new PaymentParameters();
         selectedItemIndex = -1;
         return "Create";
     }
@@ -137,7 +138,7 @@ public class SessionTypesController implements Serializable {
                 current.setId(0);
             }
             getFacade().create(current);
-            JsfUtil.addSuccessMessage(configMapFacade.getConfig("SessionTypesCreated"));
+            JsfUtil.addSuccessMessage(configMapFacade.getConfig("PaymentParametersCreated"));
             return prepareCreate();
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
@@ -150,7 +151,7 @@ public class SessionTypesController implements Serializable {
             current.setId(0);
             getFacade().create(current);
             recreateModel();
-            JsfUtil.addSuccessMessage(configMapFacade.getConfig("SessionTypesCreated"));
+            JsfUtil.addSuccessMessage(configMapFacade.getConfig("PaymentParametersCreated"));
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
         }
@@ -158,8 +159,8 @@ public class SessionTypesController implements Serializable {
     }
 
     public String prepareEdit() {
-        current = (SessionTypes) getItems().getRowData();
-        selectedItemIndex = pagination.getPageFirstItem() + getItems().getRowIndex();
+        //current = (PaymentParameters)getItems().getRowData();
+        //selectedItemIndex = pagination.getPageFirstItem() + getItems().getRowIndex();
         return "Edit";
     }
 
@@ -174,7 +175,7 @@ public class SessionTypesController implements Serializable {
     public String update() {
         try {
             getFacade().edit(current);
-            JsfUtil.addSuccessMessage(configMapFacade.getConfig("SessionTypesUpdated"));
+            JsfUtil.addSuccessMessage(configMapFacade.getConfig("PaymentParametersUpdated"));
             return "View";
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
@@ -182,12 +183,10 @@ public class SessionTypesController implements Serializable {
         }
     }
 
-    public String destroy() {
-        current = (SessionTypes) getItems().getRowData();
-        selectedItemIndex = pagination.getPageFirstItem() + getItems().getRowIndex();
+    public void destroy() {
         performDestroy();
         recreateModel();
-        return "List";
+        current = null;
     }
 
     public String destroyAndView() {
@@ -203,10 +202,23 @@ public class SessionTypesController implements Serializable {
         }
     }
 
+    public PaymentParameters getSelectedForDeletion() {
+        return selectedForDeletion;
+    }
+
+    public void setSelectedForDeletion(PaymentParameters selectedForDeletion) {
+        this.selectedForDeletion = selectedForDeletion;
+        current = selectedForDeletion;
+
+        performDestroy();
+        recreateModel();
+
+    }
+
     private void performDestroy() {
         try {
             getFacade().remove(current);
-            JsfUtil.addSuccessMessage(configMapFacade.getConfig("SessionTypesDeleted"));
+            JsfUtil.addSuccessMessage(configMapFacade.getConfig("PaymentParametersDeleted"));
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
         }
@@ -259,36 +271,39 @@ public class SessionTypesController implements Serializable {
     }
 
     public SelectItem[] getItemsAvailableSelectMany() {
+        file:///home/david/.netbeans/8.0/config/Templates/JSF/JSF_From_Entity_Wizard/StandardJSF/create.ftl
+
         return JsfUtil.getSelectItems(ejbFacade.findAll(), false);
     }
 
-    /*public SelectItem[] getItemsAvailableSelectOne() {
+    public SelectItem[] getItemsAvailableSelectOne() {
         return JsfUtil.getSelectItems(ejbFacade.findAll(), true);
-    }*/
-     public void onEdit(RowEditEvent event) {
-        SessionTypes cm = (SessionTypes) event.getObject();
+    }
+
+    public Collection<PaymentParameters> getItemsAvailable() {
+        return ejbFacade.findAll();
+    }
+
+    public void onEdit(RowEditEvent event) {
+        PaymentParameters cm = (PaymentParameters) event.getObject();
         getFacade().edit(cm);
         recreateModel();
         JsfUtil.addSuccessMessage("Row Edit Successful");
-    }
-     public Collection<SessionTypes> getItemsAvailableSelectOne() {
-        return ejbFacade.findAllSessionTypesOrderByName(true);
     }
 
     public void onCancel(RowEditEvent event) {
         JsfUtil.addErrorMessage("Row Edit Cancelled");
     }
 
-    @FacesConverter(forClass = SessionTypes.class)
-    public static class SessionTypesControllerConverter implements Converter {
+    @FacesConverter(forClass = PaymentParameters.class)
+    public static class PaymentParametersControllerConverter implements Converter {
 
-        @Override
         public Object getAsObject(FacesContext facesContext, UIComponent component, String value) {
             if (value == null || value.length() == 0) {
                 return null;
             }
-            SessionTypesController controller = (SessionTypesController) facesContext.getApplication().getELResolver().
-                    getValue(facesContext.getELContext(), null, "sessionTypesController");
+            PaymentParametersController controller = (PaymentParametersController) facesContext.getApplication().getELResolver().
+                    getValue(facesContext.getELContext(), null, "paymentParametersController");
             return controller.ejbFacade.find(getKey(value));
         }
 
@@ -309,11 +324,11 @@ public class SessionTypesController implements Serializable {
             if (object == null) {
                 return null;
             }
-            if (object instanceof SessionTypes) {
-                SessionTypes o = (SessionTypes) object;
+            if (object instanceof PaymentParameters) {
+                PaymentParameters o = (PaymentParameters) object;
                 return getStringKey(o.getId());
             } else {
-                throw new IllegalArgumentException("object " + object + " is of type " + object.getClass().getName() + "; expected type: " + SessionTypesController.class.getName());
+                throw new IllegalArgumentException("object " + object + " is of type " + object.getClass().getName() + "; expected type: " + PaymentParametersController.class.getName());
             }
         }
 

@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" >
+
+    <ui:composition template="/template.xhtml">
+        <ui:define name="title">
+            <h:outputText value="#{configMapController.getKey('ListPaymentParametersTitle')}"></h:outputText>
+        </ui:define>
+        <ui:define name="body">
+
+
+
+
+
+            <h:form id="PaymentParametersListForm">
+                <h:outputText escape="false" value="#{configMapController.getKey('ListPaymentParametersEmpty')}" rendered="#{paymentParametersController.items.rowCount == 0}"/>
+                <h:panelGroup rendered="#{paymentParametersController.items.rowCount > 0}">
+                    <p:dataTable  
+                        id="datalist"  
+                        editable="true" 
+                        value="#{paymentParametersController.items}" 
+                        selection="#{paymentParametersController.selected}" 
+                        rowKey="#{item.id}" 
+                        filteredValue="#{paymentParametersController.filteredItems}"  
+                        widgetVar="paymentParametersControllerTable" 
+                        var="item"  
+                        paginator="true" 
+                        rows="15"  
+                        paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  
+                        rowsPerPageTemplate="5,10,15,20,25,50,100" >
+                        <f:facet name="header">
+                            <p:outputPanel>
+                                <h:outputText value="Search all fields:" />
+                                <h:inputText id="globalFilter" onkeyup="paymentParametersControllerTable.filter()" />
+                            </p:outputPanel>
+                        </f:facet>
+                        <p:ajax event="rowEdit" listener="#{paymentParametersController.onEdit}" update=":growl" oncomplete="paymentParametersControllerTable.filter()" />  
+                        <p:ajax event="rowEditCancel" listener="#{paymentParametersController.onCancel}" update=":growl"  oncomplete="paymentParametersControllerTable.filter()" />  
+                        <p:ajax event="rowSelect"   update="createButton viewButton editButton deleteButton"/>
+                        <p:ajax event="rowUnselect" update="createButton viewButton editButton deleteButton"/>
+                        <p:column selectionMode="single"/>
+                        <p:column sortBy="#{item.id}" filterBy="#{item.id}" headerText="#{configMapController.getKey('ListPaymentParametersTitle_id')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.id}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.id}" label="#{configMapController.getKey('ListPaymentParametersTitle_id')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.contractStartDate}" filterBy="#{item.contractStartDate}" headerText="#{configMapController.getKey('ListPaymentParametersTitle_contractStartDate')}"   >
+
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.contractStartDate}">
+                                        <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                                    </h:outputText>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:calendar value="#{item.contractStartDate}">	
+                                        <p:ajax event="dateSelect" listener= "#{paymentParametersController.handleDateSelect}" update=":growl" />
+                                    </p:calendar>
+                                </f:facet>
+                            </p:cellEditor> 
+
+                        </p:column>
+                        <p:column sortBy="#{item.mobilePhoneNumber}" filterBy="#{item.mobilePhoneNumber}" headerText="#{configMapController.getKey('ListPaymentParametersTitle_mobilePhoneNumber')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.mobilePhoneNumber}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.mobilePhoneNumber}" label="#{configMapController.getKey('ListPaymentParametersTitle_mobilePhoneNumber')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.smsPaymentReminder}" filterBy="#{item.smsPaymentReminder}" headerText="#{configMapController.getKey('ListPaymentParametersTitle_smsPaymentReminder')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.smsPaymentReminder}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.smsPaymentReminder}" label="#{configMapController.getKey('ListPaymentParametersTitle_smsPaymentReminder')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.smsFailedNotification}" filterBy="#{item.smsFailedNotification}" headerText="#{configMapController.getKey('ListPaymentParametersTitle_smsFailedNotification')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.smsFailedNotification}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.smsFailedNotification}" label="#{configMapController.getKey('ListPaymentParametersTitle_smsFailedNotification')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.smsExpiredCard}" filterBy="#{item.smsExpiredCard}" headerText="#{configMapController.getKey('ListPaymentParametersTitle_smsExpiredCard')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.smsExpiredCard}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.smsExpiredCard}" label="#{configMapController.getKey('ListPaymentParametersTitle_smsExpiredCard')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.paymentGatewayName}" filterBy="#{item.paymentGatewayName}" headerText="#{configMapController.getKey('ListPaymentParametersTitle_paymentGatewayName')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.paymentGatewayName}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.paymentGatewayName}" label="#{configMapController.getKey('ListPaymentParametersTitle_paymentGatewayName')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.loggedInUser}" filterBy="#{item.loggedInUser}" headerText="#{configMapController.getKey('ListPaymentParametersTitle_loggedInUser')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.loggedInUser}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.loggedInUser}" label="#{configMapController.getKey('ListPaymentParametersTitle_loggedInUser')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column rendered="#{paymentParametersController.isUserInRole('ADMIN')}"  headerText="Edit" style="width:50px">  
+                            <p:rowEditor />  
+                        </p:column>  
+
+
+                        <f:facet name="footer">
+                            <p:commandButton rendered="#{paymentParametersController.isUserInRole('ADMIN')}" id="createButton" icon="ui-icon-plus"   value="#{configMapController.getKey('Create')}" actionListener="#{paymentParametersController.prepareCreate}" update=":PaymentParametersCreateForm" oncomplete="PF('PaymentParametersCreateDialog').show()"/>
+                            <p:commandButton id="viewButton"   icon="ui-icon-search" value="#{configMapController.getKey('View')}" update=":PaymentParametersViewForm" oncomplete="PF('PaymentParametersViewDialog').show()" disabled="#{empty paymentParametersController.selected}"/>
+                            <p:commandButton rendered="#{paymentParametersController.isUserInRole('ADMIN')}" id="editButton"   icon="ui-icon-pencil" value="#{configMapController.getKey('Edit')}" update=":PaymentParametersEditForm" oncomplete="PF('PaymentParametersEditDialog').show()" disabled="#{empty paymentParametersController.selected}"/>
+                            <p:commandButton rendered="#{paymentParametersController.isUserInRole('ADMIN')}" id="deleteButton" icon="ui-icon-trash"  value="#{configMapController.getKey('Delete')}" actionListener="#{paymentParametersController.destroy}" update=":growl,datalist" disabled="#{empty paymentParametersController.selected}"/>
+                        </f:facet>
+
+                    </p:dataTable>
+                </h:panelGroup>
+            </h:form>
+
+            <ui:include src="Create.xhtml"/>
+            <ui:include src="Edit.xhtml"/>
+            <ui:include src="View.xhtml"/>
+
+        </ui:define>
+    </ui:composition>
+
+</html>

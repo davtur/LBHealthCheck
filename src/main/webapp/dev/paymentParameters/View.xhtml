@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" 
+      xmlns:ui="http://java.sun.com/jsf/facelets" >
+
+    <ui:composition>
+
+        <p:dialog id="PaymentParametersViewDlg" widgetVar="PaymentParametersViewDialog" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('ViewPaymentParametersTitle')}">
+            <h:form id="PaymentParametersViewForm">
+                <h:panelGroup id="display">
+                    <p:panelGrid columns="2" rendered="#{paymentParametersController.selected != null}">
+                        <h:outputText value="#{configMapController.getKey('ViewPaymentParametersLabel_id')}"/>
+                        <h:outputText value="#{paymentParametersController.selected.id}" title="#{configMapController.getKey('ViewPaymentParametersTitle_id')}"/>
+                        <h:outputText value="#{configMapController.getKey('ViewPaymentParametersLabel_contractStartDate')}"/>
+                        <h:outputText value="#{paymentParametersController.selected.contractStartDate}" title="#{configMapController.getKey('ViewPaymentParametersTitle_contractStartDate')}">
+                            <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                        </h:outputText>
+                        <h:outputText value="#{configMapController.getKey('ViewPaymentParametersLabel_mobilePhoneNumber')}"/>
+                        <h:outputText value="#{paymentParametersController.selected.mobilePhoneNumber}" title="#{configMapController.getKey('ViewPaymentParametersTitle_mobilePhoneNumber')}"/>
+                        <h:outputText value="#{configMapController.getKey('ViewPaymentParametersLabel_smsPaymentReminder')}"/>
+                        <h:outputText value="#{paymentParametersController.selected.smsPaymentReminder}" title="#{configMapController.getKey('ViewPaymentParametersTitle_smsPaymentReminder')}"/>
+                        <h:outputText value="#{configMapController.getKey('ViewPaymentParametersLabel_smsFailedNotification')}"/>
+                        <h:outputText value="#{paymentParametersController.selected.smsFailedNotification}" title="#{configMapController.getKey('ViewPaymentParametersTitle_smsFailedNotification')}"/>
+                        <h:outputText value="#{configMapController.getKey('ViewPaymentParametersLabel_smsExpiredCard')}"/>
+                        <h:outputText value="#{paymentParametersController.selected.smsExpiredCard}" title="#{configMapController.getKey('ViewPaymentParametersTitle_smsExpiredCard')}"/>
+                        <h:outputText value="#{configMapController.getKey('ViewPaymentParametersLabel_paymentGatewayName')}"/>
+                        <h:outputText value="#{paymentParametersController.selected.paymentGatewayName}" title="#{configMapController.getKey('ViewPaymentParametersTitle_paymentGatewayName')}"/>
+                        <h:outputText value="#{configMapController.getKey('ViewPaymentParametersLabel_loggedInUser')}"/>
+                        <h:outputText value="#{paymentParametersController.selected.loggedInUser}" title="#{configMapController.getKey('ViewPaymentParametersTitle_loggedInUser')}"/>
+                    </p:panelGrid>
+                    <p:commandButton value="#{configMapController.getKey('Close')}" onclick="PaymentParametersViewDialog.hide()"/>
+                </h:panelGroup>
+            </h:form>
+        </p:dialog>
+
+    </ui:composition>
+</html>

@@ -85,6 +85,9 @@
                             <f:selectItems value="#{preferedContactController.itemsAvailableSelectOne}"/>
                             <p:ajax   update=":formCustomersEdit1:panelCustomersEdit1"  />
                         </p:selectOneMenu>
+                        <p:selectBooleanCheckbox value="#{customersController.paymentParametersSmsExpiredCard}"  label="Sms Expired Card" />
+                            
+                   
                     </h:panelGrid>
                 </p:panel>
                 <p:commandButton   ajax="false"    action="#{customersController.update}" value="#{configMapController.getKey('EditCustomersSaveLink')}"/>

@@ -180,6 +180,13 @@
                             <p:password id="password1"  value="#{customersController.checkPass}" onfocus="this.select()" feedback="true" title="#{configMapController.getKey('EditCustomersTitle_password')}">
                                 <p:ajax listener="#{customersController.checkPassChange}" event="keyup" />
                             </p:password>
+                            <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_SmsExpiredCard')}" for="checkbox1" />
+                            <p:selectBooleanCheckbox id="checkbox1" value="#{customersController.paymentParametersSmsExpiredCard}"  label="Sms Expired Card" />
+                           <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_SmsPaymentReminder')}" for="checkbox2" />
+                           <p:selectBooleanCheckbox id="checkbox2" value="#{customersController.paymentParametersSmsPaymentReminder}"  label="Sms Payment Reminder" />
+                           <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_SmsFailedNotification')}" for="checkbox3" />
+                           <p:selectBooleanCheckbox id="checkbox3" value="#{customersController.paymentParametersSmsFailedNotification}"  label="Sms Failed Notification" />
+
                             <p:commandButton  id="passButton" ajax="true" actionListener="#{customersController.updatepass}" update=":growl"   value="#{configMapController.getKey('EditCustomersUpdatePassword')}" immediate="true"/>
                             <p:panel>
                                 <p:commandButton id="dialogueSave1"  actionListener="#{customersController.createDialogue}" value="#{configMapController.getKey('CreateCustomersSaveLink')}" update=":tv:customerslistForm1:customersTableList :growl"/>                
@@ -220,8 +227,8 @@
 
                             <p:commandButton id="showAddPaymentButton" rendered="#{ezidebit.waitingForPaymentDetails == false}" oncomplete="PF('createPaymentDialogueWidget').show();"    value="#{configMapController.getKey('AddPaymentButtonLink')}"  update=":growl " /> 
                             <p:commandButton id="showAddPaymentScheduleButton" rendered="#{ezidebit.waitingForPaymentDetails == false}" oncomplete="PF('createPaymentScheduleDialogueWidget').show();"    value="#{configMapController.getKey('AddPaymentScheduleButtonLink')}" update=":growl "  /> 
-                             <p:commandButton id="editPaymentMethodButton" rendered="#{ezidebit.customerExistsInPaymentGateway == true and ezidebit.customerDetailsHaveBeenRetrieved == true}"  oncomplete="PF('editPaymentMethodDialogueWidget').show();"    value="#{configMapController.getKey('editPaymentMethodButtonLink')}" update=":growl :iFrameForm"  /> 
-                          
+                            <p:commandButton id="editPaymentMethodButton" rendered="#{ezidebit.customerExistsInPaymentGateway == true and ezidebit.customerDetailsHaveBeenRetrieved == true}"  oncomplete="PF('editPaymentMethodDialogueWidget').show();"    value="#{configMapController.getKey('editPaymentMethodButtonLink')}" update=":growl :iFrameForm"  /> 
+
                             <h:outputText rendered="#{ezidebit.waitingForPaymentDetails}" value="WAITING FOR BANK DETAILS - "/>
                             <h:outputText rendered="#{!ezidebit.asyncOperationRunning}" value="Idle"/>
                             <h:outputText rendered="#{ezidebit.asyncOperationRunning}" value="Busy"/>
@@ -350,24 +357,24 @@
                                 <p:commandButton  id="paymentsButton" ajax="true"   actionListener="#{ezidebit.createCustomerRecord}" update=":growl :tv:paymentsForm "   value="#{configMapController.getKey('EditCustomersUpdatePayment')}" />
                                 <p:outputLabel value="#{configMapController.getKey('EditCustomersAddToPaymentGatewayLabel')}" for="paymentsButton" />
                             </p:panelGrid>
-                            
+
                         </p:outputPanel>
 
 
                         <p:remoteCommand name="taskCompleted" actionListener="#{ezidebit.pollerListener}" />
                     </h:form>  
-                   <!-- <h:form id="iFrameForm" > 
-                        <p:outputPanel id="iFramePanel" >
-                            <p:panelGrid id="dialoguePaymenstGrid2" columns="2" rendered="#{ezidebit.customerExistsInPaymentGateway == true and ezidebit.customerDetailsHaveBeenRetrieved == true}"  >
-                                <p:panel id="viewPaymentsGrid" header="View Payment Method for Customer #{customersController.selected.firstname} #{customersController.selected.lastname}" >
-                                    <iframe id="ezidebitIframeView"  style="width:400px;height:400px" src="#{ezidebit.getEziDebitWidgetUrl(false)}" />
-                                </p:panel>
-                                <p:panel id="editPaymentsGrid" header="Edit The Payment Method for Customer #{customersController.selected.firstname} #{customersController.selected.lastname}">
-                                    <iframe id="ezidebitIframeEdit"  style="width:400px;height:400px" src="#{ezidebit.getEziDebitWidgetUrl(true)}" />
-                                </p:panel>
-                            </p:panelGrid>
-                        </p:outputPanel>
-                    </h:form>    -->
+                    <!-- <h:form id="iFrameForm" > 
+                         <p:outputPanel id="iFramePanel" >
+                             <p:panelGrid id="dialoguePaymenstGrid2" columns="2" rendered="#{ezidebit.customerExistsInPaymentGateway == true and ezidebit.customerDetailsHaveBeenRetrieved == true}"  >
+                                 <p:panel id="viewPaymentsGrid" header="View Payment Method for Customer #{customersController.selected.firstname} #{customersController.selected.lastname}" >
+                                     <iframe id="ezidebitIframeView"  style="width:400px;height:400px" src="#{ezidebit.getEziDebitWidgetUrl(false)}" />
+                                 </p:panel>
+                                 <p:panel id="editPaymentsGrid" header="Edit The Payment Method for Customer #{customersController.selected.firstname} #{customersController.selected.lastname}">
+                                     <iframe id="ezidebitIframeEdit"  style="width:400px;height:400px" src="#{ezidebit.getEziDebitWidgetUrl(true)}" />
+                                 </p:panel>
+                             </p:panelGrid>
+                         </p:outputPanel>
+                     </h:form>    -->
                 </p:tab>
 
 

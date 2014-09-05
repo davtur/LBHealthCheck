@@ -10,6 +10,7 @@ import au.com.manlyit.fitnesscrm.stats.classes.util.PfSelectableDataModel;
 import au.com.manlyit.fitnesscrm.stats.db.CustomerState;
 import au.com.manlyit.fitnesscrm.stats.db.Groups;
 import au.com.manlyit.fitnesscrm.stats.db.Notes;
+import au.com.manlyit.fitnesscrm.stats.db.PaymentParameters;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -49,7 +50,7 @@ public class CustomersController implements Serializable {
     private Customers selectedForDeletion;
     private CustomerState selectedState;
     private Notes selectedNoteForDeletion;
-
+    private static final String paymentGateway = "EZIDEBIT";
     private CustomerState[] selectedCustomerStates;
     private List<CustomerState> customerStateList;
     private PfSelectableDataModel<Customers> items = null;
@@ -64,6 +65,8 @@ public class CustomersController implements Serializable {
     private au.com.manlyit.fitnesscrm.stats.beans.CustomerStateFacade ejbCustomerStateFacade;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.NotesFacade ejbNotesFacade;
+    @Inject
+    private au.com.manlyit.fitnesscrm.stats.beans.PaymentParametersFacade ejbPaymentParametersFacade;
     @Inject
     private ConfigMapFacade configMapFacade;
     private DatatableSelectionHelper pagination;
@@ -249,6 +252,87 @@ public class CustomersController implements Serializable {
         this.filteredItems = filteredItems;
     }
 
+    private void createDefaultPaymentParameters(String paymentGatewayName) {
+        Collection<PaymentParameters> pay = current.getPaymentParametersCollection();
+        PaymentParameters payParams;
+        try {
+            if (pay.isEmpty() && paymentGatewayName.toUpperCase().contains(paymentGateway)) {
+                payParams = new PaymentParameters(0, new Date(), current.getTelephone(), "NO", "NO", "NO", paymentGateway);
+                //Customers loggedInUser = customersFacade.findCustomerByUsername(FacesContext.getCurrentInstance().getExternalContext().getRemoteUser());
+                payParams.setLoggedInUser(current);
+
+                current.getPaymentParametersCollection().add(payParams);
+                ejbFacade.editAndFlush(current);
+            }
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "createDefaultPaymentParameters Method in Customers Controller", e);
+        }
+    }
+
+    private PaymentParameters getSelectedCustomersPaymentParameters() {
+        PaymentParameters pp = null;
+        Collection<PaymentParameters> ppl = current.getPaymentParametersCollection();
+        if (ppl == null || ppl.isEmpty()) {
+            createDefaultPaymentParameters(paymentGateway);
+        }
+        ppl = current.getPaymentParametersCollection();
+        int s = ppl.size();
+        for (PaymentParameters payParams : ppl) {
+            if (payParams.getPaymentGatewayName().compareTo(paymentGateway) == 0) {
+                pp = payParams;
+            }
+        }
+        if (s > 1) {
+            logger.log(Level.WARNING, " Customer {0} has {1} Payment parameters Objects. Should only be one as only Ezidebit has been implemented", new Object[]{current.getUsername(), s});
+        }
+        if (pp == null) {
+            logger.log(Level.SEVERE, " Customer {0} has NULL Payment parameters.", new Object[]{current.getUsername()});
+        }
+        return pp;
+    }
+
+    public boolean getPaymentParametersSmsPaymentReminder() {
+        return !getSelectedCustomersPaymentParameters().getSmsPaymentReminder().toUpperCase().contains("NO");
+    }
+
+    public boolean getPaymentParametersSmsExpiredCard() {
+        return !getSelectedCustomersPaymentParameters().getSmsExpiredCard().toUpperCase().contains("NO");
+    }
+
+    public boolean getPaymentParametersSmsFailedNotification() {
+        return !getSelectedCustomersPaymentParameters().getSmsFailedNotification().toUpperCase().contains("NO");
+    }
+
+    public void setPaymentParametersSmsPaymentReminder(boolean param) {
+        String converted = "NO";
+        if (param) {
+            converted = "YES";
+        }
+        PaymentParameters pp = getSelectedCustomersPaymentParameters();
+        pp.setSmsPaymentReminder(converted);
+         ejbPaymentParametersFacade.edit(pp);
+    }
+
+    public void setPaymentParametersSmsExpiredCard(boolean param) {
+        String converted = "NO";
+        if (param) {
+            converted = "YES";
+        }
+        PaymentParameters pp = getSelectedCustomersPaymentParameters();
+        pp.setSmsExpiredCard(converted);
+        ejbPaymentParametersFacade.edit(pp);
+    }
+
+    public void setPaymentParametersSmsFailedNotification(boolean param) {
+        String converted = "NO";
+        if (param) {
+            converted = "YES";
+        }
+        PaymentParameters pp = getSelectedCustomersPaymentParameters();
+        pp.setSmsFailedNotification(converted);
+         ejbPaymentParametersFacade.edit(pp);
+    }
+
     /**
      * @return the multiSelected
      */
@@ -345,6 +429,7 @@ public class CustomersController implements Serializable {
                 Groups grp = new Groups(0, "USER");
                 grp.setUsername(c);
                 ejbGroupsFacade.create(grp);
+                createDefaultPaymentParameters(paymentGateway);
                 recreateModel();
                 JsfUtil.addSuccessMessage(configMapFacade.getConfig("CustomersCreated"));
                 return prepareCreate();
@@ -382,6 +467,7 @@ public class CustomersController implements Serializable {
                 Groups grp = new Groups(0, "USER");
                 grp.setUsername(c);
                 ejbGroupsFacade.create(grp);
+                createDefaultPaymentParameters(paymentGateway);
                 recreateAllAffectedPageModels();
                 setSelected(c);
 
