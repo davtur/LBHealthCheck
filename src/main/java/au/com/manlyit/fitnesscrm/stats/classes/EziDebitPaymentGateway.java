@@ -698,6 +698,16 @@ public class EziDebitPaymentGateway implements Serializable {
         return customerExistsInPaymentGateway;
     }
 
+    public boolean isShowAddToPaymentGatewayButton() {
+        if(customerDetailsHaveBeenRetrieved){
+            if(customerCancelledInPaymentGateway || customerExistsInPaymentGateway == false){
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
     private Customers getSelectedCustomer() {
         FacesContext context = FacesContext.getCurrentInstance();
         CustomersController controller = (CustomersController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "customersController");
@@ -1472,19 +1482,27 @@ public class EziDebitPaymentGateway implements Serializable {
                     JsfUtil.pushSuccessMessage(CHANNEL + sessionId, "Important!", "You must enter customer banking details before payments can be set up.");
                 } else {
                     logger.log(Level.WARNING, message);
+                    setWaitingForPaymentDetails(false);
                     JsfUtil.pushErrorMessage(CHANNEL + sessionId, message, "");
                 }
+                if (eziStatusCode.toUpperCase().contains("CANCELLED")) {
+                    message = "The Customer is in a Cancelled status in the payment gateway";
+                    logger.log(Level.INFO, message);
+                    JsfUtil.pushSuccessMessage(CHANNEL + sessionId, "Important!", message);
+                    setCustomerCancelledInPaymentGateway(true);
+                } else {
+                    setCustomerCancelledInPaymentGateway(false);
+                }
             } else {
+                //status codes match
                 setWaitingForPaymentDetails(false);
+                if (eziStatusCode.toUpperCase().contains("CANCELLED")) {
+                     setCustomerCancelledInPaymentGateway(true);
+                }else{
+                    setCustomerCancelledInPaymentGateway(false);
+                }
             }
-            if (eziStatusCode.toUpperCase().contains("CANCELLED")) {
-                message = "The Customer is in a Cancelled status in the payment gateway";
-                logger.log(Level.INFO, message);
-                JsfUtil.pushSuccessMessage(CHANNEL + sessionId, "Important!", message);
-                setCustomerCancelledInPaymentGateway(true);
-            } else {
-                setCustomerCancelledInPaymentGateway(false);
-            }
+
         } else {
             customerExistsInPaymentGateway = false;
         }

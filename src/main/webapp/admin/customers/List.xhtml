@@ -222,12 +222,12 @@
 
                         </p:panel>
 
-                        <p:outputPanel id="mainPanel" rendered="#{ezidebit.asyncOperationRunning == false and ezidebit.customerDetailsHaveBeenRetrieved == true  and ezidebit.customerExistsInPaymentGateway == true}" >
-                            <p:commandButton id="reloadPageButton" value="Reload Page" actionListener="#{ezidebit.refreshPaymentsPage}" rendered="#{ezidebit.customerExistsInPaymentGateway}" update=":tv:paymentsForm  :growl" />
-
-                            <p:commandButton id="showAddPaymentButton" rendered="#{ezidebit.waitingForPaymentDetails == false}" oncomplete="PF('createPaymentDialogueWidget').show();"    value="#{configMapController.getKey('AddPaymentButtonLink')}"  update=":growl " /> 
-                            <p:commandButton id="showAddPaymentScheduleButton" rendered="#{ezidebit.waitingForPaymentDetails == false}" oncomplete="PF('createPaymentScheduleDialogueWidget').show();"    value="#{configMapController.getKey('AddPaymentScheduleButtonLink')}" update=":growl "  /> 
-                            <p:commandButton id="editPaymentMethodButton" rendered="#{ezidebit.customerExistsInPaymentGateway == true and ezidebit.customerDetailsHaveBeenRetrieved == true}"  oncomplete="PF('editPaymentMethodDialogueWidget').show();"    value="#{configMapController.getKey('editPaymentMethodButtonLink')}" update=":growl :iFrameForm"  /> 
+                        <p:outputPanel id="mainPanel" rendered="#{ezidebit.asyncOperationRunning == false and ezidebit.customerDetailsHaveBeenRetrieved == true  }" >
+                            <p:commandButton id="reloadPageButton" value="Reload Page" actionListener="#{ezidebit.refreshPaymentsPage}" rendered="#{ezidebit.customerExistsInPaymentGateway }" update=":tv:paymentsForm  :growl" />
+                            <p:commandButton id="paymentsButton" rendered="#{ezidebit.showAddToPaymentGatewayButton}"    actionListener="#{ezidebit.createCustomerRecord}" update=":growl :tv:paymentsForm "   value="#{configMapController.getKey('EditCustomersUpdatePayment')}" />
+                            <p:commandButton id="showAddPaymentButton" rendered="#{ezidebit.waitingForPaymentDetails == false and ezidebit.customerCancelledInPaymentGateway == false and ezidebit.customerExistsInPaymentGateway == true}" oncomplete="PF('createPaymentDialogueWidget').show();"    value="#{configMapController.getKey('AddPaymentButtonLink')}"  update=":growl " /> 
+                            <p:commandButton id="showAddPaymentScheduleButton" rendered="#{ezidebit.waitingForPaymentDetails == false and ezidebit.customerCancelledInPaymentGateway == false and ezidebit.customerExistsInPaymentGateway == true}" oncomplete="PF('createPaymentScheduleDialogueWidget').show();"    value="#{configMapController.getKey('AddPaymentScheduleButtonLink')}" update=":growl "  /> 
+                            <p:commandButton id="editPaymentMethodButton" rendered="#{ezidebit.customerExistsInPaymentGateway == true and ezidebit.customerDetailsHaveBeenRetrieved == true and ezidebit.customerCancelledInPaymentGateway ==false}"  oncomplete="PF('editPaymentMethodDialogueWidget').show();"    value="#{configMapController.getKey('editPaymentMethodButtonLink')}" update=":growl :iFrameForm"  /> 
 
                             <h:outputText rendered="#{ezidebit.waitingForPaymentDetails}" value="WAITING FOR BANK DETAILS - "/>
                             <h:outputText rendered="#{!ezidebit.asyncOperationRunning}" value="Idle"/>
@@ -352,13 +352,7 @@
 
                             </p:panelGrid>
                         </p:panel>
-                        <p:outputPanel id="iFrameHeaderPanel" >
-                            <p:panelGrid id="dialoguePaymenstGrid1" columns="2" rendered="#{ezidebit.customerExistsInPaymentGateway == false and ezidebit.customerDetailsHaveBeenRetrieved == true}" >
-                                <p:commandButton  id="paymentsButton" ajax="true"   actionListener="#{ezidebit.createCustomerRecord}" update=":growl :tv:paymentsForm "   value="#{configMapController.getKey('EditCustomersUpdatePayment')}" />
-                                <p:outputLabel value="#{configMapController.getKey('EditCustomersAddToPaymentGatewayLabel')}" for="paymentsButton" />
-                            </p:panelGrid>
-
-                        </p:outputPanel>
+                       
 
 
                         <p:remoteCommand name="taskCompleted" actionListener="#{ezidebit.pollerListener}" />
