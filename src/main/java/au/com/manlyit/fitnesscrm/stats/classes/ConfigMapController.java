@@ -205,7 +205,7 @@ public class ConfigMapController implements Serializable {
                         Exception e1 = ejbe.getCausedByException();
                         Exception e = (Exception) e1.getCause();
                         String mess = e.getMessage();
-                        if (mess.indexOf("Duplicate entry") != -1) {
+                        if (mess.contains("Duplicate entry")) {
                             count--;
                             duplicateLines += line + "\r\n";
                         } else {
