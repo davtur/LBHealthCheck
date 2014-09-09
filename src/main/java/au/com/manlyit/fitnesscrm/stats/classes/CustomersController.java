@@ -119,10 +119,9 @@ public class CustomersController implements Serializable {
         inRole = FacesContext.getCurrentInstance().getExternalContext().isUserInRole(roleName);
         return inRole;
     }
-    
-    
-      public  boolean isCustomerInRole(Customers cust,String roleName) {
-       return ejbGroupsFacade.isCustomerInGroup(cust, roleName);
+
+    public boolean isCustomerInRole(Customers cust, String roleName) {
+        return ejbGroupsFacade.isCustomerInGroup(cust, roleName);
     }
 
     public void setSelectedCustomer(ActionEvent event) {
@@ -260,18 +259,25 @@ public class CustomersController implements Serializable {
     private void createDefaultPaymentParameters(String paymentGatewayName) {
         Collection<PaymentParameters> pay = current.getPaymentParametersCollection();
         PaymentParameters payParams;
+        if (pay != null) {
+            if (pay.isEmpty()) {
+                pay = null;
+            }
+
+        }
         try {
-            if (pay.isEmpty() && paymentGatewayName.toUpperCase().contains(paymentGateway)) {
+            if (pay == null && paymentGatewayName.toUpperCase().contains(paymentGateway)) {
                 payParams = new PaymentParameters(0, new Date(), current.getTelephone(), "NO", "NO", "NO", paymentGateway);
                 //Customers loggedInUser = customersFacade.findCustomerByUsername(FacesContext.getCurrentInstance().getExternalContext().getRemoteUser());
                 payParams.setLoggedInUser(current);
-
+                ejbPaymentParametersFacade.create(payParams);
                 current.getPaymentParametersCollection().add(payParams);
                 ejbFacade.editAndFlush(current);
             }
         } catch (Exception e) {
             logger.log(Level.SEVERE, "createDefaultPaymentParameters Method in Customers Controller", e);
         }
+
     }
 
     private PaymentParameters getSelectedCustomersPaymentParameters() {
@@ -315,7 +321,7 @@ public class CustomersController implements Serializable {
         }
         PaymentParameters pp = getSelectedCustomersPaymentParameters();
         pp.setSmsPaymentReminder(converted);
-         ejbPaymentParametersFacade.edit(pp);
+        ejbPaymentParametersFacade.edit(pp);
     }
 
     public void setPaymentParametersSmsExpiredCard(boolean param) {
@@ -335,7 +341,7 @@ public class CustomersController implements Serializable {
         }
         PaymentParameters pp = getSelectedCustomersPaymentParameters();
         pp.setSmsFailedNotification(converted);
-         ejbPaymentParametersFacade.edit(pp);
+        ejbPaymentParametersFacade.edit(pp);
     }
 
     /**
@@ -434,7 +440,7 @@ public class CustomersController implements Serializable {
                 Groups grp = new Groups(0, "USER");
                 grp.setUsername(c);
                 ejbGroupsFacade.create(grp);
-                createDefaultPaymentParameters(paymentGateway);
+                //createDefaultPaymentParameters(paymentGateway);
                 recreateModel();
                 JsfUtil.addSuccessMessage(configMapFacade.getConfig("CustomersCreated"));
                 return prepareCreate();
@@ -472,10 +478,10 @@ public class CustomersController implements Serializable {
                 Groups grp = new Groups(0, "USER");
                 grp.setUsername(c);
                 ejbGroupsFacade.create(grp);
-                createDefaultPaymentParameters(paymentGateway);
+               // createDefaultPaymentParameters(paymentGateway);
                 recreateAllAffectedPageModels();
                 setSelected(c);
-
+ 
                 JsfUtil.addSuccessMessage(configMapFacade.getConfig("CustomersCreated"));
             } catch (Exception e) {
                 String cause = e.getCause().getCause().getMessage();
