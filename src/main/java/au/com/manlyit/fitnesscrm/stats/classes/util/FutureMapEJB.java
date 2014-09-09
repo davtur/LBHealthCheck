@@ -193,7 +193,9 @@ public class FutureMapEJB {
                  }*/
                 int y = 0;
                 String details = "";
-                for (AsyncJob aj : fmap) {
+                AsyncJob aj ;
+                for (int x = fmap.size();x>0;x--) {
+                    aj = fmap.get(x-1);
                     Future ft = aj.getFuture();
                     String key = aj.getJobName();
                     if (ft.isDone()) {
@@ -208,7 +210,7 @@ public class FutureMapEJB {
                     jobStartTime.add(Calendar.SECOND, TIMEOUT_SECONDS);
                     if (jobStartTime.compareTo(currentTime) < 0) {
                         ft.cancel(true);
-                        remove(sessionId,key);
+                        fmap.remove(x-1);
                         logger.log(Level.INFO, "SessionId {0} async job {1} has timed out ({2} seconds )  and been cancelled.", new Object[]{key, sessionId, TIMEOUT_SECONDS});
                     }
 

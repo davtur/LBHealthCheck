@@ -119,6 +119,11 @@ public class CustomersController implements Serializable {
         inRole = FacesContext.getCurrentInstance().getExternalContext().isUserInRole(roleName);
         return inRole;
     }
+    
+    
+      public  boolean isCustomerInRole(Customers cust,String roleName) {
+       return ejbGroupsFacade.isCustomerInGroup(cust, roleName);
+    }
 
     public void setSelectedCustomer(ActionEvent event) {
         if (multiSelected.length == 1) {

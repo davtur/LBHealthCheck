@@ -50,12 +50,13 @@ public class PaymentBean implements Serializable {
 
     private static final Logger logger = Logger.getLogger(PaymentBean.class.getName());
     private static final String paymentGateway = "EZIDEBIT";
-    
+
     @Inject
     private CustomersFacade customersFacade;
-    @Inject ConfigMapFacade configMapFacade;
-    
-    private INonPCIService getWs(){
+    @Inject
+    ConfigMapFacade configMapFacade;
+
+    private INonPCIService getWs() {
         URL url = null;
         WebServiceException e = null;
         try {
@@ -66,8 +67,7 @@ public class PaymentBean implements Serializable {
         return new NonPCIService(url).getBasicHttpBindingINonPCIService();
     }
 
-
-      @Asynchronous
+    @Asynchronous
     public Future<CustomerDetails> getCustomerDetails(Customers cust, String digitalKey) {
 
         CustomerDetails cd = null;
@@ -79,7 +79,7 @@ public class PaymentBean implements Serializable {
         }
 
         logger.log(Level.INFO, "Running async task - Getting Customer Details {0}", cust.getUsername());
-        
+
         EziResponseOfCustomerDetailsTHgMB7OL customerdetails = getWs().getCustomerDetails(digitalKey, "", cust.getId().toString());
         if (customerdetails.getError() == 0) {// any errors will be a non zero value
             logger.log(Level.INFO, "Get Customer Details Response: Name - {0}", customerdetails.getData().getValue().getCustomerName().getValue());
@@ -105,7 +105,7 @@ public class PaymentBean implements Serializable {
             return new AsyncResult<>(cd);
         }
         logger.log(Level.INFO, "Getting Customer (EziId) Details {0}", eziDebitId);
-        
+
         EziResponseOfCustomerDetailsTHgMB7OL customerdetails = getWs().getCustomerDetails(digitalKey, eziDebitId, "");
         if (customerdetails.getError() == 0) {// any errors will be a non zero value
             logger.log(Level.INFO, "Get Customer (EziId) Details Response: Name - {0}", customerdetails.getData().getValue().getCustomerName().getValue());
@@ -117,61 +117,60 @@ public class PaymentBean implements Serializable {
         }
         return new AsyncResult<>(cd);
     }
+
+    /*  
+     pci compliant version only
     
-  /*  
-    pci compliant version only
-    
-    @Asynchronous
-    public Future<CustomerDetails> getCustomerAccountDetails(Customers cust, String digitalKey) {
+     @Asynchronous
+     public Future<CustomerDetails> getCustomerAccountDetails(Customers cust, String digitalKey) {
 
-        CustomerDetails cd = null;
-        if (cust == null || digitalKey == null) {
-            return new AsyncResult<>(cd);
-        }
-        if (cust.getId() == null || digitalKey.trim().isEmpty()) {
-            return new AsyncResult<>(cd);
-        }
+     CustomerDetails cd = null;
+     if (cust == null || digitalKey == null) {
+     return new AsyncResult<>(cd);
+     }
+     if (cust.getId() == null || digitalKey.trim().isEmpty()) {
+     return new AsyncResult<>(cd);
+     }
 
-        logger.log(Level.INFO, "Running async task - Getting Customer Account Details {0}", cust.getUsername());
+     logger.log(Level.INFO, "Running async task - Getting Customer Account Details {0}", cust.getUsername());
         
-        EziResponseOfCustomerAccountDetails customerdetails = getWs().getCustomerAccountDetails(digitalKey, "", cust.getId().toString());
-        if (customerdetails.getError() == 0) {// any errors will be a non zero value
-            logger.log(Level.INFO, "Get Customer Account Details Response: Name - {0}", customerdetails.getData().getValue().getCustomerName().getValue());
+     EziResponseOfCustomerAccountDetails customerdetails = getWs().getCustomerAccountDetails(digitalKey, "", cust.getId().toString());
+     if (customerdetails.getError() == 0) {// any errors will be a non zero value
+     logger.log(Level.INFO, "Get Customer Account Details Response: Name - {0}", customerdetails.getData().getValue().getCustomerName().getValue());
 
-            cd = customerdetails.getData().getValue();
+     cd = customerdetails.getData().getValue();
 
-        } else {
-            logger.log(Level.WARNING, "Get Customer Account Details Response: Error - {0}", customerdetails.getErrorMessage().getValue());
+     } else {
+     logger.log(Level.WARNING, "Get Customer Account Details Response: Error - {0}", customerdetails.getErrorMessage().getValue());
 
-        }
-        return new AsyncResult<>(cd);
+     }
+     return new AsyncResult<>(cd);
 
-    }
+     }
 
-    @Asynchronous
-    public Future<CustomerDetails> getCustomerAccountDetailsFromEziDebitId(String eziDebitId, String digitalKey) {
+     @Asynchronous
+     public Future<CustomerDetails> getCustomerAccountDetailsFromEziDebitId(String eziDebitId, String digitalKey) {
 
-        CustomerDetails cd = null;
-        if (eziDebitId == null || digitalKey == null) {
-            return new AsyncResult<>(cd);
-        }
-        if (eziDebitId.trim().isEmpty() || digitalKey.trim().isEmpty()) {
-            return new AsyncResult<>(cd);
-        }
-        logger.log(Level.INFO, "Getting Customer (EziId) Account Details {0}", eziDebitId);
+     CustomerDetails cd = null;
+     if (eziDebitId == null || digitalKey == null) {
+     return new AsyncResult<>(cd);
+     }
+     if (eziDebitId.trim().isEmpty() || digitalKey.trim().isEmpty()) {
+     return new AsyncResult<>(cd);
+     }
+     logger.log(Level.INFO, "Getting Customer (EziId) Account Details {0}", eziDebitId);
         
-        EziResponseOfCustomerDetailsTHgMB7OL customerdetails = getWs().getCustomerAccountDetails(digitalKey, eziDebitId, "");
-        if (customerdetails.getError() == 0) {// any errors will be a non zero value
-            logger.log(Level.INFO, "Get Customer (EziId) Account Details Response: Name - {0}", customerdetails.getData().getValue().getCustomerName().getValue());
+     EziResponseOfCustomerDetailsTHgMB7OL customerdetails = getWs().getCustomerAccountDetails(digitalKey, eziDebitId, "");
+     if (customerdetails.getError() == 0) {// any errors will be a non zero value
+     logger.log(Level.INFO, "Get Customer (EziId) Account Details Response: Name - {0}", customerdetails.getData().getValue().getCustomerName().getValue());
 
-            cd = customerdetails.getData().getValue();
+     cd = customerdetails.getData().getValue();
 
-        } else {
-            logger.log(Level.WARNING, "Get Customer (EziId) Account Details Response: Error - {0}", customerdetails.getErrorMessage().getValue());
-        }
-        return new AsyncResult<>(cd);
-    }*/
-
+     } else {
+     logger.log(Level.WARNING, "Get Customer (EziId) Account Details Response: Error - {0}", customerdetails.getErrorMessage().getValue());
+     }
+     return new AsyncResult<>(cd);
+     }*/
     @Asynchronous
     public Future<Boolean> editCustomerDetails(Customers cust, String eziDebitRef, String digitalKey) {
         String ourSystemRef = "";
@@ -182,12 +181,12 @@ public class PaymentBean implements Serializable {
         }
         boolean result = false;
         logger.log(Level.INFO, "Editing Customer  {0}", cust.getUsername());
-        
+
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         Collection<PaymentParameters> pay = cust.getPaymentParametersCollection();
         PaymentParameters payParams = null;
         String addresssLine2 = ""; // not used
-        String humanFriendlyReference = cust.getId() +" "+cust.getLastname().toUpperCase() + " " + cust.getFirstname().toUpperCase(); // existing customers use this type of reference by default
+        String humanFriendlyReference = cust.getId() + " " + cust.getLastname().toUpperCase() + " " + cust.getFirstname().toUpperCase(); // existing customers use this type of reference by default
 
         if (pay != null) {
             for (PaymentParameters pp : pay) {
@@ -234,7 +233,7 @@ public class PaymentBean implements Serializable {
         String eziDebitCustomerId = ""; // use our reference instead. THis must be an empty string.
 
         String ourSystemCustomerReference = cust.getId().toString();
-        
+
         String keepManualPaymentsString = "NO";// update all specified payments for customer 
         if (keepManualPayments) {
             keepManualPaymentsString = "YES";// maintain any one off or ad-hoc payment amounts
@@ -278,7 +277,6 @@ public class PaymentBean implements Serializable {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         String debitDateString = sdf.format(debitDate);
         String ourSystemCustomerReference = cust.getId().toString();
-        
 
         if ((paymentReference != null && paymentReference.trim().isEmpty() == false) && paymentAmountInCents.compareTo(new Long(0)) > 0) {
             paymentAmountInCents = new Long(0);
@@ -318,7 +316,7 @@ public class PaymentBean implements Serializable {
         boolean result = false;
         String eziDebitCustomerId = ""; // use our reference instead. THis must be an empty string.
         String ourSystemCustomerReference = cust.getId().toString();
-        
+
         if (newStatus.compareTo("A") == 0 || newStatus.compareTo("H") == 0 || newStatus.compareTo("C") == 0) {
             if (loggedInUser.length() > 50) {
                 loggedInUser = loggedInUser.substring(0, 50);
@@ -372,8 +370,6 @@ public class PaymentBean implements Serializable {
 
         String ourSystemCustomerReference = cust.getId().toString();
 
-        
-
         EziResponseOfArrayOfScheduledPaymentTHgMB7OL eziResponse = getWs().getScheduledPayments(digitalKey, fromDateString, toDateString, eziDebitCustomerId, ourSystemCustomerReference);
         logger.log(Level.INFO, "getScheduledPayments Response: Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
         if (eziResponse.getError() == 0) {// any errors will be a non zero value
@@ -391,7 +387,7 @@ public class PaymentBean implements Serializable {
     public Future<Boolean> addCustomer(Customers cust, String paymentGatewayName, String digitalKey) {
         boolean result = false;
         logger.log(Level.INFO, "Adding Customer  {0}", cust.getUsername());
-        
+
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         Collection<PaymentParameters> pay = cust.getPaymentParametersCollection();
         if (pay == null) {
@@ -400,7 +396,7 @@ public class PaymentBean implements Serializable {
         }
         PaymentParameters payParams = null;
         String addresssLine2 = ""; // not used
-        String humanFriendlyReference = cust.getLastname().toUpperCase() + " " + cust.getFirstname().toUpperCase(); // existing customers use this type of reference by default
+        String humanFriendlyReference = cust.getId() + " " + cust.getLastname().toUpperCase() + " " + cust.getFirstname().toUpperCase(); // existing customers use this type of reference by default
         if (pay.isEmpty() && paymentGatewayName.toUpperCase().contains(paymentGateway)) {
             payParams = new PaymentParameters(0, new Date(), cust.getTelephone(), "NO", "NO", "NO", paymentGateway);
             //Customers loggedInUser = customersFacade.findCustomerByUsername(FacesContext.getCurrentInstance().getExternalContext().getRemoteUser());
@@ -450,7 +446,6 @@ public class PaymentBean implements Serializable {
         //  scheduled by you. It cannot access information about real-time payments. Other
         //  methods are provided for retrieving real-time payment information.
         PaymentDetail result = null;
-        
 
         if (paymentReference == null) {
 
@@ -502,7 +497,6 @@ public class PaymentBean implements Serializable {
         //  - 'F' (fatal dishonour) - Payment has been dishonoured by the Customer's
         //  financial institution;
         boolean result = false;
-        
 
         if (paymentReference == null) {
 
@@ -542,7 +536,6 @@ public class PaymentBean implements Serializable {
         //  scheduled by you. It cannot access information about real-time payments. Other
         //  methods are provided for retrieving real-time payment information.
         PaymentDetailPlusNextPaymentInfo result = null;
-        
 
         if (paymentReference == null) {
 
@@ -639,8 +632,6 @@ public class PaymentBean implements Serializable {
 
         String ourSystemCustomerReference = cust.getId().toString();
 
-        
-
         EziResponseOfArrayOfPaymentTHgMB7OL eziResponse = getWs().getPayments(digitalKey, paymentType, paymentMethod, paymentSource, paymentReference, fromDateString, toDateString, dateField, eziDebitCustomerId, ourSystemCustomerReference);
         logger.log(Level.INFO, "getPayments Response: Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
         if (eziResponse.getError() == 0) {// any errors will be a non zero value
@@ -663,7 +654,7 @@ public class PaymentBean implements Serializable {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         String debitDateString = sdf.format(debitDate);
         String ourSystemCustomerReference = cust.getId().toString();
-        
+
         if (paymentReference.length() > 50) {
             paymentReference = paymentReference.substring(0, 50);
             logger.log(Level.WARNING, "addPayment paymentReference is greater than the allowed 50 characters. Truncating! to 50 chars");
@@ -689,7 +680,6 @@ public class PaymentBean implements Serializable {
             }
         } else {
             logger.log(Level.WARNING, "addPayment Response: Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
-            
 
         }
 
@@ -765,7 +755,6 @@ public class PaymentBean implements Serializable {
         }
         String schedulePeriodTypeString = "";
         schedulePeriodTypeString = schedulePeriodTypeString + schedulePeriodType;
-        
 
         if (loggedInUser.length() > 50) {
             loggedInUser = loggedInUser.substring(0, 50);
@@ -813,7 +802,6 @@ public class PaymentBean implements Serializable {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         String changeFromDateString = sdf.format(changeFromDate);
         String ourSystemCustomerReference = cust.getId().toString();
-        
 
         if (loggedInUser.length() > 50) {
             loggedInUser = loggedInUser.substring(0, 50);
@@ -860,8 +848,6 @@ public class PaymentBean implements Serializable {
             paymentReference = "";
         }
 
-        
-
         if (loggedInUser.length() > 50) {
             loggedInUser = loggedInUser.substring(0, 50);
             logger.log(Level.WARNING, "changeScheduledDate loggedInUser is greater than the allowed 50 characters. Truncating! to 50 chars");
@@ -889,8 +875,6 @@ public class PaymentBean implements Serializable {
         //  check that the BSB is valid
         boolean result = false;
 
-        
-
         EziResponseOfstring eziResponse = getWs().isBsbValid(digitalKey, bsb);
         logger.log(Level.INFO, "isBsbValid Response: Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
         if (eziResponse.getError() == 0) {// any errors will be a non zero value
@@ -912,8 +896,6 @@ public class PaymentBean implements Serializable {
         //  Description
         //  check that the BSB is valid
         boolean result = false;
-
-        
 
         EziResponseOfstring eziResponse = getWs().isSystemLocked(digitalKey);
         logger.log(Level.INFO, "isSystemLocked Response: Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
@@ -940,7 +922,7 @@ public class PaymentBean implements Serializable {
         //  you expect to, based on the API document that you have.
 
         String result = "ERROR Getting version";
-        
+
         EziResponseOfstring eziResponse = getWs().paymentExchangeVersion();
         logger.log(Level.INFO, "getPaymentExchangeVersion Response: Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
         if (eziResponse.getError() == 0) {// any errors will be a non zero value

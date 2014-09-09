@@ -17,6 +17,10 @@
         <validator-class>au.com.manlyit.fitnesscrm.stats.classes.util.EmailValidator</validator-class>
     </validator>
     <validator>
+        <validator-id>au.com.manlyit.fitnesscrm.stats.classes.util.PhoneNumberValidator</validator-id>
+        <validator-class>au.com.manlyit.fitnesscrm.stats.classes.util.PhoneNumberValidator</validator-class>
+    </validator>
+    <validator>
         <validator-id>au.com.manlyit.fitnesscrm.stats.classes.util.NoSpecialCharStringValidator</validator-id>
         <validator-class>au.com.manlyit.fitnesscrm.stats.classes.util.NoSpecialCharStringValidator</validator-class>
     </validator>
