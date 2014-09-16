@@ -2,7 +2,6 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package au.com.manlyit.fitnesscrm.stats.classes.util;
 
 import java.util.regex.Matcher;
@@ -17,34 +16,47 @@ import javax.faces.validator.ValidatorException;
  *
  * @author dturner
  */
-public class PhoneNumberValidator implements Validator{
+public class PhoneNumberValidator implements Validator {
 
-    public PhoneNumberValidator(){
+    public PhoneNumberValidator() {
 
     }
 
     @Override
-     public void validate(FacesContext facesContext,
+    public void validate(FacesContext facesContext,
             UIComponent uIComponent, Object object) throws ValidatorException {
-
-        String phoneNumber = (String)object;
-        //Set the email pattern string
-        Pattern p = Pattern.compile("\\d{10}");
-
+        boolean numberIsValid = false;
+        String phoneNumber = (String) object;
+        phoneNumber = phoneNumber.replaceAll("[^\\d.]", "");
+        Pattern p;
+        Matcher m;
+        if (phoneNumber.startsWith("0")) {
+            //Set the email pattern string
+            p = Pattern.compile("\\d{10}");
+            m = p.matcher(phoneNumber);
+            boolean matchFound = m.matches();
+             if (matchFound && phoneNumber.charAt(1) != '0') {
+                numberIsValid = true;
+            }
+        } else {
+            p = Pattern.compile("\\d{11}");
+            m = p.matcher(phoneNumber);
+            boolean matchFound = m.matches();
+            if (matchFound && phoneNumber.startsWith("61")) {
+                numberIsValid = true;
+            }
+        }
         //Match the given string with the pattern
-        Matcher m = p.matcher(phoneNumber);
 
         //Check whether match is found
-        boolean matchFound = m.matches();
-
-        if (!matchFound) {
+        if (numberIsValid == false) {
             FacesMessage message = new FacesMessage();
             message.setDetail("Validation Error");
             message.setSummary("The Phone number is not valid");
             message.setSeverity(FacesMessage.SEVERITY_ERROR);
             throw new ValidatorException(message);
         }
-    }
 
+    }
 
 }

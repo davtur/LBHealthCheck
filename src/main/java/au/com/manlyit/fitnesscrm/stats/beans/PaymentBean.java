@@ -33,9 +33,12 @@ import java.util.Properties;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.ejb.AsyncResult;
 import javax.ejb.Asynchronous;
 import javax.ejb.Stateless;
+import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.xml.ws.WebServiceException;
@@ -384,7 +387,57 @@ public class PaymentBean implements Serializable {
     }
 
     @Asynchronous
-    public Future<Boolean> addCustomer(Customers cust, String paymentGatewayName, String digitalKey) {
+    public Future<Boolean> addCustomer(Customers cust, String paymentGatewayName, String digitalKey,String authenticatedUser) {
+
+        
+        if (authenticatedUser == null) {
+
+            logger.log(Level.INFO, "Authenticated User is NULL - Aborting add customer to ezidebit");
+            return new AsyncResult<>(false);
+
+        }
+
+        if (cust == null || digitalKey == null || paymentGatewayName == null) {
+            return new AsyncResult<>(false);
+        }
+        if (cust.getId() == null || digitalKey.trim().isEmpty()) {
+            return new AsyncResult<>(false);
+        }
+        // check if customer already exists in the gateway
+        // if they are in cancelled status modify the old references so a new record can be created as cancelled customers in exidebit can't be reactivated.
+
+        CustomerDetails cd = null;
+        EziResponseOfCustomerDetailsTHgMB7OL customerdetails = getWs().getCustomerDetails(digitalKey, "", cust.getId().toString());
+        if (customerdetails.getError() == 0) {// any errors will be a non zero value
+            logger.log(Level.INFO, "Add customer to payment gateway. Check if they already exist. Get Customer Details Response: Name - {0}", customerdetails.getData().getValue().getCustomerName().getValue());
+
+            cd = customerdetails.getData().getValue();
+
+        } else {
+            logger.log(Level.WARNING, "Add customer to payment gateway. Check if they already exist. Get Customer Details Response: Error - {0}", customerdetails.getErrorMessage().getValue());
+
+        }
+        if (cd != null) {
+            if (cd.getStatusDescription().getValue().toUpperCase().contains("CANCELLED")) {
+                String ourSystemRef = cd.getYourSystemReference().getValue();
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+                ourSystemRef += "-CANCELLED-" + sdf.format(new Date());
+                String ourGeneralReference = cust.getLastname() + " " + cust.getFirstname() ;
+
+                EziResponseOfstring editCustomerDetail = getWs().editCustomerDetails(digitalKey, "",cust.getId().toString() , ourSystemRef, ourGeneralReference, cd.getCustomerName().getValue(),cd.getCustomerFirstName().getValue(), cust.getStreetAddress(), cd.getAddressLine2().getValue(), cust.getSuburb(), cust.getPostcode(), cust.getAddrState(), cust.getEmailAddress(), cust.getTelephone(), cd.getSmsPaymentReminder().getValue(), cd.getSmsFailedNotification().getValue(), cd.getSmsExpiredCard().getValue(), authenticatedUser);
+                logger.log(Level.INFO, "editCustomerDetail Response: Error - {0}, Data - {1}", new Object[]{editCustomerDetail.getErrorMessage().getValue(), editCustomerDetail.getData().getValue()});
+                if (editCustomerDetail.getError() == 0) {// any errors will be a non zero value
+
+                    logger.log(Level.INFO, "Add Customer old cancelled reference edited - Response: Error - {0}, Data - {1}", new Object[]{editCustomerDetail.getErrorMessage().getValue(), editCustomerDetail.getData().getValue()});
+
+                } else {
+                    logger.log(Level.WARNING, "editCustomerDetail Response: Error - {0}, Data - {1}", new Object[]{editCustomerDetail.getErrorMessage().getValue(), editCustomerDetail.getData().getValue()});
+
+                }
+            }
+
+        }
+
         boolean result = false;
         logger.log(Level.INFO, "Adding Customer  {0}", cust.getUsername());
 
@@ -398,6 +451,7 @@ public class PaymentBean implements Serializable {
         String addresssLine2 = ""; // not used
         String humanFriendlyReference = cust.getId() + " " + cust.getLastname().toUpperCase() + " " + cust.getFirstname().toUpperCase(); // existing customers use this type of reference by default
         if (pay.isEmpty() && paymentGatewayName.toUpperCase().contains(paymentGateway)) {
+
             payParams = new PaymentParameters(0, new Date(), cust.getTelephone(), "NO", "NO", "NO", paymentGateway);
             //Customers loggedInUser = customersFacade.findCustomerByUsername(FacesContext.getCurrentInstance().getExternalContext().getRemoteUser());
             payParams.setLoggedInUser(cust);
@@ -423,7 +477,20 @@ public class PaymentBean implements Serializable {
 //New Zealand Customers the mobile
 //phone number must be 10 digits
 //long and begin with '02'
-        EziResponseOfNewCustomerXcXH3LiW addCustomerResponse = getWs().addCustomer(digitalKey, cust.getId().toString(), humanFriendlyReference, cust.getLastname(), cust.getFirstname(), cust.getStreetAddress(), addresssLine2, cust.getSuburb(), cust.getAddrState(), cust.getPostcode(), cust.getEmailAddress(), payParams.getMobilePhoneNumber(), sdf.format(payParams.getContractStartDate()), payParams.getSmsPaymentReminder(), payParams.getSmsFailedNotification(), payParams.getSmsExpiredCard(), payParams.getLoggedInUser().getUsername());
+        String phoneNumber = payParams.getMobilePhoneNumber();
+        if (phoneNumber == null) {
+            phoneNumber = "";
+            logger.log(Level.INFO, "Invalid Phone Number for Customer {0}. Setting it to empty string", cust.getUsername());
+        }
+        Pattern p = Pattern.compile("\\d{10}");
+        Matcher m = p.matcher(phoneNumber);
+        //ezidebit requires an australian mobile phone number that starts with 04
+        if (m.matches() == false || phoneNumber.startsWith("04") == false) {
+            phoneNumber = "";
+            logger.log(Level.INFO, "Invalid Phone Number for Customer {0}. Setting it to empty string", cust.getUsername());
+        }
+
+        EziResponseOfNewCustomerXcXH3LiW addCustomerResponse = getWs().addCustomer(digitalKey, cust.getId().toString(), humanFriendlyReference, cust.getLastname(), cust.getFirstname(), cust.getStreetAddress(), addresssLine2, cust.getSuburb(), cust.getAddrState(), cust.getPostcode(), cust.getEmailAddress(), phoneNumber, sdf.format(payParams.getContractStartDate()), payParams.getSmsPaymentReminder(), payParams.getSmsFailedNotification(), payParams.getSmsExpiredCard(), payParams.getLoggedInUser().getUsername());
 
         if (addCustomerResponse.getError() == 0) {// any errors will be a non zero value
             result = true;

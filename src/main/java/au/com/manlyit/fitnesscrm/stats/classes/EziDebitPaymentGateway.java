@@ -699,15 +699,18 @@ public class EziDebitPaymentGateway implements Serializable {
     }
 
     public boolean isShowAddToPaymentGatewayButton() {
-        if(customerDetailsHaveBeenRetrieved){
-            if(customerCancelledInPaymentGateway || customerExistsInPaymentGateway == false){
+        if (customerDetailsHaveBeenRetrieved) {
+            if (customerCancelledInPaymentGateway || customerExistsInPaymentGateway == false) {
+                if(selectedCustomer.getActive().getCustomerState().contains("ACTIVE")){
+                    
                 return true;
+                }
             }
         }
-        
+
         return false;
     }
-    
+
     private Customers getSelectedCustomer() {
         FacesContext context = FacesContext.getCurrentInstance();
         CustomersController controller = (CustomersController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "customersController");
@@ -846,8 +849,8 @@ public class EziDebitPaymentGateway implements Serializable {
     }
 
     public void createCustomerRecord() {
-
-        startAsynchJob("AddCustomer", paymentBean.addCustomer(getSelectedCustomer(), paymentGateway, getDigitalKey()));
+        String authenticatedUser = FacesContext.getCurrentInstance().getExternalContext().getRemoteUser();
+        startAsynchJob("AddCustomer", paymentBean.addCustomer(getSelectedCustomer(), paymentGateway, getDigitalKey(), authenticatedUser));
         JsfUtil.addSuccessMessage("Processing Add Customer to Payment Gateway Request.", "");
 
     }
@@ -1497,8 +1500,8 @@ public class EziDebitPaymentGateway implements Serializable {
                 //status codes match
                 setWaitingForPaymentDetails(false);
                 if (eziStatusCode.toUpperCase().contains("CANCELLED")) {
-                     setCustomerCancelledInPaymentGateway(true);
-                }else{
+                    setCustomerCancelledInPaymentGateway(true);
+                } else {
                     setCustomerCancelledInPaymentGateway(false);
                 }
             }

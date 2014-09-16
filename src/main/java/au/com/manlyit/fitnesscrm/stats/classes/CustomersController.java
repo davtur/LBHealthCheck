@@ -24,6 +24,8 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.enterprise.context.SessionScoped;
 import javax.faces.component.UIComponent;
 import javax.faces.context.ExternalContext;
@@ -267,7 +269,19 @@ public class CustomersController implements Serializable {
         }
         try {
             if (pay == null && paymentGatewayName.toUpperCase().contains(paymentGateway)) {
-                payParams = new PaymentParameters(0, new Date(), current.getTelephone(), "NO", "NO", "NO", paymentGateway);
+                String phoneNumber = current.getTelephone();
+                if (phoneNumber == null) {
+                    phoneNumber = "0000000000";
+                    logger.log(Level.INFO, "Invalid Phone Number for Customer {0}. Setting it to empty string", current.getUsername());
+                }
+                Pattern p = Pattern.compile("\\d{10}");
+                Matcher m = p.matcher(phoneNumber);
+                //ezidebit requires an australian mobile phone number that starts with 04
+                if (m.matches() == false || phoneNumber.startsWith("04") == false) {
+                    phoneNumber = "0000000000";
+                    logger.log(Level.INFO, "Invalid Phone Number for Customer {0}. Setting it to empty string", current.getUsername());
+                }
+                payParams = new PaymentParameters(0, new Date(), phoneNumber, "NO", "NO", "NO", paymentGateway);
                 //Customers loggedInUser = customersFacade.findCustomerByUsername(FacesContext.getCurrentInstance().getExternalContext().getRemoteUser());
                 payParams.setLoggedInUser(current);
                 ejbPaymentParametersFacade.create(payParams);
@@ -478,10 +492,10 @@ public class CustomersController implements Serializable {
                 Groups grp = new Groups(0, "USER");
                 grp.setUsername(c);
                 ejbGroupsFacade.create(grp);
-               // createDefaultPaymentParameters(paymentGateway);
+                // createDefaultPaymentParameters(paymentGateway);
                 recreateAllAffectedPageModels();
                 setSelected(c);
- 
+
                 JsfUtil.addSuccessMessage(configMapFacade.getConfig("CustomersCreated"));
             } catch (Exception e) {
                 String cause = e.getCause().getCause().getMessage();
@@ -541,26 +555,25 @@ public class CustomersController implements Serializable {
 
     public void changeCustomersState(ActionEvent actionEvent) {
         int count = 0;
-        int cancelledCount = 0;
+        FacesContext context = FacesContext.getCurrentInstance();
+        EziDebitPaymentGateway controller = (EziDebitPaymentGateway) context.getApplication().getELResolver().getValue(context.getELContext(), null, "ezidebit");
+
         for (Customers cust : multiSelected) {
-
-            if (cust.getActive().getCustomerState().contains("CANCELLED")) {
-                cancelledCount++;
-            } else {
-
-                FacesContext context = FacesContext.getCurrentInstance();
-                EziDebitPaymentGateway controller = (EziDebitPaymentGateway) context.getApplication().getELResolver().getValue(context.getELContext(), null, "ezidebit");
+            if (cust.getActive().getCustomerState().contains("CANCELLED") == false) {
+                // CAncelled customers canot be reinstated in the payment gateway they must be added as new
                 controller.changeCustomerStatus(cust, selectedState);
-                cust.setActive(selectedState);
-                getFacade().edit(cust);
-                count++;
-                recreateModel();
+
+            }else{
+                
             }
+            cust.setActive(selectedState);
+            getFacade().edit(cust);
+            count++;
+            recreateModel();
+
         }
         String message = count + " " + configMapFacade.getConfig("CustomersStateChanged") + " " + selectedState.getCustomerState() + ".";
-        if (cancelledCount > 0) {
-            message += " WARNING:" + cancelledCount + " cancelled customers could not be changed.";
-        }
+
         JsfUtil.addSuccessMessage(message);
     }
 

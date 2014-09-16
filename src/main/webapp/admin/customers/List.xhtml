@@ -233,8 +233,9 @@
                             <p:commandButton id="editPaymentMethodButton" rendered="#{ezidebit.customerExistsInPaymentGateway == true and ezidebit.customerDetailsHaveBeenRetrieved == true and ezidebit.customerCancelledInPaymentGateway ==false}"  oncomplete="PF('editPaymentMethodDialogueWidget').show();"    value="#{configMapController.getKey('editPaymentMethodButtonLink')}" update=":growl :iFrameForm"  /> 
 
                             <h:outputText rendered="#{ezidebit.waitingForPaymentDetails}" value="WAITING FOR BANK DETAILS - "/>
-                            <h:outputText rendered="#{!ezidebit.asyncOperationRunning}" value="Idle"/>
-                            <h:outputText rendered="#{ezidebit.asyncOperationRunning}" value="Busy"/>
+                            <h:outputText rendered="#{ezidebit.customerCancelledInPaymentGateway  }" value=" Customer CANCELLED - Payment details can't be modified  "/>
+                            <h:outputText rendered="#{!ezidebit.asyncOperationRunning}" value=" Status: Idle"/>
+                            <h:outputText rendered="#{ezidebit.asyncOperationRunning}" value="Status: Busy"/>
                         </p:outputPanel>
  
 
