@@ -43,6 +43,8 @@
 
                         <h:outputLabel value="#{configMapController.getKey('CreateSessionHistoryLabel_comments')}"/>
                         <h:outputText value="#{sessionHistoryController.selected.comments}" title="#{configMapController.getKey('CreateSessionHistoryTitle_comments')}"/>
+                        <h:outputLabel value="#{configMapController.getKey('CreateSessionHistoryLabel_adminNotes')}"/>
+                        <h:outputText value="#{sessionHistoryController.selected.adminNotes}" title="#{configMapController.getKey('CreateSessionHistoryTitle_adminNotes')}"/>
                     </h:panelGrid>
                 </p:panel>
                 <p:dataTable value="#{sessionHistoryController.selected.participantsCollection}" var="item"  paginator="true" rows="15"  paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  rowsPerPageTemplate="5,10,15,20,25,50,100" >

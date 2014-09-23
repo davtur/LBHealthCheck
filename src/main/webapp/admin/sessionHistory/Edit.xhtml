@@ -58,6 +58,10 @@
                                <p:outputLabel value="#{configMapController.getKey('CreateSessionHistoryLabel_comments')}" for="comments" />
                                 <p:inputTextarea id="comments" style="width:100%;height:100%" value="#{sessionHistoryController.selected.comments}" cols="35" rows="8" title="#{configMapController.getKey('CreateSessionHistoryTitle_comments')}"/>
                            </p:panel>
+                            <p:panel >
+                               <p:outputLabel value="#{configMapController.getKey('CreateSessionHistoryLabel_adminNotes')}" for="adminNotes" />
+                                <p:inputTextarea id="adminNotes" style="width:100%;height:100%" value="#{sessionHistoryController.selected.adminNotes}" cols="35" rows="8" title="#{configMapController.getKey('CreateSessionHistoryTitle_adminNotes')}"/>
+                           </p:panel>
                        </p:panel>
                     </h:panelGrid>
 

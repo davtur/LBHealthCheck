@@ -53,7 +53,7 @@
                 </h:panelGroup>
                 <h:outputText escape="false" value="#{configMapController.getKey('ListSessionHistoryEmpty')}" rendered="#{sessionHistoryController.customerItems.rowCount == 0}"/>
                 <h:panelGroup rendered="#{sessionHistoryController.customerItems.rowCount > 0}">
-                    <p:dataTable value="#{sessionHistoryController.customerItems}" filteredValue="#{sessionHistoryController.filteredItems}"  var="item" widgetVar="sessionsTable"  paginator="true" rows="15"  paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  rowsPerPageTemplate="5,10,15,20,25,50,100" >
+                    <p:dataTable id="sessionsDataTable" value="#{sessionHistoryController.customerItems}" filteredValue="#{sessionHistoryController.filteredItems}"  var="item" widgetVar="sessionsTable"  paginator="true" rows="15"  paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  rowsPerPageTemplate="5,10,15,20,25,50,100" >
                         <f:facet name="header">
                             <p:outputPanel>
                                 <h:outputText value="Search all fields:" />
@@ -101,6 +101,12 @@
                                 <h:outputText value="#{configMapController.getKey('ListSessionHistoryTitle_comments')}"/>
                             </f:facet>
                             <h:outputText value="#{item.comments}"/>
+                        </p:column>
+                      <p:column sortBy="#{item.adminNotes}" filterBy="#{item.adminNotes}"  headerText="#{configMapController.getKey('ListSessionHistoryTitle_adminNotes')}" >
+                            <f:facet name="header">
+                                <h:outputText value="#{configMapController.getKey('ListSessionHistoryTitle_adminNotes')}"/>
+                            </f:facet>
+                            <h:outputText value="#{item.adminNotes}"/>
                         </p:column>
 
                         <p:column>

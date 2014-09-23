@@ -14,7 +14,7 @@
                 <p:panel>
                     <h:panelGrid columns="3">
 
-                        <p:commandButton  id="createSessiondialogueSave"  oncomplete="PF('createSessionDialogueWidget').hide();"  actionListener="#{sessionHistoryController.createDialogue}" value="#{configMapController.getKey('CreateSessionHistorySaveLink')}" />
+                        <p:commandButton  id="createSessiondialogueSave"  oncomplete="PF('createSessionDialogueWidget').hide();"  actionListener="#{sessionHistoryController.createDialogue}" update=":growl @widgetVar('sessionsTable')" value="#{configMapController.getKey('CreateSessionHistorySaveLink')}" />
                         <p:commandButton id="createSessiondialogueDiscard" onclick="PF('createSessionDialogueWidget').hide()"  value="#{configMapController.getKey('AddPaymentDiscardLink')}" update=":growl"/>                
 
 
@@ -46,9 +46,12 @@
                             </p:panel>
                             <p:panel >
                                 <p:outputLabel value="#{configMapController.getKey('CreateSessionHistoryLabel_comments')}" for="comments" />
-                                <p:inputTextarea id="comments" style="width:100%;height:100%" value="#{sessionHistoryController.selected.comments}" cols="35" rows="8" title="#{configMapController.getKey('CreateSessionHistoryTitle_comments')}"/>
+                                <p:inputTextarea id="comments" style="width:100%;height:100%" value="#{sessionHistoryController.selected.comments}" cols="35" rows="4" title="#{configMapController.getKey('CreateSessionHistoryTitle_comments')}"/>
                             </p:panel>
-
+                            <p:panel >
+                                <p:outputLabel value="#{configMapController.getKey('CreateSessionHistoryLabel_adminNotes')}" for="adminNotes" />
+                                <p:inputTextarea id="adminNotes" style="width:100%;height:100%" value="#{sessionHistoryController.selected.adminNotes}" cols="35" rows="4" title="#{configMapController.getKey('CreateSessionHistoryTitle_adminNotes')}"/>
+                            </p:panel>
                         </p:panel>
 
                         <p:panel>

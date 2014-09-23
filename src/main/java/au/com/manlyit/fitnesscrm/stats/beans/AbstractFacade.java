@@ -64,6 +64,7 @@ public abstract class AbstractFacade<T> {
         //q.setHint("javax.persistence.cache.retrieveMode", "BYPASS");
         return q.getResultList();
     }
+   
 
     public List<T> findRange(int[] range) {
         javax.persistence.criteria.CriteriaQuery cq = getEntityManager().getCriteriaBuilder().createQuery();

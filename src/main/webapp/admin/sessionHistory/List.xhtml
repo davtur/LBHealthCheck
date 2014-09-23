@@ -16,7 +16,7 @@
                    <!-- <p:outputLabel value="#{configMapController.getKey('SelectCustomerForSessionHistory_Label')}" for="sessionstart" />-->
                     <p:selectOneMenu id="custForChart"   value="#{mySessionsChart1.selectedCustomer}" filter="true" converter="#{custConverter}"  label="#{configMapController.getKey('SelectCustomerForSessionHistory_Title')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionHistoryRequiredMessage_trainer')}">
                         <f:selectItems value="#{customersController.customersAvailableSelectOneObject}"   var="cust" itemLabel="#{cust.firstname} #{cust.lastname}" itemValue="#{cust}"/>
-                        <p:ajax   update="customChart" />
+                        <p:ajax   update="customChart sessionsDataTable" />
                     </p:selectOneMenu>
 
 
@@ -33,7 +33,7 @@
                    <!-- <p:outputLabel value="#{configMapController.getKey('SelectDateIntervalForSessionHistory_Label')}" for="chartInterval" />-->
                     <p:selectOneMenu id="chartInterval"   value="#{mySessionsChart1.dateInterval}"   label="#{configMapController.getKey('CreateSessionHistoryTitle_trainer')}" >
                         <f:selectItems value="#{mySessionsChart1.dateIntervalItems}" />                         
-                        <p:ajax   update="customChart" />
+                        <p:ajax   update="customChart sessionsDataTable" />
                     </p:selectOneMenu>
                 </p:panelGrid>
 
@@ -54,11 +54,13 @@
 
 
                 <h:panelGroup >
-                    <p:commandButton id="createButton" ajax="false" action="#{sessionHistoryController.prepareCreate}" value="#{configMapController.getKey('ListSessionHistoryCreateLink')}"/>
+                    <!--<p:commandButton id="createButton" ajax="false" action="#{sessionHistoryController.prepareCreate}" value="#{configMapController.getKey('ListSessionHistoryCreateLink')}"/>-->
+                    <p:commandButton id="createButtonDialogue"  onclick="PF('createSessionDialogueWidget').show()" type="button" value="#{configMapController.getKey('ListSessionHistoryCreateLink')}"/>
+
                 </h:panelGroup>
                 <h:outputText escape="false" value="#{configMapController.getKey('ListSessionHistoryEmpty')}" rendered="#{sessionHistoryController.items.rowCount == 0}"/>
                 <h:panelGroup rendered="#{sessionHistoryController.items.rowCount > 0}">
-                    <p:dataTable value="#{sessionHistoryController.items}" var="item" widgetVar="sessionsTable"  paginator="true" rows="15"  paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  rowsPerPageTemplate="5,10,15,20,25,50,100" >
+                    <p:dataTable id="sessionsDataTable" value="#{sessionHistoryController.items}" var="item" widgetVar="sessionsTable"  paginator="true" rows="15"  paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  rowsPerPageTemplate="5,10,15,20,25,50,100" >
                     <!--    <p:column sortBy="#{item.id}" >
                             <f:facet name="header">
                                 <h:outputText value="#{configMapController.getKey('ListSessionHistoryTitle_id')}"/>
@@ -97,6 +99,12 @@
                             <h:outputText value="#{item.trainer.firstname} #{item.trainer.lastname}"/>
                         </p:column>-->
 
+                        <p:column sortBy="#{item.adminNotes}" filterBy="#{item.adminNotes}"  headerText="#{configMapController.getKey('ListSessionHistoryTitle_adminNotes')}" >
+                            <f:facet name="header">
+                                <h:outputText value="#{configMapController.getKey('ListSessionHistoryTitle_adminNotes')}"/>
+                            </f:facet>
+                            <h:outputText value="#{item.adminNotes}"/>
+                        </p:column>
                         <p:column sortBy="#{item.comments}" filterBy="#{item.comments}"  headerText="#{configMapController.getKey('ListSessionHistoryTitle_comments')}" >
                             <f:facet name="header">
                                 <h:outputText value="#{configMapController.getKey('ListSessionHistoryTitle_comments')}"/>
@@ -123,7 +131,9 @@
                     </p:dataTable>
                 </h:panelGroup>
             </h:form>
+            <ui:include src="/trainer/sessionHistory/CreateSessionInfo.xhtml"/>
         </ui:define>
+        
     </ui:composition>
 
 </html>

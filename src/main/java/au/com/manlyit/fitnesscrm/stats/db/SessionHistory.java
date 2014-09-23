@@ -60,6 +60,10 @@ public class SessionHistory implements BaseEntity,Serializable {
     @Size(max = 65535)
     @Column(name = "comments")
     private String comments;
+     @Lob
+    @Size(max = 65535)
+    @Column(name = "admin_notes")
+    private String adminNotes;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "sessionHistoryId")
     private Collection<Participants> participantsCollection;
    
@@ -158,6 +162,20 @@ public class SessionHistory implements BaseEntity,Serializable {
 
     public void setSessionTrainersCollection(Collection<SessionTrainers> sessionTrainersCollection) {
         this.sessionTrainersCollection = sessionTrainersCollection;
+    }
+
+    /**
+     * @return the adminNotes
+     */
+    public String getAdminNotes() {
+        return adminNotes;
+    }
+
+    /**
+     * @param adminNotes the adminNotes to set
+     */
+    public void setAdminNotes(String adminNotes) {
+        this.adminNotes = adminNotes;
     }
     
 }

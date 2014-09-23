@@ -74,6 +74,7 @@ public class SessionHistoryFacade extends AbstractFacade<SessionHistory> {
         return ((Long) q.getSingleResult()).intValue();
     }
 
+
     public List<SessionHistory> findAll(boolean sortAsc) {
         List<SessionHistory> retList = null;
         try {
@@ -241,10 +242,15 @@ public class SessionHistoryFacade extends AbstractFacade<SessionHistory> {
 
             Join<SessionHistory, SessionTrainers> jn = rt.joinCollection("sessionTrainersCollection");
             Expression<Customers> sessionTrainer = jn.get("customerId");
+            Expression<Date> stime = rt.get("sessiondate");
             Predicate condition = cb.equal(sessionTrainer, trainer);
             cq.where(cb.and(condition));
             cq.select(rt);
-
+            if (sortAsc) {
+                cq.orderBy(cb.asc(stime));
+            } else {
+                cq.orderBy(cb.desc(stime));
+            }
             Query q = em.createQuery(cq);
             retList = (List<SessionHistory>) q.getResultList();
         } catch (Exception e) {

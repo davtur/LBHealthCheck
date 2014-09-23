@@ -64,7 +64,11 @@
                             <f:selectItems value="#{sessionHistoryController.activeTrainers}" var="cust" itemLabel="#{cust.firstname} #{cust.lastname}" itemValue="#{cust}"/>
                         </p:selectCheckboxMenu>
                     </pm:field>
-
+                    <p:spacer height="10em" />
+                    <pm:field>
+                        <p:outputLabel for="adminnotes" value="#{configMapController.getKey('CreateSessionHistoryLabel_adminNotes')}" />
+                        <p:inputTextarea id="adminnotes" value="#{sessionHistoryController.selected.adminNotes}"  />
+                    </pm:field>
                     <p:spacer height="10em" />
                     <pm:field>
                         <p:outputLabel for="comments" value="#{configMapController.getKey('CreateSessionHistoryLabel_comments')}" />

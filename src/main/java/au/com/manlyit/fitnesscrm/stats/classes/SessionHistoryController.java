@@ -152,7 +152,8 @@ public class SessionHistoryController implements Serializable {
 
                 @Override
                 public PfSelectableDataModel createPageDataModel() {
-                    return new PfSelectableDataModel<>(ejbFacade.findAll());
+                    
+                    return new PfSelectableDataModel<>(ejbFacade.findAll(false));
                 }
 
             };
@@ -188,7 +189,9 @@ public class SessionHistoryController implements Serializable {
 
                 @Override
                 public PfSelectableDataModel createPageDataModel() {
-                    return new PfSelectableDataModel<>(ejbFacade.findSessionsByTrainer(getLoggedInUser(), true));
+                    
+
+                    return new PfSelectableDataModel<>(ejbFacade.findSessionsByTrainer(getLoggedInUser(), false));
                 }
 
             };
@@ -353,7 +356,7 @@ public class SessionHistoryController implements Serializable {
                 getFacade().edit(current);
             }
             JsfUtil.addSuccessMessage(configMapFacade.getConfig("SessionHistoryCreated"));
-            current =null;
+            current = null;
 
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
