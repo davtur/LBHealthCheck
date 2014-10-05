@@ -155,6 +155,11 @@
             <url-pattern>/myDetails.xhtml</url-pattern>
         </web-resource-collection>
         <web-resource-collection>
+            <web-resource-name>My Details Payment Method</web-resource-name>
+            <description/>
+            <url-pattern>/myDetailsPaymentMethod.xhtml</url-pattern>
+        </web-resource-collection>
+        <web-resource-collection>
             <web-resource-name>My Sessions</web-resource-name>
             <description/>
             <url-pattern>/mySessions.xhtml</url-pattern>

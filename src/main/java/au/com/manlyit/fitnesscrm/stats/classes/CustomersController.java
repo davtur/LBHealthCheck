@@ -294,7 +294,7 @@ public class CustomersController implements Serializable {
 
     }
 
-    private PaymentParameters getSelectedCustomersPaymentParameters() {
+    protected PaymentParameters getSelectedCustomersPaymentParameters() {
         PaymentParameters pp = null;
         Collection<PaymentParameters> ppl = current.getPaymentParametersCollection();
         if (ppl == null || ppl.isEmpty()) {

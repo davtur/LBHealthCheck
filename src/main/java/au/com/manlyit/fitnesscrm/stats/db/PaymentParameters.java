@@ -3,7 +3,6 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package au.com.manlyit.fitnesscrm.stats.db;
 
 import java.io.Serializable;
@@ -15,6 +14,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
@@ -42,6 +42,7 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "PaymentParameters.findBySmsExpiredCard", query = "SELECT p FROM PaymentParameters p WHERE p.smsExpiredCard = :smsExpiredCard"),
     @NamedQuery(name = "PaymentParameters.findByPaymentGatewayName", query = "SELECT p FROM PaymentParameters p WHERE p.paymentGatewayName = :paymentGatewayName")})
 public class PaymentParameters implements Serializable {
+
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -81,6 +82,10 @@ public class PaymentParameters implements Serializable {
     @JoinColumn(name = "loggedInUser", referencedColumnName = "id")
     @ManyToOne(optional = false)
     private Customers loggedInUser;
+    @Lob
+    @Size(min = 1, max = 65535)
+    @Column(name = "webddrUrl")
+    private String webddrUrl;
 
     public PaymentParameters() {
     }
@@ -187,5 +192,19 @@ public class PaymentParameters implements Serializable {
     public String toString() {
         return "au.com.manlyit.fitnesscrm.stats.db.PaymentParameters[ id=" + id + " ]";
     }
-    
+
+    /**
+     * @return the shedTitle
+     */
+    public String getWebddrUrl() {
+        return webddrUrl;
+    }
+
+    /**
+     * @param shedTitle the shedTitle to set
+     */
+    public void setWebddrUrl(String shedTitle) {
+        this.webddrUrl = shedTitle;
+    }
+
 }

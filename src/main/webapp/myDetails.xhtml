@@ -17,6 +17,8 @@
             <h:form id="createCustomerForm">
                 <p:panel>
                     <p:commandButton  actionListener="#{customersController.update}" value="#{configMapController.getKey('EditCustomersSaveLink')}" update=":growl"/>
+                    <p:commandButton id="editPaymentMethodButton" rendered="#{ezidebit.customerExistsInPaymentGateway == false or ezidebit.customerCancelledInPaymentGateway ==true}"  oncomplete="PF('editEDDRFormDialogueWidget').show();"    value="#{configMapController.getKey('editPaymentMethodButtonLink')}" update=":growl :createCustomerForm"  /> 
+
                 </p:panel>
                 <h:panelGrid columns="1">
                     <h:panelGrid columns="2">
@@ -91,6 +93,7 @@
                     </p:panel>
                 </h:panelGrid>
             </h:form>
+              <ui:include src="myDetailsPaymentMethod.xhtml"/>
         </ui:define>
     </ui:composition>
 

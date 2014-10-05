@@ -228,6 +228,8 @@
                         <p:outputPanel id="mainPanel" rendered="#{ezidebit.asyncOperationRunning == false and ezidebit.customerDetailsHaveBeenRetrieved == true  }" >
                             <p:commandButton id="reloadPageButton" value="Reload Page" actionListener="#{ezidebit.refreshPaymentsPage}" rendered="#{ezidebit.customerExistsInPaymentGateway }" update=":tv:paymentsForm  :growl" />
                             <p:commandButton id="paymentsButton" rendered="#{ezidebit.showAddToPaymentGatewayButton}"    actionListener="#{ezidebit.createCustomerRecord}" update=":growl :tv:paymentsForm "   value="#{configMapController.getKey('EditCustomersUpdatePayment')}" />
+                            <p:commandButton id="eddrButton" rendered="#{ezidebit.showAddToPaymentGatewayButton}"    oncomplete="PF('createEddrLinkDialogueWidget').show();" update=":growl :tv:paymentsForm "   value="#{configMapController.getKey('EditCustomersUpdatePayment')}" />
+
                             <p:commandButton id="showAddPaymentButton" rendered="#{ezidebit.waitingForPaymentDetails == false and ezidebit.customerCancelledInPaymentGateway == false and ezidebit.customerExistsInPaymentGateway == true}" oncomplete="PF('createPaymentDialogueWidget').show();"    value="#{configMapController.getKey('AddPaymentButtonLink')}"  update=":growl " /> 
                             <p:commandButton id="showAddPaymentScheduleButton" rendered="#{ezidebit.waitingForPaymentDetails == false and ezidebit.customerCancelledInPaymentGateway == false and ezidebit.customerExistsInPaymentGateway == true}" oncomplete="PF('createPaymentScheduleDialogueWidget').show();"    value="#{configMapController.getKey('AddPaymentScheduleButtonLink')}" update=":growl "  /> 
                             <p:commandButton id="editPaymentMethodButton" rendered="#{ezidebit.customerExistsInPaymentGateway == true and ezidebit.customerDetailsHaveBeenRetrieved == true and ezidebit.customerCancelledInPaymentGateway ==false}"  oncomplete="PF('editPaymentMethodDialogueWidget').show();"    value="#{configMapController.getKey('editPaymentMethodButtonLink')}" update=":growl :iFrameForm"  /> 
@@ -526,6 +528,7 @@
             </script>
             <ui:include src="Create.xhtml"/>
             <ui:include src="CreateSchedule.xhtml"/>
+             <ui:include src="CreateEddrLink.xhtml"/>
             <ui:include src="CreatePayment.xhtml"/>
             <ui:include src="EditPaymentMethod.xhtml"/>
         </ui:define>

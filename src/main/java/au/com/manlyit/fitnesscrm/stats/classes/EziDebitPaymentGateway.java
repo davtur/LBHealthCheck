@@ -28,8 +28,11 @@ import au.com.manlyit.fitnesscrm.stats.webservices.PaymentDetail;
 import au.com.manlyit.fitnesscrm.stats.webservices.PaymentDetailPlusNextPaymentInfo;
 import au.com.manlyit.fitnesscrm.stats.webservices.ScheduledPayment;
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLEncoder;
+import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -39,6 +42,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.Properties;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -61,9 +65,6 @@ import javax.xml.ws.WebServiceException;
 import org.primefaces.component.tabview.Tab;
 import org.primefaces.context.RequestContext;
 import org.primefaces.event.TabChangeEvent;
-import org.primefaces.push.EventBus;
-import org.primefaces.push.EventBusFactory;
-import org.primefaces.push.impl.RemoteEndpointImpl;
 
 /**
  *
@@ -82,6 +83,8 @@ public class EziDebitPaymentGateway implements Serializable {
     @Inject
     private FutureMapEJB futureMap;
     // private final Map<String, Future> futureMap = new HashMap<>();
+    @Inject
+    private au.com.manlyit.fitnesscrm.stats.beans.PaymentParametersFacade ejbPaymentParametersFacade;
     private boolean asyncOperationRunning = false;
     private final ThreadGroup tGroup1 = new ThreadGroup("EziDebitOps");
     private List<Payment> paymentsList;
@@ -133,6 +136,7 @@ public class EziDebitPaymentGateway implements Serializable {
     private boolean stopPoller = false;
     private boolean customerDetailsHaveBeenRetrieved = false;
     private String eziDebitWidgetUrl = "";
+    private String eziDebitEDDRFormUrl = "";
     private Customers selectedCustomer;
 
     ThreadFactory tf1 = new eziDebitThreadFactory();
@@ -648,6 +652,13 @@ public class EziDebitPaymentGateway implements Serializable {
         this.customerCancelledInPaymentGateway = customerCancelledInPaymentGateway;
     }
 
+    /**
+     * @param eziDebitEDDRFormUrl the eziDebitEDDRFormUrl to set
+     */
+    public void setEziDebitEDDRFormUrl(String eziDebitEDDRFormUrl) {
+        this.eziDebitEDDRFormUrl = eziDebitEDDRFormUrl;
+    }
+
     private class eziDebitThreadFactory implements ThreadFactory {
 
         @Override
@@ -701,9 +712,9 @@ public class EziDebitPaymentGateway implements Serializable {
     public boolean isShowAddToPaymentGatewayButton() {
         if (customerDetailsHaveBeenRetrieved) {
             if (customerCancelledInPaymentGateway || customerExistsInPaymentGateway == false) {
-                if(selectedCustomer.getActive().getCustomerState().contains("ACTIVE")){
-                    
-                return true;
+                if (selectedCustomer.getActive().getCustomerState().contains("ACTIVE")) {
+
+                    return true;
                 }
             }
         }
@@ -769,6 +780,33 @@ public class EziDebitPaymentGateway implements Serializable {
     }
 
     /**
+     * pp.setSmsExpiredCard(converted); ejbPaymentParametersFacade.edit(pp);
+     *
+     * @return the eziDebitWidgetUrl
+     */
+    public String getEziDebitEDDRFormUrl() {
+
+        FacesContext context = FacesContext.getCurrentInstance();
+        CustomersController controller = (CustomersController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "customersController");
+        PaymentParameters pp = controller.getSelectedCustomersPaymentParameters();
+        String webDdrUrl = pp.getWebddrUrl();// contains payment information e.g 
+
+        String amp = "&";
+
+        // eziDebitEDDRFormUrl = widgetUrl;
+        try {
+            if(webDdrUrl != null){
+            eziDebitEDDRFormUrl = URLEncoder.encode(webDdrUrl, "UTF-8");
+            }else{
+               webDdrUrl = "";    
+            }
+        } catch (UnsupportedEncodingException ex) {
+            Logger.getLogger(CustomersController.class.getName()).log(Level.SEVERE, "UTF-8 unsupported. This shouldn't happen!", ex);
+        }
+        return webDdrUrl;
+    }
+
+    /**
      * @return the editPaymentDetails
      */
     public boolean isEditPaymentDetails() {
@@ -825,6 +863,9 @@ public class EziDebitPaymentGateway implements Serializable {
             logger.log(Level.WARNING, "Payment Parameters are null");
             cust.setPaymentParametersCollection(new ArrayList<PaymentParameters>());
             pay = cust.getPaymentParametersCollection();
+        }
+        if (cust.getTelephone() == null) {
+            cust.setTelephone("0400000000");
         }
         PaymentParameters payParams = null;
         if (pay.isEmpty()) {
@@ -1626,6 +1667,64 @@ public class EziDebitPaymentGateway implements Serializable {
         setAsyncOperationRunning(true);
         AsyncJob aj = new AsyncJob(key, future);
         futureMap.put(sessionId, aj);
+    }
+
+    public void createEddrLink(ActionEvent actionEvent) {
+        Customers cust = getSelectedCustomer();
+        if (cust == null || cust.getId() == null) {
+            logger.log(Level.WARNING, "Create EDDR Link cannot be completed as teh selected customer is null.");
+            return;
+        }
+        NumberFormat nf = NumberFormat.getNumberInstance();
+        nf.setMaximumFractionDigits(2);
+        String amp = "&";
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+
+        String widgetUrl = configMapFacade.getConfig("payment.ezidebit.webddr.baseurl");
+        widgetUrl += "?" + "a=" + configMapFacade.getConfig("payment.ezidebit.webddr.hash");
+        widgetUrl += amp + "uRefLabel=" + configMapFacade.getConfig("payment.ezidebit.webddr.uRefLabel");
+        widgetUrl += amp + "fName=" + cust.getFirstname();
+        widgetUrl += amp + "lName=" + cust.getLastname();
+        widgetUrl += amp + "uRef=" + cust.getId();
+        widgetUrl += amp + "email=" + cust.getEmailAddress();
+        widgetUrl += amp + "mobile=" + cust.getTelephone();
+        widgetUrl += amp + "sms=" + configMapFacade.getConfig("payment.ezidebit.webddr.sms");
+        widgetUrl += amp + "addr=" + cust.getStreetAddress();
+        widgetUrl += amp + "suburb=" + cust.getSuburb();
+        widgetUrl += amp + "state=" + cust.getAddrState();
+        widgetUrl += amp + "pCode=" + cust.getPostcode();
+        widgetUrl += amp + "debits=2";
+        widgetUrl += amp + "rAmount=" + nf.format(paymentAmountInCents);
+        widgetUrl += amp + "rDate=" + sdf.format(paymentDebitDate);
+        widgetUrl += amp + "aFreq=" + configMapFacade.getConfig("payment.ezidebit.webddr.aFreq");
+        widgetUrl += amp + "freq=" + paymentSchedulePeriodType;
+        widgetUrl += amp + "aDur=" + configMapFacade.getConfig("payment.ezidebit.webddr.aDur");
+        widgetUrl += amp + "dur=" + configMapFacade.getConfig("payment.ezidebit.webddr.dur");
+      // TODO  widgetUrl += amp + "callback=" + configMapFacade.getConfig("payment.ezidebit.webddr.callback");
+
+        FacesContext context = FacesContext.getCurrentInstance();
+        CustomersController controller = (CustomersController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "customersController");
+        PaymentParameters pp = controller.getSelectedCustomersPaymentParameters();
+        pp.setWebddrUrl(widgetUrl);
+        ejbPaymentParametersFacade.edit(pp);
+        logger.log(Level.INFO, "eddr request url:{0}.", widgetUrl);
+    }
+
+    private Properties emailServerProperties() {
+        Properties props = new Properties();
+
+        props.put("mail.smtp.host", configMapFacade.getConfig("mail.smtp.host"));
+        props.put("mail.smtp.auth", configMapFacade.getConfig("mail.smtp.auth"));
+        props.put("mail.debug", configMapFacade.getConfig("mail.debug"));
+        props.put("mail.smtp.port", configMapFacade.getConfig("mail.smtp.port"));
+        props.put("mail.smtp.socketFactory.port", configMapFacade.getConfig("mail.smtp.socketFactory.port"));
+        props.put("mail.smtp.socketFactory.class", configMapFacade.getConfig("mail.smtp.socketFactory.class"));
+        props.put("mail.smtp.socketFactory.fallback", configMapFacade.getConfig("mail.smtp.socketFactory.fallback"));
+        props.put("mail.smtp.ssluser", configMapFacade.getConfig("mail.smtp.ssluser"));
+        props.put("mail.smtp.sslpass", configMapFacade.getConfig("mail.smtp.sslpass"));
+
+        return props;
+
     }
 
     public void createPaymentSchedule(ActionEvent actionEvent) {
