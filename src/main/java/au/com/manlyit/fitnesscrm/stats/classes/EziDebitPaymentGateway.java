@@ -27,6 +27,7 @@ import au.com.manlyit.fitnesscrm.stats.webservices.Payment;
 import au.com.manlyit.fitnesscrm.stats.webservices.PaymentDetail;
 import au.com.manlyit.fitnesscrm.stats.webservices.PaymentDetailPlusNextPaymentInfo;
 import au.com.manlyit.fitnesscrm.stats.webservices.ScheduledPayment;
+import java.io.IOException;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
@@ -56,6 +57,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.ejb.EJBException;
 import javax.enterprise.context.SessionScoped;
+import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.faces.event.ActionEvent;
 import javax.inject.Inject;
@@ -652,6 +654,18 @@ public class EziDebitPaymentGateway implements Serializable {
         this.customerCancelledInPaymentGateway = customerCancelledInPaymentGateway;
     }
 
+    public void redirectToPaymentGateway() {
+        try {
+            FacesContext context = FacesContext.getCurrentInstance();
+            ExternalContext ec = context.getExternalContext();
+            ec.redirect(eziDebitEDDRFormUrl);
+            
+        } catch (IOException ex) {
+            Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, null, ex);
+        }
+      
+    }
+
     /**
      * @param eziDebitEDDRFormUrl the eziDebitEDDRFormUrl to set
      */
@@ -794,15 +808,16 @@ public class EziDebitPaymentGateway implements Serializable {
         String amp = "&";
 
         // eziDebitEDDRFormUrl = widgetUrl;
-        try {
-            if(webDdrUrl != null){
-            eziDebitEDDRFormUrl = URLEncoder.encode(webDdrUrl, "UTF-8");
-            }else{
-               webDdrUrl = "";    
+       // try {
+            if (webDdrUrl != null) {
+                //eziDebitEDDRFormUrl = URLEncoder.encode(webDdrUrl, "UTF-8");
+                  eziDebitEDDRFormUrl = webDdrUrl;
+            } else {
+                webDdrUrl = "";
             }
-        } catch (UnsupportedEncodingException ex) {
-            Logger.getLogger(CustomersController.class.getName()).log(Level.SEVERE, "UTF-8 unsupported. This shouldn't happen!", ex);
-        }
+       // } catch (UnsupportedEncodingException ex) {
+       //     Logger.getLogger(CustomersController.class.getName()).log(Level.SEVERE, "UTF-8 unsupported. This shouldn't happen!", ex);
+       // }
         return webDdrUrl;
     }
 

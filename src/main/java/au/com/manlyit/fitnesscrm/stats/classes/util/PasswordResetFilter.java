@@ -32,7 +32,7 @@ import javax.servlet.http.HttpSession;
  *
  * @author david
  */
-@WebFilter("*.xhtml")
+@WebFilter("/reset.html")
 public class PasswordResetFilter implements Filter {
 
     private static final Logger logger = Logger.getLogger(SessionTimeoutFilter.class.getName());
@@ -51,10 +51,11 @@ public class PasswordResetFilter implements Filter {
 
         HttpServletRequest req = (HttpServletRequest) request;
         HttpServletResponse res = (HttpServletResponse) response;
-        HttpSession session = req.getSession(false);
+        HttpSession session = req.getSession(true);
+        String sessionId = session.getId();
         String key = request.getParameter("key");
         if (key != null) {
-
+            logger.log(Level.INFO, "Checking password reset key for session id:{0}.", sessionId);
             String keyDecrypted = encrypter.decrypt(key);
 // decrypt nonce encrypted by login bean
             if (keyDecrypted != null) {
@@ -86,7 +87,16 @@ public class PasswordResetFilter implements Filter {
                                     // String encodedEncryptedPass = URLEncoder.encode(encryptedPass,"UTF-8");
                                     cst.setPassword(encryptedPass);
                                     ejbCustomerFacade.edit(cst);
-                                    req.login(user, paswd);
+                                    try {
+                                        req.login(user, paswd);
+                                        logger.log(Level.INFO, "The reset password link executed successfully. User {0} has been logged in.", user);
+                                    } catch (ServletException servletException) {
+                                        if (servletException.getMessage().contains("This is request has already been authenticated") == false) {
+                                            throw servletException;
+                                        }else{
+                                            logger.log(Level.INFO, "This is request has already been authenticated. User {0} is already logged in.", user);
+                                        }
+                                    }
                                     //Redirect to the user details page
                                     // FacesContext fc = FacesContext.getCurrentInstance();
                                     //CustomersController custController = (CustomersController) fc.getApplication().evaluateExpressionGet(fc, "#{customersController}", CustomersController.class);
@@ -98,15 +108,15 @@ public class PasswordResetFilter implements Filter {
                                         res.sendRedirect(detailsURL);
 
                                     } catch (IOException e) {
-                                        logger.log(Level.SEVERE, "Redirect to MyDetails failed",e);
+                                        logger.log(Level.SEVERE, "Redirect to MyDetails failed", e);
                                         //JsfUtil.addErrorMessage(e, "Redirect to MyDetails failed");
 
                                     }
 
                                 } else {
-                                     String detailsURL = req.getContextPath() + "/login.xhtml";
+                                    String detailsURL = req.getContextPath() + "/login.xhtml";
                                     res.sendRedirect(detailsURL);
-                                     logger.log(Level.INFO, "The reset password link has expired");
+                                    logger.log(Level.INFO, "The reset password link has expired");
                                 }
                             } catch (ServletException | ELException e2) {
                                 JsfUtil.addErrorMessage(e2, "Nonce does not exist. Possible hack attempt: " + key);

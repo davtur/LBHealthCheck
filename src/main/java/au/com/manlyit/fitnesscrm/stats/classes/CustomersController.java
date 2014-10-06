@@ -4,6 +4,7 @@ import au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.beans.CustomersFacade;
+import au.com.manlyit.fitnesscrm.stats.beans.LoginBean;
 import au.com.manlyit.fitnesscrm.stats.chartbeans.MySessionsChart1;
 import au.com.manlyit.fitnesscrm.stats.classes.util.DatatableSelectionHelper;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PfSelectableDataModel;
@@ -13,7 +14,6 @@ import au.com.manlyit.fitnesscrm.stats.db.Notes;
 import au.com.manlyit.fitnesscrm.stats.db.PaymentParameters;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
@@ -153,6 +153,13 @@ public class CustomersController implements Serializable {
             RequestContext.getCurrentInstance().update("iFrameForm");
 
         }
+    }
+
+    public void sendCustomerOnboardEmail() {
+        FacesContext context = FacesContext.getCurrentInstance();
+        LoginBean controller = (LoginBean) context.getApplication().getELResolver().getValue(context.getELContext(), null, "loginBean");
+        controller.doPasswordReset("system.new.customer.template",current,configMapFacade.getConfig("sendCustomerOnBoardEmailEmailSubject"));
+        JsfUtil.addSuccessMessage(configMapFacade.getConfig("sendCustomerOnBoardEmail") + " " + current.getFirstname() + " " + current.getLastname() + ".");
     }
 
     public Customers getSelected() {
@@ -563,8 +570,8 @@ public class CustomersController implements Serializable {
                 // CAncelled customers canot be reinstated in the payment gateway they must be added as new
                 controller.changeCustomerStatus(cust, selectedState);
 
-            }else{
-                
+            } else {
+
             }
             cust.setActive(selectedState);
             getFacade().edit(cust);

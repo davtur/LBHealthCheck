@@ -5,8 +5,17 @@
  */
 package au.com.manlyit.fitnesscrm.stats.classes.util;
 
+import au.com.manlyit.fitnesscrm.stats.beans.PaymentBean;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
+import au.com.manlyit.fitnesscrm.stats.db.PaymentParameters;
 import java.io.IOException;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.Properties;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.faces.context.FacesContext;
@@ -32,6 +41,7 @@ import org.primefaces.context.RequestContext;
 @WebServlet("/callback.html")
 public class WebDDRSignUpServlet extends HttpServlet {
 
+    private static final String paymentGateway = "EZIDEBIT";
     private static final long serialVersionUID = 8071426090770097330L;
     private static final Logger logger = Logger.getLogger(WebDDRSignUpServlet.class.getName());
     //private final StringEncrypter encrypter = new StringEncrypter("(lqKdh^Gr$2F^KJHG654)");
@@ -39,6 +49,12 @@ public class WebDDRSignUpServlet extends HttpServlet {
     private au.com.manlyit.fitnesscrm.stats.beans.CustomersFacade ejbFacade;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade configMapFacade;
+    @Inject
+    private FutureMapEJB futureMap;
+    @Inject
+    private PaymentBean paymentBean;
+    @Inject
+    private au.com.manlyit.fitnesscrm.stats.beans.PaymentParametersFacade ejbPaymentParametersFacade;
 
     public WebDDRSignUpServlet() {
     }
@@ -52,34 +68,115 @@ public class WebDDRSignUpServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        logger.log(Level.INFO, "*** Call Back from Web EDDR Form");
-        HttpSession httpSession = request.getSession();
-        String uref = request.getParameter("uref");
-        String cref = request.getParameter("cref");
-        String fname = request.getParameter("fname");
-        String lname = request.getParameter("lname");
-        String email = request.getParameter("email");
-        String mobile = request.getParameter("mobile");
-        String addr = request.getParameter("addr");
-        String suburb = request.getParameter("suburb");
-        String state = request.getParameter("state");
-        String pcode = request.getParameter("pcode");
-        String rdate = request.getParameter("rdate");
-        String ramount = request.getParameter("ramount");
-        String freq = request.getParameter("freq");
-        String odate = request.getParameter("odate");
-        String oamount = request.getParameter("oamount");
-        String numpayments = request.getParameter("numpayments");
-        String totalamount = request.getParameter("totalamount");
-        String method = request.getParameter("method");
-        //boolean mobileDevice = false;
-        FacesContext context = FacesContext.getCurrentInstance();
-        String sessionID = httpSession.getId();
-        logger.log(Level.INFO, "Session:{0}, Params:{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12},{13},{14},{15},{16},{17},{18}", new Object[]{sessionID, uref, cref, fname, lname, email, mobile, addr, suburb, state, pcode, rdate, ramount, freq, odate, oamount, numpayments, totalamount, method});
+        try {
+            logger.log(Level.INFO, "*** Call Back from Web EDDR Form");
+            HttpSession httpSession = request.getSession();
+            String uref = request.getParameter("uref");
+            String cref = request.getParameter("cref");
+            String fname = request.getParameter("fname");
+            String lname = request.getParameter("lname");
+            String email = request.getParameter("email");
+            String mobile = request.getParameter("mobile");
+            String addr = request.getParameter("addr");
+            String suburb = request.getParameter("suburb");
+            String state = request.getParameter("state");
+            String pcode = request.getParameter("pcode");
+            String rdate = request.getParameter("rdate");
+            String ramount = request.getParameter("ramount");
+            String freq = request.getParameter("freq");
+            String odate = request.getParameter("odate");
+            String oamount = request.getParameter("oamount");
+            String numpayments = request.getParameter("numpayments");
+            String totalamount = request.getParameter("totalamount");
+            String method = request.getParameter("method");
+            //boolean mobileDevice = false;
+            FacesContext context = FacesContext.getCurrentInstance();
+            String sessionID = httpSession.getId();
+            logger.log(Level.INFO, "Session:{0}, Params:{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12},{13},{14},{15},{16},{17},{18}", new Object[]{sessionID, uref, cref, fname, lname, email, mobile, addr, suburb, state, pcode, rdate, ramount, freq, odate, oamount, numpayments, totalamount, method});
+            String templatePlaceholder = "<!--LINK-URL-->";
+            String htmlText = configMapFacade.getConfig("system.admin.ezidebit.webddrcallback.template");
+            String name = fname + " " + lname;
+            htmlText = htmlText.replace(templatePlaceholder, name);
+            response.sendRedirect(request.getContextPath() + getValueFromKey("payment.ezidebit.callback.redirect"));
+            Future<Boolean> emailSendResult = paymentBean.sendAsynchEmail(configMapFacade.getConfig("AdminEmailAddress"), configMapFacade.getConfig("PasswordResetCCEmailAddress"), configMapFacade.getConfig("PasswordResetFromEmailAddress"), configMapFacade.getConfig("system.ezidebit.webEddrCallback.EmailSubject"), htmlText, null, emailServerProperties(), false);
+            if (emailSendResult.get() == false) {
+                logger.log(Level.WARNING, "Email for Call Back from Web EDDR Form FAILED. Future result false from async job");
+            }
 
-        
-        response.sendRedirect(request.getContextPath() + getValueFromKey("facebook.redirect.landingpage"));
+            if (uref != null) {
+                uref = uref.trim();
+                if (uref.length() > 0) {
+                    int customerId = Integer.parseInt(uref);
+                    Customers current = ejbFacade.findById(customerId);
+                    PaymentParameters pp = getCustomersPaymentParameters(current);
+                    pp.setWebddrUrl(null);
+                    ejbPaymentParametersFacade.edit(pp);
+                    logger.log(Level.INFO, " Customer {0} has set up payment info. Setting Web DDR URL to NULL as it should only be used once.", new Object[]{current.getUsername()});
+                    /*
+                     GregorianCalendar cal = new GregorianCalendar();
+                     cal.add(Calendar.MONTH, 12);
+                     Date endDate = cal.getTime();
+                     cal.add(Calendar.MONTH, -24);
+                   
+                     startAsynchJob("GetCustomerDetails", paymentBean.getCustomerDetails(current, getDigitalKey()), sessionID);
+                     startAsynchJob("GetPayments", paymentBean.getPayments(current, "ALL", "ALL", "ALL", "", cal.getTime(), endDate, false, getDigitalKey()), sessionID);
+                     startAsynchJob("GetScheduledPayments", paymentBean.getScheduledPayments(current, cal.getTime(), endDate, getDigitalKey()), sessionID);
+                     */
+                }
+            }
+        } catch (InterruptedException | ExecutionException ex) {
+            Logger.getLogger(WebDDRSignUpServlet.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
 
+    protected PaymentParameters getCustomersPaymentParameters(Customers cust) {
+        PaymentParameters pp = null;
+        Collection<PaymentParameters> ppl = cust.getPaymentParametersCollection();
+        if (ppl == null) {
+            logger.log(Level.WARNING, " Customer {0} has no Payment parameters Objects. NULL", new Object[]{cust.getUsername()});
+
+            return null;
+        }
+        int s = ppl.size();
+        for (PaymentParameters payParams : ppl) {
+            if (payParams.getPaymentGatewayName().compareTo(paymentGateway) == 0) {
+                pp = payParams;
+            }
+        }
+        if (s > 1) {
+            logger.log(Level.WARNING, " Customer {0} has {1} Payment parameters Objects. Should only be one as only Ezidebit has been implemented", new Object[]{cust.getUsername(), s});
+        }
+        if (pp == null) {
+            logger.log(Level.SEVERE, " Customer {0} has NULL Payment parameters.", new Object[]{cust.getUsername()});
+        }
+        return pp;
+    }
+
+    private Properties emailServerProperties() {
+        Properties props = new Properties();
+
+        props.put("mail.smtp.host", configMapFacade.getConfig("mail.smtp.host"));
+        props.put("mail.smtp.auth", configMapFacade.getConfig("mail.smtp.auth"));
+        props.put("mail.debug", configMapFacade.getConfig("mail.debug"));
+        props.put("mail.smtp.port", configMapFacade.getConfig("mail.smtp.port"));
+        props.put("mail.smtp.socketFactory.port", configMapFacade.getConfig("mail.smtp.socketFactory.port"));
+        props.put("mail.smtp.socketFactory.class", configMapFacade.getConfig("mail.smtp.socketFactory.class"));
+        props.put("mail.smtp.socketFactory.fallback", configMapFacade.getConfig("mail.smtp.socketFactory.fallback"));
+        props.put("mail.smtp.ssluser", configMapFacade.getConfig("mail.smtp.ssluser"));
+        props.put("mail.smtp.sslpass", configMapFacade.getConfig("mail.smtp.sslpass"));
+
+        return props;
+
+    }
+
+    private String getDigitalKey() {
+        return configMapFacade.getConfig("payment.ezidebit.widget.digitalkey");
+    }
+
+    private void startAsynchJob(String key, Future future, String sessionId) {
+
+        AsyncJob aj = new AsyncJob(key, future);
+        futureMap.put(sessionId, aj);
     }
 
     private boolean mobileDevice(HttpServletRequest req) {

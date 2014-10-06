@@ -98,7 +98,6 @@ public class CustomersFacade extends AbstractFacade<Customers> {
             cq.where(cb.and(condition1, condition2));
 
             //Query q = em.createQuery(cq);
-           
             Query q = em.createNativeQuery("SELECT * FROM customers where upper(firstname) = upper('" + firstname.trim() + "') and upper(lastname) = upper('" + lastname.trim() + "') ", Customers.class);
             cm = (Customers) q.getSingleResult();
         } catch (Exception e) {
@@ -141,6 +140,24 @@ public class CustomersFacade extends AbstractFacade<Customers> {
             cm = (Customers) q.getSingleResult();
         } catch (Exception e) {
             logger.log(Level.INFO, "Customer not found or duplicate facebookId  found :" + fbId, e);
+        }
+        return cm;
+    }
+
+    public Customers findById(int id) {
+        Customers cm = null;
+        try {
+            CriteriaBuilder cb = em.getCriteriaBuilder();
+            CriteriaQuery<Customers> cq = cb.createQuery(Customers.class);
+            Root<Customers> rt = cq.from(Customers.class);
+
+            Expression<Integer> custId = rt.get("id");
+            cq.where(cb.equal(custId, id));
+
+            Query q = em.createQuery(cq);
+            cm = (Customers) q.getSingleResult();
+        } catch (Exception e) {
+            logger.log(Level.INFO, "Customer not found or duplicate Id  found :" + id, e);
         }
         return cm;
     }

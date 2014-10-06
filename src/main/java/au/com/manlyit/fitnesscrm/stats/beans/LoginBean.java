@@ -58,7 +58,7 @@ public class LoginBean implements Serializable {
     private final StringEncrypter encrypter = new StringEncrypter("(lqKdh^Gr$2F^KJHG654)");
 
     public String getUsername() {
-       
+
         return this.username;
     }
 
@@ -91,14 +91,8 @@ public class LoginBean implements Serializable {
 
     }
 
-    public String resetPassword() {
-        /*     try {
-         String redirectUrl = configMapFacade.getConfig("login.password.reset.redirect.url") + this.username;
-         FacesContext.getCurrentInstance().getExternalContext().redirect(redirectUrl);
-         } catch (IOException ex) {
-         Logger.getLogger(LoginBean.class.getName()).log(Level.SEVERE, "Failed to redirect to password reset URL", ex);
-         }*/
-        Customers current = ejbCustomerFacade.findCustomerByUsername(username);
+    public void doPasswordReset(String templateName,Customers current,String subject) {
+        
         //valid user that wants the password reset
         //generate link and send
         if (current != null) {
@@ -117,11 +111,14 @@ public class LoginBean implements Serializable {
                 urlLink = configMapFacade.getConfig("login.password.reset.redirect.url") + encodedNonceEncrypted;
 
                 //send email
-                String htmlText = "<table width=\"600\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\">  <tr>    <td><img src=\"cid:logoimg_cid\"/></td>  </tr>  <tr>    <td height=\"220\"> <p>Pure Fitness Manly</p>      <p>Please click the following link to reset your password:</p><p>To reset your password click <a href=\"" + urlLink + "\">here</a>.</p></td>  </tr>  <tr>    <td height=\"50\" align=\"center\" valign=\"middle\" bgcolor=\"#CCCCCC\">www.purefitnessmanly.com.au | sarah@purefitnessmanly.com.au | +61433818067</td>  </tr></table>";
+                String templatePlaceholder = "<!--LINK-URL-->";
+                String htmlText = configMapFacade.getConfig(templateName);
+                htmlText = htmlText.replace(templatePlaceholder, urlLink);
+                //String htmlText = "<table width=\"600\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\">  <tr>    <td><img src=\"cid:logoimg_cid\"/></td>  </tr>  <tr>    <td height=\"220\"> <p>Pure Fitness Manly</p>      <p>Please click the following link to reset your password:</p><p>To reset your password click <a href=\"" + urlLink + "\">here</a>.</p></td>  </tr>  <tr>    <td height=\"50\" align=\"center\" valign=\"middle\" bgcolor=\"#CCCCCC\">www.purefitnessmanly.com.au | sarah@purefitnessmanly.com.au | +61433818067</td>  </tr></table>";
 
                 //String host, String to, String ccAddress, String from, String emailSubject, String message, String theAttachedfileName, boolean debug
                 //emailAgent.send("david@manlyit.com.au", "", "info@purefitnessmanly.com.au", "Password Reset", htmlText, null, true);
-                emailSendResult = ejbPaymentBean.sendAsynchEmail(current.getEmailAddress(), configMapFacade.getConfig("PasswordResetCCEmailAddress"), configMapFacade.getConfig("PasswordResetFromEmailAddress"), configMapFacade.getConfig("PasswordResetEmailSubject"), htmlText, null, emailServerProperties(), false);
+                emailSendResult = ejbPaymentBean.sendAsynchEmail(current.getEmailAddress(), configMapFacade.getConfig("PasswordResetCCEmailAddress"), configMapFacade.getConfig("PasswordResetFromEmailAddress"), subject, htmlText, null, emailServerProperties(), false);
                 JsfUtil.addSuccessMessage("Password Reset Successful!", configMapFacade.getConfig("PasswordResetSuccessful"));
                 FacesContext context = FacesContext.getCurrentInstance();
                 ActivationBean controller = (ActivationBean) context.getApplication().evaluateExpressionGet(context, "#{activationBean}", ActivationBean.class);
@@ -133,6 +130,18 @@ public class LoginBean implements Serializable {
         } else {
             JsfUtil.addErrorMessage("Error", configMapFacade.getConfig("PasswordResetErrorValidUsernameRequired"));
         }
+
+    }
+
+    public String resetPassword() {
+        /*     try {
+         String redirectUrl = configMapFacade.getConfig("login.password.reset.redirect.url") + this.username;
+         FacesContext.getCurrentInstance().getExternalContext().redirect(redirectUrl);
+         } catch (IOException ex) {
+         Logger.getLogger(LoginBean.class.getName()).log(Level.SEVERE, "Failed to redirect to password reset URL", ex);
+         }*/
+        Customers current = ejbCustomerFacade.findCustomerByUsername(username);
+        doPasswordReset("system.reset.password.template",current,configMapFacade.getConfig("PasswordResetEmailSubject"));
         return "activation";
         /* if (this.isMobileDeviceUserAgent() == true) {
          return "/mobileMenu";
@@ -183,13 +192,13 @@ public class LoginBean implements Serializable {
     public void checkAlreadyLoggedin() throws IOException {
         FacesContext context = FacesContext.getCurrentInstance();
         HttpServletRequest request = (HttpServletRequest) context.getExternalContext().getRequest();
-        
+
         String authenticatedUser = request.getRemoteUser();
-        if(authenticatedUser != null){
+        if (authenticatedUser != null) {
             logger.log(Level.INFO, "Authenticated user accessing login page. Redirecting to the landing page.");
-            redirectToLandingPage();           
+            redirectToLandingPage();
         }
-        
+
     }
 
     private void redirectToLandingPage() {

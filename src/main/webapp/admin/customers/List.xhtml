@@ -139,7 +139,7 @@
                             <p:inputText id="telephone1" value="#{customersController.selected.telephone}" title="#{configMapController.getKey('CreateCustomersTitle_telephone')}" required="true" >
                                 <f:validator validatorId="au.com.manlyit.fitnesscrm.stats.classes.util.PhoneNumberValidator" />
                             </p:inputText>
-                            
+
                             <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_fax')}" for="fax1" />
                             <p:inputText id="fax1" value="#{customersController.selected.fax}" title="#{configMapController.getKey('CreateCustomersTitle_fax')}" />
 
@@ -191,6 +191,7 @@
                                 <p:ajax listener="#{customersController.checkPassChange}" event="keyup" />
                             </p:password>
                             <p:commandButton  id="passButton" ajax="true" actionListener="#{customersController.updatepass}" update=":growl"   value="#{configMapController.getKey('EditCustomersUpdatePassword')}" immediate="true"/>
+                            <p:commandButton rendered="#{not empty ezidebit.eziDebitEDDRFormUrl and ezidebit.showAddToPaymentGatewayButton}" value="#{configMapController.getKey('sendCustomerOnBoardEmailButton')}"  action="#{customersController.sendCustomerOnboardEmail}" update=":growl "/>
                             <p:panel>
                                 <p:commandButton id="dialogueSave1"  actionListener="#{customersController.createDialogue}" value="#{configMapController.getKey('CreateCustomersSaveLink')}" update=":tv:customerslistForm1:customersTableList :growl"/>                
                             </p:panel>
@@ -215,7 +216,6 @@
 
 
 
-
                 <p:tab id="tab3" title="Payment Information" rendered="#{ezidebit.paymentGatewayEnabled}" >  
                     <h:form id="paymentsForm" > 
 
@@ -228,7 +228,8 @@
                         <p:outputPanel id="mainPanel" rendered="#{ezidebit.asyncOperationRunning == false and ezidebit.customerDetailsHaveBeenRetrieved == true  }" >
                             <p:commandButton id="reloadPageButton" value="Reload Page" actionListener="#{ezidebit.refreshPaymentsPage}" rendered="#{ezidebit.customerExistsInPaymentGateway }" update=":tv:paymentsForm  :growl" />
                             <p:commandButton id="paymentsButton" rendered="#{ezidebit.showAddToPaymentGatewayButton}"    actionListener="#{ezidebit.createCustomerRecord}" update=":growl :tv:paymentsForm "   value="#{configMapController.getKey('EditCustomersUpdatePayment')}" />
-                            <p:commandButton id="eddrButton" rendered="#{ezidebit.showAddToPaymentGatewayButton}"    oncomplete="PF('createEddrLinkDialogueWidget').show();" update=":growl :tv:paymentsForm "   value="#{configMapController.getKey('EditCustomersUpdatePayment')}" />
+                            <p:commandButton id="eddrButton" rendered="#{ezidebit.showAddToPaymentGatewayButton}"    oncomplete="PF('createEddrLinkDialogueWidget').show();" update=":growl :tv:paymentsForm "   value="#{configMapController.getKey('WebDDRScheduleSetupButton')}" />
+                            <p:commandButton rendered="#{not empty ezidebit.eziDebitEDDRFormUrl and ezidebit.showAddToPaymentGatewayButton}" value="#{configMapController.getKey('sendCustomerOnBoardEmailButton')}"  action="#{customersController.sendCustomerOnboardEmail}" update=":growl "/>
 
                             <p:commandButton id="showAddPaymentButton" rendered="#{ezidebit.waitingForPaymentDetails == false and ezidebit.customerCancelledInPaymentGateway == false and ezidebit.customerExistsInPaymentGateway == true}" oncomplete="PF('createPaymentDialogueWidget').show();"    value="#{configMapController.getKey('AddPaymentButtonLink')}"  update=":growl " /> 
                             <p:commandButton id="showAddPaymentScheduleButton" rendered="#{ezidebit.waitingForPaymentDetails == false and ezidebit.customerCancelledInPaymentGateway == false and ezidebit.customerExistsInPaymentGateway == true}" oncomplete="PF('createPaymentScheduleDialogueWidget').show();"    value="#{configMapController.getKey('AddPaymentScheduleButtonLink')}" update=":growl "  /> 
@@ -239,7 +240,7 @@
                             <h:outputText rendered="#{!ezidebit.asyncOperationRunning}" value=" Status: Idle"/>
                             <h:outputText rendered="#{ezidebit.asyncOperationRunning}" value="Status: Busy"/>
                         </p:outputPanel>
- 
+
 
                         <p:panel  id="paymentsTablePanel" rendered="#{ezidebit.paymentsList != null and ezidebit.customerExistsInPaymentGateway == true}">
                             <p:dataTable  id="paymentsTable"
@@ -358,7 +359,7 @@
 
                             </p:panelGrid>
                         </p:panel>
-                       
+
 
 
                         <p:remoteCommand name="taskCompleted" actionListener="#{ezidebit.pollerListener}" />
@@ -528,7 +529,7 @@
             </script>
             <ui:include src="Create.xhtml"/>
             <ui:include src="CreateSchedule.xhtml"/>
-             <ui:include src="CreateEddrLink.xhtml"/>
+            <ui:include src="CreateEddrLink.xhtml"/>
             <ui:include src="CreatePayment.xhtml"/>
             <ui:include src="EditPaymentMethod.xhtml"/>
         </ui:define>
