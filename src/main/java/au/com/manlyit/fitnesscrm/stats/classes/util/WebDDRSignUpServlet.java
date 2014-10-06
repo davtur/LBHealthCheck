@@ -27,6 +27,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.primefaces.context.RequestContext;
 
 @WebServlet("/callback.html")
 public class WebDDRSignUpServlet extends HttpServlet {
@@ -74,7 +75,9 @@ public class WebDDRSignUpServlet extends HttpServlet {
         //boolean mobileDevice = false;
         FacesContext context = FacesContext.getCurrentInstance();
         String sessionID = httpSession.getId();
-        logger.log(Level.INFO, "Params:{0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12},{13},{14},{15},{16},{17}",new Object[]{uref,cref,fname,lname,email,mobile,addr,suburb,state,pcode,rdate,ramount,freq,odate,oamount,numpayments,totalamount,method});
+        logger.log(Level.INFO, "Session:{0}, Params:{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12},{13},{14},{15},{16},{17},{18}", new Object[]{sessionID, uref, cref, fname, lname, email, mobile, addr, suburb, state, pcode, rdate, ramount, freq, odate, oamount, numpayments, totalamount, method});
+
+        
         response.sendRedirect(request.getContextPath() + getValueFromKey("facebook.redirect.landingpage"));
 
     }

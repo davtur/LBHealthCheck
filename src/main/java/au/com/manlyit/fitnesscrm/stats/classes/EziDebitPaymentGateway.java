@@ -1700,7 +1700,7 @@ public class EziDebitPaymentGateway implements Serializable {
         widgetUrl += amp + "freq=" + paymentSchedulePeriodType;
         widgetUrl += amp + "aDur=" + configMapFacade.getConfig("payment.ezidebit.webddr.aDur");
         widgetUrl += amp + "dur=" + configMapFacade.getConfig("payment.ezidebit.webddr.dur");
-      // TODO  widgetUrl += amp + "callback=" + configMapFacade.getConfig("payment.ezidebit.webddr.callback");
+        widgetUrl += amp + "callback=" + configMapFacade.getConfig("payment.ezidebit.webddr.callback");
 
         FacesContext context = FacesContext.getCurrentInstance();
         CustomersController controller = (CustomersController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "customersController");
