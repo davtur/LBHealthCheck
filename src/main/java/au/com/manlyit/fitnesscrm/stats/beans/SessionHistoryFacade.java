@@ -74,7 +74,6 @@ public class SessionHistoryFacade extends AbstractFacade<SessionHistory> {
         return ((Long) q.getSingleResult()).intValue();
     }
 
-
     public List<SessionHistory> findAll(boolean sortAsc) {
         List<SessionHistory> retList = null;
         try {
@@ -209,6 +208,33 @@ public class SessionHistoryFacade extends AbstractFacade<SessionHistory> {
         }
 
         return retList;
+    }
+
+    public int countSessionsByTrainerAndDateRange(Customers trainer, Date startDate, Date endDate, boolean sortAsc) {
+
+        try {
+            CriteriaBuilder cb = em.getCriteriaBuilder();
+            CriteriaQuery<Long> cq = cb.createQuery(Long.class);
+            Root<Long> rt = cq.from(Long.class);
+
+            Join<SessionHistory, SessionTrainers> jn = rt.joinCollection("sessionTrainersCollection");
+            Expression<Customers> sessionTrainer = jn.get("customerId");
+            Expression<Date> stime = rt.get("sessiondate");
+
+            Predicate condition1 = cb.between(stime, startDate, endDate);
+            Predicate condition2 = cb.equal(sessionTrainer, trainer);
+            cq.where(cb.and(condition1, condition2));
+
+            cq.select(cb.count(rt));
+
+            Query q = em.createQuery(cq);
+            return ((Long) q.getSingleResult()).intValue();
+
+        } catch (Exception e) {
+            JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
+        }
+
+        return -1;
     }
 
     public int countSessionsByTrainer(Customers trainer) {

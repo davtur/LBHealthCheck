@@ -15,23 +15,23 @@
 
                 <p:panelGrid columns="6" style="width:100%"  >
                     <p:outputLabel value="#{configMapController.getKey('SelectStartDateForSessionHistory_Label')}" for="sessionstart" />
-                    <p:calendar id="sessionstart" value="#{mySessionsChart1.startDate}" pattern="dd MMMM yyyy"
+                    <p:calendar id="sessionstart" value="#{mySessionsChart1.startDate}" pattern="dd MMMM yyyy" valueChangeListener="#{sessionHistoryController.recreateTrainerSessionsTableModel}"
                                 title="#{configMapController.getKey('SelectStartDateForSessionHistory_Title')}"    >
-                        <p:ajax event="dateSelect"  update="sessionChart"  />
+                        <p:ajax event="dateSelect"  update="sessionChart sessionsDataTable" />
                     </p:calendar> 
                     <p:outputLabel value="#{configMapController.getKey('SelectEndDateForSessionHistory_Label')}" for="sessionend" />
-                    <p:calendar id="sessionend" value="#{mySessionsChart1.endDate}"  pattern="dd MMMM yyyy"
+                    <p:calendar id="sessionend" value="#{mySessionsChart1.endDate}"  pattern="dd MMMM yyyy" valueChangeListener="#{sessionHistoryController.recreateTrainerSessionsTableModel}"
                                 title="#{configMapController.getKey('SelectEndDateForSessionHistory_Title')}"    >
-                        <p:ajax event="dateSelect"  update="sessionChart"  />
+                        <p:ajax event="dateSelect"  update="sessionChart sessionsDataTable" />
                     </p:calendar> 
                     <p:outputLabel value="#{configMapController.getKey('SelectDateIntervalForSessionHistory_Label')}" for="chartInterval" />
                     <p:selectOneMenu id="chartInterval"   value="#{mySessionsChart1.dateInterval}"   label="#{configMapController.getKey('CreateSessionHistoryTitle_trainer')}" >
                         <f:selectItems value="#{mySessionsChart1.dateIntervalItems}" />                         
-                        <p:ajax   update="sessionChart" />
+                        <p:ajax   update="sessionChart "  />
                     </p:selectOneMenu>
                 </p:panelGrid>
 
-                <p:panel header="My Sessions Chart (The number of sessions conducted each week.)">
+                <p:panel header="#{configMapController.getKey('ListSessionHistoryTitleTrainerChartHeader')}">
                     <p:barChart id="sessionChart" legendPosition="ne" title="#{customersController.selected.firstname} #{customersController.selected.lastname}" extender="chartExtender" styleClass="chartClass" value="#{mySessionsChart1.model2}" xaxisLabel="#{mySessionsChart1.xaxisLabel}" xaxisAngle="65"   stacked="true"/>
                 </p:panel>
 
@@ -46,14 +46,31 @@
                     }
                 </script>
 
-                <h:panelGroup >
+
+                <p:panel >
                     <p:commandButton id="createButtonDialogue"  onclick="PF('createSessionDialogueWidget').show()" type="button" value="#{configMapController.getKey('ListSessionHistoryCreateLink')}"/>
-                    
+                    <p:spacer/>
                     <p:commandButton id="createButtonMobile" ajax="false" action="#{sessionHistoryController.prepareCreateMobileReturnCreate}" value="#{configMapController.getKey('ListSessionHistoryCreateMobileLink')}"/>
-                </h:panelGroup>
-                <h:outputText escape="false" value="#{configMapController.getKey('ListSessionHistoryEmpty')}" rendered="#{sessionHistoryController.customerItems.rowCount == 0}"/>
+                    <p:spacer />
+                    <h:outputText escape="false" value="#{configMapController.getKey('ListSessionHistoryEmpty')}" rendered="#{sessionHistoryController.customerItems.rowCount == 0}"/>
+
+                    <p:outputLabel  value="#{configMapController.getKey('ListSessionHistoryShowTrainerSessions')}" for="allSessionsSelected" rendered="#{sessionHistoryController.customerItems.rowCount > 0}"/>
+
+                    <p:selectBooleanCheckbox id="allSessionsSelected"   value="#{sessionHistoryController.showAllSessionsByTrainer}" rendered="#{sessionHistoryController.customerItems.rowCount > 0}">  
+                        <p:ajax update="sessionsDataTable" />  
+                    </p:selectBooleanCheckbox> 
+                    <p:spacer/>
+                    <p:commandButton value="Export as PDF" ajax="false" rendered="#{sessionHistoryController.customerItems.rowCount > 0}">
+                        <p:dataExporter type="pdf" target="sessionsDataTable" fileName="trainer-session-history" preProcessor="#{sessionHistoryController.preProcessPDF}"/>
+                    </p:commandButton>
+                    <p:spacer/>
+                    <p:commandButton value="Export as Excel" ajax="false" rendered="#{sessionHistoryController.customerItems.rowCount > 0}">
+                        <p:dataExporter type="xls" target="sessionsDataTable" fileName="trainer-session-history" preProcessor="#{sessionHistoryController.preProcessXLS}"/>
+                    </p:commandButton>
+                </p:panel>
                 <h:panelGroup rendered="#{sessionHistoryController.customerItems.rowCount > 0}">
-                    <p:dataTable id="sessionsDataTable" value="#{sessionHistoryController.customerItems}" filteredValue="#{sessionHistoryController.filteredItems}"  var="item" widgetVar="sessionsTable"  paginator="true" rows="15"  paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  rowsPerPageTemplate="5,10,15,20,25,50,100" >
+
+                    <p:dataTable id="sessionsDataTable" value="#{sessionHistoryController.customerItems}" filteredValue="#{sessionHistoryController.filteredItems}"  var="item" widgetVar="sessionsTable"  paginator="true" rows="10"  paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  rowsPerPageTemplate="5,10,15,20,25,50,100" >
                         <f:facet name="header">
                             <p:outputPanel>
                                 <h:outputText value="Search all fields:" />
@@ -74,7 +91,7 @@
                                 <f:convertDateTime pattern="dd/MM/yyyy" />
                             </h:outputText>
                         </p:column>
-                        <p:column sortBy="#{item.sessionTrainersCollection[0].customerId.firstname}" >
+                        <p:column sortBy="#{item.sessionTrainersCollection[0].customerId.firstname}" exportable="false">
                             <f:facet name="header">
                                 <h:outputText value="Trainer(s)"/>
                             </f:facet>
@@ -102,14 +119,14 @@
                             </f:facet>
                             <h:outputText value="#{item.comments}"/>
                         </p:column>
-                      <p:column sortBy="#{item.adminNotes}" filterBy="#{item.adminNotes}"  headerText="#{configMapController.getKey('ListSessionHistoryTitle_adminNotes')}" >
+                        <p:column sortBy="#{item.adminNotes}" filterBy="#{item.adminNotes}"  headerText="#{configMapController.getKey('ListSessionHistoryTitle_adminNotes')}" >
                             <f:facet name="header">
                                 <h:outputText value="#{configMapController.getKey('ListSessionHistoryTitle_adminNotes')}"/>
                             </f:facet>
                             <h:outputText value="#{item.adminNotes}"/>
                         </p:column>
 
-                        <p:column>
+                        <p:column exportable="false">
                             <f:facet name="header">
                                 <h:outputText value="&nbsp;"/>
                             </f:facet>

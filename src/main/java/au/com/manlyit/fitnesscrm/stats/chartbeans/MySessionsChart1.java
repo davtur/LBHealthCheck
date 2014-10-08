@@ -115,6 +115,25 @@ public class MySessionsChart1 implements Serializable {
         model.addSeries(ptSessionSeries);
 
     }
+    public Date getChartStartTime(){
+         GregorianCalendar startCal = new GregorianCalendar();
+         startCal.setTime(getStartDate());
+        startCal.set(Calendar.HOUR, 0);
+        startCal.set(Calendar.SECOND, 0);
+        startCal.set(Calendar.MINUTE, 0);
+        startCal.set(Calendar.MILLISECOND, 0);
+        
+        return startCal.getTime();
+    }
+    public Date getChartEndTime(){
+        GregorianCalendar endCal = new GregorianCalendar();
+        endCal.setTime(getEndDate());
+        endCal.set(Calendar.HOUR, 23);
+        endCal.set(Calendar.SECOND, 59);
+        endCal.set(Calendar.MINUTE, 59);
+        endCal.set(Calendar.MILLISECOND, 999);
+        return endCal.getTime();
+    }
 
     private CartesianChartModel createSessionsChart(boolean isTrainer, Customers user) {
         CartesianChartModel ccModel;
@@ -143,19 +162,10 @@ public class MySessionsChart1 implements Serializable {
 
         }
         SimpleDateFormat sdf = new SimpleDateFormat(dateFormatString);
+        setStartDate(getChartStartTime());
         startCal.setTime(getStartDate());
-        startCal.set(Calendar.HOUR, 0);
-        startCal.set(Calendar.SECOND, 0);
-        startCal.set(Calendar.MINUTE, 0);
-        startCal.set(Calendar.MILLISECOND, 0);
-        setStartDate(startCal.getTime());
-
-        endCal.setTime(getEndDate());
-        endCal.set(Calendar.HOUR, 23);
-        endCal.set(Calendar.SECOND, 59);
-        endCal.set(Calendar.MINUTE, 59);
-        endCal.set(Calendar.MILLISECOND, 999);
-
+        endCal.setTime(getChartEndTime());
+        
         while (startCal.compareTo(endCal) < 0) {
             startCal.add(calendarIncrementInterval, 1);
             numberOfSeriesPoints++;

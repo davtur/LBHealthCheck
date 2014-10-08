@@ -10,10 +10,18 @@ import au.com.manlyit.fitnesscrm.stats.classes.util.PfSelectableDataModel;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import au.com.manlyit.fitnesscrm.stats.db.Participants;
 import au.com.manlyit.fitnesscrm.stats.db.SessionTrainers;
+import com.lowagie.text.BadElementException;
+import com.lowagie.text.Document;
+import com.lowagie.text.DocumentException;
+import com.lowagie.text.Image;
+import com.lowagie.text.Paragraph;
+
 import java.awt.event.ActionEvent;
+import java.io.File;
 import java.io.IOException;
 
 import java.io.Serializable;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -35,7 +43,14 @@ import javax.faces.convert.Converter;
 import javax.faces.convert.FacesConverter;
 import javax.faces.event.ValueChangeEvent;
 import javax.faces.model.SelectItem;
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
+import org.apache.poi.hssf.usermodel.HSSFCellStyle;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.hssf.util.HSSFColor;
+import org.primefaces.context.RequestContext;
 import org.primefaces.event.SelectEvent;
 import org.primefaces.model.DualListModel;
 import org.primefaces.model.SelectableDataModel;
@@ -75,6 +90,7 @@ public class SessionHistoryController implements Serializable {
     private List<Customers> trainers;
     private int hourSpinner = 0;
     private int minuteSpinner = 0;
+    private boolean showAllSessionsByTrainer = false;
 
     public SessionHistoryController() {
     }
@@ -152,7 +168,7 @@ public class SessionHistoryController implements Serializable {
 
                 @Override
                 public PfSelectableDataModel createPageDataModel() {
-                    
+
                     return new PfSelectableDataModel<>(ejbFacade.findAll(false));
                 }
 
@@ -184,14 +200,25 @@ public class SessionHistoryController implements Serializable {
 
                 @Override
                 public int getItemsCount() {
-                    return getFacade().countSessionsByTrainer(getLoggedInUser());
+                    if (showAllSessionsByTrainer) {
+                        return getFacade().countSessionsByTrainer(getLoggedInUser());
+                    } else {
+                        FacesContext context = FacesContext.getCurrentInstance();
+                        MySessionsChart1 mySessionsChart1Controller = (MySessionsChart1) context.getApplication().evaluateExpressionGet(context, "#{mySessionsChart1}", MySessionsChart1.class);
+                        return getFacade().countSessionsByTrainerAndDateRange(getLoggedInUser(), mySessionsChart1Controller.getChartStartTime(), mySessionsChart1Controller.getChartEndTime(), false);
+                    }
                 }
 
                 @Override
                 public PfSelectableDataModel createPageDataModel() {
-                    
+                    if (showAllSessionsByTrainer) {
+                        return new PfSelectableDataModel<>(ejbFacade.findSessionsByTrainer(getLoggedInUser(), false));
+                    } else {
+                        FacesContext context = FacesContext.getCurrentInstance();
+                        MySessionsChart1 mySessionsChart1Controller = (MySessionsChart1) context.getApplication().evaluateExpressionGet(context, "#{mySessionsChart1}", MySessionsChart1.class);
+                        return new PfSelectableDataModel<>(ejbFacade.findSessionsByTrainerAndDateRange(getLoggedInUser(), mySessionsChart1Controller.getChartStartTime(), mySessionsChart1Controller.getChartEndTime(), false));
 
-                    return new PfSelectableDataModel<>(ejbFacade.findSessionsByTrainer(getLoggedInUser(), false));
+                    }
                 }
 
             };
@@ -548,7 +575,14 @@ public class SessionHistoryController implements Serializable {
         }
         return participantItems;
     }
+    public void recreateTrainerSessionsTableModel(){
+        customerItems = null;
+        filteredItems = null;
+       // RequestContext requestContext = RequestContext.getCurrentInstance();
 
+       // requestContext.execute("PF('sessionsDataTable').filter();");
+    }
+  
     public void recreateModel() {
         items = null;
         customerItems = null;
@@ -822,6 +856,76 @@ public class SessionHistoryController implements Serializable {
      */
     public void setMinuteSpinner(int minuteSpinner) {
         this.minuteSpinner = minuteSpinner;
+    }
+
+    /**
+     * @return the showAllSessionsByTrainer
+     */
+    public boolean isShowAllSessionsByTrainer() {
+        return showAllSessionsByTrainer;
+    }
+
+    /**
+     * @param showAllSessionsByTrainer the showAllSessionsByTrainer to set
+     */
+    public void setShowAllSessionsByTrainer(boolean showAllSessionsByTrainer) {
+        customerItems = null;
+        filteredItems = null;
+
+        this.showAllSessionsByTrainer = showAllSessionsByTrainer;
+    }
+
+    public void preProcessXLS(Object document) {
+         String trainer = "Trainer Session History for " + getLoggedInUser().getFirstname() + " " + getLoggedInUser().getLastname();
+        
+        HSSFWorkbook wb = (HSSFWorkbook) document;
+        HSSFSheet sheet = wb.getSheetAt(0);
+        sheet.createRow(0);
+        HSSFRow header = sheet.getRow(0);
+        header.getCell(0).setCellValue(trainer);
+        HSSFCellStyle cellStyle = wb.createCellStyle();
+        cellStyle.setFillForegroundColor(HSSFColor.GREEN.index);
+        cellStyle.setFillPattern(HSSFCellStyle.SOLID_FOREGROUND);
+        for (int i = 1; i < header.getPhysicalNumberOfCells(); i++) {
+            header.getCell(i).setCellStyle(cellStyle);
+        }
+    } 
+
+    public void postProcessXLS(Object document) {
+       
+        HSSFWorkbook wb = (HSSFWorkbook) document;
+        HSSFSheet sheet = wb.getSheetAt(0);
+        HSSFRow header = sheet.getRow(0);
+        HSSFCellStyle cellStyle = wb.createCellStyle();
+        cellStyle.setFillForegroundColor(HSSFColor.GREEN.index);
+        cellStyle.setFillPattern(HSSFCellStyle.SOLID_FOREGROUND);
+        for (int i = 0; i < header.getPhysicalNumberOfCells(); i++) {
+            header.getCell(i).setCellStyle(cellStyle);
+        }
+    }
+
+    public void preProcessPDF(Object document) throws IOException,
+            BadElementException, DocumentException {
+        Document pdf = (Document) document;
+        //FacesContext context = FacesContext.getCurrentInstance();
+        //ExternalContext ec = context.getExternalContext();
+        //HttpServletRequest request = (HttpServletRequest) context.getExternalContext().getRequest();
+        ServletContext servletContext = (ServletContext) FacesContext.getCurrentInstance().getExternalContext().getContext();
+        String logo = servletContext.getContextPath() + File.separator + "resources" + File.separator + "images"
+                + File.separator + "logo.png";
+        URL imageResource = servletContext.getResource(File.separator + "resources" + File.separator + "images"
+                + File.separator + "logo.png");
+        pdf.open();
+        pdf.add(Image.getInstance(new URL("https://services.purefitnessmanly.com.au/FitnessStats/resources/images/logo.png")));
+        String trainer = "Trainer Session History for " + getLoggedInUser().getFirstname() + " " + getLoggedInUser().getLastname();
+        pdf.addTitle(trainer);
+        pdf.add(new Paragraph(trainer));
+        pdf.add(new Paragraph(" "));
+    }
+
+    public void postProcessPDF(Object document) throws IOException,
+            BadElementException, DocumentException {
+
     }
 
     @FacesConverter(forClass = SessionHistory.class)

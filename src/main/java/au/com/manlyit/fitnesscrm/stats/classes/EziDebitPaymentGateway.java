@@ -1708,7 +1708,7 @@ public class EziDebitPaymentGateway implements Serializable {
         widgetUrl += amp + "suburb=" + cust.getSuburb();
         widgetUrl += amp + "state=" + cust.getAddrState();
         widgetUrl += amp + "pCode=" + cust.getPostcode();
-        widgetUrl += amp + "debits=2";
+        widgetUrl += amp + "debits=" + configMapFacade.getConfig("payment.ezidebit.webddr.debits");
         widgetUrl += amp + "rAmount=" + nf.format(paymentAmountInCents);
         widgetUrl += amp + "rDate=" + sdf.format(paymentDebitDate);
         widgetUrl += amp + "aFreq=" + configMapFacade.getConfig("payment.ezidebit.webddr.aFreq");

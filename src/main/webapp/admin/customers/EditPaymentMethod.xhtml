@@ -14,7 +14,7 @@
             <h:form id="iFrameForm" > 
                 <p:outputPanel id="iFramePanel" >
                          <p:panel id="viewPaymentsGrid" header="#{configMapController.getKey('EditPaymentMethodDialogueCustName')} #{customersController.selected.firstname} #{customersController.selected.lastname}" >
-                            <iframe id="ezidebitIframeView" src="#{ezidebit.getEziDebitWidgetUrl()}"  style="width:600px;height:800px" />
+                            <iframe id="ezidebitIframeView" src="#{ezidebit.getEziDebitWidgetUrl()}"   />
                         </p:panel>
                 </p:outputPanel>
 
