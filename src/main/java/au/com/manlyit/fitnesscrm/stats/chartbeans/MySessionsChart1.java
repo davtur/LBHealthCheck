@@ -34,6 +34,7 @@ import javax.annotation.PostConstruct;
 import javax.el.ELException;
 import javax.enterprise.context.SessionScoped;
 import javax.faces.model.SelectItem;
+import org.primefaces.model.chart.AxisType;
 import org.primefaces.model.chart.BarChartSeries;
 
 @Named("mySessionsChart1")
@@ -122,16 +123,17 @@ public class MySessionsChart1 implements Serializable {
         startCal.set(Calendar.SECOND, 0);
         startCal.set(Calendar.MINUTE, 0);
         startCal.set(Calendar.MILLISECOND, 0);
-        
+        setStartDate(startCal.getTime());
         return startCal.getTime();
     }
     public Date getChartEndTime(){
         GregorianCalendar endCal = new GregorianCalendar();
         endCal.setTime(getEndDate());
-        endCal.set(Calendar.HOUR, 23);
-        endCal.set(Calendar.SECOND, 59);
-        endCal.set(Calendar.MINUTE, 59);
-        endCal.set(Calendar.MILLISECOND, 999);
+        endCal.set(Calendar.HOUR, 0);
+        endCal.set(Calendar.SECOND, 0);
+        endCal.set(Calendar.MINUTE, 0);
+        endCal.set(Calendar.MILLISECOND, 0);
+        setEndDate(endCal.getTime());
         return endCal.getTime();
     }
 
@@ -162,8 +164,8 @@ public class MySessionsChart1 implements Serializable {
 
         }
         SimpleDateFormat sdf = new SimpleDateFormat(dateFormatString);
-        setStartDate(getChartStartTime());
-        startCal.setTime(getStartDate());
+ 
+        startCal.setTime(getChartStartTime());
         endCal.setTime(getChartEndTime());
         
         while (startCal.compareTo(endCal) < 0) {
@@ -172,10 +174,10 @@ public class MySessionsChart1 implements Serializable {
         }
         startCal.setTime(getStartDate());
         endCal.setTime(getStartDate());
-        endCal.set(Calendar.HOUR, 23);
-        endCal.set(Calendar.SECOND, 59);
-        endCal.set(Calendar.MINUTE, 59);
-        endCal.set(Calendar.MILLISECOND, 999);
+        //endCal.set(Calendar.HOUR, 23);
+        //endCal.set(Calendar.SECOND, 59);
+       // endCal.set(Calendar.MINUTE, 59);
+        //endCal.set(Calendar.MILLISECOND, 999);
         endCal.add(calendarIncrementInterval, 1);
 
         List<BarChartSeries> seriesList = new ArrayList<>();
@@ -183,36 +185,41 @@ public class MySessionsChart1 implements Serializable {
         List<SessionTypes> sessionTypesList = ejbSessionTypesFacade.findAll();
 
         for (SessionTypes st : sessionTypesList) {
-            BarChartSeries lcs = new BarChartSeries();
-            lcs.setLabel(st.getName());
-            seriesList.add(lcs);
+            BarChartSeries barChartSeries = new BarChartSeries();
+            barChartSeries.setLabel(st.getName());
+            seriesList.add(barChartSeries);
         }
         try {
             for (int x = 0; x < numberOfSeriesPoints; x++) {
 
                 String xAxixValue = sdf.format(startCal.getTime());
                 for (BarChartSeries lcs : seriesList) {
-                    lcs.set(xAxixValue, new Double(0));
+                    lcs.set(xAxixValue, (double) 0);
                 }
+                Date strt = startCal.getTime();
+                Date end  = endCal.getTime();
                 if (isTrainer == false) {
-                    sessions = ejbSessionHistoryFacade.findSessionsByParticipantAndDateRange(user, startCal.getTime(), endCal.getTime(), true);
+                    sessions = ejbSessionHistoryFacade.findSessionsByParticipantAndDateRange(user,strt ,end , true);
                 } else {
-                    sessions = ejbSessionHistoryFacade.findSessionsByTrainerAndDateRange(user, startCal.getTime(), endCal.getTime(), true);
+                    sessions = ejbSessionHistoryFacade.findSessionsByTrainerAndDateRange(user, strt, end, true);
+                    logger.log(Level.FINE, "Get Sessions for Trainer:{0}, No.Sessions:{1},startdate:{2},End date:{3}",new Object[]{user.getUsername(),sessions.size(),strt,end});
                 }
 
                 for (SessionHistory sess : sessions) {
                     String type = sess.getSessionTypesId().getName();
-                    for (BarChartSeries lcs : seriesList) {
-                        if (lcs.getLabel().compareTo(type) == 0) {
-                            Double c = (Double) lcs.getData().get(xAxixValue);
+                    for (BarChartSeries barChartSeries : seriesList) {
+                        if (barChartSeries.getLabel().compareTo(type) == 0) {
+                            Double c = (Double) barChartSeries.getData().get(xAxixValue);
+                            
                             if (c == null) {
                                 c = new Double(1);
                             } else {
-                                c = c + new Double(1);
+                                c = c + (double) 1;
                             }
-                            lcs.set(xAxixValue, c);
-                            int index = seriesList.indexOf(lcs);
-                            seriesList.set(index, lcs);
+                            logger.log(Level.FINE, "Get Sessions for Trainer.Add chartpoint at {1}, Value:{1}",new Object[]{c.toString(),xAxixValue});
+                            barChartSeries.set(xAxixValue, c);
+                            int index = seriesList.indexOf(barChartSeries);
+                            seriesList.set(index, barChartSeries);
                         }
                     }
                 }
@@ -227,7 +234,7 @@ public class MySessionsChart1 implements Serializable {
         int numberOfSeriesAddedToChart = 0;
         for (BarChartSeries bcs : seriesList) {
             Collection<Number> values = bcs.getData().values();
-            Double totalSessions = new Double(0);
+            Double totalSessions = (double) 0;
             Iterator i = values.iterator();
             while (i.hasNext()) {
                 totalSessions = totalSessions + (Double) i.next();
@@ -240,7 +247,12 @@ public class MySessionsChart1 implements Serializable {
         }
         if (numberOfSeriesAddedToChart == 0) { // add an empty series with a label of empty
             if (seriesList.isEmpty() == false) {
-                ccModel.addSeries(seriesList.get(0));
+                BarChartSeries bcs = seriesList.get(0);
+                bcs.setLabel("Empty");
+                bcs.set(sdf.format(getChartStartTime()), (double) 0);
+                bcs.set(sdf.format(getChartEndTime()), (double) 0);
+                ccModel.addSeries(bcs);
+                 logger.log(Level.INFO, "The date range selected is for the seriesList is empty!");
             } else {
                 logger.log(Level.WARNING, "Cannot creat a chart model as the seriesList is empty!");
             }
@@ -279,6 +291,9 @@ public class MySessionsChart1 implements Serializable {
             }
 
         }
+      // if(model2.getSeries().isEmpty()){
+      //     model2 = null;
+      // }
 
         return model2;
     }

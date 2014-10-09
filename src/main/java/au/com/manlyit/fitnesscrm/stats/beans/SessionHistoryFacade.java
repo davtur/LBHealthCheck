@@ -191,9 +191,10 @@ public class SessionHistoryFacade extends AbstractFacade<SessionHistory> {
             Expression<Customers> sessionTrainer = jn.get("customerId");
             Expression<Date> stime = rt.get("sessiondate");
 
-            Predicate condition1 = cb.between(stime, startDate, endDate);
-            Predicate condition2 = cb.equal(sessionTrainer, trainer);
-            cq.where(cb.and(condition1, condition2));
+            Predicate condition1 = cb.greaterThanOrEqualTo(stime, startDate);
+            Predicate condition2 = cb.lessThan(stime, endDate);
+            Predicate condition3 = cb.equal(sessionTrainer, trainer);
+            cq.where(cb.and(condition1, condition2, condition3));
             cq.select(rt);
 
             if (sortAsc) {
@@ -221,9 +222,10 @@ public class SessionHistoryFacade extends AbstractFacade<SessionHistory> {
             Expression<Customers> sessionTrainer = jn.get("customerId");
             Expression<Date> stime = rt.get("sessiondate");
 
-            Predicate condition1 = cb.between(stime, startDate, endDate);
-            Predicate condition2 = cb.equal(sessionTrainer, trainer);
-            cq.where(cb.and(condition1, condition2));
+            Predicate condition1 = cb.greaterThanOrEqualTo(stime, startDate);
+            Predicate condition2 = cb.lessThan(stime, endDate);
+            Predicate condition3 = cb.equal(sessionTrainer, trainer);
+            cq.where(cb.and(condition1, condition2, condition3));
 
             cq.select(cb.count(rt));
 

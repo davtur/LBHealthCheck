@@ -11,6 +11,7 @@ import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import au.com.manlyit.fitnesscrm.stats.db.Participants;
 import au.com.manlyit.fitnesscrm.stats.db.SessionTrainers;
 import com.lowagie.text.BadElementException;
+
 import com.lowagie.text.Document;
 import com.lowagie.text.DocumentException;
 import com.lowagie.text.Image;
@@ -45,12 +46,18 @@ import javax.faces.event.ValueChangeEvent;
 import javax.faces.model.SelectItem;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
+import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFCellStyle;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.hssf.util.HSSFColor;
-import org.primefaces.context.RequestContext;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.DataFormat;
+import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.ss.usermodel.Row;
 import org.primefaces.event.SelectEvent;
 import org.primefaces.model.DualListModel;
 import org.primefaces.model.SelectableDataModel;
@@ -216,7 +223,11 @@ public class SessionHistoryController implements Serializable {
                     } else {
                         FacesContext context = FacesContext.getCurrentInstance();
                         MySessionsChart1 mySessionsChart1Controller = (MySessionsChart1) context.getApplication().evaluateExpressionGet(context, "#{mySessionsChart1}", MySessionsChart1.class);
-                        return new PfSelectableDataModel<>(ejbFacade.findSessionsByTrainerAndDateRange(getLoggedInUser(), mySessionsChart1Controller.getChartStartTime(), mySessionsChart1Controller.getChartEndTime(), false));
+                        List<SessionHistory> shList = ejbFacade.findSessionsByTrainerAndDateRange(getLoggedInUser(), mySessionsChart1Controller.getChartStartTime(), mySessionsChart1Controller.getChartEndTime(), false);
+                        if (shList.isEmpty()) {
+                            return null;
+                        }
+                        return new PfSelectableDataModel<>(shList);
 
                     }
                 }
@@ -565,6 +576,9 @@ public class SessionHistoryController implements Serializable {
     public SelectableDataModel<SessionHistory> getCustomerItems() {
         if (customerItems == null) {
             customerItems = getCustomerPagination().createPageDataModel();
+            if (customerItems == null) {
+                return null;
+            }
         }
         return customerItems;
     }
@@ -575,14 +589,15 @@ public class SessionHistoryController implements Serializable {
         }
         return participantItems;
     }
-    public void recreateTrainerSessionsTableModel(){
+
+    public void recreateTrainerSessionsTableModel() {
         customerItems = null;
         filteredItems = null;
        // RequestContext requestContext = RequestContext.getCurrentInstance();
 
-       // requestContext.execute("PF('sessionsDataTable').filter();");
+        // requestContext.execute("PF('sessionsDataTable').filter();");
     }
-  
+
     public void recreateModel() {
         items = null;
         customerItems = null;
@@ -876,31 +891,76 @@ public class SessionHistoryController implements Serializable {
     }
 
     public void preProcessXLS(Object document) {
-         String trainer = "Trainer Session History for " + getLoggedInUser().getFirstname() + " " + getLoggedInUser().getLastname();
-        
+        String trainer = "Trainer Session History for " + getLoggedInUser().getFirstname() + " " + getLoggedInUser().getLastname();
+
         HSSFWorkbook wb = (HSSFWorkbook) document;
         HSSFSheet sheet = wb.getSheetAt(0);
-        sheet.createRow(0);
-        HSSFRow header = sheet.getRow(0);
-        header.getCell(0).setCellValue(trainer);
+        HSSFRow row = sheet.createRow(0);
+        HSSFCell cell = row.createCell(0);
+        cell.setCellValue(trainer);
         HSSFCellStyle cellStyle = wb.createCellStyle();
-        cellStyle.setFillForegroundColor(HSSFColor.GREEN.index);
+        DataFormat df = wb.createDataFormat();
+        cellStyle.setFillForegroundColor(HSSFColor.BLUE.index);
         cellStyle.setFillPattern(HSSFCellStyle.SOLID_FOREGROUND);
-        for (int i = 1; i < header.getPhysicalNumberOfCells(); i++) {
-            header.getCell(i).setCellStyle(cellStyle);
+        for (int i = 1; i < row.getPhysicalNumberOfCells(); i++) {
+            row.getCell(i).setCellStyle(cellStyle);
         }
-    } 
+        cellStyle.setDataFormat(df.getFormat("YYYY-MM-DD HH:MM:SS"));
+
+        cell = row.createCell(1);
+        cell.setCellValue(new Date());
+        cell.setCellStyle(cellStyle);
+        sheet.createRow(1);
+        sheet.createRow(2);
+
+    }
 
     public void postProcessXLS(Object document) {
-       
+        String trainer = "Trainer Session History for " + getLoggedInUser().getFirstname() + " " + getLoggedInUser().getLastname();
         HSSFWorkbook wb = (HSSFWorkbook) document;
         HSSFSheet sheet = wb.getSheetAt(0);
-        HSSFRow header = sheet.getRow(0);
+        sheet.shiftRows(0, sheet.getLastRowNum(), 7);
+        HSSFRow row = sheet.createRow(0);
+        HSSFCell cell = row.createCell(0);
         HSSFCellStyle cellStyle = wb.createCellStyle();
-        cellStyle.setFillForegroundColor(HSSFColor.GREEN.index);
-        cellStyle.setFillPattern(HSSFCellStyle.SOLID_FOREGROUND);
-        for (int i = 0; i < header.getPhysicalNumberOfCells(); i++) {
-            header.getCell(i).setCellStyle(cellStyle);
+        DataFormat df = wb.createDataFormat();
+        cellStyle.setDataFormat(df.getFormat("YYYY-MM-DD HH:MM:SS"));
+        cell.setCellValue(trainer);
+        //first row (0-based),last row  (0-based),first column (0-based),last column  (0-based)
+        sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 2));
+        CellStyle style = wb.createCellStyle();
+        CellStyle style2 = wb.createCellStyle();
+        style.setFillForegroundColor(IndexedColors.BLACK.getIndex());
+        //style.setFillPattern(CellStyle.SOLID_FOREGROUND);
+        style.setFillBackgroundColor(IndexedColors.AQUA.getIndex());
+        style.setFillPattern(CellStyle.BIG_SPOTS);
+        style2.setFillForegroundColor(IndexedColors.BLACK.getIndex());
+        //style2.setFillPattern(CellStyle.SOLID_FOREGROUND);
+        style2.setFillBackgroundColor(IndexedColors.LIGHT_TURQUOISE.getIndex());
+        style2.setFillPattern(CellStyle.BIG_SPOTS);
+
+        HSSFCell cell3 = row.createCell(3);
+        cell3.setCellValue(new Date());
+        cell3.setCellStyle(cellStyle);
+        //sheet.createRow(1);
+        //sheet.createRow(2);
+        boolean rowColor = false;
+        for (Row row2 : sheet) {
+            if (row2.getRowNum() > 2) {
+                rowColor = !(rowColor);
+                for (Cell cell2 : row2) {
+                    //cell2.setCellValue(cell.getStringCellValue().toUpperCase());
+                    if (rowColor) {
+                        cell2.setCellStyle(style);
+                    } else {
+                        cell2.setCellStyle(style2);
+                    }
+
+                }
+            }
+        }
+        for (int c = 0; c < row.getLastCellNum() + 1; c++) {
+            sheet.autoSizeColumn(c);
         }
     }
 

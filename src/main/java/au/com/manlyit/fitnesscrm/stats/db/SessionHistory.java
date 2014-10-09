@@ -3,7 +3,6 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package au.com.manlyit.fitnesscrm.stats.db;
 
 import au.com.manlyit.fitnesscrm.stats.classes.util.BaseEntity;
@@ -42,9 +41,8 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "SessionHistory.findAll", query = "SELECT s FROM SessionHistory s"),
     @NamedQuery(name = "SessionHistory.findById", query = "SELECT s FROM SessionHistory s WHERE s.id = :id"),
     @NamedQuery(name = "SessionHistory.findBySessiondate", query = "SELECT s FROM SessionHistory s WHERE s.sessiondate = :sessiondate")})
-public class SessionHistory implements BaseEntity,Serializable {
-    
-    
+public class SessionHistory implements BaseEntity, Serializable {
+
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -60,19 +58,20 @@ public class SessionHistory implements BaseEntity,Serializable {
     @Size(max = 65535)
     @Column(name = "comments")
     private String comments;
-     @Lob
+    @Lob
     @Size(max = 65535)
     @Column(name = "admin_notes")
     private String adminNotes;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "sessionHistoryId")
     private Collection<Participants> participantsCollection;
-   
+
     @JoinColumn(name = "session_types_id", referencedColumnName = "id")
     @ManyToOne(optional = false)
     private SessionTypes sessionTypesId;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "sessionHistoryId")
     private Collection<SessionTrainers> sessionTrainersCollection;
+
     public SessionHistory() {
     }
 
@@ -118,7 +117,18 @@ public class SessionHistory implements BaseEntity,Serializable {
         this.participantsCollection = participantsCollection;
     }
 
-  
+    @XmlTransient
+    public String getParticipantsAsString() {
+        String particpants = "";
+        for (Participants p : participantsCollection) {
+            if (particpants.isEmpty() == false) {
+                particpants += ", ";
+            }
+            particpants += p.getCustomerId().getFirstname() + " " + p.getCustomerId().getLastname();
+        }
+
+        return particpants;
+    }
 
     public SessionTypes getSessionTypesId() {
         return sessionTypesId;
@@ -152,8 +162,6 @@ public class SessionHistory implements BaseEntity,Serializable {
     public String toString() {
         return "au.com.manlyit.fitnesscrm.stats.db.SessionHistory[ id=" + id + " ]";
     }
-    
-    
 
     @XmlTransient
     public Collection<SessionTrainers> getSessionTrainersCollection() {
@@ -177,5 +185,5 @@ public class SessionHistory implements BaseEntity,Serializable {
     public void setAdminNotes(String adminNotes) {
         this.adminNotes = adminNotes;
     }
-    
+
 }
