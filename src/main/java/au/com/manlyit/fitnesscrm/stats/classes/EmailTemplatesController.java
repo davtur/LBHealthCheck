@@ -136,9 +136,13 @@ public class EmailTemplatesController implements Serializable {
         try {
             if (current.getId() == null) {
                 current.setId(0);
+                getFacade().create(current);
+                JsfUtil.addSuccessMessage(configMapFacade.getConfig("EmailTemplatesCreated"));
+            } else {
+                getFacade().edit(current);
+                JsfUtil.addSuccessMessage(configMapFacade.getConfig("EmailTemplatesUpdated"));
             }
-            getFacade().create(current);
-            JsfUtil.addSuccessMessage(configMapFacade.getConfig("EmailTemplatesCreated"));
+
             return prepareCreate();
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));

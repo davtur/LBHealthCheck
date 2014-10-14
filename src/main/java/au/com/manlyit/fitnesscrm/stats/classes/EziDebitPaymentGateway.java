@@ -657,13 +657,18 @@ public class EziDebitPaymentGateway implements Serializable {
     public void redirectToPaymentGateway() {
         try {
             FacesContext context = FacesContext.getCurrentInstance();
-            ExternalContext ec = context.getExternalContext();
-            ec.redirect(eziDebitEDDRFormUrl);
-            
+            CustomersController controller = (CustomersController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "customersController");
+            controller.setSelected(customersFacade.find(getSelectedCustomer().getId()));
+            PaymentParameters pp = controller.getSelectedCustomersPaymentParameters();
+            if (pp.getWebddrUrl() != null) {
+
+                ExternalContext ec = context.getExternalContext();
+                ec.redirect(eziDebitEDDRFormUrl);
+            }
         } catch (IOException ex) {
             Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, null, ex);
         }
-      
+
     }
 
     /**
@@ -721,6 +726,16 @@ public class EziDebitPaymentGateway implements Serializable {
      */
     public boolean isCustomerExistsInPaymentGateway() {
         return customerExistsInPaymentGateway;
+    }
+
+    public boolean isCustomerWebDDRFormEnabled() {
+
+        FacesContext context = FacesContext.getCurrentInstance();
+        CustomersController controller = (CustomersController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "customersController");
+        PaymentParameters pp = controller.getSelectedCustomersPaymentParameters();
+        String webDdrUrl = pp.getWebddrUrl();// contains payment information e.g 
+        return webDdrUrl != null;
+
     }
 
     public boolean isShowAddToPaymentGatewayButton() {
@@ -808,16 +823,16 @@ public class EziDebitPaymentGateway implements Serializable {
         String amp = "&";
 
         // eziDebitEDDRFormUrl = widgetUrl;
-       // try {
-            if (webDdrUrl != null) {
-                //eziDebitEDDRFormUrl = URLEncoder.encode(webDdrUrl, "UTF-8");
-                  eziDebitEDDRFormUrl = webDdrUrl;
-            } else {
-                webDdrUrl = "";
-            }
-       // } catch (UnsupportedEncodingException ex) {
-       //     Logger.getLogger(CustomersController.class.getName()).log(Level.SEVERE, "UTF-8 unsupported. This shouldn't happen!", ex);
-       // }
+        // try {
+        if (webDdrUrl != null) {
+            //eziDebitEDDRFormUrl = URLEncoder.encode(webDdrUrl, "UTF-8");
+            eziDebitEDDRFormUrl = webDdrUrl;
+        } else {
+            webDdrUrl = "";
+        }
+        // } catch (UnsupportedEncodingException ex) {
+        //     Logger.getLogger(CustomersController.class.getName()).log(Level.SEVERE, "UTF-8 unsupported. This shouldn't happen!", ex);
+        // }
         return webDdrUrl;
     }
 

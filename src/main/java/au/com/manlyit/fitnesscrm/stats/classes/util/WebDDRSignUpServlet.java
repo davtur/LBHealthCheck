@@ -111,6 +111,7 @@ public class WebDDRSignUpServlet extends HttpServlet {
                     PaymentParameters pp = getCustomersPaymentParameters(current);
                     pp.setWebddrUrl(null);
                     ejbPaymentParametersFacade.edit(pp);
+                    ejbFacade.editAndFlush(current);
                     logger.log(Level.INFO, " Customer {0} has set up payment info. Setting Web DDR URL to NULL as it should only be used once.", new Object[]{current.getUsername()});
                     /*
                      GregorianCalendar cal = new GregorianCalendar();

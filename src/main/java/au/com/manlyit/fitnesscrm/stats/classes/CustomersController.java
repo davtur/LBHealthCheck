@@ -298,16 +298,15 @@ public class CustomersController implements Serializable {
         } catch (Exception e) {
             logger.log(Level.SEVERE, "createDefaultPaymentParameters Method in Customers Controller", e);
         }
-
     }
 
     protected PaymentParameters getSelectedCustomersPaymentParameters() {
         PaymentParameters pp = null;
-        Collection<PaymentParameters> ppl = current.getPaymentParametersCollection();
+        Collection<PaymentParameters> ppl = getSelected().getPaymentParametersCollection();
         if (ppl == null || ppl.isEmpty()) {
             createDefaultPaymentParameters(paymentGateway);
         }
-        ppl = current.getPaymentParametersCollection();
+        ppl = getSelected().getPaymentParametersCollection();
         int s = ppl.size();
         for (PaymentParameters payParams : ppl) {
             if (payParams.getPaymentGatewayName().compareTo(paymentGateway) == 0) {

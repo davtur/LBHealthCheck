@@ -17,7 +17,7 @@
             <h:form id="createCustomerForm">
                 <p:panel>
                     <p:commandButton  actionListener="#{customersController.update}" value="#{configMapController.getKey('EditCustomersSaveLink')}" update=":growl"/>
-                    <p:commandButton id="editPaymentMethodButton" rendered="#{ezidebit.customerExistsInPaymentGateway == false or ezidebit.customerCancelledInPaymentGateway ==true}"  actionListener="#{ezidebit.redirectToPaymentGateway}"    value="#{configMapController.getKey('EnterPaymentDetailsButton')}" update=":growl :createCustomerForm"  /> 
+                    <p:commandButton id="editPaymentMethodButton" rendered="#{ezidebit.customerWebDDRFormEnabled}"  actionListener="#{ezidebit.redirectToPaymentGateway}"    value="#{configMapController.getKey('EnterPaymentDetailsButton')}" update=":growl :createCustomerForm"  /> 
 
                 </p:panel>
                 <h:panelGrid columns="1">
