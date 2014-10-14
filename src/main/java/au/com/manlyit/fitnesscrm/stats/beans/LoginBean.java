@@ -53,6 +53,8 @@ public class LoginBean implements Serializable {
     private au.com.manlyit.fitnesscrm.stats.beans.ActivationFacade ejbActivationFacade;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.CustomersFacade ejbCustomerFacade;
+     @Inject
+    private au.com.manlyit.fitnesscrm.stats.beans.EmailTemplatesFacade ejbEmailTemplatesFacade;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.PaymentBean ejbPaymentBean;
     private final StringEncrypter encrypter = new StringEncrypter("(lqKdh^Gr$2F^KJHG654)");
@@ -112,7 +114,10 @@ public class LoginBean implements Serializable {
 
                 //send email
                 String templatePlaceholder = "<!--LINK-URL-->";
-                String htmlText = configMapFacade.getConfig(templateName);
+                //String htmlText = configMapFacade.getConfig(templateName);
+                String htmlText = ejbEmailTemplatesFacade.findTemplateByName(templateName).getTemplate();
+                
+                
                 htmlText = htmlText.replace(templatePlaceholder, urlLink);
                 //String htmlText = "<table width=\"600\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\">  <tr>    <td><img src=\"cid:logoimg_cid\"/></td>  </tr>  <tr>    <td height=\"220\"> <p>Pure Fitness Manly</p>      <p>Please click the following link to reset your password:</p><p>To reset your password click <a href=\"" + urlLink + "\">here</a>.</p></td>  </tr>  <tr>    <td height=\"50\" align=\"center\" valign=\"middle\" bgcolor=\"#CCCCCC\">www.purefitnessmanly.com.au | sarah@purefitnessmanly.com.au | +61433818067</td>  </tr></table>";
 

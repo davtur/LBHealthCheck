@@ -42,10 +42,14 @@ public class EmailQueueController implements Serializable {
     private au.com.manlyit.fitnesscrm.stats.beans.CustomersFacade ejbCustomerFacade;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.ActivationFacade ejbActivationFacade;
+     @Inject
+    private au.com.manlyit.fitnesscrm.stats.beans.EmailTemplatesFacade ejbEmailTemplatesFacade;
     @Inject
     private ConfigMapFacade configMapFacade;
     private PaginationHelper pagination;
     private int selectedItemIndex;
+    private String templateName;
+    private String templateDescription;
     private DualListModel<Customers> participants;
 
     public EmailQueueController() {
@@ -265,7 +269,7 @@ public class EmailQueueController implements Serializable {
 
         SendHTMLEmailWithFileAttached emailAgent = new SendHTMLEmailWithFileAttached();
         String htmlText = "<table width=\"600\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\">  <tr>    <td><img src=\"cid:logoimg_cid\"/></td>  </tr>  <tr>    <td height=\"220\"> <p>Pure Fitness Manly</p>      <p>Please click the following link to reset your password:</p><p>To reset your password click <a href=\"" + urlLink + "\">here</a>.</p></td>  </tr>  <tr>    <td height=\"50\" align=\"center\" valign=\"middle\" bgcolor=\"#CCCCCC\">www.purefitnessmanly.com.au | sarah@purefitnessmanly.com.au | +61433818067</td>  </tr></table>";
-
+// TODO String htmlText = ejbEmailTemplatesFacade.findTemplateByName(templateName).getTemplate();
         //String host, String to, String ccAddress, String from, String emailSubject, String message, String theAttachedfileName, boolean debug
         emailAgent.send("david@manlyit.com.au", "", "noreply@purefitnessmanly.com.au", "Password Reset", htmlText, null,emailServerProperties(), true);
 
@@ -349,6 +353,34 @@ public class EmailQueueController implements Serializable {
 
     public SelectItem[] getItemsAvailableSelectOne() {
         return JsfUtil.getSelectItems(ejbFacade.findAll(), true);
+    }
+
+    /**
+     * @return the templateName
+     */
+    public String getTemplateName() {
+        return templateName;
+    }
+
+    /**
+     * @param templateName the templateName to set
+     */
+    public void setTemplateName(String templateName) {
+        this.templateName = templateName;
+    }
+
+    /**
+     * @return the templateDescription
+     */
+    public String getTemplateDescription() {
+        return templateDescription;
+    }
+
+    /**
+     * @param templateDescription the templateDescription to set
+     */
+    public void setTemplateDescription(String templateDescription) {
+        this.templateDescription = templateDescription;
     }
 
     @FacesConverter(forClass = EmailQueue.class)

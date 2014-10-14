@@ -13,6 +13,7 @@
     <class>au.com.manlyit.fitnesscrm.stats.db.DemographicTypes</class>
     <class>au.com.manlyit.fitnesscrm.stats.db.EmailFormat</class>
     <class>au.com.manlyit.fitnesscrm.stats.db.EmailQueue</class>
+    <class>au.com.manlyit.fitnesscrm.stats.db.EmailTemplates</class>
     <class>au.com.manlyit.fitnesscrm.stats.db.FitnessTestCharts</class>
     <class>au.com.manlyit.fitnesscrm.stats.db.Groups</class>
     <class>au.com.manlyit.fitnesscrm.stats.db.Invoice</class>

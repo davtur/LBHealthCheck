@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" 
+      xmlns:ui="http://java.sun.com/jsf/facelets" >
+
+    <ui:composition>
+
+        <p:dialog id="EmailTemplatesViewDlg" widgetVar="EmailTemplatesViewDialog" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('ViewEmailTemplatesTitle')}">
+            <h:form id="EmailTemplatesViewForm">
+                <h:panelGroup id="display">
+                    <p:panelGrid columns="2" rendered="#{emailTemplatesController.selected != null}">
+                        <h:outputText value="#{configMapController.getKey('ViewEmailTemplatesLabel_id')}"/>
+                        <h:outputText value="#{emailTemplatesController.selected.id}" title="#{configMapController.getKey('ViewEmailTemplatesTitle_id')}"/>
+                        <h:outputText value="#{configMapController.getKey('ViewEmailTemplatesLabel_name')}"/>
+                        <h:outputText value="#{emailTemplatesController.selected.name}" title="#{configMapController.getKey('ViewEmailTemplatesTitle_name')}"/>
+                        <h:outputText value="#{configMapController.getKey('ViewEmailTemplatesLabel_description')}"/>
+                        <h:outputText value="#{emailTemplatesController.selected.description}" title="#{configMapController.getKey('ViewEmailTemplatesTitle_description')}"/>
+                        <h:outputText value="#{configMapController.getKey('ViewEmailTemplatesLabel_template')}"/>
+                        <h:outputText value="#{emailTemplatesController.selected.template}"  escape="false" title="#{configMapController.getKey('ViewEmailTemplatesTitle_template')}"/>
+                    </p:panelGrid>
+                    <p:commandButton value="#{configMapController.getKey('Close')}" onclick="EmailTemplatesViewDialog.hide()"/>
+                </h:panelGroup>
+            </h:form>
+        </p:dialog>
+
+    </ui:composition>
+</html>

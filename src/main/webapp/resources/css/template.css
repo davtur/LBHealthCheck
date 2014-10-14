@@ -15,6 +15,10 @@
 //#headerbar {
 ////   background:  url(/FitnessStats/resources/images/logo.png) 50% 0 repeat-x; 
 //}
+div.emailTemplateEditor .ui-editor {
+    height:100% ; 
+}
+
 .emailEditorInput{
   width:600px;  
 }
