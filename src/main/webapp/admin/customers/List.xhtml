@@ -257,6 +257,10 @@
 
                                     </p:outputPanel>
                                 </f:facet>
+                                <p:column sortBy="#{pay.paymentID.value}" filterBy="#{pay.paymentID.value}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentID')}"   >
+                                    <h:outputText value="#{pay.paymentID.value}"/>
+                                </p:column>
+
                                 <p:column sortBy="#{pay.customerName.value}" filterBy="#{pay.customerName.value}" headerText="#{configMapController.getKey('ListPaymentsTitle_customerName')}"   >
                                     <h:outputText value="#{pay.customerName.value}"/>
                                 </p:column>
@@ -281,6 +285,49 @@
                                     </h:outputText>
                                 </p:column>
                             </p:dataTable>
+                            <p:dataTable  id="paymentsTable2"
+                                          value="#{ezidebit.paymentDBList}" 
+                                          filteredValue="#{ezidebit.paymentsListFilteredItems2}"  
+                                          widgetVar="paymentsListControllerTable"
+                                          var="pay"  
+                                          paginator="true" rows="15"  
+                                          paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  
+                                          rowsPerPageTemplate="5,10,15,20,25,50,100" >
+                                <f:facet name="header">
+                                    <p:outputPanel>
+                                        <h:outputText value="Payments" />
+
+                                    </p:outputPanel>
+                                </f:facet>
+                                <p:column sortBy="#{pay.paymentID}" filterBy="#{pay.paymentID}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentID')}"   >
+                                    <h:outputText value="#{pay.paymentID}"/>
+                                </p:column>
+
+                                <p:column sortBy="#{pay.customerName.firstname} #{pay.customerName.lastname}" filterBy="#{pay.customerName.firstname} #{pay.customerName.lastname}" headerText="#{configMapController.getKey('ListPaymentsTitle_customerName')}"   >
+                                    <h:outputText value="#{pay.customerName.firstname} #{pay.customerName.lastname}"/>
+                                </p:column>
+                                <p:column sortBy="#{pay.paymentReference}" filterBy="#{pay.paymentReference}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentReference')}"   >
+                                    <h:outputText value="#{pay.paymentReference}"/>
+                                </p:column>
+                                <p:column sortBy="#{pay.paymentAmount}" filterBy="#{pay.paymentAmount}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentAmount')}"   >
+                                    <h:outputText value="#{pay.paymentAmount}">
+                                        <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
+                                    </h:outputText>
+                                </p:column>
+                                <p:column sortBy="#{pay.paymentStatus}" filterBy="#{pay.paymentStatus}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentStatus')}"   >
+                                    <h:outputText  rendered="#{pay.paymentStatus == 'W'}"  value="Waiting"/>
+                                    <h:outputText  rendered="#{pay.paymentStatus == 'P'}"  value="Pending"/>
+                                    <h:outputText  rendered="#{pay.paymentStatus == 'S'}"  value="Successful"/>
+                                    <h:outputText  rendered="#{pay.paymentStatus == 'D'}"  value="Dis.Insufficient Funds"/>
+                                    <h:outputText  rendered="#{pay.paymentStatus == 'F'}"  value="Dishonoured"/>
+                                </p:column>
+                                <p:column sortBy="#{pay.debitDate}" filterBy="#{pay.debitDate}" headerText="#{configMapController.getKey('ListPaymentsTitle_debitDate')}"   >
+                                    <h:outputText value="#{pay.debitDate}">
+                                        <f:convertDateTime pattern="dd MMM yyyy" />
+                                    </h:outputText>
+                                </p:column>
+                            </p:dataTable>
+
                         </p:panel>
 
                         <p:panel id="scheduledPaymentsTablePanel" rendered="#{ezidebit.scheduledPaymentsList != null and ezidebit.customerExistsInPaymentGateway == true}">

@@ -25,6 +25,7 @@
     <class>au.com.manlyit.fitnesscrm.stats.db.Notes</class>
     <class>au.com.manlyit.fitnesscrm.stats.db.Participants</class>
     <class>au.com.manlyit.fitnesscrm.stats.db.PaymentParameters</class>
+    <class>au.com.manlyit.fitnesscrm.stats.db.Payments</class>
     <class>au.com.manlyit.fitnesscrm.stats.db.Plan</class>
     <class>au.com.manlyit.fitnesscrm.stats.db.PreferedContact</class>
     <class>au.com.manlyit.fitnesscrm.stats.db.QrtzCronTriggers</class>

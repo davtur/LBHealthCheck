@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" 
+      xmlns:ui="http://java.sun.com/jsf/facelets" >
+
+    <ui:composition>
+
+        <p:dialog id="PaymentsViewDlg" widgetVar="PaymentsViewDialog" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('ViewPaymentsTitle')}">
+            <h:form id="PaymentsViewForm">
+                <h:panelGroup id="display">
+                    <p:panelGrid columns="2" rendered="#{paymentsController.selected != null}">
+                        <h:outputText value="#{configMapController.getKey('ViewPaymentsLabel_id')}"/>
+                        <h:outputText value="#{paymentsController.selected.id}" title="#{configMapController.getKey('ViewPaymentsTitle_id')}"/>
+                        <h:outputText value="#{configMapController.getKey('ViewPaymentsLabel_createDatetime')}"/>
+                        <h:outputText value="#{paymentsController.selected.createDatetime}" title="#{configMapController.getKey('ViewPaymentsTitle_createDatetime')}">
+                            <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                        </h:outputText>
+                        <h:outputText value="#{configMapController.getKey('ViewPaymentsLabel_lastUpdatedDatetime')}"/>
+                        <h:outputText value="#{paymentsController.selected.lastUpdatedDatetime}" title="#{configMapController.getKey('ViewPaymentsTitle_lastUpdatedDatetime')}">
+                            <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                        </h:outputText>
+                        <h:outputText value="#{configMapController.getKey('ViewPaymentsLabel_bankFailedReason')}"/>
+                        <h:outputText value="#{paymentsController.selected.bankFailedReason}" title="#{configMapController.getKey('ViewPaymentsTitle_bankFailedReason')}"/>
+                        <h:outputText value="#{configMapController.getKey('ViewPaymentsLabel_bankReceiptID')}"/>
+                        <h:outputText value="#{paymentsController.selected.bankReceiptID}" title="#{configMapController.getKey('ViewPaymentsTitle_bankReceiptID')}"/>
+                        <h:outputText value="#{configMapController.getKey('ViewPaymentsLabel_bankReturnCode')}"/>
+                        <h:outputText value="#{paymentsController.selected.bankReturnCode}" title="#{configMapController.getKey('ViewPaymentsTitle_bankReturnCode')}"/>
+                        <h:outputText value="#{configMapController.getKey('ViewPaymentsLabel_debitDate')}"/>
+                        <h:outputText value="#{paymentsController.selected.debitDate}" title="#{configMapController.getKey('ViewPaymentsTitle_debitDate')}">
+                            <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                        </h:outputText>
+                        <h:outputText value="#{configMapController.getKey('ViewPaymentsLabel_ezidebitCustomerID')}"/>
+                        <h:outputText value="#{paymentsController.selected.ezidebitCustomerID}" title="#{configMapController.getKey('ViewPaymentsTitle_ezidebitCustomerID')}"/>
+                        <h:outputText value="#{configMapController.getKey('ViewPaymentsLabel_invoiceID')}"/>
+                        <h:outputText value="#{paymentsController.selected.invoiceID}" title="#{configMapController.getKey('ViewPaymentsTitle_invoiceID')}"/>
+                        <h:outputText value="#{configMapController.getKey('ViewPaymentsLabel_manuallyAddedPayment')}"/>
+                        <h:outputText value="#{paymentsController.selected.manuallyAddedPayment}" title="#{configMapController.getKey('ViewPaymentsTitle_manuallyAddedPayment')}"/>
+                        <h:outputText value="#{configMapController.getKey('ViewPaymentsLabel_paymentAmount')}"/>
+                        <h:outputText value="#{paymentsController.selected.paymentAmount}" title="#{configMapController.getKey('ViewPaymentsTitle_paymentAmount')}"/>
+                        <h:outputText value="#{configMapController.getKey('ViewPaymentsLabel_paymentDate')}"/>
+                        <h:outputText value="#{paymentsController.selected.paymentDate}" title="#{configMapController.getKey('ViewPaymentsTitle_paymentDate')}">
+                            <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                        </h:outputText>
+                        <h:outputText value="#{configMapController.getKey('ViewPaymentsLabel_paymentID')}"/>
+                        <h:outputText value="#{paymentsController.selected.paymentID}" title="#{configMapController.getKey('ViewPaymentsTitle_paymentID')}"/>
+                        <h:outputText value="#{configMapController.getKey('ViewPaymentsLabel_paymentMethod')}"/>
+                        <h:outputText value="#{paymentsController.selected.paymentMethod}" title="#{configMapController.getKey('ViewPaymentsTitle_paymentMethod')}"/>
+                        <h:outputText value="#{configMapController.getKey('ViewPaymentsLabel_paymentReference')}"/>
+                        <h:outputText value="#{paymentsController.selected.paymentReference}" title="#{configMapController.getKey('ViewPaymentsTitle_paymentReference')}"/>
+                        <h:outputText value="#{configMapController.getKey('ViewPaymentsLabel_paymentSource')}"/>
+                        <h:outputText value="#{paymentsController.selected.paymentSource}" title="#{configMapController.getKey('ViewPaymentsTitle_paymentSource')}"/>
+                        <h:outputText value="#{configMapController.getKey('ViewPaymentsLabel_paymentStatus')}"/>
+                        <h:outputText value="#{paymentsController.selected.paymentStatus}" title="#{configMapController.getKey('ViewPaymentsTitle_paymentStatus')}"/>
+                        <h:outputText value="#{configMapController.getKey('ViewPaymentsLabel_scheduledAmount')}"/>
+                        <h:outputText value="#{paymentsController.selected.scheduledAmount}" title="#{configMapController.getKey('ViewPaymentsTitle_scheduledAmount')}"/>
+                        <h:outputText value="#{configMapController.getKey('ViewPaymentsLabel_settlementDate')}"/>
+                        <h:outputText value="#{paymentsController.selected.settlementDate}" title="#{configMapController.getKey('ViewPaymentsTitle_settlementDate')}">
+                            <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                        </h:outputText>
+                        <h:outputText value="#{configMapController.getKey('ViewPaymentsLabel_transactionFeeClient')}"/>
+                        <h:outputText value="#{paymentsController.selected.transactionFeeClient}" title="#{configMapController.getKey('ViewPaymentsTitle_transactionFeeClient')}"/>
+                        <h:outputText value="#{configMapController.getKey('ViewPaymentsLabel_transactionFeeCustomer')}"/>
+                        <h:outputText value="#{paymentsController.selected.transactionFeeCustomer}" title="#{configMapController.getKey('ViewPaymentsTitle_transactionFeeCustomer')}"/>
+                        <h:outputText value="#{configMapController.getKey('ViewPaymentsLabel_transactionTime')}"/>
+                        <h:outputText value="#{paymentsController.selected.transactionTime}" title="#{configMapController.getKey('ViewPaymentsTitle_transactionTime')}">
+                            <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                        </h:outputText>
+                        <h:outputText value="#{configMapController.getKey('ViewPaymentsLabel_yourGeneralReference')}"/>
+                        <h:outputText value="#{paymentsController.selected.yourGeneralReference}" title="#{configMapController.getKey('ViewPaymentsTitle_yourGeneralReference')}"/>
+                        <h:outputText value="#{configMapController.getKey('ViewPaymentsLabel_yourSystemReference')}"/>
+                        <h:outputText value="#{paymentsController.selected.yourSystemReference}" title="#{configMapController.getKey('ViewPaymentsTitle_yourSystemReference')}"/>
+                        <h:outputText value="#{configMapController.getKey('ViewPaymentsLabel_customerName')}"/>
+                        <h:outputText value="#{paymentsController.selected.customerName}" title="#{configMapController.getKey('ViewPaymentsTitle_customerName')}"/>
+                    </p:panelGrid>
+                    <p:commandButton value="#{configMapController.getKey('Close')}" onclick="PaymentsViewDialog.hide()"/>
+                </h:panelGroup>
+            </h:form>
+        </p:dialog>
+
+    </ui:composition>
+</html>

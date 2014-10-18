@@ -1,0 +1,393 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" >
+
+    <ui:composition template="/template.xhtml">
+        <ui:define name="title">
+            <h:outputText value="#{configMapController.getKey('ListPaymentsTitle')}"></h:outputText>
+        </ui:define>
+        <ui:define name="body">
+
+
+
+
+
+            <h:form id="PaymentsListForm">
+                <h:outputText escape="false" value="#{configMapController.getKey('ListPaymentsEmpty')}" rendered="#{paymentsController.items.rowCount == 0}"/>
+                <h:panelGroup rendered="#{paymentsController.items.rowCount > 0}">
+                    <p:dataTable  
+                        id="datalist"  
+                        editable="true" 
+                        value="#{paymentsController.items}" 
+                        selection="#{paymentsController.selected}" 
+                        rowKey="#{item.id}" 
+                        filteredValue="#{paymentsController.filteredItems}"  
+                        widgetVar="paymentsControllerTable" 
+                        var="item"  
+                        paginator="true" 
+                        rows="15"  
+                        paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  
+                        rowsPerPageTemplate="5,10,15,20,25,50,100" >
+                        <f:facet name="header">
+                            <p:outputPanel>
+                                <h:outputText value="Search all fields:" />
+                                <h:inputText id="globalFilter" onkeyup="paymentsControllerTable.filter()" />
+                            </p:outputPanel>
+                        </f:facet>
+                        <p:ajax event="rowEdit" listener="#{paymentsController.onEdit}" update=":growl" oncomplete="paymentsControllerTable.filter()" />  
+                        <p:ajax event="rowEditCancel" listener="#{paymentsController.onCancel}" update=":growl"  oncomplete="paymentsControllerTable.filter()" />  
+                        <p:ajax event="rowSelect"   update="createButton viewButton editButton deleteButton"/>
+                        <p:ajax event="rowUnselect" update="createButton viewButton editButton deleteButton"/>
+                        <p:column selectionMode="single"/>
+                        <p:column sortBy="#{item.id}" filterBy="#{item.id}" headerText="#{configMapController.getKey('ListPaymentsTitle_id')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.id}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.id}" label="#{configMapController.getKey('ListPaymentsTitle_id')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.createDatetime}" filterBy="#{item.createDatetime}" headerText="#{configMapController.getKey('ListPaymentsTitle_createDatetime')}"   >
+
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.createDatetime}">
+                                        <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                                    </h:outputText>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:calendar value="#{item.createDatetime}">	
+                                        <p:ajax event="dateSelect" listener= "#{paymentsController.handleDateSelect}" update=":growl" />
+                                    </p:calendar>
+                                </f:facet>
+                            </p:cellEditor> 
+
+                        </p:column>
+                        <p:column sortBy="#{item.lastUpdatedDatetime}" filterBy="#{item.lastUpdatedDatetime}" headerText="#{configMapController.getKey('ListPaymentsTitle_lastUpdatedDatetime')}"   >
+
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.lastUpdatedDatetime}">
+                                        <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                                    </h:outputText>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:calendar value="#{item.lastUpdatedDatetime}">	
+                                        <p:ajax event="dateSelect" listener= "#{paymentsController.handleDateSelect}" update=":growl" />
+                                    </p:calendar>
+                                </f:facet>
+                            </p:cellEditor> 
+
+                        </p:column>
+                        <p:column sortBy="#{item.bankFailedReason}" filterBy="#{item.bankFailedReason}" headerText="#{configMapController.getKey('ListPaymentsTitle_bankFailedReason')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.bankFailedReason}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.bankFailedReason}" label="#{configMapController.getKey('ListPaymentsTitle_bankFailedReason')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.bankReceiptID}" filterBy="#{item.bankReceiptID}" headerText="#{configMapController.getKey('ListPaymentsTitle_bankReceiptID')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.bankReceiptID}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.bankReceiptID}" label="#{configMapController.getKey('ListPaymentsTitle_bankReceiptID')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.bankReturnCode}" filterBy="#{item.bankReturnCode}" headerText="#{configMapController.getKey('ListPaymentsTitle_bankReturnCode')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.bankReturnCode}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.bankReturnCode}" label="#{configMapController.getKey('ListPaymentsTitle_bankReturnCode')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.debitDate}" filterBy="#{item.debitDate}" headerText="#{configMapController.getKey('ListPaymentsTitle_debitDate')}"   >
+
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.debitDate}">
+                                        <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                                    </h:outputText>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:calendar value="#{item.debitDate}">	
+                                        <p:ajax event="dateSelect" listener= "#{paymentsController.handleDateSelect}" update=":growl" />
+                                    </p:calendar>
+                                </f:facet>
+                            </p:cellEditor> 
+
+                        </p:column>
+                        <p:column sortBy="#{item.ezidebitCustomerID}" filterBy="#{item.ezidebitCustomerID}" headerText="#{configMapController.getKey('ListPaymentsTitle_ezidebitCustomerID')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.ezidebitCustomerID}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.ezidebitCustomerID}" label="#{configMapController.getKey('ListPaymentsTitle_ezidebitCustomerID')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.invoiceID}" filterBy="#{item.invoiceID}" headerText="#{configMapController.getKey('ListPaymentsTitle_invoiceID')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.invoiceID}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.invoiceID}" label="#{configMapController.getKey('ListPaymentsTitle_invoiceID')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.manuallyAddedPayment}" filterBy="#{item.manuallyAddedPayment}" headerText="#{configMapController.getKey('ListPaymentsTitle_manuallyAddedPayment')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.manuallyAddedPayment}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.manuallyAddedPayment}" label="#{configMapController.getKey('ListPaymentsTitle_manuallyAddedPayment')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.paymentAmount}" filterBy="#{item.paymentAmount}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentAmount')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.paymentAmount}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.paymentAmount}" label="#{configMapController.getKey('ListPaymentsTitle_paymentAmount')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.paymentDate}" filterBy="#{item.paymentDate}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentDate')}"   >
+
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.paymentDate}">
+                                        <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                                    </h:outputText>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:calendar value="#{item.paymentDate}">	
+                                        <p:ajax event="dateSelect" listener= "#{paymentsController.handleDateSelect}" update=":growl" />
+                                    </p:calendar>
+                                </f:facet>
+                            </p:cellEditor> 
+
+                        </p:column>
+                        <p:column sortBy="#{item.paymentID}" filterBy="#{item.paymentID}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentID')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.paymentID}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.paymentID}" label="#{configMapController.getKey('ListPaymentsTitle_paymentID')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.paymentMethod}" filterBy="#{item.paymentMethod}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentMethod')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.paymentMethod}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.paymentMethod}" label="#{configMapController.getKey('ListPaymentsTitle_paymentMethod')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.paymentReference}" filterBy="#{item.paymentReference}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentReference')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.paymentReference}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.paymentReference}" label="#{configMapController.getKey('ListPaymentsTitle_paymentReference')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.paymentSource}" filterBy="#{item.paymentSource}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentSource')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.paymentSource}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.paymentSource}" label="#{configMapController.getKey('ListPaymentsTitle_paymentSource')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.paymentStatus}" filterBy="#{item.paymentStatus}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentStatus')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.paymentStatus}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.paymentStatus}" label="#{configMapController.getKey('ListPaymentsTitle_paymentStatus')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.scheduledAmount}" filterBy="#{item.scheduledAmount}" headerText="#{configMapController.getKey('ListPaymentsTitle_scheduledAmount')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.scheduledAmount}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.scheduledAmount}" label="#{configMapController.getKey('ListPaymentsTitle_scheduledAmount')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.settlementDate}" filterBy="#{item.settlementDate}" headerText="#{configMapController.getKey('ListPaymentsTitle_settlementDate')}"   >
+
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.settlementDate}">
+                                        <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                                    </h:outputText>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:calendar value="#{item.settlementDate}">	
+                                        <p:ajax event="dateSelect" listener= "#{paymentsController.handleDateSelect}" update=":growl" />
+                                    </p:calendar>
+                                </f:facet>
+                            </p:cellEditor> 
+
+                        </p:column>
+                        <p:column sortBy="#{item.transactionFeeClient}" filterBy="#{item.transactionFeeClient}" headerText="#{configMapController.getKey('ListPaymentsTitle_transactionFeeClient')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.transactionFeeClient}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.transactionFeeClient}" label="#{configMapController.getKey('ListPaymentsTitle_transactionFeeClient')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.transactionFeeCustomer}" filterBy="#{item.transactionFeeCustomer}" headerText="#{configMapController.getKey('ListPaymentsTitle_transactionFeeCustomer')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.transactionFeeCustomer}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.transactionFeeCustomer}" label="#{configMapController.getKey('ListPaymentsTitle_transactionFeeCustomer')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.transactionTime}" filterBy="#{item.transactionTime}" headerText="#{configMapController.getKey('ListPaymentsTitle_transactionTime')}"   >
+
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.transactionTime}">
+                                        <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                                    </h:outputText>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:calendar value="#{item.transactionTime}">	
+                                        <p:ajax event="dateSelect" listener= "#{paymentsController.handleDateSelect}" update=":growl" />
+                                    </p:calendar>
+                                </f:facet>
+                            </p:cellEditor> 
+
+                        </p:column>
+                        <p:column sortBy="#{item.yourGeneralReference}" filterBy="#{item.yourGeneralReference}" headerText="#{configMapController.getKey('ListPaymentsTitle_yourGeneralReference')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.yourGeneralReference}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.yourGeneralReference}" label="#{configMapController.getKey('ListPaymentsTitle_yourGeneralReference')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.yourSystemReference}" filterBy="#{item.yourSystemReference}" headerText="#{configMapController.getKey('ListPaymentsTitle_yourSystemReference')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.yourSystemReference}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.yourSystemReference}" label="#{configMapController.getKey('ListPaymentsTitle_yourSystemReference')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.customerName}" filterBy="#{item.customerName}" headerText="#{configMapController.getKey('ListPaymentsTitle_customerName')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.customerName}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.customerName}" label="#{configMapController.getKey('ListPaymentsTitle_customerName')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column rendered="#{paymentsController.isUserInRole('ADMIN')}"  headerText="Edit" style="width:50px">  
+                            <p:rowEditor />  
+                        </p:column>  
+
+
+                        <f:facet name="footer">
+                            <p:commandButton rendered="#{paymentsController.isUserInRole('ADMIN')}" id="createButton" icon="ui-icon-plus"   value="#{configMapController.getKey('Create')}" actionListener="#{paymentsController.prepareCreate}" update=":PaymentsCreateForm" oncomplete="PF('PaymentsCreateDialog').show()"/>
+                            <p:commandButton id="viewButton"   icon="ui-icon-search" value="#{configMapController.getKey('View')}" update=":PaymentsViewForm" oncomplete="PF('PaymentsViewDialog').show()" disabled="#{empty paymentsController.selected}"/>
+                            <p:commandButton rendered="#{paymentsController.isUserInRole('ADMIN')}" id="editButton"   icon="ui-icon-pencil" value="#{configMapController.getKey('Edit')}" update=":PaymentsEditForm" oncomplete="PF('PaymentsEditDialog').show()" disabled="#{empty paymentsController.selected}"/>
+                            <p:commandButton rendered="#{paymentsController.isUserInRole('ADMIN')}" id="deleteButton" icon="ui-icon-trash"  value="#{configMapController.getKey('Delete')}" actionListener="#{paymentsController.destroy}" update=":growl,datalist" disabled="#{empty paymentsController.selected}"/>
+                        </f:facet>
+
+                    </p:dataTable>
+                </h:panelGroup>
+            </h:form>
+
+            <ui:include src="Create.xhtml"/>
+            <ui:include src="Edit.xhtml"/>
+            <ui:include src="View.xhtml"/>
+
+        </ui:define>
+    </ui:composition>
+
+</html>

@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" >
+
+    <ui:composition >
+        <p:dialog id="PaymentsCreateDlg" widgetVar="PaymentsCreateDialog" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('CreatePaymentsTitle')}">
+
+            <h:form id="PaymentsCreateForm">
+                <h:panelGroup id="display">
+                    <p:panelGrid columns="2" rendered="#{paymentsController.selected != null}">
+                        <p:outputLabel value="#{configMapController.getKey('CreatePaymentsLabel_id')}" for="id" />
+                        <p:inputText id="id" value="#{paymentsController.selected.id}" title="#{configMapController.getKey('CreatePaymentsTitle_id')}" required="true" requiredMessage="#{configMapController.getKey('CreatePaymentsRequiredMessage_id')}"/>
+                        <p:outputLabel value="#{configMapController.getKey('CreatePaymentsLabel_createDatetime')}" for="createDatetime" />
+
+
+                        <p:calendar id="createDatetime" pattern="MM/dd/yyyy HH:mm:ss"  value="#{paymentsController.selected.createDatetime}"  title="#{configMapController.getKey('CreatePaymentsTitle_createDatetime')}" required="true" requiredMessage="#{configMapController.getKey('CreatePaymentsRequiredMessage_createDatetime')}">
+                            <p:ajax event="dateSelect" listener="#{paymentsController.handleDateSelect}" update=":PaymentsCreateForm" />
+                        </p:calendar>
+                        <p:outputLabel value="#{configMapController.getKey('CreatePaymentsLabel_lastUpdatedDatetime')}" for="lastUpdatedDatetime" />
+
+
+                        <p:calendar id="lastUpdatedDatetime" pattern="MM/dd/yyyy HH:mm:ss"  value="#{paymentsController.selected.lastUpdatedDatetime}"  title="#{configMapController.getKey('CreatePaymentsTitle_lastUpdatedDatetime')}" required="true" requiredMessage="#{configMapController.getKey('CreatePaymentsRequiredMessage_lastUpdatedDatetime')}">
+                            <p:ajax event="dateSelect" listener="#{paymentsController.handleDateSelect}" update=":PaymentsCreateForm" />
+                        </p:calendar>
+                        <p:outputLabel value="#{configMapController.getKey('CreatePaymentsLabel_bankFailedReason')}" for="bankFailedReason" />
+                        <p:inputText id="bankFailedReason" value="#{paymentsController.selected.bankFailedReason}" title="#{configMapController.getKey('CreatePaymentsTitle_bankFailedReason')}" />
+                        <p:outputLabel value="#{configMapController.getKey('CreatePaymentsLabel_bankReceiptID')}" for="bankReceiptID" />
+                        <p:inputText id="bankReceiptID" value="#{paymentsController.selected.bankReceiptID}" title="#{configMapController.getKey('CreatePaymentsTitle_bankReceiptID')}" />
+                        <p:outputLabel value="#{configMapController.getKey('CreatePaymentsLabel_bankReturnCode')}" for="bankReturnCode" />
+                        <p:inputText id="bankReturnCode" value="#{paymentsController.selected.bankReturnCode}" title="#{configMapController.getKey('CreatePaymentsTitle_bankReturnCode')}" />
+                        <p:outputLabel value="#{configMapController.getKey('CreatePaymentsLabel_debitDate')}" for="debitDate" />
+
+
+                        <p:calendar id="debitDate" pattern="MM/dd/yyyy HH:mm:ss"  value="#{paymentsController.selected.debitDate}"  title="#{configMapController.getKey('CreatePaymentsTitle_debitDate')}" >
+                            <p:ajax event="dateSelect" listener="#{paymentsController.handleDateSelect}" update=":PaymentsCreateForm" />
+                        </p:calendar>
+                        <p:outputLabel value="#{configMapController.getKey('CreatePaymentsLabel_ezidebitCustomerID')}" for="ezidebitCustomerID" />
+                        <p:inputText id="ezidebitCustomerID" value="#{paymentsController.selected.ezidebitCustomerID}" title="#{configMapController.getKey('CreatePaymentsTitle_ezidebitCustomerID')}" />
+                        <p:outputLabel value="#{configMapController.getKey('CreatePaymentsLabel_invoiceID')}" for="invoiceID" />
+                        <p:inputText id="invoiceID" value="#{paymentsController.selected.invoiceID}" title="#{configMapController.getKey('CreatePaymentsTitle_invoiceID')}" />
+                        <p:outputLabel value="#{configMapController.getKey('CreatePaymentsLabel_manuallyAddedPayment')}" for="manuallyAddedPayment" />
+                        <p:inputText id="manuallyAddedPayment" value="#{paymentsController.selected.manuallyAddedPayment}" title="#{configMapController.getKey('CreatePaymentsTitle_manuallyAddedPayment')}" />
+                        <p:outputLabel value="#{configMapController.getKey('CreatePaymentsLabel_paymentAmount')}" for="paymentAmount" />
+                        <p:inputText id="paymentAmount" value="#{paymentsController.selected.paymentAmount}" title="#{configMapController.getKey('CreatePaymentsTitle_paymentAmount')}" />
+                        <p:outputLabel value="#{configMapController.getKey('CreatePaymentsLabel_paymentDate')}" for="paymentDate" />
+
+
+                        <p:calendar id="paymentDate" pattern="MM/dd/yyyy HH:mm:ss"  value="#{paymentsController.selected.paymentDate}"  title="#{configMapController.getKey('CreatePaymentsTitle_paymentDate')}" >
+                            <p:ajax event="dateSelect" listener="#{paymentsController.handleDateSelect}" update=":PaymentsCreateForm" />
+                        </p:calendar>
+                        <p:outputLabel value="#{configMapController.getKey('CreatePaymentsLabel_paymentID')}" for="paymentID" />
+                        <p:inputText id="paymentID" value="#{paymentsController.selected.paymentID}" title="#{configMapController.getKey('CreatePaymentsTitle_paymentID')}" />
+                        <p:outputLabel value="#{configMapController.getKey('CreatePaymentsLabel_paymentMethod')}" for="paymentMethod" />
+                        <p:inputText id="paymentMethod" value="#{paymentsController.selected.paymentMethod}" title="#{configMapController.getKey('CreatePaymentsTitle_paymentMethod')}" />
+                        <p:outputLabel value="#{configMapController.getKey('CreatePaymentsLabel_paymentReference')}" for="paymentReference" />
+                        <p:inputText id="paymentReference" value="#{paymentsController.selected.paymentReference}" title="#{configMapController.getKey('CreatePaymentsTitle_paymentReference')}" />
+                        <p:outputLabel value="#{configMapController.getKey('CreatePaymentsLabel_paymentSource')}" for="paymentSource" />
+                        <p:inputText id="paymentSource" value="#{paymentsController.selected.paymentSource}" title="#{configMapController.getKey('CreatePaymentsTitle_paymentSource')}" />
+                        <p:outputLabel value="#{configMapController.getKey('CreatePaymentsLabel_paymentStatus')}" for="paymentStatus" />
+                        <p:inputText id="paymentStatus" value="#{paymentsController.selected.paymentStatus}" title="#{configMapController.getKey('CreatePaymentsTitle_paymentStatus')}" />
+                        <p:outputLabel value="#{configMapController.getKey('CreatePaymentsLabel_scheduledAmount')}" for="scheduledAmount" />
+                        <p:inputText id="scheduledAmount" value="#{paymentsController.selected.scheduledAmount}" title="#{configMapController.getKey('CreatePaymentsTitle_scheduledAmount')}" />
+                        <p:outputLabel value="#{configMapController.getKey('CreatePaymentsLabel_settlementDate')}" for="settlementDate" />
+
+
+                        <p:calendar id="settlementDate" pattern="MM/dd/yyyy HH:mm:ss"  value="#{paymentsController.selected.settlementDate}"  title="#{configMapController.getKey('CreatePaymentsTitle_settlementDate')}" >
+                            <p:ajax event="dateSelect" listener="#{paymentsController.handleDateSelect}" update=":PaymentsCreateForm" />
+                        </p:calendar>
+                        <p:outputLabel value="#{configMapController.getKey('CreatePaymentsLabel_transactionFeeClient')}" for="transactionFeeClient" />
+                        <p:inputText id="transactionFeeClient" value="#{paymentsController.selected.transactionFeeClient}" title="#{configMapController.getKey('CreatePaymentsTitle_transactionFeeClient')}" />
+                        <p:outputLabel value="#{configMapController.getKey('CreatePaymentsLabel_transactionFeeCustomer')}" for="transactionFeeCustomer" />
+                        <p:inputText id="transactionFeeCustomer" value="#{paymentsController.selected.transactionFeeCustomer}" title="#{configMapController.getKey('CreatePaymentsTitle_transactionFeeCustomer')}" />
+                        <p:outputLabel value="#{configMapController.getKey('CreatePaymentsLabel_transactionTime')}" for="transactionTime" />
+
+
+                        <p:calendar id="transactionTime" pattern="MM/dd/yyyy HH:mm:ss"  value="#{paymentsController.selected.transactionTime}"  title="#{configMapController.getKey('CreatePaymentsTitle_transactionTime')}" >
+                            <p:ajax event="dateSelect" listener="#{paymentsController.handleDateSelect}" update=":PaymentsCreateForm" />
+                        </p:calendar>
+                        <p:outputLabel value="#{configMapController.getKey('CreatePaymentsLabel_yourGeneralReference')}" for="yourGeneralReference" />
+                        <p:inputText id="yourGeneralReference" value="#{paymentsController.selected.yourGeneralReference}" title="#{configMapController.getKey('CreatePaymentsTitle_yourGeneralReference')}" />
+                        <p:outputLabel value="#{configMapController.getKey('CreatePaymentsLabel_yourSystemReference')}" for="yourSystemReference" />
+                        <p:inputText id="yourSystemReference" value="#{paymentsController.selected.yourSystemReference}" title="#{configMapController.getKey('CreatePaymentsTitle_yourSystemReference')}" />
+                        <p:outputLabel value="#{configMapController.getKey('CreatePaymentsLabel_customerName')}" for="customerName" />
+                        <p:selectOneMenu id="customerName" valueChangeListener="#{paymentsController.selectOneMenuValueChangeListener}"  value="#{paymentsController.selected.customerName}"  label="#{configMapController.getKey('CreatePaymentsTitle_customerName')}" >
+                            <f:selectItems value="#{customersController.itemsAvailableSelectOne}"/>
+                            <p:ajax   update=":PaymentsCreateForm"  />
+                        </p:selectOneMenu>
+                    </p:panelGrid>
+                    <p:commandButton actionListener="#{paymentsController.createDialogue}" value="#{configMapController.getKey('Save')}" update="display,:PaymentsListForm:datalist,:growl" oncomplete="handleSubmit(args,'PaymentsCreateDialog');paymentsControllerTable.filter()"/>
+                    <p:commandButton value="#{configMapController.getKey('Cancel')}" onclick="PaymentsCreateDialog.hide()"/>
+                </h:panelGroup>
+            </h:form>
+        </p:dialog>
+
+    </ui:composition>    
+
+</html>

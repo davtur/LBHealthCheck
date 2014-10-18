@@ -9,14 +9,18 @@ import au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade;
 import au.com.manlyit.fitnesscrm.stats.beans.CustomerStateFacade;
 import au.com.manlyit.fitnesscrm.stats.beans.CustomersFacade;
 import au.com.manlyit.fitnesscrm.stats.beans.PaymentBean;
+import au.com.manlyit.fitnesscrm.stats.beans.PaymentsFacade;
 import au.com.manlyit.fitnesscrm.stats.classes.util.AsyncJob;
+import au.com.manlyit.fitnesscrm.stats.classes.util.DatatableSelectionHelper;
 import au.com.manlyit.fitnesscrm.stats.classes.util.FutureMapEJB;
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
+import au.com.manlyit.fitnesscrm.stats.classes.util.PfSelectableDataModel;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PushComponentUpdateBean;
 import au.com.manlyit.fitnesscrm.stats.classes.util.ScheduledPaymentPojo;
 import au.com.manlyit.fitnesscrm.stats.db.CustomerState;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import au.com.manlyit.fitnesscrm.stats.db.PaymentParameters;
+import au.com.manlyit.fitnesscrm.stats.db.Payments;
 import au.com.manlyit.fitnesscrm.stats.webservices.ArrayOfPayment;
 import au.com.manlyit.fitnesscrm.stats.webservices.ArrayOfScheduledPayment;
 import au.com.manlyit.fitnesscrm.stats.webservices.CustomerDetails;
@@ -29,10 +33,8 @@ import au.com.manlyit.fitnesscrm.stats.webservices.PaymentDetailPlusNextPaymentI
 import au.com.manlyit.fitnesscrm.stats.webservices.ScheduledPayment;
 import java.io.IOException;
 import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLEncoder;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -87,16 +89,31 @@ public class EziDebitPaymentGateway implements Serializable {
     // private final Map<String, Future> futureMap = new HashMap<>();
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.PaymentParametersFacade ejbPaymentParametersFacade;
+        @Inject
+    private PaymentBean paymentBean;
+    @Inject
+    private PushComponentUpdateBean pushComponentUpdateBean;
+    @Inject
+    private ConfigMapFacade configMapFacade;
+    @Inject
+    private CustomersFacade customersFacade;
+    @Inject
+    private CustomerStateFacade customerStateFacade;
+   @Inject
+    private PaymentsFacade paymentsFacade;
     private boolean asyncOperationRunning = false;
     private final ThreadGroup tGroup1 = new ThreadGroup("EziDebitOps");
     private List<Payment> paymentsList;
+    private PfSelectableDataModel<Payments> paymentDBList = null; 
     private List<Payment> paymentsListFilteredItems;
+    private List<Payment> paymentsListFilteredItems2;
     private List<ScheduledPaymentPojo> scheduledPaymentsList;
     private ScheduledPaymentPojo selectedScheduledPayment;
     private List<ScheduledPaymentPojo> scheduledPaymentsListFilteredItems;
     private CustomerDetails currentCustomerDetails;
     private Payment payment;
     private Date paymentDebitDate = new Date();
+    private DatatableSelectionHelper pagination;
     private Date changeFromDate = new Date();
     private Long paymentAmountInCents = new Long("0");
     private Long paymentLimitAmountInCents = new Long("0");
@@ -118,16 +135,6 @@ public class EziDebitPaymentGateway implements Serializable {
     private boolean editPaymentMethodEnabled = false;
     private Integer progress;
     private AtomicBoolean pageLoaded = new AtomicBoolean(false);
-    @Inject
-    private PaymentBean paymentBean;
-    @Inject
-    private PushComponentUpdateBean pushComponentUpdateBean;
-    @Inject
-    private ConfigMapFacade configMapFacade;
-    @Inject
-    private CustomersFacade customersFacade;
-    @Inject
-    private CustomerStateFacade customerStateFacade;
 
     private String bulkvalue = "";
     private String duplicateValues = "";
@@ -678,6 +685,29 @@ public class EziDebitPaymentGateway implements Serializable {
         this.eziDebitEDDRFormUrl = eziDebitEDDRFormUrl;
     }
 
+   
+
+    /**
+     * @param paymentDBList the paymentDBList to set
+     */
+    public void setPaymentDBList(PfSelectableDataModel<Payments> paymentDBList) {
+        this.paymentDBList = paymentDBList;
+    }
+
+    /**
+     * @return the paymentsListFilteredItems2
+     */
+    public List<Payment> getPaymentsListFilteredItems2() {
+        return paymentsListFilteredItems2;
+    }
+
+    /**
+     * @param paymentsListFilteredItems2 the paymentsListFilteredItems2 to set
+     */
+    public void setPaymentsListFilteredItems2(List<Payment> paymentsListFilteredItems2) {
+        this.paymentsListFilteredItems2 = paymentsListFilteredItems2;
+    }
+
     private class eziDebitThreadFactory implements ThreadFactory {
 
         @Override
@@ -750,6 +780,15 @@ public class EziDebitPaymentGateway implements Serializable {
 
         return false;
     }
+
+    public PfSelectableDataModel<Payments> getPaymentDBList() {
+        if (paymentDBList == null) {
+            paymentDBList = new PfSelectableDataModel<>(paymentsFacade.findPaymentsByCustomer(selectedCustomer));
+        }
+        return paymentDBList;
+    }
+
+    
 
     private Customers getSelectedCustomer() {
         FacesContext context = FacesContext.getCurrentInstance();
@@ -1636,9 +1675,11 @@ public class EziDebitPaymentGateway implements Serializable {
     public void recreateModels() {
         // clear all arrays and reload from DB
         setPaymentsList(null);
+        setPaymentDBList(null);
         setPaymentsListFilteredItems(null);
         setScheduledPaymentsList(null);
         setScheduledPaymentsListFilteredItems(null);
+        setPaymentsListFilteredItems2(null);
         setCustomerDetailsHaveBeenRetrieved(false);
         setCurrentCustomerDetails(null);
 

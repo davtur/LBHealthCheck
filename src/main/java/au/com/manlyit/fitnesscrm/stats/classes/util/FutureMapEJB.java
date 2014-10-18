@@ -5,12 +5,27 @@
  */
 package au.com.manlyit.fitnesscrm.stats.classes.util;
 
+import au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade;
+import au.com.manlyit.fitnesscrm.stats.beans.CustomersFacade;
+import au.com.manlyit.fitnesscrm.stats.beans.PaymentsFacade;
+import au.com.manlyit.fitnesscrm.stats.classes.EziDebitPaymentGateway;
+import au.com.manlyit.fitnesscrm.stats.db.Customers;
+import au.com.manlyit.fitnesscrm.stats.db.Payments;
+import au.com.manlyit.fitnesscrm.stats.webservices.ArrayOfPayment;
+import au.com.manlyit.fitnesscrm.stats.webservices.ArrayOfScheduledPayment;
+import au.com.manlyit.fitnesscrm.stats.webservices.CustomerDetails;
+import au.com.manlyit.fitnesscrm.stats.webservices.Payment;
+import au.com.manlyit.fitnesscrm.stats.webservices.ScheduledPayment;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -21,9 +36,9 @@ import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.ejb.Timer;
 import javax.faces.application.FacesMessage;
+import javax.inject.Inject;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.primefaces.push.EventBus;
-import org.primefaces.push.EventBus.Reply;
 import org.primefaces.push.EventBusFactory;
 import org.primefaces.push.RemoteEndpoint;
 import org.primefaces.push.annotation.OnClose;
@@ -48,6 +63,12 @@ public class FutureMapEJB {
     private static final int TIMEOUT_SECONDS = 30;
     private final ConcurrentHashMap<String, List<AsyncJob>> futureMap = new ConcurrentHashMap<>();
     private final static String CHANNEL = "/payments/";
+    @Inject
+    private CustomersFacade customersFacade;
+    @Inject
+    private ConfigMapFacade configMapFacade;
+    @Inject
+    private PaymentsFacade paymentsFacade;
 
     @PathParam("user")
     private String username;
@@ -160,13 +181,13 @@ public class FutureMapEJB {
         final String broadcastChannel = CHANNEL + sessionChannel;
         final String summ = summary;
         EventBus eventBus = EventBusFactory.getDefault().eventBus();
-       /* Reply rep = new EventBus.Reply() {
-            @Override
-            public void completed(String message) {
+        /* Reply rep = new EventBus.Reply() {
+         @Override
+         public void completed(String message) {
 
-                logger.log(Level.INFO, "Message Delivered:Channel={0}, Summary={1}.", new Object[]{broadcastChannel, summ});
-            }
-        };*/
+         logger.log(Level.INFO, "Message Delivered:Channel={0}, Summary={1}.", new Object[]{broadcastChannel, summ});
+         }
+         };*/
         // eventBus.publish(channels.getChannel(getUser()), new FacesMessage(StringEscapeUtils.escapeHtml(summary), StringEscapeUtils.escapeHtml(detail)));
         eventBus.publish(broadcastChannel, new FacesMessage(StringEscapeUtils.escapeHtml(summary), StringEscapeUtils.escapeHtml(detail)));
     }
@@ -193,15 +214,16 @@ public class FutureMapEJB {
                  }*/
                 int y = 0;
                 String details = "";
-                AsyncJob aj ;
-                for (int x = fmap.size();x>0;x--) {
-                    aj = fmap.get(x-1);
+                AsyncJob aj;
+                for (int x = fmap.size(); x > 0; x--) {
+                    aj = fmap.get(x - 1);
                     Future ft = aj.getFuture();
                     String key = aj.getJobName();
                     if (ft.isDone()) {
                         y++;
                         logger.log(Level.INFO, "SessionId {0} async job {1} has finished.", new Object[]{key, sessionId});
                         details += key + " ";
+                        processCompletedAsyncJobs(sessionId);
                     }
                     GregorianCalendar jobStartTime = new GregorianCalendar();
                     GregorianCalendar currentTime = new GregorianCalendar();
@@ -210,7 +232,7 @@ public class FutureMapEJB {
                     jobStartTime.add(Calendar.SECOND, TIMEOUT_SECONDS);
                     if (jobStartTime.compareTo(currentTime) < 0) {
                         ft.cancel(true);
-                        fmap.remove(x-1);
+                        fmap.remove(x - 1);
                         logger.log(Level.INFO, "SessionId {0} async job {1} has timed out ({2} seconds )  and been cancelled.", new Object[]{key, sessionId, TIMEOUT_SECONDS});
                     }
 
@@ -226,4 +248,305 @@ public class FutureMapEJB {
     }
 
     // run a schedules
+    public void processCompletedAsyncJobs(String sessionId) {
+
+        String key = "";
+
+        try {
+
+            key = "GetCustomerDetails";
+            if (containsKey(sessionId, key)) {
+                Future ft = (Future) get(sessionId, key).getFuture();
+                if (ft.isDone()) {
+                    // remove(sessionId, key);
+                    processGetCustomerDetails(ft);
+
+                }
+            }
+
+            key = "GetPayments";
+            if (containsKey(sessionId, key)) {
+                Future ft = (Future) get(sessionId, key).getFuture();
+                if (ft.isDone()) {
+                    //   remove(sessionId, key);
+                    processGetPayments(ft);
+                }
+            }
+
+            key = "GetScheduledPayments";
+            if (containsKey(sessionId, key)) {
+                Future ft = (Future) get(sessionId, key).getFuture();
+                if (ft.isDone()) {
+                    //    remove(sessionId, key);
+                    processGetScheduledPayments(ft);
+                }
+            }
+
+        } catch (CancellationException ex) {
+            logger.log(Level.WARNING, key + ":", ex);
+
+        }
+    }
+
+    private void processGetPayments(Future ft) {
+        ArrayOfPayment result = null;
+        try {
+            result = (ArrayOfPayment) ft.get();
+        } catch (InterruptedException | ExecutionException ex) {
+            Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        if (result != null && result.getPayment().isEmpty() == false) {
+            List<Payment> payList = result.getPayment();
+            if (payList != null) {
+                String customerRef = payList.get(0).getYourSystemReference().getValue();
+                if (customerRef.trim().isEmpty() == false) {
+                    int custId = Integer.parseInt(customerRef);
+
+                    Customers cust = customersFacade.findById(custId);
+                    if (cust != null) {
+
+                        List<Payments> crmPaymentList = paymentsFacade.findPaymentsByCustomer(cust);
+
+                        for (Payment pay : payList) {
+                            String paymentID = pay.getPaymentID().getValue();
+                            if (paymentID.toUpperCase().contains("SCHEDULED")) {
+                                // scheduled payment no paymentID
+                                logger.log(Level.FINE, "processGetPayments scheduled payment .",pay.toString());
+                            } else {
+                                Payments crmPay = paymentsFacade.findPaymentByPaymentId(paymentID);
+                                if (crmPay != null) { //' payment exists
+                                    if (comparePaymentXMLToEntity(crmPay, pay, cust)) {
+                                        // they are the same so no update
+                                        logger.log(Level.FINE, "processGetPayments paymenst are the same.");
+                                    } else {
+                                        crmPay = convertPaymentXMLToEntity(crmPay, pay, cust);
+                                        paymentsFacade.edit(crmPay);
+                                    }
+                                } else { //payment doesn't exist in crm so add it
+                                    crmPay = convertPaymentXMLToEntity(crmPay, pay, cust);
+                                    paymentsFacade.create(crmPay);
+                                }
+                            }
+
+                        }
+                        if (crmPaymentList.size() > 0) {
+                            //TODO delete any payments that aren't in Ezidebit
+                        }
+
+                    } else {
+                        logger.log(Level.WARNING, "processGetPayments couldn't find a customer with our system ref from payment.");
+                    }
+                } else {
+                    logger.log(Level.WARNING, "processGetPayments our system ref in payment is null.");
+                }
+
+            }
+        }
+
+        logger.log(Level.INFO, "processGetPayments completed");
+    }
+
+    private Payments convertPaymentXMLToEntity(Payments payment, Payment pay, Customers cust) {
+
+        if (payment == null) {
+            payment = new Payments();
+            payment.setCreateDatetime(new Date());
+            payment.setLastUpdatedDatetime(new Date());
+            payment.setId(0);
+            payment.setCustomerName(cust);
+        }
+        try {
+            payment.setBankFailedReason(pay.getBankFailedReason().getValue());
+            payment.setBankReceiptID(pay.getBankReceiptID().getValue());
+            payment.setBankReturnCode(pay.getBankReturnCode().getValue());
+            //payment.setCustomerName(cust);
+            payment.setDebitDate(pay.getDebitDate().getValue().toGregorianCalendar().getTime());
+            payment.setEzidebitCustomerID(pay.getBankFailedReason().getValue());
+            payment.setInvoiceID(pay.getEzidebitCustomerID().getValue());
+            payment.setPaymentAmount(new BigDecimal(pay.getPaymentAmount().floatValue()));
+            payment.setPaymentID(pay.getPaymentID().getValue());
+            payment.setPaymentMethod(pay.getPaymentMethod().getValue());
+            payment.setPaymentReference(pay.getPaymentReference().getValue());
+            payment.setPaymentSource(pay.getPaymentSource().getValue());
+            payment.setScheduledAmount(new BigDecimal(pay.getScheduledAmount().floatValue()));
+
+            payment.setSettlementDate(pay.getSettlementDate().getValue().toGregorianCalendar().getTime());
+            payment.setPaymentStatus(pay.getPaymentStatus().getValue());
+            payment.setTransactionFeeClient(new BigDecimal(pay.getTransactionFeeClient().floatValue()));
+            payment.setTransactionFeeCustomer(new BigDecimal(pay.getTransactionFeeCustomer().floatValue()));
+
+            if (pay.getTransactionTime().getValue() != null) {
+                payment.setTransactionTime(pay.getTransactionTime().getValue().toGregorianCalendar().getTime()); // only valid for real time and credit card payments
+            }
+
+            payment.setYourGeneralReference(pay.getYourGeneralReference().getValue());
+            payment.setYourSystemReference(pay.getYourSystemReference().getValue());
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "convertPaymentXMLToEntity method failed.:", e);
+        }
+
+        return payment;
+
+    }
+
+    private boolean comparePaymentXMLToEntity(Payments payment, Payment pay, Customers cust) {
+
+        boolean theSame = true;
+        try {
+            if (payment.getBankFailedReason().contains(pay.getBankFailedReason().getValue()) == false) {
+                theSame = false;
+            }
+            if (payment.getBankReceiptID().contains(pay.getBankReceiptID().getValue()) == false) {
+                theSame = false;
+            }
+            if (payment.getBankReturnCode().contains(pay.getBankReturnCode().getValue()) == false) {
+                theSame = false;
+            }
+            if (payment.getCustomerName() == null) {
+                theSame = false;
+            } else {
+                if (payment.getCustomerName().getId().toString().contains(pay.getYourSystemReference().getValue()) == false) {
+                    theSame = false;
+                }
+            }
+            if (payment.getDebitDate().compareTo(pay.getDebitDate().getValue().toGregorianCalendar().getTime()) != 0) {
+                theSame = false;
+            }
+            if (payment.getEzidebitCustomerID().contains(pay.getBankFailedReason().getValue()) == false) {
+                theSame = false;
+            }
+            if (payment.getInvoiceID().contains(pay.getEzidebitCustomerID().getValue()) == false) {
+                theSame = false;
+            }
+            if (payment.getPaymentAmount().compareTo(new BigDecimal(pay.getPaymentAmount().floatValue())) != 0) {
+                theSame = false;
+            }
+            if (payment.getPaymentID().contains(pay.getPaymentID().getValue()) == false) {
+                theSame = false;
+            }
+            if (payment.getPaymentMethod().contains(pay.getPaymentMethod().getValue()) == false) {
+                theSame = false;
+            }
+            if (payment.getPaymentReference().contains(pay.getPaymentReference().getValue()) == false) {
+                theSame = false;
+            }
+            if (payment.getPaymentSource().contains(pay.getPaymentSource().getValue()) == false) {
+                theSame = false;
+            }
+            if (payment.getPaymentStatus().contains(pay.getPaymentStatus().getValue()) == false) {
+                theSame = false;
+            }
+            if (payment.getScheduledAmount().compareTo(new BigDecimal(pay.getScheduledAmount().floatValue())) != 0) {
+                theSame = false;
+            }
+            if (payment.getSettlementDate().compareTo(pay.getSettlementDate().getValue().toGregorianCalendar().getTime()) != 0) {
+                theSame = false;
+            }
+            if (payment.getTransactionFeeClient().compareTo(new BigDecimal(pay.getTransactionFeeClient().floatValue())) != 0) {
+                theSame = false;
+            }
+            if (payment.getTransactionFeeCustomer().compareTo(new BigDecimal(pay.getTransactionFeeCustomer().floatValue())) != 0) {
+                theSame = false;
+            }
+            if (pay.getTransactionTime().getValue() != null) {
+                if (payment.getTransactionTime().compareTo(pay.getTransactionTime().getValue().toGregorianCalendar().getTime()) != 0) {
+                    theSame = false;
+                }
+            }
+            if (payment.getYourGeneralReference().contains(pay.getYourGeneralReference().getValue()) == false) {
+                theSame = false;
+            }
+            if (payment.getYourSystemReference().contains(pay.getYourSystemReference().getValue()) == false) {
+                theSame = false;
+            }
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "convertPaymentXMLToEntity method failed.:", e);
+        }
+
+        return theSame;
+
+    }
+
+    private void processGetScheduledPayments(Future ft) {
+        ArrayOfScheduledPayment result = null;
+        try {
+            result = (ArrayOfScheduledPayment) ft.get();
+        } catch (InterruptedException | ExecutionException ex) {
+            Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        if (result != null) {
+            List<ScheduledPayment> payList = result.getScheduledPayment();
+            if (payList != null) {
+                // 
+                List<ScheduledPaymentPojo> pojoList = new ArrayList<>();
+                int id = 1;
+                for (ScheduledPayment sp : payList) {
+                    pojoList.add(new ScheduledPaymentPojo(id, sp.getEzidebitCustomerID().getValue(), sp.isManuallyAddedPayment(), sp.getPaymentAmount(), sp.getPaymentDate().toGregorianCalendar().getTime(), sp.getPaymentReference().getValue(), sp.getYourGeneralReference().getValue(), sp.getYourSystemReference().getValue()));
+                    id++;
+                }
+                // setScheduledPaymentsList(pojoList);
+                // setScheduledPaymentsListFilteredItems(null);
+            }
+        }
+
+        logger.log(Level.INFO, "processGetScheduledPayments completed");
+    }
+
+    private void processGetCustomerDetails(Future ft) {
+        CustomerDetails result = null;
+        /*  setCustomerDetailsHaveBeenRetrieved(true);
+         try {
+         result = (CustomerDetails) ft.get();
+         } catch (InterruptedException | ExecutionException ex) {
+         Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, "GetCustomerDetails", ex);
+         }
+         if (result != null) {
+         // do something with result
+         setAutoStartPoller(false);
+         customerExistsInPaymentGateway = true;
+
+         setCurrentCustomerDetails(result);
+         String eziStatusCode = result.getStatusDescription().getValue().toUpperCase().trim();
+         String ourStatus = getSelectedCustomer().getActive().getCustomerState().toUpperCase().trim();
+         String message = "";
+         if (ourStatus.contains(eziStatusCode) == false) {
+         // status codes don't match
+         String cust = getSelectedCustomer().getUsername();
+         message = "Customer Status codes dont match. Customer: " + cust + ", ezidebit status:" + eziStatusCode + ", Crm Status:" + ourStatus + "";
+         if (eziStatusCode.contains("WAITING BANK DETAILS")) {
+         message = "The Customer does not have any banking details. Customer: " + cust + ", ezidebit status:" + eziStatusCode + ", Crm Status:" + ourStatus + "";
+         logger.log(Level.INFO, message);
+         setWaitingForPaymentDetails(true);
+         JsfUtil.pushSuccessMessage(CHANNEL + sessionId, "Important!", "You must enter customer banking details before payments can be set up.");
+         } else {
+         logger.log(Level.WARNING, message);
+         setWaitingForPaymentDetails(false);
+         JsfUtil.pushErrorMessage(CHANNEL + sessionId, message, "");
+         }
+         if (eziStatusCode.toUpperCase().contains("CANCELLED")) {
+         message = "The Customer is in a Cancelled status in the payment gateway";
+         logger.log(Level.INFO, message);
+         JsfUtil.pushSuccessMessage(CHANNEL + sessionId, "Important!", message);
+         setCustomerCancelledInPaymentGateway(true);
+         } else {
+         setCustomerCancelledInPaymentGateway(false);
+         }
+         } else {
+         //status codes match
+         setWaitingForPaymentDetails(false);
+         if (eziStatusCode.toUpperCase().contains("CANCELLED")) {
+         setCustomerCancelledInPaymentGateway(true);
+         } else {
+         setCustomerCancelledInPaymentGateway(false);
+         }
+         }
+
+         } else {
+         customerExistsInPaymentGateway = false;
+         }
+         logger.log(Level.INFO, "processGetCustomerDetails completed");
+         */
+    }
+
 }

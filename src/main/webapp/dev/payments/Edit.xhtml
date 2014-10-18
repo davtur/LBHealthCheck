@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" >
+
+    <ui:composition>
+        <p:dialog id="PaymentsEditDlg" widgetVar="PaymentsEditDialog" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('EditPaymentsTitle')}">
+            <h:form id="PaymentsEditForm">
+                <h:panelGroup id="display">
+                    <p:panelGrid columns="2" rendered="#{paymentsController.selected != null}">
+                        <h:outputLabel value="#{configMapController.getKey('EditPaymentsLabel_id')}" for="id" />
+                        <h:inputText id="id"  value="#{paymentsController.selected.id}" title="#{configMapController.getKey('EditPaymentsTitle_id')}" required="true" requiredMessage="#{configMapController.getKey('EditPaymentsRequiredMessage_id')}"/>
+                        <h:outputLabel value="#{configMapController.getKey('EditPaymentsLabel_createDatetime')}" for="createDatetime" />
+                        <h:inputText id="createDatetime" value="#{paymentsController.selected.createDatetime}" title="#{configMapController.getKey('EditPaymentsTitle_createDatetime')}" required="true" requiredMessage="#{configMapController.getKey('EditPaymentsRequiredMessage_createDatetime')}">
+                            <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                        </h:inputText>
+                        <h:outputLabel value="#{configMapController.getKey('EditPaymentsLabel_lastUpdatedDatetime')}" for="lastUpdatedDatetime" />
+                        <h:inputText id="lastUpdatedDatetime" value="#{paymentsController.selected.lastUpdatedDatetime}" title="#{configMapController.getKey('EditPaymentsTitle_lastUpdatedDatetime')}" required="true" requiredMessage="#{configMapController.getKey('EditPaymentsRequiredMessage_lastUpdatedDatetime')}">
+                            <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                        </h:inputText>
+                        <h:outputLabel value="#{configMapController.getKey('EditPaymentsLabel_bankFailedReason')}" for="bankFailedReason" />
+                        <h:inputText id="bankFailedReason"  value="#{paymentsController.selected.bankFailedReason}" title="#{configMapController.getKey('EditPaymentsTitle_bankFailedReason')}" />
+                        <h:outputLabel value="#{configMapController.getKey('EditPaymentsLabel_bankReceiptID')}" for="bankReceiptID" />
+                        <h:inputText id="bankReceiptID"  value="#{paymentsController.selected.bankReceiptID}" title="#{configMapController.getKey('EditPaymentsTitle_bankReceiptID')}" />
+                        <h:outputLabel value="#{configMapController.getKey('EditPaymentsLabel_bankReturnCode')}" for="bankReturnCode" />
+                        <h:inputText id="bankReturnCode"  value="#{paymentsController.selected.bankReturnCode}" title="#{configMapController.getKey('EditPaymentsTitle_bankReturnCode')}" />
+                        <h:outputLabel value="#{configMapController.getKey('EditPaymentsLabel_debitDate')}" for="debitDate" />
+                        <h:inputText id="debitDate" value="#{paymentsController.selected.debitDate}" title="#{configMapController.getKey('EditPaymentsTitle_debitDate')}" >
+                            <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                        </h:inputText>
+                        <h:outputLabel value="#{configMapController.getKey('EditPaymentsLabel_ezidebitCustomerID')}" for="ezidebitCustomerID" />
+                        <h:inputText id="ezidebitCustomerID"  value="#{paymentsController.selected.ezidebitCustomerID}" title="#{configMapController.getKey('EditPaymentsTitle_ezidebitCustomerID')}" />
+                        <h:outputLabel value="#{configMapController.getKey('EditPaymentsLabel_invoiceID')}" for="invoiceID" />
+                        <h:inputText id="invoiceID"  value="#{paymentsController.selected.invoiceID}" title="#{configMapController.getKey('EditPaymentsTitle_invoiceID')}" />
+                        <h:outputLabel value="#{configMapController.getKey('EditPaymentsLabel_manuallyAddedPayment')}" for="manuallyAddedPayment" />
+                        <h:inputText id="manuallyAddedPayment"  value="#{paymentsController.selected.manuallyAddedPayment}" title="#{configMapController.getKey('EditPaymentsTitle_manuallyAddedPayment')}" />
+                        <h:outputLabel value="#{configMapController.getKey('EditPaymentsLabel_paymentAmount')}" for="paymentAmount" />
+                        <h:inputText id="paymentAmount"  value="#{paymentsController.selected.paymentAmount}" title="#{configMapController.getKey('EditPaymentsTitle_paymentAmount')}" />
+                        <h:outputLabel value="#{configMapController.getKey('EditPaymentsLabel_paymentDate')}" for="paymentDate" />
+                        <h:inputText id="paymentDate" value="#{paymentsController.selected.paymentDate}" title="#{configMapController.getKey('EditPaymentsTitle_paymentDate')}" >
+                            <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                        </h:inputText>
+                        <h:outputLabel value="#{configMapController.getKey('EditPaymentsLabel_paymentID')}" for="paymentID" />
+                        <h:inputText id="paymentID"  value="#{paymentsController.selected.paymentID}" title="#{configMapController.getKey('EditPaymentsTitle_paymentID')}" />
+                        <h:outputLabel value="#{configMapController.getKey('EditPaymentsLabel_paymentMethod')}" for="paymentMethod" />
+                        <h:inputText id="paymentMethod"  value="#{paymentsController.selected.paymentMethod}" title="#{configMapController.getKey('EditPaymentsTitle_paymentMethod')}" />
+                        <h:outputLabel value="#{configMapController.getKey('EditPaymentsLabel_paymentReference')}" for="paymentReference" />
+                        <h:inputText id="paymentReference"  value="#{paymentsController.selected.paymentReference}" title="#{configMapController.getKey('EditPaymentsTitle_paymentReference')}" />
+                        <h:outputLabel value="#{configMapController.getKey('EditPaymentsLabel_paymentSource')}" for="paymentSource" />
+                        <h:inputText id="paymentSource"  value="#{paymentsController.selected.paymentSource}" title="#{configMapController.getKey('EditPaymentsTitle_paymentSource')}" />
+                        <h:outputLabel value="#{configMapController.getKey('EditPaymentsLabel_paymentStatus')}" for="paymentStatus" />
+                        <h:inputText id="paymentStatus"  value="#{paymentsController.selected.paymentStatus}" title="#{configMapController.getKey('EditPaymentsTitle_paymentStatus')}" />
+                        <h:outputLabel value="#{configMapController.getKey('EditPaymentsLabel_scheduledAmount')}" for="scheduledAmount" />
+                        <h:inputText id="scheduledAmount"  value="#{paymentsController.selected.scheduledAmount}" title="#{configMapController.getKey('EditPaymentsTitle_scheduledAmount')}" />
+                        <h:outputLabel value="#{configMapController.getKey('EditPaymentsLabel_settlementDate')}" for="settlementDate" />
+                        <h:inputText id="settlementDate" value="#{paymentsController.selected.settlementDate}" title="#{configMapController.getKey('EditPaymentsTitle_settlementDate')}" >
+                            <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                        </h:inputText>
+                        <h:outputLabel value="#{configMapController.getKey('EditPaymentsLabel_transactionFeeClient')}" for="transactionFeeClient" />
+                        <h:inputText id="transactionFeeClient"  value="#{paymentsController.selected.transactionFeeClient}" title="#{configMapController.getKey('EditPaymentsTitle_transactionFeeClient')}" />
+                        <h:outputLabel value="#{configMapController.getKey('EditPaymentsLabel_transactionFeeCustomer')}" for="transactionFeeCustomer" />
+                        <h:inputText id="transactionFeeCustomer"  value="#{paymentsController.selected.transactionFeeCustomer}" title="#{configMapController.getKey('EditPaymentsTitle_transactionFeeCustomer')}" />
+                        <h:outputLabel value="#{configMapController.getKey('EditPaymentsLabel_transactionTime')}" for="transactionTime" />
+                        <h:inputText id="transactionTime" value="#{paymentsController.selected.transactionTime}" title="#{configMapController.getKey('EditPaymentsTitle_transactionTime')}" >
+                            <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                        </h:inputText>
+                        <h:outputLabel value="#{configMapController.getKey('EditPaymentsLabel_yourGeneralReference')}" for="yourGeneralReference" />
+                        <h:inputText id="yourGeneralReference"  value="#{paymentsController.selected.yourGeneralReference}" title="#{configMapController.getKey('EditPaymentsTitle_yourGeneralReference')}" />
+                        <h:outputLabel value="#{configMapController.getKey('EditPaymentsLabel_yourSystemReference')}" for="yourSystemReference" />
+                        <h:inputText id="yourSystemReference"  value="#{paymentsController.selected.yourSystemReference}" title="#{configMapController.getKey('EditPaymentsTitle_yourSystemReference')}" />
+                        <h:outputLabel value="#{configMapController.getKey('EditPaymentsLabel_customerName')}" for="customerName" />
+                        <p:selectOneMenu id="customerName" valueChangeListener="#{paymentsController.selectOneMenuValueChangeListener}" value="#{paymentsController.selected.customerName}" label="#{configMapController.getKey('EditPaymentsTitle_customerName')}" >
+                            <f:selectItems value="#{customersController.itemsAvailableSelectOne}"/>
+                            <p:ajax   update=":PaymentsEditForm"  />
+                        </p:selectOneMenu>
+                    </p:panelGrid>
+                    <p:commandButton actionListener="#{paymentsController.update}" value="#{configMapController.getKey('Save')}" update="display,:PaymentsListForm:datalist,:growl" oncomplete="handleSubmit(args, 'PaymentsEditDialog');paymentsControllerTable.filter()"/>
+                    <p:commandButton value="#{configMapController.getKey('Cancel')}" onclick="PaymentsEditDialog.hide()"/>
+                </h:panelGroup>
+            </h:form>
+        </p:dialog>
+
+    </ui:composition>
+</html>

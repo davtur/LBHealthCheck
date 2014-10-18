@@ -59,6 +59,8 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Customers.findByFacebookId", query = "SELECT c FROM Customers c WHERE c.facebookId = :facebookId"),
     @NamedQuery(name = "Customers.findByGoogleId", query = "SELECT c FROM Customers c WHERE c.googleId = :googleId")})
 public class Customers implements BaseEntity, Serializable {
+    @OneToMany(mappedBy = "customerName")
+    private Collection<Payments> paymentsCollection;
     @Basic(optional = false)
     @NotNull
     @Column(name = "gender")
@@ -518,6 +520,15 @@ public class Customers implements BaseEntity, Serializable {
 
     public void setGender(Character gender) {
         this.gender = gender;
+    }
+
+    @XmlTransient
+    public Collection<Payments> getPaymentsCollection() {
+        return paymentsCollection;
+    }
+
+    public void setPaymentsCollection(Collection<Payments> paymentsCollection) {
+        this.paymentsCollection = paymentsCollection;
     }
 
 }
