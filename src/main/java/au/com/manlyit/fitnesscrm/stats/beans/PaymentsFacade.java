@@ -68,7 +68,7 @@ public class PaymentsFacade extends AbstractFacade<Payments> {
 
             Expression<Customers> cust = rt.get("customerName");
             Expression<String> paymentID = rt.get("paymentID");
-            cq.where(cb.and(cb.equal(cust, customer),cb.equal(paymentID, "SCHEDULED")));
+            cq.where(cb.and(cb.equal(cust, customer),cb.isNull(paymentID)));
 
             Query q = em.createQuery(cq);
             retList = q.getResultList();

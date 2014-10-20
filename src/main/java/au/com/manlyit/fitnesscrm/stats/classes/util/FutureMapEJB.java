@@ -375,56 +375,58 @@ public class FutureMapEJB {
         if (result != null) {
             List<ScheduledPayment> payList = result.getScheduledPayment();
             if (payList != null) {
-                String customerRef = payList.get(0).getYourSystemReference().getValue();
-                if (customerRef.trim().isEmpty() == false) {
-                    int custId = 0;
-                    try {
-                        custId = Integer.parseInt(customerRef.trim());
-                    } catch (NumberFormatException numberFormatException) {
-                        logger.log(Level.WARNING, "processGetScheduledPayments an ezidebit YourSystemReference string cannot be converted to a number.", numberFormatException);
-
-                    }
-
-                    Customers cust = customersFacade.findById(custId);
-                    if (cust != null) {
-                        for (ScheduledPayment pay : payList) {
-                            if (customerRef.compareTo(pay.getYourSystemReference().getValue().trim()) != 0) {
-                                logger.log(Level.WARNING, "processGetScheduledPayments . The list being processed contains multiple customers.It should only contain one for this method. Aborting.");
-                                abort = true;
-                            }
+                if (payList.size() > 1) {
+                    String customerRef = payList.get(0).getYourSystemReference().getValue();
+                    if (customerRef.trim().isEmpty() == false) {
+                        int custId = 0;
+                        try {
+                            custId = Integer.parseInt(customerRef.trim());
+                        } catch (NumberFormatException numberFormatException) {
+                            logger.log(Level.WARNING, "processGetScheduledPayments an ezidebit YourSystemReference string cannot be converted to a number.", numberFormatException);
 
                         }
-                        if (abort == false) {
-                            scheduledPayments = payList.size();
 
-                            List<Payments> crmPaymentList = paymentsFacade.findScheduledPaymentsByCustomer(cust);
-                            existingInCRM = crmPaymentList.size();
-                            int numberDeleted = 0;
-                            for (Payments p : crmPaymentList) {
-                                paymentsFacade.remove(p);
-                                numberDeleted++;
-                            }
-                            if (numberDeleted != existingInCRM) {
-                                logger.log(Level.WARNING, "processGetScheduledPayments - Failed to delete some scheduled payments. ExistedInCRM={0}, Deleted={1},Existeding in Payment Gateway={2}", new Object[]{existingInCRM, numberDeleted, scheduledPayments});
-
-                            }
+                        Customers cust = customersFacade.findById(custId);
+                        if (cust != null) {
                             for (ScheduledPayment pay : payList) {
-                                Payments crmPay = convertScheduledPaymentXMLToEntity(new Payments(), pay, cust);
-                                paymentsFacade.create(crmPay);
-                                createScheduledPayments++;
-                            }
-                            if (createScheduledPayments != scheduledPayments) {
-                                
-                                logger.log(Level.WARNING, "processGetScheduledPayments - The number of payments created does not equal the number retrieved from the payment gateway. Retireved={1}, Created={2}, Existed In CRM and were deleted={0}", new Object[]{existingInCRM, createScheduledPayments, scheduledPayments});
+                                if (customerRef.compareTo(pay.getYourSystemReference().getValue().trim()) != 0) {
+                                    logger.log(Level.WARNING, "processGetScheduledPayments . The list being processed contains multiple customers.It should only contain one for this method. Aborting.");
+                                    abort = true;
+                                }
 
                             }
+                            if (abort == false) {
+                                scheduledPayments = payList.size();
+
+                                List<Payments> crmPaymentList = paymentsFacade.findScheduledPaymentsByCustomer(cust);
+                                existingInCRM = crmPaymentList.size();
+                                int numberDeleted = 0;
+                                for (Payments p : crmPaymentList) {
+                                    paymentsFacade.remove(p);
+                                    numberDeleted++;
+                                }
+                                if (numberDeleted != existingInCRM) {
+                                    logger.log(Level.WARNING, "processGetScheduledPayments - Failed to delete some scheduled payments. ExistedInCRM={0}, Deleted={1},Existeding in Payment Gateway={2}", new Object[]{existingInCRM, numberDeleted, scheduledPayments});
+
+                                }
+                                for (ScheduledPayment pay : payList) {
+                                    Payments crmPay = convertScheduledPaymentXMLToEntity(null, pay, cust);
+                                    paymentsFacade.create(crmPay);
+                                    createScheduledPayments++;
+                                }
+                                if (createScheduledPayments != scheduledPayments) {
+
+                                    logger.log(Level.WARNING, "processGetScheduledPayments - The number of payments created does not equal the number retrieved from the payment gateway. Retireved={1}, Created={2}, Existed In CRM and were deleted={0}", new Object[]{existingInCRM, createScheduledPayments, scheduledPayments});
+
+                                }
+
+                            }
+                        } else {
+                            logger.log(Level.SEVERE, "processGetScheduledPayments couldn't find a customer with our system ref from payment.");
+                            /*TODO email a report at the end of the process if there are any payments swithout a customer reference
+                             as this means that a customer is in ezidebits system but not ours */
 
                         }
-                    } else {
-                        logger.log(Level.SEVERE, "processGetScheduledPayments couldn't find a customer with our system ref from payment.");
-                        /*TODO email a report at the end of the process if there are any payments swithout a customer reference
-                         as this means that a customer is in ezidebits system but not ours */
-
                     }
                 }
             }
@@ -486,6 +488,7 @@ public class FutureMapEJB {
             payment.setCustomerName(cust);
         }
         try {
+            payment.setLastUpdatedDatetime(new Date());
             payment.setBankFailedReason("");
             payment.setBankReceiptID("");
             payment.setBankReturnCode("");
@@ -493,7 +496,7 @@ public class FutureMapEJB {
             payment.setEzidebitCustomerID(pay.getEzidebitCustomerID().getValue());
             payment.setInvoiceID(pay.getEzidebitCustomerID().getValue());
             payment.setPaymentAmount(new BigDecimal(pay.getPaymentAmount().floatValue()));
-            payment.setPaymentID("SCHEDULED");
+            payment.setPaymentID(null);
             payment.setPaymentMethod("DR");
             payment.setPaymentReference(pay.getPaymentReference().getValue());
             payment.setPaymentSource("SCHEDULED");
