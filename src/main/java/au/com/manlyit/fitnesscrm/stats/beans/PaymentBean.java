@@ -387,9 +387,8 @@ public class PaymentBean implements Serializable {
     }
 
     @Asynchronous
-    public Future<Boolean> addCustomer(Customers cust, String paymentGatewayName, String digitalKey,String authenticatedUser) {
+    public Future<Boolean> addCustomer(Customers cust, String paymentGatewayName, String digitalKey, String authenticatedUser) {
 
-        
         if (authenticatedUser == null) {
 
             logger.log(Level.INFO, "Authenticated User is NULL - Aborting add customer to ezidebit");
@@ -422,9 +421,9 @@ public class PaymentBean implements Serializable {
                 String ourSystemRef = cd.getYourSystemReference().getValue();
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
                 ourSystemRef += "-CANCELLED-" + sdf.format(new Date());
-                String ourGeneralReference = cust.getLastname() + " " + cust.getFirstname() ;
+                String ourGeneralReference = cust.getLastname() + " " + cust.getFirstname();
 
-                EziResponseOfstring editCustomerDetail = getWs().editCustomerDetails(digitalKey, "",cust.getId().toString() , ourSystemRef, ourGeneralReference, cd.getCustomerName().getValue(),cd.getCustomerFirstName().getValue(), cust.getStreetAddress(), cd.getAddressLine2().getValue(), cust.getSuburb(), cust.getPostcode(), cust.getAddrState(), cust.getEmailAddress(), cust.getTelephone(), cd.getSmsPaymentReminder().getValue(), cd.getSmsFailedNotification().getValue(), cd.getSmsExpiredCard().getValue(), authenticatedUser);
+                EziResponseOfstring editCustomerDetail = getWs().editCustomerDetails(digitalKey, "", cust.getId().toString(), ourSystemRef, ourGeneralReference, cd.getCustomerName().getValue(), cd.getCustomerFirstName().getValue(), cust.getStreetAddress(), cd.getAddressLine2().getValue(), cust.getSuburb(), cust.getPostcode(), cust.getAddrState(), cust.getEmailAddress(), cust.getTelephone(), cd.getSmsPaymentReminder().getValue(), cd.getSmsFailedNotification().getValue(), cd.getSmsExpiredCard().getValue(), authenticatedUser);
                 logger.log(Level.INFO, "editCustomerDetail Response: Error - {0}, Data - {1}", new Object[]{editCustomerDetail.getErrorMessage().getValue(), editCustomerDetail.getData().getValue()});
                 if (editCustomerDetail.getError() == 0) {// any errors will be a non zero value
 
@@ -706,6 +705,57 @@ public class PaymentBean implements Serializable {
 
         } else {
             logger.log(Level.WARNING, "getPayments Response: Error - {0}, ", eziResponse.getErrorMessage().getValue());
+
+        }
+
+        return new AsyncResult<>(result);
+    }
+
+    @Asynchronous
+    public synchronized Future<ArrayOfPayment> getAllPaymentsBySystemSinceDate(Date fromDate,boolean useSettlementDate, String digitalKey) {
+        //  Description
+        //  	  
+        //  This method allows you to retrieve payment information from across Ezidebit's various
+        //  payment systems. It provides you with access to scheduled, pending and completed
+        //  payments made through all payment channels.
+        //  It is important to note the following when querying Payment details:
+        //  • This method can be used to retrieve information about payments that have been
+        //  made by your Customer through any means;
+        //  • This is the recommended method for retrieving a set of payment results in a
+        //  single call as most other methods are designed to provide detail about a single
+        //  transaction. This method will return a full set of transactions matching the
+        //  supplied criteria;
+        //  • The flexibility of using a wildcard in the PaymentReference search value means
+        //  that if you are adding payments with the AddPayment method as they become
+        //  due, you can provide structured PaymentReferences that will allow you to group
+        //  or batch payments in a way that you see fit;
+        //  • Ezidebit only processes settlement deposits to clients once a day. Since the
+        //  "SUCCESS" criteria for a scheduled direct debit payment is set when the payment
+        //  is deposited to the client, the combination of
+        //  PaymentType=ALL
+        //  DateField=SETTLEMENT
+        //  DateFrom={LastSuccessfulPaymentDate + 1}
+        //  DateTo={currentDate}
+        //  will provide you with all payments that have been made to the client since the
+        //  last time your system received payment information.
+        ArrayOfPayment result = new ArrayOfPayment();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        String fromDateString = ""; // The exact date on which the payment that you wish to move is scheduled to be deducted from your Customer's bank account or credit card.
+        if (fromDate != null) {
+            fromDateString = sdf.format(fromDate);
+        }
+
+        String dateField = "PAYMENT";
+        if (useSettlementDate == true) {
+            dateField = "SETTLEMENT";
+        }
+        EziResponseOfArrayOfPaymentTHgMB7OL eziResponse = getWs().getPayments(digitalKey, "ALL", "ALL", "ALL", "", fromDateString, "", dateField, "", "");
+        logger.log(Level.INFO, "getAllPaymentsBySystemSinceDate Response: Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
+        if (eziResponse.getError() == 0) {// any errors will be a non zero value
+            result = eziResponse.getData().getValue();
+
+        } else {
+            logger.log(Level.WARNING, "getAllPaymentsBySystemSinceDate Response: Error - {0}, ", eziResponse.getErrorMessage().getValue());
 
         }
 

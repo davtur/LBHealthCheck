@@ -58,6 +58,26 @@ public class PaymentsFacade extends AbstractFacade<Payments> {
         }
         return retList;
     }
+     public List<Payments> findScheduledPaymentsByCustomer(Customers customer) {
+        List retList = null;
+        
+        try {
+            CriteriaBuilder cb = em.getCriteriaBuilder();
+            CriteriaQuery<Payments> cq = cb.createQuery(Payments.class);
+            Root<Payments> rt = cq.from(Payments.class);
+
+            Expression<Customers> cust = rt.get("customerName");
+            Expression<String> paymentID = rt.get("paymentID");
+            cq.where(cb.and(cb.equal(cust, customer),cb.equal(paymentID, "SCHEDULED")));
+
+            Query q = em.createQuery(cq);
+            retList = q.getResultList();
+        } catch (Exception e) {
+
+            logger.log(Level.INFO, "Could not find customers Payments.", e);
+        }
+        return retList;
+    }
 
     public Payments findPaymentByPaymentId(String paymentId) {
         Payments cm = null;
