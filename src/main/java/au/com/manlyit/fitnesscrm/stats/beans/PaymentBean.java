@@ -186,24 +186,11 @@ public class PaymentBean implements Serializable {
         logger.log(Level.INFO, "Editing Customer  {0}", cust.getUsername());
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        Collection<PaymentParameters> pay = cust.getPaymentParametersCollection();
-        PaymentParameters payParams = null;
+
+        PaymentParameters payParams = cust.getPaymentParameters();
         String addresssLine2 = ""; // not used
         String humanFriendlyReference = cust.getId() + " " + cust.getLastname().toUpperCase() + " " + cust.getFirstname().toUpperCase(); // existing customers use this type of reference by default
 
-        if (pay != null) {
-            for (PaymentParameters pp : pay) {
-                if (pp.getPaymentGatewayName().compareTo(paymentGateway) == 0) {
-                    payParams = pp;
-                } else {
-
-                }
-
-            }
-        } else {
-            logger.log(Level.WARNING, "Payment Parameters are null");
-            return new AsyncResult<>(false);
-        }
         if (payParams == null) {
             logger.log(Level.WARNING, "Payment gateway EZIDEBIT parameters not found");
             return new AsyncResult<>(false);
@@ -441,29 +428,19 @@ public class PaymentBean implements Serializable {
         logger.log(Level.INFO, "Adding Customer  {0}", cust.getUsername());
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        Collection<PaymentParameters> pay = cust.getPaymentParametersCollection();
-        if (pay == null) {
-            logger.log(Level.WARNING, "Payment Parameters are null");
-            return new AsyncResult<>(false);
-        }
-        PaymentParameters payParams = null;
+
+        PaymentParameters payParams = cust.getPaymentParameters();
         String addresssLine2 = ""; // not used
         String humanFriendlyReference = cust.getId() + " " + cust.getLastname().toUpperCase() + " " + cust.getFirstname().toUpperCase(); // existing customers use this type of reference by default
-        if (pay.isEmpty() && paymentGatewayName.toUpperCase().contains(paymentGateway)) {
+        if (payParams == null && paymentGatewayName.toUpperCase().contains(paymentGateway)) {
 
             payParams = new PaymentParameters(0, new Date(), cust.getTelephone(), "NO", "NO", "NO", paymentGateway);
             //Customers loggedInUser = customersFacade.findCustomerByUsername(FacesContext.getCurrentInstance().getExternalContext().getRemoteUser());
             payParams.setLoggedInUser(cust);
 
-            cust.getPaymentParametersCollection().add(payParams);
+            cust.setPaymentParameters(payParams);
             customersFacade.editAndFlush(cust);
-        } else {
-            for (PaymentParameters pp : pay) {
-                if (pp.getPaymentGatewayName().compareTo(paymentGateway) == 0) {
-                    payParams = pp;
-                }
-            }
-        }
+        } 
 
         if (payParams == null) {
             logger.log(Level.WARNING, "Payment gateway EZIDEBIT parameters not found");
@@ -712,7 +689,7 @@ public class PaymentBean implements Serializable {
     }
 
     @Asynchronous
-    public synchronized Future<ArrayOfPayment> getAllPaymentsBySystemSinceDate(Date fromDate,boolean useSettlementDate, String digitalKey) {
+    public synchronized Future<ArrayOfPayment> getAllPaymentsBySystemSinceDate(Date fromDate, boolean useSettlementDate, String digitalKey) {
         //  Description
         //  	  
         //  This method allows you to retrieve payment information from across Ezidebit's various

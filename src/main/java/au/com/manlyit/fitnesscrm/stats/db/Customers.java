@@ -21,6 +21,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -59,6 +60,9 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Customers.findByFacebookId", query = "SELECT c FROM Customers c WHERE c.facebookId = :facebookId"),
     @NamedQuery(name = "Customers.findByGoogleId", query = "SELECT c FROM Customers c WHERE c.googleId = :googleId")})
 public class Customers implements BaseEntity, Serializable {
+
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "loggedInUser")
+    private PaymentParameters paymentParameters;
     @OneToMany(mappedBy = "customerName")
     private Collection<Payments> paymentsCollection;
     @Basic(optional = false)
@@ -144,8 +148,7 @@ public class Customers implements BaseEntity, Serializable {
     private Collection<Activation> activationCollection;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "username")
     private Collection<Groups> groupsCollection;
-    @OneToMany(mappedBy = "loggedInUser")
-    private Collection<PaymentParameters> paymentParametersCollection;
+
     @JoinColumn(name = "active", referencedColumnName = "id")
     @ManyToOne
     private CustomerState active;
@@ -168,7 +171,7 @@ public class Customers implements BaseEntity, Serializable {
     private Collection<StatsTaken> statsTakenCollection;
     @OneToMany(mappedBy = "userId")
     private Collection<Notes> notesCollection;
-    
+
     @Size(max = 45)
     @Column(name = "facebookId")
     private String facebookId;
@@ -201,7 +204,6 @@ public class Customers implements BaseEntity, Serializable {
     public void setId(Integer id) {
         this.id = id;
     }
-
 
     public String getFirstname() {
         return firstname;
@@ -340,8 +342,6 @@ public class Customers implements BaseEntity, Serializable {
         this.invoiceCollection = invoiceCollection;
     }
 
-   
-
     @XmlTransient
     public Collection<CustomerGoals> getCustomerGoalsCollection() {
         return customerGoalsCollection;
@@ -453,17 +453,6 @@ public class Customers implements BaseEntity, Serializable {
         this.notesCollection = notesCollection;
     }
 
-  @XmlTransient
-    public Collection<PaymentParameters> getPaymentParametersCollection() {
-        return paymentParametersCollection;
-    }
-
-    public void setPaymentParametersCollection(Collection<PaymentParameters> paymentParametersCollection) {
-        this.paymentParametersCollection = paymentParametersCollection;
-    }
-
-   
-    
     @Override
     public int hashCode() {
         int hash = 0;
@@ -529,6 +518,14 @@ public class Customers implements BaseEntity, Serializable {
 
     public void setPaymentsCollection(Collection<Payments> paymentsCollection) {
         this.paymentsCollection = paymentsCollection;
+    }
+
+    public PaymentParameters getPaymentParameters() {
+        return paymentParameters;
+    }
+
+    public void setPaymentParameters(PaymentParameters paymentParameters) {
+        this.paymentParameters = paymentParameters;
     }
 
 }

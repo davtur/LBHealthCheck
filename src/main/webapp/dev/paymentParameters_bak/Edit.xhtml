@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" >
+
+    <ui:composition>
+        <p:dialog id="PaymentParametersEditDlg" widgetVar="PaymentParametersEditDialog" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('EditPaymentParametersTitle')}">
+            <h:form id="PaymentParametersEditForm">
+                <h:panelGroup id="display">
+                    <p:panelGrid columns="2" rendered="#{paymentParametersController.selected != null}">
+                        <h:outputLabel value="#{configMapController.getKey('EditPaymentParametersLabel_id')}" for="id" />
+                        <h:inputText id="id"  value="#{paymentParametersController.selected.id}" title="#{configMapController.getKey('EditPaymentParametersTitle_id')}" required="true" requiredMessage="#{configMapController.getKey('EditPaymentParametersRequiredMessage_id')}"/>
+                        <h:outputLabel value="#{configMapController.getKey('EditPaymentParametersLabel_contractStartDate')}" for="contractStartDate" />
+                        <h:inputText id="contractStartDate" value="#{paymentParametersController.selected.contractStartDate}" title="#{configMapController.getKey('EditPaymentParametersTitle_contractStartDate')}" required="true" requiredMessage="#{configMapController.getKey('EditPaymentParametersRequiredMessage_contractStartDate')}">
+                            <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                        </h:inputText>
+                        <h:outputLabel value="#{configMapController.getKey('EditPaymentParametersLabel_mobilePhoneNumber')}" for="mobilePhoneNumber" />
+                        <h:inputText id="mobilePhoneNumber"  value="#{paymentParametersController.selected.mobilePhoneNumber}" title="#{configMapController.getKey('EditPaymentParametersTitle_mobilePhoneNumber')}" required="true" requiredMessage="#{configMapController.getKey('EditPaymentParametersRequiredMessage_mobilePhoneNumber')}"/>
+                        <h:outputLabel value="#{configMapController.getKey('EditPaymentParametersLabel_smsPaymentReminder')}" for="smsPaymentReminder" />
+                        <h:inputText id="smsPaymentReminder"  value="#{paymentParametersController.selected.smsPaymentReminder}" title="#{configMapController.getKey('EditPaymentParametersTitle_smsPaymentReminder')}" required="true" requiredMessage="#{configMapController.getKey('EditPaymentParametersRequiredMessage_smsPaymentReminder')}"/>
+                        <h:outputLabel value="#{configMapController.getKey('EditPaymentParametersLabel_smsFailedNotification')}" for="smsFailedNotification" />
+                        <h:inputText id="smsFailedNotification"  value="#{paymentParametersController.selected.smsFailedNotification}" title="#{configMapController.getKey('EditPaymentParametersTitle_smsFailedNotification')}" required="true" requiredMessage="#{configMapController.getKey('EditPaymentParametersRequiredMessage_smsFailedNotification')}"/>
+                        <h:outputLabel value="#{configMapController.getKey('EditPaymentParametersLabel_smsExpiredCard')}" for="smsExpiredCard" />
+                        <h:inputText id="smsExpiredCard"  value="#{paymentParametersController.selected.smsExpiredCard}" title="#{configMapController.getKey('EditPaymentParametersTitle_smsExpiredCard')}" required="true" requiredMessage="#{configMapController.getKey('EditPaymentParametersRequiredMessage_smsExpiredCard')}"/>
+                        <h:outputLabel value="#{configMapController.getKey('EditPaymentParametersLabel_paymentGatewayName')}" for="paymentGatewayName" />
+                        <h:inputText id="paymentGatewayName"  value="#{paymentParametersController.selected.paymentGatewayName}" title="#{configMapController.getKey('EditPaymentParametersTitle_paymentGatewayName')}" required="true" requiredMessage="#{configMapController.getKey('EditPaymentParametersRequiredMessage_paymentGatewayName')}"/>
+                        <h:outputLabel value="#{configMapController.getKey('EditPaymentParametersLabel_loggedInUser')}" for="loggedInUser" />
+                        <p:selectOneMenu id="loggedInUser" valueChangeListener="#{paymentParametersController.selectOneMenuValueChangeListener}" value="#{paymentParametersController.selected.loggedInUser}" label="#{configMapController.getKey('EditPaymentParametersTitle_loggedInUser')}" required="true" requiredMessage="#{configMapController.getKey('EditPaymentParametersRequiredMessage_loggedInUser')}">
+                            <f:selectItems value="#{customersController.itemsAvailableSelectOne}"/>
+                            <p:ajax   update=":PaymentParametersEditForm"  />
+                        </p:selectOneMenu>
+                    </p:panelGrid>
+                    <p:commandButton actionListener="#{paymentParametersController.update}" value="#{configMapController.getKey('Save')}" update="display,:PaymentParametersListForm:datalist,:growl" oncomplete="handleSubmit(args, 'PaymentParametersEditDialog');paymentParametersControllerTable.filter()"/>
+                    <p:commandButton value="#{configMapController.getKey('Cancel')}" onclick="PaymentParametersEditDialog.hide()"/>
+                </h:panelGroup>
+            </h:form>
+        </p:dialog>
+
+    </ui:composition>
+</html>

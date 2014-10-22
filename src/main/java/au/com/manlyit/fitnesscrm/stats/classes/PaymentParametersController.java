@@ -6,47 +6,30 @@ import au.com.manlyit.fitnesscrm.stats.classes.util.PaginationHelper;
 import au.com.manlyit.fitnesscrm.stats.beans.PaymentParametersFacade;
 
 import java.io.Serializable;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
 import java.util.ResourceBundle;
+import javax.ejb.EJB;
+import javax.inject.Named;
 import javax.enterprise.context.SessionScoped;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 import javax.faces.convert.Converter;
 import javax.faces.convert.FacesConverter;
-import javax.faces.event.ActionEvent;
-import javax.faces.event.ValueChangeEvent;
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
-import javax.inject.Inject;
-import javax.inject.Named;
-import org.primefaces.event.RowEditEvent;
-import org.primefaces.event.SelectEvent;
 
 @Named("paymentParametersController")
 @SessionScoped
 public class PaymentParametersController implements Serializable {
 
     private PaymentParameters current;
-    private PaymentParameters selectedForDeletion;
     private DataModel items = null;
-    @Inject
+    @EJB
     private au.com.manlyit.fitnesscrm.stats.beans.PaymentParametersFacade ejbFacade;
-    @Inject
-    private au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade configMapFacade;
     private PaginationHelper pagination;
     private int selectedItemIndex;
-    private List<PaymentParameters> filteredItems;
-    private PaymentParameters[] multiSelected;
 
     public PaymentParametersController() {
-    }
-
-    public static boolean isUserInRole(String roleName) {
-        boolean inRole = FacesContext.getCurrentInstance().getExternalContext().isUserInRole(roleName);
-        return inRole;
     }
 
     public PaymentParameters getSelected() {
@@ -57,21 +40,13 @@ public class PaymentParametersController implements Serializable {
         return current;
     }
 
-    public void setSelected(PaymentParameters selected) {
-        if (selected != null) {
-            current = selected;
-            selectedItemIndex = -1;
-        }
-
-    }
-
     private PaymentParametersFacade getFacade() {
         return ejbFacade;
     }
 
     public PaginationHelper getPagination() {
         if (pagination == null) {
-            pagination = new PaginationHelper(1000000) {
+            pagination = new PaginationHelper(10) {
 
                 @Override
                 public int getItemsCount() {
@@ -87,42 +62,14 @@ public class PaymentParametersController implements Serializable {
         return pagination;
     }
 
-    /**
-     * @return the filteredItems
-     */
-    public List<PaymentParameters> getFilteredItems() {
-        return filteredItems;
-    }
-
-    /**
-     * @param filteredItems the filteredItems to set
-     */
-    public void setFilteredItems(List<PaymentParameters> filteredItems) {
-        this.filteredItems = filteredItems;
-    }
-
-    /**
-     * @return the multiSelected
-     */
-    public PaymentParameters[] getMultiSelected() {
-        return multiSelected;
-    }
-
-    /**
-     * @param multiSelected the multiSelected to set
-     */
-    public void setMultiSelected(PaymentParameters[] multiSelected) {
-        this.multiSelected = multiSelected;
-    }
-
     public String prepareList() {
         recreateModel();
         return "List";
     }
 
     public String prepareView() {
-        //current = (PaymentParameters)getItems().getRowData();
-        //selectedItemIndex = pagination.getPageFirstItem() + getItems().getRowIndex();
+        current = (PaymentParameters) getItems().getRowData();
+        selectedItemIndex = pagination.getPageFirstItem() + getItems().getRowIndex();
         return "View";
     }
 
@@ -134,59 +81,39 @@ public class PaymentParametersController implements Serializable {
 
     public String create() {
         try {
-            if (current.getId() == null) {
-                current.setId(0);
-            }
             getFacade().create(current);
-            JsfUtil.addSuccessMessage(configMapFacade.getConfig("PaymentParametersCreated"));
+            JsfUtil.addSuccessMessage(ResourceBundle.getBundle("/Bundle").getString("PaymentParametersCreated"));
             return prepareCreate();
         } catch (Exception e) {
-            JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
+            JsfUtil.addErrorMessage(e, ResourceBundle.getBundle("/Bundle").getString("PersistenceErrorOccured"));
             return null;
         }
     }
 
-    public void createDialogue(ActionEvent actionEvent) {
-        try {
-            current.setId(0);
-            getFacade().create(current);
-            recreateModel();
-            JsfUtil.addSuccessMessage(configMapFacade.getConfig("PaymentParametersCreated"));
-        } catch (Exception e) {
-            JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
-        }
-
-    }
-
     public String prepareEdit() {
-        //current = (PaymentParameters)getItems().getRowData();
-        //selectedItemIndex = pagination.getPageFirstItem() + getItems().getRowIndex();
+        current = (PaymentParameters) getItems().getRowData();
+        selectedItemIndex = pagination.getPageFirstItem() + getItems().getRowIndex();
         return "Edit";
-    }
-
-    public void selectOneMenuValueChangeListener(ValueChangeEvent vce) {
-        Object o = vce.getNewValue();
-    }
-
-    public void selectManyMenuValueChangeListener(ValueChangeEvent vce) {
-        Object o = vce.getNewValue();
     }
 
     public String update() {
         try {
             getFacade().edit(current);
-            JsfUtil.addSuccessMessage(configMapFacade.getConfig("PaymentParametersUpdated"));
+            JsfUtil.addSuccessMessage(ResourceBundle.getBundle("/Bundle").getString("PaymentParametersUpdated"));
             return "View";
         } catch (Exception e) {
-            JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
+            JsfUtil.addErrorMessage(e, ResourceBundle.getBundle("/Bundle").getString("PersistenceErrorOccured"));
             return null;
         }
     }
 
-    public void destroy() {
+    public String destroy() {
+        current = (PaymentParameters) getItems().getRowData();
+        selectedItemIndex = pagination.getPageFirstItem() + getItems().getRowIndex();
         performDestroy();
+        recreatePagination();
         recreateModel();
-        current = null;
+        return "List";
     }
 
     public String destroyAndView() {
@@ -202,25 +129,12 @@ public class PaymentParametersController implements Serializable {
         }
     }
 
-    public PaymentParameters getSelectedForDeletion() {
-        return selectedForDeletion;
-    }
-
-    public void setSelectedForDeletion(PaymentParameters selectedForDeletion) {
-        this.selectedForDeletion = selectedForDeletion;
-        current = selectedForDeletion;
-
-        performDestroy();
-        recreateModel();
-
-    }
-
     private void performDestroy() {
         try {
             getFacade().remove(current);
-            JsfUtil.addSuccessMessage(configMapFacade.getConfig("PaymentParametersDeleted"));
+            JsfUtil.addSuccessMessage(ResourceBundle.getBundle("/Bundle").getString("PaymentParametersDeleted"));
         } catch (Exception e) {
-            JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
+            JsfUtil.addErrorMessage(e, ResourceBundle.getBundle("/Bundle").getString("PersistenceErrorOccured"));
         }
     }
 
@@ -248,20 +162,16 @@ public class PaymentParametersController implements Serializable {
 
     private void recreateModel() {
         items = null;
-        filteredItems = null;
+    }
+
+    private void recreatePagination() {
+        pagination = null;
     }
 
     public String next() {
         getPagination().nextPage();
         recreateModel();
         return "List";
-    }
-
-    public void handleDateSelect(SelectEvent event) {
-
-        Date date = (Date) event.getObject();
-
-        //Add facesmessage
     }
 
     public String previous() {
@@ -271,8 +181,6 @@ public class PaymentParametersController implements Serializable {
     }
 
     public SelectItem[] getItemsAvailableSelectMany() {
-        file:///home/david/.netbeans/8.0/config/Templates/JSF/JSF_From_Entity_Wizard/StandardJSF/create.ftl
-
         return JsfUtil.getSelectItems(ejbFacade.findAll(), false);
     }
 
@@ -280,31 +188,21 @@ public class PaymentParametersController implements Serializable {
         return JsfUtil.getSelectItems(ejbFacade.findAll(), true);
     }
 
-    public Collection<PaymentParameters> getItemsAvailable() {
-        return ejbFacade.findAll();
-    }
-
-    public void onEdit(RowEditEvent event) {
-        PaymentParameters cm = (PaymentParameters) event.getObject();
-        getFacade().edit(cm);
-        recreateModel();
-        JsfUtil.addSuccessMessage("Row Edit Successful");
-    }
-
-    public void onCancel(RowEditEvent event) {
-        JsfUtil.addErrorMessage("Row Edit Cancelled");
+    public PaymentParameters getPaymentParameters(java.lang.Integer id) {
+        return ejbFacade.find(id);
     }
 
     @FacesConverter(forClass = PaymentParameters.class)
     public static class PaymentParametersControllerConverter implements Converter {
 
+        @Override
         public Object getAsObject(FacesContext facesContext, UIComponent component, String value) {
             if (value == null || value.length() == 0) {
                 return null;
             }
             PaymentParametersController controller = (PaymentParametersController) facesContext.getApplication().getELResolver().
                     getValue(facesContext.getELContext(), null, "paymentParametersController");
-            return controller.ejbFacade.find(getKey(value));
+            return controller.getPaymentParameters(getKey(value));
         }
 
         java.lang.Integer getKey(String value) {
@@ -328,7 +226,7 @@ public class PaymentParametersController implements Serializable {
                 PaymentParameters o = (PaymentParameters) object;
                 return getStringKey(o.getId());
             } else {
-                throw new IllegalArgumentException("object " + object + " is of type " + object.getClass().getName() + "; expected type: " + PaymentParametersController.class.getName());
+                throw new IllegalArgumentException("object " + object + " is of type " + object.getClass().getName() + "; expected type: " + PaymentParameters.class.getName());
             }
         }
 

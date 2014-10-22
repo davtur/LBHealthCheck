@@ -108,7 +108,7 @@ public class WebDDRSignUpServlet extends HttpServlet {
                 if (uref.length() > 0) {
                     int customerId = Integer.parseInt(uref);
                     Customers current = ejbFacade.findById(customerId);
-                    PaymentParameters pp = getCustomersPaymentParameters(current);
+                    PaymentParameters pp = current.getPaymentParameters();
                     pp.setWebddrUrl(null);
                     ejbPaymentParametersFacade.edit(pp);
                     ejbFacade.editAndFlush(current);
@@ -130,28 +130,7 @@ public class WebDDRSignUpServlet extends HttpServlet {
         }
     }
 
-    protected PaymentParameters getCustomersPaymentParameters(Customers cust) {
-        PaymentParameters pp = null;
-        Collection<PaymentParameters> ppl = cust.getPaymentParametersCollection();
-        if (ppl == null) {
-            logger.log(Level.WARNING, " Customer {0} has no Payment parameters Objects. NULL", new Object[]{cust.getUsername()});
-
-            return null;
-        }
-        int s = ppl.size();
-        for (PaymentParameters payParams : ppl) {
-            if (payParams.getPaymentGatewayName().compareTo(paymentGateway) == 0) {
-                pp = payParams;
-            }
-        }
-        if (s > 1) {
-            logger.log(Level.WARNING, " Customer {0} has {1} Payment parameters Objects. Should only be one as only Ezidebit has been implemented", new Object[]{cust.getUsername(), s});
-        }
-        if (pp == null) {
-            logger.log(Level.SEVERE, " Customer {0} has NULL Payment parameters.", new Object[]{cust.getUsername()});
-        }
-        return pp;
-    }
+   
 
     private Properties emailServerProperties() {
         Properties props = new Properties();

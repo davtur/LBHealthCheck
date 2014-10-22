@@ -1,168 +1,225 @@
-<?xml version="1.0" encoding="ISO-8859-1" ?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:ui="http://java.sun.com/jsf/facelets"
-      xmlns:h="http://java.sun.com/jsf/html"
-      xmlns:f="http://java.sun.com/jsf/core"
-      xmlns:p="http://primefaces.org/ui" >
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
 
     <ui:composition template="/template.xhtml">
         <ui:define name="title">
-            <h:outputText value="#{configMapController.getKey('ListPaymentParametersTitle')}"></h:outputText>
+            <h:outputText value="#{bundle.ListPaymentParametersTitle}"></h:outputText>
         </ui:define>
         <ui:define name="body">
-
-
-
-
-
-            <h:form id="PaymentParametersListForm">
-                <h:outputText escape="false" value="#{configMapController.getKey('ListPaymentParametersEmpty')}" rendered="#{paymentParametersController.items.rowCount == 0}"/>
-                <h:panelGroup rendered="#{paymentParametersController.items.rowCount > 0}">
-                    <p:dataTable  
-                        id="datalist"  
-                        editable="true" 
-                        value="#{paymentParametersController.items}" 
-                        selection="#{paymentParametersController.selected}" 
-                        rowKey="#{item.id}" 
-                        filteredValue="#{paymentParametersController.filteredItems}"  
-                        widgetVar="paymentParametersControllerTable" 
-                        var="item"  
-                        paginator="true" 
-                        rows="15"  
-                        paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  
-                        rowsPerPageTemplate="5,10,15,20,25,50,100" >
-                        <f:facet name="header">
-                            <p:outputPanel>
-                                <h:outputText value="Search all fields:" />
-                                <h:inputText id="globalFilter" onkeyup="paymentParametersControllerTable.filter()" />
-                            </p:outputPanel>
-                        </f:facet>
-                        <p:ajax event="rowEdit" listener="#{paymentParametersController.onEdit}" update=":growl" oncomplete="paymentParametersControllerTable.filter()" />  
-                        <p:ajax event="rowEditCancel" listener="#{paymentParametersController.onCancel}" update=":growl"  oncomplete="paymentParametersControllerTable.filter()" />  
-                        <p:ajax event="rowSelect"   update="createButton viewButton editButton deleteButton"/>
-                        <p:ajax event="rowUnselect" update="createButton viewButton editButton deleteButton"/>
-                        <p:column selectionMode="single"/>
-                        <p:column sortBy="#{item.id}" filterBy="#{item.id}" headerText="#{configMapController.getKey('ListPaymentParametersTitle_id')}"   >
-                            <p:cellEditor> 
-                                <f:facet name="output">
-                                    <h:outputText value="#{item.id}"/>
-                                </f:facet>
-                                <f:facet name="input">
-                                    <p:inputText value="#{item.id}" label="#{configMapController.getKey('ListPaymentParametersTitle_id')}" />
-                                </f:facet>
-                            </p:cellEditor> 
-
-
-                        </p:column>
-                        <p:column sortBy="#{item.contractStartDate}" filterBy="#{item.contractStartDate}" headerText="#{configMapController.getKey('ListPaymentParametersTitle_contractStartDate')}"   >
-
-                            <p:cellEditor> 
-                                <f:facet name="output">
-                                    <h:outputText value="#{item.contractStartDate}">
-                                        <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
-                                    </h:outputText>
-                                </f:facet>
-                                <f:facet name="input">
-                                    <p:calendar value="#{item.contractStartDate}">	
-                                        <p:ajax event="dateSelect" listener= "#{paymentParametersController.handleDateSelect}" update=":growl" />
-                                    </p:calendar>
-                                </f:facet>
-                            </p:cellEditor> 
-
-                        </p:column>
-                        <p:column sortBy="#{item.mobilePhoneNumber}" filterBy="#{item.mobilePhoneNumber}" headerText="#{configMapController.getKey('ListPaymentParametersTitle_mobilePhoneNumber')}"   >
-                            <p:cellEditor> 
-                                <f:facet name="output">
-                                    <h:outputText value="#{item.mobilePhoneNumber}"/>
-                                </f:facet>
-                                <f:facet name="input">
-                                    <p:inputText value="#{item.mobilePhoneNumber}" label="#{configMapController.getKey('ListPaymentParametersTitle_mobilePhoneNumber')}" />
-                                </f:facet>
-                            </p:cellEditor> 
-
-
-                        </p:column>
-                        <p:column sortBy="#{item.smsPaymentReminder}" filterBy="#{item.smsPaymentReminder}" headerText="#{configMapController.getKey('ListPaymentParametersTitle_smsPaymentReminder')}"   >
-                            <p:cellEditor> 
-                                <f:facet name="output">
-                                    <h:outputText value="#{item.smsPaymentReminder}"/>
-                                </f:facet>
-                                <f:facet name="input">
-                                    <p:inputText value="#{item.smsPaymentReminder}" label="#{configMapController.getKey('ListPaymentParametersTitle_smsPaymentReminder')}" />
-                                </f:facet>
-                            </p:cellEditor> 
-
-
-                        </p:column>
-                        <p:column sortBy="#{item.smsFailedNotification}" filterBy="#{item.smsFailedNotification}" headerText="#{configMapController.getKey('ListPaymentParametersTitle_smsFailedNotification')}"   >
-                            <p:cellEditor> 
-                                <f:facet name="output">
-                                    <h:outputText value="#{item.smsFailedNotification}"/>
-                                </f:facet>
-                                <f:facet name="input">
-                                    <p:inputText value="#{item.smsFailedNotification}" label="#{configMapController.getKey('ListPaymentParametersTitle_smsFailedNotification')}" />
-                                </f:facet>
-                            </p:cellEditor> 
-
-
-                        </p:column>
-                        <p:column sortBy="#{item.smsExpiredCard}" filterBy="#{item.smsExpiredCard}" headerText="#{configMapController.getKey('ListPaymentParametersTitle_smsExpiredCard')}"   >
-                            <p:cellEditor> 
-                                <f:facet name="output">
-                                    <h:outputText value="#{item.smsExpiredCard}"/>
-                                </f:facet>
-                                <f:facet name="input">
-                                    <p:inputText value="#{item.smsExpiredCard}" label="#{configMapController.getKey('ListPaymentParametersTitle_smsExpiredCard')}" />
-                                </f:facet>
-                            </p:cellEditor> 
-
-
-                        </p:column>
-                        <p:column sortBy="#{item.paymentGatewayName}" filterBy="#{item.paymentGatewayName}" headerText="#{configMapController.getKey('ListPaymentParametersTitle_paymentGatewayName')}"   >
-                            <p:cellEditor> 
-                                <f:facet name="output">
-                                    <h:outputText value="#{item.paymentGatewayName}"/>
-                                </f:facet>
-                                <f:facet name="input">
-                                    <p:inputText value="#{item.paymentGatewayName}" label="#{configMapController.getKey('ListPaymentParametersTitle_paymentGatewayName')}" />
-                                </f:facet>
-                            </p:cellEditor> 
-
-
-                        </p:column>
-                        <p:column sortBy="#{item.loggedInUser}" filterBy="#{item.loggedInUser}" headerText="#{configMapController.getKey('ListPaymentParametersTitle_loggedInUser')}"   >
-                            <p:cellEditor> 
-                                <f:facet name="output">
-                                    <h:outputText value="#{item.loggedInUser}"/>
-                                </f:facet>
-                                <f:facet name="input">
-                                    <p:inputText value="#{item.loggedInUser}" label="#{configMapController.getKey('ListPaymentParametersTitle_loggedInUser')}" />
-                                </f:facet>
-                            </p:cellEditor> 
-
-
-                        </p:column>
-                        <p:column rendered="#{paymentParametersController.isUserInRole('ADMIN')}"  headerText="Edit" style="width:50px">  
-                            <p:rowEditor />  
-                        </p:column>  
-
-
-                        <f:facet name="footer">
-                            <p:commandButton rendered="#{paymentParametersController.isUserInRole('ADMIN')}" id="createButton" icon="ui-icon-plus"   value="#{configMapController.getKey('Create')}" actionListener="#{paymentParametersController.prepareCreate}" update=":PaymentParametersCreateForm" oncomplete="PF('PaymentParametersCreateDialog').show()"/>
-                            <p:commandButton id="viewButton"   icon="ui-icon-search" value="#{configMapController.getKey('View')}" update=":PaymentParametersViewForm" oncomplete="PF('PaymentParametersViewDialog').show()" disabled="#{empty paymentParametersController.selected}"/>
-                            <p:commandButton rendered="#{paymentParametersController.isUserInRole('ADMIN')}" id="editButton"   icon="ui-icon-pencil" value="#{configMapController.getKey('Edit')}" update=":PaymentParametersEditForm" oncomplete="PF('PaymentParametersEditDialog').show()" disabled="#{empty paymentParametersController.selected}"/>
-                            <p:commandButton rendered="#{paymentParametersController.isUserInRole('ADMIN')}" id="deleteButton" icon="ui-icon-trash"  value="#{configMapController.getKey('Delete')}" actionListener="#{paymentParametersController.destroy}" update=":growl,datalist" disabled="#{empty paymentParametersController.selected}"/>
-                        </f:facet>
-
-                    </p:dataTable>
+            <h:form styleClass="jsfcrud_list_form">
+                <h:panelGroup id="messagePanel" layout="block">
+                    <h:messages errorStyle="color: red" infoStyle="color: green" layout="table"/>
                 </h:panelGroup>
+                <h:outputText escape="false" value="#{bundle.ListPaymentParametersEmpty}" rendered="#{paymentParametersController.items.rowCount == 0}"/>
+                <h:panelGroup rendered="#{paymentParametersController.items.rowCount > 0}">
+                    <h:outputText value="#{paymentParametersController.pagination.pageFirstItem + 1}..#{paymentParametersController.pagination.pageLastItem + 1}/#{paymentParametersController.pagination.itemsCount}"/>&nbsp;
+                    <h:commandLink action="#{paymentParametersController.previous}" value="#{bundle.Previous} #{paymentParametersController.pagination.pageSize}" rendered="#{paymentParametersController.pagination.hasPreviousPage}"/>&nbsp;
+                    <h:commandLink action="#{paymentParametersController.next}" value="#{bundle.Next} #{paymentParametersController.pagination.pageSize}" rendered="#{paymentParametersController.pagination.hasNextPage}"/>&nbsp;
+                    <h:dataTable value="#{paymentParametersController.items}" var="item" border="0" cellpadding="2" cellspacing="0" rowClasses="jsfcrud_odd_row,jsfcrud_even_row" rules="all" style="border:solid 1px">
+                        <h:column>
+                            <f:facet name="header">
+                                <h:outputText value="#{bundle.ListPaymentParametersTitle_id}"/>
+                            </f:facet>
+                            <h:outputText value="#{item.id}"/>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">
+                                <h:outputText value="#{bundle.ListPaymentParametersTitle_contractStartDate}"/>
+                            </f:facet>
+                            <h:outputText value="#{item.contractStartDate}">
+                                <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                            </h:outputText>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">
+                                <h:outputText value="#{bundle.ListPaymentParametersTitle_mobilePhoneNumber}"/>
+                            </f:facet>
+                            <h:outputText value="#{item.mobilePhoneNumber}"/>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">
+                                <h:outputText value="#{bundle.ListPaymentParametersTitle_smsPaymentReminder}"/>
+                            </f:facet>
+                            <h:outputText value="#{item.smsPaymentReminder}"/>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">
+                                <h:outputText value="#{bundle.ListPaymentParametersTitle_smsFailedNotification}"/>
+                            </f:facet>
+                            <h:outputText value="#{item.smsFailedNotification}"/>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">
+                                <h:outputText value="#{bundle.ListPaymentParametersTitle_smsExpiredCard}"/>
+                            </f:facet>
+                            <h:outputText value="#{item.smsExpiredCard}"/>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">
+                                <h:outputText value="#{bundle.ListPaymentParametersTitle_paymentGatewayName}"/>
+                            </f:facet>
+                            <h:outputText value="#{item.paymentGatewayName}"/>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">
+                                <h:outputText value="#{bundle.ListPaymentParametersTitle_loggedInUser}"/>
+                            </f:facet>
+                            <h:outputText value="#{item.loggedInUser}"/>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">
+                                <h:outputText value="#{bundle.ListPaymentParametersTitle_webddrUrl}"/>
+                            </f:facet>
+                            <h:outputText value="#{item.webddrUrl}"/>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">
+                                <h:outputText value="#{bundle.ListPaymentParametersTitle_addressLine1}"/>
+                            </f:facet>
+                            <h:outputText value="#{item.addressLine1}"/>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">
+                                <h:outputText value="#{bundle.ListPaymentParametersTitle_addressLine2}"/>
+                            </f:facet>
+                            <h:outputText value="#{item.addressLine2}"/>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">
+                                <h:outputText value="#{bundle.ListPaymentParametersTitle_addressPostCode}"/>
+                            </f:facet>
+                            <h:outputText value="#{item.addressPostCode}"/>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">
+                                <h:outputText value="#{bundle.ListPaymentParametersTitle_addressState}"/>
+                            </f:facet>
+                            <h:outputText value="#{item.addressState}"/>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">
+                                <h:outputText value="#{bundle.ListPaymentParametersTitle_addressSuburb}"/>
+                            </f:facet>
+                            <h:outputText value="#{item.addressSuburb}"/>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">
+                                <h:outputText value="#{bundle.ListPaymentParametersTitle_customerFirstName}"/>
+                            </f:facet>
+                            <h:outputText value="#{item.customerFirstName}"/>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">
+                                <h:outputText value="#{bundle.ListPaymentParametersTitle_customerName}"/>
+                            </f:facet>
+                            <h:outputText value="#{item.customerName}"/>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">
+                                <h:outputText value="#{bundle.ListPaymentParametersTitle_email}"/>
+                            </f:facet>
+                            <h:outputText value="#{item.email}"/>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">
+                                <h:outputText value="#{bundle.ListPaymentParametersTitle_ezidebitCustomerID}"/>
+                            </f:facet>
+                            <h:outputText value="#{item.ezidebitCustomerID}"/>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">
+                                <h:outputText value="#{bundle.ListPaymentParametersTitle_paymentMethod}"/>
+                            </f:facet>
+                            <h:outputText value="#{item.paymentMethod}"/>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">
+                                <h:outputText value="#{bundle.ListPaymentParametersTitle_paymentPeriod}"/>
+                            </f:facet>
+                            <h:outputText value="#{item.paymentPeriod}"/>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">
+                                <h:outputText value="#{bundle.ListPaymentParametersTitle_paymentPeriodDayOfMonth}"/>
+                            </f:facet>
+                            <h:outputText value="#{item.paymentPeriodDayOfMonth}"/>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">
+                                <h:outputText value="#{bundle.ListPaymentParametersTitle_paymentPeriodDayOfWeek}"/>
+                            </f:facet>
+                            <h:outputText value="#{item.paymentPeriodDayOfWeek}"/>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">
+                                <h:outputText value="#{bundle.ListPaymentParametersTitle_statusCode}"/>
+                            </f:facet>
+                            <h:outputText value="#{item.statusCode}"/>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">
+                                <h:outputText value="#{bundle.ListPaymentParametersTitle_statusDescription}"/>
+                            </f:facet>
+                            <h:outputText value="#{item.statusDescription}"/>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">
+                                <h:outputText value="#{bundle.ListPaymentParametersTitle_totalPaymentsFailed}"/>
+                            </f:facet>
+                            <h:outputText value="#{item.totalPaymentsFailed}"/>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">
+                                <h:outputText value="#{bundle.ListPaymentParametersTitle_totalPaymentsFailedAmount}"/>
+                            </f:facet>
+                            <h:outputText value="#{item.totalPaymentsFailedAmount}"/>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">
+                                <h:outputText value="#{bundle.ListPaymentParametersTitle_totalPaymentsSuccessful}"/>
+                            </f:facet>
+                            <h:outputText value="#{item.totalPaymentsSuccessful}"/>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">
+                                <h:outputText value="#{bundle.ListPaymentParametersTitle_totalPaymentsSuccessfulAmount}"/>
+                            </f:facet>
+                            <h:outputText value="#{item.totalPaymentsSuccessfulAmount}"/>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">
+                                <h:outputText value="#{bundle.ListPaymentParametersTitle_yourGeneralReference}"/>
+                            </f:facet>
+                            <h:outputText value="#{item.yourGeneralReference}"/>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">
+                                <h:outputText value="#{bundle.ListPaymentParametersTitle_yourSystemReference}"/>
+                            </f:facet>
+                            <h:outputText value="#{item.yourSystemReference}"/>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">
+                                <h:outputText value="&nbsp;"/>
+                            </f:facet>
+                            <h:commandLink action="#{paymentParametersController.prepareView}" value="#{bundle.ListPaymentParametersViewLink}"/>
+                            <h:outputText value=" "/>
+                            <h:commandLink action="#{paymentParametersController.prepareEdit}" value="#{bundle.ListPaymentParametersEditLink}"/>
+                            <h:outputText value=" "/>
+                            <h:commandLink action="#{paymentParametersController.destroy}" value="#{bundle.ListPaymentParametersDestroyLink}"/>
+                        </h:column>
+                    </h:dataTable>
+                </h:panelGroup>
+                <br />
+                <h:commandLink action="#{paymentParametersController.prepareCreate}" value="#{bundle.ListPaymentParametersCreateLink}"/>
+                <br />
+                <br />
+                <h:link outcome="/index" value="#{bundle.ListPaymentParametersIndexLink}"/>
             </h:form>
-
-            <ui:include src="Create.xhtml"/>
-            <ui:include src="Edit.xhtml"/>
-            <ui:include src="View.xhtml"/>
-
         </ui:define>
     </ui:composition>
 

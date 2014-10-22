@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" >
+
+    <ui:composition >
+        <p:dialog id="PaymentParametersCreateDlg" widgetVar="PaymentParametersCreateDialog" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('CreatePaymentParametersTitle')}">
+
+            <h:form id="PaymentParametersCreateForm">
+                <h:panelGroup id="display">
+                    <p:panelGrid columns="2" rendered="#{paymentParametersController.selected != null}">
+                        <p:outputLabel value="#{configMapController.getKey('CreatePaymentParametersLabel_id')}" for="id" />
+                        <p:inputText id="id" value="#{paymentParametersController.selected.id}" title="#{configMapController.getKey('CreatePaymentParametersTitle_id')}" required="true" requiredMessage="#{configMapController.getKey('CreatePaymentParametersRequiredMessage_id')}"/>
+                        <p:outputLabel value="#{configMapController.getKey('CreatePaymentParametersLabel_contractStartDate')}" for="contractStartDate" />
+
+
+                        <p:calendar id="contractStartDate" pattern="MM/dd/yyyy HH:mm:ss"  value="#{paymentParametersController.selected.contractStartDate}"  title="#{configMapController.getKey('CreatePaymentParametersTitle_contractStartDate')}" required="true" requiredMessage="#{configMapController.getKey('CreatePaymentParametersRequiredMessage_contractStartDate')}">
+                            <p:ajax event="dateSelect" listener="#{paymentParametersController.handleDateSelect}" update=":PaymentParametersCreateForm" />
+                        </p:calendar>
+                        <p:outputLabel value="#{configMapController.getKey('CreatePaymentParametersLabel_mobilePhoneNumber')}" for="mobilePhoneNumber" />
+                        <p:inputText id="mobilePhoneNumber" value="#{paymentParametersController.selected.mobilePhoneNumber}" title="#{configMapController.getKey('CreatePaymentParametersTitle_mobilePhoneNumber')}" required="true" requiredMessage="#{configMapController.getKey('CreatePaymentParametersRequiredMessage_mobilePhoneNumber')}"/>
+                        <p:outputLabel value="#{configMapController.getKey('CreatePaymentParametersLabel_smsPaymentReminder')}" for="smsPaymentReminder" />
+                        <p:inputText id="smsPaymentReminder" value="#{paymentParametersController.selected.smsPaymentReminder}" title="#{configMapController.getKey('CreatePaymentParametersTitle_smsPaymentReminder')}" required="true" requiredMessage="#{configMapController.getKey('CreatePaymentParametersRequiredMessage_smsPaymentReminder')}"/>
+                        <p:outputLabel value="#{configMapController.getKey('CreatePaymentParametersLabel_smsFailedNotification')}" for="smsFailedNotification" />
+                        <p:inputText id="smsFailedNotification" value="#{paymentParametersController.selected.smsFailedNotification}" title="#{configMapController.getKey('CreatePaymentParametersTitle_smsFailedNotification')}" required="true" requiredMessage="#{configMapController.getKey('CreatePaymentParametersRequiredMessage_smsFailedNotification')}"/>
+                        <p:outputLabel value="#{configMapController.getKey('CreatePaymentParametersLabel_smsExpiredCard')}" for="smsExpiredCard" />
+                        <p:inputText id="smsExpiredCard" value="#{paymentParametersController.selected.smsExpiredCard}" title="#{configMapController.getKey('CreatePaymentParametersTitle_smsExpiredCard')}" required="true" requiredMessage="#{configMapController.getKey('CreatePaymentParametersRequiredMessage_smsExpiredCard')}"/>
+                        <p:outputLabel value="#{configMapController.getKey('CreatePaymentParametersLabel_paymentGatewayName')}" for="paymentGatewayName" />
+                        <p:inputText id="paymentGatewayName" value="#{paymentParametersController.selected.paymentGatewayName}" title="#{configMapController.getKey('CreatePaymentParametersTitle_paymentGatewayName')}" required="true" requiredMessage="#{configMapController.getKey('CreatePaymentParametersRequiredMessage_paymentGatewayName')}"/>
+                        <p:outputLabel value="#{configMapController.getKey('CreatePaymentParametersLabel_loggedInUser')}" for="loggedInUser" />
+                        <p:selectOneMenu id="loggedInUser" valueChangeListener="#{paymentParametersController.selectOneMenuValueChangeListener}"  value="#{paymentParametersController.selected.loggedInUser}"  label="#{configMapController.getKey('CreatePaymentParametersTitle_loggedInUser')}" required="true" requiredMessage="#{configMapController.getKey('CreatePaymentParametersRequiredMessage_loggedInUser')}">
+                            <f:selectItems value="#{customersController.itemsAvailableSelectOne}"/>
+                            <p:ajax   update=":PaymentParametersCreateForm"  />
+                        </p:selectOneMenu>
+                    </p:panelGrid>
+                    <p:commandButton actionListener="#{paymentParametersController.createDialogue}" value="#{configMapController.getKey('Save')}" update="display,:PaymentParametersListForm:datalist,:growl" oncomplete="handleSubmit(args,'PaymentParametersCreateDialog');paymentParametersControllerTable.filter()"/>
+                    <p:commandButton value="#{configMapController.getKey('Cancel')}" onclick="PaymentParametersCreateDialog.hide()"/>
+                </h:panelGroup>
+            </h:form>
+        </p:dialog>
+
+    </ui:composition>    
+
+</html>

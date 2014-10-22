@@ -266,16 +266,11 @@ public class CustomersController implements Serializable {
     }
 
     private void createDefaultPaymentParameters(String paymentGatewayName) {
-        Collection<PaymentParameters> pay = current.getPaymentParametersCollection();
-        PaymentParameters payParams;
-        if (pay != null) {
-            if (pay.isEmpty()) {
-                pay = null;
-            }
-
-        }
+       
+        PaymentParameters payParams = current.getPaymentParameters();
+        
         try {
-            if (pay == null && paymentGatewayName.toUpperCase().contains(paymentGateway)) {
+            if (payParams == null && paymentGatewayName.toUpperCase().contains(paymentGateway)) {
                 String phoneNumber = current.getTelephone();
                 if (phoneNumber == null) {
                     phoneNumber = "0000000000";
@@ -292,7 +287,7 @@ public class CustomersController implements Serializable {
                 //Customers loggedInUser = customersFacade.findCustomerByUsername(FacesContext.getCurrentInstance().getExternalContext().getRemoteUser());
                 payParams.setLoggedInUser(current);
                 ejbPaymentParametersFacade.create(payParams);
-                current.getPaymentParametersCollection().add(payParams);
+                current.setPaymentParameters(payParams);
                 ejbFacade.editAndFlush(current);
             }
         } catch (Exception e) {
@@ -301,23 +296,13 @@ public class CustomersController implements Serializable {
     }
 
     protected PaymentParameters getSelectedCustomersPaymentParameters() {
-        PaymentParameters pp = null;
-        Collection<PaymentParameters> ppl = getSelected().getPaymentParametersCollection();
-        if (ppl == null || ppl.isEmpty()) {
+        PaymentParameters pp = getSelected().getPaymentParameters();
+         if (pp == null ) {
             createDefaultPaymentParameters(paymentGateway);
         }
-        ppl = getSelected().getPaymentParametersCollection();
-        int s = ppl.size();
-        for (PaymentParameters payParams : ppl) {
-            if (payParams.getPaymentGatewayName().compareTo(paymentGateway) == 0) {
-                pp = payParams;
-            }
-        }
-        if (s > 1) {
-            logger.log(Level.WARNING, " Customer {0} has {1} Payment parameters Objects. Should only be one as only Ezidebit has been implemented", new Object[]{current.getUsername(), s});
-        }
-        if (pp == null) {
-            logger.log(Level.SEVERE, " Customer {0} has NULL Payment parameters.", new Object[]{current.getUsername()});
+        pp = getSelected().getPaymentParameters();
+         if (pp == null) {
+            logger.log(Level.SEVERE, " Customer {0} has NULL Payment parameters.Method createDefaultPaymentParameters failed", new Object[]{current.getUsername()});
         }
         return pp;
     }

@@ -31,25 +31,13 @@ public class TestEziDebitModule {
         logger.log(Level.INFO, "Starting tests!");
         INonPCIService ws = new NonPCIService().getBasicHttpBindingINonPCIService();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        Collection<PaymentParameters> pay = cust.getPaymentParametersCollection();
-        PaymentParameters payParams = null;
+        PaymentParameters payParams = cust.getPaymentParameters();
+
         String addresssLine2 = "";
 
-        if (pay != null) {
-            for (PaymentParameters pp : pay) {
-                if (pp.getPaymentGatewayName().compareTo("EZIDEBIT") == 0) {
-                    payParams = pp;
-                } else {
-
-                }
-
-            }
-        } else {
-            logger.log(Level.WARNING, "Payment Parameters are null");
-            return false;
-        }
+        
         if (payParams == null) {
-            logger.log(Level.WARNING, "Payment gateway EZIDEBIT parameters not found");
+            logger.log(Level.WARNING, "Payment gateway EZIDEBIT parameters not found ( null )");
             return false;
         }
 

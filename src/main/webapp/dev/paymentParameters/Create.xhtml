@@ -1,47 +1,95 @@
-<?xml version="1.0" encoding="ISO-8859-1" ?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:ui="http://java.sun.com/jsf/facelets"
-      xmlns:h="http://java.sun.com/jsf/html"
-      xmlns:f="http://java.sun.com/jsf/core"
-      xmlns:p="http://primefaces.org/ui" >
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
 
-    <ui:composition >
-        <p:dialog id="PaymentParametersCreateDlg" widgetVar="PaymentParametersCreateDialog" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('CreatePaymentParametersTitle')}">
-
-            <h:form id="PaymentParametersCreateForm">
-                <h:panelGroup id="display">
-                    <p:panelGrid columns="2" rendered="#{paymentParametersController.selected != null}">
-                        <p:outputLabel value="#{configMapController.getKey('CreatePaymentParametersLabel_id')}" for="id" />
-                        <p:inputText id="id" value="#{paymentParametersController.selected.id}" title="#{configMapController.getKey('CreatePaymentParametersTitle_id')}" required="true" requiredMessage="#{configMapController.getKey('CreatePaymentParametersRequiredMessage_id')}"/>
-                        <p:outputLabel value="#{configMapController.getKey('CreatePaymentParametersLabel_contractStartDate')}" for="contractStartDate" />
-
-
-                        <p:calendar id="contractStartDate" pattern="MM/dd/yyyy HH:mm:ss"  value="#{paymentParametersController.selected.contractStartDate}"  title="#{configMapController.getKey('CreatePaymentParametersTitle_contractStartDate')}" required="true" requiredMessage="#{configMapController.getKey('CreatePaymentParametersRequiredMessage_contractStartDate')}">
-                            <p:ajax event="dateSelect" listener="#{paymentParametersController.handleDateSelect}" update=":PaymentParametersCreateForm" />
-                        </p:calendar>
-                        <p:outputLabel value="#{configMapController.getKey('CreatePaymentParametersLabel_mobilePhoneNumber')}" for="mobilePhoneNumber" />
-                        <p:inputText id="mobilePhoneNumber" value="#{paymentParametersController.selected.mobilePhoneNumber}" title="#{configMapController.getKey('CreatePaymentParametersTitle_mobilePhoneNumber')}" required="true" requiredMessage="#{configMapController.getKey('CreatePaymentParametersRequiredMessage_mobilePhoneNumber')}"/>
-                        <p:outputLabel value="#{configMapController.getKey('CreatePaymentParametersLabel_smsPaymentReminder')}" for="smsPaymentReminder" />
-                        <p:inputText id="smsPaymentReminder" value="#{paymentParametersController.selected.smsPaymentReminder}" title="#{configMapController.getKey('CreatePaymentParametersTitle_smsPaymentReminder')}" required="true" requiredMessage="#{configMapController.getKey('CreatePaymentParametersRequiredMessage_smsPaymentReminder')}"/>
-                        <p:outputLabel value="#{configMapController.getKey('CreatePaymentParametersLabel_smsFailedNotification')}" for="smsFailedNotification" />
-                        <p:inputText id="smsFailedNotification" value="#{paymentParametersController.selected.smsFailedNotification}" title="#{configMapController.getKey('CreatePaymentParametersTitle_smsFailedNotification')}" required="true" requiredMessage="#{configMapController.getKey('CreatePaymentParametersRequiredMessage_smsFailedNotification')}"/>
-                        <p:outputLabel value="#{configMapController.getKey('CreatePaymentParametersLabel_smsExpiredCard')}" for="smsExpiredCard" />
-                        <p:inputText id="smsExpiredCard" value="#{paymentParametersController.selected.smsExpiredCard}" title="#{configMapController.getKey('CreatePaymentParametersTitle_smsExpiredCard')}" required="true" requiredMessage="#{configMapController.getKey('CreatePaymentParametersRequiredMessage_smsExpiredCard')}"/>
-                        <p:outputLabel value="#{configMapController.getKey('CreatePaymentParametersLabel_paymentGatewayName')}" for="paymentGatewayName" />
-                        <p:inputText id="paymentGatewayName" value="#{paymentParametersController.selected.paymentGatewayName}" title="#{configMapController.getKey('CreatePaymentParametersTitle_paymentGatewayName')}" required="true" requiredMessage="#{configMapController.getKey('CreatePaymentParametersRequiredMessage_paymentGatewayName')}"/>
-                        <p:outputLabel value="#{configMapController.getKey('CreatePaymentParametersLabel_loggedInUser')}" for="loggedInUser" />
-                        <p:selectOneMenu id="loggedInUser" valueChangeListener="#{paymentParametersController.selectOneMenuValueChangeListener}"  value="#{paymentParametersController.selected.loggedInUser}"  label="#{configMapController.getKey('CreatePaymentParametersTitle_loggedInUser')}" required="true" requiredMessage="#{configMapController.getKey('CreatePaymentParametersRequiredMessage_loggedInUser')}">
-                            <f:selectItems value="#{customersController.itemsAvailableSelectOne}"/>
-                            <p:ajax   update=":PaymentParametersCreateForm"  />
-                        </p:selectOneMenu>
-                    </p:panelGrid>
-                    <p:commandButton actionListener="#{paymentParametersController.createDialogue}" value="#{configMapController.getKey('Save')}" update="display,:PaymentParametersListForm:datalist,:growl" oncomplete="handleSubmit(args,'PaymentParametersCreateDialog');paymentParametersControllerTable.filter()"/>
-                    <p:commandButton value="#{configMapController.getKey('Cancel')}" onclick="PaymentParametersCreateDialog.hide()"/>
-                </h:panelGroup>
+    <ui:composition template="/template.xhtml">
+        <ui:define name="title">
+            <h:outputText value="#{bundle.CreatePaymentParametersTitle}"></h:outputText>
+        </ui:define>
+        <ui:define name="body">
+            <h:panelGroup id="messagePanel" layout="block">
+                <h:messages errorStyle="color: red" infoStyle="color: green" layout="table"/>
+            </h:panelGroup>
+            <h:form>
+                <h:panelGrid columns="2">
+                    <h:outputLabel value="#{bundle.CreatePaymentParametersLabel_id}" for="id" />
+                    <h:inputText id="id" value="#{paymentParametersController.selected.id}" title="#{bundle.CreatePaymentParametersTitle_id}" required="true" requiredMessage="#{bundle.CreatePaymentParametersRequiredMessage_id}"/>
+                    <h:outputLabel value="#{bundle.CreatePaymentParametersLabel_contractStartDate}" for="contractStartDate" />
+                    <h:inputText id="contractStartDate" value="#{paymentParametersController.selected.contractStartDate}" title="#{bundle.CreatePaymentParametersTitle_contractStartDate}" required="true" requiredMessage="#{bundle.CreatePaymentParametersRequiredMessage_contractStartDate}">
+                        <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                    </h:inputText>
+                    <h:outputLabel value="#{bundle.CreatePaymentParametersLabel_mobilePhoneNumber}" for="mobilePhoneNumber" />
+                    <h:inputText id="mobilePhoneNumber" value="#{paymentParametersController.selected.mobilePhoneNumber}" title="#{bundle.CreatePaymentParametersTitle_mobilePhoneNumber}" required="true" requiredMessage="#{bundle.CreatePaymentParametersRequiredMessage_mobilePhoneNumber}"/>
+                    <h:outputLabel value="#{bundle.CreatePaymentParametersLabel_smsPaymentReminder}" for="smsPaymentReminder" />
+                    <h:inputText id="smsPaymentReminder" value="#{paymentParametersController.selected.smsPaymentReminder}" title="#{bundle.CreatePaymentParametersTitle_smsPaymentReminder}" required="true" requiredMessage="#{bundle.CreatePaymentParametersRequiredMessage_smsPaymentReminder}"/>
+                    <h:outputLabel value="#{bundle.CreatePaymentParametersLabel_smsFailedNotification}" for="smsFailedNotification" />
+                    <h:inputText id="smsFailedNotification" value="#{paymentParametersController.selected.smsFailedNotification}" title="#{bundle.CreatePaymentParametersTitle_smsFailedNotification}" required="true" requiredMessage="#{bundle.CreatePaymentParametersRequiredMessage_smsFailedNotification}"/>
+                    <h:outputLabel value="#{bundle.CreatePaymentParametersLabel_smsExpiredCard}" for="smsExpiredCard" />
+                    <h:inputText id="smsExpiredCard" value="#{paymentParametersController.selected.smsExpiredCard}" title="#{bundle.CreatePaymentParametersTitle_smsExpiredCard}" required="true" requiredMessage="#{bundle.CreatePaymentParametersRequiredMessage_smsExpiredCard}"/>
+                    <h:outputLabel value="#{bundle.CreatePaymentParametersLabel_paymentGatewayName}" for="paymentGatewayName" />
+                    <h:inputText id="paymentGatewayName" value="#{paymentParametersController.selected.paymentGatewayName}" title="#{bundle.CreatePaymentParametersTitle_paymentGatewayName}" required="true" requiredMessage="#{bundle.CreatePaymentParametersRequiredMessage_paymentGatewayName}"/>
+                    <h:outputLabel value="#{bundle.CreatePaymentParametersLabel_loggedInUser}" for="loggedInUser" />
+                    <h:selectOneMenu id="loggedInUser" value="#{paymentParametersController.selected.loggedInUser}" title="#{bundle.CreatePaymentParametersTitle_loggedInUser}" required="true" requiredMessage="#{bundle.CreatePaymentParametersRequiredMessage_loggedInUser}">
+                        <f:selectItems value="#{customersController.itemsAvailableSelectOne}"/>
+                    </h:selectOneMenu>
+                    <h:outputLabel value="#{bundle.CreatePaymentParametersLabel_webddrUrl}" for="webddrUrl" />
+                    <h:inputTextarea rows="4" cols="30" id="webddrUrl" value="#{paymentParametersController.selected.webddrUrl}" title="#{bundle.CreatePaymentParametersTitle_webddrUrl}" />
+                    <h:outputLabel value="#{bundle.CreatePaymentParametersLabel_addressLine1}" for="addressLine1" />
+                    <h:inputText id="addressLine1" value="#{paymentParametersController.selected.addressLine1}" title="#{bundle.CreatePaymentParametersTitle_addressLine1}" />
+                    <h:outputLabel value="#{bundle.CreatePaymentParametersLabel_addressLine2}" for="addressLine2" />
+                    <h:inputText id="addressLine2" value="#{paymentParametersController.selected.addressLine2}" title="#{bundle.CreatePaymentParametersTitle_addressLine2}" />
+                    <h:outputLabel value="#{bundle.CreatePaymentParametersLabel_addressPostCode}" for="addressPostCode" />
+                    <h:inputText id="addressPostCode" value="#{paymentParametersController.selected.addressPostCode}" title="#{bundle.CreatePaymentParametersTitle_addressPostCode}" />
+                    <h:outputLabel value="#{bundle.CreatePaymentParametersLabel_addressState}" for="addressState" />
+                    <h:inputText id="addressState" value="#{paymentParametersController.selected.addressState}" title="#{bundle.CreatePaymentParametersTitle_addressState}" />
+                    <h:outputLabel value="#{bundle.CreatePaymentParametersLabel_addressSuburb}" for="addressSuburb" />
+                    <h:inputText id="addressSuburb" value="#{paymentParametersController.selected.addressSuburb}" title="#{bundle.CreatePaymentParametersTitle_addressSuburb}" />
+                    <h:outputLabel value="#{bundle.CreatePaymentParametersLabel_customerFirstName}" for="customerFirstName" />
+                    <h:inputText id="customerFirstName" value="#{paymentParametersController.selected.customerFirstName}" title="#{bundle.CreatePaymentParametersTitle_customerFirstName}" />
+                    <h:outputLabel value="#{bundle.CreatePaymentParametersLabel_customerName}" for="customerName" />
+                    <h:inputText id="customerName" value="#{paymentParametersController.selected.customerName}" title="#{bundle.CreatePaymentParametersTitle_customerName}" />
+                    <h:outputLabel value="#{bundle.CreatePaymentParametersLabel_email}" for="email" />
+                    <h:inputText id="email" value="#{paymentParametersController.selected.email}" title="#{bundle.CreatePaymentParametersTitle_email}" />
+                    <h:outputLabel value="#{bundle.CreatePaymentParametersLabel_ezidebitCustomerID}" for="ezidebitCustomerID" />
+                    <h:inputText id="ezidebitCustomerID" value="#{paymentParametersController.selected.ezidebitCustomerID}" title="#{bundle.CreatePaymentParametersTitle_ezidebitCustomerID}" />
+                    <h:outputLabel value="#{bundle.CreatePaymentParametersLabel_paymentMethod}" for="paymentMethod" />
+                    <h:inputText id="paymentMethod" value="#{paymentParametersController.selected.paymentMethod}" title="#{bundle.CreatePaymentParametersTitle_paymentMethod}" />
+                    <h:outputLabel value="#{bundle.CreatePaymentParametersLabel_paymentPeriod}" for="paymentPeriod" />
+                    <h:inputText id="paymentPeriod" value="#{paymentParametersController.selected.paymentPeriod}" title="#{bundle.CreatePaymentParametersTitle_paymentPeriod}" />
+                    <h:outputLabel value="#{bundle.CreatePaymentParametersLabel_paymentPeriodDayOfMonth}" for="paymentPeriodDayOfMonth" />
+                    <h:inputText id="paymentPeriodDayOfMonth" value="#{paymentParametersController.selected.paymentPeriodDayOfMonth}" title="#{bundle.CreatePaymentParametersTitle_paymentPeriodDayOfMonth}" />
+                    <h:outputLabel value="#{bundle.CreatePaymentParametersLabel_paymentPeriodDayOfWeek}" for="paymentPeriodDayOfWeek" />
+                    <h:inputText id="paymentPeriodDayOfWeek" value="#{paymentParametersController.selected.paymentPeriodDayOfWeek}" title="#{bundle.CreatePaymentParametersTitle_paymentPeriodDayOfWeek}" />
+                    <h:outputLabel value="#{bundle.CreatePaymentParametersLabel_statusCode}" for="statusCode" />
+                    <h:inputText id="statusCode" value="#{paymentParametersController.selected.statusCode}" title="#{bundle.CreatePaymentParametersTitle_statusCode}" />
+                    <h:outputLabel value="#{bundle.CreatePaymentParametersLabel_statusDescription}" for="statusDescription" />
+                    <h:inputText id="statusDescription" value="#{paymentParametersController.selected.statusDescription}" title="#{bundle.CreatePaymentParametersTitle_statusDescription}" />
+                    <h:outputLabel value="#{bundle.CreatePaymentParametersLabel_totalPaymentsFailed}" for="totalPaymentsFailed" />
+                    <h:inputText id="totalPaymentsFailed" value="#{paymentParametersController.selected.totalPaymentsFailed}" title="#{bundle.CreatePaymentParametersTitle_totalPaymentsFailed}" />
+                    <h:outputLabel value="#{bundle.CreatePaymentParametersLabel_totalPaymentsFailedAmount}" for="totalPaymentsFailedAmount" />
+                    <h:inputText id="totalPaymentsFailedAmount" value="#{paymentParametersController.selected.totalPaymentsFailedAmount}" title="#{bundle.CreatePaymentParametersTitle_totalPaymentsFailedAmount}" />
+                    <h:outputLabel value="#{bundle.CreatePaymentParametersLabel_totalPaymentsSuccessful}" for="totalPaymentsSuccessful" />
+                    <h:inputText id="totalPaymentsSuccessful" value="#{paymentParametersController.selected.totalPaymentsSuccessful}" title="#{bundle.CreatePaymentParametersTitle_totalPaymentsSuccessful}" />
+                    <h:outputLabel value="#{bundle.CreatePaymentParametersLabel_totalPaymentsSuccessfulAmount}" for="totalPaymentsSuccessfulAmount" />
+                    <h:inputText id="totalPaymentsSuccessfulAmount" value="#{paymentParametersController.selected.totalPaymentsSuccessfulAmount}" title="#{bundle.CreatePaymentParametersTitle_totalPaymentsSuccessfulAmount}" />
+                    <h:outputLabel value="#{bundle.CreatePaymentParametersLabel_yourGeneralReference}" for="yourGeneralReference" />
+                    <h:inputText id="yourGeneralReference" value="#{paymentParametersController.selected.yourGeneralReference}" title="#{bundle.CreatePaymentParametersTitle_yourGeneralReference}" />
+                    <h:outputLabel value="#{bundle.CreatePaymentParametersLabel_yourSystemReference}" for="yourSystemReference" />
+                    <h:inputText id="yourSystemReference" value="#{paymentParametersController.selected.yourSystemReference}" title="#{bundle.CreatePaymentParametersTitle_yourSystemReference}" />
+                </h:panelGrid>
+                <br />
+                <h:commandLink action="#{paymentParametersController.create}" value="#{bundle.CreatePaymentParametersSaveLink}" />
+                <br />
+                <br />
+                <h:commandLink action="#{paymentParametersController.prepareList}" value="#{bundle.CreatePaymentParametersShowAllLink}" immediate="true"/>
+                <br />
+                <br />
+                <h:link outcome="/index" value="#{bundle.CreatePaymentParametersIndexLink}"/>
             </h:form>
-        </p:dialog>
-
-    </ui:composition>    
+        </ui:define>
+    </ui:composition>
 
 </html>

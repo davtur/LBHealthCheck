@@ -927,33 +927,18 @@ public class EziDebitPaymentGateway implements Serializable {
             logger.log(Level.WARNING, "Customer is null: addDefaultPaymentParametersIfEmpty(Customers cust)");
             return;
         }
-        Collection<PaymentParameters> pay = cust.getPaymentParametersCollection();
-        if (pay == null) {
-            logger.log(Level.WARNING, "Payment Parameters are null");
-            cust.setPaymentParametersCollection(new ArrayList<PaymentParameters>());
-            pay = cust.getPaymentParametersCollection();
-        }
+        PaymentParameters pay = cust.getPaymentParameters();
+       
         if (cust.getTelephone() == null) {
             cust.setTelephone("0400000000");
         }
-        PaymentParameters payParams = null;
-        if (pay.isEmpty()) {
-            payParams = new PaymentParameters(0, contractStartDate, cust.getTelephone(), "NO", "NO", "NO", paymentGateway);
-            payParams.setLoggedInUser(cust);
-            cust.getPaymentParametersCollection().add(payParams);
+ 
+        if (pay==null) {
+            pay = new PaymentParameters(0, contractStartDate, cust.getTelephone(), "NO", "NO", "NO", paymentGateway);
+            pay.setLoggedInUser(cust);
+            cust.setPaymentParameters(pay);
             logger.log(Level.INFO, "Adding default payment gateway parameters for this customer as they don't have any.");
             customersFacade.editAndFlush(cust);
-        } else {
-            for (PaymentParameters pp : pay) {
-                if (pp.getPaymentGatewayName().compareTo(paymentGateway) == 0) {
-                    payParams = pp;
-                }
-            }
-        }
-
-        if (payParams == null) {
-            logger.log(Level.WARNING, "Payment gateway EZIDEBIT parameters were not saved or incorrect payment gateway name!");
-
         }
 
     }
