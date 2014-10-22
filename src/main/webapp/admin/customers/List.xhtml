@@ -5,7 +5,7 @@
       xmlns:h="http://java.sun.com/jsf/html" 
       xmlns:f="http://java.sun.com/jsf/core" 
       xmlns:p="http://primefaces.org/ui" >
- 
+
     <ui:composition template="/template.xhtml">
         <ui:define name="title">
             <h:outputText  value="#{configMapController.getKey('ListCustomersTitle')}"></h:outputText>
@@ -240,9 +240,7 @@
                             <h:outputText rendered="#{!ezidebit.asyncOperationRunning}" value=" Status: Idle"/>
                             <h:outputText rendered="#{ezidebit.asyncOperationRunning}" value="Status: Busy"/>
                         </p:outputPanel>
-
-
-                        <p:panel  id="paymentsTablePanel" rendered="#{ezidebit.paymentsList != null and ezidebit.customerExistsInPaymentGateway == true}">
+                        <p:panel id="paymentsTablePanel"  rendered="#{ezidebit.paymentsList != null and ezidebit.customerExistsInPaymentGateway == true}"> 
                             <p:dataTable  id="paymentsTable"
                                           value="#{ezidebit.paymentsList}" 
                                           filteredValue="#{ezidebit.paymentsListFilteredItems}"  
@@ -285,6 +283,10 @@
                                     </h:outputText>
                                 </p:column>
                             </p:dataTable>
+
+                        </p:panel>
+
+                        <p:panel  id="paymentsTablePanel2" rendered="#{ezidebit.paymentsList != null and ezidebit.customerExistsInPaymentGateway == true}">
                             <p:dataTable  id="paymentsTable2"
                                           value="#{ezidebit.paymentDBList}" 
                                           filteredValue="#{ezidebit.paymentsListFilteredItems2}"  

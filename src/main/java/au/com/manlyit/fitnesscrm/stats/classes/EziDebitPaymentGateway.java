@@ -1340,6 +1340,8 @@ public class EziDebitPaymentGateway implements Serializable {
             if (payList != null) {
                 setPaymentsList(payList);
                 setPaymentsListFilteredItems(null);
+                setPaymentDBList(null);
+                setPaymentsListFilteredItems2(null);
             }
         }
 
@@ -1365,6 +1367,8 @@ public class EziDebitPaymentGateway implements Serializable {
                 }
                 setScheduledPaymentsList(pojoList);
                 setScheduledPaymentsListFilteredItems(null);
+                setPaymentDBList(null);
+                setPaymentsListFilteredItems2(null);
             }
         }
 
