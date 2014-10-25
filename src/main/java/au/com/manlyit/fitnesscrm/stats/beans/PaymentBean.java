@@ -721,12 +721,13 @@ public class PaymentBean implements Serializable {
         if (fromDate != null) {
             fromDateString = sdf.format(fromDate);
         }
+        String toDate = sdf.format(new Date());
 
         String dateField = "PAYMENT";
         if (useSettlementDate == true) {
             dateField = "SETTLEMENT";
         }
-        EziResponseOfArrayOfPaymentTHgMB7OL eziResponse = getWs().getPayments(digitalKey, "ALL", "ALL", "ALL", "", fromDateString, "", dateField, "", "");
+        EziResponseOfArrayOfPaymentTHgMB7OL eziResponse = getWs().getPayments(digitalKey, "ALL", "ALL", "ALL", "", fromDateString,toDate, dateField, "", "");
         logger.log(Level.INFO, "getAllPaymentsBySystemSinceDate Response: Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
         if (eziResponse.getError() == 0) {// any errors will be a non zero value
             result = eziResponse.getData().getValue();

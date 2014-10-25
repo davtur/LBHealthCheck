@@ -31,6 +31,14 @@ import au.com.manlyit.fitnesscrm.stats.webservices.Payment;
 import au.com.manlyit.fitnesscrm.stats.webservices.PaymentDetail;
 import au.com.manlyit.fitnesscrm.stats.webservices.PaymentDetailPlusNextPaymentInfo;
 import au.com.manlyit.fitnesscrm.stats.webservices.ScheduledPayment;
+import com.lowagie.text.BadElementException;
+import com.lowagie.text.Document;
+import com.lowagie.text.DocumentException;
+import com.lowagie.text.Font;
+import com.lowagie.text.Image;
+import com.lowagie.text.PageSize;
+import com.lowagie.text.Paragraph;
+import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.MalformedURLException;
@@ -41,7 +49,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
@@ -64,8 +71,21 @@ import javax.faces.context.FacesContext;
 import javax.faces.event.ActionEvent;
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
 import javax.xml.ws.WebServiceException;
+import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.hssf.usermodel.HSSFCellStyle;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.hssf.util.HSSFColor;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.DataFormat;
+import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.primefaces.component.tabview.Tab;
 import org.primefaces.context.RequestContext;
 import org.primefaces.event.TabChangeEvent;
@@ -89,7 +109,7 @@ public class EziDebitPaymentGateway implements Serializable {
     // private final Map<String, Future> futureMap = new HashMap<>();
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.PaymentParametersFacade ejbPaymentParametersFacade;
-        @Inject
+    @Inject
     private PaymentBean paymentBean;
     @Inject
     private PushComponentUpdateBean pushComponentUpdateBean;
@@ -99,15 +119,19 @@ public class EziDebitPaymentGateway implements Serializable {
     private CustomersFacade customersFacade;
     @Inject
     private CustomerStateFacade customerStateFacade;
-   @Inject
+    @Inject
     private PaymentsFacade paymentsFacade;
     private boolean asyncOperationRunning = false;
     private final ThreadGroup tGroup1 = new ThreadGroup("EziDebitOps");
     private List<Payment> paymentsList;
-    private PfSelectableDataModel<Payments> paymentDBList = null; 
+    private PfSelectableDataModel<Payments> paymentDBList = null;
+    private PfSelectableDataModel<Payments> reportPaymentsList = null;
     private List<Payment> paymentsListFilteredItems;
     private List<Payment> paymentsListFilteredItems2;
+    private List<Payment> reportPaymentsListFilteredItems;
     private List<ScheduledPaymentPojo> scheduledPaymentsList;
+    private Payments selectedReportItem;
+    private String reportName = "defaultreport";
     private ScheduledPaymentPojo selectedScheduledPayment;
     private List<ScheduledPaymentPojo> scheduledPaymentsListFilteredItems;
     private CustomerDetails currentCustomerDetails;
@@ -133,8 +157,16 @@ public class EziDebitPaymentGateway implements Serializable {
     private boolean customerCancelledInPaymentGateway = false;
     private boolean paymentGatewayEnabled = true;
     private boolean editPaymentMethodEnabled = false;
+    private boolean reportUseSettlementDate = false;
+    private boolean reportShowSuccessful = true;
+    private boolean reportShowFailed = true;
+    private boolean reportShowPending = true;
+    private boolean manualRefreshFromPaymentGateway = false;
+
     private Integer progress;
     private AtomicBoolean pageLoaded = new AtomicBoolean(false);
+    private Date reportStartDate;
+    private Date reportEndDate;
 
     private String bulkvalue = "";
     private String duplicateValues = "";
@@ -143,6 +175,7 @@ public class EziDebitPaymentGateway implements Serializable {
     private boolean editPaymentDetails = false;
     private boolean autoStartPoller = true;
     private boolean stopPoller = false;
+    private int reportType = 0;
     private boolean customerDetailsHaveBeenRetrieved = false;
     private String eziDebitWidgetUrl = "";
     private String eziDebitEDDRFormUrl = "";
@@ -155,6 +188,10 @@ public class EziDebitPaymentGateway implements Serializable {
     private void setSessionId() {
         FacesContext facesContext = FacesContext.getCurrentInstance();
         this.sessionId = ((HttpSession) facesContext.getExternalContext().getSession(false)).getId();
+        GregorianCalendar cal = new GregorianCalendar();
+        reportEndDate = cal.getTime();
+        cal.add(Calendar.DAY_OF_YEAR, -7);
+        reportStartDate = cal.getTime();
     }
 
     /**
@@ -223,6 +260,11 @@ public class EziDebitPaymentGateway implements Serializable {
             startAsynchJob("EditCustomerDetails", paymentBean.editCustomerDetails(cust, null, getDigitalKey()));
         }
 
+    }
+
+    public void reportDateChange() {
+        reportPaymentsList = null;
+        reportPaymentsListFilteredItems = null;
     }
 
     /**
@@ -661,6 +703,122 @@ public class EziDebitPaymentGateway implements Serializable {
         this.customerCancelledInPaymentGateway = customerCancelledInPaymentGateway;
     }
 
+    public void preProcessXLS(Object document) {
+        SimpleDateFormat sdf = new SimpleDateFormat("EEE, d MMM yyyy");
+        String type = "Settlement";
+        if (reportType == 0) {
+            type = "Payment";
+        }
+        String reportTitle = type + " report for the period " + sdf.format(reportStartDate) + " to " + sdf.format(reportEndDate);
+        HSSFWorkbook wb = (HSSFWorkbook) document;
+        HSSFSheet sheet = wb.getSheetAt(0);
+        HSSFRow row = sheet.createRow(0);
+        HSSFCell cell = row.createCell(0);
+        cell.setCellValue(reportTitle);
+        HSSFCellStyle cellStyle = wb.createCellStyle();
+        DataFormat df = wb.createDataFormat();
+        cellStyle.setFillForegroundColor(HSSFColor.BLUE.index);
+        cellStyle.setFillPattern(HSSFCellStyle.SOLID_FOREGROUND);
+        for (int i = 1; i < row.getPhysicalNumberOfCells(); i++) {
+            row.getCell(i).setCellStyle(cellStyle);
+        }
+        cellStyle.setDataFormat(df.getFormat("YYYY-MM-DD HH:MM:SS"));
+
+        cell = row.createCell(1);
+        cell.setCellValue(new Date());
+        cell.setCellStyle(cellStyle);
+        sheet.createRow(1);
+        sheet.createRow(2);
+
+    }
+
+    public void postProcessXLS(Object document) {
+        SimpleDateFormat sdf = new SimpleDateFormat("EEE, d MMM yyyy");
+        String type = "Settlement";
+        if (reportType == 0) {
+            type = "Payment";
+        }
+        String reportTitle = type + " report for the period " + sdf.format(reportStartDate) + " to " + sdf.format(reportEndDate);
+        HSSFWorkbook wb = (HSSFWorkbook) document;
+        HSSFSheet sheet = wb.getSheetAt(0);
+        sheet.shiftRows(0, sheet.getLastRowNum(), 7);
+        HSSFRow row = sheet.createRow(0);
+        HSSFCell cell = row.createCell(0);
+        HSSFCellStyle cellStyle = wb.createCellStyle();
+        DataFormat df = wb.createDataFormat();
+        cellStyle.setDataFormat(df.getFormat("YYYY-MM-DD HH:MM:SS"));
+        cell.setCellValue(reportTitle);
+        //first row (0-based),last row  (0-based),first column (0-based),last column  (0-based)
+        sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 2));
+        CellStyle style = wb.createCellStyle();
+        CellStyle style2 = wb.createCellStyle();
+        style.setFillForegroundColor(IndexedColors.BLACK.getIndex());
+        //style.setFillPattern(CellStyle.SOLID_FOREGROUND);
+        style.setFillBackgroundColor(IndexedColors.AQUA.getIndex());
+        style.setFillPattern(CellStyle.BIG_SPOTS);
+        style2.setFillForegroundColor(IndexedColors.BLACK.getIndex());
+        //style2.setFillPattern(CellStyle.SOLID_FOREGROUND);
+        style2.setFillBackgroundColor(IndexedColors.LIGHT_TURQUOISE.getIndex());
+        style2.setFillPattern(CellStyle.BIG_SPOTS);
+
+        HSSFCell cell3 = row.createCell(3);
+        cell3.setCellValue(new Date());
+        cell3.setCellStyle(cellStyle);
+        //sheet.createRow(1);
+        //sheet.createRow(2);
+        boolean rowColor = false;
+        for (Row row2 : sheet) {
+            if (row2.getRowNum() > 2) {
+                rowColor = !(rowColor);
+                for (Cell cell2 : row2) {
+                    //cell2.setCellValue(cell.getStringCellValue().toUpperCase());
+                    if (rowColor) {
+                        cell2.setCellStyle(style);
+                    } else {
+                        cell2.setCellStyle(style2);
+                    }
+
+                }
+            }
+        }
+        for (int c = 0; c < row.getLastCellNum() + 1; c++) {
+            sheet.autoSizeColumn(c);
+        }
+    }
+
+    public void preProcessPDF(Object document) throws IOException,
+            BadElementException, DocumentException {
+        Document pdf = (Document) document;
+        pdf.setPageSize(PageSize.A4.rotate());
+
+        //FacesContext context = FacesContext.getCurrentInstance();
+        //ExternalContext ec = context.getExternalContext();
+        //HttpServletRequest request = (HttpServletRequest) context.getExternalContext().getRequest();
+        ServletContext servletContext = (ServletContext) FacesContext.getCurrentInstance().getExternalContext().getContext();
+        String logo = servletContext.getContextPath() + File.separator + "resources" + File.separator + "images"
+                + File.separator + "logo.png";
+        URL imageResource = servletContext.getResource(File.separator + "resources" + File.separator + "images"
+                + File.separator + "logo.png");
+        pdf.open();
+        pdf.add(Image.getInstance(new URL("https://services.purefitnessmanly.com.au/FitnessStats/resources/images/logo.png")));
+        SimpleDateFormat sdf = new SimpleDateFormat("EEE, d MMM yyyy");
+        String type = "Settlement";
+        if (reportType == 0) {
+            type = "Payment";
+        }
+        String reportTitle = type + " report for the period " + sdf.format(reportStartDate) + " to " + sdf.format(reportEndDate);
+        pdf.addTitle(reportTitle);
+        pdf.add(new Paragraph(reportTitle));
+        pdf.add(new Paragraph(" "));
+        Font font = new Font(Font.NORMAL);
+        font.setSize(8);
+    }
+
+    public void postProcessPDF(Object document) throws IOException,
+            BadElementException, DocumentException {
+
+    }
+
     public void redirectToPaymentGateway() {
         try {
             FacesContext context = FacesContext.getCurrentInstance();
@@ -678,14 +836,30 @@ public class EziDebitPaymentGateway implements Serializable {
 
     }
 
+    public void runReport() {
+        reportPaymentsList = null;
+        reportPaymentsListFilteredItems = null;
+        String key = "PaymentReport";
+        reportUseSettlementDate = false;
+        if (reportType == 1) {
+            key = "SettlementReport";
+            reportUseSettlementDate = true;
+        }
+
+        if (manualRefreshFromPaymentGateway) {
+            manualRefreshFromPaymentGateway = false;
+            Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.INFO, "Starting async Manual Refresh from Payment Gateway with starting date:", reportStartDate);
+            startAsynchJob(key, paymentBean.getAllPaymentsBySystemSinceDate(reportStartDate, reportUseSettlementDate, getDigitalKey()));
+
+        }
+    }
+
     /**
      * @param eziDebitEDDRFormUrl the eziDebitEDDRFormUrl to set
      */
     public void setEziDebitEDDRFormUrl(String eziDebitEDDRFormUrl) {
         this.eziDebitEDDRFormUrl = eziDebitEDDRFormUrl;
     }
-
-   
 
     /**
      * @param paymentDBList the paymentDBList to set
@@ -706,6 +880,181 @@ public class EziDebitPaymentGateway implements Serializable {
      */
     public void setPaymentsListFilteredItems2(List<Payment> paymentsListFilteredItems2) {
         this.paymentsListFilteredItems2 = paymentsListFilteredItems2;
+    }
+
+    /**
+     * @return the reportPaymentsList
+     */
+    public PfSelectableDataModel<Payments> getReportPaymentsList() {
+        if (reportPaymentsList == null) {
+            Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.INFO, "Running Report");
+            reportPaymentsList = new PfSelectableDataModel<>(paymentsFacade.findPaymentsByDateRange(reportUseSettlementDate, reportShowSuccessful, reportShowFailed, reportShowPending, reportStartDate, reportEndDate, false));
+            Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.INFO, "Report Completed");
+        }
+        return reportPaymentsList;
+    }
+
+    /**
+     * @param reportPaymentsList the reportPaymentsList to set
+     */
+    public void setReportPaymentsList(PfSelectableDataModel<Payments> reportPaymentsList) {
+        this.reportPaymentsList = reportPaymentsList;
+    }
+
+    /**
+     * @return the reportPaymentsListFilteredItems
+     */
+    public List<Payment> getReportPaymentsListFilteredItems() {
+        return reportPaymentsListFilteredItems;
+    }
+
+    /**
+     * @param reportPaymentsListFilteredItems the
+     * reportPaymentsListFilteredItems to set
+     */
+    public void setReportPaymentsListFilteredItems(List<Payment> reportPaymentsListFilteredItems) {
+        this.reportPaymentsListFilteredItems = reportPaymentsListFilteredItems;
+    }
+
+    /**
+     * @return the reportUseSettlementDate
+     */
+    public boolean isReportUseSettlementDate() {
+        return reportUseSettlementDate;
+    }
+
+    /**
+     * @param reportUseSettlementDate the reportUseSettlementDate to set
+     */
+    public void setReportUseSettlementDate(boolean reportUseSettlementDate) {
+        this.reportUseSettlementDate = reportUseSettlementDate;
+    }
+
+    /**
+     * @return the reportShowSuccessful
+     */
+    public boolean isReportShowSuccessful() {
+        return reportShowSuccessful;
+    }
+
+    /**
+     * @param reportShowSuccessful the reportShowSuccessful to set
+     */
+    public void setReportShowSuccessful(boolean reportShowSuccessful) {
+        this.reportShowSuccessful = reportShowSuccessful;
+    }
+
+    /**
+     * @return the reportShowFailed
+     */
+    public boolean isReportShowFailed() {
+        return reportShowFailed;
+    }
+
+    /**
+     * @param reportShowFailed the reportShowFailed to set
+     */
+    public void setReportShowFailed(boolean reportShowFailed) {
+        this.reportShowFailed = reportShowFailed;
+    }
+
+    /**
+     * @return the reportShowPending
+     */
+    public boolean isReportShowPending() {
+        return reportShowPending;
+    }
+
+    /**
+     * @param reportShowPending the reportShowPending to set
+     */
+    public void setReportShowPending(boolean reportShowPending) {
+        this.reportShowPending = reportShowPending;
+    }
+
+    /**
+     * @return the reportStartDate
+     */
+    public Date getReportStartDate() {
+        return reportStartDate;
+    }
+
+    /**
+     * @param reportStartDate the reportStartDate to set
+     */
+    public void setReportStartDate(Date reportStartDate) {
+        this.reportStartDate = reportStartDate;
+    }
+
+    /**
+     * @return the reportEndDate
+     */
+    public Date getReportEndDate() {
+        return reportEndDate;
+    }
+
+    /**
+     * @param reportEndDate the reportEndDate to set
+     */
+    public void setReportEndDate(Date reportEndDate) {
+        this.reportEndDate = reportEndDate;
+    }
+
+    /**
+     * @return the selectedReportItem
+     */
+    public Payments getSelectedReportItem() {
+        return selectedReportItem;
+    }
+
+    /**
+     * @param selectedReportItem the selectedReportItem to set
+     */
+    public void setSelectedReportItem(Payments selectedReportItem) {
+        this.selectedReportItem = selectedReportItem;
+    }
+
+    /**
+     * @return the reportName
+     */
+    public String getReportName() {
+        return reportName;
+    }
+
+    /**
+     * @param reportName the reportName to set
+     */
+    public void setReportName(String reportName) {
+        this.reportName = reportName;
+    }
+
+    /**
+     * @return the reportType
+     */
+    public int getReportType() {
+        return reportType;
+    }
+
+    /**
+     * @param reportType the reportType to set
+     */
+    public void setReportType(int reportType) {
+        this.reportType = reportType;
+    }
+
+    /**
+     * @return the manualRefreshFromPaymentGateway
+     */
+    public boolean isManualRefreshFromPaymentGateway() {
+        return manualRefreshFromPaymentGateway;
+    }
+
+    /**
+     * @param manualRefreshFromPaymentGateway the
+     * manualRefreshFromPaymentGateway to set
+     */
+    public void setManualRefreshFromPaymentGateway(boolean manualRefreshFromPaymentGateway) {
+        this.manualRefreshFromPaymentGateway = manualRefreshFromPaymentGateway;
     }
 
     private class eziDebitThreadFactory implements ThreadFactory {
@@ -787,8 +1136,6 @@ public class EziDebitPaymentGateway implements Serializable {
         }
         return paymentDBList;
     }
-
-    
 
     private Customers getSelectedCustomer() {
         FacesContext context = FacesContext.getCurrentInstance();
@@ -928,12 +1275,12 @@ public class EziDebitPaymentGateway implements Serializable {
             return;
         }
         PaymentParameters pay = cust.getPaymentParameters();
-       
+
         if (cust.getTelephone() == null) {
             cust.setTelephone("0400000000");
         }
- 
-        if (pay==null) {
+
+        if (pay == null) {
             pay = new PaymentParameters(0, contractStartDate, cust.getTelephone(), "NO", "NO", "NO", paymentGateway);
             pay.setLoggedInUser(cust);
             cust.setPaymentParameters(pay);
@@ -1306,11 +1653,66 @@ public class EziDebitPaymentGateway implements Serializable {
                     processGetPaymentDetailPlusNextPaymentInfo(ft);
                 }
             }
-
+            key = "PaymentReport";
+            if (futureMapContainsKey(key)) {
+                Future ft = (Future) futureMapGetKey(key);
+                if (ft.isDone()) {
+                    futureMapRemoveKey(key);
+                    processPaymentReport(ft);
+                }
+            }
+            key = "SettlementReport";
+            if (futureMapContainsKey(key)) {
+                Future ft = (Future) futureMapGetKey(key);
+                if (ft.isDone()) {
+                    futureMapRemoveKey(key);
+                    processSettlementReport(ft);
+                }
+            }
         } catch (CancellationException ex) {
             logger.log(Level.WARNING, key + ":", ex);
 
         }
+    }
+
+    private void processPaymentReport(Future ft) {
+        ArrayOfPayment result = null;
+        try {
+            result = (ArrayOfPayment) ft.get();
+        } catch (InterruptedException | ExecutionException ex) {
+            Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        if (result != null) {
+            List<Payment> payList = result.getPayment();
+            if (payList != null) {
+                setPaymentsList(payList);
+                setPaymentsListFilteredItems(null);
+                setPaymentDBList(null);
+                setPaymentsListFilteredItems2(null);
+            }
+        }
+
+        logger.log(Level.INFO, "processPaymentReport completed");
+    }
+
+    private void processSettlementReport(Future ft) {
+        ArrayOfPayment result = null;
+        try {
+            result = (ArrayOfPayment) ft.get();
+        } catch (InterruptedException | ExecutionException ex) {
+            Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        if (result != null) {
+            List<Payment> payList = result.getPayment();
+            if (payList != null) {
+                setPaymentsList(payList);
+                setPaymentsListFilteredItems(null);
+                setPaymentDBList(null);
+                setPaymentsListFilteredItems2(null);
+            }
+        }
+
+        logger.log(Level.INFO, "processSettlementReport completed");
     }
 
     private void processGetPayments(Future ft) {
