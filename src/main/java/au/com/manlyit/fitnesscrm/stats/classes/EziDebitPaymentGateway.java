@@ -180,6 +180,8 @@ public class EziDebitPaymentGateway implements Serializable {
     private String eziDebitWidgetUrl = "";
     private String eziDebitEDDRFormUrl = "";
     private Customers selectedCustomer;
+    private float reportTotalSuccessful=0;
+    private float reportTotalDishonoured=0;
 
     ThreadFactory tf1 = new eziDebitThreadFactory();
     private String sessionId;
@@ -800,7 +802,12 @@ public class EziDebitPaymentGateway implements Serializable {
         URL imageResource = servletContext.getResource(File.separator + "resources" + File.separator + "images"
                 + File.separator + "logo.png");
         pdf.open();
-        pdf.add(Image.getInstance(new URL("https://services.purefitnessmanly.com.au/FitnessStats/resources/images/logo.png")));
+        String urlForLogo =  configMapFacade.getConfig("system.email.logo");
+        try {
+            pdf.add(Image.getInstance(new URL(urlForLogo)));
+        } catch (IOException | DocumentException iOException) {
+            logger.log(Level.WARNING, "Logo URL error",iOException);
+        }
         SimpleDateFormat sdf = new SimpleDateFormat("EEE, d MMM yyyy");
         String type = "Settlement";
         if (reportType == 0) {
@@ -888,8 +895,20 @@ public class EziDebitPaymentGateway implements Serializable {
     public PfSelectableDataModel<Payments> getReportPaymentsList() {
         if (reportPaymentsList == null) {
             Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.INFO, "Running Report");
-            reportPaymentsList = new PfSelectableDataModel<>(paymentsFacade.findPaymentsByDateRange(reportUseSettlementDate, reportShowSuccessful, reportShowFailed, reportShowPending, reportStartDate, reportEndDate, false));
+            List<Payments> pl = paymentsFacade.findPaymentsByDateRange(reportUseSettlementDate, reportShowSuccessful, reportShowFailed, reportShowPending, reportStartDate, reportEndDate, false);
+            reportTotalSuccessful = 0;
+            reportTotalDishonoured = 0;
+            for(Payments p : pl){
+                if(p.getPaymentStatus().contains("S") || p.getPaymentStatus().contains("P") ){
+                    reportTotalSuccessful = reportTotalSuccessful + p.getPaymentAmount().floatValue();
+                }else{
+                    reportTotalDishonoured = reportTotalDishonoured +  p.getPaymentAmount().floatValue();
+                }
+            }
+            
+            reportPaymentsList = new PfSelectableDataModel<>(pl);
             Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.INFO, "Report Completed");
+            
         }
         return reportPaymentsList;
     }
@@ -1055,6 +1074,34 @@ public class EziDebitPaymentGateway implements Serializable {
      */
     public void setManualRefreshFromPaymentGateway(boolean manualRefreshFromPaymentGateway) {
         this.manualRefreshFromPaymentGateway = manualRefreshFromPaymentGateway;
+    }
+
+    /**
+     * @return the reportTotalSuccessful
+     */
+    public float getReportTotalSuccessful() {
+        return reportTotalSuccessful;
+    }
+
+    /**
+     * @param reportTotalSuccessful the reportTotalSuccessful to set
+     */
+    public void setReportTotalSuccessful(float reportTotalSuccessful) {
+        this.reportTotalSuccessful = reportTotalSuccessful;
+    }
+
+    /**
+     * @return the reportTotalDishonoured
+     */
+    public float getReportTotalDishonoured() {
+        return reportTotalDishonoured;
+    }
+
+    /**
+     * @param reportTotalDishonoured the reportTotalDishonoured to set
+     */
+    public void setReportTotalDishonoured(float reportTotalDishonoured) {
+        this.reportTotalDishonoured = reportTotalDishonoured;
     }
 
     private class eziDebitThreadFactory implements ThreadFactory {

@@ -671,6 +671,7 @@ public class FutureMapEJB {
                     pp.setPaymentPeriod(custDetails.getPaymentPeriod().getValue());
                     pp.setPaymentPeriodDayOfMonth(custDetails.getPaymentPeriodDayOfMonth().getValue());
                     pp.setPaymentPeriodDayOfWeek(custDetails.getPaymentPeriodDayOfWeek().getValue());
+                  
                     pp.setSmsExpiredCard(custDetails.getSmsExpiredCard().getValue());
                     pp.setSmsFailedNotification(custDetails.getSmsFailedNotification().getValue());
                     pp.setSmsPaymentReminder(custDetails.getSmsPaymentReminder().getValue());
@@ -700,7 +701,7 @@ public class FutureMapEJB {
             if (payment == null) {
                 payment = new Payments();
                 payment.setCreateDatetime(new Date());
-
+payment.setManuallyAddedPayment(false);
                 payment.setId(0);
                 payment.setCustomerName(cust);
             }
@@ -717,6 +718,13 @@ public class FutureMapEJB {
                 payment.setPaymentID(pay.getPaymentID().getValue());
                 payment.setPaymentMethod(pay.getPaymentMethod().getValue());
                 payment.setPaymentReference(pay.getPaymentReference().getValue());
+                if(pay.getPaymentReference() != null){
+                    if(pay.getPaymentReference().getValue().trim().isEmpty() == false){
+                       payment.setManuallyAddedPayment(true);
+                    }else{
+                       payment.setManuallyAddedPayment(false); 
+                    }
+                }
                 payment.setPaymentSource(pay.getPaymentSource().getValue());
                 payment.setScheduledAmount(new BigDecimal(pay.getScheduledAmount().floatValue()));
 
@@ -760,6 +768,11 @@ public class FutureMapEJB {
                 payment.setPaymentID(null);
                 payment.setPaymentMethod("DR");
                 payment.setPaymentReference(pay.getPaymentReference().getValue());
+                if(pay.isManuallyAddedPayment() != null){
+                    
+                       payment.setManuallyAddedPayment(pay.isManuallyAddedPayment());
+                    
+                }
                 payment.setPaymentSource("SCHEDULED");
                 payment.setScheduledAmount(new BigDecimal(pay.getPaymentAmount().floatValue()));
 
