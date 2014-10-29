@@ -727,11 +727,18 @@ public class PaymentBean implements Serializable {
         if (useSettlementDate == true) {
             dateField = "SETTLEMENT";
         }
-        EziResponseOfArrayOfPaymentTHgMB7OL eziResponse = getWs().getPayments(digitalKey, "ALL", "ALL", "ALL", "", fromDateString,toDate, dateField, "", "");
-        logger.log(Level.INFO, "getAllPaymentsBySystemSinceDate Response: Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
-        if (eziResponse.getError() == 0) {// any errors will be a non zero value
-            result = eziResponse.getData().getValue();
+       logger.log(Level.INFO, "getAllPaymentsBySystemSinceDate - Calling ezidebit WS, From Date {0}, To Date {1}, report Type {2}", new Object[]{fromDateString, toDate,dateField});
 
+        EziResponseOfArrayOfPaymentTHgMB7OL eziResponse = getWs().getPayments(digitalKey, "ALL", "ALL", "ALL", "", fromDateString,toDate, dateField, "", "");
+        if (eziResponse.getError() == 0) {// any errors will be a non zero value
+                    logger.log(Level.INFO, "getAllPaymentsBySystemSinceDate Response:OK - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
+
+            result = eziResponse.getData().getValue();
+            if(result.getPayment() != null){
+                   logger.log(Level.INFO, "getAllPaymentsBySystemSinceDate Response: OK {0}, No of Payments in List = {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue().getPayment().size()});
+    
+            }
+ 
         } else {
             logger.log(Level.WARNING, "getAllPaymentsBySystemSinceDate Response: Error - {0}, ", eziResponse.getErrorMessage().getValue());
 

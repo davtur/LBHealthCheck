@@ -60,6 +60,9 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Customers.findByFacebookId", query = "SELECT c FROM Customers c WHERE c.facebookId = :facebookId"),
     @NamedQuery(name = "Customers.findByGoogleId", query = "SELECT c FROM Customers c WHERE c.googleId = :googleId")})
 public class Customers implements BaseEntity, Serializable {
+    @JoinColumn(name = "profile_image", referencedColumnName = "id")
+    @OneToOne
+    private CustomerImages profileImage;
 
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "loggedInUser")
     private PaymentParameters paymentParameters;
@@ -526,6 +529,14 @@ public class Customers implements BaseEntity, Serializable {
 
     public void setPaymentParameters(PaymentParameters paymentParameters) {
         this.paymentParameters = paymentParameters;
+    }
+
+    public CustomerImages getProfileImage() {
+        return profileImage;
+    }
+
+    public void setProfileImage(CustomerImages profileImage) {
+        this.profileImage = profileImage;
     }
 
 }

@@ -401,6 +401,9 @@ public class SessionHistoryController implements Serializable {
 
         }
     }
+    public void onTransfer(){
+        logger.log(Level.FINE, "Picklist Transfer");
+    }
 
     public String create() {
         try {

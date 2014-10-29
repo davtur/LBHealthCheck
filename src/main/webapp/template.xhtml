@@ -35,28 +35,23 @@
                                     </p:ajaxStatus>
                                 </div>
                             </div>
-
+                            <h:form id="errorForm">
+                                <p:ajaxExceptionHandler type="javax.faces.application.ViewExpiredException"
+                                                        update="exceptionDialog" onexception="PF('exceptionDialog').show();" />
+                                <p:dialog id="exceptionDialog" header="Exception: #{pfExceptionHandler.type}
+                                          occured!" widgetVar="exceptionDialog" height="500px">
+                                    Message: #{pfExceptionHandler.message} <br/>
+                                    Stack Trace: <h:outputText value="#{pfExceptionHandler.formattedStackTrace}"
+                                                              escape="false" />
+                                    <p:button onclick="document.location.href = document.location.href;"
+                                              value="Reload!"/>
+                                </p:dialog>
+                            </h:form>
 
                             <h:form id="menuForm">
 
-                                <p:ajaxExceptionHandler type="javax.faces.application.ViewExpiredException"
-                                                        update="exceptionDialog"
-                                                        onexception="PF('exceptionDialog').show();" />
+                                
 
-                                <p:ajaxExceptionHandler type="java.lang.NullPointerException"
-                                                        update="exceptionDialog"
-                                                        onexception="PF('exceptionDialog').show();" />
-
-                                <p:dialog id="exceptionDialog" header="Exception '#{pfExceptionHandler.type}' occured!" widgetVar="exceptionDialog"
-                                          height="500px">
-                                    Message: #{pfExceptionHandler.message} <br/>
-                                    StackTrace: <h:outputText value="#{pfExceptionHandler.formattedStackTrace}" escape="false" /> <br />
-
-                                    <p:button onclick="document.location.href = document.location.href;"
-                                              value="Reload!"
-                                              rendered="#{pfExceptionHandler.type == 'javax.faces.application.ViewExpiredException'}" />
-                                </p:dialog>
- 
                                 <p:menubar id="mainmenubar1" autoDisplay="true">
                                     <p:submenu  label="Developer" rendered="#{customersController.isUserInRole('DEVELOPER')}"  id="devMenu1" >
                                         <p:menuitem
@@ -155,7 +150,7 @@
                                             id="customers"                              
                                             action="/admin/customers/List.xhtml" value="Customers"  ajax="false"   >                        
                                         </p:menuitem>
-                                         <p:menuitem action="/admin/reports/List.xhtml" ajax="false"
+                                        <p:menuitem action="/admin/reports/List.xhtml" ajax="false"
                                                     id="reports"     
                                                     value="Reports">
                                         </p:menuitem>

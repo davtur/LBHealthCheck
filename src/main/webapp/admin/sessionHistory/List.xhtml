@@ -38,7 +38,7 @@
                 </p:panelGrid>
 
                 <p:panel id="customChart" widgetVar="customChartWidget" header="My Sessions Chart (The number of times you have trained each week.)">
-                    <p:barChart legendPosition="ne" title="#{mySessionsChart1.selectedCustomer.firstname} #{mySessionsChart1.selectedCustomer.lastname}" extender="chartExtender" styleClass="chartClass" value="#{mySessionsChart1.customChartModel}" xaxisLabel="#{mySessionsChart1.xaxisLabel}" xaxisAngle="65"   stacked="true"/>
+                    <p:chart type="bar"   styleClass="chartClass" model="#{mySessionsChart1.customChartModel}"     />
                 </p:panel>
 
                 <script >

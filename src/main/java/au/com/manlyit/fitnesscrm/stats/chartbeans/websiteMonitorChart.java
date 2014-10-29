@@ -25,7 +25,7 @@ import java.util.GregorianCalendar;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.primefaces.model.chart.LineChartSeries;
+import org.primefaces.model.chart.ChartSeries;
 
 @Named("websiteMonitorChart")
 @RequestScoped
@@ -80,8 +80,8 @@ public class websiteMonitorChart implements Serializable {
         successfulTestResults = cutSeriesDownToAnAppropriateSize(successfulTestResults, maxSize);
         failedTestResults = cutSeriesDownToAnAppropriateSize(failedTestResults, maxSize);
 
-        LineChartSeries responseTimeSeries = new LineChartSeries();
-        LineChartSeries responseTimeSeries2 = new LineChartSeries();
+        ChartSeries responseTimeSeries = new ChartSeries();
+        ChartSeries responseTimeSeries2 = new ChartSeries();
         responseTimeSeries.setLabel("Successful Response Times");
         responseTimeSeries2.setLabel("Failed Tests");
         //responseTimeSeries.setStyle("monitorSeriesSuccess");

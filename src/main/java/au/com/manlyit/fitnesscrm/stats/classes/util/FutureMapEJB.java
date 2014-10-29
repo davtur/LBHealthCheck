@@ -65,7 +65,7 @@ import org.primefaces.push.impl.JSONEncoder;
 public class FutureMapEJB {
 
     private static final Logger logger = Logger.getLogger(FutureMapEJB.class.getName());
-    private static final int TIMEOUT_SECONDS = 30;
+    private static final int TIMEOUT_SECONDS = 120;
     private static final String FUTUREMAP_INTERNALID = "FMINTID876987";
     private final ConcurrentHashMap<String, List<AsyncJob>> futureMap = new ConcurrentHashMap<>();
     private final static String CHANNEL = "/payments/";
@@ -77,6 +77,7 @@ public class FutureMapEJB {
     private final Object lock6 = new Object();
     private final Object lock7 = new Object();
     private final Object lock8 = new Object();
+    private final Object lock9 = new Object();
     private final AtomicBoolean settlementReportLock = new AtomicBoolean(false);
     private final AtomicBoolean paymentReportLock = new AtomicBoolean(false);
     private List<Payment> paymentsByCustomersMissingFromCRM;
@@ -116,9 +117,12 @@ public class FutureMapEJB {
      */
     public List<AsyncJob> getFutureMap(String userSessionId) {
         //return a map of future tasks that belong to a sessionid
-        synchronized (lock1) {
+        synchronized (lock9) {
+            logger.log(Level.INFO, "Get Future Map.  for sessionID {0}.", userSessionId);
+
             List<AsyncJob> fmap = futureMap.get(userSessionId);
             if (fmap == null) {
+                logger.log(Level.INFO, "Get Future Map. Map is null for sessionID {0} . Creating an empty list.", userSessionId);
                 futureMap.put(userSessionId, new ArrayList<AsyncJob>());
             }
             return fmap;
@@ -135,6 +139,7 @@ public class FutureMapEJB {
             logger.log(Level.INFO, "The Settlement Report Already Running.");
             return false;
         } else {
+            logger.log(Level.INFO, "Future Map, runSettlementReport. from date {0}.", fromDate);
             AsyncJob aj = new AsyncJob("SettlementReport", paymentBean.getAllPaymentsBySystemSinceDate(fromDate, true, getDigitalKey()));
             this.put(FUTUREMAP_INTERNALID, aj);
             settlementReportLock.set(true);
@@ -148,6 +153,7 @@ public class FutureMapEJB {
             logger.log(Level.INFO, "The Settlement Report Already Running.");
             return false;
         } else {
+            logger.log(Level.INFO, "Future Map, runPaymentReport. from date {0}.", fromDate);
             AsyncJob aj = new AsyncJob("PaymentReport", paymentBean.getAllPaymentsBySystemSinceDate(fromDate, false, getDigitalKey()));
             this.put(FUTUREMAP_INTERNALID, aj);
             paymentReportLock.set(true);
@@ -157,6 +163,7 @@ public class FutureMapEJB {
 
     public void remove(String userSessionId, String key) {
         synchronized (lock1) {
+            logger.log(Level.INFO, "Future Map, remove. sessionid {0}, key {1}.",new Object[]{userSessionId,key} );
             List<AsyncJob> fmap = getFutureMap(userSessionId);
             for (int x = fmap.size(); x > 0; x--) {
                 AsyncJob aj = fmap.get(x - 1);
@@ -173,6 +180,7 @@ public class FutureMapEJB {
 
     public AsyncJob get(String userSessionId, String key) {
         synchronized (lock1) {
+            logger.log(Level.INFO, "Future Map, get sessionid {0}, key {1}.",new Object[]{userSessionId,key} );
             List<AsyncJob> fmap = getFutureMap(userSessionId);
             for (int x = fmap.size(); x > 0; x--) {
                 AsyncJob aj = fmap.get(x - 1);
@@ -211,9 +219,10 @@ public class FutureMapEJB {
     public void put(String userSessionId, AsyncJob aj) {
         synchronized (lock1) {
             try {
+                logger.log(Level.INFO, "Future Map, put. sessionid {0},AsyncJob key {1}.",new Object[]{userSessionId,aj.getJobName()} );
                 getFutureMap(userSessionId).add(aj);
             } catch (Exception e) {
-                logger.log(Level.SEVERE, "Future Map put(String userSessionId, AsyncJob aj) method. Unable to add Async Job, Session:{1}, job Name:{2}, start Time:{3}, Error Message:{0}",new Object[]{e.getMessage(),userSessionId,aj.getJobName(),aj.getStartTime()}); 
+                logger.log(Level.SEVERE, "Future Map put(String userSessionId, AsyncJob aj) method. Unable to add Async Job, Session:{1}, job Name:{2}, start Time:{3}, Error Message:{0}", new Object[]{e.getMessage(), userSessionId, aj.getJobName(), aj.getStartTime()});
             }
         }
     }
@@ -324,10 +333,12 @@ public class FutureMapEJB {
             }
 
         }
+        logger.log(Level.FINE, "Finished Checking Future Map for completed jobs.");
     }
 
     // run a schedules
     public void processCompletedAsyncJobs(String sessionId) {
+        logger.log(Level.INFO, "Future Map is processing Completed Async Jobs .");
         synchronized (lock3) {
             String key = "";
 
@@ -363,10 +374,10 @@ public class FutureMapEJB {
                 if (containsKey(sessionId, key)) {
                     Future ft = (Future) get(sessionId, key).getFuture();
                     if (ft.isDone()) {
-                         //    remove(sessionId, key);
-                          processPaymentReport(ft);
-                         if(sessionId.contains(FUTUREMAP_INTERNALID)){
-                             remove(sessionId, key);
+                        //    remove(sessionId, key);
+                        processPaymentReport(ft);
+                        if (sessionId.contains(FUTUREMAP_INTERNALID)) {
+                            remove(sessionId, key);
                         }
                     }
                 }
@@ -376,8 +387,8 @@ public class FutureMapEJB {
                     if (ft.isDone()) {
                         //    remove(sessionId, key);
                         processSettlementReport(ft);
-                         if(sessionId.contains(FUTUREMAP_INTERNALID)){
-                             remove(sessionId, key);
+                        if (sessionId.contains(FUTUREMAP_INTERNALID)) {
+                            remove(sessionId, key);
                         }
                     }
                 }
@@ -671,7 +682,7 @@ public class FutureMapEJB {
                     pp.setPaymentPeriod(custDetails.getPaymentPeriod().getValue());
                     pp.setPaymentPeriodDayOfMonth(custDetails.getPaymentPeriodDayOfMonth().getValue());
                     pp.setPaymentPeriodDayOfWeek(custDetails.getPaymentPeriodDayOfWeek().getValue());
-                  
+
                     pp.setSmsExpiredCard(custDetails.getSmsExpiredCard().getValue());
                     pp.setSmsFailedNotification(custDetails.getSmsFailedNotification().getValue());
                     pp.setSmsPaymentReminder(custDetails.getSmsPaymentReminder().getValue());
@@ -701,7 +712,7 @@ public class FutureMapEJB {
             if (payment == null) {
                 payment = new Payments();
                 payment.setCreateDatetime(new Date());
-payment.setManuallyAddedPayment(false);
+                payment.setManuallyAddedPayment(false);
                 payment.setId(0);
                 payment.setCustomerName(cust);
             }
@@ -718,11 +729,11 @@ payment.setManuallyAddedPayment(false);
                 payment.setPaymentID(pay.getPaymentID().getValue());
                 payment.setPaymentMethod(pay.getPaymentMethod().getValue());
                 payment.setPaymentReference(pay.getPaymentReference().getValue());
-                if(pay.getPaymentReference() != null){
-                    if(pay.getPaymentReference().getValue().trim().isEmpty() == false){
-                       payment.setManuallyAddedPayment(true);
-                    }else{
-                       payment.setManuallyAddedPayment(false); 
+                if (pay.getPaymentReference() != null) {
+                    if (pay.getPaymentReference().getValue().trim().isEmpty() == false) {
+                        payment.setManuallyAddedPayment(true);
+                    } else {
+                        payment.setManuallyAddedPayment(false);
                     }
                 }
                 payment.setPaymentSource(pay.getPaymentSource().getValue());
@@ -752,11 +763,11 @@ payment.setManuallyAddedPayment(false);
             if (payment == null) {
                 payment = new Payments();
                 payment.setCreateDatetime(new Date());
-                 payment.setId(0);
+                payment.setId(0);
                 payment.setCustomerName(cust);
             }
             try {
-                
+
                 payment.setLastUpdatedDatetime(new Date());
                 payment.setBankFailedReason("");
                 payment.setBankReceiptID("");
@@ -768,10 +779,10 @@ payment.setManuallyAddedPayment(false);
                 payment.setPaymentID(null);
                 payment.setPaymentMethod("DR");
                 payment.setPaymentReference(pay.getPaymentReference().getValue());
-                if(pay.isManuallyAddedPayment() != null){
-                    
-                       payment.setManuallyAddedPayment(pay.isManuallyAddedPayment());
-                    
+                if (pay.isManuallyAddedPayment() != null) {
+
+                    payment.setManuallyAddedPayment(pay.isManuallyAddedPayment());
+
                 }
                 payment.setPaymentSource("SCHEDULED");
                 payment.setScheduledAmount(new BigDecimal(pay.getPaymentAmount().floatValue()));

@@ -11,7 +11,7 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.faces.context.FacesContext;
-import  org.primefaces.model.chart.LineChartSeries;
+import  org.primefaces.model.chart.ChartSeries;
 import org.primefaces.model.chart.CartesianChartModel;
 
 /**
@@ -47,9 +47,9 @@ public class FitnessTestsChart  implements Serializable {
         stypes.add(ejbStatTypesFacade.find(7)); //push up
         stypes.add(ejbStatTypesFacade.find(9)); //Situp
 
-        List<LineChartSeries> seriesList = chartController.getChartDataForModel(stypes);
+        List<ChartSeries> seriesList = chartController.getChartDataForModel(stypes);
         model = new CartesianChartModel();
-        for (LineChartSeries cs : seriesList) {
+        for (ChartSeries cs : seriesList) {
             model.addSeries(cs);
         }
     }

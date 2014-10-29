@@ -79,6 +79,7 @@ public class CustomerImagesController implements Serializable {
     private String effect = "fade";
     private boolean saveButtonDisabled = true;
     private UploadedFile uploadedFile;
+    private boolean profilePhoto = false;
 
     public CustomerImagesController() {
     }
@@ -92,6 +93,69 @@ public class CustomerImagesController implements Serializable {
 
     private int getUser() {
         return getSelectedCustomer().getId();
+    }
+
+    public void createDefaultProfilePic(Customers cust) {
+        String placeholderImage = configMapFacade.getConfig("system.default.profile.image");
+        String fileExtension = placeholderImage.substring(placeholderImage.lastIndexOf(".")).toLowerCase();
+        int imgType = -1;
+        if (fileExtension.contains("jpeg") || fileExtension.contains("jpg")) {
+            imgType = 2;
+            fileExtension = "jpeg";
+        }
+        if (fileExtension.contains("png")) {
+            imgType = 1;
+            fileExtension = "png";
+        }
+        if (fileExtension.contains("gif")) {
+            imgType = 0;
+            fileExtension = "gif";
+        }
+        if (imgType == -1) {
+            logger.log(Level.WARNING, "createDefaultProfilePic , Cannot add default profile pic for customer {1} due the picture not being in jpeg, gif or png. resource:{0}", new Object[]{placeholderImage, cust.getUsername()});
+            return;
+        }
+        if (cust != null) {
+            if (cust.getProfileImage() == null) {
+                try {
+                    CustomerImages ci = new CustomerImages(0);
+                    BufferedImage img = null;
+                    InputStream stream = FacesContext.getCurrentInstance().getExternalContext().getResourceAsStream(placeholderImage);
+                    try {
+                        img = ImageIO.read(stream);
+                    } catch (IOException e) {
+                        Logger.getLogger(CustomerImagesController.class.getName()).log(Level.SEVERE, "createDefaultProfilePic, Loading image into buffer error!!", e);
+
+                        JsfUtil.addErrorMessage(e, "Loading image into buffer error!!");
+                    }
+
+                    ByteArrayOutputStream os = new ByteArrayOutputStream();
+                    try {
+
+                        ImageIO.write(img, fileExtension, os);
+
+                    } catch (IOException ex) {
+                        Logger.getLogger(CustomerImagesController.class.getName()).log(Level.SEVERE, "createDefaultProfilePic, write image  error!!", ex);
+                        JsfUtil.addErrorMessage(ex, "createDefaultProfilePic, write image  error!!");
+                    }
+
+                    ci.setImage(os.toByteArray());
+                    ci.setImageType(imgType);
+                    ci.setCustomers(cust);
+                    ci.setCustomerId(cust);
+                    ci.setDatetaken(new Date());
+
+                    ejbFacade.edit(ci);
+                    cust.setProfileImage(ci);
+                    ejbCustomersFacade.edit(cust);
+                } catch (Exception e) {
+                    logger.log(Level.WARNING, "createDefaultProfilePic , Cannot add default profile pic for customer {1} due to an exception:{0}", new Object[]{e, cust.getUsername()});
+
+                }
+            }
+        } else {
+            logger.log(Level.WARNING, "createDefaultProfilePic ERROR, Cannot add default profile pic to a null customer object");
+        }
     }
 
     private Customers getSelectedCustomer() {
@@ -201,14 +265,36 @@ public class CustomerImagesController implements Serializable {
 
     private void processUploadedFile(UploadedFile file) {
         BufferedImage img = null;
+        String fileName = file.getFileName();
+        String fileExtension = fileName.substring(fileName.lastIndexOf(".")).toLowerCase();
+        int imgType = -1;
+        if (fileExtension.contains("jpeg") || fileExtension.contains("jpg")) {
+            imgType = 2;
+            fileExtension = "jpeg";
+        }
+        if (fileExtension.contains("png")) {
+            imgType = 1;
+            fileExtension = "png";
+        }
+        if (fileExtension.contains("gif")) {
+            imgType = 0;
+            fileExtension = "gif";
+        }
+        if (imgType == -1) {
+            logger.log(Level.WARNING, "processUploadedFile , Cannot add default profile pic  due the picture not being in jpeg, gif or png. resource:{0}", new Object[]{fileName});
+            return;
+        }
+
         try {
             img = ImageIO.read(file.getInputstream());
         } catch (IOException e) {
             JsfUtil.addErrorMessage(e, "Loading image into buffer error!!");
         }
+
         //BufferedImage scaledImg = resizeImageKeepAspect(img, new_width);
         BufferedImage scaledImg = resizeImageWithHintKeepAspect(img, 0, new_height);// use a 0 for heigh or width to keep aspect
-        updateImages(scaledImg);
+        updateImages(scaledImg, fileExtension);
+        current.setImageType(imgType);//jpeg
         //BufferedImage data = null;
         //Iterator readers = ImageIO.getImageReadersByFormatName("jpeg");
         // ImageReader reader = (ImageReader) readers.next();
@@ -283,12 +369,12 @@ public class CustomerImagesController implements Serializable {
 
     }
 
-    private void updateImages(BufferedImage img) {
+    private void updateImages(BufferedImage img, String fileType) {
 
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         try {
 
-            ImageIO.write(img, "jpeg", os);
+            ImageIO.write(img, fileType, os);
 
         } catch (IOException ex) {
             Logger.getLogger(CustomerImagesController.class.getName()).log(Level.SEVERE, null, ex);
@@ -296,7 +382,7 @@ public class CustomerImagesController implements Serializable {
         }
 
         current.setImage(os.toByteArray());
-        current.setImageType(2);//jpeg
+
         InputStream stream = new ByteArrayInputStream(os.toByteArray());
 
         try {
@@ -380,7 +466,22 @@ public class CustomerImagesController implements Serializable {
         int newHeight = new_height;
 
         BufferedImage scaledImg = resizeImageWithHintKeepAspect(img, newWidth, newHeight);
-        updateImages(scaledImg);
+        String type;
+        switch (current.getImageType()) {
+            case 0:
+                type = "gif";
+                break;
+            case 1:
+                type = "png";
+                break;
+            case 2:
+                type = "jpeg";
+                break;
+            default:
+                type = "jpeg";
+
+        }
+        updateImages(scaledImg, type);
         JsfUtil.addSuccessMessage(configMapFacade.getConfig("IMageRotateSuccessful"));
     }
 
@@ -443,6 +544,7 @@ public class CustomerImagesController implements Serializable {
         loadImage(current);
         selectedItemIndex = -1;
         setSaveButtonDisabled(true);
+        setProfilePhoto(false);
     }
 
     public String prepareEdit() {
@@ -492,10 +594,16 @@ public class CustomerImagesController implements Serializable {
     public String create() {
         try {
             current.setId(0);// auto generated by DB , but cannot be null 
-            if(current.getCustomerId() == null){
-                current.setCustomerId(getSelectedCustomer());
+            Customers cust = getSelectedCustomer();
+            if (current.getCustomerId() == null) {
+                current.setCustomerId(cust);
             }
+
             getFacade().create(current);
+            if (isProfilePhoto()) {
+                cust.setProfileImage(current);
+                ejbCustomersFacade.edit(cust);
+            }
             JsfUtil.addSuccessMessage(configMapFacade.getConfig("CustomerImagesCreated"));
             return prepareCreate();
         } catch (Exception e) {
@@ -533,19 +641,29 @@ public class CustomerImagesController implements Serializable {
     }
 
     private void loadImage(CustomerImages ci) {
+        String placeholderImage = "/resources/images/Barefoot-image_100_by_100.jpg";
+        uploadedImage = loadDefaultImageIfNull(ci, placeholderImage);
+
+    }
+
+    private StreamedContent loadDefaultImageIfNull(CustomerImages ci, String defaultImagePath) {
+        StreamedContent sc = null;
         if (ci.getImage() == null) {
             try {
                 // get default image
-                InputStream stream = FacesContext.getCurrentInstance().getExternalContext().getResourceAsStream("/resources/images/Barefoot-image_100_by_100.jpg");
-                uploadedImage = new DefaultStreamedContent(stream, "image/jpeg");
+                InputStream stream = FacesContext.getCurrentInstance().getExternalContext().getResourceAsStream(defaultImagePath);
+                sc = new DefaultStreamedContent(stream, "image/jpeg");
             } catch (Exception e) {
-                JsfUtil.addErrorMessage(e, "Trying to set Barefoot-image_100_by_100.jpg as the defailt image failed!");
+                String message = "Could not load default image:" + defaultImagePath;
+                JsfUtil.addErrorMessage(message);
+                logger.log(Level.WARNING, message, e);
             }
         } else {
             ByteArrayInputStream is = new ByteArrayInputStream(ci.getImage());
             String imgtyp = getImageTypeString(ci.getImageType());
-            uploadedImage = new DefaultStreamedContent(is, imgtyp);
+            sc = new DefaultStreamedContent(is, imgtyp);
         }
+        return sc;
     }
 
     public String update() {
@@ -836,6 +954,20 @@ public class CustomerImagesController implements Serializable {
      */
     public void setCropperImage(CroppedImage cropperImage) {
         this.cropperImage = cropperImage;
+    }
+
+    /**
+     * @return the profilePhoto
+     */
+    public boolean isProfilePhoto() {
+        return profilePhoto;
+    }
+
+    /**
+     * @param profilePhoto the profilePhoto to set
+     */
+    public void setProfilePhoto(boolean profilePhoto) {
+        this.profilePhoto = profilePhoto;
     }
 
     @FacesConverter(forClass = CustomerImages.class)

@@ -6,13 +6,13 @@
 
 package au.com.manlyit.fitnesscrm.stats.chartbeans;
 
-import org.primefaces.model.chart.CartesianChartModel;
+import org.primefaces.model.chart.LineChartModel;
 
 /**
  *
  * @author david
  */
-public class FitnessCartesianChartModel extends CartesianChartModel{
+public class FitnessCartesianChartModel extends LineChartModel{
     
 
     private String chartName;

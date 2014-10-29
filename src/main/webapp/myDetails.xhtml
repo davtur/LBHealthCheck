@@ -56,6 +56,10 @@
                             </h:panelGrid>
                         </p:panel>
                         <p:panel id="panel2">
+                            <p:panel >
+                                <p:graphicImage id="photo1" value="#{customersController.selected.profileImage.imageStream}" width="300px" cache="false" />
+
+                            </p:panel>
                             <h:panelGrid columns="2">
                                 <h:outputLabel value="#{configMapController.getKey('EditCustomersLabel_streetAddress')}" for="streetAddress" />
                                 <p:inputText id="streetAddress" value="#{customersController.selected.streetAddress}" title="#{configMapController.getKey('EditCustomersTitle_streetAddress')}" required="false" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_streetAddress')}"/>
@@ -93,7 +97,7 @@
                     </p:panel>
                 </h:panelGrid>
             </h:form>
-              <ui:include src="myDetailsPaymentMethod.xhtml"/>
+            <ui:include src="myDetailsPaymentMethod.xhtml"/>
         </ui:define>
     </ui:composition>
 

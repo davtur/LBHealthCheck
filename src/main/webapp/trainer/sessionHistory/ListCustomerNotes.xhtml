@@ -9,7 +9,7 @@
 
 
     <h:head>
-     </h:head>
+    </h:head>
 
     <h:body>
         <!-- Main View  -->
@@ -25,26 +25,30 @@
 
             </pm:header>
             <pm:content >                
-                
-                    <h:form id="notesForm">  
-                   
-                        <p:dataList    value="#{sessionHistoryController.activeCustomers}" var="cust">
-                            <f:attribute name="filter" value="true" />
-                            <p:column>
-                                <p:commandLink action="/trainer/sessionHistory/CreateCustomerNotes?faces-redirect=true" ajax="false" >
-                                    <h:outputText value="#{notes.createTimestamp}">
-                                        <f:convertDateTime pattern="dd MMM yyyy  HH:mm" />
-                                    </h:outputText> 
-                                    <h:outputText value="#{cust.firstname} #{cust.lastname}"/>
-                                    <h:outputText styleClass="ui-li-count" value="Edit"/>           
 
-                                    <f:setPropertyActionListener value="#{cust}" target="#{notesController.selectedUser}"  />
+                <h:form id="notesForm">  
 
-                                </p:commandLink> 
-                            </p:column>
-                        </p:dataList>
-                    </h:form>
-               
+                    <p:dataList    value="#{sessionHistoryController.activeCustomers}" var="cust">
+                        <f:attribute name="filter" value="true" />
+                        <p:column>
+                            <p:commandLink action="/trainer/sessionHistory/CreateCustomerNotes?faces-redirect=true" ajax="false" >
+                                <h:outputText value="#{notes.createTimestamp}">
+                                    <f:convertDateTime pattern="dd MMM yyyy  HH:mm" />
+                                </h:outputText> 
+                                <p:graphicImage value="#{customerImagesController.dynamicImage}" width="50px">
+                                    <f:param name="imageid" value="#{cust.profileImage.id}"/>
+                                </p:graphicImage>
+
+                                <h:outputText value="#{cust.firstname} #{cust.lastname}"/>
+                                <h:outputText styleClass="ui-li-count" value="Edit"/>           
+
+                                <f:setPropertyActionListener value="#{cust}" target="#{notesController.selectedUser}"  />
+
+                            </p:commandLink> 
+                        </p:column>
+                    </p:dataList>
+                </h:form>
+
             </pm:content>
 
 

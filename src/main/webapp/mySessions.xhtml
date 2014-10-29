@@ -34,8 +34,8 @@
 
 
 
-                    <p:barChart id="sessionChart" legendPosition="ne" title="#{customersController.selected.firstname} #{customersController.selected.lastname}" 
-                                extender="chartExtender" styleClass="chartClass" value="#{mySessionsChart1.model}" xaxisLabel="#{mySessionsChart1.xaxisLabel}" xaxisAngle="65"  stacked="true"/>
+                    <p:chart id="sessionChart" type="bar"
+                                styleClass="chartClass" model="#{mySessionsChart1.model}"    />
                 </p:panel>
 
                 <script >

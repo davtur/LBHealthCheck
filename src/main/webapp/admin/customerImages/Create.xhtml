@@ -18,29 +18,29 @@
             <!--<p:log/>-->
             <p:panel>
                 <h:form id="photoCreate"  enctype="multipart/form-data">
-                    <h:panelGrid columns="2">
-                        <h:outputLabel value="#{configMapController.getKey('CreateCustomerImagesLabel_customerId')}" for="customerId" />
-                        <h:outputLabel value="#{configMapController.getKey('CreateCustomerImagesLabel_imageType')}" for="imageType" />
-                        <h:selectOneMenu  valueChangeListener="#{customerImagesController.handleCustomerChange}"  id="customerId" converter="customerConverter" value="#{customerImagesController.selected.customerId}" title="#{configMapController.getKey('CreateCustomerImagesTitle_customerId')}" required="true" requiredMessage="#{configMapController.getKey('CreateCustomerImagesRequiredMessage_customerId')}">
+                    <p:panelGrid columns="2">
+                        <p:outputLabel value="#{configMapController.getKey('CreateCustomerImagesLabel_customerId')}" for="customerId" />
+                        <p:outputLabel value="#{configMapController.getKey('CreateCustomerImagesLabel_imageType')}" for="imageType" />
+                        <p:selectOneMenu  valueChangeListener="#{customerImagesController.handleCustomerChange}" filter="true" id="customerId" converter="customerConverter" value="#{customerImagesController.selected.customerId}" label="#{configMapController.getKey('CreateCustomerImagesTitle_customerId')}" required="true" requiredMessage="#{configMapController.getKey('CreateCustomerImagesRequiredMessage_customerId')}">
                             <f:selectItems  value="#{customersController.customersAvailableSelectOneObject}"/>
                             <p:ajax update=":growl" />
 
-                        </h:selectOneMenu>
+                        </p:selectOneMenu>
 
 
-                        <h:selectOneMenu id="imageType" value="#{customerImagesController.selected.imageType}" title="#{configMapController.getKey('CreateCustomerImagesTitle_imageType')}" required="true" requiredMessage="#{configMapController.getKey('CreateCustomerImagesRequiredMessage_imageType')}">
+                        <p:selectOneMenu id="imageType" value="#{customerImagesController.selected.imageType}"  label="#{configMapController.getKey('CreateCustomerImagesTitle_imageType')}" required="true" requiredMessage="#{configMapController.getKey('CreateCustomerImagesRequiredMessage_imageType')}">
                             <f:selectItem   itemValue="0" itemLabel="JPEG"/>
-                        </h:selectOneMenu>
+                        </p:selectOneMenu>
 
 
 
-                        <h:outputLabel value="#{configMapController.getKey('CreateCustomerImagesLabel_image')}" for="photo1" />
-                        <h:outputLabel value="#{configMapController.getKey('CreateCustomerImagesLabel_datetaken')}" for="datetaken" />
+                        <p:outputLabel value="#{configMapController.getKey('CreateCustomerImagesLabel_image')}" for="photo1" />
+                        <p:outputLabel value="#{configMapController.getKey('CreateCustomerImagesLabel_datetaken')}" for="datetaken" />
                         <p:panel id="photoPanel3" header="Select a photo to upload (jpeg)">
-                            <h:panelGrid columns="2" width="400px">
+                            <p:panelGrid columns="2" style="width:400px">
                                 <p:fileUpload fileLimitMessage="The size of the picture is too big! ( > 10MB )" mode="advanced" fileUploadListener="#{customerImagesController.handleFileUpload}" auto="true" update=":photoCreate:photoPanel3  :photoCreate:datetaken :growl :photoCreate2:saveButton" allowTypes="/(\.|\/)(gif|jpe?g|png)$/" sizeLimit="10000000" />
                                 <p:graphicImage id="photo1" value="#{customerImagesController.uploadedImage}" width="300px" cache="false" />
-                            </h:panelGrid>
+                            </p:panelGrid>
                             <!-- <p:panel id="imageCropperPanel" header="Uploaded Image">
                                  <h:panelGrid columns="2">  
                                      <p:imageCropper value="#{customerImagesController.cropperImage}"  
@@ -65,20 +65,24 @@
                             <p:ajax event="dateSelect" listener="#{customerImagesController.handleDateSelect}" update=":growl"  />
 
                         </p:calendar>
+                 <p:outputLabel  value="#{configMapController.getKey('CreateCustomerImagesLabel_profilephoto')}" for="profilephoto" />
+                 <p:selectBooleanCheckbox id="profilephoto"   value="#{customerImagesController.profilePhoto}" >
+                 <p:ajax />
+                 </p:selectBooleanCheckbox>  
 
-                    </h:panelGrid>
+                    </p:panelGrid>
                 </h:form>
                 <h:form id="photoCreate2">
                     <p:panel id="saveButton">
 
-                        <h:panelGrid  columns="2">
+                        <p:panelGrid  columns="2">
                             <p:commandButton  disabled="#{customerImagesController.saveButtonDisabled}" update=":photoCreate:photoPanel3 :photoCreate:datetaken :growl :photoCreate2:saveButton"   actionListener="#{customerImagesController.createFromDialogue}" value="#{configMapController.getKey('CreateCustomerImagesSaveLink')}" />
 
 
                             <p:commandButton   ajax="false"   action="#{customerImagesController.prepareList}" value="#{configMapController.getKey('CreateCustomerImagesShowAllLink')}" immediate="true"/>
                             <p:commandButton      actionListener="#{customerImagesController.rotate90degrees}" update=":photoCreate:photoPanel3 :photoCreate:datetaken :growl :photoCreate2:saveButton"  value="#{configMapController.getKey('CreateCustomerImagesRotateImage90Link')}" />
 
-                        </h:panelGrid>
+                        </p:panelGrid>
                     </p:panel>
                 </h:form>
             </p:panel>

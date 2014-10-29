@@ -32,14 +32,12 @@
                             <f:selectItem itemValue="#{0}" itemLabel="Payment Report"/>  
                             <f:selectItem itemValue="#{1}" itemLabel="Settlement Report"/> 
 
-                            <p:ajax   update="@form"  />
+                            <p:ajax   update="@form totalSuccessful totalDishonoured"  />
                         </p:selectOneMenu>
 
                         <p:commandButton id="runReport" ajax="false" action="#{ezidebit.runReport}" value="#{configMapController.getKey('ListReportRunReportLink')}"/>
                     </p:panelGrid>
                     <p:panelGrid columns="4" >
-
-                        <h:outputText escape="false" value="#{configMapController.getKey('ListReportEmpty')}" rendered="#{ezidebit.reportPaymentsList.rowCount == 0}"/>
                         <p:outputLabel  value="#{configMapController.getKey('ListReportShowSuccessful')}" for="showSuccessful" />
                         <p:selectBooleanCheckbox id="showSuccessful"   value="#{ezidebit.reportShowSuccessful}" >  
                             <p:ajax update="@form" listener="#{ezidebit.reportDateChange}" />  
@@ -54,9 +52,8 @@
                         </p:selectBooleanCheckbox> 
 
                         <p:outputLabel  value="#{configMapController.getKey('ListReportManualRefresh')}" for="manualRefresh" />
-                        <p:selectBooleanCheckbox id="manualRefresh"   value="#{ezidebit.manualRefreshFromPaymentGateway}" >  
-                            <p:ajax update="@form"  listener="#{ezidebit.reportDateChange}" />  
-                        </p:selectBooleanCheckbox> 
+                        <p:selectBooleanCheckbox id="manualRefresh"   value="#{ezidebit.manualRefreshFromPaymentGateway}" />  
+                            
                     </p:panelGrid>
 
                     <p:panelGrid columns="2" >
@@ -69,6 +66,8 @@
                             <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
                         </h:outputText>
                     </p:panelGrid>
+
+                    <h:outputText escape="false" value="#{configMapController.getKey('ListReportEmpty')}" rendered="#{ezidebit.reportPaymentsList.rowCount == 0}"/>
 
                 </p:panelGrid>
                 <h:outputText escape="false" value="#{configMapController.getKey('ListPaymentsEmpty')}" rendered="#{ezidebit.reportPaymentsList.rowCount == 0}"/>

@@ -11,7 +11,7 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.faces.context.FacesContext;
-import  org.primefaces.model.chart.LineChartSeries;
+import  org.primefaces.model.chart.ChartSeries;
 import org.primefaces.model.chart.CartesianChartModel;
 
 import javax.enterprise.context.RequestScoped;
@@ -40,9 +40,9 @@ public class BeepTestAndVO2MaxChart  implements Serializable {
         stypes.add(ejbStatTypesFacade.find(6));
         stypes.add(ejbStatTypesFacade.find(11));
 
-        List<LineChartSeries> seriesList = chartController.getChartDataForModel(stypes);
+        List<ChartSeries> seriesList = chartController.getChartDataForModel(stypes);
         model = new CartesianChartModel();
-        for (LineChartSeries cs : seriesList) {
+        for (ChartSeries cs : seriesList) {
             model.addSeries(cs);
         }
     }

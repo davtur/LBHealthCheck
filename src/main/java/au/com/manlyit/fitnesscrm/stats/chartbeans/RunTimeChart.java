@@ -11,7 +11,7 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.faces.context.FacesContext;
-import  org.primefaces.model.chart.LineChartSeries;
+import  org.primefaces.model.chart.ChartSeries;
 import org.primefaces.model.chart.CartesianChartModel;
 
 /**
@@ -22,7 +22,7 @@ import org.primefaces.model.chart.CartesianChartModel;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Named;
 import java.io.Serializable;
-import org.primefaces.model.chart.LineChartSeries;
+import org.primefaces.model.chart.ChartSeries;
 
 @Named("runTimeChart")
 @RequestScoped
@@ -46,9 +46,9 @@ public class RunTimeChart  implements Serializable {
         ArrayList<StatTypes> stypes = new ArrayList<StatTypes>();
         stypes.add(ejbStatTypesFacade.find(14));// 2.4km run
       
-        List<LineChartSeries> seriesList = chartController.getChartDataForModel(stypes);
+        List<ChartSeries> seriesList = chartController.getChartDataForModel(stypes);
         model = new CartesianChartModel();
-        for (LineChartSeries cs : seriesList) {
+        for (ChartSeries cs : seriesList) {
             model.addSeries(cs);
         }
 

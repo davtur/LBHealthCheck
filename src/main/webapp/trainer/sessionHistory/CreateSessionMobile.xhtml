@@ -33,7 +33,7 @@
                     <pm:field>
                         <p:outputLabel for="sessiondate" value="#{configMapController.getKey('CreateSessionHistoryLabel_sessiondate')}" />
                         <p:calendar id="sessiondate" value="#{sessionHistoryController.selected.sessiondate}"  pattern="dd/MM/yyyy" >
-                           
+
                         </p:calendar>
                     </pm:field>  
                     <pm:field>
@@ -44,7 +44,7 @@
                     <pm:field>   
                         <h:outputLabel for="ajaxSpinner2" value="Minute: " />
                         <pm:inputSlider id="ajaxSpinner2" minValue="0" maxValue="59"  valueChangeListener="#{sessionHistoryController.minuteSpinnerChange}"  step="15" value="#{sessionHistoryController.minuteSpinner}"/>
-                  </pm:field>  
+                    </pm:field>  
 
 
                     <p:spacer height="10em" />
@@ -77,9 +77,19 @@
                     <p:spacer height="10em" />
                     <pm:field>
                         <p:outputLabel for="scroll" value="#{configMapController.getKey('CreateSessionHistoryLabel_picker')}" />
-                        <p:selectCheckboxMenu  id="scroll" filter="true" filterMatchMode="startsWith" value="#{sessionHistoryController.attendingCustomers}"  converter="#{custConverter}" label="#{configMapController.getKey('CreateSessionHistoryLabel_picker')}">  
-                            <f:selectItems value="#{sessionHistoryController.activeCustomers}" var="cust"  itemLabel="#{cust.firstname} #{cust.lastname}" itemValue="#{cust}" />  
+                        <p:selectCheckboxMenu  id="scroll" filter="true" filterMatchMode="startsWith" 
+                                               value="#{sessionHistoryController.attendingCustomers}"  
+                                               converter="#{custConverter}" 
+                                               label="#{configMapController.getKey('CreateSessionHistoryLabel_picker')}"
+                                               > 
+
+                            <f:selectItems value="#{sessionHistoryController.activeCustomers}" 
+                                           var="cust"  
+                                           itemLabel="#{cust.firstname} #{cust.lastname}" 
+                                           itemValue="#{cust}" />  
+
                         </p:selectCheckboxMenu>
+                      
                     </pm:field>
                     <p:spacer height="10em" />
                     <p:spacer height="10em" />
@@ -106,7 +116,7 @@
                      </h:form>
                  </p:dialog> -->
 
- 
+
 
             </pm:content>
 

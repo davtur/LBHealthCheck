@@ -132,7 +132,7 @@ public class EziDebitPaymentGateway implements Serializable {
     private List<ScheduledPaymentPojo> scheduledPaymentsList;
     private Payments selectedReportItem;
     private String reportName = "defaultreport";
-    private ScheduledPaymentPojo selectedScheduledPayment;
+    private Payments selectedScheduledPayment;
     private List<ScheduledPaymentPojo> scheduledPaymentsListFilteredItems;
     private CustomerDetails currentCustomerDetails;
     private Payment payment;
@@ -267,6 +267,7 @@ public class EziDebitPaymentGateway implements Serializable {
     public void reportDateChange() {
         reportPaymentsList = null;
         reportPaymentsListFilteredItems = null;
+        generatePaymentsReport();
     }
 
     /**
@@ -543,14 +544,14 @@ public class EziDebitPaymentGateway implements Serializable {
     /**
      * @return the selectedScheduledPayment
      */
-    public ScheduledPaymentPojo getSelectedScheduledPayment() {
+    public Payments getSelectedScheduledPayment() {
         return selectedScheduledPayment;
     }
 
     /**
      * @param selectedScheduledPayment the selectedScheduledPayment to set
      */
-    public void setSelectedScheduledPayment(ScheduledPaymentPojo selectedScheduledPayment) {
+    public void setSelectedScheduledPayment(Payments selectedScheduledPayment) {
         this.selectedScheduledPayment = selectedScheduledPayment;
     }
 
@@ -889,12 +890,9 @@ public class EziDebitPaymentGateway implements Serializable {
         this.paymentsListFilteredItems2 = paymentsListFilteredItems2;
     }
 
-    /**
-     * @return the reportPaymentsList
-     */
-    public PfSelectableDataModel<Payments> getReportPaymentsList() {
-        if (reportPaymentsList == null) {
-            Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.INFO, "Running Report");
+    
+    private void generatePaymentsReport(){
+        Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.INFO, "Running Report");
             List<Payments> pl = paymentsFacade.findPaymentsByDateRange(reportUseSettlementDate, reportShowSuccessful, reportShowFailed, reportShowPending, reportStartDate, reportEndDate, false);
             reportTotalSuccessful = 0;
             reportTotalDishonoured = 0;
@@ -908,6 +906,13 @@ public class EziDebitPaymentGateway implements Serializable {
             
             reportPaymentsList = new PfSelectableDataModel<>(pl);
             Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.INFO, "Report Completed");
+    }
+    /**
+     * @return the reportPaymentsList
+     */
+    public PfSelectableDataModel<Payments> getReportPaymentsList() {
+        if (reportPaymentsList == null) {
+            generatePaymentsReport();
             
         }
         return reportPaymentsList;
@@ -2243,6 +2248,7 @@ public class EziDebitPaymentGateway implements Serializable {
         char spt = paymentSchedulePeriodType.charAt(0);
         if (loggedInUser != null) {
             startAsynchJob("CreateSchedule", paymentBean.createSchedule(selectedCustomer, paymentDebitDate, spt, paymentDayOfWeek, paymentDayOfMonth, paymentFirstWeekOfMonth, paymentSecondWeekOfMonth, paymentThirdWeekOfMonth, paymentFourthWeekOfMonth, amount, paymentLimitToNumberOfPayments, amountLimit, paymentKeepManualPayments, loggedInUser, getDigitalKey()));
+        JsfUtil.addSuccessMessage("Sending Delete Request to Payment Gateway.");
         } else {
             logger.log(Level.WARNING, "Logged in user is null. Add Single Payment aborted.");
         }
@@ -2251,7 +2257,7 @@ public class EziDebitPaymentGateway implements Serializable {
     public void deleteScheduledPayment(ActionEvent actionEvent) {
 
         String loggedInUser = FacesContext.getCurrentInstance().getExternalContext().getRemoteUser();
-        Double amount = selectedScheduledPayment.getPaymentAmount() * (double) 100;
+        Double amount = selectedScheduledPayment.getPaymentAmount().floatValue() * (double) 100;
         if (loggedInUser != null) {
             startAsynchJob("DeletePayment", paymentBean.deletePayment(selectedCustomer, selectedScheduledPayment.getPaymentDate(), amount.longValue(), selectedScheduledPayment.getPaymentReference(), loggedInUser, getDigitalKey()));
         } else {

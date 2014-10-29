@@ -25,15 +25,20 @@
                         </p:galleria>
                     </p:panel>
                 </p:panel>
+            </h:form>
+            <h:form>
 
-
+                <!--  <p:panel >
+                      <p:chart type="line" model="#{bean.dateModel}" style="height:400px;"/>
+  <p:chart type="line" model="#{chartController.modelList.get(2)}"   style="height:400px;"/>
+                  </p:panel> -->
                 <p:dataList  value="#{chartController.modelList}"  var="chart" id="chartsList"  
-                             paginator="true" rows="5"  
+                             paginator="true" rows="10"  
                              paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink} {RowsPerPageDropdown}"  
                              rowsPerPageTemplate="5,10,15" type="none">
 
-                    <p:panel header="#{chart.chartName}">
-                        <p:lineChart  styleClass="chartClass" value="#{chart}" yaxisLabel="#{chart.getyAxisLabel()}" legendPosition="ne"  />
+                    <p:panel header="#{chart.title}">                    
+                        <p:chart type="line" styleClass="chartClass"  model="#{chart}"/>
                     </p:panel>
 
                 </p:dataList>

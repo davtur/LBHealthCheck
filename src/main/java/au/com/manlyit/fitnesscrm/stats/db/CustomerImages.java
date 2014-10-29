@@ -11,6 +11,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
+import java.util.Collection;
 import java.util.Date;
 import javax.faces.context.FacesContext;
 import javax.persistence.Basic;
@@ -24,11 +25,13 @@ import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 import org.primefaces.model.DefaultStreamedContent;
 import org.primefaces.model.StreamedContent;
 
@@ -45,6 +48,12 @@ import org.primefaces.model.StreamedContent;
     @NamedQuery(name = "CustomerImages.findByImageType", query = "SELECT c FROM CustomerImages c WHERE c.imageType = :imageType"),
     @NamedQuery(name = "CustomerImages.findByDatetaken", query = "SELECT c FROM CustomerImages c WHERE c.datetaken = :datetaken")})
 public class CustomerImages implements Serializable {
+    @Lob
+    @Column(name = "image")
+    private byte[] image;
+    @OneToOne(mappedBy = "profileImage")
+    private Customers customers;
+    
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -61,9 +70,6 @@ public class CustomerImages implements Serializable {
     @Column(name = "datetaken")
     @Temporal(TemporalType.TIMESTAMP)
     private Date datetaken;
-    @Lob
-    @Column(name = "image")
-    private byte[] image;
     @JoinColumn(name = "customer_id", referencedColumnName = "id")
     @ManyToOne(optional = false)
     private Customers customerId;
@@ -112,9 +118,6 @@ public class CustomerImages implements Serializable {
         this.datetaken = datetaken;
     }
 
-    public byte[] getImage() {
-        return image;
-    }
 
     public StreamedContent getImageStream() {
         StreamedContent sc = null;
@@ -143,9 +146,6 @@ public class CustomerImages implements Serializable {
         return sc;
     }
 
-    public void setImage(byte[] image) {
-        this.image = image;
-    }
 
     public Customers getCustomerId() {
         return customerId;
@@ -178,5 +178,21 @@ public class CustomerImages implements Serializable {
     @Override
     public String toString() {
         return "au.com.manlyit.fitnesscrm.stats.db.CustomerImages[ id=" + id + " ]";
+    }
+
+    public byte[] getImage() {
+        return image;
+    }
+
+    public void setImage(byte[] image) {
+        this.image = image;
+    }
+
+    public Customers getCustomers() {
+        return customers;
+    }
+
+    public void setCustomers(Customers customers) {
+        this.customers = customers;
     }
 }

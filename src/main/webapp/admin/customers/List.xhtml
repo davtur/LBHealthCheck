@@ -83,16 +83,27 @@
                                 <p:column sortBy="#{item.lastname}" filterBy="#{item.lastname}" headerText="#{configMapController.getKey('ListCustomersTitle_lastname')}"   >
                                     <h:outputText value="#{item.lastname}"/>
                                 </p:column>
-                                <p:column sortBy="#{item.dob}" filterBy="#{item.dob}" headerText="#{configMapController.getKey('ListCustomersTitle_dob')}"   >
+                                <!--<p:column sortBy="#{item.dob}" filterBy="#{item.dob}" headerText="#{configMapController.getKey('ListCustomersTitle_dob')}"   >
                                     <h:outputText value="#{item.dob}">
                                         <f:convertDateTime pattern="dd MMM yyyy" />
                                     </h:outputText>
                                 </p:column>
                                 <p:column sortBy="#{item.emailAddress}" filterBy="#{item.emailAddress}" headerText="#{configMapController.getKey('ListCustomersTitle_emailAddress')}"   >
                                     <h:outputText value="#{item.emailAddress}"/>
-                                </p:column>
-                                <p:column sortBy="#{item.active.customerState}" filterBy="#{item.active.customerState}" headerText="#{configMapController.getKey('ListCustomersTitle_active')}"   >
+                                </p:column>-->
+                                <p:column sortBy="#{item.active.customerState}" filterBy="#{item.active.customerState}" headerText="#{configMapController.getKey('ListCustomersTitle_activeCRM')}"   >
                                     <h:outputText value="#{item.active.customerState}"/> <h:outputText value=" TRAINER" rendered="#{customersController.isCustomerInRole(item,'TRAINER')}" />
+                                </p:column>
+                                <p:column sortBy="#{item.paymentParameters.statusDescription}" filterBy="#{item.paymentParameters.statusDescription}" headerText="#{configMapController.getKey('ListCustomersTitle_activeEZI')}"   >
+                                    <h:outputText value="#{item.paymentParameters.statusDescription}"/> 
+                                </p:column>
+                                <p:column sortBy="#{item.paymentParameters.contractStartDate}" filterBy="#{item.paymentParameters.contractStartDate}" headerText="#{configMapController.getKey('ListCustomersTitle_contractStartDate')}"   >
+                                    <h:outputText value="#{item.paymentParameters.contractStartDate}"/> 
+                                </p:column>
+                                <p:column sortBy="#{item.paymentParameters.totalPaymentsSuccessfulAmount}" filterBy="#{item.paymentParameters.totalPaymentsSuccessfulAmount}" headerText="#{configMapController.getKey('ListCustomersTitle_totalPaymentsSuccessfulAmount')}"   >
+                                    <h:outputText value="#{item.paymentParameters.totalPaymentsSuccessfulAmount}">
+                                        <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
+                                    </h:outputText>
                                 </p:column>
 
                             </p:dataTable>
@@ -244,7 +255,87 @@
                             <h:outputText rendered="#{!ezidebit.asyncOperationRunning}" value=" Status: Idle"/>
                             <h:outputText rendered="#{ezidebit.asyncOperationRunning}" value="Status: Busy"/>
                         </p:outputPanel>
-                        <p:panel id="paymentsTablePanel"  rendered="#{ezidebit.paymentsList != null and ezidebit.customerExistsInPaymentGateway == true}"> 
+
+                        <p:panel  id="paymentsTablePanel2" rendered="#{ezidebit.paymentDBList != null}">
+                            <p:dataTable  id="paymentsTable2"
+                                          selectionMode="single"
+                                          selection="#{ezidebit.selectedScheduledPayment}" 
+                                          value="#{ezidebit.paymentDBList}" 
+                                          filteredValue="#{ezidebit.paymentsListFilteredItems2}"  
+                                          widgetVar="paymentsListControllerTable"
+                                          var="pay"  
+                                          rowKey="#{pay.id}"
+                                          paginator="true" rows="15"  
+                                          paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  
+                                          rowsPerPageTemplate="5,10,15,20,25,50,100" >
+                                <f:facet name="header">
+                                    <p:outputPanel>
+                                        <h:outputText value="Payments" />
+
+                                    </p:outputPanel>
+                                </f:facet>
+                                <p:column sortBy="#{pay.paymentID}" filterBy="#{pay.paymentID}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentID')}"   >
+                                    <h:outputText value="#{pay.paymentID}"/>
+                                </p:column>
+
+                                <p:column sortBy="#{pay.customerName.firstname} #{pay.customerName.lastname}" filterBy="#{pay.customerName.firstname} #{pay.customerName.lastname}" headerText="#{configMapController.getKey('ListPaymentsTitle_customerName')}"   >
+                                    <h:outputText value="#{pay.customerName.firstname} #{pay.customerName.lastname}"/>
+                                </p:column>
+                                <p:column sortBy="#{pay.paymentReference}" filterBy="#{pay.paymentReference}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentReference')}"   >
+                                    <h:outputText value="#{pay.paymentReference}"/>
+                                </p:column>
+                                <p:column sortBy="#{pay.paymentAmount}" filterBy="#{pay.paymentAmount}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentAmount')}"   >
+                                    <h:outputText value="#{pay.paymentAmount}">
+                                        <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
+                                    </h:outputText>
+                                </p:column>
+                                <p:column sortBy="#{pay.paymentStatus}" filterBy="#{pay.paymentStatus}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentStatus')}"   >
+                                    <h:outputText  rendered="#{pay.paymentStatus == 'W'}"  value="Waiting"/>
+                                    <h:outputText  rendered="#{pay.paymentStatus == 'P'}"  value="Pending"/>
+                                    <h:outputText  rendered="#{pay.paymentStatus == 'S'}"  value="Successful"/>
+                                    <h:outputText  rendered="#{pay.paymentStatus == 'D'}"  value="Dis.Insufficient Funds"/>
+                                    <h:outputText  rendered="#{pay.paymentStatus == 'F'}"  value="Dishonoured"/>
+                                </p:column>
+                                <p:column sortBy="#{pay.debitDate}" filterBy="#{pay.debitDate}" headerText="#{configMapController.getKey('ListPaymentsTitle_debitDate')}"   >
+                                    <h:outputText value="#{pay.debitDate}">
+                                        <f:convertDateTime pattern="dd MMM yyyy" />
+                                    </h:outputText>
+                                </p:column>
+                                <f:facet name="footer">
+                                    <p:commandButton  process="paymentsTable2" rendered="#{fitnessTestChartsController.isUserInRole('ADMIN')}" id="deleteButton" icon="ui-icon-trash"  value="#{configMapController.getKey('Delete')}" actionListener="#{ezidebit.deleteScheduledPayment}" update=":growl " disabled="#{empty fitnessTestChartsController.selected}"/>
+                                </f:facet>
+
+                            </p:dataTable>
+
+                        </p:panel>
+                        <p:panel id="customerDetailsPanel" rendered="#{customersController.selected.paymentParameters != null }" header="CRM Customer Record">
+                            <p:panelGrid columns="2" style="width:100%">
+                                <p:outputLabel value="Customer Name:" /> <h:outputText value="#{customersController.selected.paymentParameters.customerName} #{ezidebit.currentCustomerDetails.customerName.value}"/>
+                                <p:outputLabel value="Customer Address:" /> <h:outputText value="#{customersController.selected.paymentParameters.addressLine1} #{ezidebit.currentCustomerDetails.addressLine1.value}, #{ezidebit.currentCustomerDetails.addressSuburb.value} #{ezidebit.currentCustomerDetails.addressState.value} #{ezidebit.currentCustomerDetails.addressPostCode.value}"/>
+                                <p:outputLabel value="Contract Start:" /> <h:outputText value="#{customersController.selected.paymentParameters.contractStartDate}"/>
+                                <p:outputLabel value="Email Address:" /> <h:outputText value="#{customersController.selected.paymentParameters.email}"/>
+                                <p:outputLabel value="Mobile Phone:" /> <h:outputText value="#{customersController.selected.paymentParameters.mobilePhoneNumber}"/>
+                                <p:outputLabel value="Ezidebit ID:" /> <h:outputText value="#{customersController.selected.paymentParameters.ezidebitCustomerID}"/>
+                                <p:outputLabel value="General  ID:" /> <h:outputText value="#{customersController.selected.paymentParameters.yourGeneralReference}"/>
+                                <p:outputLabel value="System   ID:" /> <h:outputText value="#{customersController.selected.paymentParameters.yourSystemReference}"/>
+                                <p:outputLabel value="Status:" /> <h:outputText value="#{customersController.selected.paymentParameters.statusDescription}"/>
+                                <p:outputLabel value="Payment Method:" /> <h:outputText value="#{customersController.selected.paymentParameters.paymentMethod}"/>
+                                <p:outputLabel value="Payment Period" /> <h:outputText value="#{customersController.selected.paymentParameters.paymentPeriod}"/>
+                                <p:outputLabel value="Payment Day Of Month" /> <h:outputText value="#{customersController.selected.paymentParameters.paymentPeriodDayOfMonth}"/>
+                                <p:outputLabel value="Payment Day of Week" /> <h:outputText value="#{customersController.selected.paymentParameters.paymentPeriodDayOfWeek}"/>
+                                <p:outputLabel value="Successful Payments" /> <h:outputText value="#{customersController.selected.paymentParameters.totalPaymentsSuccessful}"/>
+                                <p:outputLabel value="Amount Paid" /> <h:outputText value="#{customersController.selected.paymentParameters.totalPaymentsSuccessfulAmount}"><f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
+                                </h:outputText>
+                                <p:outputLabel value="Failed Payments" /> <h:outputText value="#{customersController.selected.paymentParameters.totalPaymentsFailed}"/>
+                                <p:outputLabel value="Failed Amount" /> <h:outputText value="#{customersController.selected.paymentParameters.totalPaymentsFailedAmount}"><f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
+                                </h:outputText>
+                                <p:outputLabel value="Send Expired Card SMS" /> <h:outputText value="#{customersController.selected.paymentParameters.smsExpiredCard}"/>
+                                <p:outputLabel value="Send Failed Payment SMS" /> <h:outputText value="#{customersController.selected.paymentParameters.smsFailedNotification}"/>
+                                <p:outputLabel value="Send Payment Reminder SMS" /> <h:outputText value="#{customersController.selected.paymentParameters.smsPaymentReminder}"/>
+
+                            </p:panelGrid>
+                        </p:panel>
+                        <p:panel id="paymentsTablePanel" collapsed="true" header="Completed Payments in Ezidebit" rendered="#{ezidebit.paymentsList != null and ezidebit.customerExistsInPaymentGateway == true}"> 
                             <p:dataTable  id="paymentsTable"
                                           value="#{ezidebit.paymentsList}" 
                                           filteredValue="#{ezidebit.paymentsListFilteredItems}"  
@@ -290,53 +381,7 @@
 
                         </p:panel>
 
-                        <p:panel  id="paymentsTablePanel2" rendered="#{ezidebit.paymentsList != null and ezidebit.customerExistsInPaymentGateway == true}">
-                            <p:dataTable  id="paymentsTable2"
-                                          value="#{ezidebit.paymentDBList}" 
-                                          filteredValue="#{ezidebit.paymentsListFilteredItems2}"  
-                                          widgetVar="paymentsListControllerTable"
-                                          var="pay"  
-                                          paginator="true" rows="15"  
-                                          paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  
-                                          rowsPerPageTemplate="5,10,15,20,25,50,100" >
-                                <f:facet name="header">
-                                    <p:outputPanel>
-                                        <h:outputText value="Payments" />
-
-                                    </p:outputPanel>
-                                </f:facet>
-                                <p:column sortBy="#{pay.paymentID}" filterBy="#{pay.paymentID}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentID')}"   >
-                                    <h:outputText value="#{pay.paymentID}"/>
-                                </p:column>
-
-                                <p:column sortBy="#{pay.customerName.firstname} #{pay.customerName.lastname}" filterBy="#{pay.customerName.firstname} #{pay.customerName.lastname}" headerText="#{configMapController.getKey('ListPaymentsTitle_customerName')}"   >
-                                    <h:outputText value="#{pay.customerName.firstname} #{pay.customerName.lastname}"/>
-                                </p:column>
-                                <p:column sortBy="#{pay.paymentReference}" filterBy="#{pay.paymentReference}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentReference')}"   >
-                                    <h:outputText value="#{pay.paymentReference}"/>
-                                </p:column>
-                                <p:column sortBy="#{pay.paymentAmount}" filterBy="#{pay.paymentAmount}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentAmount')}"   >
-                                    <h:outputText value="#{pay.paymentAmount}">
-                                        <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
-                                    </h:outputText>
-                                </p:column>
-                                <p:column sortBy="#{pay.paymentStatus}" filterBy="#{pay.paymentStatus}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentStatus')}"   >
-                                    <h:outputText  rendered="#{pay.paymentStatus == 'W'}"  value="Waiting"/>
-                                    <h:outputText  rendered="#{pay.paymentStatus == 'P'}"  value="Pending"/>
-                                    <h:outputText  rendered="#{pay.paymentStatus == 'S'}"  value="Successful"/>
-                                    <h:outputText  rendered="#{pay.paymentStatus == 'D'}"  value="Dis.Insufficient Funds"/>
-                                    <h:outputText  rendered="#{pay.paymentStatus == 'F'}"  value="Dishonoured"/>
-                                </p:column>
-                                <p:column sortBy="#{pay.debitDate}" filterBy="#{pay.debitDate}" headerText="#{configMapController.getKey('ListPaymentsTitle_debitDate')}"   >
-                                    <h:outputText value="#{pay.debitDate}">
-                                        <f:convertDateTime pattern="dd MMM yyyy" />
-                                    </h:outputText>
-                                </p:column>
-                            </p:dataTable>
-
-                        </p:panel>
-
-                        <p:panel id="scheduledPaymentsTablePanel" rendered="#{ezidebit.scheduledPaymentsList != null and ezidebit.customerExistsInPaymentGateway == true}">
+                        <p:panel id="scheduledPaymentsTablePanel" collapsed="true" header="Scheduled Payments in Ezidebit" rendered="#{ezidebit.scheduledPaymentsList != null and ezidebit.customerExistsInPaymentGateway == true}">
                             <p:dataTable id="scheduledPaymentsTable"
                                          selectionMode="single"
                                          selection="#{ezidebit.selectedScheduledPayment}" 
@@ -381,9 +426,9 @@
                                     <h:outputText rendered="#{payment.isManuallyAddedPayment()}" value="Manual"/>
                                     <h:outputText rendered="#{!payment.isManuallyAddedPayment()}" value="Auto"/>
                                 </p:column>
-                                <f:facet name="footer">
+                              <!--  <f:facet name="footer">
                                     <p:commandButton  process="scheduledPaymentsTable" rendered="#{fitnessTestChartsController.isUserInRole('ADMIN')}" id="deleteButton" icon="ui-icon-trash"  value="#{configMapController.getKey('Delete')}" actionListener="#{ezidebit.deleteScheduledPayment}" update=":growl " disabled="#{empty fitnessTestChartsController.selected}"/>
-                                </f:facet>
+                                </f:facet>-->
 
                             </p:dataTable>
                         </p:panel>

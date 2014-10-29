@@ -85,29 +85,40 @@
 
 
                             <!--   
-                              <p:selectManyMenu id="scroll" value="#{sessionHistoryController.attendingCustomers}" converter="#{custConverter}" style="width:250px;height:600px" var="customer" showCheckbox="true"> --> 
-                            <p:pickList id="picker"  value="#{sessionHistoryController.participants}"
-                                             var="cust"
-     
-                                             itemLabel="#{cust.firstname} #{cust.lastname}"
-                                             itemValue="#{cust}" converter="#{custConverter}">
-                                     <f:facet name="sourceCaption">Did not attend</f:facet>
-                                     <f:facet name="targetCaption">Attended Session</f:facet>
-                                 </p:pickList>
-     
-                                 <p:dialog  modal="true" showEffect="fade" hideEffect="fade" widgetVar="cityDialog">
-                                     <h:panelGrid  id="displayCities" columns="2">
-                                         <h:outputText value="Source: " style="font-weight:bold"/>
-                                         <ui:repeat value="#{sessionHistoryController.participants.source}" var="item">
-                                             <h:outputText value="#{item}" style="margin-right:5px" />
-                                         </ui:repeat>
-     
-                                         <h:outputText value="Target: " style="font-weight:bold"/>
-                                         <ui:repeat  value="#{sessionHistoryController.participants.target}" var="item">
-                                             <h:outputText value="#{item}" style="margin-right:5px" />
-                                         </ui:repeat>
-                                     </h:panelGrid>
-                                 </p:dialog>-->
+                              <p:selectManyMenu id="scroll" value="#{sessionHistoryController.attendingCustomers}" converter="#{custConverter}" style="width:250px;height:600px" var="customer" showCheckbox="true">
+                            <p:pickList id="picker"  value="#{sessionHistoryController.participants}" 
+                                        var="cust"
+                                        iconOnly="true" effect="bounce"
+                                                                                <!--itemLabel="#{cust.firstname} #{cust.lastname}"-->
+                                       <!--  itemValue="#{cust}" converter="#{custConverter}" >
+                                        <p:column style="width:25%">
+                                    <p:graphicImage value="#{cust.profileImage.imageStream}"/>
+                                </p:column>
+                                <p:column style="width:75%;">
+                            #{cust.firstname} #{cust.lastname}
+                        </p:column>
+                        <f:facet name="sourceCaption">Did not attend</f:facet>
+                        <f:facet name="targetCaption">Attended Session</f:facet>
+                    </p:pickList>  --> 
+                            <p:pickList id="PojoPickList" value="#{sessionHistoryController.participants}" var="cust" effect="bounce"
+                                        itemValue="#{cust}" itemLabel="#{cust.firstname} #{cust.lastname}" showSourceControls="true" showTargetControls="true" showCheckbox="true"
+                                        showSourceFilter="true" showTargetFilter="true" filterMatchMode="contains" converter="#{custConverter}">
+
+                                <f:facet name="sourceCaption">Did not attend</f:facet>
+                                <f:facet name="targetCaption">Attended Session</f:facet>
+                              <p:column style="width:25%">
+                                    <p:graphicImage  value="#{cust.profileImage.imageStream}" width="100" height="70"/>
+                                </p:column>
+
+                                <p:column style="width:75%;">
+                                    <h:outputText value="#{cust.firstname} #{cust.lastname}" />
+                                </p:column>
+                                
+                                <p:ajax event="transfer" listener="#{pickListView.onTransfer}" update="msg" />
+
+  
+                            </p:pickList>
+
                         </p:panel>
 
                     </h:panelGrid>

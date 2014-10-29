@@ -111,10 +111,21 @@ public class CustomersController implements Serializable {
         HttpServletRequest req = (HttpServletRequest) facesContext.getExternalContext().getRequest(); //request;
         String uaString = req.getHeader("User-Agent");
         logger.log(Level.INFO, "User-Agent of this seesion is :{0}", uaString);
-
+       // sanityCheckCustomersForDefaultItems();
 //resp.setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY);
 //resp.setHeader("Location", "/AppName/site/ie/home.jsp");
     }
+
+   /* private void sanityCheckCustomersForDefaultItems() {
+        logger.log(Level.INFO, "Performing Sanity Checks on Customers");
+        List<Customers> cl = ejbFacade.findAll();
+        for (Customers c : cl) {
+            if (c.getProfileImage() == null) {
+                createDefaultCustomerProfilePicture(c);
+            }
+        }
+        logger.log(Level.INFO, "FINISHED Performing Sanity Checks on Customers");
+    }*/
 
     public static boolean isUserInRole(String roleName) {
         boolean inRole = false;
@@ -148,6 +159,9 @@ public class CustomersController implements Serializable {
             controller.setSelectedCustomer(cust);
             selectedItemIndex = -1;
             checkPass = current.getPassword();
+            if (cust.getProfileImage() == null) {
+                createDefaultCustomerProfilePicture(cust);
+            }
             recreateAllAffectedPageModels();
             setCustomerTabsEnabled(true);
             RequestContext.getCurrentInstance().update("iFrameForm");
@@ -158,7 +172,7 @@ public class CustomersController implements Serializable {
     public void sendCustomerOnboardEmail() {
         FacesContext context = FacesContext.getCurrentInstance();
         LoginBean controller = (LoginBean) context.getApplication().getELResolver().getValue(context.getELContext(), null, "loginBean");
-        controller.doPasswordReset("system.new.customer.template",current,configMapFacade.getConfig("sendCustomerOnBoardEmailEmailSubject"));
+        controller.doPasswordReset("system.new.customer.template", current, configMapFacade.getConfig("sendCustomerOnBoardEmailEmailSubject"));
         JsfUtil.addSuccessMessage(configMapFacade.getConfig("sendCustomerOnBoardEmail") + " " + current.getFirstname() + " " + current.getLastname() + ".");
     }
 
@@ -266,9 +280,9 @@ public class CustomersController implements Serializable {
     }
 
     private void createDefaultPaymentParameters(String paymentGatewayName) {
-       
+
         PaymentParameters payParams = current.getPaymentParameters();
-        
+
         try {
             if (payParams == null && paymentGatewayName.toUpperCase().contains(paymentGateway)) {
                 String phoneNumber = current.getTelephone();
@@ -297,11 +311,11 @@ public class CustomersController implements Serializable {
 
     protected PaymentParameters getSelectedCustomersPaymentParameters() {
         PaymentParameters pp = getSelected().getPaymentParameters();
-         if (pp == null ) {
+        if (pp == null) {
             createDefaultPaymentParameters(paymentGateway);
         }
         pp = getSelected().getPaymentParameters();
-         if (pp == null) {
+        if (pp == null) {
             logger.log(Level.SEVERE, " Customer {0} has NULL Payment parameters.Method createDefaultPaymentParameters failed", new Object[]{current.getUsername()});
         }
         return pp;
@@ -434,8 +448,17 @@ public class CustomersController implements Serializable {
         //RequestContext.getCurrentInstance().openDialog("customersCreateDialogue");
     }
 
+    private void createDefaultCustomerProfilePicture(Customers c) {
+        FacesContext context = FacesContext.getCurrentInstance();
+        CustomerImagesController custImageCon = (CustomerImagesController) context.getApplication().evaluateExpressionGet(context, "#{customerImagesController}", CustomerImagesController.class);
+        custImageCon.createDefaultProfilePic(c);
+
+    }
+
     public String create() {
         try {
+            FacesContext context = FacesContext.getCurrentInstance();
+
             Customers c = getSelected();
             c.setId(0);
             c.setPassword(PasswordService.getInstance().encrypt(c.getPassword()));
@@ -445,6 +468,7 @@ public class CustomersController implements Serializable {
                 Groups grp = new Groups(0, "USER");
                 grp.setUsername(c);
                 ejbGroupsFacade.create(grp);
+                createDefaultCustomerProfilePicture(c);
                 //createDefaultPaymentParameters(paymentGateway);
                 recreateModel();
                 JsfUtil.addSuccessMessage(configMapFacade.getConfig("CustomersCreated"));
@@ -475,6 +499,7 @@ public class CustomersController implements Serializable {
         FacesContext context = FacesContext.getCurrentInstance();
         Customers c = getSelected();
         EziDebitPaymentGateway ezi = (EziDebitPaymentGateway) context.getApplication().evaluateExpressionGet(context, "#{ezidebit}", EziDebitPaymentGateway.class);
+
         if (c.getId() == null || getFacade().find(c.getId()) == null) {
             // does not exist so create a new customer
             try {
@@ -483,6 +508,7 @@ public class CustomersController implements Serializable {
                 Groups grp = new Groups(0, "USER");
                 grp.setUsername(c);
                 ejbGroupsFacade.create(grp);
+                createDefaultCustomerProfilePicture(c);
                 // createDefaultPaymentParameters(paymentGateway);
                 recreateAllAffectedPageModels();
                 setSelected(c);
