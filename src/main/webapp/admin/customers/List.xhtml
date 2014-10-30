@@ -98,13 +98,26 @@
                                     <h:outputText value="#{item.paymentParameters.statusDescription}"/> 
                                 </p:column>
                                 <p:column sortBy="#{item.paymentParameters.contractStartDate}" filterBy="#{item.paymentParameters.contractStartDate}" headerText="#{configMapController.getKey('ListCustomersTitle_contractStartDate')}"   >
-                                    <h:outputText value="#{item.paymentParameters.contractStartDate}"/> 
+                                    <h:outputText value="#{item.paymentParameters.contractStartDate}">
+                                        <f:convertDateTime pattern="dd MMM yyyy" />
+                                    </h:outputText>
                                 </p:column>
                                 <p:column sortBy="#{item.paymentParameters.totalPaymentsSuccessfulAmount}" filterBy="#{item.paymentParameters.totalPaymentsSuccessfulAmount}" headerText="#{configMapController.getKey('ListCustomersTitle_totalPaymentsSuccessfulAmount')}"   >
                                     <h:outputText value="#{item.paymentParameters.totalPaymentsSuccessfulAmount}">
                                         <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
                                     </h:outputText>
                                 </p:column>
+                                <p:column sortBy="#{item.paymentParameters.lastSuccessfulScheduledPayment.debitDate}" filterBy="#{item.paymentParameters.lastSuccessfulScheduledPayment.debitDate}" headerText="#{configMapController.getKey('ListCustomersTitle_lastSuccessfulScheduledPayment')}"   >
+                                    <h:outputText value="#{item.paymentParameters.lastSuccessfulScheduledPayment.debitDate}">
+                                        <f:convertDateTime pattern="dd MMM yyyy" />
+                                    </h:outputText>
+                                </p:column>
+                                <p:column sortBy="#{item.paymentParameters.nextScheduledPayment.debitDate}" filterBy="#{item.paymentParameters.nextScheduledPayment.debitDate}" headerText="#{configMapController.getKey('ListCustomersTitle_nextScheduledPayment')}"   >
+                                    <h:outputText value="#{item.paymentParameters.nextScheduledPayment.debitDate}">
+                                        <f:convertDateTime pattern="dd MMM yyyy" />
+                                    </h:outputText>
+                                </p:column>
+ 
 
                             </p:dataTable>
                         </h:panelGroup>
@@ -334,6 +347,8 @@
                                 <p:outputLabel value="Send Expired Card SMS" /> <h:outputText value="#{customersController.selected.paymentParameters.smsExpiredCard}"/>
                                 <p:outputLabel value="Send Failed Payment SMS" /> <h:outputText value="#{customersController.selected.paymentParameters.smsFailedNotification}"/>
                                 <p:outputLabel value="Send Payment Reminder SMS" /> <h:outputText value="#{customersController.selected.paymentParameters.smsPaymentReminder}"/>
+                                <p:outputLabel value="Last Successful Payment" /> <h:outputText value="#{customersController.selected.paymentParameters.lastSuccessfulScheduledPayment.debitDate}"/>
+                                <p:outputLabel value="Next Scheduled Payment" /> <h:outputText value="#{customersController.selected.paymentParameters.nextScheduledPayment.debitDate}"/>
 
                             </p:panelGrid>
                         </p:panel>
@@ -401,7 +416,7 @@
 
                                     </p:outputPanel>
                                 </f:facet>
-                               
+
 
                                 <p:column  >
                                     <h:outputText value="#{payment.id}"/>
@@ -427,9 +442,9 @@
                                     <h:outputText rendered="#{payment.isManuallyAddedPayment()}" value="Manual"/>
                                     <h:outputText rendered="#{!payment.isManuallyAddedPayment()}" value="Auto"/>
                                 </p:column>
-                              <!--  <f:facet name="footer">
-                                    <p:commandButton  process="scheduledPaymentsTable" rendered="#{fitnessTestChartsController.isUserInRole('ADMIN')}" id="deleteButton" icon="ui-icon-trash"  value="#{configMapController.getKey('Delete')}" actionListener="#{ezidebit.deleteScheduledPayment}" update=":growl " disabled="#{empty fitnessTestChartsController.selected}"/>
-                                </f:facet>-->
+                                <!--  <f:facet name="footer">
+                                      <p:commandButton  process="scheduledPaymentsTable" rendered="#{fitnessTestChartsController.isUserInRole('ADMIN')}" id="deleteButton" icon="ui-icon-trash"  value="#{configMapController.getKey('Delete')}" actionListener="#{ezidebit.deleteScheduledPayment}" update=":growl " disabled="#{empty fitnessTestChartsController.selected}"/>
+                                  </f:facet>-->
 
                             </p:dataTable>
                         </p:panel>

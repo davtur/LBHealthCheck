@@ -43,6 +43,12 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "PaymentParameters.findBySmsExpiredCard", query = "SELECT p FROM PaymentParameters p WHERE p.smsExpiredCard = :smsExpiredCard"),
     @NamedQuery(name = "PaymentParameters.findByPaymentGatewayName", query = "SELECT p FROM PaymentParameters p WHERE p.paymentGatewayName = :paymentGatewayName")})
 public class PaymentParameters implements Serializable {
+    @JoinColumn(name = "nextScheduledPayment", referencedColumnName = "id")
+    @OneToOne
+    private Payments nextScheduledPayment;
+    @JoinColumn(name = "lastSuccessfulScheduledPayment", referencedColumnName = "id")
+    @OneToOne
+    private Payments lastSuccessfulScheduledPayment;
     @Size(max = 255)
     @Column(name = "addressLine1")
     private String addressLine1;
@@ -435,6 +441,22 @@ public class PaymentParameters implements Serializable {
 
     public void setYourSystemReference(String yourSystemReference) {
         this.yourSystemReference = yourSystemReference;
+    }
+
+    public Payments getNextScheduledPayment() {
+        return nextScheduledPayment;
+    }
+
+    public void setNextScheduledPayment(Payments nextScheduledPayment) {
+        this.nextScheduledPayment = nextScheduledPayment;
+    }
+
+    public Payments getLastSuccessfulScheduledPayment() {
+        return lastSuccessfulScheduledPayment;
+    }
+
+    public void setLastSuccessfulScheduledPayment(Payments lastSuccessfulScheduledPayment) {
+        this.lastSuccessfulScheduledPayment = lastSuccessfulScheduledPayment;
     }
 
 }

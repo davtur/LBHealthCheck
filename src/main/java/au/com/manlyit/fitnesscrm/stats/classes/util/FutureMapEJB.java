@@ -138,7 +138,7 @@ public class FutureMapEJB implements Serializable {
     public List<AsyncJob> getFutureMap(String userSessionId) {
         //return a map of future tasks that belong to a sessionid
         synchronized (lock9) {
-        logger.log(Level.INFO, "Get Future Map.  for sessionID {0}.", userSessionId);
+        logger.log(Level.FINE, "Get Future Map.  for sessionID {0}.", userSessionId);
 
         List<AsyncJob> fmap = futureMap.get(userSessionId);
         if (fmap == null) {
@@ -202,7 +202,7 @@ public class FutureMapEJB implements Serializable {
 
     public AsyncJob get(String userSessionId, String key) {
         synchronized (lock1) {
-            logger.log(Level.INFO, "Future Map, get sessionid {0}, key {1}.",new Object[]{userSessionId,key} );
+            logger.log(Level.FINE, "Future Map, get sessionid {0}, key {1}.",new Object[]{userSessionId,key} );
         List<AsyncJob> fmap = getFutureMap(userSessionId);
         for (int x = fmap.size(); x > 0; x--) {
             AsyncJob aj = fmap.get(x - 1);
@@ -461,6 +461,10 @@ public class FutureMapEJB implements Serializable {
                 for (Payment pay : payList) {
 
                     String customerRef = pay.getYourSystemReference().getValue();
+                    int k = customerRef.indexOf("-");
+                    if(k >0){
+                        customerRef = customerRef.substring(0, k);
+                    }
                     int custId = 0;
                     try {
                         custId = Integer.parseInt(customerRef.trim());
@@ -523,6 +527,10 @@ public class FutureMapEJB implements Serializable {
             List<Payment> payList = result.getPayment();
             if (payList.isEmpty() == false) {
                 String customerRef = payList.get(0).getYourSystemReference().getValue();
+                 int k = customerRef.indexOf("-");
+                    if(k >0){
+                        customerRef = customerRef.substring(0, k);
+                    }
                 if (customerRef.trim().isEmpty() == false) {
                     int custId = 0;
                     try {
@@ -598,6 +606,10 @@ public class FutureMapEJB implements Serializable {
             if (payList != null) {
                 if (payList.size() > 1) {
                     String customerRef = payList.get(0).getYourSystemReference().getValue();
+                     int k = customerRef.indexOf("-");
+                    if(k >0){
+                        customerRef = customerRef.substring(0, k);
+                    }
                     if (customerRef.trim().isEmpty() == false) {
                         int custId = 0;
                         try {
@@ -668,6 +680,10 @@ public class FutureMapEJB implements Serializable {
         if (custDetails != null) {
             // do something with result
             String customerRef = custDetails.getYourSystemReference().getValue();
+             int k = customerRef.indexOf("-");
+                    if(k >0){
+                        customerRef = customerRef.substring(0, k);
+                    }
             if (customerRef.trim().isEmpty() == false) {
                 int custId = 0;
                 try {
@@ -688,7 +704,8 @@ public class FutureMapEJB implements Serializable {
                         pp.setLoggedInUser(cust);
                         isNew = true;
                     }
-
+                    pp.setLastSuccessfulScheduledPayment(paymentsFacade.findLastSuccessfulScheduledPayment(cust));
+                    pp.setNextScheduledPayment(paymentsFacade.findNextScheduledPayment(cust));
                     pp.setAddressLine1(custDetails.getAddressLine1().getValue());
                     pp.setAddressLine2(custDetails.getAddressLine2().getValue());
                     pp.setAddressPostCode(custDetails.getAddressPostCode().getValue());

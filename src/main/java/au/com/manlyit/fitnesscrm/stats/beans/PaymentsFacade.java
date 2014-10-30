@@ -7,9 +7,7 @@ package au.com.manlyit.fitnesscrm.stats.beans;
 
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
-import au.com.manlyit.fitnesscrm.stats.db.Participants;
 import au.com.manlyit.fitnesscrm.stats.db.Payments;
-import au.com.manlyit.fitnesscrm.stats.db.SessionHistory;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -23,7 +21,6 @@ import javax.persistence.Query;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
@@ -99,12 +96,12 @@ public class PaymentsFacade extends AbstractFacade<Payments> {
             Expression<Customers> cust = rt.get("customerName");
             Expression<String> paymentID = rt.get("paymentID");
             cq.where(cb.and(cb.equal(cust, customer), cb.isNotNull(paymentID)));
-            cq.orderBy(cb.asc(dDate));
+            cq.orderBy(cb.desc(dDate));
      
-            Query q = em.createQuery(cq).setMaxResults(1);
+            Query q = em.createQuery(cq);
             
             if (q.getResultList().size() > 0) {
-                cm = (Payments) q.getSingleResult();
+                 cm = (Payments) q.getResultList().get(0);
             }
         } catch (Exception e) {
              logger.log(Level.INFO, "findLastSuccessfulPayment error customer:{0} " + customer, e);
@@ -121,12 +118,12 @@ public class PaymentsFacade extends AbstractFacade<Payments> {
             Expression<Customers> cust = rt.get("customerName");
             Expression<String> paymentID = rt.get("paymentID");
             cq.where(cb.and(cb.equal(cust, customer), cb.isNull(paymentID)));
-            cq.orderBy(cb.desc(dDate));
+            cq.orderBy(cb.asc(dDate));
      
-            Query q = em.createQuery(cq).setMaxResults(1);
-            
+            Query q = em.createQuery(cq);
+           
             if (q.getResultList().size() > 0) {
-                cm = (Payments) q.getSingleResult();
+                cm = (Payments) q.getResultList().get(0);
             }
         } catch (Exception e) {
             logger.log(Level.INFO, "findNextScheduledPayment error customer:{0} " + customer, e);
@@ -177,7 +174,7 @@ public class PaymentsFacade extends AbstractFacade<Payments> {
                 predicatesList1.add(cb.between(stime3, startDate, endDate));
             }
             Expression<Date> status = rt.get("paymentStatus");
-            Predicate condition1 = cb.between(stime, startDate, endDate);
+         //   Predicate condition1 = cb.between(stime, startDate, endDate);
             if (showSuccessful) {
                 predicatesList2.add(cb.equal(status, "S"));
             }

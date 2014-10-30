@@ -19,6 +19,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -60,6 +61,10 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "Payments.findByYourGeneralReference", query = "SELECT p FROM Payments p WHERE p.yourGeneralReference = :yourGeneralReference"),
     @NamedQuery(name = "Payments.findByYourSystemReference", query = "SELECT p FROM Payments p WHERE p.yourSystemReference = :yourSystemReference")})
 public class Payments implements  BaseEntity,Serializable {
+    @OneToOne(mappedBy = "nextScheduledPayment")
+    private PaymentParameters paymentParameters;
+    @OneToOne(mappedBy = "lastSuccessfulScheduledPayment")
+    private PaymentParameters paymentParameters1;
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -375,6 +380,22 @@ public class Payments implements  BaseEntity,Serializable {
     @Override
     public String toString() {
         return "au.com.manlyit.fitnesscrm.stats.db.Payments[ id=" + id + " ]";
+    }
+
+    public PaymentParameters getPaymentParameters() {
+        return paymentParameters;
+    }
+
+    public void setPaymentParameters(PaymentParameters paymentParameters) {
+        this.paymentParameters = paymentParameters;
+    }
+
+    public PaymentParameters getPaymentParameters1() {
+        return paymentParameters1;
+    }
+
+    public void setPaymentParameters1(PaymentParameters paymentParameters1) {
+        this.paymentParameters1 = paymentParameters1;
     }
     
 }

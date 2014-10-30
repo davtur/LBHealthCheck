@@ -11,7 +11,6 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
-import java.util.Collection;
 import java.util.Date;
 import javax.faces.context.FacesContext;
 import javax.persistence.Basic;
@@ -31,7 +30,6 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
 import org.primefaces.model.DefaultStreamedContent;
 import org.primefaces.model.StreamedContent;
 
@@ -132,6 +130,9 @@ public class CustomerImages implements Serializable {
         } else {
             String type = "image/jpeg";
             switch (getImageType()) {
+                case 0:
+                    type = "image/gif";
+                    break;
                 case 1:
                     type = "image/png";
                     break;
@@ -180,13 +181,6 @@ public class CustomerImages implements Serializable {
         return "au.com.manlyit.fitnesscrm.stats.db.CustomerImages[ id=" + id + " ]";
     }
 
-    public byte[] getImage() {
-        return image;
-    }
-
-    public void setImage(byte[] image) {
-        this.image = image;
-    }
 
     public Customers getCustomers() {
         return customers;
@@ -194,5 +188,13 @@ public class CustomerImages implements Serializable {
 
     public void setCustomers(Customers customers) {
         this.customers = customers;
+    }
+
+    public byte[] getImage() {
+        return image;
+    }
+
+    public void setImage(byte[] image) {
+        this.image = image;
     }
 }
