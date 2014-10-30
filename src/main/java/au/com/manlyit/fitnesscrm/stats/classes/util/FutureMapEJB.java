@@ -10,7 +10,9 @@ import au.com.manlyit.fitnesscrm.stats.beans.CustomersFacade;
 import au.com.manlyit.fitnesscrm.stats.beans.PaymentBean;
 import au.com.manlyit.fitnesscrm.stats.beans.PaymentParametersFacade;
 import au.com.manlyit.fitnesscrm.stats.beans.PaymentsFacade;
+import au.com.manlyit.fitnesscrm.stats.classes.CustomerImagesController;
 import au.com.manlyit.fitnesscrm.stats.classes.EziDebitPaymentGateway;
+import au.com.manlyit.fitnesscrm.stats.db.CustomerImages;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import au.com.manlyit.fitnesscrm.stats.db.PaymentParameters;
 import au.com.manlyit.fitnesscrm.stats.db.Payments;
@@ -19,6 +21,11 @@ import au.com.manlyit.fitnesscrm.stats.webservices.ArrayOfScheduledPayment;
 import au.com.manlyit.fitnesscrm.stats.webservices.CustomerDetails;
 import au.com.manlyit.fitnesscrm.stats.webservices.Payment;
 import au.com.manlyit.fitnesscrm.stats.webservices.ScheduledPayment;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -33,6 +40,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.ejb.Asynchronous;
 import javax.ejb.LocalBean;
@@ -41,6 +49,8 @@ import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.ejb.Timer;
 import javax.faces.application.FacesMessage;
+import javax.faces.context.FacesContext;
+import javax.imageio.ImageIO;
 import javax.inject.Inject;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.primefaces.push.EventBus;
@@ -62,7 +72,7 @@ import org.primefaces.push.impl.JSONEncoder;
 @Singleton
 @LocalBean
 @Startup
-public class FutureMapEJB {
+public class FutureMapEJB implements Serializable {
 
     private static final Logger logger = Logger.getLogger(FutureMapEJB.class.getName());
     private static final int TIMEOUT_SECONDS = 120;
@@ -81,6 +91,9 @@ public class FutureMapEJB {
     private final AtomicBoolean settlementReportLock = new AtomicBoolean(false);
     private final AtomicBoolean paymentReportLock = new AtomicBoolean(false);
     private List<Payment> paymentsByCustomersMissingFromCRM;
+    @Inject
+    private au.com.manlyit.fitnesscrm.stats.beans.CustomerImagesFacade ejbCustomerImagesFacade;
+
     @Inject
     private CustomersFacade customersFacade;
     @Inject
@@ -111,6 +124,13 @@ public class FutureMapEJB {
 
     }
 
+    @PostConstruct
+    private void applicationSetup() {
+        logger.log(Level.INFO, "Application Setup Running");
+        sanityCheckCustomersForDefaultItems();
+        logger.log(Level.INFO, "Application Setup Completed");
+    }
+
     /**
      * @param userSessionId
      * @return the futureMap
@@ -118,15 +138,16 @@ public class FutureMapEJB {
     public List<AsyncJob> getFutureMap(String userSessionId) {
         //return a map of future tasks that belong to a sessionid
         synchronized (lock9) {
-            logger.log(Level.INFO, "Get Future Map.  for sessionID {0}.", userSessionId);
+        logger.log(Level.INFO, "Get Future Map.  for sessionID {0}.", userSessionId);
 
-            List<AsyncJob> fmap = futureMap.get(userSessionId);
-            if (fmap == null) {
-                logger.log(Level.INFO, "Get Future Map. Map is null for sessionID {0} . Creating an empty list.", userSessionId);
-                futureMap.put(userSessionId, new ArrayList<AsyncJob>());
-            }
-            return fmap;
+        List<AsyncJob> fmap = futureMap.get(userSessionId);
+        if (fmap == null) {
+            logger.log(Level.INFO, "Get Future Map. Map is null for sessionID {0} . Creating an empty list.", userSessionId);
+            futureMap.put(userSessionId, new ArrayList<AsyncJob>());
         }
+        return fmap;
+
+    }
     }
 
     private String getDigitalKey() {
@@ -164,14 +185,15 @@ public class FutureMapEJB {
     public void remove(String userSessionId, String key) {
         synchronized (lock1) {
             logger.log(Level.INFO, "Future Map, remove. sessionid {0}, key {1}.",new Object[]{userSessionId,key} );
-            List<AsyncJob> fmap = getFutureMap(userSessionId);
-            for (int x = fmap.size(); x > 0; x--) {
-                AsyncJob aj = fmap.get(x - 1);
-                if (aj.getJobName().contentEquals(key)) {
-                    fmap.remove(x - 1);
-                }
+        List<AsyncJob> fmap = getFutureMap(userSessionId);
+        for (int x = fmap.size(); x > 0; x--) {
+            AsyncJob aj = fmap.get(x - 1);
+            if (aj.getJobName().contentEquals(key)) {
+                fmap.remove(x - 1);
             }
         }
+
+    }
     }
 
     public int size(String userSessionId) {
@@ -181,32 +203,34 @@ public class FutureMapEJB {
     public AsyncJob get(String userSessionId, String key) {
         synchronized (lock1) {
             logger.log(Level.INFO, "Future Map, get sessionid {0}, key {1}.",new Object[]{userSessionId,key} );
-            List<AsyncJob> fmap = getFutureMap(userSessionId);
-            for (int x = fmap.size(); x > 0; x--) {
-                AsyncJob aj = fmap.get(x - 1);
-                if (aj.getJobName().contentEquals(key)) {
-                    return aj;
-                }
+        List<AsyncJob> fmap = getFutureMap(userSessionId);
+        for (int x = fmap.size(); x > 0; x--) {
+            AsyncJob aj = fmap.get(x - 1);
+            if (aj.getJobName().contentEquals(key)) {
+                return aj;
             }
-            return null;
         }
+        return null;
+
+    }
     }
 
     public boolean containsKey(String userSessionId, String key) {
         synchronized (lock1) {
-            List<AsyncJob> fmap = getFutureMap(userSessionId);
-            try {
-                for (int x = fmap.size(); x > 0; x--) {
-                    AsyncJob aj = fmap.get(x - 1);
-                    if (aj.getJobName().contentEquals(key)) {
-                        return true;
-                    }
+        List<AsyncJob> fmap = getFutureMap(userSessionId);
+        try {
+            for (int x = fmap.size(); x > 0; x--) {
+                AsyncJob aj = fmap.get(x - 1);
+                if (aj.getJobName().contentEquals(key)) {
+                    return true;
                 }
-            } catch (Exception e) {
-                logger.log(Level.SEVERE, "futureMap.containsKey", e);
             }
-            return false;
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "futureMap.containsKey", e);
         }
+        return false;
+
+    }
     }
 
     /**
@@ -218,55 +242,55 @@ public class FutureMapEJB {
      */
     public void put(String userSessionId, AsyncJob aj) {
         synchronized (lock1) {
-            try {
-                logger.log(Level.INFO, "Future Map, put. sessionid {0},AsyncJob key {1}.",new Object[]{userSessionId,aj.getJobName()} );
-                getFutureMap(userSessionId).add(aj);
-            } catch (Exception e) {
-                logger.log(Level.SEVERE, "Future Map put(String userSessionId, AsyncJob aj) method. Unable to add Async Job, Session:{1}, job Name:{2}, start Time:{3}, Error Message:{0}", new Object[]{e.getMessage(), userSessionId, aj.getJobName(), aj.getStartTime()});
-            }
+        try {
+            logger.log(Level.INFO, "Future Map, put. sessionid {0},AsyncJob key {1}.", new Object[]{userSessionId, aj.getJobName()});
+            getFutureMap(userSessionId).add(aj);
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Future Map put(String userSessionId, AsyncJob aj) method. Unable to add Async Job, Session:{1}, job Name:{2}, start Time:{3}, Error Message:{0}", new Object[]{e.getMessage(), userSessionId, aj.getJobName(), aj.getStartTime()});
         }
+    }
     }
 
     public void cancelFutures(String userSessionId) {
         synchronized (lock1) {
-            if (getFutureMap(userSessionId) != null) {
-                List<AsyncJob> fmap = getFutureMap(userSessionId);
-                for (AsyncJob aj : fmap) {
-                    Future ft = (Future) aj.getFuture();
-                    ft.cancel(false);
-                }
-                getFutureMap(userSessionId).clear();
+        if (getFutureMap(userSessionId) != null) {
+            List<AsyncJob> fmap = getFutureMap(userSessionId);
+            for (AsyncJob aj : fmap) {
+                Future ft = (Future) aj.getFuture();
+                ft.cancel(false);
             }
+            getFutureMap(userSessionId).clear();
         }
+    }
     }
 
     @PreDestroy
     private void cancelAllAsyncJobs() {
         synchronized (lock1) {
-            for (Map.Entry pairs : futureMap.entrySet()) {
-                cancelFutures((String) pairs.getKey());
-            }
-            futureMap.clear();
+        for (Map.Entry pairs : futureMap.entrySet()) {
+            cancelFutures((String) pairs.getKey());
         }
+        futureMap.clear();
+    }
     }
 
     public void sendMessage(String sessionChannel, String summary, String detail) {
         //TODO
         // sessionChannel = "/test";// remove this once the channel is dynamically set by session id
         synchronized (lock2) {
-            final String broadcastChannel = CHANNEL + sessionChannel;
-            final String summ = summary;
-            EventBus eventBus = EventBusFactory.getDefault().eventBus();
-            /* Reply rep = new EventBus.Reply() {
-             @Override
-             public void completed(String message) {
+        final String broadcastChannel = CHANNEL + sessionChannel;
+        final String summ = summary;
+        EventBus eventBus = EventBusFactory.getDefault().eventBus();
+        /* Reply rep = new EventBus.Reply() {
+         @Override
+         public void completed(String message) {
 
-             logger.log(Level.INFO, "Message Delivered:Channel={0}, Summary={1}.", new Object[]{broadcastChannel, summ});
-             }
-             };*/
-            // eventBus.publish(channels.getChannel(getUser()), new FacesMessage(StringEscapeUtils.escapeHtml(summary), StringEscapeUtils.escapeHtml(detail)));
-            eventBus.publish(broadcastChannel, new FacesMessage(StringEscapeUtils.escapeHtml(summary), StringEscapeUtils.escapeHtml(detail)));
-        }
+         logger.log(Level.INFO, "Message Delivered:Channel={0}, Summary={1}.", new Object[]{broadcastChannel, summ});
+         }
+         };*/
+        // eventBus.publish(channels.getChannel(getUser()), new FacesMessage(StringEscapeUtils.escapeHtml(summary), StringEscapeUtils.escapeHtml(detail)));
+        eventBus.publish(broadcastChannel, new FacesMessage(StringEscapeUtils.escapeHtml(summary), StringEscapeUtils.escapeHtml(detail)));
+    }
     }
 
     @Schedule(dayOfMonth = "*", hour = "6", minute = "0", second = "0")
@@ -340,82 +364,82 @@ public class FutureMapEJB {
     public void processCompletedAsyncJobs(String sessionId) {
         logger.log(Level.INFO, "Future Map is processing Completed Async Jobs .");
         synchronized (lock3) {
-            String key = "";
+        String key = "";
 
-            try {
+        try {
 
-                key = "GetCustomerDetails";
-                if (containsKey(sessionId, key)) {
-                    Future ft = (Future) get(sessionId, key).getFuture();
-                    if (ft.isDone()) {
-                        // remove(sessionId, key);
-                        processGetCustomerDetails(ft);
+            key = "GetCustomerDetails";
+            if (containsKey(sessionId, key)) {
+                Future ft = (Future) get(sessionId, key).getFuture();
+                if (ft.isDone()) {
+                    // remove(sessionId, key);
+                    processGetCustomerDetails(ft);
 
-                    }
                 }
-
-                key = "GetPayments";
-                if (containsKey(sessionId, key)) {
-                    Future ft = (Future) get(sessionId, key).getFuture();
-                    if (ft.isDone()) {
-                        //   remove(sessionId, key);
-                        processGetPayments(ft);
-                    }
-                }
-                key = "GetScheduledPayments";
-                if (containsKey(sessionId, key)) {
-                    Future ft = (Future) get(sessionId, key).getFuture();
-                    if (ft.isDone()) {
-                        //    remove(sessionId, key);
-                        processGetScheduledPayments(ft);
-                    }
-                }
-                key = "PaymentReport";
-                if (containsKey(sessionId, key)) {
-                    Future ft = (Future) get(sessionId, key).getFuture();
-                    if (ft.isDone()) {
-                        //    remove(sessionId, key);
-                        processPaymentReport(ft);
-                        if (sessionId.contains(FUTUREMAP_INTERNALID)) {
-                            remove(sessionId, key);
-                        }
-                    }
-                }
-                key = "SettlementReport";
-                if (containsKey(sessionId, key)) {
-                    Future ft = (Future) get(sessionId, key).getFuture();
-                    if (ft.isDone()) {
-                        //    remove(sessionId, key);
-                        processSettlementReport(ft);
-                        if (sessionId.contains(FUTUREMAP_INTERNALID)) {
-                            remove(sessionId, key);
-                        }
-                    }
-                }
-
-            } catch (CancellationException ex) {
-                logger.log(Level.WARNING, key + " Future Map:", ex);
-
             }
+
+            key = "GetPayments";
+            if (containsKey(sessionId, key)) {
+                Future ft = (Future) get(sessionId, key).getFuture();
+                if (ft.isDone()) {
+                    //   remove(sessionId, key);
+                    processGetPayments(ft);
+                }
+            }
+            key = "GetScheduledPayments";
+            if (containsKey(sessionId, key)) {
+                Future ft = (Future) get(sessionId, key).getFuture();
+                if (ft.isDone()) {
+                    //    remove(sessionId, key);
+                    processGetScheduledPayments(ft);
+                }
+            }
+            key = "PaymentReport";
+            if (containsKey(sessionId, key)) {
+                Future ft = (Future) get(sessionId, key).getFuture();
+                if (ft.isDone()) {
+                    //    remove(sessionId, key);
+                    processPaymentReport(ft);
+                    if (sessionId.contains(FUTUREMAP_INTERNALID)) {
+                        remove(sessionId, key);
+                    }
+                }
+            }
+            key = "SettlementReport";
+            if (containsKey(sessionId, key)) {
+                Future ft = (Future) get(sessionId, key).getFuture();
+                if (ft.isDone()) {
+                    //    remove(sessionId, key);
+                    processSettlementReport(ft);
+                    if (sessionId.contains(FUTUREMAP_INTERNALID)) {
+                        remove(sessionId, key);
+                    }
+                }
+            }
+
+        } catch (CancellationException ex) {
+            logger.log(Level.WARNING, key + " Future Map:", ex);
+
         }
+    }
     }
 
     private void processSettlementReport(Future ft) {
         synchronized (lock8) {
-            logger.log(Level.INFO, "Future Map is processing the Settlement Report .");
-            processReport(ft);
-            logger.log(Level.INFO, "Future Map has finished asyc processing the Settlement Report .");
-            settlementReportLock.set(false);
-        }
+        logger.log(Level.INFO, "Future Map is processing the Settlement Report .");
+        processReport(ft);
+        logger.log(Level.INFO, "Future Map has finished asyc processing the Settlement Report .");
+        settlementReportLock.set(false);
+    }
     }
 
     private void processPaymentReport(Future ft) {
         synchronized (lock7) {
-            logger.log(Level.INFO, "Future Map is processing the Payment Report .");
-            processReport(ft);
-            logger.log(Level.INFO, "Future Map has finished async processing the Payment Report .");
-            paymentReportLock.set(false);
-        }
+        logger.log(Level.INFO, "Future Map is processing the Payment Report .");
+        processReport(ft);
+        logger.log(Level.INFO, "Future Map has finished async processing the Payment Report .");
+        paymentReportLock.set(false);
+    }
     }
 
     @Asynchronous
@@ -709,177 +733,250 @@ public class FutureMapEJB {
 
     private Payments convertPaymentXMLToEntity(Payments payment, Payment pay, Customers cust) {
         synchronized (lock4) {
-            if (payment == null) {
-                payment = new Payments();
-                payment.setCreateDatetime(new Date());
-                payment.setManuallyAddedPayment(false);
-                payment.setId(0);
-                payment.setCustomerName(cust);
-            }
-            try {
-                payment.setLastUpdatedDatetime(new Date());
-                payment.setBankFailedReason(pay.getBankFailedReason().getValue());
-                payment.setBankReceiptID(pay.getBankReceiptID().getValue());
-                payment.setBankReturnCode(pay.getBankReturnCode().getValue());
-                //payment.setCustomerName(cust);
-                payment.setDebitDate(pay.getDebitDate().getValue().toGregorianCalendar().getTime());
-                payment.setEzidebitCustomerID(pay.getEzidebitCustomerID().getValue());
-                payment.setInvoiceID(pay.getInvoiceID().getValue());
-                payment.setPaymentAmount(new BigDecimal(pay.getPaymentAmount().floatValue()));
-                payment.setPaymentID(pay.getPaymentID().getValue());
-                payment.setPaymentMethod(pay.getPaymentMethod().getValue());
-                payment.setPaymentReference(pay.getPaymentReference().getValue());
-                if (pay.getPaymentReference() != null) {
-                    if (pay.getPaymentReference().getValue().trim().isEmpty() == false) {
-                        payment.setManuallyAddedPayment(true);
-                    } else {
-                        payment.setManuallyAddedPayment(false);
-                    }
-                }
-                payment.setPaymentSource(pay.getPaymentSource().getValue());
-                payment.setScheduledAmount(new BigDecimal(pay.getScheduledAmount().floatValue()));
-
-                payment.setSettlementDate(pay.getSettlementDate().getValue().toGregorianCalendar().getTime());
-                payment.setPaymentStatus(pay.getPaymentStatus().getValue());
-                payment.setTransactionFeeClient(new BigDecimal(pay.getTransactionFeeClient().floatValue()));
-                payment.setTransactionFeeCustomer(new BigDecimal(pay.getTransactionFeeCustomer().floatValue()));
-
-                if (pay.getTransactionTime().getValue() != null) {
-                    payment.setTransactionTime(pay.getTransactionTime().getValue().toGregorianCalendar().getTime()); // only valid for real time and credit card payments
-                }
-
-                payment.setYourGeneralReference(pay.getYourGeneralReference().getValue());
-                payment.setYourSystemReference(pay.getYourSystemReference().getValue());
-            } catch (Exception e) {
-                logger.log(Level.WARNING, "Future Map convertPaymentXMLToEntity method failed.:", e);
-            }
-
-            return payment;
+        if (payment == null) {
+            payment = new Payments();
+            payment.setCreateDatetime(new Date());
+            payment.setManuallyAddedPayment(false);
+            payment.setId(0);
+            payment.setCustomerName(cust);
         }
+        try {
+            payment.setLastUpdatedDatetime(new Date());
+            payment.setBankFailedReason(pay.getBankFailedReason().getValue());
+            payment.setBankReceiptID(pay.getBankReceiptID().getValue());
+            payment.setBankReturnCode(pay.getBankReturnCode().getValue());
+            //payment.setCustomerName(cust);
+            payment.setDebitDate(pay.getDebitDate().getValue().toGregorianCalendar().getTime());
+            payment.setEzidebitCustomerID(pay.getEzidebitCustomerID().getValue());
+            payment.setInvoiceID(pay.getInvoiceID().getValue());
+            payment.setPaymentAmount(new BigDecimal(pay.getPaymentAmount().floatValue()));
+            payment.setPaymentID(pay.getPaymentID().getValue());
+            payment.setPaymentMethod(pay.getPaymentMethod().getValue());
+            payment.setPaymentReference(pay.getPaymentReference().getValue());
+            if (pay.getPaymentReference() != null) {
+                if (pay.getPaymentReference().getValue().trim().isEmpty() == false) {
+                    payment.setManuallyAddedPayment(true);
+                } else {
+                    payment.setManuallyAddedPayment(false);
+                }
+            }
+            payment.setPaymentSource(pay.getPaymentSource().getValue());
+            payment.setScheduledAmount(new BigDecimal(pay.getScheduledAmount().floatValue()));
+
+            payment.setSettlementDate(pay.getSettlementDate().getValue().toGregorianCalendar().getTime());
+            payment.setPaymentStatus(pay.getPaymentStatus().getValue());
+            payment.setTransactionFeeClient(new BigDecimal(pay.getTransactionFeeClient().floatValue()));
+            payment.setTransactionFeeCustomer(new BigDecimal(pay.getTransactionFeeCustomer().floatValue()));
+
+            if (pay.getTransactionTime().getValue() != null) {
+                payment.setTransactionTime(pay.getTransactionTime().getValue().toGregorianCalendar().getTime()); // only valid for real time and credit card payments
+            }
+
+            payment.setYourGeneralReference(pay.getYourGeneralReference().getValue());
+            payment.setYourSystemReference(pay.getYourSystemReference().getValue());
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "Future Map convertPaymentXMLToEntity method failed.:", e);
+        }
+
+        return payment;
+    }
     }
 
     private Payments convertScheduledPaymentXMLToEntity(Payments payment, ScheduledPayment pay, Customers cust) {
         synchronized (lock5) {
-            if (payment == null) {
-                payment = new Payments();
-                payment.setCreateDatetime(new Date());
-                payment.setId(0);
-                payment.setCustomerName(cust);
-            }
-            try {
-
-                payment.setLastUpdatedDatetime(new Date());
-                payment.setBankFailedReason("");
-                payment.setBankReceiptID("");
-                payment.setBankReturnCode("");
-                payment.setDebitDate(pay.getPaymentDate().toGregorianCalendar().getTime());
-                payment.setEzidebitCustomerID(pay.getEzidebitCustomerID().getValue());
-                payment.setInvoiceID(pay.getEzidebitCustomerID().getValue());
-                payment.setPaymentAmount(new BigDecimal(pay.getPaymentAmount().floatValue()));
-                payment.setPaymentID(null);
-                payment.setPaymentMethod("DR");
-                payment.setPaymentReference(pay.getPaymentReference().getValue());
-                if (pay.isManuallyAddedPayment() != null) {
-
-                    payment.setManuallyAddedPayment(pay.isManuallyAddedPayment());
-
-                }
-                payment.setPaymentSource("SCHEDULED");
-                payment.setScheduledAmount(new BigDecimal(pay.getPaymentAmount().floatValue()));
-
-                payment.setSettlementDate(null);
-                payment.setPaymentStatus(null);
-                payment.setTransactionFeeClient(new BigDecimal(0));
-                payment.setTransactionFeeCustomer(new BigDecimal(0));
-
-                payment.setTransactionTime(null); // only valid for real time and credit card payments
-
-                payment.setYourGeneralReference(pay.getYourGeneralReference().getValue());
-                payment.setYourSystemReference(pay.getYourSystemReference().getValue());
-            } catch (Exception e) {
-                logger.log(Level.WARNING, "Future Map convertPaymentXMLToEntity method failed.:", e);
-            }
-
-            return payment;
-
+        if (payment == null) {
+            payment = new Payments();
+            payment.setCreateDatetime(new Date());
+            payment.setId(0);
+            payment.setCustomerName(cust);
         }
+        try {
+
+            payment.setLastUpdatedDatetime(new Date());
+            payment.setBankFailedReason("");
+            payment.setBankReceiptID("");
+            payment.setBankReturnCode("");
+            payment.setDebitDate(pay.getPaymentDate().toGregorianCalendar().getTime());
+            payment.setEzidebitCustomerID(pay.getEzidebitCustomerID().getValue());
+            payment.setInvoiceID(pay.getEzidebitCustomerID().getValue());
+            payment.setPaymentAmount(new BigDecimal(pay.getPaymentAmount().floatValue()));
+            payment.setPaymentID(null);
+            payment.setPaymentMethod("DR");
+            payment.setPaymentReference(pay.getPaymentReference().getValue());
+            if (pay.isManuallyAddedPayment() != null) {
+
+                payment.setManuallyAddedPayment(pay.isManuallyAddedPayment());
+
+            }
+            payment.setPaymentSource("SCHEDULED");
+            payment.setScheduledAmount(new BigDecimal(pay.getPaymentAmount().floatValue()));
+
+            payment.setSettlementDate(null);
+            payment.setPaymentStatus(null);
+            payment.setTransactionFeeClient(new BigDecimal(0));
+            payment.setTransactionFeeCustomer(new BigDecimal(0));
+
+            payment.setTransactionTime(null); // only valid for real time and credit card payments
+
+            payment.setYourGeneralReference(pay.getYourGeneralReference().getValue());
+            payment.setYourSystemReference(pay.getYourSystemReference().getValue());
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "Future Map convertPaymentXMLToEntity method failed.:", e);
+        }
+
+        return payment;
+
+    }
     }
 
     private boolean comparePaymentXMLToEntity(Payments payment, Payment pay) {
         synchronized (lock6) {
-            boolean theSame = true;
-            try {
-                if (payment.getBankFailedReason().contains(pay.getBankFailedReason().getValue()) == false) {
-                    theSame = false;
-                }
-                if (payment.getBankReceiptID().contains(pay.getBankReceiptID().getValue()) == false) {
-                    theSame = false;
-                }
-                if (payment.getBankReturnCode().contains(pay.getBankReturnCode().getValue()) == false) {
-                    theSame = false;
-                }
-                if (payment.getCustomerName() == null) {
-                    theSame = false;
-                } else {
-                    if (payment.getCustomerName().getId().toString().contains(pay.getYourSystemReference().getValue()) == false) {
-                        theSame = false;
-                    }
-                }
-                if (payment.getDebitDate().compareTo(pay.getDebitDate().getValue().toGregorianCalendar().getTime()) != 0) {
-                    theSame = false;
-                }
-                if (payment.getEzidebitCustomerID().contains(pay.getBankFailedReason().getValue()) == false) {
-                    theSame = false;
-                }
-                if (payment.getInvoiceID().contains(pay.getEzidebitCustomerID().getValue()) == false) {
-                    theSame = false;
-                }
-                if (payment.getPaymentAmount().compareTo(new BigDecimal(pay.getPaymentAmount().floatValue())) != 0) {
-                    theSame = false;
-                }
-                if (payment.getPaymentID().contains(pay.getPaymentID().getValue()) == false) {
-                    theSame = false;
-                }
-                if (payment.getPaymentMethod().contains(pay.getPaymentMethod().getValue()) == false) {
-                    theSame = false;
-                }
-                if (payment.getPaymentReference().contains(pay.getPaymentReference().getValue()) == false) {
-                    theSame = false;
-                }
-                if (payment.getPaymentSource().contains(pay.getPaymentSource().getValue()) == false) {
-                    theSame = false;
-                }
-                if (payment.getPaymentStatus().contains(pay.getPaymentStatus().getValue()) == false) {
-                    theSame = false;
-                }
-                if (payment.getScheduledAmount().compareTo(new BigDecimal(pay.getScheduledAmount().floatValue())) != 0) {
-                    theSame = false;
-                }
-                if (payment.getSettlementDate().compareTo(pay.getSettlementDate().getValue().toGregorianCalendar().getTime()) != 0) {
-                    theSame = false;
-                }
-                if (payment.getTransactionFeeClient().compareTo(new BigDecimal(pay.getTransactionFeeClient().floatValue())) != 0) {
-                    theSame = false;
-                }
-                if (payment.getTransactionFeeCustomer().compareTo(new BigDecimal(pay.getTransactionFeeCustomer().floatValue())) != 0) {
-                    theSame = false;
-                }
-                if (pay.getTransactionTime().getValue() != null) {
-                    if (payment.getTransactionTime().compareTo(pay.getTransactionTime().getValue().toGregorianCalendar().getTime()) != 0) {
-                        theSame = false;
-                    }
-                }
-                if (payment.getYourGeneralReference().contains(pay.getYourGeneralReference().getValue()) == false) {
-                    theSame = false;
-                }
-                if (payment.getYourSystemReference().contains(pay.getYourSystemReference().getValue()) == false) {
-                    theSame = false;
-                }
-            } catch (Exception e) {
-                logger.log(Level.WARNING, "Future Map convertPaymentXMLToEntity method failed.:", e);
+        boolean theSame = true;
+        try {
+            if (payment.getBankFailedReason().contains(pay.getBankFailedReason().getValue()) == false) {
+                theSame = false;
             }
+            if (payment.getBankReceiptID().contains(pay.getBankReceiptID().getValue()) == false) {
+                theSame = false;
+            }
+            if (payment.getBankReturnCode().contains(pay.getBankReturnCode().getValue()) == false) {
+                theSame = false;
+            }
+            if (payment.getCustomerName() == null) {
+                theSame = false;
+            } else {
+                if (payment.getCustomerName().getId().toString().contains(pay.getYourSystemReference().getValue()) == false) {
+                    theSame = false;
+                }
+            }
+            if (payment.getDebitDate().compareTo(pay.getDebitDate().getValue().toGregorianCalendar().getTime()) != 0) {
+                theSame = false;
+            }
+            if (payment.getEzidebitCustomerID().contains(pay.getBankFailedReason().getValue()) == false) {
+                theSame = false;
+            }
+            if (payment.getInvoiceID().contains(pay.getEzidebitCustomerID().getValue()) == false) {
+                theSame = false;
+            }
+            if (payment.getPaymentAmount().compareTo(new BigDecimal(pay.getPaymentAmount().floatValue())) != 0) {
+                theSame = false;
+            }
+            if (payment.getPaymentID().contains(pay.getPaymentID().getValue()) == false) {
+                theSame = false;
+            }
+            if (payment.getPaymentMethod().contains(pay.getPaymentMethod().getValue()) == false) {
+                theSame = false;
+            }
+            if (payment.getPaymentReference().contains(pay.getPaymentReference().getValue()) == false) {
+                theSame = false;
+            }
+            if (payment.getPaymentSource().contains(pay.getPaymentSource().getValue()) == false) {
+                theSame = false;
+            }
+            if (payment.getPaymentStatus().contains(pay.getPaymentStatus().getValue()) == false) {
+                theSame = false;
+            }
+            if (payment.getScheduledAmount().compareTo(new BigDecimal(pay.getScheduledAmount().floatValue())) != 0) {
+                theSame = false;
+            }
+            if (payment.getSettlementDate().compareTo(pay.getSettlementDate().getValue().toGregorianCalendar().getTime()) != 0) {
+                theSame = false;
+            }
+            if (payment.getTransactionFeeClient().compareTo(new BigDecimal(pay.getTransactionFeeClient().floatValue())) != 0) {
+                theSame = false;
+            }
+            if (payment.getTransactionFeeCustomer().compareTo(new BigDecimal(pay.getTransactionFeeCustomer().floatValue())) != 0) {
+                theSame = false;
+            }
+            if (pay.getTransactionTime().getValue() != null) {
+                if (payment.getTransactionTime().compareTo(pay.getTransactionTime().getValue().toGregorianCalendar().getTime()) != 0) {
+                    theSame = false;
+                }
+            }
+            if (payment.getYourGeneralReference().contains(pay.getYourGeneralReference().getValue()) == false) {
+                theSame = false;
+            }
+            if (payment.getYourSystemReference().contains(pay.getYourSystemReference().getValue()) == false) {
+                theSame = false;
+            }
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "Future Map convertPaymentXMLToEntity method failed.:", e);
+        }
 
-            return theSame;
+        return theSame;
+    }
+    }
+    private void sanityCheckCustomersForDefaultItems() {
+        logger.log(Level.INFO, "Performing Sanity Checks on Customers");
+        List<Customers> cl = customersFacade.findAll();
+        for (Customers c : cl) {
+            if (c.getProfileImage() == null) {
+                createDefaultProfilePic(c);
+            }
+        }
+        logger.log(Level.INFO, "FINISHED Performing Sanity Checks on Customers");
+    }
+
+    private void createDefaultProfilePic(Customers cust) {
+        String placeholderImage = configMapFacade.getConfig("system.default.profile.image");
+        String fileExtension = placeholderImage.substring(placeholderImage.lastIndexOf(".")).toLowerCase();
+        int imgType = -1;
+        if (fileExtension.contains("jpeg") || fileExtension.contains("jpg")) {
+            imgType = 2;
+            fileExtension = "jpeg";
+        }
+        if (fileExtension.contains("png")) {
+            imgType = 1;
+            fileExtension = "png";
+        }
+        if (fileExtension.contains("gif")) {
+            imgType = 0;
+            fileExtension = "gif";
+        }
+        if (imgType == -1) {
+            logger.log(Level.WARNING, "createDefaultProfilePic , Cannot add default profile pic for customer {1} due the picture not being in jpeg, gif or png. resource:{0}", new Object[]{placeholderImage, cust.getUsername()});
+            return;
+        }
+        if (cust != null) {
+            if (cust.getProfileImage() == null) {
+                try {
+                    CustomerImages ci = new CustomerImages(0);
+                    BufferedImage img = null;
+                    InputStream stream = FacesContext.getCurrentInstance().getExternalContext().getResourceAsStream(placeholderImage);
+                    try {
+                        img = ImageIO.read(stream);
+                    } catch (IOException e) {
+                        Logger.getLogger(CustomerImagesController.class.getName()).log(Level.SEVERE, "createDefaultProfilePic, Loading image into buffer error!!", e);
+
+                        JsfUtil.addErrorMessage(e, "Loading image into buffer error!!");
+                    }
+
+                    ByteArrayOutputStream os = new ByteArrayOutputStream();
+                    try {
+
+                        ImageIO.write(img, fileExtension, os);
+
+                    } catch (IOException ex) {
+                        Logger.getLogger(CustomerImagesController.class.getName()).log(Level.SEVERE, "createDefaultProfilePic, write image  error!!", ex);
+                        JsfUtil.addErrorMessage(ex, "createDefaultProfilePic, write image  error!!");
+                    }
+
+                    ci.setImage(os.toByteArray());
+                    ci.setImageType(imgType);
+                    ci.setCustomers(cust);
+                    ci.setCustomerId(cust);
+                    ci.setDatetaken(new Date());
+
+                    ejbCustomerImagesFacade.edit(ci);
+                    cust.setProfileImage(ci);
+                    customersFacade.edit(cust);
+                } catch (Exception e) {
+                    logger.log(Level.WARNING, "createDefaultProfilePic , Cannot add default profile pic for customer {1} due to an exception:{0}", new Object[]{e, cust.getUsername()});
+
+                }
+            }
+        } else {
+            logger.log(Level.WARNING, "createDefaultProfilePic ERROR, Cannot add default profile pic to a null customer object");
         }
     }
 

@@ -263,6 +263,12 @@ public class PaymentBean implements Serializable {
         //  than one payment for PaymentAmountInCents scheduled on DebitDate, then only
         //  one of the payments will be deleted.
         boolean result = false;
+        if (debitDate == null || cust == null || paymentAmountInCents < 0) {
+            logger.log(Level.WARNING, "deletePayment NULL parameter of Amount < 0. cust {0}, date {1}, Amount {2}", new Object[]{cust, debitDate, paymentAmountInCents});
+
+            return new AsyncResult<>(result);
+        }
+
         String eziDebitCustomerId = ""; // use our reference instead. THis must be an empty string.
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         String debitDateString = sdf.format(debitDate);
@@ -440,7 +446,7 @@ public class PaymentBean implements Serializable {
 
             cust.setPaymentParameters(payParams);
             customersFacade.editAndFlush(cust);
-        } 
+        }
 
         if (payParams == null) {
             logger.log(Level.WARNING, "Payment gateway EZIDEBIT parameters not found");
@@ -727,18 +733,18 @@ public class PaymentBean implements Serializable {
         if (useSettlementDate == true) {
             dateField = "SETTLEMENT";
         }
-       logger.log(Level.INFO, "getAllPaymentsBySystemSinceDate - Calling ezidebit WS, From Date {0}, To Date {1}, report Type {2}", new Object[]{fromDateString, toDate,dateField});
+        logger.log(Level.INFO, "getAllPaymentsBySystemSinceDate - Calling ezidebit WS, From Date {0}, To Date {1}, report Type {2}", new Object[]{fromDateString, toDate, dateField});
 
-        EziResponseOfArrayOfPaymentTHgMB7OL eziResponse = getWs().getPayments(digitalKey, "ALL", "ALL", "ALL", "", fromDateString,toDate, dateField, "", "");
+        EziResponseOfArrayOfPaymentTHgMB7OL eziResponse = getWs().getPayments(digitalKey, "ALL", "ALL", "ALL", "", fromDateString, toDate, dateField, "", "");
         if (eziResponse.getError() == 0) {// any errors will be a non zero value
-                    logger.log(Level.INFO, "getAllPaymentsBySystemSinceDate Response:OK - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
+            logger.log(Level.INFO, "getAllPaymentsBySystemSinceDate Response:OK - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
 
             result = eziResponse.getData().getValue();
-            if(result.getPayment() != null){
-                   logger.log(Level.INFO, "getAllPaymentsBySystemSinceDate Response: OK {0}, No of Payments in List = {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue().getPayment().size()});
-    
+            if (result.getPayment() != null) {
+                logger.log(Level.INFO, "getAllPaymentsBySystemSinceDate Response: OK {0}, No of Payments in List = {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue().getPayment().size()});
+
             }
- 
+
         } else {
             logger.log(Level.WARNING, "getAllPaymentsBySystemSinceDate Response: Error - {0}, ", eziResponse.getErrorMessage().getValue());
 

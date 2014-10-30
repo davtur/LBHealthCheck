@@ -114,7 +114,12 @@
     <listener>
         <description>Context Listener</description>
         <listener-class>au.com.manlyit.fitnesscrm.stats.classes.CrmContextListener</listener-class>
+    </listener><listener>
+        <description>Atmosphere Session Support Listener</description>
+        <listener-class>org.atmosphere.cpr.SessionSupport</listener-class>
     </listener>
+    
+    
     <!--<filter>
         <filter-name>PrimeFaces FileUpload Filter</filter-name>
         <filter-class>org.primefaces.webapp.filter.FileUploadFilter</filter-class>

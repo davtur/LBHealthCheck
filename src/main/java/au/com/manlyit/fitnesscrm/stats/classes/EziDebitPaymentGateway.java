@@ -2259,7 +2259,7 @@ public class EziDebitPaymentGateway implements Serializable {
         String loggedInUser = FacesContext.getCurrentInstance().getExternalContext().getRemoteUser();
         Double amount = selectedScheduledPayment.getPaymentAmount().floatValue() * (double) 100;
         if (loggedInUser != null) {
-            startAsynchJob("DeletePayment", paymentBean.deletePayment(selectedCustomer, selectedScheduledPayment.getPaymentDate(), amount.longValue(), selectedScheduledPayment.getPaymentReference(), loggedInUser, getDigitalKey()));
+            startAsynchJob("DeletePayment", paymentBean.deletePayment(selectedCustomer, selectedScheduledPayment.getDebitDate(), amount.longValue(), selectedScheduledPayment.getPaymentReference(), loggedInUser, getDigitalKey()));
         } else {
             logger.log(Level.WARNING, "Logged in user is null. Delete Payment aborted.");
         }

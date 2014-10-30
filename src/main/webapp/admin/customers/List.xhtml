@@ -274,6 +274,8 @@
 
                                     </p:outputPanel>
                                 </f:facet>
+                                <p:ajax event="rowSelect"   update="deleteButton"/>
+                                <p:ajax event="rowUnselect" update="deleteButton"/> 
                                 <p:column sortBy="#{pay.paymentID}" filterBy="#{pay.paymentID}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentID')}"   >
                                     <h:outputText value="#{pay.paymentID}"/>
                                 </p:column>
@@ -335,7 +337,7 @@
 
                             </p:panelGrid>
                         </p:panel>
-                        <p:panel id="paymentsTablePanel" collapsed="true" header="Completed Payments in Ezidebit" rendered="#{ezidebit.paymentsList != null and ezidebit.customerExistsInPaymentGateway == true}"> 
+                        <p:panel id="paymentsTablePanel" collapsed="true" toggleable="true" header="Completed Payments in Ezidebit" rendered="#{ezidebit.paymentsList != null and ezidebit.customerExistsInPaymentGateway == true}"> 
                             <p:dataTable  id="paymentsTable"
                                           value="#{ezidebit.paymentsList}" 
                                           filteredValue="#{ezidebit.paymentsListFilteredItems}"  
@@ -381,7 +383,7 @@
 
                         </p:panel>
 
-                        <p:panel id="scheduledPaymentsTablePanel" collapsed="true" header="Scheduled Payments in Ezidebit" rendered="#{ezidebit.scheduledPaymentsList != null and ezidebit.customerExistsInPaymentGateway == true}">
+                        <p:panel id="scheduledPaymentsTablePanel"  collapsed="true" toggleable="true"  header="Scheduled Payments in Ezidebit" rendered="#{ezidebit.scheduledPaymentsList != null and ezidebit.customerExistsInPaymentGateway == true}">
                             <p:dataTable id="scheduledPaymentsTable"
                                          selectionMode="single"
                                          selection="#{ezidebit.selectedScheduledPayment}" 
@@ -399,8 +401,7 @@
 
                                     </p:outputPanel>
                                 </f:facet>
-                                <p:ajax event="rowSelect"   update="deleteButton"/>
-                                <p:ajax event="rowUnselect" update="deleteButton"/>
+                               
 
                                 <p:column  >
                                     <h:outputText value="#{payment.id}"/>
@@ -432,7 +433,7 @@
 
                             </p:dataTable>
                         </p:panel>
-                        <p:panel id="ezidebitCustomerDetailsPanel" rendered="#{ezidebit.currentCustomerDetails != null }" header="EziDebit Customer Record">
+                        <p:panel id="ezidebitCustomerDetailsPanel" collapsed="true" toggleable="true" rendered="#{ezidebit.currentCustomerDetails != null }" header="Customer Record in EziDebit">
                             <p:panelGrid columns="2" style="width:100%">
                                 <p:outputLabel value="Customer Name:" /> <h:outputText value="#{ezidebit.currentCustomerDetails.customerFirstName.value} #{ezidebit.currentCustomerDetails.customerName.value}"/>
                                 <p:outputLabel value="Customer Address:" /> <h:outputText value="#{ezidebit.currentCustomerDetails.addressLine2.value} #{ezidebit.currentCustomerDetails.addressLine1.value}, #{ezidebit.currentCustomerDetails.addressSuburb.value} #{ezidebit.currentCustomerDetails.addressState.value} #{ezidebit.currentCustomerDetails.addressPostCode.value}"/>

@@ -75,11 +75,11 @@ public class PaymentsFacade extends AbstractFacade<Payments> {
             CriteriaBuilder cb = em.getCriteriaBuilder();
             CriteriaQuery<Payments> cq = cb.createQuery(Payments.class);
             Root<Payments> rt = cq.from(Payments.class);
-
+            Expression<Date> dDate = rt.get("debitDate");
             Expression<Customers> cust = rt.get("customerName");
             Expression<String> paymentID = rt.get("paymentID");
             cq.where(cb.and(cb.equal(cust, customer), cb.isNull(paymentID)));
-
+            cq.orderBy(cb.asc(dDate));
             Query q = em.createQuery(cq);
             retList = q.getResultList();
         } catch (Exception e) {
@@ -87,6 +87,51 @@ public class PaymentsFacade extends AbstractFacade<Payments> {
             logger.log(Level.INFO, "Could not find customers Payments.", e);
         }
         return retList;
+    }
+
+    public Payments findLastSuccessfulScheduledPayment(Customers customer) {
+        Payments cm = null;
+        try {
+           CriteriaBuilder cb = em.getCriteriaBuilder();
+            CriteriaQuery<Payments> cq = cb.createQuery(Payments.class);
+            Root<Payments> rt = cq.from(Payments.class);
+            Expression<Date> dDate = rt.get("debitDate");
+            Expression<Customers> cust = rt.get("customerName");
+            Expression<String> paymentID = rt.get("paymentID");
+            cq.where(cb.and(cb.equal(cust, customer), cb.isNotNull(paymentID)));
+            cq.orderBy(cb.asc(dDate));
+     
+            Query q = em.createQuery(cq).setMaxResults(1);
+            
+            if (q.getResultList().size() > 0) {
+                cm = (Payments) q.getSingleResult();
+            }
+        } catch (Exception e) {
+             logger.log(Level.INFO, "findLastSuccessfulPayment error customer:{0} " + customer, e);
+        }
+        return cm;
+    }
+    public Payments findNextScheduledPayment(Customers customer) {
+        Payments cm = null;
+        try {
+           CriteriaBuilder cb = em.getCriteriaBuilder();
+            CriteriaQuery<Payments> cq = cb.createQuery(Payments.class);
+            Root<Payments> rt = cq.from(Payments.class);
+            Expression<Date> dDate = rt.get("debitDate");
+            Expression<Customers> cust = rt.get("customerName");
+            Expression<String> paymentID = rt.get("paymentID");
+            cq.where(cb.and(cb.equal(cust, customer), cb.isNull(paymentID)));
+            cq.orderBy(cb.desc(dDate));
+     
+            Query q = em.createQuery(cq).setMaxResults(1);
+            
+            if (q.getResultList().size() > 0) {
+                cm = (Payments) q.getSingleResult();
+            }
+        } catch (Exception e) {
+            logger.log(Level.INFO, "findNextScheduledPayment error customer:{0} " + customer, e);
+        }
+        return cm;
     }
 
     public Payments findPaymentByPaymentId(String paymentId) {
