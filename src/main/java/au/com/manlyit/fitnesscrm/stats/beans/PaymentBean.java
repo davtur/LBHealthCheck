@@ -309,6 +309,7 @@ public class PaymentBean implements Serializable {
     @Asynchronous
     public Future<Boolean> changeCustomerStatus(Customers cust, String newStatus, String loggedInUser, String digitalKey) {
         // note: cancelled status cannot be changed with this method. i.e. cancelled is final like deleted.
+        logger.log(Level.INFO, "{2} changed customer ({0}) status to {1}", new Object[]{cust.getUsername(),newStatus,loggedInUser});
         boolean result = false;
         String eziDebitCustomerId = ""; // use our reference instead. THis must be an empty string.
         String ourSystemCustomerReference = cust.getId().toString();
@@ -695,7 +696,7 @@ public class PaymentBean implements Serializable {
     }
 
     @Asynchronous
-    public synchronized Future<ArrayOfPayment> getAllPaymentsBySystemSinceDate(Date fromDate, boolean useSettlementDate, String digitalKey) {
+    public synchronized Future<ArrayOfPayment> getAllPaymentsBySystemSinceDate(Date fromDate,Date endDate, boolean useSettlementDate, String digitalKey) {
         //  Description
         //  	  
         //  This method allows you to retrieve payment information from across Ezidebit's various
@@ -727,7 +728,7 @@ public class PaymentBean implements Serializable {
         if (fromDate != null) {
             fromDateString = sdf.format(fromDate);
         }
-        String toDate = sdf.format(new Date());
+        String toDate = sdf.format(endDate);
 
         String dateField = "PAYMENT";
         if (useSettlementDate == true) {

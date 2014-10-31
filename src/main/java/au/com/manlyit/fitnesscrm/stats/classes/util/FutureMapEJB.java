@@ -161,22 +161,33 @@ public class FutureMapEJB implements Serializable {
             return false;
         } else {
             logger.log(Level.INFO, "Future Map, runSettlementReport. from date {0}.", fromDate);
-            AsyncJob aj = new AsyncJob("SettlementReport", paymentBean.getAllPaymentsBySystemSinceDate(fromDate, true, getDigitalKey()));
+            Date toDate = new Date();
+            AsyncJob aj = new AsyncJob("SettlementReport", paymentBean.getAllPaymentsBySystemSinceDate(fromDate,toDate, true, getDigitalKey()));
             this.put(FUTUREMAP_INTERNALID, aj);
             settlementReportLock.set(true);
         }
         return true;
     }
 
-    public boolean runPaymentReport(Date fromDate) {
+    public boolean runPaymentReport(Date fromDate) throws InterruptedException {
         // use this if to get the lates payment information
         if (paymentReportLock.get() == true) {
             logger.log(Level.INFO, "The Settlement Report Already Running.");
             return false;
         } else {
             logger.log(Level.INFO, "Future Map, runPaymentReport. from date {0}.", fromDate);
-            AsyncJob aj = new AsyncJob("PaymentReport", paymentBean.getAllPaymentsBySystemSinceDate(fromDate, false, getDigitalKey()));
+            Date toDate = new Date();
+            AsyncJob aj = new AsyncJob("PaymentReport", paymentBean.getAllPaymentsBySystemSinceDate(fromDate, toDate,false, getDigitalKey()));
             this.put(FUTUREMAP_INTERNALID, aj);
+            
+            List<Customers> acl = customersFacade.findAllActiveCustomers(true);
+            AsyncJob aj2 ;
+            for(Customers c:acl){
+                aj2 = new AsyncJob("GetCustomerDetails", paymentBean.getCustomerDetails(c, getDigitalKey()));
+                this.put(FUTUREMAP_INTERNALID, aj);
+                Thread.sleep(500);//sleeping for a long time wont affect performance (the warning is there for a short sleep of say 5ms ) but we don't want to overload the payment gateway or they may get upset.
+            }
+            
             paymentReportLock.set(true);
         }
         return true;
@@ -295,13 +306,17 @@ public class FutureMapEJB implements Serializable {
 
     @Schedule(dayOfMonth = "*", hour = "6", minute = "0", second = "0")
     //@Schedule(dayOfMonth = "*", hour = "*", minute = "*", second = "0")//debug
-    public void retrievePaymentsReportFromPaymentGateway(Timer t) {  // run every day at 5am seconds
+    public void retrievePaymentsReportFromPaymentGateway(Timer t) {  try {
+        // run every day at 5am seconds
         GregorianCalendar cal = new GregorianCalendar();
         cal.add(Calendar.DAY_OF_YEAR, -7);
         logger.log(Level.INFO, "Running the daily payment report from date:{0}", cal.getTime());
 
         boolean result = runPaymentReport(cal.getTime());
         logger.log(Level.INFO, "The daily payment report has completed. Result:{0}", result);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(FutureMapEJB.class.getName()).log(Level.WARNING, "Run Payment Report was interrupted", ex);
+        }
     }
 
     @Schedule(hour = "*", minute = "*", second = "*")

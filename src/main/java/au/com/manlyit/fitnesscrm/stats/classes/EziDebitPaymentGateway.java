@@ -857,7 +857,7 @@ public class EziDebitPaymentGateway implements Serializable {
         if (manualRefreshFromPaymentGateway) {
             manualRefreshFromPaymentGateway = false;
             Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.INFO, "Starting async Manual Refresh from Payment Gateway with starting date:", reportStartDate);
-            startAsynchJob(key, paymentBean.getAllPaymentsBySystemSinceDate(reportStartDate, reportUseSettlementDate, getDigitalKey()));
+            startAsynchJob(key, paymentBean.getAllPaymentsBySystemSinceDate(reportStartDate,reportEndDate, reportUseSettlementDate, getDigitalKey()));
 
         }
     }

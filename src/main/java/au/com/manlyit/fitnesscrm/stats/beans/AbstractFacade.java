@@ -4,6 +4,7 @@
  */
 package au.com.manlyit.fitnesscrm.stats.beans;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -22,7 +23,7 @@ import org.primefaces.model.SortOrder;
  * @author david
  * @param <T>
  */
-public abstract class AbstractFacade<T> {
+public abstract class AbstractFacade<T> implements Serializable{
     private static final Logger logger = Logger.getLogger(AbstractFacade.class.getName());
     private final Class<T> entityClass;
 
