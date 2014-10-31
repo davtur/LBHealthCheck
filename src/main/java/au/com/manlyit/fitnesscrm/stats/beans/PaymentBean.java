@@ -1,11 +1,6 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package au.com.manlyit.fitnesscrm.stats.beans;
 
-import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.classes.util.SendHTMLEmailWithFileAttached;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import au.com.manlyit.fitnesscrm.stats.db.PaymentParameters;
@@ -27,7 +22,6 @@ import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
-import java.util.Collection;
 import java.util.Date;
 import java.util.Properties;
 import java.util.concurrent.Future;
@@ -57,7 +51,9 @@ public class PaymentBean implements Serializable {
     @Inject
     private CustomersFacade customersFacade;
     @Inject
-    ConfigMapFacade configMapFacade;
+    private ConfigMapFacade configMapFacade;
+    @Inject
+    private AuditLogFacade auditLogFacade;
 
     private INonPCIService getWs() {
         URL url = null;
@@ -65,7 +61,9 @@ public class PaymentBean implements Serializable {
         try {
             url = new URL(configMapFacade.getConfig("payment.ezidebit.gateway.url"));
         } catch (MalformedURLException ex) {
-            e = new WebServiceException(ex);
+
+            logger.log(Level.SEVERE, "MalformedURLException - payment.ezidebit.gateway.url", ex);
+
         }
         return new NonPCIService(url).getBasicHttpBindingINonPCIService();
     }
@@ -206,6 +204,11 @@ public class PaymentBean implements Serializable {
         logger.log(Level.INFO, "editCustomerDetail Response: Error - {0}, Data - {1}", new Object[]{editCustomerDetail.getErrorMessage().getValue(), editCustomerDetail.getData().getValue()});
         if (editCustomerDetail.getError() == 0) {// any errors will be a non zero value
             result = true;
+            String auditDetails = "Edit the customers details for  :" + cust.getUsername() + " Details:  " + humanFriendlyReference + " " + cust.getLastname() + " " + cust.getFirstname() + " " + cust.getStreetAddress() + " " + addresssLine2 + " " + cust.getSuburb() + " " + cust.getPostcode() + " " + cust.getAddrState() + " " + cust.getEmailAddress() + " " + cust.getTelephone() + " " + payParams.getSmsPaymentReminder() + " " + payParams.getSmsFailedNotification() + " " + payParams.getSmsExpiredCard() + " " + payParams.getLoggedInUser().getUsername();
+            String changedFrom = "Existing Customer Record";
+            String changedTo = "Edited customer record";
+            auditLogFacade.audit(customersFacade.findCustomerByUsername(FacesContext.getCurrentInstance().getExternalContext().getRemoteUser()), cust, "editCustomerDetails", auditDetails, changedFrom, changedTo);
+
         } else {
             logger.log(Level.WARNING, "editCustomerDetail Response: Error - {0}, Data - {1}", new Object[]{editCustomerDetail.getErrorMessage().getValue(), editCustomerDetail.getData().getValue()});
 
@@ -237,6 +240,11 @@ public class PaymentBean implements Serializable {
         if (eziResponse.getError() == 0) {// any errors will be a non zero value
 
             if (eziResponse.getData().getValue().compareTo("S") == 0) {
+                String auditDetails = "Cleared scheduled for  :" + cust.getUsername() + ".  Keep Manual Payments: " + keepManualPayments;
+                String changedFrom = "From Date:" + cust.getPaymentParameters().getPaymentPeriod();
+                String changedTo = "Cleared Schedule";
+                auditLogFacade.audit(customersFacade.findCustomerByUsername(loggedInUser), cust, "clearSchedule", auditDetails, changedFrom, changedTo);
+
                 return new AsyncResult<>(true);
             } else {
                 logger.log(Level.WARNING, "clearSchedule Response Data value should be S ( Successful ) : Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
@@ -295,6 +303,11 @@ public class PaymentBean implements Serializable {
 
             if (eziResponse.getData().getValue().compareTo("S") == 0) {
                 result = true;
+                String auditDetails = "Debit Date:" + debitDateString + ", Amount (cents): " + paymentAmountInCents.toString() + ", Payment Ref:" + paymentReference;
+                String changedFrom = "Ref:" + paymentReference;
+                String changedTo = "Deleted";
+                auditLogFacade.audit(customersFacade.findCustomerByUsername(loggedInUser), cust, "deletePayment", auditDetails, changedFrom, changedTo);
+
             } else {
                 logger.log(Level.WARNING, "deletePayment Response Data value should be S ( Successful ) : Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
             }
@@ -309,11 +322,12 @@ public class PaymentBean implements Serializable {
     @Asynchronous
     public Future<Boolean> changeCustomerStatus(Customers cust, String newStatus, String loggedInUser, String digitalKey) {
         // note: cancelled status cannot be changed with this method. i.e. cancelled is final like deleted.
-        logger.log(Level.INFO, "{2} changed customer ({0}) status to {1}", new Object[]{cust.getUsername(),newStatus,loggedInUser});
+        logger.log(Level.INFO, "{2} changed customer ({0}) status to {1}", new Object[]{cust.getUsername(), newStatus, loggedInUser});
+
         boolean result = false;
         String eziDebitCustomerId = ""; // use our reference instead. THis must be an empty string.
         String ourSystemCustomerReference = cust.getId().toString();
-
+        String oldStatus = cust.getPaymentParameters().getStatusDescription();
         if (newStatus.compareTo("A") == 0 || newStatus.compareTo("H") == 0 || newStatus.compareTo("C") == 0) {
             if (loggedInUser.length() > 50) {
                 loggedInUser = loggedInUser.substring(0, 50);
@@ -330,6 +344,11 @@ public class PaymentBean implements Serializable {
             if (eziResponse.getError() == 0) {// any errors will be a non zero value
                 if (eziResponse.getData().getValue().compareTo("S") == 0) {
                     result = true;
+                    String auditDetails = "Changed the status for :" + cust.getUsername() + " to  " + newStatus + " from " + oldStatus;
+                    String changedFrom = "Old Status:" + oldStatus;
+                    String changedTo = "New Status:" + newStatus;
+                    auditLogFacade.audit(customersFacade.findCustomerByUsername(loggedInUser), cust, "changeCustomerStatus", auditDetails, changedFrom, changedTo);
+
                     logger.log(Level.INFO, "changeCustomerStatus  Successful  : ErrorCode - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
 
                 } else {
@@ -477,6 +496,11 @@ public class PaymentBean implements Serializable {
 
         if (addCustomerResponse.getError() == 0) {// any errors will be a non zero value
             result = true;
+            String auditDetails = "Customer Added :" + cust.getUsername() + " to  " + paymentGateway;
+            String changedFrom = "non-existant";
+            String changedTo = "New Customer:";
+            auditLogFacade.audit(customersFacade.findCustomerByUsername(authenticatedUser), cust, "addCustomer", auditDetails, changedFrom, changedTo);
+
             logger.log(Level.INFO, "Add Customer Response: Error - {0}, Data - {1}", new Object[]{addCustomerResponse.getErrorMessage().getValue(), addCustomerResponse.getData().getValue()});
 
         } else {
@@ -696,7 +720,7 @@ public class PaymentBean implements Serializable {
     }
 
     @Asynchronous
-    public synchronized Future<ArrayOfPayment> getAllPaymentsBySystemSinceDate(Date fromDate,Date endDate, boolean useSettlementDate, String digitalKey) {
+    public synchronized Future<ArrayOfPayment> getAllPaymentsBySystemSinceDate(Date fromDate, Date endDate, boolean useSettlementDate, String digitalKey) {
         //  Description
         //  	  
         //  This method allows you to retrieve payment information from across Ezidebit's various
@@ -784,6 +808,11 @@ public class PaymentBean implements Serializable {
 
             if (eziResponse.getData().getValue().compareTo("S") == 0) {
                 result = true;
+                String auditDetails = "Payment Added - Debit Date:" + debitDateString + ", Amount (cents): " + paymentAmountInCents.toString() + ", Payment Ref:" + paymentReference;
+                String changedFrom = "non-existent";
+                String changedTo = "Ref:" + paymentReference;
+                auditLogFacade.audit(customersFacade.findCustomerByUsername(loggedInUser), cust, "addPayment", auditDetails, changedFrom, changedTo);
+
             } else {
                 logger.log(Level.WARNING, "addPayment Response Data value should be S ( Successful ) : Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
             }
@@ -877,6 +906,11 @@ public class PaymentBean implements Serializable {
 
                 if (eziResponse.getData().getValue().compareTo("S") == 0) {
                     result = true;
+                    String auditDetails = "Created scheduled for  :" + cust.getUsername() + ".  Keep Manual Payments: " + keepManualPayments + ", start:" + scheduleStartDateString + ",Period Type:" + schedulePeriodTypeString + ",Amount:" + paymentAmountInCents;
+                    String changedFrom = "From Date:" + cust.getPaymentParameters().getPaymentPeriod();
+                    String changedTo = "New Schedule";
+                    auditLogFacade.audit(customersFacade.findCustomerByUsername(loggedInUser), cust, "createSchedule", auditDetails, changedFrom, changedTo);
+
                 } else {
                     logger.log(Level.WARNING, "createSchedule Response Data value should be S ( Successful ) : Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
                 }
@@ -922,6 +956,11 @@ public class PaymentBean implements Serializable {
 
             if (eziResponse.getData().getValue().compareTo("S") == 0) {
                 result = true;
+                String auditDetails = "Changed the scheduled Amount for  :" + cust.getUsername() + " from  " + changeFromDateString + " to Amount in cents : " + newPaymentAmountInCents;
+                String changedFrom = "From Date:" + changeFromDateString;
+                String changedTo = "New Amount (cents):" + newPaymentAmountInCents;
+                auditLogFacade.audit(customersFacade.findCustomerByUsername(loggedInUser), cust, "addCustomer", auditDetails, changedFrom, changedTo);
+
             } else {
                 logger.log(Level.WARNING, "changeScheduledAmount Response Data value should be S ( Successful ) : Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
             }
@@ -967,6 +1006,11 @@ public class PaymentBean implements Serializable {
 
             if (eziResponse.getData().getValue().compareTo("S") == 0) {
                 result = true;
+                String auditDetails = "Changed the scheduled Date for  :" + cust.getUsername() + " from  " + changeFromDateString + " to Date: " + changeToDateString + ", Ref:" + paymentReference + ", Keep Manual Payments =" + keepManualPaymentsString;
+                String changedFrom = "From Date:" + changeFromDateString;
+                String changedTo = "New Date:" + changeToDateString;
+                auditLogFacade.audit(customersFacade.findCustomerByUsername(loggedInUser), cust, "changeScheduledDate", auditDetails, changedFrom, changedTo);
+
             } else {
                 logger.log(Level.WARNING, "changeScheduledDate Response Data value should be S ( Successful ) : Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
             }

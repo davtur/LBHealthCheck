@@ -25,7 +25,6 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.enterprise.context.SessionScoped;
 import javax.inject.Named;
-import javax.faces.event.ActionEvent;
 import javax.imageio.ImageIO;
 import org.jfree.chart.JFreeChart;
 import org.jfree.data.time.Minute;
@@ -44,12 +43,12 @@ import org.primefaces.model.StreamedContent;
 public class JFreeChartWebMonBean implements Serializable {
 
     private static final Logger logger = Logger.getLogger(websiteMonitorChart.class.getName());
-    private SimpleDateFormat sdf2 = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-    private SimpleDateFormat sdf4 = new SimpleDateFormat("HH:mm:ss");
-    private SimpleDateFormat sdf3 = new SimpleDateFormat("EEEE, d MMM yyyy");
-    private static int DAYS_TO_DISPLAY = 7;
+    private final SimpleDateFormat sdf2 = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+    private final SimpleDateFormat sdf4 = new SimpleDateFormat("HH:mm:ss");
+    private final SimpleDateFormat sdf3 = new SimpleDateFormat("EEEE, d MMM yyyy");
+    private static final int DAYS_TO_DISPLAY = 7;
     private String lastUpdateTime = "Last Updated: " + sdf4.format(new Date());
-    private ArrayList<Date> latestChartDates = new ArrayList<Date>();
+    private ArrayList<Date> latestChartDates = new ArrayList<>();
     private byte[] chart0;
     private byte[] chart1;
     private byte[] chart2;
@@ -278,7 +277,7 @@ public class JFreeChartWebMonBean implements Serializable {
     }
 
     private ArrayList<TimeSeries> populateSeries(String label, String label2, String label3, String label4, List<WebsiteMonitor> sqlResults) {
-        ArrayList<TimeSeries> alts = new ArrayList<TimeSeries>();
+        ArrayList<TimeSeries> alts = new ArrayList<>();
         TimeSeries series = null;
         TimeSeries series2 = null;
         TimeSeries series3 = null;
@@ -317,7 +316,7 @@ public class JFreeChartWebMonBean implements Serializable {
                         series4.add(new Minute(wm.getStartTime()), yVal4);
                     }
                 } catch (Exception e) {
-                    if (e.getMessage().indexOf("Duplicates are not permitted") != -1) {
+                    if (e.getMessage().contains("Duplicates are not permitted")) {
                         logger.log(Level.FINE, "Duplicate time detected for series point id: {0}. Skipping!!", wm.getId());
                     } else {
                         logger.log(Level.WARNING, "Couldn't add series point!!", e);
@@ -392,9 +391,6 @@ public class JFreeChartWebMonBean implements Serializable {
         this.latestChartDates = latestChartDates;
     }
 
-    /**
-     * @param models the models to set
-     */
     /* public void setModels(ArrayList<StreamedContent> models) {
     this.models = models;
     }/*

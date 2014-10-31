@@ -42,7 +42,7 @@
                                           occured!" widgetVar="exceptionDialog" height="500px">
                                     Message: #{pfExceptionHandler.message} <br/>
                                     Stack Trace: <h:outputText value="#{pfExceptionHandler.formattedStackTrace}"
-                                                              escape="false" />
+                                                               escape="false" />
                                     <p:button onclick="document.location.href = document.location.href;"
                                               value="Reload!"/>
                                 </p:dialog>
@@ -50,7 +50,7 @@
 
                             <h:form id="menuForm">
 
-                                
+
 
                                 <p:menubar id="mainmenubar1" autoDisplay="true">
                                     <p:submenu  label="Developer" rendered="#{customersController.isUserInRole('DEVELOPER')}"  id="devMenu1" >
@@ -191,7 +191,10 @@
                                             id="fitnesscharts"                              
                                             action="/admin/fitnessTestCharts/List.xhtml" ajax="false"  value="Fitness Test Charts"    >                       
                                         </p:menuitem>
-
+                                        <p:menuitem
+                                            id="auditLog"                              
+                                            action="/admin/auditLog/List.xhtml" ajax="false"  value="Change Log"    >                       
+                                        </p:menuitem>
                                     </p:submenu>
 
 

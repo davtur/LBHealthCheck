@@ -127,7 +127,7 @@ public class EziDebitPaymentGateway implements Serializable {
     private PfSelectableDataModel<Payments> paymentDBList = null;
     private PfSelectableDataModel<Payments> reportPaymentsList = null;
     private List<Payment> paymentsListFilteredItems;
-    private List<Payment> paymentsListFilteredItems2;
+    private List<Payment> paymentsDBListFilteredItems;
     private List<Payment> reportPaymentsListFilteredItems;
     private List<ScheduledPaymentPojo> scheduledPaymentsList;
     private Payments selectedReportItem;
@@ -877,17 +877,17 @@ public class EziDebitPaymentGateway implements Serializable {
     }
 
     /**
-     * @return the paymentsListFilteredItems2
+     * @return the paymentsDBListFilteredItems
      */
-    public List<Payment> getPaymentsListFilteredItems2() {
-        return paymentsListFilteredItems2;
+    public List<Payment> getPaymentsDBListFilteredItems() {
+        return paymentsDBListFilteredItems;
     }
 
     /**
-     * @param paymentsListFilteredItems2 the paymentsListFilteredItems2 to set
+     * @param paymentsListFilteredItems2 the paymentsDBListFilteredItems to set
      */
-    public void setPaymentsListFilteredItems2(List<Payment> paymentsListFilteredItems2) {
-        this.paymentsListFilteredItems2 = paymentsListFilteredItems2;
+    public void setPaymentsDBListFilteredItems(List<Payment> paymentsListFilteredItems2) {
+        this.paymentsDBListFilteredItems = paymentsListFilteredItems2;
     }
 
     
@@ -1740,7 +1740,7 @@ public class EziDebitPaymentGateway implements Serializable {
                 setPaymentsList(payList);
                 setPaymentsListFilteredItems(null);
                 setPaymentDBList(null);
-                setPaymentsListFilteredItems2(null);
+                setPaymentsDBListFilteredItems(null);
             }
         }
 
@@ -1760,7 +1760,7 @@ public class EziDebitPaymentGateway implements Serializable {
                 setPaymentsList(payList);
                 setPaymentsListFilteredItems(null);
                 setPaymentDBList(null);
-                setPaymentsListFilteredItems2(null);
+                setPaymentsDBListFilteredItems(null);
             }
         }
 
@@ -1780,7 +1780,7 @@ public class EziDebitPaymentGateway implements Serializable {
                 setPaymentsList(payList);
                 setPaymentsListFilteredItems(null);
                 setPaymentDBList(null);
-                setPaymentsListFilteredItems2(null);
+                setPaymentsDBListFilteredItems(null);
             }
         }
 
@@ -1807,7 +1807,7 @@ public class EziDebitPaymentGateway implements Serializable {
                 setScheduledPaymentsList(pojoList);
                 setScheduledPaymentsListFilteredItems(null);
                 setPaymentDBList(null);
-                setPaymentsListFilteredItems2(null);
+                setPaymentsDBListFilteredItems(null);
             }
         }
 
@@ -2118,11 +2118,14 @@ public class EziDebitPaymentGateway implements Serializable {
     public void recreateModels() {
         // clear all arrays and reload from DB
         setPaymentsList(null);
-        setPaymentDBList(null);
         setPaymentsListFilteredItems(null);
+         
+        setPaymentDBList(null);
+        setPaymentsDBListFilteredItems(null);
+       
         setScheduledPaymentsList(null);
         setScheduledPaymentsListFilteredItems(null);
-        setPaymentsListFilteredItems2(null);
+        
         setCustomerDetailsHaveBeenRetrieved(false);
         setCurrentCustomerDetails(null);
 

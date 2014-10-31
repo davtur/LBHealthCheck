@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" >
+
+    <ui:composition template="/template.xhtml">
+        <ui:define name="title">
+            <h:outputText value="#{configMapController.getKey('ListAuditLogTitle')}"></h:outputText>
+        </ui:define>
+        <ui:define name="body">
+
+
+
+
+
+            <h:form id="AuditLogListForm">
+                <h:outputText escape="false" value="#{configMapController.getKey('ListAuditLogEmpty')}" rendered="#{auditLogController.items.rowCount == 0}"/>
+                <h:panelGroup rendered="#{auditLogController.items.rowCount > 0}">
+                    <p:dataTable  
+                        id="datalist"  
+
+                        value="#{auditLogController.items}" 
+                        selection="#{auditLogController.selected}" 
+                        rowKey="#{item.id}" 
+                        filteredValue="#{auditLogController.filteredItems}"  
+                        widgetVar="auditLogControllerTable" 
+                        selectionMode="single"
+                        var="item" 
+                        scrollable="true"
+                       
+                        >
+                          <f:facet name="header">
+                            <p:outputPanel>
+                                <h:outputText value="Search all fields:" />
+                                <h:inputText id="globalFilter" onkeyup="auditLogControllerTable.filter()" />
+                            </p:outputPanel>
+                        </f:facet>
+                        <p:ajax event="rowSelect"   update=" viewButton  "/>
+                        <p:ajax event="rowUnselect" update=" viewButton  "/>
+
+                        <p:column sortBy="#{item.id}" filterBy="#{item.id}" headerText="#{configMapController.getKey('ListAuditLogTitle_id')}"   >
+                            <h:outputText value="#{item.id}"/>
+                        </p:column>
+                        <p:column sortBy="#{item.timestampOfChange}" filterBy="#{item.timestampOfChange}" headerText="#{configMapController.getKey('ListAuditLogTitle_timestampOfChange')}"   >
+                            <h:outputText value="#{item.timestampOfChange}">
+                                <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                            </h:outputText>
+                        </p:column>
+                       <p:column sortBy="#{item.typeOfChange}" filterBy="#{item.typeOfChange}" headerText="#{configMapController.getKey('ListAuditLogTitle_typeOfChange')}"   >
+                            <h:outputText value="#{item.typeOfChange}"/>
+                        </p:column>
+                        <p:column sortBy="#{item.changedBy.username}" filterBy="#{item.changedBy.username}" headerText="#{configMapController.getKey('ListAuditLogTitle_changedBy')}"   >
+                            <h:outputText value="#{item.changedBy.username}"/>
+                        </p:column>
+                        <p:column sortBy="#{item.customer.username}" filterBy="#{item.customer.username}" headerText="#{configMapController.getKey('ListAuditLogTitle_customer')}"   >
+                            <h:outputText value="#{item.customer.username}"/>
+                        </p:column>
+ 
+                        <p:column sortBy="#{item.detailsOfChange}" filterBy="#{item.detailsOfChange}" headerText="#{configMapController.getKey('ListAuditLogTitle_detailsOfChange')}"   >
+                            <h:outputText value="#{item.detailsOfChange}"/>
+                        </p:column>
+                        <p:column sortBy="#{item.changedFrom}" filterBy="#{item.changedFrom}" headerText="#{configMapController.getKey('ListAuditLogTitle_changedFrom')}"   >
+                            <h:outputText value="#{item.changedFrom}"/>
+                        </p:column>
+                        <p:column sortBy="#{item.changedTo}" filterBy="#{item.changedTo}" headerText="#{configMapController.getKey('ListAuditLogTitle_changedTo')}"   >
+                            <h:outputText value="#{item.changedTo}"/>
+                        </p:column>
+                         <f:facet name="footer">
+                            <p:commandButton id="viewButton"   icon="ui-icon-search" value="#{configMapController.getKey('View')}" update=":AuditLogViewForm" oncomplete="PF('AuditLogViewDialog').show()" disabled="#{empty auditLogController.selected}"/>
+                        </f:facet>
+
+                    </p:dataTable>
+                </h:panelGroup>
+            </h:form>
+
+            <ui:include src="View.xhtml"/>
+
+        </ui:define>
+    </ui:composition>
+
+</html>

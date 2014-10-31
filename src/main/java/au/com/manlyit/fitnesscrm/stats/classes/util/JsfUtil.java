@@ -1,7 +1,9 @@
 package au.com.manlyit.fitnesscrm.stats.classes.util;
 
 import au.com.manlyit.fitnesscrm.stats.classes.CustomersController;
+import au.com.manlyit.fitnesscrm.stats.db.AuditLog;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
+import java.io.Serializable;
 import java.util.List;
 import java.util.logging.Logger;
 import javax.inject.Inject;
@@ -14,10 +16,12 @@ import org.apache.commons.lang.StringEscapeUtils;
 import org.primefaces.push.EventBus;
 import org.primefaces.push.EventBusFactory;
 
-public class JsfUtil {
+public class JsfUtil implements Serializable{
 
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.CustomersFacade ejbCustomerFacade;
+    @Inject
+    private au.com.manlyit.fitnesscrm.stats.beans.AuditLogFacade ejbAuditLogFacade;
 
     public static SelectItem[] getSelectItems(List<?> entities, boolean selectOne) {
         int size = selectOne ? entities.size() + 1 : entities.size();
@@ -134,33 +138,29 @@ public class JsfUtil {
         return converter.getAsObject(FacesContext.getCurrentInstance(), component, theId);
     }
 
-    public int getUser() {
-        int cust_id;
-        FacesContext facesContext = FacesContext.getCurrentInstance();
-        String name = facesContext.getExternalContext().getRemoteUser();
-        Customers cust = ejbCustomerFacade.findCustomerByUsername(name);
-        cust_id = cust.getId();
-        return cust_id;
-    }
+   /* public synchronized int getUser() {
+       return ejbCustomerFacade.findCustomerByUsername(FacesContext.getCurrentInstance().getExternalContext().getRemoteUser()).getId();
+    }*/
 
-    public Customers getCustomer() {
+    /*public synchronized Customers getCustomer() {
         Customers cust;
         FacesContext context = FacesContext.getCurrentInstance();
         CustomersController custController = (CustomersController) context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
-        String name = custController.getSelected().getUsername();
-        cust = ejbCustomerFacade.findCustomerByUsername(name);
+        cust = ejbCustomerFacade.findCustomerByUsername(custController.getSelected().getUsername());
 
         return cust;
-    }
+    }*/
 
     public static boolean isValidationFailed() {
         return FacesContext.getCurrentInstance().isValidationFailed();
     }
 
-    public boolean isAdminUser() {
+    public static boolean isAdminUser() {
         FacesContext facesContext = FacesContext.getCurrentInstance();
         boolean isAdmin = facesContext.getExternalContext().isUserInRole("ADMIN");
         return isAdmin;
     }
+
+   
 
 }

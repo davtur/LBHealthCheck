@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" >
+
+    <ui:composition>
+        <p:dialog id="AuditLogEditDlg" widgetVar="AuditLogEditDialog" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('EditAuditLogTitle')}">
+            <h:form id="AuditLogEditForm">
+                <h:panelGroup id="display">
+                    <p:panelGrid columns="2" rendered="#{auditLogController.selected != null}">
+                        <h:outputLabel value="#{configMapController.getKey('EditAuditLogLabel_id')}" for="id" />
+                        <h:inputText id="id"  value="#{auditLogController.selected.id}" title="#{configMapController.getKey('EditAuditLogTitle_id')}" required="true" requiredMessage="#{configMapController.getKey('EditAuditLogRequiredMessage_id')}"/>
+                        <h:outputLabel value="#{configMapController.getKey('EditAuditLogLabel_detailsOfChange')}" for="detailsOfChange" />
+                        <h:inputTextarea rows="4" cols="30" id="detailsOfChange" value="#{auditLogController.selected.detailsOfChange}" title="#{configMapController.getKey('EditAuditLogTitle_detailsOfChange')}" />
+                        <h:outputLabel value="#{configMapController.getKey('EditAuditLogLabel_changedFrom')}" for="changedFrom" />
+                        <h:inputText id="changedFrom"  value="#{auditLogController.selected.changedFrom}" title="#{configMapController.getKey('EditAuditLogTitle_changedFrom')}" />
+                        <h:outputLabel value="#{configMapController.getKey('EditAuditLogLabel_changedTo')}" for="changedTo" />
+                        <h:inputText id="changedTo"  value="#{auditLogController.selected.changedTo}" title="#{configMapController.getKey('EditAuditLogTitle_changedTo')}" />
+                        <h:outputLabel value="#{configMapController.getKey('EditAuditLogLabel_typeOfChange')}" for="typeOfChange" />
+                        <h:inputText id="typeOfChange"  value="#{auditLogController.selected.typeOfChange}" title="#{configMapController.getKey('EditAuditLogTitle_typeOfChange')}" />
+                        <h:outputLabel value="#{configMapController.getKey('EditAuditLogLabel_timestampOfChange')}" for="timestampOfChange" />
+                        <h:inputText id="timestampOfChange" value="#{auditLogController.selected.timestampOfChange}" title="#{configMapController.getKey('EditAuditLogTitle_timestampOfChange')}" required="true" requiredMessage="#{configMapController.getKey('EditAuditLogRequiredMessage_timestampOfChange')}">
+                            <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                        </h:inputText>
+                        <h:outputLabel value="#{configMapController.getKey('EditAuditLogLabel_changedBy')}" for="changedBy" />
+                        <p:selectOneMenu id="changedBy" valueChangeListener="#{auditLogController.selectOneMenuValueChangeListener}" value="#{auditLogController.selected.changedBy}" label="#{configMapController.getKey('EditAuditLogTitle_changedBy')}" >
+                            <f:selectItems value="#{customersController.itemsAvailableSelectOne}"/>
+                            <p:ajax   update=":AuditLogEditForm"  />
+                        </p:selectOneMenu>
+                        <h:outputLabel value="#{configMapController.getKey('EditAuditLogLabel_customer')}" for="customer" />
+                        <p:selectOneMenu id="customer" valueChangeListener="#{auditLogController.selectOneMenuValueChangeListener}" value="#{auditLogController.selected.customer}" label="#{configMapController.getKey('EditAuditLogTitle_customer')}" >
+                            <f:selectItems value="#{customersController.itemsAvailableSelectOne}"/>
+                            <p:ajax   update=":AuditLogEditForm"  />
+                        </p:selectOneMenu>
+                    </p:panelGrid>
+                    <p:commandButton actionListener="#{auditLogController.update}" value="#{configMapController.getKey('Save')}" update="display,:AuditLogListForm:datalist,:growl" oncomplete="handleSubmit(args, 'AuditLogEditDialog');auditLogControllerTable.filter()"/>
+                    <p:commandButton value="#{configMapController.getKey('Cancel')}" onclick="AuditLogEditDialog.hide()"/>
+                </h:panelGroup>
+            </h:form>
+        </p:dialog>
+
+    </ui:composition>
+</html>

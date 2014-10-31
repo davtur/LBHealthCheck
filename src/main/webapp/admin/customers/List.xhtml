@@ -107,7 +107,7 @@
                                         <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
                                     </h:outputText>
                                 </p:column>
-                                <p:column sortBy="#{item.paymentParameters.lastSuccessfulScheduledPayment.debitDate}" filterBy="#{item.paymentParameters.lastSuccessfulScheduledPayment.debitDate}" headerText="#{configMapController.getKey('ListCustomersTitle_lastSuccessfulScheduledPayment')}"   >
+                                <p:column  sortBy="#{item.paymentParameters.lastSuccessfulScheduledPayment.debitDate}" filterBy="#{item.paymentParameters.lastSuccessfulScheduledPayment.debitDate}" headerText="#{configMapController.getKey('ListCustomersTitle_lastSuccessfulScheduledPayment')}"   >
                                     <h:outputText value="#{item.paymentParameters.lastSuccessfulScheduledPayment.debitDate}">
                                         <f:convertDateTime pattern="dd MMM yyyy" />
                                     </h:outputText>
@@ -274,7 +274,7 @@
                                           selectionMode="single"
                                           selection="#{ezidebit.selectedScheduledPayment}" 
                                           value="#{ezidebit.paymentDBList}" 
-                                          filteredValue="#{ezidebit.paymentsListFilteredItems2}"  
+                                          filteredValue="#{ezidebit.paymentsDBListFilteredItems}"  
                                           widgetVar="paymentsListControllerTable"
                                           var="pay"  
                                           rowKey="#{pay.id}"
@@ -476,7 +476,7 @@
 
 
 
-                        <p:remoteCommand name="taskCompleted" actionListener="#{ezidebit.pollerListener}" />
+                        <p:remoteCommand name="taskCompleted" actionListener="#{ezidebit.pollerListener}"  />
                     </h:form>  
                     <!-- <h:form id="iFrameForm" > 
                          <p:outputPanel id="iFramePanel" >

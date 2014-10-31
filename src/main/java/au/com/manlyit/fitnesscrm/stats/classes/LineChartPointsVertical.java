@@ -5,29 +5,26 @@
 package au.com.manlyit.fitnesscrm.stats.classes;
 
 import au.com.manlyit.fitnesscrm.stats.db.Stat;
+import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
  *
  * @author david
  */
-public class LineChartPointsVertical {
+public class LineChartPointsVertical implements Serializable {
 
-    private ArrayList<Stat> verticalPoints = new ArrayList<Stat>();
-private String timeTaken;
-    /**
-     * @return the labels
-     */
+    private final ArrayList<Stat> verticalPoints = new ArrayList<>();
+    private String timeTaken;
+
     public Stat getStat(int id) {
         return verticalPoints.get(id);
     }
 
-    /**
-     * @param labels the labels to set
-     */
     public void addStat(Stat st) {
         verticalPoints.add(st);
     }
+
     /**
      * @return the timeTaken
      */
@@ -42,9 +39,6 @@ private String timeTaken;
         this.timeTaken = timeTaken;
     }
 
-    /**
-     * @return the stats
-     */
     public ArrayList<Stat> getVerticalPoints() {
         return verticalPoints;
     }

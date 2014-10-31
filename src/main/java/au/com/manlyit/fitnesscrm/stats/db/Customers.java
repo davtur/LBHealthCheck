@@ -60,6 +60,10 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Customers.findByFacebookId", query = "SELECT c FROM Customers c WHERE c.facebookId = :facebookId"),
     @NamedQuery(name = "Customers.findByGoogleId", query = "SELECT c FROM Customers c WHERE c.googleId = :googleId")})
 public class Customers implements BaseEntity, Serializable {
+    @OneToMany(mappedBy = "changedBy")
+    private Collection<AuditLog> auditLogCollection;
+    @OneToMany(mappedBy = "customer")
+    private Collection<AuditLog> auditLogCollection1;
     @JoinColumn(name = "profile_image", referencedColumnName = "id")
     @OneToOne
     private CustomerImages profileImage;
@@ -537,6 +541,24 @@ public class Customers implements BaseEntity, Serializable {
 
     public void setProfileImage(CustomerImages profileImage) {
         this.profileImage = profileImage;
+    }
+
+    @XmlTransient
+    public Collection<AuditLog> getAuditLogCollection() {
+        return auditLogCollection;
+    }
+
+    public void setAuditLogCollection(Collection<AuditLog> auditLogCollection) {
+        this.auditLogCollection = auditLogCollection;
+    }
+
+    @XmlTransient
+    public Collection<AuditLog> getAuditLogCollection1() {
+        return auditLogCollection1;
+    }
+
+    public void setAuditLogCollection1(Collection<AuditLog> auditLogCollection1) {
+        this.auditLogCollection1 = auditLogCollection1;
     }
 
 }

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" 
+      xmlns:ui="http://java.sun.com/jsf/facelets" >
+
+    <ui:composition>
+
+        <p:dialog id="AuditLogViewDlg" widgetVar="AuditLogViewDialog" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('ViewAuditLogTitle')}">
+            <h:form id="AuditLogViewForm">
+                <h:panelGroup id="display">
+                    <p:panelGrid columns="2" rendered="#{auditLogController.selected != null}">
+                        <h:outputText value="#{configMapController.getKey('ViewAuditLogLabel_id')}"/>
+                        <h:outputText value="#{auditLogController.selected.id}" title="#{configMapController.getKey('ViewAuditLogTitle_id')}"/>
+                        <h:outputText value="#{configMapController.getKey('ViewAuditLogLabel_detailsOfChange')}"/>
+                        <h:outputText value="#{auditLogController.selected.detailsOfChange}" title="#{configMapController.getKey('ViewAuditLogTitle_detailsOfChange')}"/>
+                        <h:outputText value="#{configMapController.getKey('ViewAuditLogLabel_changedFrom')}"/>
+                        <h:outputText value="#{auditLogController.selected.changedFrom}" title="#{configMapController.getKey('ViewAuditLogTitle_changedFrom')}"/>
+                        <h:outputText value="#{configMapController.getKey('ViewAuditLogLabel_changedTo')}"/>
+                        <h:outputText value="#{auditLogController.selected.changedTo}" title="#{configMapController.getKey('ViewAuditLogTitle_changedTo')}"/>
+                        <h:outputText value="#{configMapController.getKey('ViewAuditLogLabel_typeOfChange')}"/>
+                        <h:outputText value="#{auditLogController.selected.typeOfChange}" title="#{configMapController.getKey('ViewAuditLogTitle_typeOfChange')}"/>
+                        <h:outputText value="#{configMapController.getKey('ViewAuditLogLabel_timestampOfChange')}"/>
+                        <h:outputText value="#{auditLogController.selected.timestampOfChange}" title="#{configMapController.getKey('ViewAuditLogTitle_timestampOfChange')}">
+                            <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                        </h:outputText>
+                        <h:outputText value="#{configMapController.getKey('ViewAuditLogLabel_changedBy')}"/>
+                        <h:outputText value="#{auditLogController.selected.changedBy.username}" title="#{configMapController.getKey('ViewAuditLogTitle_changedBy')}"/>
+                        <h:outputText value="#{configMapController.getKey('ViewAuditLogLabel_customer')}"/>
+                        <h:outputText value="#{auditLogController.selected.customer.username}" title="#{configMapController.getKey('ViewAuditLogTitle_customer')}"/>
+                    </p:panelGrid>
+                    <p:commandButton value="#{configMapController.getKey('Close')}" onclick="AuditLogViewDialog.hide()"/>
+                </h:panelGroup>
+            </h:form>
+        </p:dialog>
+
+    </ui:composition>
+</html>
