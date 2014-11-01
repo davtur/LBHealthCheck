@@ -5,6 +5,7 @@ import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.beans.CustomersFacade;
 import au.com.manlyit.fitnesscrm.stats.beans.LoginBean;
+import au.com.manlyit.fitnesscrm.stats.beans.PaymentsFacade;
 import au.com.manlyit.fitnesscrm.stats.chartbeans.MySessionsChart1;
 import au.com.manlyit.fitnesscrm.stats.classes.util.DatatableSelectionHelper;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PfSelectableDataModel;
@@ -14,6 +15,7 @@ import au.com.manlyit.fitnesscrm.stats.db.Notes;
 import au.com.manlyit.fitnesscrm.stats.db.PaymentParameters;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
@@ -71,6 +73,8 @@ public class CustomersController implements Serializable {
     private au.com.manlyit.fitnesscrm.stats.beans.PaymentParametersFacade ejbPaymentParametersFacade;
     @Inject
     private ConfigMapFacade configMapFacade;
+    @Inject
+    private PaymentsFacade ejbPaymentsFacade;
     private DatatableSelectionHelper pagination;
     private DatatableSelectionHelper notesPagination;
     private int selectedItemIndex;
@@ -111,22 +115,21 @@ public class CustomersController implements Serializable {
         HttpServletRequest req = (HttpServletRequest) facesContext.getExternalContext().getRequest(); //request;
         String uaString = req.getHeader("User-Agent");
         logger.log(Level.INFO, "User-Agent of this seesion is :{0}", uaString);
-       // sanityCheckCustomersForDefaultItems();
+        // sanityCheckCustomersForDefaultItems();
 //resp.setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY);
 //resp.setHeader("Location", "/AppName/site/ie/home.jsp");
     }
 
-   /* private void sanityCheckCustomersForDefaultItems() {
-        logger.log(Level.INFO, "Performing Sanity Checks on Customers");
-        List<Customers> cl = ejbFacade.findAll();
-        for (Customers c : cl) {
-            if (c.getProfileImage() == null) {
-                createDefaultCustomerProfilePicture(c);
-            }
-        }
-        logger.log(Level.INFO, "FINISHED Performing Sanity Checks on Customers");
-    }*/
-
+    /* private void sanityCheckCustomersForDefaultItems() {
+     logger.log(Level.INFO, "Performing Sanity Checks on Customers");
+     List<Customers> cl = ejbFacade.findAll();
+     for (Customers c : cl) {
+     if (c.getProfileImage() == null) {
+     createDefaultCustomerProfilePicture(c);
+     }
+     }
+     logger.log(Level.INFO, "FINISHED Performing Sanity Checks on Customers");
+     }*/
     public static boolean isUserInRole(String roleName) {
         boolean inRole = false;
         inRole = FacesContext.getCurrentInstance().getExternalContext().isUserInRole(roleName);
@@ -279,12 +282,17 @@ public class CustomersController implements Serializable {
         this.filteredItems = filteredItems;
     }
 
-    private void createDefaultPaymentParameters(String paymentGatewayName) {
+   private void createDefaultPaymentParameters(Customers current) {
 
-        PaymentParameters payParams = current.getPaymentParameters();
+        if (current == null) {
+            logger.log(Level.WARNING, "Future Map createDefaultPaymentParameters . Customer is NULL.");
+            return;
+        }
+
+        PaymentParameters pp = current.getPaymentParameters();
 
         try {
-            if (payParams == null && paymentGatewayName.toUpperCase().contains(paymentGateway)) {
+            if (pp == null) {
                 String phoneNumber = current.getTelephone();
                 if (phoneNumber == null) {
                     phoneNumber = "0000000000";
@@ -297,11 +305,43 @@ public class CustomersController implements Serializable {
                     phoneNumber = "0000000000";
                     logger.log(Level.INFO, "Invalid Phone Number for Customer {0}. Setting it to empty string", current.getUsername());
                 }
-                payParams = new PaymentParameters(0, new Date(), phoneNumber, "NO", "NO", "NO", paymentGateway);
-                //Customers loggedInUser = customersFacade.findCustomerByUsername(FacesContext.getCurrentInstance().getExternalContext().getRemoteUser());
-                payParams.setLoggedInUser(current);
-                ejbPaymentParametersFacade.create(payParams);
-                current.setPaymentParameters(payParams);
+                pp = new PaymentParameters();
+                pp.setId(0);
+                pp.setWebddrUrl(null);
+                pp.setLoggedInUser(current);
+                pp.setLastSuccessfulScheduledPayment(ejbPaymentsFacade.findLastSuccessfulScheduledPayment(current));
+                pp.setNextScheduledPayment(ejbPaymentsFacade.findNextScheduledPayment(current));
+                pp.setAddressLine1("");
+                pp.setAddressLine2("");
+                pp.setAddressPostCode("");
+                pp.setAddressState("");
+                pp.setAddressSuburb("");
+                pp.setContractStartDate(new Date());
+                pp.setCustomerFirstName("");
+                pp.setCustomerName("");
+                pp.setEmail("");
+                pp.setEzidebitCustomerID("");
+
+                pp.setMobilePhoneNumber(phoneNumber);
+                pp.setPaymentGatewayName("EZIDEBIT");
+                pp.setPaymentMethod("");
+                pp.setPaymentPeriod("");
+                pp.setPaymentPeriodDayOfMonth("");
+                pp.setPaymentPeriodDayOfWeek("");
+
+                pp.setSmsExpiredCard("YES");
+                pp.setSmsFailedNotification("YES");
+                pp.setSmsPaymentReminder("NO");
+                pp.setStatusCode("");
+                pp.setStatusDescription("");
+                pp.setTotalPaymentsFailed(0);
+                pp.setTotalPaymentsFailedAmount(new BigDecimal(0));
+                pp.setTotalPaymentsSuccessful(0);
+                pp.setTotalPaymentsSuccessfulAmount(new BigDecimal(0));
+                pp.setYourGeneralReference("");
+                pp.setYourSystemReference(current.getId().toString());
+                ejbPaymentParametersFacade.create(pp);
+                current.setPaymentParameters(pp);
                 ejbFacade.editAndFlush(current);
             }
         } catch (Exception e) {
@@ -311,12 +351,12 @@ public class CustomersController implements Serializable {
 
     protected PaymentParameters getSelectedCustomersPaymentParameters() {
         PaymentParameters pp = getSelected().getPaymentParameters();
+       // if (pp == null) {
+       //     createDefaultPaymentParameters(paymentGateway);
+       // }
+       // pp = getSelected().getPaymentParameters();
         if (pp == null) {
-            createDefaultPaymentParameters(paymentGateway);
-        }
-        pp = getSelected().getPaymentParameters();
-        if (pp == null) {
-            logger.log(Level.SEVERE, " Customer {0} has NULL Payment parameters.Method createDefaultPaymentParameters failed", new Object[]{current.getUsername()});
+            logger.log(Level.SEVERE, " Customer {0} has NULL Payment parameters.", new Object[]{current.getUsername()});
         }
         return pp;
     }
@@ -469,7 +509,7 @@ public class CustomersController implements Serializable {
                 grp.setUsername(c);
                 ejbGroupsFacade.create(grp);
                 createDefaultCustomerProfilePicture(c);
-                //createDefaultPaymentParameters(paymentGateway);
+                createDefaultPaymentParameters(c);
                 recreateModel();
                 JsfUtil.addSuccessMessage(configMapFacade.getConfig("CustomersCreated"));
                 return prepareCreate();
@@ -574,24 +614,25 @@ public class CustomersController implements Serializable {
         int count = 0;
         FacesContext context = FacesContext.getCurrentInstance();
         EziDebitPaymentGateway controller = (EziDebitPaymentGateway) context.getApplication().getELResolver().getValue(context.getELContext(), null, "ezidebit");
-
-        for (Customers cust : multiSelected) {
-            if (cust.getActive().getCustomerState().contains("CANCELLED") == false) {
-                // CAncelled customers canot be reinstated in the payment gateway they must be added as new
-                controller.changeCustomerStatus(cust, selectedState);
-
-            } else {
-
+         if (selectedState.getCustomerState().contains("CANCELLED") == true && controller.isCustomerCancellationConfirmed() == false) {
+             RequestContext.getCurrentInstance().update("confirmCancellation");
+             RequestContext.getCurrentInstance().execute("PF('confirmCancellationDialogueWidget').show()");
+          } else {
+            for (Customers cust : multiSelected) {
+                if (cust.getActive().getCustomerState().contains("CANCELLED") == false) {
+                    // Cancelled customers canot be reinstated in the payment gateway they must be added as new, so only attempt to change in the payment gateway if customer is active or on hold.
+                    controller.changeCustomerStatus(cust, selectedState);
+                } 
+                cust.setActive(selectedState);
+                getFacade().edit(cust);
+                count++;
+                recreateModel();
             }
-            cust.setActive(selectedState);
-            getFacade().edit(cust);
-            count++;
-            recreateModel();
-
+            controller.setCustomerCancellationConfirmed(false);
+            String message = count + " " + configMapFacade.getConfig("CustomersStateChanged") + " " + selectedState.getCustomerState() + ".";
+            JsfUtil.addSuccessMessage(message);
         }
-        String message = count + " " + configMapFacade.getConfig("CustomersStateChanged") + " " + selectedState.getCustomerState() + ".";
 
-        JsfUtil.addSuccessMessage(message);
     }
 
     public String updatepass() {
@@ -838,7 +879,7 @@ public class CustomersController implements Serializable {
         Object o = event.getObject();
         if (o.getClass().equals(Customers.class)) {
             Customers cust = (Customers) o;
-            setSelected(cust);
+            //setSelected(cust);
         }
 
     }

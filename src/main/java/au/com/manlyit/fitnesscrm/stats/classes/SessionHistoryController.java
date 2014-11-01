@@ -15,6 +15,7 @@ import com.lowagie.text.BadElementException;
 import com.lowagie.text.Document;
 import com.lowagie.text.DocumentException;
 import com.lowagie.text.Image;
+import com.lowagie.text.PageSize;
 import com.lowagie.text.Paragraph;
 
 import java.awt.event.ActionEvent;
@@ -208,22 +209,22 @@ public class SessionHistoryController implements Serializable {
                 @Override
                 public int getItemsCount() {
                     if (showAllSessionsByTrainer) {
-                        return getFacade().countSessionsByTrainer(getLoggedInUser());
+                        return getFacade().countSessionsByTrainer(getSelectedCustomer());
                     } else {
                         FacesContext context = FacesContext.getCurrentInstance();
                         MySessionsChart1 mySessionsChart1Controller = (MySessionsChart1) context.getApplication().evaluateExpressionGet(context, "#{mySessionsChart1}", MySessionsChart1.class);
-                        return getFacade().countSessionsByTrainerAndDateRange(getLoggedInUser(), mySessionsChart1Controller.getChartStartTime(), mySessionsChart1Controller.getChartEndTime(), false);
+                        return getFacade().countSessionsByTrainerAndDateRange(getSelectedCustomer(), mySessionsChart1Controller.getChartStartTime(), mySessionsChart1Controller.getChartEndTime(), false);
                     }
                 }
 
                 @Override
                 public PfSelectableDataModel createPageDataModel() {
                     if (showAllSessionsByTrainer) {
-                        return new PfSelectableDataModel<>(ejbFacade.findSessionsByTrainer(getLoggedInUser(), false));
+                        return new PfSelectableDataModel<>(ejbFacade.findSessionsByTrainer(getSelectedCustomer(), false));
                     } else {
                         FacesContext context = FacesContext.getCurrentInstance();
                         MySessionsChart1 mySessionsChart1Controller = (MySessionsChart1) context.getApplication().evaluateExpressionGet(context, "#{mySessionsChart1}", MySessionsChart1.class);
-                        List<SessionHistory> shList = ejbFacade.findSessionsByTrainerAndDateRange(getLoggedInUser(), mySessionsChart1Controller.getChartStartTime(), mySessionsChart1Controller.getChartEndTime(), false);
+                        List<SessionHistory> shList = ejbFacade.findSessionsByTrainerAndDateRange(getSelectedCustomer(), mySessionsChart1Controller.getChartStartTime(), mySessionsChart1Controller.getChartEndTime(), false);
                         if (shList.isEmpty()) {
                             return null;
                         }
@@ -243,12 +244,16 @@ public class SessionHistoryController implements Serializable {
 
                 @Override
                 public int getItemsCount() {
-                    return getFacade().countSessionsByParticipant(getLoggedInUser());
+                    FacesContext context = FacesContext.getCurrentInstance();
+                    MySessionsChart1 mySessionsChart1Controller = (MySessionsChart1) context.getApplication().evaluateExpressionGet(context, "#{mySessionsChart1}", MySessionsChart1.class);
+                    return getFacade().countSessionsByParticipantAndDateRange(getSelectedCustomer(), mySessionsChart1Controller.getChartStartTime(), mySessionsChart1Controller.getChartEndTime());
                 }
 
                 @Override
                 public PfSelectableDataModel createPageDataModel() {
-                    return new PfSelectableDataModel<>(ejbFacade.findSessionsByParticipant(getLoggedInUser(), true));
+                    FacesContext context = FacesContext.getCurrentInstance();
+                    MySessionsChart1 mySessionsChart1Controller = (MySessionsChart1) context.getApplication().evaluateExpressionGet(context, "#{mySessionsChart1}", MySessionsChart1.class);
+                    return new PfSelectableDataModel<>(ejbFacade.findSessionsByParticipantAndDateRange(getSelectedCustomer(), mySessionsChart1Controller.getChartStartTime(), mySessionsChart1Controller.getChartEndTime(), true));
                 }
 
             };
@@ -264,7 +269,7 @@ public class SessionHistoryController implements Serializable {
      public int getItemsCount() {
      Customers loggedInUser = null;
      try {
-     return ejbFacade.countByCustId(getLoggedInUser().getId());
+     return ejbFacade.countByCustId(getSelectedCustomer().getId());
      } catch (ELException e) {
      JsfUtil.addErrorMessage(e, "Couldn't get customer i Session History controller");
      }
@@ -277,7 +282,7 @@ public class SessionHistoryController implements Serializable {
      Customers loggedInUser = null;
      try {
      //loggedInUser = ejbCustomerFacade.findCustomerByUsername(FacesContext.getCurrentInstance().getExternalContext().getRemoteUser());
-     loggedInUser = getLoggedInUser();
+     loggedInUser = getSelectedCustomer();
      String msg = "CreatingDataModel for user: " + loggedInUser.getUsername();
      Logger.getLogger(getClass().getName()).log(Level.INFO, msg);
      return new ListDataModel(ejbFacade.findAllByCustId(loggedInUser.getId(), true));
@@ -291,7 +296,7 @@ public class SessionHistoryController implements Serializable {
      }
      return pagination;
      }*/
-    private Customers getLoggedInUser() {
+    private Customers getSelectedCustomer() {
         FacesContext context = FacesContext.getCurrentInstance();
         CustomersController custController = (CustomersController) context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
         return custController.getSelected();
@@ -323,7 +328,7 @@ public class SessionHistoryController implements Serializable {
         List<SessionTrainers> parts = new ArrayList<>();
 
         SessionTrainers p = new SessionTrainers(0);
-        p.setCustomerId(getLoggedInUser());
+        p.setCustomerId(getSelectedCustomer());
         p.setSessionHistoryId(current);
         parts.add(p);
         current.setSessionTrainersCollection(parts);
@@ -401,7 +406,8 @@ public class SessionHistoryController implements Serializable {
 
         }
     }
-    public void onTransfer(){
+
+    public void onTransfer() {
         logger.log(Level.FINE, "Picklist Transfer");
     }
 
@@ -571,24 +577,41 @@ public class SessionHistoryController implements Serializable {
 
     public SelectableDataModel<SessionHistory> getItems() {
         if (items == null) {
-            items = getPagination().createPageDataModel();
+            items = new PfSelectableDataModel<>(ejbFacade.findAll(false));
         }
         return items;
     }
 
     public SelectableDataModel<SessionHistory> getCustomerItems() {
         if (customerItems == null) {
-            customerItems = getCustomerPagination().createPageDataModel();
-            if (customerItems == null) {
-                return null;
-            }
+            //customerItems = getCustomerPagination().createPageDataModel();
+            if (showAllSessionsByTrainer) {
+                        customerItems =  new PfSelectableDataModel<>(ejbFacade.findSessionsByTrainer(getSelectedCustomer(), false));
+                    } else {
+                        FacesContext context = FacesContext.getCurrentInstance();
+                        MySessionsChart1 mySessionsChart1Controller = (MySessionsChart1) context.getApplication().evaluateExpressionGet(context, "#{mySessionsChart1}", MySessionsChart1.class);
+                        List<SessionHistory> shList = ejbFacade.findSessionsByTrainerAndDateRange(getSelectedCustomer(), mySessionsChart1Controller.getChartStartTime(), mySessionsChart1Controller.getChartEndTime(), false);
+                        if (shList.isEmpty()) {
+                            customerItems = null;
+                            return customerItems;
+                        }
+                        customerItems =  new PfSelectableDataModel<>(shList);
+
+                    }
+            
         }
         return customerItems;
     }
 
     public SelectableDataModel<SessionHistory> getParticipantItems() {
         if (participantItems == null) {
-            participantItems = getParticipantPagination().createPageDataModel();
+            FacesContext context = FacesContext.getCurrentInstance();
+            MySessionsChart1 mySessionsChart1Controller = (MySessionsChart1) context.getApplication().evaluateExpressionGet(context, "#{mySessionsChart1}", MySessionsChart1.class);
+            Customers user = getSelectedCustomer();
+            Date start = mySessionsChart1Controller.getChartStartTime();
+            Date end = mySessionsChart1Controller.getChartEndTime();
+            participantItems = new PfSelectableDataModel<>(ejbFacade.findSessionsByParticipantAndDateRange(user,start ,end , true));
+            //participantItems = getParticipantPagination().createPageDataModel();
         }
         return participantItems;
     }
@@ -894,7 +917,7 @@ public class SessionHistoryController implements Serializable {
     }
 
     public void preProcessXLS(Object document) {
-        String trainer = "Trainer Session History for " + getLoggedInUser().getFirstname() + " " + getLoggedInUser().getLastname();
+        String trainer = "Trainer Session History for " + getSelectedCustomer().getFirstname() + " " + getSelectedCustomer().getLastname();
 
         HSSFWorkbook wb = (HSSFWorkbook) document;
         HSSFSheet sheet = wb.getSheetAt(0);
@@ -919,7 +942,7 @@ public class SessionHistoryController implements Serializable {
     }
 
     public void postProcessXLS(Object document) {
-        String trainer = "Trainer Session History for " + getLoggedInUser().getFirstname() + " " + getLoggedInUser().getLastname();
+        String trainer = "Trainer Session History for " + getSelectedCustomer().getFirstname() + " " + getSelectedCustomer().getLastname();
         HSSFWorkbook wb = (HSSFWorkbook) document;
         HSSFSheet sheet = wb.getSheetAt(0);
         sheet.shiftRows(0, sheet.getLastRowNum(), 7);
@@ -970,6 +993,7 @@ public class SessionHistoryController implements Serializable {
     public void preProcessPDF(Object document) throws IOException,
             BadElementException, DocumentException {
         Document pdf = (Document) document;
+        pdf.setPageSize(PageSize.A4.rotate());
         //FacesContext context = FacesContext.getCurrentInstance();
         //ExternalContext ec = context.getExternalContext();
         //HttpServletRequest request = (HttpServletRequest) context.getExternalContext().getRequest();
@@ -980,7 +1004,7 @@ public class SessionHistoryController implements Serializable {
                 + File.separator + "logo.png");
         pdf.open();
         pdf.add(Image.getInstance(new URL("https://services.purefitnessmanly.com.au/FitnessStats/resources/images/logo.png")));
-        String trainer = "Trainer Session History for " + getLoggedInUser().getFirstname() + " " + getLoggedInUser().getLastname();
+        String trainer = "Trainer Session History for " + getSelectedCustomer().getFirstname() + " " + getSelectedCustomer().getLastname();
         pdf.addTitle(trainer);
         pdf.add(new Paragraph(trainer));
         pdf.add(new Paragraph(" "));

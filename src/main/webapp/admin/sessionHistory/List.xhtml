@@ -23,12 +23,12 @@
                     <p:outputLabel value="#{configMapController.getKey('SelectStartDateForSessionHistory_Label')}" for="sessionstart" />
                     <p:calendar id="sessionstart" value="#{mySessionsChart1.startDate}" pattern="dd MMMM yyyy"
                                 title="#{configMapController.getKey('SelectStartDateForSessionHistory_Title')}"    >
-                        <p:ajax event="dateSelect"  update="customChart"  />
+                        <p:ajax event="dateSelect"  update="customChart sessionsDataTable"  />
                     </p:calendar> 
                     <p:outputLabel value="#{configMapController.getKey('SelectEndDateForSessionHistory_Label')}" for="sessionend" />
                     <p:calendar id="sessionend" value="#{mySessionsChart1.endDate}"  pattern="dd MMMM yyyy"
                                 title="#{configMapController.getKey('SelectEndDateForSessionHistory_Title')}"    >
-                        <p:ajax event="dateSelect"  update="customChart"  />
+                        <p:ajax event="dateSelect"  update="customChart sessionsDataTable"  />
                     </p:calendar> 
                    <!-- <p:outputLabel value="#{configMapController.getKey('SelectDateIntervalForSessionHistory_Label')}" for="chartInterval" />-->
                     <p:selectOneMenu id="chartInterval"   value="#{mySessionsChart1.dateInterval}"   label="#{configMapController.getKey('CreateSessionHistoryTitle_trainer')}" >
@@ -58,61 +58,62 @@
                     <p:commandButton id="createButtonDialogue"  onclick="PF('createSessionDialogueWidget').show()" type="button" value="#{configMapController.getKey('ListSessionHistoryCreateLink')}"/>
 
                 </h:panelGroup>
-                <h:outputText escape="false" value="#{configMapController.getKey('ListSessionHistoryEmpty')}" rendered="#{sessionHistoryController.items.rowCount == 0}"/>
-                <h:panelGroup rendered="#{sessionHistoryController.items.rowCount > 0}">
-                    <p:dataTable id="sessionsDataTable" value="#{sessionHistoryController.items}" var="item" widgetVar="sessionsTable"  paginator="true" rows="15"  paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  rowsPerPageTemplate="5,10,15,20,25,50,100" >
-                    <!--    <p:column sortBy="#{item.id}" >
-                            <f:facet name="header">
-                                <h:outputText value="#{configMapController.getKey('ListSessionHistoryTitle_id')}"/>
-                            </f:facet>
+                <h:outputText escape="false" value="#{configMapController.getKey('ListSessionHistoryEmpty')}" rendered="#{empty sessionHistoryController.items}"/>
+                <h:panelGroup rendered="#{not empty sessionHistoryController.items}">
+                    <p:dataTable id="sessionsDataTable" 
+                                 value="#{sessionHistoryController.items}" 
+                                 var="item" 
+                                 widgetVar="sessionsTable"  
+                                 scrollable="true"
+                                 scrollHeight="400"
+                                 >
+                        <f:facet name="header">
+                            <p:outputPanel>
+                                <p:outputPanel>
+                                    <h:outputText  rendered="#{not empty sessionHistoryController.filteredItems}" value="#{sessionHistoryController.filteredItems.size} Records Found"/>
+                                    <h:outputText  rendered="#{empty sessionHistoryController.filteredItems}" value="#{sessionHistoryController.customerItems.rowCount} Records Found"/>
+                                </p:outputPanel>
+                                <h:outputText value="Search all fields:" />
+                                <p:inputText id="globalFilter" onkeyup="PF('sessionsTable').filter()" />
+                                <p:commandButton value="Export as PDF" ajax="false" rendered="#{not empty sessionHistoryController.items}">
+                                    <p:dataExporter type="pdf" target="sessionsDataTable" fileName="trainer-session-history" preProcessor="#{sessionHistoryController.preProcessPDF}"/>
+                                </p:commandButton>
+                                <p:spacer/>
+                                <p:commandButton value="Export as Excel" ajax="false" rendered="#{not empty sessionHistoryController.items}">
+                                    <p:dataExporter type="xls" target="sessionsDataTable" fileName="trainer-session-history" postProcessor="#{sessionHistoryController.postProcessXLS}"/>
+                                </p:commandButton>
+                            </p:outputPanel>
+                        </f:facet>
+                        <p:column sortBy="#{item.id}"  filterBy="#{item.id}"  headerText="#{configMapController.getKey('ListSessionHistoryTitle_id')}" >
                             <h:outputText value="#{item.id}"/>
-                        </p:column>-->
-                        <p:column sortBy="#{item.sessiondate}" >
-                            <f:facet name="header">
-                                <h:outputText value="#{configMapController.getKey('ListSessionHistoryTitle_sessiondate')}"/>
-                            </f:facet>
+                        </p:column>
+                        <p:column sortBy="#{item.sessiondate}"  filterBy="#{item.sessiondate}"   headerText="#{configMapController.getKey('ListSessionHistoryTitle_sessiondate')}" >                       
                             <h:outputText value="#{item.sessiondate}">
-                                <f:convertDateTime pattern="dd/MM/yyyy hh:mm" />
+                                <f:convertDateTime pattern="dd/MM/yyyy h:mm" />
                             </h:outputText>
                         </p:column>
+                        <p:column sortBy="#{item.sessionTrainersCollection[0].customerId.firstname}"  exportable="false" headerText="#{configMapController.getKey('ListSessionHistoryTitle_Trainers')}">
 
-                        <p:column sortBy="#{item.sessionTrainersCollection[0].customerId.firstname}" >
-                            <f:facet name="header">
-                                <h:outputText value="Trainer(s)"/>
-                            </f:facet>
                             <p:dataList    value="#{item.sessionTrainersCollection}" var="trainers">
                                 <h:outputText value="#{trainers.customerId.firstname} #{trainers.customerId.lastname}"/>
                             </p:dataList>
 
                         </p:column>
-
-                        <p:column sortBy="#{item.sessionTypesId.name}"  filterBy="#{item.sessionTypesId.name}"  headerText="#{configMapController.getKey('ListSessionHistoryTitle_sessionType')}" >
-                            <f:facet name="header">
-                                <h:outputText value="#{configMapController.getKey('ListSessionHistoryTitle_sessionType')}" />
-                            </f:facet>
+                        <p:column sortBy="#{item.sessionTypesId.name}"  filterBy="#{item.sessionTypesId.name}"  headerText="#{configMapController.getKey('ListSessionHistoryTitle_sessionType')}" >                           
                             <h:outputText value="#{item.sessionTypesId.name}"/>
                         </p:column>
-                      <!--   <p:column sortBy="#{item.trainer.firstname}"  filterBy="#{item.trainer.firstname}"  headerText="#{configMapController.getKey('ListSessionHistoryTitle_trainer')}" >
-                            <f:facet name="header">
-                                <h:outputText value="#{configMapController.getKey('ListSessionHistoryTitle_trainer')}"/>
-                            </f:facet>
-                            <h:outputText value="#{item.trainer.firstname} #{item.trainer.lastname}"/>
-                        </p:column>-->
 
-                        <p:column sortBy="#{item.adminNotes}" filterBy="#{item.adminNotes}"  headerText="#{configMapController.getKey('ListSessionHistoryTitle_adminNotes')}" >
-                            <f:facet name="header">
-                                <h:outputText value="#{configMapController.getKey('ListSessionHistoryTitle_adminNotes')}"/>
-                            </f:facet>
-                            <h:outputText value="#{item.adminNotes}"/>
+                        <p:column sortBy="#{item.participantsAsString}" filterBy="#{item.participantsAsString}" filterMatchMode="contains"   headerText="#{configMapController.getKey('ListSessionHistoryTitle_participantsAsString')}">
+                            <h:outputText value="#{item.participantsAsString}"/>
                         </p:column>
-                        <p:column sortBy="#{item.comments}" filterBy="#{item.comments}"  headerText="#{configMapController.getKey('ListSessionHistoryTitle_comments')}" >
-                            <f:facet name="header">
-                                <h:outputText value="#{configMapController.getKey('ListSessionHistoryTitle_comments')}"/>
-                            </f:facet>
+                        <p:column sortBy="#{item.comments}" filterBy="#{item.comments}" filterMatchMode="contains"   headerText="#{configMapController.getKey('ListSessionHistoryTitle_comments')}" >
                             <h:outputText value="#{item.comments}"/>
                         </p:column>
+                        <p:column sortBy="#{item.adminNotes}" filterBy="#{item.adminNotes}" filterMatchMode="contains"  headerText="#{configMapController.getKey('ListSessionHistoryTitle_adminNotes')}" >
+                            <h:outputText value="#{item.adminNotes}"/>
+                        </p:column>
 
-                        <p:column>
+                        <p:column exportable="false">
                             <f:facet name="header">
                                 <h:outputText value="&nbsp;"/>
                             </f:facet>
@@ -133,7 +134,7 @@
             </h:form>
             <ui:include src="/trainer/sessionHistory/CreateSessionInfo.xhtml"/>
         </ui:define>
-        
+
     </ui:composition>
 
 </html>

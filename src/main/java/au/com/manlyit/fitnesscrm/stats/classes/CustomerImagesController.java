@@ -13,9 +13,11 @@ import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.net.URL;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -61,6 +63,7 @@ public class CustomerImagesController implements Serializable {
     private CustomerImages current;
     private static final int new_width = 800;// must match panelheight on gallery component
     private static final int new_height = 500;// must match panelheight on gallery component
+    private static final int PROFILE_PIC_HEIGHT_IN_PIX =100;
     private StreamedContent croppedImage;
     private CroppedImage cropperImage;
     private CustomerImages selectedForDeletion;
@@ -95,7 +98,7 @@ public class CustomerImagesController implements Serializable {
         return getSelectedCustomer().getId();
     }
 
-    public void createDefaultProfilePic(Customers cust) {
+    protected void createDefaultProfilePic(Customers cust) {
         String placeholderImage = configMapFacade.getConfig("system.default.profile.image");
         String fileExtension = placeholderImage.substring(placeholderImage.lastIndexOf(".")).toLowerCase();
         int imgType = -1;
@@ -117,26 +120,36 @@ public class CustomerImagesController implements Serializable {
         }
         if (cust != null) {
             if (cust.getProfileImage() == null) {
+                CustomerImages ci;
+                BufferedImage img;
+                //InputStream stream;
                 try {
-                    CustomerImages ci = new CustomerImages(0);
-                    BufferedImage img = null;
-                    InputStream stream = FacesContext.getCurrentInstance().getExternalContext().getResourceAsStream(placeholderImage);
+                    ci = new CustomerImages(0);
+                    img = null;
+                    //FacesContext context =  FacesContext.getCurrentInstance();
+                    //String servPath = context.getExternalContext().getRequestServletPath() + placeholderImage;
+                    //stream = FacesContext.getCurrentInstance().getExternalContext().getResourceAsStream(servPath) ;
                     try {
-                        img = ImageIO.read(stream);
+                        //img = ImageIO.read(stream);
+                        img = ImageIO.read(new URL(placeholderImage));
                     } catch (IOException e) {
-                        Logger.getLogger(CustomerImagesController.class.getName()).log(Level.SEVERE, "createDefaultProfilePic, Loading image into buffer error!!", e);
+                        if (e.getCause().getClass() == FileNotFoundException.class) {
+                            Logger.getLogger(CustomerImagesController.class.getName()).log(Level.SEVERE, "createDefaultProfilePic, File not found!!: {0}", placeholderImage);
 
-                        JsfUtil.addErrorMessage(e, "Loading image into buffer error!!");
+                        } else {
+                            Logger.getLogger(CustomerImagesController.class.getName()).log(Level.SEVERE, "createDefaultProfilePic, Loading image into buffer error!!", e);
+                        }
                     }
-
+                    img = resizeImageWithHintKeepAspect(img, 0, PROFILE_PIC_HEIGHT_IN_PIX);
                     ByteArrayOutputStream os = new ByteArrayOutputStream();
                     try {
 
                         ImageIO.write(img, fileExtension, os);
 
                     } catch (IOException ex) {
+
                         Logger.getLogger(CustomerImagesController.class.getName()).log(Level.SEVERE, "createDefaultProfilePic, write image  error!!", ex);
-                        JsfUtil.addErrorMessage(ex, "createDefaultProfilePic, write image  error!!");
+
                     }
 
                     ci.setImage(os.toByteArray());
@@ -194,7 +207,7 @@ public class CustomerImagesController implements Serializable {
         this.uploadedFile = file;
     }
 
-    private BufferedImage resizeImageWithHintKeepAspect(BufferedImage originalImage, int newWidth, int newHeight) {
+    private static BufferedImage resizeImageWithHintKeepAspect(BufferedImage originalImage, int newWidth, int newHeight) {
         int type = originalImage.getType() == 0 ? BufferedImage.TYPE_INT_ARGB : originalImage.getType();
         float w = originalImage.getWidth();
         float h = originalImage.getHeight();

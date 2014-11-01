@@ -321,17 +321,27 @@ public class PaymentBean implements Serializable {
 
     @Asynchronous
     public Future<Boolean> changeCustomerStatus(Customers cust, String newStatus, String loggedInUser, String digitalKey) {
+        
+        
+        if(cust ==null || newStatus == null || loggedInUser == null ){
+            logger.log(Level.WARNING, "changeCustomerStatus ABORTED because cust ==null || newStatus == null || loggedInUser == null");
+             return new AsyncResult<>(false);
+        }
+            
         // note: cancelled status cannot be changed with this method. i.e. cancelled is final like deleted.
         logger.log(Level.INFO, "{2} changed customer ({0}) status to {1}", new Object[]{cust.getUsername(), newStatus, loggedInUser});
 
         boolean result = false;
         String eziDebitCustomerId = ""; // use our reference instead. THis must be an empty string.
         String ourSystemCustomerReference = cust.getId().toString();
-        String oldStatus = cust.getPaymentParameters().getStatusDescription();
+        String oldStatus = "Does not exist in payment gateway.";
+                if(cust.getPaymentParameters() != null ){
+                    oldStatus =    cust.getPaymentParameters().getStatusDescription();
+                }
         if (newStatus.compareTo("A") == 0 || newStatus.compareTo("H") == 0 || newStatus.compareTo("C") == 0) {
             if (loggedInUser.length() > 50) {
                 loggedInUser = loggedInUser.substring(0, 50);
-                logger.log(Level.WARNING, "addPayment loggedInUser is greater than the allowed 50 characters. Truncating! to 50 chars");
+                logger.log(Level.WARNING, "changeCustomerStatus loggedInUser is greater than the allowed 50 characters. Truncating! to 50 chars");
             }
             EziResponseOfstring eziResponse = null;
             try {

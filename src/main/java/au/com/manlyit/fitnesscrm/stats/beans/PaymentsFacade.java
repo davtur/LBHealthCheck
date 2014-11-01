@@ -124,6 +124,8 @@ public class PaymentsFacade extends AbstractFacade<Payments> {
            
             if (q.getResultList().size() > 0) {
                 cm = (Payments) q.getResultList().get(0);
+            }else{
+                logger.log(Level.INFO, "findNextScheduledPayment did not find any scheduled payments for customer:{0}", customer.getUsername());
             }
         } catch (Exception e) {
             logger.log(Level.INFO, "findNextScheduledPayment error customer:{0} " + customer, e);

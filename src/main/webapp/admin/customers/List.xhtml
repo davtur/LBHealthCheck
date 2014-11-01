@@ -59,10 +59,8 @@
                                          widgetVar="customersControllerTable" 
                                          editable="true" 
                                          var="item"  
-                                         paginator="true" 
-                                         rows="15"  
-                                         paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  
-                                         rowsPerPageTemplate="5,10,15,20,25,50,100" >
+                                         scrollHeight="400"
+                                         scrollable="true" >
                                 <f:facet name="header">
                                     <p:outputPanel>
                                         <h:outputText value="Search all fields:" />
@@ -71,7 +69,7 @@
                                 </f:facet>
                                 <!--<p:ajax event="rowEdit"   listener="#{customersController.onEdit}" update=":growl"  />  
                                 <p:ajax event="rowEditCancel" listener="#{customersController.onCancel}" update=":growl"   /> -->
-                                <p:ajax event="rowSelect"   update=":growl :tv:customerslistForm1:selectedUser :tv:formCustomersEdit1 :formCustomersCreate1 :tv:paymentsForm :tv:NoteslistForm1 "  />  
+                                <p:ajax event="rowSelect"   update=":growl :tv:customerslistForm1:selectedUser :tv:formCustomersEdit1 :formCustomersCreate1 :tv:paymentsForm :tv:NoteslistForm1 :confirmCancellation "  />  
                                 <p:column selectionMode="multiple" />
                                 <p:column sortBy="#{item.id}" filterBy="#{item.id}" headerText="#{configMapController.getKey('ListCustomersTitle_id')}"   >
                                     <h:outputText value="#{item.id}"/>
@@ -117,7 +115,7 @@
                                         <f:convertDateTime pattern="dd MMM yyyy" />
                                     </h:outputText>
                                 </p:column>
- 
+
 
                             </p:dataTable>
                         </h:panelGroup>
@@ -183,10 +181,10 @@
                                 <f:selectItems value="#{customersController.itemsAvailableSelectOne}"  />
                             </p:selectOneMenu>
 
-                            <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_active')}" for="active1" />
+                           <!-- <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_active')}" for="active1" />
                             <p:selectOneMenu id="active1" valueChangeListener="#{customersController.selectOneMenuValueChangeListener}" converter="customerStateConverter" value="#{customersController.selected.active}" label="#{configMapController.getKey('CreateCustomersTitle_active')}" >
                                 <f:selectItems value="#{customerStateController.itemsAvailableAsObjects}"  var="custState" itemLabel="#{custState.customerState}" itemValue="#{custState}"/>                           
-                            </p:selectOneMenu>
+                            </p:selectOneMenu>-->
                             <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_groupPricing')}" for="groupPricing1" />
                             <p:selectOneMenu id="groupPricing1" valueChangeListener="#{customersController.selectOneMenuValueChangeListener}" converter="planConverter" value="#{customersController.selected.groupPricing}" label="#{configMapController.getKey('CreateCustomersTitle_groupPricing')}" >
                                 <f:selectItems value="#{planController.itemsAvailableAsObjects}"  var="plan" itemLabel="#{plan.planName}" itemValue="#{plan}"/>
@@ -207,23 +205,26 @@
                             <p:selectOneMenu id="preferredContact1" valueChangeListener="#{customersController.selectOneMenuValueChangeListener}" converter="preferedContactConverter" value="#{customersController.selected.preferredContact}" label="#{configMapController.getKey('CreateCustomersTitle_preferredContact')}" >
                                 <f:selectItems value="#{preferedContactController.itemsAvailableAsObjects}"  var="prefContact" itemLabel="#{prefContact.preferedContactMethod}" itemValue="#{prefContact}"/>
                             </p:selectOneMenu>
-
-                            <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_SmsExpiredCard')}" for="checkbox1" />
-                            <p:selectBooleanCheckbox id="checkbox1" value="#{customersController.paymentParametersSmsExpiredCard}"  label="Sms Expired Card" />
-                            <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_SmsPaymentReminder')}" for="checkbox2" />
-                            <p:selectBooleanCheckbox id="checkbox2" value="#{customersController.paymentParametersSmsPaymentReminder}"  label="Sms Payment Reminder" />
-                            <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_SmsFailedNotification')}" for="checkbox3" />
-                            <p:selectBooleanCheckbox id="checkbox3" value="#{customersController.paymentParametersSmsFailedNotification}"  label="Sms Failed Notification" />
+                            <h:panelGrid columns="2" rendered="#{not empty customersController.selected.paymentParameters}" >
+                                <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_SmsExpiredCard')}" for="checkbox1" />
+                                <p:selectBooleanCheckbox id="checkbox1" value="#{customersController.paymentParametersSmsExpiredCard}"  label="Sms Expired Card" />
+                                <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_SmsPaymentReminder')}" for="checkbox2" />
+                                <p:selectBooleanCheckbox id="checkbox2" value="#{customersController.paymentParametersSmsPaymentReminder}"  label="Sms Payment Reminder" />
+                                <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_SmsFailedNotification')}" for="checkbox3" />
+                                <p:selectBooleanCheckbox id="checkbox3" value="#{customersController.paymentParametersSmsFailedNotification}"  label="Sms Failed Notification" />
+                            </h:panelGrid>
+                            <p:outputLabel value=""/>
                             <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_password')}" for="password1" />
-                            <p:password id="password1"  value="#{customersController.checkPass}" onfocus="this.select()" feedback="true" title="#{configMapController.getKey('EditCustomersTitle_password')}">
+                            <p:password id="password1"  value="#{customersController.checkPass}" onfocus="this.select()" feedback="true" redisplay="true" title="#{configMapController.getKey('EditCustomersTitle_password')}">
                                 <p:ajax listener="#{customersController.checkPassChange}" event="keyup" />
                             </p:password>
                             <p:commandButton  id="passButton" ajax="true" actionListener="#{customersController.updatepass}" update=":growl"   value="#{configMapController.getKey('EditCustomersUpdatePassword')}" immediate="true"/>
                             <p:commandButton rendered="#{not empty ezidebit.eziDebitEDDRFormUrl and ezidebit.showAddToPaymentGatewayButton}" value="#{configMapController.getKey('sendCustomerOnBoardEmailButton')}"  action="#{customersController.sendCustomerOnboardEmail}" update=":growl "/>
-                            <p:panel>
-                                <p:commandButton id="dialogueSave1"  actionListener="#{customersController.createDialogue}" value="#{configMapController.getKey('CreateCustomersSaveLink')}" update=":tv:customerslistForm1:customersTableList :growl"/>                
-                            </p:panel>
                         </p:panelGrid>
+                        <p:panel>
+                            <p:commandButton id="dialogueSave1"  actionListener="#{customersController.createDialogue}" value="#{configMapController.getKey('CreateCustomersSaveLink')}" update=":tv:customerslistForm1:customersTableList :growl"/>                
+                        </p:panel>
+
                     </h:form>
                 </p:tab>
 
@@ -645,6 +646,7 @@
             <ui:include src="CreateSchedule.xhtml"/>
             <ui:include src="CreateEddrLink.xhtml"/>
             <ui:include src="CreatePayment.xhtml"/>
+            <ui:include src="confirmCancelDialogue.xhtml"/>
             <ui:include src="EditPaymentMethod.xhtml"/>
         </ui:define>
     </ui:composition>
