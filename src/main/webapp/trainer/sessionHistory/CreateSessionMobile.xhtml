@@ -97,8 +97,8 @@
                         <p:dataList  id="scroll"   value="#{sessionHistoryController.selectableActiveCustomers}" var="cust" rowIndexVar="rowIndex" >
                             <f:attribute name="filter" value="true" />
                             <p:column>
-                                <h:panelGrid id="customerPanel" columns="4" >
-                                    <h:outputText value="#{rowIndex}" style="padding-left: 30px"/>
+                                <h:panelGrid id="customerPanel" columns="3" >
+                                   <!-- <h:outputText value="#{rowIndex}" style="padding-left: 30px"/>-->
                                    <p:graphicImage value="#{customerImagesController.dynamicImage}" width="50px">
                                         <f:param name="imageid" value="#{cust.profileImage.id}"/>
                                     </p:graphicImage>

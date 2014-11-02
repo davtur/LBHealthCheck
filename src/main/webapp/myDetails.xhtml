@@ -21,8 +21,8 @@
 
                 </p:panel>
                 <h:panelGrid columns="1">
-                    <h:panelGrid columns="2">
-                        <p:panel id="panel1" header="#{configMapController.getKey('ListCustomersTitle_CustomerDetailsHeader')}">
+                    <h:panelGrid columns="3">
+                        <p:panel id="panel1"  style="height: 550px" header="#{configMapController.getKey('ListCustomersTitle_CustomerDetailsHeader')}">
                             <h:panelGrid columns="2" >
                                 <h:outputLabel value="#{configMapController.getKey('EditCustomersLabel_gender')}" for="gender" />
                                 <h:selectOneMenu id="gender" value="#{customersController.selected.gender}" title="#{configMapController.getKey('EditCustomersTitle_gender')}" required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_gender')}">
@@ -87,37 +87,71 @@
                             </h:panelGrid>
 
                         </p:panel>
-                        <p:panel id="panel2">
+                        <p:panel id="panel2" style="height: 550px">
                             <p:panel header="#{configMapController.getKey('ListCustomersTitle_ProfilePic')}">
-                                <p:graphicImage id="photo1" value="#{customersController.selected.profileImage.imageStream}" width="300px" cache="false" />
+                                <p:graphicImage id="photo1" value="#{customersController.selected.profileImage.imageStream}" height="300px" cache="false" />
 
                             </p:panel>
                             <h:panelGrid columns="2">
 
                             </h:panelGrid>
                             <p:panel  header="#{configMapController.getKey('ListCustomersTitle_PanelHeader')}">
-                                <p:panelGrid columns="2">
+                                <p:panelGrid columns="3">
                                     <h:outputLabel value="#{configMapController.getKey('ListCustomersTitle_activeEZI')}" />
                                     <h:outputText value="#{customersController.selected.paymentParameters.statusDescription}"/> 
-
+                                    <h:outputText value=""/>
                                     <h:outputLabel value="#{configMapController.getKey('ListCustomersTitle_lastSuccessfulScheduledPayment')}" />
                                     <h:outputText value="#{customersController.selected.paymentParameters.lastSuccessfulScheduledPayment.debitDate}">
                                         <f:convertDateTime pattern="dd MMM yyyy" />
+                                    </h:outputText>
+                                    <h:outputText value="#{customersController.selected.paymentParameters.lastSuccessfulScheduledPayment.paymentAmount}">
+                                        <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
                                     </h:outputText>
                                     <h:outputLabel value="#{configMapController.getKey('ListCustomersTitle_nextScheduledPayment')}" />
 
                                     <h:outputText value="#{customersController.selected.paymentParameters.nextScheduledPayment.debitDate}">
                                         <f:convertDateTime pattern="dd MMM yyyy" />
                                     </h:outputText>
+                                    <h:outputText value="#{customersController.selected.paymentParameters.nextScheduledPayment.paymentAmount}">
+                                        <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
+                                    </h:outputText>
                                 </p:panelGrid>
                             </p:panel>
 
                         </p:panel>
 
-                    </h:panelGrid>
-                    <p:panel id="panel3">
+                        <p:panel id="panel3" style="height: 550px">
+                            <p:panel id="photoPanel3" header="Select a photo to upload (jpeg)">
+                                <p:panelGrid columns="2" style="width:400px">
+                                    <p:fileUpload fileLimitMessage="The size of the picture is too big! ( > 10MB )" mode="advanced" fileUploadListener="#{customerImagesController.handleFileUpload}" auto="true" update="photoPanel3  :growl photo1 photo2" allowTypes="/(\.|\/)(gif|jpe?g|png)$/" sizeLimit="10000000" />
+                                    <p:graphicImage id="photo2" value="#{customerImagesController.uploadedImage}" height="400px" cache="false" />
+                                </p:panelGrid>
+                                <!-- <p:panel id="imageCropperPanel" header="Uploaded Image">
+                                     <h:panelGrid columns="2">  
+                                         <p:imageCropper value="#{customerImagesController.cropperImage}"  
+                                                         image="#{customerImagesController.uploadedImage}"  
+                                                         initialCoords="225,75,300,125"/>  
+     
+                                         <p:graphicImage id="localCroppedImage"  
+                                                         value="#{customerImagesController.croppedImage}" />  
+                                     </h:panelGrid>  
+     
+                                     <p:commandButton value="Crop"  
+                                                      
+                                                      update=":photoCreate:photoPanel3"/> 
+                                 </p:panel> -->
 
-                    </p:panel>
+                            </p:panel>
+                            <h:panelGrid columns="3">
+                                <p:outputLabel  value="#{configMapController.getKey('CreateCustomerImagesLabel_profilephoto')}" for="profilephoto" />
+                                <p:selectBooleanCheckbox id="profilephoto"   value="#{customerImagesController.profilePhoto}" >
+                                    <p:ajax />
+                                </p:selectBooleanCheckbox>  
+                                <p:commandButton  disabled="#{customerImagesController.saveButtonDisabled}" update="photoPanel3  :growl photo1 photo2"   actionListener="#{customerImagesController.createFromDialogue}" value="#{configMapController.getKey('CreateCustomerImagesSaveLink')}" />
+                            </h:panelGrid>
+                        </p:panel>
+
+                    </h:panelGrid>
                 </h:panelGrid>
             </h:form>
             <ui:include src="myDetailsPaymentMethod.xhtml"/>

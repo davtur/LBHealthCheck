@@ -63,7 +63,7 @@ public class CustomerImagesController implements Serializable {
     private CustomerImages current;
     private static final int new_width = 800;// must match panelheight on gallery component
     private static final int new_height = 500;// must match panelheight on gallery component
-    private static final int PROFILE_PIC_HEIGHT_IN_PIX =100;
+    private static final int PROFILE_PIC_HEIGHT_IN_PIX = 100;
     private StreamedContent croppedImage;
     private CroppedImage cropperImage;
     private CustomerImages selectedForDeletion;
@@ -393,11 +393,8 @@ public class CustomerImagesController implements Serializable {
             Logger.getLogger(CustomerImagesController.class.getName()).log(Level.SEVERE, null, ex);
             JsfUtil.addErrorMessage(ex, "Scaling image  error!!");
         }
-
-        current.setImage(os.toByteArray());
-
+        getSelected().setImage(os.toByteArray());
         InputStream stream = new ByteArrayInputStream(os.toByteArray());
-
         try {
 
             setUploadedImage(new DefaultStreamedContent(stream, "image/jpeg"));

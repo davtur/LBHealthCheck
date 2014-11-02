@@ -52,10 +52,10 @@ public class PaymentsFacade extends AbstractFacade<Payments> {
             CriteriaBuilder cb = em.getCriteriaBuilder();
             CriteriaQuery<Payments> cq = cb.createQuery(Payments.class);
             Root<Payments> rt = cq.from(Payments.class);
-
+            Expression<Date> dDate = rt.get("debitDate");
             Expression<Customers> cust = rt.get("customerName");
             cq.where(cb.equal(cust, customer));
-
+            cq.orderBy(cb.asc(dDate));
             Query q = em.createQuery(cq);
             retList = q.getResultList();
         } catch (Exception e) {
@@ -89,7 +89,7 @@ public class PaymentsFacade extends AbstractFacade<Payments> {
     public Payments findLastSuccessfulScheduledPayment(Customers customer) {
         Payments cm = null;
         try {
-           CriteriaBuilder cb = em.getCriteriaBuilder();
+            CriteriaBuilder cb = em.getCriteriaBuilder();
             CriteriaQuery<Payments> cq = cb.createQuery(Payments.class);
             Root<Payments> rt = cq.from(Payments.class);
             Expression<Date> dDate = rt.get("debitDate");
@@ -97,21 +97,22 @@ public class PaymentsFacade extends AbstractFacade<Payments> {
             Expression<String> paymentID = rt.get("paymentID");
             cq.where(cb.and(cb.equal(cust, customer), cb.isNotNull(paymentID)));
             cq.orderBy(cb.desc(dDate));
-     
+
             Query q = em.createQuery(cq);
-            
+
             if (q.getResultList().size() > 0) {
-                 cm = (Payments) q.getResultList().get(0);
+                cm = (Payments) q.getResultList().get(0);
             }
         } catch (Exception e) {
-             logger.log(Level.INFO, "findLastSuccessfulPayment error customer:{0} " + customer, e);
+            logger.log(Level.INFO, "findLastSuccessfulPayment error customer:{0} " + customer, e);
         }
         return cm;
     }
+
     public Payments findNextScheduledPayment(Customers customer) {
         Payments cm = null;
         try {
-           CriteriaBuilder cb = em.getCriteriaBuilder();
+            CriteriaBuilder cb = em.getCriteriaBuilder();
             CriteriaQuery<Payments> cq = cb.createQuery(Payments.class);
             Root<Payments> rt = cq.from(Payments.class);
             Expression<Date> dDate = rt.get("debitDate");
@@ -119,12 +120,12 @@ public class PaymentsFacade extends AbstractFacade<Payments> {
             Expression<String> paymentID = rt.get("paymentID");
             cq.where(cb.and(cb.equal(cust, customer), cb.isNull(paymentID)));
             cq.orderBy(cb.asc(dDate));
-     
+
             Query q = em.createQuery(cq);
-           
+
             if (q.getResultList().size() > 0) {
                 cm = (Payments) q.getResultList().get(0);
-            }else{
+            } else {
                 logger.log(Level.INFO, "findNextScheduledPayment did not find any scheduled payments for customer:{0}", customer.getUsername());
             }
         } catch (Exception e) {
@@ -176,7 +177,7 @@ public class PaymentsFacade extends AbstractFacade<Payments> {
                 predicatesList1.add(cb.between(stime3, startDate, endDate));
             }
             Expression<Date> status = rt.get("paymentStatus");
-         //   Predicate condition1 = cb.between(stime, startDate, endDate);
+            //   Predicate condition1 = cb.between(stime, startDate, endDate);
             if (showSuccessful) {
                 predicatesList2.add(cb.equal(status, "S"));
             }

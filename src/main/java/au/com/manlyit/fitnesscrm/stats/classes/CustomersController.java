@@ -747,7 +747,8 @@ public class CustomersController implements Serializable {
      }*/
     public PfSelectableDataModel<Customers> getItems() {
         if (items == null) {
-            items = getPagination().createPageDataModel();
+           items =  new PfSelectableDataModel<>(ejbFacade.findFilteredCustomers(true, selectedCustomerStates));
+           // items = getPagination().createPageDataModel();
         }
         return items;
     }

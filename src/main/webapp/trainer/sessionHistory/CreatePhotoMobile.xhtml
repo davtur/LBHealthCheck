@@ -42,9 +42,11 @@
                         <p:ajax event="dateSelect" listener="#{customerImagesController.handleDateSelect}" update=":photos:growl"  />
 
                     </p:calendar>
-                    <p:outputLabel  value="#{configMapController.getKey('CreateCustomerImagesLabel_profilephoto')}" for="profilephoto" />
-                    <p:selectBooleanCheckbox id="profilephoto"   value="#{customerImagesController.profilePhoto}"/>  
-
+                    <h:panelGrid columns="2">
+                         <p:selectBooleanCheckbox id="profilephoto"   value="#{customerImagesController.profilePhoto}"/>  
+                        <p:outputLabel  value="#{configMapController.getKey('CreateCustomerImagesLabel_profilephoto')}" for="profilephoto" style="padding-left: 40px"/>
+                    </h:panelGrid>
+                    <p:spacer height="10em" />
 
                 </h:form>
                 <h:form id="photoCreate2" enctype="multipart/form-data">

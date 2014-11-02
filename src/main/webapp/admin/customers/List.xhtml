@@ -100,14 +100,14 @@
                                         <f:convertDateTime pattern="dd MMM yyyy" />
                                     </h:outputText>
                                 </p:column>
-                              <p:column sortBy="#{item.paymentParameters.nextScheduledPayment.debitDate}" filterBy="#{item.paymentParameters.nextScheduledPayment.debitDate}" headerText="#{configMapController.getKey('ListCustomersTitle_nextScheduledPayment')}"   >
+                                <p:column sortBy="#{item.paymentParameters.nextScheduledPayment.debitDate}" filterBy="#{item.paymentParameters.nextScheduledPayment.debitDate}" headerText="#{configMapController.getKey('ListCustomersTitle_nextScheduledPayment')}"   >
                                     <h:outputText value="#{item.paymentParameters.nextScheduledPayment.debitDate}">
                                         <f:convertDateTime pattern="dd MMM yyyy" />
                                     </h:outputText>
                                 </p:column>
                                 <p:column sortBy="#{item.paymentParameters.nextScheduledPayment.lastUpdatedDatetime}" filterBy="#{item.paymentParameters.nextScheduledPayment.lastUpdatedDatetime}" headerText="#{configMapController.getKey('ListCustomersTitle_lastUpdated')}"   >
                                     <h:outputText value="#{item.paymentParameters.nextScheduledPayment.lastUpdatedDatetime}">
-                                        <f:convertDateTime pattern="yyyy-MM-dd hh:mm:ss" />
+                                        <f:convertDateTime  pattern="yyyy-MM-dd hh:mm:ss" />
                                     </h:outputText>
                                 </p:column>
 
@@ -121,7 +121,7 @@
                                         <f:convertDateTime pattern="dd MMM yyyy" />
                                     </h:outputText>
                                 </p:column>
-   
+
 
                             </p:dataTable>
                         </h:panelGroup>
@@ -285,46 +285,47 @@
                                           widgetVar="paymentsListControllerTable"
                                           var="pay"  
                                           rowKey="#{pay.id}"
-                                          paginator="true" rows="15"  
-                                          paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  
-                                          rowsPerPageTemplate="5,10,15,20,25,50,100" >
+                                          scrollable="true"
+                                          scrollHeight="300"
+
+                                          >
                                 <f:facet name="header">
                                     <p:outputPanel>
                                         <h:outputText value="Payments" />
 
                                     </p:outputPanel>
                                 </f:facet>
-                                <p:ajax event="rowSelect"   update="deleteButton"/>
-                                <p:ajax event="rowUnselect" update="deleteButton"/> 
-                                <p:column sortBy="#{pay.paymentID}" filterBy="#{pay.paymentID}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentID')}"   >
+                                <p:ajax event="rowSelect"   />
+                                <p:ajax event="rowUnselect" /> 
+                                <p:column  sortBy="#{pay.paymentID}" filterBy="#{pay.paymentID}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentID')}"   >
                                     <h:outputText value="#{pay.paymentID}"/>
                                 </p:column>
 
-                                <p:column sortBy="#{pay.customerName.firstname} #{pay.customerName.lastname}" filterBy="#{pay.customerName.firstname} #{pay.customerName.lastname}" headerText="#{configMapController.getKey('ListPaymentsTitle_customerName')}"   >
+                                <p:column  sortBy="#{pay.customerName.firstname} #{pay.customerName.lastname}" filterBy="#{pay.customerName.firstname} #{pay.customerName.lastname}" headerText="#{configMapController.getKey('ListPaymentsTitle_customerName')}"   >
                                     <h:outputText value="#{pay.customerName.firstname} #{pay.customerName.lastname}"/>
                                 </p:column>
-                                <p:column sortBy="#{pay.paymentReference}" filterBy="#{pay.paymentReference}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentReference')}"   >
+                                <p:column  sortBy="#{pay.paymentReference}" filterBy="#{pay.paymentReference}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentReference')}"   >
                                     <h:outputText value="#{pay.paymentReference}"/>
                                 </p:column>
-                                <p:column sortBy="#{pay.paymentAmount}" filterBy="#{pay.paymentAmount}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentAmount')}"   >
+                                <p:column  sortBy="#{pay.paymentAmount}" filterBy="#{pay.paymentAmount}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentAmount')}"   >
                                     <h:outputText value="#{pay.paymentAmount}">
                                         <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
                                     </h:outputText>
                                 </p:column>
-                                <p:column sortBy="#{pay.paymentStatus}" filterBy="#{pay.paymentStatus}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentStatus')}"   >
+                                <p:column  sortBy="#{pay.paymentStatus}" filterBy="#{pay.paymentStatus}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentStatus')}"   >
                                     <h:outputText  rendered="#{pay.paymentStatus == 'W'}"  value="Waiting"/>
                                     <h:outputText  rendered="#{pay.paymentStatus == 'P'}"  value="Pending"/>
                                     <h:outputText  rendered="#{pay.paymentStatus == 'S'}"  value="Successful"/>
                                     <h:outputText  rendered="#{pay.paymentStatus == 'D'}"  value="Dis.Insufficient Funds"/>
                                     <h:outputText  rendered="#{pay.paymentStatus == 'F'}"  value="Dishonoured"/>
                                 </p:column>
-                                <p:column sortBy="#{pay.debitDate}" filterBy="#{pay.debitDate}" headerText="#{configMapController.getKey('ListPaymentsTitle_debitDate')}"   >
+                                <p:column  sortBy="#{pay.debitDate}" filterBy="#{pay.debitDate}" headerText="#{configMapController.getKey('ListPaymentsTitle_debitDate')}"   >
                                     <h:outputText value="#{pay.debitDate}">
                                         <f:convertDateTime pattern="dd MMM yyyy" />
                                     </h:outputText>
                                 </p:column>
                                 <f:facet name="footer">
-                                    <p:commandButton  process="paymentsTable2" rendered="#{fitnessTestChartsController.isUserInRole('ADMIN')}" id="deleteButton" icon="ui-icon-trash"  value="#{configMapController.getKey('Delete')}" actionListener="#{ezidebit.deleteScheduledPayment}" update=":growl " disabled="#{empty fitnessTestChartsController.selected}"/>
+                                    <p:commandButton  process=":tv:paymentsForm:paymentsTable2" rendered="#{fitnessTestChartsController.isUserInRole('ADMIN')}" id="deleteButton" icon="ui-icon-trash"  value="#{configMapController.getKey('Delete')}" actionListener="#{ezidebit.deleteScheduledPayment}" update=":growl " disabled="#{empty fitnessTestChartsController.selected}"/>
                                 </f:facet>
 
                             </p:dataTable>

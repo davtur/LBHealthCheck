@@ -845,6 +845,21 @@ public class EziDebitPaymentGateway implements Serializable {
 
     }
 
+    public void refreshAllActiveCustomers() {
+        List<Customers> acl = customersFacade.findAllActiveCustomers(true);
+        AsyncJob aj2;
+        for (Customers c : acl) {
+            try {
+                startAsynchJob("GetCustomerDetails", paymentBean.getCustomerDetails(c, getDigitalKey()));
+
+                Thread.sleep(100);//sleeping for a long time wont affect performance (the warning is there for a short sleep of say 5ms ) but we don't want to overload the payment gateway or they may get upset.
+            } catch (InterruptedException ex) {
+                Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+
+    }
+
     public void runReport() {
         reportPaymentsList = null;
         reportPaymentsListFilteredItems = null;
@@ -859,8 +874,10 @@ public class EziDebitPaymentGateway implements Serializable {
             manualRefreshFromPaymentGateway = false;
             Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.INFO, "Starting async Manual Refresh from Payment Gateway with starting date:", reportStartDate);
             startAsynchJob(key, paymentBean.getAllPaymentsBySystemSinceDate(reportStartDate, reportEndDate, reportUseSettlementDate, getDigitalKey()));
-
+            Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.INFO, "Starting async Manual Refresh of All active customers:");
+            refreshAllActiveCustomers();
         }
+
     }
 
     /**
