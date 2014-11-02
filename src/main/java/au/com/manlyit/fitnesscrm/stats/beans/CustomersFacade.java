@@ -37,6 +37,7 @@ public class CustomersFacade extends AbstractFacade<Customers> {
     private EntityManager em;
     private static final Logger logger = Logger.getLogger(CustomersFacade.class.getName());
 
+    @Override
     protected EntityManager getEntityManager() {
         return em;
     }
@@ -99,8 +100,15 @@ public class CustomersFacade extends AbstractFacade<Customers> {
 
             //Query q = em.createQuery(cq);
             Query q = em.createNativeQuery("SELECT * FROM customers where upper(firstname) = upper('" + firstname.trim() + "') and upper(lastname) = upper('" + lastname.trim() + "') ", Customers.class);
-            cm = (Customers) q.getSingleResult();
-        } catch (Exception e) {
+         int size = q.getResultList().size();
+            if (size == 1) {
+                cm = (Customers) q.getSingleResult();
+            } else if (size == 0) {
+                logger.log(Level.WARNING, "Customers findCustomerByName, Customer not found : Customer name  = {0} {1}", new Object[]{ firstname,lastname,size});
+            } else if (size > 1) {
+                logger.log(Level.WARNING, "Customers findCustomerByName, Duplicate Customer id's found for Customer facebookId = {0} {1}. The number of duplicates is {1}",new Object[]{ firstname,lastname,size});
+            }
+       } catch (Exception e) {
             logger.log(Level.INFO, "Customer not found:{0} {1} , {2}", new Object[]{firstname, lastname, e.getMessage()});
         }
         return cm;
@@ -137,7 +145,14 @@ public class CustomersFacade extends AbstractFacade<Customers> {
             cq.where(cb.equal(facebookId, fbId));
 
             Query q = em.createQuery(cq);
-            cm = (Customers) q.getSingleResult();
+           int size = q.getResultList().size();
+            if (size == 1) {
+                cm = (Customers) q.getSingleResult();
+            } else if (size == 0) {
+                logger.log(Level.WARNING, "Customers findCustomerByFacebookId, Customer not found : Customer facebookId = {0}", fbId);
+            } else if (size > 1) {
+                logger.log(Level.WARNING, "Customers findCustomerByFacebookId, Duplicate Customer id's found for Customer facebookId = {0}. The number of duplicates is {1}",new Object[]{ fbId,size});
+            }
         } catch (Exception e) {
             logger.log(Level.INFO, "Customer not found or duplicate facebookId  found :" + fbId, e);
         }
@@ -155,9 +170,16 @@ public class CustomersFacade extends AbstractFacade<Customers> {
             cq.where(cb.equal(custId, id));
 
             Query q = em.createQuery(cq);
-            cm = (Customers) q.getSingleResult();
+            int size = q.getResultList().size();
+            if (size == 1) {
+                cm = (Customers) q.getSingleResult();
+            } else if (size == 0) {
+                logger.log(Level.WARNING, "Customers findById, Customer not found : Customer Id = {0}", id);
+            } else if (size > 1) {
+                logger.log(Level.WARNING, "Customers findById, Duplicate Customer id's found for Customer Id = {0}. The number of duplicates is {1}",new Object[]{ id,size});
+            }
         } catch (Exception e) {
-            logger.log(Level.INFO, "Customer not found or duplicate Id  found :" + id, e);
+            logger.log(Level.WARNING, "Customers findById, An exception occurred for customer id :" + id, e);
         }
         return cm;
     }

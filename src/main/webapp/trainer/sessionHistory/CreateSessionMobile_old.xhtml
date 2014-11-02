@@ -31,7 +31,7 @@
 
                 <h:form id="sessionsForm">  
                     <p:growl/>
-                    <p:commandButton   ajax="false"   action="#{sessionHistoryController.createMobileDatalist}" value="#{configMapController.getKey('CreateSessionHistorySaveLink')}" />
+                    <p:commandButton   ajax="false"   action="#{sessionHistoryController.createMobile}" value="#{configMapController.getKey('CreateSessionHistorySaveLink')}" />
 
                     <p:spacer height="10em" />
 
@@ -48,7 +48,7 @@
                     </pm:field>  
                     <pm:field>   
                         <h:outputLabel for="ajaxSpinner2" value="Minute: " />
-                        <pm:inputSlider id="ajaxSpinner2" minValue="0" maxValue="55"  valueChangeListener="#{sessionHistoryController.minuteSpinnerChange}"  step="5" value="#{sessionHistoryController.minuteSpinner}"/>
+                        <pm:inputSlider id="ajaxSpinner2" minValue="0" maxValue="59"  valueChangeListener="#{sessionHistoryController.minuteSpinnerChange}"  step="15" value="#{sessionHistoryController.minuteSpinner}"/>
                     </pm:field>  
 
 
@@ -82,7 +82,7 @@
                     <p:spacer height="10em" />
                     <pm:field>
                         <p:outputLabel for="scroll" value="#{configMapController.getKey('CreateSessionHistoryLabel_picker')}" />
-                        <!--<p:selectCheckboxMenu  id="scroll" filter="true" filterMatchMode="startsWith" 
+                        <p:selectCheckboxMenu  id="scroll" filter="true" filterMatchMode="startsWith" 
                                                value="#{sessionHistoryController.attendingCustomers}"  
                                                converter="#{custConverter}" 
                                                label="#{configMapController.getKey('CreateSessionHistoryLabel_picker')}"
@@ -93,28 +93,12 @@
                                            itemLabel="#{cust.firstname} #{cust.lastname}" 
                                            itemValue="#{cust}" />  
 
-                        </p:selectCheckboxMenu>-->
-                        <p:dataList  id="scroll"   value="#{sessionHistoryController.selectableActiveCustomers}" var="cust" rowIndexVar="rowIndex" >
-                            <f:attribute name="filter" value="true" />
-                            <p:column>
-                                <h:panelGrid id="customerPanel" columns="4" >
-                                    <h:outputText value="#{rowIndex}" style="padding-left: 30px"/>
-                                   <p:graphicImage value="#{customerImagesController.dynamicImage}" width="50px">
-                                        <f:param name="imageid" value="#{cust.profileImage.id}"/>
-                                    </p:graphicImage>
-                                   <p:selectBooleanCheckbox id="btnAttendedSession" value="#{sessionHistoryController.checkedCustomers[rowIndex]}" style="text-align: right"/>
-                                     <!--   <p:ajax update="btnAttendedSession" listener="#{sessionHistoryController.updateSelectedCustomers()}" event="click" process="btnAttendedSession"/>
-                                    </p:selectBooleanCheckbox>-->
-                                     
-                                    <h:outputText value="#{cust.firstname} #{cust.lastname}" style="padding-left: 30px"/>
-                                </h:panelGrid>
-                            </p:column>
-                        </p:dataList>
+                        </p:selectCheckboxMenu>
 
                     </pm:field>
                     <p:spacer height="10em" />
                     <p:spacer height="10em" />
-                    <p:commandButton   ajax="false"   action="#{sessionHistoryController.createMobileDatalist}" value="#{configMapController.getKey('CreateSessionHistorySaveLink')}" />
+                    <p:commandButton   ajax="false"   action="#{sessionHistoryController.createMobile}" value="#{configMapController.getKey('CreateSessionHistorySaveLink')}" />
                 </h:form>
                 <!-- <p:dialog id="createNotesDialog" widgetVar="createSessionDlg">
                      <h:form id="dlgCSForm">  

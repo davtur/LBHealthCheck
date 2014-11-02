@@ -84,10 +84,12 @@ public class SessionHistory implements BaseEntity, Serializable {
         this.sessiondate = sessiondate;
     }
 
+    @Override
     public Integer getId() {
         return id;
     }
 
+    @Override
     public void setId(Integer id) {
         this.id = id;
     }

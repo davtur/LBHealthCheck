@@ -36,6 +36,7 @@
                                     <h:outputText value="#{sess.sessiondate}">
                                         <f:convertDateTime pattern="dd MMM yyyy  HH:mm" />
                                     </h:outputText> 
+                                    <h:outputText value=" - #{sess.sessionTypesId.name}"/>
                                     <h:outputText styleClass="ui-li-count" value="Edit"/>
                                     <!--<h:outputText styleClass="ui-li-count" value="#{sess.participantsCollection.size}" converter="#{javax.faces.convert.IntegerConverter}" />-->
                                        

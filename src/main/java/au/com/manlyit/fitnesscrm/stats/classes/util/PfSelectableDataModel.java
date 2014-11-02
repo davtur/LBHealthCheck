@@ -7,6 +7,7 @@ package au.com.manlyit.fitnesscrm.stats.classes.util;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Objects;
 import javax.faces.model.ListDataModel;
 import org.primefaces.model.SelectableDataModel;
 
@@ -29,7 +30,7 @@ public class PfSelectableDataModel<T extends BaseEntity> extends ListDataModel<T
         List<T> list = (List<T>) getWrappedData();
 
         for (T ejb : list) {
-            if (ejb.getId() == (new Integer(rowKey))) {
+            if (Objects.equals(ejb.getId(), new Integer(rowKey))) {
                 return ejb;
             }
         }

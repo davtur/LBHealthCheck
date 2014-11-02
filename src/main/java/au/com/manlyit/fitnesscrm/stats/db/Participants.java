@@ -3,13 +3,14 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package au.com.manlyit.fitnesscrm.stats.db;
 
 import java.io.Serializable;
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -31,6 +32,7 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "Participants.findAll", query = "SELECT p FROM Participants p"),
     @NamedQuery(name = "Participants.findById", query = "SELECT p FROM Participants p WHERE p.id = :id")})
 public class Participants implements Serializable {
+
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,7 +40,7 @@ public class Participants implements Serializable {
     @Column(name = "id")
     private Integer id;
     @JoinColumn(name = "session_history_id", referencedColumnName = "id")
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = false, cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private SessionHistory sessionHistoryId;
     @JoinColumn(name = "customer_id", referencedColumnName = "id")
     @ManyToOne(optional = false)
@@ -99,5 +101,5 @@ public class Participants implements Serializable {
     public String toString() {
         return "au.com.manlyit.fitnesscrm.stats.db.Participants[ id=" + id + " ]";
     }
-    
+
 }

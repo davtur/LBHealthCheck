@@ -29,7 +29,9 @@
 
 
                         <p:selectOneMenu id="imageType" value="#{customerImagesController.selected.imageType}"  label="#{configMapController.getKey('CreateCustomerImagesTitle_imageType')}" required="true" requiredMessage="#{configMapController.getKey('CreateCustomerImagesRequiredMessage_imageType')}">
-                            <f:selectItem   itemValue="0" itemLabel="JPEG"/>
+                            <f:selectItem   itemValue="2" itemLabel="JPEG"/>
+                            <f:selectItem   itemValue="1" itemLabel="PNG"/>
+                            <f:selectItem   itemValue="0" itemLabel="GIF"/>
                         </p:selectOneMenu>
 
 

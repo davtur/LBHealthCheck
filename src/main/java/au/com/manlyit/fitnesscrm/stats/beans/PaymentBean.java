@@ -1,4 +1,3 @@
-
 package au.com.manlyit.fitnesscrm.stats.beans;
 
 import au.com.manlyit.fitnesscrm.stats.classes.util.SendHTMLEmailWithFileAttached;
@@ -79,14 +78,15 @@ public class PaymentBean implements Serializable {
             return new AsyncResult<>(cd);
         }
 
-        logger.log(Level.INFO, "Running async task - Getting Customer Details {0}", cust.getUsername());
+        logger.log(Level.INFO, "Payment Bean - Running async task - Getting Customer Details {0}", cust.getUsername());
 
         EziResponseOfCustomerDetailsTHgMB7OL customerdetails = getWs().getCustomerDetails(digitalKey, "", cust.getId().toString());
         if (customerdetails.getError() == 0) {// any errors will be a non zero value
-            logger.log(Level.INFO, "Get Customer Details Response: Name - {0}", customerdetails.getData().getValue().getCustomerName().getValue());
 
             cd = customerdetails.getData().getValue();
-
+            if (cd != null) {
+                logger.log(Level.INFO, "Payment Bean - Get Customer Details Response: Customer  - {0}, Ezidebit Name : {1} {2}", new Object[]{cust.getUsername(), cd.getCustomerFirstName().getValue(), cd.getCustomerName().getValue()});
+            }
         } else {
             logger.log(Level.WARNING, "Get Customer Details Response: Error - {0}", customerdetails.getErrorMessage().getValue());
 
@@ -321,13 +321,12 @@ public class PaymentBean implements Serializable {
 
     @Asynchronous
     public Future<Boolean> changeCustomerStatus(Customers cust, String newStatus, String loggedInUser, String digitalKey) {
-        
-        
-        if(cust ==null || newStatus == null || loggedInUser == null ){
+
+        if (cust == null || newStatus == null || loggedInUser == null) {
             logger.log(Level.WARNING, "changeCustomerStatus ABORTED because cust ==null || newStatus == null || loggedInUser == null");
-             return new AsyncResult<>(false);
+            return new AsyncResult<>(false);
         }
-            
+
         // note: cancelled status cannot be changed with this method. i.e. cancelled is final like deleted.
         logger.log(Level.INFO, "{2} changed customer ({0}) status to {1}", new Object[]{cust.getUsername(), newStatus, loggedInUser});
 
@@ -335,9 +334,9 @@ public class PaymentBean implements Serializable {
         String eziDebitCustomerId = ""; // use our reference instead. THis must be an empty string.
         String ourSystemCustomerReference = cust.getId().toString();
         String oldStatus = "Does not exist in payment gateway.";
-                if(cust.getPaymentParameters() != null ){
-                    oldStatus =    cust.getPaymentParameters().getStatusDescription();
-                }
+        if (cust.getPaymentParameters() != null) {
+            oldStatus = cust.getPaymentParameters().getStatusDescription();
+        }
         if (newStatus.compareTo("A") == 0 || newStatus.compareTo("H") == 0 || newStatus.compareTo("C") == 0) {
             if (loggedInUser.length() > 50) {
                 loggedInUser = loggedInUser.substring(0, 50);
@@ -395,11 +394,15 @@ public class PaymentBean implements Serializable {
         }
 
         String ourSystemCustomerReference = cust.getId().toString();
-
+        logger.log(Level.INFO, "Payment Bean - Running async task - Getting Scheduled Payments for Customer {0}", cust.getUsername());
         EziResponseOfArrayOfScheduledPaymentTHgMB7OL eziResponse = getWs().getScheduledPayments(digitalKey, fromDateString, toDateString, eziDebitCustomerId, ourSystemCustomerReference);
-        logger.log(Level.INFO, "getScheduledPayments Response: Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
-        if (eziResponse.getError() == 0) {// any errors will be a non zero value
+         if (eziResponse.getError() == 0) {// any errors will be a non zero value
             result = eziResponse.getData().getValue();
+            if (result != null) {
+                logger.log(Level.INFO, "Payment Bean - Get Customer Scheduled Payments Response Recieved from ezidebit for Customer  - {0}, Number of Payments : {1} ", new Object[]{cust.getUsername(), result.getScheduledPayment().size()});
+            } else {
+                logger.log(Level.WARNING, "getScheduledPayments Response: Error - NULL Result ");
+            }
 
         } else {
             logger.log(Level.WARNING, "getScheduledPayments Response: Error - {0}, ", eziResponse.getErrorMessage().getValue());
@@ -715,12 +718,16 @@ public class PaymentBean implements Serializable {
         }
 
         String ourSystemCustomerReference = cust.getId().toString();
-
+        logger.log(Level.INFO, "Payment Bean - Running async task - Getting Payments for Customer {0}", cust.getUsername());
         EziResponseOfArrayOfPaymentTHgMB7OL eziResponse = getWs().getPayments(digitalKey, paymentType, paymentMethod, paymentSource, paymentReference, fromDateString, toDateString, dateField, eziDebitCustomerId, ourSystemCustomerReference);
-        logger.log(Level.INFO, "getPayments Response: Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
+        // logger.log(Level.INFO, "getPayments Response: Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
         if (eziResponse.getError() == 0) {// any errors will be a non zero value
             result = eziResponse.getData().getValue();
-
+            if (result != null) {
+                logger.log(Level.INFO, "Payment Bean - Get Customer Payments Response Recieved from ezidebit for Customer  - {0}, Number of Payments : {1} ", new Object[]{cust.getUsername(), result.getPayment().size()});
+            } else {
+                logger.log(Level.WARNING, "getPayments Response: Error - NULL Result ");
+            }
         } else {
             logger.log(Level.WARNING, "getPayments Response: Error - {0}, ", eziResponse.getErrorMessage().getValue());
 

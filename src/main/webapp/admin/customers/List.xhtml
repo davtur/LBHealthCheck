@@ -100,6 +100,17 @@
                                         <f:convertDateTime pattern="dd MMM yyyy" />
                                     </h:outputText>
                                 </p:column>
+                              <p:column sortBy="#{item.paymentParameters.nextScheduledPayment.debitDate}" filterBy="#{item.paymentParameters.nextScheduledPayment.debitDate}" headerText="#{configMapController.getKey('ListCustomersTitle_nextScheduledPayment')}"   >
+                                    <h:outputText value="#{item.paymentParameters.nextScheduledPayment.debitDate}">
+                                        <f:convertDateTime pattern="dd MMM yyyy" />
+                                    </h:outputText>
+                                </p:column>
+                                <p:column sortBy="#{item.paymentParameters.nextScheduledPayment.lastUpdatedDatetime}" filterBy="#{item.paymentParameters.nextScheduledPayment.lastUpdatedDatetime}" headerText="#{configMapController.getKey('ListCustomersTitle_lastUpdated')}"   >
+                                    <h:outputText value="#{item.paymentParameters.nextScheduledPayment.lastUpdatedDatetime}">
+                                        <f:convertDateTime pattern="yyyy-MM-dd hh:mm:ss" />
+                                    </h:outputText>
+                                </p:column>
+
                                 <p:column sortBy="#{item.paymentParameters.totalPaymentsSuccessfulAmount}" filterBy="#{item.paymentParameters.totalPaymentsSuccessfulAmount}" headerText="#{configMapController.getKey('ListCustomersTitle_totalPaymentsSuccessfulAmount')}"   >
                                     <h:outputText value="#{item.paymentParameters.totalPaymentsSuccessfulAmount}">
                                         <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
@@ -110,12 +121,7 @@
                                         <f:convertDateTime pattern="dd MMM yyyy" />
                                     </h:outputText>
                                 </p:column>
-                                <p:column sortBy="#{item.paymentParameters.nextScheduledPayment.debitDate}" filterBy="#{item.paymentParameters.nextScheduledPayment.debitDate}" headerText="#{configMapController.getKey('ListCustomersTitle_nextScheduledPayment')}"   >
-                                    <h:outputText value="#{item.paymentParameters.nextScheduledPayment.debitDate}">
-                                        <f:convertDateTime pattern="dd MMM yyyy" />
-                                    </h:outputText>
-                                </p:column>
-
+   
 
                             </p:dataTable>
                         </h:panelGroup>

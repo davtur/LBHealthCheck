@@ -565,6 +565,7 @@ public class FutureMapEJB implements Serializable {
 
                     Customers cust = customersFacade.findById(custId);
                     if (cust != null) {
+                        logger.log(Level.INFO, "Future Map processGetPayments. Processing {0} payments for customer {1}.", new Object[]{payList.size(), cust.getUsername()});
                         for (Payment pay : payList) {
                             if (customerRef.compareTo(pay.getYourSystemReference().getValue().trim()) != 0) {
                                 logger.log(Level.WARNING, "Future Map processGetPayments . The list being processed contains multiple customers.It should only contain one for this method. Aborting.");
@@ -644,6 +645,7 @@ public class FutureMapEJB implements Serializable {
 
                         Customers cust = customersFacade.findById(custId);
                         if (cust != null) {
+                            logger.log(Level.INFO, "Future Map processGetScheduledPayments. Processing {0} payments for customer {1}.", new Object[]{payList.size(), cust.getUsername()});
                             for (ScheduledPayment pay : payList) {
                                 if (customerRef.compareTo(pay.getYourSystemReference().getValue().trim()) != 0) {
                                     logger.log(Level.WARNING, "Future Map processGetScheduledPayments . The list being processed contains multiple customers.It should only contain one for this method. Aborting.");
@@ -785,6 +787,8 @@ public class FutureMapEJB implements Serializable {
 
                 Customers cust = customersFacade.findById(custId);
                 if (cust != null) {
+                    logger.log(Level.INFO, "Future Map processGetCustomerDetails. Processing details for customer {0}.", new Object[]{cust.getUsername()});
+
                     PaymentParameters pp = cust.getPaymentParameters();
                     boolean isNew = false;
                     if (pp == null) {
@@ -794,8 +798,20 @@ public class FutureMapEJB implements Serializable {
                         pp.setLoggedInUser(cust);
                         isNew = true;
                     }
-                    pp.setLastSuccessfulScheduledPayment(paymentsFacade.findLastSuccessfulScheduledPayment(cust));
-                    pp.setNextScheduledPayment(paymentsFacade.findNextScheduledPayment(cust));
+                    Payments p1 = null;
+                    try {
+                        p1 = paymentsFacade.findLastSuccessfulScheduledPayment(cust);
+                    } catch (Exception e) {
+                        logger.log(Level.WARNING, "Future Map processGetCustomerDetails. findLastSuccessfulScheduledPayment for customer {0}. {1}", new Object[]{cust.getUsername(), e});
+                    }
+                    Payments p2 = null;
+                    try {
+                        p2 = paymentsFacade.findNextScheduledPayment(cust);
+                    } catch (Exception e) {
+                        logger.log(Level.WARNING, "Future Map processGetCustomerDetails. findNextScheduledPayment for customer {0}. {1}", new Object[]{cust.getUsername(), e});
+                    }
+                    pp.setLastSuccessfulScheduledPayment(p1);
+                    pp.setNextScheduledPayment(p2);
                     pp.setAddressLine1(custDetails.getAddressLine1().getValue());
                     pp.setAddressLine2(custDetails.getAddressLine2().getValue());
                     pp.setAddressPostCode(custDetails.getAddressPostCode().getValue());
@@ -830,6 +846,7 @@ public class FutureMapEJB implements Serializable {
                     } else {
                         paymentParametersFacade.edit(pp);
                     }
+                    customersFacade.edit(cust);
                 } else {
                     logger.log(Level.WARNING, "Future Map processGetCustomerDetails an ezidebit YourSystemReference string cannot be converted to a number.");
                 }
@@ -1021,7 +1038,7 @@ public class FutureMapEJB implements Serializable {
             if (c.getProfileImage() == null) {
                 createDefaultProfilePic(c);
             }
-            if(c.getPaymentParameters() == null){
+            if (c.getPaymentParameters() == null) {
                 createDefaultPaymentParameters(c);
             }
         }
