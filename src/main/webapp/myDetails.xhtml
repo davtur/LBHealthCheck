@@ -128,26 +128,28 @@
                                 </p:panelGrid>
                                 <!-- <p:panel id="imageCropperPanel" header="Uploaded Image">
                                      <h:panelGrid columns="2">  
-                                         <p:imageCropper value="#{customerImagesController.cropperImage}"  
-                                                         image="#{customerImagesController.uploadedImage}"  
+                                         <p:imageCropper value="#{customerImagesController.croppedImage}"  
+                                                         image="#{customerImagesController.uploadedImageTempFile.path}"  
                                                          initialCoords="225,75,300,125"/>  
      
-                                         <p:graphicImage id="localCroppedImage"  
-                                                         value="#{customerImagesController.croppedImage}" />  
+                                         <p:graphicImage id="localCroppedImage"  rendered="#{not empty customerImagesController.uploadedImageTempFile}"
+                                                         value="#{customerImagesController.uploadedImageTempFile.path}" />  
                                      </h:panelGrid>  
      
-                                     <p:commandButton value="Crop"  
+                                     <p:commandButton value="Crop"  actionListener="#{customerImagesController.crop}" rendered="#{not empty customerImagesController.uploadedImageTempFile}"
                                                       
-                                                      update=":photoCreate:photoPanel3"/> 
-                                 </p:panel> -->
+                                                      update="photoPanel3"/> 
+                                 </p:panel> 
 
-                            </p:panel>
-                            <h:panelGrid columns="3">
+                            </p:panel>-->
+                            <h:panelGrid columns="4">
                                 <p:outputLabel  value="#{configMapController.getKey('CreateCustomerImagesLabel_profilephoto')}" for="profilephoto" />
                                 <p:selectBooleanCheckbox id="profilephoto"   value="#{customerImagesController.profilePhoto}" >
                                     <p:ajax />
                                 </p:selectBooleanCheckbox>  
                                 <p:commandButton  disabled="#{customerImagesController.saveButtonDisabled}" update="photoPanel3  :growl photo1 photo2"   actionListener="#{customerImagesController.createFromDialogue}" value="#{configMapController.getKey('CreateCustomerImagesSaveLink')}" />
+                                <p:commandButton      actionListener="#{customerImagesController.rotate90degrees}" update="photoPanel3  :growl photo1 photo2 :growl panel3"  value="#{configMapController.getKey('CreateCustomerImagesRotateImage90Link')}" />
+
                             </h:panelGrid>
                         </p:panel>
 

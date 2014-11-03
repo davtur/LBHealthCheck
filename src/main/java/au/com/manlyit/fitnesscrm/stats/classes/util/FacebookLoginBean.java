@@ -32,7 +32,7 @@ public class FacebookLoginBean implements Serializable {
     private au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade configMapFacade;
 
     public String getFacebookUrlAuth() {
-        String returnValue ="";
+        String returnValue = "";
         FacesContext context = FacesContext.getCurrentInstance();
         ExternalContext ec = context.getExternalContext();
         HttpServletRequest request = (HttpServletRequest) context.getExternalContext().getRequest();
@@ -41,18 +41,23 @@ public class FacebookLoginBean implements Serializable {
                 = (HttpSession) ec.getSession(false);
         String userName = (String) session.getAttribute("FACEBOOK_USER");
         if (userName != null) {
-           
-                String isMobile = (String) session.getAttribute("MOBILE_DEVICE");
-                String landingPage;
-                if (isMobile.contains("TRUE")) {                    
-                    landingPage = configMapFacade.getConfig("facebook.redirect.mobilelandingpage");
+
+            String isMobile = (String) session.getAttribute("MOBILE_DEVICE");
+            String landingPage;
+            if (isMobile.contains("TRUE")) {
+                landingPage = configMapFacade.getConfig("facebook.redirect.mobilelandingpage");
+            } else {
+                landingPage = configMapFacade.getConfig("facebook.redirect.landingpage");
+            }
+            String message = "The user " + userName + " is already logged in. Redirecting to the landing Page:" + landingPage;
+            logger.log(Level.INFO, message);
+            try {
+                String sendToThisUrl = request.getContextPath() + landingPage;
+                if (request.getPathInfo().contains(sendToThisUrl)) {
+                    logger.log(Level.INFO, "getFacebookUrlAuth -  The path is the same as the redirect URL. No need to redirect.");
                 } else {
-                    landingPage = configMapFacade.getConfig("facebook.redirect.landingpage");
+                    ec.redirect(sendToThisUrl);
                 }
-                String message ="The user " + userName + " is already logged in. Redirecting to the landing Page:" + landingPage;
-                logger.log(Level.INFO, message);
-                 try {
-                ec.redirect(request.getContextPath() + landingPage);                
             } catch (IOException ex) {
                 Logger.getLogger(FacebookLoginBean.class.getName()).log(Level.SEVERE, "Redirecting to Landing Page:", ex);
             }
@@ -63,7 +68,7 @@ public class FacebookLoginBean implements Serializable {
             returnValue = configMapFacade.getConfig("facebook.app.oauth.url") + "client_id="
                     + appId + "&redirect_uri=" + redirectUrl
                     + "&scope=email,user_birthday&state=" + sessionId;
-            
+
         }
         return returnValue;
     }

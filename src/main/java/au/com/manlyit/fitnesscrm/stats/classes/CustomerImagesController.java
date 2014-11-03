@@ -13,6 +13,7 @@ import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -40,7 +41,9 @@ import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
 import javax.imageio.ImageIO;
+import javax.imageio.stream.FileImageOutputStream;
 import javax.servlet.http.HttpServletRequest;
+
 import org.apache.sanselan.ImageReadException;
 import org.apache.sanselan.Sanselan;
 import org.apache.sanselan.common.IImageMetadata;
@@ -64,8 +67,9 @@ public class CustomerImagesController implements Serializable {
     private static final int new_width = 800;// must match panelheight on gallery component
     private static final int new_height = 500;// must match panelheight on gallery component
     private static final int PROFILE_PIC_HEIGHT_IN_PIX = 100;
-    private StreamedContent croppedImage;
-    private CroppedImage cropperImage;
+    private StreamedContent streamedCroppedImage;
+    private CroppedImage croppedImage;
+    private File uploadedImageTempFile;
     private CustomerImages selectedForDeletion;
     private DataModel items = null;
     @Inject
@@ -279,7 +283,23 @@ public class CustomerImagesController implements Serializable {
     private void processUploadedFile(UploadedFile file) {
         BufferedImage img = null;
         String fileName = file.getFileName();
+        String contentType = file.getContentType();
+
         String fileExtension = fileName.substring(fileName.lastIndexOf(".")).toLowerCase();
+        String name = fileName.substring(0, fileName.lastIndexOf(".")).toLowerCase();
+        try {
+            uploadedImageTempFile = File.createTempFile(name, fileExtension);
+        } catch (IOException ex) {
+            Logger.getLogger(CustomerImagesController.class.getName()).log(Level.SEVERE, "Create Temp File", ex);
+        }
+
+        /*   try (FileImageOutputStream imageOutput = new FileImageOutputStream(uploadedImageTempFile)) {
+         byte[] image = IOUtils.toByteArray(file.getInputstream());
+         imageOutput.write(image, 0, image.length);
+
+         } catch (IOException iOException) {
+         Logger.getLogger(CustomerImagesController.class.getName()).log(Level.SEVERE, null, iOException);
+         }*/
         int imgType = -1;
         if (fileExtension.contains("jpeg") || fileExtension.contains("jpg")) {
             imgType = 2;
@@ -297,9 +317,10 @@ public class CustomerImagesController implements Serializable {
             logger.log(Level.WARNING, "processUploadedFile , Cannot add default profile pic  due the picture not being in jpeg, gif or png. resource:{0}", new Object[]{fileName});
             return;
         }
-
+        logger.log(Level.INFO, "processUploadedFile , Name of Uploaded File: {0}, contentType: {1}, file Extension:{2}", new Object[]{fileName, contentType, fileExtension});
         try {
             img = ImageIO.read(file.getInputstream());
+            ImageIO.write(img, fileExtension, uploadedImageTempFile);
         } catch (IOException e) {
             JsfUtil.addErrorMessage(e, "Loading image into buffer error!!");
         }
@@ -312,61 +333,63 @@ public class CustomerImagesController implements Serializable {
         //Iterator readers = ImageIO.getImageReadersByFormatName("jpeg");
         // ImageReader reader = (ImageReader) readers.next();
         try { // get meta data from photo
-            IImageMetadata metadata = Sanselan.getMetadata(file.getInputstream(), null);
-            JpegImageMetadata jpegMetadata = (JpegImageMetadata) metadata;
-            if (jpegMetadata != null) {
-                // print out various interesting EXIF tags.
-                //for debugging only - comment out
-                printTagValue(jpegMetadata, TiffConstants.TIFF_TAG_XRESOLUTION);
-                printTagValue(jpegMetadata, TiffConstants.TIFF_TAG_DATE_TIME);
-                printTagValue(jpegMetadata,
-                        TiffConstants.EXIF_TAG_DATE_TIME_ORIGINAL);
-                printTagValue(jpegMetadata, TiffConstants.EXIF_TAG_CREATE_DATE);
-                printTagValue(jpegMetadata, TiffConstants.EXIF_TAG_ISO);
-                printTagValue(jpegMetadata,
-                        TiffConstants.EXIF_TAG_SHUTTER_SPEED_VALUE);
-                printTagValue(jpegMetadata, TiffConstants.EXIF_TAG_APERTURE_VALUE);
-                printTagValue(jpegMetadata, TiffConstants.EXIF_TAG_BRIGHTNESS_VALUE);
-                printTagValue(jpegMetadata, TiffConstants.GPS_TAG_GPS_LATITUDE_REF);
-                printTagValue(jpegMetadata, TiffConstants.GPS_TAG_GPS_LATITUDE);
-                printTagValue(jpegMetadata, TiffConstants.GPS_TAG_GPS_LONGITUDE_REF);
-                printTagValue(jpegMetadata, TiffConstants.GPS_TAG_GPS_LONGITUDE);
+            if (imgType == 2) {
+                IImageMetadata metadata = Sanselan.getMetadata(file.getInputstream(), null);
+                JpegImageMetadata jpegMetadata = (JpegImageMetadata) metadata;
+                if (jpegMetadata != null) {
+                    // print out various interesting EXIF tags.
+                    //for debugging only - comment out
+                    printTagValue(jpegMetadata, TiffConstants.TIFF_TAG_XRESOLUTION);
+                    printTagValue(jpegMetadata, TiffConstants.TIFF_TAG_DATE_TIME);
+                    printTagValue(jpegMetadata,
+                            TiffConstants.EXIF_TAG_DATE_TIME_ORIGINAL);
+                    printTagValue(jpegMetadata, TiffConstants.EXIF_TAG_CREATE_DATE);
+                    printTagValue(jpegMetadata, TiffConstants.EXIF_TAG_ISO);
+                    printTagValue(jpegMetadata,
+                            TiffConstants.EXIF_TAG_SHUTTER_SPEED_VALUE);
+                    printTagValue(jpegMetadata, TiffConstants.EXIF_TAG_APERTURE_VALUE);
+                    printTagValue(jpegMetadata, TiffConstants.EXIF_TAG_BRIGHTNESS_VALUE);
+                    printTagValue(jpegMetadata, TiffConstants.GPS_TAG_GPS_LATITUDE_REF);
+                    printTagValue(jpegMetadata, TiffConstants.GPS_TAG_GPS_LATITUDE);
+                    printTagValue(jpegMetadata, TiffConstants.GPS_TAG_GPS_LONGITUDE_REF);
+                    printTagValue(jpegMetadata, TiffConstants.GPS_TAG_GPS_LONGITUDE);
 
-                TiffField field = jpegMetadata.findEXIFValue(TiffConstants.EXIF_TAG_DATE_TIME_ORIGINAL);
-                if (field == null) {
+                    TiffField field = jpegMetadata.findEXIFValue(TiffConstants.EXIF_TAG_DATE_TIME_ORIGINAL);
+                    if (field == null) {
 
-                    Logger.getLogger(CustomerImagesController.class.getName()).log(Level.INFO, "Photo upload date not found in EXIF data");
-                } else {
-                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy:MM:dd HH:mm:ss");
-                    String dateString = field.getValueDescription();
-                    dateString = dateString.replace("'", " ").trim();
-                    Date dateThePhotoWasTaken = null;
-                    try {
-                        ParsePosition pp = new ParsePosition(0);
-                        dateThePhotoWasTaken = sdf.parse(dateString, pp);
-                    } catch (Exception e) {
-                        JsfUtil.addErrorMessage(e, "Couldnt get the date the photo was taken from the image file!");
-                    }
-                    if (dateThePhotoWasTaken != null) {
-                        current.setDatetaken(dateThePhotoWasTaken);
+                        Logger.getLogger(CustomerImagesController.class.getName()).log(Level.INFO, "Photo upload date not found in EXIF data");
                     } else {
-                        JsfUtil.addErrorMessage("Couldnt get the date the photo was taken from the image file!. The Date is Null!");
+                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy:MM:dd HH:mm:ss");
+                        String dateString = field.getValueDescription();
+                        dateString = dateString.replace("'", " ").trim();
+                        Date dateThePhotoWasTaken = null;
+                        try {
+                            ParsePosition pp = new ParsePosition(0);
+                            dateThePhotoWasTaken = sdf.parse(dateString, pp);
+                        } catch (Exception e) {
+                            JsfUtil.addErrorMessage(e, "Couldnt get the date the photo was taken from the image file!");
+                        }
+                        if (dateThePhotoWasTaken != null) {
+                            current.setDatetaken(dateThePhotoWasTaken);
+                        } else {
+                            JsfUtil.addErrorMessage("Couldnt get the date the photo was taken from the image file!. The Date is Null!");
+
+                        }
+                        JsfUtil.addSuccessMessage("Modifying the photo taken date to the date extracted from the photo: " + dateString);
 
                     }
-                    JsfUtil.addSuccessMessage("Modifying the photo taken date to the date extracted from the photo: " + dateString);
 
+                } else {
+                    JsfUtil.addErrorMessage("Couldnt get the date the photo was taken from the image file! No EXIF data in the photo.");
                 }
-
-            } else {
-                JsfUtil.addErrorMessage("Couldnt get the date the photo was taken from the image file! No EXIF data in the photo.");
+                /* ImageInputStream iis = ImageIO.createImageInputStream(uploadedFile.getInputstream());
+                 reader.setInput(iis, true);
+                 IIOMetadata tags = reader.getImageMetadata(0);
+                 Node tagNode = tags.getAsTree(tags.getNativeMetadataFormatName());
+                 String st = tagNode.getTextContent();
+                
+                 data = reader.read(0);*/
             }
-            /* ImageInputStream iis = ImageIO.createImageInputStream(uploadedFile.getInputstream());
-             reader.setInput(iis, true);
-             IIOMetadata tags = reader.getImageMetadata(0);
-             Node tagNode = tags.getAsTree(tags.getNativeMetadataFormatName());
-             String st = tagNode.getTextContent();
-            
-             data = reader.read(0);*/
         } catch (IOException | ImageReadException e) {
             JsfUtil.addErrorMessage(e, "Couldnt get the date the photo was taken from the image file! No EXIF data in the photo.");
         }
@@ -376,8 +399,8 @@ public class CustomerImagesController implements Serializable {
     public void handleFileUpload(FileUploadEvent event) {
 //Barefoot-image_100_by_100.jpg
 
-        UploadedFile file = event.getFile();
-        processUploadedFile(file);
+        uploadedFile = event.getFile();
+        processUploadedFile(uploadedFile);
         setSaveButtonDisabled(false);
 
     }
@@ -398,7 +421,7 @@ public class CustomerImagesController implements Serializable {
         try {
 
             setUploadedImage(new DefaultStreamedContent(stream, "image/jpeg"));
-            setCroppedImage(getUploadedImage());
+            //setCroppedImage(getUploadedImage());
         } catch (Exception ex) {
             Logger.getLogger(CustomerImagesController.class.getName()).log(Level.SEVERE, null, ex);
             JsfUtil.addErrorMessage(ex, "Update image error!!");
@@ -460,6 +483,11 @@ public class CustomerImagesController implements Serializable {
     public String prepareList() {
         recreateModel();
         return "List";
+    }
+
+    private BufferedImage rotateBufferedImage(BufferedImage oldImage, int degreesToRotate) {
+        return rotateImage(degreesToRotate, oldImage);
+
     }
 
     public void rotate90degrees(ActionEvent event) {
@@ -613,6 +641,9 @@ public class CustomerImagesController implements Serializable {
             if (isProfilePhoto()) {
                 cust.setProfileImage(current);
                 ejbCustomersFacade.edit(cust);
+                FacesContext context = FacesContext.getCurrentInstance();
+                CustomersController custController = (CustomersController) context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
+                custController.setSelected(cust);
             }
             JsfUtil.addSuccessMessage(configMapFacade.getConfig("CustomerImagesCreated"));
             return prepareCreate();
@@ -648,6 +679,36 @@ public class CustomerImagesController implements Serializable {
 
         return type;
 
+    }
+
+    private String getFileExtensionFromFilePath(String path) {
+        return path.substring(path.lastIndexOf(".")).toLowerCase();
+
+    }
+
+    public String crop() {
+
+        InputStream stream = new ByteArrayInputStream(croppedImage.getBytes());
+        try {
+            String extension = getFileExtensionFromFilePath(croppedImage.getOriginalFilename());
+            setUploadedImage(new DefaultStreamedContent(stream, "image/" + extension)
+            );
+            //setCroppedImage(getUploadedImage());
+
+            FileImageOutputStream imageOutput;
+            try {
+                imageOutput = new FileImageOutputStream(new File(uploadedImageTempFile.getAbsolutePath()));
+                imageOutput.write(croppedImage.getBytes(), 0, croppedImage.getBytes().length);
+                imageOutput.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } catch (Exception ex) {
+            Logger.getLogger(CustomerImagesController.class.getName()).log(Level.SEVERE, null, ex);
+            JsfUtil.addErrorMessage(ex, "Update image error!!");
+        }
+
+        return null;
     }
 
     private void loadImage(CustomerImages ci) {
@@ -942,28 +1003,28 @@ public class CustomerImagesController implements Serializable {
      * @return the croppedImage
      */
     public StreamedContent getCroppedImage() {
-        return croppedImage;
+        return streamedCroppedImage;
     }
 
     /**
      * @param croppedImage the croppedImage to set
      */
     public void setCroppedImage(StreamedContent croppedImage) {
-        this.croppedImage = croppedImage;
+        this.streamedCroppedImage = croppedImage;
     }
 
     /**
      * @return the cropperImage
      */
     public CroppedImage getCropperImage() {
-        return cropperImage;
+        return croppedImage;
     }
 
     /**
      * @param cropperImage the cropperImage to set
      */
     public void setCropperImage(CroppedImage cropperImage) {
-        this.cropperImage = cropperImage;
+        this.croppedImage = cropperImage;
     }
 
     /**
@@ -978,6 +1039,20 @@ public class CustomerImagesController implements Serializable {
      */
     public void setProfilePhoto(boolean profilePhoto) {
         this.profilePhoto = profilePhoto;
+    }
+
+    /**
+     * @return the uploadedImageTempFile
+     */
+    public File getUploadedImageTempFile() {
+        return uploadedImageTempFile;
+    }
+
+    /**
+     * @param uploadedImageTempFile the uploadedImageTempFile to set
+     */
+    public void setUploadedImageTempFile(File uploadedImageTempFile) {
+        this.uploadedImageTempFile = uploadedImageTempFile;
     }
 
     @FacesConverter(forClass = CustomerImages.class)

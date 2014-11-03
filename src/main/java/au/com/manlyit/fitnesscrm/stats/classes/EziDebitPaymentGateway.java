@@ -249,11 +249,13 @@ public class EziDebitPaymentGateway implements Serializable {
         startAsynchJob("GetCustomerDetails", paymentBean.getCustomerDetails(selectedCustomer, getDigitalKey()));
     }
 
-    protected void getPayments() {
+    protected void getPayments(int monthsAhead ,int monthsbehind) {
         GregorianCalendar cal = new GregorianCalendar();
-        cal.add(Calendar.MONTH, 12);
+       
+        cal.add(Calendar.MONTH, monthsAhead);
         Date endDate = cal.getTime();
-        cal.add(Calendar.MONTH, -24);
+        cal.add(Calendar.MONTH, -(monthsAhead));
+        cal.add(Calendar.DAY_OF_YEAR, -(monthsbehind));
         startAsynchJob("GetPayments", paymentBean.getPayments(selectedCustomer, "ALL", "ALL", "ALL", "", cal.getTime(), endDate, false, getDigitalKey()));
         startAsynchJob("GetScheduledPayments", paymentBean.getScheduledPayments(selectedCustomer, cal.getTime(), endDate, getDigitalKey()));
     }
@@ -581,7 +583,7 @@ public class EziDebitPaymentGateway implements Serializable {
             FacesContext context = FacesContext.getCurrentInstance();
             CustomersController controller = (CustomersController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "customersController");
             this.setSelectedCustomer(controller.getSelected());
-            getPayments();
+            getPayments(12,1);
             RequestContext.getCurrentInstance().update("iFrameForm");
         }
         return asyncOperationRunning;
@@ -1402,7 +1404,7 @@ public class EziDebitPaymentGateway implements Serializable {
             JsfUtil.addSuccessMessage("Customer Added to Payment Gateway Successfully.", "");
             customerExistsInPaymentGateway = true;
             startAsynchJob("GetCustomerDetails", paymentBean.getCustomerDetails(selectedCustomer, getDigitalKey()));
-            getPayments();
+            getPayments(12,1);
 
         } else {
             JsfUtil.addErrorMessage("Couldn't add Customer To Payment Gateway. Check logs");
@@ -1865,7 +1867,7 @@ public class EziDebitPaymentGateway implements Serializable {
         } else {
             JsfUtil.pushErrorMessage(CHANNEL + sessionId, "Add Payment", "Payment Failed! Is the customer active with valid account/card details?");
         }
-        getPayments();
+        getPayments(12,1);
         logger.log(Level.INFO, "processAddPaymentResult completed");
     }
 
@@ -1878,7 +1880,7 @@ public class EziDebitPaymentGateway implements Serializable {
         }
         if (result == true) {
             JsfUtil.pushSuccessMessage(CHANNEL + sessionId, "Payment", "Successfully Created Schedule.");
-            getPayments();
+            getPayments(12,1);
 
         } else {
             JsfUtil.pushErrorMessage(CHANNEL + sessionId, "Payment", "The Create Schedule operation failed!.");
@@ -1896,7 +1898,7 @@ public class EziDebitPaymentGateway implements Serializable {
         if (result == true) {
             JsfUtil.pushSuccessMessage(CHANNEL + sessionId, "Payment Gateway", "Successfully Edited Customer Details  .");
             getCustDetailsFromEzi();
-            getPayments();
+            getPayments(12,1);
         } else {
             JsfUtil.pushErrorMessage(CHANNEL + sessionId, "Payment Gateway", "The operation failed!.");
         }
@@ -1912,7 +1914,7 @@ public class EziDebitPaymentGateway implements Serializable {
         }
         if (result == true) {
             JsfUtil.pushSuccessMessage(CHANNEL + sessionId, "Payment Gateway", "Successfully Cleared Schedule .");
-            getPayments();
+            getPayments(12,1);
         } else {
             JsfUtil.pushErrorMessage(CHANNEL + sessionId, "Payment Gateway", "The operation failed!.");
         }
@@ -1929,7 +1931,7 @@ public class EziDebitPaymentGateway implements Serializable {
         if (result == true) {
             setSelectedScheduledPayment(null);
             JsfUtil.pushSuccessMessage(CHANNEL + sessionId, "Payment Gateway", "Successfully Deleted Payment  .");
-            getPayments();
+            getPayments(12,1);
         } else {
             JsfUtil.pushErrorMessage(CHANNEL + sessionId, "Payment Gateway", "The delete payment operation failed!.");
         }
@@ -1947,7 +1949,7 @@ public class EziDebitPaymentGateway implements Serializable {
             JsfUtil.pushSuccessMessage(CHANNEL + sessionId, "Payment Gateway", "Successfully Changed Customer Status  .");
             startAsynchJob("GetCustomerDetails", paymentBean.getCustomerDetails(selectedCustomer, getDigitalKey()));
             RequestContext.getCurrentInstance().update("customerslistForm1");
-            getPayments();
+            getPayments(12,1);
         } else {
             JsfUtil.pushErrorMessage(CHANNEL + sessionId, "Payment Gateway", "The change status operation failed!.");
         }
@@ -1979,7 +1981,7 @@ public class EziDebitPaymentGateway implements Serializable {
         }
         if (result == true) {
             JsfUtil.pushSuccessMessage(CHANNEL + sessionId, "Payment Gateway", "Successfully  Changed Scheduled Amount .");
-            getPayments();
+            getPayments(12,1);
         } else {
             JsfUtil.pushErrorMessage(CHANNEL + sessionId, "Payment Gateway", "The operation failed!.");
         }
@@ -1995,7 +1997,7 @@ public class EziDebitPaymentGateway implements Serializable {
         }
         if (result == true) {
             JsfUtil.pushSuccessMessage(CHANNEL + sessionId, "Payment Gateway", "Successfully Changed Scheduled Date  .");
-            getPayments();
+            getPayments(12,1);
         } else {
             JsfUtil.pushErrorMessage(CHANNEL + sessionId, "Payment Gateway", "The operation failed!.");
         }
@@ -2185,7 +2187,7 @@ public class EziDebitPaymentGateway implements Serializable {
         futureMap.cancelFutures(sessionId);
         getCustDetailsFromEzi();
 
-        getPayments();
+        getPayments(12,1);
         this.progress = 0;
 
         /*CustomerDetails cd = getCustomerDetails(selectedCustomer);

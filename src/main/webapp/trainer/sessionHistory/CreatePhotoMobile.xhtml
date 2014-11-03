@@ -43,7 +43,9 @@
 
                     </p:calendar>
                     <h:panelGrid columns="2">
-                         <p:selectBooleanCheckbox id="profilephoto"   value="#{customerImagesController.profilePhoto}"/>  
+                        <p:selectBooleanCheckbox id="profilephoto" immediate="true"  value="#{customerImagesController.profilePhoto}">
+                        <p:ajax />
+                        </p:selectBooleanCheckbox>  
                         <p:outputLabel  value="#{configMapController.getKey('CreateCustomerImagesLabel_profilephoto')}" for="profilephoto" style="padding-left: 40px"/>
                     </h:panelGrid>
                     <p:spacer height="10em" />
