@@ -139,9 +139,9 @@
                                      <p:commandButton value="Crop"  actionListener="#{customerImagesController.crop}" rendered="#{not empty customerImagesController.uploadedImageTempFile}"
                                                       
                                                       update="photoPanel3"/> 
-                                 </p:panel> 
+                                 </p:panel> -->
 
-                            </p:panel>-->
+                            </p:panel>
                             <h:panelGrid columns="4">
                                 <p:outputLabel  value="#{configMapController.getKey('CreateCustomerImagesLabel_profilephoto')}" for="profilephoto" />
                                 <p:selectBooleanCheckbox id="profilephoto"   value="#{customerImagesController.profilePhoto}" >

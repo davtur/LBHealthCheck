@@ -865,18 +865,40 @@ public class FutureMapEJB implements Serializable {
                 payment.setCustomerName(cust);
             }
             try {
-                payment.setLastUpdatedDatetime(new Date());
-                payment.setBankFailedReason(pay.getBankFailedReason().getValue());
-                payment.setBankReceiptID(pay.getBankReceiptID().getValue());
-                payment.setBankReturnCode(pay.getBankReturnCode().getValue());
+                
+                    payment.setLastUpdatedDatetime(new Date());
+                
+                if (pay.getBankFailedReason() != null) {
+                    payment.setBankFailedReason(pay.getBankFailedReason().getValue());
+                }
+                if (pay.getBankReceiptID() != null) {
+                    payment.setBankReceiptID(pay.getBankReceiptID().getValue());
+                }
+                if (pay.getBankReturnCode() != null) {
+                    payment.setBankReturnCode(pay.getBankReturnCode().getValue());
+                }
                 //payment.setCustomerName(cust);
-                payment.setDebitDate(pay.getDebitDate().getValue().toGregorianCalendar().getTime());
-                payment.setEzidebitCustomerID(pay.getEzidebitCustomerID().getValue());
-                payment.setInvoiceID(pay.getInvoiceID().getValue());
-                payment.setPaymentAmount(new BigDecimal(pay.getPaymentAmount().floatValue()));
-                payment.setPaymentID(pay.getPaymentID().getValue());
-                payment.setPaymentMethod(pay.getPaymentMethod().getValue());
-                payment.setPaymentReference(pay.getPaymentReference().getValue());
+                if (pay.getDebitDate() != null) {
+                    payment.setDebitDate(pay.getDebitDate().getValue().toGregorianCalendar().getTime());
+                }
+                if (pay.getEzidebitCustomerID() != null) {
+                    payment.setEzidebitCustomerID(pay.getEzidebitCustomerID().getValue());
+                }
+                if (pay.getInvoiceID() != null) {
+                    payment.setInvoiceID(pay.getInvoiceID().getValue());
+                }
+                if (pay.getPaymentAmount() != null) {
+                    payment.setPaymentAmount(new BigDecimal(pay.getPaymentAmount().floatValue()));
+                }
+                if (pay.getPaymentID() != null) {
+                    payment.setPaymentID(pay.getPaymentID().getValue());
+                }
+                if (pay.getPaymentMethod() != null) {
+                    payment.setPaymentMethod(pay.getPaymentMethod().getValue());
+                }
+                if (pay.getPaymentReference() != null) {
+                    payment.setPaymentReference(pay.getPaymentReference().getValue());
+                }
                 if (pay.getPaymentReference() != null) {
                     if (pay.getPaymentReference().getValue().trim().isEmpty() == false) {
                         payment.setManuallyAddedPayment(true);
@@ -884,22 +906,36 @@ public class FutureMapEJB implements Serializable {
                         payment.setManuallyAddedPayment(false);
                     }
                 }
-                payment.setPaymentSource(pay.getPaymentSource().getValue());
-                payment.setScheduledAmount(new BigDecimal(pay.getScheduledAmount().floatValue()));
-
-                payment.setSettlementDate(pay.getSettlementDate().getValue().toGregorianCalendar().getTime());
-                payment.setPaymentStatus(pay.getPaymentStatus().getValue());
-                payment.setTransactionFeeClient(new BigDecimal(pay.getTransactionFeeClient().floatValue()));
-                payment.setTransactionFeeCustomer(new BigDecimal(pay.getTransactionFeeCustomer().floatValue()));
-
-                if (pay.getTransactionTime().getValue() != null) {
-                    payment.setTransactionTime(pay.getTransactionTime().getValue().toGregorianCalendar().getTime()); // only valid for real time and credit card payments
+                if (pay.getPaymentSource() != null) {
+                    payment.setPaymentSource(pay.getPaymentSource().getValue());
+                }
+                if (pay.getScheduledAmount() != null) {
+                    payment.setScheduledAmount(new BigDecimal(pay.getScheduledAmount().floatValue()));
+                }
+                if (pay.getSettlementDate() != null) {
+                    payment.setSettlementDate(pay.getSettlementDate().getValue().toGregorianCalendar().getTime());
+                }
+                if (pay.getPaymentStatus() != null) {
+                    payment.setPaymentStatus(pay.getPaymentStatus().getValue());
+                }
+                if (pay.getTransactionFeeClient() != null) {
+                    payment.setTransactionFeeClient(new BigDecimal(pay.getTransactionFeeClient().floatValue()));
+                }
+                if (pay.getTransactionFeeCustomer() != null) {
+                    payment.setTransactionFeeCustomer(new BigDecimal(pay.getTransactionFeeCustomer().floatValue()));
                 }
 
-                payment.setYourGeneralReference(pay.getYourGeneralReference().getValue());
-                payment.setYourSystemReference(pay.getYourSystemReference().getValue());
+                if (pay.getTransactionTime() != null) {
+                    payment.setTransactionTime(pay.getTransactionTime().getValue().toGregorianCalendar().getTime()); // only valid for real time and credit card payments
+                }
+                if (pay.getYourGeneralReference() != null) {
+                    payment.setYourGeneralReference(pay.getYourGeneralReference().getValue());
+                }
+                if (pay.getYourSystemReference() != null) {
+                    payment.setYourSystemReference(pay.getYourSystemReference().getValue());
+                }
             } catch (Exception e) {
-                logger.log(Level.WARNING, "Future Map convertPaymentXMLToEntity method failed.:", e);
+                logger.log(Level.WARNING, "Future Map convertPaymentXMLToEntity method failed. Customer {2},Error {0},payment XML {1}:", new Object[]{e.getMessage(), pay.toString(), cust.getUsername()});
             }
 
             return payment;
