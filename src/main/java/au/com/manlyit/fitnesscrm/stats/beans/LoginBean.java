@@ -57,6 +57,8 @@ public class LoginBean implements Serializable {
     private au.com.manlyit.fitnesscrm.stats.beans.EmailTemplatesFacade ejbEmailTemplatesFacade;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.PaymentBean ejbPaymentBean;
+    @Inject
+    private au.com.manlyit.fitnesscrm.stats.beans.AuditLogFacade ejbAuditLogFacade;
     private final StringEncrypter encrypter = new StringEncrypter("(lqKdh^Gr$2F^KJHG654)");
 
     public String getUsername() {
@@ -252,6 +254,12 @@ public class LoginBean implements Serializable {
                 }
             }
             redirectToLandingPage();
+            Customers cust = ejbCustomerFacade.findCustomerByUsername(username);
+            String auditDetails = "Customer Login Successful:" + cust.getUsername() + " Details:  " + cust.getLastname() + " " + cust.getFirstname() + " ";
+            String changedFrom = "UnAuthenticated";
+            String changedTo = "Authenticated User:" + username;
+            ejbAuditLogFacade.audit(cust, cust, "Logged In", auditDetails, changedFrom, changedTo);
+
         } catch (ServletException e) {
             JsfUtil.addErrorMessage(e, "Login Failed.");
             logger.log(Level.WARNING, "Login Failed", e);
@@ -269,6 +277,12 @@ public class LoginBean implements Serializable {
         HttpServletRequest request = (HttpServletRequest) context.getExternalContext().getRequest();
         try {
             request.logout();
+            Customers cust = ejbCustomerFacade.findCustomerByUsername(context.getExternalContext().getRemoteUser());
+            String auditDetails = "Customer Logout Successful:" + cust.getUsername() + " Details:  " + cust.getLastname() + " " + cust.getFirstname() + " ";
+            String changedTo = "UnAuthenticated";
+            String changedFrom = "Authenticated User:" + cust.getUsername();
+            ejbAuditLogFacade.audit(cust, cust, "Logged In", auditDetails, changedFrom, changedTo);
+
         } catch (ServletException e) {
             JsfUtil.addErrorMessage("Logout failed.", e.getMessage());
         }

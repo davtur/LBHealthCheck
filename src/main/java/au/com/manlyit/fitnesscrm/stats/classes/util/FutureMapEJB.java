@@ -30,12 +30,14 @@ import java.math.BigDecimal;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -79,7 +81,7 @@ public class FutureMapEJB implements Serializable {
     private static final Logger logger = Logger.getLogger(FutureMapEJB.class.getName());
     private static final int TIMEOUT_SECONDS = 120;
     private static final String FUTUREMAP_INTERNALID = "FMINTID876987";
-    private final ConcurrentHashMap<String, List<AsyncJob>> futureMap = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, ArrayList<AsyncJob>> futureMap = new ConcurrentHashMap<>();
     private final static String CHANNEL = "/payments/";
     private final Object lock1 = new Object();
     private final Object lock2 = new Object();
@@ -90,8 +92,10 @@ public class FutureMapEJB implements Serializable {
     private final Object lock7 = new Object();
     private final Object lock8 = new Object();
     private final Object lock9 = new Object();
+    private final Object futureMapArrayLock = new Object();
     private final AtomicBoolean settlementReportLock = new AtomicBoolean(false);
     private final AtomicBoolean paymentReportLock = new AtomicBoolean(false);
+    private final AtomicBoolean asychCheckProcessing = new AtomicBoolean(false);
     private List<Payment> paymentsByCustomersMissingFromCRM;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.CustomerImagesFacade ejbCustomerImagesFacade;
@@ -108,6 +112,9 @@ public class FutureMapEJB implements Serializable {
     private PaymentBean paymentBean;
     @PathParam("user")
     private String username;
+
+    public FutureMapEJB() {
+    }
 
     @OnMessage(encoders = {JSONEncoder.class})
     public FacesMessage onMessage(FacesMessage message) {
@@ -142,12 +149,12 @@ public class FutureMapEJB implements Serializable {
      * @param userSessionId
      * @return the futureMap
      */
-    public List<AsyncJob> getFutureMap(String userSessionId) {
+    public ArrayList<AsyncJob> getFutureMap(String userSessionId) {
         //return a map of future tasks that belong to a sessionid
-        synchronized (lock9) {
+        synchronized (futureMapArrayLock) {
             logger.log(Level.FINE, "Get Future Map.  for sessionID {0}.", userSessionId);
 
-            List<AsyncJob> fmap = futureMap.get(userSessionId);
+            ArrayList<AsyncJob> fmap = futureMap.get(userSessionId);
             if (fmap == null) {
                 logger.log(Level.INFO, "Get Future Map. Map is null for sessionID {0} . Creating an empty list.", userSessionId);
                 futureMap.put(userSessionId, new ArrayList<AsyncJob>());
@@ -201,9 +208,10 @@ public class FutureMapEJB implements Serializable {
     }
 
     public void remove(String userSessionId, String key) {
-        synchronized (lock1) {
+        synchronized (futureMapArrayLock) {
             logger.log(Level.INFO, "Future Map, remove. sessionid {0}, key {1}.", new Object[]{userSessionId, key});
             List<AsyncJob> fmap = getFutureMap(userSessionId);
+
             for (int x = fmap.size(); x > 0; x--) {
                 AsyncJob aj = fmap.get(x - 1);
                 if (aj.getJobName().contentEquals(key)) {
@@ -215,34 +223,43 @@ public class FutureMapEJB implements Serializable {
     }
 
     public int size(String userSessionId) {
-        return getFutureMap(userSessionId).size();
+        int s;
+        synchronized (futureMapArrayLock) {
+
+            s = getFutureMap(userSessionId).size();
+        }
+        return s;
     }
 
     public AsyncJob get(String userSessionId, String key) {
-        synchronized (lock1) {
+        synchronized (futureMapArrayLock) {
             logger.log(Level.FINE, "Future Map, get sessionid {0}, key {1}.", new Object[]{userSessionId, key});
             List<AsyncJob> fmap = getFutureMap(userSessionId);
+
             for (int x = fmap.size(); x > 0; x--) {
                 AsyncJob aj = fmap.get(x - 1);
                 if (aj.getJobName().contentEquals(key)) {
                     return aj;
                 }
             }
+
             return null;
 
         }
     }
 
     public boolean containsKey(String userSessionId, String key) {
-        synchronized (lock1) {
+        synchronized (futureMapArrayLock) {
             List<AsyncJob> fmap = getFutureMap(userSessionId);
             try {
+
                 for (int x = fmap.size(); x > 0; x--) {
                     AsyncJob aj = fmap.get(x - 1);
                     if (aj.getJobName().contentEquals(key)) {
                         return true;
                     }
                 }
+
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "futureMap.containsKey", e);
             }
@@ -259,7 +276,7 @@ public class FutureMapEJB implements Serializable {
      *
      */
     public void put(String userSessionId, AsyncJob aj) {
-        synchronized (lock1) {
+        synchronized (futureMapArrayLock) {
             try {
                 logger.log(Level.INFO, "Future Map, put. sessionid {0},AsyncJob key {1}.", new Object[]{userSessionId, aj.getJobName()});
                 getFutureMap(userSessionId).add(aj);
@@ -270,13 +287,15 @@ public class FutureMapEJB implements Serializable {
     }
 
     public void cancelFutures(String userSessionId) {
-        synchronized (lock1) {
+        synchronized (futureMapArrayLock) {
             if (getFutureMap(userSessionId) != null) {
                 List<AsyncJob> fmap = getFutureMap(userSessionId);
+
                 for (AsyncJob aj : fmap) {
                     Future ft = (Future) aj.getFuture();
                     ft.cancel(false);
                 }
+
                 getFutureMap(userSessionId).clear();
             }
         }
@@ -284,7 +303,7 @@ public class FutureMapEJB implements Serializable {
 
     @PreDestroy
     private void cancelAllAsyncJobs() {
-        synchronized (lock1) {
+        synchronized (futureMapArrayLock) {
             for (Map.Entry pairs : futureMap.entrySet()) {
                 cancelFutures((String) pairs.getKey());
             }
@@ -330,57 +349,70 @@ public class FutureMapEJB implements Serializable {
     @Schedule(hour = "*", minute = "*", second = "*")
     public void checkRunningJobsAndNotifyIfComplete(Timer t) {  // run every 1 seconds
 
-        logger.log(Level.FINE, "Checking Future Map for completed jobs.");
+        if (asychCheckProcessing.get() == false) {
+            logger.log(Level.FINE, "Checking Future Map for completed jobs.");
+            asychCheckProcessing.set(true);
+            try {
+                synchronized (futureMapArrayLock) {
+                    for (Map.Entry pairs : futureMap.entrySet()) {
+                        String sessionId = (String) pairs.getKey();
+                        ArrayList<AsyncJob> fmap = (ArrayList<AsyncJob>) pairs.getValue();
+                        int k = fmap.size();
+                        if (k > 0) {
 
-        for (Map.Entry pairs : futureMap.entrySet()) {
-            String sessionId = (String) pairs.getKey();
-            ArrayList<AsyncJob> fmap = (ArrayList<AsyncJob>) pairs.getValue();
-            int k = fmap.size();
-            if (k > 0) {
+                            logger.log(Level.INFO, "{0} jobs are running. Checking Future Map to see if asych jobs have finished so their results can be processed.", k);
+                            /*for (Map.Entry pairsFut : fmap.entrySet()) {
+                             Future ft = (Future) pairsFut.getValue();
+                             String key = (String) pairsFut.getKey();
+                             if (ft.isDone()) {
+                             sendMessage(sessionId, "Asynchronous Task Completed", key);
+                             logger.log(Level.INFO, "Notifying sessionId {0} that async job {1} has finished.", new Object[]{key, sessionId});
+                             }
+                             }*/
+                            int y = 0;
+                            String details = "";
+                            AsyncJob aj;
 
-                logger.log(Level.INFO, "{0} jobs are running. Checking Future Map to see if asych jobs have finished so their results can be processed.", k);
-                /*for (Map.Entry pairsFut : fmap.entrySet()) {
-                 Future ft = (Future) pairsFut.getValue();
-                 String key = (String) pairsFut.getKey();
-                 if (ft.isDone()) {
-                 sendMessage(sessionId, "Asynchronous Task Completed", key);
-                 logger.log(Level.INFO, "Notifying sessionId {0} that async job {1} has finished.", new Object[]{key, sessionId});
-                 }
-                 }*/
-                int y = 0;
-                String details = "";
-                AsyncJob aj;
-                for (int x = fmap.size(); x > 0; x--) {
-                    aj = fmap.get(x - 1);
-                    Future ft = aj.getFuture();
-                    String key = aj.getJobName();
-                    if (ft.isDone()) {
-                        y++;
-                        logger.log(Level.INFO, "SessionId {0} Future Map async job {1} has finished.", new Object[]{key, sessionId});
-                        details += key + " ";
-                        processCompletedAsyncJobs(sessionId);
+                            for (int x = fmap.size(); x > 0; x--) {
+                                aj = fmap.get(x - 1);
+                                Future ft = aj.getFuture();
+                                String key = aj.getJobName();
+                                if (ft.isDone()) {
+                                    y++;
+                                    logger.log(Level.INFO, "SessionId {0} Future Map async job {1} has finished.", new Object[]{key, sessionId});
+                                    details += key + " ";
+                                    processCompletedAsyncJobs(sessionId);
+                                }
+                                GregorianCalendar jobStartTime = new GregorianCalendar();
+                                GregorianCalendar currentTime = new GregorianCalendar();
+
+                                jobStartTime.setTime(aj.getStartTime());
+                                jobStartTime.add(Calendar.SECOND, TIMEOUT_SECONDS);
+                                if (jobStartTime.compareTo(currentTime) < 0) {
+                                    ft.cancel(true);
+                                    fmap.remove(x - 1);
+                                    logger.log(Level.INFO, "SessionId {0} async job {1} has timed out ({2} seconds )  and been cancelled.", new Object[]{key, sessionId, TIMEOUT_SECONDS});
+                                }
+
+                            }
+
+                            if (y > 0) {
+                                sendMessage(sessionId, "Asynchronous Tasks Completed", details);
+                                logger.log(Level.INFO, "Notifying that {0} async jobs for sessionId {1} have finished.", new Object[]{Integer.toString(y), sessionId});
+                            }
+
+                        }
+
                     }
-                    GregorianCalendar jobStartTime = new GregorianCalendar();
-                    GregorianCalendar currentTime = new GregorianCalendar();
-
-                    jobStartTime.setTime(aj.getStartTime());
-                    jobStartTime.add(Calendar.SECOND, TIMEOUT_SECONDS);
-                    if (jobStartTime.compareTo(currentTime) < 0) {
-                        ft.cancel(true);
-                        fmap.remove(x - 1);
-                        logger.log(Level.INFO, "SessionId {0} async job {1} has timed out ({2} seconds )  and been cancelled.", new Object[]{key, sessionId, TIMEOUT_SECONDS});
-                    }
-
                 }
-                if (y > 0) {
-                    sendMessage(sessionId, "Asynchronous Tasks Completed", details);
-                    logger.log(Level.INFO, "Notifying that {0} async jobs for sessionId {1} have finished.", new Object[]{Integer.toString(y), sessionId});
-                }
-
+            } finally {
+                asychCheckProcessing.set(false);
+                logger.log(Level.FINE, "Finished Checking Future Map for completed jobs.");
             }
 
+        } else {
+            logger.log(Level.INFO, "Future Map - skipping checkRunningJobsAndNotifyIfComplete as its still running.");
         }
-        logger.log(Level.FINE, "Finished Checking Future Map for completed jobs.");
     }
 
     // run a schedules
@@ -617,8 +649,8 @@ public class FutureMapEJB implements Serializable {
     private void processGetScheduledPayments(Future ft) {
         ArrayOfScheduledPayment result = null;
         boolean abort = false;
-        int scheduledPayments = 0;
-        int existingInCRM = 0;
+        int scheduledPayments;
+        int existingInCRM;
         int createScheduledPayments = 0;
         try {
             result = (ArrayOfScheduledPayment) ft.get();
@@ -857,6 +889,22 @@ public class FutureMapEJB implements Serializable {
 
     private Payments convertPaymentXMLToEntity(Payments payment, Payment pay, Customers cust) {
         synchronized (lock4) {
+            if (pay == null || cust == null) {
+                String p1 = "NULL";
+                String p2 = "NULL";
+                String p3 = "NULL";
+                if (payment != null) {
+                    p1 = payment.getYourSystemReference();
+                }
+                if (pay != null) {
+                    p2 = pay.getYourSystemReference().getValue();
+                }
+                if (cust != null) {
+                    p3 = cust.getUsername();
+                }
+                logger.log(Level.WARNING, "Future Map convertPaymentXMLToEntity method failed.Cant poceed due to a null value. Customer {2},payment pojo {0},payment XML {1}:", new Object[]{p1, p2, p3});
+                return null;
+            }
             if (payment == null) {
                 payment = new Payments();
                 payment.setCreateDatetime(new Date());
@@ -865,9 +913,9 @@ public class FutureMapEJB implements Serializable {
                 payment.setCustomerName(cust);
             }
             try {
-                
-                    payment.setLastUpdatedDatetime(new Date());
-                
+
+                payment.setLastUpdatedDatetime(new Date());
+
                 if (pay.getBankFailedReason() != null) {
                     payment.setBankFailedReason(pay.getBankFailedReason().getValue());
                 }
@@ -935,7 +983,7 @@ public class FutureMapEJB implements Serializable {
                     payment.setYourSystemReference(pay.getYourSystemReference().getValue());
                 }
             } catch (Exception e) {
-                logger.log(Level.WARNING, "Future Map convertPaymentXMLToEntity method failed. Customer {2},Error {0},payment XML {1}:", new Object[]{e.getMessage(), pay.toString(), cust.getUsername()});
+                logger.log(Level.WARNING, "Future Map convertPaymentXMLToEntity method failed. Customer: {2},Error Message: {0},payment XML: {1}:", new Object[]{e.getMessage(), pay.toString(), cust.getUsername()});
             }
 
             return payment;
@@ -944,6 +992,22 @@ public class FutureMapEJB implements Serializable {
 
     private Payments convertScheduledPaymentXMLToEntity(Payments payment, ScheduledPayment pay, Customers cust) {
         synchronized (lock5) {
+            if (pay == null || cust == null) {
+                String p1 = "NULL";
+                String p2 = "NULL";
+                String p3 = "NULL";
+                if (payment != null) {
+                    p1 = payment.getYourSystemReference();
+                }
+                if (pay != null) {
+                    p2 = pay.getYourSystemReference().getValue();
+                }
+                if (cust != null) {
+                    p3 = cust.getUsername();
+                }
+                logger.log(Level.WARNING, "Future Map convertScheduledPaymentXMLToEntity method failed due to a NULL value. Customer {2},payment pojo {0},payment XML {1}:", new Object[]{p1, p2, p3});
+                return null;
+            }
             if (payment == null) {
                 payment = new Payments();
                 payment.setCreateDatetime(new Date());
@@ -981,7 +1045,7 @@ public class FutureMapEJB implements Serializable {
                 payment.setYourGeneralReference(pay.getYourGeneralReference().getValue());
                 payment.setYourSystemReference(pay.getYourSystemReference().getValue());
             } catch (Exception e) {
-                logger.log(Level.WARNING, "Future Map convertPaymentXMLToEntity method failed.:", e);
+                logger.log(Level.WARNING, "Future Map convertScheduledPaymentXMLToEntity method failed.:", e);
             }
 
             return payment;
@@ -991,79 +1055,90 @@ public class FutureMapEJB implements Serializable {
 
     private boolean comparePaymentXMLToEntity(Payments payment, Payment pay) {
         synchronized (lock6) {
-            boolean theSame = true;
+            if (payment == null || pay == null) {
+                if (payment == null && pay == null) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
             try {
-                if (payment.getBankFailedReason().contains(pay.getBankFailedReason().getValue()) == false) {
-                    theSame = false;
+                if (payment.getBankFailedReason() != null && pay.getBankFailedReason() != null) {
+                    if (payment.getBankFailedReason().contains(pay.getBankFailedReason().getValue()) == false) {
+                        return false;
+                    }
+                } else if (payment.getBankFailedReason() != null || pay.getBankFailedReason() != null) {
+                    return false;
                 }
                 if (payment.getBankReceiptID().contains(pay.getBankReceiptID().getValue()) == false) {
-                    theSame = false;
+                    return false;
                 }
                 if (payment.getBankReturnCode().contains(pay.getBankReturnCode().getValue()) == false) {
-                    theSame = false;
+                    return false;
                 }
                 if (payment.getCustomerName() == null) {
-                    theSame = false;
+                    return false;
                 } else {
                     if (payment.getCustomerName().getId().toString().contains(pay.getYourSystemReference().getValue()) == false) {
-                        theSame = false;
+                        return false;
                     }
                 }
                 if (payment.getDebitDate().compareTo(pay.getDebitDate().getValue().toGregorianCalendar().getTime()) != 0) {
-                    theSame = false;
+                    return false;
                 }
                 if (payment.getEzidebitCustomerID().contains(pay.getBankFailedReason().getValue()) == false) {
-                    theSame = false;
+                    return false;
                 }
                 if (payment.getInvoiceID().contains(pay.getEzidebitCustomerID().getValue()) == false) {
-                    theSame = false;
+                    return false;
                 }
                 if (payment.getPaymentAmount().compareTo(new BigDecimal(pay.getPaymentAmount().floatValue())) != 0) {
-                    theSame = false;
+                    return false;
                 }
                 if (payment.getPaymentID().contains(pay.getPaymentID().getValue()) == false) {
-                    theSame = false;
+                    return false;
                 }
                 if (payment.getPaymentMethod().contains(pay.getPaymentMethod().getValue()) == false) {
-                    theSame = false;
+                    return false;
                 }
                 if (payment.getPaymentReference().contains(pay.getPaymentReference().getValue()) == false) {
-                    theSame = false;
+                    return false;
                 }
                 if (payment.getPaymentSource().contains(pay.getPaymentSource().getValue()) == false) {
-                    theSame = false;
+                    return false;
                 }
                 if (payment.getPaymentStatus().contains(pay.getPaymentStatus().getValue()) == false) {
-                    theSame = false;
+                    return false;
                 }
                 if (payment.getScheduledAmount().compareTo(new BigDecimal(pay.getScheduledAmount().floatValue())) != 0) {
-                    theSame = false;
+                    return false;
                 }
                 if (payment.getSettlementDate().compareTo(pay.getSettlementDate().getValue().toGregorianCalendar().getTime()) != 0) {
-                    theSame = false;
+                    return false;
                 }
                 if (payment.getTransactionFeeClient().compareTo(new BigDecimal(pay.getTransactionFeeClient().floatValue())) != 0) {
-                    theSame = false;
+                    return false;
                 }
                 if (payment.getTransactionFeeCustomer().compareTo(new BigDecimal(pay.getTransactionFeeCustomer().floatValue())) != 0) {
-                    theSame = false;
+                    return false;
                 }
                 if (pay.getTransactionTime().getValue() != null) {
                     if (payment.getTransactionTime().compareTo(pay.getTransactionTime().getValue().toGregorianCalendar().getTime()) != 0) {
-                        theSame = false;
+                        return false;
                     }
                 }
                 if (payment.getYourGeneralReference().contains(pay.getYourGeneralReference().getValue()) == false) {
-                    theSame = false;
+                    return false;
                 }
                 if (payment.getYourSystemReference().contains(pay.getYourSystemReference().getValue()) == false) {
-                    theSame = false;
+                    return false;
                 }
             } catch (Exception e) {
-                logger.log(Level.WARNING, "Future Map convertPaymentXMLToEntity method failed.:", e);
+                logger.log(Level.WARNING, "Future Map comparePaymentXMLToEntity method failed.:", e.getMessage());
+                return false;
             }
 
-            return theSame;
+            return true;
         }
     }
 

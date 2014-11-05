@@ -351,10 +351,10 @@ public class CustomersController implements Serializable {
 
     protected PaymentParameters getSelectedCustomersPaymentParameters() {
         PaymentParameters pp = getSelected().getPaymentParameters();
-       // if (pp == null) {
-       //     createDefaultPaymentParameters(paymentGateway);
-       // }
-       // pp = getSelected().getPaymentParameters();
+        if (pp == null) {
+            createDefaultPaymentParameters(getSelected());
+       }
+       pp = getSelected().getPaymentParameters();
         if (pp == null) {
             logger.log(Level.SEVERE, " Customer {0} has NULL Payment parameters.", new Object[]{current.getUsername()});
         }
