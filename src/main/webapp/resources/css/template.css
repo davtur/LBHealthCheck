@@ -19,6 +19,33 @@ div.emailTemplateEditor .ui-editor {
     height:100% ; 
 }
 
+.editPaymentMethodIFrame {
+    //background-color:  #ffffff !important;
+    max-height: 400px !important;
+    height: 380px !important;
+    width: 320px !important;  
+}
+
+.editPaymentMethodIFrame #wrapper {
+  height: 400px !important; 
+  background-color:  #ffffff !important;
+}
+.editPaymentMethodIFrame #content {
+  height: 400px !important; 
+  background-color:  #ffffff !important;
+}
+/*#ezidebitIframeView {
+   width: 300px !important;  
+   height:450px !important;
+}
+#ezidebitIframeView div#wrapper,
+#ezidebitIframeView html,
+#ezidebitIframeView body,
+#ezidebitIframeView div {
+    background-color: yellow !important;
+    height:400px !important; 
+    //width: 100% !important;
+}*/
 .emailEditorInput{
   width:600px;  
 }

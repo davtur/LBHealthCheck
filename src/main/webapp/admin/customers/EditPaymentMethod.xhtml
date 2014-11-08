@@ -8,14 +8,16 @@
 
     <ui:composition >
         <!--<p:log />--> 
-        <p:confirmDialog id="editPaymentMethodDialogue" message="#{configMapController.getKey('EditPaymentMethodDialogueTitle')}"  closable="false"
-                         header="#{configMapController.getKey('EditPaymentMethodTitle')}" severity="info" widgetVar="editPaymentMethodDialogueWidget"> 
+        <p:confirmDialog id="editPaymentMethodDialogue" message="#{configMapController.getKey('EditPaymentMethodDialogueTitle')}"  closable="false"  
+                         header="#{configMapController.getKey('EditPaymentMethodTitle')}" severity="info" widgetVar="editPaymentMethodDialogueWidget" > 
 
             <h:form id="iFrameForm" > 
                 <p:outputPanel id="iFramePanel" >
-                         <p:panel id="viewPaymentsGrid" header="#{configMapController.getKey('EditPaymentMethodDialogueCustName')} #{customersController.selected.firstname} #{customersController.selected.lastname}" >
-                            <iframe id="ezidebitIframeView" src="#{ezidebit.getEziDebitWidgetUrl()}"   />
-                        </p:panel>
+                    <p:panel id="viewPaymentsGrid" header="#{configMapController.getKey('EditPaymentMethodDialogueCustName')} #{customersController.selected.firstname} #{customersController.selected.lastname}"  >
+                    
+                    
+                    <iframe id="ezidebitIframeView" src="#{ezidebit.getEziDebitWidgetUrl()}" class="editPaymentMethodIFrame" style="background-color: #ffffff;max-height: 450px;"/>
+</p:panel>
                 </p:outputPanel>
 
                 <p:panel>

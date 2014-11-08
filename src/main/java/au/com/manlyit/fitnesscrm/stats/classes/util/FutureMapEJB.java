@@ -732,10 +732,10 @@ public class FutureMapEJB implements Serializable {
             return;
         }
 
-        PaymentParameters pp = current.getPaymentParameters();
+        PaymentParameters pp ;
 
         try {
-            if (pp == null) {
+
                 String phoneNumber = current.getTelephone();
                 if (phoneNumber == null) {
                     phoneNumber = "0000000000";
@@ -782,11 +782,11 @@ public class FutureMapEJB implements Serializable {
                 pp.setTotalPaymentsSuccessful(0);
                 pp.setTotalPaymentsSuccessfulAmount(new BigDecimal(0));
                 pp.setYourGeneralReference("");
-                pp.setYourSystemReference(current.getId().toString());
+                pp.setYourSystemReference("");
                 paymentParametersFacade.create(pp);
                 current.setPaymentParameters(pp);
                 customersFacade.editAndFlush(current);
-            }
+            
         } catch (Exception e) {
             logger.log(Level.SEVERE, "createDefaultPaymentParameters Method in Customers Controller", e);
         }
@@ -873,12 +873,16 @@ public class FutureMapEJB implements Serializable {
                     pp.setTotalPaymentsSuccessfulAmount(new BigDecimal(custDetails.getTotalPaymentsSuccessfulAmount().floatValue()));
                     pp.setYourGeneralReference(custDetails.getYourGeneralReference().getValue());
                     pp.setYourSystemReference(custDetails.getYourSystemReference().getValue());
+                    
                     if (isNew) {
                         paymentParametersFacade.create(pp);
+                        cust.setPaymentParameters(pp);
                     } else {
                         paymentParametersFacade.edit(pp);
+                        cust.setPaymentParameters(pp);
                     }
                     customersFacade.edit(cust);
+                    
                 } else {
                     logger.log(Level.WARNING, "Future Map processGetCustomerDetails an ezidebit YourSystemReference string cannot be converted to a number.");
                 }
@@ -973,7 +977,7 @@ public class FutureMapEJB implements Serializable {
                     payment.setTransactionFeeCustomer(new BigDecimal(pay.getTransactionFeeCustomer().floatValue()));
                 }
 
-                if (pay.getTransactionTime() != null) {
+                if (  pay.getTransactionTime() != null && pay.getTransactionTime().getValue() != null) {
                     payment.setTransactionTime(pay.getTransactionTime().getValue().toGregorianCalendar().getTime()); // only valid for real time and credit card payments
                 }
                 if (pay.getYourGeneralReference() != null) {

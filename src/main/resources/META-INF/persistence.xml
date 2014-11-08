@@ -9,7 +9,7 @@
     <class>au.com.manlyit.fitnesscrm.stats.db.CustomerGoals</class>
     <class>au.com.manlyit.fitnesscrm.stats.db.CustomerImages</class>
     <class>au.com.manlyit.fitnesscrm.stats.db.CustomerState</class>
-    <class>au.com.manlyit.fitnesscrm.stats.db.Customers</class> 
+    <class>au.com.manlyit.fitnesscrm.stats.db.Customers</class>
     <class>au.com.manlyit.fitnesscrm.stats.db.DemographicTypes</class>
     <class>au.com.manlyit.fitnesscrm.stats.db.EmailFormat</class>
     <class>au.com.manlyit.fitnesscrm.stats.db.EmailQueue</class>
@@ -29,12 +29,10 @@
     <class>au.com.manlyit.fitnesscrm.stats.db.Plan</class>
     <class>au.com.manlyit.fitnesscrm.stats.db.PreferedContact</class>
     <class>au.com.manlyit.fitnesscrm.stats.db.QrtzCronTriggers</class>
-
     <class>au.com.manlyit.fitnesscrm.stats.db.QrtzJobDetails</class>
     <class>au.com.manlyit.fitnesscrm.stats.db.QrtzSimpleTriggers</class>
-
     <class>au.com.manlyit.fitnesscrm.stats.db.QrtzTriggers</class>
-   <class>au.com.manlyit.fitnesscrm.stats.db.Schedule</class>
+    <class>au.com.manlyit.fitnesscrm.stats.db.Schedule</class>
     <class>au.com.manlyit.fitnesscrm.stats.db.SessionHistory</class>
     <class>au.com.manlyit.fitnesscrm.stats.db.SessionTypes</class>
     <class>au.com.manlyit.fitnesscrm.stats.db.Stat</class>

@@ -281,7 +281,7 @@ public class LoginBean implements Serializable {
             String auditDetails = "Customer Logout Successful:" + cust.getUsername() + " Details:  " + cust.getLastname() + " " + cust.getFirstname() + " ";
             String changedTo = "UnAuthenticated";
             String changedFrom = "Authenticated User:" + cust.getUsername();
-            ejbAuditLogFacade.audit(cust, cust, "Logged In", auditDetails, changedFrom, changedTo);
+            ejbAuditLogFacade.audit(cust, cust, "Logged Out", auditDetails, changedFrom, changedTo);
 
         } catch (ServletException e) {
             JsfUtil.addErrorMessage("Logout failed.", e.getMessage());

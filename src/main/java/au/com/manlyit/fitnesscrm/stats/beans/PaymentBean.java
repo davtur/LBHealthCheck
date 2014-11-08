@@ -173,7 +173,7 @@ public class PaymentBean implements Serializable {
      return new AsyncResult<>(cd);
      }*/
     @Asynchronous
-    public Future<Boolean> editCustomerDetails(Customers cust, String eziDebitRef, String digitalKey) {
+    public Future<Boolean> editCustomerDetails(Customers cust, String eziDebitRef,Customers loggedInUser, String digitalKey) {
         String ourSystemRef = "";
 
         if (eziDebitRef == null) {
@@ -207,7 +207,12 @@ public class PaymentBean implements Serializable {
             String auditDetails = "Edit the customers details for  :" + cust.getUsername() + " Details:  " + humanFriendlyReference + " " + cust.getLastname() + " " + cust.getFirstname() + " " + cust.getStreetAddress() + " " + addresssLine2 + " " + cust.getSuburb() + " " + cust.getPostcode() + " " + cust.getAddrState() + " " + cust.getEmailAddress() + " " + cust.getTelephone() + " " + payParams.getSmsPaymentReminder() + " " + payParams.getSmsFailedNotification() + " " + payParams.getSmsExpiredCard() + " " + payParams.getLoggedInUser().getUsername();
             String changedFrom = "Existing Customer Record";
             String changedTo = "Edited customer record";
-            auditLogFacade.audit(customersFacade.findCustomerByUsername(FacesContext.getCurrentInstance().getExternalContext().getRemoteUser()), cust, "editCustomerDetails", auditDetails, changedFrom, changedTo);
+           
+            if(loggedInUser == null){
+                loggedInUser = cust;
+                 logger.log(Level.WARNING, "Payment Bean, editCustomerDetail: The logged in user is NULL");
+            }
+            auditLogFacade.audit(loggedInUser, cust, "editCustomerDetails", auditDetails, changedFrom, changedTo);
 
         } else {
             logger.log(Level.WARNING, "editCustomerDetail Response: Error - {0}, Data - {1}", new Object[]{editCustomerDetail.getErrorMessage().getValue(), editCustomerDetail.getData().getValue()});

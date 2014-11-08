@@ -49,6 +49,8 @@ public class CustomersFacade extends AbstractFacade<Customers> {
         Logger.getLogger(getClass().getName()).log(Level.INFO, message);
 
     }
+    
+    
 
     public CustomersFacade() {
         super(Customers.class);
@@ -158,7 +160,35 @@ public class CustomersFacade extends AbstractFacade<Customers> {
         }
         return cm;
     }
+    
+   
 
+     public Customers findByIdBypassCache(int id) {
+        Customers cm = null;
+        try {
+            CriteriaBuilder cb = em.getCriteriaBuilder();
+            CriteriaQuery<Customers> cq = cb.createQuery(Customers.class);
+            Root<Customers> rt = cq.from(Customers.class);
+
+            Expression<Integer> custId = rt.get("id");
+            cq.where(cb.equal(custId, id));
+
+            Query q = em.createQuery(cq);
+             q.setHint("javax.persistence.cache.retrieveMode", "BYPASS");
+            int size = q.getResultList().size();
+            if (size == 1) {
+                cm = (Customers) q.getSingleResult();
+            } else if (size == 0) {
+                logger.log(Level.WARNING, "Customers findById, Customer not found : Customer Id = {0}", id);
+            } else if (size > 1) {
+                logger.log(Level.WARNING, "Customers findById, Duplicate Customer id's found for Customer Id = {0}. The number of duplicates is {1}",new Object[]{ id,size});
+            }
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "Customers findById, An exception occurred for customer id :" + id, e);
+        }
+        return cm;
+    }
+    
     public Customers findById(int id) {
         Customers cm = null;
         try {

@@ -46,7 +46,7 @@ public class PaymentsFacade extends AbstractFacade<Payments> {
         super(Payments.class);
     }
 
-    public List<Payments> findPaymentsByCustomer(Customers customer) {
+    public List<Payments> findPaymentsByCustomer(Customers customer,boolean bypassCache) {
         List retList = null;
         try {
             CriteriaBuilder cb = em.getCriteriaBuilder();
@@ -57,6 +57,9 @@ public class PaymentsFacade extends AbstractFacade<Payments> {
             cq.where(cb.equal(cust, customer));
             cq.orderBy(cb.asc(dDate));
             Query q = em.createQuery(cq);
+            if(bypassCache){
+                q.setHint("javax.persistence.cache.retrieveMode", "BYPASS");
+            }
             retList = q.getResultList();
         } catch (Exception e) {
 

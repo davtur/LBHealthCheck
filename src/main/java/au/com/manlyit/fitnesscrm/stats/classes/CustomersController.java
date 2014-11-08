@@ -152,6 +152,9 @@ public class CustomersController implements Serializable {
             JsfUtil.addErrorMessage(configMapFacade.getConfig("setSelectedCustomerNoneSelected"));
         }
     }
+    public void updateSelectedCustomer(Customers cust){
+        current = cust;
+    }
 
     public void setSelected(Customers cust) {
         if (cust != null) {
@@ -170,7 +173,7 @@ public class CustomersController implements Serializable {
             RequestContext.getCurrentInstance().update("iFrameForm");
 
         }
-    }
+    } 
 
     public void sendCustomerOnboardEmail() {
         FacesContext context = FacesContext.getCurrentInstance();
@@ -282,68 +285,68 @@ public class CustomersController implements Serializable {
         this.filteredItems = filteredItems;
     }
 
-   private void createDefaultPaymentParameters(Customers current) {
+    private void createDefaultPaymentParameters(Customers current) {
 
         if (current == null) {
             logger.log(Level.WARNING, "Future Map createDefaultPaymentParameters . Customer is NULL.");
             return;
         }
 
-        PaymentParameters pp = current.getPaymentParameters();
+        PaymentParameters pp;
 
         try {
-            if (pp == null) {
-                String phoneNumber = current.getTelephone();
-                if (phoneNumber == null) {
-                    phoneNumber = "0000000000";
-                    logger.log(Level.INFO, "Invalid Phone Number for Customer {0}. Setting it to empty string", current.getUsername());
-                }
-                Pattern p = Pattern.compile("\\d{10}");
-                Matcher m = p.matcher(phoneNumber);
-                //ezidebit requires an australian mobile phone number that starts with 04
-                if (m.matches() == false || phoneNumber.startsWith("04") == false) {
-                    phoneNumber = "0000000000";
-                    logger.log(Level.INFO, "Invalid Phone Number for Customer {0}. Setting it to empty string", current.getUsername());
-                }
-                pp = new PaymentParameters();
-                pp.setId(0);
-                pp.setWebddrUrl(null);
-                pp.setLoggedInUser(current);
-                pp.setLastSuccessfulScheduledPayment(ejbPaymentsFacade.findLastSuccessfulScheduledPayment(current));
-                pp.setNextScheduledPayment(ejbPaymentsFacade.findNextScheduledPayment(current));
-                pp.setAddressLine1("");
-                pp.setAddressLine2("");
-                pp.setAddressPostCode("");
-                pp.setAddressState("");
-                pp.setAddressSuburb("");
-                pp.setContractStartDate(new Date());
-                pp.setCustomerFirstName("");
-                pp.setCustomerName("");
-                pp.setEmail("");
-                pp.setEzidebitCustomerID("");
 
-                pp.setMobilePhoneNumber(phoneNumber);
-                pp.setPaymentGatewayName("EZIDEBIT");
-                pp.setPaymentMethod("");
-                pp.setPaymentPeriod("");
-                pp.setPaymentPeriodDayOfMonth("");
-                pp.setPaymentPeriodDayOfWeek("");
-
-                pp.setSmsExpiredCard("YES");
-                pp.setSmsFailedNotification("YES");
-                pp.setSmsPaymentReminder("NO");
-                pp.setStatusCode("");
-                pp.setStatusDescription("");
-                pp.setTotalPaymentsFailed(0);
-                pp.setTotalPaymentsFailedAmount(new BigDecimal(0));
-                pp.setTotalPaymentsSuccessful(0);
-                pp.setTotalPaymentsSuccessfulAmount(new BigDecimal(0));
-                pp.setYourGeneralReference("");
-                pp.setYourSystemReference(current.getId().toString());
-                ejbPaymentParametersFacade.create(pp);
-                current.setPaymentParameters(pp);
-                ejbFacade.editAndFlush(current);
+            String phoneNumber = current.getTelephone();
+            if (phoneNumber == null) {
+                phoneNumber = "0000000000";
+                logger.log(Level.INFO, "Invalid Phone Number for Customer {0}. Setting it to empty string", current.getUsername());
             }
+            Pattern p = Pattern.compile("\\d{10}");
+            Matcher m = p.matcher(phoneNumber);
+            //ezidebit requires an australian mobile phone number that starts with 04
+            if (m.matches() == false || phoneNumber.startsWith("04") == false) {
+                phoneNumber = "0000000000";
+                logger.log(Level.INFO, "Invalid Phone Number for Customer {0}. Setting it to empty string", current.getUsername());
+            }
+            pp = new PaymentParameters();
+            pp.setId(0);
+            pp.setWebddrUrl(null);
+            pp.setLoggedInUser(current);
+            pp.setLastSuccessfulScheduledPayment(ejbPaymentsFacade.findLastSuccessfulScheduledPayment(current));
+            pp.setNextScheduledPayment(ejbPaymentsFacade.findNextScheduledPayment(current));
+            pp.setAddressLine1("");
+            pp.setAddressLine2("");
+            pp.setAddressPostCode("");
+            pp.setAddressState("");
+            pp.setAddressSuburb("");
+            pp.setContractStartDate(new Date());
+            pp.setCustomerFirstName("");
+            pp.setCustomerName("");
+            pp.setEmail("");
+            pp.setEzidebitCustomerID("");
+
+            pp.setMobilePhoneNumber(phoneNumber);
+            pp.setPaymentGatewayName("EZIDEBIT");
+            pp.setPaymentMethod("");
+            pp.setPaymentPeriod("");
+            pp.setPaymentPeriodDayOfMonth("");
+            pp.setPaymentPeriodDayOfWeek("");
+
+            pp.setSmsExpiredCard("YES");
+            pp.setSmsFailedNotification("YES");
+            pp.setSmsPaymentReminder("NO");
+            pp.setStatusCode("");
+            pp.setStatusDescription("");
+            pp.setTotalPaymentsFailed(0);
+            pp.setTotalPaymentsFailedAmount(new BigDecimal(0));
+            pp.setTotalPaymentsSuccessful(0);
+            pp.setTotalPaymentsSuccessfulAmount(new BigDecimal(0));
+            pp.setYourGeneralReference("");
+            pp.setYourSystemReference("");
+            ejbPaymentParametersFacade.create(pp);
+            current.setPaymentParameters(pp);
+            ejbFacade.editAndFlush(current);
+
         } catch (Exception e) {
             logger.log(Level.SEVERE, "createDefaultPaymentParameters Method in Customers Controller", e);
         }
@@ -353,8 +356,8 @@ public class CustomersController implements Serializable {
         PaymentParameters pp = getSelected().getPaymentParameters();
         if (pp == null) {
             createDefaultPaymentParameters(getSelected());
-       }
-       pp = getSelected().getPaymentParameters();
+        }
+        pp = getSelected().getPaymentParameters();
         if (pp == null) {
             logger.log(Level.SEVERE, " Customer {0} has NULL Payment parameters.", new Object[]{current.getUsername()});
         }
@@ -614,15 +617,15 @@ public class CustomersController implements Serializable {
         int count = 0;
         FacesContext context = FacesContext.getCurrentInstance();
         EziDebitPaymentGateway controller = (EziDebitPaymentGateway) context.getApplication().getELResolver().getValue(context.getELContext(), null, "ezidebit");
-         if (selectedState.getCustomerState().contains("CANCELLED") == true && controller.isCustomerCancellationConfirmed() == false) {
-             RequestContext.getCurrentInstance().update("confirmCancellation");
-             RequestContext.getCurrentInstance().execute("PF('confirmCancellationDialogueWidget').show()");
-          } else {
+        if (selectedState.getCustomerState().contains("CANCELLED") == true && controller.isCustomerCancellationConfirmed() == false) {
+            RequestContext.getCurrentInstance().update("confirmCancellation");
+            RequestContext.getCurrentInstance().execute("PF('confirmCancellationDialogueWidget').show()");
+        } else {
             for (Customers cust : multiSelected) {
                 if (cust.getActive().getCustomerState().contains("CANCELLED") == false) {
                     // Cancelled customers canot be reinstated in the payment gateway they must be added as new, so only attempt to change in the payment gateway if customer is active or on hold.
                     controller.changeCustomerStatus(cust, selectedState);
-                } 
+                }
                 cust.setActive(selectedState);
                 getFacade().edit(cust);
                 count++;
@@ -747,8 +750,8 @@ public class CustomersController implements Serializable {
      }*/
     public PfSelectableDataModel<Customers> getItems() {
         if (items == null) {
-           items =  new PfSelectableDataModel<>(ejbFacade.findFilteredCustomers(true, selectedCustomerStates));
-           // items = getPagination().createPageDataModel();
+            items = new PfSelectableDataModel<>(ejbFacade.findFilteredCustomers(true, selectedCustomerStates));
+            // items = getPagination().createPageDataModel();
         }
         return items;
     }

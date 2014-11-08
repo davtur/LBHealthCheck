@@ -125,6 +125,7 @@ public class EziDebitPaymentGateway implements Serializable {
     private au.com.manlyit.fitnesscrm.stats.beans.AuditLogFacade ejbAuditLogFacade;
 
     private boolean asyncOperationRunning = false;
+    private boolean refreshFromDB = false;
     private final ThreadGroup tGroup1 = new ThreadGroup("EziDebitOps");
     private List<Payment> paymentsList;
     private PfSelectableDataModel<Payments> paymentDBList = null;
@@ -248,6 +249,16 @@ public class EziDebitPaymentGateway implements Serializable {
         return paymentsList;
     }
 
+    private Customers getLoggedInUser() {
+        String user = FacesContext.getCurrentInstance().getExternalContext().getRemoteUser();
+        Customers cust = customersFacade.findCustomerByUsername(user);
+
+        if (cust == null) {
+            logger.log(Level.SEVERE, "getLoggedInUser - the remote user couldn't be found in the database. This shouldn't happen. We may have been hacked!!");
+        }
+        return cust;
+    }
+
     private void getCustDetailsFromEzi() {
         startAsynchJob("GetCustomerDetails", paymentBean.getCustomerDetails(selectedCustomer, getDigitalKey()));
     }
@@ -265,7 +276,7 @@ public class EziDebitPaymentGateway implements Serializable {
 
     public void editCustomerDetailsInEziDebit(Customers cust) {
         if (customerExistsInPaymentGateway) {
-            startAsynchJob("EditCustomerDetails", paymentBean.editCustomerDetails(cust, null, getDigitalKey()));
+            startAsynchJob("EditCustomerDetails", paymentBean.editCustomerDetails(cust, null, getLoggedInUser(), getDigitalKey()));
         }
 
     }
@@ -1228,7 +1239,7 @@ public class EziDebitPaymentGateway implements Serializable {
 
     public PfSelectableDataModel<Payments> getPaymentDBList() {
         if (paymentDBList == null) {
-            paymentDBList = new PfSelectableDataModel<>(paymentsFacade.findPaymentsByCustomer(selectedCustomer));
+            paymentDBList = new PfSelectableDataModel<>(paymentsFacade.findPaymentsByCustomer(selectedCustomer,refreshFromDB));
         }
         return paymentDBList;
     }
@@ -1236,7 +1247,12 @@ public class EziDebitPaymentGateway implements Serializable {
     private Customers getSelectedCustomer() {
         FacesContext context = FacesContext.getCurrentInstance();
         CustomersController controller = (CustomersController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "customersController");
+        if (refreshFromDB) {
+            refreshFromDB = false;
+            controller.updateSelectedCustomer(customersFacade.findByIdBypassCache(controller.getSelected().getId()));
+        }
         return controller.getSelected();
+
     }
 
     /**
@@ -1270,17 +1286,22 @@ public class EziDebitPaymentGateway implements Serializable {
         widgetUrl += "?" + "dk=" + getDigitalKey();
         widgetUrl += amp + "cr=" + cust.getId().toString();
         widgetUrl += amp + "e=" + configMapFacade.getConfig("payment.ezidebit.widget.e"); // 0 = dont allow customer to edit
-        widgetUrl += amp + "template=" + configMapFacade.getConfig("payment.ezidebit.widget.template");//template name win7
-        widgetUrl += amp + "f=" + configMapFacade.getConfig("payment.ezidebit.widget.f");//font Arial
-        widgetUrl += amp + "h1c=" + configMapFacade.getConfig("payment.ezidebit.widget.h1c");//header colour FF5595
-        widgetUrl += amp + "h1s=" + configMapFacade.getConfig("payment.ezidebit.widget.h1s");//header size in pixels 24
-        widgetUrl += amp + "lblc=" + configMapFacade.getConfig("payment.ezidebit.widget.lblc"); // label colour EB7636
-        widgetUrl += amp + "lbls=" + configMapFacade.getConfig("payment.ezidebit.widget.lbls");//label size in pixels 18
-        widgetUrl += amp + "bgc=" + configMapFacade.getConfig("payment.ezidebit.widget.bgc");//background FFFFFF
-        widgetUrl += amp + "hgl=" + configMapFacade.getConfig("payment.ezidebit.widget.hgl");// highlight 1892CD
-        widgetUrl += amp + "txtc=" + configMapFacade.getConfig("payment.ezidebit.widget.txtc");//text 333333
-        widgetUrl += amp + "txtbgc=" + configMapFacade.getConfig("payment.ezidebit.widget.txtbgc");//text background FFFFFF
-        widgetUrl += amp + "txtbc=" + configMapFacade.getConfig("payment.ezidebit.widget.txtbc");//Textbox Focus Border Colour EB7636
+        String template = configMapFacade.getConfig("payment.ezidebit.widget.template");
+       /* if (template.trim().isEmpty() == false) {
+            widgetUrl += amp + "template=" + template;//template name win7 
+        } else {
+
+            widgetUrl += amp + "f=" + configMapFacade.getConfig("payment.ezidebit.widget.f");//font Arial
+            widgetUrl += amp + "h1c=" + configMapFacade.getConfig("payment.ezidebit.widget.h1c");//header colour FF5595
+            widgetUrl += amp + "h1s=" + configMapFacade.getConfig("payment.ezidebit.widget.h1s");//header size in pixels 24
+            widgetUrl += amp + "lblc=" + configMapFacade.getConfig("payment.ezidebit.widget.lblc"); // label colour EB7636
+            widgetUrl += amp + "lbls=" + configMapFacade.getConfig("payment.ezidebit.widget.lbls");//label size in pixels 18
+            widgetUrl += amp + "bgc=" + configMapFacade.getConfig("payment.ezidebit.widget.bgc");//background FFFFFF
+            widgetUrl += amp + "hgl=" + configMapFacade.getConfig("payment.ezidebit.widget.hgl");// highlight 1892CD
+            widgetUrl += amp + "txtc=" + configMapFacade.getConfig("payment.ezidebit.widget.txtc");//text 333333
+            widgetUrl += amp + "txtbgc=" + configMapFacade.getConfig("payment.ezidebit.widget.txtbgc");//text background FFFFFF
+            widgetUrl += amp + "txtbc=" + configMapFacade.getConfig("payment.ezidebit.widget.txtbc");//Textbox Focus Border Colour EB7636
+        }*/
         eziDebitWidgetUrl = widgetUrl;
         /*try {
          eziDebitWidgetUrl = URLEncoder.encode(widgetUrl,"UTF-8");
@@ -1410,7 +1431,7 @@ public class EziDebitPaymentGateway implements Serializable {
             logger.log(Level.WARNING, "processAddCustomer", ex);
         }
         if (result == true) {
-            JsfUtil.addSuccessMessage("Customer Added to Payment Gateway Successfully.", "");
+            JsfUtil.addSuccessMessage("Customer Added to Payment Gateway Successfully.", "Customer Added to Payment Gateway Successfully.");
             customerExistsInPaymentGateway = true;
             startAsynchJob("GetCustomerDetails", paymentBean.getCustomerDetails(selectedCustomer, getDigitalKey()));
             getPayments(12, 1);
@@ -1553,6 +1574,7 @@ public class EziDebitPaymentGateway implements Serializable {
             setRefreshIFrames(false);
         }
         RequestContext.getCurrentInstance().update("paymentsForm");
+        refreshFromDB =true;
     }
 
     @PreDestroy
@@ -1831,7 +1853,8 @@ public class EziDebitPaymentGateway implements Serializable {
                 setPaymentsDBListFilteredItems(null);
             }
         }
-
+        RequestContext.getCurrentInstance().update("customerslistForm1");
+        refreshFromDB = true;
         logger.log(Level.INFO, "processGetPayments completed");
     }
 
@@ -1860,7 +1883,8 @@ public class EziDebitPaymentGateway implements Serializable {
                 setPaymentsDBListFilteredItems(null);
             }
         }
-
+        RequestContext.getCurrentInstance().update("customerslistForm1");
+        refreshFromDB = true;
         logger.log(Level.INFO, "processGetScheduledPayments completed");
     }
 
@@ -2080,13 +2104,13 @@ public class EziDebitPaymentGateway implements Serializable {
             setCurrentCustomerDetails(result);
             String eziStatusCode = "Unknown";
             if (result.getStatusDescription() != null) {
-               eziStatusCode = result.getStatusDescription().getValue().toUpperCase().trim();
+                eziStatusCode = result.getStatusDescription().getValue().toUpperCase().trim();
             }
             String ourStatus = getSelectedCustomer().getActive().getCustomerState().toUpperCase().trim();
             String message = "";
             if (ourStatus.contains(eziStatusCode) == false) {
                 // status codes don't match
- 
+
                 message = "Customer Status codes dont match. Customer: " + cust + ", ezidebit status:" + eziStatusCode + ", Crm Status:" + ourStatus + "";
                 if (eziStatusCode.contains("WAITING BANK DETAILS")) {
                     message = "The Customer does not have any banking details. Customer: " + cust + ", ezidebit status:" + eziStatusCode + ", Crm Status:" + ourStatus + "";
@@ -2120,7 +2144,15 @@ public class EziDebitPaymentGateway implements Serializable {
             customerExistsInPaymentGateway = false;
         }
         RequestContext.getCurrentInstance().update("customerslistForm1");
+        refreshFromDB = true;
+        getCustomersController().recreateModel();
         logger.log(Level.INFO, "processGetCustomerDetails completed");
+    }
+
+    private CustomersController getCustomersController() {
+        FacesContext context = FacesContext.getCurrentInstance();
+        return (CustomersController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "customersController");
+
     }
 
     public void refreshPaymentsPage(ActionEvent actionEvent) {
@@ -2242,6 +2274,7 @@ public class EziDebitPaymentGateway implements Serializable {
         setAsyncOperationRunning(true);
         AsyncJob aj = new AsyncJob(key, future);
         futureMap.put(sessionId, aj);
+        
     }
 
     public void createEddrLink(ActionEvent actionEvent) {
@@ -2519,7 +2552,7 @@ public class EziDebitPaymentGateway implements Serializable {
                                     }
                                     if (updateSystemRefInEzidebit == true) {
                                         try {
-                                            Future<Boolean> res = paymentBean.editCustomerDetails(localCustomer, eziSysRef, getDigitalKey());
+                                            Future<Boolean> res = paymentBean.editCustomerDetails(localCustomer, eziSysRef, getLoggedInUser(), getDigitalKey());
 
                                             if (res.get(180, TimeUnit.SECONDS) == true) {
                                                 logger.log(Level.INFO, "System reference updated");
