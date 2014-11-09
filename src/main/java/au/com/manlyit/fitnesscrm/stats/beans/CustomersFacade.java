@@ -241,7 +241,7 @@ public class CustomersFacade extends AbstractFacade<Customers> {
         return retList;
     }
 
-    public List<Customers> findFilteredCustomers(boolean sortAsc, CustomerState[] selectedCustomerStates) {
+    public List<Customers> findFilteredCustomers(boolean sortAsc, CustomerState[] selectedCustomerStates,boolean bypassCache) {
         List retList = null;
         if (selectedCustomerStates == null || selectedCustomerStates.length == 0) {
             return new ArrayList<>();
@@ -272,6 +272,9 @@ public class CustomersFacade extends AbstractFacade<Customers> {
                 cq.orderBy(cb.desc(express));
             }
             Query q = em.createQuery(cq);
+            if(bypassCache){
+                 q.setHint("javax.persistence.cache.retrieveMode", "BYPASS");
+            }
             retList = q.getResultList();
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));

@@ -30,14 +30,13 @@ import java.math.BigDecimal;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -56,6 +55,8 @@ import javax.ejb.Timer;
 import javax.faces.application.FacesMessage;
 import javax.imageio.ImageIO;
 import javax.inject.Inject;
+import javax.xml.bind.JAXBElement;
+import javax.xml.datatype.XMLGregorianCalendar;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.primefaces.push.EventBus;
 import org.primefaces.push.EventBusFactory;
@@ -644,9 +645,84 @@ public class FutureMapEJB implements Serializable {
 
         logger.log(Level.INFO, "Future Map processGetPayments completed");
     }
+  @Asynchronous
+    private void processGetScheduledPayments(Future ft) {
+        // Update the payments table with any new information retrived by the getPayments exzidebit web service.
+        // Only for one customer.
+        ArrayOfScheduledPayment result = null;
+        boolean abort = false;
+        try {
+            result = (ArrayOfScheduledPayment) ft.get();
+        } catch (InterruptedException | ExecutionException ex) {
+            Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        if (result != null && result.getScheduledPayment() != null) {
+            List<ScheduledPayment> payList = result.getScheduledPayment();
+            if (payList.isEmpty() == false) {
+                String customerRef = payList.get(0).getYourSystemReference().getValue();
+                int k = customerRef.indexOf("-");
+                if (k > 0) {
+                    customerRef = customerRef.substring(0, k);
+                }
+                if (customerRef.trim().isEmpty() == false) {
+                    int custId = 0;
+                    try {
+                        custId = Integer.parseInt(customerRef.trim());
+                    } catch (NumberFormatException numberFormatException) {
+                        logger.log(Level.WARNING, "Future Map processGetScheduledPayments an ezidebit YourSystemReference string cannot be converted to a number.", numberFormatException);
+
+                    }
+
+                    Customers cust = customersFacade.findById(custId);
+                    if (cust != null) {
+                        logger.log(Level.INFO, "Future Map processGetScheduledPayments. Processing {0} payments for customer {1}.", new Object[]{payList.size(), cust.getUsername()});
+                        for (ScheduledPayment pay : payList) {
+                            if (customerRef.compareTo(pay.getYourSystemReference().getValue().trim()) != 0) {
+                                logger.log(Level.WARNING, "Future Map processGetScheduledPayments . The list being processed contains multiple customers.It should only contain one for this method. Aborting.");
+                                abort = true;
+                            }
+
+                        }
+                        if (abort == false) {
+                            for (ScheduledPayment pay : payList) {
+                               
+                               
+                                    Payments crmPay = paymentsFacade.findScheduledPayment(pay);
+                                    if (crmPay != null) { //' payment exists
+                                        if (compareScheduledPaymentXMLToEntity(crmPay, pay)) {
+                                            // they are the same so no update
+                                            logger.log(Level.FINE, "Future Map processGetScheduledPayments paymenst are the same.");
+                                        } else {
+                                            crmPay = convertScheduledPaymentXMLToEntity(crmPay, pay, cust);
+                                            paymentsFacade.edit(crmPay);
+                                        }
+                                    } else { //payment doesn't exist in crm so add it
+                                        crmPay = convertScheduledPaymentXMLToEntity(crmPay, pay, cust);
+                                        paymentsFacade.create(crmPay);
+                                    }
+                                
+
+                            }
+                        }
+                    } else {
+                        logger.log(Level.SEVERE, "Future Map processGetScheduledPayments couldn't find a customer with our system ref from payment.");
+                        /*TODO email a report at the end of the process if there are any payments swithout a customer reference
+                         as this means that a customer is in ezidebits system but not ours */
+
+                    }
+                } else {
+                    logger.log(Level.WARNING, "Future Map processGetScheduledPayments our system ref in payment is null.");
+                }
+
+            }
+        }
+
+        logger.log(Level.INFO, "Future Map processGetScheduledPayments completed");
+    }
 
     @Asynchronous
-    private void processGetScheduledPayments(Future ft) {
+    private void processGetScheduledPayments2(Future ft) {
         ArrayOfScheduledPayment result = null;
         boolean abort = false;
         int scheduledPayments;
@@ -900,18 +976,18 @@ public class FutureMapEJB implements Serializable {
                 if (payment != null) {
                     p1 = payment.getYourSystemReference();
                 }
-                 if (cust != null) {
+                if (cust != null) {
                     p3 = cust.getUsername();
                 }
                 if (pay != null) {
                     if (pay.getYourSystemReference().isNil() == false) {
                         p2 = pay.getYourSystemReference().getValue();
-                    }else{
-                     logger.log(Level.WARNING, "Future Map convertPaymentXMLToEntity method failed.Your system reference is NULL. Customer {2},payment pojo {0},payment XML {1}:", new Object[]{p1, p2, p3});
-    
+                    } else {
+                        logger.log(Level.WARNING, "Future Map convertPaymentXMLToEntity method failed.Your system reference is NULL. Customer {2},payment pojo {0},payment XML {1}:", new Object[]{p1, p2, p3});
+
                     }
                 }
-               
+
                 logger.log(Level.WARNING, "Future Map convertPaymentXMLToEntity method failed.Cant poceed due to a null value. Customer {2},payment pojo {0},payment XML {1}:", new Object[]{p1, p2, p3});
                 return null;
             }
@@ -1071,88 +1147,222 @@ public class FutureMapEJB implements Serializable {
         }
     }
 
+    private synchronized boolean compareStringToXMLString(String s, JAXBElement<String> xs) {
+        boolean result = true;// return true if they are the same
+        String s2 = null;
+        if (s != null) {
+            s = s.trim();
+            if (s.isEmpty()) {
+                s = null;
+            }
+        }
+        if (xs != null) {
+            if (xs.isNil() == false) {
+                s2 = xs.getValue().trim();
+                if (s2.isEmpty()) {
+                    s2 = null;
+                }
+            } else {
+                s2 = null;
+            }
+        }
+        if (s == null && s2 == null) {
+            return true;
+        }
+        if ((s == null && s2 != null) || (s != null && s2 == null)) {
+            return false;
+        }
+
+        if (s.compareTo(s2) != 0) {
+            return false;
+        }
+        return result;
+    }
+private synchronized boolean compareDateToXMLGregCalendar(Date d, XMLGregorianCalendar xgc) {
+        boolean result = true;// return true if they are the same
+       GregorianCalendar gc = null;
+        if (xgc != null) {
+            if (xgc.toGregorianCalendar() != null) {
+                gc = xgc.toGregorianCalendar();
+            }
+        }
+
+        if (d == null && gc == null) {
+            return true;
+        }
+        if ((d == null && gc != null) || (d != null && gc == null)) {
+            return false;
+        }
+        Date d2 = gc.getTime();
+        if (d.compareTo(d2) != 0) {
+            return false;
+        }
+        return result;
+    }
+    private synchronized boolean compareDateToXMLGregCal(Date d, JAXBElement<XMLGregorianCalendar> jxgc) {
+        boolean result = true;// return true if they are the same
+        GregorianCalendar xgc = null;
+        if (jxgc != null) {
+            if (jxgc.isNil() == false) {
+                xgc = jxgc.getValue().toGregorianCalendar();
+            }
+        }
+
+        if (d == null && xgc == null) {
+            return true;
+        }
+        if ((d == null && xgc != null) || (d != null && xgc == null)) {
+            return false;
+        }
+        Date d2 = xgc.getTime();
+        if (d.compareTo(d2) != 0) {
+            return false;
+        }
+        return result;
+    }
+
+    private synchronized boolean compareBigDecimalToDouble(BigDecimal d, Double bd) {
+        boolean result = true;// return true if they are the same
+        BigDecimal d2 = null;
+        if (bd != null) {
+            d2 = new BigDecimal(bd);
+        }
+
+        if (d == null && d2 == null) {
+            return true;
+        }
+        if ((d == null && d2 != null) || (d != null && d2 == null)) {
+            return false;
+        }
+
+        if (d.compareTo(d2) != 0) {
+            return false;
+        }
+        return result;
+    }
+
     private boolean comparePaymentXMLToEntity(Payments payment, Payment pay) {
         synchronized (lock6) {
             if (payment == null || pay == null) {
-                if (payment == null && pay == null) {
-                    return true;
-                } else {
-                    return false;
-                }
+                return payment == null && pay == null;
             }
             try {
-                if (payment.getBankFailedReason() != null && pay.getBankFailedReason() != null) {
-                    if (payment.getBankFailedReason().contains(pay.getBankFailedReason().getValue()) == false) {
-                        return false;
-                    }
-                } else if (payment.getBankFailedReason() != null || pay.getBankFailedReason() != null) {
+
+                if (compareStringToXMLString(payment.getBankFailedReason(), pay.getBankFailedReason()) == false) {
                     return false;
                 }
-                if (payment.getBankReceiptID().contains(pay.getBankReceiptID().getValue()) == false) {
+
+                if (compareStringToXMLString(payment.getBankReceiptID(), pay.getBankReceiptID()) == false) {
                     return false;
                 }
-                if (payment.getBankReturnCode().contains(pay.getBankReturnCode().getValue()) == false) {
+                if (compareStringToXMLString(payment.getBankReturnCode(), pay.getBankReturnCode()) == false) {
                     return false;
                 }
                 if (payment.getCustomerName() == null) {
                     return false;
                 } else {
-                    if (payment.getCustomerName().getId().toString().contains(pay.getYourSystemReference().getValue()) == false) {
+                    if (compareStringToXMLString(payment.getCustomerName().getId().toString(), (pay.getYourSystemReference())) == false) {
                         return false;
                     }
                 }
-                if (payment.getDebitDate().compareTo(pay.getDebitDate().getValue().toGregorianCalendar().getTime()) != 0) {
+                if (compareDateToXMLGregCal(payment.getDebitDate(), pay.getDebitDate()) == false) {
                     return false;
                 }
-                if (payment.getEzidebitCustomerID().contains(pay.getBankFailedReason().getValue()) == false) {
+                if (compareStringToXMLString(payment.getEzidebitCustomerID(), pay.getEzidebitCustomerID()) == false) {
                     return false;
                 }
-                if (payment.getInvoiceID().contains(pay.getEzidebitCustomerID().getValue()) == false) {
+                if (compareStringToXMLString(payment.getInvoiceID(), pay.getInvoiceID()) == false) {
                     return false;
                 }
-                if (payment.getPaymentAmount().compareTo(new BigDecimal(pay.getPaymentAmount().floatValue())) != 0) {
+                if (compareBigDecimalToDouble(payment.getPaymentAmount(),pay.getPaymentAmount()) == false) {
                     return false;
                 }
-                if (payment.getPaymentID().contains(pay.getPaymentID().getValue()) == false) {
+                if (compareStringToXMLString(payment.getPaymentID(), pay.getPaymentID()) == false) {
                     return false;
                 }
-                if (payment.getPaymentMethod().contains(pay.getPaymentMethod().getValue()) == false) {
+                if (compareStringToXMLString(payment.getPaymentMethod(), pay.getPaymentMethod()) == false) {
                     return false;
                 }
-                if (payment.getPaymentReference().contains(pay.getPaymentReference().getValue()) == false) {
+                if (compareStringToXMLString(payment.getPaymentReference(), pay.getPaymentReference()) == false) {
                     return false;
                 }
-                if (payment.getPaymentSource().contains(pay.getPaymentSource().getValue()) == false) {
+                if (compareStringToXMLString(payment.getPaymentSource(), pay.getPaymentSource()) == false) {
                     return false;
                 }
-                if (payment.getPaymentStatus().contains(pay.getPaymentStatus().getValue()) == false) {
+                if (compareStringToXMLString(payment.getPaymentStatus(), pay.getPaymentStatus()) == false) {
                     return false;
                 }
-                if (payment.getScheduledAmount().compareTo(new BigDecimal(pay.getScheduledAmount().floatValue())) != 0) {
+                if (compareBigDecimalToDouble(payment.getScheduledAmount(),pay.getScheduledAmount())  == false) {
                     return false;
                 }
-                if (payment.getSettlementDate().compareTo(pay.getSettlementDate().getValue().toGregorianCalendar().getTime()) != 0) {
+                if (compareDateToXMLGregCal(payment.getSettlementDate(), pay.getSettlementDate()) == false) {
                     return false;
                 }
-                if (payment.getTransactionFeeClient().compareTo(new BigDecimal(pay.getTransactionFeeClient().floatValue())) != 0) {
+                if (compareBigDecimalToDouble(payment.getTransactionFeeClient(),pay.getTransactionFeeClient())  == false) {
                     return false;
                 }
-                if (payment.getTransactionFeeCustomer().compareTo(new BigDecimal(pay.getTransactionFeeCustomer().floatValue())) != 0) {
+                if (compareBigDecimalToDouble(payment.getTransactionFeeCustomer(),pay.getTransactionFeeCustomer())  == false) {
                     return false;
                 }
-                if (pay.getTransactionTime().getValue() != null) {
-                    if (payment.getTransactionTime().compareTo(pay.getTransactionTime().getValue().toGregorianCalendar().getTime()) != 0) {
-                        return false;
-                    }
-                }
-                if (payment.getYourGeneralReference().contains(pay.getYourGeneralReference().getValue()) == false) {
+                if (compareDateToXMLGregCal(payment.getTransactionTime(), pay.getTransactionTime()) == false) {
                     return false;
                 }
-                if (payment.getYourSystemReference().contains(pay.getYourSystemReference().getValue()) == false) {
+                if (compareStringToXMLString(payment.getYourGeneralReference(), pay.getYourGeneralReference()) == false) {
+                    return false;
+                }
+                if (compareStringToXMLString(payment.getYourSystemReference(), pay.getYourSystemReference()) == false) {
                     return false;
                 }
             } catch (Exception e) {
                 logger.log(Level.WARNING, "Future Map comparePaymentXMLToEntity method failed.:", e.getMessage());
+                return false;
+            }
+
+            return true;
+        }
+    }
+
+    private boolean compareScheduledPaymentXMLToEntity(Payments payment, ScheduledPayment pay) {
+        synchronized (lock6) {
+            if (payment == null || pay == null) {
+                return payment == null && pay == null;
+            }
+          try {
+
+               
+                if (payment.getCustomerName() == null) {
+                    return false;
+                } else {
+                    if (compareStringToXMLString(payment.getCustomerName().getId().toString(), (pay.getYourSystemReference())) == false) {
+                        return false;
+                    }
+                }
+                if (compareDateToXMLGregCalendar(payment.getDebitDate(),pay.getPaymentDate()) == false) {
+                    return false;
+                }
+                if (compareStringToXMLString(payment.getEzidebitCustomerID(), pay.getEzidebitCustomerID()) == false) {
+                    return false;
+                }
+                
+                if (compareBigDecimalToDouble(payment.getPaymentAmount(),pay.getPaymentAmount()) == false) {
+                    return false;
+                }
+                if (!Objects.equals(payment.getManuallyAddedPayment(), pay.isManuallyAddedPayment())) {
+                    return false;
+                }
+                
+                if (compareStringToXMLString(payment.getPaymentReference(), pay.getPaymentReference()) == false) {
+                    return false;
+                }
+                
+                if (compareStringToXMLString(payment.getYourGeneralReference(), pay.getYourGeneralReference()) == false) {
+                    return false;
+                }
+                if (compareStringToXMLString(payment.getYourSystemReference(), pay.getYourSystemReference()) == false) {
+                    return false;
+                }
+            } catch (Exception e) {
+                logger.log(Level.WARNING, "Future Map compareScheduledPaymentXMLToEntity method failed.:", e.getMessage());
                 return false;
             }
 

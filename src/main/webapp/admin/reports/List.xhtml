@@ -126,29 +126,29 @@
                        </p:column>
                         <p:column sortBy="#{item.settlementDate}" filterBy="#{item.settlementDate}" headerText="#{configMapController.getKey('ListPaymentsTitle_settlementDate')}"   >
                             <h:outputText value="#{item.settlementDate}">
-                                <f:convertDateTime pattern="MM/dd/yyyy" />
+                                <f:convertDateTime pattern="E dd MMM yyyy" />
                             </h:outputText>
                         </p:column>
 
                         <p:column sortBy="#{item.debitDate}" filterBy="#{item.debitDate}" headerText="#{configMapController.getKey('ListPaymentsTitle_debitDate')}"   >
                             <h:outputText value="#{item.debitDate}">
-                                <f:convertDateTime pattern="MM/dd/yyyy" />
+                                <f:convertDateTime pattern="E dd MMM yyyy" />
                             </h:outputText>
                         </p:column>
                         <p:column sortBy="#{item.paymentDate}" filterBy="#{item.paymentDate}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentDate')}"   >
                             <h:outputText value="#{item.paymentDate}">
-                                <f:convertDateTime pattern="MM/dd/yyyy" />
+                                <f:convertDateTime pattern="E dd MMM yyyy" />
                             </h:outputText>
                         </p:column>
                         <p:column sortBy="#{item.transactionTime}" filterBy="#{item.transactionTime}" headerText="#{configMapController.getKey('ListPaymentsTitle_transactionTime')}"   >
                             <h:outputText value="#{item.transactionTime}">
-                                <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                                <f:convertDateTime pattern="E dd MMM yyyy HH:mm:ss" />
                             </h:outputText>
                         </p:column>
 
                         <p:column sortBy="#{item.lastUpdatedDatetime}" filterBy="#{item.lastUpdatedDatetime}" headerText="#{configMapController.getKey('ListPaymentsTitle_lastUpdatedDatetime')}"   >
                             <h:outputText value="#{item.lastUpdatedDatetime}">
-                                <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                                <f:convertDateTime pattern="dd MMM yyyy HH:mm:ss" />
                             </h:outputText>
                         </p:column>
                         <p:column sortBy="#{item.bankFailedReason}" filterBy="#{item.bankFailedReason}" headerText="#{configMapController.getKey('ListPaymentsTitle_bankFailedReason')}"   >
@@ -205,7 +205,7 @@
                         </p:column>
                         <p:column sortBy="#{item.createDatetime}"  exportable="false" filterBy="#{item.createDatetime}" headerText="#{configMapController.getKey('ListPaymentsTitle_createDatetime')}"   >
                             <h:outputText value="#{item.createDatetime}">
-                                <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                                <f:convertDateTime pattern="dd MMM yyyy HH:mm:ss" />
                             </h:outputText>
                         </p:column>
 

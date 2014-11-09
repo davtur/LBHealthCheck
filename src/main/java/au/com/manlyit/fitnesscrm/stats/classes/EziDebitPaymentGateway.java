@@ -41,6 +41,7 @@ import com.lowagie.text.Paragraph;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.NumberFormat;
@@ -64,7 +65,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import javax.ejb.AsyncResult;
 import javax.ejb.EJBException;
 import javax.enterprise.context.SessionScoped;
 import javax.faces.context.ExternalContext;
@@ -1957,24 +1957,25 @@ public class EziDebitPaymentGateway implements Serializable {
 
     private void processDeletePayment(Future ft) {
         boolean result = false;
-        String errorMessage =  "The delete payment operation failed!.";
+        String errorMessage = "The delete payment operation failed!.";
         try {
             result = (boolean) ft.get();
         } catch (InterruptedException | ExecutionException ex) {
-           String causedBy = ex.getCause().getCause().getMessage();
+            String causedBy = ex.getCause().getCause().getMessage();
             if (causedBy.contains("Payment selected for deletion could not be found")) {
                 logger.log(Level.WARNING, "deletePayment - Payment selected for deletion could not be found..");
-                errorMessage =  "The payment selected for deletion could not be found!";
+                errorMessage = "The payment selected for deletion could not be found!";
             } else {
                 Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, "Processing Async Results", ex);
             }
         }
         if (result == true) {
+
             setSelectedScheduledPayment(null);
             JsfUtil.pushSuccessMessage(CHANNEL + sessionId, "Payment Gateway", "Successfully Deleted Payment  .");
             getPayments(12, 1);
         } else {
-            JsfUtil.pushErrorMessage(CHANNEL + sessionId, "Payment Gateway",errorMessage);
+            JsfUtil.pushErrorMessage(CHANNEL + sessionId, "Payment Gateway", errorMessage);
         }
         logger.log(Level.INFO, "processDeletePayment completed");
     }
@@ -2349,6 +2350,12 @@ public class EziDebitPaymentGateway implements Serializable {
         Long amountLimit = paymentLimitAmountInCents * (long) 100;
         char spt = paymentSchedulePeriodType.charAt(0);
         if (loggedInUser != null) {
+            List<Payments> crmPaymentList = paymentsFacade.findScheduledPaymentsByCustomer(selectedCustomer);
+            for (Payments p : crmPaymentList) {
+                if (!(paymentKeepManualPayments && p.getManuallyAddedPayment())) {
+                    paymentsFacade.remove(p);
+                }
+            }
             startAsynchJob("CreateSchedule", paymentBean.createSchedule(selectedCustomer, paymentDebitDate, spt, paymentDayOfWeek, paymentDayOfMonth, paymentFirstWeekOfMonth, paymentSecondWeekOfMonth, paymentThirdWeekOfMonth, paymentFourthWeekOfMonth, amount, paymentLimitToNumberOfPayments, amountLimit, paymentKeepManualPayments, loggedInUser, getDigitalKey()));
             JsfUtil.addSuccessMessage("Sending Delete Request to Payment Gateway.");
         } else {
@@ -2361,6 +2368,12 @@ public class EziDebitPaymentGateway implements Serializable {
         String loggedInUser = FacesContext.getCurrentInstance().getExternalContext().getRemoteUser();
         Double amount = selectedScheduledPayment.getPaymentAmount().floatValue() * (double) 100;
         if (loggedInUser != null) {
+            Payments pay = paymentsFacade.findScheduledPayment(selectedScheduledPayment.getPaymentAmount(), selectedScheduledPayment.getDebitDate(), selectedScheduledPayment.getPaymentReference(), selectedScheduledPayment.getManuallyAddedPayment());
+            if (pay != null) {
+                paymentsFacade.remove(pay);
+            } else {
+                logger.log(Level.WARNING, "deleteScheduledPayment , cant't find the local scheduled payment in our DB.");
+            }
             startAsynchJob("DeletePayment", paymentBean.deletePayment(selectedCustomer, selectedScheduledPayment.getDebitDate(), amount.longValue(), selectedScheduledPayment.getPaymentReference(), loggedInUser, getDigitalKey()));
         } else {
             logger.log(Level.WARNING, "Logged in user is null. Delete Payment aborted.");
@@ -2394,6 +2407,12 @@ public class EziDebitPaymentGateway implements Serializable {
         String loggedInUser = FacesContext.getCurrentInstance().getExternalContext().getRemoteUser();
         Long amount = paymentAmountInCents * (long) 100;
         if (loggedInUser != null) {
+             List<Payments> crmPaymentList = paymentsFacade.findScheduledPaymentsByCustomer(selectedCustomer);
+            for (Payments p : crmPaymentList) {
+                if (!(paymentKeepManualPayments && p.getManuallyAddedPayment())) {
+                    paymentsFacade.remove(p);
+                }
+            }
             startAsynchJob("ChangeScheduledAmount", paymentBean.changeScheduledAmount(selectedCustomer, paymentDebitDate, amount, paymentLimitToNumberOfPayments, applyToAllFuturePayments, paymentKeepManualPayments, loggedInUser, getDigitalKey()));
         } else {
             logger.log(Level.WARNING, "Logged in user is null. Add Single Payment aborted.");

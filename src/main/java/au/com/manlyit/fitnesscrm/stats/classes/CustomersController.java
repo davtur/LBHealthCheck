@@ -241,7 +241,7 @@ public class CustomersController implements Serializable {
                 @Override
                 public PfSelectableDataModel createPageDataModel() {
 
-                    return new PfSelectableDataModel<>(ejbFacade.findFilteredCustomers(true, selectedCustomerStates));
+                    return new PfSelectableDataModel<>(ejbFacade.findFilteredCustomers(true, selectedCustomerStates,true));
 
                 }
 
@@ -750,7 +750,7 @@ public class CustomersController implements Serializable {
      }*/
     public PfSelectableDataModel<Customers> getItems() {
         if (items == null) {
-            items = new PfSelectableDataModel<>(ejbFacade.findFilteredCustomers(true, selectedCustomerStates));
+            items = new PfSelectableDataModel<>(ejbFacade.findFilteredCustomers(true, selectedCustomerStates,true));
             // items = getPagination().createPageDataModel();
         }
         return items;

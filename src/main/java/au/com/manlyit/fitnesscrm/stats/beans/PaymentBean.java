@@ -17,6 +17,7 @@ import au.com.manlyit.fitnesscrm.stats.webservices.INonPCIService;
 import au.com.manlyit.fitnesscrm.stats.webservices.NonPCIService;
 import au.com.manlyit.fitnesscrm.stats.webservices.PaymentDetail;
 import au.com.manlyit.fitnesscrm.stats.webservices.PaymentDetailPlusNextPaymentInfo;
+import au.com.manlyit.fitnesscrm.stats.webservices.ScheduledPayment;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -275,6 +276,8 @@ public class PaymentBean implements Serializable {
         //  If you provide values for DebitDate and PaymentAmountInCents and there is more
         //  than one payment for PaymentAmountInCents scheduled on DebitDate, then only
         //  one of the payments will be deleted.
+        
+        
         boolean result = false;
         if (debitDate == null || cust == null || paymentAmountInCents < 0) {
             logger.log(Level.WARNING, "deletePayment NULL parameter of Amount < 0. cust {0}, date {1}, Amount {2}", new Object[]{cust, debitDate, paymentAmountInCents});
