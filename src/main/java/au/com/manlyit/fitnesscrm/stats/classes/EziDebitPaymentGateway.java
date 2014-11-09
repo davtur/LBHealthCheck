@@ -64,6 +64,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.ejb.AsyncResult;
 import javax.ejb.EJBException;
 import javax.enterprise.context.SessionScoped;
 import javax.faces.context.ExternalContext;
@@ -1239,7 +1240,7 @@ public class EziDebitPaymentGateway implements Serializable {
 
     public PfSelectableDataModel<Payments> getPaymentDBList() {
         if (paymentDBList == null) {
-            paymentDBList = new PfSelectableDataModel<>(paymentsFacade.findPaymentsByCustomer(selectedCustomer,refreshFromDB));
+            paymentDBList = new PfSelectableDataModel<>(paymentsFacade.findPaymentsByCustomer(selectedCustomer, refreshFromDB));
         }
         return paymentDBList;
     }
@@ -1287,21 +1288,21 @@ public class EziDebitPaymentGateway implements Serializable {
         widgetUrl += amp + "cr=" + cust.getId().toString();
         widgetUrl += amp + "e=" + configMapFacade.getConfig("payment.ezidebit.widget.e"); // 0 = dont allow customer to edit
         String template = configMapFacade.getConfig("payment.ezidebit.widget.template");
-       /* if (template.trim().isEmpty() == false) {
-            widgetUrl += amp + "template=" + template;//template name win7 
-        } else {
+        /* if (template.trim().isEmpty() == false) {
+         widgetUrl += amp + "template=" + template;//template name win7 
+         } else {
 
-            widgetUrl += amp + "f=" + configMapFacade.getConfig("payment.ezidebit.widget.f");//font Arial
-            widgetUrl += amp + "h1c=" + configMapFacade.getConfig("payment.ezidebit.widget.h1c");//header colour FF5595
-            widgetUrl += amp + "h1s=" + configMapFacade.getConfig("payment.ezidebit.widget.h1s");//header size in pixels 24
-            widgetUrl += amp + "lblc=" + configMapFacade.getConfig("payment.ezidebit.widget.lblc"); // label colour EB7636
-            widgetUrl += amp + "lbls=" + configMapFacade.getConfig("payment.ezidebit.widget.lbls");//label size in pixels 18
-            widgetUrl += amp + "bgc=" + configMapFacade.getConfig("payment.ezidebit.widget.bgc");//background FFFFFF
-            widgetUrl += amp + "hgl=" + configMapFacade.getConfig("payment.ezidebit.widget.hgl");// highlight 1892CD
-            widgetUrl += amp + "txtc=" + configMapFacade.getConfig("payment.ezidebit.widget.txtc");//text 333333
-            widgetUrl += amp + "txtbgc=" + configMapFacade.getConfig("payment.ezidebit.widget.txtbgc");//text background FFFFFF
-            widgetUrl += amp + "txtbc=" + configMapFacade.getConfig("payment.ezidebit.widget.txtbc");//Textbox Focus Border Colour EB7636
-        }*/
+         widgetUrl += amp + "f=" + configMapFacade.getConfig("payment.ezidebit.widget.f");//font Arial
+         widgetUrl += amp + "h1c=" + configMapFacade.getConfig("payment.ezidebit.widget.h1c");//header colour FF5595
+         widgetUrl += amp + "h1s=" + configMapFacade.getConfig("payment.ezidebit.widget.h1s");//header size in pixels 24
+         widgetUrl += amp + "lblc=" + configMapFacade.getConfig("payment.ezidebit.widget.lblc"); // label colour EB7636
+         widgetUrl += amp + "lbls=" + configMapFacade.getConfig("payment.ezidebit.widget.lbls");//label size in pixels 18
+         widgetUrl += amp + "bgc=" + configMapFacade.getConfig("payment.ezidebit.widget.bgc");//background FFFFFF
+         widgetUrl += amp + "hgl=" + configMapFacade.getConfig("payment.ezidebit.widget.hgl");// highlight 1892CD
+         widgetUrl += amp + "txtc=" + configMapFacade.getConfig("payment.ezidebit.widget.txtc");//text 333333
+         widgetUrl += amp + "txtbgc=" + configMapFacade.getConfig("payment.ezidebit.widget.txtbgc");//text background FFFFFF
+         widgetUrl += amp + "txtbc=" + configMapFacade.getConfig("payment.ezidebit.widget.txtbc");//Textbox Focus Border Colour EB7636
+         }*/
         eziDebitWidgetUrl = widgetUrl;
         /*try {
          eziDebitWidgetUrl = URLEncoder.encode(widgetUrl,"UTF-8");
@@ -1574,7 +1575,7 @@ public class EziDebitPaymentGateway implements Serializable {
             setRefreshIFrames(false);
         }
         RequestContext.getCurrentInstance().update("paymentsForm");
-        refreshFromDB =true;
+        refreshFromDB = true;
     }
 
     @PreDestroy
@@ -1956,17 +1957,24 @@ public class EziDebitPaymentGateway implements Serializable {
 
     private void processDeletePayment(Future ft) {
         boolean result = false;
+        String errorMessage =  "The delete payment operation failed!.";
         try {
             result = (boolean) ft.get();
         } catch (InterruptedException | ExecutionException ex) {
-            Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, "Processing Async Results", ex);
+           String causedBy = ex.getCause().getCause().getMessage();
+            if (causedBy.contains("Payment selected for deletion could not be found")) {
+                logger.log(Level.WARNING, "deletePayment - Payment selected for deletion could not be found..");
+                errorMessage =  "The payment selected for deletion could not be found!";
+            } else {
+                Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, "Processing Async Results", ex);
+            }
         }
         if (result == true) {
             setSelectedScheduledPayment(null);
             JsfUtil.pushSuccessMessage(CHANNEL + sessionId, "Payment Gateway", "Successfully Deleted Payment  .");
             getPayments(12, 1);
         } else {
-            JsfUtil.pushErrorMessage(CHANNEL + sessionId, "Payment Gateway", "The delete payment operation failed!.");
+            JsfUtil.pushErrorMessage(CHANNEL + sessionId, "Payment Gateway",errorMessage);
         }
         logger.log(Level.INFO, "processDeletePayment completed");
     }
@@ -2274,7 +2282,7 @@ public class EziDebitPaymentGateway implements Serializable {
         setAsyncOperationRunning(true);
         AsyncJob aj = new AsyncJob(key, future);
         futureMap.put(sessionId, aj);
-        
+
     }
 
     public void createEddrLink(ActionEvent actionEvent) {

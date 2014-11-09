@@ -53,7 +53,7 @@
 
                         <p:outputLabel  value="#{configMapController.getKey('ListReportManualRefresh')}" for="manualRefresh" />
                         <p:selectBooleanCheckbox id="manualRefresh"   value="#{ezidebit.manualRefreshFromPaymentGateway}" />  
-                            
+
                     </p:panelGrid>
 
                     <p:panelGrid columns="2" >
@@ -117,14 +117,13 @@
                         </p:column>
 
                         <p:column sortBy="#{item.paymentStatus}" filterBy="#{item.paymentStatus}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentStatus')}"   >
-
-                            <h:outputText  rendered="#{item.paymentStatus == 'W'}"  value="Waiting"/>
-                            <h:outputText  rendered="#{item.paymentStatus == 'P'}"  value="Pending"/>
-                            <h:outputText  rendered="#{item.paymentStatus == 'S'}"  value="Successful"/>
-                            <h:outputText  rendered="#{item.paymentStatus == 'D'}"  value="Dis.Insufficient Funds"/>
-                            <h:outputText  rendered="#{item.paymentStatus == 'F'}"  value="Dishonoured"/>
-
-                        </p:column>
+                            <h:outputText   value="#{item.paymentStatus} --"/>
+                            <h:outputText  rendered="#{item.paymentStatus == 'W'}"  value=" Waiting"/>
+                            <h:outputText  rendered="#{item.paymentStatus == 'P'}"  value=" Pending"/>
+                            <h:outputText  rendered="#{item.paymentStatus == 'S'}"  value=" Successful" style="color: green"/>
+                            <h:outputText  rendered="#{item.paymentStatus == 'D'}"  value=" Dis.Insufficient Funds" style="color: red"/>
+                            <h:outputText  rendered="#{item.paymentStatus == 'F'}"  value=" Dishonoured" style="color: red"/>
+                       </p:column>
                         <p:column sortBy="#{item.settlementDate}" filterBy="#{item.settlementDate}" headerText="#{configMapController.getKey('ListPaymentsTitle_settlementDate')}"   >
                             <h:outputText value="#{item.settlementDate}">
                                 <f:convertDateTime pattern="MM/dd/yyyy" />
@@ -211,7 +210,7 @@
                         </p:column>
 
                         <f:facet name="footer">
-                                 <h:outputText value=" "/>
+                            <h:outputText value=" "/>
                         </f:facet>
                     </p:dataTable>
 

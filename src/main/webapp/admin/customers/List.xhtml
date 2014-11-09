@@ -92,11 +92,11 @@
                                     </h:outputText>
                                     <h:outputText rendered="#{empty item.paymentParameters.nextScheduledPayment}" value="---"/>
                                 </p:column>
-                                <p:column sortBy="#{item.paymentParameters.nextScheduledPayment.lastUpdatedDatetime}" filterBy="#{item.paymentParameters.nextScheduledPayment.lastUpdatedDatetime}" headerText="#{configMapController.getKey('ListCustomersTitle_lastUpdated')}"   >
-                                    <h:outputText  rendered="#{not empty item.paymentParameters.nextScheduledPayment}"  value="#{item.paymentParameters.nextScheduledPayment.lastUpdatedDatetime}">
+                                <p:column sortBy="#{item.paymentParameters.lastSuccessfulScheduledPayment.lastUpdatedDatetime}" filterBy="#{item.paymentParameters.lastSuccessfulScheduledPayment.lastUpdatedDatetime}" headerText="#{configMapController.getKey('ListCustomersTitle_lastUpdated')}"   >
+                                    <h:outputText  rendered="#{not empty item.paymentParameters.lastSuccessfulScheduledPayment}"  value="#{item.paymentParameters.lastSuccessfulScheduledPayment.lastUpdatedDatetime}">
                                         <f:convertDateTime  pattern="yyyy-MM-dd hh:mm:ss" />
                                     </h:outputText>
-                                    <h:outputText rendered="#{empty item.paymentParameters.nextScheduledPayment}" value="---"/>
+                                    <h:outputText rendered="#{empty item.paymentParameters.lastSuccessfulScheduledPayment}" value="---"/>
                                 </p:column>
 
                                 <p:column sortBy="#{item.paymentParameters.totalPaymentsSuccessfulAmount}" filterBy="#{item.paymentParameters.totalPaymentsSuccessfulAmount}" headerText="#{configMapController.getKey('ListCustomersTitle_totalPaymentsSuccessfulAmount')}"   >
@@ -284,6 +284,7 @@
                                 <p:ajax event="rowUnselect" /> 
                                 <p:column  sortBy="#{pay.paymentID}" filterBy="#{pay.paymentID}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentID')}"   >
                                     <h:outputText value="#{pay.paymentID}"/>
+                                    <h:outputText  rendered="#{empty pay.paymentID}"  value="Scheduled" style="background-color: lightseagreen;"/>
                                 </p:column>
 
                                 <p:column  sortBy="#{pay.customerName.lastname}" filterBy="#{pay.customerName.lastname}" headerText="#{configMapController.getKey('ListPaymentsTitle_customerName')}"   >
@@ -297,26 +298,43 @@
                                         <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
                                     </h:outputText>
                                 </p:column>
-                                <p:column  sortBy="#{pay.paymentStatus}" filterBy="#{pay.paymentStatus}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentStatus')}"   >
-                                    <h:outputText  rendered="#{pay.paymentStatus == 'W'}"  value="Waiting"/>
-                                    <h:outputText  rendered="#{pay.paymentStatus == 'P'}"  value="Pending"/>
-                                    <h:outputText  rendered="#{pay.paymentStatus == 'S'}"  value="Successful"/>
-                                    <h:outputText  rendered="#{pay.paymentStatus == 'D'}"  value="Dis.Insufficient Funds"/>
-                                    <h:outputText  rendered="#{pay.paymentStatus == 'F'}"  value="Dishonoured"/>
+                                <p:column  sortBy="#{pay.transactionFeeCustomer}" filterBy="#{pay.transactionFeeCustomer}" headerText="#{configMapController.getKey('ListPaymentsTitle_transactionFeeCustomer')}"   >
+                                    <h:outputText value="#{pay.transactionFeeCustomer}">
+                                        <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
+                                    </h:outputText>
+                                </p:column>
+                                <p:column  sortBy="#{pay.transactionFeeClient}" filterBy="#{pay.transactionFeeClient}" headerText="#{configMapController.getKey('ListPaymentsTitle_transactionFeeClient')}"   >
+                                    <h:outputText value="#{pay.transactionFeeClient}">
+                                        <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
+                                    </h:outputText>
                                 </p:column>
                                 <p:column  sortBy="#{pay.debitDate}" filterBy="#{pay.debitDate}" headerText="#{configMapController.getKey('ListPaymentsTitle_debitDate')}"   >
                                     <h:outputText value="#{pay.debitDate}">
-                                        <f:convertDateTime pattern="dd MMM yyyy" />
+                                        <f:convertDateTime pattern="E dd MMM yyyy" />
                                     </h:outputText>
                                 </p:column>
+                                <p:column  sortBy="#{pay.settlementDate}" filterBy="#{pay.settlementDate}" headerText="#{configMapController.getKey('ListPaymentsTitle_settlementDate')}"   >
+                                    <h:outputText value="#{pay.settlementDate}">
+                                       <f:convertDateTime pattern="E dd MMM yyyy" />
+                                    </h:outputText>
+                                </p:column>
+                                <p:column  sortBy="#{pay.paymentStatus}" filterBy="#{pay.paymentStatus}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentStatus')}"   >
+                                    <h:outputText   value="#{pay.paymentStatus} --"/>
+                                    <h:outputText  rendered="#{pay.paymentStatus == 'W'}"  value=" Waiting"/>
+                                    <h:outputText  rendered="#{pay.paymentStatus == 'P'}"  value=" Pending"/>
+                                    <h:outputText  rendered="#{pay.paymentStatus == 'S'}"  value=" Successful" style="color: green"/>
+                                    <h:outputText  rendered="#{pay.paymentStatus == 'D'}"  value=" Dis.Insufficient Funds" style="color: red"/>
+                                    <h:outputText  rendered="#{pay.paymentStatus == 'F'}"  value=" Dishonoured" style="color: red"/>
+                                </p:column>
+
 
                             </p:dataTable>
 
                         </p:panel>
                         <p:panel id="customerDetailsPanel" rendered="#{customersController.selected.paymentParameters != null }" header="CRM Customer Record">
                             <p:panelGrid columns="2" style="width:100%">
-                                <p:outputLabel value="Customer Name:" /> <h:outputText value="#{customersController.selected.paymentParameters.customerName} #{ezidebit.currentCustomerDetails.customerName.value}"/>
-                                <p:outputLabel value="Customer Address:" /> <h:outputText value="#{customersController.selected.paymentParameters.addressLine1} #{ezidebit.currentCustomerDetails.addressLine1.value}, #{ezidebit.currentCustomerDetails.addressSuburb.value} #{ezidebit.currentCustomerDetails.addressState.value} #{ezidebit.currentCustomerDetails.addressPostCode.value}"/>
+                                <p:outputLabel value="Customer Name:" /> <h:outputText value="CRM: #{customersController.selected.paymentParameters.customerName}, EZI: #{ezidebit.currentCustomerDetails.customerName.value}"/>
+                                <p:outputLabel value="Customer Address:" /> <h:outputText value="CRM: #{customersController.selected.paymentParameters.addressLine1}, EZI: #{ezidebit.currentCustomerDetails.addressLine1.value}, #{ezidebit.currentCustomerDetails.addressSuburb.value} #{ezidebit.currentCustomerDetails.addressState.value} #{ezidebit.currentCustomerDetails.addressPostCode.value}"/>
                                 <p:outputLabel value="Contract Start:" /> <h:outputText value="#{customersController.selected.paymentParameters.contractStartDate}"/>
                                 <p:outputLabel value="Email Address:" /> <h:outputText value="#{customersController.selected.paymentParameters.email}"/>
                                 <p:outputLabel value="Mobile Phone:" /> <h:outputText value="#{customersController.selected.paymentParameters.mobilePhoneNumber}"/>

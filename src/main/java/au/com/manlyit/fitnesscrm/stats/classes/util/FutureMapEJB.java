@@ -732,61 +732,61 @@ public class FutureMapEJB implements Serializable {
             return;
         }
 
-        PaymentParameters pp ;
+        PaymentParameters pp;
 
         try {
 
-                String phoneNumber = current.getTelephone();
-                if (phoneNumber == null) {
-                    phoneNumber = "0000000000";
-                    logger.log(Level.INFO, "Invalid Phone Number for Customer {0}. Setting it to empty string", current.getUsername());
-                }
-                Pattern p = Pattern.compile("\\d{10}");
-                Matcher m = p.matcher(phoneNumber);
-                //ezidebit requires an australian mobile phone number that starts with 04
-                if (m.matches() == false || phoneNumber.startsWith("04") == false) {
-                    phoneNumber = "0000000000";
-                    logger.log(Level.INFO, "Invalid Phone Number for Customer {0}. Setting it to empty string", current.getUsername());
-                }
-                pp = new PaymentParameters();
-                pp.setId(0);
-                pp.setWebddrUrl(null);
-                pp.setLoggedInUser(current);
-                pp.setLastSuccessfulScheduledPayment(paymentsFacade.findLastSuccessfulScheduledPayment(current));
-                pp.setNextScheduledPayment(paymentsFacade.findNextScheduledPayment(current));
-                pp.setAddressLine1("");
-                pp.setAddressLine2("");
-                pp.setAddressPostCode("");
-                pp.setAddressState("");
-                pp.setAddressSuburb("");
-                pp.setContractStartDate(new Date());
-                pp.setCustomerFirstName("");
-                pp.setCustomerName("");
-                pp.setEmail("");
-                pp.setEzidebitCustomerID("");
+            String phoneNumber = current.getTelephone();
+            if (phoneNumber == null) {
+                phoneNumber = "0000000000";
+                logger.log(Level.INFO, "Invalid Phone Number for Customer {0}. Setting it to empty string", current.getUsername());
+            }
+            Pattern p = Pattern.compile("\\d{10}");
+            Matcher m = p.matcher(phoneNumber);
+            //ezidebit requires an australian mobile phone number that starts with 04
+            if (m.matches() == false || phoneNumber.startsWith("04") == false) {
+                phoneNumber = "0000000000";
+                logger.log(Level.INFO, "Invalid Phone Number for Customer {0}. Setting it to empty string", current.getUsername());
+            }
+            pp = new PaymentParameters();
+            pp.setId(0);
+            pp.setWebddrUrl(null);
+            pp.setLoggedInUser(current);
+            pp.setLastSuccessfulScheduledPayment(paymentsFacade.findLastSuccessfulScheduledPayment(current));
+            pp.setNextScheduledPayment(paymentsFacade.findNextScheduledPayment(current));
+            pp.setAddressLine1("");
+            pp.setAddressLine2("");
+            pp.setAddressPostCode("");
+            pp.setAddressState("");
+            pp.setAddressSuburb("");
+            pp.setContractStartDate(new Date());
+            pp.setCustomerFirstName("");
+            pp.setCustomerName("");
+            pp.setEmail("");
+            pp.setEzidebitCustomerID("");
 
-                pp.setMobilePhoneNumber(phoneNumber);
-                pp.setPaymentGatewayName("EZIDEBIT");
-                pp.setPaymentMethod("");
-                pp.setPaymentPeriod("");
-                pp.setPaymentPeriodDayOfMonth("");
-                pp.setPaymentPeriodDayOfWeek("");
+            pp.setMobilePhoneNumber(phoneNumber);
+            pp.setPaymentGatewayName("EZIDEBIT");
+            pp.setPaymentMethod("");
+            pp.setPaymentPeriod("");
+            pp.setPaymentPeriodDayOfMonth("");
+            pp.setPaymentPeriodDayOfWeek("");
 
-                pp.setSmsExpiredCard("YES");
-                pp.setSmsFailedNotification("YES");
-                pp.setSmsPaymentReminder("NO");
-                pp.setStatusCode("");
-                pp.setStatusDescription("");
-                pp.setTotalPaymentsFailed(0);
-                pp.setTotalPaymentsFailedAmount(new BigDecimal(0));
-                pp.setTotalPaymentsSuccessful(0);
-                pp.setTotalPaymentsSuccessfulAmount(new BigDecimal(0));
-                pp.setYourGeneralReference("");
-                pp.setYourSystemReference("");
-                paymentParametersFacade.create(pp);
-                current.setPaymentParameters(pp);
-                customersFacade.editAndFlush(current);
-            
+            pp.setSmsExpiredCard("YES");
+            pp.setSmsFailedNotification("YES");
+            pp.setSmsPaymentReminder("NO");
+            pp.setStatusCode("");
+            pp.setStatusDescription("");
+            pp.setTotalPaymentsFailed(0);
+            pp.setTotalPaymentsFailedAmount(new BigDecimal(0));
+            pp.setTotalPaymentsSuccessful(0);
+            pp.setTotalPaymentsSuccessfulAmount(new BigDecimal(0));
+            pp.setYourGeneralReference("");
+            pp.setYourSystemReference("");
+            paymentParametersFacade.create(pp);
+            current.setPaymentParameters(pp);
+            customersFacade.editAndFlush(current);
+
         } catch (Exception e) {
             logger.log(Level.SEVERE, "createDefaultPaymentParameters Method in Customers Controller", e);
         }
@@ -873,7 +873,7 @@ public class FutureMapEJB implements Serializable {
                     pp.setTotalPaymentsSuccessfulAmount(new BigDecimal(custDetails.getTotalPaymentsSuccessfulAmount().floatValue()));
                     pp.setYourGeneralReference(custDetails.getYourGeneralReference().getValue());
                     pp.setYourSystemReference(custDetails.getYourSystemReference().getValue());
-                    
+
                     if (isNew) {
                         paymentParametersFacade.create(pp);
                         cust.setPaymentParameters(pp);
@@ -882,7 +882,7 @@ public class FutureMapEJB implements Serializable {
                         cust.setPaymentParameters(pp);
                     }
                     customersFacade.edit(cust);
-                    
+
                 } else {
                     logger.log(Level.WARNING, "Future Map processGetCustomerDetails an ezidebit YourSystemReference string cannot be converted to a number.");
                 }
@@ -900,12 +900,18 @@ public class FutureMapEJB implements Serializable {
                 if (payment != null) {
                     p1 = payment.getYourSystemReference();
                 }
-                if (pay != null) {
-                    p2 = pay.getYourSystemReference().getValue();
-                }
-                if (cust != null) {
+                 if (cust != null) {
                     p3 = cust.getUsername();
                 }
+                if (pay != null) {
+                    if (pay.getYourSystemReference().isNil() == false) {
+                        p2 = pay.getYourSystemReference().getValue();
+                    }else{
+                     logger.log(Level.WARNING, "Future Map convertPaymentXMLToEntity method failed.Your system reference is NULL. Customer {2},payment pojo {0},payment XML {1}:", new Object[]{p1, p2, p3});
+    
+                    }
+                }
+               
                 logger.log(Level.WARNING, "Future Map convertPaymentXMLToEntity method failed.Cant poceed due to a null value. Customer {2},payment pojo {0},payment XML {1}:", new Object[]{p1, p2, p3});
                 return null;
             }
@@ -920,54 +926,60 @@ public class FutureMapEJB implements Serializable {
 
                 payment.setLastUpdatedDatetime(new Date());
 
-                if (pay.getBankFailedReason() != null) {
+                if (pay.getBankFailedReason().isNil() == false) {
                     payment.setBankFailedReason(pay.getBankFailedReason().getValue());
                 }
-                if (pay.getBankReceiptID() != null) {
+                if (pay.getBankReceiptID().isNil() == false) {
                     payment.setBankReceiptID(pay.getBankReceiptID().getValue());
                 }
-                if (pay.getBankReturnCode() != null) {
+                if (pay.getBankReturnCode().isNil() == false) {
                     payment.setBankReturnCode(pay.getBankReturnCode().getValue());
                 }
                 //payment.setCustomerName(cust);
-                if (pay.getDebitDate() != null) {
+
+                try {
                     payment.setDebitDate(pay.getDebitDate().getValue().toGregorianCalendar().getTime());
+                } catch (NullPointerException e) {
+                    logger.log(Level.WARNING, "Future Map convertPaymentXMLToEntity - DebitDate is NULL. Customer: {2},payment XML: {1}:", new Object[]{pay.toString(), cust.getUsername()});
                 }
-                if (pay.getEzidebitCustomerID() != null) {
+
+                if (pay.getEzidebitCustomerID().isNil() == false) {
                     payment.setEzidebitCustomerID(pay.getEzidebitCustomerID().getValue());
                 }
-                if (pay.getInvoiceID() != null) {
+                if (pay.getInvoiceID().isNil() == false) {
                     payment.setInvoiceID(pay.getInvoiceID().getValue());
                 }
                 if (pay.getPaymentAmount() != null) {
                     payment.setPaymentAmount(new BigDecimal(pay.getPaymentAmount().floatValue()));
                 }
-                if (pay.getPaymentID() != null) {
+                if (pay.getPaymentID().isNil() == false) {
                     payment.setPaymentID(pay.getPaymentID().getValue());
                 }
-                if (pay.getPaymentMethod() != null) {
+                if (pay.getPaymentMethod().isNil() == false) {
                     payment.setPaymentMethod(pay.getPaymentMethod().getValue());
                 }
-                if (pay.getPaymentReference() != null) {
+                if (pay.getPaymentReference().isNil() == false) {
                     payment.setPaymentReference(pay.getPaymentReference().getValue());
                 }
-                if (pay.getPaymentReference() != null) {
+                if (pay.getPaymentReference().isNil() == false) {
                     if (pay.getPaymentReference().getValue().trim().isEmpty() == false) {
                         payment.setManuallyAddedPayment(true);
                     } else {
                         payment.setManuallyAddedPayment(false);
                     }
                 }
-                if (pay.getPaymentSource() != null) {
+                if (pay.getPaymentSource().isNil() == false) {
                     payment.setPaymentSource(pay.getPaymentSource().getValue());
                 }
                 if (pay.getScheduledAmount() != null) {
                     payment.setScheduledAmount(new BigDecimal(pay.getScheduledAmount().floatValue()));
                 }
-                if (pay.getSettlementDate() != null) {
+                try {
                     payment.setSettlementDate(pay.getSettlementDate().getValue().toGregorianCalendar().getTime());
+                } catch (NullPointerException e) {
+                    logger.log(Level.WARNING, "Future Map convertPaymentXMLToEntity - SettlementDate is NULL. Customer: {2},payment XML: {1}:", new Object[]{pay.toString(), cust.getUsername()});
                 }
-                if (pay.getPaymentStatus() != null) {
+                if (pay.getPaymentStatus().isNil() == false) {
                     payment.setPaymentStatus(pay.getPaymentStatus().getValue());
                 }
                 if (pay.getTransactionFeeClient() != null) {
@@ -977,13 +989,15 @@ public class FutureMapEJB implements Serializable {
                     payment.setTransactionFeeCustomer(new BigDecimal(pay.getTransactionFeeCustomer().floatValue()));
                 }
 
-                if (  pay.getTransactionTime() != null && pay.getTransactionTime().getValue() != null) {
+                try {
                     payment.setTransactionTime(pay.getTransactionTime().getValue().toGregorianCalendar().getTime()); // only valid for real time and credit card payments
+                } catch (NullPointerException e) {
+                    logger.log(Level.INFO, "Future Map convertPaymentXMLToEntity - TransactionTime is NULL. Customer: {2},payment XML: {1}:", new Object[]{pay.toString(), cust.getUsername()});
                 }
-                if (pay.getYourGeneralReference() != null) {
+                if (pay.getYourGeneralReference().isNil() == false) {
                     payment.setYourGeneralReference(pay.getYourGeneralReference().getValue());
                 }
-                if (pay.getYourSystemReference() != null) {
+                if (pay.getYourSystemReference().isNil() == false) {
                     payment.setYourSystemReference(pay.getYourSystemReference().getValue());
                 }
             } catch (Exception e) {

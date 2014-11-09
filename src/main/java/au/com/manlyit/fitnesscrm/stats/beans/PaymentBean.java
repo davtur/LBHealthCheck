@@ -173,7 +173,7 @@ public class PaymentBean implements Serializable {
      return new AsyncResult<>(cd);
      }*/
     @Asynchronous
-    public Future<Boolean> editCustomerDetails(Customers cust, String eziDebitRef,Customers loggedInUser, String digitalKey) {
+    public Future<Boolean> editCustomerDetails(Customers cust, String eziDebitRef, Customers loggedInUser, String digitalKey) {
         String ourSystemRef = "";
 
         if (eziDebitRef == null) {
@@ -207,10 +207,10 @@ public class PaymentBean implements Serializable {
             String auditDetails = "Edit the customers details for  :" + cust.getUsername() + " Details:  " + humanFriendlyReference + " " + cust.getLastname() + " " + cust.getFirstname() + " " + cust.getStreetAddress() + " " + addresssLine2 + " " + cust.getSuburb() + " " + cust.getPostcode() + " " + cust.getAddrState() + " " + cust.getEmailAddress() + " " + cust.getTelephone() + " " + payParams.getSmsPaymentReminder() + " " + payParams.getSmsFailedNotification() + " " + payParams.getSmsExpiredCard() + " " + payParams.getLoggedInUser().getUsername();
             String changedFrom = "Existing Customer Record";
             String changedTo = "Edited customer record";
-           
-            if(loggedInUser == null){
+
+            if (loggedInUser == null) {
                 loggedInUser = cust;
-                 logger.log(Level.WARNING, "Payment Bean, editCustomerDetail: The logged in user is NULL");
+                logger.log(Level.WARNING, "Payment Bean, editCustomerDetail: The logged in user is NULL");
             }
             auditLogFacade.audit(loggedInUser, cust, "editCustomerDetails", auditDetails, changedFrom, changedTo);
 
@@ -302,7 +302,10 @@ public class PaymentBean implements Serializable {
             loggedInUser = loggedInUser.substring(0, 50);
             logger.log(Level.WARNING, "deletePayment loggedInUser is greater than the allowed 50 characters. Truncating! to 50 chars");
         }
-        EziResponseOfstring eziResponse = getWs().deletePayment(digitalKey, eziDebitCustomerId, ourSystemCustomerReference, paymentReference, debitDateString, paymentAmountInCents, loggedInUser);
+        EziResponseOfstring eziResponse = null;
+
+        eziResponse = getWs().deletePayment(digitalKey, eziDebitCustomerId, ourSystemCustomerReference, paymentReference, debitDateString, paymentAmountInCents, loggedInUser);
+
         logger.log(Level.INFO, "deletePayment Response: Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
         if (eziResponse.getError() == 0) {// any errors will be a non zero value
 
@@ -401,7 +404,7 @@ public class PaymentBean implements Serializable {
         String ourSystemCustomerReference = cust.getId().toString();
         logger.log(Level.INFO, "Payment Bean - Running async task - Getting Scheduled Payments for Customer {0}", cust.getUsername());
         EziResponseOfArrayOfScheduledPaymentTHgMB7OL eziResponse = getWs().getScheduledPayments(digitalKey, fromDateString, toDateString, eziDebitCustomerId, ourSystemCustomerReference);
-         if (eziResponse.getError() == 0) {// any errors will be a non zero value
+        if (eziResponse.getError() == 0) {// any errors will be a non zero value
             result = eziResponse.getData().getValue();
             if (result != null) {
                 logger.log(Level.INFO, "Payment Bean - Get Customer Scheduled Payments Response Recieved from ezidebit for Customer  - {0}, Number of Payments : {1} ", new Object[]{cust.getUsername(), result.getScheduledPayment().size()});
