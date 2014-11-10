@@ -92,6 +92,10 @@
                         >
                         <f:facet name="header">
                             <p:outputPanel>
+                                <p:outputPanel>
+                                    <h:outputText  rendered="#{not empty ezidebit.reportPaymentsListFilteredItems}" value="#{ezidebit.reportPaymentsListFilteredItems.size} Records Found"/>
+                                    <h:outputText  rendered="#{empty ezidebit.reportPaymentsListFilteredItems}" value="#{ezidebit.reportPaymentsList.rowCount} Records Found"/>
+                                </p:outputPanel>
                                 <h:outputText value="Search all fields:" />
                                 <h:inputText id="globalFilter" onkeyup="paymentsControllerTable.filter()" />
 

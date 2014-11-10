@@ -89,6 +89,7 @@ public class CustomersController implements Serializable {
     private Customers loggedInUser;
     private boolean impersonating = false;
     private boolean customerTabsEnabled = false;
+    private boolean showNonUsers = false;
     private static final Logger logger = Logger.getLogger(CustomersController.class.getName());
 
     public CustomersController() {
@@ -241,7 +242,7 @@ public class CustomersController implements Serializable {
                 @Override
                 public PfSelectableDataModel createPageDataModel() {
 
-                    return new PfSelectableDataModel<>(ejbFacade.findFilteredCustomers(true, selectedCustomerStates,true));
+                    return new PfSelectableDataModel<>(ejbFacade.findFilteredCustomers(true, selectedCustomerStates,showNonUsers,true));
 
                 }
 
@@ -750,7 +751,7 @@ public class CustomersController implements Serializable {
      }*/
     public PfSelectableDataModel<Customers> getItems() {
         if (items == null) {
-            items = new PfSelectableDataModel<>(ejbFacade.findFilteredCustomers(true, selectedCustomerStates,true));
+            items = new PfSelectableDataModel<>(ejbFacade.findFilteredCustomers(true, selectedCustomerStates,showNonUsers,true));
             // items = getPagination().createPageDataModel();
         }
         return items;
@@ -1186,6 +1187,21 @@ public class CustomersController implements Serializable {
      */
     public void setSelectedCustomerStates(CustomerState[] selectedCustomerStates) {
         this.selectedCustomerStates = selectedCustomerStates;
+    }
+
+    /**
+     * @return the showNonUsers
+     */
+    public boolean isShowNonUsers() {
+        return showNonUsers;
+    }
+
+    /**
+     * @param showNonUsers the showNonUsers to set
+     */
+    public void setShowNonUsers(boolean showNonUsers) {
+        this.showNonUsers = showNonUsers;
+        recreateModel();
     }
 
     @FacesConverter(forClass = Customers.class)
