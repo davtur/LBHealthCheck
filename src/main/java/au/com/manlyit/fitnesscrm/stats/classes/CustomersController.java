@@ -89,6 +89,7 @@ public class CustomersController implements Serializable {
     private Customers loggedInUser;
     private boolean impersonating = false;
     private boolean customerTabsEnabled = false;
+    private boolean refreshFromDB = false;
     private boolean showNonUsers = false;
     private static final Logger logger = Logger.getLogger(CustomersController.class.getName());
 
@@ -751,7 +752,9 @@ public class CustomersController implements Serializable {
      }*/
     public PfSelectableDataModel<Customers> getItems() {
         if (items == null) {
-            items = new PfSelectableDataModel<>(ejbFacade.findFilteredCustomers(true, selectedCustomerStates,showNonUsers,true));
+            
+            items = new PfSelectableDataModel<>(ejbFacade.findFilteredCustomers(true, selectedCustomerStates,showNonUsers, isRefreshFromDB()));
+            setRefreshFromDB(false);
             // items = getPagination().createPageDataModel();
         }
         return items;
@@ -1202,6 +1205,20 @@ public class CustomersController implements Serializable {
     public void setShowNonUsers(boolean showNonUsers) {
         this.showNonUsers = showNonUsers;
         recreateModel();
+    }
+
+    /**
+     * @return the refreshFromDB
+     */
+    public boolean isRefreshFromDB() {
+        return refreshFromDB;
+    }
+
+    /**
+     * @param refreshFromDB the refreshFromDB to set
+     */
+    public void setRefreshFromDB(boolean refreshFromDB) {
+        this.refreshFromDB = refreshFromDB;
     }
 
     @FacesConverter(forClass = Customers.class)

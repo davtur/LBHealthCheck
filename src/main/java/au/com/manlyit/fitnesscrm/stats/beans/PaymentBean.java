@@ -276,8 +276,6 @@ public class PaymentBean implements Serializable {
         //  If you provide values for DebitDate and PaymentAmountInCents and there is more
         //  than one payment for PaymentAmountInCents scheduled on DebitDate, then only
         //  one of the payments will be deleted.
-        
-        
         boolean result = false;
         if (debitDate == null || cust == null || paymentAmountInCents < 0) {
             logger.log(Level.WARNING, "deletePayment NULL parameter of Amount < 0. cust {0}, date {1}, Amount {2}", new Object[]{cust, debitDate, paymentAmountInCents});
@@ -289,14 +287,11 @@ public class PaymentBean implements Serializable {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         String debitDateString = sdf.format(debitDate);
         String ourSystemCustomerReference = cust.getId().toString();
-
-        if ((paymentReference != null && paymentReference.trim().isEmpty() == false) && paymentAmountInCents.compareTo(new Long(0)) > 0) {
-            paymentAmountInCents = new Long(0);
-            logger.log(Level.WARNING, "deletePayment paymentReference is not NULL and paymentAmount is also set.It should be 0 if using payment reference. Setting Amount to zero and using paymentReference to identify the payment");
-        }
+        
         if (paymentReference == null) {
             paymentReference = "";
         }
+        paymentReference = paymentReference.trim();
         if (paymentReference.length() > 50) {
             paymentReference = paymentReference.substring(0, 50);
             logger.log(Level.WARNING, "deletePayment paymentReference is greater than the allowed 50 characters. Truncating! to 50 chars");
@@ -306,8 +301,13 @@ public class PaymentBean implements Serializable {
             logger.log(Level.WARNING, "deletePayment loggedInUser is greater than the allowed 50 characters. Truncating! to 50 chars");
         }
         EziResponseOfstring eziResponse = null;
-
-        eziResponse = getWs().deletePayment(digitalKey, eziDebitCustomerId, ourSystemCustomerReference, paymentReference, debitDateString, paymentAmountInCents, loggedInUser);
+        if (paymentReference.isEmpty()) {
+            eziResponse = getWs().deletePayment(digitalKey, eziDebitCustomerId, ourSystemCustomerReference, "", debitDateString, paymentAmountInCents, loggedInUser);
+            logger.log(Level.INFO, "deletePayment - the paymentReference is  NULL so date and amount will be used to identify the payment.If there are two then only one will be deleted.");
+        } else {
+            eziResponse = getWs().deletePayment(digitalKey, eziDebitCustomerId, ourSystemCustomerReference, paymentReference, debitDateString, new Long(0), loggedInUser);
+            logger.log(Level.INFO, "deletePayment - the paymentReference is not NULL and is overriding date and amount to identify the payment");
+        }
 
         logger.log(Level.INFO, "deletePayment Response: Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
         if (eziResponse.getError() == 0) {// any errors will be a non zero value

@@ -1812,6 +1812,10 @@ public class EziDebitPaymentGateway implements Serializable {
             }
         }
 
+        refreshFromDB = true;
+        getCustomersController().setRefreshFromDB(true);
+        getCustomersController().recreateModel();
+
         logger.log(Level.INFO, "processPaymentReport completed");
     }
 
@@ -1831,6 +1835,10 @@ public class EziDebitPaymentGateway implements Serializable {
                 setPaymentsDBListFilteredItems(null);
             }
         }
+
+        refreshFromDB = true;
+        getCustomersController().setRefreshFromDB(true);
+        getCustomersController().recreateModel();
 
         logger.log(Level.INFO, "processSettlementReport completed");
     }
@@ -2154,6 +2162,7 @@ public class EziDebitPaymentGateway implements Serializable {
         }
         RequestContext.getCurrentInstance().update("customerslistForm1");
         refreshFromDB = true;
+        getCustomersController().setRefreshFromDB(true);
         getCustomersController().recreateModel();
         logger.log(Level.INFO, "processGetCustomerDetails completed");
     }
@@ -2407,7 +2416,7 @@ public class EziDebitPaymentGateway implements Serializable {
         String loggedInUser = FacesContext.getCurrentInstance().getExternalContext().getRemoteUser();
         Long amount = paymentAmountInCents * (long) 100;
         if (loggedInUser != null) {
-             List<Payments> crmPaymentList = paymentsFacade.findScheduledPaymentsByCustomer(selectedCustomer);
+            List<Payments> crmPaymentList = paymentsFacade.findScheduledPaymentsByCustomer(selectedCustomer);
             for (Payments p : crmPaymentList) {
                 if (!(paymentKeepManualPayments && p.getManuallyAddedPayment())) {
                     paymentsFacade.remove(p);

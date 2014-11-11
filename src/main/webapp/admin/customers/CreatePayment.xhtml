@@ -12,7 +12,7 @@
             <h:form id="createPayment">    
                 <p:panelGrid id="addPaymentGrid1" columns="4">
                     <p:outputLabel value="#{configMapController.getKey('AddPaymentLabel_debitdate')}" for="debitDate" />
-                    <p:calendar id="debitDate" pattern="MM/dd/yyyy" value="#{ezidebit.paymentDebitDate}" title="#{configMapController.getKey('AddPaymentTitle_debitdate')}" required="true" requiredMessage="#{configMapController.getKey('AddPaymentRequiredMessage_debitdate')}" >
+                    <p:calendar id="debitDate" pattern="dd MMM yyyy" value="#{ezidebit.paymentDebitDate}" title="#{configMapController.getKey('AddPaymentTitle_debitdate')}" required="true" requiredMessage="#{configMapController.getKey('AddPaymentRequiredMessage_debitdate')}" >
                         <p:ajax />
                     </p:calendar>
                     <p:outputLabel value="#{configMapController.getKey('AddPaymentLabel_paymentAmount')}" for="payAmount" />

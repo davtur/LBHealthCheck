@@ -109,8 +109,8 @@
                                     <h:outputText rendered="#{empty item.paymentParameters.lastSuccessfulScheduledPayment}" value="---"/>
                                 </p:column>
 
-                                <p:column sortBy="#{item.paymentParameters.totalPaymentsSuccessfulAmount}" filterBy="#{item.paymentParameters.totalPaymentsSuccessfulAmount}" headerText="#{configMapController.getKey('ListCustomersTitle_totalPaymentsSuccessfulAmount')}"   >
-                                    <h:outputText value="#{item.paymentParameters.totalPaymentsSuccessfulAmount}">
+                                <p:column sortBy="#{item.paymentParameters.lastSuccessfulScheduledPayment.paymentAmount}" filterBy="#{item.paymentParameters.lastSuccessfulScheduledPayment.paymentAmount}" headerText="#{configMapController.getKey('ListCustomersTitle_totalPaymentsSuccessfulAmount')}"   >
+                                    <h:outputText rendered="#{not empty item.paymentParameters.lastSuccessfulScheduledPayment}" value="#{item.paymentParameters.lastSuccessfulScheduledPayment.paymentAmount}">
                                         <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
                                     </h:outputText>
                                 </p:column>
@@ -260,8 +260,6 @@
                             <p:commandButton id="eddrButton" rendered="#{ezidebit.showAddToPaymentGatewayButton}"    oncomplete="PF('createEddrLinkDialogueWidget').show();" update=":growl :tv:paymentsForm "   value="#{configMapController.getKey('WebDDRScheduleSetupButton')}" />
                             <p:commandButton rendered="#{not empty ezidebit.eziDebitEDDRFormUrl and ezidebit.showAddToPaymentGatewayButton}" value="#{configMapController.getKey('sendCustomerOnBoardEmailButton')}"  action="#{customersController.sendCustomerOnboardEmail}" update=":growl "/>
 
-                            <p:commandButton id="showAddPaymentButton" rendered="#{ezidebit.waitingForPaymentDetails == false and ezidebit.customerCancelledInPaymentGateway == false and ezidebit.customerExistsInPaymentGateway == true}" oncomplete="PF('createPaymentDialogueWidget').show();"    value="#{configMapController.getKey('AddPaymentButtonLink')}"  update=":growl " /> 
-                            <p:commandButton id="showAddPaymentScheduleButton" rendered="#{ezidebit.waitingForPaymentDetails == false and ezidebit.customerCancelledInPaymentGateway == false and ezidebit.customerExistsInPaymentGateway == true}" oncomplete="PF('createPaymentScheduleDialogueWidget').show();"    value="#{configMapController.getKey('AddPaymentScheduleButtonLink')}" update=":growl "  /> 
                             <p:commandButton id="editPaymentMethodButton" rendered="#{ezidebit.customerExistsInPaymentGateway == true and ezidebit.customerDetailsHaveBeenRetrieved == true and ezidebit.customerCancelledInPaymentGateway ==false}" onclick="changeiFrameCss" oncomplete="PF('editPaymentMethodDialogueWidget').show();"    value="#{configMapController.getKey('editPaymentMethodButtonLink')}" update=":growl :iFrameForm"  /> 
 
                             <h:outputText rendered="#{ezidebit.waitingForPaymentDetails}" value="WAITING FOR BANK DETAILS - "/>
@@ -294,6 +292,9 @@
                                                 </h:outputText>
                                             </p:outputPanel>-->
                                         <h:outputText value="Payments" />
+                                        <p:commandButton id="showAddPaymentButton" rendered="#{ezidebit.waitingForPaymentDetails == false and ezidebit.customerCancelledInPaymentGateway == false and ezidebit.customerExistsInPaymentGateway == true}" oncomplete="PF('createPaymentDialogueWidget').show();"    value="#{configMapController.getKey('AddPaymentButtonLink')}"  update=":growl " /> 
+                                        <p:commandButton id="showAddPaymentScheduleButton" rendered="#{ezidebit.waitingForPaymentDetails == false and ezidebit.customerCancelledInPaymentGateway == false and ezidebit.customerExistsInPaymentGateway == true}" oncomplete="PF('createPaymentScheduleDialogueWidget').show();"    value="#{configMapController.getKey('AddPaymentScheduleButtonLink')}" update=":growl "  /> 
+
                                         <p:commandButton  process=":tv:paymentsForm:paymentsTable2" rendered="#{fitnessTestChartsController.isUserInRole('ADMIN')}" id="deleteButton" icon="ui-icon-trash"  value="#{configMapController.getKey('Delete')}" actionListener="#{ezidebit.deleteScheduledPayment}" update=":growl " disabled="#{empty fitnessTestChartsController.selected}"/>
 
                                     </p:outputPanel>
