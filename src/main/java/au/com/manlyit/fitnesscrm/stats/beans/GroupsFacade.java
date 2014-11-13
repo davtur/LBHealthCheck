@@ -30,6 +30,7 @@ public class GroupsFacade extends AbstractFacade<Groups> {
     private EntityManager em;
     private static final Logger logger = Logger.getLogger(GroupsFacade.class.getName());
 
+    @Override
     protected EntityManager getEntityManager() {
         return em;
     }
@@ -58,5 +59,31 @@ public class GroupsFacade extends AbstractFacade<Groups> {
             logger.log(Level.SEVERE, "isCustomerInGroup error:{0} {1} ", new Object[]{cust.getUsername(), group, e.getMessage()});
         }
         return false;
+     }
+     public Groups getCustomerGroup(Customers cust, String group) {
+        Groups cm = null;
+        try {
+            CriteriaBuilder cb = em.getCriteriaBuilder();
+            CriteriaQuery<Groups> cq = cb.createQuery(Groups.class);
+            Root<Groups> rt = cq.from(Groups.class);
+            Expression<String> groupname = rt.get("groupname");
+            Expression<Customers> customer = rt.get("username");
+            Predicate condition1 = cb.equal(cb.trim(cb.upper(groupname)), group.toUpperCase().trim());
+            Predicate condition2 = cb.equal(customer, cust);
+            cq.where(cb.and(condition1, condition2));
+            Query q = em.createQuery(cq);
+            
+            List retList = q.getResultList();
+            int k = retList.size();
+            if(k > 0){
+                cm = (Groups)retList.get(0);
+            }
+            if(k > 1){
+              logger.log(Level.SEVERE, "getCustomerGroup. {2} duplicates returned. User:{0}, Group:{1} ", new Object[]{cust.getUsername(), group,k});  
+            }
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "isCustomerInGroup error:{0} {1} ", new Object[]{cust.getUsername(), group, e.getMessage()});
+        }
+        return cm;
      }
 }

@@ -58,10 +58,10 @@
                     <p:commandButton id="createButtonDialogue"  onclick="PF('createSessionDialogueWidget').show()" type="button" value="#{configMapController.getKey('ListSessionHistoryCreateLink')}"/>
 
                 </h:panelGroup>
-                <h:outputText escape="false" value="#{configMapController.getKey('ListSessionHistoryEmpty')}" rendered="#{empty sessionHistoryController.items}"/>
-                <h:panelGroup rendered="#{not empty sessionHistoryController.items}">
+                <h:outputText escape="false" value="#{configMapController.getKey('ListSessionHistoryEmpty')}" rendered="#{empty sessionHistoryController.customerOrTrainerItems}"/>
+                <h:panelGroup rendered="#{not empty sessionHistoryController.customerOrTrainerItems}">
                     <p:dataTable id="sessionsDataTable" 
-                                 value="#{sessionHistoryController.items}" 
+                                 value="#{sessionHistoryController.customerOrTrainerItems}" 
                                  var="item" 
                                  widgetVar="sessionsTable"  
                                  scrollable="true"
@@ -71,16 +71,16 @@
                             <p:outputPanel>
                                 <p:outputPanel>
                                     <h:outputText  rendered="#{not empty sessionHistoryController.filteredItems}" value="#{sessionHistoryController.filteredItems.size} Records Found"/>
-                                    <h:outputText  rendered="#{empty sessionHistoryController.filteredItems}" value="#{sessionHistoryController.customerItems.rowCount} Records Found"/>
+                                    <h:outputText  rendered="#{empty sessionHistoryController.filteredItems}" value="#{sessionHistoryController.customerOrTrainerItems.rowCount} Records Found"/>
                                 </p:outputPanel>
                                 <h:outputText value="Search all fields:" />
                                 <p:inputText id="globalFilter" onkeyup="PF('sessionsTable').filter()" />
-                                <p:commandButton value="Export as PDF" ajax="false" rendered="#{not empty sessionHistoryController.items}">
-                                    <p:dataExporter type="pdf" target="sessionsDataTable" fileName="trainer-session-history" preProcessor="#{sessionHistoryController.preProcessPDF}"/>
+                                <p:commandButton value="Export as PDF" ajax="false" rendered="#{not empty sessionHistoryController.customerOrTrainerItems}">
+                                    <p:dataExporter type="pdf" target="sessionsDataTable" fileName="#{sessionHistoryController.exportFileName}" preProcessor="#{sessionHistoryController.preProcessPDF}"/>
                                 </p:commandButton>
                                 <p:spacer/>
-                                <p:commandButton value="Export as Excel" ajax="false" rendered="#{not empty sessionHistoryController.items}">
-                                    <p:dataExporter type="xls" target="sessionsDataTable" fileName="trainer-session-history" postProcessor="#{sessionHistoryController.postProcessXLS}"/>
+                                <p:commandButton value="Export as Excel" ajax="false" rendered="#{not empty sessionHistoryController.customerOrTrainerItems}">
+                                    <p:dataExporter type="xls" target="sessionsDataTable" fileName="#{sessionHistoryController.exportFileName}" postProcessor="#{sessionHistoryController.postProcessXLS}"/>
                                 </p:commandButton>
                             </p:outputPanel>
                         </f:facet>

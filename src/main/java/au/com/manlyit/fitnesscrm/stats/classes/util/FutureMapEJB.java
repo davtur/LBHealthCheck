@@ -646,7 +646,7 @@ public class FutureMapEJB implements Serializable {
         logger.log(Level.INFO, "Future Map processGetPayments completed");
     }
   @Asynchronous
-    private void processGetScheduledPayments(Future ft) {
+    private void processGetScheduledPayments2(Future ft) {
         // Update the payments table with any new information retrived by the getPayments exzidebit web service.
         // Only for one customer.
         ArrayOfScheduledPayment result = null;
@@ -722,7 +722,7 @@ public class FutureMapEJB implements Serializable {
     }
 
     @Asynchronous
-    private void processGetScheduledPayments2(Future ft) {
+    private void processGetScheduledPayments(Future ft) {
         ArrayOfScheduledPayment result = null;
         boolean abort = false;
         int scheduledPayments;

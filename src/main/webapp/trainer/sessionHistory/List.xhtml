@@ -82,12 +82,12 @@
                                 </p:outputPanel>
                                 <h:outputText value=" Search all fields:" />
                                 <p:inputText id="globalFilter" onkeyup="PF('sessionsTable').filter()" />
-                                <p:commandButton value="Export as PDF" ajax="false" rendered="#{not empty sessionHistoryController.filteredItems}">
-                                    <p:dataExporter type="pdf" target="sessionsDataTable" fileName="trainer-session-history" preProcessor="#{sessionHistoryController.preProcessPDF}"/>
+                                <p:commandButton value="Export as PDF" ajax="false" rendered="#{not empty sessionHistoryController.customerItems}">
+                                    <p:dataExporter type="pdf" target="sessionsDataTable" fileName="#{sessionHistoryController.exportFileName}" preProcessor="#{sessionHistoryController.preProcessPDF}"/>
                                 </p:commandButton>
                                 <p:spacer/>
-                                <p:commandButton value="Export as Excel" ajax="false" rendered="#{not empty sessionHistoryController.filteredItems}">
-                                    <p:dataExporter type="xls" target="sessionsDataTable" fileName="trainer-session-history" postProcessor="#{sessionHistoryController.postProcessXLS}"/>
+                                <p:commandButton value="Export as Excel" ajax="false" rendered="#{not empty sessionHistoryController.customerItems}">
+                                    <p:dataExporter type="xls" target="sessionsDataTable" fileName="#{sessionHistoryController.exportFileName}" postProcessor="#{sessionHistoryController.postProcessXLS}"/>
                                 </p:commandButton>
                               
                             </p:outputPanel>

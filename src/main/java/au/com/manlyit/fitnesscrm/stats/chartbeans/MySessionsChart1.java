@@ -13,7 +13,6 @@ import javax.inject.Inject;
 import javax.faces.context.FacesContext;
 import org.primefaces.model.chart.ChartSeries;
 
-
 /**
  *
  * @author david
@@ -38,7 +37,6 @@ import org.primefaces.model.chart.Axis;
 import org.primefaces.model.chart.AxisType;
 import org.primefaces.model.chart.BarChartModel;
 import org.primefaces.model.chart.BarChartSeries;
-
 
 @Named("mySessionsChart1")
 @SessionScoped
@@ -76,6 +74,8 @@ public class MySessionsChart1 implements Serializable {
     private au.com.manlyit.fitnesscrm.stats.beans.CustomersFacade ejbCustomerFacade;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.SessionHistoryFacade ejbSessionHistoryFacade;
+    @Inject
+    private au.com.manlyit.fitnesscrm.stats.beans.GroupsFacade ejbGroupsFacade;
 
     //@PostConstruct
     public void createChart() {
@@ -267,13 +267,13 @@ public class MySessionsChart1 implements Serializable {
         ccModel.setLegendPosition("ne");
         ccModel.setStacked(true);
         ccModel.setExtender("chartExtender");
-        
+
         Axis xAxis = ccModel.getAxis(AxisType.X);
         xAxis.setLabel(getXaxisLabel());
         xAxis.setTickAngle(65);
-       
+
        // Axis yAxis = ccModel.getAxis(AxisType.Y);
-       // yAxis.setLabel(getY);
+        // yAxis.setLabel(getY);
         return ccModel;
     }
 
@@ -307,7 +307,7 @@ public class MySessionsChart1 implements Serializable {
             }
 
         }
-      // if(model2.getSeries().isEmpty()){
+        // if(model2.getSeries().isEmpty()){
         //     model2 = null;
         // }
 
@@ -316,7 +316,8 @@ public class MySessionsChart1 implements Serializable {
 
     public BarChartModel getCustomChartModel() {
         if (customModel == null) {
-            boolean isTrainer = FacesContext.getCurrentInstance().getExternalContext().isUserInRole("TRAINER");
+            //boolean isTrainer = FacesContext.getCurrentInstance().getExternalContext().isUserInRole("TRAINER");
+            boolean isTrainer = ejbGroupsFacade.isCustomerInGroup(getSelectedCustomer(), "TRAINER");
             customModel = createSessionsChart(isTrainer, getSelectedCustomer());
         }
         return customModel;
