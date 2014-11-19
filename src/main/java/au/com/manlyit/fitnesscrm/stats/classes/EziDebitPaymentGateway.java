@@ -2275,17 +2275,21 @@ public class EziDebitPaymentGateway implements Serializable {
         setEditPaymentMethodEnabled(true);
     }
 
-    public void addSinglePayment(ActionEvent actionEvent) {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddhhmmss");
-        String paymentReference = selectedCustomer.getId().toString() + "-" + sdf.format(new Date());
-        String loggedInUser = FacesContext.getCurrentInstance().getExternalContext().getRemoteUser();
-        Long amount = paymentAmountInCents * (long) 100;
-        if (loggedInUser != null) {
-            startAsynchJob("AddPayment", paymentBean.addPayment(selectedCustomer, paymentDebitDate, amount, paymentReference, loggedInUser, getDigitalKey()));
+    private void addPayment(Customers cust, Date debitDate, long amountInCents, String ref, Customers adminUser) {
+
+        if (adminUser != null) {
+            startAsynchJob("AddPayment", paymentBean.addPayment(cust, debitDate, amountInCents, ref, adminUser.getUsername(), getDigitalKey()));
         } else {
             logger.log(Level.WARNING, "Logged in user is null. Add Single Payment aborted.");
         }
 
+    }
+
+    public void addSinglePayment(ActionEvent actionEvent) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddhhmmss");
+        String paymentReference = selectedCustomer.getId().toString() + "-" + sdf.format(new Date());
+        Long amount = paymentAmountInCents * (long) 100;
+        addPayment(selectedCustomer, paymentDebitDate, amount, paymentReference, getLoggedInUser());
     }
 
     private void startAsynchJob(String key, Future future) {
@@ -2298,7 +2302,7 @@ public class EziDebitPaymentGateway implements Serializable {
     public void createEddrLink(ActionEvent actionEvent) {
         Customers cust = getSelectedCustomer();
         if (cust == null || cust.getId() == null) {
-            logger.log(Level.WARNING, "Create EDDR Link cannot be completed as teh selected customer is null.");
+            logger.log(Level.WARNING, "Create EDDR Link cannot be completed as the selected customer is null.");
             return;
         }
         NumberFormat nf = NumberFormat.getNumberInstance();
