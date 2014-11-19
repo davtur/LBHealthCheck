@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" >
+
+    <ui:composition >
+        <!--<p:log />--> 
+        <p:confirmDialog id="clearScheduleDialogue" message="#{configMapController.getKey('ClearScheduleDialogueTitle')}"  closable="false"
+                         header="#{configMapController.getKey('ClearScheduleTitle')}" severity="info" widgetVar="clearScheduleDialogueWidget"> 
+            <h:form id="clearScheduleForm">    
+                <p:panel>
+                    <p:outputLabel value="#{configMapController.getKey('ClearScheduleLabel_paymentKeepManualPayments')}" for="paymentKeepManualPayments2" />
+                    <p:selectBooleanCheckbox id="paymentKeepManualPayments2" value="#{ezidebit.paymentKeepManualPayments}">  
+                        <p:ajax update="clearScheduleForm" />  
+                    </p:selectBooleanCheckbox>  
+
+                </p:panel>
+
+                <p:panel>
+                    <p:commandButton id="clearSchedule" oncomplete="PF('clearScheduleDialogueWidget').hide();"  actionListener="#{ezidebit.clearSchedule}" value="#{configMapController.getKey('ClearScheduleSaveLink')}" update=" :growl "/>                
+                    <p:commandButton id="clearScheduledialogueDiscard" onclick="PF('ClearScheduleDialogueWidget').hide()"  value="#{configMapController.getKey('ClearScheduleDiscardLink')}" update=":growl"/>                
+
+                </p:panel>
+            </h:form>
+        </p:confirmDialog>
+
+
+    </ui:composition>
+
+</html>

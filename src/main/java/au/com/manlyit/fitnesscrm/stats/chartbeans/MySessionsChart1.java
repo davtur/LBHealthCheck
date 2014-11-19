@@ -5,6 +5,7 @@
 package au.com.manlyit.fitnesscrm.stats.chartbeans;
 
 import au.com.manlyit.fitnesscrm.stats.classes.CustomersController;
+import au.com.manlyit.fitnesscrm.stats.classes.SessionHistoryController;
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import au.com.manlyit.fitnesscrm.stats.db.SessionHistory;
@@ -331,7 +332,7 @@ public class MySessionsChart1 implements Serializable {
             FacesContext context = FacesContext.getCurrentInstance();
             CustomersController custController = (CustomersController) context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
 
-            selectedCustomer = custController.getLoggedInUser();
+            selectedCustomer = custController.getSelected();
         }
         return selectedCustomer;
     }
@@ -342,6 +343,10 @@ public class MySessionsChart1 implements Serializable {
     public void setSelectedCustomer(Customers selectedCustomer) {
         customModel = null;
         this.selectedCustomer = selectedCustomer;
+          FacesContext context = FacesContext.getCurrentInstance();
+            SessionHistoryController sessionHistoryController = (SessionHistoryController) context.getApplication().evaluateExpressionGet(context, "#{sessionHistoryController}", SessionHistoryController.class);
+            sessionHistoryController.recreateModel();
+            sessionHistoryController.setSessionHistoryExportFileName();
     }
 
     /**

@@ -2139,7 +2139,7 @@ public class EziDebitPaymentGateway implements Serializable {
                     setWaitingForPaymentDetails(false);
                     JsfUtil.pushErrorMessage(CHANNEL + sessionId, message, "");
                 }
-                if (eziStatusCode.toUpperCase().contains("CANCELLED")) {
+                if (eziStatusCode.trim().toUpperCase().contains("CANCELLED")) {
                     message = "The Customer is in a Cancelled status in the payment gateway";
                     logger.log(Level.INFO, message);
                     JsfUtil.pushSuccessMessage(CHANNEL + sessionId, "Important!", message);
@@ -2370,6 +2370,17 @@ public class EziDebitPaymentGateway implements Serializable {
         } else {
             logger.log(Level.WARNING, "Logged in user is null. Add Single Payment aborted.");
         }
+    }
+
+    public void clearSchedule(ActionEvent actionEvent) {
+
+        String loggedInUser = FacesContext.getCurrentInstance().getExternalContext().getRemoteUser();
+        if (loggedInUser != null) {
+            startAsynchJob("ClearSchedule", paymentBean.clearSchedule(selectedCustomer, paymentKeepManualPayments, loggedInUser, getDigitalKey()));
+        } else {
+            logger.log(Level.WARNING, "Logged in user is null. clearSchedule aborted.");
+        }
+
     }
 
     public void deleteScheduledPayment(ActionEvent actionEvent) {

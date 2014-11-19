@@ -16,24 +16,24 @@
                    <!-- <p:outputLabel value="#{configMapController.getKey('SelectCustomerForSessionHistory_Label')}" for="sessionstart" />-->
                     <p:selectOneMenu id="custForChart"   value="#{mySessionsChart1.selectedCustomer}" filter="true" converter="#{custConverter}"  label="#{configMapController.getKey('SelectCustomerForSessionHistory_Title')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionHistoryRequiredMessage_trainer')}">
                         <f:selectItems value="#{customersController.customersAvailableSelectOneObject}"   var="cust" itemLabel="#{cust.firstname} #{cust.lastname}" itemValue="#{cust}"/>
-                        <p:ajax   update="customChart sessionsDataTable" />
+                        <p:ajax   update=":listSessionHistoryForm1" />
                     </p:selectOneMenu>
 
 
                     <p:outputLabel value="#{configMapController.getKey('SelectStartDateForSessionHistory_Label')}" for="sessionstart" />
                     <p:calendar id="sessionstart" value="#{mySessionsChart1.startDate}" pattern="dd MMMM yyyy"
                                 title="#{configMapController.getKey('SelectStartDateForSessionHistory_Title')}"    >
-                        <p:ajax event="dateSelect"  update="customChart sessionsDataTable"  />
+                        <p:ajax event="dateSelect"  update=":listSessionHistoryForm1"  />
                     </p:calendar> 
                     <p:outputLabel value="#{configMapController.getKey('SelectEndDateForSessionHistory_Label')}" for="sessionend" />
                     <p:calendar id="sessionend" value="#{mySessionsChart1.endDate}"  pattern="dd MMMM yyyy"
                                 title="#{configMapController.getKey('SelectEndDateForSessionHistory_Title')}"    >
-                        <p:ajax event="dateSelect"  update="customChart sessionsDataTable"  />
+                        <p:ajax event="dateSelect"  update=":listSessionHistoryForm1"  />
                     </p:calendar> 
                    <!-- <p:outputLabel value="#{configMapController.getKey('SelectDateIntervalForSessionHistory_Label')}" for="chartInterval" />-->
                     <p:selectOneMenu id="chartInterval"   value="#{mySessionsChart1.dateInterval}"   label="#{configMapController.getKey('CreateSessionHistoryTitle_trainer')}" >
                         <f:selectItems value="#{mySessionsChart1.dateIntervalItems}" />                         
-                        <p:ajax   update="customChart sessionsDataTable" />
+                        <p:ajax   update=":listSessionHistoryForm1" />
                     </p:selectOneMenu>
                 </p:panelGrid>
 
@@ -60,27 +60,28 @@
                 </h:panelGroup>
                 <h:outputText escape="false" value="#{configMapController.getKey('ListSessionHistoryEmpty')}" rendered="#{empty sessionHistoryController.customerOrTrainerItems}"/>
                 <h:panelGroup rendered="#{not empty sessionHistoryController.customerOrTrainerItems}">
-                    <p:dataTable id="sessionsDataTable" 
+                    <p:dataTable id="sessionsHistoryDataTable" 
                                  value="#{sessionHistoryController.customerOrTrainerItems}" 
+                                 filteredValue="#{sessionHistoryController.customerOrTrainerfilteredItems}"
                                  var="item" 
-                                 widgetVar="sessionsTable"  
+                                 widgetVar="sessionsHistoryDataTableWidget"  
                                  scrollable="true"
                                  scrollHeight="400"
                                  >
                         <f:facet name="header">
                             <p:outputPanel>
                                 <p:outputPanel>
-                                    <h:outputText  rendered="#{not empty sessionHistoryController.filteredItems}" value="#{sessionHistoryController.filteredItems.size} Records Found"/>
-                                    <h:outputText  rendered="#{empty sessionHistoryController.filteredItems}" value="#{sessionHistoryController.customerOrTrainerItems.rowCount} Records Found"/>
+                                    <h:outputText  rendered="#{not empty sessionHistoryController.customerOrTrainerfilteredItems}" value="#{sessionHistoryController.customerOrTrainerfilteredItems.size} Records Found"/>
+                                    <h:outputText  rendered="#{empty sessionHistoryController.customerOrTrainerfilteredItems}" value="#{sessionHistoryController.customerOrTrainerItems.rowCount} Records Found"/>
                                 </p:outputPanel>
                                 <h:outputText value="Search all fields:" />
-                                <p:inputText id="globalFilter" onkeyup="PF('sessionsTable').filter()" />
+                                <p:inputText id="globalFilter" onkeyup="PF('sessionsHistoryDataTableWidget').filter()" />
                                 <p:commandButton value="Export as PDF" ajax="false" rendered="#{not empty sessionHistoryController.customerOrTrainerItems}">
-                                    <p:dataExporter type="pdf" target="sessionsDataTable" fileName="#{sessionHistoryController.exportFileName}" preProcessor="#{sessionHistoryController.preProcessPDF}"/>
+                                    <p:dataExporter type="pdf" target="sessionsHistoryDataTable" fileName="#{sessionHistoryController.exportFileName}" preProcessor="#{sessionHistoryController.preProcessPDF}"/>
                                 </p:commandButton>
                                 <p:spacer/>
                                 <p:commandButton value="Export as Excel" ajax="false" rendered="#{not empty sessionHistoryController.customerOrTrainerItems}">
-                                    <p:dataExporter type="xls" target="sessionsDataTable" fileName="#{sessionHistoryController.exportFileName}" postProcessor="#{sessionHistoryController.postProcessXLS}"/>
+                                    <p:dataExporter type="xls" target="sessionsHistoryDataTable" fileName="#{sessionHistoryController.exportFileName}" postProcessor="#{sessionHistoryController.postProcessXLS}"/>
                                 </p:commandButton>
                             </p:outputPanel>
                         </f:facet>
