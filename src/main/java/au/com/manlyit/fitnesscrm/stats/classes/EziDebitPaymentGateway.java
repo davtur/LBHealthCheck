@@ -2451,7 +2451,7 @@ public class EziDebitPaymentGateway implements Serializable {
         int calendarField = 0;
         int calendarAmount = 0;
         int currentDay = startCal.get(Calendar.DAY_OF_MONTH);
-
+        int dow = startCal.get(Calendar.DAY_OF_WEEK);
         switch (schedulePeriodType) {
             case 'W'://weekly
                 calendarField = Calendar.DAY_OF_YEAR;
@@ -2480,12 +2480,17 @@ public class EziDebitPaymentGateway implements Serializable {
                     startCal.add(Calendar.MONTH, 1);
                 }
                 startCal.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+
+                if (dow > dayOfWeek) {
+                    int d = dow - dayOfWeek;
+                    startCal.add(Calendar.DAY_OF_MONTH, d);
+                }
                 startCal.set(Calendar.DAY_OF_WEEK, dayOfWeek);
                 break;
             case 'N': //Weekday in month (e.g. Monday in the third week of every month)
                 calendarField = Calendar.MONTH;
                 calendarAmount = 1;
-                startCal.set(Calendar.DAY_OF_WEEK, dayOfWeek);
+
                 if (firstWeekOfMonth) {
                     startCal.set(Calendar.WEEK_OF_MONTH, 1);
                 }
@@ -2498,6 +2503,12 @@ public class EziDebitPaymentGateway implements Serializable {
                 if (fourthWeekOfMonth) {
                     startCal.set(Calendar.WEEK_OF_MONTH, 4);
                 }
+
+                if (dow > dayOfWeek) {
+                    int d = dow - dayOfWeek;
+                    startCal.add(Calendar.DAY_OF_MONTH, d);
+                }
+                startCal.set(Calendar.DAY_OF_WEEK, dayOfWeek);
                 break;
             case 'Q': // quarterly
                 calendarField = Calendar.MONTH;
@@ -2553,8 +2564,8 @@ public class EziDebitPaymentGateway implements Serializable {
 
             startCal.add(calendarField, calendarAmount);
             Date placeholder = startCal.getTime();
-            
-            if (schedulePeriodType == 'N' ) {
+
+            if (schedulePeriodType == 'N') {
                 //TODO fix this 
                 if (firstWeekOfMonth) {
                     startCal.set(Calendar.WEEK_OF_MONTH, 1);
@@ -2568,9 +2579,10 @@ public class EziDebitPaymentGateway implements Serializable {
                 if (fourthWeekOfMonth) {
                     startCal.set(Calendar.WEEK_OF_MONTH, 4);
                 }
-                int dow = startCal.get(Calendar.DAY_OF_WEEK);
-                if(dow > dayOfWeek){
-                   startCal.add(Calendar.DAY_OF_MONTH,7); 
+                int dow2 = startCal.get(Calendar.DAY_OF_WEEK);
+                if (dow2 > dayOfWeek) {
+                    int d = dow2 - dayOfWeek;
+                    startCal.add(Calendar.DAY_OF_MONTH, d);
                 }
                 startCal.set(Calendar.DAY_OF_WEEK, dayOfWeek);
             } else {
