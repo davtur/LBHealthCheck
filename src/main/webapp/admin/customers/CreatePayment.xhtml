@@ -21,7 +21,7 @@
                     </p:inputText>
                 </p:panelGrid>
                 <p:panel>
-                    <p:commandButton id="createPaymentdialogueSave"  oncomplete="PF('createPaymentDialogueWidget').hide();"  actionListener="#{ezidebit.addSinglePayment}" value="#{configMapController.getKey('AddPaymentSaveLink')}" update=":growl  "/>                
+                    <p:commandButton id="createPaymentdialogueSave"  oncomplete="PF('createPaymentDialogueWidget').hide();"  actionListener="#{ezidebit.addSinglePayment}" value="#{configMapController.getKey('AddPaymentSaveLink')}" update=":growl :tv:paymentsForm "/>                
                     <p:commandButton id="createPaymentdialogueDiscard" onclick="PF('createPaymentDialogueWidget').hide()"  value="#{configMapController.getKey('AddPaymentDiscardLink')}" update=":growl"/>                
                 </p:panel>     
             </h:form>

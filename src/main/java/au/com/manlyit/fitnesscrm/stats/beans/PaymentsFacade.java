@@ -5,6 +5,7 @@
  */
 package au.com.manlyit.fitnesscrm.stats.beans;
 
+import au.com.manlyit.fitnesscrm.stats.beans.util.PaymentStatus;
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import au.com.manlyit.fitnesscrm.stats.db.Payments;
@@ -70,7 +71,7 @@ public class PaymentsFacade extends AbstractFacade<Payments> {
         return retList;
     }
 
-    public List<Payments> findScheduledPaymentsByCustomer(Customers customer) {
+    public List<Payments> findPaymentsByCustomerAndStatus(Customers customer, String status) {
         List retList = null;
 
         try {
@@ -79,8 +80,8 @@ public class PaymentsFacade extends AbstractFacade<Payments> {
             Root<Payments> rt = cq.from(Payments.class);
             Expression<Date> dDate = rt.get("debitDate");
             Expression<Customers> cust = rt.get("customerName");
-            Expression<String> paymentID = rt.get("paymentID");
-            cq.where(cb.and(cb.equal(cust, customer), cb.isNull(paymentID)));
+            Expression<String> paymentStatus = rt.get("paymentStatus");
+            cq.where(cb.and(cb.equal(cust, customer), cb.equal(paymentStatus, status)));
             cq.orderBy(cb.asc(dDate));
             Query q = em.createQuery(cq);
             retList = q.getResultList();
@@ -99,8 +100,8 @@ public class PaymentsFacade extends AbstractFacade<Payments> {
             Root<Payments> rt = cq.from(Payments.class);
             Expression<Date> dDate = rt.get("debitDate");
             Expression<Customers> cust = rt.get("customerName");
-            Expression<String> paymentID = rt.get("paymentID");
-            cq.where(cb.and(cb.equal(cust, customer), cb.isNotNull(paymentID)));
+            Expression<String> paymentStatus = rt.get("paymentStatus");
+            cq.where(cb.and(cb.equal(cust, customer), cb.equal(paymentStatus, PaymentStatus.SUCESSFUL.value())));
             cq.orderBy(cb.desc(dDate));
 
             Query q = em.createQuery(cq);
@@ -122,8 +123,8 @@ public class PaymentsFacade extends AbstractFacade<Payments> {
             Root<Payments> rt = cq.from(Payments.class);
             Expression<Date> dDate = rt.get("debitDate");
             Expression<Customers> cust = rt.get("customerName");
-            Expression<String> paymentID = rt.get("paymentID");
-            cq.where(cb.and(cb.equal(cust, customer), cb.isNull(paymentID)));
+            Expression<String> paymentStatus = rt.get("paymentStatus");
+            cq.where(cb.and(cb.equal(cust, customer), cb.equal(paymentStatus, PaymentStatus.SCHEDULED.value())));
             cq.orderBy(cb.asc(dDate));
 
             Query q = em.createQuery(cq);
@@ -158,42 +159,123 @@ public class PaymentsFacade extends AbstractFacade<Payments> {
         }
         return cm;
     }
-     public Payments findScheduledPayment(BigDecimal paymentAmount,Date debitDate,String paymentReference,Boolean manuallyAddedPayment) {
+
+    public Payments findScheduledPayment(String paymentReference) {
         Payments cm = null;
+        int id;
+        try {
+            id = Integer.parseInt(paymentReference);
+        } catch (NumberFormatException numberFormatException) {
+            logger.log(Level.WARNING, "findScheduledPayment by reference. Reference is not a valid number :{0}", paymentReference);
+            return null;
+        }
         ArrayList<Predicate> predicatesList1 = new ArrayList<>();
         try {
             CriteriaBuilder cb = em.getCriteriaBuilder();
             CriteriaQuery<Payments> cq = cb.createQuery(Payments.class);
             Root<Payments> rt = cq.from(Payments.class);
+            boolean validReference = false;
+            if (paymentReference != null) {
+                validReference = !paymentReference.trim().isEmpty();
+            }
+            Expression<Integer> payRef = rt.get("id");
+            Expression<String> paymentStatus = rt.get("paymentStatus");
 
-            Expression<BigDecimal> payAmount = rt.get("paymentAmount");
-            Expression<Date> payDate = rt.get("debitDate");
-            Expression<String> payRef = rt.get("paymentReference");
-            Expression<Boolean> manualPay = rt.get("manuallyAddedPayment");
+            predicatesList1.add(cb.equal(payRef, id));
 
-            predicatesList1.add(cb.equal(payAmount, paymentAmount));
-            predicatesList1.add(cb.equal(payDate, debitDate));
-            predicatesList1.add(cb.equal(payRef, paymentReference));
-            predicatesList1.add(cb.equal(manualPay, manuallyAddedPayment));
+            predicatesList1.add(cb.equal(paymentStatus, PaymentStatus.SCHEDULED.value()));
 
             cq.where(predicatesList1.<Predicate>toArray(new Predicate[predicatesList1.size()]));
 
             Query q = em.createQuery(cq);
-            if (q.getResultList().size() > 0) {
+            if (q.getResultList().size() == 1) {
                 cm = (Payments) q.getSingleResult();
-            }else{
-                       logger.log(Level.INFO, "findScheduledPayment not found , Amount:{0},Date:{1},Ref:{2},Manual:{3}",new Object[]{paymentAmount.toString(),debitDate,paymentReference,manuallyAddedPayment});
-     
+            } else if (q.getResultList().size() > 1) {
+                cm = (Payments) q.getResultList().get(0);
+                logger.log(Level.WARNING, "findScheduledPayment Multiple payments found , Amount:{0},Date:{1},Ref:{2},Manual:{3}", new Object[]{paymentReference});
+
+            } else {
+                logger.log(Level.INFO, "findScheduledPayment not found , Amount:{0},Date:{1},Ref:{2},Manual:{3}", new Object[]{paymentReference});
+
             }
         } catch (Exception e) {
-            logger.log(Level.INFO, "findScheduledPayment not found , Amount:{0},Date:{1},Ref:{2},Manual:{3}, error:{4}",new Object[]{paymentAmount.toString(),debitDate,paymentReference,manuallyAddedPayment,e.getMessage()});
+            logger.log(Level.INFO, "findScheduledPayment not found , Amount:{0},Date:{1},Ref:{2},Manual:{3}, error:{4}", new Object[]{paymentReference, e.getMessage()});
         }
         return cm;
     }
 
+    public Payments findScheduledPayment(BigDecimal paymentAmount, Date debitDate, String paymentReference, Boolean manuallyAddedPayment) {
+        Payments cm = null;
+        ArrayList<Predicate> predicatesList1 = new ArrayList<>();
+        boolean validReference = false;
+        if (paymentReference != null) {
+            validReference = !paymentReference.trim().isEmpty();
+        }
+        int id = 0;
+        if (validReference) {
+            try {
+                id = Integer.parseInt(paymentReference);
+            } catch (NumberFormatException numberFormatException) {
+                logger.log(Level.WARNING, "findScheduledPayment by reference. Reference is not a valid number :{0}", paymentReference);
+                return null;
+            }
+        }
+        try {
+            CriteriaBuilder cb = em.getCriteriaBuilder();
+            CriteriaQuery<Payments> cq = cb.createQuery(Payments.class);
+            Root<Payments> rt = cq.from(Payments.class);
 
+            Expression<BigDecimal> payAmount = rt.get("paymentAmount");
+            Expression<Date> payDate = rt.get("debitDate");
+            Expression<Integer> payRef = rt.get("id");
+            Expression<Boolean> manualPay = rt.get("manuallyAddedPayment");
+            Expression<String> paymentStatus = rt.get("paymentStatus");
+            if (validReference) {
+                predicatesList1.add(cb.equal(payRef, id));
+            } else {
+
+                predicatesList1.add(cb.equal(payAmount, paymentAmount));
+                predicatesList1.add(cb.equal(payDate, debitDate));
+                predicatesList1.add(cb.equal(manualPay, manuallyAddedPayment));
+            }
+
+            predicatesList1.add(cb.equal(paymentStatus, PaymentStatus.SCHEDULED.value()));
+
+            cq.where(predicatesList1.<Predicate>toArray(new Predicate[predicatesList1.size()]));
+
+            Query q = em.createQuery(cq);
+            if (q.getResultList().size() == 1) {
+                cm = (Payments) q.getSingleResult();
+            } else if (q.getResultList().size() > 1) {
+                cm = (Payments) q.getResultList().get(0);
+                logger.log(Level.WARNING, "findScheduledPayment Multiple payments found , Amount:{0},Date:{1},Ref:{2},Manual:{3}", new Object[]{paymentAmount.toString(), debitDate, paymentReference, manuallyAddedPayment});
+
+            } else {
+                logger.log(Level.INFO, "findScheduledPayment not found , Amount:{0},Date:{1},Ref:{2},Manual:{3}", new Object[]{paymentAmount.toString(), debitDate, paymentReference, manuallyAddedPayment});
+
+            }
+        } catch (Exception e) {
+            logger.log(Level.INFO, "findScheduledPayment not found , Amount:{0},Date:{1},Ref:{2},Manual:{3}, error:{4}", new Object[]{paymentAmount.toString(), debitDate, paymentReference, manuallyAddedPayment, e.getMessage()});
+        }
+        return cm;
+    }
+ 
     public Payments findScheduledPayment(ScheduledPayment pay) {
         Payments cm = null;
+        boolean validReference = false;
+        if (pay.getPaymentReference().isNil() == false) {
+            validReference = !pay.getPaymentReference().getValue().trim().isEmpty();
+        }
+        int id = 0;
+        if (validReference) {
+            String ref = pay.getPaymentReference().getValue().trim();
+            try {
+                id = Integer.parseInt(ref);
+            } catch (NumberFormatException numberFormatException) {
+                logger.log(Level.WARNING, "findScheduledPayment by reference. Reference is not a valid number :{0}", ref);
+                return null;
+            }
+        }
         ArrayList<Predicate> predicatesList1 = new ArrayList<>();
         try {
             CriteriaBuilder cb = em.getCriteriaBuilder();
@@ -202,25 +284,34 @@ public class PaymentsFacade extends AbstractFacade<Payments> {
 
             Expression<BigDecimal> payAmount = rt.get("paymentAmount");
             Expression<Date> payDate = rt.get("debitDate");
-            Expression<String> payRef = rt.get("paymentReference");
+            Expression<Integer> payRef = rt.get("id");
             Expression<Boolean> manualPay = rt.get("manuallyAddedPayment");
+            Expression<String> paymentStatus = rt.get("paymentStatus");
+            if (validReference) {
+                predicatesList1.add(cb.equal(payRef, id));
+            } else {
+                predicatesList1.add(cb.equal(payAmount, new BigDecimal(pay.getPaymentAmount())));
+                predicatesList1.add(cb.equal(payDate, pay.getPaymentDate().toGregorianCalendar().getTime()));
+                predicatesList1.add(cb.equal(manualPay, pay.isManuallyAddedPayment()));
+            }
 
-            predicatesList1.add(cb.equal(payAmount, new BigDecimal(pay.getPaymentAmount())));
-            predicatesList1.add(cb.equal(payDate, pay.getPaymentDate().toGregorianCalendar().getTime()));
-            predicatesList1.add(cb.equal(payRef, pay.getPaymentReference().getValue()));
-            predicatesList1.add(cb.equal(manualPay, pay.isManuallyAddedPayment()));
-
+            predicatesList1.add(cb.equal(paymentStatus, PaymentStatus.SCHEDULED.value()));
             cq.where(predicatesList1.<Predicate>toArray(new Predicate[predicatesList1.size()]));
 
             Query q = em.createQuery(cq);
-            if (q.getResultList().size() > 0) {
+            if (q.getResultList().size() == 1) {
                 cm = (Payments) q.getSingleResult();
-            }else{
-                       logger.log(Level.INFO, "findScheduledPayment not found , Amount:{0},Date:{1},Ref:{2},Manual:{3}",new Object[]{pay.getPaymentAmount().toString(),pay.getPaymentDate().toGregorianCalendar().getTime(),pay.getPaymentReference().getValue(),pay.isManuallyAddedPayment().toString()});
-     
+            } else if (q.getResultList().size() > 1) {
+                cm = (Payments) q.getResultList().get(0);
+                logger.log(Level.WARNING, "findScheduledPayment Multiple payments found , Amount:{0},Date:{1},Ref:{2},Manual:{3}", new Object[]{pay.getPaymentAmount().toString(), pay.getPaymentDate().toGregorianCalendar().getTime(), pay.getPaymentReference().getValue(), pay.isManuallyAddedPayment().toString()});
+
+            } else {
+
+                logger.log(Level.INFO, "findScheduledPayment not found , Amount:{0},Date:{1},Ref:{2},Manual:{3}", new Object[]{pay.getPaymentAmount().toString(), pay.getPaymentDate().toGregorianCalendar().getTime(), pay.getPaymentReference().getValue(), pay.isManuallyAddedPayment().toString()});
+
             }
         } catch (Exception e) {
-            logger.log(Level.INFO, "findScheduledPayment not found , Amount:{0},Date:{1},Ref:{2},Manual:{3}, error:{4}",new Object[]{pay.getPaymentAmount().toString(),pay.getPaymentDate().toGregorianCalendar().getTime(),pay.getPaymentReference().getValue(),pay.isManuallyAddedPayment().toString(),e.getMessage()});
+            logger.log(Level.INFO, "findScheduledPayment not found , Amount:{0},Date:{1},Ref:{2},Manual:{3}, error:{4}", new Object[]{pay.getPaymentAmount().toString(), pay.getPaymentDate().toGregorianCalendar().getTime(), pay.getPaymentReference().getValue(), pay.isManuallyAddedPayment().toString(), e.getMessage()});
         }
         return cm;
     }
@@ -254,6 +345,7 @@ public class PaymentsFacade extends AbstractFacade<Payments> {
             }
             if (showPending) {
                 predicatesList2.add(cb.equal(status, "P"));
+                predicatesList2.add(cb.equal(status, "W"));
             }
             if (showFailed) {
                 predicatesList2.add(cb.equal(status, "F"));

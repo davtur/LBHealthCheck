@@ -276,8 +276,13 @@ public class PaymentBean implements Serializable {
         //  If you provide values for DebitDate and PaymentAmountInCents and there is more
         //  than one payment for PaymentAmountInCents scheduled on DebitDate, then only
         //  one of the payments will be deleted.
+        if(paymentReference == null){
+            paymentReference ="";
+        }
+        
+        
         boolean result = false;
-        if (debitDate == null || cust == null || paymentAmountInCents < 0) {
+        if ( paymentReference.isEmpty() &&  (debitDate == null || cust == null || paymentAmountInCents < 0)) {
             logger.log(Level.WARNING, "deletePayment NULL parameter of Amount < 0. cust {0}, date {1}, Amount {2}", new Object[]{cust, debitDate, paymentAmountInCents});
 
             return new AsyncResult<>(result);
@@ -287,10 +292,7 @@ public class PaymentBean implements Serializable {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         String debitDateString = sdf.format(debitDate);
         String ourSystemCustomerReference = cust.getId().toString();
-        
-        if (paymentReference == null) {
-            paymentReference = "";
-        }
+       
         paymentReference = paymentReference.trim();
         if (paymentReference.length() > 50) {
             paymentReference = paymentReference.substring(0, 50);
@@ -315,6 +317,68 @@ public class PaymentBean implements Serializable {
             if (eziResponse.getData().getValue().compareTo("S") == 0) {
                 result = true;
                 String auditDetails = "Debit Date:" + debitDateString + ", Amount (cents): " + paymentAmountInCents.toString() + ", Payment Ref:" + paymentReference;
+                String changedFrom = "Ref:" + paymentReference;
+                String changedTo = "Deleted";
+                auditLogFacade.audit(customersFacade.findCustomerByUsername(loggedInUser), cust, "deletePayment", auditDetails, changedFrom, changedTo);
+
+            } else {
+                logger.log(Level.WARNING, "deletePayment Response Data value should be S ( Successful ) : Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
+            }
+        } else {
+            logger.log(Level.WARNING, "deletePayment Response: Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
+
+        }
+
+        return new AsyncResult<>(result);
+    }
+@Asynchronous
+    public Future<Boolean> deletePaymentByRef(Customers cust,  String paymentReference, String loggedInUser, String digitalKey) {
+        	//  This method will delete a single payment from the Customer's payment schedule.
+        //  It is important to note the following when deleting a payment:
+
+        //  Only scheduled payments with a PaymentStatus of 'W' can be deleted;
+        //  A specified PaymentReference value will override the debit date and payment
+        //  amount when identifying the payment to be deleted;
+        //  Values for both DebitDate and PaymentAmountInCents must be provided in order
+        //  to identify a payment;
+        //  If you provide values for DebitDate and PaymentAmountInCents and there is more
+        //  than one payment for PaymentAmountInCents scheduled on DebitDate, then only
+        //  one of the payments will be deleted.
+        boolean result = false;
+        if ( cust == null ) {
+            logger.log(Level.WARNING, "deletePayment Customer NULL ");
+
+            return new AsyncResult<>(result);
+        }
+
+        String eziDebitCustomerId = ""; // use our reference instead. THis must be an empty string.
+        
+        String ourSystemCustomerReference = cust.getId().toString();
+        
+        if (paymentReference == null) {
+            paymentReference = "";
+        }
+        paymentReference = paymentReference.trim();
+        if (paymentReference.length() > 50) {
+            paymentReference = paymentReference.substring(0, 50);
+            logger.log(Level.WARNING, "deletePayment paymentReference is greater than the allowed 50 characters. Truncating! to 50 chars");
+        }
+        if (loggedInUser.length() > 50) {
+            loggedInUser = loggedInUser.substring(0, 50);
+            logger.log(Level.WARNING, "deletePayment loggedInUser is greater than the allowed 50 characters. Truncating! to 50 chars");
+        }
+        EziResponseOfstring eziResponse = null;
+       
+            eziResponse = getWs().deletePayment(digitalKey, eziDebitCustomerId, ourSystemCustomerReference, paymentReference, "", new Long(0), loggedInUser);
+            logger.log(Level.INFO, "deletePayment - the paymentReference is not NULL and is overriding date and amount to identify the payment");
+       
+
+        logger.log(Level.INFO, "deletePayment Response: Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
+        if (eziResponse.getError() == 0) {// any errors will be a non zero value
+
+            if (eziResponse.getData().getValue().compareTo("S") == 0) {
+                result = true;
+                String auditDetails = "Payment Ref:" + paymentReference;
                 String changedFrom = "Ref:" + paymentReference;
                 String changedTo = "Deleted";
                 auditLogFacade.audit(customersFacade.findCustomerByUsername(loggedInUser), cust, "deletePayment", auditDetails, changedFrom, changedTo);
@@ -807,10 +871,10 @@ public class PaymentBean implements Serializable {
     }
 
     @Asynchronous
-    public Future<Boolean> addPayment(Customers cust, Date debitDate, Long paymentAmountInCents, String paymentReference, String loggedInUser, String digitalKey) {
+    public Future<String> addPayment(Customers cust, Date debitDate, Long paymentAmountInCents, String paymentReference, String loggedInUser, String digitalKey) {
         // paymentReference Max 50 chars. It can be search with with a wildcard in other methods. Use invoice number or other payment identifier
         logger.log(Level.INFO, "running asychronous task addPayment Customer {0}, debitDate {1}, paymentAmountInCents {2}", new Object[]{cust, debitDate, paymentAmountInCents});
-        boolean result = false;
+        String result = paymentReference;
         String eziDebitCustomerId = ""; // use our reference instead. THis must be an empty string.
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         String debitDateString = sdf.format(debitDate);
@@ -829,19 +893,20 @@ public class PaymentBean implements Serializable {
             eziResponse = getWs().addPayment(digitalKey, eziDebitCustomerId, ourSystemCustomerReference, debitDateString, paymentAmountInCents, paymentReference, loggedInUser);
         } catch (Exception e) {
             logger.log(Level.WARNING, "addPayment Method Response: Exception - {0}", e);
-            return new AsyncResult<>(false);
+            return new AsyncResult<>("");
         }
         logger.log(Level.INFO, "addPayment Response: Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
         if (eziResponse.getError() == 0) {// any errors will be a non zero value
 
             if (eziResponse.getData().getValue().compareTo("S") == 0) {
-                result = true;
+                
                 String auditDetails = "Payment Added - Debit Date:" + debitDateString + ", Amount (cents): " + paymentAmountInCents.toString() + ", Payment Ref:" + paymentReference;
                 String changedFrom = "non-existent";
                 String changedTo = "Ref:" + paymentReference;
                 auditLogFacade.audit(customersFacade.findCustomerByUsername(loggedInUser), cust, "addPayment", auditDetails, changedFrom, changedTo);
 
             } else {
+                result = "";
                 logger.log(Level.WARNING, "addPayment Response Data value should be S ( Successful ) : Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
             }
         } else {

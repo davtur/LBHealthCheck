@@ -20,7 +20,7 @@
                 </p:panel>
 
                 <p:panel>
-                    <p:commandButton id="clearSchedule" oncomplete="PF('clearScheduleDialogueWidget').hide();"  actionListener="#{ezidebit.clearSchedule}" value="#{configMapController.getKey('ClearScheduleSaveLink')}" update=" :growl "/>                
+                    <p:commandButton id="clearSchedule" oncomplete="PF('clearScheduleDialogueWidget').hide();"  actionListener="#{ezidebit.clearSchedule}" value="#{configMapController.getKey('ClearScheduleSaveLink')}" update=" :growl  :tv:paymentsForm"/>                
                     <p:commandButton id="clearScheduledialogueDiscard" onclick="PF('ClearScheduleDialogueWidget').hide()"  value="#{configMapController.getKey('ClearScheduleDiscardLink')}" update=":growl"/>                
 
                 </p:panel>

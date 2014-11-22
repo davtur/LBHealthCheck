@@ -296,7 +296,7 @@
                                         <p:commandButton id="showAddPaymentScheduleButton" rendered="#{ezidebit.waitingForPaymentDetails == false and ezidebit.customerCancelledInPaymentGateway == false and ezidebit.customerExistsInPaymentGateway == true}" oncomplete="PF('createPaymentScheduleDialogueWidget').show();"    value="#{configMapController.getKey('AddPaymentScheduleButtonLink')}" update=":growl "  /> 
                                         <p:commandButton id="showClearScheduleButton" rendered="#{ezidebit.waitingForPaymentDetails == false and ezidebit.customerCancelledInPaymentGateway == false and ezidebit.customerExistsInPaymentGateway == true}" oncomplete="PF('clearScheduleDialogueWidget').show();"    value="#{configMapController.getKey('ClearScheduleButtonLink')}" update=":growl "  /> 
 
-                                        <p:commandButton  process=":tv:paymentsForm:paymentsTable2" rendered="#{fitnessTestChartsController.isUserInRole('ADMIN')}" id="deleteButton" icon="ui-icon-trash"  value="#{configMapController.getKey('Delete')}" actionListener="#{ezidebit.deleteScheduledPayment}" update=":growl " disabled="#{empty fitnessTestChartsController.selected}"/>
+                                        <p:commandButton  process=":tv:paymentsForm:paymentsTable2" rendered="#{fitnessTestChartsController.isUserInRole('ADMIN')}" id="deleteButton" icon="ui-icon-trash"  value="#{configMapController.getKey('Delete')}" actionListener="#{ezidebit.deleteScheduledPayment}" update=":growl :tv:paymentsForm" disabled="#{empty fitnessTestChartsController.selected}"/>
 
                                     </p:outputPanel>
                                 </f:facet>
@@ -339,12 +339,14 @@
                                     </h:outputText>
                                 </p:column>
                                 <p:column  sortBy="#{pay.paymentStatus}" filterBy="#{pay.paymentStatus}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentStatus')}"   >
-                                    <h:outputText   value="#{pay.paymentStatus} --"/>
-                                    <h:outputText  rendered="#{pay.paymentStatus == 'W'}"  value=" Waiting"/>
-                                    <h:outputText  rendered="#{pay.paymentStatus == 'P'}"  value=" Pending"/>
-                                    <h:outputText  rendered="#{pay.paymentStatus == 'S'}"  value=" Successful" style="color: green"/>
-                                    <h:outputText  rendered="#{pay.paymentStatus == 'D'}"  value=" Dis.Insufficient Funds" style="color: red"/>
-                                    <h:outputText  rendered="#{pay.paymentStatus == 'F'}"  value=" Dishonoured" style="color: red"/>
+                                   
+                                    <h:outputText  rendered="#{pay.paymentStatus == 'W'}"  value="#{pay.paymentStatus} -- Waiting"/>
+                                    <h:outputText  rendered="#{pay.paymentStatus == 'N'}"  value="#{pay.paymentStatus} -- Scheduled"/>
+                                    <h:outputText  rendered="#{pay.paymentStatus == 'U'}"  value="#{pay.paymentStatus} -- Processing" style="color: yellow"/>
+                                    <h:outputText  rendered="#{pay.paymentStatus == 'P'}"  value="#{pay.paymentStatus} -- Pending"/>
+                                    <h:outputText  rendered="#{pay.paymentStatus == 'S'}"  value="#{pay.paymentStatus} -- Successful" style="color: green"/>
+                                    <h:outputText  rendered="#{pay.paymentStatus == 'D'}"  value="#{pay.paymentStatus} -- Dis.Insufficient Funds" style="color: red"/>
+                                    <h:outputText  rendered="#{pay.paymentStatus == 'F'}"  value="#{pay.paymentStatus} -- Dishonoured" style="color: red"/>
                                 </p:column>
 
 
