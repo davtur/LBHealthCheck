@@ -2397,15 +2397,15 @@ public class EziDebitPaymentGateway implements Serializable {
         paymentsDBListFilteredItems = null;
     }
 
-    public void createCRMPaymentSchedule(Customers cust, Date scheduleStartDate, Date scheduleEndDate, char schedulePeriodType, int dayOfWeek, int dayOfMonth, long amountInCents, int limitToNumberOfPayments, long paymentAmountLimitInCents, boolean keepManualPayments, boolean firstWeekOfMonth, boolean secondWeekOfMonth, boolean thirdWeekOfMonth, boolean fourthWeekOfMonth, String loggedInUser) {
+    public void createCRMPaymentSchedule(Customers cust, Date scheduleStartDate, Date scheduleEndDate, char schedulePeriodType, int payDayOfWeek, int dayOfMonth, long amountInCents, int limitToNumberOfPayments, long paymentAmountLimitInCents, boolean keepManualPayments, boolean firstWeekOfMonth, boolean secondWeekOfMonth, boolean thirdWeekOfMonth, boolean fourthWeekOfMonth, String loggedInUser) {
 
         if (schedulePeriodType == 'W' || schedulePeriodType == 'F' || schedulePeriodType == 'N' || schedulePeriodType == '4') {
-            if (dayOfWeek < 1 || dayOfWeek > 7) {
+            if (payDayOfWeek < 1 || payDayOfWeek > 7) {
                 logger.log(Level.WARNING, "createSchedule  FAILED: A value must be provided for dayOfWeek  when the SchedulePeriodType is  W,F,4,N");
                 return;
             }
-            if (dayOfWeek < 2 || dayOfWeek > 6) {
-                dayOfWeek = 2;// can't debit on weekends only weekdays
+            if (payDayOfWeek < 2 || payDayOfWeek > 6) {
+                payDayOfWeek = 2;// can't debit on weekends only weekdays
             }
         }
         if (schedulePeriodType == 'M') {
@@ -2428,14 +2428,13 @@ public class EziDebitPaymentGateway implements Serializable {
         if (fourthWeekOfMonth) {
             check++;
         }
-        if (schedulePeriodType == 'N' && check != 1) {
+        if (schedulePeriodType == 'N' && check == 0) {
             logger.log(Level.WARNING, "createSchedule FAILED: A value must be provided for week Of Month  when the SchedulePeriodType is N");
             return;
         }
 
         //delete all existing scheduled payments
         List<Payments> crmPaymentList = paymentsFacade.findPaymentsByCustomerAndStatus(cust, PaymentStatus.SCHEDULED.value());
-        startAsynchJob("ClearSchedule", paymentBean.clearSchedule(cust, false, loggedInUser, getDigitalKey()));
 
         for (Payments p : crmPaymentList) {
             if (!(keepManualPayments && p.getManuallyAddedPayment())) {
@@ -2444,6 +2443,11 @@ public class EziDebitPaymentGateway implements Serializable {
                 startAsynchJob("DeletePayment", paymentBean.deletePaymentByRef(cust, ref, loggedInUser, getDigitalKey()));
             }
         }
+       // startAsynchJob("ClearSchedule", paymentBean.clearSchedule(cust, false, loggedInUser, getDigitalKey()));// work around failsafe until migration complete. THere are styill scheduled payments without a payment reference from DB
+        // try {
+        //     Thread.sleep(200);// work around to ensure clearschedule workaround doesn't impact new payments being added 
+        // } catch (InterruptedException interruptedException) {
+        //  }
         GregorianCalendar startCal = new GregorianCalendar();
         GregorianCalendar endCal = new GregorianCalendar();
         startCal.setTime(scheduleStartDate);
@@ -2451,17 +2455,29 @@ public class EziDebitPaymentGateway implements Serializable {
         int calendarField = 0;
         int calendarAmount = 0;
         int currentDay = startCal.get(Calendar.DAY_OF_MONTH);
-        int dow = startCal.get(Calendar.DAY_OF_WEEK);
+        int calendarDow = startCal.get(Calendar.DAY_OF_WEEK);
         switch (schedulePeriodType) {
             case 'W'://weekly
                 calendarField = Calendar.DAY_OF_YEAR;
                 calendarAmount = 7;
-                startCal.set(Calendar.DAY_OF_WEEK, dayOfWeek);//sunday = 1 , monday = 2 ...saturday = 7
+                if (calendarDow > payDayOfWeek) {
+                    int d = (payDayOfWeek + 7) - calendarDow;
+                    startCal.add(Calendar.DAY_OF_YEAR, d);
+                } else {
+                    int d = payDayOfWeek - calendarDow;
+                    startCal.add(Calendar.DAY_OF_YEAR, d);
+                }//sunday = 1 , monday = 2 ...saturday = 7
                 break;
             case 'F'://fortnightly
                 calendarField = Calendar.DAY_OF_YEAR;
                 calendarAmount = 14;
-                startCal.set(Calendar.DAY_OF_WEEK, dayOfWeek);
+                if (calendarDow > payDayOfWeek) {
+                    int d = (payDayOfWeek + 7) - calendarDow;
+                    startCal.add(Calendar.DAY_OF_YEAR, d);
+                } else {
+                    int d = payDayOfWeek - calendarDow;
+                    startCal.add(Calendar.DAY_OF_YEAR, d);
+                }
                 break;
             case 'M':// monthly
                 calendarField = Calendar.MONTH;
@@ -2475,17 +2491,19 @@ public class EziDebitPaymentGateway implements Serializable {
             case '4': // 4 weekly
                 calendarField = Calendar.DAY_OF_YEAR;
                 calendarAmount = 28;
-
+                startCal.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                calendarDow = startCal.get(Calendar.DAY_OF_WEEK);
+                if (calendarDow > payDayOfWeek) {
+                    int d = (payDayOfWeek + 7) - calendarDow;
+                    startCal.add(Calendar.DAY_OF_YEAR, d);
+                } else {
+                    int d = payDayOfWeek - calendarDow;
+                    startCal.add(Calendar.DAY_OF_YEAR, d);
+                }
                 if (currentDay > dayOfMonth) {
                     startCal.add(Calendar.MONTH, 1);
                 }
-                startCal.set(Calendar.DAY_OF_MONTH, dayOfMonth);
 
-                if (dow > dayOfWeek) {
-                    int d = dow - dayOfWeek;
-                    startCal.add(Calendar.DAY_OF_MONTH, d);
-                }
-                startCal.set(Calendar.DAY_OF_WEEK, dayOfWeek);
                 break;
             case 'N': //Weekday in month (e.g. Monday in the third week of every month)
                 calendarField = Calendar.MONTH;
@@ -2504,11 +2522,14 @@ public class EziDebitPaymentGateway implements Serializable {
                     startCal.set(Calendar.WEEK_OF_MONTH, 4);
                 }
 
-                if (dow > dayOfWeek) {
-                    int d = dow - dayOfWeek;
-                    startCal.add(Calendar.DAY_OF_MONTH, d);
+                calendarDow = startCal.get(Calendar.DAY_OF_WEEK);
+                if (calendarDow > payDayOfWeek) {
+                    int d = (payDayOfWeek + 7) - calendarDow;
+                    startCal.add(Calendar.DAY_OF_YEAR, d);
+                } else {
+                    int d = payDayOfWeek - calendarDow;
+                    startCal.add(Calendar.DAY_OF_YEAR, d);
                 }
-                startCal.set(Calendar.DAY_OF_WEEK, dayOfWeek);
                 break;
             case 'Q': // quarterly
                 calendarField = Calendar.MONTH;
@@ -2580,11 +2601,12 @@ public class EziDebitPaymentGateway implements Serializable {
                     startCal.set(Calendar.WEEK_OF_MONTH, 4);
                 }
                 int dow2 = startCal.get(Calendar.DAY_OF_WEEK);
-                if (dow2 > dayOfWeek) {
-                    int d = dow2 - dayOfWeek;
+                if (dow2 > payDayOfWeek) {
+                    int d = dow2 - payDayOfWeek;
                     startCal.add(Calendar.DAY_OF_MONTH, d);
+                } else {
+                    startCal.set(Calendar.DAY_OF_WEEK, payDayOfWeek);
                 }
-                startCal.set(Calendar.DAY_OF_WEEK, dayOfWeek);
             } else {
                 if (startCal.get(Calendar.DAY_OF_WEEK) < Calendar.MONDAY || startCal.get(Calendar.DAY_OF_WEEK) > Calendar.FRIDAY) {
                     startCal.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);

@@ -276,13 +276,12 @@ public class PaymentBean implements Serializable {
         //  If you provide values for DebitDate and PaymentAmountInCents and there is more
         //  than one payment for PaymentAmountInCents scheduled on DebitDate, then only
         //  one of the payments will be deleted.
-        if(paymentReference == null){
-            paymentReference ="";
+        if (paymentReference == null) {
+            paymentReference = "";
         }
-        
-        
+
         boolean result = false;
-        if ( paymentReference.isEmpty() &&  (debitDate == null || cust == null || paymentAmountInCents < 0)) {
+        if (paymentReference.isEmpty() && (debitDate == null || cust == null || paymentAmountInCents < 0)) {
             logger.log(Level.WARNING, "deletePayment NULL parameter of Amount < 0. cust {0}, date {1}, Amount {2}", new Object[]{cust, debitDate, paymentAmountInCents});
 
             return new AsyncResult<>(result);
@@ -292,7 +291,7 @@ public class PaymentBean implements Serializable {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         String debitDateString = sdf.format(debitDate);
         String ourSystemCustomerReference = cust.getId().toString();
-       
+
         paymentReference = paymentReference.trim();
         if (paymentReference.length() > 50) {
             paymentReference = paymentReference.substring(0, 50);
@@ -331,8 +330,9 @@ public class PaymentBean implements Serializable {
 
         return new AsyncResult<>(result);
     }
-@Asynchronous
-    public Future<Boolean> deletePaymentByRef(Customers cust,  String paymentReference, String loggedInUser, String digitalKey) {
+
+    @Asynchronous
+    public Future<Boolean> deletePaymentByRef(Customers cust, String paymentReference, String loggedInUser, String digitalKey) {
         	//  This method will delete a single payment from the Customer's payment schedule.
         //  It is important to note the following when deleting a payment:
 
@@ -345,19 +345,31 @@ public class PaymentBean implements Serializable {
         //  than one payment for PaymentAmountInCents scheduled on DebitDate, then only
         //  one of the payments will be deleted.
         boolean result = false;
-        if ( cust == null ) {
+        if (cust == null) {
             logger.log(Level.WARNING, "deletePayment Customer NULL ");
-
+            return new AsyncResult<>(result);
+        }
+        if (paymentReference == null) {
+            logger.log(Level.WARNING, "deletePayment paymentReference NULL ");
+            return new AsyncResult<>(result);
+        }
+        if (paymentReference.trim().isEmpty()) {
+            logger.log(Level.WARNING, "deletePayment paymentReference is empty. ");
+            return new AsyncResult<>(result);
+        }
+        if (loggedInUser == null) {
+            logger.log(Level.WARNING, "deletePayment loggedInUser NULL ");
+            return new AsyncResult<>(result);
+        }
+        if (digitalKey == null) {
+            logger.log(Level.WARNING, "deletePayment digitalKey NULL ");
             return new AsyncResult<>(result);
         }
 
         String eziDebitCustomerId = ""; // use our reference instead. THis must be an empty string.
-        
+
         String ourSystemCustomerReference = cust.getId().toString();
-        
-        if (paymentReference == null) {
-            paymentReference = "";
-        }
+
         paymentReference = paymentReference.trim();
         if (paymentReference.length() > 50) {
             paymentReference = paymentReference.substring(0, 50);
@@ -368,27 +380,41 @@ public class PaymentBean implements Serializable {
             logger.log(Level.WARNING, "deletePayment loggedInUser is greater than the allowed 50 characters. Truncating! to 50 chars");
         }
         EziResponseOfstring eziResponse = null;
-       
+
+        try {
             eziResponse = getWs().deletePayment(digitalKey, eziDebitCustomerId, ourSystemCustomerReference, paymentReference, "", new Long(0), loggedInUser);
-            logger.log(Level.INFO, "deletePayment - the paymentReference is not NULL and is overriding date and amount to identify the payment");
-       
-
-        logger.log(Level.INFO, "deletePayment Response: Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
-        if (eziResponse.getError() == 0) {// any errors will be a non zero value
-
-            if (eziResponse.getData().getValue().compareTo("S") == 0) {
-                result = true;
-                String auditDetails = "Payment Ref:" + paymentReference;
-                String changedFrom = "Ref:" + paymentReference;
-                String changedTo = "Deleted";
-                auditLogFacade.audit(customersFacade.findCustomerByUsername(loggedInUser), cust, "deletePayment", auditDetails, changedFrom, changedTo);
-
+        } catch (Exception e) {
+            if (e.getMessage().contains("Payment selected for deletion could not be found")) {
+                logger.log(Level.WARNING, "deletePayment:The Payment selected for deletion could not be found.Payment Ref: {2}, Customer {0}, logged In User - {1}", new Object[]{cust.getUsername(), loggedInUser, paymentReference});
             } else {
-                logger.log(Level.WARNING, "deletePayment Response Data value should be S ( Successful ) : Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
+                logger.log(Level.INFO, "deletePayment - FAILED", e);
+            }
+            return new AsyncResult<>(result);
+        }
+        logger.log(Level.INFO, "deletePayment - the paymentReference is not NULL and is overriding date and amount to identify the payment");
+        if (eziResponse != null) {
+            // logger.log(Level.INFO, "deletePayment Response: Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
+            if (eziResponse.getError() == 0) {// any errors will be a non zero value
+
+                if (eziResponse.getData().getValue().compareTo("S") == 0) {
+                    result = true;
+                    String auditDetails = "Payment Ref:" + paymentReference;
+                    String changedFrom = "Ref:" + paymentReference;
+                    String changedTo = "Deleted";
+                    try {
+                        auditLogFacade.audit(customersFacade.findCustomerByUsername(loggedInUser), cust, "deletePayment", auditDetails, changedFrom, changedTo);
+                    } catch (Exception e) {
+                        logger.log(Level.WARNING, "deletePayment Auidt logging failed : Customer - {0}, logged In User - {1}", new Object[]{cust.getUsername(), loggedInUser});
+                    }
+                } else {
+                    logger.log(Level.WARNING, "deletePayment Response Data value should be S ( Successful ) : Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
+                }
+            } else {
+                logger.log(Level.WARNING, "deletePayment Response: Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
+
             }
         } else {
-            logger.log(Level.WARNING, "deletePayment Response: Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
-
+            logger.log(Level.WARNING, "deletePayment - the EziResponseOfstring is  NULL ");
         }
 
         return new AsyncResult<>(result);
@@ -895,11 +921,11 @@ public class PaymentBean implements Serializable {
             logger.log(Level.WARNING, "addPayment Method Response: Exception - {0}", e);
             return new AsyncResult<>("");
         }
-        logger.log(Level.INFO, "addPayment Response: Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
         if (eziResponse.getError() == 0) {// any errors will be a non zero value
+            logger.log(Level.INFO, "addPayment Response: Successful. Reference:{0}, Customer: {2}, Return Value: - {1}", new Object[]{paymentReference, eziResponse.getData().getValue(), cust.getUsername()});
 
             if (eziResponse.getData().getValue().compareTo("S") == 0) {
-                
+
                 String auditDetails = "Payment Added - Debit Date:" + debitDateString + ", Amount (cents): " + paymentAmountInCents.toString() + ", Payment Ref:" + paymentReference;
                 String changedFrom = "non-existent";
                 String changedTo = "Ref:" + paymentReference;
