@@ -145,7 +145,7 @@ public class EziDebitPaymentGateway implements Serializable {
     private Date paymentDebitDate = new Date();
     private DatatableSelectionHelper pagination;
     private Date changeFromDate = new Date();
-    private Long paymentAmountInCents = new Long("0");
+    private float paymentAmountInCents = new Long("0");
     private Long paymentLimitAmountInCents = new Long("0");
     private String paymentSchedulePeriodType = "W";
     private String paymentDayOfWeek = "MON";// required when Period Type is W, F, 4, N
@@ -341,14 +341,14 @@ public class EziDebitPaymentGateway implements Serializable {
     /**
      * @return the paymentAmountInCents
      */
-    public Long getPaymentAmountInCents() {
+    public float getPaymentAmountInCents() {
         return paymentAmountInCents;
     }
 
     /**
      * @param paymentAmountInCents the paymentAmountInCents to set
      */
-    public void setPaymentAmountInCents(Long paymentAmountInCents) {
+    public void setPaymentAmountInCents(float paymentAmountInCents) {
         this.paymentAmountInCents = paymentAmountInCents;
     }
 
@@ -2265,11 +2265,11 @@ public class EziDebitPaymentGateway implements Serializable {
 
     public void createPaymentSchedule(ActionEvent actionEvent) {
         String loggedInUser = FacesContext.getCurrentInstance().getExternalContext().getRemoteUser();
-        Long amount = paymentAmountInCents * (long) 100;
+        Long amount = (long) (paymentAmountInCents * (float) 100);
         Long amountLimit = paymentLimitAmountInCents * (long) 100;
         char spt = paymentSchedulePeriodType.charAt(0);
         GregorianCalendar endCal = new GregorianCalendar();
-        endCal.setTime(paymentDebitDate);
+        //endCal.setTime(paymentDebitDate);// ezi debit only supports 1 year from current date
         endCal.add(Calendar.YEAR, 1);
         int dow = Calendar.MONDAY;
         if (paymentDayOfWeek.contains("TUE")) {
@@ -2349,16 +2349,19 @@ public class EziDebitPaymentGateway implements Serializable {
 
         //delete all existing scheduled payments
         List<Payments> crmPaymentList = paymentsFacade.findPaymentsByCustomerAndStatus(cust, PaymentStatus.SCHEDULED.value());
-
-        for (Payments p : crmPaymentList) {
-            String ref = p.getId().toString();
-            boolean isManual = p.getManuallyAddedPayment();
-            if (keepManualPayments == true && isManual) {
-                logger.log(Level.INFO, "createSchedule - keeping manual payment: Cust={0}, Ref={1}, Manaul Payment = {2}", new Object[]{cust.getUsername(), ref, isManual});
-            } else {
-                logger.log(Level.INFO, "createSchedule - Deleting payment: Cust={0}, Ref={1}, Manaul Payment = {2}", new Object[]{cust.getUsername(), ref, isManual});
-                paymentsFacade.remove(p);
-                startAsynchJob("DeletePayment", paymentBean.deletePaymentByRef(cust, ref, loggedInUser, getDigitalKey()));
+        if (crmPaymentList != null) {
+            logger.log(Level.INFO, "createSchedule - Found {0} existing scheduled payments for {1}", new Object[]{crmPaymentList.size(), cust.getUsername()});
+            for (int x = crmPaymentList.size() - 1; x > -1; x--) {
+                Payments p = crmPaymentList.get(x);
+                String ref = p.getId().toString();
+                boolean isManual = p.getManuallyAddedPayment();
+                if (keepManualPayments == true && isManual) {
+                    logger.log(Level.INFO, "createSchedule - keeping manual payment: Cust={0}, Ref={1}, Manaul Payment = {2}", new Object[]{cust.getUsername(), ref, isManual});
+                } else {
+                    logger.log(Level.INFO, "createSchedule - Deleting payment: Cust={0}, Ref={1}, Manaul Payment = {2}", new Object[]{cust.getUsername(), ref, isManual});
+                    paymentsFacade.remove(p);
+                    startAsynchJob("DeletePayment", paymentBean.deletePaymentByRef(cust, ref, loggedInUser, getDigitalKey()));
+                }
             }
         }
         // startAsynchJob("ClearSchedule", paymentBean.clearSchedule(cust, false, loggedInUser, getDigitalKey()));// work around failsafe until migration complete. THere are styill scheduled payments without a payment reference from DB
@@ -2408,7 +2411,7 @@ public class EziDebitPaymentGateway implements Serializable {
                 break;
             case '4': // 4 weekly
                 calendarField = Calendar.DAY_OF_YEAR;
-                calendarAmount = 7;
+                calendarAmount = 28;
                 startCal.set(Calendar.DAY_OF_MONTH, dayOfMonth);
                 if (currentDay > dayOfMonth) {
                     startCal.add(Calendar.MONTH, 1);
@@ -2424,22 +2427,8 @@ public class EziDebitPaymentGateway implements Serializable {
 
                 break;
             case 'N': //Weekday in month (e.g. Monday in the third week of every month)
-                calendarField = Calendar.MONTH;
-                calendarAmount = 1;
-
-                if (firstWeekOfMonth) {
-                    startCal.set(Calendar.WEEK_OF_MONTH, 1);
-                }
-                if (secondWeekOfMonth) {
-                    startCal.set(Calendar.WEEK_OF_MONTH, 2);
-                }
-                if (thirdWeekOfMonth) {
-                    startCal.set(Calendar.WEEK_OF_MONTH, 3);
-                }
-                if (fourthWeekOfMonth) {
-                    startCal.set(Calendar.WEEK_OF_MONTH, 4);
-                }
-
+                calendarField = Calendar.DAY_OF_YEAR;
+                calendarAmount = 7;
                 calendarDow = startCal.get(Calendar.DAY_OF_WEEK);
                 if (calendarDow > payDayOfWeek) {
                     int d = (payDayOfWeek + 7) - calendarDow;
@@ -2482,28 +2471,29 @@ public class EziDebitPaymentGateway implements Serializable {
 
             if (schedulePeriodType == 'N') {
                 //TODO fix this 
-                if (startCal.get(Calendar.WEEK_OF_MONTH) == 1 && firstWeekOfMonth == true) {
+                //if (startCal.get(Calendar.WEEK_OF_MONTH) == 1 && firstWeekOfMonth == true) {
+                if (startCal.get(Calendar.DAY_OF_MONTH) >= 1 && startCal.get(Calendar.DAY_OF_MONTH) <= 7 && firstWeekOfMonth == true) {
                     if (arePaymentsWithinLimits(limitToNumberOfPayments, paymentAmountLimitInCents, cumulativeAmountInCents, amountInCents, numberOfpayments)) {
                         addPayment(cust, newDebitDate, amountInCents, false);
                         numberOfpayments++;
                     }
 
                 }
-                if (startCal.get(Calendar.WEEK_OF_MONTH) == 2 && secondWeekOfMonth == true) {
+                if (startCal.get(Calendar.DAY_OF_MONTH) >= 8 && startCal.get(Calendar.DAY_OF_MONTH) <= 14 && secondWeekOfMonth == true) {
                     if (arePaymentsWithinLimits(limitToNumberOfPayments, paymentAmountLimitInCents, cumulativeAmountInCents, amountInCents, numberOfpayments)) {
                         addPayment(cust, newDebitDate, amountInCents, false);
                         numberOfpayments++;
                     }
 
                 }
-                if (startCal.get(Calendar.WEEK_OF_MONTH) == 3 && thirdWeekOfMonth == true) {
+                if (startCal.get(Calendar.DAY_OF_MONTH) >= 15 && startCal.get(Calendar.DAY_OF_MONTH) <= 21 && thirdWeekOfMonth == true) {
                     if (arePaymentsWithinLimits(limitToNumberOfPayments, paymentAmountLimitInCents, cumulativeAmountInCents, amountInCents, numberOfpayments)) {
                         addPayment(cust, newDebitDate, amountInCents, false);
                         numberOfpayments++;
                     }
 
                 }
-                if (startCal.get(Calendar.WEEK_OF_MONTH) == 4 && fourthWeekOfMonth == true) {
+                if (startCal.get(Calendar.DAY_OF_MONTH) >= 22 && startCal.get(Calendar.DAY_OF_MONTH) <= 28 && fourthWeekOfMonth == true) {
                     if (arePaymentsWithinLimits(limitToNumberOfPayments, paymentAmountLimitInCents, cumulativeAmountInCents, amountInCents, numberOfpayments)) {
                         addPayment(cust, newDebitDate, amountInCents, false);
                         numberOfpayments++;
@@ -2515,7 +2505,7 @@ public class EziDebitPaymentGateway implements Serializable {
 
                 calendarDow = startCal.get(Calendar.DAY_OF_WEEK);
                 if (calendarDow > payDayOfWeek) {
-                    int d = (payDayOfWeek + 7) - calendarDow;
+                    int d = calendarDow - (payDayOfWeek + 7);
                     startCal.add(Calendar.DAY_OF_YEAR, d);
                 } else {
                     int d = payDayOfWeek - calendarDow;
@@ -2599,7 +2589,7 @@ public class EziDebitPaymentGateway implements Serializable {
     }
 
     public void addSinglePayment(ActionEvent actionEvent) {
-        Long amount = paymentAmountInCents * (long) 100;
+        Long amount = (long) (paymentAmountInCents * (float) 100);
         addPayment(selectedCustomer, paymentDebitDate, amount, true);
         paymentDBList = null;
         paymentsDBListFilteredItems = null;
@@ -2610,15 +2600,27 @@ public class EziDebitPaymentGateway implements Serializable {
         String loggedInUser = FacesContext.getCurrentInstance().getExternalContext().getRemoteUser();
         if (loggedInUser != null) {
             List<Payments> crmPaymentList = paymentsFacade.findPaymentsByCustomerAndStatus(selectedCustomer, PaymentStatus.SCHEDULED.value());
-            startAsynchJob("ClearSchedule", paymentBean.clearSchedule(selectedCustomer, false, loggedInUser, getDigitalKey()));
-
-            for (Payments p : crmPaymentList) {
-                if (!(paymentKeepManualPayments && p.getManuallyAddedPayment())) {
+            if (paymentKeepManualPayments == false) {
+                startAsynchJob("ClearSchedule", paymentBean.clearSchedule(selectedCustomer, false, loggedInUser, getDigitalKey()));
+            }
+            if (crmPaymentList != null) {
+                logger.log(Level.INFO, "createSchedule - Found {0} existing scheduled payments for {1}", new Object[]{crmPaymentList.size(), selectedCustomer.getUsername()});
+                for (int x = crmPaymentList.size() - 1; x > -1; x--) {
+                    Payments p = crmPaymentList.get(x);
                     String ref = p.getId().toString();
-                    paymentsFacade.remove(p);
-                    // startAsynchJob("DeletePayment", paymentBean.deletePaymentByRef(selectedCustomer, ref, loggedInUser, getDigitalKey()));
+                    boolean isManual = p.getManuallyAddedPayment();
+                    if (paymentKeepManualPayments == true && isManual) {
+                        logger.log(Level.INFO, "createSchedule - keeping manual payment: Cust={0}, Ref={1}, Manaul Payment = {2}", new Object[]{selectedCustomer.getUsername(), ref, isManual});
+                    } else {
+                        logger.log(Level.INFO, "createSchedule - Deleting payment: Cust={0}, Ref={1}, Manaul Payment = {2}", new Object[]{selectedCustomer.getUsername(), ref, isManual});
+                        paymentsFacade.remove(p);
+                        if (paymentKeepManualPayments == true) {
+                            startAsynchJob("DeletePayment", paymentBean.deletePaymentByRef(selectedCustomer, ref, loggedInUser, getDigitalKey()));
+                        }
+                    }
                 }
             }
+
             paymentDBList = null;
             paymentsDBListFilteredItems = null;
         } else {
@@ -2671,7 +2673,7 @@ public class EziDebitPaymentGateway implements Serializable {
 
     public void changeScheduledAmount(ActionEvent actionEvent) {
         String loggedInUser = FacesContext.getCurrentInstance().getExternalContext().getRemoteUser();
-        Long amount = paymentAmountInCents * (long) 100;
+        Long amount = (long) (paymentAmountInCents * (float) 100);
         if (loggedInUser != null) {
             List<Payments> crmPaymentList = paymentsFacade.findPaymentsByCustomerAndStatus(selectedCustomer, PaymentStatus.SCHEDULED.value());
             for (Payments p : crmPaymentList) {

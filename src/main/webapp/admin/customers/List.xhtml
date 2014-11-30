@@ -310,6 +310,11 @@
                                 <p:column  sortBy="#{pay.customerName.lastname}" filterBy="#{pay.customerName.lastname}" headerText="#{configMapController.getKey('ListPaymentsTitle_customerName')}"   >
                                     <h:outputText value="#{pay.customerName.firstname} #{pay.customerName.lastname}"/>
                                 </p:column>
+                                <p:column  sortBy="#{pay.manuallyAddedPayment}" filterBy="#{pay.manuallyAddedPayment}" headerText="#{configMapController.getKey('ListPaymentsTitle_manual')}"   >
+                                    <h:outputText rendered="#{pay.manuallyAddedPayment}" value="Manual"/>
+                                    <h:outputText rendered="#{!pay.manuallyAddedPayment}" value="Auto"/>
+                                </p:column>
+
                                 <p:column  sortBy="#{pay.paymentReference}" filterBy="#{pay.paymentReference}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentReference')}"   >
                                     <h:outputText value="#{pay.paymentReference}"/>
                                 </p:column>
@@ -339,7 +344,7 @@
                                     </h:outputText>
                                 </p:column>
                                 <p:column  sortBy="#{pay.paymentStatus}" filterBy="#{pay.paymentStatus}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentStatus')}"   >
-                                   
+
                                     <h:outputText  rendered="#{pay.paymentStatus == 'W'}"  value="#{pay.paymentStatus} -- Waiting"/>
                                     <h:outputText  rendered="#{pay.paymentStatus == 'N'}"  value="#{pay.paymentStatus} -- Scheduled"/>
                                     <h:outputText  rendered="#{pay.paymentStatus == 'U'}"  value="#{pay.paymentStatus} -- Processing" style="color: yellow"/>
@@ -347,6 +352,7 @@
                                     <h:outputText  rendered="#{pay.paymentStatus == 'S'}"  value="#{pay.paymentStatus} -- Successful" style="color: green"/>
                                     <h:outputText  rendered="#{pay.paymentStatus == 'D'}"  value="#{pay.paymentStatus} -- Dis.Insufficient Funds" style="color: red"/>
                                     <h:outputText  rendered="#{pay.paymentStatus == 'F'}"  value="#{pay.paymentStatus} -- Dishonoured" style="color: red"/>
+                                    <h:outputText  rendered="#{pay.paymentStatus == 'X'}"  value="#{pay.paymentStatus} -- Deleted In PGW" style="color: red"/>
                                 </p:column>
 
 
@@ -427,6 +433,7 @@
                                     <h:outputText  rendered="#{pay.paymentStatus.value == 'S'}"  value="Successful"/>
                                     <h:outputText  rendered="#{pay.paymentStatus.value == 'D'}"  value="Dis.Insufficient Funds"/>
                                     <h:outputText  rendered="#{pay.paymentStatus.value == 'F'}"  value="Dishonoured"/>
+                                    <h:outputText  rendered="#{pay.paymentStatus.value == 'X'}"  value="Deleted In PGW"/>
                                 </p:column>
                                 <p:column sortBy="#{pay.debitDate.value.toGregorianCalendar().time}" filterBy="#{pay.debitDate.value.toGregorianCalendar().time}" headerText="#{configMapController.getKey('ListPaymentsTitle_debitDate')}"   >
                                     <h:outputText value="#{pay.debitDate.value.toGregorianCalendar().time}">

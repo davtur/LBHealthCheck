@@ -90,6 +90,7 @@ public class CustomersController implements Serializable {
     private boolean impersonating = false;
     private boolean customerTabsEnabled = false;
     private boolean refreshFromDB = false;
+    private boolean addUserButtonDisabled = true;
     private boolean showNonUsers = false;
     private static final Logger logger = Logger.getLogger(CustomersController.class.getName());
 
@@ -863,19 +864,37 @@ public class CustomersController implements Serializable {
     public void firstNameListener(ValueChangeEvent vce) {
         Object o = vce.getNewValue();
         if (o.getClass().equals(String.class)) {
-            String newVAl = (String) o;
-            String updatedUsername = newVAl + "." + current.getLastname();
-            current.setUsername(updatedUsername.toLowerCase().replace(' ', '_'));
+            String newVal = (String) o;
+            updateUsername(newVal, null);
+
         }
     }
 
     public void lastNameListener(ValueChangeEvent vce) {
         Object o = vce.getNewValue();
         if (o.getClass().equals(String.class)) {
-            String newVAl = (String) o;
-            String updatedUsername = current.getFirstname() + "." + newVAl;
+            String newVal = (String) o;
+            updateUsername(null, newVal);
 
-            current.setUsername(updatedUsername.toLowerCase().replace(' ', '_'));
+        }
+    }
+
+    private void updateUsername(String firstname, String lastname) {
+        String updatedUsername = "";
+        if (firstname == null) {
+            updatedUsername = current.getFirstname() + "." + lastname;
+        }
+        if (lastname == null) {
+            updatedUsername = firstname + "." + current.getLastname();
+        }
+        String newUsername = updatedUsername.toLowerCase().replace(' ', '_');
+        current.setUsername(newUsername);
+        Customers cust = getFacade().findCustomerByUsername(newUsername);
+        if(cust != null){
+            setAddUserButtonDisabled(true);
+            JsfUtil.addErrorMessage("Error", "That username is already taken!");
+        }else{
+            setAddUserButtonDisabled(false);
         }
     }
 
@@ -1222,6 +1241,20 @@ public class CustomersController implements Serializable {
      */
     public void setRefreshFromDB(boolean refreshFromDB) {
         this.refreshFromDB = refreshFromDB;
+    }
+
+    /**
+     * @return the addUserButtonDisabled
+     */
+    public boolean isAddUserButtonDisabled() {
+        return addUserButtonDisabled;
+    }
+
+    /**
+     * @param addUserButtonDisabled the addUserButtonDisabled to set
+     */
+    public void setAddUserButtonDisabled(boolean addUserButtonDisabled) {
+        this.addUserButtonDisabled = addUserButtonDisabled;
     }
 
     @FacesConverter(forClass = Customers.class)

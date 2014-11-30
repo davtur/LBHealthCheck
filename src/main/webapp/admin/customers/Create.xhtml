@@ -17,7 +17,7 @@
 
                     <p:outputLabel value="#{configMapController.getKey('EditCustomersLabel_firstname')}" for="firstname" />
                     <p:inputText id="firstname"  value="#{customersController.selected.firstname}" title="#{configMapController.getKey('EditCustomersTitle_firstname')}" valueChangeListener="#{customersController.firstNameListener}" required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_firstname')}">
-                        <p:ajax update=":formCustomersCreate1:username" event="keyup"/>
+                        <p:ajax update=":formCustomersCreate1:username :formCustomersCreate1:dialogueSave" event="keyup"/>
                     </p:inputText>
                     <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_gender')}" title="#{configMapController.getKey('EditCustomersTitle_gender')}" for="gender" />
                     <p:selectOneMenu id="gender" value="#{customersController.selected.gender}"   required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_gender')}">
@@ -26,7 +26,7 @@
                     </p:selectOneMenu>
                     <p:outputLabel value="#{configMapController.getKey('EditCustomersLabel_lastname')}" for="lastname" />
                     <p:inputText id="lastname" value="#{customersController.selected.lastname}" title="#{configMapController.getKey('EditCustomersTitle_lastname')}" valueChangeListener="#{customersController.lastNameListener}" required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_lastname')}">
-                        <p:ajax update=":formCustomersCreate1:username" event="keyup" />
+                        <p:ajax update=":formCustomersCreate1:username  :formCustomersCreate1:dialogueSave" event="keyup" />
                     </p:inputText>
                     <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_dob')}" for="dob" />
                     <p:calendar id="dob" pattern="MM/dd/yyyy" value="#{customersController.selected.dob}" title="#{configMapController.getKey('CreateCustomersTitle_dob')}" required="true" requiredMessage="#{configMapController.getKey('CreateCustomersRequiredMessage_dob')}" />
@@ -93,7 +93,7 @@
                     </p:password>
                 </p:panelGrid>
                 <p:panel><!--  onclick="handleSubmit(args,'customersCreateDialogue');"-->
-                    <p:commandButton id="dialogueSave" oncomplete="PF('customersCreateDialogue').hide()"  actionListener="#{customersController.createDialogue}" value="#{configMapController.getKey('CreateCustomersSaveLink')}" update=":growl :tv:customerslistForm1 :tv:formCustomersEdit1 :formCustomersCreate1 :tv:paymentsForm :tv:NoteslistForm1"/>                
+                    <p:commandButton id="dialogueSave" disabled="#{customersController.addUserButtonDisabled}" oncomplete="PF('customersCreateDialogue').hide()"  actionListener="#{customersController.createDialogue}" value="#{configMapController.getKey('CreateCustomersSaveLink')}" update=":growl :tv:customerslistForm1 :tv:formCustomersEdit1 :formCustomersCreate1 :tv:paymentsForm :tv:NoteslistForm1"/>                
                     <p:commandButton id="dialogueDiscard" onclick="PF('customersCreateDialogue').hide()"  actionListener="#{customersController.cancelCreateDialogue}" value="#{configMapController.getKey('CreateCustomersDiscardLink')}" update=":growl"/>                
 
                 </p:panel>

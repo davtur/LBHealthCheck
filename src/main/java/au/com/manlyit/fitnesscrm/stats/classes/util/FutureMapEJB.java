@@ -739,8 +739,9 @@ public class FutureMapEJB implements Serializable {
                                         paymentsFacade.edit(crmPay);
                                     }
                                 } else { //payment doesn't exist in crm so add it
-                                    crmPay = convertScheduledPaymentXMLToEntity(crmPay, pay, cust);
-                                    paymentsFacade.create(crmPay);
+                                    logger.log(Level.SEVERE, "Future Map processGetScheduledPayments - A payment exists in the PGW but not in CRM. EzidebitID={0}, CRM Ref:{1}, Amount={2}, Date={3}, Ref={4}",new Object[]{pay.getEzidebitCustomerID(),pay.getYourSystemReference(),pay.getPaymentAmount(),pay.getPaymentDate(),pay.getPaymentReference()});
+                                    //crmPay = convertScheduledPaymentXMLToEntity(crmPay, pay, cust);
+                                    //paymentsFacade.create(crmPay);
                                 }
 
                             }
@@ -763,7 +764,8 @@ public class FutureMapEJB implements Serializable {
                                 if (found == false) {
                                     //String ref = p.getId().toString();
                                     if (p.getCreateDatetime().before(testDate)) {// make sure we don't delate payments that have just been added and may still be being processed by the gateway. i.e they've been put into our DB but havn't been put into the payment gateway schedule yet
-                                        paymentsFacade.remove(p);
+                                        p.setPaymentStatus("X");
+                                        paymentsFacade.edit(p);
                                     }
                                     //AsyncJob aj = new AsyncJob("DeletePayment", paymentBean.deletePaymentByRef(cust, ref, "system", getDigitalKey()));
                                     //this.put(FUTUREMAP_INTERNALID, aj);
@@ -1103,13 +1105,13 @@ public class FutureMapEJB implements Serializable {
                 if (pay.getPaymentReference().isNil() == false) {
                     payment.setPaymentReference(pay.getPaymentReference().getValue());
                 }
-                if (pay.getPaymentReference().isNil() == false) {
+               /* if (pay.getPaymentReference().isNil() == false) {
                     if (pay.getPaymentReference().getValue().trim().isEmpty() == false) {
                         payment.setManuallyAddedPayment(true);
                     } else {
                         payment.setManuallyAddedPayment(false);
                     }
-                }
+                }*/
                 if (pay.getPaymentSource().isNil() == false) {
                     payment.setPaymentSource(pay.getPaymentSource().getValue());
                 }
@@ -1187,11 +1189,11 @@ public class FutureMapEJB implements Serializable {
                 payment.setPaymentID(null);
                 payment.setPaymentMethod("DR");
                 payment.setPaymentReference(pay.getPaymentReference().getValue());
-                if (pay.isManuallyAddedPayment() != null) {
+               /* if (pay.isManuallyAddedPayment() != null) {
 
                     payment.setManuallyAddedPayment(pay.isManuallyAddedPayment());
 
-                }
+                }*/
                 payment.setPaymentSource("SCHEDULED");
                 payment.setScheduledAmount(new BigDecimal(pay.getPaymentAmount().floatValue()));
 
@@ -1414,9 +1416,9 @@ public class FutureMapEJB implements Serializable {
                 if (compareBigDecimalToDouble(payment.getPaymentAmount(), pay.getPaymentAmount()) == false) {
                     return false;
                 }
-                if (!Objects.equals(payment.getManuallyAddedPayment(), pay.isManuallyAddedPayment())) {
+               /* if (!Objects.equals(payment.getManuallyAddedPayment(), pay.isManuallyAddedPayment())) {
                     return false;
-                }
+                }*/
 
                 if (compareStringToXMLString(payment.getPaymentReference(), pay.getPaymentReference()) == false) {
                     return false;
