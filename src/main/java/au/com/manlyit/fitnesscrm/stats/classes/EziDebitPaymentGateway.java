@@ -2361,6 +2361,11 @@ public class EziDebitPaymentGateway implements Serializable {
                     logger.log(Level.INFO, "createSchedule - Deleting payment: Cust={0}, Ref={1}, Manaul Payment = {2}", new Object[]{cust.getUsername(), ref, isManual});
                     paymentsFacade.remove(p);
                     startAsynchJob("DeletePayment", paymentBean.deletePaymentByRef(cust, ref, loggedInUser, getDigitalKey()));
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException ex) {
+                        Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                 }
             }
         }
@@ -2530,7 +2535,11 @@ public class EziDebitPaymentGateway implements Serializable {
                 newDebitDate = startCal.getTime();
                 startCal.setTime(placeholder);// set it back to correct day of month as we may have changed the day of the week.
             }
-
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException ex) {
+                Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
 
     }
