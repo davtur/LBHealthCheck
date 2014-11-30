@@ -154,7 +154,8 @@ public class CustomersController implements Serializable {
             JsfUtil.addErrorMessage(configMapFacade.getConfig("setSelectedCustomerNoneSelected"));
         }
     }
-    public void updateSelectedCustomer(Customers cust){
+
+    public void updateSelectedCustomer(Customers cust) {
         current = cust;
     }
 
@@ -165,6 +166,8 @@ public class CustomersController implements Serializable {
             FacesContext context = FacesContext.getCurrentInstance();
             EziDebitPaymentGateway controller = (EziDebitPaymentGateway) context.getApplication().getELResolver().getValue(context.getELContext(), null, "ezidebit");
             controller.setSelectedCustomer(cust);
+            MySessionsChart1 c2 = (MySessionsChart1) context.getApplication().evaluateExpressionGet(context, "#{mySessionsChart1}", MySessionsChart1.class);
+            c2.setSelectedCustomer(cust);
             selectedItemIndex = -1;
             checkPass = current.getPassword();
             if (cust.getProfileImage() == null) {
@@ -175,7 +178,7 @@ public class CustomersController implements Serializable {
             RequestContext.getCurrentInstance().update("iFrameForm");
 
         }
-    } 
+    }
 
     public void sendCustomerOnboardEmail() {
         FacesContext context = FacesContext.getCurrentInstance();
@@ -243,7 +246,7 @@ public class CustomersController implements Serializable {
                 @Override
                 public PfSelectableDataModel createPageDataModel() {
 
-                    return new PfSelectableDataModel<>(ejbFacade.findFilteredCustomers(true, selectedCustomerStates,showNonUsers,true));
+                    return new PfSelectableDataModel<>(ejbFacade.findFilteredCustomers(true, selectedCustomerStates, showNonUsers, true));
 
                 }
 
@@ -752,8 +755,8 @@ public class CustomersController implements Serializable {
      }*/
     public PfSelectableDataModel<Customers> getItems() {
         if (items == null) {
-            
-            items = new PfSelectableDataModel<>(ejbFacade.findFilteredCustomers(true, selectedCustomerStates,showNonUsers, isRefreshFromDB()));
+
+            items = new PfSelectableDataModel<>(ejbFacade.findFilteredCustomers(true, selectedCustomerStates, showNonUsers, isRefreshFromDB()));
             setRefreshFromDB(false);
             // items = getPagination().createPageDataModel();
         }

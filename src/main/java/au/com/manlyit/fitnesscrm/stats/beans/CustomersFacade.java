@@ -198,13 +198,18 @@ public class CustomersFacade extends AbstractFacade<Customers> {
             cq.where(cb.equal(custId, id));
 
             Query q = em.createQuery(cq);
-            int size = q.getResultList().size();
-            if (size == 1) {
-                cm = (Customers) q.getSingleResult();
-            } else if (size == 0) {
-                logger.log(Level.WARNING, "Customers findById, Customer not found : Customer Id = {0}", id);
-            } else if (size > 1) {
-                logger.log(Level.WARNING, "Customers findById, Duplicate Customer id's found for Customer Id = {0}. The number of duplicates is {1}", new Object[]{id, size});
+            List retList = q.getResultList();
+            if (retList != null) {
+                int size = retList.size();
+                if (size == 1) {
+                    cm = (Customers) retList.get(0);
+                } else if (size == 0) {
+                    logger.log(Level.WARNING, "Customers findById, Customer not found : Customer Id = {0}", id);
+                } else if (size > 1) {
+                    logger.log(Level.WARNING, "Customers findById, Duplicate Customer id's found for Customer Id = {0}. The number of duplicates is {1}", new Object[]{id, size});
+                }
+            } else {
+                logger.log(Level.WARNING, "Customers findById, Customer not found, LIST IS NULL : Customer Id = {0}", id);
             }
         } catch (Exception e) {
             logger.log(Level.WARNING, "Customers findById, An exception occurred for customer id :" + id, e);

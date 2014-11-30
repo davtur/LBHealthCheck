@@ -160,6 +160,7 @@ public class FutureMapEJB implements Serializable {
             if (fmap == null) {
                 logger.log(Level.INFO, "Get Future Map. Map is null for sessionID {0} . Creating an empty list.", userSessionId);
                 futureMap.put(userSessionId, new ArrayList<AsyncJob>());
+                fmap = futureMap.get(userSessionId);
             }
             return fmap;
 
@@ -374,33 +375,43 @@ public class FutureMapEJB implements Serializable {
                             int y = 0;
                             String details = "";
                             AsyncJob aj;
-
-                            for (int x = fmap.size(); x > 0; x--) {
-                                aj = fmap.get(x - 1);
-                                Future ft = aj.getFuture();
-                                String key = aj.getJobName();
-                                if (ft.isDone()) {
-                                    y++;
-                                    logger.log(Level.INFO, "SessionId {0} Future Map async job {1} has finished.", new Object[]{key, sessionId});
-                                    details += key + " ";
-                                    processCompletedAsyncJobs(sessionId);
+                            try {
+                                
+                                for (int x = fmap.size() - 1; x >= 0; x--) {
+                                    aj = fmap.get(x);
+                                    boolean alreadyRemoved = false;
+                                    Future ft = aj.getFuture();
+                                    String key = aj.getJobName();
+                                    if (ft.isDone()) {
+                                        y++;
+                                        logger.log(Level.INFO, "SessionId {0} Future Map async job {1} has finished.", new Object[]{key, sessionId});
+                                        details += key + " ";
+                                        processCompletedAsyncJobs(key, ft);
+                                        if (sessionId.contains(FUTUREMAP_INTERNALID)) {
+                                            fmap.remove(x);
+                                            alreadyRemoved = true;
+                                        }
+                                    }
+                                    GregorianCalendar jobStartTime = new GregorianCalendar();
+                                    GregorianCalendar currentTime = new GregorianCalendar();
+                                    
+                                    jobStartTime.setTime(aj.getStartTime());
+                                    jobStartTime.add(Calendar.SECOND, TIMEOUT_SECONDS);
+                                    if (jobStartTime.compareTo(currentTime) < 0 && alreadyRemoved == false) {
+                                        ft.cancel(true);
+                                        fmap.remove(x);
+                                        logger.log(Level.INFO, "SessionId {0} async job {1} has timed out ({2} seconds )  and been cancelled.", new Object[]{key, sessionId, TIMEOUT_SECONDS});
+                                    }
+                                    
                                 }
-                                GregorianCalendar jobStartTime = new GregorianCalendar();
-                                GregorianCalendar currentTime = new GregorianCalendar();
-
-                                jobStartTime.setTime(aj.getStartTime());
-                                jobStartTime.add(Calendar.SECOND, TIMEOUT_SECONDS);
-                                if (jobStartTime.compareTo(currentTime) < 0) {
-                                    ft.cancel(true);
-                                    fmap.remove(x - 1);
-                                    logger.log(Level.INFO, "SessionId {0} async job {1} has timed out ({2} seconds )  and been cancelled.", new Object[]{key, sessionId, TIMEOUT_SECONDS});
-                                }
-
+                            } catch (Exception e) {
+                                 logger.log(Level.SEVERE, "checkRunningJobsAndNotifyIfComplete,  {0} async jobs for sessionId {1} have finished.Exception {2}", new Object[]{Integer.toString(y), sessionId,e});
                             }
-
                             if (y > 0) {
-                                sendMessage(sessionId, "Asynchronous Tasks Completed", details);
                                 logger.log(Level.INFO, "Notifying that {0} async jobs for sessionId {1} have finished.", new Object[]{Integer.toString(y), sessionId});
+                                if (sessionId.contains(FUTUREMAP_INTERNALID) == false) {
+                                    sendMessage(sessionId, "Asynchronous Tasks Completed", details);
+                                }
                             }
 
                         }
@@ -416,62 +427,28 @@ public class FutureMapEJB implements Serializable {
             logger.log(Level.INFO, "Future Map - skipping checkRunningJobsAndNotifyIfComplete as its still running.");
         }
     }
+// run a schedules
 
-    // run a schedules
-    public void processCompletedAsyncJobs(String sessionId) {
+    public void processCompletedAsyncJobs(String key, Future ft) {
         logger.log(Level.INFO, "Future Map is processing Completed Async Jobs .");
         synchronized (lock3) {
-            String key = "";
 
             try {
 
-                key = "GetCustomerDetails";
-                if (containsKey(sessionId, key)) {
-                    Future ft = (Future) get(sessionId, key).getFuture();
-                    if (ft.isDone()) {
-                        // remove(sessionId, key);
-                        processGetCustomerDetails(ft);
-
-                    }
+                if (key.contains("GetCustomerDetails")) {
+                    processGetCustomerDetails(ft);
                 }
-
-                key = "GetPayments";
-                if (containsKey(sessionId, key)) {
-                    Future ft = (Future) get(sessionId, key).getFuture();
-                    if (ft.isDone()) {
-                        //   remove(sessionId, key);
-                        processGetPayments(ft);
-                    }
+                if (key.contains("GetPayments")) {
+                    processGetPayments(ft);
                 }
-                key = "GetScheduledPayments";
-                if (containsKey(sessionId, key)) {
-                    Future ft = (Future) get(sessionId, key).getFuture();
-                    if (ft.isDone()) {
-                        //    remove(sessionId, key);
-                        processGetScheduledPayments(ft);
-                    }
+                if (key.contains("GetScheduledPayments")) {
+                    processGetScheduledPayments(ft);
                 }
-                key = "PaymentReport";
-                if (containsKey(sessionId, key)) {
-                    Future ft = (Future) get(sessionId, key).getFuture();
-                    if (ft.isDone()) {
-                        //    remove(sessionId, key);
-                        processPaymentReport(ft);
-                        if (sessionId.contains(FUTUREMAP_INTERNALID)) {
-                            remove(sessionId, key);
-                        }
-                    }
+                if (key.contains("PaymentReport")) {
+                    processPaymentReport(ft);
                 }
-                key = "SettlementReport";
-                if (containsKey(sessionId, key)) {
-                    Future ft = (Future) get(sessionId, key).getFuture();
-                    if (ft.isDone()) {
-                        //    remove(sessionId, key);
-                        processSettlementReport(ft);
-                        if (sessionId.contains(FUTUREMAP_INTERNALID)) {
-                            remove(sessionId, key);
-                        }
-                    }
+                if (key.contains("SettlementReport")) {
+                    processSettlementReport(ft);
                 }
 
             } catch (CancellationException ex) {
@@ -481,6 +458,69 @@ public class FutureMapEJB implements Serializable {
         }
     }
 
+    // run a schedules
+  /*  public void processCompletedAsyncJobs2(String sessionId) {
+     logger.log(Level.INFO, "Future Map is processing Completed Async Jobs .");
+     synchronized (lock3) {
+     String key = "";
+
+     try {
+
+     key = "GetCustomerDetails";
+     if (containsKey(sessionId, key)) {
+     Future ft = (Future) get(sessionId, key).getFuture();
+     if (ft.isDone()) {
+     // remove(sessionId, key);
+     processGetCustomerDetails(ft);
+
+     }
+     }
+
+     key = "GetPayments";
+     if (containsKey(sessionId, key)) {
+     Future ft = (Future) get(sessionId, key).getFuture();
+     if (ft.isDone()) {
+     //   remove(sessionId, key);
+     processGetPayments(ft);
+     }
+     }
+     key = "GetScheduledPayments";
+     if (containsKey(sessionId, key)) {
+     Future ft = (Future) get(sessionId, key).getFuture();
+     if (ft.isDone()) {
+     //    remove(sessionId, key);
+     processGetScheduledPayments(ft);
+     }
+     }
+     key = "PaymentReport";
+     if (containsKey(sessionId, key)) {
+     Future ft = (Future) get(sessionId, key).getFuture();
+     if (ft.isDone()) {
+     //    remove(sessionId, key);
+     processPaymentReport(ft);
+     if (sessionId.contains(FUTUREMAP_INTERNALID)) {
+     remove(sessionId, key);
+     }
+     }
+     }
+     key = "SettlementReport";
+     if (containsKey(sessionId, key)) {
+     Future ft = (Future) get(sessionId, key).getFuture();
+     if (ft.isDone()) {
+     //    remove(sessionId, key);
+     processSettlementReport(ft);
+     if (sessionId.contains(FUTUREMAP_INTERNALID)) {
+     remove(sessionId, key);
+     }
+     }
+     }
+
+     } catch (CancellationException ex) {
+     logger.log(Level.WARNING, key + " Future Map:", ex);
+
+     }
+     }
+     }*/
     private void processSettlementReport(Future ft) {
         synchronized (lock8) {
             logger.log(Level.INFO, "Future Map is processing the Settlement Report .");
@@ -747,7 +787,7 @@ public class FutureMapEJB implements Serializable {
         logger.log(Level.INFO, "Future Map processGetScheduledPayments completed");
     }
 
-    @Asynchronous
+   /* @Asynchronous
     private void processGetScheduledPayments2(Future ft) {
         ArrayOfScheduledPayment result = null;
         boolean abort = false;
@@ -818,14 +858,14 @@ public class FutureMapEJB implements Serializable {
                             /*TODO email a report at the end of the process if there are any payments swithout a customer reference
                              as this means that a customer is in ezidebits system but not ours */
 
-                        }
+                      /*  }
                     }
                 }
             }
 
             logger.log(Level.INFO, "processGetScheduledPayments completed");
         }
-    }
+    }n */
 
     private void createDefaultPaymentParameters(Customers current) {
 

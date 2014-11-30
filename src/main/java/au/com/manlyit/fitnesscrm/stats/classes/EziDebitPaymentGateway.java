@@ -1541,44 +1541,6 @@ public class EziDebitPaymentGateway implements Serializable {
         logger.log(Level.INFO, "Adding connect request to primefaces requestcontext. PF(\'subscriber\').connect(\'/{0}\')", sessionId);
     }
 
-    public void pollerListener() {
-        logger.log(Level.INFO, "Poller called backing bean listener method.");
-
-        int k = futureMap.size(sessionId);
-        if (k > 0) {
-            logger.log(Level.INFO, "{0} jobs are running. Checking to see if asych jobs have finished so their results can be processed.", k);
-            if (isAsyncOperationRunning() == false) {
-                logger.log(Level.WARNING, "{0} jobs are running but asychOperationRunning flag is false!!", k);
-                setAsyncOperationRunning(true);
-            }
-            checkIfAsyncJobsHaveFinishedAndUpdate();
-        }
-        k = futureMap.size(sessionId);
-        if (k == 0) {
-            setAsyncOperationRunning(false);
-            logger.log(Level.INFO, "Asking request context to update components.");
-
-            //ArrayList<String> componentsToUpdate = new ArrayList<>();
-            //componentsToUpdate.add(":tv:paymentsForm:progressBarPanel");
-            //componentsToUpdate.add("paymentsForm:mainPanel");
-            //componentsToUpdate.add("tv:paymentsForm:iFrameHeaderPanel");
-            //componentsToUpdate.add("paymentsTablePanel");
-            //componentsToUpdate.add("scheduledPaymentsTablePanel");
-            //componentsToUpdate.add("tv:paymentsForm");
-            // requestContext.execute("PF('paymentPoller').stop();");
-            //pushComponentUpdateBean.sendMessage("Notification", "Payment Gateway Request Completed");
-            logger.log(Level.INFO, "All asych jobs have finished.");
-        }
-
-        if (isRefreshIFrames() == true) {
-            RequestContext.getCurrentInstance().update("iFrameForm");
-            logger.log(Level.INFO, "Asking Request Context to update IFrame forms.");
-            setRefreshIFrames(false);
-        }
-        RequestContext.getCurrentInstance().update("paymentsForm");
-        refreshFromDB = true;
-    }
-
     @PreDestroy
     private void cleanUp() {
         futureMap.cancelFutures(sessionId);
@@ -1608,188 +1570,140 @@ public class EziDebitPaymentGateway implements Serializable {
         futureMap.remove(sessionId, key);
     }
 
-    public void checkIfAsyncJobsHaveFinishedAndUpdate() {
+    public void pollerListener() {
+        logger.log(Level.INFO, "Poller called backing bean listener method.");
 
-        String key = "";
+        int k = futureMap.size(sessionId);
+        if (k > 0) {
+            logger.log(Level.INFO, "{0} jobs are running. Checking to see if asych jobs have finished so their results can be processed.", k);
+            if (isAsyncOperationRunning() == false) {
+                logger.log(Level.WARNING, "{0} jobs are running but asychOperationRunning flag is false!!", k);
+                setAsyncOperationRunning(true);
+            }
+
+            int y = 0;
+            String details = "";
+            AsyncJob aj;
+            ArrayList<AsyncJob> fmap = futureMap.getFutureMap(sessionId);
+            try {
+
+                for (int x = fmap.size() - 1; x >= 0; x--) {
+                    aj = fmap.get(x);
+
+                    Future ft = aj.getFuture();
+                    String key = aj.getJobName();
+                    if (ft.isDone()) {
+                        y++;
+                        logger.log(Level.INFO, "SessionId {0} Future Map async job {1} has finished.", new Object[]{key, sessionId});
+                        details += key + " ";
+                        checkIfAsyncJobsHaveFinishedAndUpdate(key, ft);
+
+                        fmap.remove(x);
+
+                    }
+
+                }
+            } catch (Exception e) {
+                logger.log(Level.SEVERE, "checkRunningJobsAndNotifyIfComplete,  {0} async jobs for sessionId {1} have finished.Exception {2}", new Object[]{Integer.toString(y), sessionId, e});
+            }
+
+            // checkIfAsyncJobsHaveFinishedAndUpdate();
+        }
+        k = futureMap.size(sessionId);
+        if (k == 0) {
+            setAsyncOperationRunning(false);
+            logger.log(Level.INFO, "Asking request context to update components.");
+
+            //ArrayList<String> componentsToUpdate = new ArrayList<>();
+            //componentsToUpdate.add(":tv:paymentsForm:progressBarPanel");
+            //componentsToUpdate.add("paymentsForm:mainPanel");
+            //componentsToUpdate.add("tv:paymentsForm:iFrameHeaderPanel");
+            //componentsToUpdate.add("paymentsTablePanel");
+            //componentsToUpdate.add("scheduledPaymentsTablePanel");
+            //componentsToUpdate.add("tv:paymentsForm");
+            // requestContext.execute("PF('paymentPoller').stop();");
+            //pushComponentUpdateBean.sendMessage("Notification", "Payment Gateway Request Completed");
+            logger.log(Level.INFO, "All asych jobs have finished.");
+        }
+
+        if (isRefreshIFrames() == true) {
+            RequestContext.getCurrentInstance().update("iFrameForm");
+            logger.log(Level.INFO, "Asking Request Context to update IFrame forms.");
+            setRefreshIFrames(false);
+        }
+        RequestContext.getCurrentInstance().update("paymentsForm");
+        refreshFromDB = true;
+    }
+
+    public void checkIfAsyncJobsHaveFinishedAndUpdate(String key, Future ft) {
 
         try {
 
-            key = "GetCustomerDetails";
-            if (futureMapContainsKey(key)) {
-                Future ft = (Future) futureMapGetKey(key);
-                if (ft.isDone()) {
-                    futureMapRemoveKey(key);
-                    processGetCustomerDetails(ft);
-                    RequestContext.getCurrentInstance().update("customerslistForm1");
+            if (key.contains("GetCustomerDetails")) {
+                processGetCustomerDetails(ft);
+                RequestContext.getCurrentInstance().update("customerslistForm1");
+            }
+            if (key.contains("AddPayment")) {
+                processAddPaymentResult(ft);
+            }
+            if (key.contains("GetPayments")) {
+                processGetPayments(ft);
+            }
+            if (key.contains("GetScheduledPayments")) {
+                processGetScheduledPayments(ft);
+            }
+            if (key.contains("CreateSchedule")) {
+                processCreateSchedule(ft);
+            }
+            if (key.contains("AddCustomer")) {
+                processAddCustomer(ft);
+            }
+            if (key.contains("EditCustomerDetails")) {
+                processEditCustomerDetails(ft);
+            }
+            if (key.contains("ClearSchedule")) {
+                processClearSchedule(ft);
+            }
+            if (key.contains("DeletePayment")) {
+                processDeletePayment(ft);
+            }
+            if (key.contains("ChangeCustomerStatus")) {
+                processChangeCustomerStatus(ft);
+            }
+            if (key.contains("GetPaymentStatus")) {
+                processGetPaymentStatus(ft);
+            }
+            if (key.contains("ChangeScheduledAmount")) {
+                processChangeScheduledAmount(ft);
+            }
+            if (key.contains("ChangeScheduledDate")) {
+                processChangeScheduledDate(ft);
+            }
+            if (key.contains("IsBsbValid")) {
+                processIsBsbValid(ft);
+            }
+            if (key.contains("IsSystemLocked")) {
+                processIsSystemLocked(ft);
+            }
+            if (key.contains("GetPaymentExchangeVersion")) {
+                processGetPaymentExchangeVersion(ft);
+            }
+            if (key.contains("GetCustomerDetailsFromEziDebitId")) {
+                processGetCustomerDetailsFromEziDebitId(ft);
+            }
+            if (key.contains("GetPaymentDetail")) {
+                processGetPaymentDetail(ft);
+            }
+            if (key.contains("GetPaymentDetailPlusNextPaymentInfo")) {
+                processGetPaymentDetailPlusNextPaymentInfo(ft);
+            }
+            if (key.contains("PaymentReport")) {
+                processPaymentReport(ft);
+            }
+            if (key.contains("SettlementReport")) {
+                processSettlementReport(ft);
+            }
 
-                }
-            }
-            /// process next op
-
-            key = "AddPayment";
-            if (futureMapContainsKey(key)) {
-                Future ft = (Future) futureMapGetKey(key);
-                if (ft.isDone()) {
-                    futureMapRemoveKey(key);
-                    processAddPaymentResult(ft);
-                }
-            }
-            // process next op
-
-            key = "GetPayments";
-            if (futureMapContainsKey(key)) {
-                Future ft = (Future) futureMapGetKey(key);
-                if (ft.isDone()) {
-                    futureMapRemoveKey(key);
-                    processGetPayments(ft);
-                }
-            }
-
-            key = "GetScheduledPayments";
-            if (futureMapContainsKey(key)) {
-                Future ft = (Future) futureMapGetKey(key);
-                if (ft.isDone()) {
-                    futureMapRemoveKey(key);
-                    processGetScheduledPayments(ft);
-                }
-            }
-            key = "CreateSchedule";
-            if (futureMapContainsKey(key)) {
-                Future ft = (Future) futureMapGetKey(key);
-                if (ft.isDone()) {
-                    futureMapRemoveKey(key);
-                    processCreateSchedule(ft);
-                }
-            }
-            key = "AddCustomer";
-            if (futureMapContainsKey(key)) {
-                Future ft = (Future) futureMapGetKey(key);
-                if (ft.isDone()) {
-                    futureMapRemoveKey(key);
-                    processAddCustomer(ft);
-                }
-            }
-
-            key = "EditCustomerDetails";
-            if (futureMapContainsKey(key)) {
-                Future ft = (Future) futureMapGetKey(key);
-                if (ft.isDone()) {
-                    futureMapRemoveKey(key);
-                    processEditCustomerDetails(ft);
-                }
-            }
-            key = "ClearSchedule";
-            if (futureMapContainsKey(key)) {
-                Future ft = (Future) futureMapGetKey(key);
-                if (ft.isDone()) {
-                    futureMapRemoveKey(key);
-                    processClearSchedule(ft);
-                }
-            }
-            key = "DeletePayment";
-            if (futureMapContainsKey(key)) {
-                Future ft = (Future) futureMapGetKey(key);
-                if (ft.isDone()) {
-                    futureMapRemoveKey(key);
-                    processDeletePayment(ft);
-                }
-            }
-            key = "ChangeCustomerStatus";
-            if (futureMapContainsKey(key)) {
-                Future ft = (Future) futureMapGetKey(key);
-                if (ft.isDone()) {
-                    futureMapRemoveKey(key);
-                    processChangeCustomerStatus(ft);
-                }
-            }
-            key = "GetPaymentStatus";
-            if (futureMapContainsKey(key)) {
-                Future ft = (Future) futureMapGetKey(key);
-                if (ft.isDone()) {
-                    futureMapRemoveKey(key);
-                    processGetPaymentStatus(ft);
-                }
-            }
-            key = "ChangeScheduledAmount";
-            if (futureMapContainsKey(key)) {
-                Future ft = (Future) futureMapGetKey(key);
-                if (ft.isDone()) {
-                    futureMapRemoveKey(key);
-                    processChangeScheduledAmount(ft);
-                }
-            }
-            key = "ChangeScheduledDate";
-            if (futureMapContainsKey(key)) {
-                Future ft = (Future) futureMapGetKey(key);
-                if (ft.isDone()) {
-                    futureMapRemoveKey(key);
-                    processChangeScheduledDate(ft);
-                }
-            }
-            key = "IsBsbValid";
-            if (futureMapContainsKey(key)) {
-                Future ft = (Future) futureMapGetKey(key);
-                if (ft.isDone()) {
-                    futureMapRemoveKey(key);
-                    processIsBsbValid(ft);
-                }
-            }
-            key = "IsSystemLocked";
-            if (futureMapContainsKey(key)) {
-                Future ft = (Future) futureMapGetKey(key);
-                if (ft.isDone()) {
-                    futureMapRemoveKey(key);
-                    processIsSystemLocked(ft);
-                }
-            }
-            key = "GetPaymentExchangeVersion";
-            if (futureMapContainsKey(key)) {
-                Future ft = (Future) futureMapGetKey(key);
-                if (ft.isDone()) {
-                    futureMapRemoveKey(key);
-                    processGetPaymentExchangeVersion(ft);
-                }
-            }
-            key = "GetCustomerDetailsFromEziDebitId";
-            if (futureMapContainsKey(key)) {
-                Future ft = (Future) futureMapGetKey(key);
-                if (ft.isDone()) {
-                    futureMapRemoveKey(key);
-                    processGetCustomerDetailsFromEziDebitId(ft);
-                }
-            }
-            key = "GetPaymentDetail";
-            if (futureMapContainsKey(key)) {
-                Future ft = (Future) futureMapGetKey(key);
-                if (ft.isDone()) {
-                    futureMapRemoveKey(key);
-                    processGetPaymentDetail(ft);
-                }
-            }
-            key = "GetPaymentDetailPlusNextPaymentInfo";
-            if (futureMapContainsKey(key)) {
-                Future ft = (Future) futureMapGetKey(key);
-                if (ft.isDone()) {
-                    futureMapRemoveKey(key);
-                    processGetPaymentDetailPlusNextPaymentInfo(ft);
-                }
-            }
-            key = "PaymentReport";
-            if (futureMapContainsKey(key)) {
-                Future ft = (Future) futureMapGetKey(key);
-                if (ft.isDone()) {
-                    futureMapRemoveKey(key);
-                    processPaymentReport(ft);
-                }
-            }
-            key = "SettlementReport";
-            if (futureMapContainsKey(key)) {
-                Future ft = (Future) futureMapGetKey(key);
-                if (ft.isDone()) {
-                    futureMapRemoveKey(key);
-                    processSettlementReport(ft);
-                }
-            }
         } catch (CancellationException ex) {
             logger.log(Level.WARNING, key + ":", ex);
 
@@ -2357,18 +2271,18 @@ public class EziDebitPaymentGateway implements Serializable {
         GregorianCalendar endCal = new GregorianCalendar();
         endCal.setTime(paymentDebitDate);
         endCal.add(Calendar.YEAR, 1);
-        int dow = 2;
+        int dow = Calendar.MONDAY;
         if (paymentDayOfWeek.contains("TUE")) {
-            dow = 3;
+            dow = Calendar.TUESDAY;
         }
         if (paymentDayOfWeek.contains("WED")) {
-            dow = 4;
+            dow = Calendar.WEDNESDAY;
         }
         if (paymentDayOfWeek.contains("THU")) {
-            dow = 5;
+            dow = Calendar.THURSDAY;
         }
         if (paymentDayOfWeek.contains("FRI")) {
-            dow = 6;
+            dow = Calendar.FRIDAY;
         }
         if (loggedInUser != null) {
 
@@ -2437,13 +2351,17 @@ public class EziDebitPaymentGateway implements Serializable {
         List<Payments> crmPaymentList = paymentsFacade.findPaymentsByCustomerAndStatus(cust, PaymentStatus.SCHEDULED.value());
 
         for (Payments p : crmPaymentList) {
-            if (!(keepManualPayments && p.getManuallyAddedPayment())) {
-                String ref = p.getId().toString();
+            String ref = p.getId().toString();
+            boolean isManual = p.getManuallyAddedPayment();
+            if (keepManualPayments == true && isManual) {
+                logger.log(Level.INFO, "createSchedule - keeping manual payment: Cust={0}, Ref={1}, Manaul Payment = {2}", new Object[]{cust.getUsername(), ref, isManual});
+            } else {
+                logger.log(Level.INFO, "createSchedule - Deleting payment: Cust={0}, Ref={1}, Manaul Payment = {2}", new Object[]{cust.getUsername(), ref, isManual});
                 paymentsFacade.remove(p);
                 startAsynchJob("DeletePayment", paymentBean.deletePaymentByRef(cust, ref, loggedInUser, getDigitalKey()));
             }
         }
-       // startAsynchJob("ClearSchedule", paymentBean.clearSchedule(cust, false, loggedInUser, getDigitalKey()));// work around failsafe until migration complete. THere are styill scheduled payments without a payment reference from DB
+        // startAsynchJob("ClearSchedule", paymentBean.clearSchedule(cust, false, loggedInUser, getDigitalKey()));// work around failsafe until migration complete. THere are styill scheduled payments without a payment reference from DB
         // try {
         //     Thread.sleep(200);// work around to ensure clearschedule workaround doesn't impact new payments being added 
         // } catch (InterruptedException interruptedException) {
@@ -2490,8 +2408,11 @@ public class EziDebitPaymentGateway implements Serializable {
                 break;
             case '4': // 4 weekly
                 calendarField = Calendar.DAY_OF_YEAR;
-                calendarAmount = 28;
+                calendarAmount = 7;
                 startCal.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                if (currentDay > dayOfMonth) {
+                    startCal.add(Calendar.MONTH, 1);
+                }
                 calendarDow = startCal.get(Calendar.DAY_OF_WEEK);
                 if (calendarDow > payDayOfWeek) {
                     int d = (payDayOfWeek + 7) - calendarDow;
@@ -2499,9 +2420,6 @@ public class EziDebitPaymentGateway implements Serializable {
                 } else {
                     int d = payDayOfWeek - calendarDow;
                     startCal.add(Calendar.DAY_OF_YEAR, d);
-                }
-                if (currentDay > dayOfMonth) {
-                    startCal.add(Calendar.MONTH, 1);
                 }
 
                 break;
@@ -2561,59 +2479,94 @@ public class EziDebitPaymentGateway implements Serializable {
         Date newDebitDate = startCal.getTime();
 
         while (startCal.compareTo(endCal) < 0) {
-            if (limitToNumberOfPayments > 0 || paymentAmountLimitInCents > 0) {
-                numberOfpayments++;
-                cumulativeAmountInCents += amountInCents;
-                if (limitToNumberOfPayments > 0 && paymentAmountLimitInCents > 0) {
-                    if (limitToNumberOfPayments < numberOfpayments && paymentAmountLimitInCents > cumulativeAmountInCents) {
-                        addPayment(cust, newDebitDate, amountInCents, false);
-                    }
-                }
-                if (limitToNumberOfPayments > 0 && paymentAmountLimitInCents == 0) {
-                    if (limitToNumberOfPayments < numberOfpayments) {
-                        addPayment(cust, newDebitDate, amountInCents, false);
-                    }
-                }
-                if (limitToNumberOfPayments == 0 && paymentAmountLimitInCents > 0) {
-                    if (paymentAmountLimitInCents > cumulativeAmountInCents) {
-                        addPayment(cust, newDebitDate, amountInCents, false);
-                    }
-                }
-            } else {
-                addPayment(cust, newDebitDate, amountInCents, false);
-            }
-
-            startCal.add(calendarField, calendarAmount);
-            Date placeholder = startCal.getTime();
 
             if (schedulePeriodType == 'N') {
                 //TODO fix this 
-                if (firstWeekOfMonth) {
-                    startCal.set(Calendar.WEEK_OF_MONTH, 1);
+                if (startCal.get(Calendar.WEEK_OF_MONTH) == 1 && firstWeekOfMonth == true) {
+                    if (arePaymentsWithinLimits(limitToNumberOfPayments, paymentAmountLimitInCents, cumulativeAmountInCents, amountInCents, numberOfpayments)) {
+                        addPayment(cust, newDebitDate, amountInCents, false);
+                        numberOfpayments++;
+                    }
+
                 }
-                if (secondWeekOfMonth) {
-                    startCal.set(Calendar.WEEK_OF_MONTH, 2);
+                if (startCal.get(Calendar.WEEK_OF_MONTH) == 2 && secondWeekOfMonth == true) {
+                    if (arePaymentsWithinLimits(limitToNumberOfPayments, paymentAmountLimitInCents, cumulativeAmountInCents, amountInCents, numberOfpayments)) {
+                        addPayment(cust, newDebitDate, amountInCents, false);
+                        numberOfpayments++;
+                    }
+
                 }
-                if (thirdWeekOfMonth) {
-                    startCal.set(Calendar.WEEK_OF_MONTH, 3);
+                if (startCal.get(Calendar.WEEK_OF_MONTH) == 3 && thirdWeekOfMonth == true) {
+                    if (arePaymentsWithinLimits(limitToNumberOfPayments, paymentAmountLimitInCents, cumulativeAmountInCents, amountInCents, numberOfpayments)) {
+                        addPayment(cust, newDebitDate, amountInCents, false);
+                        numberOfpayments++;
+                    }
+
                 }
-                if (fourthWeekOfMonth) {
-                    startCal.set(Calendar.WEEK_OF_MONTH, 4);
+                if (startCal.get(Calendar.WEEK_OF_MONTH) == 4 && fourthWeekOfMonth == true) {
+                    if (arePaymentsWithinLimits(limitToNumberOfPayments, paymentAmountLimitInCents, cumulativeAmountInCents, amountInCents, numberOfpayments)) {
+                        addPayment(cust, newDebitDate, amountInCents, false);
+                        numberOfpayments++;
+                    }
+
                 }
-                int dow2 = startCal.get(Calendar.DAY_OF_WEEK);
-                if (dow2 > payDayOfWeek) {
-                    int d = dow2 - payDayOfWeek;
-                    startCal.add(Calendar.DAY_OF_MONTH, d);
+                startCal.add(calendarField, calendarAmount);
+                Date placeholder = startCal.getTime();
+
+                calendarDow = startCal.get(Calendar.DAY_OF_WEEK);
+                if (calendarDow > payDayOfWeek) {
+                    int d = (payDayOfWeek + 7) - calendarDow;
+                    startCal.add(Calendar.DAY_OF_YEAR, d);
                 } else {
-                    startCal.set(Calendar.DAY_OF_WEEK, payDayOfWeek);
+                    int d = payDayOfWeek - calendarDow;
+                    startCal.add(Calendar.DAY_OF_YEAR, d);
                 }
+                newDebitDate = startCal.getTime();
+                startCal.setTime(placeholder);// set it back to correct day of month as we may have changed the day of the week.
             } else {
-                if (startCal.get(Calendar.DAY_OF_WEEK) < Calendar.MONDAY || startCal.get(Calendar.DAY_OF_WEEK) > Calendar.FRIDAY) {
-                    startCal.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+                if (arePaymentsWithinLimits(limitToNumberOfPayments, paymentAmountLimitInCents, cumulativeAmountInCents, amountInCents, numberOfpayments)) {
+                    addPayment(cust, newDebitDate, amountInCents, false);
+                    numberOfpayments++;
+                }
+                startCal.add(calendarField, calendarAmount);
+                Date placeholder = startCal.getTime();
+                // we can only schedule payments for business days
+                if (startCal.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) {
+                    startCal.add(Calendar.DAY_OF_YEAR, 2);
+                }
+                if (startCal.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
+                    startCal.add(Calendar.DAY_OF_YEAR, 1);
+                }
+                newDebitDate = startCal.getTime();
+                startCal.setTime(placeholder);// set it back to correct day of month as we may have changed the day of the week.
+            }
+
+        }
+
+    }
+
+    private boolean arePaymentsWithinLimits(int limitToNumberOfPayments, long paymentAmountLimitInCents, long cumulativeAmountInCents, long amountInCents, int numberOfpayments) {
+        if (limitToNumberOfPayments > 0 || paymentAmountLimitInCents > 0) {
+            cumulativeAmountInCents += amountInCents;
+            if (limitToNumberOfPayments > 0 && paymentAmountLimitInCents > 0) {
+                if (limitToNumberOfPayments > numberOfpayments && paymentAmountLimitInCents > cumulativeAmountInCents) {
+                    return true;
                 }
             }
-            newDebitDate = startCal.getTime();
-            startCal.setTime(placeholder);// set it back to correct day of month as we may have changed the day of the week.
+            if (limitToNumberOfPayments > 0 && paymentAmountLimitInCents == 0) {
+                if (limitToNumberOfPayments > numberOfpayments) {
+                    return true;
+                }
+            }
+            if (limitToNumberOfPayments == 0 && paymentAmountLimitInCents > 0) {
+                if (paymentAmountLimitInCents > cumulativeAmountInCents) {
+                    return true;
+                }
+            }
+            return false;
+
+        } else {
+            return true;
         }
 
     }
