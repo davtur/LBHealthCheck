@@ -2288,10 +2288,12 @@ public class EziDebitPaymentGateway implements Serializable {
 
             String dom = Integer.toString(paymentDayOfMonth);
             Customers c = selectedCustomer;
-            c.getPaymentParameters().setPaymentPeriod(paymentSchedulePeriodType);
-            c.getPaymentParameters().setPaymentPeriodDayOfMonth(dom);
-            c.getPaymentParameters().setPaymentPeriodDayOfWeek(paymentDayOfWeek);
-            c.getPaymentParameters().setNextScheduledPayment(null);
+            PaymentParameters pp = c.getPaymentParameters();
+            pp.setPaymentPeriod(paymentSchedulePeriodType);
+            pp.setPaymentPeriodDayOfMonth(dom);
+            pp.setPaymentPeriodDayOfWeek(paymentDayOfWeek);
+            pp.setNextScheduledPayment(null);
+            ejbPaymentParametersFacade.edit(pp);
             customersFacade.edit(c);
             createCRMPaymentSchedule(selectedCustomer, paymentDebitDate, endCal.getTime(), spt, dow, paymentDayOfMonth, amount, paymentLimitToNumberOfPayments, amountLimit, paymentKeepManualPayments, paymentFirstWeekOfMonth, paymentSecondWeekOfMonth, paymentThirdWeekOfMonth, paymentFourthWeekOfMonth, loggedInUser);
             /* List<Payments> crmPaymentList = paymentsFacade.findPaymentsByCustomerAndStatus(selectedCustomer, PaymentStatus.SCHEDULED.value());
@@ -2382,6 +2384,10 @@ public class EziDebitPaymentGateway implements Serializable {
         int calendarAmount = 0;
         int currentDay = startCal.get(Calendar.DAY_OF_MONTH);
         int calendarDow = startCal.get(Calendar.DAY_OF_WEEK);
+         if (schedulePeriodType != 'M') {
+             dayOfMonth = currentDay;
+         }
+        
         switch (schedulePeriodType) {
             case 'W'://weekly
                 calendarField = Calendar.DAY_OF_YEAR;
@@ -2417,10 +2423,10 @@ public class EziDebitPaymentGateway implements Serializable {
             case '4': // 4 weekly
                 calendarField = Calendar.DAY_OF_YEAR;
                 calendarAmount = 28;
-                startCal.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-                if (currentDay > dayOfMonth) {
-                    startCal.add(Calendar.MONTH, 1);
-                }
+                //startCal.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                //if (currentDay > dayOfMonth) {
+                //    startCal.add(Calendar.MONTH, 1);
+                //}
                 calendarDow = startCal.get(Calendar.DAY_OF_WEEK);
                 if (calendarDow > payDayOfWeek) {
                     int d = (payDayOfWeek + 7) - calendarDow;
@@ -2446,26 +2452,26 @@ public class EziDebitPaymentGateway implements Serializable {
             case 'Q': // quarterly
                 calendarField = Calendar.MONTH;
                 calendarAmount = 3;
-                if (currentDay > dayOfMonth) {
-                    startCal.add(Calendar.MONTH, 1);
-                }
-                startCal.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                //if (currentDay > dayOfMonth) {
+               //     startCal.add(Calendar.MONTH, 1);
+               // }
+               // startCal.set(Calendar.DAY_OF_MONTH, dayOfMonth);
                 break;
             case 'H': // 6 monthly
                 calendarField = Calendar.MONTH;
                 calendarAmount = 6;
-                if (currentDay > dayOfMonth) {
-                    startCal.add(Calendar.MONTH, 1);
-                }
-                startCal.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+               // if (currentDay > dayOfMonth) {
+               //     startCal.add(Calendar.MONTH, 1);
+               // }
+              //  startCal.set(Calendar.DAY_OF_MONTH, dayOfMonth);
                 break;
             case 'Y'://yearly
                 calendarField = Calendar.YEAR;
                 calendarAmount = 1;
-                if (currentDay > dayOfMonth) {
-                    startCal.add(Calendar.MONTH, 1);
-                }
-                startCal.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+               // if (currentDay > dayOfMonth) {
+              //      startCal.add(Calendar.MONTH, 1);
+              //  }
+              //  startCal.set(Calendar.DAY_OF_MONTH, dayOfMonth);
                 break;
         }
         int numberOfpayments = 0;
@@ -2629,7 +2635,18 @@ public class EziDebitPaymentGateway implements Serializable {
                     }
                 }
             }
-
+            Customers c = selectedCustomer;
+             PaymentParameters pp = c.getPaymentParameters();
+            pp.setPaymentPeriod("Z");
+            pp.setPaymentPeriodDayOfMonth("-");
+            pp.setPaymentPeriodDayOfWeek("---");
+            pp.setNextScheduledPayment(null);
+            ejbPaymentParametersFacade.edit(pp);
+            customersFacade.edit(c);
+           
+            
+            customersFacade.edit(c);
+            
             paymentDBList = null;
             paymentsDBListFilteredItems = null;
         } else {

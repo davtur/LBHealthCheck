@@ -96,11 +96,32 @@
                                         <f:convertDateTime pattern="dd MMM yyyy" />
                                     </h:outputText>
                                 </p:column>
+                                <p:column sortBy="#{item.paymentParameters.paymentPeriod}" filterBy="#{item.paymentParameters.paymentPeriod}" headerText="#{configMapController.getKey('ListCustomersTitle_paymentPeriod')}"   >
+                                   
+                                    <h:outputText  rendered="#{item.paymentParameters.paymentPeriod == 'F'}"  value="Fortnightly" />
+                                    <h:outputText  rendered="#{item.paymentParameters.paymentPeriod == 'M'}"  value="Monthly" />
+                                    <h:outputText  rendered="#{item.paymentParameters.paymentPeriod == '4'}"  value="4 Weekly" />
+                                    <h:outputText  rendered="#{item.paymentParameters.paymentPeriod == 'N'}"  value="Weekday in Month" />
+                                    <h:outputText  rendered="#{item.paymentParameters.paymentPeriod == 'Q'}"  value="Quarterly" />
+                                    <h:outputText  rendered="#{item.paymentParameters.paymentPeriod == 'H'}"  value="Half Yearly" />
+                                    <h:outputText  rendered="#{item.paymentParameters.paymentPeriod == 'Y'}"  value="Annually" />
+                                    <h:outputText  rendered="#{item.paymentParameters.paymentPeriod == 'W'}"  value="Weekly" />
+                                    <h:outputText  rendered="#{item.paymentParameters.paymentPeriod == 'Z'}"  value="No Schedule" />
+                                    <h:outputText  rendered="#{item.paymentParameters.paymentPeriod != 'Z' and item.paymentParameters.paymentPeriod != 'M' and item.paymentParameters.paymentPeriod != 'Q' and item.paymentParameters.paymentPeriod != 'H' and item.paymentParameters.paymentPeriod != 'Y' }"  value=" - #{item.paymentParameters.paymentPeriodDayOfWeek}"/> 
+                                    <h:outputText  rendered="#{item.paymentParameters.paymentPeriod != 'Z' and item.paymentParameters.paymentPeriod == 'M' }"  value=", day-#{item.paymentParameters.paymentPeriodDayOfMonth}"/> 
+
+                                </p:column>
+
                                 <p:column sortBy="#{item.paymentParameters.nextScheduledPayment.debitDate}" filterBy="#{item.paymentParameters.nextScheduledPayment.debitDate}" headerText="#{configMapController.getKey('ListCustomersTitle_nextScheduledPayment')}"   >
                                     <h:outputText rendered="#{not empty item.paymentParameters.nextScheduledPayment}"  value="#{item.paymentParameters.nextScheduledPayment.debitDate}">
                                         <f:convertDateTime pattern="E dd MMM yyyy" />
                                     </h:outputText>
                                     <h:outputText rendered="#{empty item.paymentParameters.nextScheduledPayment}" value="---"/>
+                                </p:column>
+                                <p:column sortBy="#{item.paymentParameters.nextScheduledPayment.paymentAmount}" filterBy="#{item.paymentParameters.nextScheduledPayment.paymentAmount}" headerText="#{configMapController.getKey('ListCustomersTitle_nextScheduledPaymentAmount')}"   >
+                                    <h:outputText rendered="#{not empty item.paymentParameters.nextScheduledPayment}" value="#{item.paymentParameters.nextScheduledPayment.paymentAmount}">
+                                        <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
+                                    </h:outputText>
                                 </p:column>
                                 <p:column sortBy="#{item.paymentParameters.lastSuccessfulScheduledPayment.lastUpdatedDatetime}" filterBy="#{item.paymentParameters.lastSuccessfulScheduledPayment.lastUpdatedDatetime}" headerText="#{configMapController.getKey('ListCustomersTitle_lastUpdated')}"   >
                                     <h:outputText  rendered="#{not empty item.paymentParameters.lastSuccessfulScheduledPayment}"  value="#{item.paymentParameters.lastSuccessfulScheduledPayment.lastUpdatedDatetime}">

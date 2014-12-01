@@ -55,9 +55,9 @@
                         <p:ajax update="addPaymentScheduleGrid2" /> 
                     </p:selectOneMenu>
 
-                    <p:outputLabel  rendered="#{ezidebit.paymentSchedulePeriodType == 'M' or ezidebit.paymentSchedulePeriodType == '4'}" value="#{configMapController.getKey('AddPaymentScheduleLabel_paymentDayOfMonth')}" for="dayOfMonth" />
+                    <p:outputLabel  rendered="#{ezidebit.paymentSchedulePeriodType == 'M' }" value="#{configMapController.getKey('AddPaymentScheduleLabel_paymentDayOfMonth')}" for="dayOfMonth" />
 
-                    <p:selectOneMenu  rendered="#{ezidebit.paymentSchedulePeriodType == 'M' or ezidebit.paymentSchedulePeriodType == '4'}" id="dayOfMonth" value="#{ezidebit.paymentDayOfMonth}"  >
+                    <p:selectOneMenu  rendered="#{ezidebit.paymentSchedulePeriodType == 'M' }" id="dayOfMonth" value="#{ezidebit.paymentDayOfMonth}"  >
                         <f:selectItems value="#{ezidebit.daysInMonth}" var="num" itemValue="#{num}" /> 
 
                     </p:selectOneMenu> 
