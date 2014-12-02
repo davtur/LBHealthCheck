@@ -133,8 +133,8 @@ public class EziDebitPaymentGateway implements Serializable {
     private PfSelectableDataModel<Payments> paymentDBList = null;
     private PfSelectableDataModel<Payments> reportPaymentsList = null;
     private List<Payment> paymentsListFilteredItems;
-    private List<Payment> paymentsDBListFilteredItems;
-    private List<Payment> reportPaymentsListFilteredItems;
+    private List<Payments> paymentsDBListFilteredItems;
+    private List<Payments> reportPaymentsListFilteredItems;
     private List<ScheduledPaymentPojo> scheduledPaymentsList;
     private Payments selectedReportItem;
     private String reportName = "defaultreport";
@@ -921,14 +921,14 @@ public class EziDebitPaymentGateway implements Serializable {
     /**
      * @return the paymentsDBListFilteredItems
      */
-    public List<Payment> getPaymentsDBListFilteredItems() {
+    public List<Payments> getPaymentsDBListFilteredItems() {
         return paymentsDBListFilteredItems;
     }
 
     /**
      * @param paymentsListFilteredItems2 the paymentsDBListFilteredItems to set
      */
-    public void setPaymentsDBListFilteredItems(List<Payment> paymentsListFilteredItems2) {
+    public void setPaymentsDBListFilteredItems(List<Payments> paymentsListFilteredItems2) {
         this.paymentsDBListFilteredItems = paymentsListFilteredItems2;
     }
 
@@ -970,7 +970,7 @@ public class EziDebitPaymentGateway implements Serializable {
     /**
      * @return the reportPaymentsListFilteredItems
      */
-    public List<Payment> getReportPaymentsListFilteredItems() {
+    public List<Payments> getReportPaymentsListFilteredItems() {
         return reportPaymentsListFilteredItems;
     }
 
@@ -978,7 +978,7 @@ public class EziDebitPaymentGateway implements Serializable {
      * @param reportPaymentsListFilteredItems the
      * reportPaymentsListFilteredItems to set
      */
-    public void setReportPaymentsListFilteredItems(List<Payment> reportPaymentsListFilteredItems) {
+    public void setReportPaymentsListFilteredItems(List<Payments> reportPaymentsListFilteredItems) {
         this.reportPaymentsListFilteredItems = reportPaymentsListFilteredItems;
     }
 
@@ -1821,12 +1821,30 @@ public class EziDebitPaymentGateway implements Serializable {
         }
         if (result.isEmpty() == false) {
             JsfUtil.pushSuccessMessage(CHANNEL + sessionId, "Add Payment", "Payment (" + result + ") submitted successfully.");
-            int id = Integer.parseInt(result);
-            Payments pay = paymentsFacade.findScheduledPayment(result);
+            int id = 0;
+            try {
+                id = Integer.parseInt(result);
+            } catch (NumberFormatException numberFormatException) {
+            }
+            Payments pay = paymentsFacade.findPaymentById(id);
             if (pay != null) {
+                pay.setPaymentStatus(PaymentStatus.SCHEDULED.value());
+                pay.setPaymentReference(Integer.toString(id));
+                paymentsFacade.edit(pay);
+                if (paymentDBList != null) {
+                    List<Payments> lp = (List<Payments>) paymentDBList.getWrappedData();
+                    int index = lp.indexOf(pay);
+                    lp.set(index, pay);
+                }
+                if (paymentsDBListFilteredItems != null) {
+                    int index = paymentsDBListFilteredItems.indexOf(pay);
+                    paymentsDBListFilteredItems.set(index, pay);
+                }
                 if (pay.getManuallyAddedPayment()) {
                     getPayments(12, 1);
                 }
+            } else {
+                logger.log(Level.INFO, "processAddPaymentResult FAILED - could not find payment id ", result);
             }
 
         } else {
@@ -2309,6 +2327,7 @@ public class EziDebitPaymentGateway implements Serializable {
         } else {
             logger.log(Level.WARNING, "Logged in user is null. Add Single Payment aborted.");
         }
+        getPayments(12, 1);
         paymentDBList = null;
         paymentsDBListFilteredItems = null;
     }
@@ -2362,7 +2381,7 @@ public class EziDebitPaymentGateway implements Serializable {
                 } else {
                     logger.log(Level.INFO, "createSchedule - Deleting payment: Cust={0}, Ref={1}, Manaul Payment = {2}", new Object[]{cust.getUsername(), ref, isManual});
                     paymentsFacade.remove(p);
-                    startAsynchJob("DeletePayment", paymentBean.deletePaymentByRef(cust, ref, loggedInUser, getDigitalKey()));
+                    startAsynchJob("DeletePayment-" + ref, paymentBean.deletePaymentByRef(cust, ref, loggedInUser, getDigitalKey()));
                     try {
                         Thread.sleep(100);
                     } catch (InterruptedException ex) {
@@ -2384,10 +2403,10 @@ public class EziDebitPaymentGateway implements Serializable {
         int calendarAmount = 0;
         int currentDay = startCal.get(Calendar.DAY_OF_MONTH);
         int calendarDow = startCal.get(Calendar.DAY_OF_WEEK);
-         if (schedulePeriodType != 'M') {
-             dayOfMonth = currentDay;
-         }
-        
+        if (schedulePeriodType != 'M') {
+            dayOfMonth = currentDay;
+        }
+
         switch (schedulePeriodType) {
             case 'W'://weekly
                 calendarField = Calendar.DAY_OF_YEAR;
@@ -2453,25 +2472,25 @@ public class EziDebitPaymentGateway implements Serializable {
                 calendarField = Calendar.MONTH;
                 calendarAmount = 3;
                 //if (currentDay > dayOfMonth) {
-               //     startCal.add(Calendar.MONTH, 1);
-               // }
-               // startCal.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                //     startCal.add(Calendar.MONTH, 1);
+                // }
+                // startCal.set(Calendar.DAY_OF_MONTH, dayOfMonth);
                 break;
             case 'H': // 6 monthly
                 calendarField = Calendar.MONTH;
                 calendarAmount = 6;
                // if (currentDay > dayOfMonth) {
-               //     startCal.add(Calendar.MONTH, 1);
-               // }
-              //  startCal.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                //     startCal.add(Calendar.MONTH, 1);
+                // }
+                //  startCal.set(Calendar.DAY_OF_MONTH, dayOfMonth);
                 break;
             case 'Y'://yearly
                 calendarField = Calendar.YEAR;
                 calendarAmount = 1;
                // if (currentDay > dayOfMonth) {
-              //      startCal.add(Calendar.MONTH, 1);
-              //  }
-              //  startCal.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                //      startCal.add(Calendar.MONTH, 1);
+                //  }
+                //  startCal.set(Calendar.DAY_OF_MONTH, dayOfMonth);
                 break;
         }
         int numberOfpayments = 0;
@@ -2588,7 +2607,7 @@ public class EziDebitPaymentGateway implements Serializable {
                 newPayment.setYourSystemReference(cust.getId().toString());
                 newPayment.setPaymentAmount(new BigDecimal(amountInCents / (long) 100));
                 newPayment.setCustomerName(cust);
-                newPayment.setPaymentStatus(PaymentStatus.SCHEDULED.value());
+                newPayment.setPaymentStatus(PaymentStatus.SENT_TO_GATEWAY.value());
                 newPayment.setManuallyAddedPayment(manualPayment);
                 paymentsFacade.create(newPayment);
                 String newPaymentID = newPayment.getId().toString();
@@ -2636,17 +2655,16 @@ public class EziDebitPaymentGateway implements Serializable {
                 }
             }
             Customers c = selectedCustomer;
-             PaymentParameters pp = c.getPaymentParameters();
+            PaymentParameters pp = c.getPaymentParameters();
             pp.setPaymentPeriod("Z");
             pp.setPaymentPeriodDayOfMonth("-");
             pp.setPaymentPeriodDayOfWeek("---");
             pp.setNextScheduledPayment(null);
             ejbPaymentParametersFacade.edit(pp);
             customersFacade.edit(c);
-           
-            
+
             customersFacade.edit(c);
-            
+
             paymentDBList = null;
             paymentsDBListFilteredItems = null;
         } else {

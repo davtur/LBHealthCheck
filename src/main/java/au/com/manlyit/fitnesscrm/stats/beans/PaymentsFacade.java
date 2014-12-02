@@ -58,7 +58,7 @@ public class PaymentsFacade extends AbstractFacade<Payments> {
             Expression<Date> dDate = rt.get("debitDate");
             Expression<Customers> cust = rt.get("customerName");
             cq.where(cb.equal(cust, customer));
-            cq.orderBy(cb.asc(dDate));
+            cq.orderBy(cb.desc(dDate));
             Query q = em.createQuery(cq);
             if (bypassCache) {
                 q.setHint("javax.persistence.cache.retrieveMode", "BYPASS");
@@ -140,6 +140,29 @@ public class PaymentsFacade extends AbstractFacade<Payments> {
         return cm;
     }
 
+    public Payments findPaymentById(int id) {
+        Payments cm = null;
+        try {
+            CriteriaBuilder cb = em.getCriteriaBuilder();
+            CriteriaQuery<Payments> cq = cb.createQuery(Payments.class);
+            Root<Payments> rt = cq.from(Payments.class);
+
+            Expression<Integer> payId = rt.get("id");
+            cq.where(cb.equal(payId, id));
+
+            Query q = em.createQuery(cq);
+            List<Payments> pList = q.getResultList();
+            if (pList != null) {
+                if (pList.size() > 0) {
+                    cm = pList.get(0);
+                }
+            }
+        } catch (Exception e) {
+            logger.log(Level.INFO, "payment  not found or duplicate paymentID  found :" + id, e);
+        }
+        return cm;
+    }
+
     public Payments findPaymentByPaymentId(String paymentId) {
         Payments cm = null;
         try {
@@ -184,6 +207,7 @@ public class PaymentsFacade extends AbstractFacade<Payments> {
             predicatesList1.add(cb.equal(payRef, id));
 
             predicatesList1.add(cb.equal(paymentStatus, PaymentStatus.SCHEDULED.value()));
+            predicatesList1.add(cb.equal(paymentStatus, PaymentStatus.SENT_TO_GATEWAY.value()));
 
             cq.where(predicatesList1.<Predicate>toArray(new Predicate[predicatesList1.size()]));
 
@@ -203,6 +227,35 @@ public class PaymentsFacade extends AbstractFacade<Payments> {
         }
         return cm;
     }
+    
+    public List<Payments> findScheduledPaymentsByCustomer(Customers cust) {
+        List<Payments>  cm = null;
+       
+        ArrayList<Predicate> predicatesList1 = new ArrayList<>();
+        try {
+            CriteriaBuilder cb = em.getCriteriaBuilder();
+            CriteriaQuery<Payments> cq = cb.createQuery(Payments.class);
+            Root<Payments> rt = cq.from(Payments.class);
+           
+            Expression<Customers> customer = rt.get("customerName");
+            Expression<String> paymentStatus = rt.get("paymentStatus");
+
+            predicatesList1.add(cb.equal(customer, cust));
+
+            predicatesList1.add(cb.equal(paymentStatus, PaymentStatus.SCHEDULED.value()));
+            predicatesList1.add(cb.equal(paymentStatus, PaymentStatus.SENT_TO_GATEWAY.value()));
+
+            cq.where(predicatesList1.<Predicate>toArray(new Predicate[predicatesList1.size()]));
+
+            Query q = em.createQuery(cq);
+            cm = q.getResultList();
+             
+        } catch (Exception e) {
+            logger.log(Level.INFO, "findScheduledPaymentsByCustomer not found , Customer:{0}, error:{1}", new Object[]{cust.getUsername(), e.getMessage()});
+        }
+        return cm;
+    }
+
 
     public Payments findScheduledPayment(BigDecimal paymentAmount, Date debitDate, String paymentReference, Boolean manuallyAddedPayment) {
         Payments cm = null;
@@ -240,6 +293,7 @@ public class PaymentsFacade extends AbstractFacade<Payments> {
             }
 
             predicatesList1.add(cb.equal(paymentStatus, PaymentStatus.SCHEDULED.value()));
+            predicatesList1.add(cb.equal(paymentStatus, PaymentStatus.SENT_TO_GATEWAY.value()));
 
             cq.where(predicatesList1.<Predicate>toArray(new Predicate[predicatesList1.size()]));
 
@@ -259,7 +313,7 @@ public class PaymentsFacade extends AbstractFacade<Payments> {
         }
         return cm;
     }
- 
+
     public Payments findScheduledPayment(ScheduledPayment pay) {
         Payments cm = null;
         boolean validReference = false;
@@ -275,8 +329,8 @@ public class PaymentsFacade extends AbstractFacade<Payments> {
                 logger.log(Level.WARNING, "findScheduledPayment by reference. Reference is not a valid number :{0}", ref);
                 return null;
             }
-        }else{          
-             logger.log(Level.WARNING, "findScheduledPayment . Reference is not a valid  :{0}", pay.getYourSystemReference());
+        } else {
+            logger.log(Level.WARNING, "findScheduledPayment . Reference is not a valid  :{0}", pay.getYourSystemReference());
         }
         ArrayList<Predicate> predicatesList1 = new ArrayList<>();
         try {
@@ -298,6 +352,7 @@ public class PaymentsFacade extends AbstractFacade<Payments> {
             }
 
             predicatesList1.add(cb.equal(paymentStatus, PaymentStatus.SCHEDULED.value()));
+            predicatesList1.add(cb.equal(paymentStatus, PaymentStatus.SENT_TO_GATEWAY.value()));
             cq.where(predicatesList1.<Predicate>toArray(new Predicate[predicatesList1.size()]));
 
             Query q = em.createQuery(cq);

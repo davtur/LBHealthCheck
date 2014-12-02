@@ -143,6 +143,16 @@ public class CustomersController implements Serializable {
         return ejbGroupsFacade.isCustomerInGroup(cust, roleName);
     }
 
+    public void setSelecteDblClick(SelectEvent event) {
+        Object o = event.getObject();
+        if (o.getClass() == Customers.class) {
+            Customers c = (Customers) o;
+            setSelected(c);
+            JsfUtil.addSuccessMessage(configMapFacade.getConfig("setSelectedCustomer") + " " + c.getFirstname() + " " + c.getLastname() + ".");
+
+        }
+    }
+
     public void setSelectedCustomer(ActionEvent event) {
         if (multiSelected.length == 1) {
             Customers c = multiSelected[0];
@@ -890,10 +900,10 @@ public class CustomersController implements Serializable {
         String newUsername = updatedUsername.toLowerCase().replace(' ', '_');
         current.setUsername(newUsername);
         Customers cust = getFacade().findCustomerByUsername(newUsername);
-        if(cust != null){
+        if (cust != null) {
             setAddUserButtonDisabled(true);
             JsfUtil.addErrorMessage("Error", "That username is already taken!");
-        }else{
+        } else {
             setAddUserButtonDisabled(false);
         }
     }
@@ -1185,14 +1195,14 @@ public class CustomersController implements Serializable {
             //selectedCustomerStates = new CustomerState[customerStateList.size()];
             //selectedCustomerStates = customerStateList.toArray(selectedCustomerStates);
 
-            selectedCustomerStates = new CustomerState[2];
+            selectedCustomerStates = new CustomerState[1];
             for (CustomerState cs : customerStateList) {
                 if (cs.getCustomerState().contains("ACTIVE")) {
                     selectedCustomerStates[0] = cs;
                 }
-                if (cs.getCustomerState().contains("ON HOLD")) {
-                    selectedCustomerStates[1] = cs;
-                }
+               // if (cs.getCustomerState().contains("ON HOLD")) {
+               //     selectedCustomerStates[1] = cs;
+              //  }
 
             }
 
