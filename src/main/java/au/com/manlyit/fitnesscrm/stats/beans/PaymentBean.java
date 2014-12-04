@@ -223,12 +223,12 @@ public class PaymentBean implements Serializable {
     }
 
     @Asynchronous
-    public Future<Boolean> clearSchedule(Customers cust, boolean keepManualPayments, String loggedInUser, String digitalKey) {
+    public Future<String> clearSchedule(Customers cust, boolean keepManualPayments, String loggedInUser, String digitalKey) {
         // This method will remove payments that exist in the payment schedule for the given
         // customer. You can control whether all payments are deleted, or if you wish to preserve
         // any manually added payments, and delete an ongoing cyclic schedule.
 
-        boolean result = false;
+        String result = cust.getId().toString() + ",FAILED";
         String eziDebitCustomerId = ""; // use our reference instead. THis must be an empty string.
 
         String ourSystemCustomerReference = cust.getId().toString();
@@ -250,8 +250,8 @@ public class PaymentBean implements Serializable {
                 String changedFrom = "From Date:" + cust.getPaymentParameters().getPaymentPeriod();
                 String changedTo = "Cleared Schedule";
                 auditLogFacade.audit(customersFacade.findCustomerByUsername(loggedInUser), cust, "clearSchedule", auditDetails, changedFrom, changedTo);
-
-                return new AsyncResult<>(true);
+                result = cust.getId().toString() + ",OK";
+                return new AsyncResult<>(result);
             } else {
                 logger.log(Level.WARNING, "clearSchedule Response Data value should be S ( Successful ) : Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
             }

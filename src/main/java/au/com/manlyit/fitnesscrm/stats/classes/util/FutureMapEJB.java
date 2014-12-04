@@ -804,7 +804,7 @@ public class FutureMapEJB implements Serializable {
                                 if (found == false) {
                                     //String ref = p.getId().toString();
                                     if (p.getCreateDatetime().before(testDate)) {// make sure we don't delate payments that have just been added and may still be being processed by the gateway. i.e they've been put into our DB but havn't been put into the payment gateway schedule yet
-                                        p.setPaymentStatus("X");
+                                        p.setPaymentStatus(PaymentStatus.MISSING_IN_PGW.value());
                                         paymentsFacade.edit(p);
                                     }
                                     //AsyncJob aj = new AsyncJob("DeletePayment", paymentBean.deletePaymentByRef(cust, ref, "system", getDigitalKey()));

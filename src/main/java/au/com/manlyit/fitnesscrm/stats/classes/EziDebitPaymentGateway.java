@@ -90,6 +90,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.primefaces.component.tabview.Tab;
 import org.primefaces.context.RequestContext;
+import org.primefaces.event.SelectEvent;
 import org.primefaces.event.TabChangeEvent;
 
 /**
@@ -1638,7 +1639,6 @@ public class EziDebitPaymentGateway implements Serializable {
     public void checkIfAsyncJobsHaveFinishedAndUpdate(String key, Future ft) {
 
         try {
-
             if (key.contains("GetCustomerDetails")) {
                 processGetCustomerDetails(ft);
                 RequestContext.getCurrentInstance().update("customerslistForm1");
@@ -1856,7 +1856,7 @@ public class EziDebitPaymentGateway implements Serializable {
                 pay.setPaymentReference(Integer.toString(id));
                 paymentsFacade.edit(pay);
                 updatePaymentLists(pay);
-               // if (pay.getManuallyAddedPayment()) {
+                // if (pay.getManuallyAddedPayment()) {
                 //     getPayments(12, 1);
                 // }
             } else {
@@ -1905,13 +1905,29 @@ public class EziDebitPaymentGateway implements Serializable {
     }
 
     private void processClearSchedule(Future ft) {
-        boolean result = false;
+        String result = "0,FAILED";
         try {
-            result = (boolean) ft.get();
+            result = (String) ft.get();
         } catch (InterruptedException | ExecutionException ex) {
             Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, "Processing Async Results", ex);
         }
-        if (result == true) {
+        if (result.contains("OK")) {
+            String[] res = result.split(",");
+            String ref = res[0];
+            int reference = -1;
+            try {
+                reference = Integer.parseInt(ref);
+
+            } catch (NumberFormatException numberFormatException) {
+            }
+            Customers cust = customersFacade.findById(reference);
+            if (cust != null) {
+                List<Payments> crmPaymentList = paymentsFacade.findPaymentsByCustomerAndStatus(cust, PaymentStatus.SCHEDULED.value());
+                for (int x = crmPaymentList.size() - 1; x > -1; x--) {
+                    Payments p = crmPaymentList.get(x);
+                    paymentsFacade.remove(p);
+                }
+            }
             JsfUtil.pushSuccessMessage(CHANNEL + sessionId, "Payment Gateway", "Successfully Cleared Schedule .");
             getPayments(12, 1);
         } else {
@@ -1944,8 +1960,12 @@ public class EziDebitPaymentGateway implements Serializable {
             } catch (NumberFormatException numberFormatException) {
             }
             Payments pay = paymentsFacade.findPaymentById(reference);
-            removeFromPaymentLists(pay);
-            paymentsFacade.remove(pay);
+            if (pay != null) {
+                removeFromPaymentLists(pay);
+                paymentsFacade.remove(pay);
+            }else{
+                 logger.log(Level.WARNING, "Process deletePayment - Payment that was deleted could not be found in the our DB");
+            }
             setSelectedScheduledPayment(null);
             JsfUtil.pushSuccessMessage(CHANNEL + sessionId, "Payment Gateway", "Successfully Deleted Payment  .");
             //getPayments(12, 1);
@@ -2674,13 +2694,12 @@ public class EziDebitPaymentGateway implements Serializable {
                         logger.log(Level.INFO, "createSchedule - keeping manual payment: Cust={0}, Ref={1}, Manaul Payment = {2}", new Object[]{selectedCustomer.getUsername(), ref, isManual});
                     } else {
                         logger.log(Level.INFO, "createSchedule - Deleting payment: Cust={0}, Ref={1}, Manaul Payment = {2}", new Object[]{selectedCustomer.getUsername(), ref, isManual});
-                        //paymentsFacade.remove(p);
-                        p.setPaymentStatus(PaymentStatus.DELETING.value());
-
-                        paymentsFacade.edit(p);
-                        updatePaymentLists(p);
-
-                        if (paymentKeepManualPayments == true) {
+                        if (paymentKeepManualPayments == false) {
+                            paymentsFacade.remove(p);
+                        } else {
+                            p.setPaymentStatus(PaymentStatus.DELETE_REQUESTED.value());
+                            paymentsFacade.edit(p);
+                            updatePaymentLists(p);
                             startAsynchJob("DeletePayment", paymentBean.deletePaymentByRef(selectedCustomer, ref, loggedInUser, getDigitalKey()));
                         }
                     }
@@ -2695,37 +2714,53 @@ public class EziDebitPaymentGateway implements Serializable {
             ejbPaymentParametersFacade.edit(pp);
             customersFacade.edit(c);
 
-           // paymentDBList = null;
-          //  paymentsDBListFilteredItems = null;
+            // paymentDBList = null;
+            //  paymentsDBListFilteredItems = null;
         } else {
             logger.log(Level.WARNING, "Logged in user is null. clearSchedule aborted.");
         }
 
     }
 
-    public void deleteScheduledPayment(ActionEvent actionEvent) {
-
-        String loggedInUser = FacesContext.getCurrentInstance().getExternalContext().getRemoteUser();
-        Double amount = selectedScheduledPayment.getPaymentAmount().floatValue() * (double) 100;
-        if (loggedInUser != null) {
-            Payments pay = paymentsFacade.findScheduledPayment(selectedScheduledPayment.getPaymentAmount(), selectedScheduledPayment.getDebitDate(), selectedScheduledPayment.getPaymentReference(), selectedScheduledPayment.getManuallyAddedPayment());
-            if (pay != null) {
-
-                pay.setPaymentStatus(PaymentStatus.DELETING.value());
-
-                paymentsFacade.edit(pay);
-                updatePaymentLists(pay);
-                //paymentsFacade.remove(pay);
-                //paymentDBList = null;
-                //paymentsDBListFilteredItems = null;
-            } else {
-                logger.log(Level.WARNING, "deleteScheduledPayment , cant't find the local scheduled payment in our DB.");
-            }
-            startAsynchJob("DeletePayment", paymentBean.deletePayment(selectedCustomer, selectedScheduledPayment.getDebitDate(), amount.longValue(), selectedScheduledPayment.getPaymentReference(), loggedInUser, getDigitalKey()));
+    public void updateSelectedScheduledPayment(SelectEvent event) {
+        Object o = event.getObject();
+        if (o.getClass() == Payments.class) {
+            Payments pay = (Payments) o;
+            selectedScheduledPayment = pay;
+            logger.log(Level.INFO, "Paymenmt Table Payment Selected. Payment Id :{0}", selectedScheduledPayment.getId().toString());
         } else {
-            logger.log(Level.WARNING, "Logged in user is null. Delete Payment aborted.");
+            logger.log(Level.WARNING, "Payment Table Payment Select Failed.");
         }
 
+    }
+
+    public void deleteScheduledPayment(ActionEvent actionEvent) {
+        if (selectedScheduledPayment != null) {
+            String loggedInUser = FacesContext.getCurrentInstance().getExternalContext().getRemoteUser();
+            Double amount = selectedScheduledPayment.getPaymentAmount().floatValue() * (double) 100;
+            if (loggedInUser != null) {
+                Payments pay = paymentsFacade.findPaymentById(selectedScheduledPayment.getId());
+
+                if (pay != null) {
+                    if (pay.getPaymentStatus().contentEquals(PaymentStatus.SCHEDULED.value())) {
+                        pay.setPaymentStatus(PaymentStatus.DELETE_REQUESTED.value());
+
+                        paymentsFacade.edit(pay);
+                        updatePaymentLists(pay);
+                        startAsynchJob("DeletePayment", paymentBean.deletePayment(selectedCustomer, selectedScheduledPayment.getDebitDate(), amount.longValue(), selectedScheduledPayment.getId().toString(), loggedInUser, getDigitalKey()));
+
+                        //paymentsFacade.remove(pay);
+                        //paymentDBList = null;
+                        //paymentsDBListFilteredItems = null;
+                    }
+
+                } else {
+                    logger.log(Level.WARNING, "deleteScheduledPayment , cant't find the local scheduled payment in our DB.");
+                }
+            } else {
+                logger.log(Level.WARNING, "Logged in user is null. Delete Payment aborted.");
+            }
+        }
     }
 
     public void changeCustomerStatus(Customers cust, CustomerState cs) {
