@@ -1812,6 +1812,30 @@ public class EziDebitPaymentGateway implements Serializable {
         logger.log(Level.INFO, "processGetScheduledPayments completed");
     }
 
+    private void updatePaymentLists(Payments pay) {
+        if (paymentDBList != null) {
+            List<Payments> lp = (List<Payments>) paymentDBList.getWrappedData();
+            int index = lp.indexOf(pay);
+            lp.set(index, pay);
+        }
+        if (paymentsDBListFilteredItems != null) {
+            int index = paymentsDBListFilteredItems.indexOf(pay);
+            paymentsDBListFilteredItems.set(index, pay);
+        }
+    }
+
+    private void removeFromPaymentLists(Payments pay) {
+        if (paymentDBList != null) {
+            List<Payments> lp = (List<Payments>) paymentDBList.getWrappedData();
+            int index = lp.indexOf(pay);
+            lp.remove(index);
+        }
+        if (paymentsDBListFilteredItems != null) {
+            int index = paymentsDBListFilteredItems.indexOf(pay);
+            paymentsDBListFilteredItems.remove(index);
+        }
+    }
+
     private void processAddPaymentResult(Future ft) {
         String result = "";
         try {
@@ -1831,18 +1855,10 @@ public class EziDebitPaymentGateway implements Serializable {
                 pay.setPaymentStatus(PaymentStatus.SCHEDULED.value());
                 pay.setPaymentReference(Integer.toString(id));
                 paymentsFacade.edit(pay);
-                if (paymentDBList != null) {
-                    List<Payments> lp = (List<Payments>) paymentDBList.getWrappedData();
-                    int index = lp.indexOf(pay);
-                    lp.set(index, pay);
-                }
-                if (paymentsDBListFilteredItems != null) {
-                    int index = paymentsDBListFilteredItems.indexOf(pay);
-                    paymentsDBListFilteredItems.set(index, pay);
-                }
-                if (pay.getManuallyAddedPayment()) {
-                    getPayments(12, 1);
-                }
+                updatePaymentLists(pay);
+               // if (pay.getManuallyAddedPayment()) {
+                //     getPayments(12, 1);
+                // }
             } else {
                 logger.log(Level.INFO, "processAddPaymentResult FAILED - could not find payment id ", result);
             }
@@ -1905,10 +1921,10 @@ public class EziDebitPaymentGateway implements Serializable {
     }
 
     private void processDeletePayment(Future ft) {
-        boolean result = false;
+        String result = "0,FAILED";
         String errorMessage = "The delete payment operation failed!.";
         try {
-            result = (boolean) ft.get();
+            result = (String) ft.get();
         } catch (InterruptedException | ExecutionException ex) {
             String causedBy = ex.getCause().getCause().getMessage();
             if (causedBy.contains("Payment selected for deletion could not be found")) {
@@ -1918,11 +1934,22 @@ public class EziDebitPaymentGateway implements Serializable {
                 Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, "Processing Async Results", ex);
             }
         }
-        if (result == true) {
+        if (result.contains("OK")) {
+            String[] res = result.split(",");
+            String ref = res[0];
+            int reference = -1;
+            try {
+                reference = Integer.parseInt(ref);
 
+            } catch (NumberFormatException numberFormatException) {
+            }
+            Payments pay = paymentsFacade.findPaymentById(reference);
+            removeFromPaymentLists(pay);
+            paymentsFacade.remove(pay);
             setSelectedScheduledPayment(null);
             JsfUtil.pushSuccessMessage(CHANNEL + sessionId, "Payment Gateway", "Successfully Deleted Payment  .");
-            getPayments(12, 1);
+            //getPayments(12, 1);
+
         } else {
             JsfUtil.pushErrorMessage(CHANNEL + sessionId, "Payment Gateway", errorMessage);
         }
@@ -2479,7 +2506,7 @@ public class EziDebitPaymentGateway implements Serializable {
             case 'H': // 6 monthly
                 calendarField = Calendar.MONTH;
                 calendarAmount = 6;
-               // if (currentDay > dayOfMonth) {
+                // if (currentDay > dayOfMonth) {
                 //     startCal.add(Calendar.MONTH, 1);
                 // }
                 //  startCal.set(Calendar.DAY_OF_MONTH, dayOfMonth);
@@ -2487,7 +2514,7 @@ public class EziDebitPaymentGateway implements Serializable {
             case 'Y'://yearly
                 calendarField = Calendar.YEAR;
                 calendarAmount = 1;
-               // if (currentDay > dayOfMonth) {
+                // if (currentDay > dayOfMonth) {
                 //      startCal.add(Calendar.MONTH, 1);
                 //  }
                 //  startCal.set(Calendar.DAY_OF_MONTH, dayOfMonth);
@@ -2647,7 +2674,12 @@ public class EziDebitPaymentGateway implements Serializable {
                         logger.log(Level.INFO, "createSchedule - keeping manual payment: Cust={0}, Ref={1}, Manaul Payment = {2}", new Object[]{selectedCustomer.getUsername(), ref, isManual});
                     } else {
                         logger.log(Level.INFO, "createSchedule - Deleting payment: Cust={0}, Ref={1}, Manaul Payment = {2}", new Object[]{selectedCustomer.getUsername(), ref, isManual});
-                        paymentsFacade.remove(p);
+                        //paymentsFacade.remove(p);
+                        p.setPaymentStatus(PaymentStatus.DELETING.value());
+
+                        paymentsFacade.edit(p);
+                        updatePaymentLists(p);
+
                         if (paymentKeepManualPayments == true) {
                             startAsynchJob("DeletePayment", paymentBean.deletePaymentByRef(selectedCustomer, ref, loggedInUser, getDigitalKey()));
                         }
@@ -2663,10 +2695,8 @@ public class EziDebitPaymentGateway implements Serializable {
             ejbPaymentParametersFacade.edit(pp);
             customersFacade.edit(c);
 
-            customersFacade.edit(c);
-
-            paymentDBList = null;
-            paymentsDBListFilteredItems = null;
+           // paymentDBList = null;
+          //  paymentsDBListFilteredItems = null;
         } else {
             logger.log(Level.WARNING, "Logged in user is null. clearSchedule aborted.");
         }
@@ -2680,9 +2710,14 @@ public class EziDebitPaymentGateway implements Serializable {
         if (loggedInUser != null) {
             Payments pay = paymentsFacade.findScheduledPayment(selectedScheduledPayment.getPaymentAmount(), selectedScheduledPayment.getDebitDate(), selectedScheduledPayment.getPaymentReference(), selectedScheduledPayment.getManuallyAddedPayment());
             if (pay != null) {
-                paymentsFacade.remove(pay);
-                paymentDBList = null;
-                paymentsDBListFilteredItems = null;
+
+                pay.setPaymentStatus(PaymentStatus.DELETING.value());
+
+                paymentsFacade.edit(pay);
+                updatePaymentLists(pay);
+                //paymentsFacade.remove(pay);
+                //paymentDBList = null;
+                //paymentsDBListFilteredItems = null;
             } else {
                 logger.log(Level.WARNING, "deleteScheduledPayment , cant't find the local scheduled payment in our DB.");
             }

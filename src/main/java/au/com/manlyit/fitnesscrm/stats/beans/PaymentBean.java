@@ -264,7 +264,7 @@ public class PaymentBean implements Serializable {
     }
 
     @Asynchronous
-    public Future<Boolean> deletePayment(Customers cust, Date debitDate, Long paymentAmountInCents, String paymentReference, String loggedInUser, String digitalKey) {
+    public Future<String> deletePayment(Customers cust, Date debitDate, Long paymentAmountInCents, String paymentReference, String loggedInUser, String digitalKey) {
         	//  This method will delete a single payment from the Customer's payment schedule.
         //  It is important to note the following when deleting a payment:
 
@@ -280,7 +280,7 @@ public class PaymentBean implements Serializable {
             paymentReference = "";
         }
 
-        boolean result = false;
+        String result = paymentReference + ",FAILED";
         if (paymentReference.isEmpty() && (debitDate == null || cust == null || paymentAmountInCents < 0)) {
             logger.log(Level.WARNING, "deletePayment NULL parameter of Amount < 0. cust {0}, date {1}, Amount {2}", new Object[]{cust, debitDate, paymentAmountInCents});
 
@@ -314,7 +314,7 @@ public class PaymentBean implements Serializable {
         if (eziResponse.getError() == 0) {// any errors will be a non zero value
 
             if (eziResponse.getData().getValue().compareTo("S") == 0) {
-                result = true;
+                result = paymentReference + ",OK";;
                 String auditDetails = "Debit Date:" + debitDateString + ", Amount (cents): " + paymentAmountInCents.toString() + ", Payment Ref:" + paymentReference;
                 String changedFrom = "Ref:" + paymentReference;
                 String changedTo = "Deleted";
@@ -332,7 +332,7 @@ public class PaymentBean implements Serializable {
     }
 
     @Asynchronous
-    public Future<Boolean> deletePaymentByRef(Customers cust, String paymentReference, String loggedInUser, String digitalKey) {
+    public Future<String> deletePaymentByRef(Customers cust, String paymentReference, String loggedInUser, String digitalKey) {
         	//  This method will delete a single payment from the Customer's payment schedule.
         //  It is important to note the following when deleting a payment:
 
@@ -344,7 +344,7 @@ public class PaymentBean implements Serializable {
         //  If you provide values for DebitDate and PaymentAmountInCents and there is more
         //  than one payment for PaymentAmountInCents scheduled on DebitDate, then only
         //  one of the payments will be deleted.
-        boolean result = false;
+        String result = paymentReference +",FAILED";
         if (cust == null) {
             logger.log(Level.WARNING, "deletePayment Customer NULL ");
             return new AsyncResult<>(result);
@@ -397,7 +397,7 @@ public class PaymentBean implements Serializable {
             if (eziResponse.getError() == 0) {// any errors will be a non zero value
 
                 if (eziResponse.getData().getValue().compareTo("S") == 0) {
-                    result = true;
+                    result = paymentReference + ",OK";
                     String auditDetails = "Payment Ref:" + paymentReference;
                     String changedFrom = "Ref:" + paymentReference;
                     String changedTo = "Deleted";
