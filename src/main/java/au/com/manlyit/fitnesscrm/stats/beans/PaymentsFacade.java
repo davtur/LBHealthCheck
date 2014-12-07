@@ -49,6 +49,13 @@ public class PaymentsFacade extends AbstractFacade<Payments> {
         super(Payments.class);
     }
 
+    public void createAndFlush(Payments entity) {
+        getEntityManager().persist(entity);
+        getEntityManager().flush();
+        String message = "Entity Created: " + entity.toString();
+        logger.log(Level.INFO, message);
+
+    }
     public List<Payments> findPaymentsByCustomer(Customers customer, boolean bypassCache) {
         List retList = null;
         try {
@@ -244,6 +251,7 @@ public class PaymentsFacade extends AbstractFacade<Payments> {
 
             predicatesList1.add(cb.equal(paymentStatus, PaymentStatus.SCHEDULED.value()));
             predicatesList1.add(cb.equal(paymentStatus, PaymentStatus.SENT_TO_GATEWAY.value()));
+            
 
             cq.where(predicatesList1.<Predicate>toArray(new Predicate[predicatesList1.size()]));
 

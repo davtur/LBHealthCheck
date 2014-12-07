@@ -87,7 +87,7 @@
 
                 </p:panelGrid>
                 <p:panel>
-                    <p:commandButton id="createPaymentdialogueScheduleSave" oncomplete="PF('createPaymentScheduleDialogueWidget').hide();"  actionListener="#{ezidebit.createPaymentSchedule}" value="#{configMapController.getKey('AddPaymentScheduleSaveLink')}" update=" :growl :tv:paymentsForm"/>                
+                    <p:commandButton id="createPaymentdialogueScheduleSave" onclick="PF('createPaymentScheduleDialogueWidget').hide();"  actionListener="#{ezidebit.createPaymentSchedule}" value="#{configMapController.getKey('AddPaymentScheduleSaveLink')}" update=" :growl :tv:paymentsForm"/>                
                     <p:commandButton id="createPaymentdialogueScheduleDiscard" onclick="PF('createPaymentScheduleDialogueWidget').hide()"  value="#{configMapController.getKey('AddPaymentScheduleDiscardLink')}" update=":growl"/>                
 
                 </p:panel>

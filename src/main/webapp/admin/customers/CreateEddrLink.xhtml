@@ -44,9 +44,9 @@
                         <p:ajax update="addEddrLinkGrid2" /> 
                     </p:selectOneMenu>
 
-                    <p:outputLabel rendered="#{ezidebit.paymentSchedulePeriodType == '1' ||ezidebit.paymentSchedulePeriodType == '2' || ezidebit.paymentSchedulePeriodType == '4' || ezidebit.paymentSchedulePeriodType == '8'}" value="#{configMapController.getKey('AddPaymentScheduleLabel_paymentDayOfWeek')}" for="dayOfWeekEddrLink" />
+               <!--     <p:outputLabel rendered="#{ezidebit.paymentSchedulePeriodType == '1' ||ezidebit.paymentSchedulePeriodType == '2' ||  ezidebit.paymentSchedulePeriodType == '8'}" value="#{configMapController.getKey('AddPaymentScheduleLabel_paymentDayOfWeek')}" for="dayOfWeekEddrLink" />
 
-                    <p:selectOneMenu rendered="#{ezidebit.paymentSchedulePeriodType == '1' ||ezidebit.paymentSchedulePeriodType == '2' || ezidebit.paymentSchedulePeriodType == '4' || ezidebit.paymentSchedulePeriodType == '8'}" id="dayOfWeekEddrLink" value="#{ezidebit.paymentDayOfWeek}"  >
+                    <p:selectOneMenu rendered="#{ezidebit.paymentSchedulePeriodType == '1' ||ezidebit.paymentSchedulePeriodType == '2' ||  ezidebit.paymentSchedulePeriodType == '8'}" id="dayOfWeekEddrLink" value="#{ezidebit.paymentDayOfWeek}"  >
                         <f:selectItem itemValue="MON" itemLabel="Monday" />
                         <f:selectItem itemValue="TUE" itemLabel="Tuesday" />
                         <f:selectItem itemValue="WED" itemLabel="Wednesday" />
@@ -84,7 +84,7 @@
                         <p:ajax update="addEddrLinkGrid2" />  
                     </p:selectBooleanCheckbox>  
 
-
+-->
                 </p:panelGrid>
                 <p:panel>
                     <p:commandButton id="createPaymentdialogueScheduleSave" oncomplete="PF('createEddrLinkDialogueWidget').hide();"  actionListener="#{ezidebit.createEddrLink}" value="#{configMapController.getKey('AddEddrLinkSaveLink')}" update=" :growl :tv:customerslistForm1 :tv:paymentsForm :tv:formCustomersEdit1"/>                

@@ -43,6 +43,14 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "PaymentParameters.findBySmsExpiredCard", query = "SELECT p FROM PaymentParameters p WHERE p.smsExpiredCard = :smsExpiredCard"),
     @NamedQuery(name = "PaymentParameters.findByPaymentGatewayName", query = "SELECT p FROM PaymentParameters p WHERE p.paymentGatewayName = :paymentGatewayName")})
 public class PaymentParameters implements Serializable {
+    @Column(name = "paymentRegularAmount")
+    private BigDecimal paymentRegularAmount;
+    @Column(name = "paymentRegularTotalPaymentsAmount")
+    private BigDecimal paymentRegularTotalPaymentsAmount;
+    @Column(name = "paymentRegularDuration")
+    private Integer paymentRegularDuration;
+    @Column(name = "paymentsRegularTotalNumberOfPayments")
+    private Integer paymentsRegularTotalNumberOfPayments;
     @JoinColumn(name = "nextScheduledPayment", referencedColumnName = "id")
     @OneToOne
     private Payments nextScheduledPayment;
@@ -457,6 +465,38 @@ public class PaymentParameters implements Serializable {
 
     public void setLastSuccessfulScheduledPayment(Payments lastSuccessfulScheduledPayment) {
         this.lastSuccessfulScheduledPayment = lastSuccessfulScheduledPayment;
+    }
+
+    public BigDecimal getPaymentRegularAmount() {
+        return paymentRegularAmount;
+    }
+
+    public void setPaymentRegularAmount(BigDecimal paymentRegularAmount) {
+        this.paymentRegularAmount = paymentRegularAmount;
+    }
+
+    public BigDecimal getPaymentRegularTotalPaymentsAmount() {
+        return paymentRegularTotalPaymentsAmount;
+    }
+
+    public void setPaymentRegularTotalPaymentsAmount(BigDecimal paymentRegularTotalPaymentsAmount) {
+        this.paymentRegularTotalPaymentsAmount = paymentRegularTotalPaymentsAmount;
+    }
+
+    public Integer getPaymentRegularDuration() {
+        return paymentRegularDuration;
+    }
+
+    public void setPaymentRegularDuration(Integer paymentRegularDuration) {
+        this.paymentRegularDuration = paymentRegularDuration;
+    }
+
+    public Integer getPaymentsRegularTotalNumberOfPayments() {
+        return paymentsRegularTotalNumberOfPayments;
+    }
+
+    public void setPaymentsRegularTotalNumberOfPayments(Integer paymentsRegularTotalNumberOfPayments) {
+        this.paymentsRegularTotalNumberOfPayments = paymentsRegularTotalNumberOfPayments;
     }
 
 }

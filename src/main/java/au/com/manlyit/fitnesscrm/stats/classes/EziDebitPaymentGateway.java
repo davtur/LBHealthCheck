@@ -54,6 +54,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.Locale;
 import java.util.Properties;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
@@ -1844,7 +1845,7 @@ public class EziDebitPaymentGateway implements Serializable {
             Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, null, ex);
         }
         if (result.isEmpty() == false) {
-            JsfUtil.pushSuccessMessage(CHANNEL + sessionId, "Add Payment", "Payment (" + result + ") submitted successfully.");
+            JsfUtil.addSuccessMessage("Add Payment", "Payment (" + result + ") submitted successfully.");
             int id = 0;
             try {
                 id = Integer.parseInt(result);
@@ -1864,7 +1865,7 @@ public class EziDebitPaymentGateway implements Serializable {
             }
 
         } else {
-            JsfUtil.pushErrorMessage(CHANNEL + sessionId, "Add Payment", "Payment Failed! Is the customer active with valid account/card details?");
+            JsfUtil.addErrorMessage("Add Payment", "Payment Failed! Is the customer active with valid account/card details?");
         }
 
         logger.log(Level.INFO, "processAddPaymentResult completed");
@@ -1878,11 +1879,11 @@ public class EziDebitPaymentGateway implements Serializable {
             Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, null, ex);
         }
         if (result == true) {
-            JsfUtil.pushSuccessMessage(CHANNEL + sessionId, "Payment", "Successfully Created Schedule.");
+            JsfUtil.addSuccessMessage("Payment", "Successfully Created Schedule.");
             getPayments(12, 1);
 
         } else {
-            JsfUtil.pushErrorMessage(CHANNEL + sessionId, "Payment", "The Create Schedule operation failed!.");
+            JsfUtil.addErrorMessage("Payment", "The Create Schedule operation failed!.");
         }
         logger.log(Level.INFO, "processCreateSchedule completed");
     }
@@ -1895,11 +1896,11 @@ public class EziDebitPaymentGateway implements Serializable {
             Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, "Processing Async Results", ex);
         }
         if (result == true) {
-            JsfUtil.pushSuccessMessage(CHANNEL + sessionId, "Payment Gateway", "Successfully Edited Customer Details  .");
+            JsfUtil.addSuccessMessage("Payment Gateway", "Successfully Edited Customer Details  .");
             getCustDetailsFromEzi();
             getPayments(12, 1);
         } else {
-            JsfUtil.pushErrorMessage(CHANNEL + sessionId, "Payment Gateway", "The operation failed!.");
+            JsfUtil.addErrorMessage("Payment Gateway", "The operation failed!.");
         }
         logger.log(Level.INFO, "processEditCustomerDetails completed");
     }
@@ -1927,10 +1928,10 @@ public class EziDebitPaymentGateway implements Serializable {
                     paymentsFacade.remove(p);
                 }
             }
-            JsfUtil.pushSuccessMessage(CHANNEL + sessionId, "Payment Gateway", "Successfully Cleared Schedule .");
+            JsfUtil.addSuccessMessage("Payment Gateway", "Successfully Cleared Schedule .");
             getPayments(12, 1);
         } else {
-            JsfUtil.pushErrorMessage(CHANNEL + sessionId, "Payment Gateway", "The operation failed!.");
+            JsfUtil.addErrorMessage("Payment Gateway", "The operation failed!.");
         }
         logger.log(Level.INFO, "processClearSchedule completed");
     }
@@ -1966,11 +1967,11 @@ public class EziDebitPaymentGateway implements Serializable {
                 logger.log(Level.WARNING, "Process deletePayment - Payment that was deleted could not be found in the our DB");
             }
             setSelectedScheduledPayment(null);
-            JsfUtil.pushSuccessMessage(CHANNEL + sessionId, "Payment Gateway", "Successfully Deleted Payment  .");
+            JsfUtil.addSuccessMessage("Payment Gateway", "Successfully Deleted Payment  .");
             //getPayments(12, 1);
 
         } else {
-            JsfUtil.pushErrorMessage(CHANNEL + sessionId, "Payment Gateway", errorMessage);
+            JsfUtil.addErrorMessage("Payment Gateway", errorMessage);
         }
         logger.log(Level.INFO, "processDeletePayment completed");
     }
@@ -1983,12 +1984,12 @@ public class EziDebitPaymentGateway implements Serializable {
             Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, "Processing Async Results", ex);
         }
         if (result == true) {
-            JsfUtil.pushSuccessMessage(CHANNEL + sessionId, "Payment Gateway", "Successfully Changed Customer Status  .");
+            JsfUtil.addSuccessMessage("Payment Gateway", "Successfully Changed Customer Status  .");
             startAsynchJob("GetCustomerDetails", paymentBean.getCustomerDetails(selectedCustomer, getDigitalKey()));
             RequestContext.getCurrentInstance().update("customerslistForm1");
             getPayments(12, 1);
         } else {
-            JsfUtil.pushErrorMessage(CHANNEL + sessionId, "Payment Gateway", "The change status operation failed!.");
+            JsfUtil.addErrorMessage("Payment Gateway", "The change status operation failed!.");
         }
         logger.log(Level.INFO, "processChangeCustomerStatus completed");
     }
@@ -2001,10 +2002,10 @@ public class EziDebitPaymentGateway implements Serializable {
             Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, "Processing Async Results", ex);
         }
         if (result == true) {
-            JsfUtil.pushSuccessMessage(CHANNEL + sessionId, "Payment Gateway", "Successfully Retrieved Payment Status  .");
+            JsfUtil.addSuccessMessage("Payment Gateway", "Successfully Retrieved Payment Status  .");
 
         } else {
-            JsfUtil.pushErrorMessage(CHANNEL + sessionId, "Payment Gateway", "The getPayment status operation failed!.");
+            JsfUtil.addErrorMessage("Payment Gateway", "The getPayment status operation failed!.");
         }
         logger.log(Level.INFO, "processGetPaymentStatus completed");
     }
@@ -2017,10 +2018,10 @@ public class EziDebitPaymentGateway implements Serializable {
             Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, "Processing Async Results", ex);
         }
         if (result == true) {
-            JsfUtil.pushSuccessMessage(CHANNEL + sessionId, "Payment Gateway", "Successfully  Changed Scheduled Amount .");
+            JsfUtil.addSuccessMessage("Payment Gateway", "Successfully  Changed Scheduled Amount .");
             getPayments(12, 1);
         } else {
-            JsfUtil.pushErrorMessage(CHANNEL + sessionId, "Payment Gateway", "The operation failed!.");
+            JsfUtil.addErrorMessage("Payment Gateway", "The operation failed!.");
         }
         logger.log(Level.INFO, "processChangeScheduledAmount completed");
     }
@@ -2033,10 +2034,10 @@ public class EziDebitPaymentGateway implements Serializable {
             Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, "Processing Async Results", ex);
         }
         if (result == true) {
-            JsfUtil.pushSuccessMessage(CHANNEL + sessionId, "Payment Gateway", "Successfully Changed Scheduled Date  .");
+            JsfUtil.addSuccessMessage("Payment Gateway", "Successfully Changed Scheduled Date  .");
             getPayments(12, 1);
         } else {
-            JsfUtil.pushErrorMessage(CHANNEL + sessionId, "Payment Gateway", "The operation failed!.");
+            JsfUtil.addErrorMessage("Payment Gateway", "The operation failed!.");
         }
         logger.log(Level.INFO, "processChangeScheduledDate completed");
     }
@@ -2049,10 +2050,10 @@ public class EziDebitPaymentGateway implements Serializable {
             Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, "Processing Async Results", ex);
         }
         if (result == true) {
-            JsfUtil.pushSuccessMessage(CHANNEL + sessionId, "Payment Gateway", "Successfully Checked BSB  .");
+            JsfUtil.addSuccessMessage("Payment Gateway", "Successfully Checked BSB  .");
 
         } else {
-            JsfUtil.pushErrorMessage(CHANNEL + sessionId, "Payment Gateway", "The operation failed!.");
+            JsfUtil.addErrorMessage("Payment Gateway", "The operation failed!.");
         }
         logger.log(Level.INFO, "processIsBsbValid completed");
     }
@@ -2065,10 +2066,10 @@ public class EziDebitPaymentGateway implements Serializable {
             Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, "Processing Async Results", ex);
         }
         if (result == true) {
-            JsfUtil.pushSuccessMessage(CHANNEL + sessionId, "Payment Gateway", "Successfully checked if System is Locked  .");
+            JsfUtil.addSuccessMessage("Payment Gateway", "Successfully checked if System is Locked  .");
 
         } else {
-            JsfUtil.pushErrorMessage(CHANNEL + sessionId, "Payment Gateway", "The operation failed!.");
+            JsfUtil.addErrorMessage("Payment Gateway", "The operation failed!.");
         }
         logger.log(Level.INFO, "processIsSystemLocked completed");
     }
@@ -2081,10 +2082,10 @@ public class EziDebitPaymentGateway implements Serializable {
             Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, "Processing Async Results", ex);
         }
         if (result != null && result.trim().isEmpty() == false) {
-            JsfUtil.pushSuccessMessage(CHANNEL + sessionId, "Payment Gateway", "Payment Exchange Version: " + result);
+            JsfUtil.addSuccessMessage("Payment Gateway", "Payment Exchange Version: " + result);
 
         } else {
-            JsfUtil.pushErrorMessage(CHANNEL + sessionId, "Payment Gateway", "The operation failed!.");
+            JsfUtil.addErrorMessage("Payment Gateway", "The operation failed!.");
         }
         logger.log(Level.INFO, "processGetPaymentExchangeVersion completed");
     }
@@ -2120,16 +2121,16 @@ public class EziDebitPaymentGateway implements Serializable {
                     message = "The Customer does not have any banking details. Customer: " + cust + ", ezidebit status:" + eziStatusCode + ", Crm Status:" + ourStatus + "";
                     logger.log(Level.INFO, message);
                     setWaitingForPaymentDetails(true);
-                    JsfUtil.pushSuccessMessage(CHANNEL + sessionId, "Important!", "You must enter customer banking details before payments can be set up.");
+                    JsfUtil.addSuccessMessage("Important!", "You must enter customer banking details before payments can be set up.");
                 } else {
                     logger.log(Level.WARNING, message);
                     setWaitingForPaymentDetails(false);
-                    JsfUtil.pushErrorMessage(CHANNEL + sessionId, message, "");
+                    JsfUtil.addErrorMessage(message, "");
                 }
                 if (eziStatusCode.trim().toUpperCase().contains("CANCELLED")) {
                     message = "The Customer is in a Cancelled status in the payment gateway";
                     logger.log(Level.INFO, message);
-                    JsfUtil.pushSuccessMessage(CHANNEL + sessionId, "Important!", message);
+                    JsfUtil.addSuccessMessage("Important!", message);
                     setCustomerCancelledInPaymentGateway(true);
                 } else {
                     setCustomerCancelledInPaymentGateway(false);
@@ -2275,7 +2276,44 @@ public class EziDebitPaymentGateway implements Serializable {
             logger.log(Level.WARNING, "Create EDDR Link cannot be completed as the selected customer is null.");
             return;
         }
-        NumberFormat nf = NumberFormat.getNumberInstance();
+        PaymentParameters pp = null;
+        Long amount = (long) (paymentAmountInCents * (float) 100);
+        Long amountLimit = paymentLimitAmountInCents * (long) 100;
+        char spt = paymentSchedulePeriodType.charAt(0);
+        GregorianCalendar endCal = new GregorianCalendar();
+        //endCal.setTime(paymentDebitDate);// ezi debit only supports 1 year from current date
+        endCal.add(Calendar.YEAR, 1);
+        String dom = Integer.toString(paymentDayOfMonth);
+
+        pp = cust.getPaymentParameters();
+        pp.setContractStartDate(paymentDebitDate);
+        pp.setPaymentPeriod(paymentSchedulePeriodType);
+        pp.setPaymentPeriodDayOfMonth(dom);
+        pp.setPaymentPeriodDayOfWeek(paymentDayOfWeek);
+        pp.setNextScheduledPayment(null);
+        pp.setPaymentRegularAmount(new BigDecimal(amount));
+        pp.setPaymentRegularTotalPaymentsAmount(new BigDecimal(amountLimit));
+        pp.setPaymentsRegularTotalNumberOfPayments(paymentLimitToNumberOfPayments);
+        String dur = "1";
+        if (paymentLimitToNumberOfPayments == 0 && amountLimit == 0) {
+            pp.setPaymentRegularDuration(1);//ongoing payments
+        } else {
+            if (paymentLimitToNumberOfPayments > 0) {
+                pp.setPaymentRegularDuration(4);// Total Amount
+                dur = "4";
+            }
+            if (amountLimit > 0) {
+                pp.setPaymentRegularDuration(2);// Total payments 
+                 dur = "2";
+            }
+            if (amountLimit > 0 && paymentLimitToNumberOfPayments > 0) {
+                pp.setPaymentRegularDuration(6);// Total payments - takes precedence if both are set
+            }
+        }
+        ejbPaymentParametersFacade.edit(pp);
+        customersFacade.edit(cust);
+
+        NumberFormat nf = NumberFormat.getCurrencyInstance(Locale.US);
         nf.setMaximumFractionDigits(2);
         String amp = "&";
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
@@ -2288,23 +2326,32 @@ public class EziDebitPaymentGateway implements Serializable {
         widgetUrl += amp + "uRef=" + cust.getId();
         widgetUrl += amp + "email=" + cust.getEmailAddress();
         widgetUrl += amp + "mobile=" + cust.getTelephone();
-        widgetUrl += amp + "sms=" + configMapFacade.getConfig("payment.ezidebit.webddr.sms");
+        if (pp.getSmsPaymentReminder().contains("YES")) {
+            widgetUrl += amp + "sms=1";
+        } else {
+            widgetUrl += amp + "sms=0";
+        }
         widgetUrl += amp + "addr=" + cust.getStreetAddress();
         widgetUrl += amp + "suburb=" + cust.getSuburb();
         widgetUrl += amp + "state=" + cust.getAddrState();
         widgetUrl += amp + "pCode=" + cust.getPostcode();
-        widgetUrl += amp + "debits=" + configMapFacade.getConfig("payment.ezidebit.webddr.debits");
-        widgetUrl += amp + "rAmount=" + nf.format(paymentAmountInCents);
+        String db = configMapFacade.getConfig("payment.ezidebit.webddr.debits");
+        if (db.contains("0") == false) {
+            widgetUrl += amp + "debits=" + db;// if its 0 leave unset to show once off and regular debits
+        }
+        widgetUrl += amp + "rAmount=" + nf.format((pp.getPaymentRegularAmount().divide(new BigDecimal(100))));
         widgetUrl += amp + "rDate=" + sdf.format(paymentDebitDate);
-        widgetUrl += amp + "aFreq=" + configMapFacade.getConfig("payment.ezidebit.webddr.aFreq");
+        widgetUrl += amp + "aFreq=" + paymentSchedulePeriodType;
         widgetUrl += amp + "freq=" + paymentSchedulePeriodType;
-        widgetUrl += amp + "aDur=" + configMapFacade.getConfig("payment.ezidebit.webddr.aDur");
-        widgetUrl += amp + "dur=" + configMapFacade.getConfig("payment.ezidebit.webddr.dur");
+        widgetUrl += amp + "aDur=" + pp.getPaymentRegularDuration().toString();
+        widgetUrl += amp + "dur=" + dur;
+        if(paymentLimitToNumberOfPayments > 0){
+          widgetUrl += amp + "tPay=" + Integer.toString(paymentLimitToNumberOfPayments);  
+        }
+         if(amountLimit > 0){
+          widgetUrl += amp + "tAmount=" + nf.format((new Float(amountLimit) / new Float(100)));  
+        }
         widgetUrl += amp + "callback=" + configMapFacade.getConfig("payment.ezidebit.webddr.callback");
-
-        FacesContext context = FacesContext.getCurrentInstance();
-        CustomersController controller = (CustomersController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "customersController");
-        PaymentParameters pp = controller.getSelectedCustomersPaymentParameters();
         pp.setWebddrUrl(widgetUrl);
         ejbPaymentParametersFacade.edit(pp);
         logger.log(Level.INFO, "eddr request url:{0}.", widgetUrl);
@@ -2357,9 +2404,22 @@ public class EziDebitPaymentGateway implements Serializable {
             pp.setPaymentPeriodDayOfMonth(dom);
             pp.setPaymentPeriodDayOfWeek(paymentDayOfWeek);
             pp.setNextScheduledPayment(null);
+            pp.setPaymentRegularAmount(new BigDecimal(amount));
+            pp.setPaymentRegularTotalPaymentsAmount(new BigDecimal(amountLimit));
+            pp.setPaymentsRegularTotalNumberOfPayments(paymentLimitToNumberOfPayments);
+            if (paymentLimitToNumberOfPayments == 0 && amountLimit == 0) {
+                pp.setPaymentRegularDuration(1);//ongoing payments
+            } else {
+                if (paymentLimitToNumberOfPayments > 0) {
+                    pp.setPaymentRegularDuration(4);// Total Amount
+                }
+                if (amountLimit > 0) {
+                    pp.setPaymentRegularDuration(2);// Total payments - takes precedence if both are set
+                }
+            }
             ejbPaymentParametersFacade.edit(pp);
             customersFacade.edit(c);
-            createCRMPaymentSchedule(selectedCustomer, paymentDebitDate, endCal.getTime(), spt, dow, paymentDayOfMonth, amount, paymentLimitToNumberOfPayments, amountLimit, paymentKeepManualPayments, paymentFirstWeekOfMonth, paymentSecondWeekOfMonth, paymentThirdWeekOfMonth, paymentFourthWeekOfMonth, loggedInUser);
+            paymentBean.createCRMPaymentSchedule(selectedCustomer, paymentDebitDate, endCal.getTime(), spt, dow, paymentDayOfMonth, amount, paymentLimitToNumberOfPayments, amountLimit, paymentKeepManualPayments, paymentFirstWeekOfMonth, paymentSecondWeekOfMonth, paymentThirdWeekOfMonth, paymentFourthWeekOfMonth, loggedInUser,sessionId,getDigitalKey(),futureMap,paymentBean);
             /* List<Payments> crmPaymentList = paymentsFacade.findPaymentsByCustomerAndStatus(selectedCustomer, PaymentStatus.SCHEDULED.value());
              for (Payments p : crmPaymentList) {
              if (!(paymentKeepManualPayments && p.getManuallyAddedPayment())) {
@@ -2378,299 +2438,11 @@ public class EziDebitPaymentGateway implements Serializable {
         paymentsDBListFilteredItems = null;
     }
 
-    public void createCRMPaymentSchedule(Customers cust, Date scheduleStartDate, Date scheduleEndDate, char schedulePeriodType, int payDayOfWeek, int dayOfMonth, long amountInCents, int limitToNumberOfPayments, long paymentAmountLimitInCents, boolean keepManualPayments, boolean firstWeekOfMonth, boolean secondWeekOfMonth, boolean thirdWeekOfMonth, boolean fourthWeekOfMonth, String loggedInUser) {
-
-        if (schedulePeriodType == 'W' || schedulePeriodType == 'F' || schedulePeriodType == 'N' || schedulePeriodType == '4') {
-            if (payDayOfWeek < 1 || payDayOfWeek > 7) {
-                logger.log(Level.WARNING, "createSchedule  FAILED: A value must be provided for dayOfWeek  when the SchedulePeriodType is  W,F,4,N");
-                return;
-            }
-            if (payDayOfWeek < 2 || payDayOfWeek > 6) {
-                payDayOfWeek = 2;// can't debit on weekends only weekdays
-            }
-        }
-        if (schedulePeriodType == 'M') {
-            if (dayOfMonth < 1 || dayOfMonth > 31) {
-                logger.log(Level.WARNING, "createSchedule FAILED: A value must be provided for dayOfMonth (1..31 )\n" + " when the\n" + "SchedulePeriodType is in\n" + "M");
-                return;
-            }
-        }
-
-        int check = 0;
-        if (firstWeekOfMonth) {
-            check++;
-        }
-        if (secondWeekOfMonth) {
-            check++;
-        }
-        if (thirdWeekOfMonth) {
-            check++;
-        }
-        if (fourthWeekOfMonth) {
-            check++;
-        }
-        if (schedulePeriodType == 'N' && check == 0) {
-            logger.log(Level.WARNING, "createSchedule FAILED: A value must be provided for week Of Month  when the SchedulePeriodType is N");
-            return;
-        }
-
-        //delete all existing scheduled payments
-        List<Payments> crmPaymentList = paymentsFacade.findPaymentsByCustomerAndStatus(cust, PaymentStatus.SCHEDULED.value());
-        if (crmPaymentList != null) {
-            logger.log(Level.INFO, "createSchedule - Found {0} existing scheduled payments for {1}", new Object[]{crmPaymentList.size(), cust.getUsername()});
-            for (int x = crmPaymentList.size() - 1; x > -1; x--) {
-                Payments p = crmPaymentList.get(x);
-                String ref = p.getId().toString();
-                boolean isManual = p.getManuallyAddedPayment();
-                if (keepManualPayments == true && isManual) {
-                    logger.log(Level.INFO, "createSchedule - keeping manual payment: Cust={0}, Ref={1}, Manaul Payment = {2}", new Object[]{cust.getUsername(), ref, isManual});
-                } else {
-                    logger.log(Level.INFO, "createSchedule - Deleting payment: Cust={0}, Ref={1}, Manaul Payment = {2}", new Object[]{cust.getUsername(), ref, isManual});
-                    paymentsFacade.remove(p);
-                    startAsynchJob("DeletePayment-" + ref, paymentBean.deletePaymentByRef(cust, ref, loggedInUser, getDigitalKey()));
-                    try {
-                        Thread.sleep(100);
-                    } catch (InterruptedException ex) {
-                        Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                }
-            }
-        }
-        // startAsynchJob("ClearSchedule", paymentBean.clearSchedule(cust, false, loggedInUser, getDigitalKey()));// work around failsafe until migration complete. THere are styill scheduled payments without a payment reference from DB
-        // try {
-        //     Thread.sleep(200);// work around to ensure clearschedule workaround doesn't impact new payments being added 
-        // } catch (InterruptedException interruptedException) {
-        //  }
-        GregorianCalendar startCal = new GregorianCalendar();
-        GregorianCalendar endCal = new GregorianCalendar();
-        startCal.setTime(scheduleStartDate);
-        endCal.setTime(scheduleEndDate);
-        int calendarField = 0;
-        int calendarAmount = 0;
-        int currentDay = startCal.get(Calendar.DAY_OF_MONTH);
-        int calendarDow = startCal.get(Calendar.DAY_OF_WEEK);
-        if (schedulePeriodType != 'M') {
-            dayOfMonth = currentDay;
-        }
-
-        switch (schedulePeriodType) {
-            case 'W'://weekly
-                calendarField = Calendar.DAY_OF_YEAR;
-                calendarAmount = 7;
-                if (calendarDow > payDayOfWeek) {
-                    int d = (payDayOfWeek + 7) - calendarDow;
-                    startCal.add(Calendar.DAY_OF_YEAR, d);
-                } else {
-                    int d = payDayOfWeek - calendarDow;
-                    startCal.add(Calendar.DAY_OF_YEAR, d);
-                }//sunday = 1 , monday = 2 ...saturday = 7
-                break;
-            case 'F'://fortnightly
-                calendarField = Calendar.DAY_OF_YEAR;
-                calendarAmount = 14;
-                if (calendarDow > payDayOfWeek) {
-                    int d = (payDayOfWeek + 7) - calendarDow;
-                    startCal.add(Calendar.DAY_OF_YEAR, d);
-                } else {
-                    int d = payDayOfWeek - calendarDow;
-                    startCal.add(Calendar.DAY_OF_YEAR, d);
-                }
-                break;
-            case 'M':// monthly
-                calendarField = Calendar.MONTH;
-                calendarAmount = 1;
-
-                if (currentDay > dayOfMonth) {
-                    startCal.add(calendarField, 1);
-                }
-                startCal.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-                break;
-            case '4': // 4 weekly
-                calendarField = Calendar.DAY_OF_YEAR;
-                calendarAmount = 28;
-                //startCal.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-                //if (currentDay > dayOfMonth) {
-                //    startCal.add(Calendar.MONTH, 1);
-                //}
-                calendarDow = startCal.get(Calendar.DAY_OF_WEEK);
-                if (calendarDow > payDayOfWeek) {
-                    int d = (payDayOfWeek + 7) - calendarDow;
-                    startCal.add(Calendar.DAY_OF_YEAR, d);
-                } else {
-                    int d = payDayOfWeek - calendarDow;
-                    startCal.add(Calendar.DAY_OF_YEAR, d);
-                }
-
-                break;
-            case 'N': //Weekday in month (e.g. Monday in the third week of every month)
-                calendarField = Calendar.DAY_OF_YEAR;
-                calendarAmount = 7;
-                calendarDow = startCal.get(Calendar.DAY_OF_WEEK);
-                if (calendarDow > payDayOfWeek) {
-                    int d = (payDayOfWeek + 7) - calendarDow;
-                    startCal.add(Calendar.DAY_OF_YEAR, d);
-                } else {
-                    int d = payDayOfWeek - calendarDow;
-                    startCal.add(Calendar.DAY_OF_YEAR, d);
-                }
-                break;
-            case 'Q': // quarterly
-                calendarField = Calendar.MONTH;
-                calendarAmount = 3;
-                //if (currentDay > dayOfMonth) {
-                //     startCal.add(Calendar.MONTH, 1);
-                // }
-                // startCal.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-                break;
-            case 'H': // 6 monthly
-                calendarField = Calendar.MONTH;
-                calendarAmount = 6;
-                // if (currentDay > dayOfMonth) {
-                //     startCal.add(Calendar.MONTH, 1);
-                // }
-                //  startCal.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-                break;
-            case 'Y'://yearly
-                calendarField = Calendar.YEAR;
-                calendarAmount = 1;
-                // if (currentDay > dayOfMonth) {
-                //      startCal.add(Calendar.MONTH, 1);
-                //  }
-                //  startCal.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-                break;
-        }
-        int numberOfpayments = 0;
-        long cumulativeAmountInCents = 0;
-        Date newDebitDate = startCal.getTime();
-
-        while (startCal.compareTo(endCal) < 0) {
-
-            if (schedulePeriodType == 'N') {
-                //TODO fix this 
-                //if (startCal.get(Calendar.WEEK_OF_MONTH) == 1 && firstWeekOfMonth == true) {
-                if (startCal.get(Calendar.DAY_OF_MONTH) >= 1 && startCal.get(Calendar.DAY_OF_MONTH) <= 7 && firstWeekOfMonth == true) {
-                    if (arePaymentsWithinLimits(limitToNumberOfPayments, paymentAmountLimitInCents, cumulativeAmountInCents, amountInCents, numberOfpayments)) {
-                        addPayment(cust, newDebitDate, amountInCents, false);
-                        numberOfpayments++;
-                    }
-
-                }
-                if (startCal.get(Calendar.DAY_OF_MONTH) >= 8 && startCal.get(Calendar.DAY_OF_MONTH) <= 14 && secondWeekOfMonth == true) {
-                    if (arePaymentsWithinLimits(limitToNumberOfPayments, paymentAmountLimitInCents, cumulativeAmountInCents, amountInCents, numberOfpayments)) {
-                        addPayment(cust, newDebitDate, amountInCents, false);
-                        numberOfpayments++;
-                    }
-
-                }
-                if (startCal.get(Calendar.DAY_OF_MONTH) >= 15 && startCal.get(Calendar.DAY_OF_MONTH) <= 21 && thirdWeekOfMonth == true) {
-                    if (arePaymentsWithinLimits(limitToNumberOfPayments, paymentAmountLimitInCents, cumulativeAmountInCents, amountInCents, numberOfpayments)) {
-                        addPayment(cust, newDebitDate, amountInCents, false);
-                        numberOfpayments++;
-                    }
-
-                }
-                if (startCal.get(Calendar.DAY_OF_MONTH) >= 22 && startCal.get(Calendar.DAY_OF_MONTH) <= 28 && fourthWeekOfMonth == true) {
-                    if (arePaymentsWithinLimits(limitToNumberOfPayments, paymentAmountLimitInCents, cumulativeAmountInCents, amountInCents, numberOfpayments)) {
-                        addPayment(cust, newDebitDate, amountInCents, false);
-                        numberOfpayments++;
-                    }
-
-                }
-                startCal.add(calendarField, calendarAmount);
-                Date placeholder = startCal.getTime();
-
-                calendarDow = startCal.get(Calendar.DAY_OF_WEEK);
-                if (calendarDow > payDayOfWeek) {
-                    int d = calendarDow - (payDayOfWeek + 7);
-                    startCal.add(Calendar.DAY_OF_YEAR, d);
-                } else {
-                    int d = payDayOfWeek - calendarDow;
-                    startCal.add(Calendar.DAY_OF_YEAR, d);
-                }
-                newDebitDate = startCal.getTime();
-                startCal.setTime(placeholder);// set it back to correct day of month as we may have changed the day of the week.
-            } else {
-                if (arePaymentsWithinLimits(limitToNumberOfPayments, paymentAmountLimitInCents, cumulativeAmountInCents, amountInCents, numberOfpayments)) {
-                    addPayment(cust, newDebitDate, amountInCents, false);
-                    numberOfpayments++;
-                }
-                startCal.add(calendarField, calendarAmount);
-                Date placeholder = startCal.getTime();
-                // we can only schedule payments for business days
-                if (startCal.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) {
-                    startCal.add(Calendar.DAY_OF_YEAR, 2);
-                }
-                if (startCal.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
-                    startCal.add(Calendar.DAY_OF_YEAR, 1);
-                }
-                newDebitDate = startCal.getTime();
-                startCal.setTime(placeholder);// set it back to correct day of month as we may have changed the day of the week.
-            }
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException ex) {
-                Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-
-    }
-
-    private boolean arePaymentsWithinLimits(int limitToNumberOfPayments, long paymentAmountLimitInCents, long cumulativeAmountInCents, long amountInCents, int numberOfpayments) {
-        if (limitToNumberOfPayments > 0 || paymentAmountLimitInCents > 0) {
-            cumulativeAmountInCents += amountInCents;
-            if (limitToNumberOfPayments > 0 && paymentAmountLimitInCents > 0) {
-                if (limitToNumberOfPayments > numberOfpayments && paymentAmountLimitInCents > cumulativeAmountInCents) {
-                    return true;
-                }
-            }
-            if (limitToNumberOfPayments > 0 && paymentAmountLimitInCents == 0) {
-                if (limitToNumberOfPayments > numberOfpayments) {
-                    return true;
-                }
-            }
-            if (limitToNumberOfPayments == 0 && paymentAmountLimitInCents > 0) {
-                if (paymentAmountLimitInCents > cumulativeAmountInCents) {
-                    return true;
-                }
-            }
-            return false;
-
-        } else {
-            return true;
-        }
-
-    }
-
-    private synchronized void addPayment(Customers cust, Date debitDate, long amountInCents, boolean manualPayment) {
-        String user = FacesContext.getCurrentInstance().getExternalContext().getRemoteUser();
-        if (user != null) {
-
-            try {
-                Payments newPayment = new Payments(0);
-                newPayment.setDebitDate(debitDate);
-                newPayment.setCreateDatetime(new Date());
-                newPayment.setLastUpdatedDatetime(new Date());
-                newPayment.setYourSystemReference(cust.getId().toString());
-                newPayment.setPaymentAmount(new BigDecimal(amountInCents / (long) 100));
-                newPayment.setCustomerName(cust);
-                newPayment.setPaymentStatus(PaymentStatus.SENT_TO_GATEWAY.value());
-                newPayment.setManuallyAddedPayment(manualPayment);
-                paymentsFacade.create(newPayment);
-                String newPaymentID = newPayment.getId().toString();
-                logger.log(Level.INFO, "New Payment Created for customer {0} with paymentID: {1}", new Object[]{cust.getUsername(), newPaymentID});
-                startAsynchJob("AddPayment", paymentBean.addPayment(cust, debitDate, amountInCents, newPaymentID, user, getDigitalKey()));
-            } catch (Exception e) {
-                logger.log(Level.WARNING, "Add Single Payment failed due to exception:", e);
-            }
-        } else {
-            logger.log(Level.WARNING, "Logged in user is null. Add Single Payment aborted.");
-        }
-
-    }
-
+ 
     public void addSinglePayment(ActionEvent actionEvent) {
+         String loggedInUser = FacesContext.getCurrentInstance().getExternalContext().getRemoteUser();
         Long amount = (long) (paymentAmountInCents * (float) 100);
-        addPayment(selectedCustomer, paymentDebitDate, amount, true);
+        paymentBean.addNewPayment(selectedCustomer, paymentDebitDate, amount, true,loggedInUser,sessionId,getDigitalKey(),futureMap,paymentBean);
         paymentDBList = null;
         paymentsDBListFilteredItems = null;
     }

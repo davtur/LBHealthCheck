@@ -54,6 +54,7 @@ import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.ejb.Timer;
 import javax.faces.application.FacesMessage;
+import javax.faces.context.FacesContext;
 import javax.imageio.ImageIO;
 import javax.inject.Inject;
 import javax.xml.bind.JAXBElement;
@@ -83,6 +84,7 @@ public class FutureMapEJB implements Serializable {
     private static final Logger logger = Logger.getLogger(FutureMapEJB.class.getName());
     private static final int TIMEOUT_SECONDS = 300;
     private static final String FUTUREMAP_INTERNALID = "FMINTID876987";
+
     private final ConcurrentHashMap<String, ArrayList<AsyncJob>> futureMap = new ConcurrentHashMap<>();
     private final static String CHANNEL = "/payments/";
     private final Object lock1 = new Object();
@@ -145,6 +147,13 @@ public class FutureMapEJB implements Serializable {
             logger.log(Level.SEVERE, " @PostConstruct Future Map - applicationSetup(). Exception in sanityCheckCustomersForDefaultItems: ", e);
         }
         logger.log(Level.INFO, "Application Setup Completed");
+    }
+
+    /**
+     * @return the FUTUREMAP_INTERNALID
+     */
+    public String getFutureMapInternalSessionId() {
+        return FUTUREMAP_INTERNALID;
     }
 
     /**
@@ -429,6 +438,87 @@ public class FutureMapEJB implements Serializable {
     }
 // run a schedules
 
+    private void processConvertSchedule(Future ft) {
+        String result = "0,FAILED";
+        try {
+            result = (String) ft.get();
+        } catch (InterruptedException | ExecutionException ex) {
+            Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, "Future MAp - processConvertSchedule", ex);
+        }
+        if (result.contains("OK")) {
+            String[] res = result.split(",");
+            String ref = res[0];
+            int reference = -1;
+            try {
+                reference = Integer.parseInt(ref);
+            } catch (NumberFormatException numberFormatException) {
+            }
+            Customers cust = customersFacade.findById(reference);
+            if (cust != null) {
+                List<Payments> crmPaymentList = paymentsFacade.findPaymentsByCustomerAndStatus(cust, PaymentStatus.DELETE_REQUESTED.value());
+                for (int x = crmPaymentList.size() - 1; x > -1; x--) {
+                    Payments p = crmPaymentList.get(x);
+                    paymentsFacade.remove(p);
+                }
+
+                PaymentParameters pp = cust.getPaymentParameters();
+                JsfUtil.addSuccessMessage("Payment Gateway", "Successfully Cleared Schedule .");
+                if (pp != null) {
+                    GregorianCalendar endCal = new GregorianCalendar();
+                    //endCal.setTime(paymentDebitDate);// ezi debit only supports 1 year from current date
+                    endCal.add(Calendar.YEAR, 1);
+
+                    Date paymentDebitDate = pp.getContractStartDate();
+                    BigDecimal bdAmount = pp.getPaymentRegularAmount().multiply(new BigDecimal(100));
+                    Long amount = bdAmount.longValueExact();
+                    BigDecimal bdAmountLimit = pp.getPaymentRegularTotalPaymentsAmount().multiply(new BigDecimal(100));
+                    Long amountLimit = bdAmountLimit.longValueExact();
+                    int paymentLimitToNumberOfPayments = pp.getPaymentsRegularTotalNumberOfPayments();
+                    char spt = 'Z';
+                    switch (pp.getPaymentPeriod()) {
+                        case "1":
+                            spt = 'W';
+                            break;
+                        case "2":
+                            spt = 'F';
+                            break;
+
+                        case "4":
+                            spt = 'M';
+                            break;
+
+                        case "8":
+                            spt = '4';
+                            break;
+
+                        case "16":
+                            spt = 'Q';
+                            break;
+
+                        case "32":
+                            spt = 'H';
+                            break;
+
+                        case "64":
+                            spt = 'Y';
+                            break;
+
+                    }
+
+                    int dom = Integer.parseInt(pp.getPaymentPeriodDayOfMonth());
+                    int dow = Integer.parseInt(pp.getPaymentPeriodDayOfWeek());
+                    paymentBean.createCRMPaymentSchedule(cust, paymentDebitDate, endCal.getTime(), spt, dow, dom, amount, paymentLimitToNumberOfPayments, amountLimit, false, false, false, false, false, cust.getUsername(), FUTUREMAP_INTERNALID, getDigitalKey(),this,paymentBean);
+                } else {
+                    logger.log(Level.WARNING, "processConvertSchedule cust payment parameters are null");
+                }
+            }
+            // getPayments(12, 1);
+        } else {
+            JsfUtil.addErrorMessage("Payment Gateway", "The operation failed!.");
+        }
+        logger.log(Level.INFO, "processConvertSchedule completed");
+    }
+
     public void processCompletedAsyncJobs(String key, Future ft) {
         logger.log(Level.INFO, "Future Map is processing Completed Async Jobs .");
         synchronized (lock3) {
@@ -450,7 +540,9 @@ public class FutureMapEJB implements Serializable {
                 if (key.contains("SettlementReport")) {
                     processSettlementReport(ft);
                 }
-
+                if (key.contains("ConvertSchedule")) {
+                    processConvertSchedule(ft);
+                }
             } catch (CancellationException ex) {
                 logger.log(Level.WARNING, key + " Future Map:", ex);
 
@@ -1451,7 +1543,7 @@ public class FutureMapEJB implements Serializable {
                 if (compareStringToXMLString(payment.getEzidebitCustomerID(), pay.getEzidebitCustomerID()) == false) {
                     return false;
                 }
-                 if (payment.getPaymentStatus().contains(PaymentStatus.SCHEDULED.value()) == false) {
+                if (payment.getPaymentStatus().contains(PaymentStatus.SCHEDULED.value()) == false) {
                     return false;
                 }
 

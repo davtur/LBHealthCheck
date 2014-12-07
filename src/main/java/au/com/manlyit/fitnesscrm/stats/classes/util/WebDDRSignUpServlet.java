@@ -106,31 +106,43 @@ public class WebDDRSignUpServlet extends HttpServlet {
             if (uref != null) {
                 uref = uref.trim();
                 if (uref.length() > 0) {
-                    int customerId = Integer.parseInt(uref);
-                    Customers current = ejbFacade.findById(customerId);
-                    PaymentParameters pp = current.getPaymentParameters();
-                    pp.setWebddrUrl(null);
-                    ejbPaymentParametersFacade.edit(pp);
-                    ejbFacade.editAndFlush(current);
-                    logger.log(Level.INFO, " Customer {0} has set up payment info. Setting Web DDR URL to NULL as it should only be used once.", new Object[]{current.getUsername()});
-                    /*
-                     GregorianCalendar cal = new GregorianCalendar();
-                     cal.add(Calendar.MONTH, 12);
-                     Date endDate = cal.getTime();
-                     cal.add(Calendar.MONTH, -24);
+                    int customerId = 0;
+                    Customers current = null;
+                    try {
+                        customerId = Integer.parseInt(uref);
+                        current = ejbFacade.findById(customerId);
+                    } catch (NumberFormatException numberFormatException) {
+                    }
+
+                    if (current != null) {
+                        PaymentParameters pp = current.getPaymentParameters();
+                        if (pp != null) {
+                            if (pp.getWebddrUrl() != null) {
+                                // the url is not null so this is the first time the customer has clicked the link -this should only happen once so it cant be abused.
+                                pp.setWebddrUrl(null);
+                                ejbPaymentParametersFacade.edit(pp);
+                                ejbFacade.editAndFlush(current);
+                                logger.log(Level.INFO, " Customer {0} has set up payment info. Setting Web DDR URL to NULL as it should only be used once.", new Object[]{current.getUsername()});
+                                startAsynchJob("ConvertSchedule", paymentBean.clearSchedule(current, false, current.getUsername(), getDigitalKey()), futureMap.getFutureMapInternalSessionId());
+                                /*
+                                 GregorianCalendar cal = new GregorianCalendar();
+                                 cal.add(Calendar.MONTH, 12);
+                                 Date endDate = cal.getTime();
+                                 cal.add(Calendar.MONTH, -24);
                    
-                     startAsynchJob("GetCustomerDetails", paymentBean.getCustomerDetails(current, getDigitalKey()), sessionID);
-                     startAsynchJob("GetPayments", paymentBean.getPayments(current, "ALL", "ALL", "ALL", "", cal.getTime(), endDate, false, getDigitalKey()), sessionID);
-                     startAsynchJob("GetScheduledPayments", paymentBean.getScheduledPayments(current, cal.getTime(), endDate, getDigitalKey()), sessionID);
-                     */
+                                 startAsynchJob("GetCustomerDetails", paymentBean.getCustomerDetails(current, getDigitalKey()), sessionID);
+                                 startAsynchJob("GetPayments", paymentBean.getPayments(current, "ALL", "ALL", "ALL", "", cal.getTime(), endDate, false, getDigitalKey()), sessionID);
+                                 startAsynchJob("GetScheduledPayments", paymentBean.getScheduledPayments(current, cal.getTime(), endDate, getDigitalKey()), sessionID);
+                                 */
+                            }
+                        }
+                    }
                 }
             }
         } catch (InterruptedException | ExecutionException ex) {
             Logger.getLogger(WebDDRSignUpServlet.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-
-   
 
     private Properties emailServerProperties() {
         Properties props = new Properties();
