@@ -380,7 +380,67 @@ public class PaymentsFacade extends AbstractFacade<Payments> {
         }
         return cm;
     }
+    
+ public Payments findScheduledPaymentByCust(ScheduledPayment pay,Customers cust) {
+        Payments cm = null;
+        boolean validReference = false;
+        if (pay.getPaymentReference().isNil() == false) {
+            validReference = !pay.getPaymentReference().getValue().trim().isEmpty();
+        }
+        int id = 0;
+        if (validReference) {
+            String ref = pay.getPaymentReference().getValue().trim();
+            try {
+                id = Integer.parseInt(ref);
+            } catch (NumberFormatException numberFormatException) {
+                logger.log(Level.WARNING, "findScheduledPayment by reference. Reference is not a valid number :{0}", ref);
+                return null;
+            }
+        } else {
+            logger.log(Level.WARNING, "findScheduledPayment . Reference is not a valid  :{0}", pay.getYourSystemReference());
+        }
+        ArrayList<Predicate> predicatesList1 = new ArrayList<>();
+        try {
+            CriteriaBuilder cb = em.getCriteriaBuilder();
+            CriteriaQuery<Payments> cq = cb.createQuery(Payments.class);
+            Root<Payments> rt = cq.from(Payments.class);
 
+            Expression<BigDecimal> payAmount = rt.get("paymentAmount");
+             Expression<Customers> customer = rt.get("customerName");
+            Expression<Date> payDate = rt.get("debitDate");
+            Expression<Integer> payRef = rt.get("id");
+            //Expression<Boolean> manualPay = rt.get("manuallyAddedPayment");
+            Expression<String> paymentStatus = rt.get("paymentStatus");
+            predicatesList1.add(cb.equal(customer, cust));
+            if (validReference) {
+                predicatesList1.add(cb.equal(payRef, id));
+            } else {
+                predicatesList1.add(cb.equal(payAmount, new BigDecimal(pay.getPaymentAmount())));
+                predicatesList1.add(cb.equal(payDate, pay.getPaymentDate().toGregorianCalendar().getTime()));
+                //predicatesList1.add(cb.equal(manualPay, pay.isManuallyAddedPayment()));
+            }
+
+            predicatesList1.add(cb.equal(paymentStatus, PaymentStatus.SCHEDULED.value()));
+            predicatesList1.add(cb.equal(paymentStatus, PaymentStatus.SENT_TO_GATEWAY.value()));
+            cq.where(predicatesList1.<Predicate>toArray(new Predicate[predicatesList1.size()]));
+
+            Query q = em.createQuery(cq);
+            if (q.getResultList().size() == 1) {
+                cm = (Payments) q.getSingleResult();
+            } else if (q.getResultList().size() > 1) {
+                cm = (Payments) q.getResultList().get(0);
+                logger.log(Level.WARNING, "findScheduledPayment Multiple payments found , Amount:{0},Date:{1},Ref:{2},Manual:{3}", new Object[]{pay.getPaymentAmount().toString(), pay.getPaymentDate().toGregorianCalendar().getTime(), pay.getPaymentReference().getValue(), pay.isManuallyAddedPayment().toString()});
+
+            } else {
+
+                logger.log(Level.INFO, "findScheduledPayment not found , Amount:{0},Date:{1},Ref:{2},Manual:{3}", new Object[]{pay.getPaymentAmount().toString(), pay.getPaymentDate().toGregorianCalendar().getTime(), pay.getPaymentReference().getValue(), pay.isManuallyAddedPayment().toString()});
+
+            }
+        } catch (Exception e) {
+            logger.log(Level.INFO, "findScheduledPayment not found , Amount:{0},Date:{1},Ref:{2},Manual:{3}, error:{4}", new Object[]{pay.getPaymentAmount().toString(), pay.getPaymentDate().toGregorianCalendar().getTime(), pay.getPaymentReference().getValue(), pay.isManuallyAddedPayment().toString(), e.getMessage()});
+        }
+        return cm;
+    }
     public List<Payments> findPaymentsByDateRange(boolean useSettlement, boolean showSuccessful, boolean showFailed, boolean showPending, Date startDate, Date endDate, boolean sortAsc) {
         List<Payments> retList = null;
         ArrayList<Predicate> predicatesList1 = new ArrayList<>();

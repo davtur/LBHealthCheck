@@ -850,9 +850,11 @@ public class FutureMapEJB implements Serializable {
                                 int id = -1;
                                 try {
                                     id = Integer.parseInt(pay.getPaymentReference().getValue());
+                                     crmPay = paymentsFacade.findPaymentById(id);
                                 } catch (NumberFormatException numberFormatException) {
+                                    logger.log(Level.INFO, "Future Map processGetScheduledPayments  - found a payment without a valid reference", id);
                                 }
-                                crmPay = paymentsFacade.findPaymentById(id);
+                               
                                 if (crmPay != null) {
                                     if (compareScheduledPaymentXMLToEntity(crmPay, pay)) {
                                         crmPay = convertScheduledPaymentXMLToEntity(crmPay, pay, cust);
@@ -860,7 +862,7 @@ public class FutureMapEJB implements Serializable {
                                         paymentsFacade.edit(crmPay);
                                     }
                                 } else {
-                                    crmPay = paymentsFacade.findScheduledPayment(pay);
+                                    crmPay = paymentsFacade.findScheduledPaymentByCust(pay,cust);
                                     if (crmPay != null) { //' payment exists
                                         if (compareScheduledPaymentXMLToEntity(crmPay, pay)) {
                                             // they are the same so no update
@@ -871,8 +873,14 @@ public class FutureMapEJB implements Serializable {
                                         }
                                     } else { //payment doesn't exist in crm so add it
                                         logger.log(Level.SEVERE, "Future Map processGetScheduledPayments - A payment exists in the PGW but not in CRM. EzidebitID={0}, CRM Ref:{1}, Amount={2}, Date={3}, Ref={4}", new Object[]{pay.getEzidebitCustomerID(), pay.getYourSystemReference(), pay.getPaymentAmount(), pay.getPaymentDate(), pay.getPaymentReference()});
-                                        //crmPay = convertScheduledPaymentXMLToEntity(crmPay, pay, cust);
-                                        //paymentsFacade.create(crmPay);
+                                        crmPay = convertScheduledPaymentXMLToEntity(crmPay, pay, cust);
+                                        paymentsFacade.createAndFlush(crmPay);
+                                        crmPay.setPaymentReference(crmPay.getId().toString());
+                                        crmPay.setManuallyAddedPayment(false);
+                                        paymentsFacade.edit(crmPay);
+                                        Long amountLong = crmPay.getPaymentAmount().multiply(new BigDecimal(100)).longValueExact();
+                                        paymentBean.deletePayment(cust, crmPay.getDebitDate(), amountLong, "", cust.getUsername(), getDigitalKey());
+                                        paymentBean.addPayment(cust, crmPay.getDebitDate(), amountLong, crmPay.getPaymentReference(), cust.getUsername(), getDigitalKey());
                                     }
                                 }
 

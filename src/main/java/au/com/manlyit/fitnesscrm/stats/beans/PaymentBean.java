@@ -63,10 +63,10 @@ public class PaymentBean implements Serializable {
     private ConfigMapFacade configMapFacade;
     @Inject
     private AuditLogFacade auditLogFacade;
-    
+
     @Inject
     private PaymentsFacade paymentsFacade;
-   
+
     private INonPCIService getWs() {
         URL url = null;
         WebServiceException e = null;
@@ -108,7 +108,7 @@ public class PaymentBean implements Serializable {
 
     }
 
-    public  synchronized void createCRMPaymentSchedule(Customers cust, Date scheduleStartDate, Date scheduleEndDate, char schedulePeriodType, int payDayOfWeek, int dayOfMonth, long amountInCents, int limitToNumberOfPayments, long paymentAmountLimitInCents, boolean keepManualPayments, boolean firstWeekOfMonth, boolean secondWeekOfMonth, boolean thirdWeekOfMonth, boolean fourthWeekOfMonth, String loggedInUser, String sessionId, String digitalKey,FutureMapEJB futureMap,PaymentBean payBean) {
+    public synchronized void createCRMPaymentSchedule(Customers cust, Date scheduleStartDate, Date scheduleEndDate, char schedulePeriodType, int payDayOfWeek, int dayOfMonth, long amountInCents, int limitToNumberOfPayments, long paymentAmountLimitInCents, boolean keepManualPayments, boolean firstWeekOfMonth, boolean secondWeekOfMonth, boolean thirdWeekOfMonth, boolean fourthWeekOfMonth, String loggedInUser, String sessionId, String digitalKey, FutureMapEJB futureMap, PaymentBean payBean) {
 
         if (schedulePeriodType == 'W' || schedulePeriodType == 'F' || schedulePeriodType == 'N' || schedulePeriodType == '4') {
             if (payDayOfWeek < 1 || payDayOfWeek > 7) {
@@ -281,28 +281,28 @@ public class PaymentBean implements Serializable {
                 //if (startCal.get(Calendar.WEEK_OF_MONTH) == 1 && firstWeekOfMonth == true) {
                 if (startCal.get(Calendar.DAY_OF_MONTH) >= 1 && startCal.get(Calendar.DAY_OF_MONTH) <= 7 && firstWeekOfMonth == true) {
                     if (arePaymentsWithinLimits(limitToNumberOfPayments, paymentAmountLimitInCents, cumulativeAmountInCents, amountInCents, numberOfpayments)) {
-                        addNewPayment(cust, newDebitDate, amountInCents, false, loggedInUser, sessionId, digitalKey,futureMap,payBean);
+                        addNewPayment(cust, newDebitDate, amountInCents, false, loggedInUser, sessionId, digitalKey, futureMap, payBean);
                         numberOfpayments++;
                     }
 
                 }
                 if (startCal.get(Calendar.DAY_OF_MONTH) >= 8 && startCal.get(Calendar.DAY_OF_MONTH) <= 14 && secondWeekOfMonth == true) {
                     if (arePaymentsWithinLimits(limitToNumberOfPayments, paymentAmountLimitInCents, cumulativeAmountInCents, amountInCents, numberOfpayments)) {
-                        addNewPayment(cust, newDebitDate, amountInCents, false, loggedInUser, sessionId, digitalKey,futureMap,payBean);
+                        addNewPayment(cust, newDebitDate, amountInCents, false, loggedInUser, sessionId, digitalKey, futureMap, payBean);
                         numberOfpayments++;
                     }
 
                 }
                 if (startCal.get(Calendar.DAY_OF_MONTH) >= 15 && startCal.get(Calendar.DAY_OF_MONTH) <= 21 && thirdWeekOfMonth == true) {
                     if (arePaymentsWithinLimits(limitToNumberOfPayments, paymentAmountLimitInCents, cumulativeAmountInCents, amountInCents, numberOfpayments)) {
-                        addNewPayment(cust, newDebitDate, amountInCents, false, loggedInUser, sessionId, digitalKey,futureMap,payBean);
+                        addNewPayment(cust, newDebitDate, amountInCents, false, loggedInUser, sessionId, digitalKey, futureMap, payBean);
                         numberOfpayments++;
                     }
 
                 }
                 if (startCal.get(Calendar.DAY_OF_MONTH) >= 22 && startCal.get(Calendar.DAY_OF_MONTH) <= 28 && fourthWeekOfMonth == true) {
                     if (arePaymentsWithinLimits(limitToNumberOfPayments, paymentAmountLimitInCents, cumulativeAmountInCents, amountInCents, numberOfpayments)) {
-                        addNewPayment(cust, newDebitDate, amountInCents, false, loggedInUser, sessionId, digitalKey,futureMap,payBean);
+                        addNewPayment(cust, newDebitDate, amountInCents, false, loggedInUser, sessionId, digitalKey, futureMap, payBean);
                         numberOfpayments++;
                     }
 
@@ -322,7 +322,7 @@ public class PaymentBean implements Serializable {
                 startCal.setTime(placeholder);// set it back to correct day of month as we may have changed the day of the week.
             } else {
                 if (arePaymentsWithinLimits(limitToNumberOfPayments, paymentAmountLimitInCents, cumulativeAmountInCents, amountInCents, numberOfpayments)) {
-                    addNewPayment(cust, newDebitDate, amountInCents, false, loggedInUser, sessionId, digitalKey,futureMap,payBean);
+                    addNewPayment(cust, newDebitDate, amountInCents, false, loggedInUser, sessionId, digitalKey, futureMap, payBean);
                     numberOfpayments++;
                 }
                 startCal.add(calendarField, calendarAmount);
@@ -346,7 +346,7 @@ public class PaymentBean implements Serializable {
 
     }
 
-    private  synchronized boolean arePaymentsWithinLimits(int limitToNumberOfPayments, long paymentAmountLimitInCents, long cumulativeAmountInCents, long amountInCents, int numberOfpayments) {
+    private synchronized boolean arePaymentsWithinLimits(int limitToNumberOfPayments, long paymentAmountLimitInCents, long cumulativeAmountInCents, long amountInCents, int numberOfpayments) {
         if (limitToNumberOfPayments > 0 || paymentAmountLimitInCents > 0) {
             cumulativeAmountInCents += amountInCents;
             if (limitToNumberOfPayments > 0 && paymentAmountLimitInCents > 0) {
@@ -372,7 +372,7 @@ public class PaymentBean implements Serializable {
 
     }
 
-    public synchronized void addNewPayment(Customers cust, Date debitDate, long amountInCents, boolean manualPayment, String user, String sessionId, String digitalKey,FutureMapEJB futureMap,PaymentBean payBean) {
+    public synchronized void addNewPayment(Customers cust, Date debitDate, long amountInCents, boolean manualPayment, String user, String sessionId, String digitalKey, FutureMapEJB futureMap, PaymentBean payBean) {
         //String user = FacesContext.getCurrentInstance().getExternalContext().getRemoteUser();
         if (user != null) {
 
@@ -387,7 +387,7 @@ public class PaymentBean implements Serializable {
                 newPayment.setPaymentStatus(PaymentStatus.SENT_TO_GATEWAY.value());
                 newPayment.setManuallyAddedPayment(manualPayment);
                 paymentsFacade.createAndFlush(newPayment);
-                
+
                 String newPaymentID = newPayment.getId().toString();
                 logger.log(Level.INFO, "New Payment Created for customer {0} with paymentID: {1}", new Object[]{cust.getUsername(), newPaymentID});
                 AsyncJob aj = new AsyncJob("AddPayment", payBean.addPayment(cust, debitDate, amountInCents, newPaymentID, user, digitalKey));
@@ -616,9 +616,8 @@ public class PaymentBean implements Serializable {
             logger.log(Level.INFO, "deletePayment - the paymentReference is not NULL and is overriding date and amount to identify the payment");
         }
 
-        logger.log(Level.INFO, "deletePayment Response: Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
         if (eziResponse.getError() == 0) {// any errors will be a non zero value
-
+            logger.log(Level.INFO, "deletePayment Response: OK Data - {0}", new Object[]{eziResponse.getData().getValue()});
             if (eziResponse.getData().getValue().compareTo("S") == 0) {
                 result = paymentReference + ",OK";;
                 String auditDetails = "Debit Date:" + debitDateString + ", Amount (cents): " + paymentAmountInCents.toString() + ", Payment Ref:" + paymentReference;
