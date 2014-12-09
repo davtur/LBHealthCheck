@@ -441,7 +441,7 @@ public class PaymentsFacade extends AbstractFacade<Payments> {
         }
         return cm;
     }
-    public List<Payments> findPaymentsByDateRange(boolean useSettlement, boolean showSuccessful, boolean showFailed, boolean showPending, Date startDate, Date endDate, boolean sortAsc) {
+    public List<Payments> findPaymentsByDateRange(boolean useSettlement, boolean showSuccessful, boolean showFailed, boolean showPending,boolean showScheduled, Date startDate, Date endDate, boolean sortAsc) {
         List<Payments> retList = null;
         ArrayList<Predicate> predicatesList1 = new ArrayList<>();
         ArrayList<Predicate> predicatesList2 = new ArrayList<>();
@@ -469,12 +469,16 @@ public class PaymentsFacade extends AbstractFacade<Payments> {
                 predicatesList2.add(cb.equal(status, "S"));
             }
             if (showPending) {
-                predicatesList2.add(cb.equal(status, "P"));
-                predicatesList2.add(cb.equal(status, "W"));
+                predicatesList2.add(cb.equal(status,PaymentStatus.PENDING.value()));
+                predicatesList2.add(cb.equal(status, PaymentStatus.WAITING.value()));
             }
             if (showFailed) {
-                predicatesList2.add(cb.equal(status, "F"));
-                predicatesList2.add(cb.equal(status, "D"));
+                predicatesList2.add(cb.equal(status, PaymentStatus.FATAL_DISHONOUR.value()));
+                predicatesList2.add(cb.equal(status, PaymentStatus.DISHONOURED.value()));
+            }
+            if (showScheduled) {
+                predicatesList2.add(cb.equal(status,PaymentStatus.SCHEDULED.value()));
+
             }
             cq.where(cb.and(cb.or(predicatesList1.<Predicate>toArray(new Predicate[predicatesList1.size()])), cb.or(predicatesList2.<Predicate>toArray(new Predicate[predicatesList2.size()]))));
             //cq.where(cb.and(condition1,cb.or(predicatesList.<Predicate>toArray(new Predicate[predicatesList.size()]))));

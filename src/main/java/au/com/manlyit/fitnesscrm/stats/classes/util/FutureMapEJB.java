@@ -783,13 +783,12 @@ public class FutureMapEJB implements Serializable {
                                                 paymentsFacade.edit(crmPay);
                                             }
                                         } else { //payment doesn't exist in crm so add it
-                                            logger.log(Level.INFO, "Future Map processGetPayments  - payment doesn't exist in crm so add it:{0}.", paymentRefInt);
+                                            logger.log(Level.WARNING, "Future Map processGetPayments  - payment doesn't exist in crm (this should only happen for webddr form schedule) so adding it:{0}.", paymentRefInt);
                                             crmPay = convertPaymentXMLToEntity(crmPay, pay, cust);
                                             paymentsFacade.createAndFlush(crmPay);
                                         }
                                     }
                                 }
-
                             }
                         }
                     } else {

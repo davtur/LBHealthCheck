@@ -189,12 +189,13 @@ public class CustomersFacade extends AbstractFacade<Customers> {
 
     public Customers findById(int id) {
         Customers cm = null;
+        Expression<Integer> custId ;
         try {
             CriteriaBuilder cb = em.getCriteriaBuilder();
             CriteriaQuery<Customers> cq = cb.createQuery(Customers.class);
             Root<Customers> rt = cq.from(Customers.class);
 
-            Expression<Integer> custId = rt.get("id");
+            custId = rt.get("id");
             cq.where(cb.equal(custId, id));
 
             Query q = em.createQuery(cq);

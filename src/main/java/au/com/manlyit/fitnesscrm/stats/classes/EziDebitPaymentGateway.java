@@ -169,6 +169,7 @@ public class EziDebitPaymentGateway implements Serializable {
     private boolean reportShowSuccessful = true;
     private boolean reportShowFailed = true;
     private boolean reportShowPending = true;
+    private boolean reportShowScheduled = false;
     private boolean manualRefreshFromPaymentGateway = false;
     private boolean customerCancellationConfirmed = false;
 
@@ -288,7 +289,7 @@ public class EziDebitPaymentGateway implements Serializable {
     public void reportDateChange() {
         reportPaymentsList = null;
         reportPaymentsListFilteredItems = null;
-        generatePaymentsReport();
+      
     }
 
     /**
@@ -903,7 +904,7 @@ public class EziDebitPaymentGateway implements Serializable {
 
             refreshAllActiveCustomers();
         }
-
+       
     }
 
     /**
@@ -936,7 +937,7 @@ public class EziDebitPaymentGateway implements Serializable {
 
     private void generatePaymentsReport() {
         Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.INFO, "Running Report");
-        List<Payments> pl = paymentsFacade.findPaymentsByDateRange(reportUseSettlementDate, reportShowSuccessful, reportShowFailed, reportShowPending, reportStartDate, reportEndDate, false);
+        List<Payments> pl = paymentsFacade.findPaymentsByDateRange(reportUseSettlementDate, reportShowSuccessful, reportShowFailed, reportShowPending, isReportShowScheduled(), reportStartDate, reportEndDate, false);
         reportTotalSuccessful = 0;
         reportTotalDishonoured = 0;
         for (Payments p : pl) {
@@ -1166,6 +1167,20 @@ public class EziDebitPaymentGateway implements Serializable {
      */
     public void setCustomerCancellationConfirmed(boolean customerCancellationConfirmed) {
         this.customerCancellationConfirmed = customerCancellationConfirmed;
+    }
+
+    /**
+     * @return the reportShowScheduled
+     */
+    public boolean isReportShowScheduled() {
+        return reportShowScheduled;
+    }
+
+    /**
+     * @param reportShowScheduled the reportShowScheduled to set
+     */
+    public void setReportShowScheduled(boolean reportShowScheduled) {
+        this.reportShowScheduled = reportShowScheduled;
     }
 
     private class eziDebitThreadFactory implements ThreadFactory {
@@ -2304,7 +2319,7 @@ public class EziDebitPaymentGateway implements Serializable {
             }
             if (amountLimit > 0) {
                 pp.setPaymentRegularDuration(2);// Total payments 
-                 dur = "2";
+                dur = "2";
             }
             if (amountLimit > 0 && paymentLimitToNumberOfPayments > 0) {
                 pp.setPaymentRegularDuration(6);// Total payments - takes precedence if both are set
@@ -2345,11 +2360,11 @@ public class EziDebitPaymentGateway implements Serializable {
         widgetUrl += amp + "freq=" + paymentSchedulePeriodType;
         widgetUrl += amp + "aDur=" + pp.getPaymentRegularDuration().toString();
         widgetUrl += amp + "dur=" + dur;
-        if(paymentLimitToNumberOfPayments > 0){
-          widgetUrl += amp + "tPay=" + Integer.toString(paymentLimitToNumberOfPayments);  
+        if (paymentLimitToNumberOfPayments > 0) {
+            widgetUrl += amp + "tPay=" + Integer.toString(paymentLimitToNumberOfPayments);
         }
-         if(amountLimit > 0){
-          widgetUrl += amp + "tAmount=" + nf.format((new Float(amountLimit) / new Float(100)));  
+        if (amountLimit > 0) {
+            widgetUrl += amp + "tAmount=" + nf.format((new Float(amountLimit) / new Float(100)));
         }
         widgetUrl += amp + "callback=" + configMapFacade.getConfig("payment.ezidebit.webddr.callback");
         pp.setWebddrUrl(widgetUrl);
@@ -2419,7 +2434,7 @@ public class EziDebitPaymentGateway implements Serializable {
             }
             ejbPaymentParametersFacade.edit(pp);
             customersFacade.edit(c);
-            paymentBean.createCRMPaymentSchedule(selectedCustomer, paymentDebitDate, endCal.getTime(), spt, dow, paymentDayOfMonth, amount, paymentLimitToNumberOfPayments, amountLimit, paymentKeepManualPayments, paymentFirstWeekOfMonth, paymentSecondWeekOfMonth, paymentThirdWeekOfMonth, paymentFourthWeekOfMonth, loggedInUser,sessionId,getDigitalKey(),futureMap,paymentBean);
+            paymentBean.createCRMPaymentSchedule(selectedCustomer, paymentDebitDate, endCal.getTime(), spt, dow, paymentDayOfMonth, amount, paymentLimitToNumberOfPayments, amountLimit, paymentKeepManualPayments, paymentFirstWeekOfMonth, paymentSecondWeekOfMonth, paymentThirdWeekOfMonth, paymentFourthWeekOfMonth, loggedInUser, sessionId, getDigitalKey(), futureMap, paymentBean);
             /* List<Payments> crmPaymentList = paymentsFacade.findPaymentsByCustomerAndStatus(selectedCustomer, PaymentStatus.SCHEDULED.value());
              for (Payments p : crmPaymentList) {
              if (!(paymentKeepManualPayments && p.getManuallyAddedPayment())) {
@@ -2438,11 +2453,10 @@ public class EziDebitPaymentGateway implements Serializable {
         paymentsDBListFilteredItems = null;
     }
 
- 
     public void addSinglePayment(ActionEvent actionEvent) {
-         String loggedInUser = FacesContext.getCurrentInstance().getExternalContext().getRemoteUser();
+        String loggedInUser = FacesContext.getCurrentInstance().getExternalContext().getRemoteUser();
         Long amount = (long) (paymentAmountInCents * (float) 100);
-        paymentBean.addNewPayment(selectedCustomer, paymentDebitDate, amount, true,loggedInUser,sessionId,getDigitalKey(),futureMap,paymentBean);
+        paymentBean.addNewPayment(selectedCustomer, paymentDebitDate, amount, true, loggedInUser, sessionId, getDigitalKey(), futureMap, paymentBean);
         paymentDBList = null;
         paymentsDBListFilteredItems = null;
     }
@@ -2461,10 +2475,10 @@ public class EziDebitPaymentGateway implements Serializable {
                     Payments p = crmPaymentList.get(x);
                     String ref = p.getId().toString();
                     boolean isManual = true;
-                    if(p.getManuallyAddedPayment() != null){
-                         isManual = p.getManuallyAddedPayment();
+                    if (p.getManuallyAddedPayment() != null) {
+                        isManual = p.getManuallyAddedPayment();
                     }
-                  
+
                     if (paymentKeepManualPayments == true && isManual) {
                         logger.log(Level.INFO, "createSchedule - keeping manual payment: Cust={0}, Ref={1}, Manaul Payment = {2}", new Object[]{selectedCustomer.getUsername(), ref, isManual});
                     } else {
