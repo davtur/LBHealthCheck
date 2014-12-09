@@ -273,7 +273,7 @@ public class EziDebitPaymentGateway implements Serializable {
         cal.add(Calendar.MONTH, monthsAhead);
         Date endDate = cal.getTime();
         cal.add(Calendar.MONTH, -(monthsAhead));
-        cal.add(Calendar.DAY_OF_YEAR, -(monthsbehind));
+        cal.add(Calendar.MONTH, -(monthsbehind));
         startAsynchJob("GetPayments", paymentBean.getPayments(selectedCustomer, "ALL", "ALL", "ALL", "", cal.getTime(), endDate, false, getDigitalKey()));
         startAsynchJob("GetScheduledPayments", paymentBean.getScheduledPayments(selectedCustomer, cal.getTime(), endDate, getDigitalKey()));
     }
@@ -2460,7 +2460,11 @@ public class EziDebitPaymentGateway implements Serializable {
                 for (int x = crmPaymentList.size() - 1; x > -1; x--) {
                     Payments p = crmPaymentList.get(x);
                     String ref = p.getId().toString();
-                    boolean isManual = p.getManuallyAddedPayment();
+                    boolean isManual = true;
+                    if(p.getManuallyAddedPayment() != null){
+                         isManual = p.getManuallyAddedPayment();
+                    }
+                  
                     if (paymentKeepManualPayments == true && isManual) {
                         logger.log(Level.INFO, "createSchedule - keeping manual payment: Cust={0}, Ref={1}, Manaul Payment = {2}", new Object[]{selectedCustomer.getUsername(), ref, isManual});
                     } else {

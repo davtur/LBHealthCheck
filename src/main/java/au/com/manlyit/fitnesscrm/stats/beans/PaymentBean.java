@@ -338,7 +338,7 @@ public class PaymentBean implements Serializable {
                 startCal.setTime(placeholder);// set it back to correct day of month as we may have changed the day of the week.
             }
             try {
-                Thread.sleep(100);
+                Thread.sleep(200);
             } catch (InterruptedException ex) {
                 Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, null, ex);
             }

@@ -507,7 +507,7 @@ public class FutureMapEJB implements Serializable {
 
                     int dom = Integer.parseInt(pp.getPaymentPeriodDayOfMonth());
                     int dow = Integer.parseInt(pp.getPaymentPeriodDayOfWeek());
-                    paymentBean.createCRMPaymentSchedule(cust, paymentDebitDate, endCal.getTime(), spt, dow, dom, amount, paymentLimitToNumberOfPayments, amountLimit, false, false, false, false, false, cust.getUsername(), FUTUREMAP_INTERNALID, getDigitalKey(),this,paymentBean);
+                    paymentBean.createCRMPaymentSchedule(cust, paymentDebitDate, endCal.getTime(), spt, dow, dom, amount, paymentLimitToNumberOfPayments, amountLimit, false, false, false, false, false, cust.getUsername(), FUTUREMAP_INTERNALID, getDigitalKey(), this, paymentBean);
                 } else {
                     logger.log(Level.WARNING, "processConvertSchedule cust payment parameters are null");
                 }
@@ -771,7 +771,9 @@ public class FutureMapEJB implements Serializable {
                                         // scheduled payment no paymentID
                                         logger.log(Level.INFO, "Future Map processGetPayments scheduled payment .", pay.toString());
                                     } else {
+
                                         crmPay = paymentsFacade.findPaymentByPaymentId(paymentID);
+
                                         if (crmPay != null) { //' payment exists
                                             if (comparePaymentXMLToEntity(crmPay, pay)) {
                                                 // they are the same so no update
@@ -781,8 +783,9 @@ public class FutureMapEJB implements Serializable {
                                                 paymentsFacade.edit(crmPay);
                                             }
                                         } else { //payment doesn't exist in crm so add it
+                                            logger.log(Level.INFO, "Future Map processGetPayments  - payment doesn't exist in crm so add it:{0}.", paymentRefInt);
                                             crmPay = convertPaymentXMLToEntity(crmPay, pay, cust);
-                                            paymentsFacade.create(crmPay);
+                                            paymentsFacade.createAndFlush(crmPay);
                                         }
                                     }
                                 }
@@ -790,7 +793,7 @@ public class FutureMapEJB implements Serializable {
                             }
                         }
                     } else {
-                        logger.log(Level.SEVERE, "Future Map processGetPayments couldn't find a customer with our system ref from payment.");
+                        logger.log(Level.SEVERE, "Future Map processGetPayments couldn't find a customer with our system ref ({0}) from payment.", customerRef);
                         /*TODO email a report at the end of the process if there are any payments swithout a customer reference
                          as this means that a customer is in ezidebits system but not ours */
 
@@ -850,11 +853,11 @@ public class FutureMapEJB implements Serializable {
                                 int id = -1;
                                 try {
                                     id = Integer.parseInt(pay.getPaymentReference().getValue());
-                                     crmPay = paymentsFacade.findPaymentById(id);
+                                    crmPay = paymentsFacade.findPaymentById(id);
                                 } catch (NumberFormatException numberFormatException) {
                                     logger.log(Level.INFO, "Future Map processGetScheduledPayments  - found a payment without a valid reference", id);
                                 }
-                               
+
                                 if (crmPay != null) {
                                     if (compareScheduledPaymentXMLToEntity(crmPay, pay)) {
                                         crmPay = convertScheduledPaymentXMLToEntity(crmPay, pay, cust);
@@ -862,7 +865,7 @@ public class FutureMapEJB implements Serializable {
                                         paymentsFacade.edit(crmPay);
                                     }
                                 } else {
-                                    crmPay = paymentsFacade.findScheduledPaymentByCust(pay,cust);
+                                    crmPay = paymentsFacade.findScheduledPaymentByCust(pay, cust);
                                     if (crmPay != null) { //' payment exists
                                         if (compareScheduledPaymentXMLToEntity(crmPay, pay)) {
                                             // they are the same so no update
