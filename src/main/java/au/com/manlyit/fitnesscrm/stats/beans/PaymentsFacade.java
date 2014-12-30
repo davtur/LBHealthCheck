@@ -7,6 +7,7 @@ package au.com.manlyit.fitnesscrm.stats.beans;
 
 import au.com.manlyit.fitnesscrm.stats.beans.util.PaymentStatus;
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
+import au.com.manlyit.fitnesscrm.stats.db.CustomerState;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import au.com.manlyit.fitnesscrm.stats.db.Payments;
 import au.com.manlyit.fitnesscrm.stats.webservices.ScheduledPayment;
@@ -24,6 +25,7 @@ import javax.persistence.Query;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
@@ -56,6 +58,7 @@ public class PaymentsFacade extends AbstractFacade<Payments> {
         logger.log(Level.INFO, message);
 
     }
+
     public List<Payments> findPaymentsByCustomer(Customers customer, boolean bypassCache) {
         List retList = null;
         try {
@@ -234,16 +237,16 @@ public class PaymentsFacade extends AbstractFacade<Payments> {
         }
         return cm;
     }
-    
+
     public List<Payments> findScheduledPaymentsByCustomer(Customers cust) {
-        List<Payments>  cm = null;
-       
+        List<Payments> cm = null;
+
         ArrayList<Predicate> predicatesList1 = new ArrayList<>();
         try {
             CriteriaBuilder cb = em.getCriteriaBuilder();
             CriteriaQuery<Payments> cq = cb.createQuery(Payments.class);
             Root<Payments> rt = cq.from(Payments.class);
-           
+
             Expression<Customers> customer = rt.get("customerName");
             Expression<String> paymentStatus = rt.get("paymentStatus");
 
@@ -251,19 +254,17 @@ public class PaymentsFacade extends AbstractFacade<Payments> {
 
             predicatesList1.add(cb.equal(paymentStatus, PaymentStatus.SCHEDULED.value()));
             predicatesList1.add(cb.equal(paymentStatus, PaymentStatus.SENT_TO_GATEWAY.value()));
-            
 
             cq.where(predicatesList1.<Predicate>toArray(new Predicate[predicatesList1.size()]));
 
             Query q = em.createQuery(cq);
             cm = q.getResultList();
-             
+
         } catch (Exception e) {
             logger.log(Level.INFO, "findScheduledPaymentsByCustomer not found , Customer:{0}, error:{1}", new Object[]{cust.getUsername(), e.getMessage()});
         }
         return cm;
     }
-
 
     public Payments findScheduledPayment(BigDecimal paymentAmount, Date debitDate, String paymentReference, Boolean manuallyAddedPayment) {
         Payments cm = null;
@@ -380,8 +381,8 @@ public class PaymentsFacade extends AbstractFacade<Payments> {
         }
         return cm;
     }
-    
- public Payments findScheduledPaymentByCust(ScheduledPayment pay,Customers cust) {
+
+    public Payments findScheduledPaymentByCust(ScheduledPayment pay, Customers cust) {
         Payments cm = null;
         boolean validReference = false;
         if (pay.getPaymentReference().isNil() == false) {
@@ -406,7 +407,7 @@ public class PaymentsFacade extends AbstractFacade<Payments> {
             Root<Payments> rt = cq.from(Payments.class);
 
             Expression<BigDecimal> payAmount = rt.get("paymentAmount");
-             Expression<Customers> customer = rt.get("customerName");
+            Expression<Customers> customer = rt.get("customerName");
             Expression<Date> payDate = rt.get("debitDate");
             Expression<Integer> payRef = rt.get("id");
             //Expression<Boolean> manualPay = rt.get("manuallyAddedPayment");
@@ -441,10 +442,12 @@ public class PaymentsFacade extends AbstractFacade<Payments> {
         }
         return cm;
     }
-    public List<Payments> findPaymentsByDateRange(boolean useSettlement, boolean showSuccessful, boolean showFailed, boolean showPending,boolean showScheduled, Date startDate, Date endDate, boolean sortAsc) {
+
+    public List<Payments> findPaymentsByDateRange(boolean useSettlement, boolean showSuccessful, boolean showFailed, boolean showPending, boolean showScheduled, Date startDate, Date endDate, boolean sortAsc) {
         List<Payments> retList = null;
         ArrayList<Predicate> predicatesList1 = new ArrayList<>();
         ArrayList<Predicate> predicatesList2 = new ArrayList<>();
+        String activeState = "ACTIVE";
         try {
             CriteriaBuilder cb = em.getCriteriaBuilder();
             CriteriaQuery<Payments> cq = cb.createQuery(Payments.class);
@@ -452,6 +455,17 @@ public class PaymentsFacade extends AbstractFacade<Payments> {
             Expression<Date> stime;
             Expression<Date> stime2;
             Expression<Date> stime3;
+            Join<Payments, Customers> customersJoin;// join paymenst 
+            Join<Customers, CustomerState> customerStateJoin;// join customers.active to customer_state.id
+            Expression<String> custState = null;
+            //Expression<Customers> cust = null;
+            if (showScheduled) {
+                customersJoin = rt.join("customerName");
+                customerStateJoin = customersJoin.join("active");// join customers.active to customer_state.id
+                //cust = customersJoin.get("id");
+                custState = customerStateJoin.get("customerState");
+            }
+
             if (useSettlement) {
                 stime = rt.get("settlementDate");
                 predicatesList1.add(cb.between(stime, startDate, endDate));
@@ -466,10 +480,10 @@ public class PaymentsFacade extends AbstractFacade<Payments> {
             Expression<Date> status = rt.get("paymentStatus");
             //   Predicate condition1 = cb.between(stime, startDate, endDate);
             if (showSuccessful) {
-                predicatesList2.add(cb.equal(status, "S"));
+                predicatesList2.add(cb.equal(status, PaymentStatus.SUCESSFUL.value()));
             }
             if (showPending) {
-                predicatesList2.add(cb.equal(status,PaymentStatus.PENDING.value()));
+                predicatesList2.add(cb.equal(status, PaymentStatus.PENDING.value()));
                 predicatesList2.add(cb.equal(status, PaymentStatus.WAITING.value()));
             }
             if (showFailed) {
@@ -477,7 +491,7 @@ public class PaymentsFacade extends AbstractFacade<Payments> {
                 predicatesList2.add(cb.equal(status, PaymentStatus.DISHONOURED.value()));
             }
             if (showScheduled) {
-                predicatesList2.add(cb.equal(status,PaymentStatus.SCHEDULED.value()));
+                predicatesList2.add(cb.and(cb.equal(status, PaymentStatus.SCHEDULED.value()), cb.equal(custState, activeState)));
 
             }
             cq.where(cb.and(cb.or(predicatesList1.<Predicate>toArray(new Predicate[predicatesList1.size()])), cb.or(predicatesList2.<Predicate>toArray(new Predicate[predicatesList2.size()]))));

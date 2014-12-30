@@ -5,15 +5,7 @@
  */
 package au.com.manlyit.fitnesscrm.stats.classes.util;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.UnsupportedEncodingException;
 import java.util.Date;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.primefaces.model.DefaultScheduleEvent;
 
 public class CrmScheduleEvent extends DefaultScheduleEvent {

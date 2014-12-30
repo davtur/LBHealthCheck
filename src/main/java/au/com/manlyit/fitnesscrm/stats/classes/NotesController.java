@@ -4,9 +4,12 @@ import au.com.manlyit.fitnesscrm.stats.db.Notes;
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PaginationHelper;
 import au.com.manlyit.fitnesscrm.stats.beans.NotesFacade;
+import au.com.manlyit.fitnesscrm.stats.classes.util.CrmScheduleEvent;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import java.io.Serializable;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -44,6 +47,8 @@ public class NotesController implements Serializable {
     private List<Notes> customerNoteItems;
     private Notes[] multiSelected;
     private Customers selectedUser;
+    private boolean reminder = false;
+    private Date reminderDate;
 
     public NotesController() {
     }
@@ -74,6 +79,15 @@ public class NotesController implements Serializable {
             selectedItemIndex = -1;
         }
 
+    }
+
+    public void handleReminderDateSelect(SelectEvent event) {
+        Object o = event.getObject();
+        if (o.getClass() == Date.class) {
+            Date date = (Date) event.getObject();
+            setReminderDate(date);
+            //Add facesmessage
+        }
     }
 
     private NotesFacade getFacade() {
@@ -198,6 +212,13 @@ public class NotesController implements Serializable {
             CustomersController controller = (CustomersController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "customersController");
             current.setUserId(controller.getSelected());
             getFacade().create(current);
+            if (isReminder()) {
+
+                addReminderToCalendar();
+                reminder = false;
+                reminderDate = new Date();
+            }
+            current = null;
             controller.setNotesFilteredItems(null);
             controller.setNotesItems(null);
             Logger.getLogger(NotesController.class.getName()).log(Level.INFO, "Note added for customer {0} by {1}.", new Object[]{controller.getSelected().toString(), controller.getLoggedInUser().toString()});
@@ -206,6 +227,28 @@ public class NotesController implements Serializable {
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
         }
+
+    }
+
+    private void addReminderToCalendar() {
+
+        CrmScheduleEvent event = new CrmScheduleEvent();
+        event.setStartDate(reminderDate);
+        GregorianCalendar cal = new GregorianCalendar();
+        cal.setTime(reminderDate);
+        cal.add(Calendar.HOUR_OF_DAY, 1);
+        event.setEndDate(cal.getTime());
+
+        event.setReminderDate(reminderDate);
+        event.setAllDay(false);
+        event.setAddReminder(true);
+        String title = "Reminder: " + current.getUserId().getFirstname() + " " + current.getUserId().getLastname();
+        event.setTitle(title);
+        event.setStringData(current.getNote());
+        FacesContext context = FacesContext.getCurrentInstance();
+        ScheduleController scheduleController = (ScheduleController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "scheduleController");
+        scheduleController.persistEvent(event);
+        scheduleController.addReminder(event);
 
     }
 
@@ -387,6 +430,34 @@ public class NotesController implements Serializable {
             current.setUserId(selectedUser);
         }
         this.selectedUser = selectedUser;
+    }
+
+    /**
+     * @return the reminder
+     */
+    public boolean isReminder() {
+        return reminder;
+    }
+
+    /**
+     * @param reminder the reminder to set
+     */
+    public void setReminder(boolean reminder) {
+        this.reminder = reminder;
+    }
+
+    /**
+     * @return the reminderDate
+     */
+    public Date getReminderDate() {
+        return reminderDate;
+    }
+
+    /**
+     * @param reminderDate the reminderDate to set
+     */
+    public void setReminderDate(Date reminderDate) {
+        this.reminderDate = reminderDate;
     }
 
     @FacesConverter(forClass = Notes.class)

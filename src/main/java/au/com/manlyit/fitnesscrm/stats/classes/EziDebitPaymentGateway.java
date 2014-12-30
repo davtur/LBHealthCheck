@@ -192,6 +192,7 @@ public class EziDebitPaymentGateway implements Serializable {
     private Customers selectedCustomer;
     private float reportTotalSuccessful = 0;
     private float reportTotalDishonoured = 0;
+    private float reportTotalScheduled = 0;
 
     ThreadFactory tf1 = new eziDebitThreadFactory();
     private String sessionId;
@@ -286,11 +287,11 @@ public class EziDebitPaymentGateway implements Serializable {
 
     }
 
-    public void reportDateChange() {
+   /* public void reportDateChange() {
         reportPaymentsList = null;
         reportPaymentsListFilteredItems = null;
-      
-    }
+
+    }*/
 
     /**
      * @param paymentsList the paymentsList to set
@@ -873,7 +874,7 @@ public class EziDebitPaymentGateway implements Serializable {
             try {
                 startAsynchJob("GetCustomerDetails", paymentBean.getCustomerDetails(c, getDigitalKey()));
 
-                Thread.sleep(100);//sleeping for a long time wont affect performance (the warning is there for a short sleep of say 5ms ) but we don't want to overload the payment gateway or they may get upset.
+                Thread.sleep(300);//sleeping for a long time wont affect performance (the warning is there for a short sleep of say 5ms ) but we don't want to overload the payment gateway or they may get upset.
             } catch (InterruptedException ex) {
                 Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -904,7 +905,7 @@ public class EziDebitPaymentGateway implements Serializable {
 
             refreshAllActiveCustomers();
         }
-       
+
     }
 
     /**
@@ -937,18 +938,31 @@ public class EziDebitPaymentGateway implements Serializable {
 
     private void generatePaymentsReport() {
         Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.INFO, "Running Report");
-        List<Payments> pl = paymentsFacade.findPaymentsByDateRange(reportUseSettlementDate, reportShowSuccessful, reportShowFailed, reportShowPending, isReportShowScheduled(), reportStartDate, reportEndDate, false);
-        reportTotalSuccessful = 0;
-        reportTotalDishonoured = 0;
-        for (Payments p : pl) {
-            if (p.getPaymentStatus().contains("S") || p.getPaymentStatus().contains("P")) {
-                reportTotalSuccessful = reportTotalSuccessful + p.getPaymentAmount().floatValue();
-            } else {
-                reportTotalDishonoured = reportTotalDishonoured + p.getPaymentAmount().floatValue();
-            }
-        }
+        try {
+            List<Payments> pl = paymentsFacade.findPaymentsByDateRange(reportUseSettlementDate, reportShowSuccessful, reportShowFailed, reportShowPending, isReportShowScheduled(), reportStartDate, reportEndDate, false);
+            reportTotalSuccessful = 0;
+            reportTotalDishonoured = 0;
+            reportTotalScheduled = 0;
+            if (pl != null) {
+                for (Payments p : pl) {
+                    if (p.getPaymentStatus().contains(PaymentStatus.SUCESSFUL.value()) || p.getPaymentStatus().contains(PaymentStatus.PENDING.value())) {
+                        reportTotalSuccessful = reportTotalSuccessful + p.getPaymentAmount().floatValue();
+                    } else if (p.getPaymentStatus().contains(PaymentStatus.DISHONOURED.value()) || p.getPaymentStatus().contains(PaymentStatus.FATAL_DISHONOUR.value())) {
+                        reportTotalDishonoured = reportTotalDishonoured + p.getPaymentAmount().floatValue();
+                    } else if (p.getPaymentStatus().contains(PaymentStatus.SCHEDULED.value())) {
+                        reportTotalScheduled = reportTotalScheduled + p.getPaymentAmount().floatValue();
+                    }
+                }
 
-        reportPaymentsList = new PfSelectableDataModel<>(pl);
+                reportPaymentsList = new PfSelectableDataModel<>(pl);
+            } else {
+                reportPaymentsList = new PfSelectableDataModel<>(new ArrayList<Payments>());
+                Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.WARNING, "Report Failed - paymentsFacade.findPaymentsByDateRange returned NULL");
+            }
+        } catch (Exception e) {
+            Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.WARNING, "Report Failed", e);
+            reportPaymentsList = new PfSelectableDataModel<>(new ArrayList<Payments>());
+        }
         Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.INFO, "Report Completed");
     }
 
@@ -1183,6 +1197,20 @@ public class EziDebitPaymentGateway implements Serializable {
         this.reportShowScheduled = reportShowScheduled;
     }
 
+    /**
+     * @return the reportTotalScheduled
+     */
+    public float getReportTotalScheduled() {
+        return reportTotalScheduled;
+    }
+
+    /**
+     * @param reportTotalScheduled the reportTotalScheduled to set
+     */
+    public void setReportTotalScheduled(float reportTotalScheduled) {
+        this.reportTotalScheduled = reportTotalScheduled;
+    }
+
     private class eziDebitThreadFactory implements ThreadFactory {
 
         @Override
@@ -1259,6 +1287,9 @@ public class EziDebitPaymentGateway implements Serializable {
     public PfSelectableDataModel<Payments> getPaymentDBList() {
         if (paymentDBList == null) {
             paymentDBList = new PfSelectableDataModel<>(paymentsFacade.findPaymentsByCustomer(selectedCustomer, refreshFromDB));
+        }
+        if (paymentDBList == null) {
+            paymentDBList = new PfSelectableDataModel<>(new ArrayList<Payments>());
         }
         return paymentDBList;
     }

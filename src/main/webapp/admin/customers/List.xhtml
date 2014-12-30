@@ -21,7 +21,7 @@
                 <p:tab id="tab1" title="Customer List" >  
                     <h:form id="customerslistForm1">
                         <p:panelGrid columns="4" style="width:100%;">
-  
+
                             <h:panelGroup id="selectedUserPanel">                 
                                 <p:commandButton id="selectCustomerButton"   actionListener="#{customersController.setSelectedCustomer}" value="#{configMapController.getKey('ListCustomersSelectCustomersButton')}" title="#{configMapController.getKey('ListCustomersSelectCustomersButtonHelp')}" update=":tv:customerslistForm1 :tv:formCustomersEdit1 :tv:NoteslistForm1 :tv:paymentsForm :growl" /> 
                                 <h:outputText id="selectedUser" value="Selected: #{customersController.selected.firstname} #{customersController.selected.lastname}" />
@@ -45,7 +45,7 @@
                                 <p:commandButton id="changeStateButton"     actionListener="#{customersController.changeCustomersState}" value="#{configMapController.getKey('ListCustomersChangeStateButton')}"  update=":tv:customerslistForm1:customersTableList :growl" /> 
 
                             </h:panelGroup >
-                          <p:commandButton id="showDialogButton"  oncomplete="PF('customersCreateDialogue').show()"   actionListener="#{customersController.prepareCreateAjax}" value="#{configMapController.getKey('ListCustomersCreateLink')}"  update=":formCustomersCreate1:dialogueGrid  :growl" /> 
+                            <p:commandButton id="showDialogButton"  oncomplete="PF('customersCreateDialogue').show()"   actionListener="#{customersController.prepareCreateAjax}" value="#{configMapController.getKey('ListCustomersCreateLink')}"  update=":formCustomersCreate1:dialogueGrid  :growl" /> 
 
 
                         </p:panelGrid>
@@ -60,28 +60,28 @@
                                          filteredValue="#{customersController.filteredItems}" 
                                          widgetVar="customersControllerTable" 
                                          editable="true" 
-                                         
+
                                          var="item"  
                                          scrollHeight="400"
                                          scrollable="true" >
                                 <f:facet name="header">
-                                   
 
-                                        <h:panelGroup>
-                                            <h:outputText value="Search all fields:" />
-                                            <p:inputText id="globalFilter" onkeyup="PF('customersControllerTable').filter();" />
-                                        </h:panelGroup>
+
+                                    <h:panelGroup>
+                                        <h:outputText value="Search all fields:" />
+                                        <p:inputText id="globalFilter" onkeyup="PF('customersControllerTable').filter();" />
+                                    </h:panelGroup>
                                     <h:outputText value="   " />
-                                        <h:panelGroup>
-                                            <h:outputText  rendered="#{not empty customersController.filteredItems}" value="#{customersController.filteredItems.size} Records Found"/>
-                                            <h:outputText  rendered="#{empty customersController.filteredItems}" value="#{customersController.items.rowCount} Records Found"/>
-                                        </h:panelGroup>
+                                    <h:panelGroup>
+                                        <h:outputText  rendered="#{not empty customersController.filteredItems}" value="#{customersController.filteredItems.size} Records Found"/>
+                                        <h:outputText  rendered="#{empty customersController.filteredItems}" value="#{customersController.items.rowCount} Records Found"/>
+                                    </h:panelGroup>
 
-                                  
+
 
                                 </f:facet>
                                 <p:ajax event="rowSelect"  listener="#{customersController.setSelecteDblClick}" update=":growl :tv:customerslistForm1:selectedUser :tv:formCustomersEdit1 :formCustomersCreate1 :tv:paymentsForm :tv:NoteslistForm1 :confirmCancellation "  />  
-                                 <p:column selectionMode="multiple" />
+                                <p:column selectionMode="multiple" />
                                 <p:column sortBy="#{item.id}" filterBy="#{item.id}" headerText="#{configMapController.getKey('ListCustomersTitle_id')}"   >
                                     <h:outputText value="#{item.id}"/>
                                 </p:column>
@@ -328,7 +328,7 @@
 
                                     </p:outputPanel>
                                 </f:facet>
-                                
+
                                 <p:ajax event="rowSelect"  listener="#{ezidebit.updateSelectedScheduledPayment}" />
                                 <p:ajax event="rowUnselect" /> 
                                 <p:column  sortBy="#{pay.paymentID}" filterBy="#{pay.paymentID}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentID')}"   >
@@ -342,6 +342,10 @@
                                 <p:column  sortBy="#{pay.manuallyAddedPayment}" filterBy="#{pay.manuallyAddedPayment}" headerText="#{configMapController.getKey('ListPaymentsTitle_manual')}"   >
                                     <h:outputText rendered="#{pay.manuallyAddedPayment}" value="Manual"/>
                                     <h:outputText rendered="#{!pay.manuallyAddedPayment}" value="Auto"/>
+                                </p:column>
+
+                                <p:column  sortBy="#{pay.id}" filterBy="#{pay.id}" headerText="#{configMapController.getKey('ListPaymentsTitle_id')}"   >
+                                    <h:outputText value="#{pay.id}"/>
                                 </p:column>
 
                                 <p:column  sortBy="#{pay.paymentReference}" filterBy="#{pay.paymentReference}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentReference')}"   >
@@ -590,8 +594,17 @@
                             <p:panelGrid columns="2">
                                 <p:outputLabel value="#{configMapController.getKey('CreateNotesLabel_note')}" for="note" />
                                 <p:inputTextarea rows="4" cols="30" id="note" value="#{notesController.selected.note}" title="#{configMapController.getKey('CreateNotesTitle_note')}" />
-                                <p:commandButton oncomplete="PF('NotesCreateDialogue').hide();PF('notesControllerTable').filter()" actionListener="#{notesController.createDialogue}" value="#{configMapController.getKey('CreateNotesSaveLink')}" update=":growl :tv:NoteslistForm1 :tv:formNotesCreate1"/>                
-
+                                
+                                <h:outputLabel for="reminderDate" value="Reminder:" />
+                                <p:calendar id="reminderDate" disabled="#{!notesController.reminder}" value="#{notesController.reminderDate}"  pattern="dd/MM/yyyy HH:mm">  
+                                    <p:ajax event="dateSelect" listener="#{notesController.handleReminderDateSelect}" update=":growl "  />
+                                </p:calendar>
+                                <h:outputLabel for="reminder" value="Add Reminder:" />
+                                <h:selectBooleanCheckbox id="reminder" value="#{notesController.reminder}" >
+                                    <p:ajax update=":growl :tv:formNotesCreate1:reminderDate" />
+                                </h:selectBooleanCheckbox>
+                               <p:commandButton oncomplete="PF('NotesCreateDialogue').hide();PF('notesControllerTable').filter()" actionListener="#{notesController.createDialogue}" value="#{configMapController.getKey('CreateNotesSaveLink')}" update=":growl :tv:NoteslistForm1 :tv:formNotesCreate1"/>                
+ 
                             </p:panelGrid>
                         </p:confirmDialog>
                     </h:form>

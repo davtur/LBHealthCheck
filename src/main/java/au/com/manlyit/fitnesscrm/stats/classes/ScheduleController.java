@@ -13,9 +13,13 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
 import java.io.Serializable;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.enterprise.context.SessionScoped;
 import javax.faces.application.FacesMessage;
 import javax.faces.component.UIComponent;
@@ -39,6 +43,7 @@ import org.primefaces.model.*;
 @SessionScoped
 public class ScheduleController implements Serializable {
 
+    private static final Logger logger = Logger.getLogger(ScheduleController.class.getName());
     private Schedule current;
     private Schedule selectedForDeletion;
     private DataModel items = null;
@@ -53,7 +58,7 @@ public class ScheduleController implements Serializable {
     private List<Schedule> filteredItems;
     private Schedule[] multiSelected;
     private ScheduleModel eventModel;
-    private CrmScheduleEvent event = new CrmScheduleEvent();
+    private CrmScheduleEvent event;
     private String theme;
 
     public ScheduleController() {
@@ -90,20 +95,21 @@ public class ScheduleController implements Serializable {
         }
     }
 
-    private void addReminder(CrmScheduleEvent crmEvent) {
-        FacesContext context = FacesContext.getCurrentInstance();
-        CustomersController customersController = (CustomersController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "customersController");
+    public void addReminder(CrmScheduleEvent crmEvent) {
+        //FacesContext context = FacesContext.getCurrentInstance();
+        //CustomersController customersController = (CustomersController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "customersController");
         EmailQueue email = new EmailQueue();
         email.setId(0);
         email.setStatus(0);
         email.setSendDate(crmEvent.getReminderDate());
         email.setCreateDate(new Date());
         email.setSubject(configMapFacade.getConfig("ScheduleReminderEmailMessageSubject") + crmEvent.getTitle());
-        email.setToaddresses(customersController.getLoggedInUser().getEmailAddress());
+        email.setToaddresses(configMapFacade.getConfig("email.calendar.reminder.address"));
         email.setMessage(crmEvent.getStringData());
         email.setFromaddress(configMapFacade.getConfig("email.from.address"));
 
         emailQueueFacade.create(email);
+        JsfUtil.addSuccessMessage("Event Reminder Added.");
     }
 
     public void addEvent(ActionEvent actionEvent) {
@@ -118,6 +124,7 @@ public class ScheduleController implements Serializable {
             addReminder(getEvent());
         }
         setEvent(new CrmScheduleEvent());
+        
     }
 
     public static byte[] serialize(Object obj) throws IOException {
@@ -133,11 +140,13 @@ public class ScheduleController implements Serializable {
         return is.readObject();
     }
 
-    private void persistEvent(CrmScheduleEvent event) {
+    public void persistEvent(CrmScheduleEvent event) {
         CrmScheduleEvent ssievent = (CrmScheduleEvent) event;
         Schedule ss = new Schedule(0, ssievent.getTitle(), ssievent.getStartDate(), ssievent.getEndDate());
         ss.setShedAllday(ssievent.isAllDay());
         ss.setDataObject(ssievent.getData());
+        ss.setSchedReminder(ssievent.isAddReminder());
+        ss.setSchedRemindDate(ssievent.getReminderDate());
         current = ss;
         try {
             getFacade().create(current);
@@ -170,6 +179,8 @@ public class ScheduleController implements Serializable {
         ss.setShedEnddate(ssievent.getEndDate());
         ss.setShedStartdate(ssievent.getStartDate());
         ss.setShedTitle(ssievent.getTitle());
+        ss.setSchedRemindDate(ssievent.getReminderDate());
+        ss.setSchedReminder(ssievent.isAddReminder());
         ss.setShedAllday(ssievent.isAllDay());
 
         ss.setDataObject(ssievent.getData());
@@ -191,7 +202,29 @@ public class ScheduleController implements Serializable {
     }
 
     public void onDateSelect(SelectEvent selectEvent) {
-        setEvent(new CrmScheduleEvent("New Event", (Date) selectEvent.getObject(), (Date) selectEvent.getObject()));
+        Object o = selectEvent.getObject();
+        if (o.getClass() == Date.class) {
+            Date date = (Date) selectEvent.getObject();
+            GregorianCalendar cal = new GregorianCalendar();
+            cal.setTime(date);
+ 
+          //   if (cal.get(Calendar.HOUR_OF_DAY) == 0 && cal.get(Calendar.MINUTE) == 0 && cal.get(Calendar.SECOND) == 0) {
+                cal.add(Calendar.HOUR_OF_DAY, 8); // set default hour to 9am
+           // }
+            Date start = cal.getTime();
+            cal.add(Calendar.HOUR_OF_DAY, 1);
+            Date end = cal.getTime();
+            cal.add(Calendar.HOUR_OF_DAY, -25);
+            Date remind = cal.getTime();
+            CrmScheduleEvent sEvent = new CrmScheduleEvent("New Event", start, end);
+            sEvent.setReminderDate(remind);
+            setEvent(sEvent);
+
+            //Add facesmessage
+        } else {
+            logger.log(Level.WARNING, "onDateSelect - the Object returned by the evenet is not a date");
+        }
+
     }
 
     public void onEventMove(ScheduleEntryMoveEvent event) {
@@ -424,8 +457,16 @@ public class ScheduleController implements Serializable {
     }
 
     public void handleReminderDateSelect(SelectEvent event) {
-        Date date = (Date) event.getObject();
-        //Add facesmessage
+        Object o = event.getObject();
+        if (o.getClass() == Date.class) {
+            Date date = (Date) event.getObject();
+
+            if (date.after(new Date())) {
+                getEvent().setReminderDate(date);
+            }
+
+            //Add facesmessage
+        }
     }
 
     public void handleEndDateSelect(SelectEvent event) {
@@ -435,6 +476,8 @@ public class ScheduleController implements Serializable {
 
             if (date.after(getEvent().getEndDate())) {
                 getEvent().setEndDate(date);
+            }else{
+                JsfUtil.addErrorMessage("The reminder date cannot be in the past!");
             }
 
             //Add facesmessage
@@ -447,6 +490,12 @@ public class ScheduleController implements Serializable {
             Date date = (Date) event.getObject();
             if (date.before(getEvent().getStartDate())) {
                 getEvent().setStartDate(date);
+            }
+            if (date.after(getEvent().getEndDate())) {
+                GregorianCalendar cal = new GregorianCalendar();
+                cal.setTime(date);
+                cal.add(Calendar.HOUR_OF_DAY, 1);
+                getEvent().setEndDate(cal.getTime());
             }
             //Add facesmessage
         }
@@ -499,6 +548,9 @@ public class ScheduleController implements Serializable {
      * @return the event
      */
     public CrmScheduleEvent getEvent() {
+        if (event == null) {
+            event = new CrmScheduleEvent();
+        }
         return event;
     }
 

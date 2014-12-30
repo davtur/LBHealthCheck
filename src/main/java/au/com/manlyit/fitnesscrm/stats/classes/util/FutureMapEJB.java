@@ -35,7 +35,6 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
@@ -54,7 +53,6 @@ import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.ejb.Timer;
 import javax.faces.application.FacesMessage;
-import javax.faces.context.FacesContext;
 import javax.imageio.ImageIO;
 import javax.inject.Inject;
 import javax.xml.bind.JAXBElement;
@@ -87,6 +85,7 @@ public class FutureMapEJB implements Serializable {
 
     private final ConcurrentHashMap<String, ArrayList<AsyncJob>> futureMap = new ConcurrentHashMap<>();
     private final static String CHANNEL = "/payments/";
+    private int counter = 0;
     private final Object lock1 = new Object();
     private final Object lock2 = new Object();
     private final Object lock3 = new Object();
@@ -126,9 +125,10 @@ public class FutureMapEJB implements Serializable {
     }
 
     @OnOpen
-    public void onOpen(RemoteEndpoint r, EventBus e) {
-        r.transport().toString();
-        logger.log(Level.INFO, "Atmosphere Push Connection Opened. Transport Type = {0}", r.transport().toString());
+    public void onOpen(RemoteEndpoint rEndPoint, EventBus e) {
+        rEndPoint.address();
+
+        logger.log(Level.INFO, "Atmosphere Push Connection Opened. Transport Type = {0}", rEndPoint.address());
     }
 
     @OnClose
@@ -205,18 +205,24 @@ public class FutureMapEJB implements Serializable {
             Date toDate = new Date();
             AsyncJob aj = new AsyncJob("PaymentReport", paymentBean.getAllPaymentsBySystemSinceDate(fromDate, toDate, false, getDigitalKey()));
             this.put(FUTUREMAP_INTERNALID, aj);
-
-            List<Customers> acl = customersFacade.findAllActiveCustomers(true);
-            AsyncJob aj2;
-            for (Customers c : acl) {
-                aj2 = new AsyncJob("GetCustomerDetails", paymentBean.getCustomerDetails(c, getDigitalKey()));
-                this.put(FUTUREMAP_INTERNALID, aj);
-                Thread.sleep(500);//sleeping for a long time wont affect performance (the warning is there for a short sleep of say 5ms ) but we don't want to overload the payment gateway or they may get upset.
-            }
-
+            refreshAllCustomersDetailsFromGateway();
             paymentReportLock.set(true);
         }
         return true;
+    }
+
+    private void refreshAllCustomersDetailsFromGateway() {
+        List<Customers> acl = customersFacade.findAllActiveCustomers(true);
+        AsyncJob aj2;
+        for (Customers c : acl) {
+            try {
+                aj2 = new AsyncJob("GetCustomerDetails", paymentBean.getCustomerDetails(c, getDigitalKey()));
+                this.put(FUTUREMAP_INTERNALID, aj2);
+                Thread.sleep(500);//sleeping for a long time wont affect performance (the warning is there for a short sleep of say 5ms ) but we don't want to overload the payment gateway or they may get upset.
+            } catch (InterruptedException ex) {
+                Logger.getLogger(FutureMapEJB.class.getName()).log(Level.SEVERE, "refreshAllCustomersDetailsFromGateway - Thread Sleep InterruptedException", ex.getMessage());
+            }
+        }
     }
 
     public void remove(String userSessionId, String key) {
@@ -342,8 +348,8 @@ public class FutureMapEJB implements Serializable {
         }
     }
 
-    @Schedule(dayOfMonth = "*", hour = "6", minute = "0", second = "0")
     //@Schedule(dayOfMonth = "*", hour = "*", minute = "*", second = "0")//debug
+    @Schedule(dayOfMonth = "*", hour = "6", minute = "0", second = "0")
     public void retrievePaymentsReportFromPaymentGateway(Timer t) {
         try {
             // run every day at 5am seconds
@@ -360,6 +366,11 @@ public class FutureMapEJB implements Serializable {
 
     @Schedule(hour = "*", minute = "*", second = "*")
     public void checkRunningJobsAndNotifyIfComplete(Timer t) {  // run every 1 seconds
+        counter++;
+        if (counter > 180) {
+            logger.log(Level.INFO, "EJB Timer Heartbeat (180 seconds) - checkRunningJobsAndNotifyIfComplete.");
+            counter = 0;
+        }
 
         if (asychCheckProcessing.get() == false) {
             logger.log(Level.FINE, "Checking Future Map for completed jobs.");
@@ -427,6 +438,9 @@ public class FutureMapEJB implements Serializable {
 
                     }
                 }
+            } catch (Exception e) {
+                logger.log(Level.SEVERE, "checkRunningJobsAndNotifyIfComplete, Unhandled exception in EJB timer: {0} Cause: {2}", new Object[]{e.getMessage(),e.getCause().getMessage()});
+
             } finally {
                 asychCheckProcessing.set(false);
                 logger.log(Level.FINE, "Finished Checking Future Map for completed jobs.");
@@ -664,24 +678,87 @@ public class FutureMapEJB implements Serializable {
                     Customers cust = customersFacade.findById(custId);
                     if (cust != null) {
                         String paymentID = pay.getPaymentID().getValue();
-                        if (paymentID.toUpperCase().contains("SCHEDULED")) {
-                            // scheduled payment no paymentID
-                            logger.log(Level.INFO, "Future Map processReport scheduled payment .", pay.toString());
-                        } else {
-                            Payments crmPay = paymentsFacade.findPaymentByPaymentId(paymentID);
-                            if (crmPay != null) { //' payment exists
-                                if (comparePaymentXMLToEntity(crmPay, pay)) {
-                                    // they are the same so no update
-                                    logger.log(Level.FINE, "Future Map processReport paymenst are the same.");
-                                } else {
-                                    crmPay = convertPaymentXMLToEntity(crmPay, pay, cust);
-                                    paymentsFacade.edit(crmPay);
+                        String paymentReference;
+                        Payments crmPay = null;
+                        int paymentRefInt = 0;
+                        boolean validReference = false;
+                        if (pay.getPaymentReference().isNil() == false) {
+                            paymentReference = pay.getPaymentReference().getValue().trim();
+                            if (paymentReference.contains("-") == false && paymentReference.length() > 0) {
+                                try {
+                                    paymentRefInt = Integer.parseInt(paymentReference);
+                                    crmPay = paymentsFacade.findPaymentById(paymentRefInt);
+                                    if (crmPay != null) {
+                                        validReference = true;
+                                    }
+                                } catch (NumberFormatException numberFormatException) {
                                 }
-                            } else { //payment doesn't exist in crm so add it
-                                crmPay = convertPaymentXMLToEntity(crmPay, pay, cust);
-                                paymentsFacade.create(crmPay);
                             }
                         }
+                        if (validReference) {
+                            if (comparePaymentXMLToEntity(crmPay, pay) == false) {
+                                crmPay = convertPaymentXMLToEntity(crmPay, pay, cust);
+                                logger.log(Level.INFO, "Future Map processReport  - updating payment id:{0}.", paymentRefInt);
+                                try {
+                                    paymentsFacade.edit(crmPay);
+
+                                } catch (Exception e) {
+                                    logger.log(Level.WARNING, "Future Map processReport - edit payment {0} , Exception {1}.", new Object[]{crmPay.getId().toString(), e.getMessage()});
+                                }
+                            }
+                        } else {
+                            // old payment without a primary key reference
+                            if (paymentID.toUpperCase().contains("SCHEDULED")) {
+                                // scheduled payment no paymentID
+                                logger.log(Level.INFO, "Future Map processReport scheduled payment .", pay.toString());
+                            } else {
+
+                                crmPay = paymentsFacade.findPaymentByPaymentId(paymentID);
+
+                                if (crmPay != null) { //' payment exists
+                                    if (comparePaymentXMLToEntity(crmPay, pay)) {
+                                        // they are the same so no update
+                                        logger.log(Level.FINE, "Future Map processReport paymenst are the same.");
+                                    } else {
+                                        crmPay = convertPaymentXMLToEntity(crmPay, pay, cust);
+                                        try {
+                                            paymentsFacade.edit(crmPay);
+
+                                        } catch (Exception e) {
+                                            logger.log(Level.WARNING, "Future Map processReport - edit payment {0} , Exception {1}.", new Object[]{crmPay.getId().toString(), e.getMessage()});
+                                        }
+                                    }
+                                } else { //payment doesn't exist in crm so add it
+                                    logger.log(Level.SEVERE, "Future Map processReport  - payment doesn't exist in crm (this should only happen for webddr form schedule) so adding it:{0}.", paymentRefInt);
+                                    //crmPay = convertPaymentXMLToEntity(crmPay, pay, cust);
+                                    try {
+                                        //paymentsFacade.createAndFlush(crmPay);
+                                    } catch (Exception e) {
+                                        logger.log(Level.WARNING, "Future Map processReport - create payment {0} , Exception {1}.", new Object[]{crmPay.getId().toString(), e.getMessage()});
+
+                                    }
+                                }
+                            }
+                        }
+                        /* String paymentID = pay.getPaymentID().getValue();
+                         if (paymentID.toUpperCase().contains("SCHEDULED")) {
+                         // scheduled payment no paymentID
+                         logger.log(Level.INFO, "Future Map processReport scheduled payment .", pay.toString());
+                         } else {
+                         Payments crmPay = paymentsFacade.findPaymentByPaymentId(paymentID);
+                         if (crmPay != null) { //' payment exists
+                         if (comparePaymentXMLToEntity(crmPay, pay)) {
+                         // they are the same so no update
+                         logger.log(Level.FINE, "Future Map processReport paymenst are the same.");
+                         } else {
+                         crmPay = convertPaymentXMLToEntity(crmPay, pay, cust);
+                         paymentsFacade.edit(crmPay);
+                         }
+                         } else { //payment doesn't exist in crm so add it
+                         crmPay = convertPaymentXMLToEntity(crmPay, pay, cust);
+                         paymentsFacade.create(crmPay);
+                         }
+                         }*/
 
                     } else {
                         paymentsByCustomersMissingFromCRM.add(pay);
@@ -1244,7 +1321,13 @@ public class FutureMapEJB implements Serializable {
                     payment.setPaymentMethod(pay.getPaymentMethod().getValue());
                 }
                 if (pay.getPaymentReference().isNil() == false) {
-                    payment.setPaymentReference(pay.getPaymentReference().getValue());
+                    if (pay.getPaymentReference().getValue().trim().isEmpty()) {
+                        payment.setPaymentReference(null);
+                    } else {
+                        payment.setPaymentReference(pay.getPaymentReference().getValue());
+                    }
+                } else {
+                    payment.setPaymentReference(null);
                 }
                 /* if (pay.getPaymentReference().isNil() == false) {
                  if (pay.getPaymentReference().getValue().trim().isEmpty() == false) {
@@ -1329,7 +1412,16 @@ public class FutureMapEJB implements Serializable {
                 payment.setPaymentAmount(new BigDecimal(pay.getPaymentAmount().floatValue()));
                 payment.setPaymentID(null);
                 payment.setPaymentMethod("DR");
-                payment.setPaymentReference(pay.getPaymentReference().getValue());
+                if (pay.getPaymentReference().isNil() == false) {
+                    if (pay.getPaymentReference().getValue().trim().isEmpty()) {
+                        payment.setPaymentReference(null);
+                    } else {
+                        payment.setPaymentReference(pay.getPaymentReference().getValue());
+                    }
+                } else {
+                    payment.setPaymentReference(null);
+                }
+
                 /* if (pay.isManuallyAddedPayment() != null) {
 
                  payment.setManuallyAddedPayment(pay.isManuallyAddedPayment());

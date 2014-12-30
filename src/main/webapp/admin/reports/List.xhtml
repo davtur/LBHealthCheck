@@ -17,12 +17,12 @@
                 <p:panelGrid columns="4">
                     <p:panelGrid columns="2" >
                         <p:outputLabel value="#{configMapController.getKey('SelectStartDateForReport_Label')}" for="sessionstart" />
-                        <p:calendar id="sessionstart" value="#{ezidebit.reportStartDate}" pattern="dd MMMM yyyy" valueChangeListener="#{ezidebit.reportDateChange}"
+                        <p:calendar id="sessionstart" value="#{ezidebit.reportStartDate}" pattern="dd MMMM yyyy" valueChangeListener="#{ezidebit.runReport}"
                                     title="#{configMapController.getKey('SelectStartDateForReport_Title')}"    >
                             <p:ajax event="dateSelect"  update="@form" />
                         </p:calendar> 
                         <p:outputLabel value="#{configMapController.getKey('SelectEndDateForReport_Label')}" for="sessionend" />
-                        <p:calendar id="sessionend" value="#{ezidebit.reportEndDate}"  pattern="dd MMMM yyyy" valueChangeListener="#{ezidebit.reportDateChange}"
+                        <p:calendar id="sessionend" value="#{ezidebit.reportEndDate}"  pattern="dd MMMM yyyy" valueChangeListener="#{ezidebit.runReport}"
                                     title="#{configMapController.getKey('SelectEndDateForReport_Title')}"    >
                             <p:ajax event="dateSelect"  update="@form" />
                         </p:calendar> 
@@ -32,7 +32,7 @@
                             <f:selectItem itemValue="#{0}" itemLabel="Payment Report"/>  
                             <f:selectItem itemValue="#{1}" itemLabel="Settlement Report"/> 
 
-                            <p:ajax   update="@form totalSuccessful totalDishonoured" listener="#{ezidebit.reportDateChange}"  />
+                            <p:ajax   update="@form" listener="#{ezidebit.runReport}"  />
                         </p:selectOneMenu>
 
                         <p:commandButton id="runReport"  actionListener="#{ezidebit.runReport}" value="#{configMapController.getKey('ListReportRunReportLink')}" update="@form"/>
@@ -40,19 +40,19 @@
                     <p:panelGrid columns="4" >
                         <p:outputLabel  value="#{configMapController.getKey('ListReportShowSuccessful')}" for="showSuccessful" />
                         <p:selectBooleanCheckbox id="showSuccessful"   value="#{ezidebit.reportShowSuccessful}" >  
-                            <p:ajax update="@form" listener="#{ezidebit.reportDateChange}" />  
+                            <p:ajax update="@form" listener="#{ezidebit.runReport}" />  
                         </p:selectBooleanCheckbox> 
                         <p:outputLabel  value="#{configMapController.getKey('ListReportShowFailed')}" for="showFailed" />
                         <p:selectBooleanCheckbox id="showFailed"   value="#{ezidebit.reportShowFailed}" >  
-                            <p:ajax update="@form"  listener="#{ezidebit.reportDateChange}" />  
+                            <p:ajax update="@form"  listener="#{ezidebit.runReport}" />  
                         </p:selectBooleanCheckbox> 
                         <p:outputLabel  value="#{configMapController.getKey('ListReportShowPending')}" for="showPending" />
                         <p:selectBooleanCheckbox id="showPending"   value="#{ezidebit.reportShowPending}" >  
-                            <p:ajax update="@form"  listener="#{ezidebit.reportDateChange}" />  
+                            <p:ajax update="@form"  listener="#{ezidebit.runReport}" />  
                         </p:selectBooleanCheckbox> 
                         <p:outputLabel  value="#{configMapController.getKey('ListReportShowScheduled')}" for="showScheduled" />
                         <p:selectBooleanCheckbox id="showScheduled"   value="#{ezidebit.reportShowScheduled}" >  
-                            <p:ajax update="@form"  listener="#{ezidebit.reportDateChange}" />  
+                            <p:ajax update="@form"  listener="#{ezidebit.runReport}" />  
                         </p:selectBooleanCheckbox> 
 
                         <p:outputLabel  value="#{configMapController.getKey('ListReportManualRefresh')}" for="manualRefresh" />
@@ -67,6 +67,10 @@
                         </h:outputText>
                         <p:outputLabel  value="#{configMapController.getKey('ListReportTotalDishonoured')}" for="totalDishonoured" />
                         <h:outputText id="totalDishonoured" value="#{ezidebit.reportTotalDishonoured}" >
+                            <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
+                        </h:outputText>
+                        <p:outputLabel  value="#{configMapController.getKey('ListReportTotalScheduled')}" for="totalScheduled" />
+                        <h:outputText id="totalScheduled" value="#{ezidebit.reportTotalScheduled}" >
                             <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
                         </h:outputText>
                     </p:panelGrid>

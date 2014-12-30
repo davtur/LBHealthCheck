@@ -13,7 +13,7 @@
         <ui:define name="body">
             <h:form id="scheduleForm">
 
-                <p:schedule value="#{scheduleController.eventModel}" timeZone="Australia/Sydney" widgetVar="crmSchedule" aspectRatio="2.5" timeFormat="HH:mm">
+                <p:schedule value="#{scheduleController.eventModel}" timeZone="Australia/Sydney" widgetVar="crmSchedule" aspectRatio="2.5" timeFormat="HH:mm" ignoreTimezone="false" allDaySlot="true"  >
 
                     <p:ajax event="dateSelect" listener="#{scheduleController.onDateSelect}" update=":growl :scheduleForm:eventDetails" oncomplete="PF('eventDialog').show()" />
                     <p:ajax event="eventSelect" listener="#{scheduleController.onEventSelect}" update=":growl :scheduleForm:eventDetails" oncomplete="PF('eventDialog').show()" />
@@ -28,8 +28,8 @@
                         <p:inputText id="title" value="#{scheduleController.event.title}" required="true" >
                             <p:ajax update=":growl :scheduleForm:eventDetails" />
                         </p:inputText>
-                        <h:outputLabel for="data" value="Data:" />
-                        <p:inputTextarea id="data" value="#{scheduleController.event.stringData}" required="true" autoResize="true" cols="100">
+                        <h:outputLabel for="data" value="Text:" />
+                        <p:inputTextarea id="data" value="#{scheduleController.event.stringData}" required="true" autoResize="true" cols="100" requiredMessage="The Event Details are empty!">
                             <p:ajax update=":growl :scheduleForm:eventDetails" />
                         </p:inputTextarea>
                         <h:outputLabel for="from" value="From:" />
@@ -48,7 +48,7 @@
                         </h:selectBooleanCheckbox>
                         <h:outputLabel for="reminderDate" value="Reminder:" />
                         <p:calendar id="reminderDate" disabled="#{!scheduleController.event.addReminder}" value="#{scheduleController.event.reminderDate}"  pattern="dd/MM/yyyy HH:mm">  
-                            <p:ajax event="dateSelect" listener="#{scheduleController.handleEndDateSelect}" update=":growl :scheduleForm:eventDetails"  />
+                            <p:ajax event="dateSelect" listener="#{scheduleController.handleReminderDateSelect}" update=":growl :scheduleForm:eventDetails"  />
                         </p:calendar>
                         <h:outputLabel for="reminder" value="Add Reminder:" />
                         <h:selectBooleanCheckbox id="reminder" value="#{scheduleController.event.addReminder}" >
@@ -56,7 +56,7 @@
                         </h:selectBooleanCheckbox>
                         
                         <p:commandButton disabled="!#{customersController.isUserInRole('ADMIN') || customersController.isUserInRole('LOGGEDIN_USER')}" value="Delete" actionListener="#{scheduleController.removeEvent}" oncomplete="PF('crmSchedule').update();PF('eventDialog').hide();"/>
-                        <p:commandButton disabled="!#{customersController.isUserInRole('ADMIN') || customersController.isUserInRole('LOGGEDIN_USER')}" value="Save" actionListener="#{scheduleController.addEvent}" oncomplete="PF('crmSchedule').update();PF('eventDialog').hide();"/>
+                        <p:commandButton disabled="!#{customersController.isUserInRole('ADMIN') || customersController.isUserInRole('LOGGEDIN_USER')}" value="Save" actionListener="#{scheduleController.addEvent}" oncomplete="PF('crmSchedule').update();PF('eventDialog').hide();" update=":growl"/>
                     </h:panelGrid>
                 </p:dialog>
 

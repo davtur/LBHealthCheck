@@ -43,6 +43,8 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "Schedule.findByShedStartdate", query = "SELECT s FROM Schedule s WHERE s.shedStartdate = :shedStartdate"),
     @NamedQuery(name = "Schedule.findByShedEnddate", query = "SELECT s FROM Schedule s WHERE s.shedEnddate = :shedEnddate"),
     @NamedQuery(name = "Schedule.findByShedAllday", query = "SELECT s FROM Schedule s WHERE s.shedAllday = :shedAllday"),
+    @NamedQuery(name = "Schedule.findBySchedRemindDate", query = "SELECT s FROM Schedule s WHERE s.schedRemindDate = :schedRemindDate"),
+    @NamedQuery(name = "Schedule.findBySchedReminder", query = "SELECT s FROM Schedule s WHERE s.schedReminder = :schedReminder"),
     @NamedQuery(name = "Schedule.findByShedstyleClass", query = "SELECT s FROM Schedule s WHERE s.shedstyleClass = :shedstyleClass"),
     @NamedQuery(name = "Schedule.findBySchedEditable", query = "SELECT s FROM Schedule s WHERE s.schedEditable = :schedEditable")})
 public class Schedule implements Serializable {
@@ -53,30 +55,44 @@ public class Schedule implements Serializable {
     @Basic(optional = false)
     @Column(name = "id_schedule")
     private Integer idSchedule;
+    
     @Basic(optional = false)
     @NotNull
     @Lob
     @Size(min = 1, max = 65535)
     @Column(name = "shed_title")
     private String shedTitle;
+    
     @Basic(optional = false)
     @NotNull
     @Column(name = "shed_startdate")
     @Temporal(TemporalType.TIMESTAMP)
     private Date shedStartdate;
+    
     @Basic(optional = false)
     @NotNull
     @Column(name = "shed_enddate")
     @Temporal(TemporalType.TIMESTAMP)
     private Date shedEnddate;
+    
+    @Column(name = "sched_remindDate")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date schedRemindDate;
+    
+    @Column(name = "sched_reminder")
+    private Boolean schedReminder;
+    
     @Column(name = "shed_allday")
     private Boolean shedAllday;
+    
     @Size(max = 255)
     @Column(name = "shed_styleClass")
     private String shedstyleClass;
+    
     @Lob
     @Column(name = "sched_data")
     private byte[] schedData;
+    
     @Column(name = "sched_editable")
     private Boolean schedEditable;
 
@@ -93,7 +109,7 @@ public class Schedule implements Serializable {
         this.shedStartdate = shedStartdate;
         this.shedEnddate = shedEnddate;
     }
-
+ 
     public Integer getId() {
         return idSchedule;
     }
@@ -214,6 +230,34 @@ public class Schedule implements Serializable {
     @Override
     public String toString() {
         return "au.com.manlyit.fitnesscrm.stats.db.Schedule[ idSchedule=" + idSchedule + " ]";
+    }
+
+    /**
+     * @return the schedRemindDate
+     */
+    public Date getSchedRemindDate() {
+        return schedRemindDate;
+    }
+
+    /**
+     * @param schedRemindDate the schedRemindDate to set
+     */
+    public void setSchedRemindDate(Date schedRemindDate) {
+        this.schedRemindDate = schedRemindDate;
+    }
+
+    /**
+     * @return the schedReminder
+     */
+    public Boolean getSchedReminder() {
+        return schedReminder;
+    }
+
+    /**
+     * @param schedReminder the schedReminder to set
+     */
+    public void setSchedReminder(Boolean schedReminder) {
+        this.schedReminder = schedReminder;
     }
 
 }
