@@ -4,6 +4,8 @@
  */
 package au.com.manlyit.fitnesscrm.stats.beans;
 
+import au.com.manlyit.fitnesscrm.stats.db.CustomerState;
+import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +16,8 @@ import java.util.logging.Logger;
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import org.primefaces.model.SortOrder;
@@ -23,7 +27,8 @@ import org.primefaces.model.SortOrder;
  * @author david
  * @param <T>
  */
-public abstract class AbstractFacade<T> implements Serializable{
+public abstract class AbstractFacade<T> implements Serializable {
+
     private static final Logger logger = Logger.getLogger(AbstractFacade.class.getName());
     private final Class<T> entityClass;
 
@@ -65,7 +70,6 @@ public abstract class AbstractFacade<T> implements Serializable{
         //q.setHint("javax.persistence.cache.retrieveMode", "BYPASS");
         return q.getResultList();
     }
-   
 
     public List<T> findRange(int[] range) {
         javax.persistence.criteria.CriteriaQuery cq = getEntityManager().getCriteriaBuilder().createQuery();
@@ -99,15 +103,27 @@ public abstract class AbstractFacade<T> implements Serializable{
                 cq.orderBy(builder.asc(root.get(sortField)));
             } else if (sortOrder == SortOrder.DESCENDING) {
                 cq.orderBy(builder.desc(root.get(sortField)));
-}
+            }
         }
         if (filters != null) {
             Set<Map.Entry<String, Object>> entries = filters.entrySet();
             ArrayList<Predicate> predicatesList
                     = new ArrayList<>(entries.size());
             for (Map.Entry<String, Object> filter : entries) {
-                predicatesList.add(builder.like(root.get(filter.getKey()),
-                        filter.getValue() + "%"));
+                String key = filter.getKey();
+                Expression expresskey = root.get(key);
+                Object val = filter.getValue();
+                Class type = expresskey.getJavaType();
+                if (type.equals(Customers.class)) {// THis should really be overrided in the audit facade
+                    String sVal = (String) val;
+                    int iVal = Integer.parseInt(sVal);
+                    Join<T, Customers> jn = root.join(key);// join customers.id
+                    Expression<Integer> custId = jn.get("id");
+                    predicatesList.add(builder.equal(custId, iVal));
+                } else {
+                    predicatesList.add(builder.like(expresskey, filter.getValue() + "%"));
+                }
+
             }
             cq.where(predicatesList.<Predicate>toArray(
                     new Predicate[predicatesList.size()]));

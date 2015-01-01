@@ -21,23 +21,18 @@
                 <h:panelGroup rendered="#{auditLogController.items.rowCount > 0}">
                     <p:dataTable  
                         id="datalist"  
-
-                        value="#{auditLogController.items}" 
+                        lazy="true"
+                        value="#{auditLogController.lazyModel}" 
                         selection="#{auditLogController.selected}" 
                         rowKey="#{item.id}" 
-                        filteredValue="#{auditLogController.filteredItems}"  
+                          
                         widgetVar="auditLogControllerTable" 
                         selectionMode="single"
                         var="item" 
-                        scrollable="true"
+                        paginator="true" rows="15"  paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  rowsPerPageTemplate="5,10,15,20,25,50,100" 
                        
                         >
-                          <f:facet name="header">
-                            <p:outputPanel>
-                                <h:outputText value="Search all fields:" />
-                                <h:inputText id="globalFilter" onkeyup="auditLogControllerTable.filter()" />
-                            </p:outputPanel>
-                        </f:facet>
+                          
                         <p:ajax event="rowSelect"   update=" viewButton  "/>
                         <p:ajax event="rowUnselect" update=" viewButton  "/>
 
@@ -49,13 +44,13 @@
                                 <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
                             </h:outputText>
                         </p:column>
-                       <p:column sortBy="#{item.typeOfChange}" filterBy="#{item.typeOfChange}" headerText="#{configMapController.getKey('ListAuditLogTitle_typeOfChange')}"   >
+                        <p:column sortBy="#{item.typeOfChange}" filterBy="#{item.typeOfChange}"  headerText="#{configMapController.getKey('ListAuditLogTitle_typeOfChange')}"   >
                             <h:outputText value="#{item.typeOfChange}"/>
                         </p:column>
-                        <p:column sortBy="#{item.changedBy.username}" filterBy="#{item.changedBy.username}" headerText="#{configMapController.getKey('ListAuditLogTitle_changedBy')}"   >
+                        <p:column sortBy="#{item.changedBy}" filterBy="#{item.changedBy}" filterOptions="#{customersController.itemsAvailableSelectOne}" filterMatchMode="exact" headerText="#{configMapController.getKey('ListAuditLogTitle_changedBy')}"   >
                             <h:outputText value="#{item.changedBy.username}"/>
                         </p:column>
-                        <p:column sortBy="#{item.customer.username}" filterBy="#{item.customer.username}" headerText="#{configMapController.getKey('ListAuditLogTitle_customer')}"   >
+                        <p:column sortBy="#{item.customer}" filterBy="#{item.customer}" filterOptions="#{customersController.itemsAvailableSelectOne}" filterMatchMode="exact"  headerText="#{configMapController.getKey('ListAuditLogTitle_customer')}"   >
                             <h:outputText value="#{item.customer.username}"/>
                         </p:column>
  

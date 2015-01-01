@@ -5,12 +5,15 @@ import au.com.manlyit.fitnesscrm.stats.beans.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.beans.util.PaginationHelper;
 import au.com.manlyit.fitnesscrm.stats.beans.AuditLogFacade;
 import au.com.manlyit.fitnesscrm.stats.beans.AuditLogFacade;
+import au.com.manlyit.fitnesscrm.stats.classes.util.LazyLoadingDataModel;
+import au.com.manlyit.fitnesscrm.stats.db.ConfigMap;
 
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.logging.Logger;
 import javax.enterprise.context.SessionScoped;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
@@ -25,11 +28,12 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import org.primefaces.event.RowEditEvent;
 import org.primefaces.event.SelectEvent;
+import org.primefaces.model.LazyDataModel;
 
 @Named("auditLogController")
 @SessionScoped
 public class AuditLogController implements Serializable {
-
+    private static final Logger logger = Logger.getLogger(AuditLogController.class.getName());
     private AuditLog current;
     private AuditLog selectedForDeletion;
     private DataModel items = null;
@@ -41,6 +45,7 @@ public class AuditLogController implements Serializable {
     private int selectedItemIndex;
     private List<AuditLog> filteredItems;
     private AuditLog[] multiSelected;
+    private LazyDataModel lazyModel;
 
     public AuditLogController() {
     }
@@ -65,7 +70,12 @@ public class AuditLogController implements Serializable {
         }
 
     }
-
+  public LazyDataModel<ConfigMap> getLazyModel() {
+        if(lazyModel == null){
+            lazyModel = new LazyLoadingDataModel(ejbFacade);
+        }
+        return lazyModel;
+    }
     private AuditLogFacade getFacade() {
         return ejbFacade;
     }

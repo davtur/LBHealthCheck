@@ -54,13 +54,29 @@
                 </h:panelGroup>
                 <h:outputText escape="false" value="#{configMapController.getKey('ListQrtzJobDetailsEmpty')}" rendered="#{qrtzJobDetailsController.items.rowCount == 0}"/>
                 <h:panelGroup rendered="#{qrtzJobDetailsController.items.rowCount > 0}">
-                    <p:dataTable  editable="true" value="#{qrtzJobDetailsController.items}"  widgetVar="qrtzJobDetailsControllerTable" var="item"  paginator="true" rows="15"  paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  rowsPerPageTemplate="5,10,15,20,25,50,100" >
+                    <p:dataTable  
+                        selectionMode="single"
+                        var="item" 
+                        selection="#{qrtzJobDetailsController.selected}" 
+                        filteredValue="#{ezidebit.paymentsDBListFilteredItems}"  
+                        rowKey="#{item.qrtzJobDetailsPK.jobName}"
+                        scrollHeight="500"
+                        scrollable="true" 
+                        value="#{qrtzJobDetailsController.items}"  
+                        widgetVar="qrtzJobDetailsControllerTable" 
+                        >
+
                         <f:facet name="header">
                             <p:outputPanel>
                                 <h:outputText value="Search all fields:" />
                                 <h:inputText id="globalFilter" onkeyup="PF('qrtzJobDetailsControllerTable').filter()" />
                             </p:outputPanel>
+                            <p:outputPanel>
+                                <p:commandButton rendered="#{qrtzJobDetailsController.isUserInRole('ADMIN')}"  update=":QrtzJobDetailslistForm1 :growl" actionListener="#{qrtzJobDetailsController.delete}" value="#{configMapController.getKey('ListQrtzJobDetailsDestroyLink')}"/>
+                            </p:outputPanel>
                         </f:facet>
+                        <p:ajax event="rowSelect"  listener="#{qrtzJobDetailsController.updateSelected}" />
+                        <p:ajax event="rowUnselect" /> 
                         <p:ajax event="rowEdit" listener="#{qrtzJobDetailsController.onEdit}" update=":growl" oncomplete="PF('qrtzJobDetailsControllerTable').filter()" />  
                         <p:ajax event="rowEditCancel" listener="#{qrtzJobDetailsController.onCancel}" update=":growl"  oncomplete="PF('qrtzJobDetailsControllerTable').filter()" />  
 
@@ -182,16 +198,6 @@
                                 </f:facet>
                             </p:cellEditor> 
 
-
-                        </p:column>
-                        <p:column rendered="#{qrtzJobDetailsController.isUserInRole('ADMIN')}"  headerText="Edit" style="width:50px">  
-                            <p:rowEditor />  
-                        </p:column>  
-
-                        <p:column>
-                            <p:commandButton rendered="#{qrtzJobDetailsController.isUserInRole('ADMIN')}"  update=":QrtzJobDetailslistForm1 :growl" action="#{qrtzJobDetailsController.destroy}" value="#{configMapController.getKey('ListQrtzJobDetailsDestroyLink')}">
-                                <f:setPropertyActionListener value="#{item}" target="#{qrtzJobDetailsController.selectedForDeletion}" />
-                            </p:commandButton>                        
 
                         </p:column>
                     </p:dataTable>

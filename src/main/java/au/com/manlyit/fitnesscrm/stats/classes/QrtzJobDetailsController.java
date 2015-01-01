@@ -15,6 +15,8 @@ import au.com.manlyit.fitnesscrm.stats.classes.util.PaginationHelper;
 import au.com.manlyit.fitnesscrm.stats.beans.QrtzJobDetailsFacade;
 import au.com.manlyit.fitnesscrm.stats.db.ConfigMap;
 import au.com.manlyit.fitnesscrm.stats.db.JobConfigMap;
+import au.com.manlyit.fitnesscrm.stats.db.Notes;
+import au.com.manlyit.fitnesscrm.stats.db.Payments;
 import au.com.manlyit.fitnesscrm.stats.db.Tasks;
 
 import java.io.Serializable;
@@ -29,10 +31,13 @@ import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 import javax.faces.convert.Converter;
 import javax.faces.convert.FacesConverter;
+import javax.faces.event.ActionEvent;
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
 import javax.servlet.ServletContext;
+import org.primefaces.event.RowEditEvent;
+import org.primefaces.event.SelectEvent;
 import org.quartz.CronTrigger;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
@@ -63,6 +68,7 @@ import org.quartz.JobKey;
 @SessionScoped
 public class QrtzJobDetailsController implements Serializable {
 
+    private static final Logger logger = Logger.getLogger(QrtzJobDetailsController.class.getName());
     private static final String ETAG = "{!-ENCRYPT-!}";
     private QrtzJobDetails current;
     private QrtzJobDetails[] multiSelected;
@@ -87,8 +93,40 @@ public class QrtzJobDetailsController implements Serializable {
         return current;
     }
 
+    public void setSelected(QrtzJobDetails qjd) {
+        current = qjd;
+    }
+
     private QrtzJobDetailsFacade getFacade() {
         return ejbFacade;
+    }
+
+    public void updateSelected(SelectEvent event) {
+        Object o = event.getObject();
+        if (o.getClass() == QrtzJobDetails.class) {
+            QrtzJobDetails pay = (QrtzJobDetails) o;
+            //current = pay;
+            logger.log(Level.INFO, "QrtzJobDetails Table job Selected.  Id :{0}", pay.getQrtzJobDetailsPK().getJobName());
+        } else {
+            logger.log(Level.WARNING, "QrtzJobDetails Table Job Select Failed.");
+        }
+
+    }
+
+    public void onEdit(RowEditEvent event) {
+        QrtzJobDetails cm = (QrtzJobDetails) event.getObject();
+        getFacade().edit(cm);
+        recreateModel();
+        JsfUtil.addSuccessMessage("Row Edit Successful");
+    }
+
+    public void onCancel(RowEditEvent event) {
+        JsfUtil.addErrorMessage("Row Edit Cancelled");
+    }
+
+    public void delete(ActionEvent actionEvent) {
+        performDestroy();
+        recreateModel();
     }
 
     public PaginationHelper getPagination() {
@@ -515,8 +553,8 @@ public class QrtzJobDetailsController implements Serializable {
                 Logger.getLogger(getClass().getName()).log(Level.SEVERE, "Job Detail creation failed !", e);
                 result = false;
             }
-            CronTrigger cronTrigger ;
-            Trigger trigger ;
+            CronTrigger cronTrigger;
+            Trigger trigger;
             if (cronString != null && cronString.trim().isEmpty() == false) {
                 cronTrigger = newTrigger().withIdentity("Trigger_" + jobName, Scheduler.DEFAULT_GROUP).withSchedule(cronSchedule(cronString)).usingJobData(jdm).build();
                 sched.scheduleJob(jobDetail, cronTrigger);
@@ -530,7 +568,7 @@ public class QrtzJobDetailsController implements Serializable {
             //addSuccessMessage("Added job: " + jobDetail.getName());
         } catch (SchedulerException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, "Scheduler Exception Occurred when scheduling quartz jobs:", ex);
-            if(ex.getMessage().contains("one already exists with this identification")){
+            if (ex.getMessage().contains("one already exists with this identification")) {
                 JsfUtil.addErrorMessage("A job with this name is already scheduled!");
             }
             result = false;

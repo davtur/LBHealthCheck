@@ -287,12 +287,11 @@ public class EziDebitPaymentGateway implements Serializable {
 
     }
 
-   /* public void reportDateChange() {
-        reportPaymentsList = null;
-        reportPaymentsListFilteredItems = null;
+    /* public void reportDateChange() {
+     reportPaymentsList = null;
+     reportPaymentsListFilteredItems = null;
 
-    }*/
-
+     }*/
     /**
      * @param paymentsList the paymentsList to set
      */
@@ -964,6 +963,8 @@ public class EziDebitPaymentGateway implements Serializable {
             reportPaymentsList = new PfSelectableDataModel<>(new ArrayList<Payments>());
         }
         Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.INFO, "Report Completed");
+        RequestContext.getCurrentInstance().update("reportsForm:reportDataTable");
+        //RequestContext.getCurrentInstance().update("reportsForm:totalAmounts");
     }
 
     /**
@@ -1887,10 +1888,62 @@ public class EziDebitPaymentGateway implements Serializable {
         String result = "";
         try {
             result = (String) ft.get();
-        } catch (InterruptedException | ExecutionException ex) {
-            Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (InterruptedException | ExecutionException | EJBException ex) {
+            Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, "processAddPaymentResult FAILED - Async Task Exception ", ex);
         }
-        if (result.isEmpty() == false) {
+        if (result == null) {
+            logger.log(Level.WARNING, "processAddPaymentResult FAILED - RESULT IS NULL ");
+            return;
+        }
+        if (result.startsWith("ERROR:")) {
+
+            String errorMessage = result.substring(6);
+            int k = errorMessage.indexOf(':');
+            String paymentRef = errorMessage.substring(0, k);
+            errorMessage = errorMessage.substring(k + 1);
+            int id = 0;
+            try {
+                id = Integer.parseInt(paymentRef);
+            } catch (NumberFormatException numberFormatException) {
+                logger.log(Level.INFO, "processAddPaymentResult FAILED - PaymentReference could not be converted to a number. It should be the primary key of teh payments table row ", result);
+            }
+            Payments pay = paymentsFacade.findPaymentById(id);
+            if (pay != null) {
+                if (errorMessage.contains("Your update could not be processed at this time")) {
+                    if (pay.getBankReturnCode() == null) {
+                        pay.setBankReturnCode("");
+                    }
+                    if (pay.getBankReturnCode().trim().isEmpty()) {
+                        // firts attempt at retry so set counter to 0
+                        pay.setBankReturnCode("0");
+                    } else {
+                        int retries = Integer.parseInt(pay.getBankReturnCode().trim());
+                        retries++;
+                        pay.setBankReturnCode(Integer.toString(retries));
+                        paymentsFacade.edit(pay);
+                        if (retries < 10) {
+                            retryAddPayment(pay);
+                            logger.log(Level.INFO, "processAddPaymentResult PAYMENT GATEWAY BUSY - ATTEMPTING RETRY - ", result);
+                        } else {
+                            pay.setPaymentStatus(PaymentStatus.MISSING_IN_PGW.value());
+                            paymentsFacade.edit(pay);
+                            updatePaymentLists(pay);
+                        }
+                    }
+                } else if (errorMessage.contains("This customer already has two payments on this date.")) {
+                    JsfUtil.addErrorMessage("Add Payment", "Payment ID:" + pay.getId().toString() + " for Amount:$" + pay.getPaymentAmount().toPlainString() + " on Date:" + pay.getDebitDate().toString() + " could not be added as teh customer already has two existing payments on this date!!.");
+                    paymentsFacade.remove(pay);
+                    updatePaymentLists(pay);
+                } else {
+                    pay.setPaymentStatus(PaymentStatus.MISSING_IN_PGW.value());
+                    pay.setPaymentReference(Integer.toString(id));
+                    paymentsFacade.edit(pay);
+                    updatePaymentLists(pay);
+                }
+            } else {
+                logger.log(Level.INFO, "processAddPaymentResult FAILED - ERROR processing could not find payment id ", result);
+            }
+        } else if (result.isEmpty() == false) {
             JsfUtil.addSuccessMessage("Add Payment", "Payment (" + result + ") submitted successfully.");
             int id = 0;
             try {
@@ -1909,7 +1962,6 @@ public class EziDebitPaymentGateway implements Serializable {
             } else {
                 logger.log(Level.INFO, "processAddPaymentResult FAILED - could not find payment id ", result);
             }
-
         } else {
             JsfUtil.addErrorMessage("Add Payment", "Payment Failed! Is the customer active with valid account/card details?");
         }
@@ -1984,40 +2036,91 @@ public class EziDebitPaymentGateway implements Serializable {
 
     private void processDeletePayment(Future ft) {
         String result = "0,FAILED";
-        String errorMessage = "The delete payment operation failed!.";
+        String message = "The delete payment operation failed!.";
         try {
             result = (String) ft.get();
-        } catch (InterruptedException | ExecutionException ex) {
+        } catch (InterruptedException | ExecutionException | EJBException ex) {
             String causedBy = ex.getCause().getCause().getMessage();
             if (causedBy.contains("Payment selected for deletion could not be found")) {
                 logger.log(Level.WARNING, "deletePayment - Payment selected for deletion could not be found..");
-                errorMessage = "The payment selected for deletion could not be found!";
+                message = "The payment selected for deletion could not be found!";
             } else {
                 Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, "Processing Async Results", ex);
             }
         }
-        if (result.contains("OK")) {
-            String[] res = result.split(",");
-            String ref = res[0];
+        if (result.startsWith("ERROR:") == false) {
+
             int reference = -1;
             try {
-                reference = Integer.parseInt(ref);
+                reference = Integer.parseInt(result);
 
             } catch (NumberFormatException numberFormatException) {
+                logger.log(Level.WARNING, "Process deletePayment - Thepayment reference could not be converted to a number: {0}",new Object[]{result});
             }
             Payments pay = paymentsFacade.findPaymentById(reference);
             if (pay != null) {
                 removeFromPaymentLists(pay);
                 paymentsFacade.remove(pay);
+                
             } else {
-                logger.log(Level.WARNING, "Process deletePayment - Payment that was deleted could not be found in the our DB");
+                logger.log(Level.WARNING, "Process deletePayment - Payment that was deleted could not be found in the our DB key={0}",new Object[]{reference});
             }
             setSelectedScheduledPayment(null);
             JsfUtil.addSuccessMessage("Payment Gateway", "Successfully Deleted Payment  .");
             //getPayments(12, 1);
 
         } else {
-            JsfUtil.addErrorMessage("Payment Gateway", errorMessage);
+
+            logger.log(Level.WARNING, "Process deletePayment - DELETE PAYMENT FAILED: {0}", new Object[]{result});
+            String errorMessage = result.substring(6);
+            int k = errorMessage.indexOf(':');
+            String paymentRef = errorMessage.substring(0, k);
+            errorMessage = errorMessage.substring(k + 1);
+            int id = 0;
+            try {
+                id = Integer.parseInt(paymentRef);
+            } catch (NumberFormatException numberFormatException) {
+                logger.log(Level.WARNING, "Process deletePayment  FAILED - PaymentReference could not be converted to a number. It should be the primary key of the payments table row ", result);
+            }
+            Payments pay = paymentsFacade.findPaymentById(id);
+            if (pay != null) {
+                if (errorMessage.contains("Payment selected for deletion could not be found")) {
+                    JsfUtil.addErrorMessage("Payment Gateway", "A payment with this reference could not be found in the payment gateway!");
+
+                    if (pay.getBankFailedReason().contentEquals("MISSING")) {
+                        paymentsFacade.remove(pay);
+                        removeFromPaymentLists(pay);
+                    } else {
+                        pay.setPaymentStatus(PaymentStatus.MISSING_IN_PGW.value());
+                        paymentsFacade.edit(pay);
+                        updatePaymentLists(pay);
+                    }
+                } else if (errorMessage.contains("Your update could not be processed at this time")) {
+                    if (pay.getBankReturnCode() == null) {
+                        pay.setBankReturnCode("");
+                    }
+                    if (pay.getBankReturnCode().trim().isEmpty()) {
+                        // firts attempt at retry so set counter to 0
+                        pay.setBankReturnCode("0");
+                    } else {
+                        int retries = Integer.parseInt(pay.getBankReturnCode().trim());
+                        retries++;
+                        pay.setBankReturnCode(Integer.toString(retries));
+                        paymentsFacade.edit(pay);
+                        if (retries < 10) {
+                            retryDeletePayment(pay);
+                        } else {
+                            pay.setPaymentStatus(PaymentStatus.MISSING_IN_PGW.value());
+                            paymentsFacade.edit(pay);
+                            updatePaymentLists(pay);
+                        }
+                    }
+                } else {
+                    logger.log(Level.WARNING, "Process deletePayment  FAILED - Unhandled error ", result);
+                    JsfUtil.addSuccessMessage("Payment Gateway", "Deleted Payment Error - see logs for more details .");
+                }
+
+            }
         }
         logger.log(Level.INFO, "processDeletePayment completed");
     }
@@ -2484,9 +2587,30 @@ public class EziDebitPaymentGateway implements Serializable {
         paymentsDBListFilteredItems = null;
     }
 
+    private void retryAddPayment(Payments pay) {
+        String loggedInUser = FacesContext.getCurrentInstance().getExternalContext().getRemoteUser();
+        logger.log(Level.INFO, "Retry Payment Created for customer {0} with paymentID: {1}", new Object[]{pay.getCustomerName().getUsername(), pay.getId()});
+        setAsyncOperationRunning(paymentBean.retryAddNewPayment(pay, loggedInUser, sessionId, getDigitalKey(), futureMap, paymentBean));
+        
+        paymentDBList = null;
+        paymentsDBListFilteredItems = null;
+
+    }
+
+    private void retryDeletePayment(Payments pay) {
+        String loggedInUser = FacesContext.getCurrentInstance().getExternalContext().getRemoteUser();
+        logger.log(Level.INFO, "Retry Payment Created for customer {0} with paymentID: {1}", new Object[]{pay.getCustomerName().getUsername(), pay.getId()});
+        setAsyncOperationRunning(paymentBean.retryDeletePayment(pay, loggedInUser, sessionId, getDigitalKey(), futureMap, paymentBean));
+        
+        paymentDBList = null;
+        paymentsDBListFilteredItems = null;
+
+    }
+
     public void addSinglePayment(ActionEvent actionEvent) {
         String loggedInUser = FacesContext.getCurrentInstance().getExternalContext().getRemoteUser();
         Long amount = (long) (paymentAmountInCents * (float) 100);
+        setAsyncOperationRunning(true);
         paymentBean.addNewPayment(selectedCustomer, paymentDebitDate, amount, true, loggedInUser, sessionId, getDigitalKey(), futureMap, paymentBean);
         paymentDBList = null;
         paymentsDBListFilteredItems = null;
@@ -2496,7 +2620,7 @@ public class EziDebitPaymentGateway implements Serializable {
 
         String loggedInUser = FacesContext.getCurrentInstance().getExternalContext().getRemoteUser();
         if (loggedInUser != null) {
-            List<Payments> crmPaymentList = paymentsFacade.findPaymentsByCustomerAndStatus(selectedCustomer, PaymentStatus.SCHEDULED.value());
+            List<Payments> crmPaymentList = paymentsFacade.findScheduledPaymentsByCustomer(selectedCustomer);
             if (paymentKeepManualPayments == false) {
                 startAsynchJob("ClearSchedule", paymentBean.clearSchedule(selectedCustomer, false, loggedInUser, getDigitalKey()));
             }
@@ -2521,7 +2645,7 @@ public class EziDebitPaymentGateway implements Serializable {
                         paymentsFacade.edit(p);
                         updatePaymentLists(p);
                         if (paymentKeepManualPayments == true) {
-                            startAsynchJob("DeletePayment", paymentBean.deletePaymentByRef(selectedCustomer, ref, loggedInUser, getDigitalKey()));
+                            startAsynchJob("DeletePayment", paymentBean.deletePayment(selectedCustomer, null, null, ref, loggedInUser, getDigitalKey()));
                         }
                     }
                 }
@@ -2563,9 +2687,12 @@ public class EziDebitPaymentGateway implements Serializable {
                 Payments pay = paymentsFacade.findPaymentById(selectedScheduledPayment.getId());
 
                 if (pay != null) {
-                    if (pay.getPaymentStatus().contentEquals(PaymentStatus.SCHEDULED.value()) || pay.getPaymentStatus().contentEquals(PaymentStatus.DELETE_REQUESTED.value())) {
-                        pay.setPaymentStatus(PaymentStatus.DELETE_REQUESTED.value());
+                    if (pay.getPaymentStatus().contentEquals(PaymentStatus.SCHEDULED.value()) || pay.getPaymentStatus().contentEquals(PaymentStatus.DELETE_REQUESTED.value()) || pay.getPaymentStatus().contentEquals(PaymentStatus.MISSING_IN_PGW.value())) {
 
+                        if (pay.getPaymentStatus().contentEquals(PaymentStatus.MISSING_IN_PGW.value())) {
+                            pay.setBankFailedReason("MISSING");
+                        }
+                        pay.setPaymentStatus(PaymentStatus.DELETE_REQUESTED.value());
                         paymentsFacade.edit(pay);
                         updatePaymentLists(pay);
                         startAsynchJob("DeletePayment", paymentBean.deletePayment(selectedCustomer, selectedScheduledPayment.getDebitDate(), amount.longValue(), selectedScheduledPayment.getId().toString(), loggedInUser, getDigitalKey()));

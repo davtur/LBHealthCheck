@@ -361,6 +361,8 @@ public class FutureMapEJB implements Serializable {
             logger.log(Level.INFO, "The daily payment report has completed. Result:{0}", result);
         } catch (InterruptedException ex) {
             Logger.getLogger(FutureMapEJB.class.getName()).log(Level.WARNING, "Run Payment Report was interrupted", ex);
+        }catch (Exception ex) {
+            Logger.getLogger(FutureMapEJB.class.getName()).log(Level.SEVERE, "retrievePaymentsReportFromPaymentGateway - UNHANDLED EXCEPTION In EJB TIMER", ex);
         }
     }
 
@@ -1408,7 +1410,7 @@ public class FutureMapEJB implements Serializable {
                 payment.setBankReturnCode("");
                 payment.setDebitDate(pay.getPaymentDate().toGregorianCalendar().getTime());
                 payment.setEzidebitCustomerID(pay.getEzidebitCustomerID().getValue());
-                payment.setInvoiceID(pay.getEzidebitCustomerID().getValue());
+                payment.setInvoiceID("");
                 payment.setPaymentAmount(new BigDecimal(pay.getPaymentAmount().floatValue()));
                 payment.setPaymentID(null);
                 payment.setPaymentMethod("DR");

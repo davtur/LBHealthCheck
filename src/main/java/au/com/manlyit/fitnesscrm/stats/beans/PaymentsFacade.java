@@ -238,33 +238,7 @@ public class PaymentsFacade extends AbstractFacade<Payments> {
         return cm;
     }
 
-    public List<Payments> findScheduledPaymentsByCustomer(Customers cust) {
-        List<Payments> cm = null;
-
-        ArrayList<Predicate> predicatesList1 = new ArrayList<>();
-        try {
-            CriteriaBuilder cb = em.getCriteriaBuilder();
-            CriteriaQuery<Payments> cq = cb.createQuery(Payments.class);
-            Root<Payments> rt = cq.from(Payments.class);
-
-            Expression<Customers> customer = rt.get("customerName");
-            Expression<String> paymentStatus = rt.get("paymentStatus");
-
-            predicatesList1.add(cb.equal(customer, cust));
-
-            predicatesList1.add(cb.equal(paymentStatus, PaymentStatus.SCHEDULED.value()));
-            predicatesList1.add(cb.equal(paymentStatus, PaymentStatus.SENT_TO_GATEWAY.value()));
-
-            cq.where(predicatesList1.<Predicate>toArray(new Predicate[predicatesList1.size()]));
-
-            Query q = em.createQuery(cq);
-            cm = q.getResultList();
-
-        } catch (Exception e) {
-            logger.log(Level.INFO, "findScheduledPaymentsByCustomer not found , Customer:{0}, error:{1}", new Object[]{cust.getUsername(), e.getMessage()});
-        }
-        return cm;
-    }
+    
 
     public Payments findScheduledPayment(BigDecimal paymentAmount, Date debitDate, String paymentReference, Boolean manuallyAddedPayment) {
         Payments cm = null;
@@ -439,6 +413,33 @@ public class PaymentsFacade extends AbstractFacade<Payments> {
             }
         } catch (Exception e) {
             logger.log(Level.INFO, "findScheduledPayment not found , Amount:{0},Date:{1},Ref:{2},Manual:{3}, error:{4}", new Object[]{pay.getPaymentAmount().toString(), pay.getPaymentDate().toGregorianCalendar().getTime(), pay.getPaymentReference().getValue(), pay.isManuallyAddedPayment().toString(), e.getMessage()});
+        }
+        return cm;
+    }
+    
+    
+public List<Payments> findScheduledPaymentsByCustomer(Customers cust) {
+        List<Payments> cm = null;
+
+        ArrayList<Predicate> predicatesList1 = new ArrayList<>();
+        try {
+            CriteriaBuilder cb = em.getCriteriaBuilder();
+            CriteriaQuery<Payments> cq = cb.createQuery(Payments.class);
+            Root<Payments> rt = cq.from(Payments.class);
+
+            Expression<Customers> customer = rt.get("customerName");
+            Expression<String> paymentStatus = rt.get("paymentStatus");
+
+            predicatesList1.add(cb.equal(customer, cust));
+            predicatesList1.add(cb.or(cb.equal(paymentStatus, PaymentStatus.SCHEDULED.value()),cb.equal(paymentStatus, PaymentStatus.SENT_TO_GATEWAY.value()),cb.equal(paymentStatus, PaymentStatus.DELETE_REQUESTED.value())));
+ 
+            cq.where(predicatesList1.<Predicate>toArray(new Predicate[predicatesList1.size()]));
+
+            Query q = em.createQuery(cq);
+            cm = q.getResultList();
+
+        } catch (Exception e) {
+            logger.log(Level.INFO, "findScheduledPaymentsByCustomer not found , Customer:{0}, error:{1}", new Object[]{cust.getUsername(), e.getMessage()});
         }
         return cm;
     }

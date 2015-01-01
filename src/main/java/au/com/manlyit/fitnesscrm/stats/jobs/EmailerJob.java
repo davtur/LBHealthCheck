@@ -55,6 +55,8 @@ public class EmailerJob implements Job {
             props.put("mail.smtp.socketFactory.fallback", dataMap.getString("mail.smtp.socketFactory.fallback"));
             props.put("mail.smtp.ssluser", dataMap.getString("mail.smtp.ssluser"));
             props.put("mail.smtp.sslpass", dataMap.getString("mail.smtp.sslpass"));
+            props.put("mail.smtp.headerimage.url", dataMap.getString("mail.smtp.headerimage.url"));
+
             dbUsername = dataMap.getString("db.fitness.username");
             dbPassword = dataMap.getString("db.fitness.password");
             dbConnectURL = dataMap.getString("db.fitness.url");
@@ -87,7 +89,7 @@ public class EmailerJob implements Job {
 
                 //Timestamp ts2 = new Timestamp(calCurrentTime.getTime().getTime());
                 // prepStmt.setTimestamp(1, ts2);
-                Logger.getLogger(getClass().getName()).log(Level.INFO, "Getting emails for sending from the queue.");
+                Logger.getLogger(getClass().getName()).log(Level.FINE, "Getting emails for sending from the queue.");
                 rs = prepStmt.executeQuery();
                 int sent = 0;
                 SendHTMLEmailWithFileAttached emailAgent = new SendHTMLEmailWithFileAttached();
@@ -107,36 +109,42 @@ public class EmailerJob implements Job {
                     Timestamp createDate = rs.getTimestamp("createDate");
                     if (validateEmailAddress(to) == false) {
                         valid = false;
+                        Logger.getLogger(getClass().getName()).log(Level.WARNING, "To email address is invalid");
                     }
                     if (validateEmailAddress(from) == false) {
                         valid = false;
+                        Logger.getLogger(getClass().getName()).log(Level.WARNING, "From email address is invalid");
                     }
                     if (cc != null) {
                         if (cc.trim().isEmpty()) {
                             cc = null;
-                        } else {
+                        }
+                        if (cc != null) {
                             if (validateEmailAddress(cc) == false) {
                                 valid = false;
+                                Logger.getLogger(getClass().getName()).log(Level.WARNING, "CC email address is invalid");
                             }
                         }
                     }
                     if (subject == null) {
                         valid = false;
+                        Logger.getLogger(getClass().getName()).log(Level.WARNING, "Subject is NULL");
                     }
                     if (msg == null) {
                         valid = false;
+                        Logger.getLogger(getClass().getName()).log(Level.WARNING, "Message is NULL");
                     }
                     if (sendDate == null) {
                         sendDate = new Timestamp(new Date().getTime());
                     }
-                     
+
                     calEmailSendDateTime.setTimeInMillis(sendDate.getTime());
                     if (status == 0 && valid) {
                         if (calCurrentTime.compareTo(calEmailSendDateTime) > 0) {
                             //send the email 
                             String cc2 = cc;
                             if (cc == null) {
-                                cc2 = "Null"; 
+                                cc2 = "Null";
                             }
                             try {
                                 String message = "Sending email to:" + to + ", from:" + from + ", cc:" + cc2 + ", subject:" + subject + ", message Length:" + msg.length() + ", sendDate:" + sendDate + ", createDate:" + createDate + ".";
@@ -157,9 +165,9 @@ public class EmailerJob implements Job {
 
                             }
                         }
-                    }else{
-                        if(valid == false){
-                            Logger.getLogger(getClass().getName()).log(Level.WARNING, "Invalid email parameters. Check DB table row."); 
+                    } else {
+                        if (valid == false) {
+                            Logger.getLogger(getClass().getName()).log(Level.WARNING, "MESSAGE FAILED TO SEND - Invalid email parameters. Check emailQueue DB table row, ID:{0}.",id);
                         }
                     }
                 }
