@@ -28,6 +28,11 @@ import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import org.eclipse.persistence.internal.jpa.EJBQueryImpl;
+import org.eclipse.persistence.jpa.JpaEntityManager;
+import org.eclipse.persistence.queries.DatabaseQuery;
+import org.eclipse.persistence.sessions.DatabaseRecord;
+import org.eclipse.persistence.sessions.Session;
 
 /**
  *
@@ -238,8 +243,6 @@ public class PaymentsFacade extends AbstractFacade<Payments> {
         return cm;
     }
 
-    
-
     public Payments findScheduledPayment(BigDecimal paymentAmount, Date debitDate, String paymentReference, Boolean manuallyAddedPayment) {
         Payments cm = null;
         ArrayList<Predicate> predicatesList1 = new ArrayList<>();
@@ -416,9 +419,8 @@ public class PaymentsFacade extends AbstractFacade<Payments> {
         }
         return cm;
     }
-    
-    
-public List<Payments> findScheduledPaymentsByCustomer(Customers cust) {
+
+    public List<Payments> findScheduledPaymentsByCustomer(Customers cust) {
         List<Payments> cm = null;
 
         ArrayList<Predicate> predicatesList1 = new ArrayList<>();
@@ -431,8 +433,8 @@ public List<Payments> findScheduledPaymentsByCustomer(Customers cust) {
             Expression<String> paymentStatus = rt.get("paymentStatus");
 
             predicatesList1.add(cb.equal(customer, cust));
-            predicatesList1.add(cb.or(cb.equal(paymentStatus, PaymentStatus.SCHEDULED.value()),cb.equal(paymentStatus, PaymentStatus.SENT_TO_GATEWAY.value()),cb.equal(paymentStatus, PaymentStatus.DELETE_REQUESTED.value())));
- 
+            predicatesList1.add(cb.or(cb.equal(paymentStatus, PaymentStatus.SCHEDULED.value()), cb.equal(paymentStatus, PaymentStatus.SENT_TO_GATEWAY.value()), cb.equal(paymentStatus, PaymentStatus.DELETE_REQUESTED.value())));
+
             cq.where(predicatesList1.<Predicate>toArray(new Predicate[predicatesList1.size()]));
 
             Query q = em.createQuery(cq);
@@ -506,6 +508,16 @@ public List<Payments> findScheduledPaymentsByCustomer(Customers cust) {
             }
             Query q = em.createQuery(cq);
             retList = (List<Payments>) q.getResultList();
+
+            // for debugging
+            Session session = getEntityManager().unwrap(JpaEntityManager.class).getActiveSession();
+            DatabaseQuery databaseQuery = ((EJBQueryImpl) q).getDatabaseQuery();
+            databaseQuery.prepareCall(session, new DatabaseRecord());
+            String sqlString = databaseQuery.getSQLString();
+        //This SQL will contain ? for parameters. To get the SQL translated with the arguments you need a DatabaseRecord with the parameter values.
+            // String sqlString2 = databaseQuery.getTranslatedSQLString(session, recordWithValues);
+            logger.log(Level.FINE, "Payment/Settlement Report SQL Query String: {0}  -----------------Records Found:{8}, useSettlement: {1},showSuccessful: {2},showFailed: {3},showPending: {4},showScheduled: {5},startDate: {6},endDate: {7}", new Object[]{sqlString, useSettlement, showSuccessful, showFailed, showPending, showScheduled, startDate, endDate,retList.size()});
+
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
         }

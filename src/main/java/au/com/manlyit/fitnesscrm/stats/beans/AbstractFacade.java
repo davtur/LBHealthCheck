@@ -4,22 +4,26 @@
  */
 package au.com.manlyit.fitnesscrm.stats.beans;
 
-import au.com.manlyit.fitnesscrm.stats.db.CustomerState;
-import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import java.io.Serializable;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import org.eclipse.persistence.internal.jpa.EJBQueryImpl;
+import org.eclipse.persistence.jpa.JpaEntityManager;
+import org.eclipse.persistence.queries.DatabaseQuery;
+import org.eclipse.persistence.sessions.DatabaseRecord;
+import org.eclipse.persistence.sessions.Session;
 import org.primefaces.model.SortOrder;
 
 /**
@@ -92,8 +96,9 @@ public abstract class AbstractFacade<T> implements Serializable {
     }
 // This method provides a bridge
     // between the session beans and my LazyDataModel.
-
+// Note: all of our databse entities that are involved in the lazy loading table must implement BaseEntity and have the id column name as the primary key.( see Customers class as an example )
     public List<T> load(int first, int count, String sortField, SortOrder sortOrder, Map<String, Object> filters) {
+        List<T> resultList;
         CriteriaBuilder builder = getEntityManager().getCriteriaBuilder();
         CriteriaQuery cq = builder.createQuery();
         Root root = cq.from(entityClass);
@@ -107,31 +112,43 @@ public abstract class AbstractFacade<T> implements Serializable {
         }
         if (filters != null) {
             Set<Map.Entry<String, Object>> entries = filters.entrySet();
-            ArrayList<Predicate> predicatesList
-                    = new ArrayList<>(entries.size());
+            ArrayList<Predicate> predicatesList = new ArrayList<>(entries.size());
             for (Map.Entry<String, Object> filter : entries) {
                 String key = filter.getKey();
                 Expression expresskey = root.get(key);
                 Object val = filter.getValue();
                 Class type = expresskey.getJavaType();
-                if (type.equals(Customers.class)) {// THis should really be overrided in the audit facade
+                try {
+                    Method getIdMethod = type.getMethod("getId");// this is implemented by the BaseEntity class so if it is a join to another table it should have this method
                     String sVal = (String) val;
                     int iVal = Integer.parseInt(sVal);
-                    Join<T, Customers> jn = root.join(key);// join customers.id
-                    Expression<Integer> custId = jn.get("id");
+                    Expression<Integer> custId = root.join(key).get("id");
                     predicatesList.add(builder.equal(custId, iVal));
-                } else {
+                } catch (NoSuchMethodException ex) {
                     predicatesList.add(builder.like(expresskey, filter.getValue() + "%"));
+                } catch (SecurityException ex) {
+                    Logger.getLogger(AbstractFacade.class.getName()).log(Level.SEVERE, null, ex);
                 }
-
             }
             cq.where(predicatesList.<Predicate>toArray(
                     new Predicate[predicatesList.size()]));
         }
-        javax.persistence.Query q = getEntityManager().createQuery(cq);
-        q.setFirstResult(first);
-        q.setMaxResults(count);
-        return q.getResultList();
+        javax.persistence.Query query = getEntityManager().createQuery(cq);
+
+        query.setFirstResult(first);
+
+        query.setMaxResults(count);
+        resultList = query.getResultList();
+        // for debugging
+        Session session = getEntityManager().unwrap(JpaEntityManager.class).getActiveSession();
+        DatabaseQuery databaseQuery = ((EJBQueryImpl) query).getDatabaseQuery();
+        databaseQuery.prepareCall(session, new DatabaseRecord());
+        String sqlString = databaseQuery.getSQLString();
+        //This SQL will contain ? for parameters. To get the SQL translated with the arguments you need a DatabaseRecord with the parameter values.
+        // String sqlString2 = databaseQuery.getTranslatedSQLString(session, recordWithValues);
+        logger.log(Level.FINE, "Lazy Load SQL Query String: {0}  ----------------- {1}", new Object[]{sqlString, filters.entrySet()});
+
+        return resultList;
     }
 
 }
