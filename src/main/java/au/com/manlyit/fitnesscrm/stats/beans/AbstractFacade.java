@@ -97,6 +97,7 @@ public abstract class AbstractFacade<T> implements Serializable {
 // This method provides a bridge
     // between the session beans and my LazyDataModel.
 // Note: all of our databse entities that are involved in the lazy loading table must implement BaseEntity and have the id column name as the primary key.( see Customers class as an example )
+
     public List<T> load(int first, int count, String sortField, SortOrder sortOrder, Map<String, Object> filters) {
         List<T> resultList;
         CriteriaBuilder builder = getEntityManager().getCriteriaBuilder();
@@ -146,7 +147,11 @@ public abstract class AbstractFacade<T> implements Serializable {
         String sqlString = databaseQuery.getSQLString();
         //This SQL will contain ? for parameters. To get the SQL translated with the arguments you need a DatabaseRecord with the parameter values.
         // String sqlString2 = databaseQuery.getTranslatedSQLString(session, recordWithValues);
-        logger.log(Level.FINE, "Lazy Load SQL Query String: {0}  ----------------- {1}", new Object[]{sqlString, filters.entrySet()});
+        if (filters != null) {
+            logger.log(Level.FINE, "Lazy Load SQL Query String: {0}  ----------------- {1}", new Object[]{sqlString, filters.entrySet()});
+        } else {
+            logger.log(Level.FINE, "Lazy Load SQL Query String: {0}  ----------------- Filters Null", new Object[]{sqlString});
+        }
 
         return resultList;
     }
