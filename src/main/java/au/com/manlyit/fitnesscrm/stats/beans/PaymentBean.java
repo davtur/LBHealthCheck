@@ -349,6 +349,8 @@ public class PaymentBean implements Serializable {
 
     }
 
+   
+
     private synchronized boolean arePaymentsWithinLimits(int limitToNumberOfPayments, long paymentAmountLimitInCents, long cumulativeAmountInCents, long amountInCents, int numberOfpayments) {
         if (limitToNumberOfPayments > 0 || paymentAmountLimitInCents > 0) {
             cumulativeAmountInCents += amountInCents;
@@ -382,7 +384,7 @@ public class PaymentBean implements Serializable {
             try {
                 Customers cust = pay.getCustomerName();
                 Date debitDate = pay.getDebitDate();
-                
+
                 long amountInCents = pay.getPaymentAmount().movePointRight(2).longValue();// convert to cents
                 String newPaymentID = pay.getId().toString();
                 logger.log(Level.INFO, "retryDeletePayment for customer {0} with paymentID: {1}", new Object[]{cust.getUsername(), newPaymentID});

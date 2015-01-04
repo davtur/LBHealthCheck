@@ -132,9 +132,9 @@ public class WebDDRSignUpServlet extends HttpServlet {
                                 Date endDate = cal.getTime();
                                 cal.add(Calendar.MONTH, -24);
 
-                                startAsynchJob("GetCustomerDetails", paymentBean.getCustomerDetails(current, getDigitalKey()), futureMap.getFutureMapInternalSessionId());
-                                startAsynchJob("GetPayments", paymentBean.getPayments(current, "ALL", "ALL", "ALL", "", cal.getTime(), endDate, false, getDigitalKey()), futureMap.getFutureMapInternalSessionId());
-                                startAsynchJob("GetScheduledPayments", paymentBean.getScheduledPayments(current, cal.getTime(), endDate, getDigitalKey()), futureMap.getFutureMapInternalSessionId());
+                                //startAsynchJob("GetCustomerDetails", paymentBean.getCustomerDetails(current, getDigitalKey()), futureMap.getFutureMapInternalSessionId());
+                                //startAsynchJob("GetPayments", paymentBean.getPayments(current, "ALL", "ALL", "ALL", "", cal.getTime(), endDate, false, getDigitalKey()), futureMap.getFutureMapInternalSessionId());
+                                startAsynchJob("ConvertSchedule", paymentBean.getScheduledPayments(current, cal.getTime(), endDate, getDigitalKey()), futureMap.getFutureMapInternalSessionId());
 
                             }
                         }

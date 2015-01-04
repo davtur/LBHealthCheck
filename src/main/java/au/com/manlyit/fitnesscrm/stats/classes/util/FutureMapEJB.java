@@ -361,7 +361,7 @@ public class FutureMapEJB implements Serializable {
             logger.log(Level.INFO, "The daily payment report has completed. Result:{0}", result);
         } catch (InterruptedException ex) {
             Logger.getLogger(FutureMapEJB.class.getName()).log(Level.WARNING, "Run Payment Report was interrupted", ex);
-        }catch (Exception ex) {
+        } catch (Exception ex) {
             Logger.getLogger(FutureMapEJB.class.getName()).log(Level.SEVERE, "retrievePaymentsReportFromPaymentGateway - UNHANDLED EXCEPTION In EJB TIMER", ex);
         }
     }
@@ -441,7 +441,7 @@ public class FutureMapEJB implements Serializable {
                     }
                 }
             } catch (Exception e) {
-                logger.log(Level.SEVERE, "checkRunningJobsAndNotifyIfComplete, Unhandled exception in EJB timer: {0} Cause: {2}", new Object[]{e.getMessage(),e.getCause().getMessage()});
+                logger.log(Level.SEVERE, "checkRunningJobsAndNotifyIfComplete, Unhandled exception in EJB timer: {0} Cause: {2}", new Object[]{e.getMessage(), e.getCause().getMessage()});
 
             } finally {
                 asychCheckProcessing.set(false);
@@ -454,86 +454,94 @@ public class FutureMapEJB implements Serializable {
     }
 // run a schedules
 
- /*   private void processConvertSchedule(Future ft) {
-        String result = "0,FAILED";
+    private void processConvertSchedule(Future ft) {
+        // Update the payments table with any new information retrived by the getPayments exzidebit web service.
+        // Only for one customer.
+        ArrayOfScheduledPayment result = null;
+        boolean abort = false;
         try {
-            result = (String) ft.get();
+            result = (ArrayOfScheduledPayment) ft.get();
         } catch (InterruptedException | ExecutionException ex) {
-            Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, "Future MAp - processConvertSchedule", ex);
+            Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, null, ex);
         }
-        if (result.contains("OK")) {
-            String[] res = result.split(",");
-            String ref = res[0];
-            int reference = -1;
-            try {
-                reference = Integer.parseInt(ref);
-            } catch (NumberFormatException numberFormatException) {
-            }
-            Customers cust = customersFacade.findById(reference);
-            if (cust != null) {
-                List<Payments> crmPaymentList = paymentsFacade.findPaymentsByCustomerAndStatus(cust, PaymentStatus.DELETE_REQUESTED.value());
-                for (int x = crmPaymentList.size() - 1; x > -1; x--) {
-                    Payments p = crmPaymentList.get(x);
-                    paymentsFacade.remove(p);
+
+        if (result != null && result.getScheduledPayment() != null) {
+            List<ScheduledPayment> payList = result.getScheduledPayment();
+            if (payList.isEmpty() == false) {
+                String customerRef = payList.get(0).getYourSystemReference().getValue();
+                int k = customerRef.indexOf("-");
+                if (k > 0) {
+                    customerRef = customerRef.substring(0, k);
                 }
-
-                PaymentParameters pp = cust.getPaymentParameters();
-               // JsfUtil.addSuccessMessage("Payment Gateway", "Successfully Cleared Schedule .");
-                if (pp != null) {
-                    GregorianCalendar endCal = new GregorianCalendar();
-                    //endCal.setTime(paymentDebitDate);// ezi debit only supports 1 year from current date
-                    endCal.add(Calendar.YEAR, 1);
-
-                    Date paymentDebitDate = pp.getContractStartDate();
-                    BigDecimal bdAmount = pp.getPaymentRegularAmount().multiply(new BigDecimal(100));
-                    Long amount = bdAmount.longValueExact();
-                    BigDecimal bdAmountLimit = pp.getPaymentRegularTotalPaymentsAmount().multiply(new BigDecimal(100));
-                    Long amountLimit = bdAmountLimit.longValueExact();
-                    int paymentLimitToNumberOfPayments = pp.getPaymentsRegularTotalNumberOfPayments();
-                    char spt = 'Z';
-                    switch (pp.getPaymentPeriod()) {
-                        case "1":
-                            spt = 'W';
-                            break;
-                        case "2":
-                            spt = 'F';
-                            break;
-
-                        case "4":
-                            spt = 'M';
-                            break;
-
-                        case "8":
-                            spt = '4';
-                            break;
-
-                        case "16":
-                            spt = 'Q';
-                            break;
-
-                        case "32":
-                            spt = 'H';
-                            break;
-
-                        case "64":
-                            spt = 'Y';
-                            break;
+                if (customerRef.trim().isEmpty() == false) {
+                    int custId = 0;
+                    try {
+                        custId = Integer.parseInt(customerRef.trim());
+                    } catch (NumberFormatException numberFormatException) {
+                        logger.log(Level.WARNING, "Future Map processConvertSchedule an ezidebit YourSystemReference string cannot be converted to a number.", numberFormatException);
 
                     }
 
-                    int dom = Integer.parseInt(pp.getPaymentPeriodDayOfMonth());
-                    int dow = Integer.parseInt(pp.getPaymentPeriodDayOfWeek());
-                    paymentBean.createCRMPaymentSchedule(cust, paymentDebitDate, endCal.getTime(), spt, dow, dom, amount, paymentLimitToNumberOfPayments, amountLimit, false, false, false, false, false, cust.getUsername(), FUTUREMAP_INTERNALID, getDigitalKey(), this, paymentBean);
+                    Customers cust = customersFacade.findById(custId);
+                    if (cust != null) {
+                        logger.log(Level.INFO, "Future Map processConvertSchedule. Processing {0} payments for customer {1}.", new Object[]{payList.size(), cust.getUsername()});
+                        for (ScheduledPayment pay : payList) {
+                            if (customerRef.compareTo(pay.getYourSystemReference().getValue().trim()) != 0) {
+                                logger.log(Level.WARNING, "Future Map processConvertSchedule . The list being processed contains multiple customers.It should only contain one for this method. Aborting.");
+                                abort = true;
+                            }
+
+                        }
+                        if (abort == false) {
+                            AsyncJob aj = new AsyncJob("ClearSchedule", paymentBean.clearSchedule(cust, false, cust.getUsername(), getDigitalKey()));
+                            this.put(FUTUREMAP_INTERNALID, aj);
+                            try {
+                                Thread.sleep(250);
+                            } catch (InterruptedException ex) {
+                                Logger.getLogger(FutureMapEJB.class.getName()).log(Level.SEVERE, "Thread Interrupted", ex);
+                            }
+                            for (ScheduledPayment pay : payList) {
+                                Payments crmPay = null;
+
+                                //payment doesn't exist in crm so add it
+                                logger.log(Level.WARNING, "Future Map processConvertSchedule - A payment exists in the PGW but not in CRM.(This can be ignored if a customer is onboarded with the online eddr form) EzidebitID={0}, CRM Ref:{1}, Amount={2}, Date={3}, Ref={4}", new Object[]{pay.getEzidebitCustomerID().getValue(), pay.getYourSystemReference().getValue(), pay.getPaymentAmount().floatValue(), pay.getPaymentDate().toGregorianCalendar().getTime(), pay.getPaymentReference().getValue()});
+                                crmPay = convertScheduledPaymentXMLToEntity(crmPay, pay, cust);
+                                paymentsFacade.createAndFlush(crmPay);
+                                crmPay.setPaymentReference(crmPay.getId().toString());
+                                crmPay.setManuallyAddedPayment(false);
+                                paymentsFacade.edit(crmPay);
+                                Long amountLong = null;
+                                try {
+                                    amountLong = crmPay.getPaymentAmount().movePointRight(2).longValue();
+                                } catch (Exception e) {
+                                    logger.log(Level.WARNING, "Arithemtic error.");
+                                }
+                                try {
+                                    Thread.sleep(250);
+                                } catch (InterruptedException ex) {
+                                    Logger.getLogger(FutureMapEJB.class.getName()).log(Level.SEVERE, "Thread Sleep interrupted", ex);
+                                }
+                                paymentBean.addPayment(cust, crmPay.getDebitDate(), amountLong, crmPay.getPaymentReference(), cust.getUsername(), getDigitalKey());
+
+                            }
+
+                        }
+                    }
                 } else {
-                    logger.log(Level.WARNING, "processConvertSchedule cust payment parameters are null");
+                    logger.log(Level.SEVERE, "Future Map processConvertSchedule couldn't find a customer with our system ref from payment.");
+                    /*TODO email a report at the end of the process if there are any payments swithout a customer reference
+                     as this means that a customer is in ezidebits system but not ours */
+
                 }
+            } else {
+                logger.log(Level.WARNING, "Future Map processConvertSchedule our system ref in payment is null.");
             }
-            // getPayments(18, 2);
-        } else {
-            JsfUtil.addErrorMessage("Payment Gateway", "The operation failed!.");
+
         }
-        logger.log(Level.INFO, "processConvertSchedule completed");
-    }*/
+
+        logger.log(Level.INFO,
+                "processConvertSchedule completed");
+    }
 
     public void processCompletedAsyncJobs(String key, Future ft) {
         logger.log(Level.INFO, "Future Map is processing Completed Async Jobs .");
@@ -556,9 +564,9 @@ public class FutureMapEJB implements Serializable {
                 if (key.contains("SettlementReport")) {
                     processSettlementReport(ft);
                 }
-              /*  if (key.contains("ConvertSchedule")) {
+                if (key.contains("ConvertSchedule")) {
                     processConvertSchedule(ft);
-                }*/
+                }
             } catch (CancellationException ex) {
                 logger.log(Level.WARNING, key + " Future Map:", ex);
 
@@ -655,8 +663,10 @@ public class FutureMapEJB implements Serializable {
         paymentsByCustomersMissingFromCRM = new ArrayList<>();
         try {
             result = (ArrayOfPayment) ft.get();
+
         } catch (InterruptedException | ExecutionException ex) {
-            Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(EziDebitPaymentGateway.class
+                    .getName()).log(Level.SEVERE, null, ex);
         }
 
         if (result != null && result.getPayment() != null) {
@@ -787,8 +797,10 @@ public class FutureMapEJB implements Serializable {
         boolean abort = false;
         try {
             result = (ArrayOfPayment) ft.get();
+
         } catch (InterruptedException | ExecutionException ex) {
-            Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(EziDebitPaymentGateway.class
+                    .getName()).log(Level.SEVERE, null, ex);
         }
 
         if (result != null && result.getPayment() != null) {
@@ -894,8 +906,10 @@ public class FutureMapEJB implements Serializable {
         boolean abort = false;
         try {
             result = (ArrayOfScheduledPayment) ft.get();
+
         } catch (InterruptedException | ExecutionException ex) {
-            Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(EziDebitPaymentGateway.class
+                    .getName()).log(Level.SEVERE, null, ex);
         }
 
         if (result != null && result.getScheduledPayment() != null) {
@@ -963,9 +977,16 @@ public class FutureMapEJB implements Serializable {
                                         try {
                                             amountLong = crmPay.getPaymentAmount().movePointRight(2).longValue();
                                         } catch (Exception e) {
-                                              logger.log(Level.WARNING, "Arithemtic error.");  
+                                            logger.log(Level.WARNING, "Arithemtic error.");
                                         }
                                         paymentBean.deletePayment(cust, crmPay.getDebitDate(), amountLong, "", cust.getUsername(), getDigitalKey());
+                                        try {
+                                            Thread.sleep(250);
+
+                                        } catch (InterruptedException ex) {
+                                            Logger.getLogger(FutureMapEJB.class
+                                                    .getName()).log(Level.SEVERE, "Thread Sleep interrupted", ex);
+                                        }
                                         paymentBean.addPayment(cust, crmPay.getDebitDate(), amountLong, crmPay.getPaymentReference(), cust.getUsername(), getDigitalKey());
                                     }
                                 }
@@ -1167,8 +1188,10 @@ public class FutureMapEJB implements Serializable {
 
         try {
             custDetails = (CustomerDetails) ft.get();
+
         } catch (InterruptedException | ExecutionException ex) {
-            Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, "Future Map processGetCustomerDetails", ex);
+            Logger.getLogger(EziDebitPaymentGateway.class
+                    .getName()).log(Level.SEVERE, "Future Map processGetCustomerDetails", ex);
         }
         if (custDetails != null) {
             // do something with result
@@ -1363,7 +1386,7 @@ public class FutureMapEJB implements Serializable {
                 if (pay.getTransactionFeeCustomer() != null) {
                     payment.setTransactionFeeCustomer(new BigDecimal(pay.getTransactionFeeCustomer()));
                 }
- 
+
                 try {
                     payment.setTransactionTime(pay.getTransactionTime().getValue().toGregorianCalendar().getTime()); // only valid for real time and credit card payments
                 } catch (NullPointerException e) {
@@ -1730,9 +1753,11 @@ public class FutureMapEJB implements Serializable {
                     try {
                         //img = ImageIO.read(stream);
                         img = ImageIO.read(new URL(placeholderImage));
+
                     } catch (IOException e) {
                         if (e.getCause().getClass() == FileNotFoundException.class) {
-                            Logger.getLogger(CustomerImagesController.class.getName()).log(Level.SEVERE, "createDefaultProfilePic, File not found!!: {0}", placeholderImage);
+                            Logger.getLogger(CustomerImagesController.class
+                                    .getName()).log(Level.SEVERE, "createDefaultProfilePic, File not found!!: {0}", placeholderImage);
 
                         } else {
                             Logger.getLogger(CustomerImagesController.class.getName()).log(Level.SEVERE, "createDefaultProfilePic, Loading image into buffer error!!", e);
@@ -1746,7 +1771,8 @@ public class FutureMapEJB implements Serializable {
 
                     } catch (IOException ex) {
 
-                        Logger.getLogger(CustomerImagesController.class.getName()).log(Level.SEVERE, "createDefaultProfilePic, write image  error!!", ex);
+                        Logger.getLogger(CustomerImagesController.class
+                                .getName()).log(Level.SEVERE, "createDefaultProfilePic, write image  error!!", ex);
 
                     }
 
