@@ -332,7 +332,7 @@ public class PaymentsFacade extends AbstractFacade<Payments> {
             if (validReference) {
                 predicatesList1.add(cb.equal(payRef, id));
             } else {
-                predicatesList1.add(cb.equal(payAmount, new BigDecimal(pay.getPaymentAmount())));
+                predicatesList1.add(cb.equal(payAmount, new BigDecimal(pay.getPaymentAmount().toString())));
                 predicatesList1.add(cb.equal(payDate, pay.getPaymentDate().toGregorianCalendar().getTime()));
                 //predicatesList1.add(cb.equal(manualPay, pay.isManuallyAddedPayment()));
             }
@@ -375,7 +375,7 @@ public class PaymentsFacade extends AbstractFacade<Payments> {
                 return null;
             }
         } else {
-            logger.log(Level.WARNING, "findScheduledPayment . Reference is not a valid  :{0}", pay.getYourSystemReference());
+            logger.log(Level.WARNING, "findScheduledPayment . Reference is not a valid  :{0}", pay.getYourSystemReference().getValue());
         }
         ArrayList<Predicate> predicatesList1 = new ArrayList<>();
         try {
@@ -393,7 +393,7 @@ public class PaymentsFacade extends AbstractFacade<Payments> {
             if (validReference) {
                 predicatesList1.add(cb.equal(payRef, id));
             } else {
-                predicatesList1.add(cb.equal(payAmount, new BigDecimal(pay.getPaymentAmount())));
+                predicatesList1.add(cb.equal(payAmount, new BigDecimal(pay.getPaymentAmount().toString())));
                 predicatesList1.add(cb.equal(payDate, pay.getPaymentDate().toGregorianCalendar().getTime()));
                 //predicatesList1.add(cb.equal(manualPay, pay.isManuallyAddedPayment()));
             }

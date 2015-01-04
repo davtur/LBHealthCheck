@@ -454,7 +454,7 @@ public class FutureMapEJB implements Serializable {
     }
 // run a schedules
 
-    private void processConvertSchedule(Future ft) {
+ /*   private void processConvertSchedule(Future ft) {
         String result = "0,FAILED";
         try {
             result = (String) ft.get();
@@ -478,7 +478,7 @@ public class FutureMapEJB implements Serializable {
                 }
 
                 PaymentParameters pp = cust.getPaymentParameters();
-                JsfUtil.addSuccessMessage("Payment Gateway", "Successfully Cleared Schedule .");
+               // JsfUtil.addSuccessMessage("Payment Gateway", "Successfully Cleared Schedule .");
                 if (pp != null) {
                     GregorianCalendar endCal = new GregorianCalendar();
                     //endCal.setTime(paymentDebitDate);// ezi debit only supports 1 year from current date
@@ -528,12 +528,12 @@ public class FutureMapEJB implements Serializable {
                     logger.log(Level.WARNING, "processConvertSchedule cust payment parameters are null");
                 }
             }
-            // getPayments(12, 1);
+            // getPayments(18, 2);
         } else {
             JsfUtil.addErrorMessage("Payment Gateway", "The operation failed!.");
         }
         logger.log(Level.INFO, "processConvertSchedule completed");
-    }
+    }*/
 
     public void processCompletedAsyncJobs(String key, Future ft) {
         logger.log(Level.INFO, "Future Map is processing Completed Async Jobs .");
@@ -556,9 +556,9 @@ public class FutureMapEJB implements Serializable {
                 if (key.contains("SettlementReport")) {
                     processSettlementReport(ft);
                 }
-                if (key.contains("ConvertSchedule")) {
+              /*  if (key.contains("ConvertSchedule")) {
                     processConvertSchedule(ft);
-                }
+                }*/
             } catch (CancellationException ex) {
                 logger.log(Level.WARNING, key + " Future Map:", ex);
 
@@ -953,13 +953,18 @@ public class FutureMapEJB implements Serializable {
                                             paymentsFacade.edit(crmPay);
                                         }
                                     } else { //payment doesn't exist in crm so add it
-                                        logger.log(Level.SEVERE, "Future Map processGetScheduledPayments - A payment exists in the PGW but not in CRM. EzidebitID={0}, CRM Ref:{1}, Amount={2}, Date={3}, Ref={4}", new Object[]{pay.getEzidebitCustomerID(), pay.getYourSystemReference(), pay.getPaymentAmount(), pay.getPaymentDate(), pay.getPaymentReference()});
+                                        logger.log(Level.WARNING, "Future Map processGetScheduledPayments - A payment exists in the PGW but not in CRM.(This can be ignored if a customer is onboarded with the online eddr form) EzidebitID={0}, CRM Ref:{1}, Amount={2}, Date={3}, Ref={4}", new Object[]{pay.getEzidebitCustomerID().getValue(), pay.getYourSystemReference().getValue(), pay.getPaymentAmount().floatValue(), pay.getPaymentDate().toGregorianCalendar().getTime(), pay.getPaymentReference().getValue()});
                                         crmPay = convertScheduledPaymentXMLToEntity(crmPay, pay, cust);
                                         paymentsFacade.createAndFlush(crmPay);
                                         crmPay.setPaymentReference(crmPay.getId().toString());
                                         crmPay.setManuallyAddedPayment(false);
                                         paymentsFacade.edit(crmPay);
-                                        Long amountLong = crmPay.getPaymentAmount().multiply(new BigDecimal(100)).longValueExact();
+                                        Long amountLong = null;
+                                        try {
+                                            amountLong = crmPay.getPaymentAmount().movePointRight(2).longValue();
+                                        } catch (Exception e) {
+                                              logger.log(Level.WARNING, "Arithemtic error.");  
+                                        }
                                         paymentBean.deletePayment(cust, crmPay.getDebitDate(), amountLong, "", cust.getUsername(), getDigitalKey());
                                         paymentBean.addPayment(cust, crmPay.getDebitDate(), amountLong, crmPay.getPaymentReference(), cust.getUsername(), getDigitalKey());
                                     }
@@ -1232,9 +1237,9 @@ public class FutureMapEJB implements Serializable {
                     pp.setStatusCode(custDetails.getStatusCode().getValue());
                     pp.setStatusDescription(custDetails.getStatusDescription().getValue());
                     pp.setTotalPaymentsFailed(custDetails.getTotalPaymentsFailed());
-                    pp.setTotalPaymentsFailedAmount(new BigDecimal(custDetails.getTotalPaymentsFailed().floatValue()));
+                    pp.setTotalPaymentsFailedAmount(new BigDecimal(custDetails.getTotalPaymentsFailed()));
                     pp.setTotalPaymentsSuccessful(custDetails.getTotalPaymentsSuccessful());
-                    pp.setTotalPaymentsSuccessfulAmount(new BigDecimal(custDetails.getTotalPaymentsSuccessfulAmount().floatValue()));
+                    pp.setTotalPaymentsSuccessfulAmount(new BigDecimal(custDetails.getTotalPaymentsSuccessfulAmount()));
                     pp.setYourGeneralReference(custDetails.getYourGeneralReference().getValue());
                     pp.setYourSystemReference(custDetails.getYourSystemReference().getValue());
 
@@ -1314,7 +1319,7 @@ public class FutureMapEJB implements Serializable {
                     payment.setInvoiceID(pay.getInvoiceID().getValue());
                 }
                 if (pay.getPaymentAmount() != null) {
-                    payment.setPaymentAmount(new BigDecimal(pay.getPaymentAmount().floatValue()));
+                    payment.setPaymentAmount(new BigDecimal(pay.getPaymentAmount()));
                 }
                 if (pay.getPaymentID().isNil() == false) {
                     payment.setPaymentID(pay.getPaymentID().getValue());
@@ -1342,7 +1347,7 @@ public class FutureMapEJB implements Serializable {
                     payment.setPaymentSource(pay.getPaymentSource().getValue());
                 }
                 if (pay.getScheduledAmount() != null) {
-                    payment.setScheduledAmount(new BigDecimal(pay.getScheduledAmount().floatValue()));
+                    payment.setScheduledAmount(new BigDecimal(pay.getScheduledAmount()));
                 }
                 try {
                     payment.setSettlementDate(pay.getSettlementDate().getValue().toGregorianCalendar().getTime());
@@ -1353,12 +1358,12 @@ public class FutureMapEJB implements Serializable {
                     payment.setPaymentStatus(pay.getPaymentStatus().getValue());
                 }
                 if (pay.getTransactionFeeClient() != null) {
-                    payment.setTransactionFeeClient(new BigDecimal(pay.getTransactionFeeClient().floatValue()));
+                    payment.setTransactionFeeClient(new BigDecimal(pay.getTransactionFeeClient()));
                 }
                 if (pay.getTransactionFeeCustomer() != null) {
-                    payment.setTransactionFeeCustomer(new BigDecimal(pay.getTransactionFeeCustomer().floatValue()));
+                    payment.setTransactionFeeCustomer(new BigDecimal(pay.getTransactionFeeCustomer()));
                 }
-
+ 
                 try {
                     payment.setTransactionTime(pay.getTransactionTime().getValue().toGregorianCalendar().getTime()); // only valid for real time and credit card payments
                 } catch (NullPointerException e) {
@@ -1411,7 +1416,7 @@ public class FutureMapEJB implements Serializable {
                 payment.setDebitDate(pay.getPaymentDate().toGregorianCalendar().getTime());
                 payment.setEzidebitCustomerID(pay.getEzidebitCustomerID().getValue());
                 payment.setInvoiceID("");
-                payment.setPaymentAmount(new BigDecimal(pay.getPaymentAmount().floatValue()));
+                payment.setPaymentAmount(new BigDecimal(pay.getPaymentAmount().toString()));
                 payment.setPaymentID(null);
                 payment.setPaymentMethod("DR");
                 if (pay.getPaymentReference().isNil() == false) {
@@ -1430,7 +1435,7 @@ public class FutureMapEJB implements Serializable {
 
                  }*/
                 payment.setPaymentSource("SCHEDULED");
-                payment.setScheduledAmount(new BigDecimal(pay.getPaymentAmount().floatValue()));
+                payment.setScheduledAmount(new BigDecimal(pay.getPaymentAmount()));
 
                 payment.setSettlementDate(null);
                 payment.setPaymentStatus(PaymentStatus.SCHEDULED.value());

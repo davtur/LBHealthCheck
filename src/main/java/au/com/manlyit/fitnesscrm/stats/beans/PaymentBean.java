@@ -382,7 +382,8 @@ public class PaymentBean implements Serializable {
             try {
                 Customers cust = pay.getCustomerName();
                 Date debitDate = pay.getDebitDate();
-                long amountInCents = pay.getPaymentAmount().multiply(new BigDecimal(100)).longValueExact();// convert to cents
+                
+                long amountInCents = pay.getPaymentAmount().movePointRight(2).longValue();// convert to cents
                 String newPaymentID = pay.getId().toString();
                 logger.log(Level.INFO, "retryDeletePayment for customer {0} with paymentID: {1}", new Object[]{cust.getUsername(), newPaymentID});
                 AsyncJob aj = new AsyncJob("DeletePayment", payBean.deletePayment(cust, debitDate, amountInCents, newPaymentID, user, digitalKey));
@@ -405,7 +406,7 @@ public class PaymentBean implements Serializable {
             try {
                 Customers cust = pay.getCustomerName();
                 Date debitDate = pay.getDebitDate();
-                long amountInCents = pay.getPaymentAmount().multiply(new BigDecimal(100)).longValueExact();// convert to cents
+                long amountInCents = pay.getPaymentAmount().movePointRight(2).longValue();// convert to cents
                 String newPaymentID = pay.getId().toString();
                 logger.log(Level.INFO, "retryAddNewPayment for customer {0} with paymentID: {1}", new Object[]{cust.getUsername(), newPaymentID});
                 AsyncJob aj = new AsyncJob("AddPayment", payBean.addPayment(cust, debitDate, amountInCents, newPaymentID, user, digitalKey));

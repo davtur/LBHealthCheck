@@ -10,39 +10,42 @@
         <!--<p:log />--> 
         <p:confirmDialog id="createEddrLinkDialogue" message="Set Up New Customer Using eDDR Form."  closable="false"
                          header="#{configMapController.getKey('AddEddrLinkTitle')}" severity="info" widgetVar="createEddrLinkDialogueWidget"> 
-            <h:form id="createEddrLink">    
-                <p:panelGrid id="addEddrLinkGrid1" columns="4">
+            <h:form id="createEddrLink">  
+                <p:panel   header="#{configMapController.getKey('AddPaymentScheduleHeader')}">
+                    <p:panelGrid id="addEddrLinkGrid1"  columns="4">
 
-                    <p:outputLabel value="#{configMapController.getKey('AddPaymentScheduleLabel_debitdate')}" for="debitDateEddrLink" />
-                    <p:calendar id="debitDateEddrLink" pattern="dd/MM/yyyy" value="#{ezidebit.paymentDebitDate}" title="#{configMapController.getKey('AddPaymentScheduleTitle_debitdate')}" required="true" requiredMessage="#{configMapController.getKey('AddEddrLinkRequiredMessage_debitdate')}" />
-                    <p:outputLabel value="#{configMapController.getKey('AddPaymentScheduleLabel_paymentAmount')}" for="payAmountEddrLink" />
-                    <p:inputText id="payAmountEddrLink" value="#{ezidebit.paymentAmountInCents}" title="#{configMapController.getKey('AddPaymentScheduleTitle_paymentAmount')}" required="true" requiredMessage="#{configMapController.getKey('AddPaymentScheduleRequiredMessage_paymentAmount')}">
-                        <f:convertNumber minFractionDigits="2"/>
-                    </p:inputText>
-                    <p:outputLabel value="#{configMapController.getKey('AddPaymentScheduleLabel_limitPayAmount')}" for="limitPayAmountEddrLink" />
-                    <p:inputText id="limitPayAmountEddrLink" value="#{ezidebit.paymentLimitAmountInCents}" title="#{configMapController.getKey('AddPaymentScheduleTitle_paymentLimitAmount')}" >
-                        <f:convertNumber minFractionDigits="2"/>
-                    </p:inputText>
-                    <p:outputLabel value="#{configMapController.getKey('AddPaymentScheduleLabel_limitNumberPayments')}" for="limitNumberPaymentsEddrLink" />
-                    <p:inputText id="limitNumberPaymentsEddrLink" value="#{ezidebit.paymentLimitToNumberOfPayments}" title="#{configMapController.getKey('AddPaymentScheduleTitle_limitNumberPayments')}" >
-                        <f:convertNumber minFractionDigits="0"/>
-                    </p:inputText>
-                </p:panelGrid>
-                <p:panelGrid id="addEddrLinkGrid2" columns="4"> 
+                        <p:outputLabel value="#{configMapController.getKey('AddPaymentScheduleLabel_debitdate')}" for="debitDateEddrLink" />
+                        <p:calendar id="debitDateEddrLink" pattern="dd/MM/yyyy" value="#{ezidebit.paymentDebitDate}" title="#{configMapController.getKey('AddPaymentScheduleTitle_debitdate')}"  />
+                        <p:outputLabel value="#{configMapController.getKey('AddPaymentScheduleLabel_paymentAmount')}" for="payAmountEddrLink" />
+                        <p:inputText id="payAmountEddrLink" value="#{ezidebit.paymentAmountInCents}" title="#{configMapController.getKey('AddPaymentScheduleTitle_paymentAmount')}" >
+                            <f:convertNumber minFractionDigits="2"/>
+                        </p:inputText>
+                        <p:outputLabel value="#{configMapController.getKey('AddPaymentScheduleLabel_limitPayAmount')}" for="limitPayAmountEddrLink" />
+                        <p:inputText id="limitPayAmountEddrLink" value="#{ezidebit.paymentLimitAmountInCents}" title="#{configMapController.getKey('AddPaymentScheduleTitle_paymentLimitAmount')}" >
+                            <f:convertNumber minFractionDigits="2"/>
+                        </p:inputText>
+                        <p:outputLabel value="#{configMapController.getKey('AddPaymentScheduleLabel_limitNumberPayments')}" for="limitNumberPaymentsEddrLink" />
+                        <p:inputText id="limitNumberPaymentsEddrLink" value="#{ezidebit.paymentLimitToNumberOfPayments}" title="#{configMapController.getKey('AddPaymentScheduleTitle_limitNumberPayments')}" >
+                            <f:convertNumber minFractionDigits="0"/>
+                        </p:inputText>
 
-                    <p:outputLabel value="#{configMapController.getKey('AddPaymentScheduleLabel_paymentPeriodType')}" for="periodTypeEddrLink" />
 
-                    <p:selectOneMenu id="periodTypeEddrLink" value="#{ezidebit.paymentSchedulePeriodType}"  >
-                        <f:selectItem itemValue="1" itemLabel="Weekly" />
-                        <f:selectItem itemValue="2" itemLabel="Fortnightly" />
-                        <f:selectItem itemValue="4" itemLabel="Monthly" />
-                        <f:selectItem itemValue="8" itemLabel="4 Weekly" />
-                       
-                        <f:selectItem itemValue="16" itemLabel="Quarterly" />
-                        <f:selectItem itemValue="32" itemLabel="Half Yearly" />
-                        <f:selectItem itemValue="64" itemLabel="Annually" />
-                        <p:ajax update="addEddrLinkGrid2" /> 
-                    </p:selectOneMenu>
+                    </p:panelGrid>
+                    <p:panelGrid id="addEddrLinkGrid2" columns="4"> 
+
+                        <p:outputLabel value="#{configMapController.getKey('AddPaymentScheduleLabel_paymentPeriodType')}" for="periodTypeEddrLink" />
+
+                        <p:selectOneMenu id="periodTypeEddrLink" value="#{ezidebit.paymentSchedulePeriodType}"  >
+                            <f:selectItem itemValue="1" itemLabel="Weekly" />
+                            <f:selectItem itemValue="2" itemLabel="Fortnightly" />
+                            <f:selectItem itemValue="4" itemLabel="Monthly" />
+                            <f:selectItem itemValue="8" itemLabel="4 Weekly" />
+
+                            <f:selectItem itemValue="16" itemLabel="Quarterly" />
+                            <f:selectItem itemValue="32" itemLabel="Half Yearly" />
+                            <f:selectItem itemValue="64" itemLabel="Annually" />
+                            <p:ajax update="addEddrLinkGrid2" /> 
+                        </p:selectOneMenu>
 
                <!--     <p:outputLabel rendered="#{ezidebit.paymentSchedulePeriodType == '1' ||ezidebit.paymentSchedulePeriodType == '2' ||  ezidebit.paymentSchedulePeriodType == '8'}" value="#{configMapController.getKey('AddPaymentScheduleLabel_paymentDayOfWeek')}" for="dayOfWeekEddrLink" />
 
@@ -84,8 +87,20 @@
                         <p:ajax update="addEddrLinkGrid2" />  
                     </p:selectBooleanCheckbox>  
 
--->
-                </p:panelGrid>
+                        -->
+                    </p:panelGrid>
+                </p:panel>
+                <p:panel   header="#{configMapController.getKey('AddOneOffPaymentScheduleHeader')}">
+                    <p:panelGrid id="addEddrLinkGrid3" columns="2"> 
+                        <p:outputLabel value="#{configMapController.getKey('AddOneOffPaymentScheduleLabel_debitdate')}" for="oneOffdebitDateEddrLink" />
+                        <p:calendar id="oneOffdebitDateEddrLink" pattern="dd/MM/yyyy" value="#{ezidebit.oneOffPaymentDate}" title="#{configMapController.getKey('AddOneOffPaymentScheduleTitle_debitdate')}"  />
+                        <p:outputLabel value="#{configMapController.getKey('AddOneOffPaymentScheduleLabel_paymentAmount')}" for="oneOffpayAmountEddrLink" />
+                        <p:inputText id="oneOffpayAmountEddrLink" value="#{ezidebit.oneOffPaymentAmountInCents}" title="#{configMapController.getKey('AddOneOffPaymentScheduleTitle_paymentAmount')}" >
+                            <f:convertNumber minFractionDigits="2"/>
+                        </p:inputText>
+                    </p:panelGrid>
+                </p:panel>
+
                 <p:panel>
                     <p:commandButton id="createPaymentdialogueScheduleSave" oncomplete="PF('createEddrLinkDialogueWidget').hide();"  actionListener="#{ezidebit.createEddrLink}" value="#{configMapController.getKey('AddEddrLinkSaveLink')}" update=" :growl :tv:customerslistForm1 :tv:paymentsForm :tv:formCustomersEdit1"/>                
                     <p:commandButton id="createPaymentdialogueScheduleDiscard" onclick="PF('createEddrLinkDialogueWidget').hide()"  value="#{configMapController.getKey('AddEddrLinkDiscardLink')}" update=":growl"/>                

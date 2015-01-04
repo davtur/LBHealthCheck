@@ -17,18 +17,20 @@
             <h:form id="formPlanCreate1">
                 <p:panel id="panelPlanCreate1">
                     <p:panelGrid columns="2">
-                        <p:outputLabel value="#{configMapController.getKey('CreatePlanLabel_id')}" for="id" />
-                        <p:inputText id="id" value="#{planController.selected.id}" title="#{configMapController.getKey('CreatePlanTitle_id')}" required="true" requiredMessage="#{configMapController.getKey('CreatePlanRequiredMessage_id')}"/>
                         <p:outputLabel value="#{configMapController.getKey('CreatePlanLabel_planName')}" for="planName" />
                         <p:inputText id="planName" value="#{planController.selected.planName}" title="#{configMapController.getKey('CreatePlanTitle_planName')}" required="true" requiredMessage="#{configMapController.getKey('CreatePlanRequiredMessage_planName')}"/>
                         <p:outputLabel value="#{configMapController.getKey('CreatePlanLabel_planPrice')}" for="planPrice" />
-                        <p:inputText id="planPrice" value="#{planController.selected.planPrice}" title="#{configMapController.getKey('CreatePlanTitle_planPrice')}" required="true" requiredMessage="#{configMapController.getKey('CreatePlanRequiredMessage_planPrice')}"/>
+                        <p:inputText id="planPrice" value="#{planController.selected.planPrice}" title="#{configMapController.getKey('CreatePlanTitle_planPrice')}" required="true" requiredMessage="#{configMapController.getKey('CreatePlanRequiredMessage_planPrice')}">
+                            <f:convertNumber minFractionDigits="2"/>
+                        </p:inputText>
                         <p:outputLabel value="#{configMapController.getKey('CreatePlanLabel_planDescription')}" for="planDescription" />
                         <p:inputTextarea rows="4" cols="30" id="planDescription" value="#{planController.selected.planDescription}" title="#{configMapController.getKey('CreatePlanTitle_planDescription')}" />
                         <p:outputLabel value="#{configMapController.getKey('CreatePlanLabel_planActive')}" for="planActive" />
                         <p:inputText id="planActive" value="#{planController.selected.planActive}" title="#{configMapController.getKey('CreatePlanTitle_planActive')}" required="true" requiredMessage="#{configMapController.getKey('CreatePlanRequiredMessage_planActive')}"/>
                         <p:outputLabel value="#{configMapController.getKey('CreatePlanLabel_planDiscount')}" for="planDiscount" />
-                        <p:inputText id="planDiscount" value="#{planController.selected.planDiscount}" title="#{configMapController.getKey('CreatePlanTitle_planDiscount')}" />
+                        <p:inputText id="planDiscount" value="#{planController.selected.planDiscount}" title="#{configMapController.getKey('CreatePlanTitle_planDiscount')}" >
+                            <f:convertNumber minFractionDigits="2"/>
+                        </p:inputText>
                     </p:panelGrid>
                 </p:panel>
                 <br />

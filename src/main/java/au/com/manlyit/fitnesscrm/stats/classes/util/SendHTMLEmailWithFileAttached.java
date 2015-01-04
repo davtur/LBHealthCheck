@@ -7,6 +7,7 @@ package au.com.manlyit.fitnesscrm.stats.classes.util;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.net.URL;
 import java.util.Date;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -149,6 +150,13 @@ public class SendHTMLEmailWithFileAttached implements Serializable {
 
                 stream = classLoader.getResourceAsStream(fileName);
             }
+            if(stream == null){
+                //try and get the URL if the loacla file name doesn't exist
+                try {
+                    stream = new URL(fileName).openStream();
+                } catch (IOException iOException) {
+                }
+            }
             if (stream != null) {
                 try {
                     DataSource ds = new ByteArrayDataSource(stream, "image/*");
@@ -162,7 +170,7 @@ public class SendHTMLEmailWithFileAttached implements Serializable {
                     System.out.println("Image ERROR:" + exception.getMessage());
                 }
             } else {
-                logger.log(Level.WARNING, "Email Header filename not found {0}", fileName);
+                logger.log(Level.WARNING, "Email Header filename not found: {0}",new Object[]{ fileName});
             }
             // Set the message content!
 

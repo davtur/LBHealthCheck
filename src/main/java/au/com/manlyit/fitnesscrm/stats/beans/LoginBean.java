@@ -53,7 +53,7 @@ public class LoginBean implements Serializable {
     private au.com.manlyit.fitnesscrm.stats.beans.ActivationFacade ejbActivationFacade;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.CustomersFacade ejbCustomerFacade;
-     @Inject
+    @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.EmailTemplatesFacade ejbEmailTemplatesFacade;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.PaymentBean ejbPaymentBean;
@@ -90,13 +90,13 @@ public class LoginBean implements Serializable {
         props.put("mail.smtp.socketFactory.fallback", configMapFacade.getConfig("mail.smtp.socketFactory.fallback"));
         props.put("mail.smtp.ssluser", configMapFacade.getConfig("mail.smtp.ssluser"));
         props.put("mail.smtp.sslpass", configMapFacade.getConfig("mail.smtp.sslpass"));
-
+        props.put("mail.smtp.headerimage.url", configMapFacade.getConfig("mail.smtp.headerimage.url"));
         return props;
 
     }
 
-    public void doPasswordReset(String templateName,Customers current,String subject) {
-        
+    public void doPasswordReset(String templateName, Customers current, String subject) {
+
         //valid user that wants the password reset
         //generate link and send
         if (current != null) {
@@ -118,8 +118,7 @@ public class LoginBean implements Serializable {
                 String templatePlaceholder = "<!--LINK-URL-->";
                 //String htmlText = configMapFacade.getConfig(templateName);
                 String htmlText = ejbEmailTemplatesFacade.findTemplateByName(templateName).getTemplate();
-                
-                
+
                 htmlText = htmlText.replace(templatePlaceholder, urlLink);
                 //String htmlText = "<table width=\"600\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\">  <tr>    <td><img src=\"cid:logoimg_cid\"/></td>  </tr>  <tr>    <td height=\"220\"> <p>Pure Fitness Manly</p>      <p>Please click the following link to reset your password:</p><p>To reset your password click <a href=\"" + urlLink + "\">here</a>.</p></td>  </tr>  <tr>    <td height=\"50\" align=\"center\" valign=\"middle\" bgcolor=\"#CCCCCC\">www.purefitnessmanly.com.au | sarah@purefitnessmanly.com.au | +61433818067</td>  </tr></table>";
 
@@ -148,7 +147,7 @@ public class LoginBean implements Serializable {
          Logger.getLogger(LoginBean.class.getName()).log(Level.SEVERE, "Failed to redirect to password reset URL", ex);
          }*/
         Customers current = ejbCustomerFacade.findCustomerByUsername(username);
-        doPasswordReset("system.reset.password.template",current,configMapFacade.getConfig("PasswordResetEmailSubject"));
+        doPasswordReset("system.reset.password.template", current, configMapFacade.getConfig("PasswordResetEmailSubject"));
         return "activation";
         /* if (this.isMobileDeviceUserAgent() == true) {
          return "/mobileMenu";

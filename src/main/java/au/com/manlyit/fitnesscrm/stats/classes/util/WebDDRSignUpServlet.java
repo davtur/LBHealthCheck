@@ -69,7 +69,7 @@ public class WebDDRSignUpServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         try {
-            logger.log(Level.INFO, "*** Call Back from Web EDDR Form");
+            logger.log(Level.INFO, "*** Call Back from Web EDDR Form ***");
             HttpSession httpSession = request.getSession();
             String uref = request.getParameter("uref");
             String cref = request.getParameter("cref");
@@ -93,15 +93,6 @@ public class WebDDRSignUpServlet extends HttpServlet {
             FacesContext context = FacesContext.getCurrentInstance();
             String sessionID = httpSession.getId();
             logger.log(Level.INFO, "Session:{0}, Params:{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12},{13},{14},{15},{16},{17},{18}", new Object[]{sessionID, uref, cref, fname, lname, email, mobile, addr, suburb, state, pcode, rdate, ramount, freq, odate, oamount, numpayments, totalamount, method});
-            String templatePlaceholder = "<!--LINK-URL-->";
-            String htmlText = configMapFacade.getConfig("system.admin.ezidebit.webddrcallback.template");
-            String name = fname + " " + lname;
-            htmlText = htmlText.replace(templatePlaceholder, name);
-            response.sendRedirect(request.getContextPath() + getValueFromKey("payment.ezidebit.callback.redirect"));
-            Future<Boolean> emailSendResult = paymentBean.sendAsynchEmail(configMapFacade.getConfig("AdminEmailAddress"), configMapFacade.getConfig("PasswordResetCCEmailAddress"), configMapFacade.getConfig("PasswordResetFromEmailAddress"), configMapFacade.getConfig("system.ezidebit.webEddrCallback.EmailSubject"), htmlText, null, emailServerProperties(), false);
-            if (emailSendResult.get() == false) {
-                logger.log(Level.WARNING, "Email for Call Back from Web EDDR Form FAILED. Future result false from async job");
-            }
 
             if (uref != null) {
                 uref = uref.trim();
@@ -115,6 +106,17 @@ public class WebDDRSignUpServlet extends HttpServlet {
                     }
 
                     if (current != null) {
+
+                        String templatePlaceholder = "<!--LINK-URL-->";
+                        String htmlText = configMapFacade.getConfig("system.admin.ezidebit.webddrcallback.template");
+                        String name = current.getFirstname() + " " + current.getLastname();
+                        htmlText = htmlText.replace(templatePlaceholder, name);
+                        response.sendRedirect(request.getContextPath() + getValueFromKey("payment.ezidebit.callback.redirect"));
+                        Future<Boolean> emailSendResult = paymentBean.sendAsynchEmail(configMapFacade.getConfig("AdminEmailAddress"), configMapFacade.getConfig("PasswordResetCCEmailAddress"), configMapFacade.getConfig("PasswordResetFromEmailAddress"), configMapFacade.getConfig("system.ezidebit.webEddrCallback.EmailSubject"), htmlText, null, emailServerProperties(), false);
+                        if (emailSendResult.get() == false) {
+                            logger.log(Level.WARNING, "Email for Call Back from Web EDDR Form FAILED. Future result false from async job");
+                        }
+
                         PaymentParameters pp = current.getPaymentParameters();
                         if (pp != null) {
                             if (pp.getWebddrUrl() != null) {
@@ -123,17 +125,17 @@ public class WebDDRSignUpServlet extends HttpServlet {
                                 ejbPaymentParametersFacade.edit(pp);
                                 ejbFacade.editAndFlush(current);
                                 logger.log(Level.INFO, " Customer {0} has set up payment info. Setting Web DDR URL to NULL as it should only be used once.", new Object[]{current.getUsername()});
-                                startAsynchJob("ConvertSchedule", paymentBean.clearSchedule(current, false, current.getUsername(), getDigitalKey()), futureMap.getFutureMapInternalSessionId());
-                                /*
-                                 GregorianCalendar cal = new GregorianCalendar();
-                                 cal.add(Calendar.MONTH, 12);
-                                 Date endDate = cal.getTime();
-                                 cal.add(Calendar.MONTH, -24);
-                   
-                                 startAsynchJob("GetCustomerDetails", paymentBean.getCustomerDetails(current, getDigitalKey()), sessionID);
-                                 startAsynchJob("GetPayments", paymentBean.getPayments(current, "ALL", "ALL", "ALL", "", cal.getTime(), endDate, false, getDigitalKey()), sessionID);
-                                 startAsynchJob("GetScheduledPayments", paymentBean.getScheduledPayments(current, cal.getTime(), endDate, getDigitalKey()), sessionID);
-                                 */
+                                //startAsynchJob("ConvertSchedule", paymentBean.clearSchedule(current, false, current.getUsername(), getDigitalKey()), futureMap.getFutureMapInternalSessionId());
+
+                                GregorianCalendar cal = new GregorianCalendar();
+                                cal.add(Calendar.MONTH, 18);
+                                Date endDate = cal.getTime();
+                                cal.add(Calendar.MONTH, -24);
+
+                                startAsynchJob("GetCustomerDetails", paymentBean.getCustomerDetails(current, getDigitalKey()), futureMap.getFutureMapInternalSessionId());
+                                startAsynchJob("GetPayments", paymentBean.getPayments(current, "ALL", "ALL", "ALL", "", cal.getTime(), endDate, false, getDigitalKey()), futureMap.getFutureMapInternalSessionId());
+                                startAsynchJob("GetScheduledPayments", paymentBean.getScheduledPayments(current, cal.getTime(), endDate, getDigitalKey()), futureMap.getFutureMapInternalSessionId());
+
                             }
                         }
                     }
@@ -156,6 +158,7 @@ public class WebDDRSignUpServlet extends HttpServlet {
         props.put("mail.smtp.socketFactory.fallback", configMapFacade.getConfig("mail.smtp.socketFactory.fallback"));
         props.put("mail.smtp.ssluser", configMapFacade.getConfig("mail.smtp.ssluser"));
         props.put("mail.smtp.sslpass", configMapFacade.getConfig("mail.smtp.sslpass"));
+        props.put("mail.smtp.headerimage.url", configMapFacade.getConfig("mail.smtp.headerimage.url"));
 
         return props;
 
