@@ -136,44 +136,45 @@ public class SendHTMLEmailWithFileAttached implements Serializable {
             // PREPARE THE IMAGE
             BodyPart imgPart = new MimeBodyPart();
             final String fileName = serverProperties.getProperty("mail.smtp.headerimage.url");
+            final String fileNameCid = serverProperties.getProperty("mail.smtp.headerimage.cid");
             // String fileName = "/resources/images/headerimg.jpg";
             //String fileName = "http://www.purefitnessmanly.com.au/FitnessStats/resources/images/pure_fitness_manly_group_and_personal_training.jpg";
 
-            InputStream stream = null;
+            InputStream stream ;
             // getServletContext().getResourceAsStream(fileName); //or null if you can't obtain a ServletContext
 
-            if (fileName != null) {
+            if (fileName != null && fileNameCid != null) {
                 ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
                 if (classLoader == null) {
                     classLoader = this.getClass().getClassLoader();
                 }
 
                 stream = classLoader.getResourceAsStream(fileName);
-            }
-            if(stream == null){
-                //try and get the URL if the loacla file name doesn't exist
-                try {
-                    stream = new URL(fileName).openStream();
-                } catch (IOException iOException) {
-                }
-            }
-            if (stream != null) {
-                try {
-                    DataSource ds = new ByteArrayDataSource(stream, "image/*");
 
-                    imgPart.setDataHandler(new DataHandler(ds));
-                    imgPart.setHeader("Content-ID", "<logoimg_cid>");
-                    imgPart.setDisposition(MimeBodyPart.INLINE);
-                    imgPart.setFileName(fileName);
-                    multipart.addBodyPart(imgPart);
-                } catch (IOException | MessagingException exception) {
-                    System.out.println("Image ERROR:" + exception.getMessage());
+                if (stream == null) {
+                    //try and get the URL if the loacla file name doesn't exist
+                    try {
+                        stream = new URL(fileName).openStream();
+                    } catch (IOException iOException) {
+                    }
                 }
-            } else {
-                logger.log(Level.WARNING, "Email Header filename not found: {0}",new Object[]{ fileName});
-            }
+                if (stream != null) {
+                    try {
+                        DataSource ds = new ByteArrayDataSource(stream, "image/*");
+
+                        imgPart.setDataHandler(new DataHandler(ds));
+                        imgPart.setHeader("Content-ID", "<" + fileNameCid + ">");
+                        imgPart.setDisposition(MimeBodyPart.INLINE);
+                        imgPart.setFileName(fileName);
+                        multipart.addBodyPart(imgPart);
+                    } catch (IOException | MessagingException exception) {
+                        System.out.println("Image ERROR:" + exception.getMessage());
+                    }
+                } else {
+                    logger.log(Level.WARNING, "Email Header filename and/or header cid name not found: {0}", new Object[]{fileName});
+                }
             // Set the message content!
-
+            }
             multipart.addBodyPart(htmlPart);
 
             msg.setContent(multipart);

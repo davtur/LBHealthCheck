@@ -56,6 +56,7 @@ public class EmailerJob implements Job {
             props.put("mail.smtp.ssluser", dataMap.getString("mail.smtp.ssluser"));
             props.put("mail.smtp.sslpass", dataMap.getString("mail.smtp.sslpass"));
             props.put("mail.smtp.headerimage.url", dataMap.getString("mail.smtp.headerimage.url"));
+            props.put("mail.smtp.headerimage.cid", dataMap.getString("mail.smtp.headerimage.cid"));
 
             dbUsername = dataMap.getString("db.fitness.username");
             dbPassword = dataMap.getString("db.fitness.password");
@@ -167,7 +168,7 @@ public class EmailerJob implements Job {
                         }
                     } else {
                         if (valid == false) {
-                            Logger.getLogger(getClass().getName()).log(Level.WARNING, "MESSAGE FAILED TO SEND - Invalid email parameters. Check emailQueue DB table row, ID:{0}.",id);
+                            Logger.getLogger(getClass().getName()).log(Level.WARNING, "MESSAGE FAILED TO SEND - Invalid email parameters. Check emailQueue DB table row, ID:{0}.", id);
                         }
                     }
                 }
@@ -223,25 +224,25 @@ public class EmailerJob implements Job {
 
     synchronized private Connection getAMySqlDBConnection(String connectUrl, String user, String pass) {
         Connection con = null;
-        try {
-            //String dbUrl = "jdbc:mysql://" + failFromServer + ":3306/" + db;
-            try {
-                Class.forName("com.mysql.jdbc.Driver").newInstance();
-            } catch (ClassNotFoundException | IllegalAccessException | InstantiationException ex) {
-                java.util.logging.Logger.getLogger(getClass().getName()).log(java.util.logging.Level.WARNING, "Couldnt load the com.mysql.jdbc.Driver class\r\n {0}\r\n{1}", new Object[]{connectUrl, ex.getMessage()});
-            }
-            try {
-                con = DriverManager.getConnection(connectUrl, user, pass);
-            } catch (SQLException ex) {
 
-                java.util.logging.Logger.getLogger(getClass().getName()).log(java.util.logging.Level.WARNING, "Couldnt get a connection :{0}\r\n{1}", new Object[]{connectUrl, ex.getMessage()});
-            }
-            if (con == null) {
-                java.util.logging.Logger.getLogger(getClass().getName()).log(java.util.logging.Level.WARNING, "Couldnt get a Database Connection to {0}\r\n{1},{2}", new Object[]{connectUrl, user, pass});
-            }
-        } finally {
-            return con;
+        //String dbUrl = "jdbc:mysql://" + failFromServer + ":3306/" + db;
+        try {
+            Class.forName("com.mysql.jdbc.Driver").newInstance();
+        } catch (ClassNotFoundException | IllegalAccessException | InstantiationException ex) {
+            java.util.logging.Logger.getLogger(getClass().getName()).log(java.util.logging.Level.WARNING, "Couldnt load the com.mysql.jdbc.Driver class\r\n {0}\r\n{1}", new Object[]{connectUrl, ex.getMessage()});
         }
+        try {
+            con = DriverManager.getConnection(connectUrl, user, pass);
+        } catch (SQLException ex) {
+
+            java.util.logging.Logger.getLogger(getClass().getName()).log(java.util.logging.Level.WARNING, "Couldnt get a connection :{0}\r\n{1}", new Object[]{connectUrl, ex.getMessage()});
+        }
+        if (con == null) {
+            java.util.logging.Logger.getLogger(getClass().getName()).log(java.util.logging.Level.WARNING, "Couldnt get a Database Connection to {0}\r\n{1},{2}", new Object[]{connectUrl, user, pass});
+        }
+
+        return con;
+
     }
 
 }

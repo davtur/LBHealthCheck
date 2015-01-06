@@ -123,10 +123,12 @@ public class TasksController implements Serializable {
         for (Tasks tsk : getMultiSelected()) {
             FacesContext facesContext = FacesContext.getCurrentInstance();
             QrtzJobDetailsController controller = (QrtzJobDetailsController) facesContext.getApplication().evaluateExpressionGet(facesContext, "#{qrtzJobDetailsController}", QrtzJobDetailsController.class);
+            QrtzCronTriggersController controller2 = (QrtzCronTriggersController) facesContext.getApplication().evaluateExpressionGet(facesContext, "#{qrtzCronTriggersController}", QrtzCronTriggersController.class);
             String returnVal = controller.scheduleTask(tsk, runImmediately);
             if (!returnVal.contains("success")) {
                 responseMessage = responseMessage + "\r\n" + returnVal;
                 e++;
+                controller2.recreateModel();
             } else {
                 c++;
             }

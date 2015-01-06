@@ -21,6 +21,7 @@ import java.io.Serializable;
 import java.net.URL;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
@@ -924,6 +925,9 @@ public class CustomerImagesController implements Serializable {
     public List<CustomerImages> getImages() {
         if (images == null) {
             createGallery(getUser());
+            if(images == null){
+                images = new ArrayList<>();
+            }
         }
 
         return images;

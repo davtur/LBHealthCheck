@@ -15,7 +15,7 @@
 
             <h:form id="formPlanCreate1">
                 <p:confirmDialog id="confirmDialogPlanCreate1" message="Add a Key/ Value Pair to the configuration table"  
-                                 header="#{configMapController.getKey('CreatePlanTitle')}" severity="info" widgetVar="PlanCreateDialogue"> 
+                                 header="#{configMapController.getKey('CreatePlanTitle')}" severity="info" widgetVar="planCreateDialogue"> 
 
                     <p:panelGrid columns="2">
                         <p:outputLabel value="#{configMapController.getKey('CreatePlanLabel_planName')}" for="planName" />
@@ -35,7 +35,7 @@
                         <p:inputText id="planDiscount" value="#{planController.selected.planDiscount}" title="#{configMapController.getKey('CreatePlanTitle_planDiscount')}" >
                             <f:convertNumber minFractionDigits="2"/>
                         </p:inputText>
-                        <p:commandButton oncomplete="PlanCreateDialogue.hide();planControllerTable.filter()" actionListener="#{planController.createDialogue}" value="#{configMapController.getKey('CreatePlanSaveLink')}" update=":growl"/>                
+                        <p:commandButton oncomplete="PF('planCreateDialogue').hide();PF('planControllerTable').filter()" actionListener="#{planController.createDialogue}" value="#{configMapController.getKey('CreatePlanSaveLink')}" update=":growl"/>                
                     </p:panelGrid>
                 </p:confirmDialog>
             </h:form>
@@ -46,7 +46,7 @@
 
             <h:form id="PlanlistForm1">
                 <h:panelGroup >
-                    <p:commandButton id="showDialogButton"  value="#{configMapController.getKey('ListPlanCreateLink')}" onclick="PF('PlanCreateDialogue').show()" type="button"/> 
+                    <p:commandButton id="showDialogButton"  value="#{configMapController.getKey('ListPlanCreateLink')}" onclick="PF('planCreateDialogue').show()" type="button"/> 
 
                 </h:panelGroup>
                 <h:outputText escape="false" value="#{configMapController.getKey('ListPlanEmpty')}" rendered="#{planController.items.rowCount == 0}"/>

@@ -159,7 +159,7 @@ public class WebDDRSignUpServlet extends HttpServlet {
         props.put("mail.smtp.ssluser", configMapFacade.getConfig("mail.smtp.ssluser"));
         props.put("mail.smtp.sslpass", configMapFacade.getConfig("mail.smtp.sslpass"));
         props.put("mail.smtp.headerimage.url", configMapFacade.getConfig("mail.smtp.headerimage.url"));
-
+        props.put("mail.smtp.headerimage.cid", configMapFacade.getConfig("mail.smtp.headerimage.cid"));
         return props;
 
     }

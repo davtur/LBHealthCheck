@@ -5,7 +5,9 @@ import au.com.manlyit.fitnesscrm.stats.db.QrtzCronTriggers;
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PaginationHelper;
 import au.com.manlyit.fitnesscrm.stats.beans.QrtzCronTriggersFacade;
+import au.com.manlyit.fitnesscrm.stats.db.QrtzJobDetails;
 import java.io.Serializable;
+import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -14,6 +16,7 @@ import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 import javax.faces.convert.Converter;
 import javax.faces.convert.FacesConverter;
+import javax.faces.event.ActionEvent;
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
@@ -31,15 +34,23 @@ public class QrtzCronTriggersController implements Serializable {
     private PaginationHelper pagination;
     private int selectedItemIndex;
 
+    private QrtzCronTriggers[] multiSelected;
+    private List<QrtzCronTriggers> filteredItems;
+    private QrtzCronTriggers selectedForDeletion;
+
     public QrtzCronTriggersController() {
     }
 
     public QrtzCronTriggers getSelected() {
-        if (current == null) {
-            current = new QrtzCronTriggers();
-            selectedItemIndex = -1;
+        if (getCurrent() == null) {
+            setCurrent(new QrtzCronTriggers());
+            setSelectedItemIndex(-1);
         }
-        return current;
+        return getCurrent();
+    }
+
+    public void setSelected(QrtzCronTriggers t) {
+        current = t;
     }
 
     public static boolean isUserInRole(String roleName) {
@@ -77,20 +88,20 @@ public class QrtzCronTriggersController implements Serializable {
     }
 
     public String prepareView() {
-        current = (QrtzCronTriggers) getItems().getRowData();
-        selectedItemIndex = pagination.getPageFirstItem() + getItems().getRowIndex();
+        setCurrent((QrtzCronTriggers) getItems().getRowData());
+        setSelectedItemIndex(pagination.getPageFirstItem() + getItems().getRowIndex());
         return "View";
     }
 
     public String prepareCreate() {
-        current = new QrtzCronTriggers();
-        selectedItemIndex = -1;
+        setCurrent(new QrtzCronTriggers());
+        setSelectedItemIndex(-1);
         return "Create";
     }
 
     public String create() {
         try {
-            getFacade().create(current);
+            getFacade().create(getCurrent());
 
             JsfUtil.addSuccessMessage(configMapFacade.getConfig("QrtzCronTriggersCreated"));
             return prepareCreate();
@@ -101,14 +112,14 @@ public class QrtzCronTriggersController implements Serializable {
     }
 
     public String prepareEdit() {
-        current = (QrtzCronTriggers) getItems().getRowData();
-        selectedItemIndex = pagination.getPageFirstItem() + getItems().getRowIndex();
+        setCurrent((QrtzCronTriggers) getItems().getRowData());
+        setSelectedItemIndex(pagination.getPageFirstItem() + getItems().getRowIndex());
         return "Edit";
     }
 
     public String update() {
         try {
-            getFacade().edit(current);
+            getFacade().edit(getCurrent());
             JsfUtil.addSuccessMessage(configMapFacade.getConfig("QrtzCronTriggersUpdated"));
             return "View";
         } catch (Exception e) {
@@ -118,29 +129,30 @@ public class QrtzCronTriggersController implements Serializable {
     }
 
     public String destroy() {
-        current = (QrtzCronTriggers) getItems().getRowData();
-        selectedItemIndex = pagination.getPageFirstItem() + getItems().getRowIndex();
+        setCurrent((QrtzCronTriggers) getItems().getRowData());
+        setSelectedItemIndex(pagination.getPageFirstItem() + getItems().getRowIndex());
         performDestroy();
-        recreateModel();
         return "List";
     }
 
     public String destroyAndView() {
         performDestroy();
-        recreateModel();
         updateCurrentItem();
-        if (selectedItemIndex >= 0) {
+        if (getSelectedItemIndex() >= 0) {
             return "View";
         } else {
-            // all items were removed - go back to list
-            recreateModel();
             return "List";
         }
     }
 
+    public void deleteListener(ActionEvent event) {
+        performDestroy();
+    }
+
     private void performDestroy() {
         try {
-            getFacade().remove(current);
+            getFacade().remove(getCurrent());
+            recreateModel();
             JsfUtil.addSuccessMessage(configMapFacade.getConfig("QrtzCronTriggersDeleted"));
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
@@ -149,27 +161,27 @@ public class QrtzCronTriggersController implements Serializable {
 
     private void updateCurrentItem() {
         int count = getFacade().count();
-        if (selectedItemIndex >= count) {
+        if (getSelectedItemIndex() >= count) {
             // selected index cannot be bigger than number of items:
-            selectedItemIndex = count - 1;
+            setSelectedItemIndex(count - 1);
             // go to previous page if last page disappeared:
             if (pagination.getPageFirstItem() >= count) {
                 pagination.previousPage();
             }
         }
-        if (selectedItemIndex >= 0) {
-            current = getFacade().findRange(new int[]{selectedItemIndex, selectedItemIndex + 1}).get(0);
+        if (getSelectedItemIndex() >= 0) {
+            setCurrent(getFacade().findRange(new int[]{getSelectedItemIndex(), getSelectedItemIndex() + 1}).get(0));
         }
     }
 
     public DataModel getItems() {
         if (items == null) {
-            items = getPagination().createPageDataModel();
+            items = new ListDataModel(getFacade().findAll());
         }
         return items;
     }
 
-    private void recreateModel() {
+    protected void recreateModel() {
         items = null;
     }
 
@@ -191,6 +203,76 @@ public class QrtzCronTriggersController implements Serializable {
 
     public SelectItem[] getItemsAvailableSelectOne() {
         return JsfUtil.getSelectItems(ejbFacade.findAll(), true);
+    }
+
+    /**
+     * @return the current
+     */
+    public QrtzCronTriggers getCurrent() {
+        return current;
+    }
+
+    /**
+     * @param current the current to set
+     */
+    public void setCurrent(QrtzCronTriggers current) {
+        this.current = current;
+    }
+
+    /**
+     * @return the selectedItemIndex
+     */
+    public int getSelectedItemIndex() {
+        return selectedItemIndex;
+    }
+
+    /**
+     * @param selectedItemIndex the selectedItemIndex to set
+     */
+    public void setSelectedItemIndex(int selectedItemIndex) {
+        this.selectedItemIndex = selectedItemIndex;
+    }
+
+    /**
+     * @return the multiSelected
+     */
+    public QrtzCronTriggers[] getMultiSelected() {
+        return multiSelected;
+    }
+
+    /**
+     * @param multiSelected the multiSelected to set
+     */
+    public void setMultiSelected(QrtzCronTriggers[] multiSelected) {
+        this.multiSelected = multiSelected;
+    }
+
+    /**
+     * @return the filteredItems
+     */
+    public List<QrtzCronTriggers> getFilteredItems() {
+        return filteredItems;
+    }
+
+    /**
+     * @param filteredItems the filteredItems to set
+     */
+    public void setFilteredItems(List<QrtzCronTriggers> filteredItems) {
+        this.filteredItems = filteredItems;
+    }
+
+    /**
+     * @return the selectedForDeletion
+     */
+    public QrtzCronTriggers getSelectedForDeletion() {
+        return selectedForDeletion;
+    }
+
+    /**
+     * @param selectedForDeletion the selectedForDeletion to set
+     */
+    public void setSelectedForDeletion(QrtzCronTriggers selectedForDeletion) {
+        this.selectedForDeletion = selectedForDeletion;
     }
 
     @FacesConverter(forClass = QrtzCronTriggers.class)

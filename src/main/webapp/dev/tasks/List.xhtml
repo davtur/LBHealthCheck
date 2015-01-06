@@ -14,9 +14,9 @@
             <h:form id="listForm1">
                 <h:panelGroup >
                     <p:commandButton id="createButton" ajax="false" action="#{tasksController.prepareCreate}" value="#{configMapController.getKey('ListTasksCreateButton')}"/>
-                    <p:commandButton id="scheduleButton"  actionListener="#{tasksController.scheduleSelected}" value="#{configMapController.getKey('ListTasksScheduleButton')}"/>
-                    <p:commandButton id="runNowButton"  actionListener="#{tasksController.runSelectedNow}" value="#{configMapController.getKey('ListTasksRunSelectedNowButton')}"/>
-                    <p:commandButton id="cloneButton"  actionListener="#{tasksController.cloneSelected}" value="#{configMapController.getKey('ListTasksCloneSelectedButton')}" update=":listForm1:tasksTable"/>
+                    <p:commandButton id="scheduleButton"  actionListener="#{tasksController.scheduleSelected}" value="#{configMapController.getKey('ListTasksScheduleButton')}" update=":QrtzCronTriggerslistForm1 :QrtzJobDetailslistForm1 :growl"/>
+                    <p:commandButton id="runNowButton"  actionListener="#{tasksController.runSelectedNow}" value="#{configMapController.getKey('ListTasksRunSelectedNowButton')}" update=":QrtzCronTriggerslistForm1 :QrtzJobDetailslistForm1 :growl"/>
+                    <p:commandButton id="cloneButton"  actionListener="#{tasksController.cloneSelected}" value="#{configMapController.getKey('ListTasksCloneSelectedButton')}" update=":listForm1:tasksTable :growl"/>
 
                 </h:panelGroup>
                 <h:outputText escape="false" value="#{configMapController.getKey('ListTasksEmpty')}" rendered="#{tasksController.items.rowCount == 0}"/>
@@ -24,7 +24,7 @@
                     <p:dataTable id="tasksTable" selection="#{tasksController.multiSelected}" rowKey="#{item.idtasks}" value="#{tasksController.items}"  widgetVar="tasksControllerTable" var="item"  paginator="true" rows="15"  paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  rowsPerPageTemplate="5,10,15,20,25,50,100" >
                         <f:facet name="header">
                             <p:outputPanel>
-                                <h:outputText value="Search all fields:" />
+                                <h2>Jobs Templates that can be Scheduled</h2><h:outputText value="Search all fields:" />
                                 <p:inputText id="globalFilter" onkeyup="PF('tasksControllerTable').filter()" />
                             </p:outputPanel>
                         </f:facet>
@@ -80,6 +80,234 @@
                     </p:dataTable>
                 </h:panelGroup>
             </h:form>
+            <h:form id="QrtzJobDetailslistForm1">
+                <h:outputText escape="false" value="#{configMapController.getKey('ListQrtzJobDetailsEmpty')}" rendered="#{qrtzJobDetailsController.items.rowCount == 0}"/>
+                <h:panelGroup rendered="#{qrtzJobDetailsController.items.rowCount > 0}">
+                    <p:dataTable  
+                        selectionMode="single"
+                        var="item" 
+                        selection="#{qrtzJobDetailsController.selected}" 
+                        filteredValue="#{qrtzJobDetailsController.filteredItems}"  
+                        rowKey="#{item.qrtzJobDetailsPK.jobName}"
+                        scrollHeight="auto"
+                        scrollable="true" 
+                        value="#{qrtzJobDetailsController.items}"  
+                        widgetVar="qrtzJobDetailsControllerTable" 
+                        >
+
+                        <f:facet name="header">
+                            <p:outputPanel>
+                                <h2>Scheduled Job Details</h2>  <p:commandButton rendered="#{qrtzJobDetailsController.isUserInRole('ADMIN')}"  update=":QrtzJobDetailslistForm1 :growl" actionListener="#{qrtzJobDetailsController.delete}" value="#{configMapController.getKey('ListQrtzJobDetailsDestroyLink')}"/>
+                            </p:outputPanel>
+                        </f:facet>
+                        <p:ajax event="rowSelect"  listener="#{qrtzJobDetailsController.updateSelected}" />
+                        <p:ajax event="rowUnselect" /> 
+                        <p:ajax event="rowEdit" listener="#{qrtzJobDetailsController.onEdit}" update=":growl" oncomplete="PF('qrtzJobDetailsControllerTable').filter()" />  
+                        <p:ajax event="rowEditCancel" listener="#{qrtzJobDetailsController.onCancel}" update=":growl"  oncomplete="PF('qrtzJobDetailsControllerTable').filter()" />  
+
+                        <p:column sortBy="#{item.qrtzJobDetailsPK.jobName}" filterBy="#{item.qrtzJobDetailsPK.jobName}" headerText="#{configMapController.getKey('ListQrtzJobDetailsTitle_qrtzJobDetailsPK_jobName')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.qrtzJobDetailsPK.jobName}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.qrtzJobDetailsPK.jobName}" label="#{configMapController.getKey('ListQrtzJobDetailsTitle_qrtzJobDetailsPK_jobName')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.qrtzJobDetailsPK.schedName}" filterBy="#{item.qrtzJobDetailsPK.schedName}" headerText="#{configMapController.getKey('ListQrtzJobDetailsTitle_qrtzJobDetailsPK_schedName')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.qrtzJobDetailsPK.schedName}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.qrtzJobDetailsPK.schedName}" label="#{configMapController.getKey('ListQrtzJobDetailsTitle_qrtzJobDetailsPK_schedName')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.qrtzJobDetailsPK.jobGroup}" filterBy="#{item.qrtzJobDetailsPK.jobGroup}" headerText="#{configMapController.getKey('ListQrtzJobDetailsTitle_qrtzJobDetailsPK_jobGroup')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.qrtzJobDetailsPK.jobGroup}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.qrtzJobDetailsPK.jobGroup}" label="#{configMapController.getKey('ListQrtzJobDetailsTitle_qrtzJobDetailsPK_jobGroup')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.description}" filterBy="#{item.description}" headerText="#{configMapController.getKey('ListQrtzJobDetailsTitle_description')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.description}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.description}" label="#{configMapController.getKey('ListQrtzJobDetailsTitle_description')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.jobClassName}" filterBy="#{item.jobClassName}" headerText="#{configMapController.getKey('ListQrtzJobDetailsTitle_jobClassName')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.jobClassName}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.jobClassName}" label="#{configMapController.getKey('ListQrtzJobDetailsTitle_jobClassName')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.isDurable}" filterBy="#{item.isDurable}" headerText="#{configMapController.getKey('ListQrtzJobDetailsTitle_isDurable')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.isDurable}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.isDurable}" label="#{configMapController.getKey('ListQrtzJobDetailsTitle_isDurable')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.isNonconcurrent}" filterBy="#{item.isNonconcurrent}" headerText="#{configMapController.getKey('ListQrtzJobDetailsTitle_isNonconcurrent')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.isNonconcurrent}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.isNonconcurrent}" label="#{configMapController.getKey('ListQrtzJobDetailsTitle_isNonconcurrent')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.isUpdateData}" filterBy="#{item.isUpdateData}" headerText="#{configMapController.getKey('ListQrtzJobDetailsTitle_isUpdateData')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.isUpdateData}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.isUpdateData}" label="#{configMapController.getKey('ListQrtzJobDetailsTitle_isUpdateData')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.requestsRecovery}" filterBy="#{item.requestsRecovery}" headerText="#{configMapController.getKey('ListQrtzJobDetailsTitle_requestsRecovery')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.requestsRecovery}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.requestsRecovery}" label="#{configMapController.getKey('ListQrtzJobDetailsTitle_requestsRecovery')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.jobData}" filterBy="#{item.jobData}" headerText="#{configMapController.getKey('ListQrtzJobDetailsTitle_jobData')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.jobData}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.jobData}" label="#{configMapController.getKey('ListQrtzJobDetailsTitle_jobData')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                    </p:dataTable>
+                </h:panelGroup>
+            </h:form>
+            <h:form id="QrtzCronTriggerslistForm1">
+
+                <h:outputText escape="false" value="#{configMapController.getKey('ListQrtzCronTriggersEmpty')}" rendered="#{empty qrtzCronTriggersController.items}"/>
+                <h:panelGroup rendered="#{not empty qrtzCronTriggersController.items}"> <!-->-->
+
+                    <p:dataTable  editable="true" 
+                                  selectionMode="single"
+                                  selection="#{qrtzCronTriggersController.selected}" 
+                                  filteredValue="#{qrtzCronTriggersController.filteredItems}"  
+                                  rowKey="#{item.qrtzCronTriggersPK.triggerName}"
+                                  value="#{qrtzCronTriggersController.items}" 
+                                  widgetVar="qrtzCronTriggersControllerTable" 
+                                  var="item"  
+                                  scrollHeight="auto"
+                                  scrollable="true" 
+                                  >
+                        <f:facet name="header">
+                            <p:outputPanel>
+                                <h2>Cron Trigger Details</h2>  <p:commandButton rendered="#{qrtzCronTriggersController.isUserInRole('ADMIN')}"  update=":QrtzCronTriggerslistForm1 :growl" actionListener="#{qrtzCronTriggersController.deleteListener}" value="#{configMapController.getKey('ListQrtzCronTriggersDestroyLink')}"/>
+                            </p:outputPanel>
+                        </f:facet>
+
+                        <p:ajax event="rowEdit" listener="#{qrtzCronTriggersController.onEdit}" update=":growl" oncomplete="PF('qrtzCronTriggersControllerTable').filter()" />  
+                        <p:ajax event="rowEditCancel" listener="#{qrtzCronTriggersController.onCancel}" update=":growl"  oncomplete="PF('qrtzCronTriggersControllerTable').filter()" />  
+                        <p:column sortBy="#{item.qrtzCronTriggersPK.triggerName}" filterBy="#{item.qrtzCronTriggersPK.triggerName}" headerText="#{configMapController.getKey('ListQrtzCronTriggersTitle_triggerName')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.qrtzCronTriggersPK.triggerName}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.qrtzCronTriggersPK.triggerName}" label="#{configMapController.getKey('ListQrtzCronTriggersTitle_triggerName')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.cronExpression}" filterBy="#{item.cronExpression}" headerText="#{configMapController.getKey('ListQrtzCronTriggersTitle_cronExpression')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.cronExpression}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.cronExpression}" label="#{configMapController.getKey('ListQrtzCronTriggersTitle_cronExpression')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.timeZoneId}" filterBy="#{item.timeZoneId}" headerText="#{configMapController.getKey('ListQrtzCronTriggersTitle_timeZoneId')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.timeZoneId}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.timeZoneId}" label="#{configMapController.getKey('ListQrtzCronTriggersTitle_timeZoneId')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.qrtzTriggers}" filterBy="#{item.qrtzTriggers}" headerText="#{configMapController.getKey('ListQrtzCronTriggersTitle_qrtzTriggers')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.qrtzTriggers}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.qrtzTriggers}" label="#{configMapController.getKey('ListQrtzCronTriggersTitle_qrtzTriggers')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column rendered="#{qrtzCronTriggersController.isUserInRole('ADMIN')}"  headerText="Edit" style="width:50px">  
+                            <p:rowEditor />  
+                        </p:column>  
+
+                    </p:dataTable>
+                </h:panelGroup>
+            </h:form>
+
         </ui:define>
     </ui:composition>
 

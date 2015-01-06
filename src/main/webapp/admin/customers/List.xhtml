@@ -21,10 +21,9 @@
                 <p:tab id="tab1" title="Customer List" >  
                     <h:form id="customerslistForm1">
                         <p:panelGrid columns="4" style="width:100%;">
-
                             <h:panelGroup id="selectedUserPanel">                 
-                                <p:commandButton id="selectCustomerButton"   actionListener="#{customersController.setSelectedCustomer}" value="#{configMapController.getKey('ListCustomersSelectCustomersButton')}" title="#{configMapController.getKey('ListCustomersSelectCustomersButtonHelp')}" update=":tv:customerslistForm1 :tv:formCustomersEdit1 :tv:NoteslistForm1 :tv:paymentsForm :growl" /> 
-                                <h:outputText id="selectedUser" value="Selected: #{customersController.selected.firstname} #{customersController.selected.lastname}" />
+                                <!--<p:commandButton id="selectCustomerButton"   actionListener="#{customersController.setSelectedCustomer}" value="#{configMapController.getKey('ListCustomersSelectCustomersButton')}" title="#{configMapController.getKey('ListCustomersSelectCustomersButtonHelp')}" update=":tv:customerslistForm1 :tv:formCustomersEdit1 :tv:NoteslistForm1 :tv:paymentsForm :growl" /> -->
+                                <p:panel id="selectedUser" header="Selected: #{customersController.selected.firstname} #{customersController.selected.lastname}" />
                             </h:panelGroup >
                             <h:panelGrid columns="4">
                                 <p:outputLabel  value="Filter:    " for="selectedStateCheckbox"/>
@@ -210,19 +209,24 @@
                             </p:selectOneMenu>
 
                             <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_referredby')}"  title="#{configMapController.getKey('EditCustomersTitle_referredby')}"  for="referredby1" />
-                            <p:selectOneMenu id="referredby1" value="#{customersController.selected.referredby}"   >
+                            <p:selectOneMenu id="referredby1" value="#{customersController.selected.referredby}"  filter="true"  filterMatchMode="contains">
                                 <f:selectItems value="#{customersController.itemsAvailableSelectOne}"  />
                             </p:selectOneMenu>
                             <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_groupPricing')}" for="groupPricing1" />
                             <p:selectOneMenu id="groupPricing1" valueChangeListener="#{customersController.selectOneMenuValueChangeListener}" converter="planConverter" value="#{customersController.selected.groupPricing}" label="#{configMapController.getKey('CreateCustomersTitle_groupPricing')}" >
                                 <f:selectItems value="#{planController.itemsAvailableAsObjects}"  var="plan" itemLabel="#{plan.planName} - $#{plan.planPrice} "  itemValue="#{plan}"/>
+                                <p:ajax update="planDescription"/>
                             </p:selectOneMenu>
+                            
+                            <p:outputLabel value="#{configMapController.getKey('ViewPlanLabel_planDescription')}" for="planDescription"/>
+                            <h:outputText id="planDescription" value="#{customersController.selected.groupPricing.planDescription}" title="#{configMapController.getKey('ViewPlanTitle_planDescription')}"/>
+
                             <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_emailFormat')}" for="emailFormat1" />
                             <p:selectOneMenu id="emailFormat1" valueChangeListener="#{customersController.selectOneMenuValueChangeListener}" converter="emailFormatConverter" value="#{customersController.selected.emailFormat}" label="#{configMapController.getKey('CreateCustomersTitle_emailFormat')}" >
                                 <f:selectItems value="#{emailFormatController.itemsAvailableAsObjects}"  var="emailFormat" itemLabel="#{emailFormat.emailFormat}" itemValue="#{emailFormat}"/>
                             </p:selectOneMenu>
-                            <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_auth')}" for="auth1" />
-                            <p:selectOneMenu id="auth1" valueChangeListener="#{customersController.selectOneMenuValueChangeListener}" converter="customerAuthConverter" value="#{customersController.selected.auth}" label="#{configMapController.getKey('CreateCustomersTitle_auth')}" >
+                            <p:outputLabel rendered="#{false}" value="#{configMapController.getKey('CreateCustomersLabel_auth')}" for="auth1" />
+                            <p:selectOneMenu rendered="#{false}" id="auth1" valueChangeListener="#{customersController.selectOneMenuValueChangeListener}" converter="customerAuthConverter" value="#{customersController.selected.auth}" label="#{configMapController.getKey('CreateCustomersTitle_auth')}" >
                                 <f:selectItems value="#{customerAuthController.itemsAvailableAsObjects}"  var="custAuth" itemLabel="#{custAuth.customerAuthType}" itemValue="#{custAuth}"/>
                             </p:selectOneMenu>
                             <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_demographic')}" for="demographic1" />
@@ -233,6 +237,7 @@
                             <p:selectOneMenu id="preferredContact1" valueChangeListener="#{customersController.selectOneMenuValueChangeListener}" converter="preferedContactConverter" value="#{customersController.selected.preferredContact}" label="#{configMapController.getKey('CreateCustomersTitle_preferredContact')}" >
                                 <f:selectItems value="#{preferedContactController.itemsAvailableAsObjects}"  var="prefContact" itemLabel="#{prefContact.preferedContactMethod}" itemValue="#{prefContact}"/>
                             </p:selectOneMenu>
+                            <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_smsOptions')}"  />
                             <h:panelGrid columns="2" rendered="#{not empty customersController.selected.paymentParameters}" >
                                 <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_SmsExpiredCard')}" for="checkbox1" />
                                 <p:selectBooleanCheckbox id="checkbox1" value="#{customersController.paymentParametersSmsExpiredCard}"  label="Sms Expired Card" />
@@ -241,7 +246,7 @@
                                 <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_SmsFailedNotification')}" for="checkbox3" />
                                 <p:selectBooleanCheckbox id="checkbox3" value="#{customersController.paymentParametersSmsFailedNotification}"  label="Sms Failed Notification" />
                             </h:panelGrid>
-                            <p:outputLabel value=""/>
+                           
                             <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_password')}" for="password1" />
                             <p:password id="password1"  value="#{customersController.checkPass}" onfocus="this.select()" feedback="true" redisplay="true" title="#{configMapController.getKey('EditCustomersTitle_password')}">
                                 <p:ajax listener="#{customersController.checkPassChange}" event="keyup" />
@@ -594,7 +599,7 @@
                             <p:panelGrid columns="2">
                                 <p:outputLabel value="#{configMapController.getKey('CreateNotesLabel_note')}" for="note" />
                                 <p:inputTextarea rows="4" cols="30" id="note" value="#{notesController.selected.note}" title="#{configMapController.getKey('CreateNotesTitle_note')}" />
-                                
+
                                 <h:outputLabel for="reminderDate" value="Reminder:" />
                                 <p:calendar id="reminderDate" disabled="#{!notesController.reminder}" value="#{notesController.reminderDate}"  pattern="dd/MM/yyyy HH:mm">  
                                     <p:ajax event="dateSelect" listener="#{notesController.handleReminderDateSelect}" update=":growl "  />
@@ -603,8 +608,8 @@
                                 <h:selectBooleanCheckbox id="reminder" value="#{notesController.reminder}" >
                                     <p:ajax update=":growl :tv:formNotesCreate1:reminderDate" />
                                 </h:selectBooleanCheckbox>
-                               <p:commandButton oncomplete="PF('NotesCreateDialogue').hide();PF('notesControllerTable').filter()" actionListener="#{notesController.createDialogue}" value="#{configMapController.getKey('CreateNotesSaveLink')}" update=":growl :tv:NoteslistForm1 :tv:formNotesCreate1"/>                
- 
+                                <p:commandButton oncomplete="PF('NotesCreateDialogue').hide();PF('notesControllerTable').filter()" actionListener="#{notesController.createDialogue}" value="#{configMapController.getKey('CreateNotesSaveLink')}" update=":growl :tv:NoteslistForm1 :tv:formNotesCreate1"/>                
+
                             </p:panelGrid>
                         </p:confirmDialog>
                     </h:form>
@@ -613,7 +618,7 @@
                             <p:commandButton id="showDialogButton2"  value="#{configMapController.getKey('ListNotesCreateLink')}" onclick="PF('NotesCreateDialogue').show()" type="button"/> 
 
                         </h:panelGroup> 
-                        <h:outputText id="selectedUser3" value="#{customersController.selected.firstname} #{customersController.selected.lastname}" />
+                        <h:outputText id="selectedUser3" value=" #{customersController.selected.firstname} #{customersController.selected.lastname} " />
                         <h:outputText escape="false" value="#{configMapController.getKey('ListNotesEmpty')}" rendered="#{customersController.notesItems.rowCount == 0}"/>
                         <h:panelGroup rendered="#{customersController.notesItems.rowCount > 0}">
                             <p:dataTable  editable="true" value="#{customersController.notesItems}" filteredValue="#{customersController.notesFilteredItems}"  widgetVar="notesControllerTable" var="item"  paginator="true" rows="15"  paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  rowsPerPageTemplate="5,10,15,20,25,50,100" >
