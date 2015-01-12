@@ -39,36 +39,43 @@ public class FacebookLoginBean implements Serializable {
 
         HttpSession session
                 = (HttpSession) ec.getSession(false);
-        String userName = (String) session.getAttribute("FACEBOOK_USER");
-        if (userName != null) {
+        if (session != null) {
+            String userName = (String) session.getAttribute("FACEBOOK_USER");
+            if (userName != null) {
 
-            String isMobile = (String) session.getAttribute("MOBILE_DEVICE");
-            String landingPage;
-            if (isMobile.contains("TRUE")) {
-                landingPage = configMapFacade.getConfig("facebook.redirect.mobilelandingpage");
-            } else {
-                landingPage = configMapFacade.getConfig("facebook.redirect.landingpage");
-            }
-            String message = "The user " + userName + " is already logged in. Redirecting to the landing Page:" + landingPage;
-            logger.log(Level.INFO, message);
-            try {
-                String sendToThisUrl = request.getContextPath() + landingPage;
-                if (request.getPathInfo().contains(sendToThisUrl)) {
-                    logger.log(Level.INFO, "getFacebookUrlAuth -  The path is the same as the redirect URL. No need to redirect.");
+                String isMobile = (String) session.getAttribute("MOBILE_DEVICE");
+                String landingPage = configMapFacade.getConfig("facebook.redirect.landingpage");
+                if (isMobile != null) {
+                    if (isMobile.contains("TRUE")) {
+                        landingPage = configMapFacade.getConfig("facebook.redirect.mobilelandingpage");
+                    } 
                 } else {
-                    ec.redirect(sendToThisUrl);
+                    logger.log(Level.WARNING, "getFacebookUrlAuth -  session.getAttribute(\"MOBILE_DEVICE\") is NULL.");
                 }
-            } catch (IOException ex) {
-                Logger.getLogger(FacebookLoginBean.class.getName()).log(Level.SEVERE, "Redirecting to Landing Page:", ex);
+                String message = "The user " + userName + " is already logged in. Redirecting to the landing Page:" + landingPage;
+                logger.log(Level.INFO, message);
+                try {
+                    String sendToThisUrl = request.getContextPath() + landingPage;
+                    if (request.getPathInfo().contains(sendToThisUrl)) {
+                        logger.log(Level.INFO, "getFacebookUrlAuth -  The path is the same as the redirect URL. No need to redirect.");
+                    } else {
+                        ec.redirect(sendToThisUrl);
+                    }
+                } catch (IOException ex) {
+                    Logger.getLogger(FacebookLoginBean.class.getName()).log(Level.SEVERE, "Redirecting to Landing Page:", ex);
+                }
+            } else {
+                String sessionId = session.getId();
+                String appId = configMapFacade.getConfig("facebook.app.id");//"247417342102284";
+                String redirectUrl = configMapFacade.getConfig("facebook.redirect.url");//"http://localhost:8080/FitnessStats/index.sec";
+                returnValue = configMapFacade.getConfig("facebook.app.oauth.url") + "client_id="
+                        + appId + "&redirect_uri=" + redirectUrl
+                        + "&scope=email,user_birthday&state=" + sessionId;
+
             }
         } else {
-            String sessionId = session.getId();
-            String appId = configMapFacade.getConfig("facebook.app.id");//"247417342102284";
-            String redirectUrl = configMapFacade.getConfig("facebook.redirect.url");//"http://localhost:8080/FitnessStats/index.sec";
-            returnValue = configMapFacade.getConfig("facebook.app.oauth.url") + "client_id="
-                    + appId + "&redirect_uri=" + redirectUrl
-                    + "&scope=email,user_birthday&state=" + sessionId;
-
+            logger.log(Level.WARNING, "getFacebookUrlAuth -  session  is NULL.");
+            returnValue = configMapFacade.getConfig("facebook.redirect.landingpage");
         }
         return returnValue;
     }
@@ -76,7 +83,10 @@ public class FacebookLoginBean implements Serializable {
     public String getUserFromSession() {
         HttpSession session
                 = (HttpSession) FacesContext.getCurrentInstance().getExternalContext().getSession(false);
-        String userName = (String) session.getAttribute("FACEBOOK_USER");
+        String userName = null;
+        if (session != null) {
+            userName = (String) session.getAttribute("FACEBOOK_USER");
+        }
         if (userName != null) {
             return "Hello " + userName + ". " + configMapFacade.getConfig("facebook.app.login.disabled.message");
         } else {

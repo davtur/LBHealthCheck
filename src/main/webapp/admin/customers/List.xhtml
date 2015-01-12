@@ -72,8 +72,8 @@
                                     </h:panelGroup>
                                     <h:outputText value="   " />
                                     <h:panelGroup>
-                                        <h:outputText  rendered="#{not empty customersController.filteredItems}" value="#{customersController.filteredItems.size} Records Found"/>
-                                        <h:outputText  rendered="#{empty customersController.filteredItems}" value="#{customersController.items.rowCount} Records Found"/>
+                                     <!--   <h:outputText  rendered="#{ customersController.filteredItems != null}" value="#{customersController.filteredItems.size} Records Found"/>-->
+                                        <h:outputText  rendered="#{customersController.items != null}" value="#{customersController.items.rowCount} Records Found"/>
                                     </h:panelGroup>
 
 
@@ -217,7 +217,7 @@
                                 <f:selectItems value="#{planController.itemsAvailableAsObjects}"  var="plan" itemLabel="#{plan.planName} - $#{plan.planPrice} "  itemValue="#{plan}"/>
                                 <p:ajax update="planDescription"/>
                             </p:selectOneMenu>
-                            
+
                             <p:outputLabel value="#{configMapController.getKey('ViewPlanLabel_planDescription')}" for="planDescription"/>
                             <h:outputText id="planDescription" value="#{customersController.selected.groupPricing.planDescription}" title="#{configMapController.getKey('ViewPlanTitle_planDescription')}"/>
 
@@ -246,7 +246,7 @@
                                 <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_SmsFailedNotification')}" for="checkbox3" />
                                 <p:selectBooleanCheckbox id="checkbox3" value="#{customersController.paymentParametersSmsFailedNotification}"  label="Sms Failed Notification" />
                             </h:panelGrid>
-                           
+
                             <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_password')}" for="password1" />
                             <p:password id="password1"  value="#{customersController.checkPass}" onfocus="this.select()" feedback="true" redisplay="true" title="#{configMapController.getKey('EditCustomersTitle_password')}">
                                 <p:ajax listener="#{customersController.checkPassChange}" event="keyup" />
@@ -316,14 +316,12 @@
                                           >
                                 <f:facet name="header">
                                     <p:outputPanel>
-                                        <!--    <p:outputPanel>
-                                                <h:outputText  rendered="#{not empty ezidebit.paymentsDBListFilteredItems}" value="#{ezidebit.paymentsDBListFilteredItems.size} Records Found" >
-                                                    <f:convertNumber />
-                                                </h:outputText>
-                                                <h:outputText  rendered="#{empty ezidebit.paymentsDBListFilteredItems}" value="#{ezidebit.paymentDBList.rowCount} Records Found" >
-                                                    <f:convertNumber />
-                                                </h:outputText>
-                                            </p:outputPanel>-->
+                                        <p:outputPanel>
+                                           <!-- <h:outputText  rendered="#{ezidebit.paymentsDBListFilteredItems != null}" value="#{ezidebit.paymentsDBListFilteredItems.size} Records Found" />-->
+                                               
+                                            <h:outputText  rendered="#{ezidebit.paymentDBList != null}" value="#{ezidebit.paymentDBList.rowCount} Records Found" />
+                                                
+                                        </p:outputPanel>
                                         <h:outputText value="Payments" />
                                         <p:commandButton id="showAddPaymentButton" rendered="#{ezidebit.waitingForPaymentDetails == false and ezidebit.customerCancelledInPaymentGateway == false and ezidebit.customerExistsInPaymentGateway == true}" oncomplete="PF('createPaymentDialogueWidget').show();"    value="#{configMapController.getKey('AddPaymentButtonLink')}"  update=":growl " /> 
                                         <p:commandButton id="showAddPaymentScheduleButton" rendered="#{ezidebit.waitingForPaymentDetails == false and ezidebit.customerCancelledInPaymentGateway == false and ezidebit.customerExistsInPaymentGateway == true}" oncomplete="PF('createPaymentScheduleDialogueWidget').show();"    value="#{configMapController.getKey('AddPaymentScheduleButtonLink')}" update=":growl "  /> 
@@ -438,14 +436,12 @@
                                           rowsPerPageTemplate="5,10,15,20,25,50,100" >
                                 <f:facet name="header">
                                     <p:outputPanel>
-                                        <!--      <p:outputPanel>
-                                               <h:outputText  rendered="#{not empty ezidebit.paymentsListFilteredItems}" value="#{ezidebit.paymentsListFilteredItems.size} Records Found">
-                                                   <f:convertNumber />
-                                               </h:outputText>
-                                               <h:outputText  rendered="#{empty ezidebit.paymentsListFilteredItems}" value="#{ezidebit.paymentsList.size} Records Found">
-                                                   <f:convertNumber />
-                                               </h:outputText>
-                                           </p:outputPanel> -->
+                                        <p:outputPanel>
+                                            <!--<h:outputText  rendered="#{ezidebit.paymentsListFilteredItems != null}" value="#{ezidebit.paymentsListFilteredItems.size} Records Found"/>
+                                             
+                                            <h:outputText  rendered="#{ezidebit.paymentsList != null}" value="#{ezidebit.paymentsList.size} Records Found"/>-->
+                                              
+                                        </p:outputPanel> 
 
                                         <h:outputText value="Payments" />
 
@@ -497,14 +493,14 @@
                                          rowsPerPageTemplate="5,10,15,20,25,50,100" >
                                 <f:facet name="header">
                                     <p:outputPanel>
-                                        <!--     <p:outputPanel>
-                                              <h:outputText  rendered="#{not empty ezidebit.scheduledPaymentsListFilteredItems}" value="#{ezidebit.scheduledPaymentsListFilteredItems.size} Records Found">
-                                                  <f:convertNumber />
-                                              </h:outputText>
-                                              <h:outputText  rendered="#{empty ezidebit.scheduledPaymentsListFilteredItems}" value="#{ezidebit.scheduledPaymentsList.size} Records Found">
-                                                  <f:convertNumber />
-                                              </h:outputText>
-                                          </p:outputPanel> -->
+                                        <p:outputPanel>
+                                            <!--
+                                            <h:outputText  rendered="#{ezidebit.scheduledPaymentsListFilteredItems != null}" value="#{ezidebit.scheduledPaymentsListFilteredItems.size} Records Found"/>
+                                           
+                                               
+                                            <h:outputText  rendered="#{ezidebit.scheduledPaymentsList != null}" value="#{ezidebit.scheduledPaymentsList.size} Records Found"/> -->
+                                              
+                                        </p:outputPanel> 
 
                                         <h:outputText value="Scheduled Payments" />
 

@@ -252,9 +252,11 @@ public class EziDebitPaymentGateway implements Serializable {
      * @return the paymentsList
      */
     public List<Payment> getPaymentsList() {
-        // if (paymentsList == null) {
-        //     getPayments();
-        //  }
+
+        if (paymentsList == null) {
+            paymentsList = new ArrayList<>();
+        }
+
         return paymentsList;
     }
 
@@ -362,6 +364,9 @@ public class EziDebitPaymentGateway implements Serializable {
      * @return the scheduledPaymentsList
      */
     public List<ScheduledPaymentPojo> getScheduledPaymentsList() {
+        if (scheduledPaymentsList == null) {
+            scheduledPaymentsList = new ArrayList<>();
+        }
         return scheduledPaymentsList;
     }
 
@@ -1322,7 +1327,7 @@ public class EziDebitPaymentGateway implements Serializable {
 
     public PfSelectableDataModel<Payments> getPaymentDBList() {
         if (paymentDBList == null) {
-            paymentDBList = new PfSelectableDataModel<>(paymentsFacade.findPaymentsByCustomer(selectedCustomer, refreshFromDB));
+            paymentDBList = new PfSelectableDataModel<>(paymentsFacade.findPaymentsByCustomer(selectedCustomer, false));
         }
         if (paymentDBList == null) {
             paymentDBList = new PfSelectableDataModel<>(new ArrayList<Payments>());
@@ -1333,10 +1338,10 @@ public class EziDebitPaymentGateway implements Serializable {
     private Customers getSelectedCustomer() {
         FacesContext context = FacesContext.getCurrentInstance();
         CustomersController controller = (CustomersController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "customersController");
-        if (refreshFromDB) {
-            refreshFromDB = false;
-            controller.updateSelectedCustomer(customersFacade.findByIdBypassCache(controller.getSelected().getId()));
-        }
+        /*if (refreshFromDB) {
+         refreshFromDB = false;
+         controller.updateSelectedCustomer(customersFacade.findByIdBypassCache(controller.getSelected().getId()));
+         }*/
         return controller.getSelected();
 
     }
@@ -1716,7 +1721,7 @@ public class EziDebitPaymentGateway implements Serializable {
             setRefreshIFrames(false);
         }
         RequestContext.getCurrentInstance().update("paymentsForm");
-        refreshFromDB = true;
+        //  refreshFromDB = true;
     }
 
     public void checkIfAsyncJobsHaveFinishedAndUpdate(String key, Future ft) {
@@ -1810,8 +1815,8 @@ public class EziDebitPaymentGateway implements Serializable {
             }
         }
 
-        refreshFromDB = true;
-        getCustomersController().setRefreshFromDB(true);
+        //refreshFromDB = true;
+        //getCustomersController().setRefreshFromDB(true);
         getCustomersController().recreateModel();
 
         logger.log(Level.INFO, "processPaymentReport completed");
@@ -1834,8 +1839,8 @@ public class EziDebitPaymentGateway implements Serializable {
             }
         }
 
-        refreshFromDB = true;
-        getCustomersController().setRefreshFromDB(true);
+        // refreshFromDB = true;
+        // getCustomersController().setRefreshFromDB(true);
         getCustomersController().recreateModel();
 
         logger.log(Level.INFO, "processSettlementReport completed");
@@ -1861,7 +1866,7 @@ public class EziDebitPaymentGateway implements Serializable {
             }
         }
         RequestContext.getCurrentInstance().update("customerslistForm1");
-        refreshFromDB = true;
+        // refreshFromDB = true;
         logger.log(Level.INFO, "processGetPayments completed");
     }
 
@@ -1891,7 +1896,7 @@ public class EziDebitPaymentGateway implements Serializable {
             }
         }
         RequestContext.getCurrentInstance().update("customerslistForm1");
-        refreshFromDB = true;
+        //refreshFromDB = true;
         logger.log(Level.INFO, "processGetScheduledPayments completed");
     }
 
@@ -2333,7 +2338,7 @@ public class EziDebitPaymentGateway implements Serializable {
             customerExistsInPaymentGateway = false;
         }
         RequestContext.getCurrentInstance().update("customerslistForm1");
-        refreshFromDB = true;
+        //refreshFromDB = true;
         getCustomersController().setRefreshFromDB(true);
         getCustomersController().recreateModel();
         logger.log(Level.INFO, "processGetCustomerDetails completed");
@@ -2460,9 +2465,7 @@ public class EziDebitPaymentGateway implements Serializable {
             logger.log(Level.WARNING, "Create EDDR Link cannot be completed as the selected customer is null.");
             return;
         }
-        
-        
-        
+
         PaymentParameters pp = null;
         Long amount = (long) (paymentAmountInCents * (float) 100);
         Long amountLimit = paymentLimitAmountInCents * (long) 100;
@@ -2527,25 +2530,25 @@ public class EziDebitPaymentGateway implements Serializable {
         if (db.contains("0") == false) {
             widgetUrl += amp + "debits=" + db;// if its 0 leave unset to show once off and regular debits
         }
-         if(paymentDebitDate.compareTo(oneOffPaymentDate) == 0){
-            if(paymentAmountInCents == oneOffPaymentAmount){
+        if (paymentDebitDate.compareTo(oneOffPaymentDate) == 0) {
+            if (paymentAmountInCents == oneOffPaymentAmount) {
                 // as the ezidebit form will add the payments without a reference number we need to be able to differentiate between them if they are for teh same amount on the same date.
-                oneOffPaymentAmount += (float)0.01;
+                oneOffPaymentAmount += (float) 0.01;
             }
         }
         if (paymentAmountInCents > 0) {
             widgetUrl += amp + "rAmount=" + nf.format((pp.getPaymentRegularAmount().divide(new BigDecimal(100))));
             widgetUrl += amp + "rDate=" + sdf.format(paymentDebitDate);
-        }else{
-            widgetUrl += amp + "debits=1"; 
+        } else {
+            widgetUrl += amp + "debits=1";
         }
         if (oneOffPaymentAmount > 0) {
             widgetUrl += amp + "oAmount=" + nf.format(oneOffPaymentAmount);
             widgetUrl += amp + "oDate=" + sdf.format(oneOffPaymentDate);
-        }else{
-            widgetUrl += amp + "debits=2"; 
+        } else {
+            widgetUrl += amp + "debits=2";
         }
-       
+
         widgetUrl += amp + "aFreq=" + paymentSchedulePeriodType;
         widgetUrl += amp + "freq=" + paymentSchedulePeriodType;
         widgetUrl += amp + "aDur=" + pp.getPaymentRegularDuration().toString();

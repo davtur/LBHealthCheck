@@ -14,10 +14,10 @@
             <h:form id="iFrameForm" > 
                 <p:outputPanel id="iFramePanel" >
                     <p:panel id="viewPaymentsGrid" header="#{configMapController.getKey('EditPaymentMethodDialogueCustName')} #{customersController.selected.firstname} #{customersController.selected.lastname}"  >
-                    
-                    
-                    <iframe id="ezidebitIframeView" src="#{ezidebit.getEziDebitWidgetUrl()}" class="editPaymentMethodIFrame" style="background-color: #ffffff;max-height: 450px;"/>
-</p:panel>
+
+
+                        <iframe id="ezidebitIframeView" src="#{ezidebit.getEziDebitWidgetUrl()}" class="editPaymentMethodIFrame" style="background-color: #ffffff;max-height: 450px;"/>
+                    </p:panel>
                 </p:outputPanel>
 
                 <p:panel>

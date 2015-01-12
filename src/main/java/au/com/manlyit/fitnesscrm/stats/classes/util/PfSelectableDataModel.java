@@ -6,6 +6,7 @@
 package au.com.manlyit.fitnesscrm.stats.classes.util;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import javax.faces.model.ListDataModel;
@@ -46,5 +47,11 @@ public class PfSelectableDataModel<T extends BaseEntity> extends ListDataModel<T
         return super.getRowCount();
         
     }
+
+    public boolean isEmpty() {
+        List<T> entity = (List<T>) getWrappedData();
+        return (entity == null) || entity.isEmpty();
+    }
+
 }
 

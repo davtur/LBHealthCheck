@@ -16,6 +16,7 @@ import au.com.manlyit.fitnesscrm.stats.db.PaymentParameters;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
@@ -291,6 +292,13 @@ public class CustomersController implements Serializable {
      * @return the filteredItems
      */
     public List<Customers> getFilteredItems() {
+       /* if(filteredItems==null){
+            filteredItems = new ArrayList<>();
+        }*/
+        if(filteredItems != null){
+             logger.log(Level.FINE, "FILTERED ITEMS SIZE",filteredItems.size());
+        }
+        logger.log(Level.FINE, "GET FILTERED ITEMS",filteredItems);
         return filteredItems;
     }
 
@@ -771,12 +779,18 @@ public class CustomersController implements Serializable {
             setRefreshFromDB(false);
             // items = getPagination().createPageDataModel();
         }
+        if (items == null) {
+             items = new PfSelectableDataModel<>(new ArrayList<Customers>());
+        }
         return items;
     }
 
     public PfSelectableDataModel<Notes> getNotesItems() {
         if (notesItems == null) {
             setNotesItems((PfSelectableDataModel<Notes>) getNotesPagination().createPageDataModel());
+        }
+         if (notesItems == null) {
+            setNotesItems(new PfSelectableDataModel<>(new ArrayList<Notes>()));
         }
         return notesItems;
     }
