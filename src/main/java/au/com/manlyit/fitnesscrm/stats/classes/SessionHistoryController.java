@@ -1,5 +1,6 @@
 package au.com.manlyit.fitnesscrm.stats.classes;
 
+import au.com.manlyit.fitnesscrm.stats.beans.AuditLogFacade;
 import au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade;
 import au.com.manlyit.fitnesscrm.stats.db.SessionHistory;
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
@@ -94,6 +95,8 @@ public class SessionHistoryController implements Serializable {
     private au.com.manlyit.fitnesscrm.stats.beans.SessionTrainersFacade ejbSessionTrainersFacade;
     @Inject
     private ConfigMapFacade configMapFacade;
+     @Inject
+    private AuditLogFacade auditLogFacade;
     private DatatableSelectionHelper pagination;
     private DatatableSelectionHelper customerPagination;
     private DatatableSelectionHelper participantPagination;
@@ -424,6 +427,17 @@ public class SessionHistoryController implements Serializable {
                 getFacade().edit(current);
             }
             JsfUtil.addSuccessMessage(configMapFacade.getConfig("SessionHistoryCreated"));
+            try {
+                FacesContext context = FacesContext.getCurrentInstance();
+                CustomersController customersController = (CustomersController) context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
+                Customers cust = customersController.getLoggedInUser();
+                String auditDetails = "Type:" + current.getSessionTypesId().getName() + " Date/Time:  " + current.getSessiondate().toString() + "  Participants:  " + current.getParticipantsAsString() + " ";
+                String changedFrom = "NULL";
+                String changedTo = "New Session " + current.getSessionTypesId().getName();
+                auditLogFacade.audit(cust, cust, "Create Session", auditDetails, changedFrom, changedTo);
+            } catch (Exception e) {
+                logger.log(Level.SEVERE, "Add new Session audit log failed due to an unhandled exception.",e);
+            }
             current = null;
 
         } catch (Exception e) {

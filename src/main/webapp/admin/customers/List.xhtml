@@ -289,9 +289,9 @@
 
                         <p:outputPanel id="mainPanel" rendered="#{ezidebit.asyncOperationRunning == false and ezidebit.customerDetailsHaveBeenRetrieved == true  }" >
                             <p:commandButton id="reloadPageButton" value="Reload Page" actionListener="#{ezidebit.refreshPaymentsPage}" rendered="#{ezidebit.customerExistsInPaymentGateway }" update=":tv:paymentsForm  :growl" />
-                            <p:commandButton id="paymentsButton" rendered="#{ezidebit.showAddToPaymentGatewayButton}"    actionListener="#{ezidebit.createCustomerRecord}" update=":growl :tv:paymentsForm "   value="#{configMapController.getKey('EditCustomersUpdatePayment')}" />
-                            <p:commandButton id="eddrButton" rendered="#{ezidebit.showAddToPaymentGatewayButton}"    oncomplete="PF('createEddrLinkDialogueWidget').show();" update=":growl :tv:paymentsForm "   value="#{configMapController.getKey('WebDDRScheduleSetupButton')}" />
-                            <p:commandButton rendered="#{not empty ezidebit.eziDebitEDDRFormUrl and ezidebit.showAddToPaymentGatewayButton}" value="#{configMapController.getKey('sendCustomerOnBoardEmailButton')}"  action="#{customersController.sendCustomerOnboardEmail}" update=":growl "/>
+                            <p:commandButton id="paymentsButton" disabled="#{!ezidebit.showAddToPaymentGatewayButton}"    actionListener="#{ezidebit.createCustomerRecord}" update=":growl :tv:paymentsForm "   value="#{configMapController.getKey('EditCustomersUpdatePayment')}" />
+                            <p:commandButton id="eddrButton" disabled="#{!ezidebit.showAddToPaymentGatewayButton}"    oncomplete="PF('createEddrLinkDialogueWidget').show();" update=":growl :tv:paymentsForm "   value="#{configMapController.getKey('WebDDRScheduleSetupButton')}" />
+                            <p:commandButton disabled="#{!(not empty ezidebit.eziDebitEDDRFormUrl and ezidebit.showAddToPaymentGatewayButton)}" value="#{configMapController.getKey('sendCustomerOnBoardEmailButton')}"  action="#{customersController.sendCustomerOnboardEmail}" update=":growl "/>
 
                             <p:commandButton id="editPaymentMethodButton" rendered="#{ezidebit.customerExistsInPaymentGateway == true and ezidebit.customerDetailsHaveBeenRetrieved == true and ezidebit.customerCancelledInPaymentGateway ==false}" onclick="changeiFrameCss" oncomplete="PF('editPaymentMethodDialogueWidget').show();"    value="#{configMapController.getKey('editPaymentMethodButtonLink')}" update=":growl :iFrameForm"  /> 
 

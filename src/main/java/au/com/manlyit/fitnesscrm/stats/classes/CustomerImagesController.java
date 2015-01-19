@@ -52,6 +52,7 @@ import org.apache.sanselan.formats.jpeg.JpegImageMetadata;
 import org.apache.sanselan.formats.tiff.TiffField;
 import org.apache.sanselan.formats.tiff.constants.TagInfo;
 import org.apache.sanselan.formats.tiff.constants.TiffConstants;
+import org.primefaces.context.RequestContext;
 import org.primefaces.event.SelectEvent;
 import org.primefaces.event.FileUploadEvent;
 import org.primefaces.model.CroppedImage;
@@ -403,7 +404,7 @@ public class CustomerImagesController implements Serializable {
         uploadedFile = event.getFile();
         processUploadedFile(uploadedFile);
         setSaveButtonDisabled(false);
-
+        //RequestContext.getCurrentInstance().update("createCustomerForm");
     }
 
     private void updateImages(BufferedImage img, String fileType) {
@@ -842,9 +843,13 @@ public class CustomerImagesController implements Serializable {
     public StreamedContent getUploadedImage() {
         if (uploadedImage == null) {
             try {
-                // get default image
-                InputStream stream = FacesContext.getCurrentInstance().getExternalContext().getResourceAsStream("/resources/images/Barefoot-image_100_by_100.jpg");
-                uploadedImage = new DefaultStreamedContent(stream, "image/jpeg");
+                // get default image 
+                if(current == null){
+                    setCurrent(new CustomerImages());
+                }
+                loadImage(current);
+                //InputStream stream = FacesContext.getCurrentInstance().getExternalContext().getResourceAsStream("/resources/images/Barefoot-image_100_by_100.jpg");
+                //uploadedImage = new DefaultStreamedContent(stream, "image/jpeg");
             } catch (Exception e) {
                 JsfUtil.addErrorMessage(e, "Trying to set Barefoot-image_100_by_100.jpg as the defailt image failed!");
             }

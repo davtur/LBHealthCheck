@@ -17,7 +17,7 @@
             <h:form id="createCustomerForm">
                 <p:panel>
                     <p:commandButton  actionListener="#{customersController.update}" value="#{configMapController.getKey('EditCustomersSaveLink')}" update=":growl"/>
-                    <p:commandButton id="editPaymentMethodButton" rendered="#{ezidebit.customerWebDDRFormEnabled}"  actionListener="#{ezidebit.redirectToPaymentGateway}"    value="#{configMapController.getKey('EnterPaymentDetailsButton')}" update=":growl :createCustomerForm"  /> 
+                    <p:commandButton id="editPaymentMethodButton" disabled="#{!ezidebit.customerWebDDRFormEnabled}"  actionListener="#{ezidebit.redirectToPaymentGateway}"    value="#{configMapController.getKey('EnterPaymentDetailsButton')}" update=":growl :createCustomerForm"  /> 
 
                 </p:panel>
                 <h:panelGrid columns="1">
@@ -78,11 +78,16 @@
                                     <f:selectItems value="#{emailFormatController.itemsAvailableAsObjects}"  var="emailFormat" itemLabel="#{emailFormat.emailFormat}" itemValue="#{emailFormat}"/>
                                     <p:ajax update=":createCustomerForm:panel3" event="change" />
                                 </p:selectOneMenu>
+                                 
                                 <h:outputLabel value="#{configMapController.getKey('EditCustomersLabel_password')}" for="password" />
-                                <p:password id="password"  value="#{customersController.checkPass}" onfocus="this.select()" feedback="true" title="#{configMapController.getKey('EditCustomersTitle_password')}" >
-                                    <p:ajax listener="#{customersController.checkPassChange}" event="keyup" />
-                                </p:password>
-                                <p:commandButton   ajax="true" actionListener="#{customersController.updatepass}" update=":growl"   value="#{configMapController.getKey('EditCustomersUpdatePassword')}" immediate="true"/>
+                                <p:password id="password"  value="#{customersController.checkPass}" onfocus="this.select()"   feedback="true" title="#{configMapController.getKey('EditCustomersTitle_password')}" />
+                                
+                                
+                              <!-- TODO make this a dialogue <h:outputLabel value="#{configMapController.getKey('EditCustomersLabel_password')}" for="password2" />
+                                <p:password id="password2"  value="#{customersController.checkPass}" onfocus="this.select()" feedback="true" title="#{configMapController.getKey('EditCustomersTitle_password')}" />-->
+                              
+                                <p:commandButton   ajax="true" actionListener="#{customersController.updatepass}" update="password  :growl"   value="#{configMapController.getKey('EditCustomersUpdatePassword')}" immediate="true"/>
+                               
                                 <p:outputLabel value=""/>
                             </h:panelGrid>
 
@@ -120,10 +125,11 @@
 
                         </p:panel>
 
+
                         <p:panel id="panel3" style="height: 550px">
                             <p:panel id="photoPanel3" header="Select a photo to upload (jpeg)">
                                 <p:panelGrid columns="2" style="width:400px">
-                                    <p:fileUpload fileLimitMessage="The size of the picture is too big! ( > 10MB )" mode="advanced" fileUploadListener="#{customerImagesController.handleFileUpload}" auto="true" update="photoPanel3  :growl photo1 photo2" allowTypes="/(\.|\/)(gif|jpe?g|png)$/" sizeLimit="10000000" />
+                                    <p:fileUpload fileLimitMessage="The size of the picture is too big! ( > 10MB )" mode="advanced" fileUploadListener="#{customerImagesController.handleFileUpload}" auto="true" update=":createCustomerForm:panel3  :createCustomerForm:panel2  :growl" allowTypes="/(\.|\/)(gif|jpe?g|png)$/" sizeLimit="10000000" />
                                     <p:graphicImage id="photo2" value="#{customerImagesController.uploadedImage}" height="400px" cache="false" />
                                 </p:panelGrid>
                                 <!-- <p:panel id="imageCropperPanel" header="Uploaded Image">
@@ -147,8 +153,8 @@
                                 <p:selectBooleanCheckbox id="profilephoto"   value="#{customerImagesController.profilePhoto}" >
                                     <p:ajax />
                                 </p:selectBooleanCheckbox>  
-                                <p:commandButton  disabled="#{customerImagesController.saveButtonDisabled}" update="photoPanel3  :growl photo1 photo2"   actionListener="#{customerImagesController.createFromDialogue}" value="#{configMapController.getKey('CreateCustomerImagesSaveLink')}" />
-                                <p:commandButton      actionListener="#{customerImagesController.rotate90degrees}" update="photoPanel3  :growl photo1 photo2 :growl panel3"  value="#{configMapController.getKey('CreateCustomerImagesRotateImage90Link')}" />
+                                <p:commandButton id="saveButton" disabled="#{customerImagesController.saveButtonDisabled}" update=":createCustomerForm:panel3  :createCustomerForm:panel2  :growl"   actionListener="#{customerImagesController.createFromDialogue}" value="#{configMapController.getKey('CreateCustomerImagesSaveLink')}" />
+                                <p:commandButton      actionListener="#{customerImagesController.rotate90degrees}" update=":createCustomerForm:panel3   :growl"  value="#{configMapController.getKey('CreateCustomerImagesRotateImage90Link')}" />
 
                             </h:panelGrid>
                         </p:panel>
