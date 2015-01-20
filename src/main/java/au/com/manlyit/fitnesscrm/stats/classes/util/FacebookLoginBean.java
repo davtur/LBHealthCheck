@@ -48,7 +48,7 @@ public class FacebookLoginBean implements Serializable {
                 if (isMobile != null) {
                     if (isMobile.contains("TRUE")) {
                         landingPage = configMapFacade.getConfig("facebook.redirect.mobilelandingpage");
-                    } 
+                    }
                 } else {
                     logger.log(Level.WARNING, "getFacebookUrlAuth -  session.getAttribute(\"MOBILE_DEVICE\") is NULL.");
                 }
@@ -56,12 +56,18 @@ public class FacebookLoginBean implements Serializable {
                 logger.log(Level.INFO, message);
                 try {
                     String sendToThisUrl = request.getContextPath() + landingPage;
-                    if (request.getPathInfo().contains(sendToThisUrl)) {
-                        logger.log(Level.INFO, "getFacebookUrlAuth -  The path is the same as the redirect URL. No need to redirect.");
-                    } else {
-                        ec.redirect(sendToThisUrl);
+                    String pathInfo = request.getPathInfo();
+                    /* if (pathInfo == null) {
+                     pathInfo = request.getServletPath();
+                     }*/
+                    if (pathInfo != null) {
+                        if (pathInfo.contains(sendToThisUrl)) {
+                            logger.log(Level.INFO, "getFacebookUrlAuth -  The path is the same as the redirect URL. No need to redirect.");
+                        } else {
+                            ec.redirect(sendToThisUrl);
+                        }
                     }
-                } catch (IOException ex) {
+                } catch (Exception ex) {
                     Logger.getLogger(FacebookLoginBean.class.getName()).log(Level.SEVERE, "Redirecting to Landing Page:", ex);
                 }
             } else {
