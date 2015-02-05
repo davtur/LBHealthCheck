@@ -44,6 +44,9 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Plan.findByPlanActive", query = "SELECT p FROM Plan p WHERE p.planActive = :planActive"),
     @NamedQuery(name = "Plan.findByPlanDiscount", query = "SELECT p FROM Plan p WHERE p.planDiscount = :planDiscount")})
 public class Plan implements BaseEntity, Serializable {
+    @JoinColumn(name = "session_Type", referencedColumnName = "id")
+    @ManyToOne
+    private SessionTypes sessionType;
 
     // @Max(value=?)  @Min(value=?)//if you know range of your decimal fields consider using these annotations to enforce field validation
 
@@ -197,6 +200,14 @@ public class Plan implements BaseEntity, Serializable {
 
     public void setParent(Plan parent) {
         this.parent = parent;
+    }
+
+    public SessionTypes getSessionType() {
+        return sessionType;
+    }
+
+    public void setSessionType(SessionTypes sessionType) {
+        this.sessionType = sessionType;
     }
 
 }

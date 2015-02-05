@@ -32,8 +32,10 @@ import org.primefaces.event.SelectEvent;
 @Named("planController")
 @SessionScoped
 public class PlanController implements Serializable {
+
     private static final Logger logger = Logger.getLogger(PlanController.class.getName());
     private Plan current;
+    private Plan newPlan;
     private Plan selectedSubItem;
     private List<Plan> filteredSubItems;
     private Plan selectedForDeletion;
@@ -56,11 +58,13 @@ public class PlanController implements Serializable {
         return inRole;
     }
 
+    
+
     public Plan getSelected() {
-        if (current == null) {
-            current = new Plan();
-            selectedItemIndex = -1;
-        }
+        /*if (current == null) {
+         current = new Plan();
+         selectedItemIndex = -1;
+         }*/
         return current;
     }
 
@@ -165,8 +169,8 @@ public class PlanController implements Serializable {
                 getFacade().edit(current);
                 JsfUtil.addSuccessMessage(configMapFacade.getConfig("PlanSubItemCreated"));
             } else {
-                current.setId(0);
-                getFacade().create(current);
+                newPlan.setId(0);
+                getFacade().create(newPlan);
                 JsfUtil.addSuccessMessage(configMapFacade.getConfig("PlanCreated"));
             }
             recreateModel();
@@ -223,7 +227,7 @@ public class PlanController implements Serializable {
         if (o.getClass().equals(Plan.class)) {
             Plan p = (Plan) o;
             //setSelectedSubItem(p);
-            logger.log(Level.INFO, "subItemRowSelect: {0}",p);
+            logger.log(Level.INFO, "subItemRowSelect: {0}", p);
         }
     }
 
@@ -234,6 +238,7 @@ public class PlanController implements Serializable {
 
             getFacade().remove(p);
         }
+        current = null;
         recreateModel();
     }
 
@@ -395,12 +400,13 @@ public class PlanController implements Serializable {
     /**
      * @param selectedSubItem the selectedSubItem to set
      */
-     public void setSelectedSubItem(Plan selectedSubItem) {
-        logger.log(Level.INFO, "setSelectedSubItem: {0}",selectedSubItem);
+    public void setSelectedSubItem(Plan selectedSubItem) {
+        logger.log(Level.INFO, "setSelectedSubItem: {0}", selectedSubItem);
         this.selectedSubItem = selectedSubItem;
-     }
+    }
+
     public void setSelectedSubItemAndDelete(Plan selectedSubItem) {
-        logger.log(Level.INFO, "setSelectedSubItemAndDelete: {0}",selectedSubItem);
+        logger.log(Level.INFO, "setSelectedSubItemAndDelete: {0}", selectedSubItem);
         //this.selectedSubItem = selectedSubItem;
 
         if (selectedSubItem != null) {
@@ -427,6 +433,24 @@ public class PlanController implements Serializable {
      */
     public void setFilteredSubItems(List<Plan> filteredSubItems) {
         this.filteredSubItems = filteredSubItems;
+    }
+
+    /**
+     * @return the newPlan
+     */
+    public Plan getNewPlan() {
+        if (newPlan == null) {
+            newPlan = new Plan();
+            selectedItemIndex = -1;
+        }
+        return newPlan;
+    }
+
+    /**
+     * @param newPlan the newPlan to set
+     */
+    public void setNewPlan(Plan newPlan) {
+        this.newPlan = newPlan;
     }
 
     @FacesConverter(forClass = Plan.class)

@@ -26,22 +26,28 @@
                     </p:panelGrid>
                     <p:panelGrid columns="2" rendered="#{!planController.subItem}">
                         <p:outputLabel value="#{configMapController.getKey('CreatePlanLabel_planName')}" for="planName" />
-                        <p:inputText id="planName" value="#{planController.selected.planName}" title="#{configMapController.getKey('CreatePlanTitle_planName')}" required="true" requiredMessage="#{configMapController.getKey('CreatePlanRequiredMessage_planName')}"/>
+                        <p:inputText id="planName" value="#{planController.newPlan.planName}" title="#{configMapController.getKey('CreatePlanTitle_planName')}" required="true" requiredMessage="#{configMapController.getKey('CreatePlanRequiredMessage_planName')}"/>
                         <p:outputLabel value="#{configMapController.getKey('CreatePlanLabel_planPrice')}" for="planPrice" />
-                        <p:inputText id="planPrice" value="#{planController.selected.planPrice}" title="#{configMapController.getKey('CreatePlanTitle_planPrice')}" required="true" requiredMessage="#{configMapController.getKey('CreatePlanRequiredMessage_planPrice')}">
+                        <p:inputText id="planPrice" value="#{planController.newPlan.planPrice}" title="#{configMapController.getKey('CreatePlanTitle_planPrice')}" required="true" requiredMessage="#{configMapController.getKey('CreatePlanRequiredMessage_planPrice')}">
                             <f:convertNumber minFractionDigits="2"/>
                         </p:inputText>
                         <p:outputLabel value="#{configMapController.getKey('CreatePlanLabel_planDescription')}" for="planDescription" />
-                        <p:inputTextarea rows="4" cols="30" id="planDescription" value="#{planController.selected.planDescription}" title="#{configMapController.getKey('CreatePlanTitle_planDescription')}" />
+                        <p:inputTextarea rows="4" cols="30" id="planDescription" value="#{planController.newPlan.planDescription}" title="#{configMapController.getKey('CreatePlanTitle_planDescription')}" />
                         <p:outputLabel value="#{configMapController.getKey('CreatePlanLabel_planActive')}" for="planActive" />
-                        <p:selectOneMenu id="planActive" value="#{planController.selected.planActive}"   required="true" requiredMessage="#{configMapController.getKey('CreatePlanRequiredMessage_planActive')}">
+                        <p:selectOneMenu id="planActive" value="#{planController.newPlan.planActive}"   required="true" requiredMessage="#{configMapController.getKey('CreatePlanRequiredMessage_planActive')}">
                             <f:selectItem itemValue="0" itemLabel="Active" />
                             <f:selectItem itemValue="1" itemLabel="Hidden" />
                         </p:selectOneMenu>
                         <p:outputLabel value="#{configMapController.getKey('CreatePlanLabel_planDiscount')}" for="planDiscount" />
-                        <p:inputText id="planDiscount" value="#{planController.selected.planDiscount}" title="#{configMapController.getKey('CreatePlanTitle_planDiscount')}" >
+                        <p:inputText id="planDiscount" value="#{planController.newPlan.planDiscount}" title="#{configMapController.getKey('CreatePlanTitle_planDiscount')}" >
                             <f:convertNumber minFractionDigits="2"/>
                         </p:inputText>
+                        <p:outputLabel value="#{configMapController.getKey('CreateSessionHistoryLabel_sessionType')}" for="sessionType" />
+                        <p:selectOneMenu id="sessionType" style="width:100%;height:100%" value="#{planController.newPlan.sessionType}" filterMatchMode="startsWith" filter="true" editable="false" converter="#{sessTypesConverter}" label="#{configMapController.getKey('CreateSessionHistoryTitle_sessionType')}" >
+                            <f:selectItem itemValue="#{null}" itemLabel="#{configMapController.getKey('PlanNoLinkedSessionType')}" />
+                            <f:selectItems value="#{sessionTypesController.itemsAvailableSelectOne}" var="sessionType" itemLabel="#{sessionType.name}" itemValue="#{sessionType}"/>
+                        </p:selectOneMenu>
+
                     </p:panelGrid>
                     <p:commandButton oncomplete="PF('planCreateDialogue').hide();PF('planControllerTable').filter()" actionListener="#{planController.createDialogue}" value="#{configMapController.getKey('CreatePlanSaveLink')}" update=":growl"/>                
 
@@ -56,7 +62,8 @@
 
                 <h:outputText escape="false" value="#{configMapController.getKey('ListPlanEmpty')}" rendered="#{planController.items.rowCount == 0}"/>
                 <h:panelGroup rendered="#{planController.items.rowCount > 0}">
-                    <p:dataTable  editable="true" 
+                    <p:dataTable  id="plansTable"
+                                    editable="true" 
                                   value="#{planController.items}" 
                                   filteredValue="#{planController.filteredItems}" 
                                   selection="#{planController.selected}"
@@ -72,19 +79,19 @@
                             <p:outputPanel>
                                 <h:outputText value="Search all fields:" />
                                 <h:inputText id="globalFilter" onkeyup="PF('planControllerTable').filter()" />
-                                <p:commandButton id="deleteButton" value="#{configMapController.getKey('ListPlanDestroyLink')}" actionListener="#{planController.destroyFromDialogue}"  oncomplete="PF('planControllerTable').filter()" update=":growl"  />
                                 <p:commandButton id="showDialogButton" value="#{configMapController.getKey('ListPlanCreateLink')}" actionListener="#{planController.addPlan}"   update=":growl"  />
-                                <p:commandButton id="addSubItem" value="#{configMapController.getKey('ListPlanAddSubItemLink')}" actionListener="#{planController.addSubItemToPlan}"   update=":growl"  />
+                                <p:commandButton id="deleteButton" disabled="#{empty planController.selected}" value="#{configMapController.getKey('ListPlanDestroyLink')}" actionListener="#{planController.destroyFromDialogue}"  oncomplete="PF('planControllerTable').filter()" update=":growl :PlanlistForm1:plansTable:deleteButton :PlanlistForm1:plansTable:addSubItem"  />
+                                <p:commandButton id="addSubItem"   disabled="#{empty planController.selected}" value="#{configMapController.getKey('ListPlanAddSubItemLink')}" actionListener="#{planController.addSubItemToPlan}"   update=":growl"  />
 
                            <!--  <p:commandButton id="showDialogButton"  value="#{configMapController.getKey('ListPlanCreateLink')}" onclick="PF('planCreateDialogue').show()" type="button"/> -->
                             </p:outputPanel>
                         </f:facet>
                         <p:ajax event="rowEdit" listener="#{planController.onEdit}" update=":growl" oncomplete="PF('planControllerTable').filter()" />  
                         <p:ajax event="rowEditCancel" listener="#{planController.onCancel}" update=":growl"  oncomplete="PF('planControllerTable').filter()" />  
-                        <p:ajax event="rowSelect"   />
-                        <p:ajax event="rowUnselect" /> 
-                        <p:column>
-                            <p:rowToggler />
+                        <p:ajax event="rowSelect"  update=":PlanlistForm1:plansTable:deleteButton :PlanlistForm1:plansTable:addSubItem"  />
+                        <p:ajax event="rowUnselect" update=":PlanlistForm1:plansTable:deleteButton :PlanlistForm1:plansTable:addSubItem"/> 
+                        <p:column >
+                            <p:rowToggler rendered="#{!empty item.planCollection }"/>
                         </p:column>
                         <p:column sortBy="#{item.id}" filterBy="#{item.id}" headerText="#{configMapController.getKey('ListPlanTitle_id')}"   >
                             <p:cellEditor> 
@@ -110,6 +117,21 @@
 
 
                         </p:column>
+                        <p:column sortBy="#{item.sessionType.name}" filterBy="#{item.sessionType.name}" headerText="#{configMapController.getKey('CreateSessionHistoryTitle_sessionType')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText  rendered="#{!empty item.sessionType}"  value="#{item.sessionType.name}" />
+                                    <h:outputText  rendered="#{ empty item.sessionType}"  value="#{configMapController.getKey('PlanNoLinkedSessionType')}" />
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:selectOneMenu style="width:100%;height:100%" value="#{item.sessionType}" filterMatchMode="startsWith" filter="true" editable="false" converter="#{sessTypesConverter}" label="#{configMapController.getKey('CreateSessionHistoryTitle_sessionType')}" >
+                                        <f:selectItem itemValue="#{null}" itemLabel="#{configMapController.getKey('PlanNoLinkedSessionType')}" />
+                                        <f:selectItems value="#{sessionTypesController.itemsAvailableSelectOne}" var="sessionType" itemLabel="#{sessionType.name}" itemValue="#{sessionType}"/>
+                                    </p:selectOneMenu>
+                                </f:facet>
+                            </p:cellEditor> 
+                        </p:column>
+
                         <p:column sortBy="#{item.planPrice}" filterBy="#{item.planPrice}" headerText="#{configMapController.getKey('ListPlanTitle_planPrice')}"   >
                             <p:cellEditor> 
                                 <f:facet name="output">
@@ -131,9 +153,9 @@
                                     <p:inputText value="#{item.planDescription}" label="#{configMapController.getKey('ListPlanTitle_planDescription')}" />
                                 </f:facet>
                             </p:cellEditor> 
-
-
                         </p:column>
+
+
                         <p:column sortBy="#{item.planActive}" filterBy="#{item.planActive}" headerText="#{configMapController.getKey('ListPlanTitle_planActive')}"   >
                             <p:cellEditor> 
                                 <f:facet name="output">
@@ -152,6 +174,7 @@
 
 
                         </p:column>
+
                         <p:column sortBy="#{item.planDiscount}" filterBy="#{item.planDiscount}" headerText="#{configMapController.getKey('ListPlanTitle_planDiscount')}"   >
                             <p:cellEditor> 
                                 <f:facet name="output">
@@ -170,24 +193,24 @@
 
 
 
-                        <p:rowExpansion>
-                            <h:outputText rendered="#{empty item.planCollection}" value="No Sub-Items Found"/>
+                        <p:rowExpansion  >
+                            <h:outputText rendered="#{empty item.planCollection}" value="#{configMapController.getKey('PlanNoSubItemsFound')}"/>
                             <p:dataTable  rendered="#{!empty item.planCollection }" 
                                           var="subItem" 
                                           rowKey="#{subItem.id}"
-                                          
+
                                           widgetVar="planSubItemControllerTable" 
                                           value="#{item.planCollectionModel}">
                                 <p:ajax event="rowSelect"  listener="#{planController.subItemRowSelect}" />
                                 <p:ajax event="rowUnselect" /> 
                                 <f:facet name="header">
 
-                                    <h:outputText value="#{item.planName} Sub Items" />
+                                    <h:outputText value="#{item.planName} #{configMapController.getKey('PlanRowExpansionHeader')}" />
 
                                 </f:facet>
                                 <p:column  headerText="#{configMapController.getKey('ListPlanTitle_id')}"   >
                                     <p:commandButton id="deleteSubButton" value="#{configMapController.getKey('ListPlanDestroyLink')}"  update=":growl :PlanlistForm1"  >
-                                         <f:setPropertyActionListener target="#{planController.selectedSubItemAndDelete}" value="#{subItem}" />
+                                        <f:setPropertyActionListener target="#{planController.selectedSubItemAndDelete}" value="#{subItem}" />
                                     </p:commandButton>
                                 </p:column>
 

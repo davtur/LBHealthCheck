@@ -37,6 +37,8 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "SessionTypes.findByName", query = "SELECT s FROM SessionTypes s WHERE s.name = :name"),
     @NamedQuery(name = "SessionTypes.findByDescription", query = "SELECT s FROM SessionTypes s WHERE s.description = :description")})
 public class SessionTypes implements Serializable {
+    @OneToMany(mappedBy = "sessionType")
+    private Collection<Plan> planCollection;
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -125,6 +127,15 @@ public class SessionTypes implements Serializable {
     @Override
     public String toString() {
         return name;
+    }
+
+    @XmlTransient
+    public Collection<Plan> getPlanCollection() {
+        return planCollection;
+    }
+
+    public void setPlanCollection(Collection<Plan> planCollection) {
+        this.planCollection = planCollection;
     }
 
 }

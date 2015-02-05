@@ -7,6 +7,8 @@ package au.com.manlyit.fitnesscrm.stats.classes.util;
 
 import au.com.manlyit.fitnesscrm.stats.db.SessionTypes;
 import java.io.Serializable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.inject.Inject;
 import javax.enterprise.context.SessionScoped;
@@ -24,6 +26,7 @@ import javax.faces.convert.FacesConverter;
 @SessionScoped
 @FacesConverter(value = "sessionTypesConverter")
 public class SessionTypesConverter implements Converter, Serializable{
+    private static final Logger logger = Logger.getLogger(SessionTypesConverter.class.getName());
 
    @Inject
   private  au.com.manlyit.fitnesscrm.stats.beans.SessionTypesFacade ejbFacade;
@@ -33,9 +36,14 @@ public class SessionTypesConverter implements Converter, Serializable{
 
     @Override
    public Object getAsObject(FacesContext context, UIComponent component, String value){
-        SessionTypes sess;
-        int val = Integer.parseInt(value);
-        sess = ejbFacade.find(val);
+        SessionTypes sess = null;
+       
+        try {
+            int val = Integer.parseInt(value);
+            sess = ejbFacade.find(val);
+        } catch (NumberFormatException numberFormatException) {
+            logger.log(Level.INFO, "The passed value ({0}) could not be converted to a sessionType primary key",value);
+        }
         return sess;
 
 

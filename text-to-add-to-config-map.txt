@@ -236,3 +236,4 @@ PlanSubItemNullDeleted=You must select a row first!
 PlanRowEditSuccessFul=Plan Edit Successful
 PlanRowEditCancelled=Plan Edit Cancelled
 PlanSubItemCreated=SUb Item Created Successfully
+PlanNoLinkedSessionType=Package (see Sub-Items)
