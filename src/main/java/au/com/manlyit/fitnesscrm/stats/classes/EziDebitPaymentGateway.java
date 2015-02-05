@@ -10,6 +10,8 @@ import au.com.manlyit.fitnesscrm.stats.beans.CustomerStateFacade;
 import au.com.manlyit.fitnesscrm.stats.beans.CustomersFacade;
 import au.com.manlyit.fitnesscrm.stats.beans.PaymentBean;
 import au.com.manlyit.fitnesscrm.stats.beans.PaymentsFacade;
+import au.com.manlyit.fitnesscrm.stats.beans.SessionHistoryFacade;
+import au.com.manlyit.fitnesscrm.stats.beans.SessionTypesFacade;
 import au.com.manlyit.fitnesscrm.stats.beans.util.PaymentStatus;
 import au.com.manlyit.fitnesscrm.stats.classes.util.AsyncJob;
 import au.com.manlyit.fitnesscrm.stats.classes.util.DatatableSelectionHelper;
@@ -20,8 +22,12 @@ import au.com.manlyit.fitnesscrm.stats.classes.util.PushComponentUpdateBean;
 import au.com.manlyit.fitnesscrm.stats.classes.util.ScheduledPaymentPojo;
 import au.com.manlyit.fitnesscrm.stats.db.CustomerState;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
+import au.com.manlyit.fitnesscrm.stats.db.Invoice;
 import au.com.manlyit.fitnesscrm.stats.db.PaymentParameters;
 import au.com.manlyit.fitnesscrm.stats.db.Payments;
+import au.com.manlyit.fitnesscrm.stats.db.Plan;
+import au.com.manlyit.fitnesscrm.stats.db.SessionHistory;
+import au.com.manlyit.fitnesscrm.stats.db.SessionTypes;
 import au.com.manlyit.fitnesscrm.stats.webservices.ArrayOfPayment;
 import au.com.manlyit.fitnesscrm.stats.webservices.ArrayOfScheduledPayment;
 import au.com.manlyit.fitnesscrm.stats.webservices.CustomerDetails;
@@ -127,6 +133,10 @@ public class EziDebitPaymentGateway implements Serializable {
     private PaymentsFacade paymentsFacade;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.AuditLogFacade ejbAuditLogFacade;
+    @Inject
+    private SessionHistoryFacade sessionHistoryFacade;
+    @Inject
+    private SessionTypesFacade sessionTypesFacade;
 
     private boolean asyncOperationRunning = false;
     private boolean refreshFromDB = false;
@@ -947,10 +957,44 @@ public class EziDebitPaymentGateway implements Serializable {
         this.paymentsDBListFilteredItems = paymentsListFilteredItems2;
     }
 
+    private void generateEndOfMonthReport() {
+        Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.INFO, "Running End Of Month Report");
+
+        //get the list of active customers
+        List<Customers> customerList = customersFacade.findAllActiveCustomers(true);
+        List<Invoice> invoices = new ArrayList<>();
+
+        for (Customers cust : customerList) {
+            Invoice inv = new Invoice();
+            inv.setUserId(cust);
+
+            //get payments for customer
+            List<Payments> pl = paymentsFacade.findPaymentsByDateRange(reportUseSettlementDate, reportShowSuccessful, reportShowFailed, reportShowPending, isReportShowScheduled(), reportStartDate, reportEndDate, false, cust);
+            //get sessions for customer
+            List<SessionTypes> sessionTypesList = sessionTypesFacade.findAll();
+            List<SessionHistory> sessions = sessionHistoryFacade.findSessionsByParticipantAndDateRange(cust, reportStartDate, reportEndDate, true);
+            for (SessionTypes sessType : sessionTypesList) {
+                int count = 0;
+                double total = 0;
+                Plan plan = cust.getGroupPricing();
+                for (SessionHistory sess : sessions) {
+                    String type = sess.getSessionTypesId().getName();
+                    if(type.contains(sessType.getName())){
+                        count++;
+                        //total = total + sess.getSessionTypesId().
+                    }
+                }
+            }
+            invoices.add(inv);
+        }
+
+        Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.INFO, "Completed End Of Month Report");
+    }
+
     private void generatePaymentsReport() {
         Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.INFO, "Running Report");
         try {
-            List<Payments> pl = paymentsFacade.findPaymentsByDateRange(reportUseSettlementDate, reportShowSuccessful, reportShowFailed, reportShowPending, isReportShowScheduled(), reportStartDate, reportEndDate, false);
+            List<Payments> pl = paymentsFacade.findPaymentsByDateRange(reportUseSettlementDate, reportShowSuccessful, reportShowFailed, reportShowPending, isReportShowScheduled(), reportStartDate, reportEndDate, false, null);
             reportTotalSuccessful = 0;
             reportTotalDishonoured = 0;
             reportTotalScheduled = 0;

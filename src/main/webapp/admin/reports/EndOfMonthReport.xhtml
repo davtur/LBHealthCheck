@@ -29,10 +29,7 @@
                     </p:panelGrid>
                     <p:panelGrid columns="1" >
                         <p:selectOneMenu id="reportType"  value="#{ezidebit.reportType}"   label="#{configMapController.getKey('CreateReportTitle_reportType')}" >
-                           
-                            <f:selectItem itemValue="#{0}" itemLabel="Payment Report"/>  
-                            <f:selectItem itemValue="#{1}" itemLabel="Settlement Report"/> 
-
+                          <f:selectItem itemValue="#{3}" itemLabel="End Of Month"/>   
 
                             <p:ajax    listener="#{ezidebit.runReport}"   />
                         </p:selectOneMenu>

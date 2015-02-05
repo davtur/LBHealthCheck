@@ -4,12 +4,15 @@ import au.com.manlyit.fitnesscrm.stats.db.Plan;
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PaginationHelper;
 import au.com.manlyit.fitnesscrm.stats.beans.PlanFacade;
+import au.com.manlyit.fitnesscrm.stats.classes.util.PfSelectableDataModel;
 import au.com.manlyit.fitnesscrm.stats.db.CustomerState;
 
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.enterprise.context.SessionScoped;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
@@ -22,16 +25,19 @@ import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
 import javax.inject.Inject;
 import javax.inject.Named;
+import org.primefaces.context.RequestContext;
 import org.primefaces.event.RowEditEvent;
 import org.primefaces.event.SelectEvent;
 
 @Named("planController")
 @SessionScoped
 public class PlanController implements Serializable {
-
+    private static final Logger logger = Logger.getLogger(PlanController.class.getName());
     private Plan current;
+    private Plan selectedSubItem;
+    private List<Plan> filteredSubItems;
     private Plan selectedForDeletion;
-    private DataModel items = null;
+    private PfSelectableDataModel items = null;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.PlanFacade ejbFacade;
     @Inject
@@ -40,6 +46,7 @@ public class PlanController implements Serializable {
     private int selectedItemIndex;
     private List<Plan> filteredItems;
     private Plan[] multiSelected;
+    private boolean subItem = false;
 
     public PlanController() {
     }
@@ -148,10 +155,22 @@ public class PlanController implements Serializable {
 
     public void createDialogue(ActionEvent actionEvent) {
         try {
-            current.setId(0);
-            getFacade().create(current);
+            if (isSubItem()) {
+                Plan newSubItem = new Plan(0, selectedSubItem.getPlanName(), selectedSubItem.getPlanPrice(), selectedSubItem.getPlanActive());
+                newSubItem.setParent(current);
+                newSubItem.setPlanDescription(selectedSubItem.getPlanDescription());
+                newSubItem.setPlanDiscount(selectedSubItem.getPlanDiscount());
+                //getFacade().create(newSubItem);
+                current.getPlanCollection().add(newSubItem);
+                getFacade().edit(current);
+                JsfUtil.addSuccessMessage(configMapFacade.getConfig("PlanSubItemCreated"));
+            } else {
+                current.setId(0);
+                getFacade().create(current);
+                JsfUtil.addSuccessMessage(configMapFacade.getConfig("PlanCreated"));
+            }
             recreateModel();
-            JsfUtil.addSuccessMessage(configMapFacade.getConfig("PlanCreated"));
+            //  JsfUtil.addSuccessMessage(configMapFacade.getConfig("PlanCreated"));
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
         }
@@ -181,6 +200,54 @@ public class PlanController implements Serializable {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
             return null;
         }
+    }
+
+    public void destroySubItemFromDialogue(ActionEvent event) {
+        //Object o = event.getSource();
+        // if (o.getClass().equals(Plan.class)) {
+
+        Plan p = getSelectedSubItem();
+        if (p != null) {
+            Plan parent = p.getParent();
+            getFacade().remove(p);
+            getFacade().edit(parent);
+            recreateModel();
+            JsfUtil.addSuccessMessage(configMapFacade.getConfig("PlanSubItemDeleted"));
+        } else {
+            JsfUtil.addSuccessMessage(configMapFacade.getConfig("PlanSubItemNullDeleted"));
+        }
+    }
+
+    public void subItemRowSelect(SelectEvent event) {
+        Object o = event.getObject();
+        if (o.getClass().equals(Plan.class)) {
+            Plan p = (Plan) o;
+            //setSelectedSubItem(p);
+            logger.log(Level.INFO, "subItemRowSelect: {0}",p);
+        }
+    }
+
+    public void destroyFromDialogue(ActionEvent event) {
+        //performDestroy();
+        List<Plan> plans = ejbFacade.findPLansByName(current.getPlanName());
+        for (Plan p : plans) {
+
+            getFacade().remove(p);
+        }
+        recreateModel();
+    }
+
+    public void addSubItemToPlan(ActionEvent event) {
+        setSubItem(true);
+        RequestContext.getCurrentInstance().update("formPlanCreate1");
+        RequestContext.getCurrentInstance().execute("PF('planCreateDialogue').show()");
+    }
+
+    public void addPlan(ActionEvent event) {
+        setSubItem(false);
+        RequestContext.getCurrentInstance().update("formPlanCreate1");
+        RequestContext.getCurrentInstance().execute("PF('planCreateDialogue').show()");
+
     }
 
     public String destroy() {
@@ -241,9 +308,10 @@ public class PlanController implements Serializable {
         }
     }
 
-    public DataModel getItems() {
+    public PfSelectableDataModel getItems() {
         if (items == null) {
-            items = getPagination().createPageDataModel();
+            // items = getPagination().createPageDataModel();
+            items = new PfSelectableDataModel(getFacade().findAllPlans());
         }
         return items;
     }
@@ -279,23 +347,92 @@ public class PlanController implements Serializable {
     public SelectItem[] getItemsAvailableSelectOne() {
         return JsfUtil.getSelectItems(ejbFacade.findAll(), true);
     }
-public List<Plan> getItemsAvailableAsObjects(){
-        return ejbFacade.findAll();
+
+    public List<Plan> getItemsAvailableAsObjects() {
+        return ejbFacade.findAllPlans();
     }
+
     public void onEdit(RowEditEvent event) {
         Plan cm = (Plan) event.getObject();
         getFacade().edit(cm);
+        List<Plan> plans = ejbFacade.findPLansByName(cm.getPlanName());
+        for (Plan p : plans) {
+            p.setPlanActive(cm.getPlanActive());
+            p.setPlanDescription(cm.getPlanDescription());
+            p.setPlanDiscount(cm.getPlanDiscount());
+            p.setPlanPrice(cm.getPlanPrice());
+            getFacade().edit(p);
+        }
         recreateModel();
-        JsfUtil.addSuccessMessage("Row Edit Successful");
+        JsfUtil.addSuccessMessage(configMapFacade.getConfig("PlanRowEditSuccessFul"));
     }
 
     public void onCancel(RowEditEvent event) {
-        JsfUtil.addErrorMessage("Row Edit Cancelled");
+        JsfUtil.addErrorMessage(configMapFacade.getConfig("PlanRowEditCancelled"));
+    }
+
+    /**
+     * @return the subItem
+     */
+    public boolean isSubItem() {
+        return subItem;
+    }
+
+    /**
+     * @param subItem the subItem to set
+     */
+    public void setSubItem(boolean subItem) {
+        this.subItem = subItem;
+    }
+
+    /**
+     * @return the selectedSubItem
+     */
+    public Plan getSelectedSubItem() {
+        return selectedSubItem;
+    }
+
+    /**
+     * @param selectedSubItem the selectedSubItem to set
+     */
+     public void setSelectedSubItem(Plan selectedSubItem) {
+        logger.log(Level.INFO, "setSelectedSubItem: {0}",selectedSubItem);
+        this.selectedSubItem = selectedSubItem;
+     }
+    public void setSelectedSubItemAndDelete(Plan selectedSubItem) {
+        logger.log(Level.INFO, "setSelectedSubItemAndDelete: {0}",selectedSubItem);
+        //this.selectedSubItem = selectedSubItem;
+
+        if (selectedSubItem != null) {
+            Plan parent = selectedSubItem.getParent();
+            parent.getPlanCollection().remove(selectedSubItem);
+            getFacade().remove(selectedSubItem);
+            getFacade().edit(parent);
+            recreateModel();
+            JsfUtil.addSuccessMessage(configMapFacade.getConfig("PlanSubItemDeleted"));
+        } else {
+            JsfUtil.addSuccessMessage(configMapFacade.getConfig("PlanSubItemNullDeleted"));
+        }
+    }
+
+    /**
+     * @return the filteredSubItems
+     */
+    public List<Plan> getFilteredSubItems() {
+        return filteredSubItems;
+    }
+
+    /**
+     * @param filteredSubItems the filteredSubItems to set
+     */
+    public void setFilteredSubItems(List<Plan> filteredSubItems) {
+        this.filteredSubItems = filteredSubItems;
     }
 
     @FacesConverter(forClass = Plan.class)
     public static class PlanControllerConverter implements Converter {
 
+        @Override
         public Object getAsObject(FacesContext facesContext, UIComponent component, String value) {
             if (value == null || value.length() == 0) {
                 return null;
@@ -312,11 +449,12 @@ public List<Plan> getItemsAvailableAsObjects(){
         }
 
         String getStringKey(java.lang.Integer value) {
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
             sb.append(value);
             return sb.toString();
         }
 
+        @Override
         public String getAsString(FacesContext facesContext, UIComponent component, Object object) {
             if (object == null) {
                 return null;

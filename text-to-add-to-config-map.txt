@@ -229,3 +229,10 @@ ListStatsTakenTitle_imageId=ImageId
 ListStatsTakenTitle_customerId=CustomerId
 
 
+ListPlanAddSubItemLink=Add Sub-Item
+CreatePlanTitleMessage=Add a new plan or subItem to an existing plan.
+PlanSubItemDeleted=Plan sub Item Deleted
+PlanSubItemNullDeleted=You must select a row first!
+PlanRowEditSuccessFul=Plan Edit Successful
+PlanRowEditCancelled=Plan Edit Cancelled
+PlanSubItemCreated=SUb Item Created Successfully

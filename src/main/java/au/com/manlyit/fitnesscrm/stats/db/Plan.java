@@ -3,10 +3,13 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package au.com.manlyit.fitnesscrm.stats.db;
 
+import au.com.manlyit.fitnesscrm.stats.classes.util.BaseEntity;
+import au.com.manlyit.fitnesscrm.stats.classes.util.PfSelectableDataModel;
 import java.io.Serializable;
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Collection;
 import javax.persistence.Basic;
 import javax.persistence.Column;
@@ -14,7 +17,9 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
+import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
@@ -38,7 +43,21 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Plan.findByPlanPrice", query = "SELECT p FROM Plan p WHERE p.planPrice = :planPrice"),
     @NamedQuery(name = "Plan.findByPlanActive", query = "SELECT p FROM Plan p WHERE p.planActive = :planActive"),
     @NamedQuery(name = "Plan.findByPlanDiscount", query = "SELECT p FROM Plan p WHERE p.planDiscount = :planDiscount")})
-public class Plan implements Serializable {
+public class Plan implements BaseEntity, Serializable {
+
+    // @Max(value=?)  @Min(value=?)//if you know range of your decimal fields consider using these annotations to enforce field validation
+
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "plan_price")
+    private BigDecimal planPrice;
+    @Column(name = "plan_discount")
+    private BigDecimal planDiscount;
+    @OneToMany(mappedBy = "parent")
+    private Collection<Plan> planCollection;
+    @JoinColumn(name = "parent", referencedColumnName = "id")
+    @ManyToOne
+    private Plan parent;
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -50,10 +69,6 @@ public class Plan implements Serializable {
     @Size(min = 1, max = 128)
     @Column(name = "plan_name")
     private String planName;
-    @Basic(optional = false)
-    @NotNull
-    @Column(name = "plan_price")
-    private long planPrice;
     @Lob
     @Size(max = 65535)
     @Column(name = "plan_description")
@@ -62,8 +77,6 @@ public class Plan implements Serializable {
     @NotNull
     @Column(name = "plan_active")
     private short planActive;
-    @Column(name = "plan_discount")
-    private Long planDiscount;
     @OneToMany(mappedBy = "groupPricing")
     private Collection<Customers> customersCollection;
 
@@ -74,7 +87,7 @@ public class Plan implements Serializable {
         this.id = id;
     }
 
-    public Plan(Integer id, String planName, long planPrice, short planActive) {
+    public Plan(Integer id, String planName, BigDecimal planPrice, short planActive) {
         this.id = id;
         this.planName = planName;
         this.planPrice = planPrice;
@@ -97,11 +110,11 @@ public class Plan implements Serializable {
         this.planName = planName;
     }
 
-    public long getPlanPrice() {
+    public BigDecimal getPlanPrice() {
         return planPrice;
     }
 
-    public void setPlanPrice(long planPrice) {
+    public void setPlanPrice(BigDecimal planPrice) {
         this.planPrice = planPrice;
     }
 
@@ -121,11 +134,11 @@ public class Plan implements Serializable {
         this.planActive = planActive;
     }
 
-    public Long getPlanDiscount() {
+    public BigDecimal getPlanDiscount() {
         return planDiscount;
     }
 
-    public void setPlanDiscount(Long planDiscount) {
+    public void setPlanDiscount(BigDecimal planDiscount) {
         this.planDiscount = planDiscount;
     }
 
@@ -162,5 +175,28 @@ public class Plan implements Serializable {
     public String toString() {
         return planName;
     }
-    
+
+    @XmlTransient
+    public PfSelectableDataModel getPlanCollectionModel() {
+        ArrayList<Plan> alp = new ArrayList<>(planCollection);
+        return new PfSelectableDataModel(alp);
+    }
+
+    @XmlTransient
+    public Collection<Plan> getPlanCollection() {
+        return planCollection;
+    }
+
+    public void setPlanCollection(Collection<Plan> planCollection) {
+        this.planCollection = planCollection;
+    }
+
+    public Plan getParent() {
+        return parent;
+    }
+
+    public void setParent(Plan parent) {
+        this.parent = parent;
+    }
+
 }

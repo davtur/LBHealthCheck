@@ -446,7 +446,7 @@ public class PaymentsFacade extends AbstractFacade<Payments> {
         return cm;
     }
 
-    public List<Payments> findPaymentsByDateRange(boolean useSettlement, boolean showSuccessful, boolean showFailed, boolean showPending, boolean showScheduled, Date startDate, Date endDate, boolean sortAsc) {
+    public List<Payments> findPaymentsByDateRange(boolean useSettlement, boolean showSuccessful, boolean showFailed, boolean showPending, boolean showScheduled, Date startDate, Date endDate, boolean sortAsc, Customers cust) {
         List<Payments> retList = null;
         ArrayList<Predicate> predicatesList1 = new ArrayList<>();
         ArrayList<Predicate> predicatesList2 = new ArrayList<>();
@@ -455,6 +455,7 @@ public class PaymentsFacade extends AbstractFacade<Payments> {
             CriteriaBuilder cb = em.getCriteriaBuilder();
             CriteriaQuery<Payments> cq = cb.createQuery(Payments.class);
             Root<Payments> rt = cq.from(Payments.class);
+            Expression<Customers> customer;
             Expression<Date> stime;
             Expression<Date> stime2;
             Expression<Date> stime3;
@@ -467,6 +468,11 @@ public class PaymentsFacade extends AbstractFacade<Payments> {
                 customerStateJoin = customersJoin.join("active");// join customers.active to customer_state.id
                 //cust = customersJoin.get("id");
                 custState = customerStateJoin.get("customerState");
+            }
+            if (cust != null) { // filter by customer if provided
+                customer = rt.get("customerName");
+                predicatesList1.add(cb.equal(customer, cust));
+
             }
 
             if (useSettlement) {
@@ -514,9 +520,9 @@ public class PaymentsFacade extends AbstractFacade<Payments> {
             DatabaseQuery databaseQuery = ((EJBQueryImpl) q).getDatabaseQuery();
             databaseQuery.prepareCall(session, new DatabaseRecord());
             String sqlString = databaseQuery.getSQLString();
-        //This SQL will contain ? for parameters. To get the SQL translated with the arguments you need a DatabaseRecord with the parameter values.
+            //This SQL will contain ? for parameters. To get the SQL translated with the arguments you need a DatabaseRecord with the parameter values.
             // String sqlString2 = databaseQuery.getTranslatedSQLString(session, recordWithValues);
-            logger.log(Level.FINE, "Payment/Settlement Report SQL Query String: {0}  -----------------Records Found:{8}, useSettlement: {1},showSuccessful: {2},showFailed: {3},showPending: {4},showScheduled: {5},startDate: {6},endDate: {7}", new Object[]{sqlString, useSettlement, showSuccessful, showFailed, showPending, showScheduled, startDate, endDate,retList.size()});
+            logger.log(Level.FINE, "Payment/Settlement Report SQL Query String: {0}  -----------------Records Found:{8}, useSettlement: {1},showSuccessful: {2},showFailed: {3},showPending: {4},showScheduled: {5},startDate: {6},endDate: {7}", new Object[]{sqlString, useSettlement, showSuccessful, showFailed, showPending, showScheduled, startDate, endDate, retList.size()});
 
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
