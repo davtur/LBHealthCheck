@@ -214,7 +214,7 @@
                             </p:selectOneMenu>
                             <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_groupPricing')}" for="groupPricing1" />
                             <p:selectOneMenu id="groupPricing1" valueChangeListener="#{customersController.selectOneMenuValueChangeListener}" converter="planConverter" value="#{customersController.selected.groupPricing}" label="#{configMapController.getKey('CreateCustomersTitle_groupPricing')}" >
-                                <f:selectItems value="#{planController.itemsAvailableAsObjects}"  var="plan" itemLabel="#{plan.planName} - $#{plan.planPrice} "  itemValue="#{plan}"/>
+                                <f:selectItems value="#{planController.itemsAvailableForDisplayAsObjects}"  var="plan" itemLabel="#{plan.planName} - $#{plan.planPrice} "  itemValue="#{plan}"/>
                                 <p:ajax update="planDescription"/>
                             </p:selectOneMenu>
 

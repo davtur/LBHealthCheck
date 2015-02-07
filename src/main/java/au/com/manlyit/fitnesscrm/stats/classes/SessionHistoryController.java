@@ -413,7 +413,7 @@ public class SessionHistoryController implements Serializable {
 
     public void createDialogue() {
         try {
-            updateCurrentParticipants(getAttendingCustomers());
+            updateCurrentParticipants(participants.getTarget());
             updateCurrentTrainers(getTrainers());
             setSessionHistoryItems(null);
 
@@ -447,7 +447,7 @@ public class SessionHistoryController implements Serializable {
     }
 
     public void onTransfer() {
-        logger.log(Level.FINE, "Picklist Transfer");
+        logger.log(Level.INFO, "Picklist Transfer");
     }
 
     public String create() {
@@ -532,7 +532,7 @@ public class SessionHistoryController implements Serializable {
     }
 
     private void addParticipants() {
-        List<Customers> sourceParticipants = ejbCustomerFacade.findAll(true);
+        List<Customers> sourceParticipants = ejbCustomerFacade.findAllActiveCustomers(true);
         List<Customers> targetParticipants = new ArrayList<>();
         participants = new DualListModel<>(sourceParticipants, targetParticipants);
     }

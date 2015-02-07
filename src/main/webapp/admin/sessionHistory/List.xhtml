@@ -122,9 +122,13 @@
                                 <f:setPropertyActionListener value="#{item}" target="#{sessionHistoryController.selected}" />
                             </p:commandButton>
                             <h:outputText value=" "/>
+                             
                             <p:commandButton rendered="#{sessionHistoryController.isUserInRole('ADMIN')}"  ajax="false" action="#{sessionHistoryController.prepareEdit}" value="#{configMapController.getKey('ListSessionHistoryEditLink')}">
                                 <f:setPropertyActionListener value="#{item}" target="#{sessionHistoryController.selected}" />
                             </p:commandButton>
+                            <!-- <p:commandButton rendered="#{sessionHistoryController.isUserInRole('ADMIN')}"  ajax="false" onclick="PF('createSessionDialogueWidget').show()" type="button" value="#{configMapController.getKey('ListSessionHistoryEditLink')}">
+                                <f:setPropertyActionListener value="#{item}" target="#{sessionHistoryController.selected}" />
+                            </p:commandButton>-->
                             <h:outputText value=" "/>
                             <p:commandButton rendered="#{sessionHistoryController.isUserInRole('ADMIN')}" update=":listSessionHistoryForm1"   value="#{configMapController.getKey('ListSessionHistoryDestroyLink')}">
                                 <f:setPropertyActionListener value="#{item}" target="#{sessionHistoryController.selectedForDeletion}" />

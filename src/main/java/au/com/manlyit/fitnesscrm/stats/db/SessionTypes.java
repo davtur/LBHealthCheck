@@ -18,6 +18,7 @@ import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -37,6 +38,8 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "SessionTypes.findByName", query = "SELECT s FROM SessionTypes s WHERE s.name = :name"),
     @NamedQuery(name = "SessionTypes.findByDescription", query = "SELECT s FROM SessionTypes s WHERE s.description = :description")})
 public class SessionTypes implements Serializable {
+    @OneToOne(mappedBy = "sessionType")
+    private Plan plan;
     @OneToMany(mappedBy = "sessionType")
     private Collection<Plan> planCollection;
     private static final long serialVersionUID = 1L;
@@ -129,13 +132,13 @@ public class SessionTypes implements Serializable {
         return name;
     }
 
-    @XmlTransient
-    public Collection<Plan> getPlanCollection() {
-        return planCollection;
+   
+    public Plan getPlan() {
+        return plan;
     }
 
-    public void setPlanCollection(Collection<Plan> planCollection) {
-        this.planCollection = planCollection;
+    public void setPlan(Plan plan) {
+        this.plan = plan;
     }
 
 }

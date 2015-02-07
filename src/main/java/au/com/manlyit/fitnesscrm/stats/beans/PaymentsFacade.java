@@ -471,7 +471,6 @@ public class PaymentsFacade extends AbstractFacade<Payments> {
             }
             if (cust != null) { // filter by customer if provided
                 customer = rt.get("customerName");
-                predicatesList1.add(cb.equal(customer, cust));
 
             }
 
@@ -503,7 +502,14 @@ public class PaymentsFacade extends AbstractFacade<Payments> {
                 predicatesList2.add(cb.and(cb.equal(status, PaymentStatus.SCHEDULED.value()), cb.equal(custState, activeState)));
 
             }
-            cq.where(cb.and(cb.or(predicatesList1.<Predicate>toArray(new Predicate[predicatesList1.size()])), cb.or(predicatesList2.<Predicate>toArray(new Predicate[predicatesList2.size()]))));
+            if (cust != null) { // filter by customer if provided
+                customer = rt.get("customerName");
+                //predicatesList1.add(cb.equal(customer, cust));
+                cq.where(cb.and(cb.or(predicatesList1.<Predicate>toArray(new Predicate[predicatesList1.size()])), cb.or(predicatesList2.<Predicate>toArray(new Predicate[predicatesList2.size()])), cb.equal(customer, cust)));
+            } else {
+                cq.where(cb.and(cb.or(predicatesList1.<Predicate>toArray(new Predicate[predicatesList1.size()])), cb.or(predicatesList2.<Predicate>toArray(new Predicate[predicatesList2.size()]))));
+            }
+
             //cq.where(cb.and(condition1,cb.or(predicatesList.<Predicate>toArray(new Predicate[predicatesList.size()]))));
             //cq.where(condition1);
             cq.select(rt);

@@ -6,6 +6,7 @@
 
 package au.com.manlyit.fitnesscrm.stats.db;
 
+import au.com.manlyit.fitnesscrm.stats.classes.util.BaseEntity;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import javax.persistence.Basic;
@@ -38,7 +39,7 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "InvoiceLine.findByDescription", query = "SELECT i FROM InvoiceLine i WHERE i.description = :description"),
     @NamedQuery(name = "InvoiceLine.findBySourceUserId", query = "SELECT i FROM InvoiceLine i WHERE i.sourceUserId = :sourceUserId"),
     @NamedQuery(name = "InvoiceLine.findByIsPercentage", query = "SELECT i FROM InvoiceLine i WHERE i.isPercentage = :isPercentage")})
-public class InvoiceLine implements Serializable {
+public class InvoiceLine implements  BaseEntity,Serializable {
     private static final long serialVersionUID = 1L;
     @Id
     @Basic(optional = false)

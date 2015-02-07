@@ -23,6 +23,8 @@ import au.com.manlyit.fitnesscrm.stats.classes.util.ScheduledPaymentPojo;
 import au.com.manlyit.fitnesscrm.stats.db.CustomerState;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import au.com.manlyit.fitnesscrm.stats.db.Invoice;
+import au.com.manlyit.fitnesscrm.stats.db.InvoiceLine;
+import au.com.manlyit.fitnesscrm.stats.db.InvoiceLineType;
 import au.com.manlyit.fitnesscrm.stats.db.PaymentParameters;
 import au.com.manlyit.fitnesscrm.stats.db.Payments;
 import au.com.manlyit.fitnesscrm.stats.db.Plan;
@@ -83,6 +85,7 @@ import javax.inject.Named;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
 import javax.xml.ws.WebServiceException;
+import net.sf.ezmorph.MorphUtils;
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFCellStyle;
 import org.apache.poi.hssf.usermodel.HSSFRow;
@@ -136,19 +139,27 @@ public class EziDebitPaymentGateway implements Serializable {
     @Inject
     private SessionHistoryFacade sessionHistoryFacade;
     @Inject
+    private au.com.manlyit.fitnesscrm.stats.beans.InvoiceLineTypeFacade invoiceLineTypeFacade;
+    @Inject
+    private au.com.manlyit.fitnesscrm.stats.beans.InvoiceLineFacade invoiceLineFacade;
+    @Inject
+    private au.com.manlyit.fitnesscrm.stats.beans.InvoiceFacade invoiceFacade;
+    @Inject
     private SessionTypesFacade sessionTypesFacade;
-
     private boolean asyncOperationRunning = false;
     private boolean refreshFromDB = false;
     private final ThreadGroup tGroup1 = new ThreadGroup("EziDebitOps");
     private List<Payment> paymentsList;
     private PfSelectableDataModel<Payments> paymentDBList = null;
     private PfSelectableDataModel<Payments> reportPaymentsList = null;
+    private PfSelectableDataModel<Invoice> reportEndOfMonthList = null;
     private List<Payment> paymentsListFilteredItems;
     private List<Payments> paymentsDBListFilteredItems;
     private List<Payments> reportPaymentsListFilteredItems;
+    private List<Invoice> reportEndOfMonthListFilteredItems;
     private List<ScheduledPaymentPojo> scheduledPaymentsList;
     private Payments selectedReportItem;
+    private Payments selectedEomReportItem;
     private String reportName = "defaultreport";
     private Payments selectedScheduledPayment;
     private List<ScheduledPaymentPojo> scheduledPaymentsListFilteredItems;
@@ -905,7 +916,9 @@ public class EziDebitPaymentGateway implements Serializable {
 
     public void runReport() {
         reportPaymentsList = null;
+        reportEndOfMonthList = null;
         reportPaymentsListFilteredItems = null;
+        reportEndOfMonthListFilteredItems = null;
         String key = "PaymentReport";
         reportUseSettlementDate = false;
         if (reportType == 1) {
@@ -966,29 +979,148 @@ public class EziDebitPaymentGateway implements Serializable {
 
         for (Customers cust : customerList) {
             Invoice inv = new Invoice();
+            inv.setInvoiceLineCollection(new ArrayList<InvoiceLine>());
             inv.setUserId(cust);
+//add plan line item to invoice with number of billable sessions
+            InvoiceLineType ilt = invoiceLineTypeFacade.findAll().get(1);
+            InvoiceLine il = new InvoiceLine(0);
+            BigDecimal paymentsTotal;
+            BigDecimal productsAndServicesTotal = new BigDecimal(0);
+            il.setTypeId(ilt);
 
+            il.setQuantity(new BigDecimal(1));
+            il.setDescription("Plan: " +cust.getGroupPricing().getPlanName());
+            il.setPrice(cust.getGroupPricing().getPlanPrice());
+            il.setAmount(cust.getGroupPricing().getPlanPrice());
+            productsAndServicesTotal = productsAndServicesTotal.add(il.getAmount());
+            inv.getInvoiceLineCollection().add(il);
             //get payments for customer
             List<Payments> pl = paymentsFacade.findPaymentsByDateRange(reportUseSettlementDate, reportShowSuccessful, reportShowFailed, reportShowPending, isReportShowScheduled(), reportStartDate, reportEndDate, false, cust);
             //get sessions for customer
             List<SessionTypes> sessionTypesList = sessionTypesFacade.findAll();
-            List<SessionHistory> sessions = sessionHistoryFacade.findSessionsByParticipantAndDateRange(cust, reportStartDate, reportEndDate, true);
             for (SessionTypes sessType : sessionTypesList) {
-                int count = 0;
-                double total = 0;
-                Plan plan = cust.getGroupPricing();
-                for (SessionHistory sess : sessions) {
-                    String type = sess.getSessionTypesId().getName();
-                    if(type.contains(sessType.getName())){
-                        count++;
-                        //total = total + sess.getSessionTypesId().
+                List<Date> weeks = getWeeksInMonth(reportStartDate, reportEndDate);
+                Date weekStart = reportStartDate;
+                int billableSessionsTotal = 0;
+                for (Date weekEnd : weeks) {
+                    List<SessionHistory> sessions = sessionHistoryFacade.findSessionsByParticipantAndDateRange(cust, weekStart, weekEnd, true);
+
+                    //for each session type count the sessions and bill as a line item if they are not included in the plan
+                    int count = 0;
+
+                    for (SessionHistory sess : sessions) {
+                        String type = sess.getSessionTypesId().getName();
+                        if (type.contains(sessType.getName())) {
+                            count++;
+                            //total = total + sess.getSessionTypesId().
+                        }
                     }
+                    if(count > 0){
+                    billableSessionsTotal += checkSessionsAgainstPlanWeek(count, cust, sessType);
+                    }
+                    weekStart = weekEnd;
                 }
+                //add line item to invoice with number of billable sessions
+                ilt = invoiceLineTypeFacade.findAll().get(2);
+                il = new InvoiceLine(0);
+                il.setTypeId(ilt);
+                BigDecimal bdBillableSessionsTotal = new BigDecimal(billableSessionsTotal);
+                Plan sessionPlan = sessType.getPlan();
+                BigDecimal cdPrice = new BigDecimal(0);
+                if (sessionPlan != null) {
+                    cdPrice = sessionPlan.getPlanPrice();
+                }
+                il.setQuantity(bdBillableSessionsTotal);
+                il.setDescription(sessType.getName());
+                il.setPrice(cdPrice);
+                il.setAmount(bdBillableSessionsTotal.multiply(cdPrice));
+                if (cdPrice.compareTo(new BigDecimal(0)) > 0 && bdBillableSessionsTotal.compareTo(new BigDecimal(0)) > 0) {
+                    inv.getInvoiceLineCollection().add(il);
+                    productsAndServicesTotal = productsAndServicesTotal.add(il.getAmount());
+                }
+
             }
+            //add payments line item to invoice with number of billable sessions
+            ilt = invoiceLineTypeFacade.findAll().get(0);
+            il = new InvoiceLine(0);
+            il.setTypeId(ilt);
+            paymentsTotal = new BigDecimal(0);
+            int numberOfPayments = 0;
+            for (Payments p : pl) {
+                paymentsTotal = paymentsTotal.add(p.getPaymentAmount());
+                numberOfPayments++;
+            }
+
+            il.setQuantity(new BigDecimal(numberOfPayments));
+            il.setDescription("Payment(s)");
+            productsAndServicesTotal = productsAndServicesTotal.subtract(paymentsTotal);
+            il.setPrice(paymentsTotal);
+            paymentsTotal = paymentsTotal.negate();
+            il.setAmount(paymentsTotal);
+            inv.getInvoiceLineCollection().add(il);
+            inv.setTotal(productsAndServicesTotal);
             invoices.add(inv);
+        }
+        if (invoices.isEmpty() == false) {
+            reportEndOfMonthList = new PfSelectableDataModel<>(invoices);
+        } else {
+            reportEndOfMonthList = new PfSelectableDataModel<>(new ArrayList<Invoice>());
         }
 
         Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.INFO, "Completed End Of Month Report");
+    }
+
+    private List<Date> getWeeksInMonth(Date start, Date end) {
+        List<Date> dl = new ArrayList<>();
+        GregorianCalendar gc = new GregorianCalendar();
+        gc.setTime(start);
+        while (gc.getTime().compareTo(end) <= 0) {
+            gc.add(Calendar.DAY_OF_WEEK, 7);
+            if (gc.getTime().compareTo(end) >= 0) {
+                dl.add(end);
+            } else {
+                dl.add(gc.getTime());
+            }
+
+        }
+
+        return dl;
+    } 
+
+    private int checkSessionsAgainstPlanWeek(int count, Customers cust, SessionTypes sessType) {
+        int billableSessions = 0;
+        Plan plan = cust.getGroupPricing();
+        PaymentParameters pp = cust.getPaymentParameters();
+        String paymentPeriod = pp.getPaymentPeriod();
+        List<Plan> plans = new ArrayList<>(plan.getPlanCollection());
+        int includedInPlanCount = 0;
+        for (Plan p : plans) {
+            SessionTypes st = p.getSessionType();
+            if (st != null) {
+                if (sessType.getName().contentEquals(st.getName())) {
+                    includedInPlanCount++;
+                }
+            }
+        }
+        billableSessions = count - includedInPlanCount  ;
+        if (billableSessions < 0) {
+            billableSessions = 0;
+        }
+
+        /* if (paymentPeriod.contentEquals(PaymentPeriod.MONTHLY.value())) {
+
+         }
+         if (paymentPeriod.contentEquals(PaymentPeriod.FOUR_WEEKLY.value())) {
+
+         }
+         if (paymentPeriod.contentEquals(PaymentPeriod.WEEKLY.value())) {
+
+         }
+         if (paymentPeriod.contentEquals(PaymentPeriod.FORTNIGHTLY.value())) {
+
+         }*/
+        logger.log(Level.INFO, "checkSessionsAgainstPlanWeek: Billed Sessions:{0}, Session Count:{1}, Customer: {2}, Plan: {5}, Session Type: {3}, Session Plan: {4}",new Object[]{billableSessions,count,cust.getUsername(),sessType.getName(),sessType.getPlan(),cust.getGroupPricing().getPlanName()});
+        return billableSessions;
     }
 
     private void generatePaymentsReport() {
@@ -1024,12 +1156,32 @@ public class EziDebitPaymentGateway implements Serializable {
     }
 
     /**
+     * @return the reportEndOfMonthList
+     */
+    public PfSelectableDataModel<Invoice> getReportEndOfMonthList() {
+        if (reportEndOfMonthList == null) {
+            if (reportType == 3) {
+                generateEndOfMonthReport();
+
+            } else {
+                reportEndOfMonthList = new PfSelectableDataModel<>(new ArrayList<Invoice>());
+            }
+        }
+        return reportEndOfMonthList;
+    }
+
+    /**
      * @return the reportPaymentsList
      */
     public PfSelectableDataModel<Payments> getReportPaymentsList() {
         if (reportPaymentsList == null) {
-            generatePaymentsReport();
 
+            if (reportType != 3) {
+                generatePaymentsReport();
+
+            } else {
+                reportPaymentsList = new PfSelectableDataModel<>(new ArrayList<Payments>());
+            }
         }
         return reportPaymentsList;
     }
@@ -1294,6 +1446,42 @@ public class EziDebitPaymentGateway implements Serializable {
      */
     public void setOneOffPaymentDate(Date oneOffPaymentDate) {
         this.oneOffPaymentDate = oneOffPaymentDate;
+    }
+
+    /**
+     * @param reportEndOfMonthList the reportEndOfMonthList to set
+     */
+    public void setReportEndOfMonthList(PfSelectableDataModel<Invoice> reportEndOfMonthList) {
+        this.reportEndOfMonthList = reportEndOfMonthList;
+    }
+
+    /**
+     * @return the reportEndOfMonthListFilteredItems
+     */
+    public List<Invoice> getReportEndOfMonthListFilteredItems() {
+        return reportEndOfMonthListFilteredItems;
+    }
+
+    /**
+     * @param reportEndOfMonthListFilteredItems the
+     * reportEndOfMonthListFilteredItems to set
+     */
+    public void setReportEndOfMonthListFilteredItems(List<Invoice> reportEndOfMonthListFilteredItems) {
+        this.reportEndOfMonthListFilteredItems = reportEndOfMonthListFilteredItems;
+    }
+
+    /**
+     * @return the selectedEomReportItem
+     */
+    public Payments getSelectedEomReportItem() {
+        return selectedEomReportItem;
+    }
+
+    /**
+     * @param selectedEomReportItem the selectedEomReportItem to set
+     */
+    public void setSelectedEomReportItem(Payments selectedEomReportItem) {
+        this.selectedEomReportItem = selectedEomReportItem;
     }
 
     private class eziDebitThreadFactory implements ThreadFactory {

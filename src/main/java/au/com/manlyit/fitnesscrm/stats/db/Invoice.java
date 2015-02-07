@@ -6,6 +6,7 @@
 
 package au.com.manlyit.fitnesscrm.stats.db;
 
+import au.com.manlyit.fitnesscrm.stats.classes.util.BaseEntity;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Collection;
@@ -52,7 +53,7 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Invoice.findByLastReminder", query = "SELECT i FROM Invoice i WHERE i.lastReminder = :lastReminder"),
     @NamedQuery(name = "Invoice.findByOverdueStep", query = "SELECT i FROM Invoice i WHERE i.overdueStep = :overdueStep"),
     @NamedQuery(name = "Invoice.findByCreateTimestamp", query = "SELECT i FROM Invoice i WHERE i.createTimestamp = :createTimestamp")})
-public class Invoice implements Serializable {
+public class Invoice implements BaseEntity,Serializable {
     private static final long serialVersionUID = 1L;
     @Id
     @Basic(optional = false)

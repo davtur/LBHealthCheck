@@ -61,6 +61,27 @@ public class PlanFacade extends AbstractFacade<Plan> {
         return retList;
     }
 
+    public List<Plan> findAllPlansForSelectItems() {
+        List retList = null;
+        try {
+            CriteriaBuilder cb = em.getCriteriaBuilder();
+            CriteriaQuery<Plan> cq = cb.createQuery(Plan.class);
+            Root<Plan> rt = cq.from(Plan.class);
+
+            Expression<Plan> plan = rt.get("parent");
+            Expression<Boolean> planActive = rt.get("planActive");
+            cq.where(cb.and(cb.isNull(plan), cb.equal(planActive, 0)));
+
+            Query q = em.createQuery(cq);
+
+            retList = q.getResultList();
+        } catch (Exception e) {
+
+            logger.log(Level.INFO, "Exception : Could not find all Plans.", e);
+        }
+        return retList;
+    }
+
     public List<Plan> findPLansByName(String name) {
         List retList = null;
         try {

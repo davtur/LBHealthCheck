@@ -6,6 +6,7 @@
 
 package au.com.manlyit.fitnesscrm.stats.db;
 
+import au.com.manlyit.fitnesscrm.stats.classes.util.BaseEntity;
 import java.io.Serializable;
 import java.util.Collection;
 import javax.persistence.Basic;
@@ -33,7 +34,7 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "InvoiceLineType.findById", query = "SELECT i FROM InvoiceLineType i WHERE i.id = :id"),
     @NamedQuery(name = "InvoiceLineType.findByDescription", query = "SELECT i FROM InvoiceLineType i WHERE i.description = :description"),
     @NamedQuery(name = "InvoiceLineType.findByOrderPosition", query = "SELECT i FROM InvoiceLineType i WHERE i.orderPosition = :orderPosition")})
-public class InvoiceLineType implements Serializable {
+public class InvoiceLineType implements  BaseEntity,Serializable {
     private static final long serialVersionUID = 1L;
     @Id
     @Basic(optional = false)

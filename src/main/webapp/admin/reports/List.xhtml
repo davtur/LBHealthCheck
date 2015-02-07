@@ -29,10 +29,10 @@
                     </p:panelGrid>
                     <p:panelGrid columns="1" >
                         <p:selectOneMenu id="reportType"  value="#{ezidebit.reportType}"   label="#{configMapController.getKey('CreateReportTitle_reportType')}" >
-                           
+
                             <f:selectItem itemValue="#{0}" itemLabel="Payment Report"/>  
                             <f:selectItem itemValue="#{1}" itemLabel="Settlement Report"/> 
-
+                            <f:selectItem itemValue="#{3}" itemLabel="End Of Month Report"/> 
 
                             <p:ajax    listener="#{ezidebit.runReport}"   />
                         </p:selectOneMenu>
@@ -63,7 +63,7 @@
                     </p:panelGrid>
 
                     <p:panelGrid id="totalAmounts"  columns="2"  >
-                    
+
                         <p:outputLabel  value="#{configMapController.getKey('ListReportTotalSuccessful')}" for="totalSuccessful" />
                         <h:outputText id="totalSuccessful" value="#{ezidebit.reportTotalSuccessful}" >
                             <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
@@ -139,7 +139,7 @@
                             <h:outputText  rendered="#{item.paymentStatus == 'D'}"  value=" Dis.Insufficient Funds" style="color: red"/>
                             <h:outputText  rendered="#{item.paymentStatus == 'F'}"  value=" Dishonoured" style="color: red"/>
                             <h:outputText  rendered="#{item.paymentStatus == 'N'}"  value=" Scheduled" style="color: blue"/>
-                       </p:column>
+                        </p:column>
                         <p:column sortBy="#{item.settlementDate}" filterBy="#{item.settlementDate}" headerText="#{configMapController.getKey('ListPaymentsTitle_settlementDate')}"   >
                             <h:outputText value="#{item.settlementDate}">
                                 <f:convertDateTime pattern="E dd MMM yyyy" />
@@ -225,6 +225,98 @@
                             </h:outputText>
                         </p:column>
 
+                        <f:facet name="footer">
+                            <h:outputText value=" "/>
+                        </f:facet>
+                    </p:dataTable>
+
+                </h:panelGroup> 
+                <h:panelGroup   rendered="#{ezidebit.reportEndOfMonthList.rowCount > 0}">
+
+                    <p:dataTable  
+                        id="eomReportDataTable"  
+                        editable="false" 
+                        value="#{ezidebit.reportEndOfMonthList}" 
+                        selection="#{ezidebit.selectedEomReportItem}" 
+                        rowKey="#{item.id}" 
+                        filteredValue="#{ezidebit.reportEndOfMonthListFilteredItems}"  
+                        widgetVar="eomReportControllerTable" 
+                        var="item" 
+                        selectionMode="single"
+
+                        scrollable="true"
+                        scrollHeight="500"
+                    
+
+                        >
+                        <f:facet name="header">
+                            <p:outputPanel>
+                                <p:outputPanel>
+                                    <h:outputText  rendered="#{not empty ezidebit.reportEndOfMonthListFilteredItems}" value="#{ezidebit.reportEndOfMonthListFilteredItems.size} Records Found"/>
+                                    <h:outputText  rendered="#{empty ezidebit.reportEndOfMonthListFilteredItems}" value="#{ezidebit.reportEndOfMonthList.rowCount} Records Found"/>
+                                </p:outputPanel>
+                                <h:outputText value="Search all fields:" />
+                                <h:inputText id="globalFilter2" onkeyup="eomReportControllerTable.filter()" />
+
+                                <p:commandButton value="Export as PDF" ajax="false" rendered="#{ezidebit.reportEndOfMonthList.rowCount > 0}">
+                                    <p:dataExporter type="pdf" target="eomReportDataTable" fileName="#{ezidebit.reportName}" preProcessor="#{ezidebit.preProcessPDF}"/>
+                                </p:commandButton>
+                                <p:commandButton value="Export as Excel" ajax="false" rendered="#{ezidebit.reportEndOfMonthList.rowCount > 0}">
+                                    <p:dataExporter type="xls" target="eomReportDataTable"  fileName="#{ezidebit.reportName}" postProcessor="#{ezidebit.postProcessXLS}"/>
+                                </p:commandButton>
+                            </p:outputPanel>
+                        </f:facet>
+
+                        <p:columnGroup type="header">
+                            <p:row>
+                                <p:column rowspan="1" headerText="Customer" />
+                                <p:column colspan="3" headerText="Line Item" />
+                            </p:row>
+                            <p:row>
+                                <p:column headerText="Description" />
+                                <p:column headerText="Quantity" />
+                                <p:column headerText="Price" />
+                                <p:column headerText="Amount" />
+                            </p:row>
+                        </p:columnGroup>
+                        <p:column sortBy="#{item.userId}" filterBy="#{item.userId}" headerText="#{configMapController.getKey('ListPaymentsTitle_customerName')}"   >
+                            <h:outputText value="#{item.userId.firstname} #{item.userId.lastname}"/>
+                        </p:column>
+                        <p:subTable var="subItem" value="#{item.invoiceLineCollection}">
+                            <f:facet name="header">
+                                <h:outputText value="#{configMapController.getKey('ListPaymentsTitle_customerName')} #{item.userId.firstname} #{item.userId.lastname}" />
+                            </f:facet>
+                            <p:column>
+                                <h:outputText value="#{subItem.description}" />
+                            </p:column>
+                            <p:column>
+                                <h:outputText value="#{subItem.quantity}" />
+                            </p:column>
+                            <p:column>
+                                <h:outputText value="#{subItem.price}" >
+                                    <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
+                                </h:outputText>
+                            </p:column>
+                            <p:column>
+                                <h:outputText value="#{subItem.amount}" >
+                                    <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
+                                </h:outputText>
+                            </p:column>                           
+                            <p:columnGroup type="footer">
+                                <p:row>
+                                    <p:column footerText=" " />
+                                    <p:column footerText=" " />
+                                    <p:column footerText="Total Outstanding: " style="text-align:right"/>
+                                    <p:column   >
+                                        <f:facet name="footer">
+                                            <h:outputText value="#{item.total}" >
+                                                <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
+                                            </h:outputText>
+                                        </f:facet>
+                                    </p:column>   
+                                </p:row>
+                            </p:columnGroup>
+                        </p:subTable>
                         <f:facet name="footer">
                             <h:outputText value=" "/>
                         </f:facet>

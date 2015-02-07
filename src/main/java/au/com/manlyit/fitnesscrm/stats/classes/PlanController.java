@@ -356,6 +356,9 @@ public class PlanController implements Serializable {
     public List<Plan> getItemsAvailableAsObjects() {
         return ejbFacade.findAllPlans();
     }
+    public List<Plan> getItemsAvailableForDisplayAsObjects() {
+        return ejbFacade.findAllPlansForSelectItems();
+    }
 
     public void onEdit(RowEditEvent event) {
         Plan cm = (Plan) event.getObject();
@@ -366,6 +369,7 @@ public class PlanController implements Serializable {
             p.setPlanDescription(cm.getPlanDescription());
             p.setPlanDiscount(cm.getPlanDiscount());
             p.setPlanPrice(cm.getPlanPrice());
+            p.setSessionType(cm.getSessionType());
             getFacade().edit(p);
         }
         recreateModel();
