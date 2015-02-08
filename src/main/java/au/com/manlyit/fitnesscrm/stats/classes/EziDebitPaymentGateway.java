@@ -986,6 +986,22 @@ public class EziDebitPaymentGateway implements Serializable {
             InvoiceLine il = new InvoiceLine(0);
             BigDecimal paymentsTotal;
             BigDecimal bankFeesTotal;
+            PaymentParameters pp = cust.getPaymentParameters();
+            String ppPlanPaymentDetails = "Unknown";
+            if (pp != null) {
+                try {
+                    String period = getPaymentPeriodString(pp.getPaymentPeriod());
+                    String dom = ", DOM: " + pp.getPaymentPeriodDayOfMonth() + " ";
+                    String dow = ", DOW: " + pp.getPaymentPeriodDayOfWeek();
+                    if (pp.getPaymentPeriodDayOfMonth().contentEquals("0")) {
+                        dom = "";
+                    }
+
+                    ppPlanPaymentDetails = "Period: " + period + dom + dow;
+                } catch (Exception e) {
+                    ppPlanPaymentDetails = "Unknown";
+                }
+            }
             BigDecimal productsAndServicesTotal = new BigDecimal(0);
             il.setTypeId(ilt);
 
@@ -1049,25 +1065,32 @@ public class EziDebitPaymentGateway implements Serializable {
             bankFeesTotal = new BigDecimal(0);
             int numberOfPayments = 0;
             for (Payments p : pl) {
+                BigDecimal fee = p.getTransactionFeeCustomer();
+                if (fee == null) {
+                    fee = new BigDecimal(0);
+                }
                 paymentsTotal = paymentsTotal.add(p.getPaymentAmount());
-                bankFeesTotal = bankFeesTotal.add(p.getTransactionFeeCustomer());
+                bankFeesTotal = bankFeesTotal.add(fee);
                 numberOfPayments++;
             }
             // add scheduled payment amounts 
             il.setQuantity(new BigDecimal(numberOfPayments));
-            il.setDescription("Payment(s)");
+            il.setDescription("Payment(s)" + " --- " + ppPlanPaymentDetails);
+            productsAndServicesTotal = productsAndServicesTotal.add(bankFeesTotal);
             productsAndServicesTotal = productsAndServicesTotal.subtract(paymentsTotal);
             il.setPrice(paymentsTotal);
             paymentsTotal = paymentsTotal.negate();
             il.setAmount(paymentsTotal);
-            inv.getInvoiceLineCollection().add(il);
-            // add line item for bank fees
-            il.setQuantity(new BigDecimal(numberOfPayments));
-            il.setDescription("Bank Transaction Fees");
-            il.setPrice(bankFeesTotal);
-            il.setAmount(bankFeesTotal);
-            inv.getInvoiceLineCollection().add(il);
 
+            // add line item for bank fees
+            InvoiceLine il2 = new InvoiceLine(0);
+            il2.setTypeId(ilt);
+            il2.setQuantity(new BigDecimal(numberOfPayments));
+            il2.setDescription("Bank Transaction Fees");
+            il2.setPrice(bankFeesTotal);
+            il2.setAmount(bankFeesTotal);
+            inv.getInvoiceLineCollection().add(il2);
+            inv.getInvoiceLineCollection().add(il);
             inv.setTotal(productsAndServicesTotal);
             invoices.add(inv);
         }
@@ -1078,6 +1101,40 @@ public class EziDebitPaymentGateway implements Serializable {
         }
 
         Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.INFO, "Completed End Of Month Report");
+    }
+
+    private String getPaymentPeriodString(String key) {
+        String period = "";
+        switch (key) {
+            case "4":
+                period = "4 Weekly";
+                break;
+            case "W":
+                period = "Weekly";
+                break;
+            case "M":
+                period = "Monthly";
+                break;
+            case "F":
+                period = "Fortnightly";
+                break;
+            case "Z":
+                period = "No Schedule";
+                break;
+            case "Q":
+                period = "Quarterly";
+                break;
+            case "H":
+                period = "Half Yearly";
+                break;
+            case "Y":
+                period = "Annually";
+                break;
+            case "N":
+                period = "Weekday In Month";
+                break;
+        }
+        return period;
     }
 
     private List<Date> getWeeksInMonth(Date start, Date end) {

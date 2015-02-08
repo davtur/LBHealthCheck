@@ -245,3 +245,5 @@ logCashPaymentButtonLink=Log Cash Payment
 LogCashPaymentHeader=Log Cash Payment
 LogCashPaymentMessage=Record a cash or direct deposit payment in the system.
 AddPaymentLabel_paymentRef=Optional Reference
+CreateNotesDialogueMessage=Add a note or reminder for a customer.
+CreateNotesDialogueHeader=Add Notes & Reminders for

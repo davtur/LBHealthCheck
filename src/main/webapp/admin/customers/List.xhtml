@@ -81,7 +81,7 @@
 
 
                                 </f:facet>
-                                <p:ajax event="rowSelect"  listener="#{customersController.setSelecteDblClick}" update=":growl :tv:customerslistForm1:selectedUser :tv:formCustomersEdit1 :formCustomersCreate1 :tv:paymentsForm :tv:NoteslistForm1 :confirmCancellation "  />  
+                                <p:ajax event="rowSelect"  listener="#{customersController.setSelecteDblClick}" update=":growl :tv:customerslistForm1:selectedUser :tv:formCustomersEdit1 :formCustomersCreate1 :tv:paymentsForm :tv:NoteslistForm1 :confirmCancellation :confirmDialogNotesCreate1"  />  
                                 <p:column selectionMode="multiple" />
                                 <p:column sortBy="#{item.id}" filterBy="#{item.id}" headerText="#{configMapController.getKey('ListCustomersTitle_id')}"   >
                                     <h:outputText value="#{item.id}"/>
