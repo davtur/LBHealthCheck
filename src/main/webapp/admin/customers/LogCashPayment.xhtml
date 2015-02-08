@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" >
+ <ui:composition >
+        <!--<p:log />--> 
+        <p:confirmDialog id="logCashPaymentDialogue" message="#{configMapController.getKey('LogCashPaymentMessage')}"  closable="false"
+                         header="#{configMapController.getKey('LogCashPaymentHeader')}" severity="info" widgetVar="logCashPaymentDialogueWidget"> 
+            <h:form id="logCashPayment">    
+                <p:panelGrid id="logCashPaymentGrid1" columns="4">
+                    <p:outputLabel value="#{configMapController.getKey('AddPaymentLabel_debitdate')}" for="logCashDebitDate" />
+                    <p:calendar id="logCashDebitDate" pattern="dd MMM yyyy" value="#{ezidebit.paymentDebitDate}" title="#{configMapController.getKey('AddPaymentTitle_debitdate')}" required="true" requiredMessage="#{configMapController.getKey('AddPaymentRequiredMessage_debitdate')}" >
+                        <p:ajax />
+                    </p:calendar>
+                    <p:outputLabel value="#{configMapController.getKey('AddPaymentLabel_paymentAmount')}" for="logCashPayAmount" />
+                    <p:inputText id="logCashPayAmount" value="#{ezidebit.paymentAmountInCents}" title="#{configMapController.getKey('AddPaymentTitle_paymentAmount')}" required="true" requiredMessage="#{configMapController.getKey('AddPaymentRequiredMessage_paymentAmount')}">
+                        <f:convertNumber  minFractionDigits="2"/>
+                    </p:inputText>
+                     <p:outputLabel value="#{configMapController.getKey('AddPaymentLabel_paymentRef')}" for="logCashPayRef" />
+                    <p:inputText id="logCashPayRef" value="#{ezidebit.cashPaymentReceiptReference}" title="#{configMapController.getKey('AddPaymentLabel_paymentRef')}" />
+                       
+ 
+                    
+                </p:panelGrid>
+                <p:panel>
+                    <p:commandButton id="logCashPaymentdialogueSave"  oncomplete="PF('logCashPaymentDialogueWidget').hide();"  actionListener="#{ezidebit.logSingleCashPayment}" value="#{configMapController.getKey('AddPaymentSaveLink')}" update=":growl :tv:paymentsForm "/>                
+                    <p:commandButton id="logCashPaymentdialogueDiscard" onclick="PF('logCashPaymentDialogueWidget').hide()"  value="#{configMapController.getKey('AddPaymentDiscardLink')}" update=":growl"/>                
+                </p:panel>     
+            </h:form>
+        </p:confirmDialog>
+    </ui:composition> 
+    
+</html>

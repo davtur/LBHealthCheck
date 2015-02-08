@@ -255,10 +255,8 @@
                                     <h:outputText  rendered="#{not empty ezidebit.reportEndOfMonthListFilteredItems}" value="#{ezidebit.reportEndOfMonthListFilteredItems.size} Records Found"/>
                                     <h:outputText  rendered="#{empty ezidebit.reportEndOfMonthListFilteredItems}" value="#{ezidebit.reportEndOfMonthList.rowCount} Records Found"/>
                                 </p:outputPanel>
-                                <h:outputText value="Search all fields:" />
-                                <h:inputText id="globalFilter2" onkeyup="eomReportControllerTable.filter()" />
-
-                                <p:commandButton value="Export as PDF" ajax="false" rendered="#{ezidebit.reportEndOfMonthList.rowCount > 0}">
+                                <h:outputText value="End Of Month Report" style="width:300px"/>
+                                 <p:commandButton value="Export as PDF" ajax="false" rendered="#{ezidebit.reportEndOfMonthList.rowCount > 0}">
                                     <p:dataExporter type="pdf" target="eomReportDataTable" fileName="#{ezidebit.reportName}" preProcessor="#{ezidebit.preProcessPDF}"/>
                                 </p:commandButton>
                                 <p:commandButton value="Export as Excel" ajax="false" rendered="#{ezidebit.reportEndOfMonthList.rowCount > 0}">

@@ -196,7 +196,7 @@ public class EziDebitPaymentGateway implements Serializable {
     private boolean reportShowScheduled = false;
     private boolean manualRefreshFromPaymentGateway = false;
     private boolean customerCancellationConfirmed = false;
-
+    private String cashPaymentReceiptReference = "";
     private Integer progress;
     private AtomicBoolean pageLoaded = new AtomicBoolean(false);
     private Date reportStartDate;
@@ -985,11 +985,12 @@ public class EziDebitPaymentGateway implements Serializable {
             InvoiceLineType ilt = invoiceLineTypeFacade.findAll().get(1);
             InvoiceLine il = new InvoiceLine(0);
             BigDecimal paymentsTotal;
+            BigDecimal bankFeesTotal;
             BigDecimal productsAndServicesTotal = new BigDecimal(0);
             il.setTypeId(ilt);
 
             il.setQuantity(new BigDecimal(1));
-            il.setDescription("Plan: " +cust.getGroupPricing().getPlanName());
+            il.setDescription("Plan: " + cust.getGroupPricing().getPlanName());
             il.setPrice(cust.getGroupPricing().getPlanPrice());
             il.setAmount(cust.getGroupPricing().getPlanPrice());
             productsAndServicesTotal = productsAndServicesTotal.add(il.getAmount());
@@ -1015,8 +1016,8 @@ public class EziDebitPaymentGateway implements Serializable {
                             //total = total + sess.getSessionTypesId().
                         }
                     }
-                    if(count > 0){
-                    billableSessionsTotal += checkSessionsAgainstPlanWeek(count, cust, sessType);
+                    if (count > 0) {
+                        billableSessionsTotal += checkSessionsAgainstPlanWeek(count, cust, sessType);
                     }
                     weekStart = weekEnd;
                 }
@@ -1045,12 +1046,14 @@ public class EziDebitPaymentGateway implements Serializable {
             il = new InvoiceLine(0);
             il.setTypeId(ilt);
             paymentsTotal = new BigDecimal(0);
+            bankFeesTotal = new BigDecimal(0);
             int numberOfPayments = 0;
             for (Payments p : pl) {
                 paymentsTotal = paymentsTotal.add(p.getPaymentAmount());
+                bankFeesTotal = bankFeesTotal.add(p.getTransactionFeeCustomer());
                 numberOfPayments++;
             }
-
+            // add scheduled payment amounts 
             il.setQuantity(new BigDecimal(numberOfPayments));
             il.setDescription("Payment(s)");
             productsAndServicesTotal = productsAndServicesTotal.subtract(paymentsTotal);
@@ -1058,6 +1061,13 @@ public class EziDebitPaymentGateway implements Serializable {
             paymentsTotal = paymentsTotal.negate();
             il.setAmount(paymentsTotal);
             inv.getInvoiceLineCollection().add(il);
+            // add line item for bank fees
+            il.setQuantity(new BigDecimal(numberOfPayments));
+            il.setDescription("Bank Transaction Fees");
+            il.setPrice(bankFeesTotal);
+            il.setAmount(bankFeesTotal);
+            inv.getInvoiceLineCollection().add(il);
+
             inv.setTotal(productsAndServicesTotal);
             invoices.add(inv);
         }
@@ -1085,7 +1095,7 @@ public class EziDebitPaymentGateway implements Serializable {
         }
 
         return dl;
-    } 
+    }
 
     private int checkSessionsAgainstPlanWeek(int count, Customers cust, SessionTypes sessType) {
         int billableSessions = 0;
@@ -1102,7 +1112,7 @@ public class EziDebitPaymentGateway implements Serializable {
                 }
             }
         }
-        billableSessions = count - includedInPlanCount  ;
+        billableSessions = count - includedInPlanCount;
         if (billableSessions < 0) {
             billableSessions = 0;
         }
@@ -1119,7 +1129,7 @@ public class EziDebitPaymentGateway implements Serializable {
          if (paymentPeriod.contentEquals(PaymentPeriod.FORTNIGHTLY.value())) {
 
          }*/
-        logger.log(Level.INFO, "checkSessionsAgainstPlanWeek: Billed Sessions:{0}, Session Count:{1}, Customer: {2}, Plan: {5}, Session Type: {3}, Session Plan: {4}",new Object[]{billableSessions,count,cust.getUsername(),sessType.getName(),sessType.getPlan(),cust.getGroupPricing().getPlanName()});
+        logger.log(Level.INFO, "checkSessionsAgainstPlanWeek: Billed Sessions:{0}, Session Count:{1}, Customer: {2}, Plan: {5}, Session Type: {3}, Session Plan: {4}", new Object[]{billableSessions, count, cust.getUsername(), sessType.getName(), sessType.getPlan(), cust.getGroupPricing().getPlanName()});
         return billableSessions;
     }
 
@@ -1482,6 +1492,20 @@ public class EziDebitPaymentGateway implements Serializable {
      */
     public void setSelectedEomReportItem(Payments selectedEomReportItem) {
         this.selectedEomReportItem = selectedEomReportItem;
+    }
+
+    /**
+     * @return the cashPaymentReceiptReference
+     */
+    public String getCashPaymentReceiptReference() {
+        return cashPaymentReceiptReference;
+    }
+
+    /**
+     * @param cashPaymentReceiptReference the cashPaymentReceiptReference to set
+     */
+    public void setCashPaymentReceiptReference(String cashPaymentReceiptReference) {
+        this.cashPaymentReceiptReference = cashPaymentReceiptReference;
     }
 
     private class eziDebitThreadFactory implements ThreadFactory {
@@ -2909,6 +2933,39 @@ public class EziDebitPaymentGateway implements Serializable {
         paymentsDBListFilteredItems = null;
     }
 
+    public void logSingleCashPayment(ActionEvent actionEvent) {
+        try {
+            Payments newPayment = new Payments(0);
+            newPayment.setDebitDate(paymentDebitDate);
+            newPayment.setSettlementDate(paymentDebitDate);
+            newPayment.setCreateDatetime(new Date());
+            newPayment.setLastUpdatedDatetime(new Date());
+            newPayment.setYourSystemReference(selectedCustomer.getId().toString());
+            newPayment.setPaymentAmount(new BigDecimal(paymentAmountInCents));
+            newPayment.setCustomerName(selectedCustomer);
+            newPayment.setPaymentStatus(PaymentStatus.SUCESSFUL.value());
+            newPayment.setManuallyAddedPayment(true);
+            newPayment.setBankReturnCode("");
+            newPayment.setBankFailedReason("");
+            newPayment.setBankReceiptID(cashPaymentReceiptReference);
+            newPayment.setTransactionFeeClient(BigDecimal.ZERO);
+            newPayment.setTransactionFeeCustomer(BigDecimal.ZERO);
+            paymentsFacade.createAndFlush(newPayment);
+
+            String newPaymentID = newPayment.getId().toString();
+            newPayment.setPaymentReference(newPaymentID);
+            newPayment.setPaymentID("Cash_Payment" + "_" + newPaymentID);
+            paymentsFacade.edit(newPayment);
+            logger.log(Level.INFO, "Cash/Direct Deposit Payment Created for customer {0} with paymentID: {1}", new Object[]{selectedCustomer.getUsername(), newPaymentID});
+
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "Cash/Direct Deposit Payment Payment failed due to exception:", e);
+        }
+
+        paymentDBList = null;
+        paymentsDBListFilteredItems = null;
+    }
+
     public void clearSchedule(ActionEvent actionEvent) {
 
         String loggedInUser = FacesContext.getCurrentInstance().getExternalContext().getRemoteUser();
@@ -3014,6 +3071,7 @@ public class EziDebitPaymentGateway implements Serializable {
             eziStatus = "H";
         } else if (cs.getCustomerState().contains("CANCELLED")) {
             eziStatus = "C";
+            startAsynchJob("ClearSchedule", paymentBean.clearSchedule(cust, false, loggedInUser, getDigitalKey()));
         } else {
             logger.log(Level.WARNING, "Customer status is not one of ACTIVE,ON HOLD or CANCELLED. changeCustomerStatus aborted.");
             return;

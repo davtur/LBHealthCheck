@@ -44,9 +44,11 @@
                                 <p:commandButton id="changeStateButton"     actionListener="#{customersController.changeCustomersState}" value="#{configMapController.getKey('ListCustomersChangeStateButton')}"  update=":tv:customerslistForm1:customersTableList :growl" /> 
 
                             </h:panelGroup >
-                            <p:commandButton id="showDialogButton"  oncomplete="PF('customersCreateDialogue').show()"   actionListener="#{customersController.prepareCreateAjax}" value="#{configMapController.getKey('ListCustomersCreateLink')}"  update=":formCustomersCreate1:dialogueGrid  :growl" /> 
+                            <h:panelGroup >
+                                <p:commandButton id="addNoteDialogButton1"  value="#{configMapController.getKey('ListNotesCreateLink')}" onclick="PF('NotesCreateDialogue').show()" type="button"/> 
+                                <p:commandButton id="showDialogButton"  oncomplete="PF('customersCreateDialogue').show()"   actionListener="#{customersController.prepareCreateAjax}" value="#{configMapController.getKey('ListCustomersCreateLink')}"  update=":formCustomersCreate1:dialogueGrid  :growl" /> 
 
-
+                            </h:panelGroup >
                         </p:panelGrid>
                         <h:outputText escape="false" value="#{configMapController.getKey('ListCustomersEmpty')}" rendered="#{customersController.items.rowCount == 0}"/>
                         <h:panelGroup rendered="#{customersController.items.rowCount > 0}">
@@ -318,17 +320,19 @@
                                     <p:outputPanel>
                                         <p:outputPanel>
                                            <!-- <h:outputText  rendered="#{ezidebit.paymentsDBListFilteredItems != null}" value="#{ezidebit.paymentsDBListFilteredItems.size} Records Found" />-->
-                                               
+
                                             <h:outputText  rendered="#{ezidebit.paymentDBList != null}" value="#{ezidebit.paymentDBList.rowCount} Records Found" />
-                                                
+
                                         </p:outputPanel>
                                         <h:outputText value="Payments" />
+                                        <p:commandButton id="logCashPaymentButton" oncomplete="PF('logCashPaymentDialogueWidget').show();"    value="#{configMapController.getKey('logCashPaymentButtonLink')}"  update=":growl " /> 
+
                                         <p:commandButton id="showAddPaymentButton" rendered="#{ezidebit.waitingForPaymentDetails == false and ezidebit.customerCancelledInPaymentGateway == false and ezidebit.customerExistsInPaymentGateway == true}" oncomplete="PF('createPaymentDialogueWidget').show();"    value="#{configMapController.getKey('AddPaymentButtonLink')}"  update=":growl " /> 
                                         <p:commandButton id="showAddPaymentScheduleButton" rendered="#{ezidebit.waitingForPaymentDetails == false and ezidebit.customerCancelledInPaymentGateway == false and ezidebit.customerExistsInPaymentGateway == true}" oncomplete="PF('createPaymentScheduleDialogueWidget').show();"    value="#{configMapController.getKey('AddPaymentScheduleButtonLink')}" update=":growl "  /> 
                                         <p:commandButton id="showClearScheduleButton" rendered="#{ezidebit.waitingForPaymentDetails == false and ezidebit.customerCancelledInPaymentGateway == false and ezidebit.customerExistsInPaymentGateway == true}" oncomplete="PF('clearScheduleDialogueWidget').show();"    value="#{configMapController.getKey('ClearScheduleButtonLink')}" update=":growl "  /> 
 
                                         <p:commandButton  process=":tv:paymentsForm:paymentsTable2" rendered="#{fitnessTestChartsController.isUserInRole('ADMIN')}" id="deleteButton" icon="ui-icon-trash"  value="#{configMapController.getKey('Delete')}" actionListener="#{ezidebit.deleteScheduledPayment}" update=":growl :tv:paymentsForm:scheduledPaymentsTable :tv:paymentsForm:paymentsTable2 " disabled="#{empty fitnessTestChartsController.selected}"/>
-
+                                        <p:commandButton id="addNoteDialogButton2"  value="#{configMapController.getKey('ListNotesCreateLink')}" onclick="PF('NotesCreateDialogue').show()" type="button"/> 
                                     </p:outputPanel>
                                 </f:facet>
 
@@ -440,7 +444,7 @@
                                             <!--<h:outputText  rendered="#{ezidebit.paymentsListFilteredItems != null}" value="#{ezidebit.paymentsListFilteredItems.size} Records Found"/>
                                              
                                             <h:outputText  rendered="#{ezidebit.paymentsList != null}" value="#{ezidebit.paymentsList.size} Records Found"/>-->
-                                              
+
                                         </p:outputPanel> 
 
                                         <h:outputText value="Payments" />
@@ -499,7 +503,7 @@
                                            
                                                
                                             <h:outputText  rendered="#{ezidebit.scheduledPaymentsList != null}" value="#{ezidebit.scheduledPaymentsList.size} Records Found"/> -->
-                                              
+
                                         </p:outputPanel> 
 
                                         <h:outputText value="Scheduled Payments" />
@@ -588,27 +592,7 @@
 
                 <p:tab id="tab4" title="Customer Notes"  >  
 
-                    <h:form id="formNotesCreate1">
-                        <p:confirmDialog id="confirmDialogNotesCreate1" message="Add Customer Natoes"  
-                                         header="#{configMapController.getKey('CreateNotesTitle')}" severity="info" widgetVar="NotesCreateDialogue"> 
 
-                            <p:panelGrid columns="2">
-                                <p:outputLabel value="#{configMapController.getKey('CreateNotesLabel_note')}" for="note" />
-                                <p:inputTextarea rows="4" cols="30" id="note" value="#{notesController.selected.note}" title="#{configMapController.getKey('CreateNotesTitle_note')}" />
-
-                                <h:outputLabel for="reminderDate" value="Reminder:" />
-                                <p:calendar id="reminderDate" disabled="#{!notesController.reminder}" value="#{notesController.reminderDate}"  pattern="dd/MM/yyyy HH:mm">  
-                                    <p:ajax event="dateSelect" listener="#{notesController.handleReminderDateSelect}" update=":growl "  />
-                                </p:calendar>
-                                <h:outputLabel for="reminder" value="Add Reminder:" />
-                                <h:selectBooleanCheckbox id="reminder" value="#{notesController.reminder}" >
-                                    <p:ajax update=":growl :tv:formNotesCreate1:reminderDate" />
-                                </h:selectBooleanCheckbox>
-                                <p:commandButton oncomplete="PF('NotesCreateDialogue').hide();PF('notesControllerTable').filter()" actionListener="#{notesController.createDialogue}" value="#{configMapController.getKey('CreateNotesSaveLink')}" update=":growl :tv:NoteslistForm1 :tv:formNotesCreate1"/>                
-
-                            </p:panelGrid>
-                        </p:confirmDialog>
-                    </h:form>
                     <h:form id="NoteslistForm1">
                         <h:panelGroup >
                             <p:commandButton id="showDialogButton2"  value="#{configMapController.getKey('ListNotesCreateLink')}" onclick="PF('NotesCreateDialogue').show()" type="button"/> 
@@ -709,6 +693,8 @@
             <ui:include src="ClearSchedule.xhtml"/>
             <ui:include src="CreateEddrLink.xhtml"/>
             <ui:include src="CreatePayment.xhtml"/>
+            <ui:include src="LogCashPayment.xhtml"/>
+            <ui:include src="AddCustomerNotesDialogue.xhtml"/>
             <ui:include src="confirmCancelDialogue.xhtml"/>
             <ui:include src="EditPaymentMethod.xhtml"/>
         </ui:define>

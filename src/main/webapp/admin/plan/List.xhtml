@@ -208,7 +208,7 @@
                                     <h:outputText value="#{item.planName} #{configMapController.getKey('PlanRowExpansionHeader')}" />
 
                                 </f:facet>
-                                <p:column  headerText="#{configMapController.getKey('ListPlanTitle_id')}"   >
+                                <p:column  headerText="#{configMapController.getKey('ListPlanSubItemDeleteButtonColumnHeader')}"   >
                                     <p:commandButton id="deleteSubButton" value="#{configMapController.getKey('ListPlanDestroyLink')}"  update=":growl :PlanlistForm1"  >
                                         <f:setPropertyActionListener target="#{planController.selectedSubItemAndDelete}" value="#{subItem}" />
                                     </p:commandButton>
