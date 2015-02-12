@@ -78,12 +78,12 @@
                         </h:outputText>
                     </p:panelGrid>
 
-                    <h:outputText escape="false" value="#{configMapController.getKey('ListReportEmpty')}" rendered="#{ezidebit.reportPaymentsList.rowCount == 0}"/>
+                    <!--<h:outputText escape="false" value="#{configMapController.getKey('ListReportEmpty')}" rendered="#{ezidebit.reportPaymentsList.rowCount == 0}"/>-->
 
                 </p:panelGrid>
-                <h:outputText escape="false" value="#{configMapController.getKey('ListPaymentsEmpty')}" rendered="#{ezidebit.reportPaymentsList.rowCount == 0}"/>
+                <h:outputText escape="false" value="#{configMapController.getKey('ListPaymentsEmpty')}" rendered="#{ezidebit.reportPaymentsList.rowCount == 0  and (ezidebit.reportType == 0 or ezidebit.reportType == 1 )}"/>
 
-                <h:panelGroup   rendered="#{ezidebit.reportPaymentsList.rowCount > 0}">
+                <h:panelGroup   rendered="#{ezidebit.reportPaymentsList.rowCount > 0 }">
 
                     <p:dataTable  
                         id="reportDataTable"  

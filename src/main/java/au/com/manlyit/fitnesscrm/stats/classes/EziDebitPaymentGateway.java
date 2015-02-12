@@ -1391,6 +1391,7 @@ public class EziDebitPaymentGateway implements Serializable {
      * @return the reportType
      */
     public int getReportType() {
+        
         return reportType;
     }
 
