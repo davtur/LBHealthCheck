@@ -18,13 +18,18 @@ import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
-import javax.persistence.criteria.CollectionJoin;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
+import org.eclipse.persistence.internal.jpa.EJBQueryImpl;
+import org.eclipse.persistence.jpa.JpaEntityManager;
+import org.eclipse.persistence.queries.DatabaseQuery;
+import org.eclipse.persistence.sessions.DatabaseRecord;
+import org.eclipse.persistence.sessions.Session;
 
 /**
  *
@@ -223,7 +228,7 @@ public class CustomersFacade extends AbstractFacade<Customers> {
          return cm;*/
     }
 
-    public List<Customers> findAllActiveCustomers(boolean sortAsc) {
+    public List<Customers> findAllActiveCustomers2(boolean sortAsc) {
         List retList = null;
         String state = "ACTIVE";//Active
         try {
@@ -249,8 +254,78 @@ public class CustomersFacade extends AbstractFacade<Customers> {
         }
         return retList;
     }
+    public List<Customers> findAllActiveCustomers(boolean sortAsc) {
+       return findFilteredCustomers(sortAsc,new CustomerState[]{new CustomerState(0,"ACTIVE")},false,false);
+    }
 
-    public List<Customers> findFilteredCustomers(boolean sortAsc, CustomerState[] selectedCustomerStates, boolean showTrainers, boolean bypassCache) {
+    public List<Customers> findFilteredCustomers(boolean sortAsc, CustomerState[] selectedCustomerStates, boolean showStaff, boolean bypassCache) {
+        List<Customers> retList = null;
+        if (selectedCustomerStates == null || selectedCustomerStates.length == 0) {
+            return new ArrayList<>();
+        }
+         try {
+            ArrayList<Predicate> predicatesList = new ArrayList<>();
+            ArrayList<Predicate> predicatesList2 = new ArrayList<>();
+            CriteriaBuilder cb = em.getCriteriaBuilder();
+
+            CriteriaQuery<Customers> cq = cb.createQuery(Customers.class);
+            Root<Customers> rt = cq.from(Customers.class);
+            cq.select(rt);
+
+            Subquery<String> subquery = cq.subquery(String.class);
+            Root<Groups> fromGroups = subquery.from(Groups.class);
+            Expression<String> subUser = fromGroups.get("username").get("username");
+            subquery.select(subUser);
+
+            Join<Customers, CustomerState> jn = rt.join("active");// join customers.active to customer_state.id
+
+            Expression<String> custState = jn.get("customerState");
+            Expression<String> groupName = fromGroups.get("groupname");
+            Expression<String> user = rt.get("username");
+
+            predicatesList2.add(cb.equal(groupName, "TRAINER"));
+            predicatesList2.add(cb.equal(groupName, "ADMIN"));
+            predicatesList2.add(cb.equal(groupName, "DEVELOPER"));
+
+            for (CustomerState cs : selectedCustomerStates) {
+                predicatesList.add(cb.equal(custState, cs.getCustomerState()));
+            }
+            if (showStaff == false) {
+
+                subquery.where(cb.or(predicatesList2.<Predicate>toArray(new Predicate[predicatesList2.size()])));
+                Predicate pred = cb.not(user.in(subquery));
+                cq.where(cb.and(cb.or(predicatesList.<Predicate>toArray(new Predicate[predicatesList.size()])), pred));
+            } else {
+                cq.where(cb.or(predicatesList.<Predicate>toArray(new Predicate[predicatesList.size()])));
+            }
+            Expression<String> express = rt.get("firstname");
+            if (sortAsc) {
+                cq.orderBy(cb.asc(express));
+            } else {
+                cq.orderBy(cb.desc(express));
+            }
+            Query q = em.createQuery(cq);
+            if (bypassCache) {
+                q.setHint("javax.persistence.cache.retrieveMode", "BYPASS");
+            }
+
+            retList = q.getResultList();
+            // for debugging
+            Session session = getEntityManager().unwrap(JpaEntityManager.class).getActiveSession();
+            DatabaseQuery databaseQuery = ((EJBQueryImpl) q).getDatabaseQuery();
+            databaseQuery.prepareCall(session, new DatabaseRecord());
+            String sqlString = databaseQuery.getSQLString();
+            //This SQL will contain ? for parameters. To get the SQL translated with the arguments you need a DatabaseRecord with the parameter values.
+            // String sqlString2 = databaseQuery.getTranslatedSQLString(session, recordWithValues);
+            logger.log(Level.INFO, "Payment/Settlement Report SQL Query String: {0}  -----------------Records Found:{1},", new Object[]{sqlString, retList.size()});
+
+        } catch (Exception e) {
+            JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
+        }
+        return retList;
+    }
+
+ /*   public List<Customers> findFilteredCustomers(boolean sortAsc, CustomerState[] selectedCustomerStates, boolean showTrainers, boolean bypassCache) {
         List<Customers> retList = null;
         if (selectedCustomerStates == null || selectedCustomerStates.length == 0) {
             return new ArrayList<>();
@@ -315,7 +390,7 @@ public class CustomersFacade extends AbstractFacade<Customers> {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
         }
         return retList;
-    }
+    }*/
 
     public List<Customers> findAll(boolean sortAsc) {
         List retList = null;
