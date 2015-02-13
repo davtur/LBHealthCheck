@@ -57,8 +57,10 @@ public class MySessionsChart1 implements Serializable {
     @PostConstruct
     private void initDates() {
         GregorianCalendar cal1 = new GregorianCalendar();
+        cal1.add(Calendar.DAY_OF_YEAR, 1);
         setEndDate(cal1.getTime());
-        cal1.add(Calendar.MONTH, -3);
+        cal1.add(Calendar.DAY_OF_YEAR, -1);
+        cal1.add(Calendar.MONTH, -2);
         setStartDate(cal1.getTime());
     }
 
@@ -98,6 +100,11 @@ public class MySessionsChart1 implements Serializable {
         ptSessionSeries.setLabel("PT Sessions");
         int weeksToDisplay = 26;
         GregorianCalendar cal = new GregorianCalendar();
+        cal.set(Calendar.MILLISECOND, 999);
+        cal.set(Calendar.SECOND, 59);
+        cal.set(Calendar.MINUTE, 59);
+        cal.set(Calendar.HOUR_OF_DAY, 23);
+        
 
         try {
             for (int x = 0; x < weeksToDisplay; x++) {
@@ -124,7 +131,7 @@ public class MySessionsChart1 implements Serializable {
     public Date getChartStartTime() {
         GregorianCalendar startCal = new GregorianCalendar();
         startCal.setTime(getStartDate());
-        startCal.set(Calendar.HOUR, 0);
+        startCal.set(Calendar.HOUR_OF_DAY, 0);
         startCal.set(Calendar.SECOND, 0);
         startCal.set(Calendar.MINUTE, 0);
         startCal.set(Calendar.MILLISECOND, 0);
@@ -135,10 +142,10 @@ public class MySessionsChart1 implements Serializable {
     public Date getChartEndTime() {
         GregorianCalendar endCal = new GregorianCalendar();
         endCal.setTime(getEndDate());
-        endCal.set(Calendar.HOUR, 0);
-        endCal.set(Calendar.SECOND, 0);
-        endCal.set(Calendar.MINUTE, 0);
-        endCal.set(Calendar.MILLISECOND, 0);
+        endCal.set(Calendar.HOUR_OF_DAY, 23);
+        endCal.set(Calendar.SECOND, 59);
+        endCal.set(Calendar.MINUTE, 59);
+        endCal.set(Calendar.MILLISECOND, 999);
         setEndDate(endCal.getTime());
         return endCal.getTime();
     }

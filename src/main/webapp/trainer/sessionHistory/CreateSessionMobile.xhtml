@@ -81,66 +81,29 @@
                     </pm:field>
                     <p:spacer height="10em" />
                     <pm:field>
-                        <p:outputLabel for="scroll" value="#{configMapController.getKey('CreateSessionHistoryLabel_picker')}" />
-                        <!--<p:selectCheckboxMenu  id="scroll" filter="true" filterMatchMode="startsWith" 
-                                               value="#{sessionHistoryController.attendingCustomers}"  
-                                               converter="#{custConverter}" 
-                                               label="#{configMapController.getKey('CreateSessionHistoryLabel_picker')}"
-                                               > 
-
-                            <f:selectItems value="#{sessionHistoryController.activeCustomers}" 
-                                           var="cust"  
-                                           itemLabel="#{cust.firstname} #{cust.lastname}" 
-                                           itemValue="#{cust}" />  
-
-                        </p:selectCheckboxMenu>-->
-                        <p:dataList  id="scroll"   value="#{sessionHistoryController.selectableActiveCustomers}" var="cust" rowIndexVar="rowIndex" >
-                            <f:attribute name="filter" value="true" />
-                            <p:column>
-                                <h:panelGrid id="customerPanel" columns="3" >
-                                   <!-- <h:outputText value="#{rowIndex}" style="padding-left: 30px"/>-->
-                                   <p:graphicImage value="#{customerImagesController.dynamicImage}" width="50px">
-                                        <f:param name="imageid" value="#{cust.profileImage.id}"/>
-                                    </p:graphicImage>
-                                   <p:selectBooleanCheckbox id="btnAttendedSession" value="#{sessionHistoryController.checkedCustomers[rowIndex]}" style="text-align: right"/>
-                                     <!--   <p:ajax update="btnAttendedSession" listener="#{sessionHistoryController.updateSelectedCustomers()}" event="click" process="btnAttendedSession"/>
-                                    </p:selectBooleanCheckbox>-->
-                                     
-                                    <h:outputText value="#{cust.firstname} #{cust.lastname}" style="padding-left: 30px"/>
-                                </h:panelGrid>
-                            </p:column>
-                        </p:dataList>
-
+                        <p:outputLabel for="attendanceCount" value="#{configMapController.getKey('CreateSessionHistoryLabel_picker')}" />
+                        <p:panel id="attendanceCount" header="#{configMapController.getKey('CreateSessionHistoryLabel_totalSelected')}#{sessionHistoryController.numberThatAttendedSession}" footer="#{configMapController.getKey('CreateSessionHistoryLabel_totalSelected')}#{sessionHistoryController.numberThatAttendedSession}">
+                            <p:dataList  id="scroll"   value="#{sessionHistoryController.selectableActiveCustomers}" var="cust" rowIndexVar="rowIndex" >
+                                <f:attribute name="filter" value="true" />
+                                <p:column>
+                                    <h:panelGrid id="customerPanel" columns="3" >
+                                        <p:graphicImage value="#{customerImagesController.dynamicImage}" width="50px">
+                                            <f:param name="imageid" value="#{cust.profileImage.id}"/>
+                                        </p:graphicImage>
+                                        <p:selectBooleanCheckbox id="btnAttendedSession" value="#{sessionHistoryController.checkedCustomers[rowIndex]}"  style="text-align: right">
+                                            <p:ajax update=":sessions:sessionsForm:attendanceCount"  event="change" />
+                                        </p:selectBooleanCheckbox>
+                                        <h:outputText value="#{cust.firstname} #{cust.lastname}" style="padding-left: 30px"/>
+                                    </h:panelGrid>
+                                </p:column>
+                            </p:dataList>
+                        </p:panel>
                     </pm:field>
                     <p:spacer height="10em" />
                     <p:spacer height="10em" />
                     <p:commandButton   ajax="false"   action="#{sessionHistoryController.createMobileDatalist}" value="#{configMapController.getKey('CreateSessionHistorySaveLink')}" />
                 </h:form>
-                <!-- <p:dialog id="createNotesDialog" widgetVar="createSessionDlg">
-                     <h:form id="dlgCSForm">  
-
-                         <p:dataList    value="#{customersController.items}" var="cust">
-                             <f:attribute name="filter" value="true" />
-                             <p:column>
-                                 <p:commandLink action="/trainer/sessionHistory/CreateCustomerNotes?faces-redirect=true" ajax="false" >
-                                     <h:outputText value="#{notes.createTimestamp}">
-                                         <f:convertDateTime pattern="dd MMM yyyy  HH:mm" />
-                                     </h:outputText> 
-                                     <h:outputText value="#{cust.firstname} #{cust.lastname}"/>
-                                     <h:outputText styleClass="ui-li-count" value="Edit"/>           
-
-                                     <f:setPropertyActionListener value="#{cust}" target="#{notesController.selectedUser}"  />
-
-                                 </p:commandLink> 
-                             </p:column>
-                         </p:dataList>
-                     </h:form>
-                 </p:dialog> -->
-
-
-
             </pm:content>
-
         </pm:page>
     </h:body>
 </html>

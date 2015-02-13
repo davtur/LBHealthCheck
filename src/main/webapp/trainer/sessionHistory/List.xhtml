@@ -95,7 +95,7 @@
 
                         <p:column sortBy="#{item.sessiondate}"  filterBy="#{item.sessiondate}"   headerText="#{configMapController.getKey('ListSessionHistoryTitle_sessiondate')}" >                       
                             <h:outputText value="#{item.sessiondate}">
-                                <f:convertDateTime pattern="dd/MM/yyyy h:mm" />
+                                <f:convertDateTime pattern="dd MMM yyyy -- h:mm a"  />
                             </h:outputText>
                         </p:column>
                         <p:column sortBy="#{item.sessionTrainersCollection[0].customerId.firstname}"  exportable="false" headerText="#{configMapController.getKey('ListSessionHistoryTitle_Trainers')}">

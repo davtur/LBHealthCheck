@@ -139,7 +139,7 @@ ViewFitnessTestChartsLabel_description=Description
 ViewFitnessTestChartsLabel_yaxisLabel=Y Axis Label
 
 EditFitnessTestChartsTitle=Edit Chart Parameters
-EditFitnessTestChartsLabel_id=id
+EditFitnessTestChartsLabel_id=idCreateSessionHistoryLabel_totalSelected
 EditFitnessTestChartsLabel_name=Name
 EditFitnessTestChartsLabel_description=Description
 EditFitnessTestChartsLabel_yaxisLabel=Y Axis Label
@@ -247,3 +247,5 @@ LogCashPaymentMessage=Record a cash or direct deposit payment in the system.
 AddPaymentLabel_paymentRef=Optional Reference
 CreateNotesDialogueMessage=Add a note or reminder for a customer.
 CreateNotesDialogueHeader=Add Notes & Reminders for
+CreateSessionHistoryLabel_totalSelected=Total Selected: 
+

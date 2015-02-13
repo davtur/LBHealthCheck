@@ -95,7 +95,7 @@ public class SessionHistoryController implements Serializable {
     private au.com.manlyit.fitnesscrm.stats.beans.SessionTrainersFacade ejbSessionTrainersFacade;
     @Inject
     private ConfigMapFacade configMapFacade;
-     @Inject
+    @Inject
     private AuditLogFacade auditLogFacade;
     private DatatableSelectionHelper pagination;
     private DatatableSelectionHelper customerPagination;
@@ -107,6 +107,7 @@ public class SessionHistoryController implements Serializable {
     private List<Customers> trainers;
     private int hourSpinner = 0;
     private int minuteSpinner = 0;
+    private int numberThatAttendedSession = 0;
     private boolean showAllSessionsByTrainer = false;
     private String exportFileName = "export";
 
@@ -387,12 +388,13 @@ public class SessionHistoryController implements Serializable {
         try {
             attendingCustomers = new ArrayList<>();
             for (int x = 0; x < checkedCustomers.length; x++) {
-                if (checkedCustomers[x] == true) {
+                 Boolean b = checkedCustomers[x];
+                if (b != null && b == true) {
                     Customers selectedCust = selectableActiveCustomers.get(x);
                     attendingCustomers.add(selectedCust);
                 }
             }
-
+            participants.setTarget(attendingCustomers);
             createDialogue();
             return prepareCreateMobileReturnMainMenu();
         } catch (Exception e) {
@@ -436,7 +438,7 @@ public class SessionHistoryController implements Serializable {
                 String changedTo = "New Session " + current.getSessionTypesId().getName();
                 auditLogFacade.audit(cust, cust, "Create Session", auditDetails, changedFrom, changedTo);
             } catch (Exception e) {
-                logger.log(Level.SEVERE, "Add new Session audit log failed due to an unhandled exception.",e);
+                logger.log(Level.SEVERE, "Add new Session audit log failed due to an unhandled exception.", e);
             }
             current = null;
 
@@ -1161,6 +1163,31 @@ public class SessionHistoryController implements Serializable {
      */
     public void setCustomerOrTrainerfilteredItems(List<SessionHistory> customerOrTrainerfilteredItems) {
         this.customerOrTrainerfilteredItems = customerOrTrainerfilteredItems;
+    }
+
+    /**
+     * @return the numberThatAttendedSession
+     */
+    public int getNumberThatAttendedSession() {
+        int count = 0;
+        if (checkedCustomers != null) {
+            for (int x = 0;x <checkedCustomers.length; x++) {
+                Boolean b = checkedCustomers[x];
+                if (b != null && b == true) {
+                    count++;
+                }
+            }
+        }
+        numberThatAttendedSession = count;
+        return numberThatAttendedSession;
+    }
+
+    /**
+     * @param numberThatAttendedSession the numberThatAttendedSession to set
+     */
+    public void setNumberThatAttendedSession(int numberThatAttendedSession) {
+
+        this.numberThatAttendedSession = numberThatAttendedSession;
     }
 
     @FacesConverter(forClass = SessionHistory.class)
