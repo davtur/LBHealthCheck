@@ -81,7 +81,7 @@ public class MySessionsChart1 implements Serializable {
     private au.com.manlyit.fitnesscrm.stats.beans.GroupsFacade ejbGroupsFacade;
 
     //@PostConstruct
-    public void createChart() {
+   /* public void createChart() {
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yy");
         FacesContext context = FacesContext.getCurrentInstance();
         Customers loggedInUser = null;
@@ -126,7 +126,7 @@ public class MySessionsChart1 implements Serializable {
         model.addSeries(groupSessionSeries);
         model.addSeries(ptSessionSeries);
 
-    }
+    }*/
 
     public Date getChartStartTime() {
         GregorianCalendar startCal = new GregorianCalendar();

@@ -714,7 +714,9 @@ public class SessionHistoryController implements Serializable {
 
         try {
             MySessionsChart1 controller = (MySessionsChart1) context.getApplication().evaluateExpressionGet(context, "#{mySessionsChart1}", MySessionsChart1.class);
-            controller.createChart();
+           //            controller.createChart();
+            
+            controller.recreateModel();
         } catch (ELException e) {
             JsfUtil.addErrorMessage(e, "My Sessions Chart create method exception..");
         }
