@@ -91,9 +91,34 @@
                     <p:password id="password"  value="#{customersController.checkPass}" onfocus="this.select()" feedback="true" title="#{configMapController.getKey('EditCustomersTitle_password')}" >
                         <p:ajax listener="#{customersController.checkPassChange}" event="keyup" />
                     </p:password>
+
+                    <!-- <p:outputLabel  value="Groups:    " for="selectedGroupsCheckbox"/>
+                     <p:selectManyCheckbox id="selectedGroupsCheckbox" value="#{customersController.selectedGroups}" label="Show Cancelled"   converter="customerGroupsConverter">
+                         <f:selectItems value="#{customersController.customerGroupsList}" var="custState" itemLabel="#{custState.groupname}" itemValue="#{custState}" />
+<p:ajax  event="change" />
+                     </p:selectManyCheckbox>-->
+
+
+                    <p:panel>
+                        <p:dataList  id="scroll"   value="#{customersController.customerGroupsList}" var="group" rowIndexVar="rowIndex"  >
+                            <!-- <f:attribute name="filter" value="true" />-->
+                            <p:row>
+                                <h:panelGrid id="customerPanel" columns="3" >
+
+                                    <p:selectBooleanCheckbox id="btnAttendedSession" value="#{customersController.checkedGroups[rowIndex]}"  >
+                                        <p:ajax   event="change" listener="#{customersController.groupChangedChangeListener}"/>
+                                    </p:selectBooleanCheckbox>
+                                    <h:outputText value="#{group.groupname}" />
+                                </h:panelGrid>
+                            </p:row>
+                        </p:dataList>
+
+
+                    </p:panel>
+
                 </p:panelGrid>
                 <p:panel><!--  onclick="handleSubmit(args,'customersCreateDialogue');"-->
-                    <p:commandButton id="dialogueSave" disabled="#{customersController.addUserButtonDisabled}" onclick="PF('customersCreateDialogue').hide()"  actionListener="#{customersController.createDialogue}" value="#{configMapController.getKey('CreateCustomersSaveLink')}" update=":growl :tv:customerslistForm1 :tv:formCustomersEdit1 :formCustomersCreate1 :tv:paymentsForm :tv:NoteslistForm1"/>                
+                    <p:commandButton id="dialogueSave" disabled="#{customersController.addUserButtonDisabled}" onclick="PF('customersCreateDialogue').hide()"  actionListener="#{customersController.createDialogue}"  value="#{configMapController.getKey('CreateCustomersSaveLink')}" update=":growl :tv:customerslistForm1 :tv:formCustomersEdit1 :formCustomersCreate1 :tv:paymentsForm :tv:NoteslistForm1"/>                
                     <p:commandButton id="dialogueDiscard" onclick="PF('customersCreateDialogue').hide()"  actionListener="#{customersController.cancelCreateDialogue}" value="#{configMapController.getKey('CreateCustomersDiscardLink')}" update=":growl"/>                
 
                 </p:panel>

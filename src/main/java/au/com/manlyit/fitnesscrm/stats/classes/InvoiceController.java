@@ -1,16 +1,56 @@
 package au.com.manlyit.fitnesscrm.stats.classes;
 
+import au.com.manlyit.fitnesscrm.stats.beans.CurrencyFacade;
 import au.com.manlyit.fitnesscrm.stats.db.Invoice;
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PaginationHelper;
 import au.com.manlyit.fitnesscrm.stats.beans.InvoiceFacade;
+import au.com.manlyit.fitnesscrm.stats.beans.PaymentsFacade;
+import au.com.manlyit.fitnesscrm.stats.beans.SessionHistoryFacade;
+import au.com.manlyit.fitnesscrm.stats.beans.SessionTypesFacade;
+import au.com.manlyit.fitnesscrm.stats.classes.util.PfSelectableDataModel;
+import au.com.manlyit.fitnesscrm.stats.db.Customers;
+import au.com.manlyit.fitnesscrm.stats.db.InvoiceLine;
+import au.com.manlyit.fitnesscrm.stats.db.InvoiceLineType;
+import au.com.manlyit.fitnesscrm.stats.db.PaymentParameters;
+import au.com.manlyit.fitnesscrm.stats.db.Payments;
+import au.com.manlyit.fitnesscrm.stats.db.Plan;
+import au.com.manlyit.fitnesscrm.stats.db.SessionHistory;
+import au.com.manlyit.fitnesscrm.stats.db.SessionTypes;
+import com.lowagie.text.BadElementException;
+import com.lowagie.text.Document;
+import com.lowagie.text.DocumentException;
+import com.lowagie.text.Image;
+import com.lowagie.text.PageSize;
+
+import com.lowagie.text.Paragraph;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
+import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
 
 import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.SessionScoped;
 
 import javax.faces.component.UIComponent;
+import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.faces.convert.Converter;
 import javax.faces.convert.FacesConverter;
@@ -21,25 +61,82 @@ import javax.faces.event.ValueChangeEvent;
 import javax.faces.event.ActionEvent;
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.servlet.ServletContext;
+import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.hssf.usermodel.HSSFCellStyle;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.hssf.util.HSSFColor;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.DataFormat;
+import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.primefaces.context.RequestContext;
 import org.primefaces.event.SelectEvent;
 import org.primefaces.event.RowEditEvent;
+
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.primefaces.model.DefaultStreamedContent;
+import org.primefaces.model.StreamedContent;
+import org.primefaces.util.Constants;
 
 @Named("invoiceController")
 @SessionScoped
 public class InvoiceController implements Serializable {
 
+    private static final Logger logger = Logger.getLogger(InvoiceController.class.getName());
     private Invoice current;
-    private Invoice selectedForDeletion;
-    private DataModel items = null;
+    private Invoice lastGeneratedInvoice;
+    private InvoiceLine selectedInvoiceLineItem;
+    private List<Invoice> invoiceFilteredItems;
+    private List<InvoiceLine> invoiceLineFilteredItems;
+    private PfSelectableDataModel items = null;
+    private String invoiceFileName = "invoice-download";
+    private Customers selectedCustomer;
+    private Date invoiceStartDate;
+    private Date invoiceEndDate;
+    private boolean invoiceUseSettlementDate = false;
+    private boolean invoiceShowSuccessful = true;
+    private boolean invoiceShowFailed = false;
+    private boolean invoiceShowPending = false;
+    private boolean invoiceShowScheduled = false;
+    private int invoiceType = 0;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.InvoiceFacade ejbFacade;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade configMapFacade;
-
+    @Inject
+    private SessionHistoryFacade sessionHistoryFacade;
+    @Inject
+    private au.com.manlyit.fitnesscrm.stats.beans.InvoiceLineTypeFacade invoiceLineTypeFacade;
+    @Inject
+    private au.com.manlyit.fitnesscrm.stats.beans.InvoiceLineFacade invoiceLineFacade;
+    @Inject
+    private au.com.manlyit.fitnesscrm.stats.beans.InvoiceFacade invoiceFacade;
+    @Inject
+    private SessionTypesFacade sessionTypesFacade;
+    @Inject
+    private PaymentsFacade paymentsFacade;
+    @Inject
+    private CurrencyFacade currencyFacade;
     private PaginationHelper pagination;
     private int selectedItemIndex;
 
     public InvoiceController() {
+    }
+
+    @PostConstruct
+    private void initDates() {
+
+        GregorianCalendar cal = new GregorianCalendar();
+        invoiceEndDate = cal.getTime();
+        cal.add(Calendar.DAY_OF_YEAR, -28);
+        invoiceStartDate = cal.getTime();
     }
 
     public static boolean isUserInRole(String roleName) {
@@ -47,11 +144,377 @@ public class InvoiceController implements Serializable {
         return inRole;
     }
 
-    public Invoice getSelected() {
-        if (current == null) {
-            current = new Invoice();
-            selectedItemIndex = -1;
+    public void invoiceParametersChanged() {
+        JsfUtil.addSuccessMessage("Invoice Updated", "Successfully Updated Invoice Parameters");
+        RequestContext.getCurrentInstance().update(":growl");
+    }
+
+    public void generateInvoice() {
+        current = generateInvoiceForCustomer(selectedCustomer, invoiceUseSettlementDate, invoiceShowSuccessful, invoiceShowFailed, invoiceShowPending, isInvoiceShowScheduled(), invoiceStartDate, invoiceEndDate);
+        current.setCreateTimestamp(new Date());
+        current.setCreateDatetime(invoiceStartDate);
+        current.setStatusId(1);
+        current.setDueDate(invoiceEndDate);
+        current.setPaymentAttempts(0);
+        current.setCarriedBalance(BigDecimal.ZERO);
+        current.setInProcessPayment((short) 0);
+        current.setIsReview(0);
+        current.setCurrencyId(currencyFacade.find(10));
+
+        createDialogue(null);
+        RequestContext.getCurrentInstance().update("InvoicelistForm1");
+    }
+
+    public Invoice generateInvoiceForCustomer(Customers cust, boolean useSettlementDate, boolean showSuccessful, boolean showFailed, boolean showPending, boolean showScheduled, Date startDate, Date endDate) {
+        Invoice inv = new Invoice();
+        inv.setInvoiceLineCollection(new ArrayList<InvoiceLine>());
+        inv.setUserId(cust);
+//add plan line item to invoice with number of billable sessions
+        InvoiceLineType ilt = invoiceLineTypeFacade.findAll().get(1);
+        InvoiceLine il = new InvoiceLine(0);
+        BigDecimal paymentsTotal;
+        BigDecimal bankFeesTotal;
+        PaymentParameters pp = cust.getPaymentParameters();
+        String ppPlanPaymentDetails = "Unknown";
+        if (pp != null) {
+            try {
+                String period = getPaymentPeriodString(pp.getPaymentPeriod());
+                String dom = ", DOM: " + pp.getPaymentPeriodDayOfMonth() + " ";
+                String dow = ", DOW: " + pp.getPaymentPeriodDayOfWeek();
+                if (pp.getPaymentPeriodDayOfMonth().contentEquals("0")) {
+                    dom = "";
+                }
+
+                ppPlanPaymentDetails = "Period: " + period + dom + dow;
+            } catch (Exception e) {
+                ppPlanPaymentDetails = "Unknown";
+            }
         }
+        BigDecimal productsAndServicesTotal = new BigDecimal(0);
+        il.setTypeId(ilt);
+
+        il.setQuantity(new BigDecimal(1));
+        il.setDescription("Plan: " + cust.getGroupPricing().getPlanName());
+        il.setPrice(cust.getGroupPricing().getPlanPrice());
+        il.setAmount(cust.getGroupPricing().getPlanPrice());
+        productsAndServicesTotal = productsAndServicesTotal.add(il.getAmount());
+        inv.getInvoiceLineCollection().add(il);
+        //get payments for customer
+        List<Payments> pl = paymentsFacade.findPaymentsByDateRange(useSettlementDate, showSuccessful, showFailed, showPending, showScheduled, startDate, endDate, false, cust);
+        //get sessions for customer
+        List<SessionTypes> sessionTypesList = sessionTypesFacade.findAll();
+        for (SessionTypes sessType : sessionTypesList) {
+            List<Date> weeks = getWeeksInMonth(startDate, endDate);
+            Date weekStart = startDate;
+            int billableSessionsTotal = 0;
+            for (Date weekEnd : weeks) {
+                List<SessionHistory> sessions = sessionHistoryFacade.findSessionsByParticipantAndDateRange(cust, weekStart, weekEnd, true);
+
+                //for each session type count the sessions and bill as a line item if they are not included in the plan
+                int count = 0;
+
+                for (SessionHistory sess : sessions) {
+                    String type = sess.getSessionTypesId().getName();
+                    if (type.contains(sessType.getName())) {
+                        count++;
+                        //total = total + sess.getSessionTypesId().
+                    }
+                }
+                if (count > 0) {
+                    billableSessionsTotal += checkSessionsAgainstPlanWeek(count, cust, sessType);
+                }
+                weekStart = weekEnd;
+            }
+            //add line item to invoice with number of billable sessions
+            ilt = invoiceLineTypeFacade.findAll().get(2);
+            il = new InvoiceLine(0);
+            il.setTypeId(ilt);
+            BigDecimal bdBillableSessionsTotal = new BigDecimal(billableSessionsTotal);
+            Plan sessionPlan = sessType.getPlan();
+            BigDecimal cdPrice = new BigDecimal(0);
+            if (sessionPlan != null) {
+                cdPrice = sessionPlan.getPlanPrice();
+            }
+            il.setQuantity(bdBillableSessionsTotal);
+            il.setDescription(sessType.getName());
+            il.setPrice(cdPrice);
+            il.setAmount(bdBillableSessionsTotal.multiply(cdPrice));
+            if (cdPrice.compareTo(new BigDecimal(0)) > 0 && bdBillableSessionsTotal.compareTo(new BigDecimal(0)) > 0) {
+                inv.getInvoiceLineCollection().add(il);
+                productsAndServicesTotal = productsAndServicesTotal.add(il.getAmount());
+            }
+
+        }
+        //add payments line item to invoice with number of billable sessions
+        ilt = invoiceLineTypeFacade.findAll().get(0);
+        for (Payments p : pl) {
+            il = new InvoiceLine(0);
+            il.setTypeId(ilt);
+            paymentsTotal = new BigDecimal(0);
+            bankFeesTotal = new BigDecimal(0);
+            int numberOfPayments = 0;
+
+            BigDecimal fee = p.getTransactionFeeCustomer();
+            if (fee == null) {
+                fee = new BigDecimal(0);
+            }
+            paymentsTotal = paymentsTotal.add(p.getPaymentAmount());
+            bankFeesTotal = bankFeesTotal.add(fee);
+            numberOfPayments++;
+
+            // add scheduled payment amounts 
+            //il.setQuantity(new BigDecimal(numberOfPayments));
+            il.setQuantity(new BigDecimal(1));
+            il.setDescription("Payment(s)" + " --- " + ppPlanPaymentDetails);
+            productsAndServicesTotal = productsAndServicesTotal.add(bankFeesTotal);
+            productsAndServicesTotal = productsAndServicesTotal.subtract(paymentsTotal);
+            // il.setPrice(paymentsTotal);
+            il.setPrice(p.getPaymentAmount());
+            paymentsTotal = paymentsTotal.negate();
+            //il.setAmount(paymentsTotal);
+            il.setAmount(p.getPaymentAmount());
+
+            // add line item for bank fees
+            InvoiceLine il2 = new InvoiceLine(0);
+            il2.setTypeId(ilt);
+            //il2.setQuantity(new BigDecimal(numberOfPayments));
+            il2.setQuantity(new BigDecimal(numberOfPayments));
+            il2.setDescription("Bank Transaction Fees");
+            //il2.setPrice(bankFeesTotal);
+            // il2.setAmount(bankFeesTotal);
+            il2.setPrice(fee);
+            il2.setAmount(fee);
+            inv.getInvoiceLineCollection().add(il2);
+            inv.getInvoiceLineCollection().add(il);
+        }
+        inv.setTotal(productsAndServicesTotal);
+        return inv;
+    }
+
+    private String getPaymentPeriodString(String key) {
+        String period = "";
+        switch (key) {
+            case "4":
+                period = "4 Weekly";
+                break;
+            case "W":
+                period = "Weekly";
+                break;
+            case "M":
+                period = "Monthly";
+                break;
+            case "F":
+                period = "Fortnightly";
+                break;
+            case "Z":
+                period = "No Schedule";
+                break;
+            case "Q":
+                period = "Quarterly";
+                break;
+            case "H":
+                period = "Half Yearly";
+                break;
+            case "Y":
+                period = "Annually";
+                break;
+            case "N":
+                period = "Weekday In Month";
+                break;
+        }
+        return period;
+    }
+
+    private List<Date> getWeeksInMonth(Date start, Date end) {
+        List<Date> dl = new ArrayList<>();
+        GregorianCalendar gc = new GregorianCalendar();
+        gc.setTime(start);
+        while (gc.getTime().compareTo(end) <= 0) {
+            gc.add(Calendar.DAY_OF_WEEK, 7);
+            if (gc.getTime().compareTo(end) >= 0) {
+                dl.add(end);
+            } else {
+                dl.add(gc.getTime());
+            }
+
+        }
+
+        return dl;
+    }
+
+    private int checkSessionsAgainstPlanWeek(int count, Customers cust, SessionTypes sessType) {
+        int billableSessions = 0;
+        Plan plan = cust.getGroupPricing();
+        PaymentParameters pp = cust.getPaymentParameters();
+        String paymentPeriod = pp.getPaymentPeriod();
+        List<Plan> plans = new ArrayList<>(plan.getPlanCollection());
+        int includedInPlanCount = 0;
+        for (Plan p : plans) {
+            SessionTypes st = p.getSessionType();
+            if (st != null) {
+                if (sessType.getName().contentEquals(st.getName())) {
+                    includedInPlanCount++;
+                }
+            }
+        }
+        billableSessions = count - includedInPlanCount;
+        if (billableSessions < 0) {
+            billableSessions = 0;
+        }
+
+        /* if (paymentPeriod.contentEquals(PaymentPeriod.MONTHLY.value())) {
+
+         }
+         if (paymentPeriod.contentEquals(PaymentPeriod.FOUR_WEEKLY.value())) {
+
+         }
+         if (paymentPeriod.contentEquals(PaymentPeriod.WEEKLY.value())) {
+
+         }
+         if (paymentPeriod.contentEquals(PaymentPeriod.FORTNIGHTLY.value())) {
+
+         }*/
+        logger.log(Level.INFO, "checkSessionsAgainstPlanWeek: Billed Sessions:{0}, Session Count:{1}, Customer: {2}, Plan: {5}, Session Type: {3}, Session Plan: {4}", new Object[]{billableSessions, count, cust.getUsername(), sessType.getName(), sessType.getPlan(), cust.getGroupPricing().getPlanName()});
+        return billableSessions;
+    }
+
+    public void preProcessPDF(Object document) throws IOException,
+            BadElementException, DocumentException {
+        Document pdf = (Document) document;
+        pdf.setPageSize(PageSize.A4.rotate());
+
+        //FacesContext context = FacesContext.getCurrentInstance();
+        //ExternalContext ec = context.getExternalContext();
+        //HttpServletRequest request = (HttpServletRequest) context.getExternalContext().getRequest();
+        ServletContext servletContext = (ServletContext) FacesContext.getCurrentInstance().getExternalContext().getContext();
+        String logo = servletContext.getContextPath() + File.separator + "resources" + File.separator + "images"
+                + File.separator + "logo.png";
+        URL imageResource = servletContext.getResource(File.separator + "resources" + File.separator + "images"
+                + File.separator + "logo.png");
+        pdf.open();
+        String urlForLogo = configMapFacade.getConfig("system.email.logo");
+        try {
+            pdf.add(Image.getInstance(new URL(urlForLogo)));
+        } catch (IOException | DocumentException iOException) {
+            logger.log(Level.WARNING, "Logo URL error", iOException);
+        }
+        SimpleDateFormat sdf = new SimpleDateFormat("EEE, d MMM yyyy");
+        String type = "Invoice";
+        if (invoiceType == 0) {
+            type += " (GST Included)";
+        }
+        if (invoiceType == 1) {
+            type += " (No GST) ";
+        }
+        String reportTitle = type + " invoice for the period " + sdf.format(invoiceStartDate) + " to " + sdf.format(invoiceEndDate);
+        pdf.addTitle(reportTitle);
+        pdf.add(new Paragraph(reportTitle));
+        pdf.add(new Paragraph(" "));
+        com.lowagie.text.Font font = new com.lowagie.text.Font(com.lowagie.text.Font.NORMAL);
+        font.setSize(8);
+    }
+
+    public void postProcessPDF(Object document) throws IOException,
+            BadElementException, DocumentException {
+
+    }
+
+    public void preProcessXLS(Object document) {
+        SimpleDateFormat sdf = new SimpleDateFormat("EEE, d MMM yyyy");
+
+        String type = "Invoice";
+        if (invoiceType == 0) {
+            type += " (GST Included)";
+        }
+        if (invoiceType == 1) {
+            type += " (No GST) ";
+        }
+        String reportTitle = type + " invoice for the period " + sdf.format(invoiceStartDate) + " to " + sdf.format(invoiceEndDate);
+        HSSFWorkbook wb = (HSSFWorkbook) document;
+        HSSFSheet sheet = wb.getSheetAt(0);
+        HSSFRow row = sheet.createRow(0);
+        HSSFCell cell = row.createCell(0);
+        cell.setCellValue(reportTitle);
+        HSSFCellStyle cellStyle = wb.createCellStyle();
+        DataFormat df = wb.createDataFormat();
+        cellStyle.setFillForegroundColor(HSSFColor.BLUE.index);
+        cellStyle.setFillPattern(HSSFCellStyle.SOLID_FOREGROUND);
+        for (int i = 1; i < row.getPhysicalNumberOfCells(); i++) {
+            row.getCell(i).setCellStyle(cellStyle);
+        }
+        cellStyle.setDataFormat(df.getFormat("YYYY-MM-DD HH:MM:SS"));
+
+        cell = row.createCell(1);
+        cell.setCellValue(new Date());
+        cell.setCellStyle(cellStyle);
+        sheet.createRow(1);
+        sheet.createRow(2);
+
+    }
+
+    public void postProcessXLS(Object document) {
+        SimpleDateFormat sdf = new SimpleDateFormat("EEE, d MMM yyyy");
+
+        String type = "Invoice";
+        if (invoiceType == 0) {
+            type += " (GST Included)";
+        }
+        if (invoiceType == 1) {
+            type += " (No GST) ";
+        }
+        String reportTitle = type + " report for the period " + sdf.format(invoiceStartDate) + " to " + sdf.format(invoiceEndDate);
+        HSSFWorkbook wb = (HSSFWorkbook) document;
+        HSSFSheet sheet = wb.getSheetAt(0);
+        sheet.shiftRows(0, sheet.getLastRowNum(), 7);
+        HSSFRow row = sheet.createRow(0);
+        HSSFCell cell = row.createCell(0);
+        HSSFCellStyle cellStyle = wb.createCellStyle();
+        DataFormat df = wb.createDataFormat();
+        cellStyle.setDataFormat(df.getFormat("YYYY-MM-DD HH:MM:SS"));
+        cell.setCellValue(reportTitle);
+        //first row (0-based),last row  (0-based),first column (0-based),last column  (0-based)
+        sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 2));
+        CellStyle style = wb.createCellStyle();
+        CellStyle style2 = wb.createCellStyle();
+        style.setFillForegroundColor(IndexedColors.BLACK.getIndex());
+        //style.setFillPattern(CellStyle.SOLID_FOREGROUND);
+        style.setFillBackgroundColor(IndexedColors.AQUA.getIndex());
+        style.setFillPattern(CellStyle.BIG_SPOTS);
+        style2.setFillForegroundColor(IndexedColors.BLACK.getIndex());
+        //style2.setFillPattern(CellStyle.SOLID_FOREGROUND);
+        style2.setFillBackgroundColor(IndexedColors.LIGHT_TURQUOISE.getIndex());
+        style2.setFillPattern(CellStyle.BIG_SPOTS);
+
+        HSSFCell cell3 = row.createCell(3);
+        cell3.setCellValue(new Date());
+        cell3.setCellStyle(cellStyle);
+        //sheet.createRow(1);
+        //sheet.createRow(2);
+        boolean rowColor = false;
+        for (Row row2 : sheet) {
+            if (row2.getRowNum() > 2) {
+                rowColor = !(rowColor);
+                for (Cell cell2 : row2) {
+                    //cell2.setCellValue(cell.getStringCellValue().toUpperCase());
+                    if (rowColor) {
+                        cell2.setCellStyle(style);
+                    } else {
+                        cell2.setCellStyle(style2);
+                    }
+
+                }
+            }
+        }
+        for (int c = 0; c < row.getLastCellNum() + 1; c++) {
+            sheet.autoSizeColumn(c);
+        }
+    }
+
+    public Invoice getSelected() {
+        /*if (current == null) {
+         current = new Invoice();
+         selectedItemIndex = -1;
+         }*/
         return current;
     }
 
@@ -104,6 +567,10 @@ public class InvoiceController implements Serializable {
 
     public String create() {
         try {
+            /*for(InvoiceLine il:current.getInvoiceLineCollection()){
+             il.setInvoiceId(current);
+             invoiceLineFacade.create(il);
+             }*/
             if (current.getId() == null) {
                 current.setId(0);
             }
@@ -120,11 +587,31 @@ public class InvoiceController implements Serializable {
         try {
             current.setId(0);
             getFacade().create(current);
-            recreateModel();
+            setLastGeneratedInvoice(current);
+            // add to existing lists rather than recreate entire model
+            updateTableData(current);
             JsfUtil.addSuccessMessage(configMapFacade.getConfig("InvoiceCreated"));
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
         }
+    }
+
+    private void updateTableData(Invoice inv) {
+        if (inv == null) {
+            logger.log(Level.WARNING, "updateTableData: Invoice is null! Nothing updated.");
+            return;
+        }
+        // add to existing lists rather than recreate entire model
+        if (items != null) {
+            List<Invoice> il = (List<Invoice>) items.getWrappedData();
+            il.add(inv);
+            items.setWrappedData(il);
+        }
+        if (invoiceFilteredItems != null) {
+            invoiceFilteredItems.add(inv);
+        }
+        RequestContext.getCurrentInstance().execute("PF('invoiceControllerTable').filter();");
+
     }
 
     public String prepareEdit() {
@@ -152,17 +639,24 @@ public class InvoiceController implements Serializable {
         }
     }
 
+    public void destroyDialogue() {
+        if (current != null) {
+            performDestroy();
+            recreateModel();
+            current = null;
+
+        }
+    }
+
     public String destroy() {
         current = (Invoice) getItems().getRowData();
         selectedItemIndex = pagination.getPageFirstItem() + getItems().getRowIndex();
-        performDestroy();
-        recreateModel();
+        destroyDialogue();
         return "List";
     }
 
     public String destroyAndView() {
-        performDestroy();
-        recreateModel();
+        destroyDialogue();
         updateCurrentItem();
         if (selectedItemIndex >= 0) {
             return "View";
@@ -171,19 +665,6 @@ public class InvoiceController implements Serializable {
             recreateModel();
             return "List";
         }
-    }
-
-    public Invoice getSelectedForDeletion() {
-        return selectedForDeletion;
-    }
-
-    public void setSelectedForDeletion(Invoice selectedForDeletion) {
-        this.selectedForDeletion = selectedForDeletion;
-        current = selectedForDeletion;
-
-        performDestroy();
-        recreateModel();
-
     }
 
     private void performDestroy() {
@@ -210,9 +691,9 @@ public class InvoiceController implements Serializable {
         }
     }
 
-    public DataModel getItems() {
+    public PfSelectableDataModel getItems() {
         if (items == null) {
-            items = getPagination().createPageDataModel();
+            items = new PfSelectableDataModel(getFacade().findAll());
         }
         return items;
     }
@@ -259,6 +740,163 @@ public class InvoiceController implements Serializable {
         JsfUtil.addErrorMessage("Row Edit Cancelled");
     }
 
+    /**
+     * @return the invoiceFileName
+     */
+    public String getInvoiceFileName() {
+        return invoiceFileName;
+    }
+
+    /**
+     * @param invoiceFileName the invoiceFileName to set
+     */
+    public void setInvoiceFileName(String invoiceFileName) {
+        this.invoiceFileName = invoiceFileName;
+    }
+
+    /**
+     * @return the selectedCustomer
+     */
+    public Customers getSelectedCustomer() {
+        return selectedCustomer;
+    }
+
+    /**
+     * @param selectedCustomer the selectedCustomer to set
+     */
+    public void setSelectedCustomer(Customers selectedCustomer) {
+
+        current = new Invoice(0);
+        current.setUserId(selectedCustomer);
+        this.selectedCustomer = selectedCustomer;
+    }
+
+    /**
+     * @return the invoiceStartDate
+     */
+    public Date getInvoiceStartDate() {
+        return invoiceStartDate;
+    }
+
+    /**
+     * @param invoiceStartDate the invoiceStartDate to set
+     */
+    public void setInvoiceStartDate(Date invoiceStartDate) {
+        this.invoiceStartDate = invoiceStartDate;
+    }
+
+    /**
+     * @return the invoiceEndDate
+     */
+    public Date getInvoiceEndDate() {
+        return invoiceEndDate;
+    }
+
+    /**
+     * @param invoiceEndDate the invoiceEndDate to set
+     */
+    public void setInvoiceEndDate(Date invoiceEndDate) {
+        this.invoiceEndDate = invoiceEndDate;
+    }
+
+    /**
+     * @return the invoiceUseSettlementDate
+     */
+    public boolean isInvoiceUseSettlementDate() {
+        return invoiceUseSettlementDate;
+    }
+
+    /**
+     * @param invoiceUseSettlementDate the invoiceUseSettlementDate to set
+     */
+    public void setInvoiceUseSettlementDate(boolean invoiceUseSettlementDate) {
+        this.invoiceUseSettlementDate = invoiceUseSettlementDate;
+    }
+
+    /**
+     * @return the invoiceShowSuccessful
+     */
+    public boolean isInvoiceShowSuccessful() {
+        return invoiceShowSuccessful;
+    }
+
+    /**
+     * @param invoiceShowSuccessful the invoiceShowSuccessful to set
+     */
+    public void setInvoiceShowSuccessful(boolean invoiceShowSuccessful) {
+        this.invoiceShowSuccessful = invoiceShowSuccessful;
+    }
+
+    /**
+     * @return the invoiceShowFailed
+     */
+    public boolean isInvoiceShowFailed() {
+        return invoiceShowFailed;
+    }
+
+    /**
+     * @param invoiceShowFailed the invoiceShowFailed to set
+     */
+    public void setInvoiceShowFailed(boolean invoiceShowFailed) {
+        this.invoiceShowFailed = invoiceShowFailed;
+    }
+
+    /**
+     * @return the invoiceShowPending
+     */
+    public boolean isInvoiceShowPending() {
+        return invoiceShowPending;
+    }
+
+    /**
+     * @param invoiceShowPending the invoiceShowPending to set
+     */
+    public void setInvoiceShowPending(boolean invoiceShowPending) {
+        this.invoiceShowPending = invoiceShowPending;
+    }
+
+    /**
+     * @return the invoiceShowScheduled
+     */
+    public boolean isInvoiceShowScheduled() {
+        return invoiceShowScheduled;
+    }
+
+    /**
+     * @param invoiceShowScheduled the invoiceShowScheduled to set
+     */
+    public void setInvoiceShowScheduled(boolean invoiceShowScheduled) {
+        this.invoiceShowScheduled = invoiceShowScheduled;
+    }
+
+    /**
+     * @return the invoiceFilteredItems
+     */
+    public List<Invoice> getInvoiceFilteredItems() {
+        return invoiceFilteredItems;
+    }
+
+    /**
+     * @param invoiceFilteredItems the invoiceFilteredItems to set
+     */
+    public void setInvoiceFilteredItems(List<Invoice> invoiceFilteredItems) {
+        this.invoiceFilteredItems = invoiceFilteredItems;
+    }
+
+    /**
+     * @return the lastGeneratedInvoice
+     */
+    public Invoice getLastGeneratedInvoice() {
+        return lastGeneratedInvoice;
+    }
+
+    /**
+     * @param lastGeneratedInvoice the lastGeneratedInvoice to set
+     */
+    public void setLastGeneratedInvoice(Invoice lastGeneratedInvoice) {
+        this.lastGeneratedInvoice = lastGeneratedInvoice;
+    }
+
     @FacesConverter(forClass = Invoice.class)
     public static class InvoiceControllerConverter implements Converter {
 
@@ -295,6 +933,248 @@ public class InvoiceController implements Serializable {
             }
         }
 
+    }
+
+    /**
+     * @return the selectedInvoiceLineItem
+     */
+    public InvoiceLine getSelectedInvoiceLineItem() {
+        return selectedInvoiceLineItem;
+    }
+
+    /**
+     * @param selectedInvoiceLineItem the selectedInvoiceLineItem to set
+     */
+    public void setSelectedInvoiceLineItem(InvoiceLine selectedInvoiceLineItem) {
+        this.selectedInvoiceLineItem = selectedInvoiceLineItem;
+    }
+
+    /**
+     * @return the invoiceLineFilteredItems
+     */
+    public List<InvoiceLine> getInvoiceLineFilteredItems() {
+        return invoiceLineFilteredItems;
+    }
+
+    /**
+     * @param invoiceLineFilteredItems the invoiceLineFilteredItems to set
+     */
+    public void setInvoiceLineFilteredItems(List<InvoiceLine> invoiceLineFilteredItems) {
+        this.invoiceLineFilteredItems = invoiceLineFilteredItems;
+    }
+
+    /**
+     * @return the invoiceType
+     */
+    public int getInvoiceType() {
+        return invoiceType;
+    }
+
+    /**
+     * @param invoiceType the invoiceType to set
+     */
+    public void setInvoiceType(int invoiceType) {
+        this.invoiceType = invoiceType;
+    }
+
+    public StreamedContent getExportExcel() {
+        StreamedContent file = null;
+        try {
+            Workbook wb = createExcelFromInvoice(lastGeneratedInvoice);
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            wb.write(out);
+            InputStream stream = new ByteArrayInputStream(out.toByteArray());
+            file = new DefaultStreamedContent(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", getInvoiceFileName() + ".xlsx");
+
+            //writeExcelToResponse(FacesContext.getCurrentInstance().getExternalContext(), wb, getInvoiceFileName());
+        } catch (Exception ex) {
+            Logger.getLogger(InvoiceController.class.getName()).log(Level.SEVERE, "Export Excel spreadsheet from the invoices table failed", ex);
+        }
+        return file;
+    }
+
+    /*protected void writeExcelToResponse(ExternalContext externalContext, Workbook generatedExcel, String filename) throws IOException {
+     externalContext.setResponseContentType("application/vnd.ms-excel");
+     externalContext.setResponseHeader("Expires", "0");
+     externalContext.setResponseHeader("Cache-Control", "must-revalidate, post-check=0, pre-check=0");
+     externalContext.setResponseHeader("Pragma", "public");
+     externalContext.setResponseHeader("Content-disposition", "attachment;filename=" + filename + ".xls");
+     externalContext.addResponseCookie(Constants.DOWNLOAD_COOKIE, "true", Collections.<String, Object>emptyMap());
+
+     OutputStream out = externalContext.getResponseOutputStream();
+     generatedExcel.write(out);
+     externalContext.responseFlushBuffer();
+     }*/
+    private Workbook createExcelFromInvoice(Invoice inv) {
+        Workbook wb = new XSSFWorkbook();
+        if (inv == null || inv.getUserId().getFirstname() == null || inv.getUserId().getLastname() == null || inv.getCreateDatetime() == null || inv.getDueDate() == null || inv.getInvoiceLineCollection() == null) {
+            logger.log(Level.SEVERE, "createExcelFromInvoice: invoice or invoice methods  are null");
+            return null;
+
+        }
+
+        Map<String, CellStyle> styles = createStyles(wb);
+        SimpleDateFormat sdf = new SimpleDateFormat("dd MMM YYYY");
+        Sheet sheet = wb.createSheet("Invoice");
+        PrintSetup printSetup = sheet.getPrintSetup();
+        printSetup.setLandscape(false);
+        sheet.setFitToPage(true);
+        sheet.setHorizontallyCenter(true);
+
+        //title row
+        
+        Row titleRow = sheet.createRow(0);
+        titleRow.setHeightInPoints(45);
+        Cell titleCell = titleRow.createCell(0);
+        String tit = inv.getUserId().getFirstname() + " " + inv.getUserId().getLastname() + " - " + sdf.format(inv.getCreateDatetime()) + " to " + sdf.format(inv.getDueDate());
+        titleCell.setCellValue(tit);
+        titleCell.setCellStyle(styles.get("title"));
+        sheet.addMergedRegion(CellRangeAddress.valueOf("$A$1:$D$1"));
+
+        //header row
+        Row headerRow = sheet.createRow(1);
+        headerRow.setHeightInPoints(40);
+        Cell headerCell;
+        String[] titles = {"Description", "Quantity", "Price", "Amount"};
+        for (int i = 0; i < titles.length; i++) {
+            headerCell = headerRow.createCell(i);
+            headerCell.setCellValue(titles[i]);
+            headerCell.setCellStyle(styles.get("header"));
+        }
+
+        //body - add formatting and formulas
+        int rownum = 2;
+        List<InvoiceLine> invLineItemList = new ArrayList<>(inv.getInvoiceLineCollection());
+        for (InvoiceLine li : invLineItemList) {
+            Row row = sheet.createRow(rownum++);
+            for (int j = 0; j < titles.length; j++) {
+                Cell cell = row.createCell(j);
+                if (j == 3) {
+                    //the 4th cell contains sum of quantity X price, e.g. SUM(B3*C3)
+                    String ref = "B" + rownum + "*C" + rownum;
+                    cell.setCellFormula("SUM(" + ref + ")");
+                    cell.setCellStyle(styles.get("formula_2"));
+                } else if (j == 2) {
+                    cell.setCellStyle(styles.get("formula"));
+                } else {
+                    cell.setCellStyle(styles.get("cell"));
+                }
+            }
+        }
+//row with totals below
+        Row sumRow = sheet.createRow(rownum++);
+        sumRow.setHeightInPoints(35);
+        int cellNum = 0;
+        Cell cell;
+        cell = sumRow.createCell(cellNum);
+        cell.setCellStyle(styles.get("formula_2"));
+        cell = sumRow.createCell(cellNum++);
+        cell.setCellStyle(styles.get("formula_2"));
+        cell = sumRow.createCell(cellNum++);
+        cell.setCellStyle(styles.get("formula_2"));
+
+        cell = sumRow.createCell(cellNum++);
+        cell.setCellValue("Total Outstanding:");
+        cell.setCellStyle(styles.get("formula_2"));
+
+        cell = sumRow.createCell(cellNum++);
+        String ref = "D3:D" + (2 + invLineItemList.size());
+        cell.setCellFormula("SUM(" + ref + ")");
+        cell.setCellStyle(styles.get("formula_3"));
+
+        // add cell values
+        for (int i = 0; i < invLineItemList.size(); i++) {
+            InvoiceLine il = invLineItemList.get(i);
+            Row row = sheet.getRow(2 + i);
+            row.getCell(0).setCellValue(il.getDescription());
+            row.getCell(1).setCellValue(il.getQuantity().intValue());
+            row.getCell(2).setCellValue(il.getPrice().doubleValue());
+            row.getCell(3).setCellValue(il.getAmount().doubleValue());
+
+        }
+
+        //finally set column widths, the width is measured in units of 1/256th of a character width
+        sheet.setColumnWidth(0, 60 * 256); //30 characters wide
+        for (int i = 1; i < 4; i++) {
+            sheet.setColumnWidth(i, 12 * 256);  //6 characters wide
+        }
+
+        return wb;
+    }
+
+    /**
+     * Create a library of cell styles
+     */
+    private static Map<String, CellStyle> createStyles(Workbook wb) {
+        Map<String, CellStyle> styles = new HashMap<>();
+        CellStyle style;
+        Font titleFont = wb.createFont();
+        titleFont.setFontHeightInPoints((short) 18);
+        titleFont.setBoldweight(Font.BOLDWEIGHT_BOLD);
+        style = wb.createCellStyle();
+        style.setAlignment(CellStyle.ALIGN_CENTER);
+        style.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
+        style.setFont(titleFont);
+        styles.put("title", style);
+
+        Font monthFont = wb.createFont();
+        monthFont.setFontHeightInPoints((short) 11);
+        monthFont.setColor(IndexedColors.WHITE.getIndex());
+        style = wb.createCellStyle();
+        style.setAlignment(CellStyle.ALIGN_CENTER);
+        style.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
+        style.setFillForegroundColor(IndexedColors.GREY_50_PERCENT.getIndex());
+        style.setFillPattern(CellStyle.SOLID_FOREGROUND);
+        style.setFont(monthFont);
+        style.setWrapText(true);
+        styles.put("header", style);
+
+        style = wb.createCellStyle();
+        style.setAlignment(CellStyle.ALIGN_CENTER);
+        style.setWrapText(true);
+        style.setBorderRight(CellStyle.BORDER_THIN);
+        style.setRightBorderColor(IndexedColors.BLACK.getIndex());
+        style.setBorderLeft(CellStyle.BORDER_THIN);
+        style.setLeftBorderColor(IndexedColors.BLACK.getIndex());
+        style.setBorderTop(CellStyle.BORDER_THIN);
+        style.setTopBorderColor(IndexedColors.BLACK.getIndex());
+        style.setBorderBottom(CellStyle.BORDER_THIN);
+        style.setBottomBorderColor(IndexedColors.BLACK.getIndex());
+        styles.put("cell", style);
+
+        style = wb.createCellStyle();
+        style.setAlignment(CellStyle.ALIGN_RIGHT);
+        style.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
+        style.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+        style.setFillPattern(CellStyle.SOLID_FOREGROUND);
+          style.setDataFormat(wb.createDataFormat().getFormat("$##,##0.00"));
+        styles.put("formula", style);
+
+        style = wb.createCellStyle();
+        style.setAlignment(CellStyle.ALIGN_RIGHT);
+        style.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
+        style.setFillForegroundColor(IndexedColors.GREY_40_PERCENT.getIndex());
+        style.setFillPattern(CellStyle.SOLID_FOREGROUND);
+          style.setDataFormat(wb.createDataFormat().getFormat("$##,##0.00"));
+        styles.put("formula_2", style);
+
+        Font totalFont = wb.createFont();
+        totalFont.setFontHeightInPoints((short) 11);
+        totalFont.setColor(IndexedColors.YELLOW.getIndex());
+        totalFont.setBoldweight(Font.BOLDWEIGHT_BOLD);
+        style = wb.createCellStyle();
+        style.setAlignment(CellStyle.ALIGN_RIGHT);
+        style.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
+        style.setFillForegroundColor(IndexedColors.GREY_50_PERCENT.getIndex());
+        style.setFillPattern(CellStyle.SOLID_FOREGROUND);
+  
+         style.setDataFormat(wb.createDataFormat().getFormat("$##,##0.00"));
+        style.setFont(totalFont);
+
+        styles.put("formula_3", style);
+
+        
+        return styles;
     }
 
 }

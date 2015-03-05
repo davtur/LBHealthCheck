@@ -836,6 +836,10 @@ public class SessionHistoryController implements Serializable {
      * @return the trainers
      */
     public List<Customers> getTrainers() {
+        if(trainers == null || trainers.isEmpty()){
+            trainers = new ArrayList<>();
+            trainers.add(getSelectedCustomer());
+        }
         return trainers;
     }
 

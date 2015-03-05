@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>Pure Fitness Manly Invoice</title>
+        <style >
+            .invoice1 {
+                font-family: Arial, Helvetica, sans-serif; width: 600px; -webkit-print-color-adjust: exact;
+            }
+            .invoice1Header td {
+                padding-left: 100px; font-weight: bold; font-size: 10px;
+            }
+            .invoice1Details {
+
+                padding-left: 100px;                font-weight: bold;                font-size: 10px;
+            }
+            .invoice1customrDetails {
+                padding-left: 100px;                font-weight: bold;                font-size: 10px;                vertical-align: bottom;
+            }
+            .invoice1MainTable {
+                width:500px;                font-weight: normal;                font-size: 10px;                padding-left: 100px;
+
+            }
+            .invoice1AccountSummarry {
+                padding-left: 200px;                margin-left: 100px;                font-weight: bold;                font-size: 10px;                border-bottom: solid black 1px;                border-top: solid black 1px;
+            }
+            .invoice1MainTableHeader td {
+                border-bottom: solid black 1px;
+
+            }
+            .invoice1RowOdd {
+                background-color: #bbe1ed;
+            }
+            .invoice1RowEven {
+                background-color: #4d94b2;
+            }
+            .invoice1SubTotalRow {
+
+            }
+            .invoice1SubTotals {
+                font-size: 12px;                font-weight: bold;
+            }
+            .invoice1BalanceDue {
+                font-size: 16px;                font-weight: bold;
+            }
+            .invoice1LineItemsTable {
+                padding-left: 100px;                border-style: solid;                border-color: #000000;                border-width: 0px;                width:100%;
+            }
+            .invoice1Abn {
+                font-size: 8px;                padding-left: 110px;
+            }
+            .invoice1SubTotalsData {
+
+            }
+            .invoice1SubTotalsData  {
+                border-top: solid black 1px;           
+            }
+            .invoice1BalanceDueData  {
+                border-bottom: solid black 2px;                border-top: solid black 2px;
+            }
+            .invoice1BottomRow td{
+                border-top: solid black 1px; 
+            }
+        </style>
+    </head>
+    <body>
+
+        <table class="invoice1" >
+
+            <tr class="invoice1Header">
+                <td colspan="2">
+                    <img src="http://www.purefitnessmanly.com.au/images/logo.png" alt="PurefitnessManly Logo"><br/>
+
+                    <p class="invoice1Abn">ABN 59 141 468 938 </p>
+                </td>
+            </tr>
+            <tr> <td colspan="2">
+                    <br/><br/><h2 class="invoice1AccountSummarry" >TAX INVOICE</h2><br/><br/>
+                </td>
+            </tr>
+            <tr>
+                <td class="invoice1customrDetails">
+                    <table>
+                        <tr><td><!--CustomerName-->Joe Blogs</td></tr>
+                        <tr><td><!--CustomerStreetAddress-->21 Bogus Street </td></tr>
+                        <tr><td><!--CustomerSuburbStatePostCode-->Manly NSW,2095</td></tr>
+
+                    </table>
+                </td>
+
+                <td class="invoice1Details">
+                    <table>
+                        <tr><td>Invoice No:</td><td><!--Invoice No:--></td> </tr>
+                        <tr><td>Issue Date:</td><td><!--Issue Date:--></td> </tr>
+                        <tr><td>Invoice Period:</td><td><!--Invoice Period:--></td> </tr>
+                        <tr><td>Account No:</td><td><!--Account No:--></td> </tr>
+
+                    </table>
+
+                </td>
+            </tr>
+            <tr><td colspan="2"><br/></td></tr>
+            <tr class="invoice1MainTable">
+                <td colspan="2">
+
+                    <table class="invoice1LineItemsTable">
+                        <tr class="invoice1MainTableHeader"><td>Description</td><td>Quantity</td><td>Price</td><td>Amount</td></tr>
+                        <!--InvoiceLineItems-->
+                        <tr class="invoice1RowOdd"><td>Group Training1</td><td>1</td><td>$87.00</td><td>$87.00</td></tr>
+                        <tr class="invoice1RowEven"><td>Personal Training</td><td>2</td><td>$80.00</td><td>$160.00</td></tr>
+                        <tr class="invoice1BottomRow"><td></td><td></td><td ></td><td ></td></tr>
+                        <tr class="invoice1SubTotalRow"><td></td><td></td><td class="invoice1SubTotals">SubTotal</td><td class="invoice1SubTotalsData"><!--SubTotal--></td></tr>
+                        <tr class="invoice1SubTotalRow"><td></td><td></td><td class="invoice1SubTotals">GST</td><td class="invoice1SubTotalsData"><!--GST--></td></tr>
+                        <tr class="invoice1SubTotalRow"><td></td><td></td><td class="invoice1SubTotals">Total</td><td class="invoice1SubTotalsData"><!--Total--></td></tr>
+                        <tr class="invoice1SubTotalRow"><td></td><td></td><td class="invoice1SubTotals">Amount Paid</td><td class="invoice1SubTotalsData"><!--Amount Paid--></td></tr>
+                        <tr class="invoice1SubTotalRow"><td></td><td></td><td class="invoice1BalanceDue">Balance Due</td><td class="invoice1BalanceDueData"><!--Balance Due--></td></tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+
+    </body>
+</html>

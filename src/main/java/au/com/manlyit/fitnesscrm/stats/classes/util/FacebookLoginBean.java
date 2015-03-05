@@ -17,6 +17,14 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import org.apache.commons.lang.StringUtils;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.ResponseHandler;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.BasicResponseHandler;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.primefaces.context.RequestContext;
 
 /**
  *
@@ -28,10 +36,23 @@ public class FacebookLoginBean implements Serializable {
 
     private static final Logger logger = Logger.getLogger(FacebookLoginBean.class.getName());
     private static final long serialVersionUID = -1611162265998907599L;
+
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade configMapFacade;
+    
+    
+    public void facebookRedirect(){
+        
+        try {
+            String destination = "window.location=\"" + getFacebookUrlAuth() + "\"";
+            RequestContext.getCurrentInstance().execute(destination);
+            Logger.getLogger(FacebookLoginBean.class.getName()).log(Level.INFO, "facebookRedirect to : {0}", destination);
+        } catch (Exception e) {
+            Logger.getLogger(FacebookLoginBean.class.getName()).log(Level.SEVERE, "facebookRedirect failed", e);
+        }
+    }
 
-    public String getFacebookUrlAuth() {
+    private String getFacebookUrlAuth() {
         String returnValue = "";
         FacesContext context = FacesContext.getCurrentInstance();
         ExternalContext ec = context.getExternalContext();
@@ -41,7 +62,7 @@ public class FacebookLoginBean implements Serializable {
                 = (HttpSession) ec.getSession(false);
         if (session != null) {
             String userName = (String) session.getAttribute("FACEBOOK_USER");
-            if (userName != null) {
+          /*  if (userName != null) {
 
                 String isMobile = (String) session.getAttribute("MOBILE_DEVICE");
                 String landingPage = configMapFacade.getConfig("facebook.redirect.landingpage");
@@ -57,9 +78,9 @@ public class FacebookLoginBean implements Serializable {
                 try {
                     String sendToThisUrl = request.getContextPath() + landingPage;
                     String pathInfo = request.getPathInfo();
-                    /* if (pathInfo == null) {
-                     pathInfo = request.getServletPath();
-                     }*/
+                    // if (pathInfo == null) {
+                   //  pathInfo = request.getServletPath();
+                    // }
                     if (pathInfo != null) {
                         if (pathInfo.contains(sendToThisUrl)) {
                             logger.log(Level.INFO, "getFacebookUrlAuth -  The path is the same as the redirect URL. No need to redirect.");
@@ -71,19 +92,133 @@ public class FacebookLoginBean implements Serializable {
                     Logger.getLogger(FacebookLoginBean.class.getName()).log(Level.SEVERE, "Redirecting to Landing Page:", ex);
                 }
             } else {
+          
                 String sessionId = session.getId();
                 String appId = configMapFacade.getConfig("facebook.app.id");//"247417342102284";
                 String redirectUrl = configMapFacade.getConfig("facebook.redirect.url");//"http://localhost:8080/FitnessStats/index.sec";
-                returnValue = configMapFacade.getConfig("facebook.app.oauth.url") + "client_id="
-                        + appId + "&redirect_uri=" + redirectUrl
-                        + "&scope=email,user_birthday&state=" + sessionId;
-
-            }
+                returnValue = configMapFacade.getConfig("facebook.app.oauth.url") + 
+                        "client_id=" + appId + 
+                        "&redirect_uri=" + redirectUrl + 
+                        "&scope=email,user_birthday&state=" + sessionId;
+*/ 
+           // }
+                  returnValue = getFacebookLoginRedirectUrl(session.getId()) ;
         } else {
             logger.log(Level.WARNING, "getFacebookUrlAuth -  session  is NULL.");
             returnValue = configMapFacade.getConfig("facebook.redirect.landingpage");
         }
         return returnValue;
+    }
+    
+    
+    private String getFacebookLoginRedirectUrl(String state) {
+        String returnValue;
+         if (state != null) {
+               String appId = configMapFacade.getConfig("facebook.app.id");//"247417342102284";
+                String redirectUrl = configMapFacade.getConfig("facebook.redirect.url");//"http://localhost:8080/FitnessStats/index.sec";
+                returnValue = configMapFacade.getConfig("facebook.app.oauth.url") + 
+                        "client_id=" + appId + 
+                        "&redirect_uri=" + redirectUrl + 
+                        "&scope=email,user_birthday&state=" + state;
+       } else {
+            logger.log(Level.WARNING, "getFacebookUrlAuth -  session  is NULL.");
+            returnValue = configMapFacade.getConfig("facebook.redirect.landingpage");
+        }
+        return returnValue;
+    }
+ 
+     
+    public String getAccessToken() {
+        String token = null;
+        
+            String appId = getValueFromKey("facebook.app.id");//"247417342102284";
+            String redirectUrl = getValueFromKey("facebook.redirect.url");//http://localhost:8080/FitnessStats/index.sec";
+            String faceAppSecret = getValueFromKey("facebook.app.secret");//"33715d0844267d3ba11a24d44e90be80";
+            String newUrl = "https://graph.facebook.com/oauth/access_token?client_id=" + appId +  "&client_secret=" + faceAppSecret ;
+            CloseableHttpClient httpclient = HttpClientBuilder.create().build();
+            try {
+                HttpGet httpget = new HttpGet(newUrl);
+                ResponseHandler<String> responseHandler = new BasicResponseHandler();
+                String responseBody = httpclient.execute(httpget, responseHandler);
+                token = StringUtils.removeEnd(StringUtils.removeStart(responseBody, "access_token="), "&expires=5180795");
+            } catch (ClientProtocolException e) {
+                logger.log(Level.WARNING, e.getMessage());
+            } catch (IOException e) {
+                logger.log(Level.WARNING, e.getMessage());
+            } finally {
+                try {
+                    httpclient.close();
+                } catch (IOException ex) {
+                    logger.log(Level.SEVERE, null, ex);
+                }
+            }
+        
+        return token;
+    }
+
+   /* public String getFacebookId(String email) {
+        String fbid = null;
+        if (email != null && !"".equals(email)) {
+            String appId = getValueFromKey("facebook.app.id");//"247417342102284";
+            String redirectUrl = getValueFromKey("facebook.redirect.url");//http://localhost:8080/FitnessStats/index.sec";
+            String faceAppSecret = getValueFromKey("facebook.app.secret");//"33715d0844267d3ba11a24d44e90be80";
+            String newUrl = "https://graph.facebook.com/search?access_token=" + appId + "&redirect_uri=" + redirectUrl + "&client_secret="
+                    + faceAppSecret + "&code=" + faceCode;
+            CloseableHttpClient httpclient = HttpClientBuilder.create().build();
+            try {
+                HttpGet httpget = new HttpGet(newUrl);
+                ResponseHandler<String> responseHandler = new BasicResponseHandler();
+                String responseBody = httpclient.execute(httpget, responseHandler);
+                fbid = StringUtils.removeEnd(StringUtils.removeStart(responseBody, "access_token="), "&expires=5180795");
+            } catch (ClientProtocolException e) {
+                logger.log(Level.WARNING, e.getMessage());
+            } catch (IOException e) {
+                logger.log(Level.WARNING, e.getMessage());
+            } finally {
+                try {
+                    httpclient.close();
+                } catch (IOException ex) {
+                    logger.log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+        return fbid;
+    }*/
+
+    private String getFacebookAccessToken(String faceCode) {
+        String token = null;
+        if (faceCode != null && !"".equals(faceCode)) {
+            String appId = getValueFromKey("facebook.app.id");//"247417342102284";
+            String redirectUrl = getValueFromKey("facebook.redirect.url");//http://localhost:8080/FitnessStats/index.sec";
+            String faceAppSecret = getValueFromKey("facebook.app.secret");//"33715d0844267d3ba11a24d44e90be80";
+            String newUrl = "https://graph.facebook.com/oauth/access_token?client_id="
+                    + appId + "&redirect_uri=" + redirectUrl + "&client_secret="
+                    + faceAppSecret + "&code=" + faceCode;
+            CloseableHttpClient httpclient = HttpClientBuilder.create().build();
+            try {
+                HttpGet httpget = new HttpGet(newUrl);
+                ResponseHandler<String> responseHandler = new BasicResponseHandler();
+                String responseBody = httpclient.execute(httpget, responseHandler);
+                token = StringUtils.removeEnd(StringUtils.removeStart(responseBody, "access_token="), "&expires=5180795");
+            } catch (ClientProtocolException e) {
+                logger.log(Level.WARNING, e.getMessage());
+            } catch (IOException e) {
+                logger.log(Level.WARNING, e.getMessage());
+            } finally {
+                try {
+                    httpclient.close();
+                } catch (IOException ex) {
+                    logger.log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+        return token;
+    }
+
+    private String getValueFromKey(String key) {
+        String val;
+        val = configMapFacade.getConfig(key);
+        return val;
     }
 
     public String getUserFromSession() {
@@ -99,4 +234,5 @@ public class FacebookLoginBean implements Serializable {
             return "";
         }
     }
+
 }

@@ -58,6 +58,7 @@ public class CustomersController implements Serializable {
     private static final String paymentGateway = "EZIDEBIT";
     private CustomerState[] selectedCustomerStates;
     private List<CustomerState> customerStateList;
+    private List<Groups> customerGroupsList;
     private PfSelectableDataModel<Customers> items = null;
     private PfSelectableDataModel<Notes> notesItems = null;
     @Inject
@@ -83,8 +84,10 @@ public class CustomersController implements Serializable {
     private List<Customers> filteredItems;
     private List<Notes> notesFilteredItems;
     private Customers[] multiSelected;
+    // private Groups[] selectedGroups;
+    private List<Groups> selectedGroups;
     private String checkPass = "";
-
+    private Boolean[] checkedGroups;
     private String checkPass2 = "";
     private Customers impersonate;
     private Customers loggedInUser;
@@ -175,6 +178,25 @@ public class CustomersController implements Serializable {
         if (cust != null) {
             lastSelected = current;
             current = cust;
+            selectedGroups = ejbGroupsFacade.getCustomersGroups(current);
+            customerGroupsList = null;
+
+            /*customerGroupsList = new ArrayList<>();
+             List<String> distinctGroups = ejbGroupsFacade.getGroups();
+             if (distinctGroups != null) {
+             distinctGroups.remove("DEVELOPER");
+             for (String g : distinctGroups) {
+             customerGroupsList.add(new Groups(0, g));
+             }
+             checkedGroups = new Boolean[distinctGroups.size()];
+             for(int c = 0;c < distinctGroups.size();c++){
+             for(Groups g : selectedGroups){
+             if(distinctGroups.get(c).contains(g.getGroupname())){
+             checkedGroups[c] = true;
+             }
+             }
+             }
+             }*/
             FacesContext context = FacesContext.getCurrentInstance();
             EziDebitPaymentGateway controller = (EziDebitPaymentGateway) context.getApplication().getELResolver().getValue(context.getELContext(), null, "ezidebit");
             controller.setSelectedCustomer(cust);
@@ -235,6 +257,7 @@ public class CustomersController implements Serializable {
         c.setEmailAddress(configMapFacade.getConfig("default.customer.details.email"));
         c.setFax(configMapFacade.getConfig("default.customer.details.fax"));
         c.setTelephone(configMapFacade.getConfig("default.customer.details.mobile"));
+        c.setGender('F');
 
         GregorianCalendar gc = new GregorianCalendar();
         gc.add(Calendar.YEAR, -30);
@@ -292,13 +315,13 @@ public class CustomersController implements Serializable {
      * @return the filteredItems
      */
     public List<Customers> getFilteredItems() {
-       /* if(filteredItems==null){
-            filteredItems = new ArrayList<>();
-        }*/
-        if(filteredItems != null){
-             logger.log(Level.FINE, "FILTERED ITEMS SIZE",filteredItems.size());
+        /* if(filteredItems==null){
+         filteredItems = new ArrayList<>();
+         }*/
+        if (filteredItems != null) {
+            logger.log(Level.FINE, "FILTERED ITEMS SIZE", filteredItems.size());
         }
-        logger.log(Level.FINE, "GET FILTERED ITEMS",filteredItems);
+        logger.log(Level.FINE, "GET FILTERED ITEMS", filteredItems);
         return filteredItems;
     }
 
@@ -572,9 +595,19 @@ public class CustomersController implements Serializable {
             try {
                 c.setId(0);
                 getFacade().create(c);
-                Groups grp = new Groups(0, "USER");
-                grp.setUsername(c);
-                ejbGroupsFacade.create(grp);
+
+                //create customers groups
+                for (Groups g : selectedGroups) {
+
+                    Groups grp = new Groups(0, g.getGroupname());
+                    grp.setUsername(c);
+                    ejbGroupsFacade.create(grp);
+
+                }
+
+                //Groups grp = new Groups(0, "USER");
+                // grp.setUsername(c);
+                //ejbGroupsFacade.create(grp);
                 createDefaultCustomerProfilePicture(c);
                 // createDefaultPaymentParameters(paymentGateway);
                 recreateAllAffectedPageModels();
@@ -593,6 +626,32 @@ public class CustomersController implements Serializable {
             // exists so update only
             try {
                 getFacade().edit(c);
+                //modify customers groups
+                List<Groups> customersExistingGroups = ejbGroupsFacade.getCustomersGroups(c);
+                for (Groups g : customersExistingGroups) {
+                    boolean exists = false;
+                    for (Groups sg : selectedGroups) {
+                        if (sg.equals(g)) {
+                            exists = true;
+                        }
+                    }
+                    if (exists == false) {
+                        ejbGroupsFacade.remove(g);
+                    }
+                }
+                for (Groups g : selectedGroups) {
+                    boolean exists = false;
+                    for (Groups eg : customersExistingGroups) {
+                        if (eg.equals(g)) {
+                            exists = true;
+                        }
+                    }
+                    if (exists == false) {
+                        Groups grp = new Groups(0, g.getGroupname());
+                        grp.setUsername(c);
+                        ejbGroupsFacade.create(grp);
+                    }
+                }
                 recreateAllAffectedPageModels();
                 ezi.editCustomerDetailsInEziDebit(c);
                 JsfUtil.addSuccessMessage(configMapFacade.getConfig("ChangesSaved"));
@@ -612,6 +671,19 @@ public class CustomersController implements Serializable {
         //current = (Customers) getItems().getRowData();
         //selectedItemIndex = pagination.getPageFirstItem() + getItems().getRowIndex();
         return "Edit";
+    }
+
+    public void groupChangedChangeListener() {
+        JsfUtil.addSuccessMessage("Group Changed");
+        selectedGroups = new ArrayList<>();
+        if (checkedGroups != null) {
+            for (int y = 0; y < checkedGroups.length; y++) {
+                Boolean b = checkedGroups[y];
+                if (b != null && b == true) {
+                    selectedGroups.add(customerGroupsList.get(y));
+                }
+            }
+        }
     }
 
     public void selectShowCancelledBooleanChangeListener(ValueChangeEvent vce) {
@@ -780,7 +852,7 @@ public class CustomersController implements Serializable {
             // items = getPagination().createPageDataModel();
         }
         if (items == null) {
-             items = new PfSelectableDataModel<>(new ArrayList<Customers>());
+            items = new PfSelectableDataModel<>(new ArrayList<Customers>());
         }
         return items;
     }
@@ -789,7 +861,7 @@ public class CustomersController implements Serializable {
         if (notesItems == null) {
             setNotesItems((PfSelectableDataModel<Notes>) getNotesPagination().createPageDataModel());
         }
-         if (notesItems == null) {
+        if (notesItems == null) {
             setNotesItems(new PfSelectableDataModel<>(new ArrayList<Notes>()));
         }
         return notesItems;
@@ -1214,9 +1286,9 @@ public class CustomersController implements Serializable {
                 if (cs.getCustomerState().contains("ACTIVE")) {
                     selectedCustomerStates[0] = cs;
                 }
-               // if (cs.getCustomerState().contains("ON HOLD")) {
-               //     selectedCustomerStates[1] = cs;
-              //  }
+                // if (cs.getCustomerState().contains("ON HOLD")) {
+                //     selectedCustomerStates[1] = cs;
+                //  }
 
             }
 
@@ -1279,6 +1351,78 @@ public class CustomersController implements Serializable {
      */
     public void setAddUserButtonDisabled(boolean addUserButtonDisabled) {
         this.addUserButtonDisabled = addUserButtonDisabled;
+    }
+
+    /**
+     * @return the selectedGroups
+     *
+     * public Groups[] getSelectedGroups() { if (selectedGroups == null) {
+     * List<Groups> currentUsersGroupsMembership =
+     * ejbGroupsFacade.getCustomersGroups(current); selectedGroups =
+     * currentUsersGroupsMembership.toArray(new
+     * Groups[currentUsersGroupsMembership.size()]);
+     *
+     * }
+     * return selectedGroups; }
+     */
+    public List<Groups> getSelectedGroups() {
+        if (selectedGroups == null) {
+            selectedGroups = ejbGroupsFacade.getCustomersGroups(current);
+        }
+        return selectedGroups;
+    }
+
+    /**
+     * @param selectedGroups the selectedGroups to set
+     */
+    public void setSelectedGroups(List<Groups> selectedGroups) {
+        this.selectedGroups = selectedGroups;
+    }
+
+    /**
+     * @return the customerGroupsList
+     */
+    public List<Groups> getCustomerGroupsList() {
+        if (customerGroupsList == null) {
+            customerGroupsList = new ArrayList<>();
+            List<String> distinctGroups = ejbGroupsFacade.getGroups();
+            if (distinctGroups != null) {
+                distinctGroups.remove("DEVELOPER");
+                for (String g : distinctGroups) {
+                    customerGroupsList.add(new Groups(0, g));
+                }
+                checkedGroups = new Boolean[distinctGroups.size()];
+                for (int c = 0; c < distinctGroups.size(); c++) {
+                    for (Groups g : getSelectedGroups()) {
+                        if (distinctGroups.get(c).contains(g.getGroupname())) {
+                            checkedGroups[c] = true;
+                        }
+                    }
+                }
+            }
+        }
+        return customerGroupsList;
+    }
+
+    /**
+     * @param customerGroupsList the customerGroupsList to set
+     */
+    public void setCustomerGroupsList(List<Groups> customerGroupsList) {
+        this.customerGroupsList = customerGroupsList;
+    }
+
+    /**
+     * @return the checkedGroups
+     */
+    public Boolean[] getCheckedGroups() {
+        return checkedGroups;
+    }
+
+    /**
+     * @param checkedGroups the checkedGroups to set
+     */
+    public void setCheckedGroups(Boolean[] checkedGroups) {
+        this.checkedGroups = checkedGroups;
     }
 
     @FacesConverter(forClass = Customers.class)

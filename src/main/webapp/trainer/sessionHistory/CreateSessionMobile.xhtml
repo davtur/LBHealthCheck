@@ -18,7 +18,7 @@
         <!-- Main View  -->
         <pm:page id="sessions"  title="Training Session" >
 
-            <pm:header  swatch="b" title="Log Training Session" rendered="#{empty sessionHistoryController.selected.id}">
+            <pm:header  swatch="b" title="Log Training Session"  rendered="#{empty sessionHistoryController.selected.id}">
 
                 <f:facet name="left"><h:form><p:commandButton value="Back" style="width:100px" icon="back" action="/mobileMenu?faces-redirect=true" ajax="false"/></h:form></f:facet>
             </pm:header>  
@@ -31,8 +31,7 @@
 
                 <h:form id="sessionsForm">  
                     <p:growl/>
-                    <p:commandButton   ajax="false"   action="#{sessionHistoryController.createMobileDatalist}" value="#{configMapController.getKey('CreateSessionHistorySaveLink')}" />
-
+  
                     <p:spacer height="10em" />
 
                     <pm:field>
@@ -79,37 +78,36 @@
                         <p:outputLabel for="comments" value="#{configMapController.getKey('CreateSessionHistoryLabel_comments')}" />
                         <p:inputTextarea id="comments" value="#{sessionHistoryController.selected.comments}"  />
                     </pm:field>
-                    <p:spacer height="10em" />
+                    <p:spacer height="10em"  />
                     <pm:field>
                         <p:outputLabel for="attendanceCount" value="#{configMapController.getKey('CreateSessionHistoryLabel_picker')}" />
-                        <p:panel id="attendanceCount" >
+                        <p:panel id="attendanceCount"  >
                             <f:facet name="header">
                                 <h:outputText id="attendanceCount1" value="#{configMapController.getKey('CreateSessionHistoryLabel_totalSelected')}#{sessionHistoryController.numberThatAttendedSession}"/>
                             </f:facet>
-                            <p:dataList  id="scroll"   value="#{sessionHistoryController.selectableActiveCustomers}" var="cust" rowIndexVar="rowIndex" >
-                               <!-- <f:attribute name="filter" value="true" />-->
+                            <p:dataList  id="scroll"   value="#{sessionHistoryController.selectableActiveCustomers}" var="cust" rowIndexVar="rowIndex"  >
+                                <!-- <f:attribute name="filter" value="true" />-->
                                 <p:column>
                                     <h:panelGrid id="customerPanel" columns="3" >
                                         <p:graphicImage value="#{customerImagesController.dynamicImage}" width="50px">
                                             <f:param name="imageid" value="#{cust.profileImage.id}"/>
                                         </p:graphicImage>
                                         <p:selectBooleanCheckbox id="btnAttendedSession" value="#{sessionHistoryController.checkedCustomers[rowIndex]}"  style="text-align: right">
-                                            <p:ajax update=":sessions:sessionsForm:attendanceCount1 :sessions:sessionsForm:attendanceCount2"  event="change" />
+                                            <p:ajax update=":sessions:sessionsForm:attendanceCount1 :sessions:sessionsForm:bottomButton "  event="change" />
                                         </p:selectBooleanCheckbox>
                                         <h:outputText value="#{cust.firstname} #{cust.lastname}" style="padding-left: 30px"/>
                                     </h:panelGrid>
                                 </p:column>
                             </p:dataList>
-                          <!--  <p:spacer height="10em" />
-                            <f:facet name="footer">
-                                <h:outputText id="attendanceCount2" value="#{configMapController.getKey('CreateSessionHistoryLabel_totalSelected')}#{sessionHistoryController.numberThatAttendedSession}"/>
-                            </f:facet>-->
+                            <p:spacer height="10em" />
+                            
 
                         </p:panel>
                     </pm:field>
                     <p:spacer height="10em" />
+                   
                     <p:spacer height="10em" />
-                    <p:commandButton   ajax="false"   action="#{sessionHistoryController.createMobileDatalist}" value="#{configMapController.getKey('CreateSessionHistorySaveLink')}" />
+                    <p:commandButton  id="bottomButton" ajax="false"   action="#{sessionHistoryController.createMobileDatalist}" value="#{configMapController.getKey('CreateSessionMobileSaveButton')} #{sessionHistoryController.numberThatAttendedSession}" />
                 </h:form>
             </pm:content>
         </pm:page>

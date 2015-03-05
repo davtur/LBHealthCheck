@@ -46,7 +46,7 @@
                             </h:panelGroup >
                             <h:panelGroup >
                                 <p:commandButton id="addNoteDialogButton1"  value="#{configMapController.getKey('ListNotesCreateLink')}" onclick="PF('NotesCreateDialogue').show()" type="button"/> 
-                                <p:commandButton id="showDialogButton"  oncomplete="PF('customersCreateDialogue').show()"   actionListener="#{customersController.prepareCreateAjax}" value="#{configMapController.getKey('ListCustomersCreateLink')}"  update=":formCustomersCreate1:dialogueGrid  :growl" /> 
+                                <p:commandButton id="showDialogButton"  oncomplete="PF('customersCreateDialogue').show()"   actionListener="#{customersController.prepareCreateAjax}" value="#{configMapController.getKey('ListCustomersCreateLink')}" process=":formCustomersCreate1"  update=":formCustomersCreate1:dialogueGrid  :growl" /> 
 
                             </h:panelGroup >
                         </p:panelGrid>
@@ -256,6 +256,28 @@
                             <p:commandButton  id="passButton" ajax="true" actionListener="#{customersController.updatepass}" update=":growl"   value="#{configMapController.getKey('EditCustomersUpdatePassword')}" immediate="true"/>
                             <p:commandButton rendered="#{not empty ezidebit.eziDebitEDDRFormUrl and ezidebit.showAddToPaymentGatewayButton}" value="#{configMapController.getKey('sendCustomerOnBoardEmailButton')}"  action="#{customersController.sendCustomerOnboardEmail}" update=":growl "/>
                         </p:panelGrid>
+                        <p:panel>
+                            <p:dataList  id="scroll"   value="#{customersController.customerGroupsList}" var="group" rowIndexVar="rowIndex"  >
+                                <!-- <f:attribute name="filter" value="true" />-->
+                                <p:row>
+                                    <h:panelGrid id="customerPanel" columns="3" >
+
+                                        <p:selectBooleanCheckbox id="btnAttendedSession" value="#{customersController.checkedGroups[rowIndex]}"  >
+                                            <p:ajax   event="change" listener="#{customersController.groupChangedChangeListener}"/>
+                                        </p:selectBooleanCheckbox>
+                                        <h:outputText value="#{group.groupname}" />
+                                    </h:panelGrid>
+                                </p:row>
+                            </p:dataList>
+
+                           <!-- <p:outputLabel  value="Groups:    " for="selectedGroupsCheckbox2"/>
+                            <h:selectManyCheckbox id="selectedGroupsCheckbox2" value="#{customersController.selectedGroups}"    converter="customerGroupsConverter">
+                                <f:selectItems value="#{customersController.customerGroupsList}" var="custGroup" itemLabel="#{custGroup.groupname}" itemValue="#{custGroup}" />
+
+                            </h:selectManyCheckbox>-->
+
+                        </p:panel>
+
                         <p:panel>
                             <p:commandButton id="dialogueSave1"  actionListener="#{customersController.createDialogue}" value="#{configMapController.getKey('CreateCustomersSaveLink')}" update=":tv:customerslistForm1:customersTableList :growl"/>                
                         </p:panel>

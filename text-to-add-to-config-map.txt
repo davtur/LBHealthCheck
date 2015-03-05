@@ -249,3 +249,8 @@ CreateNotesDialogueMessage=Add a note or reminder for a customer.
 CreateNotesDialogueHeader=Add Notes & Reminders for
 CreateSessionHistoryLabel_totalSelected=Total Selected: 
 
+ListInvoiceCreateInvoiceLink=Generate Invoice.
+ListCreateInvoiceTitle=Generate Invoice
+
+mysqldump CreateSessionMobileSaveButton=Save -- Total Attending: 
+

@@ -15,7 +15,7 @@
             <f:metadata>
                 <f:event type="preRenderView" listener="#{loginBean.checkAlreadyLoggedin}" />
             </f:metadata>
-            <h:form>
+            <h:form id="mainLoginForm">
 
                 <p:panel>
                     <h3>Pure Fitness Manly Account</h3>
@@ -24,7 +24,9 @@
                         <p:outputLabel  value="Username:  "/>
 
                         <p:inputText id="usernameInput" value="#{loginBean.username}" 
-                                     required="true" requiredMessage="Please enter your username"/>
+                                     required="true" requiredMessage="Please enter your username">
+                            <p:ajax event="change" update=":loginForm" />
+                        </p:inputText>
                         <br /><br />
                         <p:outputLabel  value="    Password :   " />
 
@@ -42,21 +44,27 @@
             <br />
 
             <h:form id="loginForm">
-                <p:panel>
+               <!-- <p:panel  id="facebookPanel" rendered="#{loginBean.renderFacebook}">-->
+                <p:panel  id="facebookPanel">
                     <h3>Facebook Account</h3>
-                    <p:panel >
-                        <div class="social-icons">
-                            <span class="facebook"><a target="_blank" href="https://www.facebook.com/PureFitnessManly"></a></span>
-                        </div>
-                        <p:button styleClass="loginButtonFacebook" value="Facebook Connect" href="#{facebookLoginBean.facebookUrlAuth}" />
+                    <p:panel>
+                        <h:panelGrid columns="5">
+                            <div class="social-icons">
+                                <span class="facebook"><a target="_blank" href="https://www.facebook.com/PureFitnessManly"></a></span>
+                            </div>
+                            <p:panel rendered="#{not empty loginBean.facebookId}" style="width:73px">
+                                <img src="https://graph.facebook.com/#{loginBean.facebookId}/picture"/>
+                            </p:panel>
+                            <p:commandButton widgetVar="fbLogin" onclick="PF('fbLogin').disable()" styleClass="loginButtonFacebook" value="Facebook Connect"  actionListener="#{facebookLoginBean.facebookRedirect}" />
+     <!--<p:button styleClass="loginButtonFacebook" value="Facebook Connect" href="#{facebookLoginBean.facebookUrlAuth}"  />-->
 
+                            <h:outputText value="   Log into Pure Fitness Manly using your facebook account."></h:outputText>
 
-                        <h:outputText value="   You can use your facebook account to log into Pure Fitness Manly Member Services if you find it easier."></h:outputText>
+                            <h:outputText value="#{facebookLoginBean.userFromSession}"></h:outputText>
 
-
-                        <h:outputText value="#{facebookLoginBean.userFromSession}"></h:outputText>
-
-                    </p:panel></p:panel>
+                        </h:panelGrid>
+                    </p:panel>
+                </p:panel>
             </h:form>
         </ui:define>
     </ui:composition>

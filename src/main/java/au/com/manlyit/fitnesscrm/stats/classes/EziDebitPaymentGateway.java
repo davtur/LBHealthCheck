@@ -10,8 +10,6 @@ import au.com.manlyit.fitnesscrm.stats.beans.CustomerStateFacade;
 import au.com.manlyit.fitnesscrm.stats.beans.CustomersFacade;
 import au.com.manlyit.fitnesscrm.stats.beans.PaymentBean;
 import au.com.manlyit.fitnesscrm.stats.beans.PaymentsFacade;
-import au.com.manlyit.fitnesscrm.stats.beans.SessionHistoryFacade;
-import au.com.manlyit.fitnesscrm.stats.beans.SessionTypesFacade;
 import au.com.manlyit.fitnesscrm.stats.beans.util.PaymentStatus;
 import au.com.manlyit.fitnesscrm.stats.classes.util.AsyncJob;
 import au.com.manlyit.fitnesscrm.stats.classes.util.DatatableSelectionHelper;
@@ -23,13 +21,8 @@ import au.com.manlyit.fitnesscrm.stats.classes.util.ScheduledPaymentPojo;
 import au.com.manlyit.fitnesscrm.stats.db.CustomerState;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import au.com.manlyit.fitnesscrm.stats.db.Invoice;
-import au.com.manlyit.fitnesscrm.stats.db.InvoiceLine;
-import au.com.manlyit.fitnesscrm.stats.db.InvoiceLineType;
 import au.com.manlyit.fitnesscrm.stats.db.PaymentParameters;
 import au.com.manlyit.fitnesscrm.stats.db.Payments;
-import au.com.manlyit.fitnesscrm.stats.db.Plan;
-import au.com.manlyit.fitnesscrm.stats.db.SessionHistory;
-import au.com.manlyit.fitnesscrm.stats.db.SessionTypes;
 import au.com.manlyit.fitnesscrm.stats.webservices.ArrayOfPayment;
 import au.com.manlyit.fitnesscrm.stats.webservices.ArrayOfScheduledPayment;
 import au.com.manlyit.fitnesscrm.stats.webservices.CustomerDetails;
@@ -85,7 +78,6 @@ import javax.inject.Named;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
 import javax.xml.ws.WebServiceException;
-import net.sf.ezmorph.MorphUtils;
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFCellStyle;
 import org.apache.poi.hssf.usermodel.HSSFRow;
@@ -136,16 +128,7 @@ public class EziDebitPaymentGateway implements Serializable {
     private PaymentsFacade paymentsFacade;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.AuditLogFacade ejbAuditLogFacade;
-    @Inject
-    private SessionHistoryFacade sessionHistoryFacade;
-    @Inject
-    private au.com.manlyit.fitnesscrm.stats.beans.InvoiceLineTypeFacade invoiceLineTypeFacade;
-    @Inject
-    private au.com.manlyit.fitnesscrm.stats.beans.InvoiceLineFacade invoiceLineFacade;
-    @Inject
-    private au.com.manlyit.fitnesscrm.stats.beans.InvoiceFacade invoiceFacade;
-    @Inject
-    private SessionTypesFacade sessionTypesFacade;
+
     private boolean asyncOperationRunning = false;
     private boolean refreshFromDB = false;
     private final ThreadGroup tGroup1 = new ThreadGroup("EziDebitOps");
@@ -157,6 +140,7 @@ public class EziDebitPaymentGateway implements Serializable {
     private List<Payments> paymentsDBListFilteredItems;
     private List<Payments> reportPaymentsListFilteredItems;
     private List<Invoice> reportEndOfMonthListFilteredItems;
+
     private List<ScheduledPaymentPojo> scheduledPaymentsList;
     private Payments selectedReportItem;
     private Payments selectedEomReportItem;
@@ -210,10 +194,13 @@ public class EziDebitPaymentGateway implements Serializable {
     private boolean autoStartPoller = true;
     private boolean stopPoller = false;
     private int reportType = 0;
+
     private boolean customerDetailsHaveBeenRetrieved = false;
     private String eziDebitWidgetUrl = "";
     private String eziDebitEDDRFormUrl = "";
     private Customers selectedCustomer;
+
+   
     private float reportTotalSuccessful = 0;
     private float reportTotalDishonoured = 0;
     private float reportTotalScheduled = 0;
@@ -976,123 +963,13 @@ public class EziDebitPaymentGateway implements Serializable {
         //get the list of active customers
         List<Customers> customerList = customersFacade.findAllActiveCustomers(true);
         List<Invoice> invoices = new ArrayList<>();
+        FacesContext context = FacesContext.getCurrentInstance();
+        InvoiceController controller = (InvoiceController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "invoiceController");
 
         for (Customers cust : customerList) {
-            Invoice inv = new Invoice();
-            inv.setInvoiceLineCollection(new ArrayList<InvoiceLine>());
-            inv.setUserId(cust);
-//add plan line item to invoice with number of billable sessions
-            InvoiceLineType ilt = invoiceLineTypeFacade.findAll().get(1);
-            InvoiceLine il = new InvoiceLine(0);
-            BigDecimal paymentsTotal;
-            BigDecimal bankFeesTotal;
-            PaymentParameters pp = cust.getPaymentParameters();
-            String ppPlanPaymentDetails = "Unknown";
-            if (pp != null) {
-                try {
-                    String period = getPaymentPeriodString(pp.getPaymentPeriod());
-                    String dom = ", DOM: " + pp.getPaymentPeriodDayOfMonth() + " ";
-                    String dow = ", DOW: " + pp.getPaymentPeriodDayOfWeek();
-                    if (pp.getPaymentPeriodDayOfMonth().contentEquals("0")) {
-                        dom = "";
-                    }
 
-                    ppPlanPaymentDetails = "Period: " + period + dom + dow;
-                } catch (Exception e) {
-                    ppPlanPaymentDetails = "Unknown";
-                }
-            }
-            BigDecimal productsAndServicesTotal = new BigDecimal(0);
-            il.setTypeId(ilt);
+            invoices.add(controller.generateInvoiceForCustomer(cust, reportUseSettlementDate, reportShowSuccessful, reportShowFailed, reportShowPending, isReportShowScheduled(), reportStartDate, reportEndDate));
 
-            il.setQuantity(new BigDecimal(1));
-            il.setDescription("Plan: " + cust.getGroupPricing().getPlanName());
-            il.setPrice(cust.getGroupPricing().getPlanPrice());
-            il.setAmount(cust.getGroupPricing().getPlanPrice());
-            productsAndServicesTotal = productsAndServicesTotal.add(il.getAmount());
-            inv.getInvoiceLineCollection().add(il);
-            //get payments for customer
-            List<Payments> pl = paymentsFacade.findPaymentsByDateRange(reportUseSettlementDate, reportShowSuccessful, reportShowFailed, reportShowPending, isReportShowScheduled(), reportStartDate, reportEndDate, false, cust);
-            //get sessions for customer
-            List<SessionTypes> sessionTypesList = sessionTypesFacade.findAll();
-            for (SessionTypes sessType : sessionTypesList) {
-                List<Date> weeks = getWeeksInMonth(reportStartDate, reportEndDate);
-                Date weekStart = reportStartDate;
-                int billableSessionsTotal = 0;
-                for (Date weekEnd : weeks) {
-                    List<SessionHistory> sessions = sessionHistoryFacade.findSessionsByParticipantAndDateRange(cust, weekStart, weekEnd, true);
-
-                    //for each session type count the sessions and bill as a line item if they are not included in the plan
-                    int count = 0;
-
-                    for (SessionHistory sess : sessions) {
-                        String type = sess.getSessionTypesId().getName();
-                        if (type.contains(sessType.getName())) {
-                            count++;
-                            //total = total + sess.getSessionTypesId().
-                        }
-                    }
-                    if (count > 0) {
-                        billableSessionsTotal += checkSessionsAgainstPlanWeek(count, cust, sessType);
-                    }
-                    weekStart = weekEnd;
-                }
-                //add line item to invoice with number of billable sessions
-                ilt = invoiceLineTypeFacade.findAll().get(2);
-                il = new InvoiceLine(0);
-                il.setTypeId(ilt);
-                BigDecimal bdBillableSessionsTotal = new BigDecimal(billableSessionsTotal);
-                Plan sessionPlan = sessType.getPlan();
-                BigDecimal cdPrice = new BigDecimal(0);
-                if (sessionPlan != null) {
-                    cdPrice = sessionPlan.getPlanPrice();
-                }
-                il.setQuantity(bdBillableSessionsTotal);
-                il.setDescription(sessType.getName());
-                il.setPrice(cdPrice);
-                il.setAmount(bdBillableSessionsTotal.multiply(cdPrice));
-                if (cdPrice.compareTo(new BigDecimal(0)) > 0 && bdBillableSessionsTotal.compareTo(new BigDecimal(0)) > 0) {
-                    inv.getInvoiceLineCollection().add(il);
-                    productsAndServicesTotal = productsAndServicesTotal.add(il.getAmount());
-                }
-
-            }
-            //add payments line item to invoice with number of billable sessions
-            ilt = invoiceLineTypeFacade.findAll().get(0);
-            il = new InvoiceLine(0);
-            il.setTypeId(ilt);
-            paymentsTotal = new BigDecimal(0);
-            bankFeesTotal = new BigDecimal(0);
-            int numberOfPayments = 0;
-            for (Payments p : pl) {
-                BigDecimal fee = p.getTransactionFeeCustomer();
-                if (fee == null) {
-                    fee = new BigDecimal(0);
-                }
-                paymentsTotal = paymentsTotal.add(p.getPaymentAmount());
-                bankFeesTotal = bankFeesTotal.add(fee);
-                numberOfPayments++;
-            }
-            // add scheduled payment amounts 
-            il.setQuantity(new BigDecimal(numberOfPayments));
-            il.setDescription("Payment(s)" + " --- " + ppPlanPaymentDetails);
-            productsAndServicesTotal = productsAndServicesTotal.add(bankFeesTotal);
-            productsAndServicesTotal = productsAndServicesTotal.subtract(paymentsTotal);
-            il.setPrice(paymentsTotal);
-            paymentsTotal = paymentsTotal.negate();
-            il.setAmount(paymentsTotal);
-
-            // add line item for bank fees
-            InvoiceLine il2 = new InvoiceLine(0);
-            il2.setTypeId(ilt);
-            il2.setQuantity(new BigDecimal(numberOfPayments));
-            il2.setDescription("Bank Transaction Fees");
-            il2.setPrice(bankFeesTotal);
-            il2.setAmount(bankFeesTotal);
-            inv.getInvoiceLineCollection().add(il2);
-            inv.getInvoiceLineCollection().add(il);
-            inv.setTotal(productsAndServicesTotal);
-            invoices.add(inv);
         }
         if (invoices.isEmpty() == false) {
             reportEndOfMonthList = new PfSelectableDataModel<>(invoices);
@@ -1101,93 +978,6 @@ public class EziDebitPaymentGateway implements Serializable {
         }
 
         Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.INFO, "Completed End Of Month Report");
-    }
-
-    private String getPaymentPeriodString(String key) {
-        String period = "";
-        switch (key) {
-            case "4":
-                period = "4 Weekly";
-                break;
-            case "W":
-                period = "Weekly";
-                break;
-            case "M":
-                period = "Monthly";
-                break;
-            case "F":
-                period = "Fortnightly";
-                break;
-            case "Z":
-                period = "No Schedule";
-                break;
-            case "Q":
-                period = "Quarterly";
-                break;
-            case "H":
-                period = "Half Yearly";
-                break;
-            case "Y":
-                period = "Annually";
-                break;
-            case "N":
-                period = "Weekday In Month";
-                break;
-        }
-        return period;
-    }
-
-    private List<Date> getWeeksInMonth(Date start, Date end) {
-        List<Date> dl = new ArrayList<>();
-        GregorianCalendar gc = new GregorianCalendar();
-        gc.setTime(start);
-        while (gc.getTime().compareTo(end) <= 0) {
-            gc.add(Calendar.DAY_OF_WEEK, 7);
-            if (gc.getTime().compareTo(end) >= 0) {
-                dl.add(end);
-            } else {
-                dl.add(gc.getTime());
-            }
-
-        }
-
-        return dl;
-    }
-
-    private int checkSessionsAgainstPlanWeek(int count, Customers cust, SessionTypes sessType) {
-        int billableSessions = 0;
-        Plan plan = cust.getGroupPricing();
-        PaymentParameters pp = cust.getPaymentParameters();
-        String paymentPeriod = pp.getPaymentPeriod();
-        List<Plan> plans = new ArrayList<>(plan.getPlanCollection());
-        int includedInPlanCount = 0;
-        for (Plan p : plans) {
-            SessionTypes st = p.getSessionType();
-            if (st != null) {
-                if (sessType.getName().contentEquals(st.getName())) {
-                    includedInPlanCount++;
-                }
-            }
-        }
-        billableSessions = count - includedInPlanCount;
-        if (billableSessions < 0) {
-            billableSessions = 0;
-        }
-
-        /* if (paymentPeriod.contentEquals(PaymentPeriod.MONTHLY.value())) {
-
-         }
-         if (paymentPeriod.contentEquals(PaymentPeriod.FOUR_WEEKLY.value())) {
-
-         }
-         if (paymentPeriod.contentEquals(PaymentPeriod.WEEKLY.value())) {
-
-         }
-         if (paymentPeriod.contentEquals(PaymentPeriod.FORTNIGHTLY.value())) {
-
-         }*/
-        logger.log(Level.INFO, "checkSessionsAgainstPlanWeek: Billed Sessions:{0}, Session Count:{1}, Customer: {2}, Plan: {5}, Session Type: {3}, Session Plan: {4}", new Object[]{billableSessions, count, cust.getUsername(), sessType.getName(), sessType.getPlan(), cust.getGroupPricing().getPlanName()});
-        return billableSessions;
     }
 
     private void generatePaymentsReport() {
@@ -1391,7 +1181,7 @@ public class EziDebitPaymentGateway implements Serializable {
      * @return the reportType
      */
     public int getReportType() {
-        
+
         return reportType;
     }
 
@@ -1566,6 +1356,8 @@ public class EziDebitPaymentGateway implements Serializable {
         this.cashPaymentReceiptReference = cashPaymentReceiptReference;
     }
 
+    
+
     private class eziDebitThreadFactory implements ThreadFactory {
 
         @Override
@@ -1649,7 +1441,7 @@ public class EziDebitPaymentGateway implements Serializable {
         return paymentDBList;
     }
 
-    private Customers getSelectedCustomer() {
+    public Customers getSelectedCustomer() {
         FacesContext context = FacesContext.getCurrentInstance();
         CustomersController controller = (CustomersController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "customersController");
         /*if (refreshFromDB) {
@@ -1726,7 +1518,11 @@ public class EziDebitPaymentGateway implements Serializable {
         FacesContext context = FacesContext.getCurrentInstance();
         CustomersController controller = (CustomersController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "customersController");
         PaymentParameters pp = controller.getSelectedCustomersPaymentParameters();
-        String webDdrUrl = pp.getWebddrUrl();// contains payment information e.g 
+        String webDdrUrl = null;
+        if(pp != null){
+            webDdrUrl = pp.getWebddrUrl();// contains payment information e.g 
+        }
+     
 
         String amp = "&";
 

@@ -120,10 +120,15 @@ public class PaymentsFacade extends AbstractFacade<Payments> {
             cq.orderBy(cb.desc(dDate));
 
             Query q = em.createQuery(cq);
-
-            if (q.getResultList().size() > 0) {
-                cm = (Payments) q.getResultList().get(0);
+            List<Payments> pl = q.getResultList();
+            if (pl == null) {
+                pl = new ArrayList<>();
             }
+
+            if (pl.size() > 0) {
+                cm = (Payments) pl.get(0);
+            }
+
         } catch (Exception e) {
             logger.log(Level.INFO, "findLastSuccessfulPayment error customer:{0} " + customer, e);
         }

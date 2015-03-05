@@ -33,6 +33,15 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import net.sf.json.JSONObject;
+import net.sf.json.JSONSerializer;
+import org.apache.commons.lang.StringUtils;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.ResponseHandler;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.BasicResponseHandler;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 
 /**
  *
@@ -45,7 +54,10 @@ public class LoginBean implements Serializable {
     private static final Logger logger = Logger.getLogger(LoginBean.class.getName());
     private String username;
     private String password;
+    private boolean renderFacebook = false;
+    private String facebookId;
     private boolean mobileDeviceUserAgent = false;
+    private String faceBookAccessToken;
     private Future<Boolean> emailSendResult;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade configMapFacade;
@@ -92,7 +104,7 @@ public class LoginBean implements Serializable {
         props.put("mail.smtp.sslpass", configMapFacade.getConfig("mail.smtp.sslpass"));
         props.put("mail.smtp.headerimage.url", configMapFacade.getConfig("mail.smtp.headerimage.url"));
         props.put("mail.smtp.headerimage.cid", configMapFacade.getConfig("mail.smtp.headerimage.cid"));
-   
+
         return props;
 
     }
@@ -343,5 +355,165 @@ public class LoginBean implements Serializable {
         }
 
         return false;
+    }
+
+    private boolean updateFacebookId(Customers cust) {
+
+        faceBookAccessToken = getAccessToken();
+        facebookId = getCustomerfacebookId(cust.getEmailAddress());
+        return facebookId != null;
+
+    }
+
+    public String getCustomerfacebookId(String email) {
+        String fbId = null;
+        String encodedEmail = "";
+        String encodedToken = "";
+        try {
+            encodedEmail = URLEncoder.encode(email, "UTF-8");
+            encodedToken = URLEncoder.encode(faceBookAccessToken, "UTF-8");
+        } catch (UnsupportedEncodingException ex) {
+            Logger.getLogger(LoginBean.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        String newUrl = "https://graph.facebook.com/search?access_token=" + encodedToken + "&q=" + encodedEmail + "&type=user";
+        CloseableHttpClient httpclient = HttpClientBuilder.create().build();
+        try {
+            HttpGet httpget = new HttpGet(newUrl);
+            ResponseHandler<String> responseHandler = new BasicResponseHandler();
+            String responseBody = httpclient.execute(httpget, responseHandler);
+            String firstName = null;
+            String lastName = null;
+
+            try {
+                JSONObject json = (JSONObject) JSONSerializer.toJSON(responseBody);
+                fbId = json.getString("id");
+
+                firstName = json.getString("first_name");
+                lastName = json.getString("last_name");
+
+                String fbEmail = json.getString("email");
+                if (email.contentEquals(fbEmail) == false) {
+                    logger.log(Level.WARNING, "Error getting JSON objects from facebook: emails dont match!");
+                }
+                //put user data in session
+
+                if (fbId == null || firstName == null || lastName == null || email == null) {
+                    if (facebookId == null) {
+                        logger.log(Level.WARNING, "Error getting JSON objects from facebook: Facebook ID is NULL");
+                    }
+                    if (firstName == null) {
+                        logger.log(Level.WARNING, "Error getting JSON objects from facebook: firstName is NULL");
+                    }
+                    if (lastName == null) {
+                        logger.log(Level.WARNING, "Error getting JSON objects from facebook: lastName is NULL");
+                    }
+                    if (fbEmail == null) {
+                        logger.log(Level.WARNING, "Error getting JSON objects from facebook: email is NULL");
+                    }
+                }
+
+            } catch (Exception e) {
+                logger.log(Level.WARNING, "Error getting JSON objects from facebook}", e);
+            }
+        } catch (ClientProtocolException e) {
+            logger.log(Level.WARNING, e.getMessage());
+        } catch (IOException e) {
+            logger.log(Level.WARNING, e.getMessage());
+        } finally {
+            try {
+                httpclient.close();
+            } catch (IOException ex) {
+                logger.log(Level.SEVERE, null, ex);
+            }
+        }
+
+        return fbId;
+    }
+
+    public String getAccessToken() {
+        String token = null;
+        String appId = getValueFromKey("facebook.app.id");//"247417342102284";
+        String redirectUrl = getValueFromKey("facebook.redirect.url");//http://localhost:8080/FitnessStats/index.sec";
+        String faceAppSecret = getValueFromKey("facebook.app.secret");//"33715d0844267d3ba11a24d44e90be80";
+        String newUrl = "https://graph.facebook.com/oauth/access_token?client_id=" + appId + "&client_secret=" + faceAppSecret + "&grant_type=client_credentials";
+        CloseableHttpClient httpclient = HttpClientBuilder.create().build();
+        try {
+            HttpGet httpget = new HttpGet(newUrl);
+            ResponseHandler<String> responseHandler = new BasicResponseHandler();
+            String responseBody = httpclient.execute(httpget, responseHandler);
+            token = StringUtils.removeEnd(StringUtils.removeStart(responseBody, "access_token="), "&expires=5180795");
+        } catch (ClientProtocolException e) {
+            logger.log(Level.WARNING, e.getMessage());
+        } catch (IOException e) {
+            logger.log(Level.WARNING, e.getMessage());
+        } finally {
+            try {
+                httpclient.close();
+            } catch (IOException ex) {
+                logger.log(Level.SEVERE, null, ex);
+            }
+        }
+
+        return token;
+    }
+
+    /**
+     * @return the renderFacebook
+     */
+    public boolean isRenderFacebook() {
+        Customers cust = ejbCustomerFacade.findCustomerByUsername(username);
+        if (cust != null) {
+            facebookId = cust.getFacebookId();
+            if (facebookId == null) {
+                //find the facebook id
+                return updateFacebookId(cust);
+
+            }
+            return true;
+        } else {
+            facebookId = null;
+            return false;
+        }
+
+    }
+
+    /**
+     * @param renderFacebook the renderFacebook to set
+     */
+    public void setRenderFacebook(boolean renderFacebook) {
+        this.renderFacebook = renderFacebook;
+    }
+
+    /**
+     * @return the facebookId
+     */
+    public String getFacebookId() {
+        facebookId = null;
+        Customers cust = ejbCustomerFacade.findCustomerByUsername(username);
+        if (cust != null) {
+            facebookId = cust.getFacebookId();
+        }
+        return facebookId;
+    }
+
+    /**
+     * @param facebookId the facebookId to set
+     */
+    public void setFacebookId(String facebookId) {
+        this.facebookId = facebookId;
+    }
+
+    /**
+     * @return the faceBookAccessToken
+     */
+    public String getFaceBookAccessToken() {
+        return faceBookAccessToken;
+    }
+
+    /**
+     * @param faceBookAccessToken the faceBookAccessToken to set
+     */
+    public void setFaceBookAccessToken(String faceBookAccessToken) {
+        this.faceBookAccessToken = faceBookAccessToken;
     }
 }

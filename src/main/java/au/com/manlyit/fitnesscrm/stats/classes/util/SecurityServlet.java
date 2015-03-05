@@ -5,6 +5,7 @@
  */
 package au.com.manlyit.fitnesscrm.stats.classes.util;
 
+import au.com.manlyit.fitnesscrm.stats.beans.util.CustomerStatus;
 import au.com.manlyit.fitnesscrm.stats.classes.PasswordService;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import java.io.IOException;
@@ -57,7 +58,7 @@ public class SecurityServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        logger.log(Level.INFO, "*** Called SecurityServlet");
+        //logger.log(Level.INFO, "*** Called SecurityServlet");
         HttpSession httpSession = request.getSession();
         String faceCode = request.getParameter("code");
         String state = request.getParameter("state");
@@ -66,6 +67,7 @@ public class SecurityServlet extends HttpServlet {
         String accessToken = getFacebookAccessToken(faceCode);
         Customers facebookUser = getUserMailAddressFromJsonResponse(accessToken, httpSession);
         String sessionID = httpSession.getId();
+         logger.log(Level.INFO, "SecurityServlet called: SessionId={0}, State:={1},FacebookCode={2}, Token from code:{3}",new Object[]{sessionID,state,faceCode,accessToken});
         if (state.equals(sessionID)) {
             String pfmEncrptedPassword = null;
             try {
@@ -99,27 +101,32 @@ public class SecurityServlet extends HttpServlet {
                     }
                     if (customer != null) {
                         // login facebook user with random password that is changed each login
-                        String passwd = RandomStringUtils.random(20);
-                        String encPassword = PasswordService.getInstance().encrypt(passwd);
-                        pfmEncrptedPassword = customer.getPassword();
-                        customer.setPassword(encPassword);
-                        customer.setFacebookId(fbid);
-                        ejbFacade.editAndFlush(customer);
+                        if (customer.getActive().getCustomerState().contentEquals(CustomerStatus.CANCELLED.value()) == false) {
+                            String passwd = RandomStringUtils.random(20);
+                            String encPassword = PasswordService.getInstance().encrypt(passwd);
+                            pfmEncrptedPassword = customer.getPassword();
+                            customer.setPassword(encPassword);
+                            customer.setFacebookId(fbid);
+                            ejbFacade.editAndFlush(customer);
 
-                        try {
-                            request.login(customer.getUsername(), passwd);
-                            customer.setPassword(pfmEncrptedPassword);
-                            ejbFacade.editAndFlush(customer);
-                        } catch (ServletException servletException) {
-                            logger.log(Level.INFO, "Login failed!");
-                            customer.setPassword(pfmEncrptedPassword);
-                            ejbFacade.editAndFlush(customer);
-                            if (servletException.getMessage().contains("Login failed") == false) {
-                                throw servletException;
-                            }else{
-                               context.addMessage(null, new FacesMessage("Login failed."));
-                               return;
+                            try {
+                                request.login(customer.getUsername(), passwd);
+                                customer.setPassword(pfmEncrptedPassword);
+                                ejbFacade.editAndFlush(customer);
+                            } catch (ServletException servletException) {
+                                logger.log(Level.INFO, "Login failed!");
+                                customer.setPassword(pfmEncrptedPassword);
+                                ejbFacade.editAndFlush(customer);
+                                if (servletException.getMessage().contains("Login failed") == false) {
+                                    throw servletException;
+                                } else {
+                                    context.addMessage(null, new FacesMessage("Login failed."));
+                                    return;
+                                }
                             }
+                        }else{
+                            logger.log(Level.INFO, "A cancelled customer ({0}) was denied access - facebook login button.",customer.getUsername());
+                            context.addMessage(null, new FacesMessage("Access Denied - Cancelled Status"));
                         }
                     } else {
                         context.addMessage(null, new FacesMessage("Login failed."));
@@ -139,8 +146,8 @@ public class SecurityServlet extends HttpServlet {
             }
 
         } else {
-            logger.log(Level.WARNING, "CSRF protection validation");
-             if (mobileDevice(request)) {
+            logger.log(Level.WARNING, "CSRF protection validation - The Session ID passed to the original request was does not match the one in the post to this servlet");
+            if (mobileDevice(request)) {
                 httpSession.setAttribute("MOBILE_DEVICE", "TRUE");
                 response.sendRedirect(request.getContextPath() + getValueFromKey("facebook.redirect.mobilelandingpage"));
             } else {
