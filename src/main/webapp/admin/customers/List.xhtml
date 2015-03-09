@@ -294,7 +294,7 @@
 
 
                         <p:panel>
-                            <p:commandButton id="dialogueSave1"  actionListener="#{customersController.createDialogue}" value="#{configMapController.getKey('CreateCustomersSaveLink')}" update=":tv:customerslistForm1:customersTableList :growl"/>                
+                            <p:commandButton id="dialogueSave1"  actionListener="#{customersController.editDialogue}" value="#{configMapController.getKey('CreateCustomersSaveLink')}" update=":tv:customerslistForm1:customersTableList :growl"/>                
                             <p:commandButton disabled="#{ empty ezidebit.eziDebitEDDRFormUrl and not ezidebit.showAddToPaymentGatewayButton}" value="#{configMapController.getKey('sendCustomerOnBoardEmailButton')}"  action="#{customersController.sendCustomerOnboardEmail}" update=":growl "/>
 
                         </p:panel>
