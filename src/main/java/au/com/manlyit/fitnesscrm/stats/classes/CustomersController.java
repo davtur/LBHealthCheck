@@ -91,6 +91,7 @@ public class CustomersController implements Serializable {
     private String checkPass2 = "";
     private Customers impersonate;
     private Customers loggedInUser;
+    private boolean passwordsMatch = false;
     private boolean impersonating = false;
     private boolean customerTabsEnabled = false;
     private boolean refreshFromDB = false;
@@ -604,10 +605,13 @@ public class CustomersController implements Serializable {
                     ejbGroupsFacade.create(grp);
 
                 }
+                if (ejbGroupsFacade.isCustomerInGroup(c, "USER") == false) {
+                    Groups grp = new Groups(0, "USER");
+                    grp.setUsername(c);
+                    ejbGroupsFacade.create(grp);
+                    JsfUtil.addSuccessMessage(configMapFacade.getConfig("CustomersCreatedMustBeInUserGroup"));
+                }
 
-                //Groups grp = new Groups(0, "USER");
-                // grp.setUsername(c);
-                //ejbGroupsFacade.create(grp);
                 createDefaultCustomerProfilePicture(c);
                 // createDefaultPaymentParameters(paymentGateway);
                 recreateAllAffectedPageModels();
@@ -651,6 +655,12 @@ public class CustomersController implements Serializable {
                         grp.setUsername(c);
                         ejbGroupsFacade.create(grp);
                     }
+                }
+                if (ejbGroupsFacade.isCustomerInGroup(c, "USER") == false) {
+                    Groups grp = new Groups(0, "USER");
+                    grp.setUsername(c);
+                    ejbGroupsFacade.create(grp);
+                    JsfUtil.addSuccessMessage(configMapFacade.getConfig("CustomersCreatedMustBeInUserGroup"));
                 }
                 recreateAllAffectedPageModels();
                 ezi.editCustomerDetailsInEziDebit(c);
@@ -933,7 +943,8 @@ public class CustomersController implements Serializable {
 
     public void checkPassChange() {
 
-        String y = checkPass;
+      
+       passwordsMatch = checkPass.equals(checkPass2);
     }
 
     /**
@@ -1423,6 +1434,20 @@ public class CustomersController implements Serializable {
      */
     public void setCheckedGroups(Boolean[] checkedGroups) {
         this.checkedGroups = checkedGroups;
+    }
+
+    /**
+     * @return the passwordsMatch
+     */
+    public boolean isPasswordsMatch() {
+        return passwordsMatch;
+    }
+
+    /**
+     * @param passwordsMatch the passwordsMatch to set
+     */
+    public void setPasswordsMatch(boolean passwordsMatch) {
+        this.passwordsMatch = passwordsMatch;
     }
 
     @FacesConverter(forClass = Customers.class)

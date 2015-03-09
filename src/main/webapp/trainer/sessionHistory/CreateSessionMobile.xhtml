@@ -64,7 +64,7 @@
 
                     <pm:field>
                         <p:outputLabel for="sessionType" value="#{configMapController.getKey('CreateSessionHistoryLabel_trainer')}" />
-                        <p:selectCheckboxMenu id="trainer" filter="true" filterMatchMode="startsWith"  value="#{sessionHistoryController.trainers}" converter="#{custConverter}" label="#{configMapController.getKey('CreateSessionHistoryLabel_trainer')}"  >
+                        <p:selectCheckboxMenu id="trainer" filter="true" filterMatchMode="startsWith"  value="#{sessionHistoryController.trainers}" converter="#{custConverter}" label="#{configMapController.getKey('CreateSessionHistoryLabel_trainer')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionHistoryRequiredMessage_trainer')}">
                             <f:selectItems value="#{sessionHistoryController.activeTrainers}" var="cust" itemLabel="#{cust.firstname} #{cust.lastname}" itemValue="#{cust}"/>
                         </p:selectCheckboxMenu>
                     </pm:field>

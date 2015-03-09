@@ -10,8 +10,10 @@
 
 
         <!--<p:log />--> 
-        <p:confirmDialog id="confirmDialogCustomersCreate1" message="Add a new customer to the database."  closable="false"
-                         header="#{configMapController.getKey('CreateCustomersTitle')}" severity="info" widgetVar="customersCreateDialogue"> 
+        <!--  <p:confirmDialog id="confirmDialogCustomersCreate1" message="Add a new customer to the database."  closable="false"
+                           header="#{configMapController.getKey('CreateCustomersTitle')}" severity="info" widgetVar="customersCreateDialogue" > -->
+        <p:dialog id="confirmDialogCustomersCreate1"  closable="false" fitViewport="true"
+                  header="#{configMapController.getKey('CreateCustomersTitle')}"  widgetVar="customersCreateDialogue" > 
             <h:form id="formCustomersCreate1"> 
                 <p:panelGrid id="dialogueGrid" columns="4">
 
@@ -99,22 +101,18 @@
                      </p:selectManyCheckbox>-->
 
 
-                    <p:panel>
-                        <p:dataList  id="scroll"   value="#{customersController.customerGroupsList}" var="group" rowIndexVar="rowIndex"  >
-                            <!-- <f:attribute name="filter" value="true" />-->
-                            <p:row>
-                                <h:panelGrid id="customerPanel" columns="3" >
 
-                                    <p:selectBooleanCheckbox id="btnAttendedSession" value="#{customersController.checkedGroups[rowIndex]}"  >
-                                        <p:ajax   event="change" listener="#{customersController.groupChangedChangeListener}"/>
-                                    </p:selectBooleanCheckbox>
-                                    <h:outputText value="#{group.groupname}" />
-                                </h:panelGrid>
-                            </p:row>
-                        </p:dataList>
+                    <p:dataGrid  id="scroll" columns="3"   value="#{customersController.customerGroupsList}" var="group" rowIndexVar="rowIndex"  >
+                        <h:panelGrid id="customerPanel" columns="2" style="margin-bottom:10px" cellpadding="5" >
+                            <h:outputText value="#{group.groupname}" />
+                            <p:selectBooleanCheckbox id="btnAttendedSession" value="#{customersController.checkedGroups[rowIndex]}"  >
+                                <p:ajax   event="change" listener="#{customersController.groupChangedChangeListener}"/>
+                            </p:selectBooleanCheckbox>
+                       </h:panelGrid>
+                   </p:dataGrid>
 
 
-                    </p:panel>
+
 
                 </p:panelGrid>
                 <p:panel><!--  onclick="handleSubmit(args,'customersCreateDialogue');"-->
@@ -124,7 +122,7 @@
                 </p:panel>
 
             </h:form>
-        </p:confirmDialog>
+        </p:dialog>
     </ui:composition>
 
 </html>

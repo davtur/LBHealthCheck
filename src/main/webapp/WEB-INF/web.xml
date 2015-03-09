@@ -178,6 +178,11 @@
             <url-pattern>/myDetailsPaymentMethod.xhtml</url-pattern>
         </web-resource-collection>
         <web-resource-collection>
+            <web-resource-name>Update Password</web-resource-name>
+            <description/>
+            <url-pattern>/UpdatePassword.xhtml</url-pattern>
+        </web-resource-collection>
+        <web-resource-collection>
             <web-resource-name>My Sessions</web-resource-name>
             <description/>
             <url-pattern>/mySessions.xhtml</url-pattern>

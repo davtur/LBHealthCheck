@@ -252,5 +252,8 @@ CreateSessionHistoryLabel_totalSelected=Total Selected:
 ListInvoiceCreateInvoiceLink=Generate Invoice.
 ListCreateInvoiceTitle=Generate Invoice
 
-mysqldump CreateSessionMobileSaveButton=Save -- Total Attending: 
+CreateSessionMobileSaveButton=Save -- Total Attending: 
+CustomersCreatedMustBeInUserGroup=The customer was added to the USER role automatically so they can login.
+updatePasswordTitle=Change Password
+CreateCustomersLabel_groups=Roles
 

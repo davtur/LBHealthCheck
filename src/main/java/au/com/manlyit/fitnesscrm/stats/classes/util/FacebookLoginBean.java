@@ -52,7 +52,7 @@ public class FacebookLoginBean implements Serializable {
         }
     }
 
-    private String getFacebookUrlAuth() {
+    public String getFacebookUrlAuth() {
         String returnValue = "";
         FacesContext context = FacesContext.getCurrentInstance();
         ExternalContext ec = context.getExternalContext();
