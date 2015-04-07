@@ -271,7 +271,11 @@ public class LoginBean implements Serializable {
             String auditDetails = "Customer Login Successful:" + cust.getUsername() + " Details:  " + cust.getLastname() + " " + cust.getFirstname() + " ";
             String changedFrom = "UnAuthenticated";
             String changedTo = "Authenticated User:" + username;
+            if(cust.getUsername().toLowerCase().equals("synthetic.tester")){
+                logger.log(Level.INFO, "Synthetic Tester Logged In.");
+            }else{
             ejbAuditLogFacade.audit(cust, cust, "Logged In", auditDetails, changedFrom, changedTo);
+            }
 
         } catch (ServletException e) {
             JsfUtil.addErrorMessage(e, "Login Failed.");

@@ -43,7 +43,7 @@
         <exclude-unlisted-classes>false</exclude-unlisted-classes>
         <shared-cache-mode>ALL</shared-cache-mode>
         <properties>
-            <property name="eclipselink.cache.coordination.protocol" value="rmi" />
+            <property name="eclipselink.cache.coordination.protocol" value="jms" />
             <property name="eclipselink.cache.coordination.jms.topic" value="jms/PaymentsTopic" />
             <property name="eclipselink.cache.coordination.jms.factory" value="jms/PaymentsTopicConnectionFactory" />
         </properties>
@@ -54,6 +54,10 @@
         <class>au.com.manlyit.fitnesscrm.stats.db.WebsiteMonitor</class>
         <exclude-unlisted-classes>false</exclude-unlisted-classes>
         <shared-cache-mode>ALL</shared-cache-mode>
-        <properties/>
+        <properties>
+            <property name="eclipselink.cache.coordination.protocol" value="jms" />
+            <property name="eclipselink.cache.coordination.jms.topic" value="jms/PaymentsTopic" />
+            <property name="eclipselink.cache.coordination.jms.factory" value="jms/PaymentsTopicConnectionFactory" />
+        </properties>
     </persistence-unit>
 </persistence>

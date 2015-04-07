@@ -18,7 +18,7 @@
                 <p:panelGrid id="dialogueGrid" columns="4">
 
                     <p:outputLabel value="#{configMapController.getKey('EditCustomersLabel_firstname')}" for="firstname" />
-                    <p:inputText id="firstname"  value="#{customersController.newCustomer.firstname}" title="#{configMapController.getKey('EditCustomersTitle_firstname')}" valueChangeListener="#{customersController.firstNameListener}" required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_firstname')}">
+                    <p:inputText id="firstname"  value="#{customersController.newCustomer.firstname}" title="#{configMapController.getKey('EditCustomersTitle_firstname')}" valueChangeListener="#{customersController.dialogueFirstNameListener}" required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_firstname')}">
                         <p:ajax update=":formCustomersCreate1:username :formCustomersCreate1:dialogueSave" event="keyup"/>
                     </p:inputText>
                     <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_gender')}" title="#{configMapController.getKey('EditCustomersTitle_gender')}" for="gender" />
@@ -27,7 +27,7 @@
                         <f:selectItem itemValue="F" itemLabel="Female" />
                     </p:selectOneMenu>
                     <p:outputLabel value="#{configMapController.getKey('EditCustomersLabel_lastname')}" for="lastname" />
-                    <p:inputText id="lastname" value="#{customersController.newCustomer.lastname}" title="#{configMapController.getKey('EditCustomersTitle_lastname')}" valueChangeListener="#{customersController.lastNameListener}" required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_lastname')}">
+                    <p:inputText id="lastname" value="#{customersController.newCustomer.lastname}" title="#{configMapController.getKey('EditCustomersTitle_lastname')}" valueChangeListener="#{customersController.dialogueLastNameListener}" required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_lastname')}">
                         <p:ajax update=":formCustomersCreate1:username  :formCustomersCreate1:dialogueSave" event="keyup" />
                     </p:inputText>
                     <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_dob')}" for="dob" />

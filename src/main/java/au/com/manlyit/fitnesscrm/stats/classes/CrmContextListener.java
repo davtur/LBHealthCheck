@@ -13,6 +13,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextAttributeEvent;
 import javax.servlet.ServletContextAttributeListener;
@@ -25,15 +27,16 @@ import org.quartz.impl.StdSchedulerFactory;
 
 /**
  * Example listener for context-related application events, which were
- * introduced in the 2.3 version of the Servlet API.  This listener
- * merely documents the occurrence of such events in the application log
- * associated with our servlet context.
+ * introduced in the 2.3 version of the Servlet API. This listener merely
+ * documents the occurrence of such events in the application log associated
+ * with our servlet context.
  *
  * @author Craig R. McClanahan
  * @version $Revision: 1.3 $ $Date: 2006/10/12 14:31:30 $
  */
 public final class CrmContextListener
         implements ServletContextAttributeListener, ServletContextListener {
+
     private static final Logger logger = Logger.getLogger(CrmContextListener.class.getName());
 
     // ----------------------------------------------------- Instance Variables
@@ -59,7 +62,6 @@ public final class CrmContextListener
     private boolean performShutdown = true;
     private Scheduler scheduler = null;
 
-
     // --------------------------------------------------------- Public Methods
     /**
      * Record the fact that a servlet context attribute was added.
@@ -68,10 +70,10 @@ public final class CrmContextListener
      */
     @Override
     public void attributeAdded(ServletContextAttributeEvent event) {
-
-        log("attributeAdded('" + event.getName() + "', '" +
-                event.getValue() + "')");
-
+        if (event != null) {
+            log("attributeAdded('" + event.getName() + "', '"
+                    + event.getValue() + "')");
+        }
     }
 
     /**
@@ -81,10 +83,10 @@ public final class CrmContextListener
      */
     @Override
     public void attributeRemoved(ServletContextAttributeEvent event) {
-
-        log("attributeRemoved('" + event.getName() + "', '" +
-                event.getValue() + "')");
-
+        if (event != null) {
+            log("attributeRemoved('" + event.getName() + "', '"
+                    + event.getValue() + "')");
+        }
     }
 
     /**
@@ -94,9 +96,11 @@ public final class CrmContextListener
      */
     @Override
     public void attributeReplaced(ServletContextAttributeEvent event) {
+        if (event != null) {
 
-        log("attributeReplaced('" + event.getName() + "', '" +
-                event.getValue() + "')");
+            log("attributeReplaced('" + event.getName() + "', '"
+                    + event.getValue() + "')");
+        }
 
     }
 
@@ -107,26 +111,31 @@ public final class CrmContextListener
      */
     @Override
     public void contextDestroyed(ServletContextEvent event) {
-
-        /*  EntityManagerFactory emf = (EntityManagerFactory) this.context.getAttribute("emf");
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("FitnessStatsPU2");
         if (emf != null) {
-        emf.close();
-        System.out.println("EntityManagerFactory Closed");
+            emf.close();
+            System.out.println("EntityManagerFactory for unit FitnessStatsPU2 Closed");
         } else {
-        System.out.println("EntityManagerFactory was NULL no need to close.");
-        }*/
+            System.out.println("EntityManagerFactory  for unit FitnessStatsPU2 was NULL no need to close.");
+        }
+        /*  EntityManagerFactory emf = (EntityManagerFactory) this.context.getAttribute("emf");
+         if (emf != null) {
+         emf.close();
+         System.out.println("EntityManagerFactory Closed");
+         } else {
+         System.out.println("EntityManagerFactory was NULL no need to close.");
+         }*/
 
-      /*  try {
-            main.setCancelled(true);
-            exec.shutdown();
-            exec.awaitTermination(30, TimeUnit.SECONDS);
-            exec.shutdownNow();
+        /*  try {
+         main.setCancelled(true);
+         exec.shutdown();
+         exec.awaitTermination(30, TimeUnit.SECONDS);
+         exec.shutdownNow();
 
 
-        } catch (Exception exception) {
-            System.out.println("Error sutting down main Thread in context listener" + exception.getMessage());
-        }*/
-
+         } catch (Exception exception) {
+         System.out.println("Error sutting down main Thread in context listener" + exception.getMessage());
+         }*/
         if (!performShutdown) {
             return;
         }
@@ -137,12 +146,10 @@ public final class CrmContextListener
             }
         } catch (SchedulerException e) {
             logger.log(Level.INFO, "Quartz Scheduler failed to shutdown cleanly: {0}", e.toString());
-           
+
         }
 
         System.out.println("Quartz Scheduler successful shutdown.");
-
-
 
         this.context.removeAttribute("Operations.Group");
         this.context.removeAttribute("MainThread");
@@ -163,19 +170,16 @@ public final class CrmContextListener
         logger.log(Level.INFO, "contextInitialized()");
         this.context.setAttribute("Operations.Group", tGroup);
 
-
-
         //ThreadGroup tGroup = Thread.currentThread().getThreadGroup();
 
-       /* try {
-            main = new MainThread();
-            main.setServCtx(context);
-            exec.submit(main);
-            this.context.setAttribute("MainThread", main);
-        } catch (RejectedExecutionException exception) {
-            System.out.println(exception.getMessage());
-        }*/
-
+        /* try {
+         main = new MainThread();
+         main.setServCtx(context);
+         exec.submit(main);
+         this.context.setAttribute("MainThread", main);
+         } catch (RejectedExecutionException exception) {
+         System.out.println(exception.getMessage());
+         }*/
         StdSchedulerFactory factory;
         try {
 
@@ -216,7 +220,7 @@ public final class CrmContextListener
              * the scheduler will be started. This is to maintain backwards
              * compatability.
              */
-           if (startOnLoad == null || (Boolean.valueOf(startOnLoad).booleanValue())) {
+            if (startOnLoad == null || (Boolean.valueOf(startOnLoad).booleanValue())) {
                 if (startDelay <= 0) {
                     // Start now
                     scheduler.start();
@@ -230,8 +234,8 @@ public final class CrmContextListener
                 System.out.println("Scheduler has not been started. Use scheduler.start()");
             }
 
-            String factoryKey =
-                    context.getInitParameter("servlet-context-factory-key");
+            String factoryKey
+                    = context.getInitParameter("servlet-context-factory-key");
             if (factoryKey == null) {
                 factoryKey = QUARTZ_FACTORY_KEY;
             }
@@ -244,7 +248,6 @@ public final class CrmContextListener
         }
         logger.log(Level.INFO, "INITIALISING CONTEXT FINISHED with class contextListener1");
     }
-
 
     // -------------------------------------------------------- Private Methods
     /**
@@ -264,8 +267,8 @@ public final class CrmContextListener
     }
 
     /**
-     * Log a message and associated exception to the servlet context
-     * application log.
+     * Log a message and associated exception to the servlet context application
+     * log.
      *
      * @param message Message to be logged
      * @param throwable Exception to be logged
@@ -275,7 +278,7 @@ public final class CrmContextListener
         if (context != null) {
             context.log("ContextListener: " + message, throwable);
         } else {
-            logger.log(Level.INFO, "ContextListener: {0}",new Object[]{ message,throwable});
+            logger.log(Level.INFO, "ContextListener: {0}", new Object[]{message, throwable});
         }
 
     }

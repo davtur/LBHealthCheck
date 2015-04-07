@@ -990,11 +990,29 @@ public class CustomersController implements Serializable {
         return checkPass2;
     }
 
+     public void dialogueFirstNameListener(ValueChangeEvent vce) {
+        Object o = vce.getNewValue();
+        if (o.getClass().equals(String.class)) {
+            String newVal = (String) o;
+            updateUsername(newVal, null,newCustomer);
+
+        }
+    }
+
+    public void dialogueLastNameListener(ValueChangeEvent vce) {
+        Object o = vce.getNewValue();
+        if (o.getClass().equals(String.class)) {
+            String newVal = (String) o;
+            updateUsername(null, newVal,newCustomer);
+
+        }
+    }
+    
     public void firstNameListener(ValueChangeEvent vce) {
         Object o = vce.getNewValue();
         if (o.getClass().equals(String.class)) {
             String newVal = (String) o;
-            updateUsername(newVal, null);
+            updateUsername(newVal, null,current);
 
         }
     }
@@ -1003,21 +1021,21 @@ public class CustomersController implements Serializable {
         Object o = vce.getNewValue();
         if (o.getClass().equals(String.class)) {
             String newVal = (String) o;
-            updateUsername(null, newVal);
+            updateUsername(null, newVal,current);
 
         }
     }
 
-    private void updateUsername(String firstname, String lastname) {
+    private void updateUsername(String firstname, String lastname ,Customers customer) {
         String updatedUsername = "";
         if (firstname == null) {
-            updatedUsername = current.getFirstname() + "." + lastname;
+            updatedUsername = customer.getFirstname() + "." + lastname;
         }
         if (lastname == null) {
-            updatedUsername = firstname + "." + current.getLastname();
+            updatedUsername = firstname + "." + customer.getLastname();
         }
         String newUsername = updatedUsername.toLowerCase().replace(' ', '_');
-        current.setUsername(newUsername);
+        customer.setUsername(newUsername);
         Customers cust = getFacade().findCustomerByUsername(newUsername);
         if (cust != null) {
             setAddUserButtonDisabled(true);
