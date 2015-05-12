@@ -129,11 +129,11 @@ public class LoginBean implements Serializable {
                 urlLink = configMapFacade.getConfig("login.password.reset.redirect.url") + encodedNonceEncrypted;
 
                 //send email
-                String templatePlaceholder = "<!--LINK-URL-->";
+                String templateLinkPlaceholder = configMapFacade.getConfig("login.password.reset.templateLinkPlaceholder");
                 //String htmlText = configMapFacade.getConfig(templateName);
                 String htmlText = ejbEmailTemplatesFacade.findTemplateByName(templateName).getTemplate();
 
-                htmlText = htmlText.replace(templatePlaceholder, urlLink);
+                htmlText = htmlText.replace(templateLinkPlaceholder, urlLink);
                 //String htmlText = "<table width=\"600\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\">  <tr>    <td><img src=\"cid:logoimg_cid\"/></td>  </tr>  <tr>    <td height=\"220\"> <p>Pure Fitness Manly</p>      <p>Please click the following link to reset your password:</p><p>To reset your password click <a href=\"" + urlLink + "\">here</a>.</p></td>  </tr>  <tr>    <td height=\"50\" align=\"center\" valign=\"middle\" bgcolor=\"#CCCCCC\">www.purefitnessmanly.com.au | sarah@purefitnessmanly.com.au | +61433818067</td>  </tr></table>";
 
                 //String host, String to, String ccAddress, String from, String emailSubject, String message, String theAttachedfileName, boolean debug
