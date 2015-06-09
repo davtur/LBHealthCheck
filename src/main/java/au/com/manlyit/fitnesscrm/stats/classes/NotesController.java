@@ -6,6 +6,7 @@ import au.com.manlyit.fitnesscrm.stats.classes.util.PaginationHelper;
 import au.com.manlyit.fitnesscrm.stats.beans.NotesFacade;
 import au.com.manlyit.fitnesscrm.stats.classes.util.CrmScheduleEvent;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
+import au.com.manlyit.fitnesscrm.stats.db.Payments;
 import java.io.Serializable;
 import java.util.Calendar;
 import java.util.Date;
@@ -212,6 +213,7 @@ public class NotesController implements Serializable {
             CustomersController controller = (CustomersController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "customersController");
             current.setUserId(controller.getSelected());
             getFacade().create(current);
+            controller.addToNotesDataTableLists(current);
             if (isReminder()) {
 
                 addReminderToCalendar();
@@ -219,8 +221,8 @@ public class NotesController implements Serializable {
                 reminderDate = new Date();
             }
             current = null;
-            controller.setNotesFilteredItems(null);
-            controller.setNotesItems(null);
+            
+            //controller.setNotesItems(null);
             Logger.getLogger(NotesController.class.getName()).log(Level.INFO, "Note added for customer {0} by {1}.", new Object[]{controller.getSelected().toString(), controller.getLoggedInUser().toString()});
             recreateModel();
             JsfUtil.addSuccessMessage(configMapFacade.getConfig("NotesCreated"));
@@ -285,6 +287,9 @@ public class NotesController implements Serializable {
         }
     }
 
+    
+     
+      
     public String destroy() {
         current = (Notes) getItems().getRowData();
         selectedItemIndex = pagination.getPageFirstItem() + getItems().getRowIndex();

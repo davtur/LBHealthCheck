@@ -258,3 +258,85 @@ updatePasswordTitle=Change Password
 CreateCustomersLabel_groups=Roles
 ChangesSaved=Changes Saved
 
+
+
+
+invoiceHtmlCompanyLogoUrl=http://www.purefitnessmanly.com.au/images/logo.png
+invoiceHtmlCompanyLogoAlt=Pure Fitness Manly
+invoiceHtmlCompanyAbn=ABN 59 141 468 938
+previewHtmlInvoice_message=Preview Invoice to Email
+previewHtmlInvoiceDiscardLink=Close
+previewHtmlInvoiceSaveLink=Email Invoice
+ListInvoiceExportHtmlInvoiceButton=Preview & Email Invoice
+previewHtmlInvoiceTitle=Invoice
+
+invoice.registeredForGst=false
+
+invoice.placeholder.CompanyLogoUrl=<!--CompanyLogoUrl-->
+invoice.placeholder.CompanyLogoAlt=<!--CompanyLogoAlt-->
+invoice.placeholder.CompanyAbn=<!--CompanyLogoAbn-->
+invoice.placeholder.InvoiceTypeHeading=<!--InvoiceTypeHeading-->
+invoice.placeholder.CustomerStreetAddress=<!--CustomerStreetAddress-->
+invoice.placeholder.CustomerSuburbStatePostCode=<!--CustomerSuburbStatePostCode-->
+invoice.placeholder.Invoice_No:=<!--InvoiceNo:-->
+invoice.placeholder.Issue_Date:=<!--IssueDate:-->
+invoice.placeholder.Invoice_Period:=<!--InvoicePeriod:-->
+invoice.placeholder.Account_No:=<!--AccountNo:-->
+invoice.placeholder.InvoiceLineItems=<!--InvoiceLineItems-->
+invoice.placeholder.EndInvoiceLineItems=<!--EndInvoiceLineItems-->
+invoice.placeholder.SubTotal=<!--SubTotal-->
+invoice.placeholder.GST=<!--GST-->
+invoice.placeholder.Total=<!--Total-->
+invoice.placeholder.Amount_Paid=<!--AmountPaid-->
+invoice.placeholder.Balance_Due=<!--BalanceDue-->
+
+
+
+invoice.placeholder.lineitem.productDescription=<!--ProductDescription-->
+invoice.placeholder.lineitem.productQuantity=<!--ProductQuantity-->
+invoice.placeholder.lineitem.productPrice=<!--ProductPrice-->
+invoice.placeholder.lineitem.productTax=<!--ProductTax-->
+invoice.placeholder.lineitem.productSubTotal=<!--ProductSubTotal-->
+invoice.placeholder.lineitem.productAmount=<!--ProductAmount-->
+
+invoice.placeholder.lineitemHeader.productDescription=<!--ProductDescriptionHeader-->
+invoice.placeholder.lineitemHeader.productQuantity=<!--ProductQuantityHeader-->
+invoice.placeholder.lineitemHeader.productPrice=<!--ProductPriceHeader-->
+invoice.placeholder.lineitemHeader.productTax=<!--ProductTaxHeader-->
+invoice.placeholder.lineitemHeader.productSubTotal=<!--ProductSubTotalHeader-->
+invoice.placeholder.lineitemHeader.productAmount=<!--ProductAmountHeader-->
+
+invoice.heading.registeredForGst=TAX INVOICE
+invoice.heading.notRegisteredForGst=INVOICE
+
+
+invoice.lineItemHeader.productDescription=Description
+invoice.lineItemHeader.productQuantity=Quantity
+invoice.lineItemHeader.productPrice=Price
+invoice.lineItemHeader.productTax=Gst
+invoice.lineItemHeader.productSubTotal=SubTotal
+invoice.lineItemHeader.productAmount=Total
+
+
+
+invoice.summaryHeader.subTotal=TOTAL (excl GST)
+invoice.summaryHeader.taxTotal=TOTAL GST AMOUNT PAYABLE
+invoice.summaryHeader.totalAmount=TOTAL AMOUNT PAYABLE (incl GST)
+invoice.summaryHeader.amountPaid=AMOUNT PAID
+invoice.summaryHeader.balanceDue=AMOUNT DUE
+
+
+invoice.placeholder.summaryHeader.subTotal=<!--subTotal-->
+invoice.placeholder.summaryHeader.taxTotal=<!--taxTotal-->
+invoice.placeholder.summaryHeader.totalAmount=<!--totalAmount-->
+invoice.placeholder.summaryHeader.amountPaid=<!--amountPaid-->
+invoice.placeholder.summaryHeader.balanceDue=<!--balanceDue-->
+
+
+invoice.summaryHeaderNonGst.totalAmount=TOTAL AMOUNT PAYABLE
+
+HtmlInvoiceEmailSubject=Pure Fitness Manly Invoice
+HtmlInvoiceFromEmailAddress=admin@purefitnessmanly.com.au
+HtmlInvoiceCCEmailAddress=david@manlyit.com.au
+previewHtmlInvoiceEditEmailLink=Edit Email Address
+previewHtmlInvoiceSaveEmailLink=Save Email Address

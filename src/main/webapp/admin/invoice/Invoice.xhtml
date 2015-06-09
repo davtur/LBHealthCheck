@@ -15,7 +15,7 @@
 
 
 
-            <h:form id="InvoicelistForm1">
+            <h:form id="invoiceDataForm1">
 
                 <!-- ###################################################################################################### -->        
                 <p:panelGrid columns="4">
@@ -23,12 +23,12 @@
                         <p:outputLabel value="#{configMapController.getKey('SelectStartDateForReport_Label')}" for="sessionstart" />
                         <p:calendar id="sessionstart" value="#{invoiceController.invoiceStartDate}" pattern="dd MMMM yyyy" 
                                     title="#{configMapController.getKey('SelectStartDateForReport_Title')}"    >
-                            <p:ajax event="dateSelect"    listener="#{invoiceController.invoiceParametersChanged}"/>
+                            <p:ajax event="dateSelect"  update="@form"   listener="#{invoiceController.invoiceParametersChanged}"/>
                         </p:calendar> 
                         <p:outputLabel value="#{configMapController.getKey('SelectEndDateForReport_Label')}" for="sessionend" />
                         <p:calendar id="sessionend" value="#{invoiceController.invoiceEndDate}"  pattern="dd MMMM yyyy"  
                                     title="#{configMapController.getKey('SelectEndDateForReport_Title')}"    >
-                            <p:ajax event="dateSelect"    listener="#{invoiceController.invoiceParametersChanged}"/>
+                            <p:ajax event="dateSelect"  update="@form"   listener="#{invoiceController.invoiceParametersChanged}"/>
                         </p:calendar> 
                     </p:panelGrid>
                     <p:panelGrid columns="1" >
@@ -38,14 +38,19 @@
                             <f:selectItem itemValue="#{1}" itemLabel="No GST"/> 
 
 
-                            <p:ajax    listener="#{invoiceController.invoiceParametersChanged}"   />
+                            <p:ajax   update="@form"  listener="#{invoiceController.invoiceParametersChanged}"   />
                         </p:selectOneMenu>
                         <p:selectOneMenu id="custForChart"   value="#{invoiceController.selectedCustomer}" filter="true"   converter="#{custConverter}"  label="#{configMapController.getKey('SelectCustomerForSessionHistory_Title')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionHistoryRequiredMessage_trainer')}">
                             <f:selectItems value="#{customersController.customersAvailableSelectOneObject}"   var="cust" itemLabel="#{cust.firstname} #{cust.lastname}" itemValue="#{cust}"/>
-                            <p:ajax   update=":InvoicelistForm1" listener="#{invoiceController.invoiceParametersChanged}"  />
+                            <p:ajax   update="@form" listener="#{invoiceController.invoiceParametersChanged}"  />
                         </p:selectOneMenu>
 
-                        <p:commandButton id="runReport"  actionListener="#{invoiceController.generateInvoice}"  value="#{configMapController.getKey('ListInvoiceCreateInvoiceLink')}" />
+                        <p:commandButton id="runReport"  actionListener="#{invoiceController.generateInvoice}"  value="#{configMapController.getKey('ListInvoiceCreateInvoiceLink')}" update="@form,:previewHtmlInvoice,:growl"/>
+                        <p:commandButton disabled="#{empty invoiceController.selected}"  id="doExprt" ajax="false"  value="#{configMapController.getKey('ListInvoiceExportnvoiceLink')}" >
+                            <p:fileDownload value="#{invoiceController.exportExcel}" />
+                        </p:commandButton>
+                <!--        <p:commandButton disabled="#{empty invoiceController.selected}"  id="previewHtmlInvoiceButton" actionListener="#{invoiceController.createHtmlInvoice}" value="#{configMapController.getKey('ListInvoiceExportHtmlInvoiceButton')}"  /> -->
+                        <p:commandButton disabled="#{empty invoiceController.selected}" id="previewHtmlInvoiceButton"  value="#{configMapController.getKey('ListInvoiceExportHtmlInvoiceButton')}" onclick="PF('previewHtmlInvoiceDialogueWidget').show()" type="button"/>
                     </p:panelGrid>
                     <p:panelGrid columns="4" >
                         <p:outputLabel  value="#{configMapController.getKey('ListReportShowSuccessful')}" for="showSuccessful" />
@@ -72,7 +77,7 @@
                 </p:panelGrid>              
 
 
-                <h:panelGroup   rendered="#{ not empty invoiceController.selected}">
+                <h:panelGroup id="dataTablePanel"  rendered="#{ not empty invoiceController.selected}">
 
                     <p:dataTable  
                         id="invoiceDataTable"  
@@ -86,7 +91,7 @@
                         selectionMode="single"
 
                         scrollable="true"
-                        
+
                         scrollHeight="300"
 
 
@@ -98,15 +103,19 @@
                                      <h:outputText  rendered="#{empty invoiceController.invoiceLineFilteredItems and not empty invoiceController.selected.invoiceLineCollection}" value="#{invoiceController.selected.invoiceLineCollection.rowCount} Records Found"/>
                                  </p:outputPanel>-->
                                 <h:outputText value="Invoice" style="width:300px"/>
-                                <p:commandButton value="Export as PDF" ajax="false" >
+                              <!--  <p:commandButton disabled="#{empty invoiceController.selected}"  value="Export as PDF" ajax="false" >
                                     <p:dataExporter type="pdf" target="invoiceDataTable" fileName="#{invoiceController.invoiceFileName}" preProcessor="#{invoiceController.preProcessPDF}"/>
                                 </p:commandButton>
-                                <p:commandButton value="Export as Excel" ajax="false" >
+                                <p:commandButton disabled="#{empty invoiceController.selected}"  value="Export as Excel" ajax="false" >
                                     <p:dataExporter type="xls" target="invoiceDataTable"  fileName="#{invoiceController.invoiceFileName}" postProcessor="#{invoiceController.postProcessXLS}"/>
                                 </p:commandButton>
-                                <p:commandButton id="doExprt" ajax="false"  value="#{configMapController.getKey('ListInvoiceExportnvoiceLink')}" disabled="#{empty invoiceController.selected}" >
+                                <p:commandButton disabled="#{empty invoiceController.selected}"  id="doExprt" ajax="false"  value="#{configMapController.getKey('ListInvoiceExportnvoiceLink')}" >
                                     <p:fileDownload value="#{invoiceController.exportExcel}" />
                                 </p:commandButton>
+                                 <p:commandButton disabled="#{empty invoiceController.selected}"  id="previewHtmlInvoiceButton" actionListener="#{invoiceController.createHtmlInvoice}" value="#{configMapController.getKey('ListInvoiceExportHtmlInvoiceButton')}"  /> 
+                                -->
+                                                              <!--   <p:commandButton disabled="#{!invoiceController.invoiceGenerated}" id="previewHtmlInvoiceButton" update=":previewHtmlInvoiceDialogue" value="#{configMapController.getKey('ListInvoiceExportHtmlInvoiceButton')}" onclick="PF('previewHtmlInvoiceDialogueWidget').show()" type="button"/> -->
+
                             </p:outputPanel>
                         </f:facet>
 
@@ -143,33 +152,34 @@
                         </p:column>                           
 
 
-                     <!--   <f:facet name="footer"  >
-                           
-                                <h:outputText value="Total Outstanding: #{invoiceController.selected.total}" style="text-align:right" >
-                                    <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
-                                </h:outputText>
-               
-                        </f:facet>-->
-                        
-                         <p:columnGroup type="footer">
-                                <p:row>
-                                    <p:column footerText=" " />
-                                    <p:column footerText=" " />
-                                    <p:column footerText="Total Outstanding: " style="text-align:right"/>
-                                    <p:column  style="text-align:left" >
-                                        <f:facet name="footer" >
-                                            <h:outputText value="#{invoiceController.selected.total}">
-                                                <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" maxFractionDigits="2"/>
-                                            </h:outputText>
-                                        </f:facet>
-                                    </p:column>   
-                                </p:row>
-                            </p:columnGroup>
+                        <!--   <f:facet name="footer"  >
+                              
+                                   <h:outputText value="Total Outstanding: #{invoiceController.selected.total}" style="text-align:right" >
+                                       <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
+                                   </h:outputText>
+                  
+                           </f:facet>-->
+
+                        <p:columnGroup type="footer">
+                            <p:row>
+                                <p:column footerText=" " />
+                                <p:column footerText=" " />
+                                <p:column footerText="Total Outstanding: " style="text-align:right"/>
+                                <p:column  style="text-align:left" >
+                                    <f:facet name="footer" >
+                                        <h:outputText value="#{invoiceController.selected.total}">
+                                            <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" maxFractionDigits="2"/>
+                                        </h:outputText>
+                                    </f:facet>
+                                </p:column>   
+                            </p:row>
+                        </p:columnGroup>
                     </p:dataTable>
 
                 </h:panelGroup> 
 
             </h:form>
+            <ui:include src="PreviewEmailInvoice.xhtml"/>
         </ui:define>
     </ui:composition>
 

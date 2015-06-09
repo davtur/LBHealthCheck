@@ -187,7 +187,7 @@ public class ConfigMapController implements Serializable {
 
                     // only one equals sign in the string so we can safley add it as a key value pair
                     count++;
-                    String k = line.substring(0, d);
+                    String k = line.substring(0, d).trim();
                     String v = line.substring(d + 1);
                     //ConfigMap cm1 = new ConfigMap(0, k, v);
                      ConfigMap cm1 = getFacade().getConfigMapFromKey(k);

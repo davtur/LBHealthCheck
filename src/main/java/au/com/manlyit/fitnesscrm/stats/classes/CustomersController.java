@@ -13,6 +13,7 @@ import au.com.manlyit.fitnesscrm.stats.db.CustomerState;
 import au.com.manlyit.fitnesscrm.stats.db.Groups;
 import au.com.manlyit.fitnesscrm.stats.db.Notes;
 import au.com.manlyit.fitnesscrm.stats.db.PaymentParameters;
+import au.com.manlyit.fitnesscrm.stats.db.Payments;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -596,7 +597,7 @@ public class CustomersController implements Serializable {
     private void createFromListener() {
         FacesContext context = FacesContext.getCurrentInstance();
         Customers c = getNewCustomer();
-       
+
         EziDebitPaymentGateway ezi = (EziDebitPaymentGateway) context.getApplication().evaluateExpressionGet(context, "#{ezidebit}", EziDebitPaymentGateway.class);
 
         if (c.getId() == null || getFacade().find(c.getId()) == null) {
@@ -706,6 +707,7 @@ public class CustomersController implements Serializable {
             }
         }
     }
+
     public void newCustomergroupChangedChangeListener() {
         JsfUtil.addSuccessMessage("Group Changed");
         selectedGroups = new ArrayList<>();
@@ -907,6 +909,40 @@ public class CustomersController implements Serializable {
         notesFilteredItems = null;
     }
 
+    public void deleteNote() { 
+        if (selectedNoteForDeletion != null) {
+            try {
+                removeFromNotesDataTableLists(selectedNoteForDeletion);
+                ejbNotesFacade.remove(selectedNoteForDeletion);
+                JsfUtil.addSuccessMessage(configMapFacade.getConfig("NotesDeleted"));
+            } catch (Exception e) {
+                JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
+            }
+        }
+    }
+
+    private void removeFromNotesDataTableLists(Notes note) {
+        if (notesItems != null) {
+            List<Notes> lp = (List<Notes>) notesItems.getWrappedData();
+            int index = lp.indexOf(note);
+            lp.remove(index);
+        }
+        if (notesFilteredItems != null) {
+            int index = notesFilteredItems.indexOf(note);
+            notesFilteredItems.remove(index);
+        }
+    }
+    
+    public void addToNotesDataTableLists(Notes note) {
+        if (notesItems != null) {
+            List<Notes> lp = (List<Notes>) notesItems.getWrappedData();
+             lp.add(note);
+        }
+        if (notesFilteredItems != null) {          
+            notesFilteredItems.add(note);
+        }
+    }
+
     public String next() {
         recreateModel();
         return "List";
@@ -990,11 +1026,11 @@ public class CustomersController implements Serializable {
         return checkPass2;
     }
 
-     public void dialogueFirstNameListener(ValueChangeEvent vce) {
+    public void dialogueFirstNameListener(ValueChangeEvent vce) {
         Object o = vce.getNewValue();
         if (o.getClass().equals(String.class)) {
             String newVal = (String) o;
-            updateUsername(newVal, null,newCustomer);
+            updateUsername(newVal, null, newCustomer);
 
         }
     }
@@ -1003,16 +1039,16 @@ public class CustomersController implements Serializable {
         Object o = vce.getNewValue();
         if (o.getClass().equals(String.class)) {
             String newVal = (String) o;
-            updateUsername(null, newVal,newCustomer);
+            updateUsername(null, newVal, newCustomer);
 
         }
     }
-    
+
     public void firstNameListener(ValueChangeEvent vce) {
         Object o = vce.getNewValue();
         if (o.getClass().equals(String.class)) {
             String newVal = (String) o;
-            updateUsername(newVal, null,current);
+            updateUsername(newVal, null, current);
 
         }
     }
@@ -1021,12 +1057,12 @@ public class CustomersController implements Serializable {
         Object o = vce.getNewValue();
         if (o.getClass().equals(String.class)) {
             String newVal = (String) o;
-            updateUsername(null, newVal,current);
+            updateUsername(null, newVal, current);
 
         }
     }
 
-    private void updateUsername(String firstname, String lastname ,Customers customer) {
+    private void updateUsername(String firstname, String lastname, Customers customer) {
         String updatedUsername = "";
         if (firstname == null) {
             updatedUsername = customer.getFirstname() + "." + lastname;
@@ -1454,7 +1490,8 @@ public class CustomersController implements Serializable {
         }
         return customerGroupsList;
     }
-     public List<Groups> getnewCustomerGroupsList() {
+
+    public List<Groups> getnewCustomerGroupsList() {
         if (newCustomerGroupsList == null) {
             newCustomerGroupsList = new ArrayList<>();
             List<String> distinctGroups = ejbGroupsFacade.getGroups();
@@ -1515,7 +1552,7 @@ public class CustomersController implements Serializable {
      * @return the newCustomer
      */
     public Customers getNewCustomer() {
-         if(newCustomer == null){
+        if (newCustomer == null) {
             setNewCustomer(setCusomerDefaults(new Customers()));
         }
         return newCustomer;

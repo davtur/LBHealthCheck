@@ -268,10 +268,10 @@
                                <p:commandButton update="matchGrid" value="Save" />
                             </h:panelGrid>  -->
                           <!--  <p:commandButton  id="passButton" ajax="true" actionListener="#{customersController.updatepass}" update=":growl"   value="#{configMapController.getKey('EditCustomersUpdatePassword')}" immediate="true"/>-->
-                                <p:commandButton  id="passButton" ajax="true"  onclick="PF('updatePasswordDialogueWidget').show();" update=":growl :updatePass"   value="#{configMapController.getKey('EditCustomersUpdatePassword')}" immediate="true"/>
-                         
-                           <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_groups')}" for="scroll2" />
-                            
+                            <p:commandButton  id="passButton" ajax="true"  onclick="PF('updatePasswordDialogueWidget').show();" update=":growl :updatePass"   value="#{configMapController.getKey('EditCustomersUpdatePassword')}" immediate="true"/>
+
+                            <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_groups')}" for="scroll2" />
+
                             <p:dataGrid  id="scroll2" columns="3"   value="#{customersController.customerGroupsList}" var="group" rowIndexVar="rowIndex"  >
                                 <h:panelGrid id="customerPanel2" columns="2" style="margin-bottom:10px" cellpadding="5" >
                                     <h:outputText value="#{group.groupname}" />
@@ -634,28 +634,46 @@
 
                     <h:form id="NoteslistForm1">
                         <h:panelGroup >
-                            <p:commandButton id="showDialogButton2"  value="#{configMapController.getKey('ListNotesCreateLink')}" onclick="PF('NotesCreateDialogue').show()" type="button"/> 
+                           
 
                         </h:panelGroup> 
                         <h:outputText id="selectedUser3" value=" #{customersController.selected.firstname} #{customersController.selected.lastname} " />
                         <h:outputText escape="false" value="#{configMapController.getKey('ListNotesEmpty')}" rendered="#{customersController.notesItems.rowCount == 0}"/>
                         <h:panelGroup rendered="#{customersController.notesItems.rowCount > 0}">
-                            <p:dataTable  editable="true" value="#{customersController.notesItems}" filteredValue="#{customersController.notesFilteredItems}"  widgetVar="notesControllerTable" var="item"  paginator="true" rows="15"  paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  rowsPerPageTemplate="5,10,15,20,25,50,100" >
+                            <p:dataTable  editable="true" 
+                                          value="#{customersController.notesItems}" 
+                                          filteredValue="#{customersController.notesFilteredItems}"  
+                                          widgetVar="notesControllerTable" 
+
+                                          var="item" 
+                                          selection="#{customersController.selectedNoteForDeletion}" 
+                                          rowKey="#{item.id}"
+                                          paginator="true" 
+                                          rows="15"   
+                                          paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  
+                                          rowsPerPageTemplate="5,10,15,20,25,50,100" >
                                 <f:facet name="header">
                                     <p:outputPanel>
                                         <h:outputText value="Notes" />
 
                                     </p:outputPanel>
+                                    <p:outputPanel>
+                                        <p:commandButton rendered="#{notesController.isUserInRole('ADMIN')}"  oncomplete="PF('notesControllerTable').filter()" update=":growl"  value="#{configMapController.getKey('ListNotesDestroyLink')}" actionListener="#{customersController.deleteNote}"/>
+                                    <p:commandButton id="showDialogButton2"  value="#{configMapController.getKey('ListNotesCreateLink')}" onclick="PF('NotesCreateDialogue').show()" type="button"/> 
+                                    </p:outputPanel>
                                 </f:facet>
                                 <p:ajax event="rowEdit" listener="#{customersController.onNotesEdit}" update=":growl" oncomplete="PF('notesControllerTable').filter()" />  
                                 <p:ajax event="rowEditCancel" listener="#{customersController.onNotesCancel}" update=":growl" />  
-
-                                <p:column sortBy="#{item.createTimestamp}" filterOptions="" filterBy="#{item.createTimestamp}" headerText="#{configMapController.getKey('ListNotesTitle_createTimestamp')}"   >
+                                <p:column selectionMode="single" width="50"/>
+                                <p:column rendered="#{notesController.isUserInRole('ADMIN')}"  headerText="Edit" style="width:50px">  
+                                    <p:rowEditor />  
+                                </p:column>  
+                                <p:column sortBy="#{item.createTimestamp}" filterOptions="" filterBy="#{item.createTimestamp}" headerText="#{configMapController.getKey('ListNotesTitle_createTimestamp')}"  width="150" >
 
                                     <p:cellEditor> 
                                         <f:facet name="output">
                                             <h:outputText value="#{item.createTimestamp}">
-                                                <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                                                <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
                                             </h:outputText>
                                         </f:facet>
                                         <f:facet name="input">
@@ -680,16 +698,14 @@
 
                                 </p:column>
 
-                                <p:column rendered="#{notesController.isUserInRole('ADMIN')}"  headerText="Edit" style="width:50px">  
-                                    <p:rowEditor />  
-                                </p:column>  
 
-                                <p:column>
-                                    <p:commandButton rendered="#{notesController.isUserInRole('ADMIN')}"  oncomplete="PF('notesControllerTable').filter()" update=":growl"  value="#{configMapController.getKey('ListNotesDestroyLink')}">
-                                        <f:setPropertyActionListener value="#{item}" target="#{customersController.selectedNoteForDeletion}" />
-                                    </p:commandButton>                        
 
-                                </p:column>
+                                <!--  <p:column>
+                                      <p:commandButton rendered="#{notesController.isUserInRole('ADMIN')}"  oncomplete="PF('notesControllerTable').filter()" update=":growl"  value="#{configMapController.getKey('ListNotesDestroyLink')}">
+                                          <f:setPropertyActionListener value="#{item}" target="#{customersController.selectedNoteForDeletion}" />
+                                      </p:commandButton>                        
+  
+                                  </p:column>-->
                             </p:dataTable>
                         </h:panelGroup>
                     </h:form>

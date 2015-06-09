@@ -14,12 +14,12 @@
 
             <h:form id="createEmailTemplateForm">
 
-                <h:panelGrid columns="2">
+                <p:panelGrid columns="2">
 
                     <p:commandButton   ajax="false"   action="#{emailTemplatesController.create}" value="#{configMapController.getKey('CreateEmailTemplateSaveLink')}" />
 
                     <p:commandButton   ajax="false"   action="#{emailTemplatesController.prepareList}" value="#{configMapController.getKey('CreateEmailTemplateShowAllLink')}" immediate="true"/>
-                </h:panelGrid>
+                </p:panelGrid>
 
                 <p:panel>
                     <p:panelGrid columns="2" rendered="#{emailTemplatesController.selected != null}">
@@ -29,15 +29,15 @@
                         <p:inputTextarea rows="4" cols="30" id="description"  value="#{emailTemplatesController.selected.description}"  title="#{configMapController.getKey('CreateEmailTemplatesTitle_description')}" />
                     </p:panelGrid>
                     <p:panel >
-                        <h:outputLabel value="#{configMapController.getKey('CreateEmailTemplateLabel_editorbox')}" for="editor1" />
-                        <p:editor id="editor1" value="#{emailTemplatesController.selected.template}" widgetVar="editorWidget"  styleClass="emailTemplateEditor" />  
+                        <p:outputLabel value="#{configMapController.getKey('CreateEmailTemplateLabel_editorbox')}" for="editor1" />
+                        <p:editor id="editor1" value="#{emailTemplatesController.selected.template}" widgetVar="editorWidget"  styleClass="emailTemplateEditor"  />  
                         
-                        <h:panelGrid columns="2" style="margin-top:10px">  
+                        <p:panelGrid columns="2" style="margin-top:10px">  
                             <p:commandButton value="View" update="display" oncomplete="PF('dlg').show()"  
                                              icon="ui-icon ui-icon-disk" />  
                             <p:commandButton type="button" value="Clear" onclick="PF('editorWidget').clear()"  
                                              icon="ui-icon ui-icon-close" />  
-                        </h:panelGrid>  
+                        </p:panelGrid>  
 
                         <p:dialog header="Content" widgetVar="dlg" showEffect="fade" hideEffect="fade" modal="true">          
                             <h:outputText id="display" value="#{emailTemplatesController.selected.template}" escape="false" />  
