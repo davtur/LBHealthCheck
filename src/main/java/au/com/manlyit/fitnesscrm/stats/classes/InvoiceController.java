@@ -86,7 +86,7 @@ import org.primefaces.model.StreamedContent;
 @Named("invoiceController")
 @SessionScoped
 public class InvoiceController implements Serializable {
-    
+
     private static final Logger logger = Logger.getLogger(InvoiceController.class.getName());
     private String htmlInvoiceSource = "";
     private String htmlInvoiceEmailToAddress = "";
@@ -113,7 +113,7 @@ public class InvoiceController implements Serializable {
     private au.com.manlyit.fitnesscrm.stats.beans.InvoiceFacade ejbFacade;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade configMapFacade;
-    
+
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.EmailQueueFacade emailQueueFacade;
     @Inject
@@ -136,37 +136,38 @@ public class InvoiceController implements Serializable {
     private CurrencyFacade currencyFacade;
     private PaginationHelper pagination;
     private int selectedItemIndex;
-    
+
     public InvoiceController() {
     }
-    
+
     @PostConstruct
     private void initDates() {
-        
+
         GregorianCalendar cal = new GregorianCalendar();
         invoiceEndDate = cal.getTime();
         cal.add(Calendar.DAY_OF_YEAR, -28);
         invoiceStartDate = cal.getTime();
     }
-    
+
     public static boolean isUserInRole(String roleName) {
         boolean inRole = FacesContext.getCurrentInstance().getExternalContext().isUserInRole(roleName);
         return inRole;
     }
-    
+
     public void invoiceParametersChanged() {
         JsfUtil.addSuccessMessage("Invoice Updated", "Successfully Updated Invoice Parameters");
         RequestContext.getCurrentInstance().update(":growl");
     }
-    public void editEmailAddress(){
+
+    public void editEmailAddress() {
         htmlInvoiceEmailToAddressEnabled = !htmlInvoiceEmailToAddressEnabled;
-        if(htmlInvoiceEmailToAddressEnabled){
+        if (htmlInvoiceEmailToAddressEnabled) {
             htmlInvoiceEmailEditSaveButtonText = configMapFacade.getConfig("previewHtmlInvoiceSaveEmailLink");
-        }else{
+        } else {
             htmlInvoiceEmailEditSaveButtonText = configMapFacade.getConfig("previewHtmlInvoiceEditEmailLink");
         }
     }
-    
+
     public void generateInvoice() {
         try {
             current = generateInvoiceForCustomer(selectedCustomer, invoiceUseSettlementDate, invoiceShowSuccessful, invoiceShowFailed, invoiceShowPending, isInvoiceShowScheduled(), invoiceStartDate, invoiceEndDate);
@@ -192,7 +193,7 @@ public class InvoiceController implements Serializable {
 
         //RequestContext.getCurrentInstance().update("InvoicelistForm1");
     }
-    
+
     public Invoice generateInvoiceForCustomer(Customers cust, boolean useSettlementDate, boolean showSuccessful, boolean showFailed, boolean showPending, boolean showScheduled, Date startDate, Date endDate) {
         Invoice inv = new Invoice();
         inv.setInvoiceLineCollection(new ArrayList<>());
@@ -212,7 +213,7 @@ public class InvoiceController implements Serializable {
                 if (pp.getPaymentPeriodDayOfMonth().contentEquals("0")) {
                     dom = "";
                 }
-                
+
                 ppPlanPaymentDetails = "Period: " + period + dom + dow;
             } catch (Exception e) {
                 ppPlanPaymentDetails = "Unknown";
@@ -220,7 +221,7 @@ public class InvoiceController implements Serializable {
         }
         BigDecimal productsAndServicesTotal = new BigDecimal(0);
         il.setTypeId(ilt);
-        
+
         il.setQuantity(new BigDecimal(1));
         il.setDescription("Plan: " + cust.getGroupPricing().getPlanName());
         il.setPrice(cust.getGroupPricing().getPlanPrice());
@@ -240,7 +241,7 @@ public class InvoiceController implements Serializable {
 
                 //for each session type count the sessions and bill as a line item if they are not included in the plan
                 int count = 0;
-                
+
                 for (SessionHistory sess : sessions) {
                     String type = sess.getSessionTypesId().getName();
                     if (type.contains(sessType.getName())) {
@@ -271,17 +272,19 @@ public class InvoiceController implements Serializable {
                 inv.getInvoiceLineCollection().add(il);
                 productsAndServicesTotal = productsAndServicesTotal.add(il.getAmount());
             }
-            
+
         }
         //add payments line item to invoice with number of billable sessions
         ilt = invoiceLineTypeFacade.findAll().get(0);
+        paymentsTotal = new BigDecimal(0);
+
+        bankFeesTotal = new BigDecimal(0);
         for (Payments p : pl) {
             il = new InvoiceLine(0);
             il.setTypeId(ilt);
-            paymentsTotal = new BigDecimal(0);
-            bankFeesTotal = new BigDecimal(0);
+
             int numberOfPayments = 0;
-            
+
             BigDecimal fee = p.getTransactionFeeCustomer();
             if (fee == null) {
                 fee = new BigDecimal(0);
@@ -295,7 +298,7 @@ public class InvoiceController implements Serializable {
             il.setQuantity(new BigDecimal(1));
             il.setDescription("Payment(s)" + " --- " + ppPlanPaymentDetails);
             productsAndServicesTotal = productsAndServicesTotal.add(bankFeesTotal);
-            productsAndServicesTotal = productsAndServicesTotal.subtract(paymentsTotal);
+           // productsAndServicesTotal = productsAndServicesTotal.subtract(paymentsTotal);
             // il.setPrice(paymentsTotal);
             il.setPrice(p.getPaymentAmount());
             paymentsTotal = paymentsTotal.negate();
@@ -309,16 +312,17 @@ public class InvoiceController implements Serializable {
             il2.setQuantity(new BigDecimal(numberOfPayments));
             il2.setDescription("Bank Transaction Fees");
             //il2.setPrice(bankFeesTotal);
-            // il2.setAmount(bankFeesTotal);
+            // il2.setAmount(bankFeesTotal); 
             il2.setPrice(fee);
             il2.setAmount(fee);
             inv.getInvoiceLineCollection().add(il2);
             inv.getInvoiceLineCollection().add(il);
         }
+        inv.setBalance(paymentsTotal);
         inv.setTotal(productsAndServicesTotal);
         return inv;
     }
-    
+
     private String getPaymentPeriodString(String key) {
         String period = "";
         switch (key) {
@@ -352,7 +356,7 @@ public class InvoiceController implements Serializable {
         }
         return period;
     }
-    
+
     private List<Date> getWeeksInMonth(Date start, Date end) {
         List<Date> dl = new ArrayList<>();
         GregorianCalendar gc = new GregorianCalendar();
@@ -364,12 +368,12 @@ public class InvoiceController implements Serializable {
             } else {
                 dl.add(gc.getTime());
             }
-            
+
         }
-        
+
         return dl;
     }
-    
+
     private int checkSessionsAgainstPlanWeek(int count, Customers cust, SessionTypes sessType) {
         int billableSessions = 0;
         Plan plan = cust.getGroupPricing();
@@ -405,7 +409,7 @@ public class InvoiceController implements Serializable {
         logger.log(Level.INFO, "checkSessionsAgainstPlanWeek: Billed Sessions:{0}, Session Count:{1}, Customer: {2}, Plan: {5}, Session Type: {3}, Session Plan: {4}", new Object[]{billableSessions, count, cust.getUsername(), sessType.getName(), sessType.getPlan(), cust.getGroupPricing().getPlanName()});
         return billableSessions;
     }
-    
+
     public void preProcessPDF(Object document) throws IOException,
             BadElementException, DocumentException {
         Document pdf = (Document) document;
@@ -441,15 +445,15 @@ public class InvoiceController implements Serializable {
         com.lowagie.text.Font font = new com.lowagie.text.Font(com.lowagie.text.Font.NORMAL);
         font.setSize(8);
     }
-    
+
     public void postProcessPDF(Object document) throws IOException,
             BadElementException, DocumentException {
-        
+
     }
-    
+
     public void preProcessXLS(Object document) {
         SimpleDateFormat sdf = new SimpleDateFormat("EEE, d MMM yyyy");
-        
+
         String type = "Invoice";
         if (invoiceType == 0) {
             type += " (GST Included)";
@@ -471,18 +475,18 @@ public class InvoiceController implements Serializable {
             row.getCell(i).setCellStyle(cellStyle);
         }
         cellStyle.setDataFormat(df.getFormat("YYYY-MM-DD HH:MM:SS"));
-        
+
         cell = row.createCell(1);
         cell.setCellValue(new Date());
         cell.setCellStyle(cellStyle);
         sheet.createRow(1);
         sheet.createRow(2);
-        
+
     }
-    
+
     public void postProcessXLS(Object document) {
         SimpleDateFormat sdf = new SimpleDateFormat("EEE, d MMM yyyy");
-        
+
         String type = "Invoice";
         if (invoiceType == 0) {
             type += " (GST Included)";
@@ -512,7 +516,7 @@ public class InvoiceController implements Serializable {
         //style2.setFillPattern(CellStyle.SOLID_FOREGROUND);
         style2.setFillBackgroundColor(IndexedColors.LIGHT_TURQUOISE.getIndex());
         style2.setFillPattern(CellStyle.BIG_SPOTS);
-        
+
         HSSFCell cell3 = row.createCell(3);
         cell3.setCellValue(new Date());
         cell3.setCellStyle(cellStyle);
@@ -529,7 +533,7 @@ public class InvoiceController implements Serializable {
                     } else {
                         cell2.setCellStyle(style2);
                     }
-                    
+
                 }
             }
         }
@@ -537,7 +541,7 @@ public class InvoiceController implements Serializable {
             sheet.autoSizeColumn(c);
         }
     }
-    
+
     public Invoice getSelected() {
         /*if (current == null) {
          current = new Invoice();
@@ -545,28 +549,28 @@ public class InvoiceController implements Serializable {
          }*/
         return current;
     }
-    
+
     public void setSelected(Invoice selected) {
         if (selected != null) {
             current = selected;
             selectedItemIndex = -1;
         }
-        
+
     }
-    
+
     private InvoiceFacade getFacade() {
         return ejbFacade;
     }
-    
+
     public PaginationHelper getPagination() {
         if (pagination == null) {
             pagination = new PaginationHelper(1000000) {
-                
+
                 @Override
                 public int getItemsCount() {
                     return getFacade().count();
                 }
-                
+
                 @Override
                 public DataModel createPageDataModel() {
                     return new ListDataModel(getFacade().findRange(new int[]{getPageFirstItem(), getPageFirstItem() + getPageSize()}));
@@ -575,24 +579,24 @@ public class InvoiceController implements Serializable {
         }
         return pagination;
     }
-    
+
     public String prepareList() {
         recreateModel();
         return "List";
     }
-    
+
     public String prepareView() {
         //current = (Invoice)getItems().getRowData();
         //selectedItemIndex = pagination.getPageFirstItem() + getItems().getRowIndex();
         return "View";
     }
-    
+
     public String prepareCreate() {
         current = new Invoice();
         selectedItemIndex = -1;
         return "Create";
     }
-    
+
     public String create() {
         try {
             /*for(InvoiceLine il:current.getInvoiceLineCollection()){
@@ -610,7 +614,7 @@ public class InvoiceController implements Serializable {
             return null;
         }
     }
-    
+
     public void createDialogue(ActionEvent actionEvent) {
         try {
             current.setId(0);
@@ -623,7 +627,7 @@ public class InvoiceController implements Serializable {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
         }
     }
-    
+
     private void updateTableData(Invoice inv) {
         if (inv == null) {
             logger.log(Level.WARNING, "updateTableData: Invoice is null! Nothing updated.");
@@ -641,21 +645,21 @@ public class InvoiceController implements Serializable {
         // RequestContext.getCurrentInstance().execute("PF('invoiceControllerTable').filter();");
 
     }
-    
+
     public String prepareEdit() {
         //current = (Invoice)getItems().getRowData();
         //selectedItemIndex = pagination.getPageFirstItem() + getItems().getRowIndex();
         return "Edit";
     }
-    
+
     public void selectOneMenuValueChangeListener(ValueChangeEvent vce) {
         Object o = vce.getNewValue();
     }
-    
+
     public void selectManyMenuValueChangeListener(ValueChangeEvent vce) {
         Object o = vce.getNewValue();
     }
-    
+
     public String update() {
         try {
             getFacade().edit(current);
@@ -666,23 +670,23 @@ public class InvoiceController implements Serializable {
             return null;
         }
     }
-    
+
     public void destroyDialogue() {
         if (current != null) {
             performDestroy();
             recreateModel();
             current = null;
-            
+
         }
     }
-    
+
     public String destroy() {
         current = (Invoice) getItems().getRowData();
         selectedItemIndex = pagination.getPageFirstItem() + getItems().getRowIndex();
         destroyDialogue();
         return "List";
     }
-    
+
     public String destroyAndView() {
         destroyDialogue();
         updateCurrentItem();
@@ -694,7 +698,7 @@ public class InvoiceController implements Serializable {
             return "List";
         }
     }
-    
+
     private void performDestroy() {
         try {
             getFacade().remove(current);
@@ -703,7 +707,7 @@ public class InvoiceController implements Serializable {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
         }
     }
-    
+
     private void updateCurrentItem() {
         int count = getFacade().count();
         if (selectedItemIndex >= count) {
@@ -718,52 +722,52 @@ public class InvoiceController implements Serializable {
             current = getFacade().findRange(new int[]{selectedItemIndex, selectedItemIndex + 1}).get(0);
         }
     }
-    
+
     public PfSelectableDataModel getItems() {
         if (items == null) {
             items = new PfSelectableDataModel(getFacade().findAll());
         }
         return items;
     }
-    
+
     private void recreateModel() {
         items = null;
     }
-    
+
     public String next() {
         getPagination().nextPage();
         recreateModel();
         return "List";
     }
-    
+
     public String previous() {
         getPagination().previousPage();
         recreateModel();
         return "List";
     }
-    
+
     public SelectItem[] getItemsAvailableSelectMany() {
         return JsfUtil.getSelectItems(ejbFacade.findAll(), false);
     }
-    
+
     public SelectItem[] getItemsAvailableSelectOne() {
         return JsfUtil.getSelectItems(ejbFacade.findAll(), true);
     }
-    
+
     public void handleDateSelect(SelectEvent event) {
-        
+
         Date date = (Date) event.getObject();
 
         //Add facesmessage
     }
-    
+
     public void onEdit(RowEditEvent event) {
         Invoice cm = (Invoice) event.getObject();
         getFacade().edit(cm);
         recreateModel();
         JsfUtil.addSuccessMessage("Row Edit Successful");
     }
-    
+
     public void onCancel(RowEditEvent event) {
         JsfUtil.addErrorMessage("Row Edit Cancelled");
     }
@@ -981,7 +985,8 @@ public class InvoiceController implements Serializable {
     }
 
     /**
-     * @param htmlInvoiceEmailToAddressEnabled the htmlInvoiceEmailToAddressEnabled to set
+     * @param htmlInvoiceEmailToAddressEnabled the
+     * htmlInvoiceEmailToAddressEnabled to set
      */
     public void setHtmlInvoiceEmailToAddressEnabled(boolean htmlInvoiceEmailToAddressEnabled) {
         this.htmlInvoiceEmailToAddressEnabled = htmlInvoiceEmailToAddressEnabled;
@@ -995,15 +1000,16 @@ public class InvoiceController implements Serializable {
     }
 
     /**
-     * @param htmlInvoiceEmailEditSaveButtonText the htmlInvoiceEmailEditSaveButtonText to set
+     * @param htmlInvoiceEmailEditSaveButtonText the
+     * htmlInvoiceEmailEditSaveButtonText to set
      */
     public void setHtmlInvoiceEmailEditSaveButtonText(String htmlInvoiceEmailEditSaveButtonText) {
         this.htmlInvoiceEmailEditSaveButtonText = htmlInvoiceEmailEditSaveButtonText;
     }
-    
+
     @FacesConverter(forClass = Invoice.class)
     public static class InvoiceControllerConverter implements Converter {
-        
+
         public Object getAsObject(FacesContext facesContext, UIComponent component, String value) {
             if (value == null || value.length() == 0) {
                 return null;
@@ -1012,19 +1018,19 @@ public class InvoiceController implements Serializable {
                     getValue(facesContext.getELContext(), null, "invoiceController");
             return controller.ejbFacade.find(getKey(value));
         }
-        
+
         java.lang.Integer getKey(String value) {
             java.lang.Integer key;
             key = Integer.valueOf(value);
             return key;
         }
-        
+
         String getStringKey(java.lang.Integer value) {
             StringBuffer sb = new StringBuffer();
             sb.append(value);
             return sb.toString();
         }
-        
+
         public String getAsString(FacesContext facesContext, UIComponent component, Object object) {
             if (object == null) {
                 return null;
@@ -1036,7 +1042,7 @@ public class InvoiceController implements Serializable {
                 throw new IllegalArgumentException("object " + object + " is of type " + object.getClass().getName() + "; expected type: " + InvoiceController.class.getName());
             }
         }
-        
+
     }
 
     /**
@@ -1089,17 +1095,17 @@ public class InvoiceController implements Serializable {
      RequestContext.getCurrentInstance().execute("PF('previewHtmlInvoiceDialogueWidget').show()");
      }*/
     private String generateHtmlInvoice(Invoice inv) {
-        
+
         Logger.getLogger(InvoiceController.class.getName()).log(Level.INFO, "generateHtmlInvoice: {0}", inv.getId().toString());
         String templateName = "InvoiceHtml2";
         String invoice = ejbEmailTemplatesFacade.findTemplateByName(templateName).getTemplate();
         if (inv == null || inv.getUserId().getFirstname() == null || inv.getUserId().getLastname() == null || inv.getCreateDatetime() == null || inv.getDueDate() == null || inv.getInvoiceLineCollection() == null) {
             logger.log(Level.SEVERE, "createExcelFromInvoice: invoice or invoice methods  are null");
             return null;
-            
+
         }
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/YYYY");
-        
+
         String custName = configMapFacade.getConfig("invoice.placeholder.CustomerName");
         String custStreetAddress = configMapFacade.getConfig("invoice.placeholder.CustomerStreetAddress");
         String custSuburb = configMapFacade.getConfig("invoice.placeholder.CustomerSuburbStatePostCode");
@@ -1114,25 +1120,25 @@ public class InvoiceController implements Serializable {
         String total = configMapFacade.getConfig("invoice.placeholder.Total");
         String amountPaid = configMapFacade.getConfig("invoice.placeholder.Amount_Paid");
         String balanceDue = configMapFacade.getConfig("invoice.placeholder.Balance_Due");
-        
+
         String CompanyLogoUrl = configMapFacade.getConfig("invoice.placeholder.CompanyLogoUrl");
         String CompanyLogoAlt = configMapFacade.getConfig("invoice.placeholder.CompanyLogoAlt");
         String CompanyAbn = configMapFacade.getConfig("invoice.placeholder.CompanyAbn");
         String InvoiceTypeHeading = configMapFacade.getConfig("invoice.placeholder.InvoiceTypeHeading");
-        
+
         String productDescription = configMapFacade.getConfig("invoice.placeholder.lineitemHeader.productDescription");
         String productQuantity = configMapFacade.getConfig("invoice.placeholder.lineitemHeader.productQuantity");
         String productPrice = configMapFacade.getConfig("invoice.placeholder.lineitemHeader.productPrice");
         String productTax = configMapFacade.getConfig("invoice.placeholder.lineitemHeader.productTax");
         String productSubTotal = configMapFacade.getConfig("invoice.placeholder.lineitemHeader.productSubTotal");
         String productAmount = configMapFacade.getConfig("invoice.placeholder.lineitemHeader.productAmount");
-        
+
         String summarySubTotal = configMapFacade.getConfig("invoice.placeholder.summaryHeader.subTotal");
         String summaryTaxTotal = configMapFacade.getConfig("invoice.placeholder.summaryHeader.taxTotal");
         String summaryTotalAmount = configMapFacade.getConfig("invoice.placeholder.summaryHeader.totalAmount");
         String summaryAmountPaid = configMapFacade.getConfig("invoice.placeholder.summaryHeader.amountPaid");
         String summaryBalanceDue = configMapFacade.getConfig("invoice.placeholder.summaryHeader.balanceDue");
-        
+
         String registeredForGst = configMapFacade.getConfig("invoice.registeredForGst");
         boolean calculateGst = registeredForGst.toUpperCase().contains("TRUE");
         if (calculateGst) {
@@ -1149,24 +1155,24 @@ public class InvoiceController implements Serializable {
         invoice = invoice.replace(CompanyLogoUrl, configMapFacade.getConfig("invoiceHtmlCompanyLogoUrl"));
         invoice = invoice.replace(CompanyLogoAlt, configMapFacade.getConfig("invoiceHtmlCompanyLogoAlt"));
         invoice = invoice.replace(CompanyAbn, configMapFacade.getConfig("invoiceHtmlCompanyAbn"));
-        
+
         invoice = invoice.replace(productDescription, configMapFacade.getConfig("invoice.lineItemHeader.productDescription"));
         invoice = invoice.replace(productQuantity, configMapFacade.getConfig("invoice.lineItemHeader.productQuantity"));
         invoice = invoice.replace(productPrice, configMapFacade.getConfig("invoice.lineItemHeader.productPrice"));
         invoice = invoice.replace(productAmount, configMapFacade.getConfig("invoice.lineItemHeader.productAmount"));
-        
+
         invoice = invoice.replace(summaryAmountPaid, configMapFacade.getConfig("invoice.summaryHeader.amountPaid"));
         invoice = invoice.replace(summaryBalanceDue, configMapFacade.getConfig("invoice.summaryHeader.balanceDue"));
-        
+
         invoice = invoice.replace(custName, inv.getUserId().getFirstname() + " " + inv.getUserId().getLastname());
-        
+
         invoice = invoice.replace(custStreetAddress, inv.getUserId().getStreetAddress());
         invoice = invoice.replace(custSuburb, inv.getUserId().getSuburb() + ", " + inv.getUserId().getAddrState() + " " + inv.getUserId().getPostcode());
         invoice = invoice.replace(invoiceNo, inv.getId().toString());
         invoice = invoice.replace(issueDate, sdf.format(inv.getCreateDatetime()));
         invoice = invoice.replace(invoicePeriod, sdf.format(invoiceStartDate) + " - " + sdf.format(invoiceEndDate));
         invoice = invoice.replace(accountNo, inv.getUserId().getId().toString());
-        
+
         BigDecimal subTotalDecimal;
         BigDecimal gstDecimal;
         BigDecimal totalDecimal = null;
@@ -1182,17 +1188,17 @@ public class InvoiceController implements Serializable {
                 subTotalDecimal = gstDecimal.multiply(new BigDecimal(10));
                 invoice = invoice.replace(subTotal, currencyFormat(subTotalDecimal));
                 invoice = invoice.replace(gst, currencyFormat(gstDecimal));
-                
+
             } catch (Exception e) {
                 Logger.getLogger(InvoiceController.class.getName()).log(Level.SEVERE, "Calculating GST on HTML Invoice ");
             }
         } else {
-            
+
             subTotalDecimal = inv.getTotal();
             totalDecimal = subTotalDecimal;
         }
-        amountDueDecimal = totalDecimal.subtract(amountPaidDecimal);
-        
+        amountDueDecimal = totalDecimal.add(amountPaidDecimal);
+
         invoice = invoice.replace(total, currencyFormat(totalDecimal));
         invoice = invoice.replace(amountPaid, currencyFormat(amountPaidDecimal));
         invoice = invoice.replace(balanceDue, currencyFormat(amountDueDecimal));
@@ -1216,20 +1222,20 @@ public class InvoiceController implements Serializable {
          String lineItemsFormattedRows2 = invoice.replace(regexPattern, "TESTING");
          
          */
-        
+
         String lineItems = getHtmlInvoiceLineItems(inv, lineItemsFormattedRows, calculateGst);
         invoice = invoice.replace(lineItemsFormattedRows, lineItems);
-        
+
         return invoice;
     }
-    
+
     private String getHtmlInvoiceLineItems(Invoice inv, String formattedRows, boolean calculateGst) {
-        
+
         String lineItemsFormatted = "";
         int t = formattedRows.lastIndexOf("<tr");
         String evenRow = formattedRows.substring(0, t - 1);
         String oddRow = formattedRows.substring(t);
-        
+
         String productDescription = configMapFacade.getConfig("invoice.placeholder.lineitem.productDescription");
         String productQuantity = configMapFacade.getConfig("invoice.placeholder.lineitem.ProductQuantity");
         String productPrice = configMapFacade.getConfig("invoice.placeholder.lineitem.productPrice");
@@ -1261,18 +1267,18 @@ public class InvoiceController implements Serializable {
                 rowTemplate = rowTemplate.replace(productSubTotal, currencyFormat(subTotal));
             }
             rowTemplate = rowTemplate.replace(productAmount, currencyFormat(li.getAmount()));
-            
+
             lineItemsFormatted += rowTemplate;
-            
+
         }
-        
+
         return lineItemsFormatted;
     }
-    
+
     public static String currencyFormat(BigDecimal n) {
         return NumberFormat.getCurrencyInstance().format(n);
     }
-    
+
     public StreamedContent getExportExcel() {
         StreamedContent file = null;
         try {
@@ -1306,9 +1312,9 @@ public class InvoiceController implements Serializable {
         if (inv == null || inv.getUserId().getFirstname() == null || inv.getUserId().getLastname() == null || inv.getCreateDatetime() == null || inv.getDueDate() == null || inv.getInvoiceLineCollection() == null) {
             logger.log(Level.SEVERE, "createExcelFromInvoice: invoice or invoice methods  are null");
             return null;
-            
+
         }
-        
+
         Map<String, CellStyle> styles = createStyles(wb);
         SimpleDateFormat sdf = new SimpleDateFormat("dd MMM YYYY");
         Sheet sheet = wb.createSheet("Invoice");
@@ -1367,11 +1373,11 @@ public class InvoiceController implements Serializable {
         cell.setCellStyle(styles.get("formula_2"));
         cell = sumRow.createCell(cellNum++);
         cell.setCellStyle(styles.get("formula_2"));
-        
+
         cell = sumRow.createCell(cellNum++);
         cell.setCellValue("Total Outstanding:");
         cell.setCellStyle(styles.get("formula_2"));
-        
+
         cell = sumRow.createCell(cellNum++);
         String ref = "D3:D" + (2 + invLineItemList.size());
         cell.setCellFormula("SUM(" + ref + ")");
@@ -1385,7 +1391,7 @@ public class InvoiceController implements Serializable {
             row.getCell(1).setCellValue(il.getQuantity().intValue());
             row.getCell(2).setCellValue(il.getPrice().doubleValue());
             row.getCell(3).setCellValue(il.getAmount().doubleValue());
-            
+
         }
 
         //finally set column widths, the width is measured in units of 1/256th of a character width
@@ -1393,7 +1399,7 @@ public class InvoiceController implements Serializable {
         for (int i = 1; i < 4; i++) {
             sheet.setColumnWidth(i, 12 * 256);  //6 characters wide
         }
-        
+
         return wb;
     }
 
@@ -1411,7 +1417,7 @@ public class InvoiceController implements Serializable {
         style.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
         style.setFont(titleFont);
         styles.put("title", style);
-        
+
         Font monthFont = wb.createFont();
         monthFont.setFontHeightInPoints((short) 11);
         monthFont.setColor(IndexedColors.WHITE.getIndex());
@@ -1423,7 +1429,7 @@ public class InvoiceController implements Serializable {
         style.setFont(monthFont);
         style.setWrapText(true);
         styles.put("header", style);
-        
+
         style = wb.createCellStyle();
         style.setAlignment(CellStyle.ALIGN_CENTER);
         style.setWrapText(true);
@@ -1436,7 +1442,7 @@ public class InvoiceController implements Serializable {
         style.setBorderBottom(CellStyle.BORDER_THIN);
         style.setBottomBorderColor(IndexedColors.BLACK.getIndex());
         styles.put("cell", style);
-        
+
         style = wb.createCellStyle();
         style.setAlignment(CellStyle.ALIGN_RIGHT);
         style.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
@@ -1444,7 +1450,7 @@ public class InvoiceController implements Serializable {
         style.setFillPattern(CellStyle.SOLID_FOREGROUND);
         style.setDataFormat(wb.createDataFormat().getFormat("$##,##0.00"));
         styles.put("formula", style);
-        
+
         style = wb.createCellStyle();
         style.setAlignment(CellStyle.ALIGN_RIGHT);
         style.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
@@ -1452,7 +1458,7 @@ public class InvoiceController implements Serializable {
         style.setFillPattern(CellStyle.SOLID_FOREGROUND);
         style.setDataFormat(wb.createDataFormat().getFormat("$##,##0.00"));
         styles.put("formula_2", style);
-        
+
         Font totalFont = wb.createFont();
         totalFont.setFontHeightInPoints((short) 11);
         totalFont.setColor(IndexedColors.YELLOW.getIndex());
@@ -1462,17 +1468,17 @@ public class InvoiceController implements Serializable {
         style.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
         style.setFillForegroundColor(IndexedColors.GREY_50_PERCENT.getIndex());
         style.setFillPattern(CellStyle.SOLID_FOREGROUND);
-        
+
         style.setDataFormat(wb.createDataFormat().getFormat("$##,##0.00"));
         style.setFont(totalFont);
-        
+
         styles.put("formula_3", style);
-        
+
         return styles;
     }
-    
+
     public void emailInvoice() {
-        
+
         try {
             Future<Boolean> emailSendResult = ejbPaymentBean.sendAsynchEmail(htmlInvoiceEmailToAddress, configMapFacade.getConfig("HtmlInvoiceCCEmailAddress"), configMapFacade.getConfig("HtmlInvoiceFromEmailAddress"), configMapFacade.getConfig("HtmlInvoiceEmailSubject"), htmlInvoiceSource, null, emailQueueFacade.getEmailServerProperties(), false);
             JsfUtil.addSuccessMessage("The Invoice has been Emailed to " + htmlInvoiceEmailToAddress);
@@ -1481,5 +1487,5 @@ public class InvoiceController implements Serializable {
             JsfUtil.addSuccessMessage("Error: The Invoice has NOT been Emailed to " + current.getUserId().getEmailAddress() + ", Reason:" + e.getMessage());
         }
     }
-    
+
 }

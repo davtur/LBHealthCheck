@@ -4,23 +4,11 @@
  */
 package au.com.manlyit.fitnesscrm.stats.beans;
 
-import au.com.manlyit.fitnesscrm.stats.classes.CustomerImagesController;
-import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
-import au.com.manlyit.fitnesscrm.stats.db.CustomerImages;
-import au.com.manlyit.fitnesscrm.stats.db.Customers;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.Serializable;
-import java.util.Date;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
-import javax.faces.context.FacesContext;
-import javax.imageio.ImageIO;
 import javax.inject.Inject;
 import javax.inject.Named;
 

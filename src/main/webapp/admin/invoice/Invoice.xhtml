@@ -167,7 +167,7 @@
                                 <p:column footerText="Total Outstanding: " style="text-align:right"/>
                                 <p:column  style="text-align:left" >
                                     <f:facet name="footer" >
-                                        <h:outputText value="#{invoiceController.selected.total}">
+                                        <h:outputText value="#{invoiceController.selected.total + invoiceController.selected.balance}">
                                             <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" maxFractionDigits="2"/>
                                         </h:outputText>
                                     </f:facet>
