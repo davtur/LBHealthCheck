@@ -46,7 +46,7 @@
                         </p:selectOneMenu>
 
                         <p:commandButton id="runReport"  actionListener="#{invoiceController.generateInvoice}"  value="#{configMapController.getKey('ListInvoiceCreateInvoiceLink')}" update="@form,:previewHtmlInvoice,:growl"/>
-                        <p:commandButton disabled="#{empty invoiceController.selected}"  id="doExprt" ajax="false"  value="#{configMapController.getKey('ListInvoiceExportnvoiceLink')}" >
+                        <p:commandButton disabled="#{empty invoiceController.selected}"  id="doExprt" ajax="false"  value="#{configMapController.getKey('ListInvoiceExportInvoiceLink')}" >
                             <p:fileDownload value="#{invoiceController.exportExcel}" />
                         </p:commandButton>
                 <!--        <p:commandButton disabled="#{empty invoiceController.selected}"  id="previewHtmlInvoiceButton" actionListener="#{invoiceController.createHtmlInvoice}" value="#{configMapController.getKey('ListInvoiceExportHtmlInvoiceButton')}"  /> -->

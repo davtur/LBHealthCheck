@@ -167,16 +167,22 @@ public class NotesController implements Serializable {
         return "Create";
     }
 
+    private void createNote() {
+        if (current.getId() == null) {
+            current.setId(0);
+        }
+        current.setCreateTimestamp(new Date());
+        current.setDeleted(new Short("0"));
+        FacesContext context = FacesContext.getCurrentInstance();
+        CustomersController controller = (CustomersController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "customersController");
+        current.setUserId(controller.getSelected());
+        current.setCreatedBy(controller.getLoggedInUser());
+        getFacade().create(current);
+    }
+
     public String createFromMobile() {
         try {
-            if (current.getId() == null) {
-                current.setId(0);
-            }
-            current.setCreateTimestamp(new Date());
-            current.setDeleted(new Short("0"));
-            getFacade().create(current);
-            //Customers cust = current.getUserId();
-            //current.setUserId(ejbCustomersFacade.find(cust.getId()));
+            createNote();
             recreateModel();
             JsfUtil.addSuccessMessage(configMapFacade.getConfig("NotesCreated"));
             return prepareCreateFromMobile();
@@ -188,13 +194,7 @@ public class NotesController implements Serializable {
 
     public String create() {
         try {
-            if (current.getId() == null) {
-                current.setId(0);
-            }
-            current.setCreateTimestamp(new Date());
-            current.setDeleted(new Short("0"));
-
-            getFacade().create(current);
+            createNote();
             recreateModel();
             JsfUtil.addSuccessMessage(configMapFacade.getConfig("NotesCreated"));
             return prepareCreate();
@@ -206,13 +206,10 @@ public class NotesController implements Serializable {
 
     public void createDialogue(ActionEvent actionEvent) {
         try {
-            current.setId(0);
-            current.setCreateTimestamp(new Date());
-            current.setDeleted(new Short("0"));
+            createNote();
             FacesContext context = FacesContext.getCurrentInstance();
             CustomersController controller = (CustomersController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "customersController");
-            current.setUserId(controller.getSelected());
-            getFacade().create(current);
+
             controller.addToNotesDataTableLists(current);
             if (isReminder()) {
 
@@ -221,7 +218,7 @@ public class NotesController implements Serializable {
                 reminderDate = new Date();
             }
             current = null;
-            
+
             //controller.setNotesItems(null);
             Logger.getLogger(NotesController.class.getName()).log(Level.INFO, "Note added for customer {0} by {1}.", new Object[]{controller.getSelected().toString(), controller.getLoggedInUser().toString()});
             recreateModel();
@@ -287,9 +284,6 @@ public class NotesController implements Serializable {
         }
     }
 
-    
-     
-      
     public String destroy() {
         current = (Notes) getItems().getRowData();
         selectedItemIndex = pagination.getPageFirstItem() + getItems().getRowIndex();

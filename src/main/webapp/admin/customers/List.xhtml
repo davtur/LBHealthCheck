@@ -684,7 +684,9 @@
                                     </p:cellEditor> 
 
                                 </p:column>
-
+                                <p:column  sortBy="#{item.createdBy.lastname}" filterBy="#{item.createdBy.lastname}" headerText="#{configMapController.getKey('ListNotesTitle_createdBY')}"   >
+                                    <h:outputText value="#{item.createdBy.firstname} #{item.createdBy.lastname}"/>
+                                </p:column>
                                 <p:column sortBy="#{item.note}" filterBy="#{item.note}"  filterMatchMode="contains" headerText="#{configMapController.getKey('ListNotesTitle_note')}"   >
                                     <p:cellEditor> 
                                         <f:facet name="output">

@@ -63,6 +63,9 @@ public class Notes implements BaseEntity,Serializable {
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     @ManyToOne
     private Customers userId;
+    @JoinColumn(name = "created_by", referencedColumnName = "id")
+    @ManyToOne
+    private Customers createdBy;
 
     public Notes() {
     }
@@ -77,10 +80,12 @@ public class Notes implements BaseEntity,Serializable {
         this.deleted = deleted;
     }
 
+    @Override
     public Integer getId() {
         return id;
     }
 
+    @Override
     public void setId(Integer id) {
         this.id = id;
     }
@@ -140,6 +145,20 @@ public class Notes implements BaseEntity,Serializable {
     @Override
     public String toString() {
         return "au.com.manlyit.fitnesscrm.stats.db.Notes[ id=" + id + " ]";
+    }
+
+    /**
+     * @return the createdBy
+     */
+    public Customers getCreatedBy() {
+        return createdBy;
+    }
+
+    /**
+     * @param createdBy the createdBy to set
+     */
+    public void setCreatedBy(Customers createdBy) {
+        this.createdBy = createdBy;
     }
     
 }

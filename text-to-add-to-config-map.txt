@@ -340,3 +340,10 @@ HtmlInvoiceFromEmailAddress=admin@purefitnessmanly.com.au
 HtmlInvoiceCCEmailAddress=david@manlyit.com.au
 previewHtmlInvoiceEditEmailLink=Edit Email Address
 previewHtmlInvoiceSaveEmailLink=Save Email Address
+
+invoice.placeholder.CustomerName=<!--CustomerName-->
+
+
+ListNotesTitle_createdBY=Created By
+CreateNotesLabel_note=Notes
+NotesDeleted=Delete Successful

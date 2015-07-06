@@ -936,7 +936,7 @@ public class CustomersController implements Serializable {
     public void addToNotesDataTableLists(Notes note) {
         if (notesItems != null) {
             List<Notes> lp = (List<Notes>) notesItems.getWrappedData();
-             lp.add(note);
+             lp.add(0,note);//insert at the top of the list
         }
         if (notesFilteredItems != null) {          
             notesFilteredItems.add(note);
