@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" >
+
+    <ui:composition >
+        <p:dialog id="SurveyanswersCreateDlg" widgetVar="SurveyanswersCreateDialog" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('CreateSurveyanswersTitle')}">
+
+            <h:form id="SurveyanswersCreateForm">
+                <h:panelGroup id="display">
+                    <p:panelGrid columns="2" rendered="#{surveyanswersController.selected != null}">
+                        <p:outputLabel value="#{configMapController.getKey('CreateSurveyanswersLabel_id')}" for="id" />
+                        <p:inputText id="id" value="#{surveyanswersController.selected.id}" title="#{configMapController.getKey('CreateSurveyanswersTitle_id')}" required="true" requiredMessage="#{configMapController.getKey('CreateSurveyanswersRequiredMessage_id')}"/>
+                        <p:outputLabel value="#{configMapController.getKey('CreateSurveyanswersLabel_answer')}" for="answer" />
+                        <p:inputTextarea rows="4" cols="30" id="answer"  value="#{surveyanswersController.selected.answer}"  title="#{configMapController.getKey('CreateSurveyanswersTitle_answer')}" required="true" requiredMessage="#{configMapController.getKey('CreateSurveyanswersRequiredMessage_answer')}"/>
+                        <p:outputLabel value="#{configMapController.getKey('CreateSurveyanswersLabel_surveyId')}" for="surveyId" />
+                        <p:selectOneMenu id="surveyId" valueChangeListener="#{surveyanswersController.selectOneMenuValueChangeListener}"  value="#{surveyanswersController.selected.surveyId}"  label="#{configMapController.getKey('CreateSurveyanswersTitle_surveyId')}" required="true" requiredMessage="#{configMapController.getKey('CreateSurveyanswersRequiredMessage_surveyId')}">
+                            <f:selectItems value="#{surveysController.itemsAvailableSelectOne}"/>
+                            <p:ajax   update=":SurveyanswersCreateForm"  />
+                        </p:selectOneMenu>
+                        <p:outputLabel value="#{configMapController.getKey('CreateSurveyanswersLabel_questionId')}" for="questionId" />
+                        <p:selectOneMenu id="questionId" valueChangeListener="#{surveyanswersController.selectOneMenuValueChangeListener}"  value="#{surveyanswersController.selected.questionId}"  label="#{configMapController.getKey('CreateSurveyanswersTitle_questionId')}" required="true" requiredMessage="#{configMapController.getKey('CreateSurveyanswersRequiredMessage_questionId')}">
+                            <f:selectItems value="#{surveyquestionsController.itemsAvailableSelectOne}"/>
+                            <p:ajax   update=":SurveyanswersCreateForm"  />
+                        </p:selectOneMenu>
+                        <p:outputLabel value="#{configMapController.getKey('CreateSurveyanswersLabel_userId')}" for="userId" />
+                        <p:selectOneMenu id="userId" valueChangeListener="#{surveyanswersController.selectOneMenuValueChangeListener}"  value="#{surveyanswersController.selected.userId}"  label="#{configMapController.getKey('CreateSurveyanswersTitle_userId')}" required="true" requiredMessage="#{configMapController.getKey('CreateSurveyanswersRequiredMessage_userId')}">
+                            <f:selectItems value="#{customersController.itemsAvailableSelectOne}"/>
+                            <p:ajax   update=":SurveyanswersCreateForm"  />
+                        </p:selectOneMenu>
+                        <p:outputLabel value="#{configMapController.getKey('CreateSurveyanswersLabel_answerTypeid')}" for="answerTypeid" />
+                        <p:selectOneMenu id="answerTypeid" valueChangeListener="#{surveyanswersController.selectOneMenuValueChangeListener}"  value="#{surveyanswersController.selected.answerTypeid}"  label="#{configMapController.getKey('CreateSurveyanswersTitle_answerTypeid')}" required="true" requiredMessage="#{configMapController.getKey('CreateSurveyanswersRequiredMessage_answerTypeid')}">
+                            <f:selectItems value="#{surveyquestiontypesController.itemsAvailableSelectOne}"/>
+                            <p:ajax   update=":SurveyanswersCreateForm"  />
+                        </p:selectOneMenu>
+                    </p:panelGrid>
+                    <p:commandButton actionListener="#{surveyanswersController.createDialogue}" value="#{configMapController.getKey('Save')}" update="display,:SurveyanswersListForm:datalist,:growl" oncomplete="handleSubmit(args,'SurveyanswersCreateDialog');surveyanswersControllerTable.filter()"/>
+                    <p:commandButton value="#{configMapController.getKey('Cancel')}" onclick="SurveyanswersCreateDialog.hide()"/>
+                </h:panelGroup>
+            </h:form>
+        </p:dialog>
+
+    </ui:composition>    
+
+</html>

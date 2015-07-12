@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" 
+      xmlns:ui="http://java.sun.com/jsf/facelets" >
+
+    <ui:composition>
+
+        <p:dialog id="SurveyanswersViewDlg" widgetVar="SurveyanswersViewDialog" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('ViewSurveyanswersTitle')}">
+            <h:form id="SurveyanswersViewForm">
+                <h:panelGroup id="display">
+                    <p:panelGrid columns="2" rendered="#{surveyanswersController.selected != null}">
+                        <h:outputText value="#{configMapController.getKey('ViewSurveyanswersLabel_id')}"/>
+                        <h:outputText value="#{surveyanswersController.selected.id}" title="#{configMapController.getKey('ViewSurveyanswersTitle_id')}"/>
+                        <h:outputText value="#{configMapController.getKey('ViewSurveyanswersLabel_answer')}"/>
+                        <h:outputText value="#{surveyanswersController.selected.answer}" title="#{configMapController.getKey('ViewSurveyanswersTitle_answer')}"/>
+                        <h:outputText value="#{configMapController.getKey('ViewSurveyanswersLabel_surveyId')}"/>
+                        <h:outputText value="#{surveyanswersController.selected.surveyId}" title="#{configMapController.getKey('ViewSurveyanswersTitle_surveyId')}"/>
+                        <h:outputText value="#{configMapController.getKey('ViewSurveyanswersLabel_questionId')}"/>
+                        <h:outputText value="#{surveyanswersController.selected.questionId}" title="#{configMapController.getKey('ViewSurveyanswersTitle_questionId')}"/>
+                        <h:outputText value="#{configMapController.getKey('ViewSurveyanswersLabel_userId')}"/>
+                        <h:outputText value="#{surveyanswersController.selected.userId}" title="#{configMapController.getKey('ViewSurveyanswersTitle_userId')}"/>
+                        <h:outputText value="#{configMapController.getKey('ViewSurveyanswersLabel_answerTypeid')}"/>
+                        <h:outputText value="#{surveyanswersController.selected.answerTypeid}" title="#{configMapController.getKey('ViewSurveyanswersTitle_answerTypeid')}"/>
+                    </p:panelGrid>
+                    <p:commandButton value="#{configMapController.getKey('Close')}" onclick="SurveyanswersViewDialog.hide()"/>
+                </h:panelGroup>
+            </h:form>
+        </p:dialog>
+
+    </ui:composition>
+</html>

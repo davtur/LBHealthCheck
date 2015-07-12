@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" >
+
+    <ui:composition >
+        <p:dialog id="SurveyquestiontypesCreateDlg" widgetVar="SurveyquestiontypesCreateDialog" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('CreateSurveyquestiontypesTitle')}">
+
+            <h:form id="SurveyquestiontypesCreateForm">
+                <h:panelGroup id="display">
+                    <p:panelGrid columns="2" rendered="#{surveyquestiontypesController.selected != null}">
+                        <p:outputLabel value="#{configMapController.getKey('CreateSurveyquestiontypesLabel_id')}" for="id" />
+                        <p:inputText id="id" value="#{surveyquestiontypesController.selected.id}" title="#{configMapController.getKey('CreateSurveyquestiontypesTitle_id')}" required="true" requiredMessage="#{configMapController.getKey('CreateSurveyquestiontypesRequiredMessage_id')}"/>
+                        <p:outputLabel value="#{configMapController.getKey('CreateSurveyquestiontypesLabel_type')}" for="type" />
+                        <p:inputText id="type" value="#{surveyquestiontypesController.selected.type}" title="#{configMapController.getKey('CreateSurveyquestiontypesTitle_type')}" required="true" requiredMessage="#{configMapController.getKey('CreateSurveyquestiontypesRequiredMessage_type')}"/>
+                    </p:panelGrid>
+                    <p:commandButton actionListener="#{surveyquestiontypesController.createDialogue}" value="#{configMapController.getKey('Save')}" update="display,:SurveyquestiontypesListForm:datalist,:growl" oncomplete="handleSubmit(args,'SurveyquestiontypesCreateDialog');surveyquestiontypesControllerTable.filter()"/>
+                    <p:commandButton value="#{configMapController.getKey('Cancel')}" onclick="SurveyquestiontypesCreateDialog.hide()"/>
+                </h:panelGroup>
+            </h:form>
+        </p:dialog>
+
+    </ui:composition>    
+
+</html>

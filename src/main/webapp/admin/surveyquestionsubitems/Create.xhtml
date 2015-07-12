@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" >
+
+    <ui:composition >
+               <p:dialog id="SurveyquestionsubitemsCreateDlg" widgetVar="SurveyquestionsubitemsCreateDialog" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('CreateSurveyquestionsubitemsTitle')}">
+           
+            <h:form id="SurveyquestionsubitemsCreateForm">
+                 <h:panelGroup id="display">
+                    <p:panelGrid columns="2" rendered="#{surveyquestionsubitemsController.selected != null}">
+                    <p:outputLabel value="#{configMapController.getKey('CreateSurveyquestionsubitemsLabel_id')}" for="id" />
+                    <p:inputText id="id" value="#{surveyquestionsubitemsController.selected.id}" title="#{configMapController.getKey('CreateSurveyquestionsubitemsTitle_id')}" required="true" requiredMessage="#{configMapController.getKey('CreateSurveyquestionsubitemsRequiredMessage_id')}"/>
+                    <p:outputLabel value="#{configMapController.getKey('CreateSurveyquestionsubitemsLabel_subitem')}" for="subitem" />
+                    <p:inputTextarea rows="4" cols="30" id="subitem"  value="#{surveyquestionsubitemsController.selected.subitem}"  title="#{configMapController.getKey('CreateSurveyquestionsubitemsTitle_subitem')}" required="true" requiredMessage="#{configMapController.getKey('CreateSurveyquestionsubitemsRequiredMessage_subitem')}"/>
+                    <p:outputLabel value="#{configMapController.getKey('CreateSurveyquestionsubitemsLabel_questionId')}" for="questionId" />
+                    <p:selectOneMenu id="questionId" valueChangeListener="#{surveyquestionsubitemsController.selectOneMenuValueChangeListener}"  value="#{surveyquestionsubitemsController.selected.questionId}"  label="#{configMapController.getKey('CreateSurveyquestionsubitemsTitle_questionId')}" required="true" requiredMessage="#{configMapController.getKey('CreateSurveyquestionsubitemsRequiredMessage_questionId')}">
+                        <f:selectItems value="#{surveyquestionsController.itemsAvailableSelectOne}"/>
+                    <p:ajax   update=":SurveyquestionsubitemsCreateForm"  />
+                    </p:selectOneMenu>
+                    <p:outputLabel value="#{configMapController.getKey('CreateSurveyquestionsubitemsLabel_subitemText')}" for="subitemText" />
+                    <p:inputTextarea rows="4" cols="30" id="subitemText"  value="#{surveyquestionsubitemsController.selected.subitemText}"  title="#{configMapController.getKey('CreateSurveyquestionsubitemsTitle_subitemText')}" required="true" requiredMessage="#{configMapController.getKey('CreateSurveyquestionsubitemsRequiredMessage_subitemText')}"/>
+                    <p:outputLabel value="#{configMapController.getKey('CreateSurveyquestionsubitemsLabel_subitemBool')}" for="subitemBool" />
+                    <p:inputText id="subitemBool" value="#{surveyquestionsubitemsController.selected.subitemBool}" title="#{configMapController.getKey('CreateSurveyquestionsubitemsTitle_subitemBool')}" />
+                    <p:outputLabel value="#{configMapController.getKey('CreateSurveyquestionsubitemsLabel_subitemInt')}" for="subitemInt" />
+                    <p:inputText id="subitemInt" value="#{surveyquestionsubitemsController.selected.subitemInt}" title="#{configMapController.getKey('CreateSurveyquestionsubitemsTitle_subitemInt')}" />
+                  </p:panelGrid>
+                    <p:commandButton actionListener="#{surveyquestionsubitemsController.createDialogue}" value="#{configMapController.getKey('Save')}" update="display,:SurveyquestionsubitemsListForm:datalist,:growl" oncomplete="handleSubmit(args,'SurveyquestionsubitemsCreateDialog');surveyquestionsubitemsControllerTable.filter()"/>
+                    <p:commandButton value="#{configMapController.getKey('Cancel')}" onclick="SurveyquestionsubitemsCreateDialog.hide()"/>
+                </h:panelGroup>
+             </h:form>
+          </p:dialog>
+
+    </ui:composition>    
+
+</html>

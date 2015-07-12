@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" >
+
+    <ui:composition template="/template.xhtml">
+        <ui:define name="title">
+            <h:outputText value="#{configMapController.getKey('ListSurveyquestiontypesTitle')}"></h:outputText>
+        </ui:define>
+        <ui:define name="body">
+
+
+
+
+
+            <h:form id="SurveyquestiontypesListForm">
+                <h:outputText escape="false" value="#{configMapController.getKey('ListSurveyquestiontypesEmpty')}" rendered="#{surveyquestiontypesController.items.rowCount == 0}"/>
+                <h:panelGroup >
+                    <p:dataTable  
+                        id="datalist"  
+                        editable="true" 
+                        value="#{surveyquestiontypesController.items}" 
+                        selection="#{surveyquestiontypesController.selected}" 
+                        rowKey="#{item.id}" 
+                        filteredValue="#{surveyquestiontypesController.filteredItems}"  
+                        widgetVar="surveyquestiontypesControllerTable" 
+                        var="item"  
+                        paginator="true" 
+                        rows="15"  
+                        paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  
+                        rowsPerPageTemplate="5,10,15,20,25,50,100" >
+                        <f:facet name="header">
+                            <p:outputPanel>
+                                <h:outputText value="Search all fields:" />
+                                <h:inputText id="globalFilter" onkeyup="surveyquestiontypesControllerTable.filter()" />
+                            </p:outputPanel>
+                        </f:facet>
+                        <p:ajax event="rowEdit" listener="#{surveyquestiontypesController.onEdit}" update=":growl" oncomplete="surveyquestiontypesControllerTable.filter()" />  
+                        <p:ajax event="rowEditCancel" listener="#{surveyquestiontypesController.onCancel}" update=":growl"  oncomplete="surveyquestiontypesControllerTable.filter()" />  
+                        <p:ajax event="rowSelect"   update="createButton viewButton editButton deleteButton"/>
+                        <p:ajax event="rowUnselect" update="createButton viewButton editButton deleteButton"/>
+                        <p:column selectionMode="single"/>
+                        <p:column sortBy="#{item.id}" filterBy="#{item.id}" headerText="#{configMapController.getKey('ListSurveyquestiontypesTitle_id')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.id}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.id}" label="#{configMapController.getKey('ListSurveyquestiontypesTitle_id')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.type}" filterBy="#{item.type}" headerText="#{configMapController.getKey('ListSurveyquestiontypesTitle_type')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.type}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.type}" label="#{configMapController.getKey('ListSurveyquestiontypesTitle_type')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column rendered="#{surveyquestiontypesController.isUserInRole('ADMIN')}"  headerText="Edit" style="width:50px">  
+                            <p:rowEditor />  
+                        </p:column>  
+
+
+                        <f:facet name="footer">
+                            <p:commandButton rendered="#{surveyquestiontypesController.isUserInRole('ADMIN')}" id="createButton" icon="ui-icon-plus"   value="#{configMapController.getKey('Create')}" actionListener="#{surveyquestiontypesController.prepareCreate}" update=":SurveyquestiontypesCreateForm" oncomplete="PF('SurveyquestiontypesCreateDialog').show()"/>
+                            <p:commandButton id="viewButton"   icon="ui-icon-search" value="#{configMapController.getKey('View')}" update=":SurveyquestiontypesViewForm" oncomplete="PF('SurveyquestiontypesViewDialog').show()" disabled="#{empty surveyquestiontypesController.selected}"/>
+                            <p:commandButton rendered="#{surveyquestiontypesController.isUserInRole('ADMIN')}" id="editButton"   icon="ui-icon-pencil" value="#{configMapController.getKey('Edit')}" update=":SurveyquestiontypesEditForm" oncomplete="PF('SurveyquestiontypesEditDialog').show()" disabled="#{empty surveyquestiontypesController.selected}"/>
+                            <p:commandButton rendered="#{surveyquestiontypesController.isUserInRole('ADMIN')}" id="deleteButton" icon="ui-icon-trash"  value="#{configMapController.getKey('Delete')}" actionListener="#{surveyquestiontypesController.destroy}" update=":growl,datalist" disabled="#{empty surveyquestiontypesController.selected}"/>
+                        </f:facet>
+
+                    </p:dataTable>
+                </h:panelGroup>
+            </h:form>
+
+            <ui:include src="Create.xhtml"/>
+            <ui:include src="Edit.xhtml"/>
+            <ui:include src="View.xhtml"/>
+
+        </ui:define>
+    </ui:composition>
+
+</html>

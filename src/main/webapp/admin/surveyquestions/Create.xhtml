@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" >
+
+    <ui:composition >
+        <p:dialog id="SurveyquestionsCreateDlg" widgetVar="SurveyquestionsCreateDialog" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('CreateSurveyquestionsTitle')}">
+
+            <h:form id="SurveyquestionsCreateForm">
+                <h:panelGroup id="display">
+                    <p:panelGrid columns="2" rendered="#{surveyquestionsController.selected != null}">
+                        <p:outputLabel value="#{configMapController.getKey('CreateSurveyquestionsLabel_id')}" for="id" />
+                        <p:inputText id="id" value="#{surveyquestionsController.selected.id}" title="#{configMapController.getKey('CreateSurveyquestionsTitle_id')}" required="true" requiredMessage="#{configMapController.getKey('CreateSurveyquestionsRequiredMessage_id')}"/>
+                        <p:outputLabel value="#{configMapController.getKey('CreateSurveyquestionsLabel_question')}" for="question" />
+                        <p:inputTextarea rows="4" cols="30" id="question"  value="#{surveyquestionsController.selected.question}"  title="#{configMapController.getKey('CreateSurveyquestionsTitle_question')}" required="true" requiredMessage="#{configMapController.getKey('CreateSurveyquestionsRequiredMessage_question')}"/>
+                        <p:outputLabel value="#{configMapController.getKey('CreateSurveyquestionsLabel_questionType')}" for="questionType" />
+                        <p:selectOneMenu id="questionType" valueChangeListener="#{surveyquestionsController.selectOneMenuValueChangeListener}"  value="#{surveyquestionsController.selected.questionType}"  label="#{configMapController.getKey('CreateSurveyquestionsTitle_questionType')}" required="true" requiredMessage="#{configMapController.getKey('CreateSurveyquestionsRequiredMessage_questionType')}">
+                            <f:selectItems value="#{surveyquestiontypesController.itemsAvailableSelectOne}"/>
+                            <p:ajax   update=":SurveyquestionsCreateForm"  />
+                        </p:selectOneMenu>
+                    </p:panelGrid>
+                    <p:commandButton actionListener="#{surveyquestionsController.createDialogue}" value="#{configMapController.getKey('Save')}" update="display,:SurveyquestionsListForm:datalist,:growl" oncomplete="handleSubmit(args,'SurveyquestionsCreateDialog');surveyquestionsControllerTable.filter()"/>
+                    <p:commandButton value="#{configMapController.getKey('Cancel')}" onclick="SurveyquestionsCreateDialog.hide()"/>
+                </h:panelGroup>
+            </h:form>
+        </p:dialog>
+
+    </ui:composition>    
+
+</html>

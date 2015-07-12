@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" >
+
+    <ui:composition >
+        <p:dialog id="SurveysCreateDlg" widgetVar="SurveysCreateDialog" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('CreateSurveysTitle')}">
+
+            <h:form id="SurveysCreateForm">
+                <h:panelGroup id="display">
+                    <p:panelGrid columns="2" rendered="#{surveysController.selected != null}">
+                        <p:outputLabel value="#{configMapController.getKey('CreateSurveysLabel_id')}" for="id" />
+                        <p:inputText id="id" value="#{surveysController.selected.id}" title="#{configMapController.getKey('CreateSurveysTitle_id')}" required="true" requiredMessage="#{configMapController.getKey('CreateSurveysRequiredMessage_id')}"/>
+                        <p:outputLabel value="#{configMapController.getKey('CreateSurveysLabel_name')}" for="name" />
+                        <p:inputText id="name" value="#{surveysController.selected.name}" title="#{configMapController.getKey('CreateSurveysTitle_name')}" required="true" requiredMessage="#{configMapController.getKey('CreateSurveysRequiredMessage_name')}"/>
+                        <p:outputLabel value="#{configMapController.getKey('CreateSurveysLabel_description')}" for="description" />
+                        <p:inputTextarea rows="4" cols="30" id="description"  value="#{surveysController.selected.description}"  title="#{configMapController.getKey('CreateSurveysTitle_description')}" required="true" requiredMessage="#{configMapController.getKey('CreateSurveysRequiredMessage_description')}"/>
+                    </p:panelGrid>
+                    <p:commandButton actionListener="#{surveysController.createDialogue}" value="#{configMapController.getKey('Save')}" update="display,:SurveysListForm:datalist,:growl" oncomplete="handleSubmit(args,'SurveysCreateDialog');surveysControllerTable.filter()"/>
+                    <p:commandButton value="#{configMapController.getKey('Cancel')}" onclick="SurveysCreateDialog.hide()"/>
+                </h:panelGroup>
+            </h:form>
+        </p:dialog>
+
+    </ui:composition>    
+
+</html>

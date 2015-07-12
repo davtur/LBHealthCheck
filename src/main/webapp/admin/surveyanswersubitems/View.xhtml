@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" 
+      xmlns:ui="http://java.sun.com/jsf/facelets" >
+
+    <ui:composition>
+
+        <p:dialog id="SurveyanswersubitemsViewDlg" widgetVar="SurveyanswersubitemsViewDialog" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('ViewSurveyanswersubitemsTitle')}">
+            <h:form id="SurveyanswersubitemsViewForm">
+                <h:panelGroup id="display">
+                    <p:panelGrid columns="2" rendered="#{surveyanswersubitemsController.selected != null}">
+                    <h:outputText value="#{configMapController.getKey('ViewSurveyanswersubitemsLabel_id')}"/>
+                    <h:outputText value="#{surveyanswersubitemsController.selected.id}" title="#{configMapController.getKey('ViewSurveyanswersubitemsTitle_id')}"/>
+                    <h:outputText value="#{configMapController.getKey('ViewSurveyanswersubitemsLabel_subitem')}"/>
+                    <h:outputText value="#{surveyanswersubitemsController.selected.subitem}" title="#{configMapController.getKey('ViewSurveyanswersubitemsTitle_subitem')}"/>
+                    <h:outputText value="#{configMapController.getKey('ViewSurveyanswersubitemsLabel_answerId')}"/>
+                    <h:outputText value="#{surveyanswersubitemsController.selected.answerId}" title="#{configMapController.getKey('ViewSurveyanswersubitemsTitle_answerId')}"/>
+                    <h:outputText value="#{configMapController.getKey('ViewSurveyanswersubitemsLabel_subitemText')}"/>
+                    <h:outputText value="#{surveyanswersubitemsController.selected.subitemText}" title="#{configMapController.getKey('ViewSurveyanswersubitemsTitle_subitemText')}"/>
+                    <h:outputText value="#{configMapController.getKey('ViewSurveyanswersubitemsLabel_subitemBool')}"/>
+                    <h:outputText value="#{surveyanswersubitemsController.selected.subitemBool}" title="#{configMapController.getKey('ViewSurveyanswersubitemsTitle_subitemBool')}"/>
+                    <h:outputText value="#{configMapController.getKey('ViewSurveyanswersubitemsLabel_subitemInt')}"/>
+                    <h:outputText value="#{surveyanswersubitemsController.selected.subitemInt}" title="#{configMapController.getKey('ViewSurveyanswersubitemsTitle_subitemInt')}"/>
+                     </p:panelGrid>
+                    <p:commandButton value="#{configMapController.getKey('Close')}" onclick="SurveyanswersubitemsViewDialog.hide()"/>
+                </h:panelGroup>
+            </h:form>
+        </p:dialog>
+
+    </ui:composition>
+</html>

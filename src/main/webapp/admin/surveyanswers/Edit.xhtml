@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" >
+
+    <ui:composition>
+        <p:dialog id="SurveyanswersEditDlg" widgetVar="SurveyanswersEditDialog" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('EditSurveyanswersTitle')}">
+            <h:form id="SurveyanswersEditForm">
+                <h:panelGroup id="display">
+                    <p:panelGrid columns="2" rendered="#{surveyanswersController.selected != null}">
+                        <h:outputLabel value="#{configMapController.getKey('EditSurveyanswersLabel_id')}" for="id" />
+                        <h:inputText id="id"  value="#{surveyanswersController.selected.id}" title="#{configMapController.getKey('EditSurveyanswersTitle_id')}" required="true" requiredMessage="#{configMapController.getKey('EditSurveyanswersRequiredMessage_id')}"/>
+                        <h:outputLabel value="#{configMapController.getKey('EditSurveyanswersLabel_answer')}" for="answer" />
+                        <h:inputTextarea rows="4" cols="30" id="answer" value="#{surveyanswersController.selected.answer}" title="#{configMapController.getKey('EditSurveyanswersTitle_answer')}" required="true" requiredMessage="#{configMapController.getKey('EditSurveyanswersRequiredMessage_answer')}"/>
+                        <h:outputLabel value="#{configMapController.getKey('EditSurveyanswersLabel_surveyId')}" for="surveyId" />
+                        <p:selectOneMenu id="surveyId" valueChangeListener="#{surveyanswersController.selectOneMenuValueChangeListener}" value="#{surveyanswersController.selected.surveyId}" label="#{configMapController.getKey('EditSurveyanswersTitle_surveyId')}" required="true" requiredMessage="#{configMapController.getKey('EditSurveyanswersRequiredMessage_surveyId')}">
+                            <f:selectItems value="#{surveysController.itemsAvailableSelectOne}"/>
+                            <p:ajax   update=":SurveyanswersEditForm"  />
+                        </p:selectOneMenu>
+                        <h:outputLabel value="#{configMapController.getKey('EditSurveyanswersLabel_questionId')}" for="questionId" />
+                        <p:selectOneMenu id="questionId" valueChangeListener="#{surveyanswersController.selectOneMenuValueChangeListener}" value="#{surveyanswersController.selected.questionId}" label="#{configMapController.getKey('EditSurveyanswersTitle_questionId')}" required="true" requiredMessage="#{configMapController.getKey('EditSurveyanswersRequiredMessage_questionId')}">
+                            <f:selectItems value="#{surveyquestionsController.itemsAvailableSelectOne}"/>
+                            <p:ajax   update=":SurveyanswersEditForm"  />
+                        </p:selectOneMenu>
+                        <h:outputLabel value="#{configMapController.getKey('EditSurveyanswersLabel_userId')}" for="userId" />
+                        <p:selectOneMenu id="userId" valueChangeListener="#{surveyanswersController.selectOneMenuValueChangeListener}" value="#{surveyanswersController.selected.userId}" label="#{configMapController.getKey('EditSurveyanswersTitle_userId')}" required="true" requiredMessage="#{configMapController.getKey('EditSurveyanswersRequiredMessage_userId')}">
+                            <f:selectItems value="#{customersController.itemsAvailableSelectOne}"/>
+                            <p:ajax   update=":SurveyanswersEditForm"  />
+                        </p:selectOneMenu>
+                        <h:outputLabel value="#{configMapController.getKey('EditSurveyanswersLabel_answerTypeid')}" for="answerTypeid" />
+                        <p:selectOneMenu id="answerTypeid" valueChangeListener="#{surveyanswersController.selectOneMenuValueChangeListener}" value="#{surveyanswersController.selected.answerTypeid}" label="#{configMapController.getKey('EditSurveyanswersTitle_answerTypeid')}" required="true" requiredMessage="#{configMapController.getKey('EditSurveyanswersRequiredMessage_answerTypeid')}">
+                            <f:selectItems value="#{surveyquestiontypesController.itemsAvailableSelectOne}"/>
+                            <p:ajax   update=":SurveyanswersEditForm"  />
+                        </p:selectOneMenu>
+                    </p:panelGrid>
+                    <p:commandButton actionListener="#{surveyanswersController.update}" value="#{configMapController.getKey('Save')}" update="display,:SurveyanswersListForm:datalist,:growl" oncomplete="handleSubmit(args, 'SurveyanswersEditDialog');surveyanswersControllerTable.filter()"/>
+                    <p:commandButton value="#{configMapController.getKey('Cancel')}" onclick="SurveyanswersEditDialog.hide()"/>
+                </h:panelGroup>
+            </h:form>
+        </p:dialog>
+
+    </ui:composition>
+</html>

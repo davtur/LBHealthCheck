@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" >
+
+    <ui:composition>
+        <p:dialog id="SurveyquestiontypesEditDlg" widgetVar="SurveyquestiontypesEditDialog" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('EditSurveyquestiontypesTitle')}">
+            <h:form id="SurveyquestiontypesEditForm">
+                <h:panelGroup id="display">
+                    <p:panelGrid columns="2" rendered="#{surveyquestiontypesController.selected != null}">
+                        <h:outputLabel value="#{configMapController.getKey('EditSurveyquestiontypesLabel_id')}" for="id" />
+                        <h:inputText id="id"  value="#{surveyquestiontypesController.selected.id}" title="#{configMapController.getKey('EditSurveyquestiontypesTitle_id')}" required="true" requiredMessage="#{configMapController.getKey('EditSurveyquestiontypesRequiredMessage_id')}"/>
+                        <h:outputLabel value="#{configMapController.getKey('EditSurveyquestiontypesLabel_type')}" for="type" />
+                        <h:inputText id="type"  value="#{surveyquestiontypesController.selected.type}" title="#{configMapController.getKey('EditSurveyquestiontypesTitle_type')}" required="true" requiredMessage="#{configMapController.getKey('EditSurveyquestiontypesRequiredMessage_type')}"/>
+                    </p:panelGrid>
+                    <p:commandButton actionListener="#{surveyquestiontypesController.update}" value="#{configMapController.getKey('Save')}" update="display,:SurveyquestiontypesListForm:datalist,:growl" oncomplete="handleSubmit(args, 'SurveyquestiontypesEditDialog');surveyquestiontypesControllerTable.filter()"/>
+                    <p:commandButton value="#{configMapController.getKey('Cancel')}" onclick="SurveyquestiontypesEditDialog.hide()"/>
+                </h:panelGroup>
+            </h:form>
+        </p:dialog>
+
+    </ui:composition>
+</html>

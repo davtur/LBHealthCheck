@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" 
+      xmlns:ui="http://java.sun.com/jsf/facelets" >
+
+    <ui:composition>
+
+        <p:dialog id="SurveyquestionsViewDlg" widgetVar="SurveyquestionsViewDialog" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('ViewSurveyquestionsTitle')}">
+            <h:form id="SurveyquestionsViewForm">
+                <h:panelGroup id="display">
+                    <p:panelGrid columns="2" rendered="#{surveyquestionsController.selected != null}">
+                        <h:outputText value="#{configMapController.getKey('ViewSurveyquestionsLabel_id')}"/>
+                        <h:outputText value="#{surveyquestionsController.selected.id}" title="#{configMapController.getKey('ViewSurveyquestionsTitle_id')}"/>
+                        <h:outputText value="#{configMapController.getKey('ViewSurveyquestionsLabel_question')}"/>
+                        <h:outputText value="#{surveyquestionsController.selected.question}" title="#{configMapController.getKey('ViewSurveyquestionsTitle_question')}"/>
+                        <h:outputText value="#{configMapController.getKey('ViewSurveyquestionsLabel_questionType')}"/>
+                        <h:outputText value="#{surveyquestionsController.selected.questionType}" title="#{configMapController.getKey('ViewSurveyquestionsTitle_questionType')}"/>
+                    </p:panelGrid>
+                    <p:commandButton value="#{configMapController.getKey('Close')}" onclick="SurveyquestionsViewDialog.hide()"/>
+                </h:panelGroup>
+            </h:form>
+        </p:dialog>
+
+    </ui:composition>
+</html>

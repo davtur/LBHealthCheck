@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" >
+
+    <ui:composition>
+        <p:dialog id="SurveyquestionsEditDlg" widgetVar="SurveyquestionsEditDialog" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('EditSurveyquestionsTitle')}">
+            <h:form id="SurveyquestionsEditForm">
+                <h:panelGroup id="display">
+                    <p:panelGrid columns="2" rendered="#{surveyquestionsController.selected != null}">
+                        <h:outputLabel value="#{configMapController.getKey('EditSurveyquestionsLabel_id')}" for="id" />
+                        <h:inputText id="id"  value="#{surveyquestionsController.selected.id}" title="#{configMapController.getKey('EditSurveyquestionsTitle_id')}" required="true" requiredMessage="#{configMapController.getKey('EditSurveyquestionsRequiredMessage_id')}"/>
+                        <h:outputLabel value="#{configMapController.getKey('EditSurveyquestionsLabel_question')}" for="question" />
+                        <h:inputTextarea rows="4" cols="30" id="question" value="#{surveyquestionsController.selected.question}" title="#{configMapController.getKey('EditSurveyquestionsTitle_question')}" required="true" requiredMessage="#{configMapController.getKey('EditSurveyquestionsRequiredMessage_question')}"/>
+                        <h:outputLabel value="#{configMapController.getKey('EditSurveyquestionsLabel_questionType')}" for="questionType" />
+                        <p:selectOneMenu id="questionType" valueChangeListener="#{surveyquestionsController.selectOneMenuValueChangeListener}" value="#{surveyquestionsController.selected.questionType}" label="#{configMapController.getKey('EditSurveyquestionsTitle_questionType')}" required="true" requiredMessage="#{configMapController.getKey('EditSurveyquestionsRequiredMessage_questionType')}">
+                            <f:selectItems value="#{surveyquestiontypesController.itemsAvailableSelectOne}"/>
+                            <p:ajax   update=":SurveyquestionsEditForm"  />
+                        </p:selectOneMenu>
+                    </p:panelGrid>
+                    <p:commandButton actionListener="#{surveyquestionsController.update}" value="#{configMapController.getKey('Save')}" update="display,:SurveyquestionsListForm:datalist,:growl" oncomplete="handleSubmit(args, 'SurveyquestionsEditDialog');surveyquestionsControllerTable.filter()"/>
+                    <p:commandButton value="#{configMapController.getKey('Cancel')}" onclick="SurveyquestionsEditDialog.hide()"/>
+                </h:panelGroup>
+            </h:form>
+        </p:dialog>
+
+    </ui:composition>
+</html>

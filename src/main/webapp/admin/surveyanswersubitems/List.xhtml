@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" >
+
+    <ui:composition template="/template.xhtml">
+        <ui:define name="title">
+            <h:outputText value="#{configMapController.getKey('ListSurveyanswersubitemsTitle')}"></h:outputText>
+        </ui:define>
+        <ui:define name="body">
+        
+           
+        
+        
+        
+        <h:form id="SurveyanswersubitemsListForm">
+             <h:outputText escape="false" value="#{configMapController.getKey('ListSurveyanswersubitemsEmpty')}" rendered="#{surveyanswersubitemsController.items.rowCount == 0}"/>
+            <h:panelGroup rendered="#{surveyanswersubitemsController.items.rowCount > 0}">
+                <p:dataTable  
+                id="datalist"  
+                editable="true" 
+                value="#{surveyanswersubitemsController.items}" 
+                selection="#{surveyanswersubitemsController.selected}" 
+                rowKey="#{item.id}" 
+                filteredValue="#{surveyanswersubitemsController.filteredItems}"  
+                widgetVar="surveyanswersubitemsControllerTable" 
+                var="item"  
+                paginator="true" 
+                rows="15"  
+                paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  
+                rowsPerPageTemplate="5,10,15,20,25,50,100" >
+                        <f:facet name="header">
+                            <p:outputPanel>
+                                <h:outputText value="Search all fields:" />
+                                <h:inputText id="globalFilter" onkeyup="surveyanswersubitemsControllerTable.filter()" />
+                            </p:outputPanel>
+                        </f:facet>
+                        <p:ajax event="rowEdit" listener="#{surveyanswersubitemsController.onEdit}" update=":growl" oncomplete="surveyanswersubitemsControllerTable.filter()" />  
+                        <p:ajax event="rowEditCancel" listener="#{surveyanswersubitemsController.onCancel}" update=":growl"  oncomplete="surveyanswersubitemsControllerTable.filter()" />  
+                        <p:ajax event="rowSelect"   update="createButton viewButton editButton deleteButton"/>
+                        <p:ajax event="rowUnselect" update="createButton viewButton editButton deleteButton"/>
+                        <p:column selectionMode="single"/>
+                    <p:column sortBy="#{item.id}" filterBy="#{item.id}" headerText="#{configMapController.getKey('ListSurveyanswersubitemsTitle_id')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.id}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.id}" label="#{configMapController.getKey('ListSurveyanswersubitemsTitle_id')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+                        
+                        
+                    </p:column>
+                    <p:column sortBy="#{item.subitem}" filterBy="#{item.subitem}" headerText="#{configMapController.getKey('ListSurveyanswersubitemsTitle_subitem')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.subitem}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.subitem}" label="#{configMapController.getKey('ListSurveyanswersubitemsTitle_subitem')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+                        
+                        
+                    </p:column>
+                    <p:column sortBy="#{item.answerId}" filterBy="#{item.answerId}" headerText="#{configMapController.getKey('ListSurveyanswersubitemsTitle_answerId')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.answerId}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.answerId}" label="#{configMapController.getKey('ListSurveyanswersubitemsTitle_answerId')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+                        
+                        
+                    </p:column>
+                    <p:column sortBy="#{item.subitemText}" filterBy="#{item.subitemText}" headerText="#{configMapController.getKey('ListSurveyanswersubitemsTitle_subitemText')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.subitemText}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.subitemText}" label="#{configMapController.getKey('ListSurveyanswersubitemsTitle_subitemText')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+                        
+                        
+                    </p:column>
+                    <p:column sortBy="#{item.subitemBool}" filterBy="#{item.subitemBool}" headerText="#{configMapController.getKey('ListSurveyanswersubitemsTitle_subitemBool')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.subitemBool}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.subitemBool}" label="#{configMapController.getKey('ListSurveyanswersubitemsTitle_subitemBool')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+                        
+                        
+                    </p:column>
+                    <p:column sortBy="#{item.subitemInt}" filterBy="#{item.subitemInt}" headerText="#{configMapController.getKey('ListSurveyanswersubitemsTitle_subitemInt')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.subitemInt}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.subitemInt}" label="#{configMapController.getKey('ListSurveyanswersubitemsTitle_subitemInt')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+                        
+                        
+                    </p:column>
+                    <p:column rendered="#{surveyanswersubitemsController.isUserInRole('ADMIN')}"  headerText="Edit" style="width:50px">  
+                            <p:rowEditor />  
+                    </p:column>  
+                    
+                     
+                           <f:facet name="footer">
+                                <p:commandButton rendered="#{surveyanswersubitemsController.isUserInRole('ADMIN')}" id="createButton" icon="ui-icon-plus"   value="#{configMapController.getKey('Create')}" actionListener="#{surveyanswersubitemsController.prepareCreate}" update=":SurveyanswersubitemsCreateForm" oncomplete="PF('SurveyanswersubitemsCreateDialog').show()"/>
+                                <p:commandButton id="viewButton"   icon="ui-icon-search" value="#{configMapController.getKey('View')}" update=":SurveyanswersubitemsViewForm" oncomplete="PF('SurveyanswersubitemsViewDialog').show()" disabled="#{empty surveyanswersubitemsController.selected}"/>
+                                <p:commandButton rendered="#{surveyanswersubitemsController.isUserInRole('ADMIN')}" id="editButton"   icon="ui-icon-pencil" value="#{configMapController.getKey('Edit')}" update=":SurveyanswersubitemsEditForm" oncomplete="PF('SurveyanswersubitemsEditDialog').show()" disabled="#{empty surveyanswersubitemsController.selected}"/>
+                                <p:commandButton rendered="#{surveyanswersubitemsController.isUserInRole('ADMIN')}" id="deleteButton" icon="ui-icon-trash"  value="#{configMapController.getKey('Delete')}" actionListener="#{surveyanswersubitemsController.destroy}" update=":growl,datalist" disabled="#{empty surveyanswersubitemsController.selected}"/>
+                            </f:facet>
+                   
+                </p:dataTable>
+            </h:panelGroup>
+        </h:form>
+        
+            <ui:include src="Create.xhtml"/>
+            <ui:include src="Edit.xhtml"/>
+            <ui:include src="View.xhtml"/>
+
+        </ui:define>
+    </ui:composition>
+
+</html>

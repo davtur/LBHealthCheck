@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" >
+
+    <ui:composition>
+        <p:dialog id="SurveyanswersubitemsEditDlg" widgetVar="SurveyanswersubitemsEditDialog" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('EditSurveyanswersubitemsTitle')}">
+            <h:form id="SurveyanswersubitemsEditForm">
+                <h:panelGroup id="display">
+                    <p:panelGrid columns="2" rendered="#{surveyanswersubitemsController.selected != null}">
+                    <h:outputLabel value="#{configMapController.getKey('EditSurveyanswersubitemsLabel_id')}" for="id" />
+                    <h:inputText id="id"  value="#{surveyanswersubitemsController.selected.id}" title="#{configMapController.getKey('EditSurveyanswersubitemsTitle_id')}" required="true" requiredMessage="#{configMapController.getKey('EditSurveyanswersubitemsRequiredMessage_id')}"/>
+                    <h:outputLabel value="#{configMapController.getKey('EditSurveyanswersubitemsLabel_subitem')}" for="subitem" />
+                    <h:inputTextarea rows="4" cols="30" id="subitem" value="#{surveyanswersubitemsController.selected.subitem}" title="#{configMapController.getKey('EditSurveyanswersubitemsTitle_subitem')}" required="true" requiredMessage="#{configMapController.getKey('EditSurveyanswersubitemsRequiredMessage_subitem')}"/>
+                    <h:outputLabel value="#{configMapController.getKey('EditSurveyanswersubitemsLabel_answerId')}" for="answerId" />
+                     <p:selectOneMenu id="answerId" valueChangeListener="#{surveyanswersubitemsController.selectOneMenuValueChangeListener}" value="#{surveyanswersubitemsController.selected.answerId}" label="#{configMapController.getKey('EditSurveyanswersubitemsTitle_answerId')}" required="true" requiredMessage="#{configMapController.getKey('EditSurveyanswersubitemsRequiredMessage_answerId')}">
+                        <f:selectItems value="#{surveyanswersController.itemsAvailableSelectOne}"/>
+                    <p:ajax   update=":SurveyanswersubitemsEditForm"  />
+                    </p:selectOneMenu>
+                    <h:outputLabel value="#{configMapController.getKey('EditSurveyanswersubitemsLabel_subitemText')}" for="subitemText" />
+                    <h:inputTextarea rows="4" cols="30" id="subitemText" value="#{surveyanswersubitemsController.selected.subitemText}" title="#{configMapController.getKey('EditSurveyanswersubitemsTitle_subitemText')}" required="true" requiredMessage="#{configMapController.getKey('EditSurveyanswersubitemsRequiredMessage_subitemText')}"/>
+                    <h:outputLabel value="#{configMapController.getKey('EditSurveyanswersubitemsLabel_subitemBool')}" for="subitemBool" />
+                    <h:inputText id="subitemBool"  value="#{surveyanswersubitemsController.selected.subitemBool}" title="#{configMapController.getKey('EditSurveyanswersubitemsTitle_subitemBool')}" />
+                    <h:outputLabel value="#{configMapController.getKey('EditSurveyanswersubitemsLabel_subitemInt')}" for="subitemInt" />
+                    <h:inputText id="subitemInt"  value="#{surveyanswersubitemsController.selected.subitemInt}" title="#{configMapController.getKey('EditSurveyanswersubitemsTitle_subitemInt')}" />
+                    </p:panelGrid>
+                    <p:commandButton actionListener="#{surveyanswersubitemsController.update}" value="#{configMapController.getKey('Save')}" update="display,:SurveyanswersubitemsListForm:datalist,:growl" oncomplete="handleSubmit(args, 'SurveyanswersubitemsEditDialog');surveyanswersubitemsControllerTable.filter()"/>
+                    <p:commandButton value="#{configMapController.getKey('Cancel')}" onclick="SurveyanswersubitemsEditDialog.hide()"/>
+                </h:panelGroup>
+            </h:form>
+        </p:dialog>
+
+    </ui:composition>
+</html>
