@@ -17,9 +17,15 @@
                         <h:outputText value="#{configMapController.getKey('ViewSurveyquestionsLabel_question')}"/>
                         <h:outputText value="#{surveyquestionsController.selected.question}" title="#{configMapController.getKey('ViewSurveyquestionsTitle_question')}"/>
                         <h:outputText value="#{configMapController.getKey('ViewSurveyquestionsLabel_questionType')}"/>
-                        <h:outputText value="#{surveyquestionsController.selected.questionType}" title="#{configMapController.getKey('ViewSurveyquestionsTitle_questionType')}"/>
+                        <h:outputText value="#{surveyquestionsController.selected.questionType.type}" title="#{configMapController.getKey('ViewSurveyquestionsTitle_questionType')}"/>
                     </p:panelGrid>
-                    <p:commandButton value="#{configMapController.getKey('Close')}" onclick="SurveyquestionsViewDialog.hide()"/>
+                     <p:dataList  id="subItemList2" value="#{surveyquestionsController.subItems}" var="subItem" type="unordered" itemType="none">
+                        <f:facet name="header">
+                            Sub Items 
+                        </f:facet>
+                        <h:outputText value="#{subItem.subitemText}" style="display:inline-block"/> 
+                    </p:dataList>
+                    <p:commandButton value="#{configMapController.getKey('Close')}" onclick="PF('SurveyquestionsViewDialog').hide()"/>
                 </h:panelGroup>
             </h:form>
         </p:dialog>

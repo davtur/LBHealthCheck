@@ -36,6 +36,8 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Surveys.findById", query = "SELECT s FROM Surveys s WHERE s.id = :id"),
     @NamedQuery(name = "Surveys.findByName", query = "SELECT s FROM Surveys s WHERE s.name = :name")})
 public class Surveys implements Serializable {
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "surveyId")
+    private Collection<Surveyquestions> surveyquestionsCollection;
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -124,7 +126,16 @@ public class Surveys implements Serializable {
 
     @Override
     public String toString() {
-        return "au.com.manlyit.fitnesscrm.stats.db.Surveys[ id=" + id + " ]";
+        return name;
+    }
+
+    @XmlTransient
+    public Collection<Surveyquestions> getSurveyquestionsCollection() {
+        return surveyquestionsCollection;
+    }
+
+    public void setSurveyquestionsCollection(Collection<Surveyquestions> surveyquestionsCollection) {
+        this.surveyquestionsCollection = surveyquestionsCollection;
     }
     
 }

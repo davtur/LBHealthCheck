@@ -35,7 +35,7 @@
                         <f:facet name="header">
                             <p:outputPanel>
                                 <h:outputText value="Search all fields:" />
-                                <h:inputText id="globalFilter" onkeyup="surveyquestionsControllerTable.filter()" />
+                                <h:inputText id="globalFilter" onkeyup="PF('surveyquestionsControllerTable').filter()" />
                             </p:outputPanel>
                         </f:facet>
                         <p:ajax event="rowEdit" listener="#{surveyquestionsController.onEdit}" update=":growl" oncomplete="surveyquestionsControllerTable.filter()" />  
@@ -67,13 +67,13 @@
 
 
                         </p:column>
-                        <p:column sortBy="#{item.questionType}" filterBy="#{item.questionType}" headerText="#{configMapController.getKey('ListSurveyquestionsTitle_questionType')}"   >
+                        <p:column sortBy="#{item.questionType.type}" filterBy="#{item.questionType.type}" headerText="#{configMapController.getKey('ListSurveyquestionsTitle_questionType')}"   >
                             <p:cellEditor> 
                                 <f:facet name="output">
-                                    <h:outputText value="#{item.questionType}"/>
+                                    <h:outputText value="#{item.questionType.type}"/>
                                 </f:facet>
                                 <f:facet name="input">
-                                    <p:inputText value="#{item.questionType}" label="#{configMapController.getKey('ListSurveyquestionsTitle_questionType')}" />
+                                    <p:inputText value="#{item.questionType.type}" label="#{configMapController.getKey('ListSurveyquestionsTitle_questionType')}" />
                                 </f:facet>
                             </p:cellEditor> 
 
@@ -87,8 +87,8 @@
                         <f:facet name="footer">
                             <p:commandButton rendered="#{surveyquestionsController.isUserInRole('ADMIN')}" id="createButton" icon="ui-icon-plus"   value="#{configMapController.getKey('Create')}" actionListener="#{surveyquestionsController.prepareCreate}" update=":SurveyquestionsCreateForm" oncomplete="PF('SurveyquestionsCreateDialog').show()"/>
                             <p:commandButton id="viewButton"   icon="ui-icon-search" value="#{configMapController.getKey('View')}" update=":SurveyquestionsViewForm" oncomplete="PF('SurveyquestionsViewDialog').show()" disabled="#{empty surveyquestionsController.selected}"/>
-                            <p:commandButton rendered="#{surveyquestionsController.isUserInRole('ADMIN')}" id="editButton"   icon="ui-icon-pencil" value="#{configMapController.getKey('Edit')}" update=":SurveyquestionsEditForm" oncomplete="PF('SurveyquestionsEditDialog').show()" disabled="#{empty surveyquestionsController.selected}"/>
-                            <p:commandButton rendered="#{surveyquestionsController.isUserInRole('ADMIN')}" id="deleteButton" icon="ui-icon-trash"  value="#{configMapController.getKey('Delete')}" actionListener="#{surveyquestionsController.destroy}" update=":growl,datalist" disabled="#{empty surveyquestionsController.selected}"/>
+                            <p:commandButton rendered="#{surveyquestionsController.isUserInRole('ADMIN')}" id="editButton"   icon="ui-icon-pencil" value="#{configMapController.getKey('Edit')}" actionListener="#{surveyquestionsController.prepareEditDialogue}" update=":SurveyquestionsEditForm" oncomplete="PF('SurveyquestionsEditDialog').show()" disabled="#{empty surveyquestionsController.selected}"/>
+                            <p:commandButton rendered="#{surveyquestionsController.isUserInRole('ADMIN')}" id="deleteButton" icon="ui-icon-trash"  value="#{configMapController.getKey('Delete')}" actionListener="#{surveyquestionsController.destroy}" update=":growl,:SurveyquestionsListForm:datalist" disabled="#{empty surveyquestionsController.selected}"/>
                         </f:facet>
 
                     </p:dataTable>

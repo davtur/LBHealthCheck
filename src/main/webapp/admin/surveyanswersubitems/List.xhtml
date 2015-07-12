@@ -18,7 +18,7 @@
         
         <h:form id="SurveyanswersubitemsListForm">
              <h:outputText escape="false" value="#{configMapController.getKey('ListSurveyanswersubitemsEmpty')}" rendered="#{surveyanswersubitemsController.items.rowCount == 0}"/>
-            <h:panelGroup rendered="#{surveyanswersubitemsController.items.rowCount > 0}">
+            <h:panelGroup >
                 <p:dataTable  
                 id="datalist"  
                 editable="true" 

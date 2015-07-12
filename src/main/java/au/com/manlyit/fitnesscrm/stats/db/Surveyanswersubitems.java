@@ -36,7 +36,7 @@ public class Surveyanswersubitems implements Serializable {
     @Basic(optional = false)
     @NotNull
     @Lob
-    @Size(min = 1, max = 65535)
+    @Size(min = 0, max = 65535)
     @Column(name = "subitem_text")
     private String subitemText;
     @Column(name = "subitem_bool")
@@ -49,12 +49,7 @@ public class Surveyanswersubitems implements Serializable {
     @Basic(optional = false)
     @Column(name = "id")
     private Integer id;
-    @Basic(optional = false)
-    @NotNull
-    @Lob
-    @Size(min = 1, max = 65535)
-    @Column(name = "subitem")
-    private String subitem;
+    
     @JoinColumn(name = "answer_id", referencedColumnName = "id")
     @ManyToOne(optional = false)
     private Surveyanswers answerId;
@@ -68,7 +63,7 @@ public class Surveyanswersubitems implements Serializable {
 
     public Surveyanswersubitems(Integer id, String subitem) {
         this.id = id;
-        this.subitem = subitem;
+        this.subitemText = subitem;
     }
 
     public Integer getId() {
@@ -79,13 +74,7 @@ public class Surveyanswersubitems implements Serializable {
         this.id = id;
     }
 
-    public String getSubitem() {
-        return subitem;
-    }
-
-    public void setSubitem(String subitem) {
-        this.subitem = subitem;
-    }
+   
 
     public Surveyanswers getAnswerId() {
         return answerId;

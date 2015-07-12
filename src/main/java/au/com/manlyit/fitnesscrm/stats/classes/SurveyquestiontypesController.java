@@ -4,12 +4,12 @@ import au.com.manlyit.fitnesscrm.stats.db.Surveyquestiontypes;
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PaginationHelper;
 import au.com.manlyit.fitnesscrm.stats.beans.SurveyquestiontypesFacade;
+import au.com.manlyit.fitnesscrm.stats.db.Surveyquestions;
 
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import java.util.ResourceBundle;
 import javax.enterprise.context.SessionScoped;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
@@ -40,6 +40,7 @@ public class SurveyquestiontypesController implements Serializable {
     private int selectedItemIndex;
     private List<Surveyquestiontypes> filteredItems;
     private Surveyquestiontypes[] multiSelected;
+   
 
     public SurveyquestiontypesController() {
     }
@@ -131,12 +132,14 @@ public class SurveyquestiontypesController implements Serializable {
         selectedItemIndex = -1;
         return "Create";
     }
+   
 
     public String create() {
         try {
             if (current.getId() == null) {
                 current.setId(0);
             }
+           
             getFacade().create(current);
             JsfUtil.addSuccessMessage(configMapFacade.getConfig("SurveyquestiontypesCreated"));
             return prepareCreate();
@@ -294,6 +297,8 @@ public class SurveyquestiontypesController implements Serializable {
     public void onCancel(RowEditEvent event) {
         JsfUtil.addErrorMessage("Row Edit Cancelled");
     }
+
+    
 
     @FacesConverter(forClass = Surveyquestiontypes.class)
     public static class SurveyquestiontypesControllerConverter implements Converter {

@@ -119,7 +119,7 @@ public class Surveyquestiontypes implements Serializable {
 
     @Override
     public String toString() {
-        return "au.com.manlyit.fitnesscrm.stats.db.Surveyquestiontypes[ id=" + id + " ]";
+        return type;
     }
     
 }

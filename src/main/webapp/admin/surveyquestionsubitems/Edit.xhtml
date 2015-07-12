@@ -27,8 +27,8 @@
                     <h:outputLabel value="#{configMapController.getKey('EditSurveyquestionsubitemsLabel_subitemInt')}" for="subitemInt" />
                     <h:inputText id="subitemInt"  value="#{surveyquestionsubitemsController.selected.subitemInt}" title="#{configMapController.getKey('EditSurveyquestionsubitemsTitle_subitemInt')}" />
                     </p:panelGrid>
-                    <p:commandButton actionListener="#{surveyquestionsubitemsController.update}" value="#{configMapController.getKey('Save')}" update="display,:SurveyquestionsubitemsListForm:datalist,:growl" oncomplete="handleSubmit(args, 'SurveyquestionsubitemsEditDialog');surveyquestionsubitemsControllerTable.filter()"/>
-                    <p:commandButton value="#{configMapController.getKey('Cancel')}" onclick="SurveyquestionsubitemsEditDialog.hide()"/>
+                    <p:commandButton actionListener="#{surveyquestionsubitemsController.update}" value="#{configMapController.getKey('Save')}" update="display,:SurveyquestionsubitemsListForm:datalist,:growl" oncomplete="handleSubmit(args, 'SurveyquestionsubitemsEditDialog');PF('surveyquestionsubitemsControllerTable').filter()"/>
+                    <p:commandButton value="#{configMapController.getKey('Cancel')}" onclick="PF('SurveyquestionsubitemsEditDialog').hide()"/>
                 </h:panelGroup>
             </h:form>
         </p:dialog>
