@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" 
+      xmlns:ui="http://java.sun.com/jsf/facelets" >
+
+    <ui:composition>
+
+        <p:dialog id="ToDoListViewDlg" widgetVar="ToDoListViewDialog" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('ViewToDoListTitle')}">
+            <h:form id="ToDoListViewForm">
+                <h:panelGroup id="display">
+                    <p:panelGrid columns="2" rendered="#{toDoListController.selected != null}">
+                        <h:outputText value="#{configMapController.getKey('ViewToDoListLabel_id')}"/>
+                        <h:outputText value="#{toDoListController.selected.id}" title="#{configMapController.getKey('ViewToDoListTitle_id')}"/>
+                        <h:outputText value="#{configMapController.getKey('ViewToDoListLabel_task')}"/>
+                        <h:outputText value="#{toDoListController.selected.task}" title="#{configMapController.getKey('ViewToDoListTitle_task')}"/>
+                        <h:outputText value="#{configMapController.getKey('ViewToDoListLabel_description')}"/>
+                        <h:outputText value="#{toDoListController.selected.description}" title="#{configMapController.getKey('ViewToDoListTitle_description')}"/>
+                        <h:outputText value="#{configMapController.getKey('ViewToDoListLabel_done')}"/>
+                        <h:outputText value="#{toDoListController.selected.done}" title="#{configMapController.getKey('ViewToDoListTitle_done')}"/>
+                    </p:panelGrid>
+                    <p:commandButton value="#{configMapController.getKey('Close')}" onclick="ToDoListViewDialog.hide()"/>
+                </h:panelGroup>
+            </h:form>
+        </p:dialog>
+
+    </ui:composition>
+</html>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" >
+
+    <ui:composition>
+        <p:dialog id="ToDoListEditDlg" widgetVar="ToDoListEditDialog" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('EditToDoListTitle')}">
+            <h:form id="ToDoListEditForm">
+                <h:panelGroup id="display">
+                    <p:panelGrid columns="2" rendered="#{toDoListController.selected != null}">
+                        <h:outputLabel value="#{configMapController.getKey('EditToDoListLabel_id')}" for="id" />
+                        <h:inputText id="id"  value="#{toDoListController.selected.id}" title="#{configMapController.getKey('EditToDoListTitle_id')}" required="true" requiredMessage="#{configMapController.getKey('EditToDoListRequiredMessage_id')}"/>
+                        <h:outputLabel value="#{configMapController.getKey('EditToDoListLabel_task')}" for="task" />
+                        <h:inputText id="task"  value="#{toDoListController.selected.task}" title="#{configMapController.getKey('EditToDoListTitle_task')}" required="true" requiredMessage="#{configMapController.getKey('EditToDoListRequiredMessage_task')}"/>
+                        <h:outputLabel value="#{configMapController.getKey('EditToDoListLabel_description')}" for="description" />
+                        <h:inputTextarea rows="4" cols="30" id="description" value="#{toDoListController.selected.description}" title="#{configMapController.getKey('EditToDoListTitle_description')}" required="true" requiredMessage="#{configMapController.getKey('EditToDoListRequiredMessage_description')}"/>
+                        <h:outputLabel value="#{configMapController.getKey('EditToDoListLabel_done')}" for="done" />
+                        <h:inputText id="done"  value="#{toDoListController.selected.done}" title="#{configMapController.getKey('EditToDoListTitle_done')}" />
+                    </p:panelGrid>
+                    <p:commandButton actionListener="#{toDoListController.update}" value="#{configMapController.getKey('Save')}" update="display,:ToDoListListForm:datalist,:growl" oncomplete="handleSubmit(args, 'ToDoListEditDialog');toDoListControllerTable.filter()"/>
+                    <p:commandButton value="#{configMapController.getKey('Cancel')}" onclick="ToDoListEditDialog.hide()"/>
+                </h:panelGroup>
+            </h:form>
+        </p:dialog>
+
+    </ui:composition>
+</html>
