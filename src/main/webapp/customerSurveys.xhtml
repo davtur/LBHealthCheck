@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" >
+
+    <ui:composition template="/template.xhtml">
+        <ui:define name="title">
+            <h:outputText value="#{configMapController.getKey('HealthSurveyanswersTitle')}"></h:outputText>
+        </ui:define>
+        <ui:define name="body">
+
+
+
+
+
+            <h:form id="SurveyanswersListForm">
+                
+                <p:dataList  id="surveyList" value="#{surveyanswersController.surveyList}" var="answer" type="unordered" itemType="none">
+                        <f:facet name="header">
+                            Sub Items 
+                        </f:facet>
+                        <p:commandLink update=":SurveyquestionsEditForm:subItemList2" title="Delete" styleClass="ui-icon ui-icon-trash" style="float:left;margin-right:10px;" immediate="true">
+                            <f:setPropertyActionListener value="#{answer}" target="#{surveyquestionsController.deleteSubItem}" />
+                        </p:commandLink>
+                    <h:outputText value="#{answer.questionId.question}" style="display:inline-block"/> 
+                        <!-- <p:commandButton update=":SurveyquestionsEditForm:subItemList2" value="Delete" >
+                             <f:setPropertyActionListener value="#{subItem}" target="#{surveyquestionsController.deleteSubItem}" />
+                         </p:commandButton>-->
+
+ 
+                    </p:dataList>
+               
+            </h:form>
+
+
+        </ui:define>
+    </ui:composition>
+
+</html>

@@ -37,7 +37,7 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Surveys.findByName", query = "SELECT s FROM Surveys s WHERE s.name = :name")})
 public class Surveys implements Serializable {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "surveyId")
-    private Collection<Surveyquestions> surveyquestionsCollection;
+    private Collection<SurveyQuestions> surveyquestionsCollection;
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -56,7 +56,7 @@ public class Surveys implements Serializable {
     @Column(name = "description")
     private String description;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "surveyId")
-    private Collection<Surveyanswers> surveyanswersCollection;
+    private Collection<SurveyAnswers> surveyanswersCollection;
 
     public Surveys() {
     }
@@ -96,11 +96,11 @@ public class Surveys implements Serializable {
     }
 
     @XmlTransient
-    public Collection<Surveyanswers> getSurveyanswersCollection() {
+    public Collection<SurveyAnswers> getSurveyanswersCollection() {
         return surveyanswersCollection;
     }
 
-    public void setSurveyanswersCollection(Collection<Surveyanswers> surveyanswersCollection) {
+    public void setSurveyanswersCollection(Collection<SurveyAnswers> surveyanswersCollection) {
         this.surveyanswersCollection = surveyanswersCollection;
     }
 
@@ -130,11 +130,11 @@ public class Surveys implements Serializable {
     }
 
     @XmlTransient
-    public Collection<Surveyquestions> getSurveyquestionsCollection() {
+    public Collection<SurveyQuestions> getSurveyquestionsCollection() {
         return surveyquestionsCollection;
     }
 
-    public void setSurveyquestionsCollection(Collection<Surveyquestions> surveyquestionsCollection) {
+    public void setSurveyquestionsCollection(Collection<SurveyQuestions> surveyquestionsCollection) {
         this.surveyquestionsCollection = surveyquestionsCollection;
     }
     

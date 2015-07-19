@@ -30,9 +30,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 @Table(name = "Survey_question_subitems")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "Surveyquestionsubitems.findAll", query = "SELECT s FROM Surveyquestionsubitems s"),
-    @NamedQuery(name = "Surveyquestionsubitems.findById", query = "SELECT s FROM Surveyquestionsubitems s WHERE s.id = :id")})
-public class Surveyquestionsubitems implements Serializable {
+    @NamedQuery(name = "SurveyQuestionSubItems.findAll", query = "SELECT s FROM SurveyQuestionSubItems s"),
+    @NamedQuery(name = "SurveyQuestionSubItems.findById", query = "SELECT s FROM SurveyQuestionSubItems s WHERE s.id = :id")})
+public class SurveyQuestionSubItems implements Serializable {
     @Basic(optional = false)
     @NotNull
     @Lob
@@ -52,16 +52,16 @@ public class Surveyquestionsubitems implements Serializable {
     
     @JoinColumn(name = "question_id", referencedColumnName = "id")
     @ManyToOne(optional = false)
-    private Surveyquestions questionId;
+    private SurveyQuestions questionId;
 
-    public Surveyquestionsubitems() {
+    public SurveyQuestionSubItems() {
     }
 
-    public Surveyquestionsubitems(Integer id) {
+    public SurveyQuestionSubItems(Integer id) {
         this.id = id;
     }
 
-    public Surveyquestionsubitems(Integer id, String subitem_text) {
+    public SurveyQuestionSubItems(Integer id, String subitem_text) {
         this.id = id;
         this.subitemText = subitem_text;
     }
@@ -76,11 +76,11 @@ public class Surveyquestionsubitems implements Serializable {
 
     
 
-    public Surveyquestions getQuestionId() {
+    public SurveyQuestions getQuestionId() {
         return questionId;
     }
 
-    public void setQuestionId(Surveyquestions questionId) {
+    public void setQuestionId(SurveyQuestions questionId) {
         this.questionId = questionId;
     }
 
@@ -94,10 +94,10 @@ public class Surveyquestionsubitems implements Serializable {
     @Override
     public boolean equals(Object object) {
         // TODO: Warning - this method won't work in the case the id fields are not set
-        if (!(object instanceof Surveyquestionsubitems)) {
+        if (!(object instanceof SurveyQuestionSubItems)) {
             return false;
         }
-        Surveyquestionsubitems other = (Surveyquestionsubitems) object;
+        SurveyQuestionSubItems other = (SurveyQuestionSubItems) object;
         if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
             return false;
         }
@@ -106,7 +106,7 @@ public class Surveyquestionsubitems implements Serializable {
 
     @Override
     public String toString() {
-        return "au.com.manlyit.fitnesscrm.stats.db.Surveyquestionsubitems[ id=" + id + " ]";
+        return "au.com.manlyit.fitnesscrm.stats.db.SurveyQuestionSubItems[ id=" + id + " ]";
     }
 
     public String getSubitemText() {

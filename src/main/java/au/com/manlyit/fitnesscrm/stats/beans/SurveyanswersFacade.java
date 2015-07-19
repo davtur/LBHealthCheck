@@ -7,7 +7,7 @@ package au.com.manlyit.fitnesscrm.stats.beans;
 
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
-import au.com.manlyit.fitnesscrm.stats.db.Surveyanswers;
+import au.com.manlyit.fitnesscrm.stats.db.SurveyAnswers;
 import au.com.manlyit.fitnesscrm.stats.db.Surveys;
 import java.util.List;
 import javax.ejb.Stateless;
@@ -26,7 +26,7 @@ import javax.persistence.criteria.Root;
  * @author david
  */
 @Stateless
-public class SurveyanswersFacade extends AbstractFacade<Surveyanswers> {
+public class SurveyanswersFacade extends AbstractFacade<SurveyAnswers> {
 
     @PersistenceContext(unitName = "FitnessStatsPU")
     private EntityManager em;
@@ -39,16 +39,16 @@ public class SurveyanswersFacade extends AbstractFacade<Surveyanswers> {
     }
 
     public SurveyanswersFacade() {
-        super(Surveyanswers.class);
+        super(SurveyAnswers.class);
     }
 
-    public List<Surveyanswers> findSurveyAnswersByCustomerAndSurvey(Customers customer, Surveys survey) {
-        List<Surveyanswers> retList = null;
+    public List<SurveyAnswers> findSurveyAnswersByCustomerAndSurvey(Customers customer, Surveys survey) {
+        List<SurveyAnswers> retList = null;
 
         try {
             CriteriaBuilder cb = em.getCriteriaBuilder();
-            CriteriaQuery<Surveyanswers> cq = cb.createQuery(Surveyanswers.class);
-            Root<Surveyanswers> rt = cq.from(Surveyanswers.class);
+            CriteriaQuery<SurveyAnswers> cq = cb.createQuery(SurveyAnswers.class);
+            Root<SurveyAnswers> rt = cq.from(SurveyAnswers.class);
             Expression<Customers> cust = rt.get("UserId");
             Expression<Surveys> surv = rt.get("SurveyId");
             Predicate condition1 = cb.equal(cust, customer);
@@ -57,12 +57,35 @@ public class SurveyanswersFacade extends AbstractFacade<Surveyanswers> {
             cq.select(rt);
 
             Query q = em.createQuery(cq);
-            retList = (List<Surveyanswers>) q.getResultList();
+            retList = (List<SurveyAnswers>) q.getResultList();
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
         }
 
         return retList;
     }
+     public List<SurveyAnswers> findSurveyAnswersBySurvey(Surveys survey) {
+        List<SurveyAnswers> retList = null;
+
+        try {
+            CriteriaBuilder cb = em.getCriteriaBuilder();
+            CriteriaQuery<SurveyAnswers> cq = cb.createQuery(SurveyAnswers.class);
+            Root<SurveyAnswers> rt = cq.from(SurveyAnswers.class);
+            
+            Expression<Surveys> surv = rt.get("SurveyId");
+          
+            Predicate condition2 = cb.equal(surv, survey);
+            cq.where(cb.and( condition2));
+            cq.select(rt);
+
+            Query q = em.createQuery(cq);
+            retList = (List<SurveyAnswers>) q.getResultList();
+        } catch (Exception e) {
+            JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
+        }
+
+        return retList;
+    }
+
 
 }

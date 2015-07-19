@@ -26,8 +26,8 @@
                             <p:ajax   update=":SurveyanswersEditForm"  />
                         </p:selectOneMenu>
                         <h:outputLabel value="#{configMapController.getKey('EditSurveyanswersLabel_userId')}" for="userId" />
-                        <p:selectOneMenu id="userId" valueChangeListener="#{surveyanswersController.selectOneMenuValueChangeListener}" value="#{surveyanswersController.selected.userId}" label="#{configMapController.getKey('EditSurveyanswersTitle_userId')}" required="true" requiredMessage="#{configMapController.getKey('EditSurveyanswersRequiredMessage_userId')}">
-                            <f:selectItems value="#{customersController.itemsAvailableSelectOne}"/>
+                        <p:selectOneMenu id="userId" valueChangeListener="#{surveyanswersController.selectOneMenuValueChangeListener}" value="#{surveyanswersController.selected.userId}" converter="customerConverter" label="#{configMapController.getKey('EditSurveyanswersTitle_userId')}" required="true" requiredMessage="#{configMapController.getKey('EditSurveyanswersRequiredMessage_userId')}">
+                            <f:selectItems value="#{customersController.customersAvailableSelectOneObject}"/>
                             <p:ajax   update=":SurveyanswersEditForm"  />
                         </p:selectOneMenu>
                         <h:outputLabel value="#{configMapController.getKey('EditSurveyanswersLabel_answerTypeid')}" for="answerTypeid" />

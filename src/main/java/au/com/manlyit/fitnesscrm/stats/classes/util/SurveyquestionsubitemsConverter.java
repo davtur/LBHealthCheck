@@ -5,7 +5,7 @@
 
 package au.com.manlyit.fitnesscrm.stats.classes.util;
 
-import au.com.manlyit.fitnesscrm.stats.db.Surveyquestionsubitems;
+import au.com.manlyit.fitnesscrm.stats.db.SurveyQuestionSubItems;
 import java.io.Serializable;
 
 import javax.inject.Inject;
@@ -33,7 +33,7 @@ public class SurveyquestionsubitemsConverter implements Converter, Serializable{
 
     @Override
    public Object getAsObject(FacesContext context, UIComponent component, String value){
-        Surveyquestionsubitems sess;
+        SurveyQuestionSubItems sess;
         int val = Integer.parseInt(value);
         sess = ejbFacade.find(val);
         return sess;
@@ -57,11 +57,11 @@ public class SurveyquestionsubitemsConverter implements Converter, Serializable{
             if (object == null) {
                 return null;
             }
-            if (object instanceof Surveyquestionsubitems) {
-                Surveyquestionsubitems o = (Surveyquestionsubitems) object;
+            if (object instanceof SurveyQuestionSubItems) {
+                SurveyQuestionSubItems o = (SurveyQuestionSubItems) object;
                 return getStringKey(o.getId());
             } else {
-                throw new IllegalArgumentException("object " + object + " is of type " + object.getClass().getName() + "; expected type: " + Surveyquestionsubitems.class.getName());
+                throw new IllegalArgumentException("object " + object + " is of type " + object.getClass().getName() + "; expected type: " + SurveyQuestionSubItems.class.getName());
             }
         }
 }

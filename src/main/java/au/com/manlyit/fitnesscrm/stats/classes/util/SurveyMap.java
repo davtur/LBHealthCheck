@@ -5,7 +5,7 @@
  */
 package au.com.manlyit.fitnesscrm.stats.classes.util;
 
-import au.com.manlyit.fitnesscrm.stats.db.Surveyanswers;
+import au.com.manlyit.fitnesscrm.stats.db.SurveyAnswers;
 import au.com.manlyit.fitnesscrm.stats.db.Surveys;
 import java.util.List;
 
@@ -15,9 +15,9 @@ import java.util.List;
  */
 public class SurveyMap {
     private Surveys survey;
-    private List<Surveyanswers> answers;
+    private List<SurveyAnswers> answers;
     
-    public SurveyMap(Surveys survey,List<Surveyanswers> answers){
+    public SurveyMap(Surveys survey,List<SurveyAnswers> answers){
         this.answers = answers;
         this.survey = survey;
     }
@@ -39,14 +39,14 @@ public class SurveyMap {
     /**
      * @return the answers
      */
-    public List<Surveyanswers> getAnswers() {
+    public List<SurveyAnswers> getAnswers() {
         return answers;
     }
 
     /**
      * @param answers the answers to set
      */
-    public void setAnswers(List<Surveyanswers> answers) {
+    public void setAnswers(List<SurveyAnswers> answers) {
         this.answers = answers;
     }
     

@@ -173,6 +173,11 @@
             <url-pattern>/myDetails.xhtml</url-pattern>
         </web-resource-collection>
         <web-resource-collection>
+            <web-resource-name>My Details</web-resource-name>
+            <description/>
+            <url-pattern>/customerSurveys.xhtml</url-pattern>
+        </web-resource-collection>
+        <web-resource-collection>
             <web-resource-name>My Details Payment Method</web-resource-name>
             <description/>
             <url-pattern>/myDetailsPaymentMethod.xhtml</url-pattern>

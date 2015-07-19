@@ -27,8 +27,8 @@
                             <p:ajax   update=":SurveyanswersCreateForm"  />
                         </p:selectOneMenu>
                         <p:outputLabel value="#{configMapController.getKey('CreateSurveyanswersLabel_userId')}" for="userId" />
-                        <p:selectOneMenu id="userId" valueChangeListener="#{surveyanswersController.selectOneMenuValueChangeListener}"  value="#{surveyanswersController.selected.userId}"  label="#{configMapController.getKey('CreateSurveyanswersTitle_userId')}" required="true" requiredMessage="#{configMapController.getKey('CreateSurveyanswersRequiredMessage_userId')}">
-                            <f:selectItems value="#{customersController.itemsAvailableSelectOne}"/>
+                        <p:selectOneMenu id="userId" valueChangeListener="#{surveyanswersController.selectOneMenuValueChangeListener}" converter="customerConverter" value="#{surveyanswersController.selected.userId}"  label="#{configMapController.getKey('CreateSurveyanswersTitle_userId')}" required="true" requiredMessage="#{configMapController.getKey('CreateSurveyanswersRequiredMessage_userId')}">
+                            <f:selectItems value="#{customersController.customersAvailableSelectOneObject}"/>
                             <p:ajax   update=":SurveyanswersCreateForm"  />
                         </p:selectOneMenu>
                         <p:outputLabel value="#{configMapController.getKey('CreateSurveyanswersLabel_answerTypeid')}" for="answerTypeid" />

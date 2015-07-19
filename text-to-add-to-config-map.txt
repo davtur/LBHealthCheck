@@ -831,3 +831,6 @@ ListToDoListTitle_id=Id
 ListToDoListTitle_task=Task
 ListToDoListTitle_description=Description
 ListToDoListTitle_done=Done
+
+MyDetailsSurveyPanel_title=Surveys
+MyDeatilsSurveys_viewSurveyLabel=View Survey

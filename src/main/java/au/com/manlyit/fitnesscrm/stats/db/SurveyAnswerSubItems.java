@@ -30,9 +30,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 @Table(name = "Survey_answer_subitems")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "Surveyanswersubitems.findAll", query = "SELECT s FROM Surveyanswersubitems s"),
-    @NamedQuery(name = "Surveyanswersubitems.findById", query = "SELECT s FROM Surveyanswersubitems s WHERE s.id = :id")})
-public class Surveyanswersubitems implements Serializable {
+    @NamedQuery(name = "SurveyAnswerSubItems.findAll", query = "SELECT s FROM SurveyAnswerSubItems s"),
+    @NamedQuery(name = "SurveyAnswerSubItems.findById", query = "SELECT s FROM SurveyAnswerSubItems s WHERE s.id = :id")})
+public class SurveyAnswerSubItems implements Serializable {
     @Basic(optional = false)
     @NotNull
     @Lob
@@ -52,16 +52,16 @@ public class Surveyanswersubitems implements Serializable {
     
     @JoinColumn(name = "answer_id", referencedColumnName = "id")
     @ManyToOne(optional = false)
-    private Surveyanswers answerId;
+    private SurveyAnswers answerId;
 
-    public Surveyanswersubitems() {
+    public SurveyAnswerSubItems() {
     }
 
-    public Surveyanswersubitems(Integer id) {
+    public SurveyAnswerSubItems(Integer id) {
         this.id = id;
     }
 
-    public Surveyanswersubitems(Integer id, String subitem) {
+    public SurveyAnswerSubItems(Integer id, String subitem) {
         this.id = id;
         this.subitemText = subitem;
     }
@@ -76,11 +76,11 @@ public class Surveyanswersubitems implements Serializable {
 
    
 
-    public Surveyanswers getAnswerId() {
+    public SurveyAnswers getAnswerId() {
         return answerId;
     }
 
-    public void setAnswerId(Surveyanswers answerId) {
+    public void setAnswerId(SurveyAnswers answerId) {
         this.answerId = answerId;
     }
 
@@ -94,10 +94,10 @@ public class Surveyanswersubitems implements Serializable {
     @Override
     public boolean equals(Object object) {
         // TODO: Warning - this method won't work in the case the id fields are not set
-        if (!(object instanceof Surveyanswersubitems)) {
+        if (!(object instanceof SurveyAnswerSubItems)) {
             return false;
         }
-        Surveyanswersubitems other = (Surveyanswersubitems) object;
+        SurveyAnswerSubItems other = (SurveyAnswerSubItems) object;
         if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
             return false;
         }
@@ -106,7 +106,7 @@ public class Surveyanswersubitems implements Serializable {
 
     @Override
     public String toString() {
-        return "au.com.manlyit.fitnesscrm.stats.db.Surveyanswersubitems[ id=" + id + " ]";
+        return "au.com.manlyit.fitnesscrm.stats.db.SurveyAnswerSubItems[ id=" + id + " ]";
     }
 
     public String getSubitemText() {

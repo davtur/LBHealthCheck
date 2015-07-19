@@ -17,7 +17,6 @@
             <h:form id="createCustomerForm">
                 <p:panel>
                     <p:commandButton  actionListener="#{customersController.update}" value="#{configMapController.getKey('EditCustomersSaveLink')}" update=":growl"/>
-                    <p:commandButton id="editPaymentMethodButton" disabled="#{!ezidebit.customerWebDDRFormEnabled}"  actionListener="#{ezidebit.redirectToPaymentGateway}"    value="#{configMapController.getKey('EnterPaymentDetailsButton')}" update=":growl :createCustomerForm"  /> 
 
                 </p:panel>
                 <h:panelGrid columns="1">
@@ -122,10 +121,23 @@
                                         <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
                                     </h:outputText>
                                 </p:panelGrid>
+                                <p:commandButton id="editPaymentMethodButton" disabled="#{!ezidebit.customerWebDDRFormEnabled}"  actionListener="#{ezidebit.redirectToPaymentGateway}"    value="#{configMapController.getKey('EnterPaymentDetailsButton')}" update=":growl :createCustomerForm"  /> 
+
                             </p:panel>
+                            <p:panel  header="#{configMapController.getKey('MyDetailsSurveyPanel_title')}">
+                                <p:panelGrid columns="3">
 
+                                    <p:outputLabel value="#{configMapController.getKey('CreateSurveyanswersLabel_surveyId')}" for="surveyId" />
+                                    <p:selectOneMenu id="surveyId" valueChangeListener="#{surveyanswersController.selectOneMenuValueChangeListener}"  value="#{surveyanswersController.selectedSurvey}"  label="#{configMapController.getKey('CreateSurveyanswersTitle_surveyId')}" required="true" requiredMessage="#{configMapController.getKey('CreateSurveyanswersRequiredMessage_surveyId')}">
+                                        <f:selectItems value="#{surveysController.itemsAvailableSelectOne}"/>
+                                        <p:ajax   update=":createCustomerForm"  />
+                                    </p:selectOneMenu>
+                                    <p:commandButton id="viewSurveyButton" disabled="#{empty surveyanswersController.selectedSurvey}"  action="customerSurveys"    value="#{configMapController.getKey('MyDeatilsSurveys_viewSurveyLabel')}" update=":growl :createCustomerForm"  /> 
+
+                                </p:panelGrid>
+                            </p:panel>
                         </p:panel>
-
+ 
 
                         <p:panel id="panel3" style="height: 550px">
                             <p:panel id="photoPanel3" header="Select a photo to upload (jpeg)">
@@ -164,7 +176,7 @@
                 </h:panelGrid>
             </h:form>
             <ui:include src="myDetailsPaymentMethod.xhtml"/>
-              <ui:include src="UpdatePassword.xhtml"/>
+            <ui:include src="UpdatePassword.xhtml"/>
         </ui:define>
     </ui:composition>
 

@@ -1707,16 +1707,24 @@ public class FutureMapEJB implements Serializable {
 
     private void sanityCheckCustomersForDefaultItems() {
         logger.log(Level.INFO, "Performing Sanity Checks on Customers");
-        List<Customers> cl = customersFacade.findAll();
-        for (Customers c : cl) {
-            if (c.getProfileImage() == null) {
-                createDefaultProfilePic(c);
+        if (customersFacade != null) {
+            List<Customers> cl = customersFacade.findAll();
+            if (cl != null) {
+                for (Customers c : cl) {
+                    if (c.getProfileImage() == null) {
+                        createDefaultProfilePic(c);
+                    }
+                    if (c.getPaymentParameters() == null) {
+                        createDefaultPaymentParameters(c);
+                    }
+                }
+                logger.log(Level.INFO, "FINISHED Performing Sanity Checks on Customers");
+            } else {
+                logger.log(Level.WARNING, "FAILED Performing Sanity Checks on Customers. Could not get the list of customers from the DB");
             }
-            if (c.getPaymentParameters() == null) {
-                createDefaultPaymentParameters(c);
-            }
+        } else {
+            logger.log(Level.WARNING, "FAILED Performing Sanity Checks on Customers.Customer Facade null. HAs it been initialised yet?");
         }
-        logger.log(Level.INFO, "FINISHED Performing Sanity Checks on Customers");
     }
 
     private void createDefaultProfilePic(Customers cust) {

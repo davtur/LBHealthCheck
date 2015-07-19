@@ -1,6 +1,6 @@
 package au.com.manlyit.fitnesscrm.stats.classes;
 
-import au.com.manlyit.fitnesscrm.stats.db.Surveyquestionsubitems;
+import au.com.manlyit.fitnesscrm.stats.db.SurveyQuestionSubItems;
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PaginationHelper;
 import au.com.manlyit.fitnesscrm.stats.beans.SurveyquestionsubitemsFacade;
@@ -31,8 +31,8 @@ import org.primefaces.event.SelectEvent;
 @SessionScoped
 public class SurveyquestionsubitemsController implements Serializable {
 
-    private Surveyquestionsubitems current;
-    private Surveyquestionsubitems selectedForDeletion;
+    private SurveyQuestionSubItems current;
+    private SurveyQuestionSubItems selectedForDeletion;
     private DataModel items = null;
     @Inject 
     private au.com.manlyit.fitnesscrm.stats.beans.SurveyquestionsubitemsFacade ejbFacade;
@@ -40,8 +40,8 @@ public class SurveyquestionsubitemsController implements Serializable {
     private au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade configMapFacade;
     private PaginationHelper pagination;
     private int selectedItemIndex;
-    private List<Surveyquestionsubitems> filteredItems;
-    private Surveyquestionsubitems[] multiSelected;
+    private List<SurveyQuestionSubItems> filteredItems;
+    private SurveyQuestionSubItems[] multiSelected;
 
     public SurveyquestionsubitemsController() {
     }
@@ -50,15 +50,15 @@ public class SurveyquestionsubitemsController implements Serializable {
         boolean inRole = FacesContext.getCurrentInstance().getExternalContext().isUserInRole(roleName);
         return inRole;
     }
-    public Surveyquestionsubitems getSelected() {
+    public SurveyQuestionSubItems getSelected() {
         if (current == null) {
-            current = new Surveyquestionsubitems();
+            current = new SurveyQuestionSubItems();
             selectedItemIndex = -1;
         }
         return current;
     }
 
-   public void setSelected(Surveyquestionsubitems selected) {
+   public void setSelected(SurveyQuestionSubItems selected) {
         if (selected != null) {
             current = selected;
             selectedItemIndex = -1;
@@ -89,28 +89,28 @@ public class SurveyquestionsubitemsController implements Serializable {
    /**
      * @return the filteredItems
      */
-    public List<Surveyquestionsubitems> getFilteredItems() {
+    public List<SurveyQuestionSubItems> getFilteredItems() {
         return filteredItems;
     }
 
     /**
      * @param filteredItems the filteredItems to set
      */
-    public void setFilteredItems(List<Surveyquestionsubitems> filteredItems) {
+    public void setFilteredItems(List<SurveyQuestionSubItems> filteredItems) {
         this.filteredItems = filteredItems;
     }
 
     /**
      * @return the multiSelected
      */
-    public Surveyquestionsubitems[] getMultiSelected() {
+    public SurveyQuestionSubItems[] getMultiSelected() {
         return multiSelected;
     }
 
     /**
      * @param multiSelected the multiSelected to set
      */
-    public void setMultiSelected(Surveyquestionsubitems[] multiSelected) {
+    public void setMultiSelected(SurveyQuestionSubItems[] multiSelected) {
         this.multiSelected = multiSelected;
     }
 
@@ -120,13 +120,13 @@ public class SurveyquestionsubitemsController implements Serializable {
     }
 
     public String prepareView() {
-        //current = (Surveyquestionsubitems)getItems().getRowData();
+        //current = (SurveyQuestionSubItems)getItems().getRowData();
         //selectedItemIndex = pagination.getPageFirstItem() + getItems().getRowIndex();
         return "View";
     }
 
     public String prepareCreate() {
-        current = new Surveyquestionsubitems();
+        current = new SurveyQuestionSubItems();
         selectedItemIndex = -1;
         return "Create";
     }
@@ -158,7 +158,7 @@ public class SurveyquestionsubitemsController implements Serializable {
 
     }
     public String prepareEdit() {
-        //current = (Surveyquestionsubitems)getItems().getRowData();
+        //current = (SurveyQuestionSubItems)getItems().getRowData();
         //selectedItemIndex = pagination.getPageFirstItem() + getItems().getRowIndex();
         return "Edit";
     }
@@ -200,11 +200,11 @@ public class SurveyquestionsubitemsController implements Serializable {
         }
     }
 
-    public Surveyquestionsubitems getSelectedForDeletion() {
+    public SurveyQuestionSubItems getSelectedForDeletion() {
         return selectedForDeletion;
     }
 
-    public void setSelectedForDeletion(Surveyquestionsubitems selectedForDeletion) {
+    public void setSelectedForDeletion(SurveyQuestionSubItems selectedForDeletion) {
          this.selectedForDeletion = selectedForDeletion;
         current = selectedForDeletion;
 
@@ -275,12 +275,12 @@ public class SurveyquestionsubitemsController implements Serializable {
         return JsfUtil.getSelectItems(ejbFacade.findAll(), true);
     }
 
-    public Collection<Surveyquestionsubitems> getItemsAvailable() {
+    public Collection<SurveyQuestionSubItems> getItemsAvailable() {
         return ejbFacade.findAll();
     }
    
    public void onEdit(RowEditEvent event) {
-        Surveyquestionsubitems  cm = (Surveyquestionsubitems ) event.getObject();
+        SurveyQuestionSubItems  cm = (SurveyQuestionSubItems ) event.getObject();
         getFacade().edit(cm);
         recreateModel();
         JsfUtil.addSuccessMessage("Row Edit Successful");
@@ -290,7 +290,7 @@ public class SurveyquestionsubitemsController implements Serializable {
         JsfUtil.addErrorMessage("Row Edit Cancelled");
     }
 
-    @FacesConverter(forClass=Surveyquestionsubitems.class)
+    @FacesConverter(forClass=SurveyQuestionSubItems.class)
     public static class SurveyquestionsubitemsControllerConverter implements Converter {
 
         public Object getAsObject(FacesContext facesContext, UIComponent component, String value) {
@@ -319,8 +319,8 @@ public class SurveyquestionsubitemsController implements Serializable {
             if (object == null) {
                 return null;
             }
-            if (object instanceof Surveyquestionsubitems) {
-                Surveyquestionsubitems o = (Surveyquestionsubitems) object;
+            if (object instanceof SurveyQuestionSubItems) {
+                SurveyQuestionSubItems o = (SurveyQuestionSubItems) object;
                 return getStringKey(o.getId());
             } else {
                 throw new IllegalArgumentException("object " + object + " is of type " + object.getClass().getName() + "; expected type: "+SurveyquestionsubitemsController.class.getName());

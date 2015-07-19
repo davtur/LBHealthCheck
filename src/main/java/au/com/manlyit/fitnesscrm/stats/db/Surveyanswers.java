@@ -6,25 +6,19 @@
 package au.com.manlyit.fitnesscrm.stats.db;
 
 import java.io.Serializable;
-import java.util.Collection;
 import javax.persistence.Basic;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
-import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
 
 /**
  *
@@ -49,20 +43,6 @@ public class Surveyanswers implements Serializable {
     @Size(min = 1, max = 65535)
     @Column(name = "answer")
     private String answer;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "answerId")
-    private Collection<Surveyanswersubitems> surveyanswersubitemsCollection;
-    @JoinColumn(name = "survey_id", referencedColumnName = "id")
-    @ManyToOne(optional = false)
-    private Surveys surveyId;
-    @JoinColumn(name = "question_id", referencedColumnName = "id")
-    @ManyToOne(optional = false)
-    private Surveyquestions questionId;
-    @JoinColumn(name = "user_id", referencedColumnName = "id")
-    @ManyToOne(optional = false)
-    private Customers userId;
-    @JoinColumn(name = "answerType_id", referencedColumnName = "id")
-    @ManyToOne(optional = false)
-    private Surveyquestiontypes answerTypeid;
 
     public Surveyanswers() {
     }
@@ -92,47 +72,6 @@ public class Surveyanswers implements Serializable {
         this.answer = answer;
     }
 
-    @XmlTransient
-    public Collection<Surveyanswersubitems> getSurveyanswersubitemsCollection() {
-        return surveyanswersubitemsCollection;
-    }
-
-    public void setSurveyanswersubitemsCollection(Collection<Surveyanswersubitems> surveyanswersubitemsCollection) {
-        this.surveyanswersubitemsCollection = surveyanswersubitemsCollection;
-    }
-
-    public Surveys getSurveyId() {
-        return surveyId;
-    }
-
-    public void setSurveyId(Surveys surveyId) {
-        this.surveyId = surveyId;
-    }
-
-    public Surveyquestions getQuestionId() {
-        return questionId;
-    }
-
-    public void setQuestionId(Surveyquestions questionId) {
-        this.questionId = questionId;
-    }
-
-    public Customers getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Customers userId) {
-        this.userId = userId;
-    }
-
-    public Surveyquestiontypes getAnswerTypeid() {
-        return answerTypeid;
-    }
-
-    public void setAnswerTypeid(Surveyquestiontypes answerTypeid) {
-        this.answerTypeid = answerTypeid;
-    }
-
     @Override
     public int hashCode() {
         int hash = 0;
@@ -155,7 +94,7 @@ public class Surveyanswers implements Serializable {
 
     @Override
     public String toString() {
-        return "au.com.manlyit.fitnesscrm.stats.db.Surveyanswers[ id=" + id + " ]";
+        return "au.com.manlyit.fitnesscrm.stats.beans.Surveyanswers[ id=" + id + " ]";
     }
     
 }

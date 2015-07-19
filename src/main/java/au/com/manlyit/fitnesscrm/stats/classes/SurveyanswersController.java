@@ -1,14 +1,14 @@
 package au.com.manlyit.fitnesscrm.stats.classes;
 
-import au.com.manlyit.fitnesscrm.stats.db.Surveyanswers;
+import au.com.manlyit.fitnesscrm.stats.db.SurveyAnswers;
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PaginationHelper;
 import au.com.manlyit.fitnesscrm.stats.beans.SurveyanswersFacade;
 import au.com.manlyit.fitnesscrm.stats.classes.util.SurveyMap;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
-import au.com.manlyit.fitnesscrm.stats.db.Surveyanswersubitems;
-import au.com.manlyit.fitnesscrm.stats.db.Surveyquestions;
-import au.com.manlyit.fitnesscrm.stats.db.Surveyquestionsubitems;
+import au.com.manlyit.fitnesscrm.stats.db.SurveyAnswerSubItems;
+import au.com.manlyit.fitnesscrm.stats.db.SurveyQuestions;
+import au.com.manlyit.fitnesscrm.stats.db.SurveyQuestionSubItems;
 import au.com.manlyit.fitnesscrm.stats.db.Surveys;
 
 import java.io.Serializable;
@@ -36,8 +36,9 @@ import org.primefaces.event.SelectEvent;
 @SessionScoped
 public class SurveyanswersController implements Serializable {
 
-    private Surveyanswers current;
-    private Surveyanswers selectedForDeletion;
+    private SurveyAnswers current;
+    private Surveys selectedSurvey;
+    private SurveyAnswers selectedForDeletion;
     private SurveyMap selectSurvey;
     private DataModel items = null;
     @Inject
@@ -46,9 +47,10 @@ public class SurveyanswersController implements Serializable {
     private au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade configMapFacade;
     private PaginationHelper pagination;
     private int selectedItemIndex;
-    private List<Surveyanswers> filteredItems;
-    private Surveyanswers[] multiSelected;
-    private ArrayList<SurveyMap> usersSurveys ;
+    private List<SurveyAnswers> filteredItems;
+    private List<SurveyAnswers> surveyAnswers;
+    private SurveyAnswers[] multiSelected;
+    private ArrayList<SurveyMap> usersSurveys;
 
     public SurveyanswersController() {
     }
@@ -58,15 +60,15 @@ public class SurveyanswersController implements Serializable {
         return inRole;
     }
 
-    public Surveyanswers getSelected() {
+    public SurveyAnswers getSelected() {
         if (current == null) {
-            current = new Surveyanswers();
+            current = new SurveyAnswers();
             selectedItemIndex = -1;
         }
         return current;
     }
 
-    public void setSelected(Surveyanswers selected) {
+    public void setSelected(SurveyAnswers selected) {
         if (selected != null) {
             current = selected;
             selectedItemIndex = -1;
@@ -99,28 +101,28 @@ public class SurveyanswersController implements Serializable {
     /**
      * @return the filteredItems
      */
-    public List<Surveyanswers> getFilteredItems() {
+    public List<SurveyAnswers> getFilteredItems() {
         return filteredItems;
     }
 
     /**
      * @param filteredItems the filteredItems to set
      */
-    public void setFilteredItems(List<Surveyanswers> filteredItems) {
+    public void setFilteredItems(List<SurveyAnswers> filteredItems) {
         this.filteredItems = filteredItems;
     }
 
     /**
      * @return the multiSelected
      */
-    public Surveyanswers[] getMultiSelected() {
+    public SurveyAnswers[] getMultiSelected() {
         return multiSelected;
     }
 
     /**
      * @param multiSelected the multiSelected to set
      */
-    public void setMultiSelected(Surveyanswers[] multiSelected) {
+    public void setMultiSelected(SurveyAnswers[] multiSelected) {
         this.multiSelected = multiSelected;
     }
 
@@ -130,13 +132,13 @@ public class SurveyanswersController implements Serializable {
     }
 
     public String prepareView() {
-        //current = (Surveyanswers)getItems().getRowData();
+        //current = (SurveyAnswers)getItems().getRowData();
         //selectedItemIndex = pagination.getPageFirstItem() + getItems().getRowIndex();
         return "View";
     }
 
     public String prepareCreate() {
-        current = new Surveyanswers();
+        current = new SurveyAnswers();
         selectedItemIndex = -1;
         return "Create";
     }
@@ -168,7 +170,7 @@ public class SurveyanswersController implements Serializable {
     }
 
     public String prepareEdit() {
-        //current = (Surveyanswers)getItems().getRowData();
+        //current = (SurveyAnswers)getItems().getRowData();
         //selectedItemIndex = pagination.getPageFirstItem() + getItems().getRowIndex();
         return "Edit";
     }
@@ -211,11 +213,11 @@ public class SurveyanswersController implements Serializable {
         }
     }
 
-    public Surveyanswers getSelectedForDeletion() {
+    public SurveyAnswers getSelectedForDeletion() {
         return selectedForDeletion;
     }
 
-    public void setSelectedForDeletion(Surveyanswers selectedForDeletion) {
+    public void setSelectedForDeletion(SurveyAnswers selectedForDeletion) {
         this.selectedForDeletion = selectedForDeletion;
         current = selectedForDeletion;
 
@@ -234,18 +236,23 @@ public class SurveyanswersController implements Serializable {
         Collection<Surveys> surveys = surveysController.getItemsAvailable();
         setUsersSurveys(new ArrayList<>());
         for (Surveys s : surveys) {
-            List<Surveyanswers> lsa = ejbFacade.findSurveyAnswersByCustomerAndSurvey(selectedCustomer, s);
-            if (lsa.isEmpty()) {// the survey hasn't been taken so add blank answers
-                List<Surveyquestions> lsq = new ArrayList<>(s.getSurveyquestionsCollection());
-                lsq.stream().map((quest) -> {
-                    Surveyanswers answ = new Surveyanswers(0, "");
+            List<SurveyAnswers> lsa = ejbFacade.findSurveyAnswersBySurvey(s);
+            if (lsa == null || lsa.isEmpty()) {// the survey hasn't been taken so add blank answers
+                List<SurveyQuestions> lsq = new ArrayList<>(s.getSurveyquestionsCollection());
+                for (SurveyQuestions quest : lsq) {
+
+                    SurveyAnswers answ = new SurveyAnswers(0, "");
                     answ.setQuestionId(quest);
+                    answ.setId(0);
                     answ.setSurveyId(s);
                     answ.setAnswerTypeid(quest.getQuestionType());
-                    Collection<Surveyquestionsubitems> qSubItems = quest.getSurveyquestionsubitemsCollection();
-                    ArrayList<Surveyanswersubitems> aSubItems = new ArrayList<>();
-                    qSubItems.stream().forEach((qsi) -> {
-                        Surveyanswersubitems asi = new Surveyanswersubitems(0, qsi.getSubitemText());
+                    answ.setUserId(selectedCustomer);
+                    ejbFacade.create(answ);
+                    Collection<SurveyQuestionSubItems> qSubItems = quest.getSurveyQuestionsubitemsCollection();
+                    ArrayList<SurveyAnswerSubItems> aSubItems = new ArrayList<>();
+                    for (SurveyQuestionSubItems qsi : qSubItems) {
+
+                        SurveyAnswerSubItems asi = new SurveyAnswerSubItems(0, qsi.getSubitemText());
                         Boolean subBoll = qsi.getSubitemBool();
                         if (subBoll == null) {
                             subBoll = false;
@@ -256,19 +263,21 @@ public class SurveyanswersController implements Serializable {
                         }
                         asi.setSubitemBool(subBoll);
                         asi.setSubitemInt(subInt);
-                    });
-                    answ.setSurveyanswersubitemsCollection(aSubItems);
-                    return answ;
-                }).forEach((answ) -> {
-                    ejbFacade.create(answ);
+                        asi.setAnswerId(answ);
+                        
+                        aSubItems.add(asi);
+
+                    }
+                    answ.setSurveyAnswersubitemsCollection(aSubItems);
+                    ejbFacade.edit(answ);
                     lsa.add(answ);
-                });
+                }
             }
-            getUsersSurveys().add(new SurveyMap(s,lsa));
+            getUsersSurveys().add(new SurveyMap(s, lsa));
         }
 
     }
-    
+
     private void performDestroy() {
         try {
             getFacade().remove(current);
@@ -295,9 +304,22 @@ public class SurveyanswersController implements Serializable {
 
     public DataModel getItems() {
         if (items == null) {
-            items = getPagination().createPageDataModel();
+            items = new ListDataModel(ejbFacade.findAll());
+            //items = getPagination().createPageDataModel();
         }
         return items;
+    }
+
+    public List<SurveyAnswers> getSurveyList() {
+        if (surveyAnswers == null) {
+            prepareSurveysForSelectedCustomer();
+            FacesContext context = FacesContext.getCurrentInstance();
+            CustomersController customersController = (CustomersController) context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
+            surveyAnswers = ejbFacade.findSurveyAnswersByCustomerAndSurvey(customersController.getSelected(), selectedSurvey);
+        }
+
+        return surveyAnswers;
+
     }
 
     private void recreateModel() {
@@ -334,12 +356,12 @@ public class SurveyanswersController implements Serializable {
         return JsfUtil.getSelectItems(ejbFacade.findAll(), true);
     }
 
-    public Collection<Surveyanswers> getItemsAvailable() {
+    public Collection<SurveyAnswers> getItemsAvailable() {
         return ejbFacade.findAll();
     }
 
     public void onEdit(RowEditEvent event) {
-        Surveyanswers cm = (Surveyanswers) event.getObject();
+        SurveyAnswers cm = (SurveyAnswers) event.getObject();
         getFacade().edit(cm);
         recreateModel();
         JsfUtil.addSuccessMessage("Row Edit Successful");
@@ -348,8 +370,6 @@ public class SurveyanswersController implements Serializable {
     public void onCancel(RowEditEvent event) {
         JsfUtil.addErrorMessage("Row Edit Cancelled");
     }
-
-    
 
     /**
      * @return the selectSurvey
@@ -369,7 +389,7 @@ public class SurveyanswersController implements Serializable {
      * @return the usersSurveys
      */
     public ArrayList<SurveyMap> getUsersSurveys() {
-        if(usersSurveys == null){
+        if (usersSurveys == null) {
             prepareSurveysForSelectedCustomer();
         }
         return usersSurveys;
@@ -382,7 +402,21 @@ public class SurveyanswersController implements Serializable {
         this.usersSurveys = usersSurveys;
     }
 
-    @FacesConverter(forClass = Surveyanswers.class)
+    /**
+     * @return the selectedSurvey
+     */
+    public Surveys getSelectedSurvey() {
+        return selectedSurvey;
+    }
+
+    /**
+     * @param selectedSurvey the selectedSurvey to set
+     */
+    public void setSelectedSurvey(Surveys selectedSurvey) {
+        this.selectedSurvey = selectedSurvey;
+    }
+
+    @FacesConverter(forClass = SurveyAnswers.class)
     public static class SurveyanswersControllerConverter implements Converter {
 
         public Object getAsObject(FacesContext facesContext, UIComponent component, String value) {
@@ -411,8 +445,8 @@ public class SurveyanswersController implements Serializable {
             if (object == null) {
                 return null;
             }
-            if (object instanceof Surveyanswers) {
-                Surveyanswers o = (Surveyanswers) object;
+            if (object instanceof SurveyAnswers) {
+                SurveyAnswers o = (SurveyAnswers) object;
                 return getStringKey(o.getId());
             } else {
                 throw new IllegalArgumentException("object " + object + " is of type " + object.getClass().getName() + "; expected type: " + SurveyanswersController.class.getName());

@@ -31,10 +31,10 @@ import javax.xml.bind.annotation.XmlTransient;
 @Table(name = "Survey_question_types")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "Surveyquestiontypes.findAll", query = "SELECT s FROM Surveyquestiontypes s"),
-    @NamedQuery(name = "Surveyquestiontypes.findById", query = "SELECT s FROM Surveyquestiontypes s WHERE s.id = :id"),
-    @NamedQuery(name = "Surveyquestiontypes.findByType", query = "SELECT s FROM Surveyquestiontypes s WHERE s.type = :type")})
-public class Surveyquestiontypes implements Serializable {
+    @NamedQuery(name = "SurveyQuestionTypes.findAll", query = "SELECT s FROM SurveyQuestionTypes s"),
+    @NamedQuery(name = "SurveyQuestionTypes.findById", query = "SELECT s FROM SurveyQuestionTypes s WHERE s.id = :id"),
+    @NamedQuery(name = "SurveyQuestionTypes.findByType", query = "SELECT s FROM SurveyQuestionTypes s WHERE s.type = :type")})
+public class SurveyQuestionTypes implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -47,18 +47,18 @@ public class Surveyquestiontypes implements Serializable {
     @Column(name = "type")
     private String type;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "questionType")
-    private Collection<Surveyquestions> surveyquestionsCollection;
+    private Collection<SurveyQuestions> surveyquestionsCollection;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "answerTypeid")
-    private Collection<Surveyanswers> surveyanswersCollection;
+    private Collection<SurveyAnswers> surveyanswersCollection;
 
-    public Surveyquestiontypes() {
+    public SurveyQuestionTypes() {
     }
 
-    public Surveyquestiontypes(Integer id) {
+    public SurveyQuestionTypes(Integer id) {
         this.id = id;
     }
 
-    public Surveyquestiontypes(Integer id, String type) {
+    public SurveyQuestionTypes(Integer id, String type) {
         this.id = id;
         this.type = type;
     }
@@ -80,20 +80,20 @@ public class Surveyquestiontypes implements Serializable {
     }
 
     @XmlTransient
-    public Collection<Surveyquestions> getSurveyquestionsCollection() {
+    public Collection<SurveyQuestions> getSurveyquestionsCollection() {
         return surveyquestionsCollection;
     }
 
-    public void setSurveyquestionsCollection(Collection<Surveyquestions> surveyquestionsCollection) {
+    public void setSurveyquestionsCollection(Collection<SurveyQuestions> surveyquestionsCollection) {
         this.surveyquestionsCollection = surveyquestionsCollection;
     }
 
     @XmlTransient
-    public Collection<Surveyanswers> getSurveyanswersCollection() {
+    public Collection<SurveyAnswers> getSurveyanswersCollection() {
         return surveyanswersCollection;
     }
 
-    public void setSurveyanswersCollection(Collection<Surveyanswers> surveyanswersCollection) {
+    public void setSurveyanswersCollection(Collection<SurveyAnswers> surveyanswersCollection) {
         this.surveyanswersCollection = surveyanswersCollection;
     }
 
@@ -107,10 +107,10 @@ public class Surveyquestiontypes implements Serializable {
     @Override
     public boolean equals(Object object) {
         // TODO: Warning - this method won't work in the case the id fields are not set
-        if (!(object instanceof Surveyquestiontypes)) {
+        if (!(object instanceof SurveyQuestionTypes)) {
             return false;
         }
-        Surveyquestiontypes other = (Surveyquestiontypes) object;
+        SurveyQuestionTypes other = (SurveyQuestionTypes) object;
         if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
             return false;
         }

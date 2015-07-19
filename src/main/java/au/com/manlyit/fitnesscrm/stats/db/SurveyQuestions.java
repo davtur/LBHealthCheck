@@ -34,9 +34,9 @@ import javax.xml.bind.annotation.XmlTransient;
 @Table(name = "Survey_questions")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "Surveyquestions.findAll", query = "SELECT s FROM Surveyquestions s"),
-    @NamedQuery(name = "Surveyquestions.findById", query = "SELECT s FROM Surveyquestions s WHERE s.id = :id")})
-public class Surveyquestions implements Serializable {
+    @NamedQuery(name = "SurveyQuestions.findAll", query = "SELECT s FROM SurveyQuestions s"),
+    @NamedQuery(name = "SurveyQuestions.findById", query = "SELECT s FROM SurveyQuestions s WHERE s.id = :id")})
+public class SurveyQuestions implements Serializable {
     @JoinColumn(name = "survey_id", referencedColumnName = "id")
     @ManyToOne(optional = false)
     private Surveys surveyId;
@@ -54,20 +54,20 @@ public class Surveyquestions implements Serializable {
     private String question;
     @JoinColumn(name = "question_type", referencedColumnName = "id")
     @ManyToOne(optional = false)
-    private Surveyquestiontypes questionType;
+    private SurveyQuestionTypes questionType;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "questionId")
-    private Collection<Surveyquestionsubitems> surveyquestionsubitemsCollection;
+    private Collection<SurveyQuestionSubItems> surveyquestionsubitemsCollection;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "questionId")
-    private Collection<Surveyanswers> surveyanswersCollection;
+    private Collection<SurveyAnswers> surveyanswersCollection;
 
-    public Surveyquestions() {
+    public SurveyQuestions() {
     }
 
-    public Surveyquestions(Integer id) {
+    public SurveyQuestions(Integer id) {
         this.id = id;
     }
 
-    public Surveyquestions(Integer id, String question) {
+    public SurveyQuestions(Integer id, String question) {
         this.id = id;
         this.question = question;
     }
@@ -88,29 +88,29 @@ public class Surveyquestions implements Serializable {
         this.question = question;
     }
 
-    public Surveyquestiontypes getQuestionType() {
+    public SurveyQuestionTypes getQuestionType() {
         return questionType;
     }
 
-    public void setQuestionType(Surveyquestiontypes questionType) {
+    public void setQuestionType(SurveyQuestionTypes questionType) {
         this.questionType = questionType;
     }
 
     @XmlTransient
-    public Collection<Surveyquestionsubitems> getSurveyquestionsubitemsCollection() {
+    public Collection<SurveyQuestionSubItems> getSurveyQuestionsubitemsCollection() {
         return surveyquestionsubitemsCollection;
     }
 
-    public void setSurveyquestionsubitemsCollection(Collection<Surveyquestionsubitems> surveyquestionsubitemsCollection) {
+    public void setSurveyQuestionsubitemsCollection(Collection<SurveyQuestionSubItems> surveyquestionsubitemsCollection) {
         this.surveyquestionsubitemsCollection = surveyquestionsubitemsCollection;
     }
 
     @XmlTransient
-    public Collection<Surveyanswers> getSurveyanswersCollection() {
+    public Collection<SurveyAnswers> getSurveyanswersCollection() {
         return surveyanswersCollection;
     }
 
-    public void setSurveyanswersCollection(Collection<Surveyanswers> surveyanswersCollection) {
+    public void setSurveyanswersCollection(Collection<SurveyAnswers> surveyanswersCollection) {
         this.surveyanswersCollection = surveyanswersCollection;
     }
 
@@ -124,10 +124,10 @@ public class Surveyquestions implements Serializable {
     @Override
     public boolean equals(Object object) {
         // TODO: Warning - this method won't work in the case the id fields are not set
-        if (!(object instanceof Surveyquestions)) {
+        if (!(object instanceof SurveyQuestions)) {
             return false;
         }
-        Surveyquestions other = (Surveyquestions) object;
+        SurveyQuestions other = (SurveyQuestions) object;
         if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
             return false;
         }
@@ -136,7 +136,7 @@ public class Surveyquestions implements Serializable {
 
     @Override
     public String toString() {
-        return "au.com.manlyit.fitnesscrm.stats.db.Surveyquestions[ id=" + id + " ]";
+        return "au.com.manlyit.fitnesscrm.stats.db.SurveyQuestions[ id=" + id + " ]";
     }
 
     public Surveys getSurveyId() {
