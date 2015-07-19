@@ -5,7 +5,7 @@
 
 package au.com.manlyit.fitnesscrm.stats.classes.util;
 
-import au.com.manlyit.fitnesscrm.stats.db.SurveyQuestionSubItems;
+import au.com.manlyit.fitnesscrm.stats.db.SurveyQuestionSubitems;
 import java.io.Serializable;
 
 import javax.inject.Inject;
@@ -26,14 +26,14 @@ import javax.faces.convert.FacesConverter;
 public class SurveyquestionsubitemsConverter implements Converter, Serializable{
 
    @Inject
-  private  au.com.manlyit.fitnesscrm.stats.beans.SurveyquestionsubitemsFacade ejbFacade;
+  private  au.com.manlyit.fitnesscrm.stats.beans.SurveyQuestionSubitemsFacade ejbFacade;
 
    public SurveyquestionsubitemsConverter(){
    }
 
     @Override
    public Object getAsObject(FacesContext context, UIComponent component, String value){
-        SurveyQuestionSubItems sess;
+        SurveyQuestionSubitems sess;
         int val = Integer.parseInt(value);
         sess = ejbFacade.find(val);
         return sess;
@@ -57,11 +57,11 @@ public class SurveyquestionsubitemsConverter implements Converter, Serializable{
             if (object == null) {
                 return null;
             }
-            if (object instanceof SurveyQuestionSubItems) {
-                SurveyQuestionSubItems o = (SurveyQuestionSubItems) object;
+            if (object instanceof SurveyQuestionSubitems) {
+                SurveyQuestionSubitems o = (SurveyQuestionSubitems) object;
                 return getStringKey(o.getId());
             } else {
-                throw new IllegalArgumentException("object " + object + " is of type " + object.getClass().getName() + "; expected type: " + SurveyQuestionSubItems.class.getName());
+                throw new IllegalArgumentException("object " + object + " is of type " + object.getClass().getName() + "; expected type: " + SurveyQuestionSubitems.class.getName());
             }
         }
 }

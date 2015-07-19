@@ -27,43 +27,44 @@ import javax.xml.bind.annotation.XmlRootElement;
  * @author david
  */
 @Entity
-@Table(name = "Survey_question_subitems")
+@Table(name = "survey_question_subitems")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "SurveyQuestionSubItems.findAll", query = "SELECT s FROM SurveyQuestionSubItems s"),
-    @NamedQuery(name = "SurveyQuestionSubItems.findById", query = "SELECT s FROM SurveyQuestionSubItems s WHERE s.id = :id")})
-public class SurveyQuestionSubItems implements Serializable {
-    @Basic(optional = false)
-    @NotNull
-    @Lob
-    @Size(min = 0, max = 65535)
-    @Column(name = "subitem_text")
-    private String subitemText;
-    @Column(name = "subitem_bool")
-    private Boolean subitemBool;
-    @Column(name = "subitem_int")
-    private Integer subitemInt;
+    @NamedQuery(name = "SurveyQuestionSubitems.findAll", query = "SELECT s FROM SurveyQuestionSubitems s"),
+    @NamedQuery(name = "SurveyQuestionSubitems.findById", query = "SELECT s FROM SurveyQuestionSubitems s WHERE s.id = :id"),
+    @NamedQuery(name = "SurveyQuestionSubitems.findBySubitemBool", query = "SELECT s FROM SurveyQuestionSubitems s WHERE s.subitemBool = :subitemBool"),
+    @NamedQuery(name = "SurveyQuestionSubitems.findBySubitemInt", query = "SELECT s FROM SurveyQuestionSubitems s WHERE s.subitemInt = :subitemInt")})
+public class SurveyQuestionSubitems implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "id")
     private Integer id;
-    
+    @Basic(optional = false)
+    @NotNull
+    @Lob
+    @Size(min = 1, max = 65535)
+    @Column(name = "subitem_text")
+    private String subitemText;
+    @Column(name = "subitem_bool")
+    private Boolean subitemBool;
+    @Column(name = "subitem_int")
+    private Integer subitemInt;
     @JoinColumn(name = "question_id", referencedColumnName = "id")
     @ManyToOne(optional = false)
     private SurveyQuestions questionId;
 
-    public SurveyQuestionSubItems() {
+    public SurveyQuestionSubitems() {
     }
 
-    public SurveyQuestionSubItems(Integer id) {
+    public SurveyQuestionSubitems(Integer id) {
         this.id = id;
     }
 
-    public SurveyQuestionSubItems(Integer id, String subitem_text) {
+    public SurveyQuestionSubitems(Integer id, String subitemText) {
         this.id = id;
-        this.subitemText = subitem_text;
+        this.subitemText = subitemText;
     }
 
     public Integer getId() {
@@ -72,41 +73,6 @@ public class SurveyQuestionSubItems implements Serializable {
 
     public void setId(Integer id) {
         this.id = id;
-    }
-
-    
-
-    public SurveyQuestions getQuestionId() {
-        return questionId;
-    }
-
-    public void setQuestionId(SurveyQuestions questionId) {
-        this.questionId = questionId;
-    }
-
-    @Override
-    public int hashCode() {
-        int hash = 0;
-        hash += (id != null ? id.hashCode() : 0);
-        return hash;
-    }
-
-    @Override
-    public boolean equals(Object object) {
-        // TODO: Warning - this method won't work in the case the id fields are not set
-        if (!(object instanceof SurveyQuestionSubItems)) {
-            return false;
-        }
-        SurveyQuestionSubItems other = (SurveyQuestionSubItems) object;
-        if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
-            return false;
-        }
-        return true;
-    }
-
-    @Override
-    public String toString() {
-        return "au.com.manlyit.fitnesscrm.stats.db.SurveyQuestionSubItems[ id=" + id + " ]";
     }
 
     public String getSubitemText() {
@@ -131,6 +97,39 @@ public class SurveyQuestionSubItems implements Serializable {
 
     public void setSubitemInt(Integer subitemInt) {
         this.subitemInt = subitemInt;
+    }
+
+    public SurveyQuestions getQuestionId() {
+        return questionId;
+    }
+
+    public void setQuestionId(SurveyQuestions questionId) {
+        this.questionId = questionId;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 0;
+        hash += (id != null ? id.hashCode() : 0);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        // TODO: Warning - this method won't work in the case the id fields are not set
+        if (!(object instanceof SurveyQuestionSubitems)) {
+            return false;
+        }
+        SurveyQuestionSubitems other = (SurveyQuestionSubitems) object;
+        if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return "au.com.manlyit.fitnesscrm.stats.db.SurveyQuestionSubitems[ id=" + id + " ]";
     }
     
 }

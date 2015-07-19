@@ -5,7 +5,7 @@
  */
 package au.com.manlyit.fitnesscrm.stats.beans;
 
-import au.com.manlyit.fitnesscrm.stats.db.SurveyQuestionSubItems;
+import au.com.manlyit.fitnesscrm.stats.db.SurveyAnswerSubitems;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -15,7 +15,7 @@ import javax.persistence.PersistenceContext;
  * @author david
  */
 @Stateless
-public class SurveyquestionsubitemsFacade extends AbstractFacade<SurveyQuestionSubItems> {
+public class SurveyAnswerSubitemsFacade extends AbstractFacade<SurveyAnswerSubitems> {
     @PersistenceContext(unitName = "FitnessStatsPU")
     private EntityManager em;
 
@@ -24,8 +24,8 @@ public class SurveyquestionsubitemsFacade extends AbstractFacade<SurveyQuestionS
         return em;
     }
 
-    public SurveyquestionsubitemsFacade() {
-        super(SurveyQuestionSubItems.class);
+    public SurveyAnswerSubitemsFacade() {
+        super(SurveyAnswerSubitems.class);
     }
     
 }

@@ -3,12 +3,12 @@ package au.com.manlyit.fitnesscrm.stats.classes;
 import au.com.manlyit.fitnesscrm.stats.db.SurveyAnswers;
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PaginationHelper;
-import au.com.manlyit.fitnesscrm.stats.beans.SurveyanswersFacade;
+import au.com.manlyit.fitnesscrm.stats.beans.SurveyAnswersFacade;
 import au.com.manlyit.fitnesscrm.stats.classes.util.SurveyMap;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
-import au.com.manlyit.fitnesscrm.stats.db.SurveyAnswerSubItems;
+import au.com.manlyit.fitnesscrm.stats.db.SurveyAnswerSubitems;
 import au.com.manlyit.fitnesscrm.stats.db.SurveyQuestions;
-import au.com.manlyit.fitnesscrm.stats.db.SurveyQuestionSubItems;
+import au.com.manlyit.fitnesscrm.stats.db.SurveyQuestionSubitems;
 import au.com.manlyit.fitnesscrm.stats.db.Surveys;
 
 import java.io.Serializable;
@@ -34,7 +34,7 @@ import org.primefaces.event.SelectEvent;
 
 @Named("surveyanswersController")
 @SessionScoped
-public class SurveyanswersController implements Serializable {
+public class SurveyAnswersController implements Serializable {
 
     private SurveyAnswers current;
     private Surveys selectedSurvey;
@@ -42,7 +42,7 @@ public class SurveyanswersController implements Serializable {
     private SurveyMap selectSurvey;
     private DataModel items = null;
     @Inject
-    private au.com.manlyit.fitnesscrm.stats.beans.SurveyanswersFacade ejbFacade;
+    private au.com.manlyit.fitnesscrm.stats.beans.SurveyAnswersFacade ejbFacade;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade configMapFacade;
     private PaginationHelper pagination;
@@ -52,7 +52,7 @@ public class SurveyanswersController implements Serializable {
     private SurveyAnswers[] multiSelected;
     private ArrayList<SurveyMap> usersSurveys;
 
-    public SurveyanswersController() {
+    public SurveyAnswersController() {
     }
 
     public static boolean isUserInRole(String roleName) {
@@ -76,7 +76,7 @@ public class SurveyanswersController implements Serializable {
 
     }
 
-    private SurveyanswersFacade getFacade() {
+    private SurveyAnswersFacade getFacade() {
         return ejbFacade;
     }
 
@@ -149,7 +149,7 @@ public class SurveyanswersController implements Serializable {
                 current.setId(0);
             }
             getFacade().create(current);
-            JsfUtil.addSuccessMessage(configMapFacade.getConfig("SurveyanswersCreated"));
+            JsfUtil.addSuccessMessage(configMapFacade.getConfig("SurveyAnswersCreated"));
             return prepareCreate();
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
@@ -162,7 +162,7 @@ public class SurveyanswersController implements Serializable {
             current.setId(0);
             getFacade().create(current);
             recreateModel();
-            JsfUtil.addSuccessMessage(configMapFacade.getConfig("SurveyanswersCreated"));
+            JsfUtil.addSuccessMessage(configMapFacade.getConfig("SurveyAnswersCreated"));
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
         }
@@ -186,7 +186,7 @@ public class SurveyanswersController implements Serializable {
     public String update() {
         try {
             getFacade().edit(current);
-            JsfUtil.addSuccessMessage(configMapFacade.getConfig("SurveyanswersUpdated"));
+            JsfUtil.addSuccessMessage(configMapFacade.getConfig("SurveyAnswersUpdated"));
             return "View";
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
@@ -238,7 +238,7 @@ public class SurveyanswersController implements Serializable {
         for (Surveys s : surveys) {
             List<SurveyAnswers> lsa = ejbFacade.findSurveyAnswersBySurvey(s);
             if (lsa == null || lsa.isEmpty()) {// the survey hasn't been taken so add blank answers
-                List<SurveyQuestions> lsq = new ArrayList<>(s.getSurveyquestionsCollection());
+                List<SurveyQuestions> lsq = new ArrayList<>(s.getSurveyQuestionsCollection());
                 for (SurveyQuestions quest : lsq) {
 
                     SurveyAnswers answ = new SurveyAnswers(0, "");
@@ -248,11 +248,11 @@ public class SurveyanswersController implements Serializable {
                     answ.setAnswerTypeid(quest.getQuestionType());
                     answ.setUserId(selectedCustomer);
                     ejbFacade.create(answ);
-                    Collection<SurveyQuestionSubItems> qSubItems = quest.getSurveyQuestionsubitemsCollection();
-                    ArrayList<SurveyAnswerSubItems> aSubItems = new ArrayList<>();
-                    for (SurveyQuestionSubItems qsi : qSubItems) {
+                    Collection<SurveyQuestionSubitems> qSubItems = quest.getSurveyQuestionSubitemsCollection();
+                    ArrayList<SurveyAnswerSubitems> aSubItems = new ArrayList<>();
+                    for (SurveyQuestionSubitems qsi : qSubItems) {
 
-                        SurveyAnswerSubItems asi = new SurveyAnswerSubItems(0, qsi.getSubitemText());
+                        SurveyAnswerSubitems asi = new SurveyAnswerSubitems(0, qsi.getSubitemText());
                         Boolean subBoll = qsi.getSubitemBool();
                         if (subBoll == null) {
                             subBoll = false;
@@ -268,7 +268,7 @@ public class SurveyanswersController implements Serializable {
                         aSubItems.add(asi);
 
                     }
-                    answ.setSurveyAnswersubitemsCollection(aSubItems);
+                    answ.setSurveyAnswerSubitemsCollection(aSubItems);
                     ejbFacade.edit(answ);
                     lsa.add(answ);
                 }
@@ -281,7 +281,7 @@ public class SurveyanswersController implements Serializable {
     private void performDestroy() {
         try {
             getFacade().remove(current);
-            JsfUtil.addSuccessMessage(configMapFacade.getConfig("SurveyanswersDeleted"));
+            JsfUtil.addSuccessMessage(configMapFacade.getConfig("SurveyAnswersDeleted"));
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
         }
@@ -417,13 +417,13 @@ public class SurveyanswersController implements Serializable {
     }
 
     @FacesConverter(forClass = SurveyAnswers.class)
-    public static class SurveyanswersControllerConverter implements Converter {
+    public static class SurveyAnswersControllerConverter implements Converter {
 
         public Object getAsObject(FacesContext facesContext, UIComponent component, String value) {
             if (value == null || value.length() == 0) {
                 return null;
             }
-            SurveyanswersController controller = (SurveyanswersController) facesContext.getApplication().getELResolver().
+            SurveyAnswersController controller = (SurveyAnswersController) facesContext.getApplication().getELResolver().
                     getValue(facesContext.getELContext(), null, "surveyanswersController");
             return controller.ejbFacade.find(getKey(value));
         }
@@ -449,7 +449,7 @@ public class SurveyanswersController implements Serializable {
                 SurveyAnswers o = (SurveyAnswers) object;
                 return getStringKey(o.getId());
             } else {
-                throw new IllegalArgumentException("object " + object + " is of type " + object.getClass().getName() + "; expected type: " + SurveyanswersController.class.getName());
+                throw new IllegalArgumentException("object " + object + " is of type " + object.getClass().getName() + "; expected type: " + SurveyAnswersController.class.getName());
             }
         }
 

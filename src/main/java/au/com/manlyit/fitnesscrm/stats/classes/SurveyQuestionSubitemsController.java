@@ -1,9 +1,9 @@
 package au.com.manlyit.fitnesscrm.stats.classes;
 
-import au.com.manlyit.fitnesscrm.stats.db.SurveyQuestionSubItems;
+import au.com.manlyit.fitnesscrm.stats.db.SurveyQuestionSubitems;
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PaginationHelper;
-import au.com.manlyit.fitnesscrm.stats.beans.SurveyquestionsubitemsFacade;
+import au.com.manlyit.fitnesscrm.stats.beans.SurveyQuestionSubitemsFacade;
 
 
 import java.io.Serializable;
@@ -29,43 +29,43 @@ import org.primefaces.event.SelectEvent;
 
 @Named("surveyquestionsubitemsController")
 @SessionScoped
-public class SurveyquestionsubitemsController implements Serializable {
+public class SurveyQuestionSubitemsController implements Serializable {
 
-    private SurveyQuestionSubItems current;
-    private SurveyQuestionSubItems selectedForDeletion;
+    private SurveyQuestionSubitems current;
+    private SurveyQuestionSubitems selectedForDeletion;
     private DataModel items = null;
     @Inject 
-    private au.com.manlyit.fitnesscrm.stats.beans.SurveyquestionsubitemsFacade ejbFacade;
+    private au.com.manlyit.fitnesscrm.stats.beans.SurveyQuestionSubitemsFacade ejbFacade;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade configMapFacade;
     private PaginationHelper pagination;
     private int selectedItemIndex;
-    private List<SurveyQuestionSubItems> filteredItems;
-    private SurveyQuestionSubItems[] multiSelected;
+    private List<SurveyQuestionSubitems> filteredItems;
+    private SurveyQuestionSubitems[] multiSelected;
 
-    public SurveyquestionsubitemsController() {
+    public SurveyQuestionSubitemsController() {
     }
 
      public static boolean isUserInRole(String roleName) {
         boolean inRole = FacesContext.getCurrentInstance().getExternalContext().isUserInRole(roleName);
         return inRole;
     }
-    public SurveyQuestionSubItems getSelected() {
+    public SurveyQuestionSubitems getSelected() {
         if (current == null) {
-            current = new SurveyQuestionSubItems();
+            current = new SurveyQuestionSubitems();
             selectedItemIndex = -1;
         }
         return current;
     }
 
-   public void setSelected(SurveyQuestionSubItems selected) {
+   public void setSelected(SurveyQuestionSubitems selected) {
         if (selected != null) {
             current = selected;
             selectedItemIndex = -1;
         }
 
     }
-    private SurveyquestionsubitemsFacade getFacade() {
+    private SurveyQuestionSubitemsFacade getFacade() {
         return ejbFacade;
     }
 
@@ -89,28 +89,28 @@ public class SurveyquestionsubitemsController implements Serializable {
    /**
      * @return the filteredItems
      */
-    public List<SurveyQuestionSubItems> getFilteredItems() {
+    public List<SurveyQuestionSubitems> getFilteredItems() {
         return filteredItems;
     }
 
     /**
      * @param filteredItems the filteredItems to set
      */
-    public void setFilteredItems(List<SurveyQuestionSubItems> filteredItems) {
+    public void setFilteredItems(List<SurveyQuestionSubitems> filteredItems) {
         this.filteredItems = filteredItems;
     }
 
     /**
      * @return the multiSelected
      */
-    public SurveyQuestionSubItems[] getMultiSelected() {
+    public SurveyQuestionSubitems[] getMultiSelected() {
         return multiSelected;
     }
 
     /**
      * @param multiSelected the multiSelected to set
      */
-    public void setMultiSelected(SurveyQuestionSubItems[] multiSelected) {
+    public void setMultiSelected(SurveyQuestionSubitems[] multiSelected) {
         this.multiSelected = multiSelected;
     }
 
@@ -120,13 +120,13 @@ public class SurveyquestionsubitemsController implements Serializable {
     }
 
     public String prepareView() {
-        //current = (SurveyQuestionSubItems)getItems().getRowData();
+        //current = (SurveyQuestionSubitems)getItems().getRowData();
         //selectedItemIndex = pagination.getPageFirstItem() + getItems().getRowIndex();
         return "View";
     }
 
     public String prepareCreate() {
-        current = new SurveyQuestionSubItems();
+        current = new SurveyQuestionSubitems();
         selectedItemIndex = -1;
         return "Create";
     }
@@ -158,7 +158,7 @@ public class SurveyquestionsubitemsController implements Serializable {
 
     }
     public String prepareEdit() {
-        //current = (SurveyQuestionSubItems)getItems().getRowData();
+        //current = (SurveyQuestionSubitems)getItems().getRowData();
         //selectedItemIndex = pagination.getPageFirstItem() + getItems().getRowIndex();
         return "Edit";
     }
@@ -200,11 +200,11 @@ public class SurveyquestionsubitemsController implements Serializable {
         }
     }
 
-    public SurveyQuestionSubItems getSelectedForDeletion() {
+    public SurveyQuestionSubitems getSelectedForDeletion() {
         return selectedForDeletion;
     }
 
-    public void setSelectedForDeletion(SurveyQuestionSubItems selectedForDeletion) {
+    public void setSelectedForDeletion(SurveyQuestionSubitems selectedForDeletion) {
          this.selectedForDeletion = selectedForDeletion;
         current = selectedForDeletion;
 
@@ -275,12 +275,12 @@ public class SurveyquestionsubitemsController implements Serializable {
         return JsfUtil.getSelectItems(ejbFacade.findAll(), true);
     }
 
-    public Collection<SurveyQuestionSubItems> getItemsAvailable() {
+    public Collection<SurveyQuestionSubitems> getItemsAvailable() {
         return ejbFacade.findAll();
     }
    
    public void onEdit(RowEditEvent event) {
-        SurveyQuestionSubItems  cm = (SurveyQuestionSubItems ) event.getObject();
+        SurveyQuestionSubitems  cm = (SurveyQuestionSubitems ) event.getObject();
         getFacade().edit(cm);
         recreateModel();
         JsfUtil.addSuccessMessage("Row Edit Successful");
@@ -290,14 +290,14 @@ public class SurveyquestionsubitemsController implements Serializable {
         JsfUtil.addErrorMessage("Row Edit Cancelled");
     }
 
-    @FacesConverter(forClass=SurveyQuestionSubItems.class)
+    @FacesConverter(forClass=SurveyQuestionSubitems.class)
     public static class SurveyquestionsubitemsControllerConverter implements Converter {
 
         public Object getAsObject(FacesContext facesContext, UIComponent component, String value) {
             if (value == null || value.length() == 0) {
                 return null;
             }
-            SurveyquestionsubitemsController controller = (SurveyquestionsubitemsController)facesContext.getApplication().getELResolver().
+            SurveyQuestionSubitemsController controller = (SurveyQuestionSubitemsController)facesContext.getApplication().getELResolver().
                     getValue(facesContext.getELContext(), null, "surveyquestionsubitemsController");
             return controller.ejbFacade.find(getKey(value));
         }
@@ -319,11 +319,11 @@ public class SurveyquestionsubitemsController implements Serializable {
             if (object == null) {
                 return null;
             }
-            if (object instanceof SurveyQuestionSubItems) {
-                SurveyQuestionSubItems o = (SurveyQuestionSubItems) object;
+            if (object instanceof SurveyQuestionSubitems) {
+                SurveyQuestionSubitems o = (SurveyQuestionSubitems) object;
                 return getStringKey(o.getId());
             } else {
-                throw new IllegalArgumentException("object " + object + " is of type " + object.getClass().getName() + "; expected type: "+SurveyquestionsubitemsController.class.getName());
+                throw new IllegalArgumentException("object " + object + " is of type " + object.getClass().getName() + "; expected type: "+SurveyQuestionSubitemsController.class.getName());
             }
         }
 

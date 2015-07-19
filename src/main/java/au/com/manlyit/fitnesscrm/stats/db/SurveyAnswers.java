@@ -31,12 +31,12 @@ import javax.xml.bind.annotation.XmlTransient;
  * @author david
  */
 @Entity
-@Table(name = "survey_questions")
+@Table(name = "survey_answers")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "SurveyQuestions.findAll", query = "SELECT s FROM SurveyQuestions s"),
-    @NamedQuery(name = "SurveyQuestions.findById", query = "SELECT s FROM SurveyQuestions s WHERE s.id = :id")})
-public class SurveyQuestions implements Serializable {
+    @NamedQuery(name = "SurveyAnswers.findAll", query = "SELECT s FROM SurveyAnswers s"),
+    @NamedQuery(name = "SurveyAnswers.findById", query = "SELECT s FROM SurveyAnswers s WHERE s.id = :id")})
+public class SurveyAnswers implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -47,29 +47,33 @@ public class SurveyQuestions implements Serializable {
     @NotNull
     @Lob
     @Size(min = 1, max = 65535)
-    @Column(name = "question")
-    private String question;
-    @JoinColumn(name = "question_type", referencedColumnName = "id")
-    @ManyToOne(optional = false)
-    private SurveyQuestionTypes questionType;
+    @Column(name = "answer")
+    private String answer;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "answerId")
+    private Collection<SurveyAnswerSubitems> surveyAnswerSubitemsCollection;
     @JoinColumn(name = "survey_id", referencedColumnName = "id")
     @ManyToOne(optional = false)
     private Surveys surveyId;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "questionId")
-    private Collection<SurveyQuestionSubitems> surveyQuestionSubitemsCollection;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "questionId")
-    private Collection<SurveyAnswers> surveyAnswersCollection;
+    @JoinColumn(name = "question_id", referencedColumnName = "id")
+    @ManyToOne(optional = false)
+    private SurveyQuestions questionId;
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    @ManyToOne(optional = false)
+    private Customers userId;
+    @JoinColumn(name = "answerType_id", referencedColumnName = "id")
+    @ManyToOne(optional = false)
+    private SurveyQuestionTypes answerTypeid;
 
-    public SurveyQuestions() {
+    public SurveyAnswers() {
     }
 
-    public SurveyQuestions(Integer id) {
+    public SurveyAnswers(Integer id) {
         this.id = id;
     }
 
-    public SurveyQuestions(Integer id, String question) {
+    public SurveyAnswers(Integer id, String answer) {
         this.id = id;
-        this.question = question;
+        this.answer = answer;
     }
 
     public Integer getId() {
@@ -80,20 +84,21 @@ public class SurveyQuestions implements Serializable {
         this.id = id;
     }
 
-    public String getQuestion() {
-        return question;
+    public String getAnswer() {
+        return answer;
     }
 
-    public void setQuestion(String question) {
-        this.question = question;
+    public void setAnswer(String answer) {
+        this.answer = answer;
     }
 
-    public SurveyQuestionTypes getQuestionType() {
-        return questionType;
+    @XmlTransient
+    public Collection<SurveyAnswerSubitems> getSurveyAnswerSubitemsCollection() {
+        return surveyAnswerSubitemsCollection;
     }
 
-    public void setQuestionType(SurveyQuestionTypes questionType) {
-        this.questionType = questionType;
+    public void setSurveyAnswerSubitemsCollection(Collection<SurveyAnswerSubitems> surveyAnswerSubitemsCollection) {
+        this.surveyAnswerSubitemsCollection = surveyAnswerSubitemsCollection;
     }
 
     public Surveys getSurveyId() {
@@ -104,22 +109,28 @@ public class SurveyQuestions implements Serializable {
         this.surveyId = surveyId;
     }
 
-    @XmlTransient
-    public Collection<SurveyQuestionSubitems> getSurveyQuestionSubitemsCollection() {
-        return surveyQuestionSubitemsCollection;
+    public SurveyQuestions getQuestionId() {
+        return questionId;
     }
 
-    public void setSurveyQuestionSubitemsCollection(Collection<SurveyQuestionSubitems> surveyQuestionSubitemsCollection) {
-        this.surveyQuestionSubitemsCollection = surveyQuestionSubitemsCollection;
+    public void setQuestionId(SurveyQuestions questionId) {
+        this.questionId = questionId;
     }
 
-    @XmlTransient
-    public Collection<SurveyAnswers> getSurveyAnswersCollection() {
-        return surveyAnswersCollection;
+    public Customers getUserId() {
+        return userId;
     }
 
-    public void setSurveyAnswersCollection(Collection<SurveyAnswers> surveyAnswersCollection) {
-        this.surveyAnswersCollection = surveyAnswersCollection;
+    public void setUserId(Customers userId) {
+        this.userId = userId;
+    }
+
+    public SurveyQuestionTypes getAnswerTypeid() {
+        return answerTypeid;
+    }
+
+    public void setAnswerTypeid(SurveyQuestionTypes answerTypeid) {
+        this.answerTypeid = answerTypeid;
     }
 
     @Override
@@ -132,10 +143,10 @@ public class SurveyQuestions implements Serializable {
     @Override
     public boolean equals(Object object) {
         // TODO: Warning - this method won't work in the case the id fields are not set
-        if (!(object instanceof SurveyQuestions)) {
+        if (!(object instanceof SurveyAnswers)) {
             return false;
         }
-        SurveyQuestions other = (SurveyQuestions) object;
+        SurveyAnswers other = (SurveyAnswers) object;
         if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
             return false;
         }
@@ -144,7 +155,7 @@ public class SurveyQuestions implements Serializable {
 
     @Override
     public String toString() {
-        return "au.com.manlyit.fitnesscrm.stats.db.SurveyQuestions[ id=" + id + " ]";
+        return "au.com.manlyit.fitnesscrm.stats.db.SurveyAnswers[ id=" + id + " ]";
     }
     
 }

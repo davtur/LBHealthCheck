@@ -26,7 +26,7 @@ import javax.persistence.criteria.Root;
  * @author david
  */
 @Stateless
-public class SurveyanswersFacade extends AbstractFacade<SurveyAnswers> {
+public class SurveyAnswersFacade extends AbstractFacade<SurveyAnswers> {
 
     @PersistenceContext(unitName = "FitnessStatsPU")
     private EntityManager em;
@@ -38,7 +38,7 @@ public class SurveyanswersFacade extends AbstractFacade<SurveyAnswers> {
         return em;
     }
 
-    public SurveyanswersFacade() {
+    public SurveyAnswersFacade() {
         super(SurveyAnswers.class);
     }
 

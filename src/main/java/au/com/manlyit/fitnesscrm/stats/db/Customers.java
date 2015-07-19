@@ -61,7 +61,9 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Customers.findByGoogleId", query = "SELECT c FROM Customers c WHERE c.googleId = :googleId")})
 public class Customers implements BaseEntity, Serializable {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "userId")
-    private Collection<SurveyAnswers> surveyanswersCollection;
+    private Collection<SurveyAnswers> surveyAnswersCollection;
+    
+    
     @OneToMany(mappedBy = "changedBy")
     private Collection<AuditLog> auditLogCollection;
     @OneToMany(mappedBy = "customer")
@@ -563,13 +565,16 @@ public class Customers implements BaseEntity, Serializable {
         this.auditLogCollection1 = auditLogCollection1;
     }
 
+
+  
+
     @XmlTransient
-    public Collection<SurveyAnswers> getSurveyanswersCollection() {
-        return surveyanswersCollection;
+    public Collection<SurveyAnswers> getSurveyAnswersCollection() {
+        return surveyAnswersCollection;
     }
 
-    public void setSurveyanswersCollection(Collection<SurveyAnswers> surveyanswersCollection) {
-        this.surveyanswersCollection = surveyanswersCollection;
+    public void setSurveyAnswersCollection(Collection<SurveyAnswers> surveyAnswersCollection) {
+        this.surveyAnswersCollection = surveyAnswersCollection;
     }
 
 }

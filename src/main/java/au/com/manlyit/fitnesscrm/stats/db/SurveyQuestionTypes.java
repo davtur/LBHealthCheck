@@ -28,7 +28,7 @@ import javax.xml.bind.annotation.XmlTransient;
  * @author david
  */
 @Entity
-@Table(name = "Survey_question_types")
+@Table(name = "survey_question_types")
 @XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "SurveyQuestionTypes.findAll", query = "SELECT s FROM SurveyQuestionTypes s"),
@@ -47,9 +47,9 @@ public class SurveyQuestionTypes implements Serializable {
     @Column(name = "type")
     private String type;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "questionType")
-    private Collection<SurveyQuestions> surveyquestionsCollection;
+    private Collection<SurveyQuestions> surveyQuestionsCollection;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "answerTypeid")
-    private Collection<SurveyAnswers> surveyanswersCollection;
+    private Collection<SurveyAnswers> surveyAnswersCollection;
 
     public SurveyQuestionTypes() {
     }
@@ -80,21 +80,21 @@ public class SurveyQuestionTypes implements Serializable {
     }
 
     @XmlTransient
-    public Collection<SurveyQuestions> getSurveyquestionsCollection() {
-        return surveyquestionsCollection;
+    public Collection<SurveyQuestions> getSurveyQuestionsCollection() {
+        return surveyQuestionsCollection;
     }
 
-    public void setSurveyquestionsCollection(Collection<SurveyQuestions> surveyquestionsCollection) {
-        this.surveyquestionsCollection = surveyquestionsCollection;
+    public void setSurveyQuestionsCollection(Collection<SurveyQuestions> surveyQuestionsCollection) {
+        this.surveyQuestionsCollection = surveyQuestionsCollection;
     }
 
     @XmlTransient
-    public Collection<SurveyAnswers> getSurveyanswersCollection() {
-        return surveyanswersCollection;
+    public Collection<SurveyAnswers> getSurveyAnswersCollection() {
+        return surveyAnswersCollection;
     }
 
-    public void setSurveyanswersCollection(Collection<SurveyAnswers> surveyanswersCollection) {
-        this.surveyanswersCollection = surveyanswersCollection;
+    public void setSurveyAnswersCollection(Collection<SurveyAnswers> surveyAnswersCollection) {
+        this.surveyAnswersCollection = surveyAnswersCollection;
     }
 
     @Override
@@ -119,7 +119,7 @@ public class SurveyQuestionTypes implements Serializable {
 
     @Override
     public String toString() {
-        return type;
+        return "au.com.manlyit.fitnesscrm.stats.db.SurveyQuestionTypes[ id=" + id + " ]";
     }
     
 }
