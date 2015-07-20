@@ -837,3 +837,6 @@ MyDeatilsSurveys_viewSurveyLabel=View Survey
 
 
 MyDeatilsSurveys_saveSurveyLabel=Save and Return
+EditCustomersuploadPhoto=Close
+uploadPhotoDialogueTitle=Upload Photo
+EditCustomersUploadPhotoButton=Upload
