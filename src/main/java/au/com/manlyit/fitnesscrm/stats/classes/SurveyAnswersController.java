@@ -16,7 +16,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import java.util.SortedMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.enterprise.context.SessionScoped;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
@@ -36,6 +37,7 @@ import org.primefaces.event.SelectEvent;
 @SessionScoped
 public class SurveyAnswersController implements Serializable {
 
+    private static final Logger logger = Logger.getLogger(SurveyAnswersController.class.getName());
     private SurveyAnswers current;
     private Surveys selectedSurvey;
     private SurveyAnswers selectedForDeletion;
@@ -169,6 +171,21 @@ public class SurveyAnswersController implements Serializable {
 
     }
 
+    public String saveSurvey() {
+        try {
+            for (SurveyAnswers sa : surveyAnswers) {
+                 getFacade().edit(sa);
+            }
+            JsfUtil.addSuccessMessage(configMapFacade.getConfig("SurveyAnswersCreated"));
+        } catch (Exception e) {
+            JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
+        }
+        return "myDetails";
+    }
+    public void surveyBooleanChangeListener() {
+        logger.log(Level.FINE, "Boolean Answer modified");
+    }
+
     public String prepareEdit() {
         //current = (SurveyAnswers)getItems().getRowData();
         //selectedItemIndex = pagination.getPageFirstItem() + getItems().getRowIndex();
@@ -181,6 +198,11 @@ public class SurveyAnswersController implements Serializable {
 
     public void selectManyMenuValueChangeListener(ValueChangeEvent vce) {
         Object o = vce.getNewValue();
+    }
+
+    public void textAnswerValueChange(ValueChangeEvent vce) {
+        Object o = vce.getNewValue();
+
     }
 
     public String update() {
@@ -235,47 +257,54 @@ public class SurveyAnswersController implements Serializable {
 
         Collection<Surveys> surveys = surveysController.getItemsAvailable();
         setUsersSurveys(new ArrayList<>());
-        for (Surveys s : surveys) {
-            List<SurveyAnswers> lsa = ejbFacade.findSurveyAnswersBySurvey(s);
-            if (lsa == null || lsa.isEmpty()) {// the survey hasn't been taken so add blank answers
+        try {
+            for (Surveys s : surveys) {
                 List<SurveyQuestions> lsq = new ArrayList<>(s.getSurveyQuestionsCollection());
+
+                // if (lsa == null || lsa.isEmpty()) {// the survey hasn't been taken so add blank answers
                 for (SurveyQuestions quest : lsq) {
+                    // ArrayList<SurveyAnswers> lsa = new ArrayList<>(quest.getSurveyAnswersCollection());
+                    SurveyAnswers answ = ejbFacade.findSurveyAnswersByCustomerAndQuestion(selectedCustomer, quest);
 
-                    SurveyAnswers answ = new SurveyAnswers(0, "");
-                    answ.setQuestionId(quest);
-                    answ.setId(0);
-                    answ.setSurveyId(s);
-                    answ.setAnswerTypeid(quest.getQuestionType());
-                    answ.setUserId(selectedCustomer);
-                    ejbFacade.create(answ);
-                    Collection<SurveyQuestionSubitems> qSubItems = quest.getSurveyQuestionSubitemsCollection();
-                    ArrayList<SurveyAnswerSubitems> aSubItems = new ArrayList<>();
-                    for (SurveyQuestionSubitems qsi : qSubItems) {
+                    if (answ == null) {
+                        answ = new SurveyAnswers(0, "");
+                        answ.setQuestionId(quest);
+                        answ.setId(0);
+                        //answ.setSurveyId(s);
+                        answ.setAnswerTypeid(quest.getQuestionType());
+                        answ.setUserId(selectedCustomer);
+                        ejbFacade.create(answ);
+                        Collection<SurveyQuestionSubitems> qSubItems = quest.getSurveyQuestionSubitemsCollection();
+                        ArrayList<SurveyAnswerSubitems> aSubItems = new ArrayList<>();
+                        for (SurveyQuestionSubitems qsi : qSubItems) {
 
-                        SurveyAnswerSubitems asi = new SurveyAnswerSubitems(0, qsi.getSubitemText());
-                        Boolean subBoll = qsi.getSubitemBool();
-                        if (subBoll == null) {
-                            subBoll = false;
+                            SurveyAnswerSubitems asi = new SurveyAnswerSubitems(0, qsi.getSubitemText());
+                            Boolean subBoll = qsi.getSubitemBool();
+                            if (subBoll == null) {
+                                subBoll = false;
+                            }
+                            Integer subInt = qsi.getSubitemInt();
+                            if (subInt == null) {
+                                subInt = -1;
+                            }
+                            asi.setSubitemBool(subBoll);
+                            asi.setSubitemInt(subInt);
+                            asi.setAnswerId(answ);
+
+                            aSubItems.add(asi);
+
                         }
-                        Integer subInt = qsi.getSubitemInt();
-                        if (subInt == null) {
-                            subInt = -1;
-                        }
-                        asi.setSubitemBool(subBoll);
-                        asi.setSubitemInt(subInt);
-                        asi.setAnswerId(answ);
-                        
-                        aSubItems.add(asi);
-
+                        answ.setSurveyAnswerSubitemsCollection(aSubItems);
+                        ejbFacade.edit(answ);
+                        //lsa.add(answ);
                     }
-                    answ.setSurveyAnswerSubitemsCollection(aSubItems);
-                    ejbFacade.edit(answ);
-                    lsa.add(answ);
                 }
+                //}
+                //  getUsersSurveys().add(new SurveyMap(s, lsa));
             }
-            getUsersSurveys().add(new SurveyMap(s, lsa));
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "prepareSurveysForSelectedCustomer()", e);
         }
-
     }
 
     private void performDestroy() {
@@ -312,10 +341,19 @@ public class SurveyAnswersController implements Serializable {
 
     public List<SurveyAnswers> getSurveyList() {
         if (surveyAnswers == null) {
+            surveyAnswers = new ArrayList<>();
             prepareSurveysForSelectedCustomer();
             FacesContext context = FacesContext.getCurrentInstance();
             CustomersController customersController = (CustomersController) context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
-            surveyAnswers = ejbFacade.findSurveyAnswersByCustomerAndSurvey(customersController.getSelected(), selectedSurvey);
+            Collection<SurveyQuestions> lsq = selectedSurvey.getSurveyQuestionsCollection();
+            for (SurveyQuestions quest : lsq) {
+                SurveyAnswers sa = ejbFacade.findSurveyAnswersByCustomerAndQuestion(customersController.getSelected(), quest);
+                if (sa != null) {
+                    surveyAnswers.add(sa);
+                } else {
+                    logger.log(Level.WARNING, "getSurveyList , answer for question \"{0}\" is null", quest.getQuestion());
+                }
+            }
         }
 
         return surveyAnswers;

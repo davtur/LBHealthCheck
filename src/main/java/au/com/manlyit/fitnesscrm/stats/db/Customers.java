@@ -60,8 +60,7 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Customers.findByFacebookId", query = "SELECT c FROM Customers c WHERE c.facebookId = :facebookId"),
     @NamedQuery(name = "Customers.findByGoogleId", query = "SELECT c FROM Customers c WHERE c.googleId = :googleId")})
 public class Customers implements BaseEntity, Serializable {
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "userId")
-    private Collection<SurveyAnswers> surveyAnswersCollection;
+   
     
     
     @OneToMany(mappedBy = "changedBy")
@@ -159,6 +158,8 @@ public class Customers implements BaseEntity, Serializable {
     private Collection<Activation> activationCollection;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "username")
     private Collection<Groups> groupsCollection;
+     @OneToMany(cascade = CascadeType.ALL, mappedBy = "userId")
+    private Collection<SurveyAnswers> surveyAnswersCollection;
 
     @JoinColumn(name = "active", referencedColumnName = "id")
     @ManyToOne

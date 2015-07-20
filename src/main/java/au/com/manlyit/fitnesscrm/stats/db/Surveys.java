@@ -55,8 +55,8 @@ public class Surveys implements Serializable {
     private String description;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "surveyId")
     private Collection<SurveyQuestions> surveyQuestionsCollection;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "surveyId")
-    private Collection<SurveyAnswers> surveyAnswersCollection;
+    //@OneToMany(cascade = CascadeType.ALL, mappedBy = "surveyAnswerId")
+    //private Collection<SurveyAnswers> surveyAnswersCollection;
 
     public Surveys() {
     }
@@ -104,14 +104,14 @@ public class Surveys implements Serializable {
         this.surveyQuestionsCollection = surveyQuestionsCollection;
     }
 
-    @XmlTransient
+ /*   @XmlTransient
     public Collection<SurveyAnswers> getSurveyAnswersCollection() {
         return surveyAnswersCollection;
     }
 
     public void setSurveyAnswersCollection(Collection<SurveyAnswers> surveyAnswersCollection) {
         this.surveyAnswersCollection = surveyAnswersCollection;
-    }
+    }*/
 
     @Override
     public int hashCode() {
@@ -135,7 +135,7 @@ public class Surveys implements Serializable {
 
     @Override
     public String toString() {
-        return "au.com.manlyit.fitnesscrm.stats.db.Surveys[ id=" + id + " ]";
+        return name;
     }
     
 }

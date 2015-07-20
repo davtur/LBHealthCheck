@@ -8,7 +8,7 @@ package au.com.manlyit.fitnesscrm.stats.beans;
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import au.com.manlyit.fitnesscrm.stats.db.SurveyAnswers;
-import au.com.manlyit.fitnesscrm.stats.db.Surveys;
+import au.com.manlyit.fitnesscrm.stats.db.SurveyQuestions;
 import java.util.List;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -42,17 +42,17 @@ public class SurveyAnswersFacade extends AbstractFacade<SurveyAnswers> {
         super(SurveyAnswers.class);
     }
 
-    public List<SurveyAnswers> findSurveyAnswersByCustomerAndSurvey(Customers customer, Surveys survey) {
+    public SurveyAnswers findSurveyAnswersByCustomerAndQuestion(Customers customer, SurveyQuestions quest) {
         List<SurveyAnswers> retList = null;
 
         try {
             CriteriaBuilder cb = em.getCriteriaBuilder();
             CriteriaQuery<SurveyAnswers> cq = cb.createQuery(SurveyAnswers.class);
             Root<SurveyAnswers> rt = cq.from(SurveyAnswers.class);
-            Expression<Customers> cust = rt.get("UserId");
-            Expression<Surveys> surv = rt.get("SurveyId");
+            Expression<Customers> cust = rt.get("userId");
+            Expression<SurveyQuestions> question = rt.get("questionId");
             Predicate condition1 = cb.equal(cust, customer);
-            Predicate condition2 = cb.equal(surv, survey);
+            Predicate condition2 = cb.equal(question, quest);
             cq.where(cb.and(condition1, condition2));
             cq.select(rt);
 
@@ -61,31 +61,62 @@ public class SurveyAnswersFacade extends AbstractFacade<SurveyAnswers> {
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
         }
-
-        return retList;
-    }
-     public List<SurveyAnswers> findSurveyAnswersBySurvey(Surveys survey) {
-        List<SurveyAnswers> retList = null;
-
-        try {
-            CriteriaBuilder cb = em.getCriteriaBuilder();
-            CriteriaQuery<SurveyAnswers> cq = cb.createQuery(SurveyAnswers.class);
-            Root<SurveyAnswers> rt = cq.from(SurveyAnswers.class);
-            
-            Expression<Surveys> surv = rt.get("SurveyId");
-          
-            Predicate condition2 = cb.equal(surv, survey);
-            cq.where(cb.and( condition2));
-            cq.select(rt);
-
-            Query q = em.createQuery(cq);
-            retList = (List<SurveyAnswers>) q.getResultList();
-        } catch (Exception e) {
-            JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
+        if(retList == null){
+            return null;
+        }
+        if(retList.isEmpty()){
+            return null;
+        }
+        if(retList.size() > 1){
+             JsfUtil.addErrorMessage("Duplicate Survey Answers exist for customer "+ customer.toString() + ". The number of answers returned for the question \""+ quest.getQuestion() + "\" is " + retList.size() + "."  );
         }
 
-        return retList;
+        return retList.get(0);
     }
+    /*  
+     public List<SurveyAnswers> findSurveyAnswersByCustomerAndSurvey(Customers customer, Surveys survey) {
+     List<SurveyAnswers> retList = null;
 
+     try {
+     CriteriaBuilder cb = em.getCriteriaBuilder();
+     CriteriaQuery<SurveyAnswers> cq = cb.createQuery(SurveyAnswers.class);
+     Root<SurveyAnswers> rt = cq.from(SurveyAnswers.class);
+     Expression<Customers> cust = rt.get("UserId");
+     Expression<Surveys> surv = rt.get("SurveyId");
+     Predicate condition1 = cb.equal(cust, customer);
+     Predicate condition2 = cb.equal(surv, survey);
+     cq.where(cb.and(condition1, condition2));
+     cq.select(rt);
+
+     Query q = em.createQuery(cq);
+     retList = (List<SurveyAnswers>) q.getResultList();
+     } catch (Exception e) {
+     JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
+     }
+
+     return retList;
+     }
+     public List<SurveyAnswers> findSurveyAnswersBySurvey(Surveys survey) {
+     List<SurveyAnswers> retList = null;
+
+     try {
+     CriteriaBuilder cb = em.getCriteriaBuilder();
+     CriteriaQuery<SurveyAnswers> cq = cb.createQuery(SurveyAnswers.class);
+     Root<SurveyAnswers> rt = cq.from(SurveyAnswers.class);
+            
+     Expression<Surveys> surv = rt.get("SurveyId");
+          
+     Predicate condition2 = cb.equal(surv, survey);
+     cq.where(cb.and( condition2));
+     cq.select(rt);
+
+     Query q = em.createQuery(cq);
+     retList = (List<SurveyAnswers>) q.getResultList();
+     } catch (Exception e) {
+     JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
+     }
+
+     return retList;
+     }*/
 
 }

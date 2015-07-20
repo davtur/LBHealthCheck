@@ -43,23 +43,27 @@ public class SurveyAnswers implements Serializable {
     @Basic(optional = false)
     @Column(name = "id")
     private Integer id;
+    
     @Basic(optional = false)
     @NotNull
     @Lob
-    @Size(min = 1, max = 65535)
+    @Size(min = 0, max = 65535)
     @Column(name = "answer")
     private String answer;
+    
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "answerId")
     private Collection<SurveyAnswerSubitems> surveyAnswerSubitemsCollection;
-    @JoinColumn(name = "survey_id", referencedColumnName = "id")
-    @ManyToOne(optional = false)
-    private Surveys surveyId;
+    
+   
+    
     @JoinColumn(name = "question_id", referencedColumnName = "id")
     @ManyToOne(optional = false)
     private SurveyQuestions questionId;
+    
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     @ManyToOne(optional = false)
     private Customers userId;
+    
     @JoinColumn(name = "answerType_id", referencedColumnName = "id")
     @ManyToOne(optional = false)
     private SurveyQuestionTypes answerTypeid;
@@ -101,13 +105,7 @@ public class SurveyAnswers implements Serializable {
         this.surveyAnswerSubitemsCollection = surveyAnswerSubitemsCollection;
     }
 
-    public Surveys getSurveyId() {
-        return surveyId;
-    }
-
-    public void setSurveyId(Surveys surveyId) {
-        this.surveyId = surveyId;
-    }
+   
 
     public SurveyQuestions getQuestionId() {
         return questionId;

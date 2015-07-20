@@ -834,3 +834,6 @@ ListToDoListTitle_done=Done
 
 MyDetailsSurveyPanel_title=Surveys
 MyDeatilsSurveys_viewSurveyLabel=View Survey
+
+
+MyDeatilsSurveys_saveSurveyLabel=Save and Return

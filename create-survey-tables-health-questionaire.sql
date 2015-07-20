@@ -19,7 +19,7 @@
 -- Table structure for table `survey_answer_subitems`
 --
 
-DROP TABLE IF EXISTS `Survey_answer_subitems`;
+DROP TABLE IF EXISTS `survey_answer_subitems`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `survey_answer_subitems` (
@@ -47,22 +47,22 @@ UNLOCK TABLES;
 -- Table structure for table `survey_answers`
 --
 
-DROP TABLE IF EXISTS `Survey_answers`;
+DROP TABLE IF EXISTS `survey_answers`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `survey_answers` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `user_id` int(11) NOT NULL,
-  `survey_id` int(11) NOT NULL,
+ /* `survey_id` int(11) NOT NULL,*/
   `question_id` int(11) NOT NULL,
   `answer` text NOT NULL,
   `answerType_id` int(11) NOT NULL,
   PRIMARY KEY (`id`),
-  KEY `fk_survey_answers_1_idx` (`survey_id`),
+   /*KEY `fk_survey_answers_1_idx` (`survey_id`),*/
   KEY `fk_survey_answers_2_idx` (`question_id`),
   KEY `fk_survey_answers_3_idx` (`user_id`),
   KEY `fk_survey_answers_4_idx` (`answerType_id`),
-  CONSTRAINT `fk_survey_answers_1` FOREIGN KEY (`survey_id`) REFERENCES `surveys` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  /* CONSTRAINT `fk_survey_answers_1` FOREIGN KEY (`survey_id`) REFERENCES `surveys` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,*/
   CONSTRAINT `fk_survey_answers_2` FOREIGN KEY (`question_id`) REFERENCES `survey_questions` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `fk_survey_answers_3` FOREIGN KEY (`user_id`) REFERENCES `customers` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `fk_survey_answers_4` FOREIGN KEY (`answerType_id`) REFERENCES `survey_question_types` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
@@ -82,7 +82,7 @@ UNLOCK TABLES;
 -- Table structure for table `survey_question_subitems`
 --
 
-DROP TABLE IF EXISTS `Survey_question_subitems`;
+DROP TABLE IF EXISTS `survey_question_subitems`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `survey_question_subitems` (
@@ -111,7 +111,7 @@ UNLOCK TABLES;
 -- Table structure for table `survey_question_types`
 --
 
-DROP TABLE IF EXISTS `Survey_question_types`;
+DROP TABLE IF EXISTS `survey_question_types`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `survey_question_types` (
@@ -135,7 +135,7 @@ UNLOCK TABLES;
 -- Table structure for table `survey_questions`
 --
 
-DROP TABLE IF EXISTS `Survey_questions`;
+DROP TABLE IF EXISTS `survey_questions`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `survey_questions` (
@@ -165,7 +165,7 @@ UNLOCK TABLES;
 -- Table structure for table `surveys`
 --
 
-DROP TABLE IF EXISTS `Surveys`;
+DROP TABLE IF EXISTS `surveys`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `surveys` (

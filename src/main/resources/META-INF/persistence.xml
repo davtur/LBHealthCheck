@@ -38,6 +38,13 @@
         <class>au.com.manlyit.fitnesscrm.stats.db.Stat</class>
         <class>au.com.manlyit.fitnesscrm.stats.db.StatTypes</class>
         <class>au.com.manlyit.fitnesscrm.stats.db.StatsTaken</class>
+        <class>au.com.manlyit.fitnesscrm.stats.db.SurveyAnswerSubitems</class>
+        <class>au.com.manlyit.fitnesscrm.stats.db.SurveyAnswers</class>
+        <class>au.com.manlyit.fitnesscrm.stats.db.SurveyQuestionSubitems</class>
+        <class>au.com.manlyit.fitnesscrm.stats.db.SurveyQuestionTypes</class>
+        <class>au.com.manlyit.fitnesscrm.stats.db.SurveyQuestions</class>
+        <class>au.com.manlyit.fitnesscrm.stats.db.Surveys</class>
+        <class>au.com.manlyit.fitnesscrm.stats.db.ToDoList</class>
         <class>au.com.manlyit.fitnesscrm.stats.db.Tasks</class>
         <class>au.com.manlyit.fitnesscrm.stats.db.WebsiteMonitor</class>
         <exclude-unlisted-classes>false</exclude-unlisted-classes>
