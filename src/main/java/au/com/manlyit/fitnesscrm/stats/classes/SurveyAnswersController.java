@@ -180,7 +180,7 @@ public class SurveyAnswersController implements Serializable {
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
         }
-        return "myDetails";
+        return "/myDetails.xhtml?faces-redirect=true";
     }
     public void surveyBooleanChangeListener() {
         logger.log(Level.FINE, "Boolean Answer modified");

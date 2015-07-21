@@ -6,7 +6,7 @@
         <param-value>Development</param-value>
     </context-param>
     
-     <context-param>
+    <context-param>
         <param-name>javax.faces.FACELETS_BUFFER_SIZE</param-name>
         <param-value>1048576</param-value>
     </context-param>
@@ -20,7 +20,7 @@
     </context-param>
     <context-param>
         <param-name>primefaces.THEME</param-name>
-        <param-value>aristo</param-value>
+        <param-value>afternoon</param-value>
     </context-param>
     <context-param>
         <param-name>javax.faces.STATE_SAVING_METHOD</param-name>
@@ -34,7 +34,11 @@
         <param-name>javax.faces.FACELETS_SKIP_COMMENTS</param-name>
         <param-value>true</param-value>
     </context-param>
-    <!--<context-param>
+    <!-- <context-param>
+        <param-name>primefaces.FONT_AWESOME</param-name>
+        <param-value>true</param-value>
+    </context-param>
+   <context-param>
         <param-name>primefaces.PUSH_SERVER_URL</param-name>
         <param-value>http://localhost:8082</param-value>
     </context-param>-->
@@ -114,7 +118,8 @@
     <listener>
         <description>Context Listener</description>
         <listener-class>au.com.manlyit.fitnesscrm.stats.classes.CrmContextListener</listener-class>
-    </listener><listener>
+    </listener>
+    <listener>
         <description>Atmosphere Session Support Listener</description>
         <listener-class>org.atmosphere.cpr.SessionSupport</listener-class>
     </listener>

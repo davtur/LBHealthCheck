@@ -11,27 +11,77 @@
             <h:outputText value="My Statistics"></h:outputText>
         </ui:define>
         <ui:define name="body">
-            <h:form>
+            <h:form id="myStatsForm">
                 <p:panel header="Welcome #{chartController.customer.firstname}">
-                    <p:panel header="Photos">
-                        <p:galleria var="image" value="#{customerImagesController.images}" panelWidth="667" panelHeight="500" showCaption="true" effect="#{customerImagesController.effect}" effectSpeed="1000">
+                    <h:panelGrid columns="2">
 
-                            <p:graphicImage value="#{customerImagesController.dynamicImage}"  title="This photo was taken on #{image.formattedDate}" alt="#{customerImagesController.dynamicTitle}">
-                                <f:param name="imageid" value="#{image.id}"/>
-                                <f:param name="imagedescid" value="#{image.id}"/>
-                                <f:param name="imagetitleid" value="#{image.id}"/>
-                            </p:graphicImage>
+                        <p:carousel class="myStatsCarousel parentOfUploadPhoto" id="photoGalleryCarousel" value="#{customerImagesController.images}" headerText="#{configMapController.getKey('ListMyStats_GalleryHeader')}" var="image" autoPlayInterval="4000" effectDuration="2000" effect="easeInOutCirc" circular="true" >
 
-                        </p:galleria>
-                    </p:panel>
+                            <p:panel class="customerDetailsPanel"  header="#{configMapController.getKey('ListMyStats_photoTakenText')}  #{image.formattedDate}">
+                                <p:graphicImage value="#{customerImagesController.dynamicImage}"  title="#{configMapController.getKey('ListMyStats_photoTakenText')} #{image.formattedDate}" alt="#{customerImagesController.dynamicTitle}">
+                                    <f:param name="imageid" value="#{image.id}"/>
+                                    <f:param name="imagedescid" value="#{image.id}"/>
+                                    <f:param name="imagetitleid" value="#{image.id}"/>
+                                </p:graphicImage>
+                                <h:panelGrid columns="1">
+                                    <p:commandButton update=":myStatsForm:photoGalleryCarousel"  value="Delete">
+
+                                        <f:setPropertyActionListener value="#{image}" target="#{customerImagesController.selectedForDeletion}" />
+                                    </p:commandButton>
+                                </h:panelGrid>
+                            </p:panel>
+                        </p:carousel>
+
+
+                          <!--  <p:galleria widgetVar="galleriaWidget" var="image" value="#{customerImagesController.images}" panelWidth="667" panelHeight="500" showCaption="true" effect="#{customerImagesController.effect}" effectSpeed="1000">
+
+                                <p:graphicImage value="#{customerImagesController.dynamicImage}"  title="#{configMapController.getKey('ListMyStats_photoTakenText')} #{image.formattedDate}" alt="#{customerImagesController.dynamicTitle}">
+                                    <f:param name="imageid" value="#{image.id}"/>
+                                    <f:param name="imagedescid" value="#{image.id}"/>
+                                    <f:param name="imagetitleid" value="#{image.id}"/>
+                                </p:graphicImage>
+
+                            </p:galleria>
+                        </p:panel>
+                        <p:panel class="customerDetailsPanel" header="#{configMapController.getKey('ListMyStats_SelectedPic')}">
+                            <h:panelGrid columns="1">
+                                <p:graphicImage id="photo2" value="#{customerImagesController.selected.imageStream}" height="200px" cache="false" />
+                                <p:commandButton  id="photoUploadButton2" ajax="true"  onclick="PF('uploadPhotoDialogueWidget').show();" update=":growl :uploadPhotoForm"   value="#{configMapController.getKey('EditCustomersUploadPhotoButton')}" immediate="true"/>
+                            </h:panelGrid>-->
+
+                        <p:panel class="customerDetailsPanel parentOfUploadPhoto" header="#{configMapController.getKey('ListCustomersTitle_ProfilePic')}" >
+                            <h:panelGrid columns="1">
+                                <p:graphicImage id="photo1" value="#{customersController.selected.profileImage.imageStream}"  cache="false" />
+                                <p:commandButton  id="photoUploadButton" ajax="true"  onclick="PF('uploadPhotoDialogueWidget').show();" update=":growl :uploadPhotoForm"   value="#{configMapController.getKey('EditCustomersUploadPhotoButton')}" immediate="true"/>
+                            </h:panelGrid>
+                        </p:panel>
+
+                        <!--  <p:panel header="Photo Gallery" style="height: 500px">
+                           <p:ring id="basic" value="#{customerImagesController.images}" var="image" easing="easeInOutCirc">
+                               <p:column>
+                        #{image.formattedDate}
+                         
+                         <p:graphicImage value="#{customerImagesController.dynamicImage}"  title="This photo was taken on #{image.formattedDate}" width="200px"> 
+                            <f:param name="imageid" value="#{image.id}"/>
+                             </p:graphicImage>
+                          <p:graphicImage value="#{customerImagesController.dynamicImage}"  title="This photo was taken on #{image.formattedDate}" alt="#{customerImagesController.dynamicTitle}">
+                             <f:param name="imageid" value="#{image.id}"/>
+                             <f:param name="imagedescid" value="#{image.id}"/>
+                             <f:param name="imagetitleid" value="#{image.id}"/>
+                         </p:graphicImage>
+                        <p:commandButton update=":form:carDetail" icon="ui-icon-search" title="View" oncomplete="PF('carDialog').show();">
+                              <f:setPropertyActionListener value="#{image}" target="#{ringView.selectedCar}" />
+                          </p:commandButton>
+                     </p:column>
+                 </p:ring>
+             </p:panel>-->
+                    </h:panelGrid>
                 </p:panel>
+
             </h:form>
             <h:form>
 
-                <!--  <p:panel >
-                      <p:chart type="line" model="#{bean.dateModel}" style="height:400px;"/>
-  <p:chart type="line" model="#{chartController.modelList.get(2)}"   style="height:400px;"/>
-                  </p:panel> -->
+
                 <p:dataList  value="#{chartController.modelList}"  var="chart" id="chartsList"  
                              paginator="true" rows="10"  
                              paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink} {RowsPerPageDropdown}"  
@@ -43,6 +93,7 @@
 
                 </p:dataList>
             </h:form>
+            <ui:include src="uploadPhoto.xhtml"/>
         </ui:define>
     </ui:composition>
 

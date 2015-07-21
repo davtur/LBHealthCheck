@@ -95,5 +95,20 @@ background: url(/FitnessStats/resources/templates/yoo_pace/images/tools/icons_so
  margin-left: 5px;   
  padding-right: 15px;  
 }
-												
+
+.customerDetailsPanel .ui-selectonemenu {
+     width: 100% !important;
+}
+.customerDetailsPanel .ui-button {
+     width: 100% !important;
+     padding: 5px !important;
+}												
 					
+.myStatsCarousel .ui-carousel {
+    
+     padding: 15px !important;
+}
+
+.parentOfUploadPhoto{
+    
+}

@@ -840,3 +840,6 @@ MyDeatilsSurveys_saveSurveyLabel=Save and Return
 EditCustomersuploadPhoto=Close
 uploadPhotoDialogueTitle=Upload Photo
 EditCustomersUploadPhotoButton=Upload
+ListMyStats_GalleryHeader=Photo Gallery
+ListMyStats_photoTakenText=Date Photo Taken:
+ListMyStats_SelectedPic=Selected Picture

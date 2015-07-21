@@ -14,14 +14,14 @@
               <p:panel id="panel3" style="height: 550px">
                             <p:panel id="photoPanel3" header="Select a photo to upload (jpeg)">
                                 <p:panelGrid columns="2" style="width:400px">
-                                    <p:fileUpload fileLimitMessage="The size of the picture is too big! ( > 10MB )" mode="advanced" fileUploadListener="#{customerImagesController.handleFileUpload}" auto="true" update=":uploadPhotoForm:panel3  :createCustomerForm:panel2  :growl" allowTypes="/(\.|\/)(gif|jpe?g|png)$/" sizeLimit="10000000" />
-                                    <p:graphicImage id="photo2" value="#{customerImagesController.uploadedImage}" height="400px" cache="false" />
+                                    <p:fileUpload fileLimitMessage="The size of the picture is too big! ( > 10MB )" mode="advanced" fileUploadListener="#{customerImagesController.handleFileUpload}" auto="true" update=":uploadPhotoForm:panel3  @form  :growl" allowTypes="/(\.|\/)(gif|jpe?g|png)$/" sizeLimit="10000000" />
+                                    <p:graphicImage id="photo2" class="parentOfUploadPhoto"  value="#{customerImagesController.uploadedImage}" height="400px" cache="false" />
                                 </p:panelGrid>
                                 <!-- <p:panel id="imageCropperPanel" header="Uploaded Image">
                                      <h:panelGrid columns="2">  
                                          <p:imageCropper value="#{customerImagesController.croppedImage}"  
                                                          image="#{customerImagesController.uploadedImageTempFile.path}"  
-                                                         initialCoords="225,75,300,125"/>  
+                                                         initialCoords="225,75,300,125"/>   
      
                                          <p:graphicImage id="localCroppedImage"  rendered="#{not empty customerImagesController.uploadedImageTempFile}"
                                                          value="#{customerImagesController.uploadedImageTempFile.path}" />  
@@ -38,13 +38,13 @@
                                 <p:selectBooleanCheckbox id="profilephoto"   value="#{customerImagesController.profilePhoto}" >
                                     <p:ajax />
                                 </p:selectBooleanCheckbox>  
-                                <p:commandButton id="saveButton" disabled="#{customerImagesController.saveButtonDisabled}" update=":uploadPhotoForm:panel3  :createCustomerForm:panel2  :growl"   actionListener="#{customerImagesController.createFromDialogue}" value="#{configMapController.getKey('CreateCustomerImagesSaveLink')}" />
-                                <p:commandButton      actionListener="#{customerImagesController.rotate90degrees}" update=":uploadPhotoForm:panel3   :growl"  value="#{configMapController.getKey('CreateCustomerImagesRotateImage90Link')}" />
+                                <p:commandButton id="saveButton" class="parentOfUploadPhoto" disabled="#{customerImagesController.saveButtonDisabled}" update="@(.parentOfUploadPhoto) :growl"   actionListener="#{customerImagesController.createFromDialogue}" value="#{configMapController.getKey('CreateCustomerImagesSaveLink')}" />
+                                <p:commandButton   class="parentOfUploadPhoto"  disabled="#{customerImagesController.saveButtonDisabled}"   actionListener="#{customerImagesController.rotate90degrees}" update=":uploadPhotoForm:panel3   :growl"  value="#{configMapController.getKey('CreateCustomerImagesRotateImage90Link')}" />
 
                             </h:panelGrid>
                         </p:panel>
-                    <p:commandButton  id="closeDialogueButton"  ajax="true" oncomplete="PF('uploadPhotoDialogueWidget').hide();"  update=":growl :createCustomerForm:panel2 "   value="#{configMapController.getKey('EditCustomersuploadPhoto')}" immediate="true"/>
-                    
+                    <p:commandButton  id="closeDialogueButton"  ajax="true" oncomplete="PF('uploadPhotoDialogueWidget').hide();"  update=":growl "   value="#{configMapController.getKey('EditCustomersuploadPhoto')}" immediate="true"/>
+                     
                 
             </h:form>
         </p:dialog>
