@@ -34,6 +34,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ConcurrentHashMap;
@@ -82,6 +83,7 @@ public class FutureMapEJB implements Serializable {
     private static final Logger logger = Logger.getLogger(FutureMapEJB.class.getName());
     private static final int TIMEOUT_SECONDS = 300;
     private static final String FUTUREMAP_INTERNALID = "FMINTID876987";
+    private static final long serialVersionUID = 1L;
 
     private final ConcurrentHashMap<String, ArrayList<AsyncJob>> futureMap = new ConcurrentHashMap<>();
     private final static String CHANNEL = "/payments/";
@@ -168,8 +170,10 @@ public class FutureMapEJB implements Serializable {
             ArrayList<AsyncJob> fmap = futureMap.get(userSessionId);
             if (fmap == null) {
                 logger.log(Level.INFO, "Get Future Map. Map is null for sessionID {0} . Creating an empty list.", userSessionId);
-                futureMap.put(userSessionId, new ArrayList<AsyncJob>());
+
+                futureMap.put(userSessionId, new ArrayList<>());
                 fmap = futureMap.get(userSessionId);
+
             }
             return fmap;
 
@@ -310,7 +314,7 @@ public class FutureMapEJB implements Serializable {
                 List<AsyncJob> fmap = getFutureMap(userSessionId);
 
                 for (AsyncJob aj : fmap) {
-                    Future ft = (Future) aj.getFuture();
+                    Future<?> ft = (Future) aj.getFuture();
                     ft.cancel(false);
                 }
 
@@ -322,8 +326,8 @@ public class FutureMapEJB implements Serializable {
     @PreDestroy
     private void cancelAllAsyncJobs() {
         synchronized (futureMapArrayLock) {
-            for (Map.Entry pairs : futureMap.entrySet()) {
-                cancelFutures((String) pairs.getKey());
+            for (Map.Entry<String, ArrayList<AsyncJob>> pairs : futureMap.entrySet()) {
+                cancelFutures(pairs.getKey());
             }
             futureMap.clear();
         }
@@ -334,7 +338,7 @@ public class FutureMapEJB implements Serializable {
         // sessionChannel = "/test";// remove this once the channel is dynamically set by session id
         synchronized (lock2) {
             final String broadcastChannel = CHANNEL + sessionChannel;
-            final String summ = summary;
+            // final String summ = summary;
             EventBus eventBus = EventBusFactory.getDefault().eventBus();
             /* Reply rep = new EventBus.Reply() {
              @Override
@@ -379,9 +383,9 @@ public class FutureMapEJB implements Serializable {
             asychCheckProcessing.set(true);
             try {
                 synchronized (futureMapArrayLock) {
-                    for (Map.Entry pairs : futureMap.entrySet()) {
-                        String sessionId = (String) pairs.getKey();
-                        ArrayList<AsyncJob> fmap = (ArrayList<AsyncJob>) pairs.getValue();
+                    for (Map.Entry<String, ArrayList<AsyncJob>> pairs : futureMap.entrySet()) {
+                        String sessionId = pairs.getKey();
+                        ArrayList<AsyncJob> fmap = pairs.getValue();
                         int k = fmap.size();
                         if (k > 0) {
 
@@ -395,19 +399,20 @@ public class FutureMapEJB implements Serializable {
                              }
                              }*/
                             int y = 0;
-                            String details = "";
+
+                            StringBuilder details = new StringBuilder();
                             AsyncJob aj;
                             try {
 
                                 for (int x = fmap.size() - 1; x >= 0; x--) {
                                     aj = fmap.get(x);
                                     boolean alreadyRemoved = false;
-                                    Future ft = aj.getFuture();
+                                    Future<?> ft = aj.getFuture();
                                     String key = aj.getJobName();
                                     if (ft.isDone()) {
                                         y++;
                                         logger.log(Level.INFO, "SessionId {0} Future Map async job {1} has finished.", new Object[]{key, sessionId});
-                                        details += key + " ";
+                                        details.append(key).append(" ");
                                         processCompletedAsyncJobs(key, ft);
                                         if (sessionId.contains(FUTUREMAP_INTERNALID)) {
                                             fmap.remove(x);
@@ -430,9 +435,10 @@ public class FutureMapEJB implements Serializable {
                                 logger.log(Level.SEVERE, "checkRunningJobsAndNotifyIfComplete,  {0} async jobs for sessionId {1} have finished.Exception {2}", new Object[]{Integer.toString(y), sessionId, e});
                             }
                             if (y > 0) {
-                                logger.log(Level.INFO, "Notifying that {0} async jobs for sessionId {1} have finished.", new Object[]{Integer.toString(y), sessionId});
                                 if (sessionId.contains(FUTUREMAP_INTERNALID) == false) {
-                                    sendMessage(sessionId, "Asynchronous Tasks Completed", details);
+                                    sendMessage(sessionId, "Asynchronous Tasks Completed", details.toString());
+                                    logger.log(Level.INFO, "Notifying that {0} async jobs for sessionId {1} have finished. Deatils:{2}", new Object[]{Integer.toString(y), sessionId,details.toString()});
+
                                 }
                             }
 
@@ -440,6 +446,8 @@ public class FutureMapEJB implements Serializable {
 
                     }
                 }
+            } catch (RuntimeException e) {
+                throw e;
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "checkRunningJobsAndNotifyIfComplete, Unhandled exception in EJB timer: {0} Cause: {2}", new Object[]{e.getMessage(), e.getCause().getMessage()});
 
@@ -454,7 +462,7 @@ public class FutureMapEJB implements Serializable {
     }
 // run a schedules
 
-    private void processConvertSchedule(Future ft) {
+    private void processConvertSchedule(Future<?> ft) {
         // Update the payments table with any new information retrived by the getPayments exzidebit web service.
         // Only for one customer.
         ArrayOfScheduledPayment result = null;
@@ -469,7 +477,7 @@ public class FutureMapEJB implements Serializable {
             List<ScheduledPayment> payList = result.getScheduledPayment();
             if (payList.isEmpty() == false) {
                 String customerRef = payList.get(0).getYourSystemReference().getValue();
-                int k = customerRef.indexOf("-");
+                int k = customerRef.indexOf('-');
                 if (k > 0) {
                     customerRef = customerRef.substring(0, k);
                 }
@@ -501,11 +509,10 @@ public class FutureMapEJB implements Serializable {
                                 Logger.getLogger(FutureMapEJB.class.getName()).log(Level.SEVERE, "Thread Interrupted", ex);
                             }
                             for (ScheduledPayment pay : payList) {
-                                Payments crmPay = null;
 
                                 //payment doesn't exist in crm so add it
                                 logger.log(Level.WARNING, "Future Map processConvertSchedule - A payment exists in the PGW but not in CRM.(This can be ignored if a customer is onboarded with the online eddr form) EzidebitID={0}, CRM Ref:{1}, Amount={2}, Date={3}, Ref={4}", new Object[]{pay.getEzidebitCustomerID().getValue(), pay.getYourSystemReference().getValue(), pay.getPaymentAmount().floatValue(), pay.getPaymentDate().toGregorianCalendar().getTime(), pay.getPaymentReference().getValue()});
-                                crmPay = convertScheduledPaymentXMLToEntity(crmPay, pay, cust);
+                                Payments crmPay = convertScheduledPaymentXMLToEntity(null, pay, cust);
                                 paymentsFacade.createAndFlush(crmPay);
                                 crmPay.setPaymentReference(crmPay.getId().toString());
                                 crmPay.setManuallyAddedPayment(false);
@@ -543,7 +550,7 @@ public class FutureMapEJB implements Serializable {
                 "processConvertSchedule completed");
     }
 
-    public void processCompletedAsyncJobs(String key, Future ft) {
+    public void processCompletedAsyncJobs(String key, Future<?> ft) {
         logger.log(Level.INFO, "Future Map is processing Completed Async Jobs .");
         synchronized (lock3) {
 
@@ -637,7 +644,7 @@ public class FutureMapEJB implements Serializable {
      }
      }
      }*/
-    private void processSettlementReport(Future ft) {
+    private void processSettlementReport(Future<?> ft) {
         synchronized (lock8) {
             logger.log(Level.INFO, "Future Map is processing the Settlement Report .");
             processReport(ft);
@@ -646,7 +653,7 @@ public class FutureMapEJB implements Serializable {
         }
     }
 
-    private void processPaymentReport(Future ft) {
+    private void processPaymentReport(Future<?> ft) {
         synchronized (lock7) {
             logger.log(Level.INFO, "Future Map is processing the Payment Report .");
             processReport(ft);
@@ -656,7 +663,7 @@ public class FutureMapEJB implements Serializable {
     }
 
     @Asynchronous
-    private void processReport(Future ft) {
+    private void processReport(Future<?> ft) {
         // Update the payments table with any new information retrived by the getPayments exzidebit web service.
         // Only for one customer.
         ArrayOfPayment result = null;
@@ -676,7 +683,7 @@ public class FutureMapEJB implements Serializable {
                 for (Payment pay : payList) {
 
                     String customerRef = pay.getYourSystemReference().getValue();
-                    int k = customerRef.indexOf("-");
+                    int k = customerRef.indexOf('-');
                     if (k > 0) {
                         customerRef = customerRef.substring(0, k);
                     }
@@ -720,7 +727,7 @@ public class FutureMapEJB implements Serializable {
                             }
                         } else {
                             // old payment without a primary key reference
-                            if (paymentID.toUpperCase().contains("SCHEDULED")) {
+                            if (paymentID.toUpperCase(Locale.getDefault()).contains("SCHEDULED")) {
                                 // scheduled payment no paymentID
                                 logger.log(Level.INFO, "Future Map processReport scheduled payment .", pay.toString());
                             } else {
@@ -790,7 +797,7 @@ public class FutureMapEJB implements Serializable {
     }
 
     @Asynchronous
-    private void processGetPayments(Future ft) {
+    private void processGetPayments(Future<?> ft) {
         // Update the payments table with any new information retrived by the getPayments exzidebit web service.
         // Only for one customer.
         ArrayOfPayment result = null;
@@ -807,7 +814,7 @@ public class FutureMapEJB implements Serializable {
             List<Payment> payList = result.getPayment();
             if (payList.isEmpty() == false) {
                 String customerRef = payList.get(0).getYourSystemReference().getValue();
-                int k = customerRef.indexOf("-");
+                int k = customerRef.indexOf('-');
                 if (k > 0) {
                     customerRef = customerRef.substring(0, k);
                 }
@@ -858,7 +865,7 @@ public class FutureMapEJB implements Serializable {
                                     }
                                 } else {
                                     // old payment without a primary key reference
-                                    if (paymentID.toUpperCase().contains("SCHEDULED")) {
+                                    if (paymentID.toUpperCase(Locale.getDefault()).contains("SCHEDULED")) {
                                         // scheduled payment no paymentID
                                         logger.log(Level.INFO, "Future Map processGetPayments scheduled payment .", pay.toString());
                                     } else {
@@ -875,7 +882,7 @@ public class FutureMapEJB implements Serializable {
                                             }
                                         } else { //payment doesn't exist in crm so add it
                                             logger.log(Level.WARNING, "Future Map processGetPayments  - payment doesn't exist in crm (this should only happen for webddr form schedule) so adding it:{0}.", paymentRefInt);
-                                            crmPay = convertPaymentXMLToEntity(crmPay, pay, cust);
+                                            crmPay = convertPaymentXMLToEntity(null, pay, cust);
                                             paymentsFacade.createAndFlush(crmPay);
                                         }
                                     }
@@ -899,7 +906,7 @@ public class FutureMapEJB implements Serializable {
     }
 
     @Asynchronous
-    private void processGetScheduledPayments(Future ft) {
+    private void processGetScheduledPayments(Future<?> ft) {
         // Update the payments table with any new information retrived by the getPayments exzidebit web service.
         // Only for one customer.
         ArrayOfScheduledPayment result = null;
@@ -916,7 +923,7 @@ public class FutureMapEJB implements Serializable {
             List<ScheduledPayment> payList = result.getScheduledPayment();
             if (payList.isEmpty() == false) {
                 String customerRef = payList.get(0).getYourSystemReference().getValue();
-                int k = customerRef.indexOf("-");
+                int k = customerRef.indexOf('-');
                 if (k > 0) {
                     customerRef = customerRef.substring(0, k);
                 }
@@ -968,7 +975,7 @@ public class FutureMapEJB implements Serializable {
                                         }
                                     } else { //payment doesn't exist in crm so add it
                                         logger.log(Level.WARNING, "Future Map processGetScheduledPayments - A payment exists in the PGW but not in CRM.(This can be ignored if a customer is onboarded with the online eddr form) EzidebitID={0}, CRM Ref:{1}, Amount={2}, Date={3}, Ref={4}", new Object[]{pay.getEzidebitCustomerID().getValue(), pay.getYourSystemReference().getValue(), pay.getPaymentAmount().floatValue(), pay.getPaymentDate().toGregorianCalendar().getTime(), pay.getPaymentReference().getValue()});
-                                        crmPay = convertScheduledPaymentXMLToEntity(crmPay, pay, cust);
+                                        crmPay = convertScheduledPaymentXMLToEntity(null, pay, cust);
                                         paymentsFacade.createAndFlush(crmPay);
                                         crmPay.setPaymentReference(crmPay.getId().toString());
                                         crmPay.setManuallyAddedPayment(false);
@@ -1177,13 +1184,15 @@ public class FutureMapEJB implements Serializable {
             current.setPaymentParameters(pp);
             customersFacade.editAndFlush(current);
 
+        } catch (RuntimeException e) {
+            throw e;
         } catch (Exception e) {
             logger.log(Level.SEVERE, "createDefaultPaymentParameters Method in Customers Controller", e);
         }
     }
 
     @Asynchronous
-    private void processGetCustomerDetails(Future ft) {
+    private void processGetCustomerDetails(Future<?> ft) {
         CustomerDetails custDetails = null;
 
         try {
@@ -1196,7 +1205,7 @@ public class FutureMapEJB implements Serializable {
         if (custDetails != null) {
             // do something with result
             String customerRef = custDetails.getYourSystemReference().getValue();
-            int k = customerRef.indexOf("-");
+            int k = customerRef.indexOf('-');
             if (k > 0) {
                 customerRef = customerRef.substring(0, k);
             }
@@ -1398,6 +1407,8 @@ public class FutureMapEJB implements Serializable {
                 if (pay.getYourSystemReference().isNil() == false) {
                     payment.setYourSystemReference(pay.getYourSystemReference().getValue());
                 }
+            } catch (RuntimeException e) {
+                throw e;
             } catch (Exception e) {
                 logger.log(Level.WARNING, "Future Map convertPaymentXMLToEntity method failed. Customer: {2},Error Message: {0},payment XML: {1}:", new Object[]{e.getMessage(), pay.toString(), cust.getUsername()});
             }
@@ -1729,7 +1740,7 @@ public class FutureMapEJB implements Serializable {
 
     private void createDefaultProfilePic(Customers cust) {
         String placeholderImage = configMapFacade.getConfig("system.default.profile.image");
-        String fileExtension = placeholderImage.substring(placeholderImage.lastIndexOf(".")).toLowerCase();
+        String fileExtension = placeholderImage.substring(placeholderImage.lastIndexOf('.')).toLowerCase(Locale.getDefault());
         int imgType = -1;
         if (fileExtension.contains("jpeg") || fileExtension.contains("jpg")) {
             imgType = 2;
@@ -1793,6 +1804,8 @@ public class FutureMapEJB implements Serializable {
                     ejbCustomerImagesFacade.edit(ci);
                     cust.setProfileImage(ci);
                     customersFacade.edit(cust);
+                } catch (RuntimeException e) {
+                    throw e;
                 } catch (Exception e) {
                     logger.log(Level.WARNING, "createDefaultProfilePic , Cannot add default profile pic for customer {1} due to an exception:{0}", new Object[]{e, cust.getUsername()});
 

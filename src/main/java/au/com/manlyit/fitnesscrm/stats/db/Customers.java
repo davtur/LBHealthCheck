@@ -203,16 +203,18 @@ public class Customers implements BaseEntity, Serializable {
         this.gender = gender;
         this.firstname = firstname;
         this.lastname = lastname;
-        this.dob = dob;
+        this.dob = new Date(dob.getTime());
         this.emailAddress = emailAddress;
         this.username = username;
         this.password = password;
     }
 
+    @Override
     public Integer getId() {
         return id;
     }
 
+    @Override
     public void setId(Integer id) {
         this.id = id;
     }

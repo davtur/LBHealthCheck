@@ -100,11 +100,7 @@
             <param-name>org.atmosphere.disableOnStateEvent</param-name>
             <param-value>true</param-value>
         </init-param>
-        <!-- hera I tell PrimeFaces to use my PushRule -->
-        <init-param>
-            <param-name>org.primefaces.push.rules</param-name>
-            <param-value>my.webapp.DefaultPushRule</param-value>
-        </init-param>
+        
         <load-on-startup>2</load-on-startup>
         <async-supported>true</async-supported>
     </servlet>

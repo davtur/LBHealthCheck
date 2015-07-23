@@ -16,6 +16,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 import java.util.Properties;
 import java.util.Random;
 import java.util.concurrent.Future;
@@ -23,15 +24,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.SessionScoped;
-import javax.faces.application.FacesMessage;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
-import javax.faces.event.ActionEvent;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
@@ -246,7 +244,7 @@ public class LoginBean implements Serializable {
 
     public void login() {
         FacesContext context = FacesContext.getCurrentInstance();
-        ExternalContext ec = context.getExternalContext();
+        //ExternalContext ec = context.getExternalContext();
         HttpServletRequest request = (HttpServletRequest) context.getExternalContext().getRequest();
 
         try {
@@ -271,10 +269,10 @@ public class LoginBean implements Serializable {
             String auditDetails = "Customer Login Successful:" + cust.getUsername() + " Details:  " + cust.getLastname() + " " + cust.getFirstname() + " ";
             String changedFrom = "UnAuthenticated";
             String changedTo = "Authenticated User:" + username;
-            if(cust.getUsername().toLowerCase().equals("synthetic.tester")){
+            if (cust.getUsername().toLowerCase(Locale.getDefault()).equals("synthetic.tester")) {
                 logger.log(Level.INFO, "Synthetic Tester Logged In.");
-            }else{
-            ejbAuditLogFacade.audit(cust, cust, "Logged In", auditDetails, changedFrom, changedTo);
+            } else {
+                ejbAuditLogFacade.audit(cust, cust, "Logged In", auditDetails, changedFrom, changedTo);
             }
 
         } catch (ServletException e) {
@@ -396,7 +394,9 @@ public class LoginBean implements Serializable {
                 lastName = json.getString("last_name");
 
                 String fbEmail = json.getString("email");
-                if (email.contentEquals(fbEmail) == false) {
+                if (fbEmail == null) {
+                    logger.log(Level.WARNING, "Error getting JSON objects from facebook: email is NULL");
+                } else if (email.contentEquals(fbEmail) == false) {
                     logger.log(Level.WARNING, "Error getting JSON objects from facebook: emails dont match!");
                 }
                 //put user data in session
@@ -411,9 +411,7 @@ public class LoginBean implements Serializable {
                     if (lastName == null) {
                         logger.log(Level.WARNING, "Error getting JSON objects from facebook: lastName is NULL");
                     }
-                    if (fbEmail == null) {
-                        logger.log(Level.WARNING, "Error getting JSON objects from facebook: email is NULL");
-                    }
+
                 }
 
             } catch (Exception e) {
@@ -437,7 +435,7 @@ public class LoginBean implements Serializable {
     public String getAccessToken() {
         String token = null;
         String appId = getValueFromKey("facebook.app.id");//"247417342102284";
-        String redirectUrl = getValueFromKey("facebook.redirect.url");//http://localhost:8080/FitnessStats/index.sec";
+       // String redirectUrl = getValueFromKey("facebook.redirect.url");//http://localhost:8080/FitnessStats/index.sec";
         String faceAppSecret = getValueFromKey("facebook.app.secret");//"33715d0844267d3ba11a24d44e90be80";
         String newUrl = "https://graph.facebook.com/oauth/access_token?client_id=" + appId + "&client_secret=" + faceAppSecret + "&grant_type=client_credentials";
         CloseableHttpClient httpclient = HttpClientBuilder.create().build();

@@ -15,10 +15,10 @@ import java.util.concurrent.Future;
  */
 public class AsyncJob {
     private final String jobName;
-    private final Future future;
+    private final Future<?> future;
     private final Date startTime;
     
-    public AsyncJob(String key,Future ft){
+    public AsyncJob(String key,Future<?> ft){
         this.jobName = key;
         this.future=ft;
         this.startTime = new Date();
@@ -35,7 +35,7 @@ public class AsyncJob {
     /**
      * @return the future
      */
-    public Future getFuture() {
+    public Future<?> getFuture() {
         return future;
     }
 

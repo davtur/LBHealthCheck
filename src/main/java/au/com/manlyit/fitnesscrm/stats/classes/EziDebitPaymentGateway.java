@@ -108,6 +108,7 @@ public class EziDebitPaymentGateway implements Serializable {
     //private static final String digitalKey = "78F14D92-76F1-45B0-815B-C3F0F239F624";// test
     private static final String paymentGateway = "EZIDEBIT";
     private final static String CHANNEL = "/payments/";
+    private static final long serialVersionUID = 1L;
     private int testAjaxCounter = 0;
     @Inject
     private FutureMapEJB futureMap;
@@ -1789,7 +1790,7 @@ public class EziDebitPaymentGateway implements Serializable {
                 for (int x = fmap.size() - 1; x >= 0; x--) {
                     aj = fmap.get(x);
 
-                    Future ft = aj.getFuture();
+                    Future<?> ft = aj.getFuture();
                     String key = aj.getJobName();
                     if (ft.isDone()) {
                         y++;
@@ -1834,7 +1835,7 @@ public class EziDebitPaymentGateway implements Serializable {
         //  refreshFromDB = true;
     }
 
-    public void checkIfAsyncJobsHaveFinishedAndUpdate(String key, Future ft) {
+    public void checkIfAsyncJobsHaveFinishedAndUpdate(String key, Future<?> ft) {
 
         try {
             if (key.contains("GetCustomerDetails")) {

@@ -263,6 +263,7 @@ public class CustomersController implements Serializable {
         c.setFax(configMapFacade.getConfig("default.customer.details.fax"));
         c.setTelephone(configMapFacade.getConfig("default.customer.details.mobile"));
         c.setGender('F');
+        c.setNewsletter(true);
 
         GregorianCalendar gc = new GregorianCalendar();
         gc.add(Calendar.YEAR, -30);

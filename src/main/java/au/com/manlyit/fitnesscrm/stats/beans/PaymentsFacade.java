@@ -22,6 +22,7 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
+import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
@@ -40,6 +41,7 @@ import org.eclipse.persistence.sessions.Session;
  */
 @Stateless
 public class PaymentsFacade extends AbstractFacade<Payments> {
+    private static final long serialVersionUID = 1L;
 
     @PersistenceContext(unitName = "FitnessStatsPU")
     private EntityManager em;
@@ -65,7 +67,7 @@ public class PaymentsFacade extends AbstractFacade<Payments> {
     }
 
     public List<Payments> findPaymentsByCustomer(Customers customer, boolean bypassCache) {
-        List retList = null;
+           List<Payments> retList = null;
         try {
             CriteriaBuilder cb = em.getCriteriaBuilder();
             CriteriaQuery<Payments> cq = cb.createQuery(Payments.class);
@@ -74,7 +76,7 @@ public class PaymentsFacade extends AbstractFacade<Payments> {
             Expression<Customers> cust = rt.get("customerName");
             cq.where(cb.equal(cust, customer));
             cq.orderBy(cb.desc(dDate));
-            Query q = em.createQuery(cq);
+            TypedQuery<Payments> q = em.createQuery(cq);
             if (bypassCache) {
                 q.setHint("javax.persistence.cache.retrieveMode", "BYPASS");
             }
@@ -87,7 +89,7 @@ public class PaymentsFacade extends AbstractFacade<Payments> {
     }
 
     public List<Payments> findPaymentsByCustomerAndStatus(Customers customer, String status) {
-        List retList = null;
+        List<Payments> retList = null;
 
         try {
             CriteriaBuilder cb = em.getCriteriaBuilder();
@@ -98,7 +100,7 @@ public class PaymentsFacade extends AbstractFacade<Payments> {
             Expression<String> paymentStatus = rt.get("paymentStatus");
             cq.where(cb.and(cb.equal(cust, customer), cb.equal(paymentStatus, status)));
             cq.orderBy(cb.asc(dDate));
-            Query q = em.createQuery(cq);
+            TypedQuery<Payments> q = em.createQuery(cq);
             retList = q.getResultList();
         } catch (Exception e) {
 
@@ -119,14 +121,15 @@ public class PaymentsFacade extends AbstractFacade<Payments> {
             cq.where(cb.and(cb.equal(cust, customer), cb.equal(paymentStatus, PaymentStatus.SUCESSFUL.value())));
             cq.orderBy(cb.desc(dDate));
 
-            Query q = em.createQuery(cq);
-            List<Payments> pl = q.getResultList();
+            TypedQuery<Payments> q = em.createQuery(cq);
+            List<Payments> pl;
+            pl =  q.getResultList();
             if (pl == null) {
                 pl = new ArrayList<>();
             }
 
             if (pl.size() > 0) {
-                cm = (Payments) pl.get(0);
+                cm = pl.get(0);
             }
 
         } catch (Exception e) {
@@ -170,7 +173,7 @@ public class PaymentsFacade extends AbstractFacade<Payments> {
             Expression<Integer> payId = rt.get("id");
             cq.where(cb.equal(payId, id));
 
-            Query q = em.createQuery(cq);
+            TypedQuery<Payments> q = em.createQuery(cq);
             List<Payments> pList = q.getResultList();
             if (pList != null) {
                 if (pList.size() > 0) {
@@ -193,9 +196,9 @@ public class PaymentsFacade extends AbstractFacade<Payments> {
             Expression<String> payId = rt.get("paymentID");
             cq.where(cb.equal(payId, paymentId));
 
-            Query q = em.createQuery(cq);
+            TypedQuery<Payments> q = em.createQuery(cq);
             if (q.getResultList().size() > 0) {
-                cm = (Payments) q.getSingleResult();
+                cm =  q.getSingleResult();
             }
         } catch (Exception e) {
             logger.log(Level.INFO, "paymentID not found or duplicate paymentID  found :" + paymentId, e);
@@ -231,11 +234,11 @@ public class PaymentsFacade extends AbstractFacade<Payments> {
 
             cq.where(predicatesList1.<Predicate>toArray(new Predicate[predicatesList1.size()]));
 
-            Query q = em.createQuery(cq);
+            TypedQuery<Payments> q = em.createQuery(cq);
             if (q.getResultList().size() == 1) {
-                cm = (Payments) q.getSingleResult();
+                cm =  q.getSingleResult();
             } else if (q.getResultList().size() > 1) {
-                cm = (Payments) q.getResultList().get(0);
+                cm =  q.getResultList().get(0);
                 logger.log(Level.WARNING, "findScheduledPayment Multiple payments found , Amount:{0},Date:{1},Ref:{2},Manual:{3}", new Object[]{paymentReference});
 
             } else {
@@ -288,11 +291,11 @@ public class PaymentsFacade extends AbstractFacade<Payments> {
 
             cq.where(predicatesList1.<Predicate>toArray(new Predicate[predicatesList1.size()]));
 
-            Query q = em.createQuery(cq);
+            TypedQuery<Payments> q = em.createQuery(cq);
             if (q.getResultList().size() == 1) {
-                cm = (Payments) q.getSingleResult();
+                cm =  q.getSingleResult();
             } else if (q.getResultList().size() > 1) {
-                cm = (Payments) q.getResultList().get(0);
+                cm =  q.getResultList().get(0);
                 logger.log(Level.WARNING, "findScheduledPayment Multiple payments found , Amount:{0},Date:{1},Ref:{2},Manual:{3}", new Object[]{paymentAmount.toString(), debitDate, paymentReference, manuallyAddedPayment});
 
             } else {
@@ -346,11 +349,11 @@ public class PaymentsFacade extends AbstractFacade<Payments> {
             predicatesList1.add(cb.equal(paymentStatus, PaymentStatus.SENT_TO_GATEWAY.value()));
             cq.where(predicatesList1.<Predicate>toArray(new Predicate[predicatesList1.size()]));
 
-            Query q = em.createQuery(cq);
+            TypedQuery<Payments> q = em.createQuery(cq);
             if (q.getResultList().size() == 1) {
-                cm = (Payments) q.getSingleResult();
+                cm =  q.getSingleResult();
             } else if (q.getResultList().size() > 1) {
-                cm = (Payments) q.getResultList().get(0);
+                cm =  q.getResultList().get(0);
                 logger.log(Level.WARNING, "findScheduledPayment Multiple payments found , Amount:{0},Date:{1},Ref:{2},Manual:{3}", new Object[]{pay.getPaymentAmount().toString(), pay.getPaymentDate().toGregorianCalendar().getTime(), pay.getPaymentReference().getValue(), pay.isManuallyAddedPayment().toString()});
 
             } else {
@@ -407,11 +410,11 @@ public class PaymentsFacade extends AbstractFacade<Payments> {
             predicatesList1.add(cb.equal(paymentStatus, PaymentStatus.SENT_TO_GATEWAY.value()));
             cq.where(predicatesList1.<Predicate>toArray(new Predicate[predicatesList1.size()]));
 
-            Query q = em.createQuery(cq);
+            TypedQuery<Payments> q = em.createQuery(cq);
             if (q.getResultList().size() == 1) {
-                cm = (Payments) q.getSingleResult();
+                cm = q.getSingleResult();
             } else if (q.getResultList().size() > 1) {
-                cm = (Payments) q.getResultList().get(0);
+                cm =  q.getResultList().get(0);
                 logger.log(Level.WARNING, "findScheduledPayment Multiple payments found , Amount:{0},Date:{1},Ref:{2},Manual:{3}", new Object[]{pay.getPaymentAmount().toString(), pay.getPaymentDate().toGregorianCalendar().getTime(), pay.getPaymentReference().getValue(), pay.isManuallyAddedPayment().toString()});
 
             } else {
@@ -442,7 +445,7 @@ public class PaymentsFacade extends AbstractFacade<Payments> {
 
             cq.where(predicatesList1.<Predicate>toArray(new Predicate[predicatesList1.size()]));
 
-            Query q = em.createQuery(cq);
+            TypedQuery<Payments> q = em.createQuery(cq);
             cm = q.getResultList();
 
         } catch (Exception e) {
@@ -474,10 +477,10 @@ public class PaymentsFacade extends AbstractFacade<Payments> {
                 //cust = customersJoin.get("id");
                 custState = customerStateJoin.get("customerState");
             }
-            if (cust != null) { // filter by customer if provided
-                customer = rt.get("customerName");
+          //  if (cust != null) { // filter by customer if provided
+          //      customer = rt.get("customerName");
 
-            }
+          //  }
 
             if (useSettlement) {
                 stime = rt.get("settlementDate");
@@ -523,8 +526,8 @@ public class PaymentsFacade extends AbstractFacade<Payments> {
             } else {
                 cq.orderBy(cb.desc(stime));
             }
-            Query q = em.createQuery(cq);
-            retList = (List<Payments>) q.getResultList();
+            TypedQuery<Payments> q = em.createQuery(cq);
+            retList =  q.getResultList();
 
             // for debugging
             Session session = getEntityManager().unwrap(JpaEntityManager.class).getActiveSession();
