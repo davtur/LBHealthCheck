@@ -1,14 +1,14 @@
 
-//@import url(/FitnessStats/resources/templates/yoo_pace/css/base.css);
-//@import url(/FitnessStats/resources/templates/yoo_pace/css/layout.css);
-//@import url(/FitnessStats/resources/templates/yoo_pace/css/font1/arial.css);
-.wrapper { 
-    max-width: 980px; 
+@import url(/FitnessStats/resources/css/css/base.css);
+//@import url(/FitnessStats/resources/css/css/layout.css);
+@import url(/FitnessStats/resources/css/css/font1/arial.css);
+/*div.wrapper { 
+    max-width: 980px !important; 
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
     box-sizing: border-box;
     margin: auto;
-}
+}*/
 .menu-dropdown a.level1 > span, .menu-dropdown span.level1 > span { width: 70px; }
 #header, #block-main { margin-left: 0px; }
 #maininner { width: 100%; }

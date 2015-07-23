@@ -843,3 +843,4 @@ EditCustomersUploadPhotoButton=Upload
 ListMyStats_GalleryHeader=Photo Gallery
 ListMyStats_photoTakenText=Date Photo Taken:
 ListMyStats_SelectedPic=Selected Picture
+ListMyStats_StatsPanelHeader=My Statistics

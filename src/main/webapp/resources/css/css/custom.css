@@ -1,0 +1,171 @@
+/* Copyright (C) YOOtheme GmbH, YOOtheme Proprietary Use License (http://www.yootheme.com/license) */
+
+/*
+ * Custom Style Sheet - Use this file to style your content
+ */
+
+/* Frontpage Article */
+.grid-seperator { 
+	position: relative;
+	padding-top: 30px;
+	padding-bottom: 30px;
+}
+
+.grid-seperator:before {
+	content: "";
+	display: block;
+	position: absolute;
+	bottom: 0;
+	left: 35px;
+	right: 35px;
+	border-bottom: 1px solid #e2e2e2; 
+}
+
+.grid-seperator.grid-block { margin: -15px -35px 0 -35px; }
+.grid-seperator > .grid-box > * { margin: 0 35px; }
+
+.grid-seperator .grid-box:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	border-width: 0 0 0 1px;
+	border-style: solid;
+	border-color: #e2e2e2;
+}
+
+.grid-seperator .grid-box:after {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	width: 25px;
+	margin-left: -12px;
+	background: url(../../../images/yootheme/seperator_runner.png) 50% 50% no-repeat;
+}
+
+.grid-seperator .grid-box:first-child:before,
+.grid-seperator .grid-box:first-child:after { display: none; }
+
+.grid-seperator .subtitle { margin-top: 15px; }
+
+#page .minus-margin-b30 { margin-bottom: -30px; }
+
+/* Widgetkit Slideshow */
+.wk-slideshow-pacetabs .nav li span.slideshow-icon {
+	display: inline-block;
+	vertical-align: middle;
+	margin-top: -5px;
+	margin-right: 10px;
+	width: 18px;
+	height: 25px;
+	background-position: 0 0;
+	background-repeat: no-repeat;
+}
+
+.wk-slideshow-pacetabs .nav li span.easytracking { background-image: url(../../../images/yootheme/demo/slideshow/slideshow_easytracking.png); }
+.wk-slideshow-pacetabs .nav li:hover span.slideshow-icon,
+.wk-slideshow-pacetabs .nav li.active span.slideshow-icon { background-position: 0 -25px; }
+
+.wk-slideshow-pacetabs .nav li span.activities{ background-image: url(../../../images/yootheme/demo/slideshow/slideshow_activities.png); }
+.wk-slideshow-pacetabs .nav li span.synchronization{ background-image: url(../../../images/yootheme/demo/slideshow/slideshow_synchronization.png); }
+
+.frontpage-image { border-radius: 3px 3px 0 0; }
+
+.frontpage-tabs {
+	position: absolute;
+	z-index: 1;
+}
+
+.frontpage-tabs h1 > span { color: #d7d7d7; }
+
+.frontpage-tabs.slide1 {
+	top: 15px;
+	text-align: center;
+	left: 50%;
+}
+
+.frontpage-tabs.slide1 > * { margin-left: -100%; }
+
+.frontpage-tabs.slide2,
+.frontpage-tabs.slide3 {
+	top: 35px;
+	left: 35px;
+	width: 60%;
+}
+
+/* Bottom B Lists */
+#bottom-b ul { word-wrap: break-word; }w
+
+/* Helper classes */
+
+.small-space li + li { margin-top: 5px; }
+
+/* WordPress Frontpage hide page title */
+
+.wp-page-30 .item > header { display: none; }
+
+/* Only Phones and Tablets (Portrait) */
+@media (max-width: 959px) {
+
+	.frontpage-tabs h1 { margin-bottom: 5px; }
+	.frontpage-tabs p.subtitle { margin-top: 0; }
+
+}
+
+/* Only Tablets (Portrait) */
+@media (min-width: 768px) and (max-width: 959px) {
+
+	.frontpage-tabs.slide1,
+	.frontpage-tabs.slide3 { top: 10px; }
+
+	.frontpage-tabs.slide2 { top: 10px; }
+
+	.frontpage-tabs.slide2,
+	.frontpage-tabs.slide3 { left: 33px; }
+
+}
+
+/* Only Phones (Landscape) */
+@media (min-width: 480px) and (max-width: 767px) {
+
+	.wk-slideshow-pacetabs .nav li span.slideshow-icon { margin-right: 5px; }
+
+	.frontpage-tabs.slide1,
+	.frontpage-tabs.slide3 { top: 0; }
+
+	.frontpage-tabs.slide2 { top: 5px; }
+
+	.frontpage-tabs.slide2,
+	.frontpage-tabs.slide3 { left: 23px; }
+
+	p.subtitle { margin: 10px 0; }
+
+	.frontpage-tabs .button-primary { font-size: 10px; }
+
+}
+
+/* Only Phones (Portrait) */
+@media (max-width: 479px) {
+
+	.grid-seperator .grid-box:before,
+	.grid-seperator .grid-box:after { display: none; }
+
+	.frontpage-tabs.slide1,
+	.frontpage-tabs.slide3 { top: -12px; }
+
+	.frontpage-tabs.slide2 { top: -10px; }
+
+	.frontpage-tabs.slide2,
+	.frontpage-tabs.slide3 { left: 14px; }
+
+	p.subtitle { margin: 5px 0; }
+
+	.frontpage-tabs .button-primary { 
+		padding: 0 5px;
+		font-size: 8px;
+	}
+
+}

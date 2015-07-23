@@ -1,0 +1,39 @@
+/* Copyright (C) YOOtheme GmbH, YOOtheme Proprietary Use License (http://www.yootheme.com/license) */
+
+/*Background Clouds*/
+
+#page {	background: #87c1d1 url(../../images/background/clouds/clouds_bg.jpg) 0 0 repeat-x; }
+
+#page-bg { background: url(../../images/background/clouds/clouds_img.jpg) 50% 0 no-repeat; }
+
+#block-main { 
+	border-color: #bedade;
+	border-color: rgba(0,0,0,0.05);
+	background-color: #e4f2f4;
+	background-color: rgba(255,255,255,0.5);
+}
+
+#block-main > div {
+	border-color: #ebebeb;
+	border-color: rgba(0,0,0,0.08);
+}
+
+#toolbar { text-shadow: 0 1px 0 rgba(255,255,255,0.4); }
+
+#toolbar .menu-line li { background-image: url(../../images/background/clouds/menu_line_item.png); }
+#toolbar .menu-line li:first-child { background: none; }
+
+.searchbox {
+	background-color: #bbe2ea;
+	background-color: rgba(0,0,0,0.03);
+	box-shadow: 0 1px 1px rgba(0,0,0,0.1) inset,
+				0 0 1px rgba(255,255,255,0.4);
+}
+
+.searchbox input { color: #56696d; }
+
+.searchbox input:-moz-placeholder { color: #86a3a9; }
+.searchbox input::-webkit-input-placeholder { color: #86a3a9; }
+.searchbox input.placeholder { color: #86a3a9; }
+
+.searchbox.loading button { background: url(../../images/background/clouds/searchbox_loader.gif) 50% 50% no-repeat; }

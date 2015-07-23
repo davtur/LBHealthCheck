@@ -6,17 +6,35 @@
       xmlns:f="http://java.sun.com/jsf/core"
       xmlns:p="http://primefaces.org/ui">
 
-    <ui:composition template="/template.xhtml">
+    <ui:composition template="/userTemplate.xhtml">
         <ui:define name="title">
-            <h:outputText value="My Statistics"></h:outputText>
+<h:outputText value="My Statistics"></h:outputText>
+
+
+
+
         </ui:define>
         <ui:define name="body">
             <h:form id="myStatsForm">
-                <p:panel header="Welcome #{chartController.customer.firstname}">
-                    <h:panelGrid columns="2">
+                
+                    
+                    <p:panel class="customerDetailsPanel parentOfUploadPhoto profilePictureContainer" header="#{configMapController.getKey('ListCustomersTitle_ProfilePic')}" >
+                        <h:panelGrid columns="1" class="profilePicture">
+                            <p:graphicImage id="photo1" value="#{customersController.selected.profileImage.imageStream}"  cache="false" class="profilePicture"/>
+                            <p:commandButton  id="photoUploadButton" ajax="true"  onclick="PF('uploadPhotoDialogueWidget').show();" update=":growl :uploadPhotoForm"   value="#{configMapController.getKey('EditCustomersUploadPhotoButton')}" immediate="true"/>
+                        </h:panelGrid>
+                    </p:panel>
+               
+                <p:panel header="Welcome #{chartController.customer.firstname}" class="myStatsWelcomeHeader">
+                    <h:panelGrid columns="1">
 
-                        <p:carousel class="myStatsCarousel parentOfUploadPhoto" id="photoGalleryCarousel" value="#{customerImagesController.images}" headerText="#{configMapController.getKey('ListMyStats_GalleryHeader')}" var="image" autoPlayInterval="4000" effectDuration="2000" effect="easeInOutCirc" circular="true" >
+                        <p:carousel class="myStatsCarousel parentOfUploadPhoto" widgetVar="myStatsCarouselWidget" id="photoGalleryCarousel" value="#{customerImagesController.images}" headerText="#{configMapController.getKey('ListMyStats_GalleryHeader')}" var="image" autoPlayInterval="0" effectDuration="2000" effect="elasticBoth" circular="false" >
+                            <f:facet name="header" >
+                                <p:commandButton onclick="PF('myStatsCarouselWidget').startAutoplay()"   icon="fa fa-play-circle-o" /> 
+                                <p:commandButton onclick="PF('myStatsCarouselWidget').stopAutoplay()" icon="fa fa-stop" />
 
+
+                            </f:facet>
                             <p:panel class="customerDetailsPanel"  header="#{configMapController.getKey('ListMyStats_photoTakenText')}  #{image.formattedDate}">
                                 <p:graphicImage value="#{customerImagesController.dynamicImage}"  title="#{configMapController.getKey('ListMyStats_photoTakenText')} #{image.formattedDate}" alt="#{customerImagesController.dynamicTitle}">
                                     <f:param name="imageid" value="#{image.id}"/>
@@ -49,13 +67,6 @@
                                 <p:commandButton  id="photoUploadButton2" ajax="true"  onclick="PF('uploadPhotoDialogueWidget').show();" update=":growl :uploadPhotoForm"   value="#{configMapController.getKey('EditCustomersUploadPhotoButton')}" immediate="true"/>
                             </h:panelGrid>-->
 
-                        <p:panel class="customerDetailsPanel parentOfUploadPhoto" header="#{configMapController.getKey('ListCustomersTitle_ProfilePic')}" >
-                            <h:panelGrid columns="1">
-                                <p:graphicImage id="photo1" value="#{customersController.selected.profileImage.imageStream}"  cache="false" />
-                                <p:commandButton  id="photoUploadButton" ajax="true"  onclick="PF('uploadPhotoDialogueWidget').show();" update=":growl :uploadPhotoForm"   value="#{configMapController.getKey('EditCustomersUploadPhotoButton')}" immediate="true"/>
-                            </h:panelGrid>
-                        </p:panel>
-
                         <!--  <p:panel header="Photo Gallery" style="height: 500px">
                            <p:ring id="basic" value="#{customerImagesController.images}" var="image" easing="easeInOutCirc">
                                <p:column>
@@ -81,17 +92,18 @@
             </h:form>
             <h:form>
 
+                <p:panel header="#{configMapController.getKey('ListMyStats_StatsPanelHeader')}">
+                    <p:dataList  value="#{chartController.modelList}"  var="chart" id="chartsList"  
+                                 paginator="true" rows="10"  
+                                 paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink} {RowsPerPageDropdown}"  
+                                 rowsPerPageTemplate="5,10,15" type="none">
 
-                <p:dataList  value="#{chartController.modelList}"  var="chart" id="chartsList"  
-                             paginator="true" rows="10"  
-                             paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink} {RowsPerPageDropdown}"  
-                             rowsPerPageTemplate="5,10,15" type="none">
+                        <p:panel header="#{chart.title}">                    
+                            <p:chart type="line" styleClass="chartClass"  model="#{chart}"/>
+                        </p:panel>
 
-                    <p:panel header="#{chart.title}">                    
-                        <p:chart type="line" styleClass="chartClass"  model="#{chart}"/>
-                    </p:panel>
-
-                </p:dataList>
+                    </p:dataList>
+                </p:panel>
             </h:form>
             <ui:include src="uploadPhoto.xhtml"/>
         </ui:define>

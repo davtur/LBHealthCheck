@@ -34,11 +34,11 @@
         <param-name>javax.faces.FACELETS_SKIP_COMMENTS</param-name>
         <param-value>true</param-value>
     </context-param>
-    <!-- <context-param>
+   <context-param>
         <param-name>primefaces.FONT_AWESOME</param-name>
         <param-value>true</param-value>
     </context-param>
-   <context-param>
+   <!--  <context-param>
         <param-name>primefaces.PUSH_SERVER_URL</param-name>
         <param-value>http://localhost:8082</param-value>
     </context-param>-->

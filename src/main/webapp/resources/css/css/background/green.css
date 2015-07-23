@@ -1,0 +1,41 @@
+/* Copyright (C) YOOtheme GmbH, YOOtheme Proprietary Use License (http://www.yootheme.com/license) */
+
+/*Background Green*/
+
+#page {	background: #93ebad; }
+
+#block-main { 
+	border-color: #8bdfa4;
+	border-color: rgba(70,120,85,0.1);
+	background-color: #c9f5d6;
+	background-color: rgba(255,255,255,0.5);
+	box-shadow: 0 1px 0 rgba(255,255,255,0.6) inset, 
+				0 0 0 1px rgba(255,255,255,0.3) inset;
+}
+
+#block-main > div {
+	border-color: #dae4dd;
+	border-color: rgba(70,120,85,0.2);
+}
+
+#toolbar,
+.menu-dropdown a.level1,
+.menu-dropdown span.level1 { 
+	color: #497556;
+	text-shadow: 0 1px 0 rgba(255,255,255,0.3);
+}
+
+.searchbox {
+	background-color: #8bdfa4;
+	background-color: rgba(0,0,0,0.05);
+	box-shadow: 0 1px 1px rgba(0,0,0,0.2) inset,
+				0 0 1px rgba(255,255,255,0.4);
+}
+
+.searchbox input { color: #497556; }
+
+.searchbox input:-moz-placeholder { color: #64a176; }
+.searchbox input::-webkit-input-placeholder { color: #64a176; }
+.searchbox input.placeholder { color: #64a176; }
+
+.searchbox.loading button { background: url(../../images/background/green/searchbox_loader.gif) 50% 50% no-repeat; }

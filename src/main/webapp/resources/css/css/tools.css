@@ -1,0 +1,272 @@
+/* Copyright (C) YOOtheme GmbH, YOOtheme Proprietary Use License (http://www.yootheme.com/license) */
+
+@import url(../warp/css/tools.css);
+
+
+/* Buttons (Needed for System Markup)
+----------------------------------------------------------------------------------------------------*/
+
+/* Default */
+.button-default {
+	padding: 7px 10px;
+	background: #efefef;
+	background: rgba(0,0,0,0.05);
+	border-radius: 3px;
+	box-shadow: 0 -1px 0 rgba(0,0,0,0.1) inset;
+	color: #666;
+	text-shadow: 0 1px 0 #fff;
+}
+
+.button-default:hover {
+	background: #ddd;
+	background: rgba(0,0,0,0.1);
+	box-shadow: 0 0 1px rgba(0,0,0,0.1) inset,
+				0 1px 0 rgba(0,0,0,0.1) inset, 
+				0 1px 0 rgba(255,255,255,0.8);
+	color: #666;
+	color: rgba(0,0,0,0.6);
+	text-shadow: 0 1px 0 rgba(255,255,255,0.7);
+}
+
+.button-default:active {
+	background: #d9d9d9;
+	background: rgba(0,0,0,0.15);
+}
+
+/* Primary */
+.button-primary,
+form.style button,
+form.style input[type="button"],
+form.style input[type="submit"] {
+	padding: 7px 10px;
+	border: none;
+	border-radius: 3px;
+	box-shadow: 0 -1px 0 rgba(0,0,0,0.2) inset;
+	color: #fff;
+	text-shadow: 0 1px 0 rgba(0,0,0,0.15);
+}
+
+.button-primary:hover,
+form.style button:hover,
+form.style input[type="button"]:hover,
+form.style input[type="submit"]:hover {
+	box-shadow: 0 1px 0 rgba(0,0,0,0.15) inset;
+	text-shadow: 0 1px 0 rgba(255,255,255,0.15);
+}
+
+
+/* Images and Objects (Needed for System Markup)
+----------------------------------------------------------------------------------------------------*/
+
+img.border-box { border: 1px solid #ddd; }
+
+
+/* Lists and Tables (Needed for System Markup)
+----------------------------------------------------------------------------------------------------*/
+
+/* Line */
+ul.line > li { 	
+	border-top: 1px solid #ddd;
+	border-top: 1px solid rgba(0,0,0,0.1);
+	box-shadow: inset 0 1px 0 rgba(255,255,255,0.7);
+}
+ul.line > li:first-child { 
+	border: none;
+	box-shadow: none;
+}
+
+ul.line li > a { color: #666; }
+
+/* Icon and Bullet */
+ul.line-icon,
+ul.line-bullet { 
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+ul.line-icon > li,
+ul.line-bullet > li { padding-left: 25px; }
+
+ul.line-icon li { background: url(../images/tools/list_icon.png) 0 0 no-repeat; }
+
+ul.line-icon .mail { background-position: 0 -100px; }
+ul.line-icon .phone { background-position: 0 -200px; }
+ul.line-icon > li:first-child { background-position: 0 -5px; }
+ul.line-icon li.mail:first-child { background-position: 0 -105px; }
+ul.line-icon li.phone:first-child { background-position: 0 -205px; }
+
+ul.line-bullet > li { 
+	background-position: 0 0;
+	background-repeat: no-repeat;
+}
+
+ul.line-bullet > li:first-child { background-position: 0 -5px; }
+
+/* Check */
+ul.check > li {
+	padding: 5px 0 0 30px;
+	background-position: 0 0;
+	background-repeat: no-repeat;
+}
+
+/* Zebra List and Table */
+ul.zebra > li,
+table.zebra tbody td { 
+	border-bottom: 1px solid #ddd;
+	border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+ul.zebra > li:first-child,
+table.zebra tbody tr:first-child td { 	
+	border-top: 1px solid #ddd;
+	border-top: 1px solid rgba(0,0,0,0.1);
+}
+
+ul.zebra > li.odd,
+table.zebra tbody tr.odd,
+ul.zebra > li:nth-of-type(odd),
+table.zebra tbody tr:nth-of-type(odd) { background: url(../images/tools/zebra_list.png) 0 0 repeat; }
+
+table.zebra caption { color: #666; }
+
+
+/* Definition Lists
+----------------------------------------------------------------------------------------------------*/
+
+dl.separator dt {	
+	position: relative;
+	padding-top: 5px;
+	padding-bottom: 5px;
+	text-transform: uppercase;
+}
+
+/* border code because of RTL */
+dl.separator dd {
+	padding-top: 5px;
+	padding-bottom: 5px;
+	border-width: 0 0 0 1px;
+	border-style: solid;
+	border-color: #ddd;
+}
+
+dl.separator dt:before {
+	content: "";
+	position: absolute;
+	top: 0;
+	right: -15px;
+	width: 30px;
+	border-top: 1px solid #ddd;
+}
+
+dl.separator dt:after {
+	content: "";
+	position: absolute;
+	top: -3px;
+	right: -3px;
+	width: 5px;
+	height: 5px;
+	background: #fff;
+	border: 1px solid #ddd;
+	border-radius: 6px;
+}
+
+dl.separator dt:first-child:before,
+dl.separator dt:first-child:after { display: none; }
+
+
+/* Text
+----------------------------------------------------------------------------------------------------*/
+
+/* Inline Text Box */
+em.box { 
+	background: url(../images/tools/em_box.png) repeat;
+	border-radius: 3px;
+	text-shadow: 0 1px 0 rgba(255,255,255,0.7);
+}
+
+/* Dotted Horizontal Rule */
+hr.dotted { background: url(../images/tools/line_dotted.png) 0 0 repeat-x; }
+
+
+/* Boxes
+----------------------------------------------------------------------------------------------------*/
+
+.box-content,
+.box-note,
+.box-info,
+.box-warning,
+.box-hint,
+.box-download {
+	background: #fafafa;
+	border-radius: 3px;
+	box-shadow: 0 1px 1px rgba(0,0,0,0.1) inset;
+}
+
+.box-info { background: #ebf5fa url(../images/tools/box_info.png) 0 0 no-repeat; }
+.box-warning { background: #fff0eb url(../images/tools/box_warning.png) 0 0 no-repeat; }
+.box-hint { background: #fffae6 url(../images/tools/box_hint.png) 0 0 no-repeat; }
+.box-download { background: #faffe6 url(../images/tools/box_download.png) 0 0 no-repeat; }
+
+
+/* Forms (Needed for System Markup)
+----------------------------------------------------------------------------------------------------*/
+
+form.box fieldset {
+	border: 1px solid #ddd;
+	border-radius: 3px;
+}
+form.box legend { background: #fff; }
+
+form.style input[type="text"],
+form.style input[type="password"], 
+form.style textarea, 
+form.style select { 
+	padding: 8px;
+	border: none;
+	background: #efefef;
+	border-radius: 3px;
+	box-shadow: 0 1px 1px rgba(0,0,0,0.1) inset;
+	color: #999;
+}
+
+form.style input[type="text"]:focus,
+form.style input[type="password"]:focus, 
+form.style textarea:focus, 
+form.style select:focus {
+	background: #e3e3e3;
+	background: rgba(0,0,0,0.1);
+	box-shadow: 0 1px 1px rgba(0,0,0,0.1) inset;
+	color: #666;
+}
+
+/* Social Icons */
+.social-icons {
+	padding: 0;
+	overflow: hidden;
+	list-style: none;
+}
+
+.social-icons li {
+	margin-left: 3px;
+	float: left;
+}
+
+.social-icons li:first-child { margin-left: 0; }
+
+.social-icons li a {
+	display: block;
+	width: 37px;
+	height: 37px;
+	background: url(../images/tools/icons_social.png) 0 0 no-repeat;
+}
+
+.social-icons .facebook a:hover { background-position: 0 -50px; }
+
+.social-icons .twitter a { background-position: 0 -100px; }
+.social-icons .twitter a:hover { background-position: 0 -150px; }
+
+.social-icons .rss a { background-position: 0 -200px; }
+.social-icons .rss a:hover { background-position: 0 -250px; }
+
+.social-icons .dribbble a { background-position: 0 -300px; }
+.social-icons .dribbble a:hover { background-position: 0 -350px; } 

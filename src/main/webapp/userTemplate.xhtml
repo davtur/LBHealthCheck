@@ -1,0 +1,273 @@
+<?xml version='1.0' encoding='UTF-8' ?> 
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+
+    <f:view contentType="text/html">
+        <h:head>
+            <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" ></meta>
+            <title><ui:insert name="title">Pure Fitness Manly</ui:insert></title>
+
+            <h:outputScript library="js" name="jsfcrud.js"/>
+            <h:outputStylesheet library="css" name="userTemplate.css"/>
+        </h:head>
+
+        <h:body id="page" class="page  isblog ">
+            <p:growl id="growl" widgetVar="growlWidget"    showDetail="true"    />
+            <div id="page-bg">
+                <div class="wrapper clearfix">
+
+                    <div id="header">
+                        <div id="headerbar" class="clearfix" >					
+                            <a id="pfmlogo" href="http://www.purefitnessmanly.com.au">	
+                                <img alt="Logo for Pure Fitness Manly Bootcamps and Personal Training" class="size-auto" src="/FitnessStats/resources/images/logo.png"/>
+                            </a>
+
+                            <div class="newsflash">
+                                <div id="ajaxStatus">
+                                    <p:ajaxStatus id="statusOfAjax">
+                                        <f:facet name="start">Loading...</f:facet>
+                                        <f:facet name="success"><h:outputText value="Success" /></f:facet>
+                                        <f:facet name="error">An error has occurred!</f:facet>
+                                    </p:ajaxStatus>
+                                </div>
+                            </div>
+                            <h:form id="errorForm">
+                                <p:ajaxExceptionHandler type="javax.faces.application.ViewExpiredException"
+                                                        update="exceptionDialog" onexception="PF('exceptionDialog').show();" />
+                                <p:dialog id="exceptionDialog" header="Exception: #{pfExceptionHandler.type}
+                                          occured!" widgetVar="exceptionDialog" height="500px">
+                                    Message: #{pfExceptionHandler.message} <br/>
+                                    Stack Trace: <h:outputText value="#{pfExceptionHandler.formattedStackTrace}"
+                                                               escape="false" />
+                                    <p:button onclick="document.location.href = document.location.href;"
+                                              value="Reload!"/>
+                                </p:dialog>
+                            </h:form>
+
+                            <h:form id="menuForm">
+
+
+
+                                <p:menubar id="mainmenubar1" autoDisplay="true">
+                                    <p:submenu  label="Developer" rendered="#{customersController.isUserInRole('DEVELOPER')}"  id="devMenu1" >
+                                        <p:menuitem
+                                            id="configMap"                              
+                                            action="/dev/configMap/List.xhtml" ajax="false" value="Configuration"    >                        
+                                        </p:menuitem>
+                                        <p:menuitem
+                                            id="toDoList"                              
+                                            action="/dev/toDoList/List.xhtml" ajax="false" value="ToDO List"    >                        
+                                        </p:menuitem>
+                                        <p:menuitem
+                                            id="currency"                              
+                                            action="/dev/currency/List.xhtml" ajax="false"  value="Currency"    >                       
+                                        </p:menuitem>
+
+                                        <p:menuitem
+                                            id="invoiceLine"                              
+                                            action="/dev/invoiceLine/List.xhtml" ajax="false"  value="InvoiceLine"    >                       
+                                        </p:menuitem>
+                                        <p:menuitem
+                                            id="invoiceLineType"                              
+                                            action="/dev/invoiceLineType/List.xhtml" ajax="false"  value="Invoice Line Type"    >                       
+                                        </p:menuitem>
+                                        <p:menuitem
+                                            id="item"                              
+                                            action="/dev/item/List.xhtml" ajax="false"  value="Item"    >                       
+                                        </p:menuitem>
+                                        <p:menuitem
+                                            id="demographic"                              
+                                            action="/dev/demographicTypes/List.xhtml"  ajax="false" value="Edit demographicTypes Items" >                         
+                                        </p:menuitem>
+                                        <p:menuitem
+                                            id="groups"                              
+                                            action="/dev/groups/List.xhtml"  ajax="false" value="Edit Groups Items"    >                       
+                                        </p:menuitem>
+                                        <p:menuitem
+                                            id="payments"                              
+                                            action="/dev/payments/List.xhtml"  ajax="false" value="Ezidebit Payments"    >                       
+                                        </p:menuitem>
+                                        <p:menuitem
+                                            id="sessiontype"                              
+                                            action="/dev/sessionTypes/List.xhtml" ajax="false" value="Edit SessionTypes Items"    >                        
+                                        </p:menuitem>
+                                        <p:menuitem
+                                            id="stats"                              
+                                            action="/dev/stat/List.xhtml" ajax="false" value="Edit Statistics"   >                        
+                                        </p:menuitem>
+                                        <p:menuitem
+                                            id="stattypes"                              
+                                            action="/dev/statTypes/List.xhtml" ajax="false" value="Edit Stat Types"    >                        
+                                        </p:menuitem>
+                                        <p:menuitem
+                                            id="crontriggers"                              
+                                            action="/dev/qrtzCronTriggers/List.xhtml" ajax="false" value="Job Cron Triggers"    >                        
+                                        </p:menuitem>
+                                        <p:menuitem
+                                            id="simpleTriggers"                              
+                                            action="/dev/qrtzSimpleTriggers/List.xhtml" ajax="false" value="Job Simple Triggers"    >                        
+                                        </p:menuitem>
+                                        <p:menuitem
+                                            id="jobDetails"                              
+                                            action="/dev/qrtzJobDetails/List.xhtml" ajax="false" value="Job Details"    >                        
+                                        </p:menuitem>
+                                        <p:menuitem
+                                            id="JobconfigMap"                              
+                                            action="/dev/jobConfigMap/List.xhtml" ajax="false" value="Job Parameters"    >                        
+                                        </p:menuitem>
+                                        <p:menuitem
+                                            id="tasks"                              
+                                            action="/dev/tasks/List.xhtml" ajax="false" value="Task Admin"    >                        
+                                        </p:menuitem>
+                                        <p:menuitem
+                                            id="webMonitor"                              
+                                            action="/dev/monitor/websiteMonitor/List.xhtml" ajax="false" value="Monitoring"    >                        
+                                        </p:menuitem>
+
+                                        <p:menuitem
+                                            id="monitorCharts"                              
+                                            action="/dev/monitoringcharts/List.xhtml" ajax="false" value="Charts"    >                        
+                                        </p:menuitem>
+
+                                        <p:menuitem
+                                            id="goals"                              
+                                            action="/admin/customerGoals/List.xhtml" ajax="false"  value="Goals"    >                       
+                                        </p:menuitem>
+                                        <p:menuitem
+                                            id="import"                              
+                                            action="/admin/payment/customerImport.xhtml" ajax="false"  value="EziDebit Import"    >                       
+                                        </p:menuitem>
+                                        <p:menuitem
+                                            id="surveyQuestionTypes"                              
+                                            action="/admin/surveyquestiontypes/List.xhtml" ajax="false"  value="Survey Question Types"    >                       
+                                        </p:menuitem>
+
+
+                                    </p:submenu>
+
+                                    <p:submenu  label="Admin" rendered="#{customersController.isUserInRole('ADMIN')}"  id="adminMenu1" >
+                                        <p:menuitem
+                                            id="customers"                              
+                                            action="/admin/customers/List.xhtml" value="Customers"  ajax="false"   >                        
+                                        </p:menuitem>
+                                        <p:menuitem action="/admin/reports/List.xhtml" ajax="false"
+                                                    id="reports"     
+                                                    value="Reports">
+                                        </p:menuitem>
+
+                                        <p:menuitem
+                                            id="NewInvoice"                              
+                                            action="/admin/invoice/Invoice.xhtml" ajax="false"  value="New Invoice"    >                       
+                                        </p:menuitem>
+                                        <p:menuitem
+                                            id="invoice"                              
+                                            action="/admin/invoice/List.xhtml" ajax="false"  value="Invoices"    >                       
+                                        </p:menuitem>
+                                        <p:menuitem action="/admin/schedule/schedule.xhtml" ajax="false"
+                                                    id="schedule"     
+                                                    value="Calendar">
+                                        </p:menuitem>
+
+                                        <p:menuitem
+                                            id="statstaken"                              
+                                            action="/admin/statsTaken/List.xhtml" value="Statistics"  ajax="false"   >                        
+                                        </p:menuitem>
+                                        <p:menuitem
+                                            id="sessionhist"
+                                            action="/admin/sessionHistory/List.xhtml"  ajax="false" value="Session History"  >
+                                        </p:menuitem>
+                                        <p:menuitem
+                                            id="photos"                              
+                                            action="/admin/customerImages/List.xhtml" ajax="false"  value="Photos"   >                        
+                                        </p:menuitem>
+                                        <p:menuitem
+                                            id="plans"                              
+                                            action="/admin/plan/List.xhtml" ajax="false"  value="Plans"   >                        
+                                        </p:menuitem>
+                                        <p:menuitem
+                                            id="emailqueue"                              
+                                            action="/admin/emailQueue/List.xhtml" ajax="false"  value="EmailQueue"    >                       
+                                        </p:menuitem>
+                                        <p:menuitem
+                                            id="emails"                              
+                                            action="/admin/emailQueue/CreateEmail.xhtml" ajax="false"  value="New Email"    >                       
+                                        </p:menuitem>
+                                        <p:menuitem
+                                            id="emailTemplates"                              
+                                            action="/admin/emailTemplates/List.xhtml" ajax="false"  value="Templates"    >                       
+                                        </p:menuitem>
+                                        <p:menuitem
+                                            id="fitnesscharts"                              
+                                            action="/admin/fitnessTestCharts/List.xhtml" ajax="false"  value="Fitness Test Charts"    >                       
+                                        </p:menuitem>
+                                        <p:menuitem
+                                            id="auditLog"                              
+                                            action="/admin/auditLog/List.xhtml" ajax="false"  value="Change Log"    >                       
+                                        </p:menuitem>
+                                        <p:menuitem
+                                            id="surveys"                              
+                                            action="/admin/surveys/List.xhtml" ajax="false"  value="Surveys"    >                       
+                                        </p:menuitem>
+                                        <p:menuitem
+                                            id="surveyQuestions"                              
+                                            action="/admin/surveyquestions/List.xhtml" ajax="false"  value="Survey Questions"    >                       
+                                        </p:menuitem>
+                                        <p:menuitem
+                                            id="surveyanswers"                              
+                                            action="/admin/surveyanswers/List.xhtml" ajax="false"  value="Survey Answers"    >                       
+                                        </p:menuitem>
+                                    </p:submenu>
+
+
+                                    <p:submenu  label="Trainer" rendered="#{customersController.isUserInRole('TRAINER')}"  id="trainerMenu1" >
+                                        <p:menuitem
+                                            id="mobile"                              
+                                            action="/trainer/sessionHistory/List.xhtml" ajax="false"  value="Sessions"    >                       
+                                        </p:menuitem>
+
+                                    </p:submenu>
+
+
+                                    <p:submenu label="Menu"  rendered="#{customersController.isUserInRole('USER')}" id="logout1" >
+                                        <p:menuitem
+                                            id="myStats"
+                                            action="/index.xhtml" ajax="false" value="My Stats"  >
+                                        </p:menuitem>
+                                        <p:menuitem
+                                            id="myDetails"
+                                            action="/myDetails.xhtml" ajax="false" value="My Details"  >
+                                        </p:menuitem>
+                                        <p:menuitem
+                                            id="mySessions"
+                                            action="/mySessions.xhtml" ajax="false" value="My Sessions"  >
+                                        </p:menuitem>
+
+                                        <p:menuitem  action="#{customersController.logout}"
+                                                     id="logout"
+                                                     value="Logout" >
+                                        </p:menuitem>
+
+                                    </p:submenu>
+                                </p:menubar>
+                            </h:form>
+                        </div>
+
+                    </div>
+                    <h1>
+                        <ui:insert name="title">Default Title</ui:insert>
+                    </h1>
+                    <div>
+                        <ui:insert name="body">Default Body</ui:insert>
+                    </div>
+                    <div id="footer">
+
+                    </div>
+                </div>
+            </div>
+        </h:body>
+    </f:view>
+</html>

@@ -13,8 +13,10 @@ import au.com.manlyit.fitnesscrm.stats.db.StatsTaken;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -76,7 +78,7 @@ public class ChartController implements Serializable {
      */
     public List<LineChartPointsVertical> getChartData(List<StatTypes> stypes) {
         List<LineChartPointsVertical> chartMeasurements = new ArrayList<>();
-        List<StatsTaken> statsTakenList = ejbStatsTakenFacade.findAllByCustomer(getCustomer());
+        List<StatsTaken> statsTakenList = ejbStatsTakenFacade.findAllByCustomer(getCustomer(),false);
         for (StatsTaken st : statsTakenList) {
             List<Stat> stats = ejbStatsFacade.findAll(st.getId());
             int numberOfStats = stats.size();
@@ -105,7 +107,7 @@ public class ChartController implements Serializable {
         for (StatTypes stype : stypes) {
             chartMeasurements.add(new ChartSeries());
         }
-        List<StatsTaken> statsTakenList = ejbStatsTakenFacade.findAllByCustomer(getCustomer());
+        List<StatsTaken> statsTakenList = ejbStatsTakenFacade.findAllByCustomer(getCustomer(),false);
         for (StatsTaken statTaken : statsTakenList) {
             List<Stat> stats = ejbStatsFacade.findAll(statTaken.getId());
             int numberOfStats = stats.size();
@@ -177,7 +179,9 @@ public class ChartController implements Serializable {
         model.getAxis(AxisType.Y).setLabel(chrt.getYaxisLabel());
         DateAxis axis = new DateAxis();
         axis.setTickAngle(-50);
-        axis.setMax(sdf.format(new Date()));
+        GregorianCalendar gc = new GregorianCalendar();
+        gc.add(Calendar.DAY_OF_YEAR, 3);
+        axis.setMax(sdf.format(gc.getTime()));
         axis.setTickFormat("%b %#d, %y");
         model.getAxes().put(AxisType.X, axis);
         model.setLegendPosition("ne");

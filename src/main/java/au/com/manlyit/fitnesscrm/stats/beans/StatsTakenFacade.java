@@ -5,9 +5,9 @@
  */
 package au.com.manlyit.fitnesscrm.stats.beans;
 
-import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import au.com.manlyit.fitnesscrm.stats.db.StatsTaken;
+import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -40,7 +40,7 @@ public class StatsTakenFacade extends AbstractFacade<StatsTaken> {
         super(StatsTaken.class);
     }
 
-    public List<StatsTaken> findAllByCustomer(Customers customer) {
+    public List<StatsTaken> findAllByCustomer(Customers customer,boolean sortAsc) {
         List retList = null;
         try {
             CriteriaBuilder cb = em.getCriteriaBuilder();
@@ -48,6 +48,12 @@ public class StatsTakenFacade extends AbstractFacade<StatsTaken> {
             Root<StatsTaken> rt = cq.from(StatsTaken.class);
             Expression<Integer> custId = rt.get("customerId");
             cq.where(cb.equal(custId, customer));
+            Expression<Date> express = rt.get("dateRecorded");
+            if (sortAsc) {
+                cq.orderBy(cb.asc(express));
+            } else {
+                cq.orderBy(cb.desc(express));
+            }
             Query q = em.createQuery(cq);
             retList = q.getResultList();
         } catch (Exception e) {

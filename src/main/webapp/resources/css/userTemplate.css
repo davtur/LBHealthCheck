@@ -1,0 +1,137 @@
+
+@import url(/FitnessStats/resources/css/css/base.css);
+@import url(/FitnessStats/resources/css/warp/layout.css);
+@import url(/FitnessStats/resources/css/css/font1/arial.css);
+div.wrapper { 
+    max-width: 1024px !important; 
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+    margin: auto;
+}
+.myStatsWelcomeHeader span.iu-panel-title {
+    font-size: 1.5em !important;
+}
+.profilePictureContainer {
+     max-width: 125px !important;
+     float:right;
+     padding: 3px;
+}
+.profilePicture {
+    max-width: 100px !important;
+}
+.ui-carousel {
+     max-width: 990px !important;
+    
+}
+.ui-carousel-viewport {
+     max-width: 988px !important;
+    
+}
+
+.menu-dropdown a.level1 > span, .menu-dropdown span.level1 > span { width: 70px; }
+#header, #block-main { margin-left: 0px; }
+#maininner { width: 100%; }
+//#headerbar {
+////   background:  url(/FitnessStats/resources/images/logo.png) 50% 0 repeat-x; 
+//}
+div.emailTemplateEditor .ui-editor {
+    height:100% ; 
+}
+
+.editPaymentMethodIFrame {
+    //background-color:  #ffffff !important;
+    max-height: 400px !important;
+    height: 380px !important;
+    width: 320px !important;  
+}
+
+.editPaymentMethodIFrame #wrapper {
+  height: 400px !important; 
+  background-color:  #ffffff !important;
+}
+.editPaymentMethodIFrame #content {
+  height: 400px !important; 
+  background-color:  #ffffff !important;
+}
+/*#ezidebitIframeView {
+   width: 300px !important;  
+   height:450px !important;
+}
+#ezidebitIframeView div#wrapper,
+#ezidebitIframeView html,
+#ezidebitIframeView body,
+#ezidebitIframeView div {
+    background-color: yellow !important;
+    height:400px !important; 
+    //width: 100% !important;
+}*/
+.emailEditorInput{
+  width:600px;  
+}
+#page { background: #0e446a url(/FitnessStats/resources/images/background/ocean_bg.jpg) 50% 0 repeat-x; margin-top: 0px;}
+
+//#page-bg { background: url(/FitnessStats/resources/images/background/ocean_img.jpg) 50% 0 no-repeat; }
+
+.loginPanel { 
+    background: #ffffff url(/FitnessStats/resources/images/ptlogin2.png) 50% 0 no-repeat;  
+     background-color: #ffffff;
+}
+
+.newsflash {
+    display:block;
+    float:right ;
+}
+#customerslistForm1\:active {
+    margin-right: 15px;   
+
+  float:left ;
+}
+#block-main { 
+    border-color: #c8dfe6;
+    border-color: rgba(35,130,160,0.07);
+    background-color: #e9f4f7;
+    background-color: rgba(255,255,255,0.6);
+}
+
+#block-main > div {
+    border-color: #deecf1;
+    border-color: rgba(35,130,160,0.15);
+}
+
+.ui-widget {
+font-family:  Arial,Lucida Grande, Lucida Sans, sans-serif;
+font-size: 0.8em;
+
+}
+.social-icons span a {
+display: block;
+float:left;
+width: 37px;
+height: 37px;
+background: url(/FitnessStats/resources/templates/yoo_pace/images/tools/icons_social.png) 0 0 no-repeat;
+}
+.loginButtonFacebook {
+ margin-left: 5px;   
+ padding-right: 15px;  
+}
+
+.customerDetailsPanel .ui-selectonemenu {
+     width: 100% !important;
+}
+.customerDetailsPanel .ui-button {
+     width: 100% !important;
+     padding: 5px !important;
+}
+.customerDetailsPanel .ui-panel{
+    height: 100%;
+}
+					
+.myStatsCarousel .ui-carousel {
+    
+     padding: 15px !important;
+}
+
+.parentOfUploadPhoto{
+    
+}
