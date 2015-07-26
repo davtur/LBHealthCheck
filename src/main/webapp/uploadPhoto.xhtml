@@ -4,48 +4,43 @@
       xmlns:ui="http://java.sun.com/jsf/facelets"
       xmlns:h="http://java.sun.com/jsf/html"
       xmlns:f="http://java.sun.com/jsf/core"
-      xmlns:p="http://primefaces.org/ui" >
+      xmlns:p="http://primefaces.org/ui" 
+      xmlns:pe="http://primefaces.org/ui/extensions">
     <ui:composition >
         <!--<p:log />--> 
         <p:dialog id="uploadPhotoDialogue"  closable="true"
-                  header="#{configMapController.getKey('uploadPhotoDialogueTitle')}"  widgetVar="uploadPhotoDialogueWidget"> 
-            <h:form id="uploadPhotoForm">   
+                  header="#{configMapController.getKey('uploadPhotoDialogueTitle')}" fitViewport="true" widgetVar="uploadPhotoDialogueWidget"> 
 
-              <p:panel id="panel3" style="height: 550px">
-                            <p:panel id="photoPanel3" header="Select a photo to upload (jpeg)">
-                                <p:panelGrid columns="2" style="width:400px">
-                                    <p:fileUpload fileLimitMessage="The size of the picture is too big! ( > 10MB )" mode="advanced" fileUploadListener="#{customerImagesController.handleFileUpload}" auto="true" update=":uploadPhotoForm:panel3  @form  :growl" allowTypes="/(\.|\/)(gif|jpe?g|png)$/" sizeLimit="10000000" />
-                                    <p:graphicImage id="photo2" class="parentOfUploadPhoto"  value="#{customerImagesController.uploadedImage}" height="400px" cache="false" />
-                                </p:panelGrid>
-                                <!-- <p:panel id="imageCropperPanel" header="Uploaded Image">
-                                     <h:panelGrid columns="2">  
-                                         <p:imageCropper value="#{customerImagesController.croppedImage}"  
-                                                         image="#{customerImagesController.uploadedImageTempFile.path}"  
-                                                         initialCoords="225,75,300,125"/>   
-     
-                                         <p:graphicImage id="localCroppedImage"  rendered="#{not empty customerImagesController.uploadedImageTempFile}"
-                                                         value="#{customerImagesController.uploadedImageTempFile.path}" />  
-                                     </h:panelGrid>  
-     
-                                     <p:commandButton value="Crop"  actionListener="#{customerImagesController.crop}" rendered="#{not empty customerImagesController.uploadedImageTempFile}"
-                                                      
-                                                      update="photoPanel3"/> 
-                                 </p:panel> -->
 
-                            </p:panel>
-                            <h:panelGrid columns="4">
-                                <p:outputLabel  value="#{configMapController.getKey('CreateCustomerImagesLabel_profilephoto')}" for="profilephoto" />
-                                <p:selectBooleanCheckbox id="profilephoto"   value="#{customerImagesController.profilePhoto}" >
-                                    <p:ajax />
-                                </p:selectBooleanCheckbox>  
-                                <p:commandButton id="saveButton" class="parentOfUploadPhoto" disabled="#{customerImagesController.saveButtonDisabled}" update="@(.parentOfUploadPhoto) :growl"   actionListener="#{customerImagesController.createFromDialogue}" value="#{configMapController.getKey('CreateCustomerImagesSaveLink')}" />
-                                <p:commandButton   class="parentOfUploadPhoto"  disabled="#{customerImagesController.saveButtonDisabled}"   actionListener="#{customerImagesController.rotate90degrees}" update=":uploadPhotoForm:panel3   :growl"  value="#{configMapController.getKey('CreateCustomerImagesRotateImage90Link')}" />
+            <h:form id="uploadPhotoForm">                   
+                <p:fileUpload fileLimitMessage="The size of the picture is too big! ( > 10MB )" mode="advanced" fileUploadListener="#{customerImagesController.handleFileUpload}" auto="true" update="@(.parentOfUploadPhoto)   :growl" allowTypes="/(\.|\/)(gif|jpe?g|png)$/" sizeLimit="10000000" />
 
-                            </h:panelGrid>
-                        </p:panel>
-                    <p:commandButton  id="closeDialogueButton"  ajax="true" oncomplete="PF('uploadPhotoDialogueWidget').hide();"  update=":growl "   value="#{configMapController.getKey('EditCustomersuploadPhoto')}" immediate="true"/>
-                     
-                
+
+                <p:panel id="panel3" class="parentOfUploadPhoto" >
+                    <h:panelGrid columns="1">
+                        <p:graphicImage id="uploadedPhoto"  class="parentOfUploadPhoto" value="#{customerImagesController.uploadedImage}" style="max-width: 400px" cache="false" >
+
+                        </p:graphicImage>
+
+                        <pe:imageAreaSelect id="areaSelect"  for="uploadedPhoto"  handles="true"  widgetVar="areaSelectWidget" >  
+                            <p:ajax event="selectEnd" listener="#{customerImagesController.selectEndListener}" update=":growl"/>  
+                        </pe:imageAreaSelect> 
+
+                    </h:panelGrid>
+                    <h:panelGrid columns="5">
+                        <p:outputLabel  value="#{configMapController.getKey('CreateCustomerImagesLabel_profilephoto')}" for="profilephoto" />
+                        <p:selectBooleanCheckbox id="profilephoto"  class="parentOfUploadPhoto" disabled="#{customerImagesController.saveButtonDisabled}"  value="#{customerImagesController.profilePhoto}" >
+                            <p:ajax event="change" />
+
+                        </p:selectBooleanCheckbox>  
+                        <p:commandButton id="saveButton" class="parentOfUploadPhoto" disabled="#{customerImagesController.saveButtonDisabled}"  actionListener="#{customerImagesController.createFromDialogue}" update="@(.parentOfUploadPhoto) :growl"   value="#{configMapController.getKey('CreateCustomerImagesSaveLink')}" />
+                        <p:commandButton id="rotateButton"   class="parentOfUploadPhoto"  disabled="#{customerImagesController.saveButtonDisabled}"   actionListener="#{customerImagesController.rotate90degrees}" update="@(.parentOfUploadPhoto)   :growl"  value="#{configMapController.getKey('CreateCustomerImagesRotateImage90Link')}" />
+                        <p:commandButton id="cropButton"  class="parentOfUploadPhoto" disabled="#{customerImagesController.saveButtonDisabled}" actionListener="#{customerImagesController.crop}"  update="@(.parentOfUploadPhoto) :growl"  value="#{configMapController.getKey('CreateCustomerImagesCropLink')}"  />
+
+
+                    </h:panelGrid>
+                </p:panel>
+                <p:commandButton  id="closeDialogueButton"  ajax="true" oncomplete="PF('uploadPhotoDialogueWidget').hide();"  update=":growl "   value="#{configMapController.getKey('EditCustomersuploadPhoto')}" immediate="true"/>
             </h:form>
         </p:dialog>
     </ui:composition> 

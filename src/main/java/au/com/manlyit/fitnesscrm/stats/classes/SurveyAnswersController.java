@@ -174,7 +174,7 @@ public class SurveyAnswersController implements Serializable {
     public String saveSurvey() {
         try {
             for (SurveyAnswers sa : surveyAnswers) {
-                 getFacade().edit(sa);
+                getFacade().edit(sa);
             }
             JsfUtil.addSuccessMessage(configMapFacade.getConfig("SurveyAnswersCreated"));
         } catch (Exception e) {
@@ -182,6 +182,7 @@ public class SurveyAnswersController implements Serializable {
         }
         return "/myDetails.xhtml?faces-redirect=true";
     }
+
     public void surveyBooleanChangeListener() {
         logger.log(Level.FINE, "Boolean Answer modified");
     }
@@ -444,7 +445,15 @@ public class SurveyAnswersController implements Serializable {
      * @return the selectedSurvey
      */
     public Surveys getSelectedSurvey() {
-        return selectedSurvey;
+        if (selectedSurvey == null) {
+            FacesContext context = FacesContext.getCurrentInstance();
+            SurveysController surveysController = context.getApplication().evaluateExpressionGet(context, "#{surveysController}", SurveysController.class);
+            ArrayList<Surveys> sia = new ArrayList<>(surveysController.getItemsAvailable());
+            if (sia.isEmpty() == false) {
+                selectedSurvey = sia.get(0);
+            }
+         }
+         return selectedSurvey;
     }
 
     /**

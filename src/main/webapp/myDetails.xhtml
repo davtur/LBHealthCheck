@@ -16,35 +16,36 @@
             </h:panelGroup>
             <h:form id="createCustomerForm">
 
-                <h:panelGrid columns="1">
-                    <h:panelGrid columns="2" class="customerDetailsPanel">
+                <h:panelGrid columns="1"  style="width: 100%">
+                    <h:panelGrid columns="2" class="customerDetailsPanel" style="width: 100%">
                         
-                            <p:panel id="panel1" class="customerDetailsPanel"  header="#{configMapController.getKey('ListCustomersTitle_CustomerDetailsHeader')}">
-                                <h:panelGrid columns="2" >
+                            <p:panel id="panel1" class="customerDetailsPanel"  style="width: 100%" header="#{configMapController.getKey('ListCustomersTitle_CustomerDetailsHeader')}">
+                                <h:panelGrid columns="2"  style="width: 100%">
                                     <h:outputLabel value="#{configMapController.getKey('EditCustomersLabel_gender')}" for="gender" />
                                     <h:selectOneMenu id="gender" value="#{customersController.selected.gender}" title="#{configMapController.getKey('EditCustomersTitle_gender')}" required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_gender')}">
                                         <f:selectItem itemValue="F" itemLabel="Female" />
                                         <f:selectItem itemValue="M" itemLabel="Male" />
                                         <p:ajax event="change" />
                                     </h:selectOneMenu>
+                                     <h:outputLabel value="#{configMapController.getKey('EditCustomersLabel_username')}" for="username" />
+                                    <h:outputText id="username" value="#{customersController.selected.username}" title="#{configMapController.getKey('EditCustomersTitle_username')}" />
 
+                                    <h:outputLabel value="#{configMapController.getKey('EditCustomersLabel_dob')}" for="dob" />
+                                    <p:calendar id="dob" value="#{customersController.selected.dob}" pattern="dd/MM/yyyy"   title="#{configMapController.getKey('EditCustomersTitle_dob')}"  required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_dob')}">
+                                        <p:ajax event="dateSelect" listener="#{customersController.dobChangeListener}" update=":growl"  />
+                                    </p:calendar>
+
+ 
                                     <h:outputLabel value="#{configMapController.getKey('EditCustomersLabel_firstname')}" for="firstname" />
                                     <p:inputText id="firstname"  value="#{customersController.selected.firstname}" title="#{configMapController.getKey('EditCustomersTitle_firstname')}"  required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_firstname')}"/>
 
                                     <h:outputLabel value="#{configMapController.getKey('EditCustomersLabel_lastname')}" for="lastname" />
                                     <p:inputText id="lastname" value="#{customersController.selected.lastname}" title="#{configMapController.getKey('EditCustomersTitle_lastname')}"  required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_lastname')}"/>
-
-                                    <h:outputLabel value="#{configMapController.getKey('EditCustomersLabel_username')}" for="username" />
-                                    <h:outputText id="username" value="#{customersController.selected.username}" title="#{configMapController.getKey('EditCustomersTitle_username')}" />
                                     <h:outputLabel value="#{configMapController.getKey('EditCustomersLabel_emailAddress')}" for="emailAddress" />
                                     <p:inputText id="emailAddress" value="#{customersController.selected.emailAddress}" title="#{configMapController.getKey('EditCustomersTitle_emailAddress')}" required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_emailAddress')}">
                                         <f:validator validatorId="au.com.manlyit.fitnesscrm.stats.classes.util.EmailValidator" />
                                     </p:inputText>
-                                    <h:outputLabel value="#{configMapController.getKey('EditCustomersLabel_dob')}" for="dob" />
-                                    <p:calendar id="dob" value="#{customersController.selected.dob}" pattern="dd/MM/yyyy"   title="#{configMapController.getKey('EditCustomersTitle_dob')}"  required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_dob')}">
-                                        <p:ajax event="dateSelect" listener="#{customersController.dobChangeListener}" update=":growl"  />
-                                    </p:calendar>
-                                    <h:outputLabel value="#{configMapController.getKey('EditCustomersLabel_streetAddress')}" for="streetAddress" />
+                                     <h:outputLabel value="#{configMapController.getKey('EditCustomersLabel_streetAddress')}" for="streetAddress" />
                                     <p:inputText id="streetAddress" value="#{customersController.selected.streetAddress}" title="#{configMapController.getKey('EditCustomersTitle_streetAddress')}" required="false" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_streetAddress')}"/>
                                     <h:outputLabel value="#{configMapController.getKey('EditCustomersLabel_suburb')}" for="suburb" />
                                     <p:inputText id="suburb" value="#{customersController.selected.suburb}" title="#{configMapController.getKey('EditCustomersTitle_suburb')}" required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_suburb')}"/>
@@ -55,9 +56,7 @@
                                     <h:outputLabel value="#{configMapController.getKey('EditCustomersLabel_fax')}" for="fax" />
                                     <p:inputText id="fax" value="#{customersController.selected.fax}" title="#{configMapController.getKey('EditCustomersTitle_fax')}" />
 
-                                </h:panelGrid>
-
-                                <h:panelGrid columns="2">
+                               
                                     <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_preferredContact')}" for="preferredContact1" />
                                     <p:selectOneMenu id="preferredContact1" valueChangeListener="#{customersController.selectOneMenuValueChangeListener}" converter="preferedContactConverter" value="#{customersController.selected.preferredContact}" label="#{configMapController.getKey('CreateCustomersTitle_preferredContact')}" >
                                         <f:selectItems value="#{preferedContactController.itemsAvailableAsObjects}"  var="prefContact" itemLabel="#{prefContact.preferedContactMethod}" itemValue="#{prefContact}"/>
@@ -98,7 +97,7 @@
                             <p:panel class="customerDetailsPanel parentOfUploadPhoto" header="#{configMapController.getKey('ListCustomersTitle_ProfilePic')}">
                                 <h:panelGrid columns="1">
                                     <p:graphicImage id="photo1" value="#{customersController.selected.profileImage.imageStream}" height="200px" cache="false" />
-                                    <p:commandButton  id="photoUploadButton" ajax="true"  onclick="PF('uploadPhotoDialogueWidget').show();" update=":growl :uploadPhotoForm"   value="#{configMapController.getKey('EditCustomersUploadPhotoButton')}" immediate="true"/>
+                                    <p:commandButton  id="photoUploadButton" ajax="true"  onclick="PF('uploadPhotoDialogueWidget').show();" update=":growl @(.parentOfUploadPhoto) "   value="#{configMapController.getKey('EditCustomersUploadPhotoButton')}" immediate="true"/>
                                 </h:panelGrid>
                             </p:panel>
                             <p:panel  class="customerDetailsPanel"  header="#{configMapController.getKey('MyDetailsSurveyPanel_title')}">
@@ -106,7 +105,7 @@
 
                                     <p:outputLabel value="#{configMapController.getKey('CreateSurveyanswersLabel_surveyId')}" for="surveyId" />
                                     <p:selectOneMenu id="surveyId" valueChangeListener="#{surveyanswersController.selectOneMenuValueChangeListener}"  value="#{surveyanswersController.selectedSurvey}"  label="#{configMapController.getKey('CreateSurveyanswersTitle_surveyId')}">
-                                        <f:selectItems value="#{surveysController.itemsAvailableSelectOne}"/>
+                                        <f:selectItems value="#{surveysController.itemsAvailableSelectMany}"/>
                                         <p:ajax   update=":createCustomerForm"  />
                                     </p:selectOneMenu>
                                     <p:commandButton id="viewSurveyButton" disabled="#{empty surveyanswersController.selectedSurvey}"  action="customerSurveys"    value="#{configMapController.getKey('MyDeatilsSurveys_viewSurveyLabel')}" update=":growl :createCustomerForm"  /> 

@@ -13,7 +13,6 @@
         <ui:define name="body">
             <h:form id="SurveyanswersListForm">
                 <p:panel>
-                    <p:commandButton id="saveSurveyButton"  action="#{surveyanswersController.saveSurvey}"    value="#{configMapController.getKey('MyDeatilsSurveys_saveSurveyLabel')}" update=":growl" style="padding:5px"  /> 
                     <h:outputText value="#{surveyanswersController.selectedSurvey.description}" style="padding:5px" />
                 </p:panel>
                 <h:panelGroup style="width:850px;padding-bottom: 20px">
@@ -56,6 +55,12 @@
 
                     </p:dataList>
                 </h:panelGroup>
+                
+                               <p:panel>
+                    <p:commandButton id="saveSurveyButton2"  action="#{surveyanswersController.saveSurvey}"    value="#{configMapController.getKey('MyDeatilsSurveys_saveSurveyLabel')}" update=":growl" style="padding:5px"  /> 
+                   
+                </p:panel>
+
             </h:form>
 
 

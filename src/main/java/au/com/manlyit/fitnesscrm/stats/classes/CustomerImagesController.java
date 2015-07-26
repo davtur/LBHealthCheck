@@ -18,6 +18,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
+import static java.lang.String.format;
 import java.net.URL;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
@@ -35,6 +36,7 @@ import javax.faces.component.UIComponent;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.faces.convert.Converter;
+import javax.faces.convert.ConverterException;
 import javax.faces.convert.FacesConverter;
 import javax.faces.event.ActionEvent;
 import javax.faces.event.ValueChangeEvent;
@@ -42,8 +44,8 @@ import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
 import javax.imageio.ImageIO;
-import javax.imageio.stream.FileImageOutputStream;
 import javax.servlet.http.HttpServletRequest;
+import org.apache.poi.util.IOUtils;
 
 import org.apache.sanselan.ImageReadException;
 import org.apache.sanselan.Sanselan;
@@ -55,6 +57,7 @@ import org.apache.sanselan.formats.tiff.constants.TiffConstants;
 import org.primefaces.context.RequestContext;
 import org.primefaces.event.SelectEvent;
 import org.primefaces.event.FileUploadEvent;
+import org.primefaces.extensions.event.ImageAreaSelectEvent;
 import org.primefaces.model.CroppedImage;
 import org.primefaces.model.DefaultStreamedContent;
 import org.primefaces.model.StreamedContent;
@@ -70,7 +73,9 @@ public class CustomerImagesController implements Serializable {
     private static final int new_height = 500;// must match panelheight on gallery component
     private static final int PROFILE_PIC_HEIGHT_IN_PIX = 100;
     private StreamedContent streamedCroppedImage;
+    private int[] imageCropX1X2Y1Y2;
     private CroppedImage croppedImage;
+    private BufferedImage currentImage;
     private File uploadedImageTempFile;
     private CustomerImages selectedForDeletion;
     private DataModel items = null;
@@ -179,7 +184,7 @@ public class CustomerImagesController implements Serializable {
 
     private Customers getSelectedCustomer() {
         FacesContext context = FacesContext.getCurrentInstance();
-        CustomersController custController = (CustomersController) context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
+        CustomersController custController = context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
         return custController.getSelected();
     }
 
@@ -290,8 +295,10 @@ public class CustomerImagesController implements Serializable {
         String fileExtension = fileName.substring(fileName.lastIndexOf(".")).toLowerCase();
         String name = fileName.substring(0, fileName.lastIndexOf(".")).toLowerCase();
         try {
+            //  ServletContext servletContext = (ServletContext) FacesContext.getCurrentInstance().getExternalContext().getContext();
+            //uploadedImageTempFile = new File(servletContext.getRealPath("") + File.separator + "resources" + File.separator + "images" + File.separator + "crop" + File.separator + fileName );
             uploadedImageTempFile = File.createTempFile(name, fileExtension);
-        } catch (IOException ex) {
+        } catch (Exception ex) {
             Logger.getLogger(CustomerImagesController.class.getName()).log(Level.SEVERE, "Create Temp File", ex);
         }
 
@@ -322,6 +329,7 @@ public class CustomerImagesController implements Serializable {
         logger.log(Level.INFO, "processUploadedFile , Name of Uploaded File: {0}, contentType: {1}, file Extension:{2}", new Object[]{fileName, contentType, fileExtension});
         try {
             img = ImageIO.read(file.getInputstream());
+            currentImage = img;
             ImageIO.write(img, fileExtension, uploadedImageTempFile);
         } catch (IOException e) {
             JsfUtil.addErrorMessage(e, "Loading image into buffer error!!");
@@ -331,6 +339,7 @@ public class CustomerImagesController implements Serializable {
         BufferedImage scaledImg = resizeImageWithHintKeepAspect(img, 0, new_height);// use a 0 for heigh or width to keep aspect
         updateImages(scaledImg, fileExtension);
         current.setImageType(imgType);//jpeg
+
         //BufferedImage data = null;
         //Iterator readers = ImageIO.getImageReadersByFormatName("jpeg");
         // ImageReader reader = (ImageReader) readers.next();
@@ -398,6 +407,117 @@ public class CustomerImagesController implements Serializable {
 
     }
 
+    public void selectEndListener(final ImageAreaSelectEvent e) {
+        final FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_INFO, "Area selected",
+                "X1: " + e.getX1()
+                + ", X2: " + e.getX2()
+                + ", Y1: " + e.getY1()
+                + ", Y2: " + e.getY2()
+                + ", Image width: " + e.getImgWidth()
+                + ", Image height: " + e.getImgHeight());
+        imageCropX1X2Y1Y2 = new int[]{e.getX1(), e.getY1(), e.getWidth(), e.getHeight()};
+    }
+
+    public void rotate90degrees(ActionEvent event) {
+        BufferedImage oldImage;
+        try {
+            ByteArrayInputStream is = new ByteArrayInputStream(current.getImage());
+            oldImage = ImageIO.read(is);
+        } catch (IOException ex) {
+            Logger.getLogger(CustomerImagesController.class.getName()).log(Level.SEVERE, null, ex);
+            return;
+        }
+        BufferedImage img = rotateImage(90, oldImage);
+        int newWidth = 0;
+        int newHeight = new_height;
+
+        BufferedImage scaledImg = resizeImageWithHintKeepAspect(img, newWidth, newHeight);
+        String type;
+        switch (current.getImageType()) {
+            case 0:
+                type = "gif";
+                break;
+            case 1:
+                type = "png";
+                break;
+            case 2:
+                type = "jpeg";
+                break;
+            default:
+                type = "jpeg";
+
+        }
+        updateImages(scaledImg, type);
+        JsfUtil.addSuccessMessage(configMapFacade.getConfig("IMageRotateSuccessful"));
+    }
+
+    public void crop() {
+        if (current == null) {
+            return;
+        }
+        BufferedImage oldImage;
+        try {
+            ByteArrayInputStream is = new ByteArrayInputStream(current.getImage());
+            oldImage = ImageIO.read(is);
+        } catch (IOException ex) {
+            Logger.getLogger(CustomerImagesController.class.getName()).log(Level.SEVERE, null, ex);
+            return;
+        }
+        BufferedImage img = oldImage.getSubimage(imageCropX1X2Y1Y2[0], imageCropX1X2Y1Y2[1], imageCropX1X2Y1Y2[2], imageCropX1X2Y1Y2[3]);
+        int newWidth = 0;
+        int newHeight = new_height;
+
+        BufferedImage scaledImg = resizeImageWithHintKeepAspect(img, newWidth, newHeight);
+        String type;
+        switch (current.getImageType()) {
+            case 0:
+                type = "gif";
+                break;
+            case 1:
+                type = "png";
+                break;
+            case 2:
+                type = "jpeg";
+                break;
+            default:
+                type = "jpeg";
+
+        }
+        updateImages(scaledImg, type);
+        JsfUtil.addSuccessMessage(configMapFacade.getConfig("ImageCroppedSuccessful"));
+        /*  String fileName = uploadedFile.getFileName();
+         //String contentType = uploadedFile.getContentType();
+
+         String fileExtension = fileName.substring(fileName.lastIndexOf(".")).toLowerCase();
+         try {
+         // InputStream is = uploadedFile.getInputstream();
+         //  img = ImageIO.read(is);                                        //public BufferedImage getSubimage(int x, int y, int w, int h)
+         BufferedImage cropped = currentImage.getSubimage(imageCropX1X2Y1Y2[0], imageCropX1X2Y1Y2[1], imageCropX1X2Y1Y2[2], imageCropX1X2Y1Y2[3]);
+         //extension = getFileExtensionFromFilePath(uploadedFile.getContentType());
+         updateImages(cropped, fileExtension);
+         } catch (Exception e) {
+         JsfUtil.addErrorMessage(e, "Loading image into buffer error!!");
+         }
+         try {
+
+           
+         //setCroppedImage(getUploadedImage());
+
+         FileImageOutputStream imageOutput;
+         try {
+         imageOutput = new FileImageOutputStream(new File(uploadedImageTempFile.getAbsolutePath()));
+         imageOutput.write(croppedImage.getBytes(), 0, croppedImage.getBytes().length);
+         imageOutput.close();
+         } catch (Exception e) {
+         }
+         } catch (Exception ex) {
+         Logger.getLogger(CustomerImagesController.class.getName()).log(Level.SEVERE, null, ex);
+         JsfUtil.addErrorMessage(ex, "Update image error!!");
+         }*/
+
+        return;
+    }
+
     public void handleFileUpload(FileUploadEvent event) {
 //Barefoot-image_100_by_100.jpg
 
@@ -423,6 +543,7 @@ public class CustomerImagesController implements Serializable {
         try {
 
             setUploadedImage(new DefaultStreamedContent(stream, "image/jpeg"));
+            currentImage = img;
             //setCroppedImage(getUploadedImage());
         } catch (Exception ex) {
             Logger.getLogger(CustomerImagesController.class.getName()).log(Level.SEVERE, null, ex);
@@ -492,39 +613,6 @@ public class CustomerImagesController implements Serializable {
 
     }
 
-    public void rotate90degrees(ActionEvent event) {
-        BufferedImage oldImage;
-        try {
-            ByteArrayInputStream is = new ByteArrayInputStream(current.getImage());
-            oldImage = ImageIO.read(is);
-        } catch (IOException ex) {
-            Logger.getLogger(CustomerImagesController.class.getName()).log(Level.SEVERE, null, ex);
-            return;
-        }
-        BufferedImage img = rotateImage(90, oldImage);
-        int newWidth = 0;
-        int newHeight = new_height;
-
-        BufferedImage scaledImg = resizeImageWithHintKeepAspect(img, newWidth, newHeight);
-        String type;
-        switch (current.getImageType()) {
-            case 0:
-                type = "gif";
-                break;
-            case 1:
-                type = "png";
-                break;
-            case 2:
-                type = "jpeg";
-                break;
-            default:
-                type = "jpeg";
-
-        }
-        updateImages(scaledImg, type);
-        JsfUtil.addSuccessMessage(configMapFacade.getConfig("IMageRotateSuccessful"));
-    }
-
     public void prepareViewFromStatTakenController() {
         try {
             setCurrent((CustomerImages) getItems().getRowData());
@@ -580,7 +668,7 @@ public class CustomerImagesController implements Serializable {
     }
 
     private void clearPhoto() {
-        setCurrent(new CustomerImages());
+        setCurrent(null);
         loadImage(current);
         selectedItemIndex = -1;
         setSaveButtonDisabled(true);
@@ -630,14 +718,15 @@ public class CustomerImagesController implements Serializable {
         clearPhoto();
         recreateModel();
     }
-private void createFromListener(){
-    try {
+
+    private void createFromListener() {
+        try {
             current.setId(0);// auto generated by DB , but cannot be null 
             Customers cust = getSelectedCustomer();
             if (current.getCustomerId() == null) {
                 current.setCustomerId(cust);
             }
-            if(current.getDatetaken() == null){
+            if (current.getDatetaken() == null) {
                 current.setDatetaken(new Date());
             }
             getFacade().create(current);
@@ -649,15 +738,16 @@ private void createFromListener(){
                 custController.setSelected(cust);
             }
             JsfUtil.addSuccessMessage(configMapFacade.getConfig("CustomerImagesCreated"));
-            
+
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
-           
+
         }
-}
+    }
+
     public String create() {
         createFromListener();
-        
+
         return prepareCreate();
     }
 
@@ -694,31 +784,6 @@ private void createFromListener(){
 
     }
 
-    public String crop() {
-
-        InputStream stream = new ByteArrayInputStream(croppedImage.getBytes());
-        try {
-            String extension = getFileExtensionFromFilePath(croppedImage.getOriginalFilename());
-            setUploadedImage(new DefaultStreamedContent(stream, "image/" + extension)
-            );
-            //setCroppedImage(getUploadedImage());
-
-            FileImageOutputStream imageOutput;
-            try {
-                imageOutput = new FileImageOutputStream(new File(uploadedImageTempFile.getAbsolutePath()));
-                imageOutput.write(croppedImage.getBytes(), 0, croppedImage.getBytes().length);
-                imageOutput.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        } catch (Exception ex) {
-            Logger.getLogger(CustomerImagesController.class.getName()).log(Level.SEVERE, null, ex);
-            JsfUtil.addErrorMessage(ex, "Update image error!!");
-        }
-
-        return null;
-    }
-
     private void loadImage(CustomerImages ci) {
         String placeholderImage = "/resources/images/Barefoot-image_100_by_100.jpg";
         uploadedImage = loadDefaultImageIfNull(ci, placeholderImage);
@@ -727,7 +792,7 @@ private void createFromListener(){
 
     private StreamedContent loadDefaultImageIfNull(CustomerImages ci, String defaultImagePath) {
         StreamedContent sc = null;
-        if (ci.getImage() == null) {
+        if (ci == null || ci.getImage() == null) {
             try {
                 // get default image
                 InputStream stream = FacesContext.getCurrentInstance().getExternalContext().getResourceAsStream(defaultImagePath);
@@ -767,7 +832,7 @@ private void createFromListener(){
     public void destroyListener() {
         performDestroy();
         recreateModel();
-   }
+    }
 
     public String destroyAndView() {
         performDestroy();
@@ -847,10 +912,10 @@ private void createFromListener(){
         if (uploadedImage == null) {
             try {
                 // get default image 
-                if(current == null){
-                    setCurrent(getSelectedCustomer().getProfileImage());
-                }
-                loadImage(current);
+                // if (current == null) {
+                //    setCurrent(getSelectedCustomer().getProfileImage());
+                // }
+                loadImage(null);
                 //InputStream stream = FacesContext.getCurrentInstance().getExternalContext().getResourceAsStream("/resources/images/Barefoot-image_100_by_100.jpg");
                 //uploadedImage = new DefaultStreamedContent(stream, "image/jpeg");
             } catch (Exception e) {
@@ -891,7 +956,7 @@ private void createFromListener(){
         if (id != null) {
             Integer imageId = Integer.parseInt(id);
             CustomerImages ci = ejbFacade.find(imageId);
-            current=ci;
+            current = ci;
             RequestContext.getCurrentInstance().update(":myStatsForm:photo2");
             sc = ci.getImageStream();
         } else {
@@ -904,7 +969,7 @@ private void createFromListener(){
                 JsfUtil.addErrorMessage(e, "Trying to set Barefoot-image_100_by_100.jpg as the defailt image failed!");
             }
         }
-        
+
         return sc;
     }
 
@@ -937,7 +1002,7 @@ private void createFromListener(){
     public List<CustomerImages> getImages() {
         if (images == null) {
             createGallery(getUser());
-            if(images == null){
+            if (images == null) {
                 images = new ArrayList<>();
             }
         }
@@ -993,11 +1058,13 @@ private void createFromListener(){
      * @param selectedForDeletion the selectedForDeletion to set
      */
     public void setSelectedForDeletion(CustomerImages selectedForDeletion) {
-        this.selectedForDeletion = selectedForDeletion;
-        current = selectedForDeletion;
+        if (selectedForDeletion != null) {
+            this.selectedForDeletion = selectedForDeletion;
+            current = selectedForDeletion;
 
-        performDestroy();
-        recreateModel();
+            performDestroy();
+            recreateModel();
+        }
 
     }
 
@@ -1069,6 +1136,20 @@ private void createFromListener(){
      */
     public void setUploadedImageTempFile(File uploadedImageTempFile) {
         this.uploadedImageTempFile = uploadedImageTempFile;
+    }
+
+    /**
+     * @return the currentImage
+     */
+    public BufferedImage getCurrentImage() {
+        return currentImage;
+    }
+
+    /**
+     * @param currentImage the currentImage to set
+     */
+    public void setCurrentImage(BufferedImage currentImage) {
+        this.currentImage = currentImage;
     }
 
     @FacesConverter(forClass = CustomerImages.class)

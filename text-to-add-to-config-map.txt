@@ -844,3 +844,6 @@ ListMyStats_GalleryHeader=Photo Gallery
 ListMyStats_photoTakenText=Date Photo Taken:
 ListMyStats_SelectedPic=Selected Picture
 ListMyStats_StatsPanelHeader=My Statistics
+
+CreateCustomerImagesCropLink=Crop
+ImageCroppedSuccessful=The Image was cropped successfully.
