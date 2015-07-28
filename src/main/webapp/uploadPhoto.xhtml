@@ -18,11 +18,11 @@
 
                 <p:panel id="panel3" class="parentOfUploadPhoto" >
                     <h:panelGrid columns="1">
-                        <p:graphicImage id="uploadedPhoto"  class="parentOfUploadPhoto" value="#{customerImagesController.uploadedImage}" style="max-width: 400px" cache="false" >
-
+                        <p:graphicImage id="uploadedPhoto"  class="dialoguePhoto" value="#{customerImagesController.image}" style="max-width: 400px" cache="false" >
+                                                 <f:param name="studentId" value="#{customerImagesController.uploadedImage.id}" />
                         </p:graphicImage>
 
-                        <pe:imageAreaSelect id="areaSelect"  for="uploadedPhoto"  handles="true"  widgetVar="areaSelectWidget" >  
+                        <pe:imageAreaSelect id="areaSelect" class="dialoguePhoto"  for="uploadedPhoto"  handles="true"  widgetVar="areaSelectWidget" >  
                             <p:ajax event="selectEnd" listener="#{customerImagesController.selectEndListener}" update=":growl"/>  
                         </pe:imageAreaSelect> 
 
@@ -34,8 +34,8 @@
 
                         </p:selectBooleanCheckbox>  
                         <p:commandButton id="saveButton" class="parentOfUploadPhoto" disabled="#{customerImagesController.saveButtonDisabled}"  actionListener="#{customerImagesController.createFromDialogue}" update="@(.parentOfUploadPhoto) :growl"   value="#{configMapController.getKey('CreateCustomerImagesSaveLink')}" />
-                        <p:commandButton id="rotateButton"   class="parentOfUploadPhoto"  disabled="#{customerImagesController.saveButtonDisabled}"   actionListener="#{customerImagesController.rotate90degrees}" update="@(.parentOfUploadPhoto)   :growl"  value="#{configMapController.getKey('CreateCustomerImagesRotateImage90Link')}" />
-                        <p:commandButton id="cropButton"  class="parentOfUploadPhoto" disabled="#{customerImagesController.saveButtonDisabled}" actionListener="#{customerImagesController.crop}"  update="@(.parentOfUploadPhoto) :growl"  value="#{configMapController.getKey('CreateCustomerImagesCropLink')}"  />
+                        <p:commandButton id="rotateButton"   class="parentOfUploadPhoto"  disabled="#{customerImagesController.saveButtonDisabled}"   actionListener="#{customerImagesController.rotateStreamedContent90degrees}" update="@(.dialoguePhoto)   :growl"  value="#{configMapController.getKey('CreateCustomerImagesRotateImage90Link')}" />
+                        <p:commandButton id="cropButton"  class="parentOfUploadPhoto" disabled="#{customerImagesController.saveButtonDisabled}" actionListener="#{customerImagesController.crop}"  update="@(.dialoguePhoto) :growl"  value="#{configMapController.getKey('CreateCustomerImagesCropLink')}"  />
 
 
                     </h:panelGrid>

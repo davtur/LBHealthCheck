@@ -14,3 +14,8 @@ ADD CONSTRAINT `fk_notes_1`
 
 
 
+ALTER TABLE `fitnessStats`.`customer_images` 
+CHANGE COLUMN `image` `image` LONGBLOB NOT NULL ,
+ADD COLUMN `mimeType` VARCHAR(127) NOT NULL AFTER `image`,
+ADD COLUMN `image_file_name` VARCHAR(127) NOT NULL AFTER `mimeType`,
+ADD COLUMN `image_description` TEXT NULL AFTER `image_file_name`;

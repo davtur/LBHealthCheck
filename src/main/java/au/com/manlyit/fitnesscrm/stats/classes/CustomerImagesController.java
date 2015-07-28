@@ -18,7 +18,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
-import static java.lang.String.format;
 import java.net.URL;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
@@ -36,16 +35,15 @@ import javax.faces.component.UIComponent;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.faces.convert.Converter;
-import javax.faces.convert.ConverterException;
 import javax.faces.convert.FacesConverter;
 import javax.faces.event.ActionEvent;
+import javax.faces.event.PhaseId;
 import javax.faces.event.ValueChangeEvent;
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
 import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
-import org.apache.poi.util.IOUtils;
 
 import org.apache.sanselan.ImageReadException;
 import org.apache.sanselan.Sanselan;
@@ -293,14 +291,14 @@ public class CustomerImagesController implements Serializable {
         String contentType = file.getContentType();
 
         String fileExtension = fileName.substring(fileName.lastIndexOf(".")).toLowerCase();
-        String name = fileName.substring(0, fileName.lastIndexOf(".")).toLowerCase();
-        try {
+        String name = file.getFileName();
+        //try {
             //  ServletContext servletContext = (ServletContext) FacesContext.getCurrentInstance().getExternalContext().getContext();
             //uploadedImageTempFile = new File(servletContext.getRealPath("") + File.separator + "resources" + File.separator + "images" + File.separator + "crop" + File.separator + fileName );
-            uploadedImageTempFile = File.createTempFile(name, fileExtension);
-        } catch (Exception ex) {
-            Logger.getLogger(CustomerImagesController.class.getName()).log(Level.SEVERE, "Create Temp File", ex);
-        }
+            //uploadedImageTempFile = File.createTempFile(name, fileExtension);
+       // } catch (Exception ex) {
+      //      Logger.getLogger(CustomerImagesController.class.getName()).log(Level.SEVERE, "Create Temp File", ex);
+       // }
 
         /*   try (FileImageOutputStream imageOutput = new FileImageOutputStream(uploadedImageTempFile)) {
          byte[] image = IOUtils.toByteArray(file.getInputstream());
@@ -310,20 +308,20 @@ public class CustomerImagesController implements Serializable {
          Logger.getLogger(CustomerImagesController.class.getName()).log(Level.SEVERE, null, iOException);
          }*/
         int imgType = -1;
-        if (fileExtension.contains("jpeg") || fileExtension.contains("jpg")) {
+        if (contentType.contains("jpeg") || contentType.contains("jpg")) {
             imgType = 2;
             fileExtension = "jpeg";
         }
-        if (fileExtension.contains("png")) {
+        if (contentType.contains("png")) {
             imgType = 1;
             fileExtension = "png";
         }
-        if (fileExtension.contains("gif")) {
+        if (contentType.contains("gif")) {
             imgType = 0;
             fileExtension = "gif";
         }
         if (imgType == -1) {
-            logger.log(Level.WARNING, "processUploadedFile , Cannot add default profile pic  due the picture not being in jpeg, gif or png. resource:{0}", new Object[]{fileName});
+            logger.log(Level.WARNING, "processUploadedFile , Cannot add default profile pic  due the picture not being in jpeg, gif or png. resource:{0}, contentType {1}", new Object[]{fileName,contentType});
             return;
         }
         logger.log(Level.INFO, "processUploadedFile , Name of Uploaded File: {0}, contentType: {1}, file Extension:{2}", new Object[]{fileName, contentType, fileExtension});
@@ -416,6 +414,56 @@ public class CustomerImagesController implements Serializable {
                 + ", Image width: " + e.getImgWidth()
                 + ", Image height: " + e.getImgHeight());
         imageCropX1X2Y1Y2 = new int[]{e.getX1(), e.getY1(), e.getWidth(), e.getHeight()};
+    }
+
+    private void updateImages(BufferedImage img, String fileType) {
+
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        try {
+
+            ImageIO.write(img, fileType, os);
+
+        } catch (IOException ex) {
+            Logger.getLogger(CustomerImagesController.class.getName()).log(Level.SEVERE, null, ex);
+            JsfUtil.addErrorMessage(ex, "Scaling image  error!!");
+        }
+        getSelected().setImage(os.toByteArray());
+        InputStream stream = new ByteArrayInputStream(os.toByteArray());
+        try {
+
+            setUploadedImage(new DefaultStreamedContent(stream, "image/jpeg"));
+            currentImage = img;
+            //setCroppedImage(getUploadedImage());
+        } catch (Exception ex) {
+            Logger.getLogger(CustomerImagesController.class.getName()).log(Level.SEVERE, null, ex);
+            JsfUtil.addErrorMessage(ex, "Update image error!!");
+        }
+
+    }
+
+    public void rotateStreamedContent90degrees(ActionEvent event) {
+        BufferedImage oldImage;
+        //InputStream stream;
+        ByteArrayInputStream bais =  (ByteArrayInputStream) uploadedImage.getStream();
+        bais.reset();
+        try {
+            oldImage = ImageIO.read(bais);
+        } catch (IOException ex) {
+            Logger.getLogger(CustomerImagesController.class.getName()).log(Level.SEVERE, "Rotate image  error!! Could not read uploadedImage StreamedContent ", ex);
+            return;
+        }
+        String fileType = "image/jpeg";
+        BufferedImage img = rotateImage(90, oldImage);
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        try {
+            ImageIO.write(img, fileType, os);
+            //stream = new ByteArrayInputStream(os.toByteArray());
+            setUploadedImage(new DefaultStreamedContent(new ByteArrayInputStream(os.toByteArray()), fileType));
+        } catch (IOException ex) {
+            Logger.getLogger(CustomerImagesController.class.getName()).log(Level.WARNING, "Rotate image  error!!", ex);
+            JsfUtil.addErrorMessage(ex, "Rotate image  error!!");
+        }
+        JsfUtil.addSuccessMessage(configMapFacade.getConfig("ImageRotateSuccessful"));
     }
 
     public void rotate90degrees(ActionEvent event) {
@@ -527,39 +575,17 @@ public class CustomerImagesController implements Serializable {
         //RequestContext.getCurrentInstance().update("createCustomerForm");
     }
 
-    private void updateImages(BufferedImage img, String fileType) {
-
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-        try {
-
-            ImageIO.write(img, fileType, os);
-
-        } catch (IOException ex) {
-            Logger.getLogger(CustomerImagesController.class.getName()).log(Level.SEVERE, null, ex);
-            JsfUtil.addErrorMessage(ex, "Scaling image  error!!");
-        }
-        getSelected().setImage(os.toByteArray());
-        InputStream stream = new ByteArrayInputStream(os.toByteArray());
-        try {
-
-            setUploadedImage(new DefaultStreamedContent(stream, "image/jpeg"));
-            currentImage = img;
-            //setCroppedImage(getUploadedImage());
-        } catch (Exception ex) {
-            Logger.getLogger(CustomerImagesController.class.getName()).log(Level.SEVERE, null, ex);
-            JsfUtil.addErrorMessage(ex, "Update image error!!");
-        }
-
-    }
-
     private BufferedImage rotateImage(int degrees, BufferedImage oldImage) {
-
-        BufferedImage newImage = new BufferedImage(oldImage.getHeight(), oldImage.getWidth(), oldImage.getType());
-        Graphics2D graphics = (Graphics2D) newImage.getGraphics();
-        graphics.rotate(Math.toRadians(degrees), newImage.getWidth() / 2, newImage.getHeight() / 2);
-        graphics.translate((newImage.getWidth() - oldImage.getWidth()) / 2, (newImage.getHeight() - oldImage.getHeight()) / 2);
-        graphics.drawImage(oldImage, 0, 0, oldImage.getWidth(), oldImage.getHeight(), null);
-
+        BufferedImage newImage = null;
+        if (oldImage != null) {
+            newImage = new BufferedImage(oldImage.getHeight(), oldImage.getWidth(), oldImage.getType());
+            Graphics2D graphics = (Graphics2D) newImage.getGraphics();
+            graphics.rotate(Math.toRadians(degrees), newImage.getWidth() / 2, newImage.getHeight() / 2);
+            graphics.translate((newImage.getWidth() - oldImage.getWidth()) / 2, (newImage.getHeight() - oldImage.getHeight()) / 2);
+            graphics.drawImage(oldImage, 0, 0, oldImage.getWidth(), oldImage.getHeight(), null);
+        }else{
+            logger.log(Level.WARNING, "rotateImage failed as the image to be rotated is NULL");
+        }
         return newImage;
     }
 
@@ -904,6 +930,21 @@ public class CustomerImagesController implements Serializable {
     public SelectItem[] getItemsAvailableSelectOne() {
         return JsfUtil.getSelectItems(ejbFacade.findAll(), true);
     }
+    
+    public StreamedContent getImage() throws IOException {
+        FacesContext context = FacesContext.getCurrentInstance();
+
+        if (context.getCurrentPhaseId() == PhaseId.RENDER_RESPONSE) {
+            // So, we're rendering the HTML. Return a stub StreamedContent so that it will generate right URL.
+            return new DefaultStreamedContent();
+        }
+        else {
+            // So, browser is requesting the image. Return a real StreamedContent with the image bytes.
+            String imageId = context.getExternalContext().getRequestParameterMap().get("imageId");
+            CustomerImages custImage = ejbFacade.find(Long.valueOf(imageId));
+            return new DefaultStreamedContent(new ByteArrayInputStream(custImage.getImage()));
+        }
+    }
 
     /**
      * @return the uploadedImage
@@ -921,7 +962,7 @@ public class CustomerImagesController implements Serializable {
             } catch (Exception e) {
                 JsfUtil.addErrorMessage(e, "Trying to set Barefoot-image_100_by_100.jpg as the defailt image failed!");
             }
-            RequestContext.getCurrentInstance().update("@(.parentOfUploadPhoto)");
+            RequestContext.getCurrentInstance().update("@(.dialoguePhoto)");
         }
         return uploadedImage;
     }
