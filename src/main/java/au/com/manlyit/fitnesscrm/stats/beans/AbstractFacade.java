@@ -4,6 +4,7 @@
  */
 package au.com.manlyit.fitnesscrm.stats.beans;
 
+import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -171,5 +172,6 @@ public abstract class AbstractFacade<T> implements Serializable {
 
         return resultList;
     }
+     
 
 }

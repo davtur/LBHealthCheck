@@ -150,10 +150,10 @@ public class PaymentsFacade extends AbstractFacade<Payments> {
             cq.where(cb.and(cb.equal(cust, customer), cb.equal(paymentStatus, PaymentStatus.SCHEDULED.value())));
             cq.orderBy(cb.asc(dDate));
 
-            Query q = em.createQuery(cq);
+            TypedQuery<Payments> q = em.createQuery(cq);
 
             if (q.getResultList().size() > 0) {
-                cm = (Payments) q.getResultList().get(0);
+                cm =  q.getResultList().get(0);
             } else {
                 logger.log(Level.INFO, "findNextScheduledPayment did not find any scheduled payments for customer:{0}", customer.getUsername());
             }

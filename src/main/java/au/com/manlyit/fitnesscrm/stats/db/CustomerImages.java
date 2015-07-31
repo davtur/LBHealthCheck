@@ -29,6 +29,7 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 import org.primefaces.model.DefaultStreamedContent;
 import org.primefaces.model.StreamedContent;
@@ -46,9 +47,25 @@ import org.primefaces.model.StreamedContent;
     @NamedQuery(name = "CustomerImages.findByImageType", query = "SELECT c FROM CustomerImages c WHERE c.imageType = :imageType"),
     @NamedQuery(name = "CustomerImages.findByDatetaken", query = "SELECT c FROM CustomerImages c WHERE c.datetaken = :datetaken")})
 public class CustomerImages implements Serializable {
+    @Basic(optional = false)
+    @NotNull()
     @Lob
     @Column(name = "image")
     private byte[] image;
+    @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 127)
+    @Column(name = "mimeType")
+    private String mimeType;
+    @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 127)
+    @Column(name = "image_file_name")
+    private String imageFileName;
+    @Lob
+    @Size(max = 65535)
+    @Column(name = "image_description")
+    private String imageDescription;
     @OneToOne(mappedBy = "profileImage")
     private Customers customers;
     
@@ -196,5 +213,29 @@ public class CustomerImages implements Serializable {
 
     public void setImage(byte[] image) {
         this.image = image;
+    }
+
+    public String getMimeType() {
+        return mimeType;
+    }
+
+    public void setMimeType(String mimeType) {
+        this.mimeType = mimeType;
+    }
+
+    public String getImageFileName() {
+        return imageFileName;
+    }
+
+    public void setImageFileName(String imageFileName) {
+        this.imageFileName = imageFileName;
+    }
+
+    public String getImageDescription() {
+        return imageDescription;
+    }
+
+    public void setImageDescription(String imageDescription) {
+        this.imageDescription = imageDescription;
     }
 }

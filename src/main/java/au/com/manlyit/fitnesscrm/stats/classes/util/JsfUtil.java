@@ -86,7 +86,7 @@ public class JsfUtil implements Serializable{
     }
 
     public static void addErrorMessage(String msg) {
-        FacesMessage facesMsg = new FacesMessage(FacesMessage.SEVERITY_ERROR, msg, "");
+        FacesMessage facesMsg = new FacesMessage(FacesMessage.SEVERITY_ERROR,"Error" , msg);
         FacesContext.getCurrentInstance().addMessage(null, facesMsg);
         Logger.getLogger(JsfUtil.class.getName()).severe(msg);
     }
@@ -105,14 +105,14 @@ public class JsfUtil implements Serializable{
     }
 
     public static void addSuccessMessage(String msg) {
-        FacesMessage facesMsg = new FacesMessage(FacesMessage.SEVERITY_INFO, msg, null);
+        FacesMessage facesMsg = new FacesMessage(FacesMessage.SEVERITY_INFO, "Notification", msg);
         FacesContext.getCurrentInstance().addMessage("successInfo", facesMsg);
     }
 
     public static void addSuccessMessage(String summary, String message) {
         FacesMessage facesMsg;
         if (summary.contains(message)) {
-            facesMsg = new FacesMessage(FacesMessage.SEVERITY_INFO, message, null);
+            facesMsg = new FacesMessage(FacesMessage.SEVERITY_INFO, "Notification", message);
         } else {
             facesMsg = new FacesMessage(FacesMessage.SEVERITY_INFO, summary, message);
         }

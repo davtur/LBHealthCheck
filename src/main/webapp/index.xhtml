@@ -28,8 +28,8 @@
 
                 <p:panel>
                     <p:contentFlow class="myStatsCarousel parentOfUploadPhoto" value="#{customerImagesController.images}" var="image"  style="height: 400px">
-                        <p:graphicImage  styleClass="content" value="#{customerImagesController.dynamicImage}"  title="#{configMapController.getKey('ListMyStats_photoTakenText')} #{image.formattedDate}" alt="#{customerImagesController.dynamicTitle}" >
-                            <f:param name="imageid" value="#{image.id}"/>
+                        <p:graphicImage  styleClass="content" value="#{customerImagesController.image}"  title="#{configMapController.getKey('ListMyStats_photoTakenText')} #{image.formattedDate}" alt="#{customerImagesController.dynamicTitle}" >
+                            <f:param name="imageId" value="#{image.id}"/>
                             <f:param name="imagedescid" value="#{image.id}"/>
                             <f:param name="imagetitleid" value="#{image.id}"/>
                         </p:graphicImage>
