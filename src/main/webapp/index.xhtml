@@ -32,51 +32,44 @@
 
                         <p:graphicImage  styleClass="content" value="#{customerImagesController.image}" onclick="clickFlow(this, event)" title="#{configMapController.getKey('ListMyStats_photoTakenText')} #{image.formattedDate}" alt="#{customerImagesController.dynamicTitle}" >
                             <f:param name="imageId" value="#{image.id}"/>
-                            <f:param name="imagedescid" value="#{image.id}"/>
-                            <f:param name="imagetitleid" value="#{image.id}"/>
-
-                        </p:graphicImage>
+                         </p:graphicImage>
 
                         <div class="caption">#{image.formattedDate}</div>
                         <div class="hiddenId" style="display: none;">#{image.id}</div>
-                         <!--  <p:commandButton  update=":growl @(.parentOfUploadPhoto) "  value="Delete" actionListener="#{customerImagesController.carouselImageClicked}">
-                              <f:setPropertyActionListener value="#{image}" target="#{customerImagesController.selectedForDeletion}" />   
-                           </p:commandButton>-->
                     </p:contentFlow>
                     <p:contextMenu  for="mainCarousel" >
                         <p:menuitem value="Refresh" update="mainCarousel" />
                         <p:separator/>
                         <p:menuitem value="Add New" onclick="PF('uploadPhotoDialogueWidget').show()" />
-                        <p:menuitem value="Delete" oncomplete="removePicture([{name:'selectedImage', value: $('.item.active div.hiddenId').text()}]);"
-                                    />
+                        <p:menuitem value="Delete" oncomplete="removePicture([{name:'selectedImage', value: $('.item.active div.hiddenId').text()}]);" />
                     </p:contextMenu>
                     <p:remoteCommand name="removePicture" actionListener="#{carouselBean.removePicture}" update="mainCarousel"/>
                 </p:panel> 
                 <script>
-                     function clickFlow(item, e) {
-                          if ($(item).parent().hasClass('active')) {
-                             e.stopImmediatePropagation();
-                         }
-                     }
-                 </script>
-                  <!--  <p:panel >
-                       <p:lightBox styleClass="imagebox" height="400">
-                           <ui:repeat var="image" value="#{customerImagesController.images}" >
-                               <h:outputLink value="#{customerImagesController.image}"  >
-                                   <p:graphicImage value="#{customerImagesController.image}" >
-                                                  
-                                   <f:param name="imageId" value="#{image.id}"/>
-                                      </p:graphicImage>
-                               </h:outputLink>
-                           </ui:repeat>
-   
-   
-   
-   
-   
-                       </p:lightBox>
-   
-                   </p:panel>-->
+                    function clickFlow(item, e) {
+                        if ($(item).parent().hasClass('active')) {
+                            e.stopImmediatePropagation();
+                        }
+                    }
+                </script>
+                <!--  <p:panel >
+                     <p:lightBox styleClass="imagebox" height="400">
+                         <ui:repeat var="image" value="#{customerImagesController.images}" >
+                             <h:outputLink value="#{customerImagesController.image}"  >
+                                 <p:graphicImage value="#{customerImagesController.image}" >
+                                                
+                                 <f:param name="imageId" value="#{image.id}"/>
+                                    </p:graphicImage>
+                             </h:outputLink>
+                         </ui:repeat>
+ 
+ 
+ 
+ 
+ 
+                     </p:lightBox>
+ 
+                 </p:panel>-->
 
 
                    <!--     <p:carousel class="myStatsCarousel parentOfUploadPhoto" widgetVar="myStatsCarouselWidget" id="photoGalleryCarousel" value="#{customerImagesController.images}" headerText="#{configMapController.getKey('ListMyStats_GalleryHeader')}" var="image" numVisible="6" autoPlayInterval="0" effectDuration="2000" effect="elasticBoth" circular="false" >-->

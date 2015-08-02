@@ -201,13 +201,17 @@ public class CustomerImagesController implements Serializable {
     }
 
     private void createGallery(int customerId) {
-        images = getFacade().findAllByCustId(customerId, true);
-        for (int i = images.size() - 1; i >= 0; i--) {
-            CustomerImages ci = images.get(i);
-            if (ci.getImage() == null) {
-                images.remove(i);
-            }
+        List<CustomerImages> imageList = getFacade().findAllByCustId(customerId, true);
+        if(images == null){
+            images = new ArrayList<>();
+        }else{
+            images.clear();
         }
+        imageList.stream().filter((ci) -> (ci != null && ci.getImage() != null)).forEach((ci) -> {
+            images.add(ci);
+        });
+        imageList.clear();
+        
     }
 
     public UploadedFile getUploadedFile() {
@@ -1077,7 +1081,7 @@ public class CustomerImagesController implements Serializable {
 
     public String getDynamicTitle() {
         String title = "";
-        String id = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("imagetitleid");
+        String id = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("imageId");
         if (id != null) {
             Integer imageId = Integer.parseInt(id);
             CustomerImages ci = ejbFacade.find(imageId);
@@ -1088,7 +1092,7 @@ public class CustomerImagesController implements Serializable {
 
     public String getDynamicDescription() {
         String desc = "";
-        String id = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("imagedescid");
+        String id = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("imageId");
         if (id != null) {
             Integer imageId = Integer.parseInt(id);
             CustomerImages ci = ejbFacade.find(imageId);
@@ -1100,7 +1104,7 @@ public class CustomerImagesController implements Serializable {
 
     public StreamedContent getDynamicImage() {
         StreamedContent sc = null;
-        String id = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("imageid");
+        String id = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("imageId");
 
         if (id != null) {
             Integer imageId = Integer.parseInt(id);
