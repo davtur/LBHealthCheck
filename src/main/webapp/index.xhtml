@@ -4,14 +4,11 @@
       xmlns:ui="http://java.sun.com/jsf/facelets"
       xmlns:h="http://java.sun.com/jsf/html"
       xmlns:f="http://java.sun.com/jsf/core"
-      xmlns:p="http://primefaces.org/ui">
+      xmlns:p="http://primefaces.org/ui"  >
 
     <ui:composition template="/userTemplate.xhtml">
         <ui:define name="title">
-            <h:outputText value="My Statistics"></h:outputText>
-
-
-
+            <h:outputText  value="My Statistics"></h:outputText>
 
         </ui:define>
         <ui:define name="body">
@@ -20,25 +17,66 @@
                     <p:panel class="customerDetailsPanel parentOfUploadPhoto profilePictureContainer" header="#{configMapController.getKey('ListCustomersTitle_ProfilePic')}" >
                         <h:panelGrid columns="1" class="profilePicture">
                             <p:graphicImage id="photo1" value="#{customersController.selected.profileImage.imageStream}"  cache="false" class="profilePicture"/>
-                            <p:commandButton  id="photoUploadButton" ajax="true"  onclick="PF('uploadPhotoDialogueWidget').show();" update=":growl @(.parentOfUploadPhoto) "   value="#{configMapController.getKey('EditCustomersUploadPhotoButton')}" immediate="true"/>
+                            <p:commandButton  id="photoUploadButton" ajax="true"  onclick="PF('uploadPhotoDialogueWidget').show();" update=":growl @(.parentOfUploadPhoto) "    value="#{configMapController.getKey('EditCustomersUploadPhotoButton')}" immediate="true"/>
                         </h:panelGrid>
                     </p:panel>
                 </p:panel>
+                <p:remoteCommand  actionListener="#{customerImagesController.carouselImageClicked}"  name="carouselClicked" immediate="true"/>
+
+
+
 
 
                 <p:panel>
-                    <p:contentFlow class="myStatsCarousel parentOfUploadPhoto" value="#{customerImagesController.images}" var="image"  style="height: 400px">
-                        <p:graphicImage  styleClass="content" value="#{customerImagesController.image}"  title="#{configMapController.getKey('ListMyStats_photoTakenText')} #{image.formattedDate}" alt="#{customerImagesController.dynamicTitle}" >
+                    <p:contentFlow id="mainCarousel" class="myStatsCarousel parentOfUploadPhoto" value="#{customerImagesController.images}" var="image"  style="height: 400px" widgetVar="contentFlowWidget" >
+
+                        <p:graphicImage  styleClass="content" value="#{customerImagesController.image}" onclick="clickFlow(this, event)" title="#{configMapController.getKey('ListMyStats_photoTakenText')} #{image.formattedDate}" alt="#{customerImagesController.dynamicTitle}" >
                             <f:param name="imageId" value="#{image.id}"/>
                             <f:param name="imagedescid" value="#{image.id}"/>
                             <f:param name="imagetitleid" value="#{image.id}"/>
+
                         </p:graphicImage>
+
                         <div class="caption">#{image.formattedDate}</div>
-                       <!-- <p:commandButton  update=":growl @(.parentOfUploadPhoto) "  value="Delete">
-                            <f:setPropertyActionListener value="#{image}" target="#{customerImagesController.selectedForDeletion}" />
-                        </p:commandButton>-->
+                        <div class="hiddenId" style="display: none;">#{image.id}</div>
+                         <!--  <p:commandButton  update=":growl @(.parentOfUploadPhoto) "  value="Delete" actionListener="#{customerImagesController.carouselImageClicked}">
+                              <f:setPropertyActionListener value="#{image}" target="#{customerImagesController.selectedForDeletion}" />   
+                           </p:commandButton>-->
                     </p:contentFlow>
-                </p:panel>
+                    <p:contextMenu  for="mainCarousel" >
+                        <p:menuitem value="Refresh" update="mainCarousel" />
+                        <p:separator/>
+                        <p:menuitem value="Add New" onclick="PF('uploadPhotoDialogueWidget').show()" />
+                        <p:menuitem value="Delete" oncomplete="removePicture([{name:'selectedImage', value: $('.item.active div.hiddenId').text()}]);"
+                                    />
+                    </p:contextMenu>
+                    <p:remoteCommand name="removePicture" actionListener="#{carouselBean.removePicture}" update="mainCarousel"/>
+                </p:panel> 
+                <script>
+                     function clickFlow(item, e) {
+                          if ($(item).parent().hasClass('active')) {
+                             e.stopImmediatePropagation();
+                         }
+                     }
+                 </script>
+                  <!--  <p:panel >
+                       <p:lightBox styleClass="imagebox" height="400">
+                           <ui:repeat var="image" value="#{customerImagesController.images}" >
+                               <h:outputLink value="#{customerImagesController.image}"  >
+                                   <p:graphicImage value="#{customerImagesController.image}" >
+                                                  
+                                   <f:param name="imageId" value="#{image.id}"/>
+                                      </p:graphicImage>
+                               </h:outputLink>
+                           </ui:repeat>
+   
+   
+   
+   
+   
+                       </p:lightBox>
+   
+                   </p:panel>-->
 
 
                    <!--     <p:carousel class="myStatsCarousel parentOfUploadPhoto" widgetVar="myStatsCarouselWidget" id="photoGalleryCarousel" value="#{customerImagesController.images}" headerText="#{configMapController.getKey('ListMyStats_GalleryHeader')}" var="image" numVisible="6" autoPlayInterval="0" effectDuration="2000" effect="elasticBoth" circular="false" >-->

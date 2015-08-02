@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.net.URL;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.ParsePosition;
@@ -27,6 +26,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
@@ -40,7 +40,6 @@ import javax.faces.context.FacesContext;
 import javax.faces.convert.Converter;
 import javax.faces.convert.FacesConverter;
 import javax.faces.event.ActionEvent;
-import javax.faces.event.PhaseId;
 import javax.faces.event.ValueChangeEvent;
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
@@ -70,6 +69,7 @@ public class CustomerImagesController implements Serializable {
 
     private static final Logger logger = Logger.getLogger(CustomerImagesController.class.getName());
     private CustomerImages current;
+    private CustomerImages lightBoxImage;
     private static final int new_width = 800;// must match panelheight on gallery component
     private static final int new_height = 500;// must match panelheight on gallery component
     private static final int PROFILE_PIC_HEIGHT_IN_PIX = 100;
@@ -825,6 +825,7 @@ public class CustomerImagesController implements Serializable {
         return type;
 
     }
+  
 
     private String getFileExtensionFromFilePath(String path) {
         return path.substring(path.lastIndexOf(".")).toLowerCase();
@@ -1000,6 +1001,15 @@ public class CustomerImagesController implements Serializable {
     
     
      */
+  
+      public void carouselImageClicked(ActionEvent event){
+            FacesContext context = FacesContext.getCurrentInstance();
+         String imageId = context.getExternalContext().getRequestParameterMap().get("imageId");
+            if (imageId != null) {
+                setUploadedImage(ejbFacade.find(Integer.valueOf(imageId)));
+            }
+            RequestContext.getCurrentInstance().openDialog("uploadPhotoDialogueWidget");
+    }
 
     public StreamedContent getImage() throws IOException {
         FacesContext context = FacesContext.getCurrentInstance();
@@ -1030,6 +1040,19 @@ public class CustomerImagesController implements Serializable {
             return new DefaultStreamedContent(new ByteArrayInputStream(getUploadedImage().getImage()));
         }
     }
+    public StreamedContent getLightBoxImageAsStream() throws IOException {
+        FacesContext context = FacesContext.getCurrentInstance();
+
+        if (context.getRenderResponse()) {
+            // So, we're rendering the HTML. Return a stub StreamedContent so that it will generate right URL.
+            return new DefaultStreamedContent();
+        } else {
+            // So, browser is requesting the image. Return a real StreamedContent with the image bytes.
+            return new DefaultStreamedContent(new ByteArrayInputStream(getLightBoxImage().getImage()));
+        }
+    }
+    
+    
 
     /**
      * @return the uploadedImage
@@ -1122,7 +1145,11 @@ public class CustomerImagesController implements Serializable {
 
     }
 
+    public void removeImageFromList(CustomerImages image){
+        images.remove(image);
+    }
     /**
+     * @param image
      * @return the images
      */
     public List<CustomerImages> getImages() {
@@ -1290,6 +1317,20 @@ public class CustomerImagesController implements Serializable {
      */
     public void setImageAreaSelectEvent1(ImageAreaSelectEvent imageAreaSelectEvent1) {
         this.imageAreaSelectEvent1 = imageAreaSelectEvent1;
+    }
+
+    /**
+     * @return the lightBoxImage
+     */
+    public CustomerImages getLightBoxImage() {
+        return lightBoxImage;
+    }
+
+    /**
+     * @param lightBoxImage the lightBoxImage to set
+     */
+    public void setLightBoxImage(CustomerImages lightBoxImage) {
+        this.lightBoxImage = lightBoxImage;
     }
 
     @FacesConverter(forClass = CustomerImages.class)

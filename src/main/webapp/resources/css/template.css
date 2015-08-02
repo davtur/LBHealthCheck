@@ -9,6 +9,10 @@
     box-sizing: border-box;
     margin: auto;
 }*/
+
+.hiddenId {
+    visibility: hidden;
+}
 .menu-dropdown a.level1 > span, .menu-dropdown span.level1 > span { width: 70px; }
 #header, #block-main { margin-left: 0px; }
 #maininner { width: 100%; }
