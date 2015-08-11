@@ -713,7 +713,7 @@ public class SessionHistoryController implements Serializable {
         FacesContext context = FacesContext.getCurrentInstance();
 
         try {
-            MySessionsChart1 controller = (MySessionsChart1) context.getApplication().evaluateExpressionGet(context, "#{mySessionsChart1}", MySessionsChart1.class);
+            MySessionsChart1 controller = context.getApplication().evaluateExpressionGet(context, "#{mySessionsChart1}", MySessionsChart1.class);
            //            controller.createChart();
             
             controller.recreateModel();

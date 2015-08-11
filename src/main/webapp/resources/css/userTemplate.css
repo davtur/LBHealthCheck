@@ -14,13 +14,17 @@ div.wrapper {
 }
 .profilePictureContainer {
      max-width: 125px !important;
-     float:right;
+    // float:right;
      padding: 3px;
-     margin-top: 18px;
-     margin-left: 5px;
+
+     margin: 5px;
+     display: block;
 }
 .profilePicture {
     max-width: 100px !important;
+}
+.contentFlowPanelClass {
+    width: 100% !important;
 }
 .ui-carousel {
      max-width: 990px !important;
@@ -111,7 +115,7 @@ display: block;
 float:left;
 width: 37px;
 height: 37px;
-background: url(/FitnessStats/resources/templates/yoo_pace/images/tools/icons_social.png) 0 0 no-repeat;
+background: url(/FitnessStats/resources/images/icons_social.png) 0 0 no-repeat;
 }
 .loginButtonFacebook {
  margin-left: 5px;   

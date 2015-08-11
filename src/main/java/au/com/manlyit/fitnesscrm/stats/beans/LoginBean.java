@@ -50,9 +50,11 @@ import org.apache.http.impl.client.HttpClientBuilder;
 public class LoginBean implements Serializable {
 
     private static final Logger logger = Logger.getLogger(LoginBean.class.getName());
+    private static final long serialVersionUID = 1L;
     private String username;
     private String password;
     private boolean renderFacebook = false;
+    FacesContext facesContext;
     private String facebookId;
     private boolean mobileDeviceUserAgent = false;
     private String faceBookAccessToken;
@@ -173,9 +175,11 @@ public class LoginBean implements Serializable {
     public void myPostConstruct() {
         //String renderKitId = FacesContext.getCurrentInstance().getViewRoot().getRenderKitId();
         // if (renderKitId.equalsIgnoreCase("PRIMEFACES_MOBILE")) {
+
+        facesContext = FacesContext.getCurrentInstance();
         if (mobileDevice() == true) {
             //REDIRECT TO  MOBILE PAGE
-            ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
+            ExternalContext ec = facesContext.getExternalContext();
 
             try {
                 this.setMobileDeviceUserAgent(true);
@@ -208,8 +212,8 @@ public class LoginBean implements Serializable {
     }
 
     public void checkAlreadyLoggedin() throws IOException {
-        FacesContext context = FacesContext.getCurrentInstance();
-        HttpServletRequest request = (HttpServletRequest) context.getExternalContext().getRequest();
+
+        HttpServletRequest request = (HttpServletRequest) facesContext.getExternalContext().getRequest();
 
         String authenticatedUser = request.getRemoteUser();
         if (authenticatedUser != null) {
@@ -222,7 +226,7 @@ public class LoginBean implements Serializable {
     private void redirectToLandingPage() {
         FacesContext context = FacesContext.getCurrentInstance();
         ExternalContext ec = context.getExternalContext();
-        HttpServletRequest request = (HttpServletRequest) context.getExternalContext().getRequest();
+        HttpServletRequest request = (HttpServletRequest) ec.getRequest();
         try {
 
             HttpSession httpSession = request.getSession();
@@ -244,8 +248,8 @@ public class LoginBean implements Serializable {
 
     public void login() {
         FacesContext context = FacesContext.getCurrentInstance();
-        //ExternalContext ec = context.getExternalContext();
-        HttpServletRequest request = (HttpServletRequest) context.getExternalContext().getRequest();
+        ExternalContext ec = context.getExternalContext();
+        HttpServletRequest request = (HttpServletRequest) ec.getRequest();
 
         try {
             try {
@@ -435,7 +439,7 @@ public class LoginBean implements Serializable {
     public String getAccessToken() {
         String token = null;
         String appId = getValueFromKey("facebook.app.id");//"247417342102284";
-       // String redirectUrl = getValueFromKey("facebook.redirect.url");//http://localhost:8080/FitnessStats/index.sec";
+        // String redirectUrl = getValueFromKey("facebook.redirect.url");//http://localhost:8080/FitnessStats/index.sec";
         String faceAppSecret = getValueFromKey("facebook.app.secret");//"33715d0844267d3ba11a24d44e90be80";
         String newUrl = "https://graph.facebook.com/oauth/access_token?client_id=" + appId + "&client_secret=" + faceAppSecret + "&grant_type=client_credentials";
         CloseableHttpClient httpclient = HttpClientBuilder.create().build();

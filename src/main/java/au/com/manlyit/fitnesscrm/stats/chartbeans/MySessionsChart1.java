@@ -53,6 +53,7 @@ public class MySessionsChart1 implements Serializable {
     private Date startDate;
     private Date endDate;
     private int dateInterval = 1;
+    private boolean showAllUsers = false;
 
     @PostConstruct
     private void initDates() {
@@ -82,52 +83,51 @@ public class MySessionsChart1 implements Serializable {
 
     //@PostConstruct
    /* public void createChart() {
-        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yy");
-        FacesContext context = FacesContext.getCurrentInstance();
-        Customers loggedInUser = null;
-        try {
-            //loggedInUser = ejbCustomerFacade.findCustomerByUsername(context.getExternalContext().getRemoteUser());
+     SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yy");
+     FacesContext context = FacesContext.getCurrentInstance();
+     Customers loggedInUser = null;
+     try {
+     //loggedInUser = ejbCustomerFacade.findCustomerByUsername(context.getExternalContext().getRemoteUser());
 
-            CustomersController custController = (CustomersController) context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
-            loggedInUser = custController.getSelected();
+     CustomersController custController = (CustomersController) context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
+     loggedInUser = custController.getSelected();
 
-        } catch (ELException e) {
-            JsfUtil.addErrorMessage(e, "My Sessions Chart Critical Error", "Couldn't find the customer in the database.");
-        }
-        ChartSeries groupSessionSeries = new ChartSeries();
-        groupSessionSeries.setLabel("Group Sessions");
-        ChartSeries ptSessionSeries = new ChartSeries();
-        ptSessionSeries.setLabel("PT Sessions");
-        int weeksToDisplay = 26;
-        GregorianCalendar cal = new GregorianCalendar();
-        cal.set(Calendar.MILLISECOND, 999);
-        cal.set(Calendar.SECOND, 59);
-        cal.set(Calendar.MINUTE, 59);
-        cal.set(Calendar.HOUR_OF_DAY, 23);
+     } catch (ELException e) {
+     JsfUtil.addErrorMessage(e, "My Sessions Chart Critical Error", "Couldn't find the customer in the database.");
+     }
+     ChartSeries groupSessionSeries = new ChartSeries();
+     groupSessionSeries.setLabel("Group Sessions");
+     ChartSeries ptSessionSeries = new ChartSeries();
+     ptSessionSeries.setLabel("PT Sessions");
+     int weeksToDisplay = 26;
+     GregorianCalendar cal = new GregorianCalendar();
+     cal.set(Calendar.MILLISECOND, 999);
+     cal.set(Calendar.SECOND, 59);
+     cal.set(Calendar.MINUTE, 59);
+     cal.set(Calendar.HOUR_OF_DAY, 23);
         
 
-        try {
-            for (int x = 0; x < weeksToDisplay; x++) {
-                Date top = cal.getTime();
-                cal.add(Calendar.WEEK_OF_YEAR, -1);
-                Date bottom = cal.getTime();
-                String xAxixValue = sdf.format(top);
-                String ptSessionIDs = "1,2,8";// 1,2,8 = PT
-                String groupSessionIDs = "3,5,6,7";   // 3,5,6,7 = Group
-                int numberOfPTSessionsInTheWeek = ejbSessionHistoryFacade.findMySessionsChartData(loggedInUser.getId(), top, bottom, ptSessionIDs);
-                ptSessionSeries.set(xAxixValue, numberOfPTSessionsInTheWeek);
-                int numberOfGroupSessionsInTheWeek = ejbSessionHistoryFacade.findMySessionsChartData(loggedInUser.getId(), top, bottom, groupSessionIDs);
-                groupSessionSeries.set(xAxixValue, numberOfGroupSessionsInTheWeek);
-            }
-        } catch (Exception e) {
-            JsfUtil.addErrorMessage(e, "My Sessions Chart Critical Error", "Couldn't get customer session data from the database.");
-        }
-        model = new BarChartModel();
-        model.addSeries(groupSessionSeries);
-        model.addSeries(ptSessionSeries);
+     try {
+     for (int x = 0; x < weeksToDisplay; x++) {
+     Date top = cal.getTime();
+     cal.add(Calendar.WEEK_OF_YEAR, -1);
+     Date bottom = cal.getTime();
+     String xAxixValue = sdf.format(top);
+     String ptSessionIDs = "1,2,8";// 1,2,8 = PT
+     String groupSessionIDs = "3,5,6,7";   // 3,5,6,7 = Group
+     int numberOfPTSessionsInTheWeek = ejbSessionHistoryFacade.findMySessionsChartData(loggedInUser.getId(), top, bottom, ptSessionIDs);
+     ptSessionSeries.set(xAxixValue, numberOfPTSessionsInTheWeek);
+     int numberOfGroupSessionsInTheWeek = ejbSessionHistoryFacade.findMySessionsChartData(loggedInUser.getId(), top, bottom, groupSessionIDs);
+     groupSessionSeries.set(xAxixValue, numberOfGroupSessionsInTheWeek);
+     }
+     } catch (Exception e) {
+     JsfUtil.addErrorMessage(e, "My Sessions Chart Critical Error", "Couldn't get customer session data from the database.");
+     }
+     model = new BarChartModel();
+     model.addSeries(groupSessionSeries);
+     model.addSeries(ptSessionSeries);
 
-    }*/
-
+     }*/
     public Date getChartStartTime() {
         GregorianCalendar startCal = new GregorianCalendar();
         startCal.setTime(getStartDate());
@@ -211,11 +211,18 @@ public class MySessionsChart1 implements Serializable {
                 }
                 Date strt = startCal.getTime();
                 Date end = endCal.getTime();
-                if (isTrainer == false) {
-                    sessions = ejbSessionHistoryFacade.findSessionsByParticipantAndDateRange(user, strt, end, true);
+                if (user == null) {
+                    sessions = ejbSessionHistoryFacade.findSessionsByDateRange(strt, end, true);
+                    logger.log(Level.INFO, "Get ALL Sessions , No.Sessions:{1},startdate:{2},End date:{3}", new Object[]{sessions.size(), strt, end});
                 } else {
-                    sessions = ejbSessionHistoryFacade.findSessionsByTrainerAndDateRange(user, strt, end, true);
-                    logger.log(Level.FINE, "Get Sessions for Trainer:{0}, No.Sessions:{1},startdate:{2},End date:{3}", new Object[]{user.getUsername(), sessions.size(), strt, end});
+                    if (isTrainer == false) {
+                        sessions = ejbSessionHistoryFacade.findSessionsByParticipantAndDateRange(user, strt, end, true);
+                        logger.log(Level.INFO, "Get Sessions for Participant:{0}, No.Sessions:{1},startdate:{2},End date:{3}", new Object[]{user.getUsername(), sessions.size(), strt, end});
+
+                    } else {
+                        sessions = ejbSessionHistoryFacade.findSessionsByTrainerAndDateRange(user, strt, end, true);
+                        logger.log(Level.INFO, "Get Sessions for Trainer:{0}, No.Sessions:{1},startdate:{2},End date:{3}", new Object[]{user.getUsername(), sessions.size(), strt, end});
+                    }
                 }
 
                 for (SessionHistory sess : sessions) {
@@ -280,7 +287,7 @@ public class MySessionsChart1 implements Serializable {
         xAxis.setLabel(getXaxisLabel());
         xAxis.setTickAngle(65);
 
-       // Axis yAxis = ccModel.getAxis(AxisType.Y);
+        // Axis yAxis = ccModel.getAxis(AxisType.Y);
         // yAxis.setLabel(getY);
         return ccModel;
     }
@@ -295,7 +302,7 @@ public class MySessionsChart1 implements Serializable {
         if (model == null) {
             try {
                 FacesContext context = FacesContext.getCurrentInstance();
-                CustomersController custController = (CustomersController) context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
+                CustomersController custController = context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
                 model = createSessionsChart(false, custController.getSelected());
             } catch (ELException e) {
                 JsfUtil.addErrorMessage(e, "My Sessions Chart Critical Error", "Couldn't find the customer in the database.");
@@ -326,7 +333,12 @@ public class MySessionsChart1 implements Serializable {
         if (customModel == null) {
             //boolean isTrainer = FacesContext.getCurrentInstance().getExternalContext().isUserInRole("TRAINER");
             boolean isTrainer = ejbGroupsFacade.isCustomerInGroup(getSelectedCustomer(), "TRAINER");
-            customModel = createSessionsChart(isTrainer, getSelectedCustomer());
+            if (showAllUsers) {
+                customModel = createSessionsChart(isTrainer, null);
+            } else {
+                customModel = createSessionsChart(isTrainer, getSelectedCustomer());
+            }
+
         }
         return customModel;
     }
@@ -350,10 +362,10 @@ public class MySessionsChart1 implements Serializable {
     public void setSelectedCustomer(Customers selectedCustomer) {
         customModel = null;
         this.selectedCustomer = selectedCustomer;
-          FacesContext context = FacesContext.getCurrentInstance();
-            SessionHistoryController sessionHistoryController = (SessionHistoryController) context.getApplication().evaluateExpressionGet(context, "#{sessionHistoryController}", SessionHistoryController.class);
-            sessionHistoryController.recreateModel();
-            sessionHistoryController.setSessionHistoryExportFileName();
+        FacesContext context = FacesContext.getCurrentInstance();
+        SessionHistoryController sessionHistoryController = context.getApplication().evaluateExpressionGet(context, "#{sessionHistoryController}", SessionHistoryController.class);
+        sessionHistoryController.recreateModel();
+        sessionHistoryController.setSessionHistoryExportFileName();
     }
 
     /**
@@ -373,7 +385,7 @@ public class MySessionsChart1 implements Serializable {
     /**
      * @return the startDate
      */
-    public Date getStartDate() {
+     public Date getStartDate() {
         return startDate;
     }
 
@@ -424,5 +436,23 @@ public class MySessionsChart1 implements Serializable {
         items[2] = new SelectItem(3, "Daily");
 
         return items;
+    }
+
+    /**
+     * @return the showAllUsers
+     */
+    public boolean isShowAllUsers() {
+        return showAllUsers;
+    }
+
+    /**
+     * @param showAllUsers the showAllUsers to set
+     */
+    public void setShowAllUsers(boolean showAllUsers) {
+        this.showAllUsers = showAllUsers;
+        FacesContext context = FacesContext.getCurrentInstance();
+        SessionHistoryController sessionHistoryController = context.getApplication().evaluateExpressionGet(context, "#{sessionHistoryController}", SessionHistoryController.class);
+        sessionHistoryController.recreateModel();
+        sessionHistoryController.setSessionHistoryExportFileName();
     }
 }

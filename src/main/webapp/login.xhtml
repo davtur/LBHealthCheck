@@ -13,7 +13,8 @@
         <ui:define name="body">
 
             <f:metadata>
-                <f:event type="preRenderView" listener="#{loginBean.checkAlreadyLoggedin}" />
+              <!--  <f:event type="preRenderView" listener="#{loginBean.checkAlreadyLoggedin}" />-->
+                <f:viewAction action="#{loginBean.checkAlreadyLoggedin}" />
             </f:metadata>
             <h:form id="mainLoginForm">
 

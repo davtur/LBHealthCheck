@@ -78,32 +78,42 @@
             <param-name>org.atmosphere.cpr.broadcasterCacheClass</param-name>
             <param-value>org.atmosphere.cache.UUIDBroadcasterCache</param-value>
         </init-param>
+        <load-on-startup>1</load-on-startup>
+        <async-supported>true</async-supported>
+    </servlet>
+    <!-- <servlet>
+       <servlet-name>Push Servlet</servlet-name>
+        <servlet-class>org.primefaces.push.PushServlet</servlet-class>
+        <init-param>
+            <param-name>org.atmosphere.cpr.broadcasterCacheClass</param-name>
+            <param-value>org.atmosphere.cache.UUIDBroadcasterCache</param-value>
+        </init-param>-->
         <!-- Tell Atmosphere to use TrackMessageSizeInterceptor - in order to   
         avoid glued messages -->
-        <init-param>
+    <!--    <init-param>
             <param-name>org.atmosphere.cpr.AtmosphereInterceptor</param-name>
             <param-value>org.atmosphere.client.TrackMessageSizeInterceptor</param-value>
-        </init-param>
+        </init-param>-->
         <!-- that is for long-pollin in order to cache messsages in the session   
         -->
-        <init-param>
+    <!--    <init-param>
             <param-name>org.atmosphere.cpr.sessionSupport</param-name>
             <param-value>true</param-value>
         </init-param>
         <init-param>
             <param-name>org.atmosphere.cpr.broadcasterCacheClass</param-name>
             <param-value>org.atmosphere.cache.SessionBroadcasterCache</param-value>
-        </init-param>
+        </init-param>-->
         <!-- This one I have no idea what it does. Someone in the forums   
         suggested it -->
-        <init-param>
+    <!--    <init-param>
             <param-name>org.atmosphere.disableOnStateEvent</param-name>
             <param-value>true</param-value>
         </init-param>
         
         <load-on-startup>2</load-on-startup>
         <async-supported>true</async-supported>
-    </servlet>
+    </servlet>-->
     <servlet-mapping>
         <servlet-name>Push Servlet</servlet-name>
         <url-pattern>/primepush/*</url-pattern>

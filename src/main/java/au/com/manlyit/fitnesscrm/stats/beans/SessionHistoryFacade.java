@@ -10,6 +10,7 @@ import au.com.manlyit.fitnesscrm.stats.db.Participants;
 import au.com.manlyit.fitnesscrm.stats.db.SessionHistory;
 import au.com.manlyit.fitnesscrm.stats.db.SessionTrainers;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
@@ -19,12 +20,18 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
+import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import org.eclipse.persistence.internal.jpa.EJBQueryImpl;
+import org.eclipse.persistence.jpa.JpaEntityManager;
+import org.eclipse.persistence.queries.DatabaseQuery;
+import org.eclipse.persistence.sessions.DatabaseRecord;
+import org.eclipse.persistence.sessions.Session;
 
 /**
  *
@@ -113,7 +120,7 @@ public class SessionHistoryFacade extends AbstractFacade<SessionHistory> {
             Predicate condition1 = cb.lessThan(stime, endDate);
             Predicate condition2 = cb.greaterThanOrEqualTo(stime, startDate);
             Predicate condition3 = cb.equal(sessionParticipant, participant);
-            cq.where(cb.and(condition1, condition2,condition3));
+            cq.where(cb.and(condition1, condition2, condition3));
             cq.select(rt);
             if (sortAsc) {
                 cq.orderBy(cb.asc(stime));
@@ -236,11 +243,121 @@ public class SessionHistoryFacade extends AbstractFacade<SessionHistory> {
         return retList;
     }
 
+    public List<SessionHistory> findFilteredSessions(Customers[] participants, Customers[] trainers, Date startDate, Date endDate, boolean sortAsc) {
+
+        // Dates must be valid or return empty list
+        // if participants or trainers is empty or null use a wildcard.
+        List<SessionHistory> retList = null;
+        boolean showAllTrainers = false;
+        boolean showAllParticipants = false;
+        ArrayList<Predicate> predicatesList = new ArrayList<>();
+        ArrayList<Predicate> predicatesList2 = new ArrayList<>();
+        if (trainers == null || trainers.length == 0) {
+            showAllTrainers = true;
+        }
+        if (participants == null || participants.length == 0) {
+            showAllParticipants = true;
+        }
+        try {
+            CriteriaBuilder cb = em.getCriteriaBuilder();
+            CriteriaQuery<SessionHistory> cq = cb.createQuery(SessionHistory.class);
+            Root<SessionHistory> rt = cq.from(SessionHistory.class);
+
+            Join<SessionHistory, SessionTrainers> jn = rt.joinCollection("sessionTrainersCollection");
+            Expression<Customers> sessionTrainer = jn.get("customerId");
+            Join<SessionHistory, Participants> jn2 = rt.joinCollection("participantsCollection");
+            Expression<Customers> sessionParticipant = jn2.get("customerId");
+            Expression<Date> stime = rt.get("sessiondate");
+            Predicate condition1 = cb.greaterThanOrEqualTo(stime, startDate);
+            Predicate condition2 = cb.lessThan(stime, endDate);
+
+            if (showAllTrainers == false) {
+                for (Customers trainer : trainers) {
+                    predicatesList.add(cb.equal(sessionTrainer, trainer));
+                }
+            }
+            if (showAllParticipants == false) {
+                for (Customers participant : participants) {
+                    predicatesList2.add(cb.equal(sessionParticipant, participant));
+                }
+            }
+
+            cq.where(cb.and(condition1, condition2));
+            if (showAllTrainers == false && showAllParticipants == false) {
+                cq.where(cb.and(cb.or(predicatesList.<Predicate>toArray(new Predicate[predicatesList.size()])), cb.or(predicatesList2.<Predicate>toArray(new Predicate[predicatesList.size()])), condition1, condition2));
+            }
+            if (showAllTrainers == true && showAllParticipants == false) {
+                cq.where(cb.and(cb.or(predicatesList2.<Predicate>toArray(new Predicate[predicatesList.size()])), condition1, condition2));
+            }
+            if (showAllTrainers == false && showAllParticipants == true) {
+                cq.where(cb.and(cb.or(predicatesList.<Predicate>toArray(new Predicate[predicatesList.size()])), condition1, condition2));
+            }
+            if (showAllTrainers == true && showAllParticipants == true) {
+                cq.where(cb.and(condition1, condition2));
+            }
+
+            if (sortAsc) {
+                cq.orderBy(cb.asc(stime));
+            } else {
+                cq.orderBy(cb.desc(stime));
+            }
+            TypedQuery<SessionHistory> q = em.createQuery(cq);
+
+            retList = q.getResultList();
+            // for debugging
+            Session session = getEntityManager().unwrap(JpaEntityManager.class).getActiveSession();
+            DatabaseQuery databaseQuery = ((EJBQueryImpl) q).getDatabaseQuery();
+            databaseQuery.prepareCall(session, new DatabaseRecord());
+            String sqlString = databaseQuery.getSQLString();
+            //This SQL will contain ? for parameters. To get the SQL translated with the arguments you need a DatabaseRecord with the parameter values.
+            // String sqlString2 = databaseQuery.getTranslatedSQLString(session, recordWithValues);
+            logger.log(Level.INFO, "findFilteredSessions SQL Query String: {0}  -----------------Records Found:{1},", new Object[]{sqlString, retList.size()});
+
+        } catch (Exception e) {
+            JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
+        }
+        return retList;
+    }
+
+    public List<SessionHistory> findSessionsByDateRange(Date startDate, Date endDate, boolean sortAsc) {
+        List<SessionHistory> retList = null;
+
+        try {
+            CriteriaBuilder cb = em.getCriteriaBuilder();
+            CriteriaQuery<SessionHistory> cq = cb.createQuery(SessionHistory.class
+            );
+            Root<SessionHistory> rt = cq.from(SessionHistory.class);
+
+            Join<SessionHistory, SessionTrainers> jn = rt.joinCollection("sessionTrainersCollection");
+            Expression<Customers> sessionTrainer = jn.get("customerId");
+            Expression<Date> stime = rt.get("sessiondate");
+
+            Predicate condition1 = cb.greaterThanOrEqualTo(stime, startDate);
+            Predicate condition2 = cb.lessThan(stime, endDate);
+
+            cq.where(cb.and(condition1, condition2));
+            cq.select(rt);
+
+            if (sortAsc) {
+                cq.orderBy(cb.asc(stime));
+            } else {
+                cq.orderBy(cb.desc(stime));
+            }
+            Query q = em.createQuery(cq);
+            retList = (List<SessionHistory>) q.getResultList();
+        } catch (Exception e) {
+            JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
+        }
+
+        return retList;
+    }
+
     public int countSessionsByTrainerAndDateRange(Customers trainer, Date startDate, Date endDate, boolean sortAsc) {
 
         try {
             CriteriaBuilder cb = em.getCriteriaBuilder();
-            CriteriaQuery<Long> cq = cb.createQuery(Long.class);
+            CriteriaQuery<Long> cq = cb.createQuery(Long.class
+            );
             Root<Long> rt = cq.from(Long.class);
 
             Join<SessionHistory, SessionTrainers> jn = rt.joinCollection("sessionTrainersCollection");
@@ -250,6 +367,7 @@ public class SessionHistoryFacade extends AbstractFacade<SessionHistory> {
             Predicate condition1 = cb.greaterThanOrEqualTo(stime, startDate);
             Predicate condition2 = cb.lessThan(stime, endDate);
             Predicate condition3 = cb.equal(sessionTrainer, trainer);
+
             cq.where(cb.and(condition1, condition2, condition3));
 
             cq.select(cb.count(rt));
@@ -268,12 +386,14 @@ public class SessionHistoryFacade extends AbstractFacade<SessionHistory> {
 
         try {
             CriteriaBuilder cb = em.getCriteriaBuilder();
-            CriteriaQuery<Long> cq = cb.createQuery(Long.class);
+            CriteriaQuery<Long> cq = cb.createQuery(Long.class
+            );
             Root<Long> rt = cq.from(Long.class);
 
             Join<SessionHistory, SessionTrainers> jn = rt.joinCollection("sessionTrainersCollection");
             Expression<Customers> sessionTrainer = jn.get("customerId");
             Predicate condition = cb.equal(sessionTrainer, trainer);
+
             cq.where(cb.and(condition));
             cq.select(cb.count(rt));
 
@@ -290,13 +410,15 @@ public class SessionHistoryFacade extends AbstractFacade<SessionHistory> {
 
         try {
             CriteriaBuilder cb = em.getCriteriaBuilder();
-            CriteriaQuery<SessionHistory> cq = cb.createQuery(SessionHistory.class);
+            CriteriaQuery<SessionHistory> cq = cb.createQuery(SessionHistory.class
+            );
             Root<SessionHistory> rt = cq.from(SessionHistory.class);
 
             Join<SessionHistory, SessionTrainers> jn = rt.joinCollection("sessionTrainersCollection");
             Expression<Customers> sessionTrainer = jn.get("customerId");
             Expression<Date> stime = rt.get("sessiondate");
             Predicate condition = cb.equal(sessionTrainer, trainer);
+
             cq.where(cb.and(condition));
             cq.select(rt);
             if (sortAsc) {

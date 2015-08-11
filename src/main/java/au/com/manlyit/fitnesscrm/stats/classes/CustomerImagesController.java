@@ -77,6 +77,7 @@ public class CustomerImagesController implements Serializable {
     private ImageAreaSelectEvent imageAreaSelectEvent1;
     private CroppedImage croppedImage;
     private BufferedImage currentImage;
+    private int imageListSize = 0;
     private File uploadedImageTempFile;
     private CustomerImages selectedForDeletion;
     private DataModel items = null;
@@ -201,17 +202,21 @@ public class CustomerImagesController implements Serializable {
     }
 
     private void createGallery(int customerId) {
-        List<CustomerImages> imageList = getFacade().findAllByCustId(customerId, true);
-        if(images == null){
+        try {
+            List<CustomerImages> imageList = getFacade().findAllByCustId(customerId, true);
+
             images = new ArrayList<>();
-        }else{
-            images.clear();
+
+            for (CustomerImages ci : imageList) {
+                if (ci != null && ci.getImage() != null) {
+                    images.add(ci);
+                }
+            }
+            imageListSize = images.size();
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "createGallery for" + customerId + " error :", e);
         }
-        imageList.stream().filter((ci) -> (ci != null && ci.getImage() != null)).forEach((ci) -> {
-            images.add(ci);
-        });
-        imageList.clear();
-        
+
     }
 
     public UploadedFile getUploadedFile() {
@@ -528,7 +533,7 @@ public class CustomerImagesController implements Serializable {
             int y1 = imageAreaSelectEvent1.getY1();
             //int x2 = imageAreaSelectEvent1.getX2();
             //int y2 = imageAreaSelectEvent1.getY2();
-            
+
             int oldImageWidth = oldImage.getWidth();
             int oldImageHeight = oldImage.getHeight();
             float heightScaleFactor = (float) imageHeight / (float) oldImageHeight;
@@ -538,7 +543,7 @@ public class CustomerImagesController implements Serializable {
             Float scaledY = (float) y1 / heightScaleFactor;
             Float scaledWidth = (float) selectionwidth / widthScaleFactor;
             Float scaledHeight = (float) selectionheight / heightScaleFactor;
-            
+
             int x = scaledX.intValue();
             int y = scaledY.intValue();
             int w = scaledWidth.intValue();
@@ -829,7 +834,6 @@ public class CustomerImagesController implements Serializable {
         return type;
 
     }
-  
 
     private String getFileExtensionFromFilePath(String path) {
         return path.substring(path.lastIndexOf(".")).toLowerCase();
@@ -1005,14 +1009,14 @@ public class CustomerImagesController implements Serializable {
     
     
      */
-  
-      public void carouselImageClicked(ActionEvent event){
-            FacesContext context = FacesContext.getCurrentInstance();
-         String imageId = context.getExternalContext().getRequestParameterMap().get("imageId");
-            if (imageId != null) {
-                setUploadedImage(ejbFacade.find(Integer.valueOf(imageId)));
-            }
-            RequestContext.getCurrentInstance().openDialog("uploadPhotoDialogueWidget");
+
+    public void carouselImageClicked(ActionEvent event) {
+        FacesContext context = FacesContext.getCurrentInstance();
+        String imageId = context.getExternalContext().getRequestParameterMap().get("imageId");
+        if (imageId != null) {
+            setUploadedImage(ejbFacade.find(Integer.valueOf(imageId)));
+        }
+        RequestContext.getCurrentInstance().openDialog("uploadPhotoDialogueWidget");
     }
 
     public StreamedContent getImage() throws IOException {
@@ -1044,6 +1048,7 @@ public class CustomerImagesController implements Serializable {
             return new DefaultStreamedContent(new ByteArrayInputStream(getUploadedImage().getImage()));
         }
     }
+
     public StreamedContent getLightBoxImageAsStream() throws IOException {
         FacesContext context = FacesContext.getCurrentInstance();
 
@@ -1055,8 +1060,6 @@ public class CustomerImagesController implements Serializable {
             return new DefaultStreamedContent(new ByteArrayInputStream(getLightBoxImage().getImage()));
         }
     }
-    
-    
 
     /**
      * @return the uploadedImage
@@ -1149,9 +1152,13 @@ public class CustomerImagesController implements Serializable {
 
     }
 
-    public void removeImageFromList(CustomerImages image){
+    public void removeImageFromList(CustomerImages image) {
+        
         images.remove(image);
+        imageListSize = images.size();
+        
     }
+
     /**
      * @param image
      * @return the images
@@ -1335,6 +1342,20 @@ public class CustomerImagesController implements Serializable {
      */
     public void setLightBoxImage(CustomerImages lightBoxImage) {
         this.lightBoxImage = lightBoxImage;
+    }
+
+    /**
+     * @return the imageListSize
+     */
+    public int getImageListSize() {
+        return imageListSize;
+    }
+
+    /**
+     * @param imageListSize the imageListSize to set
+     */
+    public void setImageListSize(int imageListSize) {
+        this.imageListSize = imageListSize;
     }
 
     @FacesConverter(forClass = CustomerImages.class)
