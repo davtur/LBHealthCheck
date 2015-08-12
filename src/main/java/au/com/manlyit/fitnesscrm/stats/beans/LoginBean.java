@@ -26,6 +26,7 @@ import javax.annotation.PostConstruct;
 import javax.enterprise.context.SessionScoped;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
+
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.servlet.ServletException;
@@ -47,18 +48,18 @@ import org.apache.http.impl.client.HttpClientBuilder;
  */
 @Named("loginBean")
 @SessionScoped
-public class LoginBean implements Serializable {
+ public class LoginBean implements Serializable {
 
     private static final Logger logger = Logger.getLogger(LoginBean.class.getName());
     private static final long serialVersionUID = 1L;
     private String username;
     private String password;
     private boolean renderFacebook = false;
-    FacesContext facesContext;
+   
     private String facebookId;
     private boolean mobileDeviceUserAgent = false;
     private String faceBookAccessToken;
-    private Future<Boolean> emailSendResult;
+    //private Future<Boolean> emailSendResult;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade configMapFacade;
     @Inject
@@ -138,10 +139,10 @@ public class LoginBean implements Serializable {
 
                 //String host, String to, String ccAddress, String from, String emailSubject, String message, String theAttachedfileName, boolean debug
                 //emailAgent.send("david@manlyit.com.au", "", "info@purefitnessmanly.com.au", "Password Reset", htmlText, null, true);
-                emailSendResult = ejbPaymentBean.sendAsynchEmail(current.getEmailAddress(), configMapFacade.getConfig("PasswordResetCCEmailAddress"), configMapFacade.getConfig("PasswordResetFromEmailAddress"), subject, htmlText, null, emailServerProperties(), false);
+                Future<Boolean> emailSendResult = ejbPaymentBean.sendAsynchEmail(current.getEmailAddress(), configMapFacade.getConfig("PasswordResetCCEmailAddress"), configMapFacade.getConfig("PasswordResetFromEmailAddress"), subject, htmlText, null, emailServerProperties(), false);
                 JsfUtil.addSuccessMessage("Password Reset Successful!", configMapFacade.getConfig("PasswordResetSuccessful"));
                 FacesContext context = FacesContext.getCurrentInstance();
-                ActivationBean controller = (ActivationBean) context.getApplication().evaluateExpressionGet(context, "#{activationBean}", ActivationBean.class);
+                ActivationBean controller = context.getApplication().evaluateExpressionGet(context, "#{activationBean}", ActivationBean.class);
                 controller.setValid(true);
             } catch (UnsupportedEncodingException ex) {
                 Logger.getLogger(LoginBean.class.getName()).log(Level.SEVERE, null, ex);
@@ -176,10 +177,10 @@ public class LoginBean implements Serializable {
         //String renderKitId = FacesContext.getCurrentInstance().getViewRoot().getRenderKitId();
         // if (renderKitId.equalsIgnoreCase("PRIMEFACES_MOBILE")) {
 
-        facesContext = FacesContext.getCurrentInstance();
+        //facesContext = FacesContext.getCurrentInstance();
         if (mobileDevice() == true) {
             //REDIRECT TO  MOBILE PAGE
-            ExternalContext ec = facesContext.getExternalContext();
+            ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
 
             try {
                 this.setMobileDeviceUserAgent(true);
@@ -213,7 +214,7 @@ public class LoginBean implements Serializable {
 
     public void checkAlreadyLoggedin() throws IOException {
 
-        HttpServletRequest request = (HttpServletRequest) facesContext.getExternalContext().getRequest();
+        HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
 
         String authenticatedUser = request.getRemoteUser();
         if (authenticatedUser != null) {
@@ -224,8 +225,8 @@ public class LoginBean implements Serializable {
     }
 
     private void redirectToLandingPage() {
-        FacesContext context = FacesContext.getCurrentInstance();
-        ExternalContext ec = context.getExternalContext();
+       
+        ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
         HttpServletRequest request = (HttpServletRequest) ec.getRequest();
         try {
 
