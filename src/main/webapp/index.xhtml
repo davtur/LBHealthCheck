@@ -16,14 +16,14 @@
                 <p:panel header="Welcome #{chartController.customer.firstname}" class="myStatsWelcomeHeader">
                     <p:panel class="customerDetailsPanel parentOfUploadPhoto profilePictureContainer" header="#{configMapController.getKey('ListCustomersTitle_ProfilePic')}" >
 
-                        <p:graphicImage id="photo1" value="#{customersController.selected.profileImage.imageStream}"  cache="false" class="profilePicture"/>
+                        <p:graphicImage id="photo1"  value="#{customersController.selected.profileImage.imageStream}"  cache="false" class="profilePicture"/>
                         <p:commandButton  id="photoUploadButton" ajax="true"  onclick="PF('uploadPhotoDialogueWidget').show();" update=":growl @(.parentOfUploadPhoto) "    value="#{configMapController.getKey('EditCustomersUploadPhotoButton')}" immediate="true"/>
 
                     </p:panel>
                     <p:panel id ="contentFlowPanel"  header="My Pictures : #{customerImagesController.imageListSize} loaded." >
                         <p:contentFlow id="mainCarousel" class="myStatsCarousel parentOfUploadPhoto"  value="#{customerImagesController.images}" var="image"  style="height: 400px" widgetVar="contentFlowWidget" >
 
-                            <p:graphicImage  styleClass="content" value="#{customerImagesController.image}" onclick="clickFlow(this, event)" title="#{configMapController.getKey('ListMyStats_photoTakenText')} #{image.formattedDate}" alt="#{customerImagesController.dynamicTitle}" >
+                            <p:graphicImage  styleClass="content" value="#{customerImagesController.image}" onclick="clickFlow(this, event)" title="#{configMapController.getKey('ListMyStats_photoTakenText')} #{image.formattedDate}" alt="#{customerImagesController.dynamicTitle}" cache="false">
                                 <f:param name="imageId" value="#{image.id}"/>
                             </p:graphicImage>
 
@@ -36,7 +36,7 @@
                             <p:menuitem value="Add New" onclick="PF('uploadPhotoDialogueWidget').show()" />
                             <p:menuitem value="Delete" oncomplete="removePicture([{name:'selectedImage', value: $('.item.active div.hiddenId').text()}]);" />
                         </p:contextMenu>
-                        <p:remoteCommand name="removePicture" actionListener="#{carouselBean.removePicture}" update=":myStatsForm:contentFlowPanel"/>
+                        <p:remoteCommand name="removePicture" actionListener="#{customerImagesController.removePicture}" update=":myStatsForm:contentFlowPanel"/>
                     </p:panel> 
 
 

@@ -1037,6 +1037,24 @@ public class CustomerImagesController implements Serializable {
         }
     }
 
+    public void removePicture() {
+        FacesContext context = FacesContext.getCurrentInstance();
+        Map<String, String[]> paramValues = context.getExternalContext().getRequestParameterValuesMap();
+        String[] selectedImages = paramValues.get("selectedImage");
+
+        for (String item : selectedImages) {
+            if (item != null) {
+                CustomerImages custImage = ejbFacade.find(Integer.valueOf(item));
+                if (custImage != null) {
+                    CustomerImagesController controller = (CustomerImagesController) context.getApplication().getELResolver().
+                            getValue(context.getELContext(), null, "customerImagesController");
+                    controller.removeImageFromList(custImage);
+                    ejbFacade.remove(custImage);
+                }
+            }
+        }
+    }
+
     public StreamedContent getUploadedImageAsStream() throws IOException {
         FacesContext context = FacesContext.getCurrentInstance();
 
@@ -1153,10 +1171,10 @@ public class CustomerImagesController implements Serializable {
     }
 
     public void removeImageFromList(CustomerImages image) {
-        
+
         images.remove(image);
         imageListSize = images.size();
-        
+
     }
 
     /**

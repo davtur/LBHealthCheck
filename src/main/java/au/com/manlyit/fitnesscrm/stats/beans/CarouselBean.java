@@ -8,20 +8,22 @@ package au.com.manlyit.fitnesscrm.stats.beans;
 import au.com.manlyit.fitnesscrm.stats.classes.CustomerImagesController;
 import au.com.manlyit.fitnesscrm.stats.db.CustomerImages;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.Map;
+import javax.enterprise.context.RequestScoped;
 import javax.faces.context.FacesContext;
 import javax.inject.Named;
-import javax.faces.view.ViewScoped;
 import javax.inject.Inject;
 import org.primefaces.model.DefaultStreamedContent;
+import org.primefaces.model.StreamedContent;
 
 /**
  *
  * @author david
  */
 @Named(value = "carouselBean")
-@ViewScoped
+@RequestScoped
 public class CarouselBean implements Serializable {
 
     @Inject
@@ -47,6 +49,24 @@ public class CarouselBean implements Serializable {
                     controller.removeImageFromList(custImage);
                     ejbFacade.remove(custImage);
                 }
+            }
+        }
+    }
+    
+    public StreamedContent getImage() throws IOException {
+        FacesContext context = FacesContext.getCurrentInstance();
+
+        if (context.getRenderResponse()) {
+            // So, we're rendering the HTML. Return a stub StreamedContent so that it will generate right URL.
+            return new DefaultStreamedContent();
+        } else {
+            // So, browser is requesting the image. Return a real StreamedContent with the image bytes.
+            String imageId = context.getExternalContext().getRequestParameterMap().get("imageId");
+            if (imageId != null) {
+                CustomerImages custImage = ejbFacade.find(Integer.valueOf(imageId));
+                return new DefaultStreamedContent(new ByteArrayInputStream(custImage.getImage()));
+            } else {
+                return null;
             }
         }
     }
