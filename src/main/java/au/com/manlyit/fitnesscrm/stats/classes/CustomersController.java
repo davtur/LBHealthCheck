@@ -13,7 +13,6 @@ import au.com.manlyit.fitnesscrm.stats.db.CustomerState;
 import au.com.manlyit.fitnesscrm.stats.db.Groups;
 import au.com.manlyit.fitnesscrm.stats.db.Notes;
 import au.com.manlyit.fitnesscrm.stats.db.PaymentParameters;
-import au.com.manlyit.fitnesscrm.stats.db.Payments;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -183,7 +182,7 @@ public class CustomersController implements Serializable {
         if (cust != null) {
             lastSelected = current;
             current = cust;
-            selectedGroups = ejbGroupsFacade.getCustomersGroups(current);
+            selectedGroups = ejbGroupsFacade.getCustomersGroups(cust);
             customerGroupsList = null;
 
             /*customerGroupsList = new ArrayList<>();
@@ -205,7 +204,7 @@ public class CustomersController implements Serializable {
             FacesContext context = FacesContext.getCurrentInstance();
             EziDebitPaymentGateway controller = (EziDebitPaymentGateway) context.getApplication().getELResolver().getValue(context.getELContext(), null, "ezidebit");
             controller.setSelectedCustomer(cust);
-            MySessionsChart1 c2 = (MySessionsChart1) context.getApplication().evaluateExpressionGet(context, "#{mySessionsChart1}", MySessionsChart1.class);
+            MySessionsChart1 c2 = context.getApplication().evaluateExpressionGet(context, "#{mySessionsChart1}", MySessionsChart1.class);
             c2.setSelectedCustomer(cust);
             selectedItemIndex = -1;
             checkPass = current.getPassword();
@@ -236,7 +235,7 @@ public class CustomersController implements Serializable {
         return current;
     }
 
-    private Customers setCusomerDefaults(Customers c) {
+    private Customers setCustomerDefaults(Customers c) {
 
         try {
             c.setCountryId(Integer.parseInt(configMapFacade.getConfig("default.customer.details.countryId")));
@@ -266,7 +265,7 @@ public class CustomersController implements Serializable {
         c.setNewsletter(true);
 
         GregorianCalendar gc = new GregorianCalendar();
-        gc.add(Calendar.YEAR, -30);
+        gc.add(Calendar.YEAR, -18);
         c.setDob(gc.getTime());
         return c;
     }
@@ -306,7 +305,7 @@ public class CustomersController implements Serializable {
                 }
 
                 @Override
-                public PfSelectableDataModel createPageDataModel() {
+                public PfSelectableDataModel<Notes> createPageDataModel() {
                     return new PfSelectableDataModel<>(ejbNotesFacade.findNotesByCustomer(getSelected()));
                 }
 
@@ -490,16 +489,16 @@ public class CustomersController implements Serializable {
         String message = "Recreating data models for user : " + getSelected().getUsername() + ". ";
         Logger.getLogger(getClass().getName()).log(Level.INFO, message);
         recreateModel();
-        SessionHistoryController c1 = (SessionHistoryController) context.getApplication().evaluateExpressionGet(context, "#{sessionHistoryController}", SessionHistoryController.class);
+        SessionHistoryController c1 = context.getApplication().evaluateExpressionGet(context, "#{sessionHistoryController}", SessionHistoryController.class);
         c1.recreateModel();
-        MySessionsChart1 c2 = (MySessionsChart1) context.getApplication().evaluateExpressionGet(context, "#{mySessionsChart1}", MySessionsChart1.class);
+        MySessionsChart1 c2 = context.getApplication().evaluateExpressionGet(context, "#{mySessionsChart1}", MySessionsChart1.class);
         c2.recreateModel();
-        EziDebitPaymentGateway c3 = (EziDebitPaymentGateway) context.getApplication().evaluateExpressionGet(context, "#{ezidebit}", EziDebitPaymentGateway.class);
+        EziDebitPaymentGateway c3 = context.getApplication().evaluateExpressionGet(context, "#{ezidebit}", EziDebitPaymentGateway.class);
         c3.recreateModels();
 
-        CustomerImagesController c4 = (CustomerImagesController) context.getApplication().evaluateExpressionGet(context, "#{customerImagesController}", CustomerImagesController.class);
+        CustomerImagesController c4 = context.getApplication().evaluateExpressionGet(context, "#{customerImagesController}", CustomerImagesController.class);
         c4.recreateModel();
-        ChartController c5 = (ChartController) context.getApplication().evaluateExpressionGet(context, "#{chartController}", ChartController.class);
+        ChartController c5 = context.getApplication().evaluateExpressionGet(context, "#{chartController}", ChartController.class);
         c5.recreateModel();
     }
 
@@ -531,14 +530,14 @@ public class CustomersController implements Serializable {
     }
 
     public String prepareCreate() {
-        setSelected(setCusomerDefaults(new Customers()));
+        setSelected(setCustomerDefaults(new Customers()));
         selectedItemIndex = -1;
         return "Create";
     }
 
     public void prepareCreateAjax(ActionEvent actionEvent) {
         setLastSelected(current);
-        current = setCusomerDefaults(new Customers());
+        current = setCustomerDefaults(new Customers());
         selectedItemIndex = -1;
         //RequestContext.getCurrentInstance().update("customersCreateDialogue");
         //RequestContext.getCurrentInstance().openDialog("customersCreateDialogue");
@@ -546,7 +545,7 @@ public class CustomersController implements Serializable {
 
     private void createDefaultCustomerProfilePicture(Customers c) {
         FacesContext context = FacesContext.getCurrentInstance();
-        CustomerImagesController custImageCon = (CustomerImagesController) context.getApplication().evaluateExpressionGet(context, "#{customerImagesController}", CustomerImagesController.class);
+        CustomerImagesController custImageCon = context.getApplication().evaluateExpressionGet(context, "#{customerImagesController}", CustomerImagesController.class);
         custImageCon.createDefaultProfilePic(c);
 
     }
@@ -599,34 +598,21 @@ public class CustomersController implements Serializable {
         FacesContext context = FacesContext.getCurrentInstance();
         Customers c = getNewCustomer();
 
-        EziDebitPaymentGateway ezi = (EziDebitPaymentGateway) context.getApplication().evaluateExpressionGet(context, "#{ezidebit}", EziDebitPaymentGateway.class);
+        EziDebitPaymentGateway ezi = context.getApplication().evaluateExpressionGet(context, "#{ezidebit}", EziDebitPaymentGateway.class);
 
         if (c.getId() == null || getFacade().find(c.getId()) == null) {
             // does not exist so create a new customer
             try {
                 c.setId(0);
                 getFacade().create(c);
-
-                //create customers groups
-                for (Groups g : selectedGroups) {
-
-                    Groups grp = new Groups(0, g.getGroupname());
-                    grp.setUsername(c);
-                    ejbGroupsFacade.create(grp);
-
-                }
-                if (ejbGroupsFacade.isCustomerInGroup(c, "USER") == false) {
-                    Groups grp = new Groups(0, "USER");
-                    grp.setUsername(c);
-                    ejbGroupsFacade.create(grp);
-                    JsfUtil.addSuccessMessage(configMapFacade.getConfig("CustomersCreatedMustBeInUserGroup"));
-                }
+                setSelected(c);
+                updateCustomersGroupMembership(c);
 
                 createDefaultCustomerProfilePicture(c);
                 // createDefaultPaymentParameters(paymentGateway);
-                recreateAllAffectedPageModels();
-                setSelected(c);
-                setNewCustomer(setCusomerDefaults(new Customers()));
+                 setSelected(c);
+
+                setNewCustomer(setCustomerDefaults(new Customers()));
 
                 JsfUtil.addSuccessMessage(configMapFacade.getConfig("CustomersCreated"));
             } catch (Exception e) {
@@ -641,46 +627,52 @@ public class CustomersController implements Serializable {
             // exists so update only
             try {
                 getFacade().edit(c);
-                //modify customers groups
-                List<Groups> customersExistingGroups = ejbGroupsFacade.getCustomersGroups(c);
-                for (Groups g : customersExistingGroups) {
-                    boolean exists = false;
-                    for (Groups sg : selectedGroups) {
-                        if (sg.equals(g)) {
-                            exists = true;
-                        }
-                    }
-                    if (exists == false) {
-                        ejbGroupsFacade.remove(g);
-                    }
-                }
-                for (Groups g : selectedGroups) {
-                    boolean exists = false;
-                    for (Groups eg : customersExistingGroups) {
-                        if (eg.equals(g)) {
-                            exists = true;
-                        }
-                    }
-                    if (exists == false) {
-                        Groups grp = new Groups(0, g.getGroupname());
-                        grp.setUsername(c);
-                        ejbGroupsFacade.create(grp);
-                    }
-                }
-                if (ejbGroupsFacade.isCustomerInGroup(c, "USER") == false) {
-                    Groups grp = new Groups(0, "USER");
-                    grp.setUsername(c);
-                    ejbGroupsFacade.create(grp);
-                    JsfUtil.addSuccessMessage(configMapFacade.getConfig("CustomersCreatedMustBeInUserGroup"));
-                }
-                recreateAllAffectedPageModels();
+                updateCustomersGroupMembership(c);
+                
                 ezi.editCustomerDetailsInEziDebit(c);
-                setNewCustomer(setCusomerDefaults(new Customers()));
+                recreateAllAffectedPageModels();
                 JsfUtil.addSuccessMessage(configMapFacade.getConfig("ChangesSaved"));
             } catch (Exception e) {
                 JsfUtil.addErrorMessage(e.getMessage(), configMapFacade.getConfig("PersistenceErrorOccured"));
             }
 
+        }
+
+    }
+
+    private void updateCustomersGroupMembership(Customers c) {
+
+        //modify customers groups
+        List<Groups> customersExistingGroups = ejbGroupsFacade.getCustomersGroups(c);
+        for (Groups g : customersExistingGroups) {
+            boolean exists = false;
+            for (Groups sg : selectedGroups) {
+                if (sg.equals(g)) {
+                    exists = true;
+                }
+            }
+            if (exists == false) {
+                ejbGroupsFacade.remove(g);
+            }
+        }
+        for (Groups g : selectedGroups) {
+            boolean exists = false;
+            for (Groups eg : customersExistingGroups) {
+                if (eg.equals(g)) {
+                    exists = true;
+                }
+            }
+            if (exists == false) {
+                Groups grp = new Groups(0, g.getGroupname());
+                grp.setUsername(c);
+                ejbGroupsFacade.create(grp);
+            }
+        }
+        if (ejbGroupsFacade.isCustomerInGroup(c, "USER") == false) {
+            Groups grp = new Groups(0, "USER");
+            grp.setUsername(c);
+            ejbGroupsFacade.create(grp);
+            JsfUtil.addSuccessMessage(configMapFacade.getConfig("CustomersCreatedMustBeInUserGroup"));
         }
 
     }
@@ -910,7 +902,7 @@ public class CustomersController implements Serializable {
         notesFilteredItems = null;
     }
 
-    public void deleteNote() { 
+    public void deleteNote() {
         if (selectedNoteForDeletion != null) {
             try {
                 removeFromNotesDataTableLists(selectedNoteForDeletion);
@@ -933,13 +925,13 @@ public class CustomersController implements Serializable {
             notesFilteredItems.remove(index);
         }
     }
-    
+
     public void addToNotesDataTableLists(Notes note) {
         if (notesItems != null) {
             List<Notes> lp = (List<Notes>) notesItems.getWrappedData();
-             lp.add(0,note);//insert at the top of the list
+            lp.add(0, note);//insert at the top of the list
         }
-        if (notesFilteredItems != null) {          
+        if (notesFilteredItems != null) {
             notesFilteredItems.add(note);
         }
     }
@@ -1492,7 +1484,11 @@ public class CustomersController implements Serializable {
         return customerGroupsList;
     }
 
-    public List<Groups> getnewCustomerGroupsList() {
+    /**
+     * @return the newCustomerGroupsList
+     */
+
+    public List<Groups> getNewCustomerGroupsList() {
         if (newCustomerGroupsList == null) {
             newCustomerGroupsList = new ArrayList<>();
             List<String> distinctGroups = ejbGroupsFacade.getGroups();
@@ -1502,12 +1498,13 @@ public class CustomersController implements Serializable {
                     newCustomerGroupsList.add(new Groups(0, g));
                 }
                 newCustomerCheckedGroups = new Boolean[distinctGroups.size()];
+
                 for (int c = 0; c < distinctGroups.size(); c++) {
-                    for (Groups g : getSelectedGroups()) {
-                        if (distinctGroups.get(c).contains(g.getGroupname())) {
-                            newCustomerCheckedGroups[c] = true;
-                        }
+
+                    if (distinctGroups.get(c).contains("USER")) {
+                        newCustomerCheckedGroups[c] = true;
                     }
+
                 }
             }
         }
@@ -1554,7 +1551,7 @@ public class CustomersController implements Serializable {
      */
     public Customers getNewCustomer() {
         if (newCustomer == null) {
-            setNewCustomer(setCusomerDefaults(new Customers()));
+            setNewCustomer(setCustomerDefaults(new Customers()));
         }
         return newCustomer;
     }
@@ -1564,13 +1561,6 @@ public class CustomersController implements Serializable {
      */
     public void setNewCustomer(Customers newCustomer) {
         this.newCustomer = newCustomer;
-    }
-
-    /**
-     * @return the newCustomerGroupsList
-     */
-    public List<Groups> getNewCustomerGroupsList() {
-        return newCustomerGroupsList;
     }
 
     /**

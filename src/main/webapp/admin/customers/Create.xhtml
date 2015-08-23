@@ -94,19 +94,12 @@
                         <p:ajax listener="#{customersController.checkPassChange}" event="keyup" />
                     </p:password>
 
-                    <!-- <p:outputLabel  value="Groups:    " for="newCustomerGroupsCheckbox"/>
-                     <p:selectManyCheckbox id="newCustomerGroupsCheckbox" value="#{customersController.newCustomerGroups}" label="Show Cancelled"   converter="customerGroupsConverter">
-                         <f:selectItems value="#{customersController.customerGroupsList}" var="custState" itemLabel="#{custState.groupname}" itemValue="#{custState}" />
-<p:ajax  event="change" />
-                     </p:selectManyCheckbox>-->
-
-
 
                     <p:dataGrid  id="scroll" columns="3"   value="#{customersController.newCustomerGroupsList}" var="group" rowIndexVar="rowIndex"  >
                         <h:panelGrid id="customerPanel" columns="2" style="margin-bottom:10px" cellpadding="5" >
                             <h:outputText value="#{group.groupname}" />
                             <p:selectBooleanCheckbox id="btnAttendedSession" value="#{customersController.newCustomerCheckedGroups[rowIndex]}"  >
-                                <p:ajax   event="change" listener="#{customersController.groupChangedChangeListener}"/>
+                                <p:ajax   event="change" listener="#{customersController.newCustomergroupChangedChangeListener}"/>
                             </p:selectBooleanCheckbox>
                        </h:panelGrid>
                    </p:dataGrid>

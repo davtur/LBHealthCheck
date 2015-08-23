@@ -13,6 +13,7 @@ import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
+import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
@@ -72,9 +73,9 @@ public class GroupsFacade extends AbstractFacade<Groups> {
             
             cq.where(condition1);
             cq.distinct(true);
-            Query q = em.createQuery(cq);
+            TypedQuery<Groups> q = em.createQuery(cq);
 
-            ga = (List<Groups>) q.getResultList();
+            ga = q.getResultList();
 
         } catch (Exception e) {
             logger.log(Level.SEVERE, "getCustomersGroups error: ", e.getMessage());

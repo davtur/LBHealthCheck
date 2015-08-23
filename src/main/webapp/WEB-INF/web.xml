@@ -184,7 +184,12 @@
             <url-pattern>/myDetails.xhtml</url-pattern>
         </web-resource-collection>
         <web-resource-collection>
-            <web-resource-name>My Details</web-resource-name>
+            <web-resource-name>My Details Mobile</web-resource-name>
+            <description/>
+            <url-pattern>/myDetailsMobile.xhtml</url-pattern>
+        </web-resource-collection>
+        <web-resource-collection>
+            <web-resource-name>Customer Surveys</web-resource-name>
             <description/>
             <url-pattern>/customerSurveys.xhtml</url-pattern>
         </web-resource-collection>
