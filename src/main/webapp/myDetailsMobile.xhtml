@@ -33,7 +33,7 @@
                             <h:panelGrid columns="1" id="panel2"  >
                                 <p:panel class="parentOfUploadPhoto" header="#{configMapController.getKey('ListCustomersTitle_ProfilePic')}">
 
-                                    <p:graphicImage id="photo1" value="#{customersController.selected.profileImage.imageStream}"  cache="false" />
+                                    <p:graphicImage id="photo1" value="#{customersController.selected.profileImage.imageStream}"  cache="false" style="max-width: 300px"/>
                                     <p:commandButton  id="photoUploadButton" action="pm:uploadPhoto" update=":growl @(.parentOfUploadPhoto) "   value="#{configMapController.getKey('EditCustomersUploadPhotoButton')}" />
 
                                 </p:panel>
@@ -251,7 +251,7 @@
                   </h:form>-->
 
                 <h:form id="photoCreate2" enctype="multipart/form-data">
-                    <p:graphicImage id="uploadedPhoto"  class="dialoguePhoto parentOfUploadPhoto" value="#{customerImagesController.uploadedImageAsStream}" style="max-width: 200px" cache="false" >
+                    <p:graphicImage id="uploadedPhoto"  class="dialoguePhoto parentOfUploadPhoto" value="#{customerImagesController.uploadedImageAsStream}" style="max-width: 300px" cache="false" >
 
                     </p:graphicImage>
                     <p:fileUpload  id="uploader" previewWidth="200"  fileLimitMessage="The size of the picture is too big! ( > 5 MB )" mode="simple" value="#{customerImagesController.uploadedFile}" auto="true" update=":uploadPhoto:photos:photoCreate :growl" allowTypes="/(\.|\/)(gif|jpe?g|png)$/" sizeLimit="5000000" required="true"  requiredMessage="You need to upload a photo."/>
