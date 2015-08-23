@@ -2553,6 +2553,11 @@ public class EziDebitPaymentGateway implements Serializable {
          customerExistsInPaymentGateway = true;
          }*/
     }
+ public String closeEditPaymentMobile(ActionEvent actionEvent) {
+        setEditPaymentMethodEnabled(false);
+        setSelectedCustomer(selectedCustomer);
+        return "pm:main";
+    }
 
     public void closeEditPaymentMethodDialogue(ActionEvent actionEvent) {
         setEditPaymentMethodEnabled(false);

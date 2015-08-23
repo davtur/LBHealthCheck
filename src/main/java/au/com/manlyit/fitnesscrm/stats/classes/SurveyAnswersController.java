@@ -182,6 +182,17 @@ public class SurveyAnswersController implements Serializable {
         }
         return "/myDetails.xhtml?faces-redirect=true";
     }
+      public String saveSurveyMobile() {
+        try {
+            for (SurveyAnswers sa : surveyAnswers) {
+                getFacade().edit(sa);
+            }
+            JsfUtil.addSuccessMessage(configMapFacade.getConfig("SurveyAnswersCreated"));
+        } catch (Exception e) {
+            JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
+        }
+        return "pm:main";
+    }
 
     public void surveyBooleanChangeListener() {
         logger.log(Level.FINE, "Boolean Answer modified");

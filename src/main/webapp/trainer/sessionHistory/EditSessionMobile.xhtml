@@ -29,7 +29,7 @@
             <pm:content >                
                 <p:outputPanel >
                     <h:form id="sessionsForm">  
-                        <p:growl/>
+                        <p:growl  showDetail="true"/>
                         <p:dataList    value="#{sessionHistoryController.sessionHistoryItems}" var="sess">
                             <p:column>
                                 <p:commandLink action="/trainer/sessionHistory/CreateSessionMobile?faces-redirect=true" ajax="false" >

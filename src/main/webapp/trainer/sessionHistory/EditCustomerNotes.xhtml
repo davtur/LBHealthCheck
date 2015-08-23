@@ -29,7 +29,7 @@
             <pm:content >                
                 <p:outputPanel >
                     <h:form id="notesForm">  
-                        <p:growl/>
+                        <p:growl  showDetail="true"/>
                         <p:dataList    value="#{sessionHistoryController.activeCustomers}" var="notes">
                             <f:attribute name="filter" value="true" />
                             <p:column>

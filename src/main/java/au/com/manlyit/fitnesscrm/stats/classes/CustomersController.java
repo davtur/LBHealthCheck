@@ -761,14 +761,26 @@ public class CustomersController implements Serializable {
         }
 
     }
+    public String updatePassMobile(){
+       try {
+            if (checkPass.length() >= 8) {
+               updatePassword();
+                return "pm:main";
+            } else {
+                JsfUtil.addErrorMessage("Password Update Error", configMapFacade.getConfig("PasswordLengthError"));
+                return null;
+            }
+        } catch (Exception e) {
+            JsfUtil.addErrorMessage(e, "Password Update Error", "Password Updated Failed");
+            return null;
+        } 
+        
+    }
 
     public String updatepass() {
         try {
             if (checkPass.length() >= 8) {
-                Customers c = getSelected();
-                c.setPassword(PasswordService.getInstance().encrypt(checkPass));
-                getFacade().edit(c);
-                JsfUtil.addSuccessMessage("Password Updated", "Your password was changed to " + checkPass);
+               updatePassword();
                 return "View";
             } else {
                 JsfUtil.addErrorMessage("Password Update Error", configMapFacade.getConfig("PasswordLengthError"));
@@ -778,6 +790,12 @@ public class CustomersController implements Serializable {
             JsfUtil.addErrorMessage(e, "Password Update Error", "Password Updated Failed");
             return null;
         }
+    }
+    private void updatePassword(){
+         Customers c = getSelected();
+                c.setPassword(PasswordService.getInstance().encrypt(checkPass));
+                getFacade().edit(c);
+                JsfUtil.addSuccessMessage("Password Updated", "Your password was changed to " + checkPass);
     }
 
     public String logoutMobile() {

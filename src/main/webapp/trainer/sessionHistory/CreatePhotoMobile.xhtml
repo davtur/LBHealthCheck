@@ -27,7 +27,7 @@
                 </f:facet>
             </pm:header>  
             <pm:content >            
-                <p:growl id="growl"/>
+                <p:growl id="growl" showDetail="true"/>
                 <h:form id="photoCreate" enctype="multipart/form-data">
                     <p:outputLabel value="#{configMapController.getKey('CreateCustomerImagesLabel_customerId')}" for="customerId" />
                     <p:selectOneMenu  valueChangeListener="#{customerImagesController.handleCustomerChange}" id="customerId" converter="customerConverter" value="#{customerImagesController.selected.customerId}"  required="true" requiredMessage="#{configMapController.getKey('CreateCustomerImagesRequiredMessage_customerId')}">
@@ -42,17 +42,17 @@
                         <p:ajax event="dateSelect" listener="#{customerImagesController.handleDateSelect}" update=":photos:growl"  />
 
                     </p:calendar>
-                    <h:panelGrid columns="2">
-                        <p:selectBooleanCheckbox id="profilephoto" immediate="true"  value="#{customerImagesController.profilePhoto}">
+
+                    <p:selectBooleanCheckbox id="profilephoto" immediate="true"  value="#{customerImagesController.profilePhoto}" itemLabel="#{configMapController.getKey('CreateCustomerImagesLabel_profilephoto')}">
                         <p:ajax />
-                        </p:selectBooleanCheckbox>  
-                        <p:outputLabel  value="#{configMapController.getKey('CreateCustomerImagesLabel_profilephoto')}" for="profilephoto" style="padding-left: 40px"/>
-                    </h:panelGrid>
+                    </p:selectBooleanCheckbox>  
+
+
                     <p:spacer height="10em" />
 
                 </h:form>
                 <h:form id="photoCreate2" enctype="multipart/form-data">
-                    <p:fileUpload  id="uploader" previewWidth="200"  fileLimitMessage="The size of the picture is too big! ( > 10MB )" mode="simple" value="#{customerImagesController.uploadedFile}" auto="true" update=":photos:photoCreate :photos:growl" allowTypes="/(\.|\/)(gif|jpe?g|png)$/" sizeLimit="10000000" required="true"  requiredMessage="You need to upload a photo."/>
+                    <p:fileUpload  id="uploader" previewWidth="200"  fileLimitMessage="The size of the picture is too big! ( > 10MB )" mode="simple" value="#{customerImagesController.uploadedFile}" skinSimple="true" update=":photos:photoCreate :photos:growl"  allowTypes="/(\.|\/)(gif|jpe?g|png)$/" sizeLimit="5000000" required="true"  requiredMessage="You need to upload a photo."/>
                     <p:commandButton  ajax="false"  actionListener="#{customerImagesController.createFromMobile}" value="#{configMapController.getKey('CreateCustomerImagesSaveLink')}" />
                 </h:form>
 

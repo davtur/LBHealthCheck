@@ -10,6 +10,8 @@
     margin: auto;
 }*/
 
+
+
 .hiddenId {
     visibility: hidden;
 }
@@ -31,12 +33,12 @@ div.emailTemplateEditor .ui-editor {
 }
 
 .editPaymentMethodIFrame #wrapper {
-  height: 400px !important; 
-  background-color:  #ffffff !important;
+    height: 400px !important; 
+    background-color:  #ffffff !important;
 }
 .editPaymentMethodIFrame #content {
-  height: 400px !important; 
-  background-color:  #ffffff !important;
+    height: 400px !important; 
+    background-color:  #ffffff !important;
 }
 /*#ezidebitIframeView {
    width: 300px !important;  
@@ -51,7 +53,7 @@ div.emailTemplateEditor .ui-editor {
     //width: 100% !important;
 }*/
 .emailEditorInput{
-  width:600px;  
+    width:600px;  
 }
 //#page { background: #0e446a url(/FitnessStats/resources/images/background/ocean_bg.jpg) 50% 0 repeat-x; margin-top: 0px;}
 
@@ -59,7 +61,7 @@ div.emailTemplateEditor .ui-editor {
 
 .loginPanel { 
     background: #ffffff url(/FitnessStats/resources/images/ptlogin2.png) 50% 0 no-repeat;  
-     background-color: #ffffff;
+    background-color: #ffffff;
 }
 
 .newsflash {
@@ -69,7 +71,7 @@ div.emailTemplateEditor .ui-editor {
 #customerslistForm1\:active {
     margin-right: 15px;   
 
-  float:left ;
+    float:left ;
 }
 #block-main { 
     border-color: #c8dfe6;
@@ -84,35 +86,35 @@ div.emailTemplateEditor .ui-editor {
 }
 
 .ui-widget {
-font-family:  Arial,Lucida Grande, Lucida Sans, sans-serif;
-font-size: 0.8em;
+    font-family:  Arial,Lucida Grande, Lucida Sans, sans-serif;
+    font-size: 0.8em;
 
 }
 .social-icons span a {
-display: block;
-float:left;
-width: 37px;
-height: 37px;
-background: url(/FitnessStats/resources/templates/yoo_pace/images/tools/icons_social.png) 0 0 no-repeat;
+    display: block;
+    float:left;
+    width: 37px;
+    height: 37px;
+    background: url(/FitnessStats/resources/templates/yoo_pace/images/tools/icons_social.png) 0 0 no-repeat;
 }
 .loginButtonFacebook {
- margin-left: 5px;   
- padding-right: 15px;  
+    margin-left: 5px;   
+    padding-right: 15px;  
 }
 
 .customerDetailsPanel .ui-selectonemenu {
-     width: 100% !important;
+    width: 100% !important;
 }
 .customerDetailsPanel .ui-button {
-     width: 100% !important;
-     padding: 5px !important;
+    width: 100% !important;
+    padding: 5px !important;
 }												
-					
+
 .myStatsCarousel .ui-carousel {
-    
-     padding: 15px !important;
+
+    padding: 15px !important;
 }
 
 .parentOfUploadPhoto{
-    
+
 }
