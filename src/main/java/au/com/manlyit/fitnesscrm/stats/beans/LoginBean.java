@@ -41,6 +41,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.primefaces.application.exceptionhandler.PrimeExceptionHandlerELResolver;
 
 /**
  *
@@ -152,6 +153,15 @@ import org.apache.http.impl.client.HttpClientBuilder;
             JsfUtil.addErrorMessage("Error", configMapFacade.getConfig("PasswordResetErrorValidUsernameRequired"));
         }
 
+    }
+    public void getHandleErrorFromErrorPage(){
+                FacesContext context = FacesContext.getCurrentInstance();
+                //todo
+       // PrimeExceptionHandlerELResolver handler = (PrimeExceptionHandlerELResolver) context.getApplication().getELResolver().getValue(context.getELContext(), null, "pfExceptionHandler");
+        
+       // String html = handler.
+      //                 Future<Boolean> emailSendResult = ejbPaymentBean.sendAsynchEmail(configMapFacade.getConfig("SystemErrorCCEmailAddress"), configMapFacade.getConfig("SystemErrorCCEmailAddress"), configMapFacade.getConfig("PasswordResetFromEmailAddress"), configMapFacade.getConfig("SystemErrorCCEmailAddress"), htmlText, null, emailServerProperties(), false);
+ 
     }
 
     public String resetPassword() {

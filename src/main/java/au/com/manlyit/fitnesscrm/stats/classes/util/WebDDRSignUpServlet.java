@@ -5,12 +5,12 @@
  */
 package au.com.manlyit.fitnesscrm.stats.classes.util;
 
+import au.com.manlyit.fitnesscrm.stats.beans.LoginBean;
 import au.com.manlyit.fitnesscrm.stats.beans.PaymentBean;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import au.com.manlyit.fitnesscrm.stats.db.PaymentParameters;
 import java.io.IOException;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Properties;
@@ -36,7 +36,6 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.primefaces.context.RequestContext;
 
 @WebServlet("/callback.html")
 public class WebDDRSignUpServlet extends HttpServlet {
@@ -53,6 +52,8 @@ public class WebDDRSignUpServlet extends HttpServlet {
     private FutureMapEJB futureMap;
     @Inject
     private PaymentBean paymentBean;
+    @Inject
+    private LoginBean loginBean;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.PaymentParametersFacade ejbPaymentParametersFacade;
 
@@ -111,7 +112,7 @@ public class WebDDRSignUpServlet extends HttpServlet {
                         String htmlText = configMapFacade.getConfig("system.admin.ezidebit.webddrcallback.template");
                         String name = current.getFirstname() + " " + current.getLastname();
                         htmlText = htmlText.replace(templatePlaceholder, name);
-                        response.sendRedirect(request.getContextPath() + getValueFromKey("payment.ezidebit.callback.redirect"));
+                        
                         Future<Boolean> emailSendResult = paymentBean.sendAsynchEmail(configMapFacade.getConfig("AdminEmailAddress"), configMapFacade.getConfig("PasswordResetCCEmailAddress"), configMapFacade.getConfig("PasswordResetFromEmailAddress"), configMapFacade.getConfig("system.ezidebit.webEddrCallback.EmailSubject"), htmlText, null, emailServerProperties(), false);
                         if (emailSendResult.get() == false) {
                             logger.log(Level.WARNING, "Email for Call Back from Web EDDR Form FAILED. Future result false from async job");
@@ -138,6 +139,13 @@ public class WebDDRSignUpServlet extends HttpServlet {
 
                             }
                         }
+                        if (loginBean.isMobileDeviceUserAgent() == false) {
+                            response.sendRedirect(request.getContextPath() + getValueFromKey("payment.ezidebit.callback.redirect"));
+                        } else {
+                            response.sendRedirect(request.getContextPath() + getValueFromKey("payment.ezidebit.callback.mobileRedirect"));
+                        }
+                        
+                        
                     }
                 }
             }
