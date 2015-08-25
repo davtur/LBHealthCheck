@@ -52,10 +52,10 @@
                                 </p:panel>
 
                                 <p:panel   header="#{configMapController.getKey('ListCustomersTitle_PanelHeader')}">
-                                    <h:panelGrid columns="1">
-                                        <p:commandButton id="editPaymentMethodButton" disabled="#{!ezidebit.customerWebDDRFormEnabled}"  actionListener="#{ezidebit.redirectToPaymentGateway}"    value="#{configMapController.getKey('EnterPaymentDetailsButton')}" update=":growl :main:createCustomerForm"  /> 
-                                    </h:panelGrid>
-                                    <p:panelGrid columns="3">
+
+                                    <p:commandButton id="editPaymentMethodButton" disabled="#{!ezidebit.customerWebDDRFormEnabled}"  actionListener="#{ezidebit.redirectToPaymentGateway}"    value="#{configMapController.getKey('EnterPaymentDetailsButton')}" update=":growl :main:createCustomerForm"  /> 
+
+                                    <p:panelGrid columns="3" class="ui.shadow ui-corner-all">
                                         <h:outputLabel value="#{configMapController.getKey('ListCustomersTitle_activeEZI')}" />
                                         <h:outputText value="#{customersController.selected.paymentParameters.statusDescription}"/> 
                                         <h:outputText value=""/>

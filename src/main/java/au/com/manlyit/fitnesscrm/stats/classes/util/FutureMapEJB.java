@@ -432,7 +432,7 @@ public class FutureMapEJB implements Serializable {
 
                                 }
                             } catch (Exception e) {
-                                logger.log(Level.SEVERE, "checkRunningJobsAndNotifyIfComplete,  {0} async jobs for sessionId {1} have finished.Exception {2}", new Object[]{Integer.toString(y), sessionId, e});
+                              logger.log(Level.SEVERE, "checkRunningJobsAndNotifyIfComplete,  {0} async jobs for sessionId {1} have finished.Exception {2}", new Object[]{Integer.toString(y), sessionId, e});
                             }
                             if (y > 0) {
                                 if (sessionId.contains(FUTUREMAP_INTERNALID) == false) {
