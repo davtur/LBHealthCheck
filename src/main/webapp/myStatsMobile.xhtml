@@ -3,6 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:h="http://java.sun.com/jsf/html"
       xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
       xmlns:p="http://primefaces.org/ui"
       xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
       xmlns:pm="http://primefaces.org/mobile">
@@ -107,31 +108,34 @@
                     </p:carousel>
                 </p:contentFlow>-->
                     <p:panel >
-                        <p:dataGrid widgetVar="photosWidget" var="image" pt:data-inset="true"  rows="1" value="#{customerImagesController.images}" emptyMessage="No Photos to display. Please upload some." >
-
-                             <p:graphicImage  styleClass="content" value="#{customerImagesController.image}" onclick="clickFlow(this, event)" title="#{configMapController.getKey('ListMyStats_photoTakenText')} #{image.formattedDate}" alt="#{customerImagesController.dynamicTitle}" cache="false">
-                                    <f:param name="imageId" value="#{image.id}"/>
-                                </p:graphicImage>
-
-
-                        </p:dataGrid>
+                        <p:dataList widgetVar="photosWidget" var="image" pt:data-inset="true"  rows="1" value="#{customerImagesController.images}" emptyMessage="No Photos to display. Please upload some." >
+                            <p:graphicImage  styleClass="content" value="#{customerImagesController.image}" onclick="clickFlow(this, event)" title="#{configMapController.getKey('ListMyStats_photoTakenText')} #{image.formattedDate}" alt="#{customerImagesController.dynamicTitle}" cache="false">
+                                <f:param name="imageId" value="#{image.id}"/>
+                            </p:graphicImage>
+                            <p:ajax event="swipeleft" listener="#{customerImagesController.swipeLeftListener}"
+                                    update=":growl @this"/>
+                            <p:ajax event="swiperight" listener="#{customerImagesController.swipeRightListener}"
+                                    update=":growl @this"/>
+                            <p:ajax event="taphold" listener="#{customerImagesController.tapHoldListener}"
+                                    update=":growl"/>
+                        </p:dataList>
                     </p:panel>
-                    
-                  <!--    <p:panel >
-                        <p:galleria widgetVar="galleriaWidget" var="image" value="#{customerImagesController.images}"  showCaption="true" effect="#{customerImagesController.effect}" effectSpeed="1000">
 
-                             <p:graphicImage  styleClass="content" value="#{customerImagesController.image}" onclick="clickFlow(this, event)" title="#{configMapController.getKey('ListMyStats_photoTakenText')} #{image.formattedDate}" alt="#{customerImagesController.dynamicTitle}" cache="false">
-                                    <f:param name="imageId" value="#{image.id}"/>
-                                </p:graphicImage>
-
-
-                        </p:galleria>
-                    </p:panel>
-                    <p:panel class="customerDetailsPanel" header="#{configMapController.getKey('ListMyStats_SelectedPic')}">
-                        <h:panelGrid columns="1">
-                            <p:graphicImage id="photo2" value="#{customerImagesController.selected.imageStream}" height="200px" cache="false" />
-                            <p:commandButton  id="photoUploadButton2" ajax="true"  onclick="PF('uploadPhotoDialogueWidget').show();" update=":growl :uploadPhotoForm"   value="#{configMapController.getKey('EditCustomersUploadPhotoButton')}" immediate="true"/>
-                        </h:panelGrid>-->
+                    <!--    <p:panel >
+                          <p:galleria widgetVar="galleriaWidget" var="image" value="#{customerImagesController.images}"  showCaption="true" effect="#{customerImagesController.effect}" effectSpeed="1000">
+  
+                               <p:graphicImage  styleClass="content" value="#{customerImagesController.image}" onclick="clickFlow(this, event)" title="#{configMapController.getKey('ListMyStats_photoTakenText')} #{image.formattedDate}" alt="#{customerImagesController.dynamicTitle}" cache="false">
+                                      <f:param name="imageId" value="#{image.id}"/>
+                                  </p:graphicImage>
+  
+  
+                          </p:galleria>
+                      </p:panel>
+                      <p:panel class="customerDetailsPanel" header="#{configMapController.getKey('ListMyStats_SelectedPic')}">
+                          <h:panelGrid columns="1">
+                              <p:graphicImage id="photo2" value="#{customerImagesController.selected.imageStream}" height="200px" cache="false" />
+                              <p:commandButton  id="photoUploadButton2" ajax="true"  onclick="PF('uploadPhotoDialogueWidget').show();" update=":growl :uploadPhotoForm"   value="#{configMapController.getKey('EditCustomersUploadPhotoButton')}" immediate="true"/>
+                          </h:panelGrid>-->
 
                     <!--  <p:panel header="Photo Gallery" style="height: 500px">
                        <p:ring id="basic" value="#{customerImagesController.images}" var="image" easing="easeInOutCirc">
@@ -171,6 +175,15 @@
 
             </pm:content>
 
+        </pm:page>
+        <pm:page id="displayPhoto">
+
+            <pm:content>
+                <h:form id="photoDisplay" >
+                    <p:graphicImage id="uploadedPhoto"  class="dialoguePhoto parentOfUploadPhoto" value="#{customerImagesController.uploadedImageAsStream}" style="max-width: 300px" cache="false" />
+                    <p:commandButton  id="closeDialogueButton"  action="pm:main"  value="#{configMapController.getKey('EditCustomersuploadPhoto')}" immediate="true"/>
+                </h:form>
+            </pm:content>
         </pm:page>
 
         <pm:page id="uploadPhoto">

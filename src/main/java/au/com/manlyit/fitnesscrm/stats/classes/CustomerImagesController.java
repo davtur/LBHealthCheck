@@ -58,6 +58,7 @@ import org.primefaces.context.RequestContext;
 import org.primefaces.event.SelectEvent;
 import org.primefaces.event.FileUploadEvent;
 import org.primefaces.extensions.event.ImageAreaSelectEvent;
+import org.primefaces.mobile.event.SwipeEvent;
 import org.primefaces.model.CroppedImage;
 import org.primefaces.model.DefaultStreamedContent;
 import org.primefaces.model.StreamedContent;
@@ -199,6 +200,29 @@ public class CustomerImagesController implements Serializable {
 
     public void setSelected(CustomerImages selected) {
         this.current = selected;
+    }
+
+    public void tapHoldListener(SelectEvent event) {
+        FacesMessage msg = new FacesMessage("Car Selected",
+                ((CustomerImages) event.getObject()).getFormattedDate());
+        FacesContext.getCurrentInstance().addMessage(null, msg);
+    }
+
+    public void swipeRightListener(SwipeEvent event) {
+        CustomerImages car = (CustomerImages) event.getData();
+        //carsSmall.remove(car);
+       
+        FacesContext.getCurrentInstance().addMessage(null,
+                new FacesMessage(FacesMessage.SEVERITY_INFO,
+                        "IMage Swiped", "Right: " + car.getFormattedDate()));
+    }
+     public void swipeLeftListener(SwipeEvent event) {
+        CustomerImages car = (CustomerImages) event.getData();
+        //carsSmall.remove(car);
+       
+        FacesContext.getCurrentInstance().addMessage(null,
+                new FacesMessage(FacesMessage.SEVERITY_INFO,
+                        "Image  Swiped", "Left: " + car.getFormattedDate()));
     }
 
     private void createGallery(int customerId) {
