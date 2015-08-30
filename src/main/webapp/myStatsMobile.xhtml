@@ -29,7 +29,7 @@
                     <p:panel header="Welcome #{chartController.customer.firstname}" >
                         <p:panel class="customerDetailsPanel parentOfUploadPhoto profilePictureContainer" header="#{configMapController.getKey('ListCustomersTitle_ProfilePic')}" >
 
-                            <p:graphicImage id="photo1"  value="#{customersController.selected.profileImage.imageStream}"  cache="false" class="profilePicture"/>
+                            <p:graphicImage id="photo1"  value="#{customersController.selected.profileImage.imageStream}" style="max-width:20em;max-height:20em;"  cache="false" class="profilePicture"/>
                             <p:commandButton  id="photoUploadButton" action="pm:uploadPhoto"    value="#{configMapController.getKey('EditCustomersUploadPhotoButton')}" />
 
                         </p:panel>
