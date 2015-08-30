@@ -121,7 +121,7 @@ public class EmailTemplates implements Serializable {
 
     @Override
     public String toString() {
-        return "au.com.manlyit.fitnesscrm.stats.db.EmailTemplates[ id=" + id + " ]";
+        return name;
     }
     
 }

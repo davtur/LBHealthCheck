@@ -9,7 +9,7 @@
     <ui:composition>
         <p:dialog id="EmailTemplatesEditDlg" widgetVar="EmailTemplatesEditDialog" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('EditEmailTemplatesTitle')}">
             <h:form id="EmailTemplatesEditForm">
-                <p:panelGroup id="display">
+                <p:panel id="display">
                     <p:panelGrid columns="2" rendered="#{emailTemplatesController.selected != null}">
                          <p:outputLabel value="#{configMapController.getKey('EditEmailTemplatesLabel_name')}" for="name" />
                         <p:inputText id="name"  value="#{emailTemplatesController.selected.name}" title="#{configMapController.getKey('EditEmailTemplatesTitle_name')}" required="true" requiredMessage="#{configMapController.getKey('EditEmailTemplatesRequiredMessage_name')}"/>
@@ -20,7 +20,7 @@
                     </p:panelGrid>
                     <p:commandButton actionListener="#{emailTemplatesController.update}" value="#{configMapController.getKey('Save')}" update="display,:EmailTemplatesListForm:datalist,:growl" oncomplete="handleSubmit(args, 'EmailTemplatesEditDialog');emailTemplatesControllerTable.filter()"/>
                     <p:commandButton value="#{configMapController.getKey('Cancel')}" onclick="EmailTemplatesEditDialog.hide()"/>
-                </p:panelGroup>
+                </p:panel>
             </h:form>
         </p:dialog>
 

@@ -852,3 +852,6 @@ ShowAllUsersForSessionHistory_Title=Show All
 payment.ezidebit.callback.mobileRedirect=/myDetailsMobile.xhtml
 SystemErrorEmailAddress=david@manlyit.com.au
 SystemsErrorSubject=Purefitness CRM System Error
+
+login.password.reset.templateTemporaryPasswordPlaceholder=!--USERTEMPPASS--!
+login.password.reset.templateUsernamePlaceholder=!--USERNAME--!

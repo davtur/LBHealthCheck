@@ -2,9 +2,10 @@
 <persistence version="2.0" xmlns="http://java.sun.com/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd">
   <persistence-unit name="FitnessStatsPU" transaction-type="JTA">
     <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
-   <!-- <jta-data-source>java:jboss/jdbc/fitness</jta-data-source>-->
-    <jta-data-source>jdbc/fitness</jta-data-source>
+   <!--   <jta-data-source>java:/jdbc/fitness</jta-data-source>-->
+  <jta-data-source>jdbc/fitness</jta-data-source>
     <class>au.com.manlyit.fitnesscrm.stats.db.Activation</class>
+    <class>au.com.manlyit.fitnesscrm.stats.db.AuditLog</class>
     <class>au.com.manlyit.fitnesscrm.stats.db.Currency</class>
     <class>au.com.manlyit.fitnesscrm.stats.db.ConfigMap</class>
     <class>au.com.manlyit.fitnesscrm.stats.db.CustomerAuth</class>
@@ -36,6 +37,7 @@
     <class>au.com.manlyit.fitnesscrm.stats.db.QrtzTriggers</class>
     <class>au.com.manlyit.fitnesscrm.stats.db.Schedule</class>
     <class>au.com.manlyit.fitnesscrm.stats.db.SessionHistory</class>
+    <class>au.com.manlyit.fitnesscrm.stats.db.SessionTrainers</class>
     <class>au.com.manlyit.fitnesscrm.stats.db.SessionTypes</class>
     <class>au.com.manlyit.fitnesscrm.stats.db.Stat</class>
     <class>au.com.manlyit.fitnesscrm.stats.db.StatTypes</class>
@@ -52,23 +54,31 @@
     <exclude-unlisted-classes>false</exclude-unlisted-classes>
     <shared-cache-mode>ALL</shared-cache-mode>
     <properties>
-      <property name="eclipselink.cache.coordination.protocol" value="jms"/>
+     <property name="eclipselink.cache.coordination.protocol" value="jms"/>
       <property name="eclipselink.cache.coordination.jms.topic" value="jms/PaymentsTopic"/>
       <property name="eclipselink.cache.coordination.jms.factory" value="jms/PaymentsTopicConnectionFactory"/>
+     <!--  <property name="eclipselink.cache.coordination.protocol" value="jms"/>
+      <property name="eclipselink.cache.coordination.jms.topic" value="jms/PaymentsTopic"/>
+      <property name="eclipselink.cache.coordination.jms.factory" value="java:/ConnectionFactory"/>
+      <property name="eclipselink.cache.coordination.jms.host" value="192.168.1.102:5445/" />-->
     </properties>
   </persistence-unit>
   <persistence-unit name="FitnessStatsPU2" transaction-type="RESOURCE_LOCAL">
     <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
-  <!-- <non-jta-data-source>java:jboss/jdbc/fitness2</non-jta-data-source>-->
-    <non-jta-data-source>jdbc/fitness2</non-jta-data-source>
+  <!--   <non-jta-data-source>java:/jdbc/fitness2</non-jta-data-source>-->
+  <non-jta-data-source>jdbc/fitness2</non-jta-data-source>
     <class>au.com.manlyit.fitnesscrm.stats.db.Monitoringcharts</class>
     <class>au.com.manlyit.fitnesscrm.stats.db.WebsiteMonitor</class>
     <exclude-unlisted-classes>false</exclude-unlisted-classes>
     <shared-cache-mode>ALL</shared-cache-mode>
     <properties>
-      <property name="eclipselink.cache.coordination.protocol" value="jms"/>
+     <property name="eclipselink.cache.coordination.protocol" value="jms"/>
       <property name="eclipselink.cache.coordination.jms.topic" value="jms/PaymentsTopic"/>
       <property name="eclipselink.cache.coordination.jms.factory" value="jms/PaymentsTopicConnectionFactory"/>
+     <!--  <property name="eclipselink.cache.coordination.protocol" value="jms"/>
+      <property name="eclipselink.cache.coordination.jms.topic" value="jms/PaymentsTopic"/>
+      <property name="eclipselink.cache.coordination.jms.factory" value="java:/ConnectionFactory"/>
+      <property name="eclipselink.cache.coordination.jms.host" value="192.168.1.102:5445/" />-->
     </properties>
   </persistence-unit>
 </persistence>

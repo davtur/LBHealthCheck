@@ -12,35 +12,33 @@
         </ui:define>
         <ui:define name="body">
             <h:form id="configForm">
-            <h:panelGroup id="messagePanel" layout="block">
-                <h:messages errorStyle="color: red" infoStyle="color: green" layout="table"/>
-            </h:panelGroup>
-            
+                <h:panelGroup id="messagePanel" layout="block">
+                    <h:messages errorStyle="color: red" infoStyle="color: green" layout="table" showDetail="true"/>
+                </h:panelGroup>
+
                 <p:panel>
-                    <h:outputLabel value="#{configMapController.getKey('CreateConfigMapLabel_value')}"  />
+                    <h:outputLabel value="#{configMapController.getKey('CreateConfigMapLabel_value')}   "  />
+                    <p:commandButton    update="messagePanel,configForm" process="@this" actionListener="#{configMapController.createBulk}" value="#{configMapController.getKey('CreateConfigMapSaveBulkLink')}" />
+
+                    <p:commandButton   ajax="false"   action="#{configMapController.prepareList}" value="#{configMapController.getKey('CreateConfigMapShowAllLink')}" immediate="true"/>
+
                 </p:panel>
                 <p:panel>
-                    <h:panelGrid columns="1">
+                    <p:panelGrid columns="1" style="width:100%;">
                         <h:outputLabel value="Bulk Insert (key=value, one pair per line terminated by a carriage return! )" for="bulkvalue" />
-                        <p:inputTextarea rows="20" cols="300" id="bulkvalue" value="#{configMapController.bulkvalue}" title="#{configMapController.getKey('CreateConfigMapTitle_bulkvalue')}" >
+                        <p:inputTextarea rows="20" style="width:100%;" id="bulkvalue" value="#{configMapController.bulkvalue}" title="#{configMapController.getKey('CreateConfigMapTitle_bulkvalue')}" >
                             <p:ajax process="bulkvalue" event="keyup"/>
                         </p:inputTextarea>
-                    </h:panelGrid>
+                    </p:panelGrid>
                 </p:panel>
 
                 <p:panel>
-                    <h:panelGrid columns="1">
+                    <p:panelGrid columns="1" style="width:100%;">
                         <h:outputLabel value="Rejected Entries due to Duplicate Key Values Found" for="duplicatevalue" />
-                        <p:inputTextarea rows="10" cols="300" id="duplicatevalue" value="#{configMapController.duplicateValues}" title="#{configMapController.getKey('CreateConfigMapTitle_bulkvalue')}" />
-                    </h:panelGrid>
+                        <p:inputTextarea rows="10" style="width:100%;" id="duplicatevalue" value="#{configMapController.duplicateValues}" title="#{configMapController.getKey('CreateConfigMapTitle_bulkvalue')}" />
+                    </p:panelGrid>
                 </p:panel>
-                <br />
-                <p:commandButton    update="messagePanel,configForm" process="@this" actionListener="#{configMapController.createBulk}" value="#{configMapController.getKey('CreateConfigMapSaveBulkLink')}" />
-                <br />
 
-                <br />
-                <p:commandButton   ajax="false"   action="#{configMapController.prepareList}" value="#{configMapController.getKey('CreateConfigMapShowAllLink')}" immediate="true"/>
-                <br />
             </h:form>
         </ui:define>
     </ui:composition>

@@ -28,10 +28,11 @@ import org.primefaces.event.SelectEvent;
 @Named("emailTemplatesController")
 @SessionScoped
 public class EmailTemplatesController implements Serializable {
+    private static final long serialVersionUID = 1L;
 
     private EmailTemplates current;
     private EmailTemplates selectedForDeletion;
-    private DataModel items = null;
+    private DataModel<EmailTemplates> items = null;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.EmailTemplatesFacade ejbFacade;
     @Inject
@@ -79,8 +80,8 @@ public class EmailTemplatesController implements Serializable {
                 }
 
                 @Override
-                public DataModel createPageDataModel() {
-                    return new ListDataModel(getFacade().findRange(new int[]{getPageFirstItem(), getPageFirstItem() + getPageSize()}));
+                public DataModel<EmailTemplates> createPageDataModel() {
+                    return new ListDataModel<>(getFacade().findRange(new int[]{getPageFirstItem(), getPageFirstItem() + getPageSize()}));
                 }
             };
         }
