@@ -69,6 +69,7 @@ import org.primefaces.model.UploadedFile;
 public class CustomerImagesController implements Serializable {
 
     private static final Logger logger = Logger.getLogger(CustomerImagesController.class.getName());
+    private static final long serialVersionUID = 1L;
     private CustomerImages current;
     private CustomerImages lightBoxImage;
     private static final int new_width = 800;// must match panelheight on gallery component
@@ -97,6 +98,8 @@ public class CustomerImagesController implements Serializable {
     private boolean saveButtonDisabled = true;
     private UploadedFile uploadedFile;
     private boolean profilePhoto = false;
+     int numberOfMobileImagesToDisplay= 3;
+      int offsetOfMobileImagesToDisplay= 0;
 
     public CustomerImagesController() {
     }
@@ -203,7 +206,7 @@ public class CustomerImagesController implements Serializable {
     }
 
     public void tapHoldListener(SelectEvent event) {
-        FacesMessage msg = new FacesMessage("Car Selected",
+        FacesMessage msg = new FacesMessage("Photo Date:",
                 ((CustomerImages) event.getObject()).getFormattedDate());
         FacesContext.getCurrentInstance().addMessage(null, msg);
     }
@@ -211,24 +214,32 @@ public class CustomerImagesController implements Serializable {
     public void swipeRightListener(SwipeEvent event) {
         CustomerImages car = (CustomerImages) event.getData();
         //carsSmall.remove(car);
-       
-        FacesContext.getCurrentInstance().addMessage(null,
+        int offset = images.size() - numberOfMobileImagesToDisplay;
+       if(offsetOfMobileImagesToDisplay < offset){
+           offsetOfMobileImagesToDisplay ++;
+       }
+       /* FacesContext.getCurrentInstance().addMessage(null,
                 new FacesMessage(FacesMessage.SEVERITY_INFO,
                         "IMage Swiped", "Right: " + car.getFormattedDate()));
+       */
     }
      public void swipeLeftListener(SwipeEvent event) {
         CustomerImages car = (CustomerImages) event.getData();
+        if(offsetOfMobileImagesToDisplay > 0){
+            offsetOfMobileImagesToDisplay--;
+        }
         //carsSmall.remove(car);
        
-        FacesContext.getCurrentInstance().addMessage(null,
+        /*FacesContext.getCurrentInstance().addMessage(null,
                 new FacesMessage(FacesMessage.SEVERITY_INFO,
                         "Image  Swiped", "Left: " + car.getFormattedDate()));
+        */
     }
 
     private void createGallery(int customerId) {
         try {
             List<CustomerImages> imageList = getFacade().findAllByCustId(customerId, true);
-
+            
             images = new ArrayList<>();
 
             for (CustomerImages ci : imageList) {
@@ -237,6 +248,7 @@ public class CustomerImagesController implements Serializable {
                 }
             }
             imageListSize = images.size();
+            logger.log(Level.INFO, "createGallery for customer ID:{2}. Images retrieved from DB : {0}. ImageList Size: {1}",new Object[]{ imageList.size(),imageListSize,customerId});
         } catch (Exception e) {
             logger.log(Level.WARNING, "createGallery for" + customerId + " error :", e);
         }
@@ -1215,6 +1227,37 @@ public class CustomerImagesController implements Serializable {
 
         return images;
     }
+    
+    
+    public List<CustomerImages> getMobileImages() {
+        ArrayList<CustomerImages> mobImages = null;
+        int size = 0;
+        try {
+            if (images == null) {
+                createGallery(getUser());
+                if (images == null) {
+                    images = new ArrayList<>();
+                }
+            }
+             size = images.size();
+            mobImages = new ArrayList<>();
+            int count = 0;
+            for (int c = offsetOfMobileImagesToDisplay; c < size; c++) {
+                if (count < numberOfMobileImagesToDisplay) {
+                    mobImages.add(images.get(c));
+                }
+                count++;
+                
+            }
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "getMobileImages",e);
+        }
+       
+        logger.log(Level.INFO, "getMobileImages - offset={0},Display={1},backing array Size ={2}, user:{3}, images:{4}",new Object[]{offsetOfMobileImagesToDisplay,numberOfMobileImagesToDisplay,size,getUser(),mobImages.size()});
+
+        return mobImages;
+    }
+
 
     /**
      * @param images the images to set
