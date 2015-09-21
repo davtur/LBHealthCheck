@@ -8,6 +8,7 @@ package au.com.manlyit.fitnesscrm.stats.classes;
 import au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade;
 import au.com.manlyit.fitnesscrm.stats.beans.CustomerStateFacade;
 import au.com.manlyit.fitnesscrm.stats.beans.CustomersFacade;
+import au.com.manlyit.fitnesscrm.stats.beans.NotesFacade;
 import au.com.manlyit.fitnesscrm.stats.beans.PaymentBean;
 import au.com.manlyit.fitnesscrm.stats.beans.PaymentsFacade;
 import au.com.manlyit.fitnesscrm.stats.beans.util.PaymentStatus;
@@ -21,6 +22,7 @@ import au.com.manlyit.fitnesscrm.stats.classes.util.ScheduledPaymentPojo;
 import au.com.manlyit.fitnesscrm.stats.db.CustomerState;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import au.com.manlyit.fitnesscrm.stats.db.Invoice;
+import au.com.manlyit.fitnesscrm.stats.db.Notes;
 import au.com.manlyit.fitnesscrm.stats.db.PaymentParameters;
 import au.com.manlyit.fitnesscrm.stats.db.Payments;
 import au.com.manlyit.fitnesscrm.stats.webservices.ArrayOfPayment;
@@ -126,6 +128,8 @@ public class EziDebitPaymentGateway implements Serializable {
     @Inject
     private CustomerStateFacade customerStateFacade;
     @Inject
+    private NotesFacade ejbNotesFacade;
+    @Inject
     private PaymentsFacade paymentsFacade;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.AuditLogFacade ejbAuditLogFacade;
@@ -201,7 +205,6 @@ public class EziDebitPaymentGateway implements Serializable {
     private String eziDebitEDDRFormUrl = "";
     private Customers selectedCustomer;
 
-   
     private float reportTotalSuccessful = 0;
     private float reportTotalDishonoured = 0;
     private float reportTotalScheduled = 0;
@@ -267,6 +270,27 @@ public class EziDebitPaymentGateway implements Serializable {
         }
 
         return paymentsList;
+    }
+
+    public void createCombinedAuditLogAndNote(Customers adminUser, Customers customer, String title, String message, String changedFrom, String ChangedTo) {
+        try {
+            if (adminUser == null) {
+                adminUser = customer;
+                logger.log(Level.WARNING, "Payment Gateway Controller, createCombinedAuditLogAndNote: The logged in user is NULL");
+            }
+            ejbAuditLogFacade.audit(adminUser, customer, title, message, changedFrom, ChangedTo);
+            Notes note = new Notes(0);
+            note.setCreateTimestamp(new Date());
+            note.setCreatedBy(adminUser);
+            note.setUserId(customer);
+            note.setNote(message);
+            ejbNotesFacade.create(note);
+            customersFacade.editAndFlush(customer);
+
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "Payment Gateway, createCombinedAuditLogAndNote: ", e);
+        }
+
     }
 
     private Customers getLoggedInUser() {
@@ -1357,8 +1381,6 @@ public class EziDebitPaymentGateway implements Serializable {
         this.cashPaymentReceiptReference = cashPaymentReceiptReference;
     }
 
-    
-
     private class eziDebitThreadFactory implements ThreadFactory {
 
         @Override
@@ -1520,10 +1542,9 @@ public class EziDebitPaymentGateway implements Serializable {
         CustomersController controller = (CustomersController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "customersController");
         PaymentParameters pp = controller.getSelectedCustomersPaymentParameters();
         String webDdrUrl = null;
-        if(pp != null){
+        if (pp != null) {
             webDdrUrl = pp.getWebddrUrl();// contains payment information e.g 
         }
-     
 
         String amp = "&";
 
@@ -2553,7 +2574,8 @@ public class EziDebitPaymentGateway implements Serializable {
          customerExistsInPaymentGateway = true;
          }*/
     }
- public String closeEditPaymentMobile(ActionEvent actionEvent) {
+
+    public String closeEditPaymentMobile(ActionEvent actionEvent) {
         setEditPaymentMethodEnabled(false);
         setSelectedCustomer(selectedCustomer);
         return "pm:main";
@@ -2678,9 +2700,56 @@ public class EziDebitPaymentGateway implements Serializable {
         }
         widgetUrl += amp + "callback=" + configMapFacade.getConfig("payment.ezidebit.webddr.callback");
         pp.setWebddrUrl(widgetUrl);
+        String oldUrl = "Empty";
+        if (cust.getPaymentParameters().getWebddrUrl() != null) {
+            oldUrl = cust.getPaymentParameters().getWebddrUrl();
+        }
         ejbPaymentParametersFacade.edit(pp);
         customersFacade.edit(cust);
         logger.log(Level.INFO, "eddr request url:{0}.", widgetUrl);
+        createCombinedAuditLogAndNote(getLoggedInUser(), cust, "createEddrLink", "The Direct Debit Request form was modified.", oldUrl.replace(amp, ", "), widgetUrl.replace(amp, ", "));
+    }
+
+    public void updatePaymentScheduleForm() {
+        PaymentParameters pp = getSelectedCustomer().getPaymentParameters();
+        if (pp != null) {
+
+            paymentDebitDate = pp.getContractStartDate();
+            paymentAmountInCents = pp.getPaymentRegularAmount().floatValue()/ (float) 100;
+            paymentLimitAmountInCents = pp.getPaymentRegularTotalPaymentsAmount().longValue()/ (long) 100;
+            paymentLimitToNumberOfPayments = pp.getPaymentsRegularTotalNumberOfPayments();
+            paymentSchedulePeriodType = pp.getPaymentPeriod();
+
+            NumberFormat nf = NumberFormat.getNumberInstance(Locale.US);
+            nf.setMaximumFractionDigits(2);
+            nf.setMinimumFractionDigits(2);
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+            String amp = "&";
+            String url = pp.getWebddrUrl();
+            String[] params = url.split(amp);
+            for (String p : params) {
+                String[] kv = p.split("=");
+                if (kv.length == 2) {
+                    String k = kv[0];
+                    String v = kv[1];
+                    try {
+                        if (k.contentEquals("oAmount")) {
+                            oneOffPaymentAmount = nf.parse(v).floatValue();
+
+                        }
+                        if (k.contentEquals("oDate")) {
+
+                            oneOffPaymentDate = sdf.parse(v);
+                        }
+                    } catch (ParseException parseException) {
+                        logger.log(Level.FINE, "updatePaymentScheduleForm - could not parse one off payment info from getWebddrUrl for user", getSelectedCustomer().getUsername());
+                    }
+
+                }
+
+            }
+        }
+
     }
 
     private Properties emailServerProperties() {

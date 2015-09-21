@@ -76,6 +76,8 @@ public class CustomersController implements Serializable {
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.PaymentParametersFacade ejbPaymentParametersFacade;
     @Inject
+    private au.com.manlyit.fitnesscrm.stats.beans.AuditLogFacade ejbAuditLogFacade;
+    @Inject
     private ConfigMapFacade configMapFacade;
     @Inject
     private PaymentsFacade ejbPaymentsFacade;
@@ -223,6 +225,32 @@ public class CustomersController implements Serializable {
         LoginBean controller = (LoginBean) context.getApplication().getELResolver().getValue(context.getELContext(), null, "loginBean");
         controller.doPasswordReset("system.new.customer.template", current, configMapFacade.getConfig("sendCustomerOnBoardEmailEmailSubject"));
         JsfUtil.addSuccessMessage(configMapFacade.getConfig("sendCustomerOnBoardEmail") + " " + current.getFirstname() + " " + current.getLastname() + ".");
+        
+        String auditDetails = "Customer On Board Email Sent For:" + current.getFirstname() + " " + current.getLastname() + ".";
+        String changedFrom = "N/A";
+        String changedTo = "On Board Email Sent";
+
+        createCombinedAuditLogAndNote(loggedInUser,current,"sendCustomerOnboardEmail", auditDetails,  changedFrom,  changedTo);
+    }
+    
+    public void createCombinedAuditLogAndNote(Customers adminUser, Customers customer,String title,String message, String changedFrom, String ChangedTo){
+        try {
+            if (adminUser == null) {
+                adminUser = customer;
+                logger.log(Level.WARNING, "Customers Controller, createCombinedAuditLogAndNote: The logged in user is NULL");
+            }
+            ejbAuditLogFacade.audit(adminUser, customer,title, message, changedFrom, ChangedTo);
+            Notes note = new Notes(0);
+            note.setCreateTimestamp(new Date());
+            note.setCreatedBy(adminUser);
+            note.setUserId(customer);
+            note.setNote(message);
+            ejbNotesFacade.create(note);
+            
+        } catch (Exception e) {
+             logger.log(Level.WARNING, "Customers Controller, createCombinedAuditLogAndNote: ",e);
+        }
+        
     }
 
     public Customers getSelected() {
@@ -610,7 +638,7 @@ public class CustomersController implements Serializable {
 
                 createDefaultCustomerProfilePicture(c);
                 // createDefaultPaymentParameters(paymentGateway);
-                 setSelected(c);
+                setSelected(c);
 
                 setNewCustomer(setCustomerDefaults(new Customers()));
 
@@ -628,7 +656,7 @@ public class CustomersController implements Serializable {
             try {
                 getFacade().edit(c);
                 updateCustomersGroupMembership(c);
-                
+
                 ezi.editCustomerDetailsInEziDebit(c);
                 recreateAllAffectedPageModels();
                 JsfUtil.addSuccessMessage(configMapFacade.getConfig("ChangesSaved"));
@@ -761,10 +789,11 @@ public class CustomersController implements Serializable {
         }
 
     }
-    public String updatePassMobile(){
-       try {
+
+    public String updatePassMobile() {
+        try {
             if (checkPass.length() >= 8) {
-               updatePassword();
+                updatePassword();
                 return "pm:main";
             } else {
                 JsfUtil.addErrorMessage("Password Update Error", configMapFacade.getConfig("PasswordLengthError"));
@@ -773,14 +802,14 @@ public class CustomersController implements Serializable {
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, "Password Update Error", "Password Updated Failed");
             return null;
-        } 
-        
+        }
+
     }
 
     public String updatepass() {
         try {
             if (checkPass.length() >= 8) {
-               updatePassword();
+                updatePassword();
                 return "View";
             } else {
                 JsfUtil.addErrorMessage("Password Update Error", configMapFacade.getConfig("PasswordLengthError"));
@@ -791,11 +820,12 @@ public class CustomersController implements Serializable {
             return null;
         }
     }
-    private void updatePassword(){
-         Customers c = getSelected();
-                c.setPassword(PasswordService.getInstance().encrypt(checkPass));
-                getFacade().edit(c);
-                JsfUtil.addSuccessMessage("Password Updated", "Your password was changed to " + checkPass);
+
+    private void updatePassword() {
+        Customers c = getSelected();
+        c.setPassword(PasswordService.getInstance().encrypt(checkPass));
+        getFacade().edit(c);
+        JsfUtil.addSuccessMessage("Password Updated", "Your password was changed to " + checkPass);
     }
 
     public String logoutMobile() {
@@ -1505,7 +1535,6 @@ public class CustomersController implements Serializable {
     /**
      * @return the newCustomerGroupsList
      */
-
     public List<Groups> getNewCustomerGroupsList() {
         if (newCustomerGroupsList == null) {
             newCustomerGroupsList = new ArrayList<>();

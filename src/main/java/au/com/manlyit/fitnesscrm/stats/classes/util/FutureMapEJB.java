@@ -1202,92 +1202,96 @@ public class FutureMapEJB implements Serializable {
             Logger.getLogger(EziDebitPaymentGateway.class
                     .getName()).log(Level.SEVERE, "Future Map processGetCustomerDetails", ex);
         }
-        if (custDetails != null) {
-            // do something with result
-            String customerRef = custDetails.getYourSystemReference().getValue();
-            int k = customerRef.indexOf('-');
-            if (k > 0) {
-                customerRef = customerRef.substring(0, k);
-            }
-            if (customerRef.trim().isEmpty() == false) {
-                int custId = 0;
-                try {
-                    custId = Integer.parseInt(customerRef.trim());
-                } catch (NumberFormatException numberFormatException) {
-                    logger.log(Level.WARNING, "Future Map processGetCustomerDetails an ezidebit YourSystemReference string cannot be converted to a number.", numberFormatException);
-
+        try {
+            if (custDetails != null) {
+                // do something with result
+                String customerRef = custDetails.getYourSystemReference().getValue();
+                int k = customerRef.indexOf('-');
+                if (k > 0) {
+                    customerRef = customerRef.substring(0, k);
                 }
-
-                Customers cust = customersFacade.findById(custId);
-                if (cust != null) {
-                    logger.log(Level.INFO, "Future Map processGetCustomerDetails. Processing details for customer {0}.", new Object[]{cust.getUsername()});
-
-                    PaymentParameters pp = cust.getPaymentParameters();
-                    boolean isNew = false;
-                    if (pp == null) {
-                        pp = new PaymentParameters();
-                        pp.setId(0);
-                        pp.setWebddrUrl(null);
-                        pp.setLoggedInUser(cust);
-                        isNew = true;
-                    }
-                    Payments p1 = null;
+                if (customerRef.trim().isEmpty() == false) {
+                    int custId = 0;
                     try {
-                        p1 = paymentsFacade.findLastSuccessfulScheduledPayment(cust);
-                    } catch (Exception e) {
-                        logger.log(Level.WARNING, "Future Map processGetCustomerDetails. findLastSuccessfulScheduledPayment for customer {0}. {1}", new Object[]{cust.getUsername(), e});
+                        custId = Integer.parseInt(customerRef.trim());
+                    } catch (NumberFormatException numberFormatException) {
+                        logger.log(Level.WARNING, "Future Map processGetCustomerDetails an ezidebit YourSystemReference string cannot be converted to a number.", numberFormatException);
+                        
                     }
-                    Payments p2 = null;
-                    try {
-                        p2 = paymentsFacade.findNextScheduledPayment(cust);
-                    } catch (Exception e) {
-                        logger.log(Level.WARNING, "Future Map processGetCustomerDetails. findNextScheduledPayment for customer {0}. {1}", new Object[]{cust.getUsername(), e});
-                    }
-                    pp.setLastSuccessfulScheduledPayment(p1);
-                    pp.setNextScheduledPayment(p2);
-                    pp.setAddressLine1(custDetails.getAddressLine1().getValue());
-                    pp.setAddressLine2(custDetails.getAddressLine2().getValue());
-                    pp.setAddressPostCode(custDetails.getAddressPostCode().getValue());
-                    pp.setAddressState(custDetails.getAddressState().getValue());
-                    pp.setAddressSuburb(custDetails.getAddressSuburb().getValue());
-                    pp.setContractStartDate(custDetails.getContractStartDate().getValue().toGregorianCalendar().getTime());
-                    pp.setCustomerFirstName(custDetails.getCustomerFirstName().getValue());
-                    pp.setCustomerName(custDetails.getCustomerName().getValue());
-                    pp.setEmail(custDetails.getEmail().getValue());
-                    pp.setEzidebitCustomerID(custDetails.getEzidebitCustomerID().getValue());
-
-                    pp.setMobilePhoneNumber(custDetails.getMobilePhone().getValue());
-                    pp.setPaymentGatewayName("EZIDEBIT");
-                    pp.setPaymentMethod(custDetails.getPaymentMethod().getValue());
+                    
+                    Customers cust = customersFacade.findById(custId);
+                    if (cust != null) {
+                        logger.log(Level.INFO, "Future Map processGetCustomerDetails. Processing details for customer {0}.", new Object[]{cust.getUsername()});
+                        
+                        PaymentParameters pp = cust.getPaymentParameters();
+                        boolean isNew = false;
+                        if (pp == null) {
+                            pp = new PaymentParameters();
+                            pp.setId(0);
+                            pp.setWebddrUrl(null);
+                            pp.setLoggedInUser(cust);
+                            isNew = true;
+                        }
+                        Payments p1 = null;
+                        try {
+                            p1 = paymentsFacade.findLastSuccessfulScheduledPayment(cust);
+                        } catch (Exception e) {
+                            logger.log(Level.WARNING, "Future Map processGetCustomerDetails. findLastSuccessfulScheduledPayment for customer {0}. {1}", new Object[]{cust.getUsername(), e});
+                        }
+                        Payments p2 = null;
+                        try {
+                            p2 = paymentsFacade.findNextScheduledPayment(cust);
+                        } catch (Exception e) {
+                            logger.log(Level.WARNING, "Future Map processGetCustomerDetails. findNextScheduledPayment for customer {0}. {1}", new Object[]{cust.getUsername(), e});
+                        }
+                        pp.setLastSuccessfulScheduledPayment(p1);
+                        pp.setNextScheduledPayment(p2);
+                        pp.setAddressLine1(custDetails.getAddressLine1().getValue());
+                        pp.setAddressLine2(custDetails.getAddressLine2().getValue());
+                        pp.setAddressPostCode(custDetails.getAddressPostCode().getValue());
+                        pp.setAddressState(custDetails.getAddressState().getValue());
+                        pp.setAddressSuburb(custDetails.getAddressSuburb().getValue());
+                        pp.setContractStartDate(custDetails.getContractStartDate().getValue().toGregorianCalendar().getTime());
+                        pp.setCustomerFirstName(custDetails.getCustomerFirstName().getValue());
+                        pp.setCustomerName(custDetails.getCustomerName().getValue());
+                        pp.setEmail(custDetails.getEmail().getValue());
+                        pp.setEzidebitCustomerID(custDetails.getEzidebitCustomerID().getValue());
+                        
+                        pp.setMobilePhoneNumber(custDetails.getMobilePhone().getValue());
+                        pp.setPaymentGatewayName("EZIDEBIT");
+                        pp.setPaymentMethod(custDetails.getPaymentMethod().getValue());
                     //pp.setPaymentPeriod(custDetails.getPaymentPeriod().getValue());
-                    //pp.setPaymentPeriodDayOfMonth(custDetails.getPaymentPeriodDayOfMonth().getValue());
-                    //pp.setPaymentPeriodDayOfWeek(custDetails.getPaymentPeriodDayOfWeek().getValue());
+                        //pp.setPaymentPeriodDayOfMonth(custDetails.getPaymentPeriodDayOfMonth().getValue());
+                        //pp.setPaymentPeriodDayOfWeek(custDetails.getPaymentPeriodDayOfWeek().getValue());
 
-                    pp.setSmsExpiredCard(custDetails.getSmsExpiredCard().getValue());
-                    pp.setSmsFailedNotification(custDetails.getSmsFailedNotification().getValue());
-                    pp.setSmsPaymentReminder(custDetails.getSmsPaymentReminder().getValue());
-                    pp.setStatusCode(custDetails.getStatusCode().getValue());
-                    pp.setStatusDescription(custDetails.getStatusDescription().getValue());
-                    pp.setTotalPaymentsFailed(custDetails.getTotalPaymentsFailed());
-                    pp.setTotalPaymentsFailedAmount(new BigDecimal(custDetails.getTotalPaymentsFailed()));
-                    pp.setTotalPaymentsSuccessful(custDetails.getTotalPaymentsSuccessful());
-                    pp.setTotalPaymentsSuccessfulAmount(new BigDecimal(custDetails.getTotalPaymentsSuccessfulAmount()));
-                    pp.setYourGeneralReference(custDetails.getYourGeneralReference().getValue());
-                    pp.setYourSystemReference(custDetails.getYourSystemReference().getValue());
-
-                    if (isNew) {
-                        paymentParametersFacade.create(pp);
-                        cust.setPaymentParameters(pp);
+                        pp.setSmsExpiredCard(custDetails.getSmsExpiredCard().getValue());
+                        pp.setSmsFailedNotification(custDetails.getSmsFailedNotification().getValue());
+                        pp.setSmsPaymentReminder(custDetails.getSmsPaymentReminder().getValue());
+                        pp.setStatusCode(custDetails.getStatusCode().getValue());
+                        pp.setStatusDescription(custDetails.getStatusDescription().getValue());
+                        pp.setTotalPaymentsFailed(custDetails.getTotalPaymentsFailed());
+                        pp.setTotalPaymentsFailedAmount(new BigDecimal(custDetails.getTotalPaymentsFailed()));
+                        pp.setTotalPaymentsSuccessful(custDetails.getTotalPaymentsSuccessful());
+                        pp.setTotalPaymentsSuccessfulAmount(new BigDecimal(custDetails.getTotalPaymentsSuccessfulAmount()));
+                        pp.setYourGeneralReference(custDetails.getYourGeneralReference().getValue());
+                        pp.setYourSystemReference(custDetails.getYourSystemReference().getValue());
+                        
+                        if (isNew) {
+                            paymentParametersFacade.create(pp);
+                            cust.setPaymentParameters(pp);
+                        } else {
+                            paymentParametersFacade.edit(pp);
+                            cust.setPaymentParameters(pp);
+                        }
+                        customersFacade.edit(cust);
+                        
                     } else {
-                        paymentParametersFacade.edit(pp);
-                        cust.setPaymentParameters(pp);
+                        logger.log(Level.WARNING, "Future Map processGetCustomerDetails an ezidebit YourSystemReference string cannot be converted to a number.");
                     }
-                    customersFacade.edit(cust);
-
-                } else {
-                    logger.log(Level.WARNING, "Future Map processGetCustomerDetails an ezidebit YourSystemReference string cannot be converted to a number.");
                 }
             }
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "Future Map processGetCustomerDetails FAILED",e);
         }
         logger.log(Level.INFO, "Future Map processGetCustomerDetails completed");
     }
