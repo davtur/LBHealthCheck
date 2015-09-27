@@ -58,12 +58,10 @@ public class PlanController implements Serializable {
         return inRole;
     }
 
-    
-
     public Plan getSelected() {
         /*if (current == null) {
-         current = new Plan();
-         selectedItemIndex = -1;
+            current = new Plan();
+            selectedItemIndex = -1;
          }*/
         return current;
     }

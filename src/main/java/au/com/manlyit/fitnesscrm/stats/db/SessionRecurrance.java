@@ -3,7 +3,6 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package au.com.manlyit.fitnesscrm.stats.db;
 
 import java.io.Serializable;
@@ -15,10 +14,10 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Lob;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -30,24 +29,13 @@ import javax.xml.bind.annotation.XmlTransient;
  * @author david
  */
 @Entity
-@Table(name = "session_types")
+@Table(name = "session_recurrance")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "SessionTypes.findAll", query = "SELECT s FROM SessionTypes s"),
-    @NamedQuery(name = "SessionTypes.findById", query = "SELECT s FROM SessionTypes s WHERE s.id = :id"),
-    @NamedQuery(name = "SessionTypes.findByName", query = "SELECT s FROM SessionTypes s WHERE s.name = :name"),
-    @NamedQuery(name = "SessionTypes.findByDescription", query = "SELECT s FROM SessionTypes s WHERE s.description = :description")})
-public class SessionTypes implements Serializable {
-    @Basic(optional = false)
-    @NotNull
-    @Column(name = "session_duration_minutes")
-    private int sessionDurationMinutes;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "sessionTypesId")
-    private Collection<SessionTimetable> sessionTimetableCollection;
-    @OneToOne(mappedBy = "sessionType")
-    private Plan plan;
-    @OneToMany(mappedBy = "sessionType")
-    private Collection<Plan> planCollection;
+    @NamedQuery(name = "SessionRecurrance.findAll", query = "SELECT s FROM SessionRecurrance s"),
+    @NamedQuery(name = "SessionRecurrance.findById", query = "SELECT s FROM SessionRecurrance s WHERE s.id = :id"),
+    @NamedQuery(name = "SessionRecurrance.findByName", query = "SELECT s FROM SessionRecurrance s WHERE s.name = :name")})
+public class SessionRecurrance implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -56,25 +44,26 @@ public class SessionTypes implements Serializable {
     private Integer id;
     @Basic(optional = false)
     @NotNull
-    @Size(min = 1, max = 32)
+    @Size(min = 1, max = 127)
     @Column(name = "name")
     private String name;
     @Basic(optional = false)
     @NotNull
-    @Size(min = 1, max = 96)
+    @Lob
+    @Size(min = 1, max = 65535)
     @Column(name = "description")
     private String description;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "sessionTypesId")
-    private Collection<SessionHistory> sessionHistoryCollection;
-    
-    public SessionTypes() {
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "recurranceId")
+    private Collection<SessionTimetable> sessionTimetableCollection;
+
+    public SessionRecurrance() {
     }
 
-    public SessionTypes(Integer id) {
+    public SessionRecurrance(Integer id) {
         this.id = id;
     }
 
-    public SessionTypes(Integer id, String name, String description) {
+    public SessionRecurrance(Integer id, String name, String description) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -105,12 +94,12 @@ public class SessionTypes implements Serializable {
     }
 
     @XmlTransient
-    public Collection<SessionHistory> getSessionHistoryCollection() {
-        return sessionHistoryCollection;
+    public Collection<SessionTimetable> getSessionTimetableCollection() {
+        return sessionTimetableCollection;
     }
 
-    public void setSessionHistoryCollection(Collection<SessionHistory> sessionHistoryCollection) {
-        this.sessionHistoryCollection = sessionHistoryCollection;
+    public void setSessionTimetableCollection(Collection<SessionTimetable> sessionTimetableCollection) {
+        this.sessionTimetableCollection = sessionTimetableCollection;
     }
 
     @Override
@@ -123,10 +112,10 @@ public class SessionTypes implements Serializable {
     @Override
     public boolean equals(Object object) {
         // TODO: Warning - this method won't work in the case the id fields are not set
-        if (!(object instanceof SessionTypes)) {
+        if (!(object instanceof SessionRecurrance)) {
             return false;
         }
-        SessionTypes other = (SessionTypes) object;
+        SessionRecurrance other = (SessionRecurrance) object;
         if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
             return false;
         }
@@ -137,31 +126,5 @@ public class SessionTypes implements Serializable {
     public String toString() {
         return name;
     }
-
-   
-    public Plan getPlan() {
-        return plan;
-    }
-
-    public void setPlan(Plan plan) {
-        this.plan = plan;
-    }
-
-    public int getSessionDurationMinutes() {
-        return sessionDurationMinutes;
-    }
-
-    public void setSessionDurationMinutes(int sessionDurationMinutes) {
-        this.sessionDurationMinutes = sessionDurationMinutes;
-    }
-
-    @XmlTransient
-    public Collection<SessionTimetable> getSessionTimetableCollection() {
-        return sessionTimetableCollection;
-    }
-
-    public void setSessionTimetableCollection(Collection<SessionTimetable> sessionTimetableCollection) {
-        this.sessionTimetableCollection = sessionTimetableCollection;
-    }
-
+    
 }

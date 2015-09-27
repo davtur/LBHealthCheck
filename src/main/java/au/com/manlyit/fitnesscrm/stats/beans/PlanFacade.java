@@ -5,10 +5,7 @@
  */
 package au.com.manlyit.fitnesscrm.stats.beans;
 
-import au.com.manlyit.fitnesscrm.stats.db.Customers;
-import au.com.manlyit.fitnesscrm.stats.db.Payments;
 import au.com.manlyit.fitnesscrm.stats.db.Plan;
-import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -16,6 +13,7 @@ import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
+import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
@@ -40,7 +38,7 @@ public class PlanFacade extends AbstractFacade<Plan> {
     public PlanFacade() {
         super(Plan.class);
     }
-
+    
     public List<Plan> findAllPlans() {
         List retList = null;
         try {
@@ -57,7 +55,7 @@ public class PlanFacade extends AbstractFacade<Plan> {
         } catch (Exception e) {
 
             logger.log(Level.INFO, "Exception : Could not find all Plans.", e);
-        }
+}
         return retList;
     }
 
@@ -83,7 +81,7 @@ public class PlanFacade extends AbstractFacade<Plan> {
     }
 
     public List<Plan> findPLansByName(String name) {
-        List retList = null;
+        List<Plan> retList = null;
         try {
             CriteriaBuilder cb = em.getCriteriaBuilder();
             CriteriaQuery<Plan> cq = cb.createQuery(Plan.class);
@@ -92,7 +90,7 @@ public class PlanFacade extends AbstractFacade<Plan> {
             Expression<String> plan = rt.get("planName");
             cq.where(cb.equal(plan, name));
 
-            Query q = em.createQuery(cq);
+            TypedQuery<Plan> q = em.createQuery(cq);
 
             retList = q.getResultList();
         } catch (Exception e) {

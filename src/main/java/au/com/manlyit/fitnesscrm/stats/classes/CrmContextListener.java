@@ -83,10 +83,31 @@ public final class CrmContextListener
      */
     @Override
     public void attributeRemoved(ServletContextAttributeEvent event) {
-        if (event != null) {
-            log("attributeRemoved('" + event.getName() + "', '"
-                    + event.getValue() + "')");
-        }
+       /* if (event != null) {
+            String eventName = event.getName();
+            String eventValue = "EMPTY";
+            Object eventValObject = event.getValue();
+            if(eventValObject != null){
+                try {
+                    eventValue = eventValObject.toString();
+                } catch (Exception e) {
+                }
+                
+            }
+            
+            if(eventName == null){
+                eventName = "NULL";
+            }
+             if(eventValue == null){
+                eventValue = "NULL";
+            }
+            try {
+                log("attributeRemoved('" + eventName + "', '"
+                        + eventValue + "')");
+            } catch (Exception e) {
+                logger.log(Level.INFO, "logging attributeRemoved event failed:",e);
+            }
+        }*/
     }
 
     /**

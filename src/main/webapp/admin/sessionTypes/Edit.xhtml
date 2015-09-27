@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" >
+
+    <ui:composition>
+        <p:dialog id="SessionTypesEditDlg" widgetVar="SessionTypesEditDialog" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('EditSessionTypesTitle')}">
+            <h:form id="SessionTypesEditForm">
+                <h:panelGroup id="display">
+                    <p:panelGrid columns="2" rendered="#{sessionTypesController.selected != null}">
+                        <h:outputLabel value="#{configMapController.getKey('EditSessionTypesLabel_id')}" for="id" />
+                        <h:inputText id="id"  value="#{sessionTypesController.selected.id}" title="#{configMapController.getKey('EditSessionTypesTitle_id')}" required="true" requiredMessage="#{configMapController.getKey('EditSessionTypesRequiredMessage_id')}"/>
+                        <h:outputLabel value="#{configMapController.getKey('EditSessionTypesLabel_name')}" for="name" />
+                        <h:inputText id="name"  value="#{sessionTypesController.selected.name}" title="#{configMapController.getKey('EditSessionTypesTitle_name')}" required="true" requiredMessage="#{configMapController.getKey('EditSessionTypesRequiredMessage_name')}"/>
+                        <h:outputLabel value="#{configMapController.getKey('EditSessionTypesLabel_description')}" for="description" />
+                        <h:inputText id="description"  value="#{sessionTypesController.selected.description}" title="#{configMapController.getKey('EditSessionTypesTitle_description')}" required="true" requiredMessage="#{configMapController.getKey('EditSessionTypesRequiredMessage_description')}"/>
+                        <h:outputLabel value="#{configMapController.getKey('EditSessionTypesLabel_plan')}" for="plan" />
+                        <p:selectOneMenu id="plan" valueChangeListener="#{sessionTypesController.selectOneMenuValueChangeListener}" value="#{sessionTypesController.selected.plan}" label="#{configMapController.getKey('EditSessionTypesTitle_plan')}" >
+                            <f:selectItems value="#{planController.itemsAvailableSelectOne}"/>
+                            <p:ajax   update=":SessionTypesEditForm"  />
+                        </p:selectOneMenu>
+                        <h:outputLabel value="#{configMapController.getKey('EditSessionTypesLabel_sessionDurationMinutes')}" for="sessionDurationMinutes" />
+                        <h:inputText id="sessionDurationMinutes"  value="#{sessionTypesController.selected.sessionDurationMinutes}" title="#{configMapController.getKey('EditSessionTypesTitle_sessionDurationMinutes')}" required="true" requiredMessage="#{configMapController.getKey('EditSessionTypesRequiredMessage_sessionDurationMinutes')}"/>
+                    </p:panelGrid>
+                    <p:commandButton actionListener="#{sessionTypesController.update}" value="#{configMapController.getKey('Save')}" update="display,:SessionTypesListForm:datalist,:growl" oncomplete="handleSubmit(args, 'SessionTypesEditDialog');sessionTypesControllerTable.filter()"/>
+                    <p:commandButton value="#{configMapController.getKey('Cancel')}" onclick="SessionTypesEditDialog.hide()"/>
+                </h:panelGroup>
+            </h:form>
+        </p:dialog>
+
+    </ui:composition>
+</html>

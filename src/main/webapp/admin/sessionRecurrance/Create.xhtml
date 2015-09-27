@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" >
+
+    <ui:composition >
+        <p:dialog id="SessionRecurranceCreateDlg" widgetVar="SessionRecurranceCreateDialog" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('CreateSessionRecurranceTitle')}">
+
+            <h:form id="SessionRecurranceCreateForm">
+                <h:panelGroup id="display">
+                    <p:panelGrid columns="2" rendered="#{sessionRecurranceController.selected != null}">
+                         <p:outputLabel value="#{configMapController.getKey('CreateSessionRecurranceLabel_name')}" for="name" />
+                        <p:inputText id="name" value="#{sessionRecurranceController.selected.name}" title="#{configMapController.getKey('CreateSessionRecurranceTitle_name')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionRecurranceRequiredMessage_name')}"/>
+                        <p:outputLabel value="#{configMapController.getKey('CreateSessionRecurranceLabel_description')}" for="description" />
+                        <p:inputTextarea rows="4" cols="30" id="description"  value="#{sessionRecurranceController.selected.description}"  title="#{configMapController.getKey('CreateSessionRecurranceTitle_description')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionRecurranceRequiredMessage_description')}"/>
+                    </p:panelGrid>
+                    <p:commandButton actionListener="#{sessionRecurranceController.createDialogue}" value="#{configMapController.getKey('Save')}" update="display,:SessionRecurranceListForm:datalist,:growl" oncomplete="handleSubmit(args,'SessionRecurranceCreateDialog');PF('sessionRecurranceControllerTable').filter()"/>
+                    <p:commandButton value="#{configMapController.getKey('Cancel')}" onclick="PF('SessionRecurranceCreateDialog').hide()"/>
+                </h:panelGroup>
+            </h:form>
+        </p:dialog>
+
+    </ui:composition>    
+    <p> Generated from template ( JSF_from_entity_wizard/StandardJSF/create.ftl  )- Dave 18th July 2015 </p>
+</html>

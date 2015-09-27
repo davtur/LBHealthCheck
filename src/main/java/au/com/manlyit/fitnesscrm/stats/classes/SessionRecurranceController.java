@@ -1,9 +1,9 @@
 package au.com.manlyit.fitnesscrm.stats.classes;
 
-import au.com.manlyit.fitnesscrm.stats.db.SessionTypes;
+import au.com.manlyit.fitnesscrm.stats.db.SessionRecurrance;
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PaginationHelper;
-import au.com.manlyit.fitnesscrm.stats.beans.SessionTypesFacade;
+import au.com.manlyit.fitnesscrm.stats.beans.SessionRecurranceFacade;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -25,23 +25,23 @@ import javax.inject.Named;
 import org.primefaces.event.RowEditEvent;
 import org.primefaces.event.SelectEvent;
 
-@Named("sessionTypesController")
+@Named("sessionRecurranceController")
 @SessionScoped
-public class SessionTypesController implements Serializable {
+public class SessionRecurranceController implements Serializable {
 
-    private SessionTypes current;
-    private SessionTypes selectedForDeletion;
+    private SessionRecurrance current;
+    private SessionRecurrance selectedForDeletion;
     private DataModel items = null;
     @Inject
-    private au.com.manlyit.fitnesscrm.stats.beans.SessionTypesFacade ejbFacade;
+    private au.com.manlyit.fitnesscrm.stats.beans.SessionRecurranceFacade ejbFacade;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade configMapFacade;
     private PaginationHelper pagination;
     private int selectedItemIndex;
-    private List<SessionTypes> filteredItems;
-    private SessionTypes[] multiSelected;
+    private List<SessionRecurrance> filteredItems;
+    private SessionRecurrance[] multiSelected;
 
-    public SessionTypesController() {
+    public SessionRecurranceController() {
     }
 
     public static boolean isUserInRole(String roleName) {
@@ -49,15 +49,15 @@ public class SessionTypesController implements Serializable {
         return inRole;
     }
 
-    public SessionTypes getSelected() {
+    public SessionRecurrance getSelected() {
         if (current == null) {
-            current = new SessionTypes();
+            current = new SessionRecurrance();
             selectedItemIndex = -1;
         }
         return current;
     }
 
-    public void setSelected(SessionTypes selected) {
+    public void setSelected(SessionRecurrance selected) {
         if (selected != null) {
             current = selected;
             selectedItemIndex = -1;
@@ -65,7 +65,7 @@ public class SessionTypesController implements Serializable {
 
     }
 
-    private SessionTypesFacade getFacade() {
+    private SessionRecurranceFacade getFacade() {
         return ejbFacade;
     }
 
@@ -90,28 +90,28 @@ public class SessionTypesController implements Serializable {
     /**
      * @return the filteredItems
      */
-    public List<SessionTypes> getFilteredItems() {
+    public List<SessionRecurrance> getFilteredItems() {
         return filteredItems;
     }
 
     /**
      * @param filteredItems the filteredItems to set
      */
-    public void setFilteredItems(List<SessionTypes> filteredItems) {
+    public void setFilteredItems(List<SessionRecurrance> filteredItems) {
         this.filteredItems = filteredItems;
     }
 
     /**
      * @return the multiSelected
      */
-    public SessionTypes[] getMultiSelected() {
+    public SessionRecurrance[] getMultiSelected() {
         return multiSelected;
     }
 
     /**
      * @param multiSelected the multiSelected to set
      */
-    public void setMultiSelected(SessionTypes[] multiSelected) {
+    public void setMultiSelected(SessionRecurrance[] multiSelected) {
         this.multiSelected = multiSelected;
     }
 
@@ -121,13 +121,13 @@ public class SessionTypesController implements Serializable {
     }
 
     public String prepareView() {
-        //current = (SessionTypes)getItems().getRowData();
+        //current = (SessionRecurrance)getItems().getRowData();
         //selectedItemIndex = pagination.getPageFirstItem() + getItems().getRowIndex();
         return "View";
     }
 
     public String prepareCreate() {
-        current = new SessionTypes();
+        current = new SessionRecurrance();
         selectedItemIndex = -1;
         return "Create";
     }
@@ -138,7 +138,7 @@ public class SessionTypesController implements Serializable {
                 current.setId(0);
             }
             getFacade().create(current);
-            JsfUtil.addSuccessMessage(configMapFacade.getConfig("SessionTypesCreated"));
+            JsfUtil.addSuccessMessage(configMapFacade.getConfig("SessionRecurranceCreated"));
             return prepareCreate();
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
@@ -151,7 +151,7 @@ public class SessionTypesController implements Serializable {
             current.setId(0);
             getFacade().create(current);
             recreateModel();
-            JsfUtil.addSuccessMessage(configMapFacade.getConfig("SessionTypesCreated"));
+            JsfUtil.addSuccessMessage(configMapFacade.getConfig("SessionRecurranceCreated"));
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
         }
@@ -159,7 +159,7 @@ public class SessionTypesController implements Serializable {
     }
 
     public String prepareEdit() {
-        //current = (SessionTypes)getItems().getRowData();
+        //current = (SessionRecurrance)getItems().getRowData();
         //selectedItemIndex = pagination.getPageFirstItem() + getItems().getRowIndex();
         return "Edit";
     }
@@ -175,7 +175,7 @@ public class SessionTypesController implements Serializable {
     public String update() {
         try {
             getFacade().edit(current);
-            JsfUtil.addSuccessMessage(configMapFacade.getConfig("SessionTypesUpdated"));
+            JsfUtil.addSuccessMessage(configMapFacade.getConfig("SessionRecurranceUpdated"));
             return "View";
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
@@ -202,11 +202,11 @@ public class SessionTypesController implements Serializable {
         }
     }
 
-    public SessionTypes getSelectedForDeletion() {
+    public SessionRecurrance getSelectedForDeletion() {
         return selectedForDeletion;
     }
 
-    public void setSelectedForDeletion(SessionTypes selectedForDeletion) {
+    public void setSelectedForDeletion(SessionRecurrance selectedForDeletion) {
         this.selectedForDeletion = selectedForDeletion;
         current = selectedForDeletion;
 
@@ -218,7 +218,7 @@ public class SessionTypesController implements Serializable {
     private void performDestroy() {
         try {
             getFacade().remove(current);
-            JsfUtil.addSuccessMessage(configMapFacade.getConfig("SessionTypesDeleted"));
+            JsfUtil.addSuccessMessage(configMapFacade.getConfig("SessionRecurranceDeleted"));
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
         }
@@ -280,12 +280,12 @@ public class SessionTypesController implements Serializable {
         return JsfUtil.getSelectItems(ejbFacade.findAll(), true);
     }
 
-    public Collection<SessionTypes> getItemsAvailable() {
+    public Collection<SessionRecurrance> getItemsAvailable() {
         return ejbFacade.findAll();
     }
 
     public void onEdit(RowEditEvent event) {
-        SessionTypes cm = (SessionTypes) event.getObject();
+        SessionRecurrance cm = (SessionRecurrance) event.getObject();
         getFacade().edit(cm);
         recreateModel();
         JsfUtil.addSuccessMessage("Row Edit Successful");
@@ -295,15 +295,15 @@ public class SessionTypesController implements Serializable {
         JsfUtil.addErrorMessage("Row Edit Cancelled");
     }
 
-    @FacesConverter(forClass = SessionTypes.class)
-    public static class SessionTypesControllerConverter implements Converter {
+    @FacesConverter(forClass = SessionRecurrance.class)
+    public static class SessionRecurranceControllerConverter implements Converter {
 
         public Object getAsObject(FacesContext facesContext, UIComponent component, String value) {
             if (value == null || value.length() == 0) {
                 return null;
             }
-            SessionTypesController controller = (SessionTypesController) facesContext.getApplication().getELResolver().
-                    getValue(facesContext.getELContext(), null, "sessionTypesController");
+            SessionRecurranceController controller = (SessionRecurranceController) facesContext.getApplication().getELResolver().
+                    getValue(facesContext.getELContext(), null, "sessionRecurranceController");
             return controller.ejbFacade.find(getKey(value));
         }
 
@@ -324,11 +324,11 @@ public class SessionTypesController implements Serializable {
             if (object == null) {
                 return null;
             }
-            if (object instanceof SessionTypes) {
-                SessionTypes o = (SessionTypes) object;
+            if (object instanceof SessionRecurrance) {
+                SessionRecurrance o = (SessionRecurrance) object;
                 return getStringKey(o.getId());
             } else {
-                throw new IllegalArgumentException("object " + object + " is of type " + object.getClass().getName() + "; expected type: " + SessionTypesController.class.getName());
+                throw new IllegalArgumentException("object " + object + " is of type " + object.getClass().getName() + "; expected type: " + SessionRecurranceController.class.getName());
             }
         }
 

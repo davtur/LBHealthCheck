@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" 
+      xmlns:ui="http://java.sun.com/jsf/facelets" >
+
+    <ui:composition>
+
+        <p:dialog id="SessionTypesViewDlg" widgetVar="SessionTypesViewDialog" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('ViewSessionTypesTitle')}">
+            <h:form id="SessionTypesViewForm">
+                <h:panelGroup id="display">
+                    <p:panelGrid columns="2" rendered="#{sessionTypesController.selected != null}">
+                        <h:outputText value="#{configMapController.getKey('ViewSessionTypesLabel_id')}"/>
+                        <h:outputText value="#{sessionTypesController.selected.id}" title="#{configMapController.getKey('ViewSessionTypesTitle_id')}"/>
+                        <h:outputText value="#{configMapController.getKey('ViewSessionTypesLabel_name')}"/>
+                        <h:outputText value="#{sessionTypesController.selected.name}" title="#{configMapController.getKey('ViewSessionTypesTitle_name')}"/>
+                        <h:outputText value="#{configMapController.getKey('ViewSessionTypesLabel_description')}"/>
+                        <h:outputText value="#{sessionTypesController.selected.description}" title="#{configMapController.getKey('ViewSessionTypesTitle_description')}"/>
+                        <h:outputText value="#{configMapController.getKey('ViewSessionTypesLabel_plan')}"/>
+                        <h:outputText value="#{sessionTypesController.selected.plan}" title="#{configMapController.getKey('ViewSessionTypesTitle_plan')}"/>
+                        <h:outputText value="#{configMapController.getKey('ViewSessionTypesLabel_sessionDurationMinutes')}"/>
+                        <h:outputText value="#{sessionTypesController.selected.sessionDurationMinutes}" title="#{configMapController.getKey('ViewSessionTypesTitle_sessionDurationMinutes')}"/>
+                    </p:panelGrid>
+                    <p:commandButton value="#{configMapController.getKey('Close')}" onclick="SessionTypesViewDialog.hide()"/>
+                </h:panelGroup>
+            </h:form>
+        </p:dialog>
+
+    </ui:composition>
+</html>

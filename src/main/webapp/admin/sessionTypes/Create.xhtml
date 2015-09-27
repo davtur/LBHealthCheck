@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" >
+
+    <ui:composition >
+        <p:dialog id="SessionTypesCreateDlg" widgetVar="SessionTypesCreateDialog" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('CreateSessionTypesTitle')}">
+
+            <h:form id="SessionTypesCreateForm">
+                <h:panelGroup id="display">
+                    <p:panelGrid columns="2" rendered="#{sessionTypesController.selected != null}">
+                        <p:outputLabel value="#{configMapController.getKey('CreateSessionTypesLabel_id')}" for="id" />
+                        <p:inputText id="id" value="#{sessionTypesController.selected.id}" title="#{configMapController.getKey('CreateSessionTypesTitle_id')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionTypesRequiredMessage_id')}"/>
+                        <p:outputLabel value="#{configMapController.getKey('CreateSessionTypesLabel_name')}" for="name" />
+                        <p:inputText id="name" value="#{sessionTypesController.selected.name}" title="#{configMapController.getKey('CreateSessionTypesTitle_name')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionTypesRequiredMessage_name')}"/>
+                        <p:outputLabel value="#{configMapController.getKey('CreateSessionTypesLabel_description')}" for="description" />
+                        <p:inputText id="description" value="#{sessionTypesController.selected.description}" title="#{configMapController.getKey('CreateSessionTypesTitle_description')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionTypesRequiredMessage_description')}"/>
+                        <p:outputLabel value="#{configMapController.getKey('CreateSessionTypesLabel_plan')}" for="plan" />
+                        <p:selectOneMenu id="plan" valueChangeListener="#{sessionTypesController.selectOneMenuValueChangeListener}"  value="#{sessionTypesController.selected.plan}"  label="#{configMapController.getKey('CreateSessionTypesTitle_plan')}" >
+                            <f:selectItems value="#{planController.itemsAvailableSelectOne}"/>
+                            <p:ajax   update=":SessionTypesCreateForm"  />
+                        </p:selectOneMenu>
+                        <p:outputLabel value="#{configMapController.getKey('CreateSessionTypesLabel_sessionDurationMinutes')}" for="sessionDurationMinutes" />
+                        <p:inputText id="sessionDurationMinutes" value="#{sessionTypesController.selected.sessionDurationMinutes}" title="#{configMapController.getKey('CreateSessionTypesTitle_sessionDurationMinutes')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionTypesRequiredMessage_sessionDurationMinutes')}"/>
+                    </p:panelGrid>
+                    <p:commandButton actionListener="#{sessionTypesController.createDialogue}" value="#{configMapController.getKey('Save')}" update="display,:SessionTypesListForm:datalist,:growl" oncomplete="handleSubmit(args,'SessionTypesCreateDialog');PF('sessionTypesControllerTable').filter()"/>
+                    <p:commandButton value="#{configMapController.getKey('Cancel')}" onclick="PF('SessionTypesCreateDialog').hide()"/>
+                </h:panelGroup>
+            </h:form>
+        </p:dialog>
+
+    </ui:composition>    
+    <p> Generated from template ( JSF_from_entity_wizard/StandardJSF/create.ftl  )- Dave 18th July 2015 </p>
+</html>

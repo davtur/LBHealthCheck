@@ -1,5 +1,6 @@
 /*
- * To change this template, choose Tools | Templates
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
 package au.com.manlyit.fitnesscrm.stats.beans;
@@ -36,7 +37,7 @@ public class SessionTypesFacade extends AbstractFacade<SessionTypes> {
     public SessionTypesFacade() {
         super(SessionTypes.class);
     }
-
+    
     public List<SessionTypes> findAllSessionTypesOrderByName(boolean sortAsc) {
 
         Query q;
@@ -50,7 +51,7 @@ public class SessionTypesFacade extends AbstractFacade<SessionTypes> {
                 cq.orderBy(cb.asc(express));
             } else {
                 cq.orderBy(cb.desc(express));
-            }
+}
             q = em.createQuery(cq);
             return q.getResultList();
         } catch (Exception e) {

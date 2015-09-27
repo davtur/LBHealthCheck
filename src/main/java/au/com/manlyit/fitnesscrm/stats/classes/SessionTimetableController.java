@@ -1,15 +1,14 @@
 package au.com.manlyit.fitnesscrm.stats.classes;
 
-import au.com.manlyit.fitnesscrm.stats.db.SessionTypes;
+import au.com.manlyit.fitnesscrm.stats.db.SessionTimetable;
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PaginationHelper;
-import au.com.manlyit.fitnesscrm.stats.beans.SessionTypesFacade;
+import au.com.manlyit.fitnesscrm.stats.beans.SessionTimetableFacade;
 
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import java.util.ResourceBundle;
 import javax.enterprise.context.SessionScoped;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
@@ -25,23 +24,24 @@ import javax.inject.Named;
 import org.primefaces.event.RowEditEvent;
 import org.primefaces.event.SelectEvent;
 
-@Named("sessionTypesController")
+@Named("sessionTimetableController")
 @SessionScoped
-public class SessionTypesController implements Serializable {
+public class SessionTimetableController implements Serializable {
+    private static final long serialVersionUID = 1L;
 
-    private SessionTypes current;
-    private SessionTypes selectedForDeletion;
-    private DataModel items = null;
+    private SessionTimetable current;
+    private SessionTimetable selectedForDeletion;
+    private DataModel<SessionTimetable> items = null;
     @Inject
-    private au.com.manlyit.fitnesscrm.stats.beans.SessionTypesFacade ejbFacade;
+    private au.com.manlyit.fitnesscrm.stats.beans.SessionTimetableFacade ejbFacade;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade configMapFacade;
     private PaginationHelper pagination;
     private int selectedItemIndex;
-    private List<SessionTypes> filteredItems;
-    private SessionTypes[] multiSelected;
+    private List<SessionTimetable> filteredItems;
+    private SessionTimetable[] multiSelected;
 
-    public SessionTypesController() {
+    public SessionTimetableController() {
     }
 
     public static boolean isUserInRole(String roleName) {
@@ -49,15 +49,15 @@ public class SessionTypesController implements Serializable {
         return inRole;
     }
 
-    public SessionTypes getSelected() {
+    public SessionTimetable getSelected() {
         if (current == null) {
-            current = new SessionTypes();
+            current = new SessionTimetable();
             selectedItemIndex = -1;
         }
         return current;
     }
 
-    public void setSelected(SessionTypes selected) {
+    public void setSelected(SessionTimetable selected) {
         if (selected != null) {
             current = selected;
             selectedItemIndex = -1;
@@ -65,7 +65,7 @@ public class SessionTypesController implements Serializable {
 
     }
 
-    private SessionTypesFacade getFacade() {
+    private SessionTimetableFacade getFacade() {
         return ejbFacade;
     }
 
@@ -79,8 +79,8 @@ public class SessionTypesController implements Serializable {
                 }
 
                 @Override
-                public DataModel createPageDataModel() {
-                    return new ListDataModel(getFacade().findRange(new int[]{getPageFirstItem(), getPageFirstItem() + getPageSize()}));
+                public DataModel<SessionTimetable> createPageDataModel() {
+                    return new ListDataModel<>(getFacade().findAll());
                 }
             };
         }
@@ -90,28 +90,28 @@ public class SessionTypesController implements Serializable {
     /**
      * @return the filteredItems
      */
-    public List<SessionTypes> getFilteredItems() {
+    public List<SessionTimetable> getFilteredItems() {
         return filteredItems;
     }
 
     /**
      * @param filteredItems the filteredItems to set
      */
-    public void setFilteredItems(List<SessionTypes> filteredItems) {
+    public void setFilteredItems(List<SessionTimetable> filteredItems) {
         this.filteredItems = filteredItems;
     }
 
     /**
      * @return the multiSelected
      */
-    public SessionTypes[] getMultiSelected() {
+    public SessionTimetable[] getMultiSelected() {
         return multiSelected;
     }
 
     /**
      * @param multiSelected the multiSelected to set
      */
-    public void setMultiSelected(SessionTypes[] multiSelected) {
+    public void setMultiSelected(SessionTimetable[] multiSelected) {
         this.multiSelected = multiSelected;
     }
 
@@ -121,13 +121,13 @@ public class SessionTypesController implements Serializable {
     }
 
     public String prepareView() {
-        //current = (SessionTypes)getItems().getRowData();
+        //current = (SessionTimetable)getItems().getRowData();
         //selectedItemIndex = pagination.getPageFirstItem() + getItems().getRowIndex();
         return "View";
     }
 
     public String prepareCreate() {
-        current = new SessionTypes();
+        current = new SessionTimetable();
         selectedItemIndex = -1;
         return "Create";
     }
@@ -138,7 +138,7 @@ public class SessionTypesController implements Serializable {
                 current.setId(0);
             }
             getFacade().create(current);
-            JsfUtil.addSuccessMessage(configMapFacade.getConfig("SessionTypesCreated"));
+            JsfUtil.addSuccessMessage(configMapFacade.getConfig("SessionTimetableCreated"));
             return prepareCreate();
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
@@ -151,7 +151,7 @@ public class SessionTypesController implements Serializable {
             current.setId(0);
             getFacade().create(current);
             recreateModel();
-            JsfUtil.addSuccessMessage(configMapFacade.getConfig("SessionTypesCreated"));
+            JsfUtil.addSuccessMessage(configMapFacade.getConfig("SessionTimetableCreated"));
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
         }
@@ -159,7 +159,7 @@ public class SessionTypesController implements Serializable {
     }
 
     public String prepareEdit() {
-        //current = (SessionTypes)getItems().getRowData();
+        //current = (SessionTimetable)getItems().getRowData();
         //selectedItemIndex = pagination.getPageFirstItem() + getItems().getRowIndex();
         return "Edit";
     }
@@ -175,7 +175,7 @@ public class SessionTypesController implements Serializable {
     public String update() {
         try {
             getFacade().edit(current);
-            JsfUtil.addSuccessMessage(configMapFacade.getConfig("SessionTypesUpdated"));
+            JsfUtil.addSuccessMessage(configMapFacade.getConfig("SessionTimetableUpdated"));
             return "View";
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
@@ -202,11 +202,11 @@ public class SessionTypesController implements Serializable {
         }
     }
 
-    public SessionTypes getSelectedForDeletion() {
+    public SessionTimetable getSelectedForDeletion() {
         return selectedForDeletion;
     }
 
-    public void setSelectedForDeletion(SessionTypes selectedForDeletion) {
+    public void setSelectedForDeletion(SessionTimetable selectedForDeletion) {
         this.selectedForDeletion = selectedForDeletion;
         current = selectedForDeletion;
 
@@ -218,7 +218,7 @@ public class SessionTypesController implements Serializable {
     private void performDestroy() {
         try {
             getFacade().remove(current);
-            JsfUtil.addSuccessMessage(configMapFacade.getConfig("SessionTypesDeleted"));
+            JsfUtil.addSuccessMessage(configMapFacade.getConfig("SessionTimetableDeleted"));
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
         }
@@ -239,9 +239,9 @@ public class SessionTypesController implements Serializable {
         }
     }
 
-    public DataModel getItems() {
+    public DataModel<SessionTimetable> getItems() {
         if (items == null) {
-            items = getPagination().createPageDataModel();
+            items = new ListDataModel<>(getFacade().findAll());
         }
         return items;
     }
@@ -271,7 +271,7 @@ public class SessionTypesController implements Serializable {
     }
 
     public SelectItem[] getItemsAvailableSelectMany() {
-        file:///home/david/.netbeans/8.0/config/Templates/JSF/JSF_From_Entity_Wizard/StandardJSF/create.ftl
+       // file:///home/david/.netbeans/8.0/config/Templates/JSF/JSF_From_Entity_Wizard/StandardJSF/create.ftl
 
         return JsfUtil.getSelectItems(ejbFacade.findAll(), false);
     }
@@ -280,12 +280,12 @@ public class SessionTypesController implements Serializable {
         return JsfUtil.getSelectItems(ejbFacade.findAll(), true);
     }
 
-    public Collection<SessionTypes> getItemsAvailable() {
+    public Collection<SessionTimetable> getItemsAvailable() {
         return ejbFacade.findAll();
     }
 
     public void onEdit(RowEditEvent event) {
-        SessionTypes cm = (SessionTypes) event.getObject();
+        SessionTimetable cm = (SessionTimetable) event.getObject();
         getFacade().edit(cm);
         recreateModel();
         JsfUtil.addSuccessMessage("Row Edit Successful");
@@ -295,15 +295,16 @@ public class SessionTypesController implements Serializable {
         JsfUtil.addErrorMessage("Row Edit Cancelled");
     }
 
-    @FacesConverter(forClass = SessionTypes.class)
-    public static class SessionTypesControllerConverter implements Converter {
+    @FacesConverter(forClass = SessionTimetable.class)
+    public static class SessionTimetableControllerConverter implements Converter {
 
+        @Override
         public Object getAsObject(FacesContext facesContext, UIComponent component, String value) {
             if (value == null || value.length() == 0) {
                 return null;
             }
-            SessionTypesController controller = (SessionTypesController) facesContext.getApplication().getELResolver().
-                    getValue(facesContext.getELContext(), null, "sessionTypesController");
+            SessionTimetableController controller = (SessionTimetableController) facesContext.getApplication().getELResolver().
+                    getValue(facesContext.getELContext(), null, "sessionTimetableController");
             return controller.ejbFacade.find(getKey(value));
         }
 
@@ -324,11 +325,11 @@ public class SessionTypesController implements Serializable {
             if (object == null) {
                 return null;
             }
-            if (object instanceof SessionTypes) {
-                SessionTypes o = (SessionTypes) object;
+            if (object instanceof SessionTimetable) {
+                SessionTimetable o = (SessionTimetable) object;
                 return getStringKey(o.getId());
             } else {
-                throw new IllegalArgumentException("object " + object + " is of type " + object.getClass().getName() + "; expected type: " + SessionTypesController.class.getName());
+                throw new IllegalArgumentException("object " + object + " is of type " + object.getClass().getName() + "; expected type: " + SessionTimetableController.class.getName());
             }
         }
 

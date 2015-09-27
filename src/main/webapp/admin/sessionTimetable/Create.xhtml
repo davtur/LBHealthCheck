@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" >
+
+    <ui:composition >
+        <p:dialog id="SessionTimetableCreateDlg" widgetVar="SessionTimetableCreateDialog" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('CreateSessionTimetableTitle')}">
+
+            <h:form id="SessionTimetableCreateForm">
+                <h:panelGroup id="display">
+                    <p:panelGrid columns="2" rendered="#{sessionTimetableController.selected != null}">
+                         <p:outputLabel value="#{configMapController.getKey('CreateSessionTimetableLabel_sessiondate')}" for="sessiondate" />
+
+
+                        <p:calendar id="sessiondate" pattern="dd/MM/yyyy HH:mm:ss"  value="#{sessionTimetableController.selected.sessiondate}"  title="#{configMapController.getKey('CreateSessionTimetableTitle_sessiondate')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionTimetableRequiredMessage_sessiondate')}">
+                            <p:ajax event="dateSelect" listener="#{sessionTimetableController.handleDateSelect}" update=":SessionTimetableCreateForm" />
+                        </p:calendar>
+                        <p:outputLabel value="#{configMapController.getKey('CreateSessionTimetableLabel_comments')}" for="comments" />
+                        <p:inputTextarea rows="4" cols="30" id="comments"  value="#{sessionTimetableController.selected.comments}"  title="#{configMapController.getKey('CreateSessionTimetableTitle_comments')}" >
+                            <p:ajax  event="keyup"   />
+                        </p:inputTextarea>
+                            <p:outputLabel value="#{configMapController.getKey('CreateSessionTimetableLabel_adminNotes')}" for="adminNotes" />
+                        <p:inputTextarea rows="4" cols="30" id="adminNotes"  value="#{sessionTimetableController.selected.adminNotes}"  title="#{configMapController.getKey('CreateSessionTimetableTitle_adminNotes')}" >
+                            <p:ajax  event="keyup"   />
+                        </p:inputTextarea>
+                            <p:outputLabel value="#{configMapController.getKey('CreateSessionTimetableLabel_sessionTypesId')}" for="sessionTypesId" />
+                        <p:selectOneMenu id="sessionTypesId" valueChangeListener="#{sessionTimetableController.selectOneMenuValueChangeListener}"  value="#{sessionTimetableController.selected.sessionTypesId}"  label="#{configMapController.getKey('CreateSessionTimetableTitle_sessionTypesId')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionTimetableRequiredMessage_sessionTypesId')}">
+                            <f:selectItems value="#{sessionTypesController.itemsAvailableSelectOne}"/>
+                            <p:ajax   event="select"   />
+                        </p:selectOneMenu>
+                        <p:outputLabel value="#{configMapController.getKey('CreateSessionTimetableLabel_recurranceId')}" for="recurranceId" />
+                        <p:selectOneMenu id="recurranceId" valueChangeListener="#{sessionTimetableController.selectOneMenuValueChangeListener}"  value="#{sessionTimetableController.selected.recurranceId}"  label="#{configMapController.getKey('CreateSessionTimetableTitle_recurranceId')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionTimetableRequiredMessage_recurranceId')}">
+                            <f:selectItems value="#{sessionRecurranceController.itemsAvailableSelectOne}"/>
+                            <p:ajax   event="select"  />
+                        </p:selectOneMenu>
+                    </p:panelGrid>
+                    <p:commandButton actionListener="#{sessionTimetableController.createDialogue}" value="#{configMapController.getKey('Save')}" update="display,:SessionTimetableListForm:datalist,:growl" oncomplete="handleSubmit(args,'SessionTimetableCreateDialog');PF('sessionTimetableControllerTable').filter()"/>
+                    <p:commandButton value="#{configMapController.getKey('Cancel')}" onclick="PF('SessionTimetableCreateDialog').hide()"/>
+                </h:panelGroup>
+            </h:form>
+        </p:dialog>
+
+    </ui:composition>    
+    <p> Generated from template ( JSF_from_entity_wizard/StandardJSF/create.ftl  )- Dave 18th July 2015 </p>
+</html>

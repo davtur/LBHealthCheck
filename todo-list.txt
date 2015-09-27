@@ -1,0 +1,7 @@
+TAsk:
+
+1. Make a session booking online
+
+2. Add trainers to reporting and capture outgoings
+    - trainer reward structure - the more clients the more they get paid for the session
+    - a trainer should be able to see their on taget amount for the month

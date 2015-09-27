@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" 
+      xmlns:ui="http://java.sun.com/jsf/facelets" >
+
+    <ui:composition>
+
+        <p:dialog id="SessionTimetableViewDlg" widgetVar="SessionTimetableViewDialog" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('ViewSessionTimetableTitle')}">
+            <h:form id="SessionTimetableViewForm">
+                <h:panelGroup id="display">
+                    <p:panelGrid columns="2" rendered="#{sessionTimetableController.selected != null}">
+                        <h:outputText value="#{configMapController.getKey('ViewSessionTimetableLabel_id')}"/>
+                        <h:outputText value="#{sessionTimetableController.selected.id}" title="#{configMapController.getKey('ViewSessionTimetableTitle_id')}"/>
+                        <h:outputText value="#{configMapController.getKey('ViewSessionTimetableLabel_sessiondate')}"/>
+                        <h:outputText value="#{sessionTimetableController.selected.sessiondate}" title="#{configMapController.getKey('ViewSessionTimetableTitle_sessiondate')}">
+                            <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                        </h:outputText>
+                        <h:outputText value="#{configMapController.getKey('ViewSessionTimetableLabel_comments')}"/>
+                        <h:outputText value="#{sessionTimetableController.selected.comments}" title="#{configMapController.getKey('ViewSessionTimetableTitle_comments')}"/>
+                        <h:outputText value="#{configMapController.getKey('ViewSessionTimetableLabel_adminNotes')}"/>
+                        <h:outputText value="#{sessionTimetableController.selected.adminNotes}" title="#{configMapController.getKey('ViewSessionTimetableTitle_adminNotes')}"/>
+                        <h:outputText value="#{configMapController.getKey('ViewSessionTimetableLabel_sessionTypesId')}"/>
+                        <h:outputText value="#{sessionTimetableController.selected.sessionTypesId}" title="#{configMapController.getKey('ViewSessionTimetableTitle_sessionTypesId')}"/>
+                        <h:outputText value="#{configMapController.getKey('ViewSessionTimetableLabel_recurranceId')}"/>
+                        <h:outputText value="#{sessionTimetableController.selected.recurranceId}" title="#{configMapController.getKey('ViewSessionTimetableTitle_recurranceId')}"/>
+                    </p:panelGrid>
+                    <p:commandButton value="#{configMapController.getKey('Close')}" onclick="SessionTimetableViewDialog.hide()"/>
+                </h:panelGroup>
+            </h:form>
+        </p:dialog>
+
+    </ui:composition>
+</html>

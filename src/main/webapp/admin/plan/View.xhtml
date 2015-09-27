@@ -6,17 +6,12 @@
       xmlns:p="http://primefaces.org/ui" 
       xmlns:ui="http://java.sun.com/jsf/facelets" >
 
-    <ui:composition template="/template.xhtml">
-        <ui:define name="title">
-            <h:outputText value="#{configMapController.getKey('ViewPlanTitle')}"></h:outputText>
-        </ui:define>
-        <ui:define name="body">
-            <h:panelGroup id="messagePanel" layout="block">
-                <h:messages errorStyle="color: red" infoStyle="color: green" layout="table"/>
-            </h:panelGroup>
-            <h:form>
-                <p:panel>
-                    <h:panelGrid columns="2">
+    <ui:composition>
+
+        <p:dialog id="PlanViewDlg" widgetVar="PlanViewDialog" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('ViewPlanTitle')}">
+            <h:form id="PlanViewForm">
+                <h:panelGroup id="display">
+                    <p:panelGrid columns="2" rendered="#{planController.selected != null}">
                         <h:outputText value="#{configMapController.getKey('ViewPlanLabel_id')}"/>
                         <h:outputText value="#{planController.selected.id}" title="#{configMapController.getKey('ViewPlanTitle_id')}"/>
                         <h:outputText value="#{configMapController.getKey('ViewPlanLabel_planName')}"/>
@@ -29,20 +24,17 @@
                         <h:outputText value="#{planController.selected.planActive}" title="#{configMapController.getKey('ViewPlanTitle_planActive')}"/>
                         <h:outputText value="#{configMapController.getKey('ViewPlanLabel_planDiscount')}"/>
                         <h:outputText value="#{planController.selected.planDiscount}" title="#{configMapController.getKey('ViewPlanTitle_planDiscount')}"/>
-                    </h:panelGrid>
-                </p:panel>
-                <br />
-                <p:commandButton rendered="#{planController.isUserInRole('ADMIN')}"  action="#{planController.destroyAndView}" value="#{configMapController.getKey('ViewPlanDestroyLink')}"/>
-                <br />
-                <br />
-                <p:commandButton rendered="#{planController.isUserInRole('ADMIN')}"  ajax="false"  action="Edit" value="#{configMapController.getKey('ViewPlanEditLink')}"/>
-                <br />
-                <p:commandButton rendered="#{planController.isUserInRole('ADMIN')}"  ajax="false"  action="#{planController.prepareCreate}" value="#{configMapController.getKey('ViewPlanCreateLink')}" />
-                <br />
-                <p:commandButton                                                                 ajax="false"  action="#{planController.prepareList}" value="#{configMapController.getKey('ViewPlanShowAllLink')}"/>
-
+                        <h:outputText value="#{configMapController.getKey('ViewPlanLabel_planCollectionModel')}"/>
+                        <h:outputText value="#{planController.selected.planCollectionModel}" title="#{configMapController.getKey('ViewPlanTitle_planCollectionModel')}"/>
+                        <h:outputText value="#{configMapController.getKey('ViewPlanLabel_parent')}"/>
+                        <h:outputText value="#{planController.selected.parent}" title="#{configMapController.getKey('ViewPlanTitle_parent')}"/>
+                        <h:outputText value="#{configMapController.getKey('ViewPlanLabel_sessionType')}"/>
+                        <h:outputText value="#{planController.selected.sessionType}" title="#{configMapController.getKey('ViewPlanTitle_sessionType')}"/>
+                    </p:panelGrid>
+                    <p:commandButton value="#{configMapController.getKey('Close')}" onclick="PlanViewDialog.hide()"/>
+                </h:panelGroup>
             </h:form>
-        </ui:define>
-    </ui:composition>
+        </p:dialog>
 
+    </ui:composition>
 </html>

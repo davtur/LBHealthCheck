@@ -13,86 +13,36 @@
         <ui:define name="body">
 
 
-            <h:form id="formPlanCreate1">
-                <p:confirmDialog id="confirmDialogPlanCreate1" message="#{configMapController.getKey('CreatePlanTitleMessage')}"  
-                                 header="#{configMapController.getKey('CreatePlanTitle')}" severity="info" widgetVar="planCreateDialogue"> 
-                    <p:panelGrid columns="2" rendered="#{planController.subItem}">
-                        <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_groupPricing')}" for="groupPricing1" />
-                        <p:selectOneMenu id="groupPricing1" valueChangeListener="#{customersController.selectOneMenuValueChangeListener}" converter="planConverter" value="#{planController.selectedSubItem}" label="#{configMapController.getKey('CreateCustomersTitle_groupPricing')}" >
-                            <f:selectItems value="#{planController.itemsAvailableAsObjects}"  var="plan" itemLabel="#{plan.planName} - $#{plan.planPrice} "  itemValue="#{plan}"/>
-                            <p:ajax />
-                        </p:selectOneMenu>
-
-                    </p:panelGrid>
-                    <p:panelGrid columns="2" rendered="#{!planController.subItem}">
-                        <p:outputLabel value="#{configMapController.getKey('CreatePlanLabel_planName')}" for="planName" />
-                        <p:inputText id="planName" value="#{planController.newPlan.planName}" title="#{configMapController.getKey('CreatePlanTitle_planName')}" required="true" requiredMessage="#{configMapController.getKey('CreatePlanRequiredMessage_planName')}"/>
-                        <p:outputLabel value="#{configMapController.getKey('CreatePlanLabel_planPrice')}" for="planPrice" />
-                        <p:inputText id="planPrice" value="#{planController.newPlan.planPrice}" title="#{configMapController.getKey('CreatePlanTitle_planPrice')}" required="true" requiredMessage="#{configMapController.getKey('CreatePlanRequiredMessage_planPrice')}">
-                            <f:convertNumber minFractionDigits="2"/>
-                        </p:inputText>
-                        <p:outputLabel value="#{configMapController.getKey('CreatePlanLabel_planDescription')}" for="planDescription" />
-                        <p:inputTextarea rows="4" cols="30" id="planDescription" value="#{planController.newPlan.planDescription}" title="#{configMapController.getKey('CreatePlanTitle_planDescription')}" />
-                        <p:outputLabel value="#{configMapController.getKey('CreatePlanLabel_planActive')}" for="planActive" />
-                        <p:selectOneMenu id="planActive" value="#{planController.newPlan.planActive}"   required="true" requiredMessage="#{configMapController.getKey('CreatePlanRequiredMessage_planActive')}">
-                            <f:selectItem itemValue="0" itemLabel="Active" />
-                            <f:selectItem itemValue="1" itemLabel="Hidden" />
-                        </p:selectOneMenu>
-                        <p:outputLabel value="#{configMapController.getKey('CreatePlanLabel_planDiscount')}" for="planDiscount" />
-                        <p:inputText id="planDiscount" value="#{planController.newPlan.planDiscount}" title="#{configMapController.getKey('CreatePlanTitle_planDiscount')}" >
-                            <f:convertNumber minFractionDigits="2"/>
-                        </p:inputText>
-                        <p:outputLabel value="#{configMapController.getKey('CreateSessionHistoryLabel_sessionType')}" for="sessionType" />
-                        <p:selectOneMenu id="sessionType" style="width:100%;height:100%" value="#{planController.newPlan.sessionType}" filterMatchMode="startsWith" filter="true" editable="false" converter="#{sessTypesConverter}" label="#{configMapController.getKey('CreateSessionHistoryTitle_sessionType')}" >
-                            <f:selectItem itemValue="#{null}" itemLabel="#{configMapController.getKey('PlanNoLinkedSessionType')}" />
-                            <f:selectItems value="#{sessionTypesController.itemsAvailableSelectOne}" var="sessionType" itemLabel="#{sessionType.name}" itemValue="#{sessionType}"/>
-                        </p:selectOneMenu>
-
-                    </p:panelGrid>
-                    <p:commandButton oncomplete="PF('planCreateDialogue').hide();PF('planControllerTable').filter()" actionListener="#{planController.createDialogue}" value="#{configMapController.getKey('CreatePlanSaveLink')}" update=":growl"/>                
-
-                </p:confirmDialog>
-            </h:form>
 
 
 
-
-
-            <h:form id="PlanlistForm1">
-
+            <h:form id="PlanListForm">
                 <h:outputText escape="false" value="#{configMapController.getKey('ListPlanEmpty')}" rendered="#{planController.items.rowCount == 0}"/>
-                <h:panelGroup rendered="#{planController.items.rowCount > 0}">
-                    <p:dataTable  id="plansTable"
-                                    editable="true" 
-                                  value="#{planController.items}" 
-                                  filteredValue="#{planController.filteredItems}" 
-                                  selection="#{planController.selected}"
-                                  rowKey="#{item.id}"
-                                  selectionMode="single"
-                                  widgetVar="planControllerTable" 
-                                  var="item"  
-                                  paginator="true" 
-                                  rows="15"  
-                                  paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  
-                                  rowsPerPageTemplate="5,10,15,20,25,50,100" >
+                <h:panelGroup >
+                    <p:dataTable  
+                        id="datalist"  
+                        editable="true" 
+                        value="#{planController.items}" 
+                        selection="#{planController.selected}" 
+                        rowKey="#{item.id}" 
+                        filteredValue="#{planController.filteredItems}"  
+                        widgetVar="planControllerTable" 
+                        var="item"  
+                        paginator="true" 
+                        rows="15"  
+                        paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  
+                        rowsPerPageTemplate="5,10,15,20,25,50,100" >
                         <f:facet name="header">
                             <p:outputPanel>
                                 <h:outputText value="Search all fields:" />
                                 <h:inputText id="globalFilter" onkeyup="PF('planControllerTable').filter()" />
-                                <p:commandButton id="showDialogButton" value="#{configMapController.getKey('ListPlanCreateLink')}" actionListener="#{planController.addPlan}"   update=":growl"  />
-                                <p:commandButton id="deleteButton" disabled="#{empty planController.selected}" value="#{configMapController.getKey('ListPlanDestroyLink')}" actionListener="#{planController.destroyFromDialogue}"  oncomplete="PF('planControllerTable').filter()" update=":growl :PlanlistForm1:plansTable:deleteButton :PlanlistForm1:plansTable:addSubItem"  />
-                                <p:commandButton id="addSubItem"   disabled="#{empty planController.selected}" value="#{configMapController.getKey('ListPlanAddSubItemLink')}" actionListener="#{planController.addSubItemToPlan}"   update=":growl"  />
-
-                           <!--  <p:commandButton id="showDialogButton"  value="#{configMapController.getKey('ListPlanCreateLink')}" onclick="PF('planCreateDialogue').show()" type="button"/> -->
                             </p:outputPanel>
                         </f:facet>
                         <p:ajax event="rowEdit" listener="#{planController.onEdit}" update=":growl" oncomplete="PF('planControllerTable').filter()" />  
                         <p:ajax event="rowEditCancel" listener="#{planController.onCancel}" update=":growl"  oncomplete="PF('planControllerTable').filter()" />  
-                        <p:ajax event="rowSelect"  update=":PlanlistForm1:plansTable:deleteButton :PlanlistForm1:plansTable:addSubItem"  />
-                        <p:ajax event="rowUnselect" update=":PlanlistForm1:plansTable:deleteButton :PlanlistForm1:plansTable:addSubItem"/> 
-                        <p:column >
-                            <p:rowToggler rendered="#{!empty item.planCollection }"/>
-                        </p:column>
+                        <p:ajax event="rowSelect"   update="createButton viewButton editButton deleteButton"/>
+                        <p:ajax event="rowUnselect" update="createButton viewButton editButton deleteButton"/>
+                        <p:column selectionMode="single"/>
                         <p:column sortBy="#{item.id}" filterBy="#{item.id}" headerText="#{configMapController.getKey('ListPlanTitle_id')}"   >
                             <p:cellEditor> 
                                 <f:facet name="output">
@@ -117,21 +67,6 @@
 
 
                         </p:column>
-                        <p:column sortBy="#{item.sessionType.name}" filterBy="#{item.sessionType.name}" headerText="#{configMapController.getKey('CreateSessionHistoryTitle_sessionType')}"   >
-                            <p:cellEditor> 
-                                <f:facet name="output">
-                                    <h:outputText  rendered="#{!empty item.sessionType}"  value="#{item.sessionType.name}" />
-                                    <h:outputText  rendered="#{ empty item.sessionType}"  value="#{configMapController.getKey('PlanNoLinkedSessionType')}" />
-                                </f:facet>
-                                <f:facet name="input">
-                                    <p:selectOneMenu style="width:100%;height:100%" value="#{item.sessionType}" filterMatchMode="startsWith" filter="true" editable="false" converter="#{sessTypesConverter}" label="#{configMapController.getKey('CreateSessionHistoryTitle_sessionType')}" >
-                                        <f:selectItem itemValue="#{null}" itemLabel="#{configMapController.getKey('PlanNoLinkedSessionType')}" />
-                                        <f:selectItems value="#{sessionTypesController.itemsAvailableSelectOne}" var="sessionType" itemLabel="#{sessionType.name}" itemValue="#{sessionType}"/>
-                                    </p:selectOneMenu>
-                                </f:facet>
-                            </p:cellEditor> 
-                        </p:column>
-
                         <p:column sortBy="#{item.planPrice}" filterBy="#{item.planPrice}" headerText="#{configMapController.getKey('ListPlanTitle_planPrice')}"   >
                             <p:cellEditor> 
                                 <f:facet name="output">
@@ -153,28 +88,21 @@
                                     <p:inputText value="#{item.planDescription}" label="#{configMapController.getKey('ListPlanTitle_planDescription')}" />
                                 </f:facet>
                             </p:cellEditor> 
+
+
                         </p:column>
-
-
                         <p:column sortBy="#{item.planActive}" filterBy="#{item.planActive}" headerText="#{configMapController.getKey('ListPlanTitle_planActive')}"   >
                             <p:cellEditor> 
                                 <f:facet name="output">
-                                    <h:outputText  rendered="#{item.planActive == '0'}"  value="Active" />
-                                    <h:outputText  rendered="#{item.planActive == '1'}"  value="Hidden" />
+                                    <h:outputText value="#{item.planActive}"/>
                                 </f:facet>
                                 <f:facet name="input">
-                                    <p:selectOneMenu  value="#{item.planActive}"  >
-                                        <f:selectItem itemValue="0" itemLabel="Active" />
-                                        <f:selectItem itemValue="1" itemLabel="Hidden" />
-                                    </p:selectOneMenu>
-
-                                   <!-- <p:inputText value="#{item.planActive}" label="#{configMapController.getKey('ListPlanTitle_planActive')}" />-->
+                                    <p:inputText value="#{item.planActive}" label="#{configMapController.getKey('ListPlanTitle_planActive')}" />
                                 </f:facet>
                             </p:cellEditor> 
 
 
                         </p:column>
-
                         <p:column sortBy="#{item.planDiscount}" filterBy="#{item.planDiscount}" headerText="#{configMapController.getKey('ListPlanTitle_planDiscount')}"   >
                             <p:cellEditor> 
                                 <f:facet name="output">
@@ -187,59 +115,63 @@
 
 
                         </p:column>
+                        <p:column sortBy="#{item.planCollectionModel}" filterBy="#{item.planCollectionModel}" headerText="#{configMapController.getKey('ListPlanTitle_planCollectionModel')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.planCollectionModel}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.planCollectionModel}" label="#{configMapController.getKey('ListPlanTitle_planCollectionModel')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.parent}" filterBy="#{item.parent}" headerText="#{configMapController.getKey('ListPlanTitle_parent')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.parent}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.parent}" label="#{configMapController.getKey('ListPlanTitle_parent')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.sessionType}" filterBy="#{item.sessionType}" headerText="#{configMapController.getKey('ListPlanTitle_sessionType')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.sessionType}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.sessionType}" label="#{configMapController.getKey('ListPlanTitle_sessionType')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
                         <p:column rendered="#{planController.isUserInRole('ADMIN')}"  headerText="Edit" style="width:50px">  
                             <p:rowEditor />  
                         </p:column>  
 
 
+                        <f:facet name="footer">
+                            <p:commandButton rendered="#{planController.isUserInRole('ADMIN')}" id="createButton" icon="ui-icon-plus"   value="#{configMapController.getKey('Create')}" actionListener="#{planController.prepareCreate}" update=":PlanCreateForm" oncomplete="PF('PlanCreateDialog').show()"/>
+                            <p:commandButton id="viewButton"   icon="ui-icon-search" value="#{configMapController.getKey('View')}" update=":PlanViewForm" oncomplete="PF('PlanViewDialog').show()" disabled="#{empty planController.selected}"/>
+                            <p:commandButton rendered="#{planController.isUserInRole('ADMIN')}" id="editButton"   icon="ui-icon-pencil" value="#{configMapController.getKey('Edit')}" update=":PlanEditForm" oncomplete="PF('PlanEditDialog').show()" disabled="#{empty planController.selected}"/>
+                            <p:commandButton rendered="#{planController.isUserInRole('ADMIN')}" id="deleteButton" icon="ui-icon-trash"  value="#{configMapController.getKey('Delete')}" actionListener="#{planController.destroy}" update=":growl,datalist" disabled="#{empty planController.selected}"/>
+                        </f:facet>
 
-                        <p:rowExpansion  >
-                            <h:outputText rendered="#{empty item.planCollection}" value="#{configMapController.getKey('PlanNoSubItemsFound')}"/>
-                            <p:dataTable  rendered="#{!empty item.planCollection }" 
-                                          var="subItem" 
-                                          rowKey="#{subItem.id}"
-
-                                          widgetVar="planSubItemControllerTable" 
-                                          value="#{item.planCollectionModel}">
-                                <p:ajax event="rowSelect"  listener="#{planController.subItemRowSelect}" />
-                                <p:ajax event="rowUnselect" /> 
-                                <f:facet name="header">
-
-                                    <h:outputText value="#{item.planName} #{configMapController.getKey('PlanRowExpansionHeader')}" />
-
-                                </f:facet>
-                                <p:column  headerText="#{configMapController.getKey('ListPlanSubItemDeleteButtonColumnHeader')}"   >
-                                    <p:commandButton id="deleteSubButton" value="#{configMapController.getKey('ListPlanDestroyLink')}"  update=":growl :PlanlistForm1"  >
-                                        <f:setPropertyActionListener target="#{planController.selectedSubItemAndDelete}" value="#{subItem}" />
-                                    </p:commandButton>
-                                </p:column>
-
-                                <p:column  headerText="#{configMapController.getKey('ListPlanTitle_id')}"   >
-                                    <h:outputText value="#{subItem.id}"/>
-                                </p:column>
-                                <p:column  headerText="#{configMapController.getKey('ListPlanTitle_planName')}"   >
-                                    <h:outputText value="#{subItem.planName}"/>
-                                </p:column>
-                                <p:column  headerText="#{configMapController.getKey('ListPlanTitle_planPrice')}"   >
-                                    <h:outputText value="#{subItem.planPrice}"/>
-                                </p:column>
-                                <p:column  headerText="#{configMapController.getKey('ListPlanTitle_planDescription')}"   >
-                                    <h:outputText value="#{subItem.planDescription}"/>
-                                </p:column>
-                                <p:column  headerText="#{configMapController.getKey('ListPlanTitle_planActive')}"   >
-                                    <h:outputText  rendered="#{subItem.planActive == '0'}"  value="Active" />
-                                    <h:outputText  rendered="#{subItem.planActive == '1'}"  value="Hidden" />
-                                </p:column>
-                                <p:column  headerText="#{configMapController.getKey('ListPlanTitle_planDiscount')}"   >
-                                    <h:outputText value="#{subItem.planDiscount}"/>
-                                </p:column>
-
-                            </p:dataTable>
-                        </p:rowExpansion>
                     </p:dataTable>
                 </h:panelGroup>
             </h:form>
+
+            <ui:include src="Create.xhtml"/>
+            <ui:include src="Edit.xhtml"/>
+            <ui:include src="View.xhtml"/>
+
         </ui:define>
     </ui:composition>
-
+    <p> Generated from template ( JSF_from_entity_wizard/StandardJSF/list.ftl  )- Dave 18th July 2015 </p>
 </html>
