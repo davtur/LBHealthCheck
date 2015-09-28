@@ -5,6 +5,7 @@
  */
 package au.com.manlyit.fitnesscrm.stats.db;
 
+import au.com.manlyit.fitnesscrm.stats.classes.util.BaseEntity;
 import java.io.Serializable;
 import javax.persistence.Basic;
 import javax.persistence.Column;
@@ -32,7 +33,7 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "ToDoList.findById", query = "SELECT t FROM ToDoList t WHERE t.id = :id"),
     @NamedQuery(name = "ToDoList.findByTask", query = "SELECT t FROM ToDoList t WHERE t.task = :task"),
     @NamedQuery(name = "ToDoList.findByDone", query = "SELECT t FROM ToDoList t WHERE t.done = :done")})
-public class ToDoList implements Serializable {
+public class ToDoList implements BaseEntity,Serializable {
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -4,6 +4,7 @@
  */
 package au.com.manlyit.fitnesscrm.stats.db;
 
+import au.com.manlyit.fitnesscrm.stats.classes.util.BaseEntity;
 import java.io.Serializable;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -21,7 +22,7 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "JobConfigMap.findAll", query = "SELECT j FROM JobConfigMap j"),
     @NamedQuery(name = "JobConfigMap.findByIdjobConfigMap", query = "SELECT j FROM JobConfigMap j WHERE j.idjobConfigMap = :idjobConfigMap"),
     @NamedQuery(name = "JobConfigMap.findByKey", query = "SELECT j FROM JobConfigMap j WHERE j.basicKey = :basicKey")})
-public class JobConfigMap implements Serializable {
+public class JobConfigMap implements  Serializable {
     @Lob
     @Size(max = 65535)
     @Column(name = "basicValue")

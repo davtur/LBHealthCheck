@@ -4,6 +4,7 @@
  */
 package au.com.manlyit.fitnesscrm.stats.db;
 
+import au.com.manlyit.fitnesscrm.stats.classes.util.BaseEntity;
 import java.io.Serializable;
 import java.util.Collection;
 import javax.persistence.*;
@@ -25,7 +26,7 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Tasks.findByName", query = "SELECT t FROM Tasks t WHERE t.name = :name"),
     @NamedQuery(name = "Tasks.findByCronEntry", query = "SELECT t FROM Tasks t WHERE t.cronEntry = :cronEntry"),
     @NamedQuery(name = "Tasks.findByTaskClassName", query = "SELECT t FROM Tasks t WHERE t.taskClassName = :taskClassName")})
-public class Tasks implements Serializable {
+public class Tasks implements  BaseEntity, Serializable {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "parentTask")
     private Collection<JobConfigMap> jobConfigMapCollection;
     private static final long serialVersionUID = 1L;
@@ -69,6 +70,15 @@ public class Tasks implements Serializable {
     }
 
     public void setIdtasks(Integer idtasks) {
+        this.idtasks = idtasks;
+    }
+    @Override
+     public Integer getId() {
+        return idtasks;
+    }
+
+    @Override
+    public void setId(Integer idtasks) {
         this.idtasks = idtasks;
     }
 

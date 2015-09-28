@@ -6,6 +6,7 @@
 
 package au.com.manlyit.fitnesscrm.stats.db;
 
+import au.com.manlyit.fitnesscrm.stats.classes.util.BaseEntity;
 import java.io.Serializable;
 import java.util.Collection;
 import javax.persistence.Basic;
@@ -34,7 +35,7 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "PreferedContact.findAll", query = "SELECT p FROM PreferedContact p"),
     @NamedQuery(name = "PreferedContact.findById", query = "SELECT p FROM PreferedContact p WHERE p.id = :id"),
     @NamedQuery(name = "PreferedContact.findByPreferedContactMethod", query = "SELECT p FROM PreferedContact p WHERE p.preferedContactMethod = :preferedContactMethod")})
-public class PreferedContact implements Serializable {
+public class PreferedContact implements  BaseEntity, Serializable {
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

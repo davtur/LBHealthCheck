@@ -66,19 +66,19 @@
                         <f:selectItems value="#{customersController.itemsAvailableSelectOne}"  />
                     </p:selectOneMenu>
                     <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_active')}" for="active2" />
-                    <p:selectOneMenu id="active2" valueChangeListener="#{customersController.selectOneMenuValueChangeListener}" converter="customerStateConverter" value="#{customersController.newCustomer.active}" label="#{configMapController.getKey('CreateCustomersTitle_active')}" >
+                    <p:selectOneMenu id="active2" valueChangeListener="#{customersController.selectOneMenuValueChangeListener}" converter="#{customerStateConverter}" value="#{customersController.newCustomer.active}" label="#{configMapController.getKey('CreateCustomersTitle_active')}" >
                         <f:selectItems value="#{customerStateController.itemsAvailableAsObjects}"  var="custState" itemLabel="#{custState.customerState}" itemValue="#{custState}"/>                           
                     </p:selectOneMenu>
                     <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_groupPricing')}" for="groupPricing" />
-                    <p:selectOneMenu id="groupPricing" valueChangeListener="#{customersController.selectOneMenuValueChangeListener}" converter="planConverter" value="#{customersController.newCustomer.groupPricing}" label="#{configMapController.getKey('CreateCustomersTitle_groupPricing')}" >
+                    <p:selectOneMenu id="groupPricing" valueChangeListener="#{customersController.selectOneMenuValueChangeListener}" converter="#{planConverter}" value="#{customersController.newCustomer.groupPricing}" label="#{configMapController.getKey('CreateCustomersTitle_groupPricing')}" >
                         <f:selectItems value="#{planController.itemsAvailableAsObjects}"  var="plan" itemLabel="#{plan.planName} - $#{plan.planPrice} " itemValue="#{plan}"/>
                     </p:selectOneMenu>
                     <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_emailFormat')}" for="emailFormat" />
-                    <p:selectOneMenu id="emailFormat" valueChangeListener="#{customersController.selectOneMenuValueChangeListener}" converter="emailFormatConverter" value="#{customersController.newCustomer.emailFormat}" label="#{configMapController.getKey('CreateCustomersTitle_emailFormat')}" >
+                    <p:selectOneMenu id="emailFormat" valueChangeListener="#{customersController.selectOneMenuValueChangeListener}" converter="#{emailFormatConverter}" value="#{customersController.newCustomer.emailFormat}" label="#{configMapController.getKey('CreateCustomersTitle_emailFormat')}" >
                         <f:selectItems value="#{emailFormatController.itemsAvailableAsObjects}"  var="emailFormat" itemLabel="#{emailFormat.emailFormat}" itemValue="#{emailFormat}"/>
                     </p:selectOneMenu>
                     <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_auth')}" for="auth" />
-                    <p:selectOneMenu id="auth" valueChangeListener="#{customersController.selectOneMenuValueChangeListener}" converter="customerAuthConverter" value="#{customersController.newCustomer.auth}" label="#{configMapController.getKey('CreateCustomersTitle_auth')}" >
+                    <p:selectOneMenu id="auth" valueChangeListener="#{customersController.selectOneMenuValueChangeListener}" converter="#{customerAuthConverter}" value="#{customersController.newCustomer.auth}" label="#{configMapController.getKey('CreateCustomersTitle_auth')}" >
                         <f:selectItems value="#{customerAuthController.itemsAvailableAsObjects}"  var="custAuth" itemLabel="#{custAuth.customerAuthType}" itemValue="#{custAuth}"/>
                     </p:selectOneMenu>
                     <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_demographic')}" for="demographic" />
@@ -86,7 +86,7 @@
                         <f:selectItems value="#{demographicTypesController.itemsAvailableAsObjects}"  var="demo" itemLabel="#{demo.name}" itemValue="#{demo}"/>
                     </p:selectOneMenu>
                     <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_preferredContact')}" for="preferredContact" />
-                    <p:selectOneMenu id="preferredContact" valueChangeListener="#{customersController.selectOneMenuValueChangeListener}" converter="preferedContactConverter" value="#{customersController.newCustomer.preferredContact}" label="#{configMapController.getKey('CreateCustomersTitle_preferredContact')}" >
+                    <p:selectOneMenu id="preferredContact" valueChangeListener="#{customersController.selectOneMenuValueChangeListener}" converter="#{preferedContactConverter}" value="#{customersController.newCustomer.preferredContact}" label="#{configMapController.getKey('CreateCustomersTitle_preferredContact')}" >
                         <f:selectItems value="#{preferedContactController.itemsAvailableAsObjects}"  var="prefContact" itemLabel="#{prefContact.preferedContactMethod}" itemValue="#{prefContact}"/>
                     </p:selectOneMenu>
                     <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_password')}" for="password" />

@@ -6,6 +6,7 @@
 
 package au.com.manlyit.fitnesscrm.stats.db;
 
+import au.com.manlyit.fitnesscrm.stats.classes.util.BaseEntity;
 import java.io.Serializable;
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
@@ -32,7 +33,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @NamedQueries({
     @NamedQuery(name = "SessionTrainers.findAll", query = "SELECT s FROM SessionTrainers s"),
     @NamedQuery(name = "SessionTrainers.findById", query = "SELECT s FROM SessionTrainers s WHERE s.id = :id")})
-public class SessionTrainers implements Serializable {
+public class SessionTrainers implements  BaseEntity, Serializable {
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

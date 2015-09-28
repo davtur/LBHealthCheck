@@ -21,7 +21,7 @@
                     <p:panelGrid columns="2">
                         <p:outputLabel value="#{configMapController.getKey('CreateCustomerImagesLabel_customerId')}" for="customerId" />
                         <p:outputLabel value="#{configMapController.getKey('CreateCustomerImagesLabel_imageType')}" for="imageType" />
-                        <p:selectOneMenu  valueChangeListener="#{customerImagesController.handleCustomerChange}" filter="true" id="customerId" converter="customerConverter" value="#{customerImagesController.selected.customerId}" label="#{configMapController.getKey('CreateCustomerImagesTitle_customerId')}" required="true" requiredMessage="#{configMapController.getKey('CreateCustomerImagesRequiredMessage_customerId')}">
+                        <p:selectOneMenu  valueChangeListener="#{customerImagesController.handleCustomerChange}" filter="true" id="customerId" converter="#{custConverter}" value="#{customerImagesController.selected.customerId}" label="#{configMapController.getKey('CreateCustomerImagesTitle_customerId')}" required="true" requiredMessage="#{configMapController.getKey('CreateCustomerImagesRequiredMessage_customerId')}">
                             <f:selectItems  value="#{customersController.customersAvailableSelectOneObject}"/>
                             <p:ajax update=":growl" />
 

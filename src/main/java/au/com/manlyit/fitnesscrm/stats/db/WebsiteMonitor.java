@@ -4,6 +4,7 @@
  */
 package au.com.manlyit.fitnesscrm.stats.db;
 
+import au.com.manlyit.fitnesscrm.stats.classes.util.BaseEntity;
 import java.io.Serializable;
 import java.util.Date;
 import javax.persistence.Basic;
@@ -41,7 +42,7 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "WebsiteMonitor.findByDuration2", query = "SELECT w FROM WebsiteMonitor w WHERE w.duration2 = :duration2"),
     @NamedQuery(name = "WebsiteMonitor.findByDuration3", query = "SELECT w FROM WebsiteMonitor w WHERE w.duration3 = :duration3"),
     @NamedQuery(name = "WebsiteMonitor.findByDuration4", query = "SELECT w FROM WebsiteMonitor w WHERE w.duration4 = :duration4")})
-public class WebsiteMonitor implements Serializable {
+public class WebsiteMonitor implements BaseEntity,Serializable {
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

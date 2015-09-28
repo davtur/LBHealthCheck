@@ -41,7 +41,7 @@
                             </p:inputTextarea>
                             <h:panelGrid >
                                 <h:outputLabel value="#{configMapController.getKey('CreateStatsTakenLabel_customerId')} #{statsTakenController.selected.customerId}" for="customerId" />
-                                <p:selectOneMenu id="customerId" value="#{statsTakenController.selected.customerId}" required="true" converter="customerConverter" requiredMessage="#{configMapController.getKey('CreateStatsTakenRequiredMessage_customerId')}">
+                                <p:selectOneMenu id="customerId" value="#{statsTakenController.selected.customerId}" required="true" converter="#{custConverter}" requiredMessage="#{configMapController.getKey('CreateStatsTakenRequiredMessage_customerId')}">
                                     <f:selectItems var="listItem"  itemLabel="#{listItem.firstname} #{listItem.lastname}" itemValue="#{listItem}" value="#{sessionHistoryController.activeCustomers}" />
                                 </p:selectOneMenu>
                             </h:panelGrid>

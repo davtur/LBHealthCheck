@@ -5,6 +5,7 @@
  */
 package au.com.manlyit.fitnesscrm.stats.db;
 
+import au.com.manlyit.fitnesscrm.stats.classes.util.BaseEntity;
 import java.io.Serializable;
 import javax.persistence.Basic;
 import javax.persistence.Column;
@@ -34,7 +35,7 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "SurveyAnswerSubitems.findById", query = "SELECT s FROM SurveyAnswerSubitems s WHERE s.id = :id"),
     @NamedQuery(name = "SurveyAnswerSubitems.findBySubitemBool", query = "SELECT s FROM SurveyAnswerSubitems s WHERE s.subitemBool = :subitemBool"),
     @NamedQuery(name = "SurveyAnswerSubitems.findBySubitemInt", query = "SELECT s FROM SurveyAnswerSubitems s WHERE s.subitemInt = :subitemInt")})
-public class SurveyAnswerSubitems implements Serializable {
+public class SurveyAnswerSubitems implements  BaseEntity, Serializable {
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

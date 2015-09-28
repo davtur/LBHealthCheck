@@ -56,7 +56,7 @@
 
                     <pm:field>
                         <p:outputLabel for="sessionType" value="#{configMapController.getKey('CreateSessionHistoryLabel_sessionType')}" />
-                        <p:selectOneMenu id="sessionType" value="#{sessionHistoryController.selected.sessionTypesId}" label="#{configMapController.getKey('CreateSessionHistoryLabel_sessionType')}"  converter="#{sessTypesConverter}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionHistoryRequiredMessage_sessionType')}">
+                        <p:selectOneMenu id="sessionType" value="#{sessionHistoryController.selected.sessionTypesId}" label="#{configMapController.getKey('CreateSessionHistoryLabel_sessionType')}"  converter="#{sessionTypesConverter}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionHistoryRequiredMessage_sessionType')}">
                             <f:selectItems value="#{sessionTypesController.itemsAvailableSelectOne}" />
                         </p:selectOneMenu>
                     </pm:field>

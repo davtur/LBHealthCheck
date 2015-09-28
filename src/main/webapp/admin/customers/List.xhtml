@@ -27,7 +27,7 @@
                             </h:panelGroup >
                             <h:panelGrid columns="4">
                                 <p:outputLabel  value="Filter:    " for="selectedStateCheckbox"/>
-                                <p:selectManyCheckbox id="selectedStateCheckbox" value="#{customersController.selectedCustomerStates}" label="Show Cancelled" valueChangeListener="#{customersController.selectShowCancelledBooleanChangeListener}"  converter="customerStateConverter">
+                                <p:selectManyCheckbox id="selectedStateCheckbox" value="#{customersController.selectedCustomerStates}" label="Show Cancelled" valueChangeListener="#{customersController.selectShowCancelledBooleanChangeListener}"  converter="#{customerStateConverter}">
                                     <f:selectItems value="#{customersController.customerStateList}" var="custState" itemLabel="#{custState.customerState}" itemValue="#{custState}" />
                                     <p:ajax event="change"   update=":tv:customerslistForm1"  /> 
                                 </p:selectManyCheckbox>
@@ -38,7 +38,7 @@
                             </h:panelGrid>
 
                             <h:panelGroup id="customerChangeStatusPanel">
-                                <p:selectOneMenu id="active" valueChangeListener="#{customersController.selectOneMenuValueChangeListener}" converter="customerStateConverter" value="#{customersController.selectedState}" label="#{configMapController.getKey('CreateCustomersTitle_active')}" >
+                                <p:selectOneMenu id="active" valueChangeListener="#{customersController.selectOneMenuValueChangeListener}" converter="#{customerStateConverter}" value="#{customersController.selectedState}" label="#{configMapController.getKey('CreateCustomersTitle_active')}" >
                                     <f:selectItems value="#{customerStateController.itemsAvailableAsObjects}"  var="custState" itemLabel="#{custState.customerState}" itemValue="#{custState}"/>                           
                                 </p:selectOneMenu>
                                 <p:commandButton id="changeStateButton"     actionListener="#{customersController.changeCustomersState}" value="#{configMapController.getKey('ListCustomersChangeStateButton')}"  update=":tv:customerslistForm1:customersTableList :growl" /> 
@@ -215,7 +215,7 @@
                                 <f:selectItems value="#{customersController.itemsAvailableSelectOne}"  />
                             </p:selectOneMenu>
                             <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_groupPricing')}" for="groupPricing1" />
-                            <p:selectOneMenu id="groupPricing1" valueChangeListener="#{customersController.selectOneMenuValueChangeListener}" converter="planConverter" value="#{customersController.selected.groupPricing}" label="#{configMapController.getKey('CreateCustomersTitle_groupPricing')}" >
+                            <p:selectOneMenu id="groupPricing1" valueChangeListener="#{customersController.selectOneMenuValueChangeListener}" converter="#{planConverter}" value="#{customersController.selected.groupPricing}" label="#{configMapController.getKey('CreateCustomersTitle_groupPricing')}" >
                                 <f:selectItems value="#{planController.itemsAvailableForDisplayAsObjects}"  var="plan" itemLabel="#{plan.planName} - $#{plan.planPrice} "  itemValue="#{plan}"/>
                                 <p:ajax update="planDescription"/>
                             </p:selectOneMenu>
@@ -224,11 +224,11 @@
                             <h:outputText id="planDescription" value="#{customersController.selected.groupPricing.planDescription}" title="#{configMapController.getKey('ViewPlanTitle_planDescription')}"/>
 
                             <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_emailFormat')}" for="emailFormat1" />
-                            <p:selectOneMenu id="emailFormat1" valueChangeListener="#{customersController.selectOneMenuValueChangeListener}" converter="emailFormatConverter" value="#{customersController.selected.emailFormat}" label="#{configMapController.getKey('CreateCustomersTitle_emailFormat')}" >
+                            <p:selectOneMenu id="emailFormat1" valueChangeListener="#{customersController.selectOneMenuValueChangeListener}" converter="#{emailFormatConverter}" value="#{customersController.selected.emailFormat}" label="#{configMapController.getKey('CreateCustomersTitle_emailFormat')}" >
                                 <f:selectItems value="#{emailFormatController.itemsAvailableAsObjects}"  var="emailFormat" itemLabel="#{emailFormat.emailFormat}" itemValue="#{emailFormat}"/>
                             </p:selectOneMenu>
                             <p:outputLabel rendered="#{false}" value="#{configMapController.getKey('CreateCustomersLabel_auth')}" for="auth1" />
-                            <p:selectOneMenu rendered="#{false}" id="auth1" valueChangeListener="#{customersController.selectOneMenuValueChangeListener}" converter="customerAuthConverter" value="#{customersController.selected.auth}" label="#{configMapController.getKey('CreateCustomersTitle_auth')}" >
+                            <p:selectOneMenu rendered="#{false}" id="auth1" valueChangeListener="#{customersController.selectOneMenuValueChangeListener}" converter="#{customerAuthConverter}" value="#{customersController.selected.auth}" label="#{configMapController.getKey('CreateCustomersTitle_auth')}" >
                                 <f:selectItems value="#{customerAuthController.itemsAvailableAsObjects}"  var="custAuth" itemLabel="#{custAuth.customerAuthType}" itemValue="#{custAuth}"/>
                             </p:selectOneMenu>
                             <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_demographic')}" for="demographic1" />
@@ -236,7 +236,7 @@
                                 <f:selectItems value="#{demographicTypesController.itemsAvailableAsObjects}"  var="demo" itemLabel="#{demo.name}" itemValue="#{demo}"/>
                             </p:selectOneMenu>
                             <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_preferredContact')}" for="preferredContact1" />
-                            <p:selectOneMenu id="preferredContact1" valueChangeListener="#{customersController.selectOneMenuValueChangeListener}" converter="preferedContactConverter" value="#{customersController.selected.preferredContact}" label="#{configMapController.getKey('CreateCustomersTitle_preferredContact')}" >
+                            <p:selectOneMenu id="preferredContact1" valueChangeListener="#{customersController.selectOneMenuValueChangeListener}" converter="#{preferedContactConverter}" value="#{customersController.selected.preferredContact}" label="#{configMapController.getKey('CreateCustomersTitle_preferredContact')}" >
                                 <f:selectItems value="#{preferedContactController.itemsAvailableAsObjects}"  var="prefContact" itemLabel="#{prefContact.preferedContactMethod}" itemValue="#{prefContact}"/>
                             </p:selectOneMenu>
                             <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_smsOptions')}"  />

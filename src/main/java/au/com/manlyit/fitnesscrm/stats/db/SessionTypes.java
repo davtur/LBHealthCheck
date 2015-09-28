@@ -6,6 +6,7 @@
 
 package au.com.manlyit.fitnesscrm.stats.db;
 
+import au.com.manlyit.fitnesscrm.stats.classes.util.BaseEntity;
 import java.io.Serializable;
 import java.util.Collection;
 import javax.persistence.Basic;
@@ -37,7 +38,7 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "SessionTypes.findById", query = "SELECT s FROM SessionTypes s WHERE s.id = :id"),
     @NamedQuery(name = "SessionTypes.findByName", query = "SELECT s FROM SessionTypes s WHERE s.name = :name"),
     @NamedQuery(name = "SessionTypes.findByDescription", query = "SELECT s FROM SessionTypes s WHERE s.description = :description")})
-public class SessionTypes implements Serializable {
+public class SessionTypes implements  BaseEntity, Serializable {
     @Basic(optional = false)
     @NotNull
     @Column(name = "session_duration_minutes")

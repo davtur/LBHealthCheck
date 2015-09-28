@@ -5,6 +5,7 @@
  */
 package au.com.manlyit.fitnesscrm.stats.db;
 
+import au.com.manlyit.fitnesscrm.stats.classes.util.BaseEntity;
 import java.io.Serializable;
 import java.util.Collection;
 import javax.persistence.Basic;
@@ -34,7 +35,7 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "SurveyQuestionTypes.findAll", query = "SELECT s FROM SurveyQuestionTypes s"),
     @NamedQuery(name = "SurveyQuestionTypes.findById", query = "SELECT s FROM SurveyQuestionTypes s WHERE s.id = :id"),
     @NamedQuery(name = "SurveyQuestionTypes.findByType", query = "SELECT s FROM SurveyQuestionTypes s WHERE s.type = :type")})
-public class SurveyQuestionTypes implements Serializable {
+public class SurveyQuestionTypes implements  BaseEntity, Serializable {
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

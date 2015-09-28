@@ -6,6 +6,7 @@
 
 package au.com.manlyit.fitnesscrm.stats.db;
 
+import au.com.manlyit.fitnesscrm.stats.classes.util.BaseEntity;
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -46,7 +47,7 @@ import org.primefaces.model.StreamedContent;
     @NamedQuery(name = "CustomerImages.findById", query = "SELECT c FROM CustomerImages c WHERE c.id = :id"),
     @NamedQuery(name = "CustomerImages.findByImageType", query = "SELECT c FROM CustomerImages c WHERE c.imageType = :imageType"),
     @NamedQuery(name = "CustomerImages.findByDatetaken", query = "SELECT c FROM CustomerImages c WHERE c.datetaken = :datetaken")})
-public class CustomerImages implements Serializable {
+public class CustomerImages implements  BaseEntity, Serializable {
     @Basic(optional = false)
     @NotNull()
     @Lob

@@ -5,6 +5,7 @@
  */
 package au.com.manlyit.fitnesscrm.stats.db;
 
+import au.com.manlyit.fitnesscrm.stats.classes.util.BaseEntity;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
@@ -42,7 +43,7 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "PaymentParameters.findBySmsFailedNotification", query = "SELECT p FROM PaymentParameters p WHERE p.smsFailedNotification = :smsFailedNotification"),
     @NamedQuery(name = "PaymentParameters.findBySmsExpiredCard", query = "SELECT p FROM PaymentParameters p WHERE p.smsExpiredCard = :smsExpiredCard"),
     @NamedQuery(name = "PaymentParameters.findByPaymentGatewayName", query = "SELECT p FROM PaymentParameters p WHERE p.paymentGatewayName = :paymentGatewayName")})
-public class PaymentParameters implements Serializable {
+public class PaymentParameters implements  BaseEntity, Serializable {
     @Column(name = "paymentRegularAmount")
     private BigDecimal paymentRegularAmount;
     @Column(name = "paymentRegularTotalPaymentsAmount")

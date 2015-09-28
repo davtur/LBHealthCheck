@@ -5,6 +5,7 @@
 
 package au.com.manlyit.fitnesscrm.stats.db;
 
+import au.com.manlyit.fitnesscrm.stats.classes.util.BaseEntity;
 import java.io.Serializable;
 import java.util.Date;
 import javax.persistence.Basic;
@@ -37,7 +38,7 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "CustomerGoals.findByGoal", query = "SELECT c FROM CustomerGoals c WHERE c.goal = :goal"),
     @NamedQuery(name = "CustomerGoals.findByStartdate", query = "SELECT c FROM CustomerGoals c WHERE c.startdate = :startdate"),
     @NamedQuery(name = "CustomerGoals.findByFinishdate", query = "SELECT c FROM CustomerGoals c WHERE c.finishdate = :finishdate")})
-public class CustomerGoals implements Serializable {
+public class CustomerGoals implements  BaseEntity, Serializable {
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

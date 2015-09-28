@@ -8,60 +8,17 @@ package au.com.manlyit.fitnesscrm.stats.classes.util;
 import au.com.manlyit.fitnesscrm.stats.db.SurveyQuestionSubitems;
 import java.io.Serializable;
 
-import javax.inject.Inject;
-import javax.enterprise.context.SessionScoped;
 import javax.inject.Named;
-import javax.faces.component.UIComponent;
-import javax.faces.context.FacesContext;
-import javax.faces.convert.Converter;
-import javax.faces.convert.FacesConverter;
 
 /**
  *
  * @author david
  */
 @Named ("surveyquestionsubitemsConverter")
-@SessionScoped
-@FacesConverter(value = "surveyquestionsubitemsConverter")
-public class SurveyquestionsubitemsConverter implements Converter, Serializable{
 
-   @Inject
-  private  au.com.manlyit.fitnesscrm.stats.beans.SurveyQuestionSubitemsFacade ejbFacade;
+public class SurveyquestionsubitemsConverter extends GenericConverter<SurveyQuestionSubitems> implements Serializable {
+    private static final long serialVersionUID = 1L;
 
    public SurveyquestionsubitemsConverter(){
    }
-
-    @Override
-   public Object getAsObject(FacesContext context, UIComponent component, String value){
-        SurveyQuestionSubitems sess;
-        int val = Integer.parseInt(value);
-        sess = ejbFacade.find(val);
-        return sess;
-
-
-
-     //If u look below, I convert the object into a unique string, which is its id.
-     //Therefore, I just need to write a method that query the object back from the
-     //database if given a id. getProjectById, is a method inside my Session Bean that
-     //does what I just described
-   }
-
-        String getStringKey(java.lang.Integer value) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(value);
-            return sb.toString();
-        } 
-
-   @Override
-        public String getAsString(FacesContext facesContext, UIComponent component, Object object) {
-            if (object == null) {
-                return null;
-            }
-            if (object instanceof SurveyQuestionSubitems) {
-                SurveyQuestionSubitems o = (SurveyQuestionSubitems) object;
-                return getStringKey(o.getId());
-            } else {
-                throw new IllegalArgumentException("object " + object + " is of type " + object.getClass().getName() + "; expected type: " + SurveyQuestionSubitems.class.getName());
-            }
-        }
 }

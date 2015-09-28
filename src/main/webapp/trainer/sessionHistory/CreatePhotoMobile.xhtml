@@ -30,7 +30,7 @@
                 <p:growl id="growl" showDetail="true"/>
                 <h:form id="photoCreate" enctype="multipart/form-data">
                     <p:outputLabel value="#{configMapController.getKey('CreateCustomerImagesLabel_customerId')}" for="customerId" />
-                    <p:selectOneMenu  valueChangeListener="#{customerImagesController.handleCustomerChange}" id="customerId" converter="customerConverter" value="#{customerImagesController.selected.customerId}"  required="true" requiredMessage="#{configMapController.getKey('CreateCustomerImagesRequiredMessage_customerId')}">
+                    <p:selectOneMenu  valueChangeListener="#{customerImagesController.handleCustomerChange}" id="customerId" converter="#{custConverter}" value="#{customerImagesController.selected.customerId}"  required="true" requiredMessage="#{configMapController.getKey('CreateCustomerImagesRequiredMessage_customerId')}">
 
                         <f:selectItems   value="#{sessionHistoryController.activeCustomers}"/>  
                         <p:ajax update=":photos:growl" />

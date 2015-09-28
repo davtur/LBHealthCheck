@@ -6,6 +6,7 @@
 
 package au.com.manlyit.fitnesscrm.stats.db;
 
+import au.com.manlyit.fitnesscrm.stats.classes.util.BaseEntity;
 import java.io.Serializable;
 import java.util.Collection;
 import javax.persistence.Basic;
@@ -38,7 +39,7 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "StatTypes.findById", query = "SELECT s FROM StatTypes s WHERE s.id = :id"),
     @NamedQuery(name = "StatTypes.findByName", query = "SELECT s FROM StatTypes s WHERE s.name = :name"),
     @NamedQuery(name = "StatTypes.findByDescription", query = "SELECT s FROM StatTypes s WHERE s.description = :description")})
-public class StatTypes implements Serializable {
+public class StatTypes implements  BaseEntity, Serializable {
     @JoinColumn(name = "chart", referencedColumnName = "id")
     @ManyToOne(optional = false)
     private FitnessTestCharts chart;

@@ -32,5 +32,5 @@ public class CustomImageConverter implements Converter {
         System.out.println("Value to be displayed to the user"+value);
         String output = (String)value;
         return output;
-    }
+}
 }

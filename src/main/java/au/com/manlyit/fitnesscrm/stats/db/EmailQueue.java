@@ -4,6 +4,7 @@
  */
 package au.com.manlyit.fitnesscrm.stats.db;
 
+import au.com.manlyit.fitnesscrm.stats.classes.util.BaseEntity;
 import java.io.Serializable;
 import java.util.Date;
 import javax.persistence.Basic;
@@ -36,7 +37,7 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "EmailQueue.findByStatus", query = "SELECT e FROM EmailQueue e WHERE e.status = :status"),
     @NamedQuery(name = "EmailQueue.findBySendDate", query = "SELECT e FROM EmailQueue e WHERE e.sendDate = :sendDate"),
     @NamedQuery(name = "EmailQueue.findByCreateDate", query = "SELECT e FROM EmailQueue e WHERE e.createDate = :createDate")})
-public class EmailQueue implements Serializable {
+public class EmailQueue implements  BaseEntity, Serializable {
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

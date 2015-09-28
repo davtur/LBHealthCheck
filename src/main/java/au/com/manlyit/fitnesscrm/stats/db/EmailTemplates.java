@@ -5,6 +5,7 @@
  */
 package au.com.manlyit.fitnesscrm.stats.db;
 
+import au.com.manlyit.fitnesscrm.stats.classes.util.BaseEntity;
 import java.io.Serializable;
 import javax.persistence.Basic;
 import javax.persistence.Column;
@@ -31,7 +32,7 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "EmailTemplates.findAll", query = "SELECT e FROM EmailTemplates e"),
     @NamedQuery(name = "EmailTemplates.findById", query = "SELECT e FROM EmailTemplates e WHERE e.id = :id"),
     @NamedQuery(name = "EmailTemplates.findByName", query = "SELECT e FROM EmailTemplates e WHERE e.name = :name")})
-public class EmailTemplates implements Serializable {
+public class EmailTemplates implements  BaseEntity, Serializable {
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

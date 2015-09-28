@@ -5,6 +5,7 @@
  */
 package au.com.manlyit.fitnesscrm.stats.db;
 
+import au.com.manlyit.fitnesscrm.stats.classes.util.BaseEntity;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -47,7 +48,7 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "Schedule.findBySchedReminder", query = "SELECT s FROM Schedule s WHERE s.schedReminder = :schedReminder"),
     @NamedQuery(name = "Schedule.findByShedstyleClass", query = "SELECT s FROM Schedule s WHERE s.shedstyleClass = :shedstyleClass"),
     @NamedQuery(name = "Schedule.findBySchedEditable", query = "SELECT s FROM Schedule s WHERE s.schedEditable = :schedEditable")})
-public class Schedule implements Serializable {
+public class Schedule implements  BaseEntity, Serializable {
 
     private static final long serialVersionUID = 1L;
     @Id

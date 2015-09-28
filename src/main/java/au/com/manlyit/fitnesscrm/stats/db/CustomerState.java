@@ -6,6 +6,7 @@
 
 package au.com.manlyit.fitnesscrm.stats.db;
 
+import au.com.manlyit.fitnesscrm.stats.classes.util.BaseEntity;
 import java.io.Serializable;
 import java.util.Collection;
 import javax.persistence.Basic;
@@ -34,7 +35,7 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "CustomerState.findAll", query = "SELECT c FROM CustomerState c"),
     @NamedQuery(name = "CustomerState.findById", query = "SELECT c FROM CustomerState c WHERE c.id = :id"),
     @NamedQuery(name = "CustomerState.findByCustomerState", query = "SELECT c FROM CustomerState c WHERE c.customerState = :customerState")})
-public class CustomerState implements Serializable {
+public class CustomerState implements  BaseEntity, Serializable {
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -61,10 +62,12 @@ public class CustomerState implements Serializable {
         this.customerState = customerState;
     }
 
+    @Override
     public Integer getId() {
         return id;
     }
 
+    @Override
     public void setId(Integer id) {
         this.id = id;
     }

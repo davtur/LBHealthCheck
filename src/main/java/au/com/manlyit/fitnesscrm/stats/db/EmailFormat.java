@@ -6,6 +6,7 @@
 
 package au.com.manlyit.fitnesscrm.stats.db;
 
+import au.com.manlyit.fitnesscrm.stats.classes.util.BaseEntity;
 import java.io.Serializable;
 import java.util.Collection;
 import javax.persistence.Basic;
@@ -34,7 +35,7 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "EmailFormat.findAll", query = "SELECT e FROM EmailFormat e"),
     @NamedQuery(name = "EmailFormat.findById", query = "SELECT e FROM EmailFormat e WHERE e.id = :id"),
     @NamedQuery(name = "EmailFormat.findByEmailFormat", query = "SELECT e FROM EmailFormat e WHERE e.emailFormat = :emailFormat")})
-public class EmailFormat implements Serializable {
+public class EmailFormat implements  BaseEntity, Serializable {
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -4,6 +4,7 @@
  */
 package au.com.manlyit.fitnesscrm.stats.db;
 
+import au.com.manlyit.fitnesscrm.stats.classes.util.BaseEntity;
 import java.io.Serializable;
 import java.util.Date;
 import javax.persistence.Basic;
@@ -33,7 +34,7 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "Monitoringcharts.findById", query = "SELECT m FROM Monitoringcharts m WHERE m.id = :id"),
     @NamedQuery(name = "Monitoringcharts.findByType", query = "SELECT m FROM Monitoringcharts m WHERE m.type = :type"),
     @NamedQuery(name = "Monitoringcharts.findByDate", query = "SELECT m FROM Monitoringcharts m WHERE m.date = :date")})
-public class Monitoringcharts implements Serializable {
+public class Monitoringcharts implements  BaseEntity, Serializable {
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

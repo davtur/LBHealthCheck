@@ -4,6 +4,7 @@
  */
 package au.com.manlyit.fitnesscrm.stats.db;
 
+import au.com.manlyit.fitnesscrm.stats.classes.util.BaseEntity;
 import java.io.Serializable;
 import javax.persistence.Basic;
 import javax.persistence.Column;
@@ -30,7 +31,7 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "ConfigMap.findAll", query = "SELECT c FROM ConfigMap c"),
     @NamedQuery(name = "ConfigMap.findById", query = "SELECT c FROM ConfigMap c WHERE c.id = :id"),
     @NamedQuery(name = "ConfigMap.findByConfigkey", query = "SELECT c FROM ConfigMap c WHERE c.configkey = :configkey")})
-public class ConfigMap implements Serializable {
+public class ConfigMap implements  BaseEntity, Serializable {
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -63,10 +64,12 @@ public class ConfigMap implements Serializable {
         this.configvalue = configvalue;
     }
 
+    @Override
     public Integer getId() {
         return id;
     }
 
+    @Override
     public void setId(Integer id) {
         this.id = id;
     }

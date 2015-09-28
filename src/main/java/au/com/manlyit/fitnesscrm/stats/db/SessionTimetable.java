@@ -5,6 +5,7 @@
  */
 package au.com.manlyit.fitnesscrm.stats.db;
 
+import au.com.manlyit.fitnesscrm.stats.classes.util.BaseEntity;
 import au.com.manlyit.fitnesscrm.stats.db.SessionTypes;
 import java.io.Serializable;
 import java.util.Date;
@@ -37,7 +38,7 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "SessionTimetable.findAll", query = "SELECT s FROM SessionTimetable s"),
     @NamedQuery(name = "SessionTimetable.findById", query = "SELECT s FROM SessionTimetable s WHERE s.id = :id"),
     @NamedQuery(name = "SessionTimetable.findBySessiondate", query = "SELECT s FROM SessionTimetable s WHERE s.sessiondate = :sessiondate")})
-public class SessionTimetable implements Serializable {
+public class SessionTimetable implements  BaseEntity, Serializable {
     @JoinColumn(name = "trainer_id", referencedColumnName = "id")
     @ManyToOne(optional = false)
     private Customers trainerId;

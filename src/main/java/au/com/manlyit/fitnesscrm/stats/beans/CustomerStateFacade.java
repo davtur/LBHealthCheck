@@ -17,6 +17,7 @@ import javax.persistence.PersistenceContext;
  */
 @Stateless
 public class CustomerStateFacade extends AbstractFacade<CustomerState> {
+    private static final long serialVersionUID = 1L;
     @PersistenceContext(unitName = "FitnessStatsPU")
     private EntityManager em;
 
