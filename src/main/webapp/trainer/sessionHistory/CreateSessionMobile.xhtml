@@ -56,7 +56,7 @@
                     <pm:field>
                         <p:outputLabel for="sessionType" value="#{configMapController.getKey('CreateSessionHistoryLabel_sessionType')}" />
                         <p:selectOneMenu id="sessionType" value="#{sessionHistoryController.selected.sessionTypesId}" label="#{configMapController.getKey('CreateSessionHistoryLabel_sessionType')}"  converter="#{sessTypesConverter}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionHistoryRequiredMessage_sessionType')}">
-                            <f:selectItems value="#{sessionTypesController.itemsAvailableSelectOne}" />
+                            <f:selectItems value="#{sessionTypesController.itemsAvailable}" />
                         </p:selectOneMenu>
                     </pm:field>
 
@@ -90,7 +90,7 @@
                                 <p:column>
                                     <h:panelGrid id="customerPanel" columns="3" >
                                         <p:graphicImage value="#{customerImagesController.dynamicImage}" width="50px">
-                                            <f:param name="imageid" value="#{cust.profileImage.id}"/>
+                                            <f:param name="imageId" value="#{cust.profileImage.id}"/>
                                         </p:graphicImage>
                                         <p:selectBooleanCheckbox id="btnAttendedSession" value="#{sessionHistoryController.checkedCustomers[rowIndex]}"  style="text-align: right">
                                             <p:ajax update=":sessions:sessionsForm:attendanceCount1 :sessions:sessionsForm:bottomButton "  event="change" />

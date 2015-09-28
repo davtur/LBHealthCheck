@@ -12,7 +12,7 @@
             <h:form id="SessionTimetableCreateForm">
                 <h:panelGroup id="display">
                     <p:panelGrid columns="2" rendered="#{sessionTimetableController.selected != null}">
-                         <p:outputLabel value="#{configMapController.getKey('CreateSessionTimetableLabel_sessiondate')}" for="sessiondate" />
+                        <p:outputLabel value="#{configMapController.getKey('CreateSessionTimetableLabel_sessiondate')}" for="sessiondate" />
 
 
                         <p:calendar id="sessiondate" pattern="dd/MM/yyyy HH:mm:ss"  value="#{sessionTimetableController.selected.sessiondate}"  title="#{configMapController.getKey('CreateSessionTimetableTitle_sessiondate')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionTimetableRequiredMessage_sessiondate')}">
@@ -22,11 +22,18 @@
                         <p:inputTextarea rows="4" cols="30" id="comments"  value="#{sessionTimetableController.selected.comments}"  title="#{configMapController.getKey('CreateSessionTimetableTitle_comments')}" >
                             <p:ajax  event="keyup"   />
                         </p:inputTextarea>
-                            <p:outputLabel value="#{configMapController.getKey('CreateSessionTimetableLabel_adminNotes')}" for="adminNotes" />
+                        <p:outputLabel value="#{configMapController.getKey('CreateSessionTimetableLabel_adminNotes')}" for="adminNotes" />
                         <p:inputTextarea rows="4" cols="30" id="adminNotes"  value="#{sessionTimetableController.selected.adminNotes}"  title="#{configMapController.getKey('CreateSessionTimetableTitle_adminNotes')}" >
                             <p:ajax  event="keyup"   />
                         </p:inputTextarea>
-                            <p:outputLabel value="#{configMapController.getKey('CreateSessionTimetableLabel_sessionTypesId')}" for="sessionTypesId" />
+                        <p:outputLabel value="#{configMapController.getKey('CreateSessionHistoryLabel_trainer')}" for="trainer" />
+
+                        <p:selectOneMenu id="trainer"  value="#{sessionTimetableController.selected.trainerId}" converter="#{custConverter}"  label="#{configMapController.getKey('CreateSessionHistoryTitle_trainer')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionHistoryRequiredMessage_trainer')}">
+                            <f:selectItems value="#{customersController.getCustomersByGroupObject('TRAINER',true)}" var="cust" itemLabel="#{cust.firstname} #{cust.lastname}" itemValue="#{cust}"/>
+                        <p:ajax   event="select"   />
+                        </p:selectOneMenu>
+
+                        <p:outputLabel value="#{configMapController.getKey('CreateSessionTimetableLabel_sessionTypesId')}" for="sessionTypesId" />
                         <p:selectOneMenu id="sessionTypesId" valueChangeListener="#{sessionTimetableController.selectOneMenuValueChangeListener}"  value="#{sessionTimetableController.selected.sessionTypesId}"  label="#{configMapController.getKey('CreateSessionTimetableTitle_sessionTypesId')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionTimetableRequiredMessage_sessionTypesId')}">
                             <f:selectItems value="#{sessionTypesController.itemsAvailableSelectOne}"/>
                             <p:ajax   event="select"   />

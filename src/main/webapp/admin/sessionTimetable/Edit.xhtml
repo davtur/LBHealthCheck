@@ -23,6 +23,14 @@
                         <p:inputTextarea rows="4" cols="30" id="adminNotes" value="#{sessionTimetableController.selected.adminNotes}" title="#{configMapController.getKey('EditSessionTimetableTitle_adminNotes')}" >
                             <p:ajax  event="keyup"   />
                         </p:inputTextarea>
+                                               <p:outputLabel value="#{configMapController.getKey('CreateSessionHistoryLabel_trainer')}" for="trainer" />
+
+                        <p:selectOneMenu id="trainer"  value="#{sessionTimetableController.selected.trainerId}" converter="#{custConverter}"  label="#{configMapController.getKey('CreateSessionHistoryTitle_trainer')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionHistoryRequiredMessage_trainer')}">
+                            <f:selectItems value="#{customersController.getCustomersByGroupObject('TRAINER',true)}" var="cust" itemLabel="#{cust.firstname} #{cust.lastname}" itemValue="#{cust}"/>
+                        <p:ajax   event="select"   />
+                        </p:selectOneMenu>
+
+
                         <h:outputLabel value="#{configMapController.getKey('EditSessionTimetableLabel_sessionTypesId')}" for="sessionTypesId" />
                         <p:selectOneMenu id="sessionTypesId" valueChangeListener="#{sessionTimetableController.selectOneMenuValueChangeListener}" value="#{sessionTimetableController.selected.sessionTypesId}" label="#{configMapController.getKey('EditSessionTimetableTitle_sessionTypesId')}" required="true" requiredMessage="#{configMapController.getKey('EditSessionTimetableRequiredMessage_sessionTypesId')}">
                             <f:selectItems value="#{sessionTypesController.itemsAvailableSelectOne}"/>

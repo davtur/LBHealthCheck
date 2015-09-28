@@ -71,7 +71,7 @@
                             </p:cellEditor> 
 
                         </p:column>
-                          <p:column sortBy="#{item.sessionTypesId.name}" filterBy="#{item.sessionTypesId.name}" headerText="#{configMapController.getKey('ListSessionTimetableTitle_sessionTypesId')}"   >
+                        <p:column sortBy="#{item.sessionTypesId.name}" filterBy="#{item.sessionTypesId.name}" headerText="#{configMapController.getKey('ListSessionTimetableTitle_sessionTypesId')}"   >
                             <p:cellEditor> 
                                 <f:facet name="output">
                                     <h:outputText value="#{item.sessionTypesId.name}"/>
@@ -90,6 +90,24 @@
                                 </f:facet>
                                 <f:facet name="input">
                                     <p:inputText value="#{item.recurranceId.name}" label="#{configMapController.getKey('ListSessionTimetableTitle_recurranceId')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
+                        <p:column sortBy="#{item.trainerId}" filterBy="#{item.trainerId}" headerText="#{configMapController.getKey('CreateSessionHistoryLabel_trainer')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <p:graphicImage value="#{customerImagesController.dynamicImage}" width="50px">
+                                        <f:param name="imageId" value="#{item.trainerId.profileImage.id}"/>
+                                    </p:graphicImage>
+                                    <h:outputText value="#{item.trainerId.firstname} #{item.trainerId.lastname}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:selectOneMenu id="trainer"  value="#{item.trainerId}" converter="#{custConverter}"  label="#{configMapController.getKey('CreateSessionHistoryTitle_trainer')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionHistoryRequiredMessage_trainer')}">
+                                        <f:selectItems value="#{customersController.getCustomersByGroupObject('TRAINER',true)}" var="cust" itemLabel="#{cust.firstname} #{cust.lastname}" itemValue="#{cust}"/>
+
+                                    </p:selectOneMenu>
                                 </f:facet>
                             </p:cellEditor> 
 
@@ -119,7 +137,7 @@
 
 
                         </p:column>
-                      
+
                         <p:column rendered="#{sessionTimetableController.isUserInRole('ADMIN')}"  headerText="Edit" style="width:50px">  
                             <p:rowEditor />  
                         </p:column>  

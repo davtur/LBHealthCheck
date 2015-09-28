@@ -38,6 +38,9 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "SessionTimetable.findById", query = "SELECT s FROM SessionTimetable s WHERE s.id = :id"),
     @NamedQuery(name = "SessionTimetable.findBySessiondate", query = "SELECT s FROM SessionTimetable s WHERE s.sessiondate = :sessiondate")})
 public class SessionTimetable implements Serializable {
+    @JoinColumn(name = "trainer_id", referencedColumnName = "id")
+    @ManyToOne(optional = false)
+    private Customers trainerId;
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -147,6 +150,14 @@ public class SessionTimetable implements Serializable {
     @Override
     public String toString() {
         return "au.com.manlyit.fitnesscrm.stats.beans.SessionTimetable[ id=" + id + " ]";
+    }
+
+    public Customers getTrainerId() {
+        return trainerId;
+    }
+
+    public void setTrainerId(Customers trainerId) {
+        this.trainerId = trainerId;
     }
     
 }

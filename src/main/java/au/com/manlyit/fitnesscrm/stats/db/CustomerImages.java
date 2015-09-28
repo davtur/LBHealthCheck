@@ -207,13 +207,6 @@ public class CustomerImages implements Serializable {
         this.customers = customers;
     }
 
-    public byte[] getImage() {
-        return image;
-    }
-
-    public void setImage(byte[] image) {
-        this.image = image;
-    }
 
     public String getMimeType() {
         return mimeType;
@@ -237,5 +230,13 @@ public class CustomerImages implements Serializable {
 
     public void setImageDescription(String imageDescription) {
         this.imageDescription = imageDescription;
+    }
+
+    public byte[] getImage() {
+        return image;
+    }
+
+    public void setImage(byte[] image) {
+        this.image = image;
     }
 }
