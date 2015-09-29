@@ -107,7 +107,7 @@ public class CustomersController implements Serializable {
     public CustomersController() {
     }
 
-    @PostConstruct
+    //@PostConstruct
     private void getLoggedInCustomer() {
 
         String name = "Unknown";
@@ -118,7 +118,7 @@ public class CustomersController implements Serializable {
                 current = ejbFacade.findCustomerByUsername(name);
                 loggedInUser = current;
             } else {
-                JsfUtil.addErrorMessage("Couldn't get customer not logged in yet!");
+                logger.log(Level.INFO, "getLoggedInCustomer: a call to facesContext.getExternalContext().getRemoteUser() returned NULL. User not authenticated");
             }
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, "Couldn't get customer " + name);
@@ -127,7 +127,7 @@ public class CustomersController implements Serializable {
 
         HttpServletRequest req = (HttpServletRequest) facesContext.getExternalContext().getRequest(); //request;
         String uaString = req.getHeader("User-Agent");
-        logger.log(Level.INFO, "User-Agent of this seesion is :{0}", uaString);
+        logger.log(Level.INFO, "The User-Agent of this session is :{0}", uaString);
         // sanityCheckCustomersForDefaultItems();
 //resp.setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY);
 //resp.setHeader("Location", "/AppName/site/ie/home.jsp");
@@ -225,32 +225,43 @@ public class CustomersController implements Serializable {
         LoginBean controller = (LoginBean) context.getApplication().getELResolver().getValue(context.getELContext(), null, "loginBean");
         controller.doPasswordReset("system.new.customer.template", current, configMapFacade.getConfig("sendCustomerOnBoardEmailEmailSubject"));
         JsfUtil.addSuccessMessage(configMapFacade.getConfig("sendCustomerOnBoardEmail") + " " + current.getFirstname() + " " + current.getLastname() + ".");
-        
+
         String auditDetails = "Customer On Board Email Sent For:" + current.getFirstname() + " " + current.getLastname() + ".";
         String changedFrom = "N/A";
         String changedTo = "On Board Email Sent";
 
-        createCombinedAuditLogAndNote(loggedInUser,current,"sendCustomerOnboardEmail", auditDetails,  changedFrom,  changedTo);
+        try {
+            String url = current.getPaymentParameters().getWebddrUrl();
+            int a = url.indexOf("rAmount");
+            int b = url.indexOf("businessOrPerson");
+            url = url.substring(a, b);
+            auditDetails += "\r\n" + url;
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "sendCustomerOnboardEmail: Couldn't get the payment details from the webDDR Url for the audit log and cutomer notes");
+        }
+
+        createCombinedAuditLogAndNote(loggedInUser, current, "sendCustomerOnboardEmail", auditDetails, changedFrom, changedTo);
     }
-    
-    public void createCombinedAuditLogAndNote(Customers adminUser, Customers customer,String title,String message, String changedFrom, String ChangedTo){
+
+    public void createCombinedAuditLogAndNote(Customers adminUser, Customers customer, String title, String message, String changedFrom, String ChangedTo) {
         try {
             if (adminUser == null) {
                 adminUser = customer;
                 logger.log(Level.WARNING, "Customers Controller, createCombinedAuditLogAndNote: The logged in user is NULL");
             }
-            ejbAuditLogFacade.audit(adminUser, customer,title, message, changedFrom, ChangedTo);
+            ejbAuditLogFacade.audit(adminUser, customer, title, message, changedFrom, ChangedTo);
             Notes note = new Notes(0);
             note.setCreateTimestamp(new Date());
             note.setCreatedBy(adminUser);
             note.setUserId(customer);
             note.setNote(message);
             ejbNotesFacade.create(note);
-            
+            ejbFacade.edit(customer);
+
         } catch (Exception e) {
-             logger.log(Level.WARNING, "Customers Controller, createCombinedAuditLogAndNote: ",e);
+            logger.log(Level.WARNING, "Customers Controller, createCombinedAuditLogAndNote: ", e);
         }
-        
+
     }
 
     public Customers getSelected() {

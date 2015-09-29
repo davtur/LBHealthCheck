@@ -431,7 +431,7 @@ public class SessionHistoryController implements Serializable {
             JsfUtil.addSuccessMessage(configMapFacade.getConfig("SessionHistoryCreated"));
             try {
                 FacesContext context = FacesContext.getCurrentInstance();
-                CustomersController customersController = (CustomersController) context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
+                CustomersController customersController = context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
                 Customers cust = customersController.getLoggedInUser();
                 String auditDetails = "Type:" + current.getSessionTypesId().getName() + " Date/Time:  " + current.getSessiondate().toString() + "  Participants:  " + current.getParticipantsAsString() + " ";
                 String changedFrom = "NULL";

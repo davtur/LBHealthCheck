@@ -2712,7 +2712,15 @@ public class EziDebitPaymentGateway implements Serializable {
 
     public void updatePaymentScheduleForm() {
         PaymentParameters pp = getSelectedCustomer().getPaymentParameters();
-        if (pp != null) {
+        if (pp != null 
+                && pp.getWebddrUrl() != null 
+                && pp.getWebddrUrl().isEmpty() == false 
+                && pp.getContractStartDate() != null 
+                && pp.getPaymentRegularAmount() != null 
+                && pp.getPaymentRegularTotalPaymentsAmount() != null 
+                && pp.getPaymentsRegularTotalNumberOfPayments() != null 
+                && pp.getPaymentPeriod() != null 
+                ) {
 
             paymentDebitDate = pp.getContractStartDate();
             paymentAmountInCents = pp.getPaymentRegularAmount().floatValue()/ (float) 100;
@@ -2748,6 +2756,15 @@ public class EziDebitPaymentGateway implements Serializable {
                 }
 
             }
+        }else{
+            //set to default values as this customer has not been set up yet
+            paymentDebitDate = new Date();
+            paymentAmountInCents=0;
+            paymentLimitAmountInCents= (long)0;
+            paymentLimitToNumberOfPayments=0;
+            oneOffPaymentAmount=0;
+            oneOffPaymentDate= new Date();
+          
         }
 
     }

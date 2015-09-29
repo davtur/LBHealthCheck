@@ -193,7 +193,12 @@ public class CustomersFacade extends AbstractFacade<Customers> {
     }
 
     public Customers findById(int id) {
-        Customers c = em.find(Customers.class, id);
+        Customers c = null;
+        try {
+            c = em.find(Customers.class, id);
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "CustomersFacade findById, Exception {1}, : Customer Id = {0}", new Object[]{id, e.getMessage()});
+        }
         if (c == null) {
             logger.log(Level.WARNING, "CustomersFacade findById, Customer not found : Customer Id = {0}", id);
         }

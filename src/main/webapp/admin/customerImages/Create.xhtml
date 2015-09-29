@@ -41,7 +41,7 @@
                         <p:panel id="photoPanel3" header="Select a photo to upload (jpeg)">
                             <p:panelGrid columns="2" style="width:400px">
                                 <p:fileUpload fileLimitMessage="The size of the picture is too big! ( > 10MB )" mode="advanced" fileUploadListener="#{customerImagesController.handleFileUpload}" auto="true" update=":photoCreate:photoPanel3  :photoCreate:datetaken :growl :photoCreate2:saveButton" allowTypes="/(\.|\/)(gif|jpe?g|png)$/" sizeLimit="10000000" />
-                                <p:graphicImage id="photo1" value="#{customerImagesController.uploadedImage}" width="300px" cache="false" />
+                                <p:graphicImage id="photo1" value="#{customerImagesController.uploadedImageAsStream}" width="300px" cache="false" />
                             </p:panelGrid>
                             <!-- <p:panel id="imageCropperPanel" header="Uploaded Image">
                                  <h:panelGrid columns="2">  

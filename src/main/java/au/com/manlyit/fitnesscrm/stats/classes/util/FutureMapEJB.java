@@ -1219,7 +1219,12 @@ public class FutureMapEJB implements Serializable {
                         
                     }
                     
-                    Customers cust = customersFacade.findById(custId);
+                    Customers cust = null;
+                    try {
+                        cust = customersFacade.findById(custId);
+                    } catch (Exception e) {
+                        logger.log(Level.WARNING, "customersFacade.findById(custId) {0}.", new Object[]{custId,e.getMessage()});
+                    }
                     if (cust != null) {
                         logger.log(Level.INFO, "Future Map processGetCustomerDetails. Processing details for customer {0}.", new Object[]{cust.getUsername()});
                         
@@ -1284,9 +1289,9 @@ public class FutureMapEJB implements Serializable {
                             cust.setPaymentParameters(pp);
                         }
                         customersFacade.edit(cust);
-                        
+                         
                     } else {
-                        logger.log(Level.WARNING, "Future Map processGetCustomerDetails an ezidebit YourSystemReference string cannot be converted to a number.");
+                        logger.log(Level.WARNING, "Future Map processGetCustomerDetails an ezidebit YourSystemReference string cannot be converted to a number or the customer ID does not exist");
                     }
                 }
             }

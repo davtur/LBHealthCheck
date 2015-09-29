@@ -82,7 +82,7 @@
                         <f:selectItems value="#{customerAuthController.itemsAvailableAsObjects}"  var="custAuth" itemLabel="#{custAuth.customerAuthType}" itemValue="#{custAuth}"/>
                     </p:selectOneMenu>
                     <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_demographic')}" for="demographic" />
-                    <p:selectOneMenu id="demographic" valueChangeListener="#{customersController.selectOneMenuValueChangeListener}" converter="demographicTypesConverter" value="#{customersController.newCustomer.demographic}" label="#{configMapController.getKey('CreateCustomersTitle_demographic')}" >
+                    <p:selectOneMenu id="demographic" valueChangeListener="#{customersController.selectOneMenuValueChangeListener}" converter="#{demographicTypesConverter}" value="#{customersController.newCustomer.demographic}" label="#{configMapController.getKey('CreateCustomersTitle_demographic')}" >
                         <f:selectItems value="#{demographicTypesController.itemsAvailableAsObjects}"  var="demo" itemLabel="#{demo.name}" itemValue="#{demo}"/>
                     </p:selectOneMenu>
                     <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_preferredContact')}" for="preferredContact" />

@@ -45,7 +45,7 @@ public class AuditLogController implements Serializable {
     private int selectedItemIndex;
     private List<AuditLog> filteredItems;
     private AuditLog[] multiSelected;
-    private LazyDataModel lazyModel;
+    private LazyDataModel<AuditLog> lazyModel;
 
     public AuditLogController() {
     }
@@ -70,7 +70,7 @@ public class AuditLogController implements Serializable {
         }
 
     }
-  public LazyDataModel<ConfigMap> getLazyModel() {
+  public LazyDataModel<AuditLog> getLazyModel() {
         if(lazyModel == null){
             lazyModel = new LazyLoadingDataModel(ejbFacade);
         }

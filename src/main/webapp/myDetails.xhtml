@@ -142,38 +142,6 @@
                         </h:panelGrid>
 
 
-                        <!--    <p:panel id="panel3" style="height: 550px">
-                               <p:panel id="photoPanel3" header="Select a photo to upload (jpeg)">
-                                   <p:panelGrid columns="2" style="width:400px">
-                                       <p:fileUpload fileLimitMessage="The size of the picture is too big! ( > 10MB )" mode="advanced" fileUploadListener="#{customerImagesController.handleFileUpload}" auto="true" update=":createCustomerForm:panel3  :createCustomerForm:panel2  :growl" allowTypes="/(\.|\/)(gif|jpe?g|png)$/" sizeLimit="10000000" />
-                                       <p:graphicImage id="photo2" value="#{customerImagesController.uploadedImage}" height="400px" cache="false" />
-                                   </p:panelGrid>
-                                   <p:panel id="imageCropperPanel" header="Uploaded Image">
-                                        <h:panelGrid columns="2">  
-                                            <p:imageCropper value="#{customerImagesController.croppedImage}"  
-                                                            image="#{customerImagesController.uploadedImageTempFile.path}"  
-                                                            initialCoords="225,75,300,125"/>  
-        
-                                            <p:graphicImage id="localCroppedImage"  rendered="#{not empty customerImagesController.uploadedImageTempFile}"
-                                                            value="#{customerImagesController.uploadedImageTempFile.path}" />  
-                                        </h:panelGrid>  
-        
-                                        <p:commandButton value="Crop"  actionListener="#{customerImagesController.crop}" rendered="#{not empty customerImagesController.uploadedImageTempFile}"
-                                                         
-                                                         update="photoPanel3"/> 
-                                    </p:panel> 
-   
-                               </p:panel>
-                               <h:panelGrid columns="4">
-                                   <p:outputLabel  value="#{configMapController.getKey('CreateCustomerImagesLabel_profilephoto')}" for="profilephoto" />
-                                   <p:selectBooleanCheckbox id="profilephoto"   value="#{customerImagesController.profilePhoto}" >
-                                       <p:ajax />
-                                   </p:selectBooleanCheckbox>  
-                                   <p:commandButton id="saveButton" disabled="#{customerImagesController.saveButtonDisabled}" update=":createCustomerForm:panel3  :createCustomerForm:panel2  :growl"   actionListener="#{customerImagesController.createFromDialogue}" value="#{configMapController.getKey('CreateCustomerImagesSaveLink')}" />
-                                   <p:commandButton      actionListener="#{customerImagesController.rotate90degrees}" update=":createCustomerForm:panel3   :growl"  value="#{configMapController.getKey('CreateCustomerImagesRotateImage90Link')}" />
-   
-                               </h:panelGrid>
-                           </p:panel>-->
 
                     </h:panelGrid>
                 </h:panelGrid>

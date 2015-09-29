@@ -59,3 +59,31 @@ CREATE TABLE `session_timetable` (
 
 ALTER TABLE `fitnessStats`.`session_types` 
 ADD COLUMN `session_duration_minutes` INT(4) NOT NULL DEFAULT 60 AFTER `description`;
+
+ALTER TABLE `fitnessStats`.`groups` 
+DROP FOREIGN KEY `fk_groups_1`;
+ALTER TABLE `fitnessStats`.`groups` 
+ADD CONSTRAINT `fk_groups_1`
+  FOREIGN KEY (`username`)
+  REFERENCES `fitnessStats`.`customers` (`username`)
+  ON DELETE NO ACTION
+  ON UPDATE CASCADE;
+
+
+ALTER TABLE `fitnessStats`.`participants` 
+DROP FOREIGN KEY `fk_participants_2`;
+ALTER TABLE `fitnessStats`.`participants` 
+ADD CONSTRAINT `fk_participants_2`
+  FOREIGN KEY (`session_history_id`)
+  REFERENCES `fitnessStats`.`session_history` (`id`)
+  ON DELETE NO ACTION
+  ON UPDATE CASCADE;
+
+ALTER TABLE `fitnessStats`.`paymentParameters` 
+DROP FOREIGN KEY `fk_paymentParameters_1`;
+ALTER TABLE `fitnessStats`.`paymentParameters` 
+ADD CONSTRAINT `fk_paymentParameters_1`
+  FOREIGN KEY (`loggedInUser`)
+  REFERENCES `fitnessStats`.`customers` (`id`)
+  ON DELETE NO ACTION
+  ON UPDATE CASCADE;
