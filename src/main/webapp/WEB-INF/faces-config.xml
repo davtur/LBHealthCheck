@@ -11,7 +11,9 @@
         <navigation-handler>
             org.primefaces.mobile.application.MobileNavigationHandler
         </navigation-handler>
-        
+        <resource-handler>
+            org.omnifaces.resourcehandler.UnmappedResourceHandler
+        </resource-handler>
         <resource-bundle>
             <base-name>/Bundle</base-name>
             <var>bundle</var>

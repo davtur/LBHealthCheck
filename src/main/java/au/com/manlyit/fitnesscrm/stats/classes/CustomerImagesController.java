@@ -1213,10 +1213,6 @@ public class CustomerImagesController implements Serializable {
 
     }
 
-    /**
-     * @param image
-     * @return the images
-     */
     public List<CustomerImages> getImages() {
         if (images == null) {
             createGallery(getUser());
