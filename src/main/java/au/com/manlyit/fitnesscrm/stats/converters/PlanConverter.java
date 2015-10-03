@@ -2,8 +2,9 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package au.com.manlyit.fitnesscrm.stats.classes.util;
+package au.com.manlyit.fitnesscrm.stats.converters;
 
+import au.com.manlyit.fitnesscrm.stats.converters.GenericConverter;
 import au.com.manlyit.fitnesscrm.stats.db.Plan;
 import java.io.Serializable;
 import javax.inject.Named;

@@ -49,9 +49,7 @@
     <converter>
         <description>Image Converter</description>
         <converter-id>customConverter</converter-id>
-        <converter-class>
-            au.com.manlyit.fitnesscrm.stats.classes.util.CustomImageConverter
-        </converter-class>
+        <converter-class>au.com.manlyit.fitnesscrm.stats.converters.CustomImageConverter</converter-class>
     </converter>
     <factory>
         <exception-handler-factory>

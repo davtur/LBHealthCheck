@@ -20,13 +20,13 @@
 
     <h:body>    
         <div id="menu-mask"></div>
-
+        <p:growl id="growl" widgetVar="growlWidget"    showDetail="true"    />
         <ui:include src="topbar.xhtml" />
 
         <ui:include src="layoutmenu.xhtml" />
 
         <div id="layout-portlets-cover">
-            <ui:insert name="content">
+            <ui:insert name="body">
                 Template
             </ui:insert>
 

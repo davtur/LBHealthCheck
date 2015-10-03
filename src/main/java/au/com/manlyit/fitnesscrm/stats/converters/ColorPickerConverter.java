@@ -3,7 +3,7 @@
  * and open the template in the editor.
  */
 
-package au.com.manlyit.fitnesscrm.stats.classes.util;
+package au.com.manlyit.fitnesscrm.stats.converters;
 
 /**
  *

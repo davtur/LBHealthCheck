@@ -5,78 +5,229 @@
     xmlns:ps="http://primefaces.org/spark"
     xmlns:ui="http://java.sun.com/jsf/facelets"
     xmlns:p="http://primefaces.org/ui">
+    
     <h:form>
-        <ps:menu>
+        <ps:menu id="mainmenubar1">
             <f:facet name="options">
                 <p:commandButton type="button" icon="fa fa-search Fs18 white" styleClass="Fright"/>
                 <p:inputText placeholder="Search" styleClass="Fright"/>    
             </f:facet>
+            <p:submenu  label="Developer" rendered="#{customersController.isUserInRole('DEVELOPER')}"  id="devMenu1" >
+                <p:menuitem
+                    id="configMap"                              
+                    action="/dev/configMap/List.xhtml" ajax="false" value="Configuration"    >                        
+                </p:menuitem>
+                <p:menuitem
+                    id="toDoList"                              
+                    action="/dev/toDoList/List.xhtml" ajax="false" value="ToDO List"    >                        
+                </p:menuitem>
+                <p:menuitem
+                    id="currency"                              
+                    action="/dev/currency/List.xhtml" ajax="false"  value="Currency"    >                       
+                </p:menuitem>
 
-            <p:submenu label="Colors" icon="fa fa-paint-brush">
-                <p:menuitem value="Green" icon="fa fa-paint-brush" actionListener="#{themeView.change('green')}" ajax="false"/>
-                <p:menuitem value="Blue" icon="fa fa-paint-brush" actionListener="#{themeView.change('blue')}" ajax="false"/>
-                <p:menuitem value="Orange" icon="fa fa-paint-brush" actionListener="#{themeView.change('orange')}" ajax="false"/>
-                <p:menuitem value="Red" icon="fa fa-paint-brush" actionListener="#{themeView.change('red')}" ajax="false"/>
+                <p:menuitem
+                    id="invoiceLine"                              
+                    action="/dev/invoiceLine/List.xhtml" ajax="false"  value="InvoiceLine"    >                       
+                </p:menuitem>
+                <p:menuitem
+                    id="invoiceLineType"                              
+                    action="/dev/invoiceLineType/List.xhtml" ajax="false"  value="Invoice Line Type"    >                       
+                </p:menuitem>
+                <p:menuitem
+                    id="item"                              
+                    action="/dev/item/List.xhtml" ajax="false"  value="Item"    >                       
+                </p:menuitem>
+                <p:menuitem
+                    id="demographic"                              
+                    action="/dev/demographicTypes/List.xhtml"  ajax="false" value="Edit demographicTypes Items" >                         
+                </p:menuitem>
+                <p:menuitem
+                    id="groups"                              
+                    action="/dev/groups/List.xhtml"  ajax="false" value="Edit Groups Items"    >                       
+                </p:menuitem>
+                <p:menuitem
+                    id="payments"                              
+                    action="/dev/payments/List.xhtml"  ajax="false" value="Ezidebit Payments"    >                       
+                </p:menuitem>
+                <p:menuitem
+                    id="sessiontype"                              
+                    action="/dev/sessionTypes/List.xhtml" ajax="false" value="Edit SessionTypes Items"    >                        
+                </p:menuitem>
+                <p:menuitem
+                    id="stats"                              
+                    action="/dev/stat/List.xhtml" ajax="false" value="Edit Statistics"   >                        
+                </p:menuitem>
+                <p:menuitem
+                    id="stattypes"                              
+                    action="/dev/statTypes/List.xhtml" ajax="false" value="Edit Stat Types"    >                        
+                </p:menuitem>
+                <p:menuitem
+                    id="crontriggers"                              
+                    action="/dev/qrtzCronTriggers/List.xhtml" ajax="false" value="Job Cron Triggers"    >                        
+                </p:menuitem>
+                <p:menuitem
+                    id="simpleTriggers"                              
+                    action="/dev/qrtzSimpleTriggers/List.xhtml" ajax="false" value="Job Simple Triggers"    >                        
+                </p:menuitem>
+                <p:menuitem
+                    id="jobDetails"                              
+                    action="/dev/qrtzJobDetails/List.xhtml" ajax="false" value="Job Details"    >                        
+                </p:menuitem>
+                <p:menuitem
+                    id="JobconfigMap"                              
+                    action="/dev/jobConfigMap/List.xhtml" ajax="false" value="Job Parameters"    >                        
+                </p:menuitem>
+                <p:menuitem
+                    id="tasks"                              
+                    action="/dev/tasks/List.xhtml" ajax="false" value="Task Admin"    >                        
+                </p:menuitem>
+                <p:menuitem
+                    id="webMonitor"                              
+                    action="/dev/monitor/websiteMonitor/List.xhtml" ajax="false" value="Monitoring"    >                        
+                </p:menuitem>
+
+                <p:menuitem
+                    id="monitorCharts"                              
+                    action="/dev/monitoringcharts/List.xhtml" ajax="false" value="Charts"    >                        
+                </p:menuitem>
+
+                <p:menuitem
+                    id="goals"                              
+                    action="/admin/customerGoals/List.xhtml" ajax="false"  value="Goals"    >                       
+                </p:menuitem>
+                <p:menuitem
+                    id="import"                              
+                    action="/admin/payment/customerImport.xhtml" ajax="false"  value="EziDebit Import"    >                       
+                </p:menuitem>
+                <p:menuitem
+                    id="surveyQuestionTypes"                              
+                    action="/admin/surveyquestiontypes/List.xhtml" ajax="false"  value="Survey Question Types"    >                       
+                </p:menuitem>
+                <p:menuitem
+                    id="sessionRecurrance"                              
+                    action="/admin/sessionRecurrance/List.xhtml" ajax="false"  value="Session Recurrance Types"    >                       
+                </p:menuitem>
+
+
+
             </p:submenu>
-            
-            <p:separator />
 
-            <p:submenu label="Spark Theme" icon="fa fa-rocket">
-                <p:menuitem value="Forms" icon="fa fa-file-text-o" outcome="forms" />
-                <p:menuitem value="Data Components" icon="fa fa-calendar-o" outcome="data" />
-                <p:menuitem value="DataTable" icon="fa fa-list-alt" outcome="datatable" />
-                <p:menuitem value="Panels" icon="fa fa-columns" outcome="panel" />
-                <p:menuitem value="Overlays" icon="fa fa-image" outcome="overlay" />
-                <p:menuitem value="Menus" icon="fa fa-align-justify" outcome="menu" />
-                <p:menuitem value="Messages" icon="fa fa-comments-o" outcome="messages" />
-                <p:menuitem value="FileUpload" icon="fa fa-cloud-upload" outcome="file" />
-                <p:menuitem value="Misc" icon="fa fa-stack-overflow" outcome="misc" />
+            <p:submenu  label="Admin" rendered="#{customersController.isUserInRole('ADMIN')}"  id="adminMenu1" >
+                <p:menuitem
+                    id="customers"                              
+                    action="/admin/customers/List.xhtml" value="Customers"  ajax="false"   >                        
+                </p:menuitem>
+                <p:menuitem action="/admin/reports/List.xhtml" ajax="false"
+                            id="reports"     
+                            value="Reports">
+                </p:menuitem>
+
+                <p:menuitem
+                    id="NewInvoice"                              
+                    action="/admin/invoice/Invoice.xhtml" ajax="false"  value="New Invoice"    >                       
+                </p:menuitem>
+                <p:menuitem
+                    id="invoice"                              
+                    action="/admin/invoice/List.xhtml" ajax="false"  value="Invoices"    >                       
+                </p:menuitem>
+                <p:menuitem action="/admin/schedule/schedule.xhtml" ajax="false"
+                            id="schedule"   icon="fa fa-calendar-o"   
+                            value="Calendar">
+                </p:menuitem>
+
+                <p:menuitem
+                    id="statstaken"                              
+                    action="/admin/statsTaken/List.xhtml" value="Statistics"  ajax="false"   >                        
+                </p:menuitem>
+                <p:menuitem
+                    id="sessionhist"
+                    action="/admin/sessionHistory/List.xhtml"  ajax="false" value="Session History"  >
+                </p:menuitem>
+                <p:menuitem
+                    id="photos"                              
+                    action="/admin/customerImages/List.xhtml" ajax="false"  value="Photos"   >                        
+                </p:menuitem>
+                <p:menuitem
+                    id="plans"                              
+                    action="/admin/plan/List.xhtml" ajax="false"  value="Plans"   >                        
+                </p:menuitem>
+                <p:menuitem
+                    id="emailqueue"                              
+                    action="/admin/emailQueue/List.xhtml" ajax="false"  value="EmailQueue"    >                       
+                </p:menuitem>
+                <p:menuitem
+                    id="emails"                              
+                    action="/admin/emailQueue/CreateEmail.xhtml" ajax="false"  value="New Email"    >                       
+                </p:menuitem>
+                <p:menuitem
+                    id="emailTemplates"                              
+                    action="/admin/emailTemplates/List.xhtml" ajax="false"  value="Templates"    >                       
+                </p:menuitem>
+                <p:menuitem
+                    id="fitnesscharts"                              
+                    action="/admin/fitnessTestCharts/List.xhtml" ajax="false"  value="Fitness Test Charts"    >                       
+                </p:menuitem>
+                <p:menuitem
+                    id="auditLog"                              
+                    action="/admin/auditLog/List.xhtml" ajax="false"  value="Change Log"    >                       
+                </p:menuitem>
+                <p:menuitem
+                    id="surveys"                              
+                    action="/admin/surveys/List.xhtml" ajax="false"  value="Surveys"    >                       
+                </p:menuitem>
+                <p:menuitem
+                    id="surveyQuestions"                              
+                    action="/admin/surveyquestions/List.xhtml" ajax="false"  value="Survey Questions"    >                       
+                </p:menuitem>
+                <p:menuitem
+                    id="surveyanswers"                              
+                    action="/admin/surveyanswers/List.xhtml" ajax="false"  value="Survey Answers"    >                       
+                </p:menuitem>
+                <p:menuitem
+                    id="sessionTimetable"                              
+                    action="/admin/sessionTimetable/List.xhtml" ajax="false"  value="Session Timetable"    >                       
+                </p:menuitem>
             </p:submenu>
 
-            <p:separator />
 
-            <p:submenu label="Default Pages" icon="fa fa-newspaper-o">
-                <p:menuitem value="Empty Page" icon="fa fa-plus-square" outcome="empty-page" />
-                <p:menuitem value="Login Page" icon="fa fa-sign-in" outcome="login" />
-                <p:menuitem value="Error Page" icon="fa fa-exclamation-circle" outcome="error" />
-                <p:menuitem value="404 Page" icon="fa fa-times" outcome="404" />
-                <p:menuitem value="Access Denied Page" icon="fa fa-eye-slash" outcome="access-denied" />
+            <p:submenu  label="Trainer" rendered="#{customersController.isUserInRole('TRAINER')}"  id="trainerMenu1" >
+                <p:menuitem
+                    id="mobile"                              
+                    action="/trainer/sessionHistory/List.xhtml" ajax="false"  value="Sessions"    >                       
+                </p:menuitem>
+
             </p:submenu>
 
-            <p:separator />
 
-            <p:submenu label="Menu Hierarchy" icon="fa fa-sitemap">
-                <p:submenu label="Submenu 1" icon="fa fa-folder">
-                    <p:submenu label="Submenu 1.1" icon="fa fa-folder">
-                        <p:submenu label="Submenu 1.2" icon="fa fa-folder">
-                            <p:menuitem value="Link 1" styleClass="fa fa-chain" url="#" />
-                            <p:menuitem value="Link 2" styleClass="fa fa-chain" url="#" />
-                            <p:menuitem value="Link 3" styleClass="fa fa-chain" url="#" />
-                        </p:submenu>
-                    </p:submenu>
-                </p:submenu>
-                <p:submenu label="Submenu 2" icon="fa fa-folder">
-                    <p:submenu label="Submenu 1.2" icon="fa fa-folder">
-                        <p:submenu label="Submenu 2.2" icon="fa fa-folder">
-                            <p:menuitem value="Link 1" styleClass="fa fa-chain" url="#" />
-                            <p:menuitem value="Link 2" styleClass="fa fa-chain" url="#" />
-                            <p:menuitem value="Link 3" styleClass="fa fa-chain" url="#" />
-                        </p:submenu>
-                    </p:submenu>
-                </p:submenu>
+            <p:submenu label="User" rendered="#{customersController.isUserInRole('USER')}" id="logout1" >
+                <p:menuitem
+                    id="myStats"
+                    action="/index.xhtml" ajax="false" value="My Stats"  >
+                </p:menuitem>
+                <p:menuitem
+                    id="myDetails"
+                    action="/myDetails.xhtml" ajax="false" value="My Details"  >
+                </p:menuitem>
+                <p:menuitem
+                    id="mySessions"
+                    action="/mySessions.xhtml" ajax="false" value="My Sessions"  >
+                </p:menuitem>
+                <p:menuitem
+                    id="mobileLink"
+                    action="/mobileMenu.xhtml" ajax="false" value="Mobile Friendly Site"  >
+                </p:menuitem>
+
+
+                <p:menuitem  action="#{customersController.logout}"
+                             id="logout"
+                             value="Logout" >
+                </p:menuitem>
+
             </p:submenu>
 
-            <p:separator />
-
-            <p:submenu label="Links" icon="fa fa-dropbox">
-                <p:menuitem value="Documentation" icon="fa fa-life-ring" outcome="documentation" />
-                <p:menuitem value="Font Icons" icon="fa fa-paint-brush" outcome="font-icons"/>
-                <p:menuitem value="User Profile" icon="fa fa-users" url="#"/>
-                <p:menuitem value="Tasks" icon="fa fa-history" url="#"/>
-                <p:menuitem value="Contact" icon="fa fa-microphone" url="#"/>
-            </p:submenu>
-            
-        </ps:menu>
+      
+       </ps:menu>
     </h:form>
 
 </ui:composition>

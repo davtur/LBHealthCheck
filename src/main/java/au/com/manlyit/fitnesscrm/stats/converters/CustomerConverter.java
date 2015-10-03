@@ -2,17 +2,18 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package au.com.manlyit.fitnesscrm.stats.classes.util;
+package au.com.manlyit.fitnesscrm.stats.converters;
 
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import java.io.Serializable;
-import javax.inject.Named;
+import javax.faces.convert.FacesConverter;
 
 /**
  *
  * @author david
  */
-@Named(value="custConverter")
+//@Named(value="custConverter")
+@FacesConverter(value = "customersConverter",forClass=Customers.class)
 public class CustomerConverter extends GenericConverter<Customers> implements Serializable {
     private static final long serialVersionUID = 1L;
 

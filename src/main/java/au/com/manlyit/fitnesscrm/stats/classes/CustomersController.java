@@ -1652,7 +1652,7 @@ public class CustomersController implements Serializable {
         this.newCustomerCheckedGroups = newCustomerCheckedGroups;
     }
 
-    @FacesConverter(forClass = Customers.class)
+    @FacesConverter(value="customers",forClass = Customers.class)
     public static class CustomersControllerConverter implements Converter {
 
         @Override
