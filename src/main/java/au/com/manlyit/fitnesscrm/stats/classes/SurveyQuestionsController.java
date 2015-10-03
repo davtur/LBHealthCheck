@@ -379,7 +379,7 @@ public class SurveyQuestionsController implements Serializable {
         subItems.remove(deleteSubItem);
     }
     
-    @FacesConverter(forClass = SurveyQuestions.class)
+    @FacesConverter(value="surveyQuestionsControllerConverter", forClass = SurveyQuestions.class)
     public static class SurveyquestionsControllerConverter implements Converter {
         
         public Object getAsObject(FacesContext facesContext, UIComponent component, String value) {

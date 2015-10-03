@@ -192,7 +192,7 @@ public class PaymentParametersController implements Serializable {
         return ejbFacade.find(id);
     }
 
-    @FacesConverter(forClass = PaymentParameters.class)
+    @FacesConverter(value="paymentParametersControllerConverter", forClass = PaymentParameters.class)
     public static class PaymentParametersControllerConverter implements Converter {
 
         @Override

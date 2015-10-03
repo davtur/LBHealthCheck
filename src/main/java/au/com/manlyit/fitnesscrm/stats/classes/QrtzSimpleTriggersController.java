@@ -193,7 +193,7 @@ public class QrtzSimpleTriggersController implements Serializable {
         return JsfUtil.getSelectItems(ejbFacade.findAll(), true);
     }
 
-    @FacesConverter(forClass = QrtzSimpleTriggers.class)
+    @FacesConverter(value="qrtzSimpleTriggersControllerConverter", forClass = QrtzSimpleTriggers.class)
     public static class QrtzSimpleTriggersControllerConverter implements Converter {
 
         private static final String SEPARATOR = "#";

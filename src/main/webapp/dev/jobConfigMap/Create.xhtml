@@ -18,7 +18,7 @@
                 <p:panel>
                     <p:panelGrid columns="2">
                           <p:outputLabel value="#{configMapController.getKey('CreateJobConfigMapLabel_configMapKey')}" for="configMapKey" />
-                          <p:selectOneMenu id="configMapKey" value="#{jobConfigMapController.selected.configMapKey}" filter="true" converter="#{configMapConverter}" >
+                          <p:selectOneMenu id="configMapKey" value="#{jobConfigMapController.selected.configMapKey}" filter="true" converter="configMapControllerConverter" >
                             <f:selectItems value="#{configMapController.itemsAvailableSelectObjects}"/>
                         </p:selectOneMenu>
                         <p:outputLabel value="#{configMapController.getKey('CreateJobConfigMapLabel_parentTask')}" for="parentTask" />

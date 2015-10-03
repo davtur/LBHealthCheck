@@ -455,7 +455,7 @@ public class PlanController implements Serializable {
         this.newPlan = newPlan;
     }
 
-    @FacesConverter(forClass = Plan.class)
+    @FacesConverter(value="planControllerConverter", forClass = Plan.class)
     public static class PlanControllerConverter implements Converter {
 
         @Override

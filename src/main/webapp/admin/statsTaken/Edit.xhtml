@@ -22,7 +22,7 @@
                                 <p:ajax update=":StatsTakenEditForm:editStatsTakenPanel" />
                             </p:inputTextarea>
                             <h:panelGrid >
-                                <p:selectOneMenu id="editCustomerId" value="#{statsTakenController.selected.customerId}" required="true" converter="#{custConverter}" requiredMessage="#{configMapController.getKey('EditStatsTakenRequiredMessage_customerId')}">
+                                <p:selectOneMenu id="editCustomerId" value="#{statsTakenController.selected.customerId}" required="true" converter="customersControllerConverter" requiredMessage="#{configMapController.getKey('EditStatsTakenRequiredMessage_customerId')}">
                                     <f:selectItems var="listItem"  itemLabel="#{listItem.firstname} #{listItem.lastname}" itemValue="#{listItem}" value="#{customersController.customersAvailableSelectOneObject}" />
                                     <p:ajax update=":StatsTakenEditForm:editStatsTakenPanel"  listener="#{statsTakenController.handleUserChange}" />
                                 </p:selectOneMenu>

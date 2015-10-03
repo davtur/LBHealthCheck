@@ -186,7 +186,7 @@ public class ActivationController implements Serializable {
         return JsfUtil.getSelectItems(ejbFacade.findAll(), true);
     }
 
-    @FacesConverter(forClass = Activation.class)
+    @FacesConverter(value="activationControllerConverter", forClass = Activation.class)
     public static class ActivationControllerConverter implements Converter {
 
         public Object getAsObject(FacesContext facesContext, UIComponent component, String value) {

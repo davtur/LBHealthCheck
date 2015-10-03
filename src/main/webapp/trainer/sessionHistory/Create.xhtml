@@ -38,13 +38,13 @@
                                 <h:panelGrid columns="1">
                                     <h:outputLabel value="#{configMapController.getKey('CreateSessionHistoryLabel_sessionType')}" for="sessionType" />
 
-                                    <p:selectOneMenu id="sessionType" value="#{sessionHistoryController.selected.sessionTypesId}" filterFunction="startsWith" filter="true" editable="false" converter="#{sessionTypesConverter}" label="#{configMapController.getKey('CreateSessionHistoryTitle_sessionType')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionHistoryRequiredMessage_sessionType')}">
+                                    <p:selectOneMenu id="sessionType" value="#{sessionHistoryController.selected.sessionTypesId}" filterFunction="startsWith" filter="true" editable="false" converter="sessionTypesControllerConverter" label="#{configMapController.getKey('CreateSessionHistoryTitle_sessionType')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionHistoryRequiredMessage_sessionType')}">
                                         <f:selectItems value="#{sessionTypesController.itemsAvailableSelectOne}" var="sessionType" itemLabel="#{sessionType.name}" itemValue="#{sessionType}"/>
                                     </p:selectOneMenu>
 
                                     <h:outputLabel value="#{configMapController.getKey('CreateSessionHistoryLabel_trainer')}" for="trainer" />
 
-                                    <p:selectManyMenu id="trainer"  value="#{sessionHistoryController.trainers}" converter="#{custConverter}"  label="#{configMapController.getKey('CreateSessionHistoryTitle_trainer')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionHistoryRequiredMessage_trainer')}">
+                                    <p:selectManyMenu id="trainer"  value="#{sessionHistoryController.trainers}" converter="customersControllerConverter"  label="#{configMapController.getKey('CreateSessionHistoryTitle_trainer')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionHistoryRequiredMessage_trainer')}">
                                         <f:selectItems value="#{customersController.getCustomersByGroupObject('TRAINER',true)}" var="cust" itemLabel="#{cust.firstname} #{cust.lastname}" itemValue="#{cust}"/>
                                     </p:selectManyMenu>
 
@@ -55,7 +55,7 @@
                         </h:panelGrid>
                         <p:panel  header="#{configMapController.getKey('CreateSessionHistoryLabel_picker')}" >
 
-                         <!--     <p:selectManyMenu id="scroll" style="width:250px;height:600px" value="#{sessionHistoryController.attendingCustomers}" label="Participants"  converter="#{custConverter}"  widgetVar="smanymeny">  
+                         <!--     <p:selectManyMenu id="scroll" style="width:250px;height:600px" value="#{sessionHistoryController.attendingCustomers}" label="Participants"  converter="customersControllerConverter"  widgetVar="smanymeny">  
                                 <f:selectItems value="#{sessionHistoryController.activeCustomers}" var="cust"  itemLabel="#{cust.firstname} #{cust.lastname}" itemValue="#{cust}" />            
                             </p:selectManyMenu>
 
@@ -85,12 +85,12 @@
 
 
                             <!--   
-                              <p:selectManyMenu id="scroll" value="#{sessionHistoryController.attendingCustomers}" converter="#{custConverter}" style="width:250px;height:600px" var="customer" showCheckbox="true">
+                              <p:selectManyMenu id="scroll" value="#{sessionHistoryController.attendingCustomers}" converter="customersControllerConverter" style="width:250px;height:600px" var="customer" showCheckbox="true">
                             <p:pickList id="picker"  value="#{sessionHistoryController.participants}" 
                                         var="cust"
                                         iconOnly="true" effect="bounce"
                                                                                 <!--itemLabel="#{cust.firstname} #{cust.lastname}"-->
-                                       <!--  itemValue="#{cust}" converter="#{custConverter}" >
+                                       <!--  itemValue="#{cust}" converter="customersControllerConverter" >
                                         <p:column style="width:25%">
                                     <p:graphicImage value="#{cust.profileImage.imageStream}"/>
                                 </p:column>
@@ -102,7 +102,7 @@
                     </p:pickList>  --> 
                             <p:pickList id="PojoPickList" value="#{sessionHistoryController.participants}" var="cust" effect="bounce"
                                         itemValue="#{cust}" itemLabel="#{cust.firstname} #{cust.lastname}" showSourceControls="true" showTargetControls="true" showCheckbox="true"
-                                        showSourceFilter="true" showTargetFilter="true" filterMatchMode="contains" converter="#{custConverter}">
+                                        showSourceFilter="true" showTargetFilter="true" filterMatchMode="contains" converter="customersControllerConverter">
 
                                 <f:facet name="sourceCaption">Did not attend</f:facet>
                                 <f:facet name="targetCaption">Attended Session</f:facet>

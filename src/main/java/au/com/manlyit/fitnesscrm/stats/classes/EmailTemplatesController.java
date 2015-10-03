@@ -300,7 +300,7 @@ public class EmailTemplatesController implements Serializable {
         JsfUtil.addErrorMessage("Row Edit Cancelled");
     }
 
-    @FacesConverter(forClass = EmailTemplates.class)
+    @FacesConverter(value="emailTemplatesControllerConverter", forClass = EmailTemplates.class)
     public static class EmailTemplatesControllerConverter implements Converter {
 
         public Object getAsObject(FacesContext facesContext, UIComponent component, String value) {

@@ -40,7 +40,7 @@
 
                             <p:ajax   update="@form"  listener="#{invoiceController.invoiceParametersChanged}"   />
                         </p:selectOneMenu>
-                        <p:selectOneMenu id="custForChart"   value="#{invoiceController.selectedCustomer}" filter="true"   converter="#{custConverter}"  label="#{configMapController.getKey('SelectCustomerForSessionHistory_Title')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionHistoryRequiredMessage_trainer')}">
+                        <p:selectOneMenu id="custForChart"   value="#{invoiceController.selectedCustomer}" filter="true"   converter="customersControllerConverter"  label="#{configMapController.getKey('SelectCustomerForSessionHistory_Title')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionHistoryRequiredMessage_trainer')}">
                             <f:selectItems value="#{customersController.customersAvailableSelectOneObject}"   var="cust" itemLabel="#{cust.firstname} #{cust.lastname}" itemValue="#{cust}"/>
                             <p:ajax   update="@form" listener="#{invoiceController.invoiceParametersChanged}"  />
                         </p:selectOneMenu>

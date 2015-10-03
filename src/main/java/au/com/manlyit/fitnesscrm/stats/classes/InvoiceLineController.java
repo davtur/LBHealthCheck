@@ -259,7 +259,7 @@ public class InvoiceLineController implements Serializable {
         JsfUtil.addErrorMessage("Row Edit Cancelled");
     }
 
-    @FacesConverter(forClass = InvoiceLine.class)
+    @FacesConverter(value="invoiceLineControllerConverter", forClass = InvoiceLine.class)
     public static class InvoiceLineControllerConverter implements Converter {
 
         public Object getAsObject(FacesContext facesContext, UIComponent component, String value) {

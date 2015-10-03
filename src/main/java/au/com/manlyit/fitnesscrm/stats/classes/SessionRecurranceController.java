@@ -295,7 +295,7 @@ public class SessionRecurranceController implements Serializable {
         JsfUtil.addErrorMessage("Row Edit Cancelled");
     }
 
-    @FacesConverter(forClass = SessionRecurrance.class)
+    @FacesConverter(value="sessionRecurranceControllerConverter", forClass = SessionRecurrance.class)
     public static class SessionRecurranceControllerConverter implements Converter {
 
         public Object getAsObject(FacesContext facesContext, UIComponent component, String value) {

@@ -295,7 +295,7 @@ public class ToDoListController implements Serializable {
         JsfUtil.addErrorMessage("Row Edit Cancelled");
     }
 
-    @FacesConverter(forClass = ToDoList.class)
+    @FacesConverter(value="toDoListControllerConverter", forClass = ToDoList.class)
     public static class ToDoListControllerConverter implements Converter {
 
         public Object getAsObject(FacesContext facesContext, UIComponent component, String value) {

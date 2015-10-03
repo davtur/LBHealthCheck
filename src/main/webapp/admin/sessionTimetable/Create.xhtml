@@ -28,7 +28,7 @@
                         </p:inputTextarea>
                         <p:outputLabel value="#{configMapController.getKey('CreateSessionHistoryLabel_trainer')}" for="trainer" />
 
-                        <p:selectOneMenu id="trainer"  value="#{sessionTimetableController.selected.trainerId}" converter="#{custConverter}"  label="#{configMapController.getKey('CreateSessionHistoryTitle_trainer')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionHistoryRequiredMessage_trainer')}">
+                        <p:selectOneMenu id="trainer"  value="#{sessionTimetableController.selected.trainerId}" converter="customersControllerConverter"  label="#{configMapController.getKey('CreateSessionHistoryTitle_trainer')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionHistoryRequiredMessage_trainer')}">
                             <f:selectItems value="#{customersController.getCustomersByGroupObject('TRAINER',true)}" var="cust" itemLabel="#{cust.firstname} #{cust.lastname}" itemValue="#{cust}"/>
                         <p:ajax   event="select"   />
                         </p:selectOneMenu>

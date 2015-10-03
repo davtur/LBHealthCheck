@@ -1196,7 +1196,7 @@ public class SessionHistoryController implements Serializable {
         this.numberThatAttendedSession = numberThatAttendedSession;
     }
 
-    @FacesConverter(forClass = SessionHistory.class)
+    @FacesConverter(value="sessionHistoryControllerConverter", forClass = SessionHistory.class)
     public static class SessionHistoryControllerConverter implements Converter {
 
         @Override

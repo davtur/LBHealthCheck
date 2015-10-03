@@ -258,7 +258,7 @@ public class CurrencyController implements Serializable {
         JsfUtil.addErrorMessage("Row Edit Cancelled");
     }
 
-    @FacesConverter(forClass = Currency.class)
+    @FacesConverter(value="currencyControllerConverter", forClass = Currency.class)
     public static class CurrencyControllerConverter implements Converter {
 
         public Object getAsObject(FacesContext facesContext, UIComponent component, String value) {

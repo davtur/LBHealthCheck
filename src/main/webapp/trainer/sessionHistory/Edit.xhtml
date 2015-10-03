@@ -35,12 +35,12 @@
                         <p:panel>
                             <h:panelGrid columns="1">
                                 <h:outputLabel value="#{configMapController.getKey('EditSessionHistoryLabel_sessionType')}" for="sessionType" />
-                                <h:selectOneMenu id="sessionType" value="#{sessionHistoryController.selected.sessionTypesId}"  converter="#{sessionTypesConverter}" title="#{configMapController.getKey('EditSessionHistoryTitle_sessionType')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionHistoryRequiredMessage_sessionType')}">
+                                <h:selectOneMenu id="sessionType" value="#{sessionHistoryController.selected.sessionTypesId}"  converter="sessionTypesControllerConverter" title="#{configMapController.getKey('EditSessionHistoryTitle_sessionType')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionHistoryRequiredMessage_sessionType')}">
                                     <f:selectItems value="#{sessionTypesController.itemsAvailableSelectOne}"/>
                                 </h:selectOneMenu>
 
                                 <h:outputLabel value="#{configMapController.getKey('CreateSessionHistoryLabel_trainer')}" for="trainer" />
-                                <p:selectManyMenu id="trainer"   value="#{sessionHistoryController.trainers}" converter="#{custConverter}"   >
+                                <p:selectManyMenu id="trainer"   value="#{sessionHistoryController.trainers}" converter="customersControllerConverter"   >
 
                                     <f:selectItems value="#{customersController.getCustomersByGroupObject('TRAINER',true)}" var="cust" itemLabel="#{cust.firstname} #{cust.lastname}" itemValue="#{cust}"/>
                                 </p:selectManyMenu>
@@ -57,7 +57,7 @@
                         <p:pickList id="picker" value="#{sessionHistoryController.participants}"
                                     var="cust"
                                     itemLabel="#{cust.firstname} #{cust.lastname}"
-                                    itemValue="#{cust}" converter="#{custConverter}">
+                                    itemValue="#{cust}" converter="customersControllerConverter">
                             <f:facet name="sourceCaption">Did not attend</f:facet>
                             <f:facet name="targetCaption">Attended Session</f:facet>
                         </p:pickList>

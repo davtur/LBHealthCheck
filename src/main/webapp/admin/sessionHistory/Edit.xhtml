@@ -36,7 +36,7 @@
                             <p:pickList id="sessionPicker"  value="#{sessionHistoryController.participants}"
                                         var="cust" showSourceFilter="true" showTargetFilter="true" showCheckbox="true"
                                        itemLabel="#{cust.firstname} #{cust.lastname}"
-                                        itemValue="#{cust}" converter="#{custConverter}">
+                                        itemValue="#{cust}" converter="customersControllerConverter">
                                 <f:facet name="sourceCaption">Did not attend</f:facet>
                                 <f:facet name="targetCaption">Attended Session</f:facet>
                             </p:pickList>
@@ -45,12 +45,12 @@
                              <p:panel>
                                 <p:panel>
                                     <p:outputLabel value="#{configMapController.getKey('CreateSessionHistoryLabel_sessionType')}" for="sessionType" />
-                                  <p:selectOneMenu id="sessionType" style="width:100%;height:100%" value="#{sessionHistoryController.selected.sessionTypesId}" filterFunction="startsWith" filter="true" editable="false" converter="#{sessionTypesConverter}" label="#{configMapController.getKey('CreateSessionHistoryTitle_sessionType')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionHistoryRequiredMessage_sessionType')}">
+                                  <p:selectOneMenu id="sessionType" style="width:100%;height:100%" value="#{sessionHistoryController.selected.sessionTypesId}" filterFunction="startsWith" filter="true" editable="false" converter="sessionTypesControllerConverter" label="#{configMapController.getKey('CreateSessionHistoryTitle_sessionType')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionHistoryRequiredMessage_sessionType')}">
                                         <f:selectItems value="#{sessionTypesController.itemsAvailableSelectOne}" var="sessionType" itemLabel="#{sessionType.name}" itemValue="#{sessionType}"/>
                                     </p:selectOneMenu>
                                </p:panel>
                                 <p:outputLabel value="#{configMapController.getKey('CreateSessionHistoryLabel_trainer')}" for="trainer" />
-                               <p:selectManyMenu id="trainer" style="width:100%;height:100%" showCheckbox="true" value="#{sessionHistoryController.trainers}" converter="#{custConverter}"  label="#{configMapController.getKey('CreateSessionHistoryTitle_trainer')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionHistoryRequiredMessage_trainer')}">
+                               <p:selectManyMenu id="trainer" style="width:100%;height:100%" showCheckbox="true" value="#{sessionHistoryController.trainers}" converter="customersControllerConverter"  label="#{configMapController.getKey('CreateSessionHistoryTitle_trainer')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionHistoryRequiredMessage_trainer')}">
                                     <f:selectItems value="#{customersController.getCustomersByGroupObject('TRAINER',true)}" var="cust" itemLabel="#{cust.firstname} #{cust.lastname}" itemValue="#{cust}"/>
                                 </p:selectManyMenu>
                             </p:panel>

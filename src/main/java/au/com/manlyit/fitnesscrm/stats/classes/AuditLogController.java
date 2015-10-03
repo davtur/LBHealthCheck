@@ -306,7 +306,7 @@ public class AuditLogController implements Serializable {
         JsfUtil.addErrorMessage("Row Edit Cancelled");
     }
 
-    @FacesConverter(forClass = AuditLog.class)
+    @FacesConverter(value="auditLogControllerConverter", forClass = AuditLog.class)
     public static class AuditLogControllerConverter implements Converter {
 
         public Object getAsObject(FacesContext facesContext, UIComponent component, String value) {

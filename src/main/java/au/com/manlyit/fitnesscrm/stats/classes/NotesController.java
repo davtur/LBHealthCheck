@@ -459,7 +459,7 @@ public class NotesController implements Serializable {
         this.reminderDate = reminderDate;
     }
 
-    @FacesConverter(forClass = Notes.class)
+    @FacesConverter(value="notesControllerConverter", forClass = Notes.class)
     public static class NotesControllerConverter implements Converter {
 
         public Object getAsObject(FacesContext facesContext, UIComponent component, String value) {

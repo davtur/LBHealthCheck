@@ -487,7 +487,7 @@ public class StatsTakenController implements Serializable {
         JsfUtil.addErrorMessage("Row Edit Cancelled");
     }
 
-    @FacesConverter(forClass = StatsTaken.class)
+    @FacesConverter(value="statsTakenControllerConverter", forClass = StatsTaken.class)
     public static class StatsTakenControllerConverter implements Converter {
 
         public Object getAsObject(FacesContext facesContext, UIComponent component, String value) {

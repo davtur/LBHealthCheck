@@ -186,7 +186,7 @@ public class ParticipantsController implements Serializable {
         return JsfUtil.getSelectItems(ejbFacade.findAll(), true);
     }
 
-    @FacesConverter(forClass = Participants.class)
+    @FacesConverter(value="participantsControllerConverter", forClass = Participants.class)
     public static class ParticipantsControllerConverter implements Converter {
 
         public Object getAsObject(FacesContext facesContext, UIComponent component, String value) {

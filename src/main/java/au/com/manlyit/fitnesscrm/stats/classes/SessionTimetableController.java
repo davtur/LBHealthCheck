@@ -295,7 +295,7 @@ public class SessionTimetableController implements Serializable {
         JsfUtil.addErrorMessage("Row Edit Cancelled");
     }
 
-    @FacesConverter(forClass = SessionTimetable.class)
+    @FacesConverter(value="sessionTimetableControllerConverter", forClass = SessionTimetable.class)
     public static class SessionTimetableControllerConverter implements Converter {
 
         @Override

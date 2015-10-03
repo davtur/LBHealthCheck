@@ -23,7 +23,7 @@
                                         var="cust"
 
                                         itemLabel="#{cust.firstname} #{cust.lastname}"
-                                        itemValue="#{cust}" converter="#{custConverter}">
+                                        itemValue="#{cust}" converter="customersControllerConverter">
                                 <f:facet name="sourceCaption">Customer</f:facet>
                                 <f:facet name="targetCaption">Email List</f:facet>
                             </p:pickList>

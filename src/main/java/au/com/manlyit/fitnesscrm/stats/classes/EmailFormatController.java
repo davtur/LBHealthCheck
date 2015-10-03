@@ -293,7 +293,7 @@ public List<EmailFormat> getItemsAvailableAsObjects(){
         JsfUtil.addErrorMessage("Row Edit Cancelled");
     }
 
-    @FacesConverter(forClass = EmailFormat.class)
+    @FacesConverter(value="emailFormatControllerConverter", forClass = EmailFormat.class)
     public static class EmailFormatControllerConverter implements Converter {
 
         public Object getAsObject(FacesContext facesContext, UIComponent component, String value) {

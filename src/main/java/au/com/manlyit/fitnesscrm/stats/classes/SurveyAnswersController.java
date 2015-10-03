@@ -474,7 +474,7 @@ public class SurveyAnswersController implements Serializable {
         this.selectedSurvey = selectedSurvey;
     }
 
-    @FacesConverter(forClass = SurveyAnswers.class)
+    @FacesConverter(value="surveyAnswersControllerConverter", forClass = SurveyAnswers.class)
     public static class SurveyAnswersControllerConverter implements Converter {
 
         public Object getAsObject(FacesContext facesContext, UIComponent component, String value) {

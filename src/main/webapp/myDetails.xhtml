@@ -58,7 +58,7 @@
 
 
                                         <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_preferredContact')}" for="preferredContact1" />
-                                        <p:selectOneMenu id="preferredContact1" valueChangeListener="#{customersController.selectOneMenuValueChangeListener}" converter="#{preferedContactConverter}" value="#{customersController.selected.preferredContact}" label="#{configMapController.getKey('CreateCustomersTitle_preferredContact')}" >
+                                        <p:selectOneMenu id="preferredContact1" valueChangeListener="#{customersController.selectOneMenuValueChangeListener}" converter="preferedContactControllerConverter" value="#{customersController.selected.preferredContact}" label="#{configMapController.getKey('CreateCustomersTitle_preferredContact')}" >
                                             <f:selectItems value="#{preferedContactController.itemsAvailableAsObjects}"  var="prefContact" itemLabel="#{prefContact.preferedContactMethod}" itemValue="#{prefContact}"/>
                                             <p:ajax  event="change" />
                                         </p:selectOneMenu>
@@ -70,7 +70,7 @@
                                             <p:ajax  event="change" />
                                         </p:selectOneMenu>
                                         <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_emailFormat')}" for="emailFormat1" />
-                                        <p:selectOneMenu id="emailFormat1" valueChangeListener="#{customersController.selectOneMenuValueChangeListener}" converter="#{emailFormatConverter}" value="#{customersController.selected.emailFormat}" label="#{configMapController.getKey('CreateCustomersTitle_emailFormat')}" >
+                                        <p:selectOneMenu id="emailFormat1" valueChangeListener="#{customersController.selectOneMenuValueChangeListener}" converter="emailFormatControllerConverter" value="#{customersController.selected.emailFormat}" label="#{configMapController.getKey('CreateCustomersTitle_emailFormat')}" >
                                             <f:selectItems value="#{emailFormatController.itemsAvailableAsObjects}"  var="emailFormat" itemLabel="#{emailFormat.emailFormat}" itemValue="#{emailFormat}"/>
                                             <p:ajax  event="change" />
                                         </p:selectOneMenu>

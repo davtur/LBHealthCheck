@@ -295,7 +295,7 @@ public class CustomerAuthController implements Serializable {
         JsfUtil.addErrorMessage("Row Edit Cancelled");
     }
 
-    @FacesConverter(forClass = CustomerAuth.class)
+    @FacesConverter(value="customerAuthControllerConverter", forClass = CustomerAuth.class)
     public static class CustomerAuthControllerConverter implements Converter {
 
         public Object getAsObject(FacesContext facesContext, UIComponent component, String value) {

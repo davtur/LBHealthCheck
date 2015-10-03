@@ -56,7 +56,7 @@
 
                     <pm:field>
                         <p:outputLabel for="sessionType" value="#{configMapController.getKey('CreateSessionHistoryLabel_sessionType')}" />
-                        <p:selectOneMenu id="sessionType" value="#{sessionHistoryController.selected.sessionTypesId}" label="#{configMapController.getKey('CreateSessionHistoryLabel_sessionType')}"  converter="#{sessionTypesConverter}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionHistoryRequiredMessage_sessionType')}">
+                        <p:selectOneMenu id="sessionType" value="#{sessionHistoryController.selected.sessionTypesId}" label="#{configMapController.getKey('CreateSessionHistoryLabel_sessionType')}"  converter="sessionTypesControllerConverter" required="true" requiredMessage="#{configMapController.getKey('CreateSessionHistoryRequiredMessage_sessionType')}">
                             <f:selectItems value="#{sessionTypesController.itemsAvailableSelectOne}" />
                         </p:selectOneMenu>
                     </pm:field>
@@ -65,7 +65,7 @@
 
                     <pm:field>
                         <p:outputLabel for="sessionType" value="#{configMapController.getKey('CreateSessionHistoryLabel_trainer')}" />
-                        <p:selectCheckboxMenu id="trainer" filter="true" filterMatchMode="startsWith"  value="#{sessionHistoryController.trainers}" converter="#{custConverter}" label="#{configMapController.getKey('CreateSessionHistoryLabel_trainer')}"  >
+                        <p:selectCheckboxMenu id="trainer" filter="true" filterMatchMode="startsWith"  value="#{sessionHistoryController.trainers}" converter="customersControllerConverter" label="#{configMapController.getKey('CreateSessionHistoryLabel_trainer')}"  >
                             <f:selectItems value="#{sessionHistoryController.activeTrainers}" var="cust" itemLabel="#{cust.firstname} #{cust.lastname}" itemValue="#{cust}"/>
                         </p:selectCheckboxMenu>
                     </pm:field>
@@ -84,7 +84,7 @@
                         <p:outputLabel for="scroll" value="#{configMapController.getKey('CreateSessionHistoryLabel_picker')}" />
                         <p:selectCheckboxMenu  id="scroll" filter="true" filterMatchMode="startsWith" 
                                                value="#{sessionHistoryController.attendingCustomers}"  
-                                               converter="#{custConverter}" 
+                                               converter="customersControllerConverter" 
                                                label="#{configMapController.getKey('CreateSessionHistoryLabel_picker')}"
                                                > 
 

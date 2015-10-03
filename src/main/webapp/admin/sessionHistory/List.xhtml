@@ -15,7 +15,7 @@
                 <p:panelGrid columns="4" style="width:100%"  >
                    <!-- <p:outputLabel value="#{configMapController.getKey('SelectCustomerForSessionHistory_Label')}" for="sessionstart" />-->
                     <h:panelGrid columns="3" >
-                        <p:selectOneMenu id="custForChart" disabled="#{mySessionsChart1.showAllUsers}"  value="#{mySessionsChart1.selectedCustomer}" filter="true" converter="#{custConverter}"  label="#{configMapController.getKey('SelectCustomerForSessionHistory_Title')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionHistoryRequiredMessage_trainer')}">
+                        <p:selectOneMenu id="custForChart" disabled="#{mySessionsChart1.showAllUsers}"  value="#{mySessionsChart1.selectedCustomer}" filter="true" converter="customersControllerConverter"  label="#{configMapController.getKey('SelectCustomerForSessionHistory_Title')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionHistoryRequiredMessage_trainer')}">
                             <f:selectItems value="#{customersController.customersAvailableSelectOneObject}"   var="cust" itemLabel="#{cust.firstname} #{cust.lastname}" itemValue="#{cust}"/>
                             <p:ajax   update=":listSessionHistoryForm1" />
                         </p:selectOneMenu>

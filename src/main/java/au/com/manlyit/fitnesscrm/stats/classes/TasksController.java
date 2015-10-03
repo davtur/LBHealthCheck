@@ -435,7 +435,7 @@ public class TasksController implements Serializable {
         this.multiSelected = multiSelected;
     }
     
-    @FacesConverter(forClass = Tasks.class)
+    @FacesConverter(value="tasksControllerConverter", forClass = Tasks.class)
     public static class TasksControllerConverter implements Converter {
         
         public Object getAsObject(FacesContext facesContext, UIComponent component, String value) {

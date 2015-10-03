@@ -1439,7 +1439,7 @@ public class CustomerImagesController implements Serializable {
         this.imageListSize = imageListSize;
     }
 
-    @FacesConverter(forClass = CustomerImages.class)
+    @FacesConverter(value="customerImagesControllerConverter", forClass = CustomerImages.class)
     public static class CustomerImagesControllerConverter implements Converter {
 
         public Object getAsObject(FacesContext facesContext, UIComponent component, String value) {

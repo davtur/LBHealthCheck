@@ -215,7 +215,7 @@ public class WebsiteMonitorController implements Serializable {
         return JsfUtil.getSelectItems(ejbFacade.findAll(), true);
     }
 
-    @FacesConverter(forClass = WebsiteMonitor.class)
+    @FacesConverter(value="websiteMonitorControllerConverter", forClass = WebsiteMonitor.class)
     public static class WebsiteMonitorControllerConverter implements Converter {
 
         public Object getAsObject(FacesContext facesContext, UIComponent component, String value) {

@@ -275,7 +275,7 @@ public class QrtzCronTriggersController implements Serializable {
         this.selectedForDeletion = selectedForDeletion;
     }
 
-    @FacesConverter(forClass = QrtzCronTriggers.class)
+    @FacesConverter(value="qrtzCronTriggersControllerConverter", forClass = QrtzCronTriggers.class)
     public static class QrtzCronTriggersControllerConverter implements Converter {
 
         private static final String SEPARATOR = "#";

@@ -215,7 +215,7 @@ public class MonitoringchartsController implements Serializable {
         return JsfUtil.getSelectItems(ejbFacade.findAll(), true);
     }
 
-    @FacesConverter(forClass = Monitoringcharts.class)
+    @FacesConverter(value="monitoringchartsControllerConverter", forClass = Monitoringcharts.class)
     public static class MonitoringchartsControllerConverter implements Converter {
 
         public Object getAsObject(FacesContext facesContext, UIComponent component, String value) {

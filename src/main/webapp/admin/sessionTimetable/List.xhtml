@@ -104,7 +104,7 @@
                                     <h:outputText value="#{item.trainerId.firstname} #{item.trainerId.lastname}"/>
                                 </f:facet>
                                 <f:facet name="input">
-                                    <p:selectOneMenu id="trainer"  value="#{item.trainerId}" converter="#{custConverter}"  label="#{configMapController.getKey('CreateSessionHistoryTitle_trainer')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionHistoryRequiredMessage_trainer')}">
+                                    <p:selectOneMenu id="trainer"  value="#{item.trainerId}" converter="customersControllerConverter"  label="#{configMapController.getKey('CreateSessionHistoryTitle_trainer')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionHistoryRequiredMessage_trainer')}">
                                         <f:selectItems value="#{customersController.getCustomersByGroupObject('TRAINER',true)}" var="cust" itemLabel="#{cust.firstname} #{cust.lastname}" itemValue="#{cust}"/>
 
                                     </p:selectOneMenu>

@@ -561,7 +561,7 @@ public class ScheduleController implements Serializable {
         this.event = event;
     }
 
-    @FacesConverter(forClass = Schedule.class)
+    @FacesConverter(value="scheduleControllerConverter", forClass = Schedule.class)
     public static class ScheduleControllerConverter implements Converter {
 
         @Override

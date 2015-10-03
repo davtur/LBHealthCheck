@@ -462,7 +462,7 @@ public class ConfigMapController implements Serializable {
         this.password = password;
     }
 
-    @FacesConverter(forClass = ConfigMap.class)
+    @FacesConverter(value="configMapControllerConverter",forClass = ConfigMap.class)
     public static class ConfigMapControllerConverter implements Converter {
 
         public Object getAsObject(FacesContext facesContext, UIComponent component, String value) {

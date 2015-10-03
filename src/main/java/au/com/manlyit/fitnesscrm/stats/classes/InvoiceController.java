@@ -1007,7 +1007,7 @@ public class InvoiceController implements Serializable {
         this.htmlInvoiceEmailEditSaveButtonText = htmlInvoiceEmailEditSaveButtonText;
     }
 
-    @FacesConverter(forClass = Invoice.class)
+    @FacesConverter(value="invoiceControllerConverter", forClass = Invoice.class)
     public static class InvoiceControllerConverter implements Converter {
 
         public Object getAsObject(FacesContext facesContext, UIComponent component, String value) {

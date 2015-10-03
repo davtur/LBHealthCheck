@@ -300,7 +300,7 @@ public class SurveyquestiontypesController implements Serializable {
 
     
 
-    @FacesConverter(forClass = SurveyQuestionTypes.class)
+    @FacesConverter(value="surveyQuestionTypesControllerConverter", forClass = SurveyQuestionTypes.class)
     public static class SurveyquestiontypesControllerConverter implements Converter {
 
         public Object getAsObject(FacesContext facesContext, UIComponent component, String value) {
