@@ -13,7 +13,7 @@
 
 
             <h:form id="uploadPhotoForm">                   
-                <p:fileUpload fileLimitMessage="The size of the picture is too big! ( > 10MB )"  fileUploadListener="#{customerImagesController.handleFileUpload}"  update="@(.parentOfUploadPhoto) :growl" allowTypes="/(\.|\/)(gif|jpe?g|png)$/" sizeLimit="10000000" />
+                <p:fileUpload fileLimitMessage="The size of the picture is too big! ( > 10MB )" fileLimit="1" auto="true" fileUploadListener="#{customerImagesController.handleFileUpload}"  update="@(.parentOfUploadPhoto) :growl" allowTypes="/(\.|\/)(gif|jpe?g|png)$/" sizeLimit="10000000" />
 
 
                 <p:panel id="panel3" class="parentOfUploadPhoto" >

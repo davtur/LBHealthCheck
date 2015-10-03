@@ -57,7 +57,8 @@ public class CustomersController implements Serializable {
     private CustomerState selectedState;
     private Notes selectedNoteForDeletion;
     private static final String paymentGateway = "EZIDEBIT";
-    private CustomerState[] selectedCustomerStates;
+    //private CustomerState[] selectedCustomerStates;
+    private List<CustomerState> selectedCustomerStates;
     private List<CustomerState> customerStateList;
     private List<Groups> customerGroupsList;
     private List<Groups> newCustomerGroupsList;
@@ -323,7 +324,7 @@ public class CustomersController implements Serializable {
                 }
 
                 @Override
-                public PfSelectableDataModel createPageDataModel() {
+                public PfSelectableDataModel<Customers> createPageDataModel() {
 
                     return new PfSelectableDataModel<>(ejbFacade.findFilteredCustomers(true, selectedCustomerStates, showNonUsers, true));
 
@@ -1420,10 +1421,10 @@ public class CustomersController implements Serializable {
             //selectedCustomerStates = new CustomerState[customerStateList.size()];
             //selectedCustomerStates = customerStateList.toArray(selectedCustomerStates);
 
-            selectedCustomerStates = new CustomerState[1];
+            selectedCustomerStates = new ArrayList<>();
             for (CustomerState cs : customerStateList) {
                 if (cs.getCustomerState().contains("ACTIVE")) {
-                    selectedCustomerStates[0] = cs;
+                    selectedCustomerStates.add(cs);
                 }
                 // if (cs.getCustomerState().contains("ON HOLD")) {
                 //     selectedCustomerStates[1] = cs;
@@ -1438,15 +1439,24 @@ public class CustomersController implements Serializable {
     /**
      * @return the selectedCustomerStates
      */
-    public CustomerState[] getSelectedCustomerStates() {
+    public List<CustomerState> getSelectedCustomerStates() {
         return selectedCustomerStates;
     }
 
     /**
      * @param selectedCustomerStates the selectedCustomerStates to set
      */
-    public void setSelectedCustomerStates(CustomerState[] selectedCustomerStates) {
-        this.selectedCustomerStates = selectedCustomerStates;
+    public void setSelectedCustomerStates(List<String> selectedCustomerStates) {
+        List<CustomerState> newCustomerStates = new ArrayList<>();
+        for (String s : selectedCustomerStates) {
+            for (CustomerState cs : customerStateList) {
+                if (cs.getCustomerState().contains(s)) {
+                    newCustomerStates.add(cs);
+                }
+            }
+        }
+
+        this.selectedCustomerStates = newCustomerStates;
     }
 
     /**

@@ -5,6 +5,7 @@
  */
 package au.com.manlyit.fitnesscrm.stats.db;
 
+import au.com.manlyit.fitnesscrm.stats.classes.util.BaseEntity;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import java.io.Serializable;
 import java.util.Date;
@@ -40,7 +41,7 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "AuditLog.findByChangedTo", query = "SELECT a FROM AuditLog a WHERE a.changedTo = :changedTo"),
     @NamedQuery(name = "AuditLog.findByTypeOfChange", query = "SELECT a FROM AuditLog a WHERE a.typeOfChange = :typeOfChange"),
     @NamedQuery(name = "AuditLog.findByTimestampOfChange", query = "SELECT a FROM AuditLog a WHERE a.timestampOfChange = :timestampOfChange")})
-public class AuditLog implements Serializable {
+public class AuditLog implements BaseEntity,Serializable {
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

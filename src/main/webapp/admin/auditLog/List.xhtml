@@ -16,7 +16,7 @@
 
 
 
-            <h:form id="AuditLogListForm">
+            <h:form id="auditLogListForm">
                 <h:outputText escape="false" value="#{configMapController.getKey('ListAuditLogEmpty')}" rendered="#{auditLogController.items.rowCount == 0}"/>
                 <h:panelGroup rendered="#{auditLogController.items.rowCount > 0}">
                     <p:dataTable  

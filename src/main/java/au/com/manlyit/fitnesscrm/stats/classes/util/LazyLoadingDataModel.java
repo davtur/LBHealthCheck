@@ -16,6 +16,8 @@ package au.com.manlyit.fitnesscrm.stats.classes.util;
 import au.com.manlyit.fitnesscrm.stats.beans.AbstractFacade;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.primefaces.model.LazyDataModel;
 import org.primefaces.model.SortOrder;
@@ -25,6 +27,8 @@ import org.primefaces.model.SortOrder;
  * @param <T>
  */
 public class LazyLoadingDataModel<T extends BaseEntity>  extends LazyDataModel<T> {
+    private static final long serialVersionUID = 1L;
+    private static final Logger logger = Logger.getLogger(LazyLoadingDataModel.class.getName());
     
    private volatile AbstractFacade<T> facade;
 
@@ -57,18 +61,20 @@ public class LazyLoadingDataModel<T extends BaseEntity>  extends LazyDataModel<T
     
     @Override
     public T getRowData(String rowKey) {
-        /*for(T car : data) {
-            if(car.getId().equals(rowKey))
-                return car;
+        
+        Integer id = null;
+        try {
+            id = Integer.parseInt(rowKey);
+        } catch (NumberFormatException numberFormatException) {
+            logger.log(Level.WARNING, "Could not convert rowKey to Integer. The PK should be an integer. rowKey:",rowKey);
         }
-
-        return null;*/
-        return facade.find(rowKey);
+        
+        return facade.find(id);
     }
 
     @Override
-    public Object getRowKey(T car) {
-        return car.getId();
+    public Object getRowKey(T entity) {
+        return entity.getId();
     }
 
     

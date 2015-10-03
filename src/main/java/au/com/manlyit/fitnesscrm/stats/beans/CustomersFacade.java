@@ -260,12 +260,15 @@ public class CustomersFacade extends AbstractFacade<Customers> {
         return retList;
     }
     public List<Customers> findAllActiveCustomers(boolean sortAsc) {
-       return findFilteredCustomers(sortAsc,new CustomerState[]{new CustomerState(0,"ACTIVE")},false,false);
+        ArrayList<CustomerState> acs = new ArrayList<>();
+        acs.add(new CustomerState(0,"ACTIVE"));
+       return findFilteredCustomers(sortAsc,acs,false,false);
     }
 
-    public List<Customers> findFilteredCustomers(boolean sortAsc, CustomerState[] selectedCustomerStates, boolean showStaff, boolean bypassCache) {
+    //public List<Customers> findFilteredCustomers(boolean sortAsc, CustomerState[] selectedCustomerStates, boolean showStaff, boolean bypassCache) {
+    public List<Customers> findFilteredCustomers(boolean sortAsc, List<CustomerState> selectedCustomerStates, boolean showStaff, boolean bypassCache) {
         List<Customers> retList = null;
-        if (selectedCustomerStates == null || selectedCustomerStates.length == 0) {
+        if (selectedCustomerStates == null || selectedCustomerStates.isEmpty()) {
             return new ArrayList<>();
         }
          try {

@@ -22,7 +22,7 @@ ADD COLUMN `image_description` TEXT NULL AFTER `image_file_name`;
 
 
 
-CDROP TABLE IF EXISTS`session_recurrance` ;
+DROP TABLE IF EXISTS`session_recurrance` ;
 CREATE TABLE `session_recurrance` (
   `id` int(4) NOT NULL AUTO_INCREMENT,
   `name` varchar(127) NOT NULL DEFAULT '',
