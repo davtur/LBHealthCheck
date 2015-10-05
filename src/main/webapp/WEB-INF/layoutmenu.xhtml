@@ -5,14 +5,14 @@
     xmlns:ps="http://primefaces.org/spark"
     xmlns:ui="http://java.sun.com/jsf/facelets"
     xmlns:p="http://primefaces.org/ui">
-    
+
     <h:form>
         <ps:menu id="mainmenubar1">
             <f:facet name="options">
                 <p:commandButton type="button" icon="fa fa-search Fs18 white" styleClass="Fright"/>
                 <p:inputText placeholder="Search" styleClass="Fright"/>    
             </f:facet>
-            <p:submenu  label="Developer" rendered="#{customersController.isUserInRole('DEVELOPER')}"  id="devMenu1" >
+            <p:submenu icon="fa fa-bug" label="Developer" rendered="#{customersController.isUserInRole('DEVELOPER')}"  id="devMenu1" >
                 <p:menuitem
                     id="configMap"                              
                     action="/dev/configMap/List.xhtml" ajax="false" value="Configuration"    >                        
@@ -112,8 +112,8 @@
 
 
             </p:submenu>
-
-            <p:submenu  label="Admin" rendered="#{customersController.isUserInRole('ADMIN')}"  id="adminMenu1" >
+            <p:separator />
+            <p:submenu icon="fa fa-cog" label="Admin" rendered="#{customersController.isUserInRole('ADMIN')}"  id="adminMenu1" >
                 <p:menuitem
                     id="customers"                              
                     action="/admin/customers/List.xhtml" value="Customers"  ajax="false"   >                        
@@ -190,8 +190,8 @@
                 </p:menuitem>
             </p:submenu>
 
-
-            <p:submenu  label="Trainer" rendered="#{customersController.isUserInRole('TRAINER')}"  id="trainerMenu1" >
+            <p:separator />
+            <p:submenu icon="fa fa-bullhorn"  label="Trainer" rendered="#{customersController.isUserInRole('TRAINER')}"  id="trainerMenu1" >
                 <p:menuitem
                     id="mobile"                              
                     action="/trainer/sessionHistory/List.xhtml" ajax="false"  value="Sessions"    >                       
@@ -199,8 +199,8 @@
 
             </p:submenu>
 
-
-            <p:submenu label="User" rendered="#{customersController.isUserInRole('USER')}" id="logout1" >
+            <p:separator />
+            <p:submenu icon="fa fa-user"  label="User" rendered="#{customersController.isUserInRole('USER')}" id="logout1" >
                 <p:menuitem
                     id="myStats"
                     action="/index.xhtml" ajax="false" value="My Stats"  >
@@ -226,8 +226,8 @@
 
             </p:submenu>
 
-      
-       </ps:menu>
+
+        </ps:menu>
     </h:form>
 
 </ui:composition>

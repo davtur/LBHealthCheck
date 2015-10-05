@@ -33,14 +33,14 @@
                             <p:ajax event="change" />
 
                         </p:selectBooleanCheckbox>  
-                        <p:commandButton id="saveButton" class="parentOfUploadPhoto" disabled="#{customerImagesController.saveButtonDisabled}"  actionListener="#{customerImagesController.createFromUploadDialogue}" update="@(.parentOfUploadPhoto) :growl"   value="#{configMapController.getKey('CreateCustomerImagesSaveLink')}" />
-                        <p:commandButton id="rotateButton"   class="parentOfUploadPhoto"  disabled="#{customerImagesController.saveButtonDisabled}"   actionListener="#{customerImagesController.rotateStreamedContent90degrees}" update="@(.parentOfUploadPhoto) :growl"  value="#{configMapController.getKey('CreateCustomerImagesRotateImage90Link')}" />
-                        <p:commandButton id="cropButton"  class="parentOfUploadPhoto" disabled="#{customerImagesController.saveButtonDisabled}" actionListener="#{customerImagesController.crop}"  update="@(.parentOfUploadPhoto)  :growl"  value="#{configMapController.getKey('CreateCustomerImagesCropLink')}"  />
+                        <p:commandButton id="saveButton" icon="fa fa-check white Fs14" class="parentOfUploadPhoto" disabled="#{customerImagesController.saveButtonDisabled}"  actionListener="#{customerImagesController.createFromUploadDialogue}" update="@(.parentOfUploadPhoto) :growl"   value="#{configMapController.getKey('CreateCustomerImagesSaveLink')}" />
+                        <p:commandButton id="rotateButton" icon="fa fa-rotate-right white Fs14"  class="parentOfUploadPhoto"  disabled="#{customerImagesController.saveButtonDisabled}"   actionListener="#{customerImagesController.rotateStreamedContent90degrees}" update="@(.parentOfUploadPhoto) :growl"  value="#{configMapController.getKey('CreateCustomerImagesRotateImage90Link')}" />
+                        <p:commandButton id="cropButton" icon=" fa fa-crop white Fs14" class="parentOfUploadPhoto" disabled="#{customerImagesController.saveButtonDisabled}" actionListener="#{customerImagesController.crop}"  update="@(.parentOfUploadPhoto)  :growl"  value="#{configMapController.getKey('CreateCustomerImagesCropLink')}"  />
 
 
                     </h:panelGrid>
                 </p:panel>
-                <p:commandButton  id="closeDialogueButton"  ajax="true" oncomplete="PF('uploadPhotoDialogueWidget').hide();"  update=":growl "   value="#{configMapController.getKey('EditCustomersuploadPhoto')}" immediate="true"/>
+                <p:commandButton  id="closeDialogueButton" icon=" fa fa-remove-sign white Fs14"   ajax="true" oncomplete="PF('uploadPhotoDialogueWidget').hide();"  update=":growl "   value="#{configMapController.getKey('EditCustomersuploadPhoto')}" immediate="true"/>
             </h:form>
         </p:dialog>
     </ui:composition> 

@@ -1,70 +1,70 @@
-<?xml version="1.0" encoding="ISO-8859-1" ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:ui="http://java.sun.com/jsf/facelets"
-      xmlns:h="http://java.sun.com/jsf/html"
-      xmlns:f="http://java.sun.com/jsf/core"
-      xmlns:p="http://primefaces.org/ui" >
-
-    <ui:composition template="/userTemplate.xhtml">
-        <ui:define name="title">
-            <h:outputText value="#{surveyanswersController.selectedSurvey.name}"></h:outputText>
-        </ui:define>
-        <ui:define name="body">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/template.xhtml">
+    <ui:define name="title">
+        <h:outputText value="#{surveyanswersController.selectedSurvey.name}"></h:outputText>
+    </ui:define>
+    <ui:define name="body">
+        <div class="layout-portlets-box">
             <h:form id="SurveyanswersListForm">
-                <p:panel>
-                    <h:outputText value="#{surveyanswersController.selectedSurvey.description}" style="padding:5px" />
-                </p:panel>
-                <h:panelGroup style="width:850px;padding-bottom: 20px">
-                    <p:dataList  id="surveyList" value="#{surveyanswersController.surveyList}" var="answer" type="unordered" itemType="none" >
-                        <f:facet name="header">
-                            <h:outputText value="Please fill in your Answers to the questionaire below" /> 
-                        </f:facet>
-                        <h:panelGrid columns="1" >
-                            <h:panelGroup>
-                                <h:outputText class="" value="#{answer.questionId.question}" style="font-weight: bold"/> 
-                            </h:panelGroup>
-                            <h:panelGroup rendered="#{answer.answerTypeid.type == 'Text'}">
-                                <p:inputTextarea value="#{answer.answer}" valueChangeListener="#{surveyanswersController.textAnswerValueChange}" rows="3" cols="129" style="padding-bottom: 20px">
-                                    <p:ajax />
-                                </p:inputTextarea>
-                            </h:panelGroup>
+                <h1 class="BigTopic">#{surveyanswersController.selectedSurvey.description}</h1>
+                <div class="Container100 Responsive100">
+                    <div class="ContainerIndent">
 
-                            <h:panelGroup rendered="#{answer.answerTypeid.type == 'Yes/No'}">
-                                <p:dataGrid var="subItem" value="#{answer.surveyAnswerSubitemsCollection}" columns="3" layout="grid" style="width:800px;padding-bottom: 20px">
-                                    <p:selectBooleanCheckbox value="#{subItem.subitemBool}" valueChangeListener="#{surveyanswersController.textAnswerValueChange}">
+
+                        <p:dataList  id="surveyList" value="#{surveyanswersController.surveyList}" var="answer" type="unordered" itemType="none" >
+                          
+                            <h:panelGrid columns="1" >
+                                <h:panelGroup>
+                                    <h:outputText class="" value="#{answer.questionId.question}" style="font-weight: bold"/> 
+                                </h:panelGroup>
+                                <h:panelGroup rendered="#{answer.answerTypeid.type == 'Text'}">
+                                    <p:inputTextarea value="#{answer.answer}" valueChangeListener="#{surveyanswersController.textAnswerValueChange}" rows="3" cols="129" style="padding-bottom: 20px">
                                         <p:ajax />
-                                    </p:selectBooleanCheckbox>
-                                    <h:outputText value="#{subItem.subitemText}" style="display:inline-block;padding-left: 5px"/> 
-                                </p:dataGrid>
-                            </h:panelGroup>
+                                    </p:inputTextarea>
+                                </h:panelGroup>
 
-                            <!-- TODO Add Multiple Choice -->
-                            <h:panelGroup rendered="#{answer.answerTypeid.type == 'Multiple Choice'}">
-                                <p:dataGrid var="subItem" value="#{answer.surveyAnswerSubitemsCollection}" columns="3" layout="grid" style="width:800px;padding-bottom: 20px">
-                                    <p:selectBooleanCheckbox value="#{subItem.subitemBool}" valueChangeListener="#{surveyanswersController.textAnswerValueChange}">
-                                        <p:ajax />
-                                    </p:selectBooleanCheckbox>
-                                    <h:outputText value="#{subItem.subitemText}" style="display:inline-block;padding-left: 5px"/> 
-                                </p:dataGrid>
-                            </h:panelGroup>
+                                <h:panelGroup rendered="#{answer.answerTypeid.type == 'Yes/No'}">
+                                    <p:dataGrid var="subItem" value="#{answer.surveyAnswerSubitemsCollection}" columns="3" layout="grid" style="width:800px;padding-bottom: 20px">
+                                        <p:selectBooleanCheckbox value="#{subItem.subitemBool}" valueChangeListener="#{surveyanswersController.textAnswerValueChange}">
+                                            <p:ajax />
+                                        </p:selectBooleanCheckbox>
+                                        <h:outputText value="#{subItem.subitemText}" style="display:inline-block;padding-left: 5px"/> 
+                                    </p:dataGrid>
+                                </h:panelGroup>
+
+                                <!-- TODO Add Multiple Choice -->
+                                <h:panelGroup rendered="#{answer.answerTypeid.type == 'Multiple Choice'}">
+                                    <p:dataGrid var="subItem" value="#{answer.surveyAnswerSubitemsCollection}" columns="3" layout="grid" style="width:800px;padding-bottom: 20px">
+                                        <p:selectBooleanCheckbox value="#{subItem.subitemBool}" valueChangeListener="#{surveyanswersController.textAnswerValueChange}">
+                                            <p:ajax />
+                                        </p:selectBooleanCheckbox>
+                                        <h:outputText value="#{subItem.subitemText}" style="display:inline-block;padding-left: 5px"/> 
+                                    </p:dataGrid>
+                                </h:panelGroup>
 
 
-                        </h:panelGrid>
+                            </h:panelGrid>
 
 
-                    </p:dataList>
-                </h:panelGroup>
-                
-                               <p:panel>
-                    <p:commandButton id="saveSurveyButton2"  action="#{surveyanswersController.saveSurvey}"    value="#{configMapController.getKey('MyDeatilsSurveys_saveSurveyLabel')}" update=":growl" style="padding:5px"  /> 
-                   
-                </p:panel>
+                        </p:dataList>
 
+
+                        <div class="Container100 Responsive100">
+                            <div class="ContainerIndent">
+                                <p:commandButton id="saveSurveyButton2" icon="ui-icon-check fa fa-check white Fs14"  action="#{surveyanswersController.saveSurvey}"    value="#{configMapController.getKey('MyDeatilsSurveys_saveSurveyLabel')}" update=":growl" style="padding:5px"  /> 
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
             </h:form>
+        </div>
+
+    </ui:define>
+</ui:composition>
 
 
-        </ui:define>
-    </ui:composition>
-
-</html>

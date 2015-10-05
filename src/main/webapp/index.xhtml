@@ -1,46 +1,45 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:ui="http://java.sun.com/jsf/facelets"
-      xmlns:h="http://java.sun.com/jsf/html"
-      xmlns:f="http://java.sun.com/jsf/core"
-      xmlns:p="http://primefaces.org/ui"  >
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/template.xhtml">
+    <ui:define name="title">
+        <h:outputText  value="My Statistics"></h:outputText>
 
-    <ui:composition template="/userTemplate.xhtml">
-        <ui:define name="title">
-            <h:outputText  value="My Statistics"></h:outputText>
-
-        </ui:define>
-        <ui:define name="body">
+    </ui:define>
+    <ui:define name="body">
+        <div class="layout-portlets-box">
             <h:form id="myStatsForm">
-                <p:panel header="Welcome #{chartController.customer.firstname}" class="myStatsWelcomeHeader">
-                    <p:panel class="customerDetailsPanel parentOfUploadPhoto profilePictureContainer" header="#{configMapController.getKey('ListCustomersTitle_ProfilePic')}" >
+                <div class="ContainerIndent">
+                <!--  <p:panel class="customerDetailsPanel parentOfUploadPhoto profilePictureContainer" header="#{configMapController.getKey('ListCustomersTitle_ProfilePic')}" >
 
-                        <p:graphicImage id="photo1"  value="#{customersController.selected.profileImage.imageStream}"  cache="false" class="profilePicture"/>
-                        <p:commandButton  id="photoUploadButton" ajax="true"  onclick="PF('uploadPhotoDialogueWidget').show();" update=":growl @(.parentOfUploadPhoto) "    value="#{configMapController.getKey('EditCustomersUploadPhotoButton')}" immediate="true"/>
+                      <p:graphicImage id="photo1"  value="#{customersController.selected.profileImage.imageStream}"  cache="false" class="profilePicture"/>
+                      <p:commandButton  id="photoUploadButton" ajax="true"  onclick="PF('uploadPhotoDialogueWidget').show();" update=":growl @(.parentOfUploadPhoto) "    value="#{configMapController.getKey('EditCustomersUploadPhotoButton')}" immediate="true"/>
 
-                    </p:panel>
-                    <p:panel id ="contentFlowPanel"  header="My Pictures : #{customerImagesController.imageListSize} loaded." >
-                        <p:contentFlow id="mainCarousel" class="myStatsCarousel parentOfUploadPhoto"  value="#{customerImagesController.images}" var="image"  style="height: 400px" widgetVar="contentFlowWidget" >
+                  </p:panel>
+                  <p:panel id ="contentFlowPanel"  header="My Pictures : #{customerImagesController.imageListSize} loaded." >-->
+                    <h1 class="BigTopic">#{configMapController.getKey('MyStats_MyPicturesHeader')}</h1>
+                    <p:contentFlow id="mainCarousel" class="myStatsCarousel parentOfUploadPhoto"  value="#{customerImagesController.images}" var="image"  style="height: 400px" widgetVar="contentFlowWidget" >
 
-                            <p:graphicImage  styleClass="content" value="#{customerImagesController.image}" onclick="clickFlow(this, event)" title="#{configMapController.getKey('ListMyStats_photoTakenText')} #{image.formattedDate}" alt="#{customerImagesController.dynamicTitle}" cache="false">
-                                <f:param name="imageId" value="#{image.id}"/>
-                            </p:graphicImage>
+                        <p:graphicImage  styleClass="content" value="#{customerImagesController.image}" onclick="clickFlow(this, event)" title="#{configMapController.getKey('ListMyStats_photoTakenText')} #{image.formattedDate}" alt="#{customerImagesController.dynamicTitle}" cache="false">
+                            <f:param name="imageId" value="#{image.id}"/>
+                        </p:graphicImage>
 
-                            <div class="caption">#{image.formattedDate}</div>
-                            <div class="hiddenId" style="display: none;">#{image.id}</div>
-                        </p:contentFlow>
-                        <p:contextMenu  for="mainCarousel" >
-                            <p:menuitem value="Refresh" update="contentFlowPanel" />
-                            <p:separator/>
-                            <p:menuitem value="Add New" onclick="PF('uploadPhotoDialogueWidget').show()" />
-                            <p:menuitem value="Delete" oncomplete="removePicture([{name:'selectedImage', value: $('.item.active div.hiddenId').text()}]);" />
-                        </p:contextMenu>
-                        <p:remoteCommand name="removePicture" actionListener="#{customerImagesController.removePicture}" update=":myStatsForm:contentFlowPanel"/>
-                    </p:panel> 
+                        <div class="caption">#{image.formattedDate}</div>
+                        <div class="hiddenId" style="display: none;">#{image.id}</div>
+                    </p:contentFlow>
+                    <p:contextMenu  for="mainCarousel" >
+                        <p:menuitem value="Refresh" update=":myStatsForm:mainCarousel" />
+                        <p:separator/>
+                        <p:menuitem value="Add New" onclick="PF('uploadPhotoDialogueWidget').show()" />
+                        <p:menuitem value="Delete" oncomplete="removePicture([{name:'selectedImage', value: $('.item.active div.hiddenId').text()}]);" />
+                    </p:contextMenu>
+                    <p:remoteCommand name="removePicture" actionListener="#{customerImagesController.removePicture}" update=":myStatsForm:mainCarousel"/>
+                    <!-- </p:panel> -->
 
 
-                </p:panel>
+                </div>
                 <p:remoteCommand  actionListener="#{customerImagesController.carouselImageClicked}"  name="carouselClicked" immediate="true"/>
 
                 <script>
@@ -135,23 +134,22 @@
             </h:form>
             <h:form>
 
-                <p:panel header="#{configMapController.getKey('ListMyStats_StatsPanelHeader')}">
-                    <p:dataList  value="#{chartController.modelList}"  var="chart" id="chartsList"  
-                                 paginator="true" rows="10"  
-                                 paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink} {RowsPerPageDropdown}"  
-                                 rowsPerPageTemplate="5,10,15" type="none">
 
-                        <p:panel header="#{chart.title}">                    
-                            <p:chart type="line" styleClass="chartClass"  model="#{chart}"/>
-                        </p:panel>
+                <h1 class="BigTopic">#{configMapController.getKey('ListMyStats_StatsPanelHeader')}</h1>
+                <p:dataList  value="#{chartController.modelList}"  var="chart" id="chartsList"  styleClass="myStatsChartsDatalist"
+                             paginator="false" rows="10"  
+                             paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink} {RowsPerPageDropdown}" 
+                             rowsPerPageTemplate="5,10,15" 
+                             type="none">
+                    <div class="EmptyBox10"></div>
+                    <p:chart type="line" styleClass="chartClass"  model="#{chart}"/>
+                </p:dataList>
 
-                    </p:dataList>
-                </p:panel>
             </h:form>
-            <ui:include src="uploadPhoto.xhtml"/>
-        </ui:define>
-    </ui:composition>
+        </div>
+        <ui:include src="uploadPhoto.xhtml"/>
+    </ui:define>
+</ui:composition>
 
 
-</html>
 

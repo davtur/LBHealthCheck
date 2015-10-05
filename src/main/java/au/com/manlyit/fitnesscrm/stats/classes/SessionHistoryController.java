@@ -428,7 +428,7 @@ public class SessionHistoryController implements Serializable {
                 updateSessionDateTimes();
                 getFacade().edit(current);
             }
-            JsfUtil.addSuccessMessage(configMapFacade.getConfig("SessionHistoryCreated"));
+            JsfUtil.addSuccessMessage("Notification:",configMapFacade.getConfig("SessionHistoryCreated"));
             try {
                 FacesContext context = FacesContext.getCurrentInstance();
                 CustomersController customersController = context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
