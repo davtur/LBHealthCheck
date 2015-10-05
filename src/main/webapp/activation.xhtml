@@ -1,19 +1,45 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<ui:composition template="/WEB-INF/template.xhtml" xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:ui="http://java.sun.com/jsf/facelets"
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:h="http://java.sun.com/jsf/html"
       xmlns:f="http://java.sun.com/jsf/core"
-      xmlns:p="http://primefaces.org/ui" >
-    <body>
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui">
 
+    <h:head>
+        <f:facet name="first">
+            <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+            <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+            <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"/>
+            <meta name="apple-mobile-web-app-capable" content="yes" />
+        </f:facet>
+        <title>Pure Fitness Manly</title>
+        <h:outputScript name="js/layout.js" library="spark-layout" />
+
+        <h:outputText value="&lt;!--[if gte IE 9]&gt;" escape="false" />
+        <style type="text/css">
+            /* styles for IE 9 */
+        </style>
+        <h:outputText value="&lt;![endif]--&gt;" escape="false" />
+        <f:metadata>
+            <f:viewAction action="#{loginBean.checkAlreadyLoggedin}"  immediate="true" />
+        </f:metadata>
+        <ui:insert name="head" />
+    </h:head>
+
+    <h:body>
+        <p:growl id="growl"/>
+        <div id="layout-portlets-cover">
+            <div class="other-pages-box Container40 Responsive50 MarAuto Fnone TexAlCenter ShadowGray MarTop10"
+                 style="margin-top:5%; background-image:url(/spark/resources/spark-layout/images/loginpageillust.svg); background-repeat:no-repeat; background-position:center; background-size:cover;">
+                <div class="Container90 Fnone MarAuto TexAlCenter">
         
 
-            <ui:define name="title">
+            
                 <h2> Pure Fitness Manly Password Reset</h2>
-            </ui:define>
+            
 
-            <ui:define name="body">
+            
                 <h:panelGroup layout="block" rendered="#{activationBean.valid}">
                     <div >
                         <strong>
@@ -38,9 +64,15 @@
                     
                 </h:panelGroup>
 
-            </ui:define>
+                  </div>
+            </div>
+        </div>
 
-        </ui:composition>
+        <h:outputStylesheet name="css/core-layout.css" library="spark-layout" />
+        <h:outputStylesheet name="css/font-awesome.css" library="spark-layout" />
+        <h:outputStylesheet name="css/animate.css" library="spark-layout" />
+        <h:outputStylesheet name="css/spark-layout.css" library="spark-layout" />
+    </h:body>
 
-    </body>
+</html>
 
