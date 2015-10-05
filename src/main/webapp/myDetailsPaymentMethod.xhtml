@@ -1,29 +1,30 @@
-<?xml version="1.0" encoding="ISO-8859-1" ?>
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:ui="http://java.sun.com/jsf/facelets"
-      xmlns:h="http://java.sun.com/jsf/html"
-      xmlns:f="http://java.sun.com/jsf/core"
-      xmlns:p="http://primefaces.org/ui" >
-
-    <ui:composition >
-        <!--<p:log />--> 
-        <p:confirmDialog id="editPaymentMethodDialogue" message="#{configMapController.getKey('EditPaymentMethodDialogueTitle')}"  closable="false"
-                         header="#{configMapController.getKey('EditPaymentMethodTitle')}" severity="info" widgetVar="editEDDRFormDialogueWidget" > 
-
-            <h:form id="iFrameForm" > 
-                <p:outputPanel id="iFramePanel" >
-                         <p:panel id="viewPaymentsGrid" header="#{configMapController.getKey('EditPaymentMethodDialogueCustName')} #{customersController.selected.firstname} #{customersController.selected.lastname}" >
-                            <iframe id="ezidebitIframeView" src="#{ezidebit.eziDebitEDDRFormUrl}"  width="800" height="600"/>
-                        </p:panel>
-                </p:outputPanel>
-
-                <p:panel>
-                    <p:commandButton id="editPaymentMethoddialogueClose" oncomplete="PF('editEDDRFormDialogueWidget').hide()" actionListener="#{ezidebit.closeEditPaymentMethodDialogue}" value="#{configMapController.getKey('EditPaymentMethodDiscardLink')}" update=":growl :iFrameForm"/>                
-                </p:panel>     
-            </h:form>
-        </p:confirmDialog>
-    </ui:composition> 
+<ui:composition template="/WEB-INF/template.xhtml" 
+                xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:p="http://primefaces.org/ui" >
 
 
-</html>
+    <!--<p:log />--> 
+    <p:confirmDialog id="editPaymentMethodDialogue" message="#{configMapController.getKey('EditPaymentMethodDialogueTitle')}"  closable="false"
+                     header="#{configMapController.getKey('EditPaymentMethodTitle')}" severity="info" widgetVar="editEDDRFormDialogueWidget" > 
+
+        <h:form id="iFrameForm" > 
+            <p:outputPanel id="iFramePanel" >
+                <p:panel id="viewPaymentsGrid" header="#{configMapController.getKey('EditPaymentMethodDialogueCustName')} #{customersController.selected.firstname} #{customersController.selected.lastname}" >
+                    <iframe id="ezidebitIframeView" src="#{ezidebit.eziDebitEDDRFormUrl}"  width="800" height="600"/>
+                </p:panel>
+            </p:outputPanel>
+
+            <p:panel>
+                <p:commandButton id="editPaymentMethoddialogueClose" oncomplete="PF('editEDDRFormDialogueWidget').hide()" actionListener="#{ezidebit.closeEditPaymentMethodDialogue}" value="#{configMapController.getKey('EditPaymentMethodDiscardLink')}" update=":growl :iFrameForm"/>                
+            </p:panel>     
+        </h:form>
+    </p:confirmDialog>
+</ui:composition> 
+
+
+

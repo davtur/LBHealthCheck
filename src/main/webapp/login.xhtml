@@ -1,73 +1,97 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:ui="http://java.sun.com/jsf/facelets"
       xmlns:h="http://java.sun.com/jsf/html"
       xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
       xmlns:p="http://primefaces.org/ui">
 
-    <ui:composition template="/userTemplate.xhtml">
-        <ui:define name="title">
-            <h:outputText value="Members Area"></h:outputText>
-        </ui:define>
-        <ui:define name="body">
+    <h:head>
+        <f:facet name="first">
+            <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+            <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+            <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"/>
+            <meta name="apple-mobile-web-app-capable" content="yes" />
+        </f:facet>
+        <title>Pure Fitness Manly</title>
+        <h:outputScript name="js/layout.js" library="spark-layout" />
 
-            <f:metadata>
-              <!--  <f:event type="preRenderView" listener="#{loginBean.checkAlreadyLoggedin}" />-->
-                <f:viewAction action="#{loginBean.checkAlreadyLoggedin}"  immediate="true" />
-            </f:metadata>
-            <h:form id="mainLoginForm">
+        <h:outputText value="&lt;!--[if gte IE 9]&gt;" escape="false" />
+        <style type="text/css">
+            /* styles for IE 9 */
+        </style>
+        <h:outputText value="&lt;![endif]--&gt;" escape="false" />
+        <f:metadata>
+            <f:viewAction action="#{loginBean.checkAlreadyLoggedin}"  immediate="true" />
+        </f:metadata>
+        <ui:insert name="head" />
+    </h:head>
 
-                <p:panel>
-                    <h3>Pure Fitness Manly Account</h3>
-                    <p:panel  styleClass="loginPanel">
-                        <br />
-                        <p:outputLabel  value="Username:  "/>
-
-                        <p:inputText id="usernameInput" value="#{loginBean.username}" 
-                                     required="true" requiredMessage="Please enter your username">
+    <h:body>
+        <p:growl id="growl"/>
+        <div id="layout-portlets-cover">
+            <div class="other-pages-box Container40 Responsive50 MarAuto Fnone TexAlCenter ShadowGray MarTop10"
+                 style="margin-top:5%; background-image:url(/spark/resources/spark-layout/images/loginpageillust.svg); background-repeat:no-repeat; background-position:center; background-size:cover;">
+                <div class="Container90 Fnone MarAuto TexAlCenter">
+                    <h:form id="mainLoginForm">
+                        <div class="EmptyBox50"></div>
+                        <h:graphicImage name="images/logo.png" styleClass="MarAuto MarTop20 MarBot10"/>
+                        <div class="EmptyBox20"></div>
+                        <p:inputText value="#{loginBean.username}"  placeholder="Username" styleClass="Container80 Fnone MarAuto Fs18">
                             <p:ajax event="change" update=":loginForm" />
                         </p:inputText>
-                        <br /><br />
-                        <p:outputLabel  value="    Password :   " />
+                        <div class="EmptyBox10"></div>
+                        <p:password value="#{loginBean.password}"  placeholder="Password" styleClass="Container80 Fnone MarAuto Fs18" feedback="false"/>
+                        <div class="EmptyBox20"></div>
+                        <div class="Container85 Fnone MarAuto softgray">
+                            <div class="EmptyBox5"></div>
+                            <p:selectBooleanCheckbox value="accept" itemLabel="I Accept Terms And Policies"/>
+                        </div>
+                        <div class="EmptyBox30"></div>
+                        <p:commandButton value="Login" styleClass="Fs16" actionListener="#{loginBean.login}"  update=":growl"/> 
+                        <div class="EmptyBox10"></div>
+                        <div class="Seperator"></div>
+                        <div class="EmptyBox10"></div>
+                    </h:form>
 
-                        <p:password id="passwordInput" value="#{loginBean.password}" /><br />
-                    </p:panel>
-                    <br />
-                    <p:panel>
-                        <p:commandButton value="Login" 
-                                         actionListener="#{loginBean.login}"  update=":growl"/> 
-                        <p:commandButton value="Reset Password" ajax="false"
-                                         action="#{loginBean.resetPassword}" update=":growl"/>
-                    </p:panel>
-                </p:panel>
-            </h:form>
-            <br />
+                    <h:form id="loginForm">
 
-            <h:form id="loginForm">
-               <!-- <p:panel  id="facebookPanel" rendered="#{loginBean.renderFacebook}">-->
-                <p:panel  id="facebookPanel">
-                    <h3>Facebook Account</h3>
-                    <p:panel>
-                        <h:panelGrid columns="5">
-                            <div class="social-icons">
-                                <span class="facebook"><a target="_blank" href="https://www.facebook.com/PureFitnessManly"></a></span>
-                            </div>
-                            <p:panel rendered="#{not empty loginBean.facebookId}" style="width:73px">
-                                <img src="https://graph.facebook.com/#{loginBean.facebookId}/picture"/>
-                            </p:panel>
-                            <p:commandButton widgetVar="fbLogin" onclick="PF('fbLogin').disable()" styleClass="loginButtonFacebook" value="Facebook Connect"  actionListener="#{facebookLoginBean.facebookRedirect}" />
-     <!--<p:button styleClass="loginButtonFacebook" value="Facebook Connect" href="#{facebookLoginBean.facebookUrlAuth}"  />-->
 
-                            <h:outputText value="   Log into Pure Fitness Manly using your facebook account."></h:outputText>
+                        <div class="social-icons">
+                            <span class="facebook"><a target="_blank" href="https://www.facebook.com/PureFitnessManly"></a></span>
+                        </div>
+                        <p:panel rendered="#{not empty loginBean.facebookId}" style="width:73px">
+                            <img src="https://graph.facebook.com/#{loginBean.facebookId}/picture"/>
+                        </p:panel>
+                        <p:commandButton widgetVar="fbLogin" onclick="PF('fbLogin').disable()" styleClass="loginButtonFacebook" value="Facebook Connect"  actionListener="#{facebookLoginBean.facebookRedirect}" />
 
-                            <h:outputText value="#{facebookLoginBean.userFromSession}"></h:outputText>
 
-                        </h:panelGrid>
-                    </p:panel>
-                </p:panel>
-            </h:form>
-        </ui:define>
-    </ui:composition>
+                        <p:commandButton value="Reset Password" ajax="false" styleClass="Fs16 RedButton" action="#{loginBean.resetPassword}" update=":growl"/>
+                        <div class="EmptyBox10"></div>
+                        <h:outputText value="#{facebookLoginBean.userFromSession}"></h:outputText>
+
+
+
+
+                        <div class="EmptyBox50"></div>
+
+
+
+
+
+
+
+
+
+                    </h:form>
+
+                </div>
+            </div>
+        </div>
+
+        <h:outputStylesheet name="css/core-layout.css" library="spark-layout" />
+        <h:outputStylesheet name="css/font-awesome.css" library="spark-layout" />
+        <h:outputStylesheet name="css/animate.css" library="spark-layout" />
+        <h:outputStylesheet name="css/spark-layout.css" library="spark-layout" />
+    </h:body>
 
 </html>

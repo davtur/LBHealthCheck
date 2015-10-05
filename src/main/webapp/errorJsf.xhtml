@@ -1,30 +1,27 @@
-<?xml version="1.0" encoding="ISO-8859-1" ?>
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:ui="http://java.sun.com/jsf/facelets"
-      xmlns:h="http://java.sun.com/jsf/html"
-      xmlns:f="http://java.sun.com/jsf/core"
-      xmlns:p="http://primefaces.org/ui" >
-    <body>
+<ui:composition template="/WEB-INF/template.xhtml" xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:p="http://primefaces.org/ui" >
+ 
 
-        <ui:composition template="/userTemplate.xhtml">
+        <ui:define name="title">
+            <h2> Oop's something went wrong</h2>
+        </ui:define>
 
-            <ui:define name="title">
-                <h2> Oop's something went wrong</h2>
-            </ui:define>
+        <ui:define name="body">
+            <h:panelGroup layout="block" >
+                <p>Click <a href="https://services.purefitnessmanly.com.au" >here</a> to return to Pure Fitness Manly or please call <strong>0433818067</strong> or email us <a href="mailto:sarah@purefitnessmanly.com.au">sarah@purefitnessmanly.com.au</a> if you continue to experience problems.</p> 
+            </h:panelGroup>
+            <h:panelGroup layout="block">
+                <h:outputText value="Message:#{pfExceptionHandler.message}" />
+                <h:outputText value="#{pfExceptionHandler.formattedStackTrace}" escape="false" />
+            </h:panelGroup>
 
-            <ui:define name="body">
-                  <h:panelGroup layout="block" >
-                    <p>Click <a href="https://services.purefitnessmanly.com.au" >here</a> to return to Pure Fitness Manly or please call <strong>0433818067</strong> or email us <a href="mailto:sarah@purefitnessmanly.com.au">sarah@purefitnessmanly.com.au</a> if you continue to experience problems.</p> 
-                 </h:panelGroup>
-              <h:panelGroup layout="block">
-                    <h:outputText value="Message:#{pfExceptionHandler.message}" />
-                    <h:outputText value="#{pfExceptionHandler.formattedStackTrace}" escape="false" />
-                </h:panelGroup>
+        </ui:define>
 
-            </ui:define>
 
-        </ui:composition>
+</ui:composition>
 
-    </body>
-</html>
