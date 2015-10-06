@@ -8,10 +8,10 @@
 
     <h:form>
         <ps:menu id="mainmenubar1">
-            <f:facet name="options">
+         <!--   <f:facet name="options">
                 <p:commandButton type="button" icon="fa fa-search Fs18 white" styleClass="Fright"/>
                 <p:inputText placeholder="Search" styleClass="Fright"/>    
-            </f:facet>
+            </f:facet>-->
             <p:submenu icon="fa fa-bug" label="Developer" rendered="#{customersController.isUserInRole('DEVELOPER')}"  id="devMenu1" >
                 <p:menuitem
                     id="configMap"                              
@@ -112,7 +112,7 @@
 
 
             </p:submenu>
-            <p:separator />
+            <p:separator rendered="#{customersController.isUserInRole('DEVELOPER')}" />
             <p:submenu icon="fa fa-cog" label="Admin" rendered="#{customersController.isUserInRole('ADMIN')}"  id="adminMenu1" >
                 <p:menuitem
                     id="customers"                              
@@ -190,7 +190,7 @@
                 </p:menuitem>
             </p:submenu>
 
-            <p:separator />
+            <p:separator  rendered="#{customersController.isUserInRole('ADMIN')}" />
             <p:submenu icon="fa fa-bullhorn"  label="Trainer" rendered="#{customersController.isUserInRole('TRAINER')}"  id="trainerMenu1" >
                 <p:menuitem
                     id="mobile"                              
@@ -199,7 +199,7 @@
 
             </p:submenu>
 
-            <p:separator />
+            <p:separator  rendered="#{customersController.isUserInRole('TRAINER')}"  />
             <p:submenu icon="fa fa-user"  label="User" rendered="#{customersController.isUserInRole('USER')}" id="logout1" >
                 <p:menuitem
                     id="myStats"

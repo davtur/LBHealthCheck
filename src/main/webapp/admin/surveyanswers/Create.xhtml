@@ -16,11 +16,7 @@
                         <p:inputText id="id" value="#{surveyanswersController.selected.id}" title="#{configMapController.getKey('CreateSurveyanswersTitle_id')}" required="true" requiredMessage="#{configMapController.getKey('CreateSurveyanswersRequiredMessage_id')}"/>
                         <p:outputLabel value="#{configMapController.getKey('CreateSurveyanswersLabel_answer')}" for="answer" />
                         <p:inputTextarea rows="4" cols="30" id="answer"  value="#{surveyanswersController.selected.answer}"  title="#{configMapController.getKey('CreateSurveyanswersTitle_answer')}" required="true" requiredMessage="#{configMapController.getKey('CreateSurveyanswersRequiredMessage_answer')}"/>
-                        <p:outputLabel value="#{configMapController.getKey('CreateSurveyanswersLabel_surveyId')}" for="surveyId" />
-                        <p:selectOneMenu id="surveyId" valueChangeListener="#{surveyanswersController.selectOneMenuValueChangeListener}"  value="#{surveyanswersController.selected.surveyId}"  label="#{configMapController.getKey('CreateSurveyanswersTitle_surveyId')}" required="true" requiredMessage="#{configMapController.getKey('CreateSurveyanswersRequiredMessage_surveyId')}">
-                            <f:selectItems value="#{surveysController.itemsAvailableSelectOne}"/>
-                            <p:ajax   update=":SurveyanswersCreateForm"  />
-                        </p:selectOneMenu>
+                        
                         <p:outputLabel value="#{configMapController.getKey('CreateSurveyanswersLabel_questionId')}" for="questionId" />
                         <p:selectOneMenu id="questionId" valueChangeListener="#{surveyanswersController.selectOneMenuValueChangeListener}"  value="#{surveyanswersController.selected.questionId}"  label="#{configMapController.getKey('CreateSurveyanswersTitle_questionId')}" required="true" requiredMessage="#{configMapController.getKey('CreateSurveyanswersRequiredMessage_questionId')}">
                             <f:selectItems value="#{surveyquestionsController.itemsAvailableSelectOne}"/>

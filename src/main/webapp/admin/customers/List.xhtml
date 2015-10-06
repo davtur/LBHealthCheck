@@ -1,163 +1,207 @@
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <ui:composition template="/WEB-INF/template.xhtml" xmlns="http://www.w3.org/1999/xhtml" 
-      xmlns:ui="http://java.sun.com/jsf/facelets" 
-      xmlns:h="http://java.sun.com/jsf/html" 
-      xmlns:f="http://java.sun.com/jsf/core" 
-      xmlns:p="http://primefaces.org/ui" >
+                xmlns:ui="http://java.sun.com/jsf/facelets" 
+                xmlns:h="http://java.sun.com/jsf/html" 
+                xmlns:f="http://java.sun.com/jsf/core" 
+                xmlns:p="http://primefaces.org/ui" >
 
-    
-        <ui:define name="title">
-            <h:outputText   value="#{configMapController.getKey('ListCustomersTitle')}"></h:outputText>
-        </ui:define>
-        <ui:define name="body">
-            <h:form id="remoteCommandForm">
-                <p:remoteCommand name="connectPushServer" actionListener="#{ezidebit.checkPushChannelIsOpen}" autoRun="true" />
-            </h:form>
-            <p:tabView id="tv" cache="false" prependId="false"> 
+
+    <ui:define name="title">
+        <h:outputText   value="#{configMapController.getKey('ListCustomersTitle')}"></h:outputText>
+    </ui:define>
+    <ui:define name="body">
+        <div class="layout-portlets-box">
+
+
+            <p:tabView id="tv" cache="false" prependId="false" class="layout-portlets-box"> 
                 <p:ajax  event="tabChange"  listener="#{ezidebit.onTabChange}"  />  
 
 
-                <p:tab id="tab1" title="Customer List" >  
+                <p:tab id="tab1" title="Customer List" class="Container100 Responsive100" >  
                     <h:form id="customerslistForm1">
-                        <p:panelGrid columns="4" style="width:100%;">
-                            <h:panelGroup id="selectedUserPanel">                 
-                                <!--<p:commandButton id="selectCustomerButton"   actionListener="#{customersController.setSelectedCustomer}" value="#{configMapController.getKey('ListCustomersSelectCustomersButton')}" title="#{configMapController.getKey('ListCustomersSelectCustomersButtonHelp')}" update=":tv:customerslistForm1 :tv:formCustomersEdit1 :tv:NoteslistForm1 :tv:paymentsForm :growl" /> -->
-                                <p:panel id="selectedUser" header="Selected: #{customersController.selected.firstname} #{customersController.selected.lastname}" />
-                            </h:panelGroup >
-                            <h:panelGrid columns="4">
-                                <p:outputLabel  value="Filter:    " for="selectedStateCheckbox"/>
-                                <p:selectManyCheckbox id="selectedStateCheckbox"  value="#{customersController.selectedCustomerStates}" label="Show Cancelled" valueChangeListener="#{customersController.selectShowCancelledBooleanChangeListener}"  >
-                                    <f:selectItems value="#{customersController.customerStateList}" var="cs" itemLabel="#{cs.customerState}" itemValue="#{cs}" />
-                                    <p:ajax event="change"   update=":tv:customerslistForm1"  /> 
-                                </p:selectManyCheckbox>
-                                <p:selectBooleanCheckbox id="showNonUsers"   value="#{customersController.showNonUsers}" >  
-                                    <p:ajax update="@form"   />  
-                                </p:selectBooleanCheckbox> 
-                                <p:outputLabel  value="TRAINERS" for="showNonUsers"/>
-                            </h:panelGrid>
+                        <div class="Container100 Responsive100">
+                            <div class="Container20 Responsive">
 
-                            <h:panelGroup id="customerChangeStatusPanel">
-                                <p:selectOneMenu id="active" valueChangeListener="#{customersController.selectOneMenuValueChangeListener}" converter="customerStateControllerConverter" value="#{customersController.selectedState}" label="#{configMapController.getKey('CreateCustomersTitle_active')}" >
-                                    <f:selectItems value="#{customerStateController.itemsAvailableAsObjects}"  var="custState" itemLabel="#{custState.customerState}" itemValue="#{custState}"/>                           
-                                </p:selectOneMenu>
-                                <p:commandButton id="changeStateButton"     actionListener="#{customersController.changeCustomersState}" value="#{configMapController.getKey('ListCustomersChangeStateButton')}"  update=":tv:customerslistForm1:customersTableList :growl" /> 
+                                <div class="Container100 TexAlLeft">
+                                    <div class="DispInlBlock MarTop20">
+                                        <div class="Container20"><i class="fa fa-user Fs50 red Fleft MarRight10"></i></div>
+                                        <div class="Container80">
+                                            <div class="Fright">
+                                                <h2 class="black Fs24 FontRalewayMedium"><h:outputText id="selectedUser" value="#{customersController.selected.firstname} #{customersController.selected.lastname}" /></h2>
+                                                <span class="Fs15 gray FontRalewayRegular DispBlock"><h:outputText value="Trainer, " rendered="#{customersController.isCustomerInRole(item,'TRAINER')}" /> <h:outputText value="#{customersController.selected.active.customerState}"/></span>
+                                            </div>
+                                        </div>
 
-                            </h:panelGroup >
-                            <h:panelGroup >
-                                <p:commandButton id="addNoteDialogButton1"  value="#{configMapController.getKey('ListNotesCreateLink')}" onclick="PF('NotesCreateDialogue').show()" type="button"/> 
-                                <p:commandButton id="showDialogButton"  oncomplete="PF('customersCreateDialogue').show()"   actionListener="#{customersController.prepareCreateAjax}" value="#{configMapController.getKey('ListCustomersCreateLink')}" process=":formCustomersCreate1"  update=":formCustomersCreate1:dialogueGrid  :growl" /> 
+                                    </div>
 
-                            </h:panelGroup >
-                        </p:panelGrid>
-                        <h:outputText escape="false" value="#{configMapController.getKey('ListCustomersEmpty')}" rendered="#{customersController.items.rowCount == 0}"/>
-                        <h:panelGroup rendered="#{customersController.items.rowCount > 0}">
-                            <p:dataTable id="customersTableList" 
+                                </div>
+
+                            </div>
 
 
-                                         selection="#{customersController.multiSelected}" 
-                                         rowKey="#{item.id}" 
-                                         value="#{customersController.items}" 
-                                         filteredValue="#{customersController.filteredItems}" 
-                                         widgetVar="customersControllerTable" 
-                                         editable="true" 
+                            <div class="Container40 Responsive50">
 
-                                         var="item"  
-                                         scrollHeight="400"
-                                         scrollable="true" >
-                                <f:facet name="header">
+                                <div class="Container100 TexAlCenter" >
 
+                                    <h:panelGrid columns="4" cellpadding="5" class="Wid90 BorderedBox Fleft TexAlCenter" >
+                                        <p:outputLabel value="#{configMapController.getKey('ListCustomersStatusButton')}" for="selectedStateCheckbox"/>
+                                        <p:selectManyCheckbox id="selectedStateCheckbox"  value="#{customersController.selectedCustomerStates}" label="Show Cancelled" valueChangeListener="#{customersController.selectShowCancelledBooleanChangeListener}"  >
+                                            <f:selectItems value="#{customersController.customerStateList}" var="cs" itemLabel="#{cs.customerState}" itemValue="#{cs}" />
+                                            <p:ajax event="change"   update=":tv:customerslistForm1"  /> 
+                                        </p:selectManyCheckbox>
+                                        <p:selectBooleanCheckbox id="showNonUsers"   value="#{customersController.showNonUsers}" >  
+                                            <p:ajax update="@form"   />  
+                                        </p:selectBooleanCheckbox> 
+                                        <p:outputLabel  value="TRAINERS" for="showNonUsers"/>
+                                    </h:panelGrid>
 
-                                    <h:panelGroup>
-                                        <h:outputText value="Search all fields:" />
-                                        <p:inputText id="globalFilter" onkeyup="PF('customersControllerTable').filter();" />
-                                    </h:panelGroup>
-                                    <h:outputText value="   " />
-                                    <h:panelGroup>
-                                     <!--   <h:outputText  rendered="#{ customersController.filteredItems != null}" value="#{customersController.filteredItems.size} Records Found"/>-->
-                                        <h:outputText  rendered="#{customersController.items != null}" value="#{customersController.items.rowCount} Records Found"/>
-                                    </h:panelGroup>
+                                </div>
 
 
+                            </div>
 
-                                </f:facet>
-                                <p:ajax event="rowSelect"  listener="#{customersController.setSelecteDblClick}" update=":growl :tv:customerslistForm1:selectedUser :tv:formCustomersEdit1 :formCustomersCreate1 :tv:paymentsForm :tv:NoteslistForm1 :confirmCancellation :confirmDialogNotesCreate1"  />  
-                                <p:column selectionMode="multiple" />
-                                <p:column sortBy="#{item.id}" filterBy="#{item.id}" headerText="#{configMapController.getKey('ListCustomersTitle_id')}"   >
-                                    <h:outputText value="#{item.id}"/>
-                                </p:column>
+                            <div class="Container20 Responsive">
 
-                                <p:column sortBy="#{item.firstname}" filterBy="#{item.firstname}" headerText="#{configMapController.getKey('ListCustomersTitle_firstname')}"   >
-                                    <h:outputText value="#{item.firstname}"/>
-                                </p:column>
-                                <p:column sortBy="#{item.lastname}" filterBy="#{item.lastname}" headerText="#{configMapController.getKey('ListCustomersTitle_lastname')}"   >
-                                    <h:outputText value="#{item.lastname}"/>
-                                </p:column>
-                                <p:column sortBy="#{item.active.customerState}" filterBy="#{item.active.customerState}" headerText="#{configMapController.getKey('ListCustomersTitle_activeCRM')}"   >
-                                    <h:outputText value="TRAINER " rendered="#{customersController.isCustomerInRole(item,'TRAINER')}" /> <h:outputText value="#{item.active.customerState}"/> 
-                                </p:column>
-                                <p:column sortBy="#{item.paymentParameters.statusDescription}" filterBy="#{item.paymentParameters.statusDescription}" headerText="#{configMapController.getKey('ListCustomersTitle_activeEZI')}"   >
-                                    <h:outputText value="#{item.paymentParameters.statusDescription}"/> 
-                                </p:column>
-                                <p:column sortBy="#{item.paymentParameters.contractStartDate}" filterBy="#{item.paymentParameters.contractStartDate}" headerText="#{configMapController.getKey('ListCustomersTitle_contractStartDate')}"   >
-                                    <h:outputText value="#{item.paymentParameters.contractStartDate}">
-                                        <f:convertDateTime pattern="dd MMM yyyy" />
-                                    </h:outputText>
-                                </p:column>
-                                <p:column sortBy="#{item.paymentParameters.paymentPeriod}" filterBy="#{item.paymentParameters.paymentPeriod}" headerText="#{configMapController.getKey('ListCustomersTitle_paymentPeriod')}"   >
+                                <div class="Container100 TexAlRight">
+                                    <h:panelGrid columns="2" cellpadding="5" >
+                                        <p:selectOneMenu id="active" valueChangeListener="#{customersController.selectOneMenuValueChangeListener}" converter="customerStateControllerConverter" value="#{customersController.selectedState}" label="#{configMapController.getKey('CreateCustomersTitle_active')}" >
+                                            <f:selectItems value="#{customerStateController.itemsAvailableAsObjects}"  var="custState" itemLabel="#{custState.customerState}" itemValue="#{custState}"/>                           
+                                        </p:selectOneMenu>
+                                        <p:commandButton id="changeStateButton"     actionListener="#{customersController.changeCustomersState}" value="#{configMapController.getKey('ListCustomersChangeStateButton')}"  update=":tv:customerslistForm1:customersTableList :growl" /> 
 
-                                    <h:outputText  rendered="#{item.paymentParameters.paymentPeriod == 'F'}"  value="Fortnightly" />
-                                    <h:outputText  rendered="#{item.paymentParameters.paymentPeriod == 'M'}"  value="Monthly" />
-                                    <h:outputText  rendered="#{item.paymentParameters.paymentPeriod == '4'}"  value="4 Weekly" />
-                                    <h:outputText  rendered="#{item.paymentParameters.paymentPeriod == 'N'}"  value="Weekday in Month" />
-                                    <h:outputText  rendered="#{item.paymentParameters.paymentPeriod == 'Q'}"  value="Quarterly" />
-                                    <h:outputText  rendered="#{item.paymentParameters.paymentPeriod == 'H'}"  value="Half Yearly" />
-                                    <h:outputText  rendered="#{item.paymentParameters.paymentPeriod == 'Y'}"  value="Annually" />
-                                    <h:outputText  rendered="#{item.paymentParameters.paymentPeriod == 'W'}"  value="Weekly" />
-                                    <h:outputText  rendered="#{item.paymentParameters.paymentPeriod == 'Z'}"  value="No Schedule" />
-                                    <h:outputText  rendered="#{item.paymentParameters.paymentPeriod != 'Z' and item.paymentParameters.paymentPeriod != 'M' and item.paymentParameters.paymentPeriod != 'Q' and item.paymentParameters.paymentPeriod != 'H' and item.paymentParameters.paymentPeriod != 'Y' }"  value=" - #{item.paymentParameters.paymentPeriodDayOfWeek}"/> 
-                                    <h:outputText  rendered="#{item.paymentParameters.paymentPeriod != 'Z' and item.paymentParameters.paymentPeriod == 'M' }"  value=", day-#{item.paymentParameters.paymentPeriodDayOfMonth}"/> 
+                                    </h:panelGrid >
 
-                                </p:column>
-
-                                <p:column sortBy="#{item.paymentParameters.nextScheduledPayment.debitDate}" filterBy="#{item.paymentParameters.nextScheduledPayment.debitDate}" headerText="#{configMapController.getKey('ListCustomersTitle_nextScheduledPayment')}"   >
-                                    <h:outputText rendered="#{not empty item.paymentParameters.nextScheduledPayment}"  value="#{item.paymentParameters.nextScheduledPayment.debitDate}">
-                                        <f:convertDateTime pattern="E dd MMM yyyy" />
-                                    </h:outputText>
-                                    <h:outputText rendered="#{empty item.paymentParameters.nextScheduledPayment}" value="---"/>
-                                </p:column>
-                                <p:column sortBy="#{item.paymentParameters.nextScheduledPayment.paymentAmount}" filterBy="#{item.paymentParameters.nextScheduledPayment.paymentAmount}" headerText="#{configMapController.getKey('ListCustomersTitle_nextScheduledPaymentAmount')}"   >
-                                    <h:outputText rendered="#{not empty item.paymentParameters.nextScheduledPayment}" value="#{item.paymentParameters.nextScheduledPayment.paymentAmount}">
-                                        <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
-                                    </h:outputText>
-                                </p:column>
-                                <p:column sortBy="#{item.paymentParameters.lastSuccessfulScheduledPayment.lastUpdatedDatetime}" filterBy="#{item.paymentParameters.lastSuccessfulScheduledPayment.lastUpdatedDatetime}" headerText="#{configMapController.getKey('ListCustomersTitle_lastUpdated')}"   >
-                                    <h:outputText  rendered="#{not empty item.paymentParameters.lastSuccessfulScheduledPayment}"  value="#{item.paymentParameters.lastSuccessfulScheduledPayment.lastUpdatedDatetime}">
-                                        <f:convertDateTime  pattern="yyyy-MM-dd hh:mm:ss" />
-                                    </h:outputText>
-                                    <h:outputText rendered="#{empty item.paymentParameters.lastSuccessfulScheduledPayment}" value="---"/>
-                                </p:column>
-
-                                <p:column sortBy="#{item.paymentParameters.lastSuccessfulScheduledPayment.paymentAmount}" filterBy="#{item.paymentParameters.lastSuccessfulScheduledPayment.paymentAmount}" headerText="#{configMapController.getKey('ListCustomersTitle_totalPaymentsSuccessfulAmount')}"   >
-                                    <h:outputText rendered="#{not empty item.paymentParameters.lastSuccessfulScheduledPayment}" value="#{item.paymentParameters.lastSuccessfulScheduledPayment.paymentAmount}">
-                                        <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
-                                    </h:outputText>
-                                </p:column>
-                                <p:column  sortBy="#{item.paymentParameters.lastSuccessfulScheduledPayment.debitDate}" filterBy="#{item.paymentParameters.lastSuccessfulScheduledPayment.debitDate}" headerText="#{configMapController.getKey('ListCustomersTitle_lastSuccessfulScheduledPayment')}"   >
-                                    <h:outputText rendered="#{not empty item.paymentParameters.lastSuccessfulScheduledPayment}" value="#{item.paymentParameters.lastSuccessfulScheduledPayment.debitDate}">
-                                        <f:convertDateTime pattern="E dd MMM yyyy" />
-                                    </h:outputText>
-                                    <h:outputText rendered="#{empty item.paymentParameters.lastSuccessfulScheduledPayment}" value="---"/>
-                                </p:column>
+                                </div>
 
 
-                            </p:dataTable>
-                        </h:panelGroup>
+                            </div>
+
+                            <div class="Container20 Responsive">
+
+                                <div class="Container100 TexAlRight">
+                                    <h:panelGrid columns="2" cellpadding="5" >
+                                        <p:commandButton id="addNoteDialogButton1"  value="#{configMapController.getKey('ListNotesCreateLink')}" onclick="PF('NotesCreateDialogue').show()" type="button"/> 
+                                        <p:commandButton id="showDialogButton"  oncomplete="PF('customersCreateDialogue').show()"   actionListener="#{customersController.prepareCreateAjax}" value="#{configMapController.getKey('ListCustomersCreateLink')}" process=":formCustomersCreate1"  update=":formCustomersCreate1:dialogueGrid :formCustomersCreate1:dialogueGrid2 :growl" /> 
+                                    </h:panelGrid >
+
+                                </div>
+
+
+                            </div>
+                        </div>
+                        <div class="Seperator"></div>
+                        <div class="Container100">
+                            <h:outputText escape="false" value="#{configMapController.getKey('ListCustomersEmpty')}" rendered="#{customersController.items.rowCount == 0}"/>
+                            <h:panelGroup rendered="#{customersController.items.rowCount > 0}">
+                                <p:dataTable id="customersTableList" 
+
+
+                                             selection="#{customersController.multiSelected}" 
+                                             rowKey="#{item.id}" 
+                                             value="#{customersController.items}" 
+                                             filteredValue="#{customersController.filteredItems}" 
+                                             widgetVar="customersControllerTable" 
+                                             editable="true" 
+
+                                             var="item"  
+                                             scrollHeight="400"
+                                             scrollable="true" >
+                                    <f:facet name="header">
+
+
+                                        <h:panelGroup>
+                                            <h:outputText value="Search all fields:" />
+                                            <p:inputText id="globalFilter" onkeyup="PF('customersControllerTable').filter();" />
+                                        </h:panelGroup>
+                                        <h:outputText value="   " />
+                                        <h:panelGroup>
+                                         <!--   <h:outputText  rendered="#{ customersController.filteredItems != null}" value="#{customersController.filteredItems.size} Records Found"/>-->
+                                            <h:outputText  rendered="#{customersController.items != null}" value="#{customersController.items.rowCount} Records Found"/>
+                                        </h:panelGroup>
+
+
+
+                                    </f:facet>
+                                    <p:ajax event="rowSelect"  listener="#{customersController.setSelecteDblClick}" update=":growl :tv:customerslistForm1:selectedUser :tv:formCustomersEdit1 :formCustomersCreate1 :tv:paymentsForm :tv:NoteslistForm1 :confirmCancellation :confirmDialogNotesCreate1"  />  
+                                    <p:column selectionMode="multiple" />
+                                    <p:column sortBy="#{item.id}" filterBy="#{item.id}" headerText="#{configMapController.getKey('ListCustomersTitle_id')}"   >
+                                        <h:outputText value="#{item.id}"/>
+                                    </p:column>
+
+                                    <p:column sortBy="#{item.firstname}" filterBy="#{item.firstname}" headerText="#{configMapController.getKey('ListCustomersTitle_firstname')}"   >
+                                        <h:outputText value="#{item.firstname}"/>
+                                    </p:column>
+                                    <p:column sortBy="#{item.lastname}" filterBy="#{item.lastname}" headerText="#{configMapController.getKey('ListCustomersTitle_lastname')}"   >
+                                        <h:outputText value="#{item.lastname}"/>
+                                    </p:column>
+                                    <p:column sortBy="#{item.active.customerState}" filterBy="#{item.active.customerState}" headerText="#{configMapController.getKey('ListCustomersTitle_activeCRM')}"   >
+                                        <h:outputText value="TRAINER " rendered="#{customersController.isCustomerInRole(item,'TRAINER')}" /> <h:outputText value="#{item.active.customerState}"/> 
+                                    </p:column>
+                                    <p:column sortBy="#{item.paymentParameters.statusDescription}" filterBy="#{item.paymentParameters.statusDescription}" headerText="#{configMapController.getKey('ListCustomersTitle_activeEZI')}"   >
+                                        <h:outputText value="#{item.paymentParameters.statusDescription}"/> 
+                                    </p:column>
+                                    <p:column sortBy="#{item.paymentParameters.contractStartDate}" filterBy="#{item.paymentParameters.contractStartDate}" headerText="#{configMapController.getKey('ListCustomersTitle_contractStartDate')}"   >
+                                        <h:outputText value="#{item.paymentParameters.contractStartDate}">
+                                            <f:convertDateTime pattern="dd MMM yyyy" />
+                                        </h:outputText>
+                                    </p:column>
+                                    <p:column sortBy="#{item.paymentParameters.paymentPeriod}" filterBy="#{item.paymentParameters.paymentPeriod}" headerText="#{configMapController.getKey('ListCustomersTitle_paymentPeriod')}"   >
+
+                                        <h:outputText  rendered="#{item.paymentParameters.paymentPeriod == 'F'}"  value="Fortnightly" />
+                                        <h:outputText  rendered="#{item.paymentParameters.paymentPeriod == 'M'}"  value="Monthly" />
+                                        <h:outputText  rendered="#{item.paymentParameters.paymentPeriod == '4'}"  value="4 Weekly" />
+                                        <h:outputText  rendered="#{item.paymentParameters.paymentPeriod == 'N'}"  value="Weekday in Month" />
+                                        <h:outputText  rendered="#{item.paymentParameters.paymentPeriod == 'Q'}"  value="Quarterly" />
+                                        <h:outputText  rendered="#{item.paymentParameters.paymentPeriod == 'H'}"  value="Half Yearly" />
+                                        <h:outputText  rendered="#{item.paymentParameters.paymentPeriod == 'Y'}"  value="Annually" />
+                                        <h:outputText  rendered="#{item.paymentParameters.paymentPeriod == 'W'}"  value="Weekly" />
+                                        <h:outputText  rendered="#{item.paymentParameters.paymentPeriod == 'Z'}"  value="No Schedule" />
+                                        <h:outputText  rendered="#{item.paymentParameters.paymentPeriod != 'Z' and item.paymentParameters.paymentPeriod != 'M' and item.paymentParameters.paymentPeriod != 'Q' and item.paymentParameters.paymentPeriod != 'H' and item.paymentParameters.paymentPeriod != 'Y' }"  value=" - #{item.paymentParameters.paymentPeriodDayOfWeek}"/> 
+                                        <h:outputText  rendered="#{item.paymentParameters.paymentPeriod != 'Z' and item.paymentParameters.paymentPeriod == 'M' }"  value=", day-#{item.paymentParameters.paymentPeriodDayOfMonth}"/> 
+
+                                    </p:column>
+
+                                    <p:column sortBy="#{item.paymentParameters.nextScheduledPayment.debitDate}" filterBy="#{item.paymentParameters.nextScheduledPayment.debitDate}" headerText="#{configMapController.getKey('ListCustomersTitle_nextScheduledPayment')}"   >
+                                        <h:outputText rendered="#{not empty item.paymentParameters.nextScheduledPayment}"  value="#{item.paymentParameters.nextScheduledPayment.debitDate}">
+                                            <f:convertDateTime pattern="E dd MMM yyyy" />
+                                        </h:outputText>
+                                        <h:outputText rendered="#{empty item.paymentParameters.nextScheduledPayment}" value="---"/>
+                                    </p:column>
+                                    <p:column sortBy="#{item.paymentParameters.nextScheduledPayment.paymentAmount}" filterBy="#{item.paymentParameters.nextScheduledPayment.paymentAmount}" headerText="#{configMapController.getKey('ListCustomersTitle_nextScheduledPaymentAmount')}"   >
+                                        <h:outputText rendered="#{not empty item.paymentParameters.nextScheduledPayment}" value="#{item.paymentParameters.nextScheduledPayment.paymentAmount}">
+                                            <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
+                                        </h:outputText>
+                                    </p:column>
+                                    <p:column sortBy="#{item.paymentParameters.lastSuccessfulScheduledPayment.lastUpdatedDatetime}" filterBy="#{item.paymentParameters.lastSuccessfulScheduledPayment.lastUpdatedDatetime}" headerText="#{configMapController.getKey('ListCustomersTitle_lastUpdated')}"   >
+                                        <h:outputText  rendered="#{not empty item.paymentParameters.lastSuccessfulScheduledPayment}"  value="#{item.paymentParameters.lastSuccessfulScheduledPayment.lastUpdatedDatetime}">
+                                            <f:convertDateTime  pattern="yyyy-MM-dd hh:mm:ss" />
+                                        </h:outputText>
+                                        <h:outputText rendered="#{empty item.paymentParameters.lastSuccessfulScheduledPayment}" value="---"/>
+                                    </p:column>
+
+                                    <p:column sortBy="#{item.paymentParameters.lastSuccessfulScheduledPayment.paymentAmount}" filterBy="#{item.paymentParameters.lastSuccessfulScheduledPayment.paymentAmount}" headerText="#{configMapController.getKey('ListCustomersTitle_totalPaymentsSuccessfulAmount')}"   >
+                                        <h:outputText rendered="#{not empty item.paymentParameters.lastSuccessfulScheduledPayment}" value="#{item.paymentParameters.lastSuccessfulScheduledPayment.paymentAmount}">
+                                            <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
+                                        </h:outputText>
+                                    </p:column>
+                                    <p:column  sortBy="#{item.paymentParameters.lastSuccessfulScheduledPayment.debitDate}" filterBy="#{item.paymentParameters.lastSuccessfulScheduledPayment.debitDate}" headerText="#{configMapController.getKey('ListCustomersTitle_lastSuccessfulScheduledPayment')}"   >
+                                        <h:outputText rendered="#{not empty item.paymentParameters.lastSuccessfulScheduledPayment}" value="#{item.paymentParameters.lastSuccessfulScheduledPayment.debitDate}">
+                                            <f:convertDateTime pattern="E dd MMM yyyy" />
+                                        </h:outputText>
+                                        <h:outputText rendered="#{empty item.paymentParameters.lastSuccessfulScheduledPayment}" value="---"/>
+                                    </p:column>
+
+
+                                </p:dataTable>
+                            </h:panelGroup>
+                        </div>
                     </h:form>
                 </p:tab>
 
 
-                <p:tab id="tab2" title="Edit Customer Details"  >  
+
+                <p:tab id="tab2" title="Edit Customer Details" class="Container100 Responsive100"  >  
                     <h:form id="formCustomersEdit1">    
                         <!-- <p:log />-->
                         <p:panelGrid id="dialogueGrid1" columns="4">
@@ -255,16 +299,16 @@
                             </p:password>
                             <h:panelGrid  >
                                 <p:messages id="messages" showDetail="true" autoUpdate="true"  />
-
+    
                                 <h:panelGrid columns="2" id="matchGrid" cellpadding="5">                   
                                     <h:outputLabel for="pwd1" value="Password 1: *" />
                                     <p:password id="pwd1" value="#{customersController.checkPass}" match="pwd2" label="Password 1" feedback="true" required="true" />
-
+    
                                     <h:outputLabel for="pwd2" value="Password 2: *" />
                                     <p:password id="pwd2" value="#{customersController.checkPass}" label="Password 2" required="true" />
                                 </h:panelGrid>
                                 <p:commandButton  id="passButton" ajax="true" actionListener="#{customersController.updatepass}" update=":growl matchGrid"   value="#{configMapController.getKey('EditCustomersUpdatePassword')}" immediate="true"/>
-
+    
                                <p:commandButton update="matchGrid" value="Save" />
                             </h:panelGrid>  -->
                           <!--  <p:commandButton  id="passButton" ajax="true" actionListener="#{customersController.updatepass}" update=":growl"   value="#{configMapController.getKey('EditCustomersUpdatePassword')}" immediate="true"/>-->
@@ -288,7 +332,7 @@
                         <!-- <p:outputLabel  value="Groups:    " for="selectedGroupsCheckbox2"/>
                          <h:selectManyCheckbox id="selectedGroupsCheckbox2" value="#{customersController.selectedGroups}"    converter="customerGroupsConverter">
                              <f:selectItems value="#{customersController.customerGroupsList}" var="custGroup" itemLabel="#{custGroup.groupname}" itemValue="#{custGroup}" />
-
+    
                          </h:selectManyCheckbox>-->
 
 
@@ -319,7 +363,7 @@
 
 
 
-                <p:tab id="tab3" title="Payment Information" rendered="#{ezidebit.paymentGatewayEnabled}" >  
+                <p:tab id="tab3" title="Payment Information" rendered="#{ezidebit.paymentGatewayEnabled}" class="Container100 Responsive100" >  
                     <h:form id="paymentsForm" > 
 
                         <p:panel id="progressBarPanel" rendered="#{ezidebit.asyncOperationRunning}" >
@@ -629,91 +673,85 @@
 
 
 
-                <p:tab id="tab4" title="Customer Notes"  >  
+                <p:tab id="tab4" title="Customer Notes"  class="Container100 Responsive100" >  
 
 
                     <h:form id="NoteslistForm1">
-                        <h:panelGroup >
 
-
-                        </h:panelGroup> 
                         <h:outputText id="selectedUser3" value=" #{customersController.selected.firstname} #{customersController.selected.lastname} " />
                         <h:outputText escape="false" value="#{configMapController.getKey('ListNotesEmpty')}" rendered="#{customersController.notesItems.rowCount == 0}"/>
-                        <h:panelGroup rendered="#{customersController.notesItems.rowCount > 0}">
-                            <p:dataTable  editable="true" 
-                                          value="#{customersController.notesItems}" 
-                                          filteredValue="#{customersController.notesFilteredItems}"  
-                                          widgetVar="notesControllerTable" 
 
-                                          var="item" 
-                                          selection="#{customersController.selectedNoteForDeletion}" 
-                                          rowKey="#{item.id}"
-                                          paginator="true" 
-                                          rows="15"   
-                                          paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  
-                                          rowsPerPageTemplate="5,10,15,20,25,50,100" >
-                                <f:facet name="header">
-                                    <p:outputPanel>
-                                        <h:outputText value="Notes" />
+                        <p:dataTable  editable="true" 
+                                      value="#{customersController.notesItems}" 
+                                      filteredValue="#{customersController.notesFilteredItems}"  
+                                      widgetVar="notesControllerTable" 
+                                      rendered="#{customersController.notesItems.rowCount > 0}"
+                                      var="item" 
+                                      selection="#{customersController.selectedNoteForDeletion}" 
+                                      rowKey="#{item.id}"
+                                      paginator="true" 
+                                      rows="15"   
+                                      paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  
+                                      rowsPerPageTemplate="5,10,15,20,25,50,100" >
+                            <f:facet name="header">
+                                <p:outputPanel>
+                                    <h:outputText value="Notes" />
 
-                                    </p:outputPanel>
-                                    <p:outputPanel>
-                                        <p:commandButton rendered="#{notesController.isUserInRole('ADMIN')}"  oncomplete="PF('notesControllerTable').filter()" update=":growl"  value="#{configMapController.getKey('ListNotesDestroyLink')}" actionListener="#{customersController.deleteNote}"/>
-                                        <p:commandButton id="showDialogButton2"  value="#{configMapController.getKey('ListNotesCreateLink')}" onclick="PF('NotesCreateDialogue').show()" type="button"/> 
-                                    </p:outputPanel>
-                                </f:facet>
-                                <p:ajax event="rowEdit" listener="#{customersController.onNotesEdit}" update=":growl" oncomplete="PF('notesControllerTable').filter()" />  
-                                <p:ajax event="rowEditCancel" listener="#{customersController.onNotesCancel}" update=":growl" />  
-                                <p:column selectionMode="single" width="50"/>
-                                <p:column rendered="#{notesController.isUserInRole('ADMIN')}"  headerText="Edit" style="width:50px">  
-                                    <p:rowEditor />  
-                                </p:column>  
-                                <p:column sortBy="#{item.createTimestamp}" filterOptions="" filterBy="#{item.createTimestamp}" headerText="#{configMapController.getKey('ListNotesTitle_createTimestamp')}"  width="150" >
+                                </p:outputPanel>
+                                <p:outputPanel>
+                                    <p:commandButton rendered="#{notesController.isUserInRole('ADMIN')}"  oncomplete="PF('notesControllerTable').filter()" update=":growl"  value="#{configMapController.getKey('ListNotesDestroyLink')}" actionListener="#{customersController.deleteNote}"/>
+                                    <p:commandButton id="showDialogButton2"  value="#{configMapController.getKey('ListNotesCreateLink')}" onclick="PF('NotesCreateDialogue').show()" type="button"/> 
+                                </p:outputPanel>
+                            </f:facet>
+                            <p:ajax event="rowEdit" listener="#{customersController.onNotesEdit}" update=":growl" oncomplete="PF('notesControllerTable').filter()" />  
+                            <p:ajax event="rowEditCancel" listener="#{customersController.onNotesCancel}" update=":growl" />  
+                            <p:column selectionMode="single" width="50"/>
+                            <p:column rendered="#{notesController.isUserInRole('ADMIN')}"  headerText="Edit" style="width:50px">  
+                                <p:rowEditor />  
+                            </p:column>  
+                            <p:column sortBy="#{item.createTimestamp}" filterOptions="" filterBy="#{item.createTimestamp}" headerText="#{configMapController.getKey('ListNotesTitle_createTimestamp')}"  width="150" >
 
-                                    <p:cellEditor> 
-                                        <f:facet name="output">
-                                            <h:outputText value="#{item.createTimestamp}">
-                                                <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
-                                            </h:outputText>
-                                        </f:facet>
-                                        <f:facet name="input">
-                                            <p:calendar value="#{item.createTimestamp}">	
-                                                <p:ajax event="dateSelect" listener= "#{notesController.handleDateSelect}" update=":growl" />
-                                            </p:calendar>
-                                        </f:facet>
-                                    </p:cellEditor> 
+                                <p:cellEditor> 
+                                    <f:facet name="output">
+                                        <h:outputText value="#{item.createTimestamp}">
+                                            <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
+                                        </h:outputText>
+                                    </f:facet>
+                                    <f:facet name="input">
+                                        <p:calendar value="#{item.createTimestamp}">	
+                                            <p:ajax event="dateSelect" listener= "#{notesController.handleDateSelect}" update=":growl" />
+                                        </p:calendar>
+                                    </f:facet>
+                                </p:cellEditor> 
 
-                                </p:column>
-                                <p:column  sortBy="#{item.createdBy.lastname}" filterBy="#{item.createdBy.lastname}" headerText="#{configMapController.getKey('ListNotesTitle_createdBY')}"   >
-                                    <h:outputText value="#{item.createdBy.firstname} #{item.createdBy.lastname}"/>
-                                </p:column>
-                                <p:column sortBy="#{item.note}" filterBy="#{item.note}"  filterMatchMode="contains" headerText="#{configMapController.getKey('ListNotesTitle_note')}"   >
-                                    <p:cellEditor> 
-                                        <f:facet name="output">
-                                            <h:outputText value="#{item.note}"/>
-                                        </f:facet>
-                                        <f:facet name="input">
-                                            <p:inputText value="#{item.note}" label="#{configMapController.getKey('ListNotesTitle_note')}" />
-                                        </f:facet>
-                                    </p:cellEditor> 
-
-
-                                </p:column>
+                            </p:column>
+                            <p:column  sortBy="#{item.createdBy.lastname}" filterBy="#{item.createdBy.lastname}" headerText="#{configMapController.getKey('ListNotesTitle_createdBY')}"   >
+                                <h:outputText value="#{item.createdBy.firstname} #{item.createdBy.lastname}"/>
+                            </p:column>
+                            <p:column sortBy="#{item.note}" filterBy="#{item.note}"  filterMatchMode="contains" headerText="#{configMapController.getKey('ListNotesTitle_note')}"   >
+                                <p:cellEditor> 
+                                    <f:facet name="output">
+                                        <h:outputText value="#{item.note}"/>
+                                    </f:facet>
+                                    <f:facet name="input">
+                                        <p:inputText value="#{item.note}" label="#{configMapController.getKey('ListNotesTitle_note')}" />
+                                    </f:facet>
+                                </p:cellEditor> 
 
 
+                            </p:column>
 
-                                <!--  <p:column>
-                                      <p:commandButton rendered="#{notesController.isUserInRole('ADMIN')}"  oncomplete="PF('notesControllerTable').filter()" update=":growl"  value="#{configMapController.getKey('ListNotesDestroyLink')}">
-                                          <f:setPropertyActionListener value="#{item}" target="#{customersController.selectedNoteForDeletion}" />
-                                      </p:commandButton>                        
-  
-                                  </p:column>-->
-                            </p:dataTable>
-                        </h:panelGroup>
+                        </p:dataTable>
+
                     </h:form>
 
                 </p:tab>
             </p:tabView>  
+
+
+            <h:form id="remoteCommandForm">
+                <p:remoteCommand name="connectPushServer" actionListener="#{ezidebit.checkPushChannelIsOpen}" autoRun="true" />
+            </h:form>
             <p:socket onMessage="handleMessage" onError="handleError" onTransportFailure="handleTransportFailure"  onClose="handleClose" channel="/payments" onOpen="" onReconnect="handleReconnect" autoConnect="false"  widgetVar="subscriber"/>
             <script type="text/javascript">
                 function handleMessage(facesmessage) {
@@ -759,8 +797,9 @@
             <ui:include src="confirmCancelDialogue.xhtml"/>
             <ui:include src="EditPaymentMethod.xhtml"/>
             <ui:include src="UpdatePassword.xhtml"/>
-        </ui:define>
-    </ui:composition>
+        </div>
+    </ui:define>
+</ui:composition>
 
 
 <!--

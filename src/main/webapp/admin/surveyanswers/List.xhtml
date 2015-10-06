@@ -67,25 +67,25 @@
 
 
                         </p:column>
-                        <p:column sortBy="#{item.surveyId}" filterBy="#{item.surveyId}" headerText="#{configMapController.getKey('ListSurveyanswersTitle_surveyId')}"   >
+                        <p:column sortBy="#{item.questionId.surveyId.name}" filterBy="#{item.questionId.surveyId.name}" headerText="#{configMapController.getKey('ListSurveyanswersTitle_surveyId')}"   >
                             <p:cellEditor> 
                                 <f:facet name="output">
-                                    <h:outputText value="#{item.surveyId}"/>
+                                    <h:outputText value="#{item.questionId.surveyId.name}"/>
                                 </f:facet>
                                 <f:facet name="input">
-                                    <p:inputText value="#{item.surveyId}" label="#{configMapController.getKey('ListSurveyanswersTitle_surveyId')}" />
+                                    <p:inputText value="#{item.questionId.surveyId.name}" label="#{configMapController.getKey('ListSurveyanswersTitle_surveyId')}" />
                                 </f:facet>
                             </p:cellEditor> 
 
 
                         </p:column>
-                        <p:column sortBy="#{item.questionId}" filterBy="#{item.questionId}" headerText="#{configMapController.getKey('ListSurveyanswersTitle_questionId')}"   >
+                        <p:column sortBy="#{item.questionId.question}" filterBy="#{item.questionId.question}" headerText="#{configMapController.getKey('ListSurveyanswersTitle_questionId')}"   >
                             <p:cellEditor> 
                                 <f:facet name="output">
-                                    <h:outputText value="#{item.questionId}"/>
+                                    <h:outputText value="#{item.questionId.question}"/>
                                 </f:facet>
                                 <f:facet name="input">
-                                    <p:inputText value="#{item.questionId}" label="#{configMapController.getKey('ListSurveyanswersTitle_questionId')}" />
+                                    <p:inputText value="#{item.questionId.question}" label="#{configMapController.getKey('ListSurveyanswersTitle_questionId')}" />
                                 </f:facet>
                             </p:cellEditor> 
 

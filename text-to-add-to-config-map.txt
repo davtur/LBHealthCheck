@@ -1153,3 +1153,4 @@ ListSessionTypesTitle_sessionDurationMinutes=SessionDurationMinutes
 MyStats_MyPicturesHeader=My Photos
 MySessions_Header=My Sessions Chart
 MySessions_TableHeader=My Sessions Table
+ListCustomersStatusButton=Status:
