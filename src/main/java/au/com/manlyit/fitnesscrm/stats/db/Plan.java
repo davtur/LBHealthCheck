@@ -98,10 +98,12 @@ public class Plan implements BaseEntity, Serializable {
         this.planActive = planActive;
     }
 
+    @Override
     public Integer getId() {
         return id;
     }
 
+    @Override
     public void setId(Integer id) {
         this.id = id;
     }
@@ -181,9 +183,9 @@ public class Plan implements BaseEntity, Serializable {
     }
 
     @XmlTransient
-    public PfSelectableDataModel getPlanCollectionModel() {
+    public PfSelectableDataModel<Plan> getPlanCollectionModel() {
         ArrayList<Plan> alp = new ArrayList<>(planCollection);
-        return new PfSelectableDataModel(alp);
+        return new PfSelectableDataModel<>(alp);
     }
 
     @XmlTransient

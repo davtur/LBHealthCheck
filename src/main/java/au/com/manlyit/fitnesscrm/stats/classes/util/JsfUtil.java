@@ -1,7 +1,5 @@
 package au.com.manlyit.fitnesscrm.stats.classes.util;
 
-import au.com.manlyit.fitnesscrm.stats.classes.CustomersController;
-import au.com.manlyit.fitnesscrm.stats.db.AuditLog;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import java.io.Serializable;
 import java.util.List;
@@ -16,12 +14,10 @@ import org.apache.commons.lang.StringEscapeUtils;
 import org.primefaces.push.EventBus;
 import org.primefaces.push.EventBusFactory;
 
-public class JsfUtil implements Serializable{
+public  class JsfUtil implements Serializable {
+    private static final long serialVersionUID = 1L;
 
-    @Inject
-    private au.com.manlyit.fitnesscrm.stats.beans.CustomersFacade ejbCustomerFacade;
-    @Inject
-    private au.com.manlyit.fitnesscrm.stats.beans.AuditLogFacade ejbAuditLogFacade;
+  
 
     public static SelectItem[] getSelectItems(List<?> entities, boolean selectOne) {
         int size = selectOne ? entities.size() + 1 : entities.size();
@@ -86,7 +82,7 @@ public class JsfUtil implements Serializable{
     }
 
     public static void addErrorMessage(String msg) {
-        FacesMessage facesMsg = new FacesMessage(FacesMessage.SEVERITY_ERROR,msg , null);
+        FacesMessage facesMsg = new FacesMessage(FacesMessage.SEVERITY_ERROR, msg, null);
         FacesContext.getCurrentInstance().addMessage(null, facesMsg);
         Logger.getLogger(JsfUtil.class.getName()).severe(msg);
     }
@@ -105,18 +101,18 @@ public class JsfUtil implements Serializable{
     }
 
     public static void addSuccessMessage(String msg) {
-        FacesMessage facesMsg = new FacesMessage(FacesMessage.SEVERITY_INFO, msg, null);
-        FacesContext.getCurrentInstance().addMessage("successInfo", facesMsg);
+        FacesMessage facesMsg = new FacesMessage(msg);
+        FacesContext.getCurrentInstance().addMessage(null, facesMsg);
     }
 
     public static void addSuccessMessage(String summary, String message) {
         FacesMessage facesMsg;
         if (summary.contains(message)) {
-            facesMsg = new FacesMessage(FacesMessage.SEVERITY_INFO, message, null);
+            facesMsg = new FacesMessage(message);
         } else {
-            facesMsg = new FacesMessage(FacesMessage.SEVERITY_INFO, summary, message);
+            facesMsg = new FacesMessage(summary, message);
         }
-        FacesContext.getCurrentInstance().addMessage("successInfo", facesMsg);
+        FacesContext.getCurrentInstance().addMessage(null, facesMsg);
     }
 
     public static void pushSuccessMessage(String channel, String summary, String detail) {
@@ -138,19 +134,18 @@ public class JsfUtil implements Serializable{
         return converter.getAsObject(FacesContext.getCurrentInstance(), component, theId);
     }
 
-   /* public synchronized int getUser() {
-       return ejbCustomerFacade.findCustomerByUsername(FacesContext.getCurrentInstance().getExternalContext().getRemoteUser()).getId();
-    }*/
+    /* public synchronized int getUser() {
+     return ejbCustomerFacade.findCustomerByUsername(FacesContext.getCurrentInstance().getExternalContext().getRemoteUser()).getId();
+     }*/
 
     /*public synchronized Customers getCustomer() {
-        Customers cust;
-        FacesContext context = FacesContext.getCurrentInstance();
-        CustomersController custController = (CustomersController) context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
-        cust = ejbCustomerFacade.findCustomerByUsername(custController.getSelected().getUsername());
+     Customers cust;
+     FacesContext context = FacesContext.getCurrentInstance();
+     CustomersController custController = (CustomersController) context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
+     cust = ejbCustomerFacade.findCustomerByUsername(custController.getSelected().getUsername());
 
-        return cust;
-    }*/
-
+     return cust;
+     }*/
     public static boolean isValidationFailed() {
         return FacesContext.getCurrentInstance().isValidationFailed();
     }
@@ -160,7 +155,5 @@ public class JsfUtil implements Serializable{
         boolean isAdmin = facesContext.getExternalContext().isUserInRole("ADMIN");
         return isAdmin;
     }
-
-   
 
 }

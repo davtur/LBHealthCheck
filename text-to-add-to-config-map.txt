@@ -1154,3 +1154,4 @@ MyStats_MyPicturesHeader=My Photos
 MySessions_Header=My Sessions Chart
 MySessions_TableHeader=My Sessions Table
 ListCustomersStatusButton=Status:
+(ShowAllUsersForSessionHistory_Title=All Users

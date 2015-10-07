@@ -10,6 +10,8 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.enterprise.context.SessionScoped;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
@@ -29,6 +31,7 @@ import org.primefaces.event.SelectEvent;
 @SessionScoped
 public class SessionTypesController implements Serializable {
 
+    private static final Logger logger = Logger.getLogger(SessionTypesController.class.getName());
     private SessionTypes current;
     private SessionTypes selectedForDeletion;
     private DataModel items = null;
@@ -276,7 +279,7 @@ public class SessionTypesController implements Serializable {
         return JsfUtil.getSelectItems(ejbFacade.findAll(), false);
     }
 
-     public Collection<SessionTypes> getItemsAvailableSelectOne() {
+    public Collection<SessionTypes> getItemsAvailableSelectOne() {
         return ejbFacade.findAllSessionTypesOrderByName(true);
     }
 
@@ -295,13 +298,22 @@ public class SessionTypesController implements Serializable {
         JsfUtil.addErrorMessage("Row Edit Cancelled");
     }
 
-    @FacesConverter(value="sessionTypesControllerConverter", forClass = SessionTypes.class)
+    @FacesConverter(value = "sessionTypesControllerConverter", forClass = SessionTypes.class)
     public static class SessionTypesControllerConverter implements Converter {
 
         public Object getAsObject(FacesContext facesContext, UIComponent component, String value) {
             if (value == null || value.length() == 0) {
                 return null;
             }
+
+            try {
+                Integer val = Integer.parseInt(value);
+
+            } catch (NumberFormatException numberFormatException) {
+                logger.log(Level.INFO, "The passed value ({0}) could not be converted to a sessionType primary key", value);
+                return null;
+            }
+
             SessionTypesController controller = (SessionTypesController) facesContext.getApplication().getELResolver().
                     getValue(facesContext.getELContext(), null, "sessionTypesController");
             return controller.ejbFacade.find(getKey(value));

@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
@@ -98,8 +99,8 @@ public class CustomerImagesController implements Serializable {
     private boolean saveButtonDisabled = true;
     private UploadedFile uploadedFile;
     private boolean profilePhoto = false;
-     int numberOfMobileImagesToDisplay= 3;
-      int offsetOfMobileImagesToDisplay= 0;
+    int numberOfMobileImagesToDisplay = 3;
+    int offsetOfMobileImagesToDisplay = 0;
 
     public CustomerImagesController() {
     }
@@ -215,31 +216,32 @@ public class CustomerImagesController implements Serializable {
         CustomerImages car = (CustomerImages) event.getData();
         //carsSmall.remove(car);
         int offset = images.size() - numberOfMobileImagesToDisplay;
-       if(offsetOfMobileImagesToDisplay < offset){
-           offsetOfMobileImagesToDisplay ++;
-       }
-       /* FacesContext.getCurrentInstance().addMessage(null,
-                new FacesMessage(FacesMessage.SEVERITY_INFO,
-                        "IMage Swiped", "Right: " + car.getFormattedDate()));
-       */
+        if (offsetOfMobileImagesToDisplay < offset) {
+            offsetOfMobileImagesToDisplay++;
+        }
+        /* FacesContext.getCurrentInstance().addMessage(null,
+         new FacesMessage(FacesMessage.SEVERITY_INFO,
+         "IMage Swiped", "Right: " + car.getFormattedDate()));
+         */
     }
-     public void swipeLeftListener(SwipeEvent event) {
+
+    public void swipeLeftListener(SwipeEvent event) {
         CustomerImages car = (CustomerImages) event.getData();
-        if(offsetOfMobileImagesToDisplay > 0){
+        if (offsetOfMobileImagesToDisplay > 0) {
             offsetOfMobileImagesToDisplay--;
         }
         //carsSmall.remove(car);
-       
+
         /*FacesContext.getCurrentInstance().addMessage(null,
-                new FacesMessage(FacesMessage.SEVERITY_INFO,
-                        "Image  Swiped", "Left: " + car.getFormattedDate()));
-        */
+         new FacesMessage(FacesMessage.SEVERITY_INFO,
+         "Image  Swiped", "Left: " + car.getFormattedDate()));
+         */
     }
 
     private void createGallery(int customerId) {
         try {
             List<CustomerImages> imageList = getFacade().findAllByCustId(customerId, true);
-            
+
             images = new ArrayList<>();
 
             for (CustomerImages ci : imageList) {
@@ -248,7 +250,7 @@ public class CustomerImagesController implements Serializable {
                 }
             }
             imageListSize = images.size();
-            logger.log(Level.INFO, "createGallery for customer ID:{2}. Images retrieved from DB : {0}. ImageList Size: {1}",new Object[]{ imageList.size(),imageListSize,customerId});
+            logger.log(Level.INFO, "createGallery for customer ID:{2}. Images retrieved from DB : {0}. ImageList Size: {1}", new Object[]{imageList.size(), imageListSize, customerId});
         } catch (Exception e) {
             logger.log(Level.WARNING, "createGallery for" + customerId + " error :", e);
         }
@@ -1084,8 +1086,25 @@ public class CustomerImagesController implements Serializable {
                 if (custImage != null) {
                     CustomerImagesController controller = (CustomerImagesController) context.getApplication().getELResolver().
                             getValue(context.getELContext(), null, "customerImagesController");
-                    controller.removeImageFromList(custImage);
-                    ejbFacade.remove(custImage);
+                    try {
+                        if (Objects.equals(custImage.getCustomerId().getProfileImage().getId(), custImage.getId())) {
+                            JsfUtil.addSuccessMessage("Photo Not Removed", "Your profile photo cannot be deleted. Upload a new picture to enable deletion of this one.");
+
+                        } else {
+                            if (custImage.getCustomerId().getCustomerImagesCollection().size() == 1) {
+                                JsfUtil.addSuccessMessage("Photo Not Removed", "The last photo cannot be removed");
+
+                            } else {
+
+                                ejbFacade.remove(custImage);
+                                controller.removeImageFromList(custImage);
+
+                            }
+                        }
+                    } catch (Exception e) {
+                        logger.log(Level.WARNING, "Failed To Remove Photo!", e);
+
+                    }
                 }
             }
         }
@@ -1223,8 +1242,7 @@ public class CustomerImagesController implements Serializable {
 
         return images;
     }
-    
-    
+
     public List<CustomerImages> getMobileImages() {
         ArrayList<CustomerImages> mobImages = null;
         int size = 0;
@@ -1235,7 +1253,7 @@ public class CustomerImagesController implements Serializable {
                     images = new ArrayList<>();
                 }
             }
-             size = images.size();
+            size = images.size();
             mobImages = new ArrayList<>();
             int count = 0;
             for (int c = offsetOfMobileImagesToDisplay; c < size; c++) {
@@ -1243,17 +1261,16 @@ public class CustomerImagesController implements Serializable {
                     mobImages.add(images.get(c));
                 }
                 count++;
-                
+
             }
         } catch (Exception e) {
-            logger.log(Level.SEVERE, "getMobileImages",e);
+            logger.log(Level.SEVERE, "getMobileImages", e);
         }
-       
-        logger.log(Level.INFO, "getMobileImages - offset={0},Display={1},backing array Size ={2}, user:{3}, images:{4}",new Object[]{offsetOfMobileImagesToDisplay,numberOfMobileImagesToDisplay,size,getUser(),mobImages.size()});
+
+        logger.log(Level.INFO, "getMobileImages - offset={0},Display={1},backing array Size ={2}, user:{3}, images:{4}", new Object[]{offsetOfMobileImagesToDisplay, numberOfMobileImagesToDisplay, size, getUser(), mobImages.size()});
 
         return mobImages;
     }
-
 
     /**
      * @param images the images to set
@@ -1439,7 +1456,7 @@ public class CustomerImagesController implements Serializable {
         this.imageListSize = imageListSize;
     }
 
-    @FacesConverter(value="customerImagesControllerConverter", forClass = CustomerImages.class)
+    @FacesConverter(value = "customerImagesControllerConverter", forClass = CustomerImages.class)
     public static class CustomerImagesControllerConverter implements Converter {
 
         public Object getAsObject(FacesContext facesContext, UIComponent component, String value) {

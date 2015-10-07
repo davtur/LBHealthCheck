@@ -19,23 +19,23 @@
 
                   </p:panel>
                   <p:panel id ="contentFlowPanel"  header="My Pictures : #{customerImagesController.imageListSize} loaded." >-->
-                    <h1 class="BigTopic">#{configMapController.getKey('MyStats_MyPicturesHeader')}</h1>
-                    <p:contentFlow id="mainCarousel" class="myStatsCarousel parentOfUploadPhoto"  value="#{customerImagesController.images}" var="image"  style="height: 400px" widgetVar="contentFlowWidget" >
+                    <h1  class="BigTopic">#{configMapController.getKey('MyStats_MyPicturesHeader')} (<h:outputText id="heading1"  class="myStatsCarousel parentOfUploadPhoto" value="#{customerImagesController.imageListSize}" />)</h1>
+                    <p:contentFlow id="mainCarousel" class="myStatsCarousel parentOfUploadPhoto"  value="#{customerImagesController.images}" var="photo"   widgetVar="contentFlowWidget" >
 
-                        <p:graphicImage  styleClass="content" value="#{customerImagesController.image}" onclick="clickFlow(this, event)" title="#{configMapController.getKey('ListMyStats_photoTakenText')} #{image.formattedDate}" alt="#{customerImagesController.dynamicTitle}" cache="false">
-                            <f:param name="imageId" value="#{image.id}"/>
+                        <p:graphicImage  styleClass="content" value="#{customerImagesController.image}" onclick="clickFlow(this, event)" title="#{configMapController.getKey('ListMyStats_photoTakenText')} #{photo.formattedDate}" alt="#{customerImagesController.dynamicTitle}" >
+                            <f:param name="imageId" value="#{photo.id}"/>
                         </p:graphicImage>
 
-                        <div class="caption">#{image.formattedDate}</div>
-                        <div class="hiddenId" style="display: none;">#{image.id}</div>
+                        <div class="caption">#{photo.formattedDate}</div>
+                        <div class="hiddenId" style="display: none;">#{photo.id}</div>
                     </p:contentFlow>
-                    <p:contextMenu  for="mainCarousel" >
-                        <p:menuitem value="Refresh" update=":myStatsForm:mainCarousel" />
+                    <p:contextMenu  for="mainCarousel"  >
+                        <p:menuitem value="Refresh" update=":myStatsForm:mainCarousel  :myStatsForm:heading1"  />
                         <p:separator/>
                         <p:menuitem value="Add New" onclick="PF('uploadPhotoDialogueWidget').show()" />
                         <p:menuitem value="Delete" oncomplete="removePicture([{name:'selectedImage', value: $('.item.active div.hiddenId').text()}]);" />
                     </p:contextMenu>
-                    <p:remoteCommand name="removePicture" actionListener="#{customerImagesController.removePicture}" update=":myStatsForm:mainCarousel"/>
+                    <p:remoteCommand name="removePicture" actionListener="#{customerImagesController.removePicture}" update=":growl :myStatsForm:mainCarousel :myStatsForm:heading1"/>
                     <!-- </p:panel> -->
 
 

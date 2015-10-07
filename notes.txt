@@ -30,3 +30,14 @@ dont use this as it may break in future versions of maven
             <systemPath>${project.basedir}/src/main/resources/spark-theme-1.3.1.jar</systemPath>
             <type>jar</type>
         </dependency>
+
+
+
+
+#GLASSFISH HTTP settings on the Protocal-->Listeners.
+
+We will be making large post such as photos up to 10MB so set max post size to 16777216 or -1 for unlimited
+
+increase buffers to 65535
+
+increase max save post size to 8192

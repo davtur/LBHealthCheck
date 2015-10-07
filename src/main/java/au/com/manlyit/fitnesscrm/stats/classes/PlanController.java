@@ -5,12 +5,11 @@ import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PaginationHelper;
 import au.com.manlyit.fitnesscrm.stats.beans.PlanFacade;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PfSelectableDataModel;
-import au.com.manlyit.fitnesscrm.stats.db.CustomerState;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
-import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.enterprise.context.SessionScoped;
@@ -39,7 +38,7 @@ public class PlanController implements Serializable {
     private Plan selectedSubItem;
     private List<Plan> filteredSubItems;
     private Plan selectedForDeletion;
-    private PfSelectableDataModel items = null;
+    private PfSelectableDataModel<Plan> items = null;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.PlanFacade ejbFacade;
     @Inject
@@ -311,10 +310,10 @@ public class PlanController implements Serializable {
         }
     }
 
-    public PfSelectableDataModel getItems() {
+    public PfSelectableDataModel<Plan> getItems() {
         if (items == null) {
             // items = getPagination().createPageDataModel();
-            items = new PfSelectableDataModel(getFacade().findAllPlans());
+            items = new PfSelectableDataModel<>(getFacade().findAllPlans());
         }
         return items;
     }
@@ -443,6 +442,8 @@ public class PlanController implements Serializable {
     public Plan getNewPlan() {
         if (newPlan == null) {
             newPlan = new Plan();
+            newPlan.setPlanPrice(BigDecimal.ZERO);
+            newPlan.setPlanDiscount(BigDecimal.ZERO);
             selectedItemIndex = -1;
         }
         return newPlan;

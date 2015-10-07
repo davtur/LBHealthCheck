@@ -461,7 +461,7 @@ public class ScheduleController implements Serializable {
         if (o.getClass() == Date.class) {
             Date date = (Date) event.getObject();
 
-            if (date.after(new Date())) {
+            if (date.getTime() > new Date().getTime()) {
                 getEvent().setReminderDate(date);
             }
 

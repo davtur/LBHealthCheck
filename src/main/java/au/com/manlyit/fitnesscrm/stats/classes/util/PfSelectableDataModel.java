@@ -18,6 +18,7 @@ import org.primefaces.model.SelectableDataModel;
  * @param <T>
  */
 public class PfSelectableDataModel<T extends BaseEntity> extends ListDataModel<T> implements SelectableDataModel<T>, Serializable {
+    private static final long serialVersionUID = 1L;
 
     public PfSelectableDataModel() {
     }
