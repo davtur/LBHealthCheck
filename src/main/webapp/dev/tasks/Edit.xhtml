@@ -54,7 +54,7 @@
                     <p:panelGrid columns="4">
                         <p:panelGrid columns="2">
                             <p:outputLabel value="#{configMapController.getKey('CreateJobConfigMapLabel_configMapKey')}" for="configMapKey" />
-                            <p:selectOneMenu id="configMapKey" value="#{jobConfigMapController.selected.configMapKey}" filter="true" filterMatchMode="startsWith" label="#{configMapController.getKey('CreateJobConfigMapTitle_configMapKey')}" > 
+                            <p:selectOneMenu id="configMapKey" value="#{jobConfigMapController.selected.configMapKey}"  filter="true" filterMatchMode="startsWith" label="#{configMapController.getKey('CreateJobConfigMapTitle_configMapKey')}" > 
                                 <f:selectItems value="#{configMapController.itemsAvailableSelectOne}"/>
                             </p:selectOneMenu>
                             

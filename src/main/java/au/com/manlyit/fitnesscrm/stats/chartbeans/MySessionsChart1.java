@@ -315,7 +315,7 @@ public class MySessionsChart1 implements Serializable {
         if (model2 == null) {
             try {
                 FacesContext context = FacesContext.getCurrentInstance();
-                CustomersController custController = (CustomersController) context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
+                CustomersController custController = context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
                 model2 = createSessionsChart(true, custController.getSelected());
             } catch (ELException e) {
                 JsfUtil.addErrorMessage(e, "My Sessions Chart Critical Error", "Couldn't find the customer in the database.");
@@ -349,7 +349,7 @@ public class MySessionsChart1 implements Serializable {
     public Customers getSelectedCustomer() {
         if (selectedCustomer == null) {
             FacesContext context = FacesContext.getCurrentInstance();
-            CustomersController custController = (CustomersController) context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
+            CustomersController custController = context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
 
             selectedCustomer = custController.getSelected();
         }

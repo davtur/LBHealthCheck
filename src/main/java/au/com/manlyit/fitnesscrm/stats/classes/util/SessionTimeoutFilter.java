@@ -23,7 +23,7 @@ import javax.servlet.http.HttpSession;
  * @author tgiunipero
  */
 //@WebFilter(servletNames = {"Controller"})
-@WebFilter("*.xhtml")
+//@WebFilter("*.xhtml")
 public class SessionTimeoutFilter implements Filter {
 
     private static final Logger logger = Logger.getLogger(SessionTimeoutFilter.class.getName());

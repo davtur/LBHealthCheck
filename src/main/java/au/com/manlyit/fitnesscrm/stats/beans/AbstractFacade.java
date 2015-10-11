@@ -4,10 +4,10 @@
  */
 package au.com.manlyit.fitnesscrm.stats.beans;
 
-import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -117,9 +117,11 @@ public abstract class AbstractFacade<T> implements Serializable {
 
     public List<T> load(int first, int count, String sortField, SortOrder sortOrder, Map<String, Object> filters) {
         List<T> resultList;
+        String message = "Lazy Loading: " + entityClass.getSimpleName()+",Rows="+count+", First="+first+", SortField="+sortField+", SortOrder="+sortOrder.name();
+        logger.log(Level.INFO, message);
         CriteriaBuilder builder = getEntityManager().getCriteriaBuilder();
-        CriteriaQuery cq = builder.createQuery();
-        Root root = cq.from(entityClass);
+        CriteriaQuery<T> cq = builder.createQuery(entityClass);
+        Root<T> root = cq.from(entityClass);
         cq.select(root);
         if (sortField != null) {
             if (sortOrder == SortOrder.ASCENDING) {
@@ -151,7 +153,7 @@ public abstract class AbstractFacade<T> implements Serializable {
             cq.where(predicatesList.<Predicate>toArray(
                     new Predicate[predicatesList.size()]));
         }
-        javax.persistence.Query query = getEntityManager().createQuery(cq);
+        javax.persistence.TypedQuery<T> query = getEntityManager().createQuery(cq);
 
         query.setFirstResult(first);
 
@@ -172,6 +174,71 @@ public abstract class AbstractFacade<T> implements Serializable {
 
         return resultList;
     }
-     
+     public List<T> loadDateRange(int first, int count, String sortField, SortOrder sortOrder, Map<String, Object> filters,Date startDate, Date endDate, String dateRangeFieldName) {
+        List<T> resultList;
+        String message = "Lazy Loading: " + entityClass.getSimpleName()+",Rows="+count+", First="+first+", SortField="+sortField+", SortOrder="+sortOrder.name()+", dateRangeFieldName="+dateRangeFieldName+", startDate="+startDate.toString()+", endDate="+endDate.toString();
+        logger.log(Level.INFO, message);
+        CriteriaBuilder builder = getEntityManager().getCriteriaBuilder();
+        CriteriaQuery<T> cq = builder.createQuery(entityClass);
+        Root<T> root = cq.from(entityClass);
+        cq.select(root);
+        if (sortField != null) {
+            if (sortOrder == SortOrder.ASCENDING) {
+                cq.orderBy(builder.asc(root.get(sortField)));
+            } else if (sortOrder == SortOrder.DESCENDING) {
+                cq.orderBy(builder.desc(root.get(sortField)));
+            }
+        }
+        if (filters != null) {
+            Set<Map.Entry<String, Object>> entries = filters.entrySet();
+            ArrayList<Predicate> predicatesList = new ArrayList<>(entries.size());
+            for (Map.Entry<String, Object> filter : entries) {
+                String key = filter.getKey();
+                Expression expresskey = root.get(key);
+                Object val = filter.getValue();
+                Class type = expresskey.getJavaType();
+                try {
+                    Method getIdMethod = type.getMethod("getId");// this is implemented by the BaseEntity class so if it is a join to another table it should have this method
+                    String sVal = (String) val;
+                    int iVal = Integer.parseInt(sVal);
+                    Expression<Integer> custId = root.join(key).get("id");
+                    predicatesList.add(builder.equal(custId, iVal));
+                } catch (NoSuchMethodException ex) {
+                    predicatesList.add(builder.like(expresskey, filter.getValue() + "%"));
+                } catch (SecurityException ex) {
+                    Logger.getLogger(AbstractFacade.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+             Expression<Date> stime = root.get(dateRangeFieldName);
+
+            Predicate condition1 = builder.greaterThanOrEqualTo(stime, startDate);
+            Predicate condition2 = builder.lessThan(stime, endDate);
+            
+            
+            cq.where(builder.and(predicatesList.<Predicate>toArray(
+                    new Predicate[predicatesList.size()])),condition1,condition2);
+        }
+        javax.persistence.TypedQuery<T> query = getEntityManager().createQuery(cq);
+
+        query.setFirstResult(first);
+
+        query.setMaxResults(count);
+        resultList = query.getResultList();
+        // for debugging
+        Session session = getEntityManager().unwrap(JpaEntityManager.class).getActiveSession();
+        DatabaseQuery databaseQuery = ((EJBQueryImpl) query).getDatabaseQuery();
+        databaseQuery.prepareCall(session, new DatabaseRecord());
+        String sqlString = databaseQuery.getSQLString();
+        //This SQL will contain ? for parameters. To get the SQL translated with the arguments you need a DatabaseRecord with the parameter values.
+        // String sqlString2 = databaseQuery.getTranslatedSQLString(session, recordWithValues);
+        if (filters != null) {
+            logger.log(Level.FINE, "Lazy Load SQL Query String: {0}  ----------------- {1}", new Object[]{sqlString, filters.entrySet()});
+        } else {
+            logger.log(Level.FINE, "Lazy Load SQL Query String: {0}  ----------------- Filters Null", new Object[]{sqlString});
+        }
+
+        return resultList;
+    }
+      
 
 }

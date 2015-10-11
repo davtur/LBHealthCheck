@@ -7,6 +7,7 @@ package au.com.manlyit.fitnesscrm.stats.classes.util;
 
 import au.com.manlyit.fitnesscrm.stats.beans.LoginBean;
 import au.com.manlyit.fitnesscrm.stats.beans.PaymentBean;
+import au.com.manlyit.fitnesscrm.stats.classes.CustomersController;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import au.com.manlyit.fitnesscrm.stats.db.PaymentParameters;
 import java.io.IOException;
@@ -91,7 +92,7 @@ public class WebDDRSignUpServlet extends HttpServlet {
             String totalamount = request.getParameter("totalamount");
             String method = request.getParameter("method");
             //boolean mobileDevice = false;
-            FacesContext context = FacesContext.getCurrentInstance();
+            FacesContext facesContext = FacesContext.getCurrentInstance();
             String sessionID = httpSession.getId();
             logger.log(Level.INFO, "Session:{0}, Params:{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12},{13},{14},{15},{16},{17},{18}", new Object[]{sessionID, uref, cref, fname, lname, email, mobile, addr, suburb, state, pcode, rdate, ramount, freq, odate, oamount, numpayments, totalamount, method});
 
@@ -112,7 +113,7 @@ public class WebDDRSignUpServlet extends HttpServlet {
                         String htmlText = configMapFacade.getConfig("system.admin.ezidebit.webddrcallback.template");
                         String name = current.getFirstname() + " " + current.getLastname();
                         htmlText = htmlText.replace(templatePlaceholder, name);
-                        
+
                         Future<Boolean> emailSendResult = paymentBean.sendAsynchEmail(configMapFacade.getConfig("AdminEmailAddress"), configMapFacade.getConfig("PasswordResetCCEmailAddress"), configMapFacade.getConfig("PasswordResetFromEmailAddress"), configMapFacade.getConfig("system.ezidebit.webEddrCallback.EmailSubject"), htmlText, null, emailServerProperties(), false);
                         if (emailSendResult.get() == false) {
                             logger.log(Level.WARNING, "Email for Call Back from Web EDDR Form FAILED. Future result false from async job");
@@ -139,13 +140,22 @@ public class WebDDRSignUpServlet extends HttpServlet {
 
                             }
                         }
+
+                        try {
+                            CustomersController controller = (CustomersController) facesContext.getApplication().getELResolver().
+                                    getValue(facesContext.getELContext(), null, "customersController");
+                            controller.createCombinedAuditLogAndNote(controller.getLoggedInUser(), current, "Direct Debit Form", "The direct debit form has been completed and payments created.", "Not Registered in Payemnt Gateway", "Registered in payment gateway with scheduled payments");
+
+                        } catch (Exception e) {
+                            logger.log(Level.SEVERE, "Couldn't log payemnt form submitted.");
+                        }
+
                         if (loginBean.isMobileDeviceUserAgent() == false) {
                             response.sendRedirect(request.getContextPath() + getValueFromKey("payment.ezidebit.callback.redirect"));
                         } else {
                             response.sendRedirect(request.getContextPath() + getValueFromKey("payment.ezidebit.callback.mobileRedirect"));
                         }
-                        
-                        
+
                     }
                 }
             }

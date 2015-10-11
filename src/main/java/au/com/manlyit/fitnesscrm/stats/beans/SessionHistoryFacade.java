@@ -127,8 +127,8 @@ public class SessionHistoryFacade extends AbstractFacade<SessionHistory> {
             } else {
                 cq.orderBy(cb.desc(stime));
             }
-            Query q = em.createQuery(cq);
-            retList = (List<SessionHistory>) q.getResultList();
+            TypedQuery<SessionHistory> q = em.createQuery(cq);
+            retList =  q.getResultList();
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
         }

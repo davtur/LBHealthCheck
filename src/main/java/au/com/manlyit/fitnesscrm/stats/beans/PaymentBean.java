@@ -1621,6 +1621,7 @@ public class PaymentBean implements Serializable {
         SendHTMLEmailWithFileAttached emailAgent = new SendHTMLEmailWithFileAttached();
         try {
             emailAgent.send(to, ccAddress, from, emailSubject, message, theAttachedfileName, serverProperties, debug);
+            logger.log(Level.INFO, "sendAsynchEmail TO: {0}, CC - {1}, From:{2}, Subject:{3}", new Object[]{to, ccAddress,from,emailSubject});
         } catch (Exception e) {
             String error = "Email Send Failed :" + e.getMessage();
             return new AsyncResult<>(false);

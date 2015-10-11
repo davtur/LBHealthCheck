@@ -96,7 +96,7 @@
                             <h:outputText escape="false" value="#{configMapController.getKey('ListCustomersEmpty')}" rendered="#{customersController.items.rowCount == 0}"/>
                             <h:panelGroup rendered="#{customersController.items.rowCount > 0}">
                                 <p:dataTable id="customersTableList" 
-
+                                            
 
                                              selection="#{customersController.multiSelected}" 
                                              rowKey="#{item.id}" 
@@ -119,9 +119,9 @@
                                         <h:panelGroup>
                                          <!--   <h:outputText  rendered="#{ customersController.filteredItems != null}" value="#{customersController.filteredItems.size} Records Found"/>-->
                                             <h:outputText  rendered="#{customersController.items != null}" value="#{customersController.items.rowCount} Records Found"/>
+
+                                            
                                         </h:panelGroup>
-
-
 
                                     </f:facet>
                                     <p:ajax event="rowSelect"  listener="#{customersController.setSelecteDblClick}" update=":growl :tv:customerslistForm1:selectedUser :tv:formCustomersEdit1 :formCustomersCreate1 :tv:paymentsForm :tv:NoteslistForm1 :confirmCancellation :confirmDialogNotesCreate1"  />  

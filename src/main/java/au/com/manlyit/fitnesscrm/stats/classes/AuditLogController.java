@@ -6,14 +6,18 @@ import au.com.manlyit.fitnesscrm.stats.beans.util.PaginationHelper;
 import au.com.manlyit.fitnesscrm.stats.beans.AuditLogFacade;
 import au.com.manlyit.fitnesscrm.stats.beans.AuditLogFacade;
 import au.com.manlyit.fitnesscrm.stats.classes.util.LazyLoadingDataModel;
+import au.com.manlyit.fitnesscrm.stats.classes.util.PfSelectableDataModel;
 import au.com.manlyit.fitnesscrm.stats.db.ConfigMap;
 
 import java.io.Serializable;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.SessionScoped;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
@@ -33,10 +37,11 @@ import org.primefaces.model.LazyDataModel;
 @Named("auditLogController")
 @SessionScoped
 public class AuditLogController implements Serializable {
+
     private static final Logger logger = Logger.getLogger(AuditLogController.class.getName());
     private AuditLog current;
     private AuditLog selectedForDeletion;
-    private DataModel items = null;
+    private PfSelectableDataModel<AuditLog> items = null;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.AuditLogFacade ejbFacade;
     @Inject
@@ -45,9 +50,21 @@ public class AuditLogController implements Serializable {
     private int selectedItemIndex;
     private List<AuditLog> filteredItems;
     private AuditLog[] multiSelected;
-    private LazyDataModel<AuditLog> lazyModel;
+    private LazyLoadingDataModel<AuditLog> lazyModel;
+    private Date startDate;
+    private Date endDate;
 
     public AuditLogController() {
+    }
+
+    @PostConstruct
+    private void initDates() {
+        GregorianCalendar cal1 = new GregorianCalendar();
+        cal1.add(Calendar.DAY_OF_YEAR, 1);
+        setEndDate(cal1.getTime());
+        cal1.add(Calendar.DAY_OF_YEAR, -1);
+        cal1.add(Calendar.MONTH, -1);
+        setStartDate(cal1.getTime());
     }
 
     public static boolean isUserInRole(String roleName) {
@@ -70,12 +87,18 @@ public class AuditLogController implements Serializable {
         }
 
     }
-  public LazyDataModel<AuditLog> getLazyModel() {
-        if(lazyModel == null){
-            lazyModel = new LazyLoadingDataModel(ejbFacade);
+
+    public LazyLoadingDataModel<AuditLog> getLazyModel() {
+        if (lazyModel == null) {
+            lazyModel = new LazyLoadingDataModel<>(ejbFacade);
+            lazyModel.setFromDate(getStartDate());
+            lazyModel.setToDate(getEndDate());
+            lazyModel.setDateRangeEntityFieldName("timestampOfChange");
+            lazyModel.setUseDateRange(true);
         }
         return lazyModel;
     }
+
     private AuditLogFacade getFacade() {
         return ejbFacade;
     }
@@ -141,6 +164,16 @@ public class AuditLogController implements Serializable {
         current = new AuditLog();
         selectedItemIndex = -1;
         return "Create";
+    }
+
+    public void datesChangedOnAuditLogTable() {
+        items = null;
+        filteredItems = null;
+        lazyModel.setFromDate(startDate);
+        lazyModel.setToDate(endDate);
+       // RequestContext requestContext = RequestContext.getCurrentInstance();
+
+        // requestContext.execute("PF('sessionsDataTable').filter();");
     }
 
     public String create() {
@@ -250,9 +283,10 @@ public class AuditLogController implements Serializable {
         }
     }
 
-    public DataModel getItems() {
+    public PfSelectableDataModel<AuditLog> getItems() {
         if (items == null) {
-            items = getPagination().createPageDataModel();
+            //items = getPagination().createPageDataModel();
+            items = new PfSelectableDataModel<>(ejbFacade.findAuditLogsByDateRange(startDate, endDate, true));
         }
         return items;
     }
@@ -306,7 +340,35 @@ public class AuditLogController implements Serializable {
         JsfUtil.addErrorMessage("Row Edit Cancelled");
     }
 
-    @FacesConverter(value="auditLogControllerConverter", forClass = AuditLog.class)
+    /**
+     * @return the startDate
+     */
+    public Date getStartDate() {
+        return startDate;
+    }
+
+    /**
+     * @param startDate the startDate to set
+     */
+    public void setStartDate(Date startDate) {
+        this.startDate = startDate;
+    }
+
+    /**
+     * @return the endDate
+     */
+    public Date getEndDate() {
+        return endDate;
+    }
+
+    /**
+     * @param endDate the endDate to set
+     */
+    public void setEndDate(Date endDate) {
+        this.endDate = endDate;
+    }
+
+    @FacesConverter(value = "auditLogControllerConverter", forClass = AuditLog.class)
     public static class AuditLogControllerConverter implements Converter {
 
         public Object getAsObject(FacesContext facesContext, UIComponent component, String value) {

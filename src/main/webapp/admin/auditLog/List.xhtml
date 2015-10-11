@@ -1,94 +1,137 @@
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <ui:composition template="/WEB-INF/template.xhtml" xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:ui="http://java.sun.com/jsf/facelets"
-      xmlns:h="http://java.sun.com/jsf/html"
-      xmlns:f="http://java.sun.com/jsf/core"
-      xmlns:p="http://primefaces.org/ui" >
-
-    
-        <ui:define name="title">
-            <h:outputText value="#{configMapController.getKey('ListAuditLogTitle')}"></h:outputText>
-        </ui:define>
-        <ui:define name="body">
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:p="http://primefaces.org/ui" >
 
 
+    <ui:define name="title">
+        <h:outputText value="#{configMapController.getKey('ListAuditLogTitle')}"></h:outputText>
+    </ui:define>
+    <ui:define name="body">
 
 
+
+        <div class="layout-portlets-box">
 
             <h:form id="auditLogListForm">
-                <h:outputText escape="false" value="#{configMapController.getKey('ListAuditLogEmpty')}" rendered="#{auditLogController.items.rowCount == 0}"/>
-                <h:panelGroup rendered="#{auditLogController.items.rowCount > 0}">
-                    <p:dataTable  
-                        id="datalist"  
-                        lazy="true"
-                        sortOrder="descending"
-                        value="#{auditLogController.lazyModel}" 
-                        selection="#{auditLogController.selected}" 
-                        rowKey="#{item.id}" 
+                <div class="Container100 Responsive100">
+                    <div class="ContainerIndent">
+                        <h1 class="BigTopic">#{configMapController.getKey('ListAuditLogTitle')}</h1>
 
-                        widgetVar="auditLogControllerTable" 
-                        selectionMode="single"
-                        var="item" 
-                        paginator="true" rows="15"  paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  rowsPerPageTemplate="5,10,15,20,25,50,100" 
+                        <div class="Container20 Responsive">
 
-                        >
-                        <f:facet name="footer">
-                            <p:commandButton id="viewButton"   icon="ui-icon-search" value="#{configMapController.getKey('View')}" update=":AuditLogViewForm" oncomplete="PF('AuditLogViewDialog').show()" disabled="#{empty auditLogController.selected}"/>
-                        </f:facet>
+                            <h:panelGrid columns="2" cellpadding="5" >
 
-                        <p:ajax event="rowSelect"   update=" viewButton  "/>
-                        <p:ajax event="rowUnselect" update=" viewButton  "/>
+                                <p:outputLabel value="#{configMapController.getKey('SelectStartDateForSessionHistory_Label')}" for="sessionstart" />
+                                <p:calendar id="sessionstart" value="#{auditLogController.startDate}" pattern="dd MMMM yyyy" valueChangeListener="#{auditLogController.datesChangedOnAuditLogTable}"
+                                            title="#{configMapController.getKey('SelectStartDateForSessionHistory_Title')}"    >
+                                    <p:ajax event="dateSelect"  update="datalist" />
+                                </p:calendar> 
+                            </h:panelGrid>
 
-                        <p:column sortBy="#{item.id}" filterBy="#{item.id}" headerText="#{configMapController.getKey('ListAuditLogTitle_id')}"   >
-                            <h:outputText value="#{item.id}"/>
-                        </p:column>
-                        <p:column sortBy="#{item.timestampOfChange}" filterBy="#{item.timestampOfChange}"  filterMatchMode="contains" headerText="#{configMapController.getKey('ListAuditLogTitle_timestampOfChange')}"   >
-                            <h:outputText value="#{item.timestampOfChange}">
-                                <!-- We must use MySQL time format here so that our lazy table loading and filtering works properly-->
-                                <f:convertDateTime pattern="yyyy-MM-dd HH:mm:ss" />
-                            </h:outputText>
-                        </p:column>
-                        <p:column sortBy="#{item.typeOfChange}" filterBy="#{item.typeOfChange}"  headerText="#{configMapController.getKey('ListAuditLogTitle_typeOfChange')}"   >
+                        </div>
+                        <div class="Container20 Responsive">
 
-                            <h:outputText value="#{item.typeOfChange}"/>
-                        </p:column>
-                        <p:column sortBy="#{item.changedBy}" filterBy="#{item.changedBy}"  filterMatchMode="exact"  headerText="#{configMapController.getKey('ListAuditLogTitle_changedBy')}"   >
-                            <f:facet name="filter">
-                                <p:selectOneMenu onchange="PF('auditLogControllerTable').filter()" filter="true" >
-                                    
-                                    <f:selectItems value="#{customersController.itemsAvailableSelectOne}" />
-                                </p:selectOneMenu>
-                            </f:facet>
-                            <h:outputText value="#{item.changedBy.username}"/>
-                        </p:column>
-                        <p:column sortBy="#{item.customer}" filterBy="#{item.customer}" filterMatchMode="exact"  headerText="#{configMapController.getKey('ListAuditLogTitle_customer')}"   >
-                            <f:facet name="filter">
-                                <p:selectOneMenu onchange="PF('auditLogControllerTable').filter()" filter="true" >
-                                    <!--<f:selectItem itemLabel="Select One" itemValue="#{null}" noSelectionOption="true" />-->
-                                    <f:selectItems value="#{customersController.itemsAvailableSelectOne}" />
-                                </p:selectOneMenu>
-                            </f:facet>
-                            <h:outputText value="#{item.customer.username}"/>
-                        </p:column>
+                            <h:panelGrid columns="2" cellpadding="5" >
+                                <p:outputLabel value="#{configMapController.getKey('SelectEndDateForSessionHistory_Label')}" for="sessionend" />
+                                <p:calendar id="sessionend" value="#{auditLogController.endDate}"  pattern="dd MMMM yyyy" valueChangeListener="#{auditLogController.datesChangedOnAuditLogTable}"
+                                            title="#{configMapController.getKey('SelectEndDateForSessionHistory_Title')}"    >
+                                    <p:ajax event="dateSelect"  update="datalist" />
+                                </p:calendar> 
+                            </h:panelGrid>
 
-                        <p:column sortBy="#{item.detailsOfChange}" filterBy="#{item.detailsOfChange}" headerText="#{configMapController.getKey('ListAuditLogTitle_detailsOfChange')}"   >
-                            <h:outputText value="#{item.detailsOfChange}"/>
-                        </p:column>
-                        <p:column sortBy="#{item.changedFrom}" filterBy="#{item.changedFrom}" headerText="#{configMapController.getKey('ListAuditLogTitle_changedFrom')}"   >
-                            <h:outputText value="#{item.changedFrom}"/>
-                        </p:column>
-                        <p:column sortBy="#{item.changedTo}" filterBy="#{item.changedTo}" headerText="#{configMapController.getKey('ListAuditLogTitle_changedTo')}"   >
-                            <h:outputText value="#{item.changedTo}"/>
-                        </p:column>
+                        </div>
+                    </div>
+                </div>
+                <div class="Container100 Responsive100">
+                    <div class="ContainerIndent">
+                        <h:outputText escape="false" value="#{configMapController.getKey('ListAuditLogEmpty')}" rendered="#{auditLogController.items.rowCount == 0}"/>
+                        <h:panelGroup rendered="#{auditLogController.items.rowCount > 0}">
+                            <p:dataTable  
+                                id="datalist"  
+                                lazy="true"
+                                 
+                                sortBy="#{item.id}"
+                                sortOrder="descending"
+                                value="#{auditLogController.lazyModel}" 
+                                selection="#{auditLogController.selected}" 
+                                filteredValue="#{auditLogController.filteredItems}"
+                                rowKey="#{item.id}" 
 
-                    </p:dataTable>
-                </h:panelGroup>
+                                widgetVar="auditLogControllerTable" 
+                                selectionMode="single"
+                                var="item" 
+                                scrollable="true"
+                                scrollHeight="400"
+                                scrollRows="100"
+                                liveScroll="true"
+                                >
+                               
+                                
+                                <f:facet name="footer">
+                                    <p:commandButton id="viewButton"   icon="ui-icon-search" value="#{configMapController.getKey('View')}" update=":AuditLogViewForm" oncomplete="PF('AuditLogViewDialog').show()" disabled="#{empty auditLogController.selected}"/>
+                                </f:facet>
+
+                                <p:ajax event="rowSelect"   update=" viewButton  "/>
+                                <p:ajax event="rowUnselect" update=" viewButton  "/>
+
+                                <p:column sortBy="#{item.id}" filterBy="#{item.id}" headerText="#{configMapController.getKey('ListAuditLogTitle_id')}"   >
+                                    <h:outputText value="#{item.id}"/>
+                                </p:column>
+                                <p:column sortBy="#{item.timestampOfChange}" filterBy="#{item.timestampOfChange}"  filterMatchMode="contains" headerText="#{configMapController.getKey('ListAuditLogTitle_timestampOfChange')}"   >
+                                    <h:outputText value="#{item.timestampOfChange}">
+                                        <!-- We must use MySQL time format here so that our lazy table loading and filtering works properly-->
+                                        <f:convertDateTime pattern="yyyy-MM-dd HH:mm:ss" />
+                                    </h:outputText>
+                                </p:column>
+                                <p:column sortBy="#{item.typeOfChange}" filterBy="#{item.typeOfChange}"  headerText="#{configMapController.getKey('ListAuditLogTitle_typeOfChange')}"   >
+
+                                    <h:outputText value="#{item.typeOfChange}"/>
+                                </p:column>
+                                <p:column sortBy="#{item.changedBy}" filterBy="#{item.changedBy}"  filterMatchMode="exact"  headerText="#{configMapController.getKey('ListAuditLogTitle_changedBy')}"   >
+                                    <f:facet name="filter">
+                                        <p:selectOneMenu onchange="PF('auditLogControllerTable').filter()" filter="true" >
+
+                                            <f:selectItems value="#{customersController.itemsAvailableSelectOne}" />
+                                        </p:selectOneMenu>
+                                    </f:facet>
+                                    <h:outputText value="#{item.changedBy.username}"/>
+                                </p:column>
+                                <p:column sortBy="#{item.customer}" filterBy="#{item.customer}" filterMatchMode="exact"  headerText="#{configMapController.getKey('ListAuditLogTitle_customer')}"   >
+                                    <f:facet name="filter">
+                                        <p:selectOneMenu onchange="PF('auditLogControllerTable').filter()" filter="true" >
+                                            <!--<f:selectItem itemLabel="Select One" itemValue="#{null}" noSelectionOption="true" />-->
+                                            <f:selectItems value="#{customersController.itemsAvailableSelectOne}" />
+                                        </p:selectOneMenu>
+                                    </f:facet>
+                                    <h:outputText value="#{item.customer.username}"/>
+                                </p:column>
+
+                                <p:column sortBy="#{item.detailsOfChange}" filterBy="#{item.detailsOfChange}" headerText="#{configMapController.getKey('ListAuditLogTitle_detailsOfChange')}"   >
+                                    <h:outputText value="#{item.detailsOfChange}"/>
+                                </p:column>
+                                <p:column sortBy="#{item.changedFrom}" filterBy="#{item.changedFrom}" headerText="#{configMapController.getKey('ListAuditLogTitle_changedFrom')}"   >
+                                    <h:outputText value="#{item.changedFrom}"/>
+                                </p:column>
+                                <p:column sortBy="#{item.changedTo}" filterBy="#{item.changedTo}" headerText="#{configMapController.getKey('ListAuditLogTitle_changedTo')}"   >
+                                    <h:outputText value="#{item.changedTo}"/>
+                                </p:column>
+
+                            </p:dataTable>
+                        </h:panelGroup>
+                    </div>
+                </div>
+
+
             </h:form>
+        </div>
 
-            <ui:include src="View.xhtml"/>
+        <ui:include src="View.xhtml"/>
 
-        </ui:define>
-    </ui:composition>
+    </ui:define>
+</ui:composition>
 
 
