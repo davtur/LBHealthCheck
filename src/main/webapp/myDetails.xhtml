@@ -124,7 +124,7 @@
                     <div class="ContainerIndent">
                         <h1 class="BigTopic">#{configMapController.getKey('ListCustomersTitle_PanelHeader')}</h1>
 
-                        <p:panelGrid columns="3">
+                        <p:panelGrid columns="3" class="updateMyDetailsPaymentInformation">
                             <h:outputLabel value="#{configMapController.getKey('ListCustomersTitle_activeEZI')}" />
                             <h:outputText value="#{customersController.selected.paymentParameters.statusDescription}"/> 
                             <h:outputText value=""/>

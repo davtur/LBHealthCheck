@@ -1997,7 +1997,9 @@ public class EziDebitPaymentGateway implements Serializable {
                 setPaymentsDBListFilteredItems(null);
             }
         }
-        RequestContext.getCurrentInstance().update("customerslistForm1");
+        //@(.parentOfUploadPhoto)
+       // RequestContext.getCurrentInstance().update("customerslistForm1");
+        sendUpdatesForPaymentComponents();
         // refreshFromDB = true;
         logger.log(Level.INFO, "processGetPayments completed");
     }
@@ -2027,7 +2029,8 @@ public class EziDebitPaymentGateway implements Serializable {
                 setPaymentsDBListFilteredItems(null);
             }
         }
-        RequestContext.getCurrentInstance().update("customerslistForm1");
+       // RequestContext.getCurrentInstance().update("customerslistForm1");
+        sendUpdatesForPaymentComponents();
         //refreshFromDB = true;
         logger.log(Level.INFO, "processGetScheduledPayments completed");
     }
@@ -2307,7 +2310,8 @@ public class EziDebitPaymentGateway implements Serializable {
         if (result == true) {
             JsfUtil.addSuccessMessage("Payment Gateway", "Successfully Changed Customer Status  .");
             startAsynchJob("GetCustomerDetails", paymentBean.getCustomerDetails(selectedCustomer, getDigitalKey()));
-            RequestContext.getCurrentInstance().update("customerslistForm1");
+            //RequestContext.getCurrentInstance().update("customerslistForm1");
+            sendUpdatesForPaymentComponents();
             getPayments(18, 2);
         } else {
             JsfUtil.addErrorMessage("Payment Gateway", "The change status operation failed!.");
@@ -2469,11 +2473,22 @@ public class EziDebitPaymentGateway implements Serializable {
         } else {
             customerExistsInPaymentGateway = false;
         }
-        RequestContext.getCurrentInstance().update("customerslistForm1");
+        //RequestContext.getCurrentInstance().update("customerslistForm1");
+        sendUpdatesForPaymentComponents();
         //refreshFromDB = true;
         getCustomersController().setRefreshFromDB(true);
         getCustomersController().recreateModel();
         logger.log(Level.INFO, "processGetCustomerDetails completed");
+    }
+    private void sendUpdatesForPaymentComponents(){
+        ArrayList<String> als = new ArrayList<>();
+        als.add(":tv:customerslistForm1");
+        als.add(":tv:NoteslistForm1");
+        als.add("@(.updateMyDetailsPaymentInformation)");
+        
+        RequestContext.getCurrentInstance().update(als);
+        //RequestContext.getCurrentInstance().update("customerslistForm1");
+        //RequestContext.getCurrentInstance().update("@(.updateGetPayments)");
     }
 
     private CustomersController getCustomersController() {
@@ -2614,6 +2629,10 @@ public class EziDebitPaymentGateway implements Serializable {
         String dom = Integer.toString(paymentDayOfMonth);
 
         pp = cust.getPaymentParameters();
+        if(pp ==null){
+            getCustomersController().createDefaultPaymentParameters(cust);
+            pp = cust.getPaymentParameters();
+        }
         pp.setContractStartDate(paymentDebitDate);
         pp.setPaymentPeriod(paymentSchedulePeriodType);
         pp.setPaymentPeriodDayOfMonth(dom);

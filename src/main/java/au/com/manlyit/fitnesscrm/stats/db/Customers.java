@@ -537,6 +537,7 @@ public class Customers implements BaseEntity, Serializable {
     }
 
     public PaymentParameters getPaymentParameters() {
+        
         return paymentParameters;
     }
 

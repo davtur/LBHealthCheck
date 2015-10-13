@@ -432,12 +432,12 @@ public class FutureMapEJB implements Serializable {
 
                                 }
                             } catch (Exception e) {
-                              logger.log(Level.SEVERE, "checkRunningJobsAndNotifyIfComplete,  {0} async jobs for sessionId {1} have finished.Exception {2}", new Object[]{Integer.toString(y), sessionId, e});
+                                logger.log(Level.SEVERE, "checkRunningJobsAndNotifyIfComplete,  {0} async jobs for sessionId {1} have finished.Exception {2}", new Object[]{Integer.toString(y), sessionId, e});
                             }
                             if (y > 0) {
                                 if (sessionId.contains(FUTUREMAP_INTERNALID) == false) {
                                     sendMessage(sessionId, "Asynchronous Tasks Completed", details.toString());
-                                    logger.log(Level.INFO, "Notifying that {0} async jobs for sessionId {1} have finished. Deatils:{2}", new Object[]{Integer.toString(y), sessionId,details.toString()});
+                                    logger.log(Level.INFO, "Notifying that {0} async jobs for sessionId {1} have finished. Deatils:{2}", new Object[]{Integer.toString(y), sessionId, details.toString()});
 
                                 }
                             }
@@ -1027,6 +1027,7 @@ public class FutureMapEJB implements Serializable {
                                 }
                             }
                         }
+                        updateNextScheduledPayment(cust);
                     } else {
                         logger.log(Level.SEVERE, "Future Map processGetScheduledPayments couldn't find a customer with our system ref from payment.");
                         /*TODO email a report at the end of the process if there are any payments swithout a customer reference
@@ -1216,18 +1217,18 @@ public class FutureMapEJB implements Serializable {
                         custId = Integer.parseInt(customerRef.trim());
                     } catch (NumberFormatException numberFormatException) {
                         logger.log(Level.WARNING, "Future Map processGetCustomerDetails an ezidebit YourSystemReference string cannot be converted to a number.", numberFormatException);
-                        
+
                     }
-                    
+
                     Customers cust = null;
                     try {
                         cust = customersFacade.findById(custId);
                     } catch (Exception e) {
-                        logger.log(Level.WARNING, "customersFacade.findById(custId) {0}.", new Object[]{custId,e.getMessage()});
+                        logger.log(Level.WARNING, "customersFacade.findById(custId) {0}.", new Object[]{custId, e.getMessage()});
                     }
                     if (cust != null) {
                         logger.log(Level.INFO, "Future Map processGetCustomerDetails. Processing details for customer {0}.", new Object[]{cust.getUsername()});
-                        
+
                         PaymentParameters pp = cust.getPaymentParameters();
                         boolean isNew = false;
                         if (pp == null) {
@@ -1261,11 +1262,11 @@ public class FutureMapEJB implements Serializable {
                         pp.setCustomerName(custDetails.getCustomerName().getValue());
                         pp.setEmail(custDetails.getEmail().getValue());
                         pp.setEzidebitCustomerID(custDetails.getEzidebitCustomerID().getValue());
-                        
+
                         pp.setMobilePhoneNumber(custDetails.getMobilePhone().getValue());
                         pp.setPaymentGatewayName("EZIDEBIT");
                         pp.setPaymentMethod(custDetails.getPaymentMethod().getValue());
-                    //pp.setPaymentPeriod(custDetails.getPaymentPeriod().getValue());
+                        //pp.setPaymentPeriod(custDetails.getPaymentPeriod().getValue());
                         //pp.setPaymentPeriodDayOfMonth(custDetails.getPaymentPeriodDayOfMonth().getValue());
                         //pp.setPaymentPeriodDayOfWeek(custDetails.getPaymentPeriodDayOfWeek().getValue());
 
@@ -1280,7 +1281,7 @@ public class FutureMapEJB implements Serializable {
                         pp.setTotalPaymentsSuccessfulAmount(new BigDecimal(custDetails.getTotalPaymentsSuccessfulAmount()));
                         pp.setYourGeneralReference(custDetails.getYourGeneralReference().getValue());
                         pp.setYourSystemReference(custDetails.getYourSystemReference().getValue());
-                        
+
                         if (isNew) {
                             paymentParametersFacade.create(pp);
                             cust.setPaymentParameters(pp);
@@ -1289,16 +1290,45 @@ public class FutureMapEJB implements Serializable {
                             cust.setPaymentParameters(pp);
                         }
                         customersFacade.edit(cust);
-                         
+
                     } else {
                         logger.log(Level.WARNING, "Future Map processGetCustomerDetails an ezidebit YourSystemReference string cannot be converted to a number or the customer ID does not exist");
                     }
                 }
             }
         } catch (Exception e) {
-            logger.log(Level.WARNING, "Future Map processGetCustomerDetails FAILED",e);
+            logger.log(Level.WARNING, "Future Map processGetCustomerDetails FAILED", e);
         }
         logger.log(Level.INFO, "Future Map processGetCustomerDetails completed");
+    }
+
+    private void updateNextScheduledPayment(Customers cust) {
+        if (cust != null) {
+            logger.log(Level.INFO, "updateNextScheduledPayment. Processing details for customer {0}.", new Object[]{cust.getUsername()});
+           PaymentParameters pp = cust.getPaymentParameters();
+            if (pp != null) {
+               Payments p1 = null;
+                try {
+                    p1 = paymentsFacade.findLastSuccessfulScheduledPayment(cust);
+                } catch (Exception e) {
+                    logger.log(Level.WARNING, "Future Map processGetCustomerDetails. findLastSuccessfulScheduledPayment for customer {0}. {1}", new Object[]{cust.getUsername(), e});
+                }
+                Payments p2 = null;
+                try {
+                    p2 = paymentsFacade.findNextScheduledPayment(cust);
+                } catch (Exception e) {
+                    logger.log(Level.WARNING, "Future Map processGetCustomerDetails. findNextScheduledPayment for customer {0}. {1}", new Object[]{cust.getUsername(), e});
+                }
+                pp.setLastSuccessfulScheduledPayment(p1);
+                pp.setNextScheduledPayment(p2);
+                 paymentParametersFacade.edit(pp);
+                cust.setPaymentParameters(pp);
+                customersFacade.edit(cust);
+            }
+
+        } else {
+            logger.log(Level.WARNING, "Future Map updateNextScheduledPayment  customer paymnt parameters  does not exist");
+        }
     }
 
     private Payments convertPaymentXMLToEntity(Payments payment, Payment pay, Customers cust) {

@@ -258,7 +258,14 @@ public class CustomersController implements Serializable {
             note.setNote(message);
             ejbNotesFacade.create(note);
             ejbFacade.edit(customer);
+            notesFilteredItems = null;
+            notesItems = null;
 
+            ArrayList<String> als = new ArrayList<>();
+            als.add("@(.updateNotesDataTable)");
+            //als.add("growl");
+            RequestContext.getCurrentInstance().update(als);
+            //  RequestContext.getCurrentInstance().update("@(.updateNotesDataTable)");
         } catch (Exception e) {
             logger.log(Level.WARNING, "Customers Controller, createCombinedAuditLogAndNote: ", e);
         }
@@ -377,7 +384,7 @@ public class CustomersController implements Serializable {
         this.filteredItems = filteredItems;
     }
 
-    private void createDefaultPaymentParameters(Customers current) {
+    protected void createDefaultPaymentParameters(Customers current) {
 
         if (current == null) {
             logger.log(Level.WARNING, "Future Map createDefaultPaymentParameters . Customer is NULL.");
@@ -972,6 +979,19 @@ public class CustomersController implements Serializable {
                 JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
             }
         }
+    }
+
+    public void testRequestContext() {
+        JsfUtil.addSuccessMessage("Testing Request Context Callback");
+        ArrayList<String> als = new ArrayList<>();
+        als.add(":tv:customerslistForm1");
+        als.add(":growl");
+        als.add("@(.updateNotesDataTable)");
+
+        RequestContext.getCurrentInstance().update(als);
+        //RequestContext.getCurrentInstance().update("customerslistForm1");
+        //RequestContext.getCurrentInstance().update("@(.updateNotesDataTable)");
+        
     }
 
     private void removeFromNotesDataTableLists(Notes note) {
@@ -1652,7 +1672,7 @@ public class CustomersController implements Serializable {
         this.newCustomerCheckedGroups = newCustomerCheckedGroups;
     }
 
-    @FacesConverter(value="customersControllerConverter",forClass = Customers.class)
+    @FacesConverter(value = "customersControllerConverter", forClass = Customers.class)
     public static class CustomersControllerConverter implements Converter {
 
         @Override

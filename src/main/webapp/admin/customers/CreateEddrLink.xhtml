@@ -102,7 +102,7 @@
                 </p:panel>
 
                 <p:panel>
-                    <p:commandButton id="createPaymentdialogueScheduleSave" oncomplete="PF('createEddrLinkDialogueWidget').hide();"  actionListener="#{ezidebit.createEddrLink}" value="#{configMapController.getKey('AddEddrLinkSaveLink')}" update=" :growl :tv:customerslistForm1 :tv:paymentsForm :tv:formCustomersEdit1"/>                
+                    <p:commandButton id="createPaymentdialogueScheduleSave" oncomplete="PF('createEddrLinkDialogueWidget').hide();"  actionListener="#{ezidebit.createEddrLink}" value="#{configMapController.getKey('AddEddrLinkSaveLink')}" update=" :growl @(.updateNotesDataTable)  :tv:customerslistForm1 :tv:paymentsForm :tv:formCustomersEdit1"/>                
                     <p:commandButton id="createPaymentdialogueScheduleDiscard" onclick="PF('createEddrLinkDialogueWidget').hide()"  value="#{configMapController.getKey('AddEddrLinkDiscardLink')}" update=":growl"/>                
 
                 </p:panel>

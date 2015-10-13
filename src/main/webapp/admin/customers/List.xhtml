@@ -19,7 +19,7 @@
 
 
                 <p:tab id="tab1" title="Customer List" class="Container100 Responsive100" >  
-                    <h:form id="customerslistForm1">
+                    <h:form id="customerslistForm1" styleClass="updateGetPayments" >
                         <div class="Container100 Responsive100">
                             <div class="Container20 Responsive">
 
@@ -167,12 +167,13 @@
                                         <h:outputText rendered="#{not empty item.paymentParameters.nextScheduledPayment}"  value="#{item.paymentParameters.nextScheduledPayment.debitDate}">
                                             <f:convertDateTime pattern="E dd MMM yyyy" />
                                         </h:outputText>
-                                        <h:outputText rendered="#{empty item.paymentParameters.nextScheduledPayment}" value="---"/>
-                                    </p:column>
+                                                <h:outputText rendered="#{empty item.paymentParameters.nextScheduledPayment}" styleClass="red FontBold animated pulse infinite" value="#{configMapController.getKey('paymentsNextScheduledIsNull')}"/>
+                               </p:column>
                                     <p:column sortBy="#{item.paymentParameters.nextScheduledPayment.paymentAmount}" filterBy="#{item.paymentParameters.nextScheduledPayment.paymentAmount}" headerText="#{configMapController.getKey('ListCustomersTitle_nextScheduledPaymentAmount')}"   >
                                         <h:outputText rendered="#{not empty item.paymentParameters.nextScheduledPayment}" value="#{item.paymentParameters.nextScheduledPayment.paymentAmount}">
                                             <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
                                         </h:outputText>
+                                        <h:outputText rendered="#{empty item.paymentParameters.nextScheduledPayment}"  value="---"/>
                                     </p:column>
                                     <p:column sortBy="#{item.paymentParameters.lastSuccessfulScheduledPayment.lastUpdatedDatetime}" filterBy="#{item.paymentParameters.lastSuccessfulScheduledPayment.lastUpdatedDatetime}" headerText="#{configMapController.getKey('ListCustomersTitle_lastUpdated')}"   >
                                         <h:outputText  rendered="#{not empty item.paymentParameters.lastSuccessfulScheduledPayment}"  value="#{item.paymentParameters.lastSuccessfulScheduledPayment.lastUpdatedDatetime}">
@@ -340,7 +341,7 @@
 
                         <p:panel>
                             <p:commandButton id="dialogueSave1"  actionListener="#{customersController.editDialogue}" value="#{configMapController.getKey('CreateCustomersSaveLink')}" update=":tv:customerslistForm1:customersTableList :growl"/>                
-                            <p:commandButton  value="#{configMapController.getKey('sendCustomerOnBoardEmailButton')}"  action="#{customersController.sendCustomerOnboardEmail}" update=":growl "/>
+                            <p:commandButton  value="#{configMapController.getKey('sendCustomerOnBoardEmailButton')}"  actionListener="#{customersController.sendCustomerOnboardEmail}" update="@(.updateNotesDataTable) :growl"/>
 
                         </p:panel>
 
@@ -376,8 +377,8 @@
                         <p:outputPanel id="mainPanel" rendered="#{ezidebit.asyncOperationRunning == false and ezidebit.customerDetailsHaveBeenRetrieved == true  }" >
                             <p:commandButton id="reloadPageButton" value="Reload Page" actionListener="#{ezidebit.refreshPaymentsPage}" rendered="#{ezidebit.customerExistsInPaymentGateway }" update=":tv:paymentsForm  :growl" />
                             <p:commandButton id="paymentsButton" disabled="#{!ezidebit.showAddToPaymentGatewayButton}"    actionListener="#{ezidebit.createCustomerRecord}" update=":growl :tv:paymentsForm "   value="#{configMapController.getKey('EditCustomersUpdatePayment')}" />
-                            <p:commandButton id="eddrButton" disabled="#{!ezidebit.showAddToPaymentGatewayButton}"  actionListener="#{ezidebit.updatePaymentScheduleForm}"  oncomplete="PF('createEddrLinkDialogueWidget').show();" update=":growl :tv:paymentsForm :createEddrLink"   value="#{configMapController.getKey('WebDDRScheduleSetupButton')}" />
-                            <p:commandButton  value="#{configMapController.getKey('sendCustomerOnBoardEmailButton')}"  action="#{customersController.sendCustomerOnboardEmail}" update=":growl "/>
+                            <p:commandButton id="eddrButton" disabled="#{!ezidebit.showAddToPaymentGatewayButton}"  actionListener="#{ezidebit.updatePaymentScheduleForm}"  oncomplete="PF('createEddrLinkDialogueWidget').show();" update=":growl :tv:paymentsForm :createEddrLink @(.updateNotesDataTable) "   value="#{configMapController.getKey('WebDDRScheduleSetupButton')}" />
+                            <p:commandButton  value="#{configMapController.getKey('sendCustomerOnBoardEmailButton')}"  actionListener="#{customersController.sendCustomerOnboardEmail}" update="@(.updateNotesDataTable) :growl"/>
 
                             <p:commandButton id="editPaymentMethodButton" rendered="#{ezidebit.customerExistsInPaymentGateway == true and ezidebit.customerDetailsHaveBeenRetrieved == true and ezidebit.customerCancelledInPaymentGateway ==false}" onclick="changeiFrameCss" oncomplete="PF('editPaymentMethodDialogueWidget').show();"    value="#{configMapController.getKey('editPaymentMethodButtonLink')}" update=":growl :iFrameForm"  /> 
 
@@ -669,6 +670,7 @@
                         <h:outputText escape="false" value="#{configMapController.getKey('ListNotesEmpty')}" rendered="#{customersController.notesItems.rowCount == 0}"/>
 
                         <p:dataTable  editable="true" 
+                                      styleClass="updateNotesDataTable"
                                       value="#{customersController.notesItems}" 
                                       filteredValue="#{customersController.notesFilteredItems}"  
                                       widgetVar="notesControllerTable" 
@@ -688,6 +690,7 @@
                                 <p:outputPanel>
                                     <p:commandButton rendered="#{notesController.isUserInRole('ADMIN')}"  oncomplete="PF('notesControllerTable').filter()" update=":growl"  value="#{configMapController.getKey('ListNotesDestroyLink')}" actionListener="#{customersController.deleteNote}"/>
                                     <p:commandButton id="showDialogButton2"  value="#{configMapController.getKey('ListNotesCreateLink')}" onclick="PF('NotesCreateDialogue').show()" type="button"/> 
+                                   <!-- <p:commandButton   value="TEST" update="@(.updateNotesDataTable)" actionListener="#{customersController.testRequestContext}" /> -->
                                 </p:outputPanel>
                             </f:facet>
                             <p:ajax event="rowEdit" listener="#{customersController.onNotesEdit}" update=":growl" oncomplete="PF('notesControllerTable').filter()" />  
