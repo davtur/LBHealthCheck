@@ -97,7 +97,7 @@
 
                         <h1 class="BigTopic">#{configMapController.getKey('ListCustomersTitle_ProfilePic')}</h1>
 
-                        <p:graphicImage id="photo1" value="#{customersController.selected.profileImage.imageStream}" height="200px" cache="false" />
+                        <p:graphicImage id="photo1" value="#{customersController.selected.profileImage.imageStream}" height="200px" cache="false" styleClass="parentOfUploadPhoto" />
                         <div class="EmptyBox10"></div>
                         <p:commandButton icon="fa fa-upload  white Fs14"  id="photoUploadButton" ajax="true"  onclick="PF('uploadPhotoDialogueWidget').show();" update=":growl @(.parentOfUploadPhoto) "   value="#{configMapController.getKey('EditCustomersUploadPhotoButton')}" immediate="true"/>
 

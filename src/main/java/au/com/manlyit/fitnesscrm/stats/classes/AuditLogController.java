@@ -4,10 +4,8 @@ import au.com.manlyit.fitnesscrm.stats.db.AuditLog;
 import au.com.manlyit.fitnesscrm.stats.beans.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.beans.util.PaginationHelper;
 import au.com.manlyit.fitnesscrm.stats.beans.AuditLogFacade;
-import au.com.manlyit.fitnesscrm.stats.beans.AuditLogFacade;
 import au.com.manlyit.fitnesscrm.stats.classes.util.LazyLoadingDataModel;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PfSelectableDataModel;
-import au.com.manlyit.fitnesscrm.stats.db.ConfigMap;
 
 import java.io.Serializable;
 import java.util.Calendar;
@@ -15,7 +13,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
-import java.util.ResourceBundle;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.SessionScoped;
@@ -30,9 +28,9 @@ import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
 import javax.inject.Inject;
 import javax.inject.Named;
+import org.primefaces.context.RequestContext;
 import org.primefaces.event.RowEditEvent;
 import org.primefaces.event.SelectEvent;
-import org.primefaces.model.LazyDataModel;
 
 @Named("auditLogController")
 @SessionScoped
@@ -65,6 +63,12 @@ public class AuditLogController implements Serializable {
         cal1.add(Calendar.DAY_OF_YEAR, -1);
         cal1.add(Calendar.MONTH, -1);
         setStartDate(cal1.getTime());
+        //items = new PfSelectableDataModel<>(ejbFacade.findAuditLogsByDateRange(startDate, endDate, true));
+        lazyModel = new LazyLoadingDataModel<>(ejbFacade);
+        lazyModel.setFromDate(getStartDate());
+        lazyModel.setToDate(getEndDate());
+        lazyModel.setDateRangeEntityFieldName("timestampOfChange");
+        lazyModel.setUseDateRange(true);
     }
 
     public static boolean isUserInRole(String roleName) {
@@ -167,13 +171,13 @@ public class AuditLogController implements Serializable {
     }
 
     public void datesChangedOnAuditLogTable() {
-        items = null;
-        filteredItems = null;
+        //items = null;
+        //filteredItems = null;
         lazyModel.setFromDate(startDate);
         lazyModel.setToDate(endDate);
+        recreateModel();
        // RequestContext requestContext = RequestContext.getCurrentInstance();
 
-        // requestContext.execute("PF('sessionsDataTable').filter();");
     }
 
     public String create() {
@@ -288,12 +292,14 @@ public class AuditLogController implements Serializable {
             //items = getPagination().createPageDataModel();
             items = new PfSelectableDataModel<>(ejbFacade.findAuditLogsByDateRange(startDate, endDate, true));
         }
+        logger.log(Level.INFO, "lazy Load Items : rowcount = {0}", new Object[]{items.getRowCount()});
         return items;
     }
 
     private void recreateModel() {
-        items = null;
-        filteredItems = null;
+        RequestContext.getCurrentInstance().execute("PF('sessionsDataTable').filter();");
+        // items = null;
+        //filteredItems = null;
     }
 
     public String next() {

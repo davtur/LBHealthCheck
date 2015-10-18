@@ -19,8 +19,8 @@
 
                   </p:panel>
                   <p:panel id ="contentFlowPanel"  header="My Pictures : #{customerImagesController.imageListSize} loaded." >-->
-                    <h1  class="BigTopic">#{configMapController.getKey('MyStats_MyPicturesHeader')} (<h:outputText id="heading1"  class="myStatsCarousel parentOfUploadPhoto" value="#{customerImagesController.imageListSize}" />)</h1>
-                    <p:contentFlow id="mainCarousel" class="myStatsCarousel parentOfUploadPhoto"  value="#{customerImagesController.images}" var="photo"   widgetVar="contentFlowWidget" >
+                    <h1  class="BigTopic">#{configMapController.getKey('MyStats_MyPicturesHeader')} (<h:outputText id="heading1"  styleClass="myStatsCarousel parentOfUploadPhoto" value="#{customerImagesController.imageListSize}" />)</h1>
+                    <p:contentFlow id="mainCarousel" styleClass="myStatsCarousel parentOfUploadPhoto"  value="#{customerImagesController.images}" var="photo"   widgetVar="contentFlowWidget" >
 
                         <p:graphicImage  styleClass="content" value="#{customerImagesController.image}" onclick="clickFlow(this, event)" title="#{configMapController.getKey('ListMyStats_photoTakenText')} #{photo.formattedDate}" alt="#{customerImagesController.dynamicTitle}" >
                             <f:param name="imageId" value="#{photo.id}"/>
@@ -30,7 +30,7 @@
                         <div class="hiddenId" style="display: none;">#{photo.id}</div>
                     </p:contentFlow>
                     <p:contextMenu  for="mainCarousel"  >
-                        <p:menuitem value="Refresh" update=":myStatsForm:mainCarousel  :myStatsForm:heading1"  />
+                        <p:menuitem value="Refresh" update="@(.parentOfUploadPhoto)  "  />
                         <p:separator/>
                         <p:menuitem value="Add New" onclick="PF('uploadPhotoDialogueWidget').show()" />
                         <p:menuitem value="Delete" oncomplete="removePicture([{name:'selectedImage', value: $('.item.active div.hiddenId').text()}]);" />

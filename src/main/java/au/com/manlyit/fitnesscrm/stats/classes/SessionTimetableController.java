@@ -6,8 +6,11 @@ import au.com.manlyit.fitnesscrm.stats.classes.util.PaginationHelper;
 import au.com.manlyit.fitnesscrm.stats.beans.SessionTimetableFacade;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 import javax.enterprise.context.SessionScoped;
 import javax.faces.component.UIComponent;
@@ -23,6 +26,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import org.primefaces.event.RowEditEvent;
 import org.primefaces.event.SelectEvent;
+import org.primefaces.model.SortOrder;
 
 @Named("sessionTimetableController")
 @SessionScoped
@@ -40,6 +44,7 @@ public class SessionTimetableController implements Serializable {
     private int selectedItemIndex;
     private List<SessionTimetable> filteredItems;
     private SessionTimetable[] multiSelected;
+    private Date timetableStartDate ;
 
     public SessionTimetableController() {
     }
@@ -85,6 +90,36 @@ public class SessionTimetableController implements Serializable {
             };
         }
         return pagination;
+    }
+    public List<List<SessionTimetable>> getSessionForTheWeekItems() {
+        
+        ArrayList<List<SessionTimetable>> daysOfWeek = new ArrayList<>();
+        
+        GregorianCalendar startCal = new GregorianCalendar();
+        startCal.setTime(timetableStartDate);
+        startCal.set(Calendar.HOUR_OF_DAY, 0);
+        startCal.set(Calendar.SECOND, 0);
+        startCal.set(Calendar.MINUTE, 0);
+        startCal.set(Calendar.MILLISECOND, 0);
+        GregorianCalendar endCal = new GregorianCalendar();
+        endCal.setTime(startCal.getTime());
+        endCal.add(Calendar.DAY_OF_YEAR, 1);
+        
+        for(int index = 0; index < 7;index ++ ){
+           List<SessionTimetable> sessions ;
+            
+            sessions =  ejbFacade.loadDateRange(0, 100, "sessiondate", SortOrder.UNSORTED, null, startCal.getTime(), endCal.getTime(), "sessiondate");
+            daysOfWeek.add(sessions);
+            endCal.add(Calendar.DAY_OF_YEAR, 1);
+            startCal.add(Calendar.DAY_OF_YEAR, 1);
+        }
+       
+        
+       
+        
+        
+        
+        return daysOfWeek;
     }
 
     /**
@@ -293,6 +328,20 @@ public class SessionTimetableController implements Serializable {
 
     public void onCancel(RowEditEvent event) {
         JsfUtil.addErrorMessage("Row Edit Cancelled");
+    }
+
+    /**
+     * @return the timetableStartDate
+     */
+    public Date getTimetableStartDate() {
+        return timetableStartDate;
+    }
+
+    /**
+     * @param timetableStartDate the timetableStartDate to set
+     */
+    public void setTimetableStartDate(Date timetableStartDate) {
+        this.timetableStartDate = timetableStartDate;
     }
 
     @FacesConverter(value="sessionTimetableControllerConverter", forClass = SessionTimetable.class)

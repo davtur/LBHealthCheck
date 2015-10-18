@@ -4,6 +4,7 @@
  */
 package au.com.manlyit.fitnesscrm.stats.beans;
 
+import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -15,6 +16,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.persistence.EntityManager;
+import javax.persistence.Query;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
@@ -117,7 +119,7 @@ public abstract class AbstractFacade<T> implements Serializable {
 
     public List<T> load(int first, int count, String sortField, SortOrder sortOrder, Map<String, Object> filters) {
         List<T> resultList;
-        String message = "Lazy Loading: " + entityClass.getSimpleName()+",Rows="+count+", First="+first+", SortField="+sortField+", SortOrder="+sortOrder.name();
+        String message = "Lazy Loading: " + entityClass.getSimpleName() + ",Rows=" + count + ", First=" + first + ", SortField=" + sortField + ", SortOrder=" + sortOrder.name();
         logger.log(Level.INFO, message);
         CriteriaBuilder builder = getEntityManager().getCriteriaBuilder();
         CriteriaQuery<T> cq = builder.createQuery(entityClass);
@@ -174,14 +176,46 @@ public abstract class AbstractFacade<T> implements Serializable {
 
         return resultList;
     }
-     public List<T> loadDateRange(int first, int count, String sortField, SortOrder sortOrder, Map<String, Object> filters,Date startDate, Date endDate, String dateRangeFieldName) {
+
+    public int countDateRange(Date startDate, Date endDate, String dateRangeFieldName) {
+        int count = -1;
+        try {
+            CriteriaBuilder cb = getEntityManager().getCriteriaBuilder();
+            CriteriaQuery cq = cb.createQuery();
+            Root<T> rt = cq.from(entityClass);
+
+            Expression<Date> stime = rt.get(dateRangeFieldName);
+            Predicate c1 = cb.greaterThanOrEqualTo(stime, startDate);
+            Predicate c2 = cb.lessThan(stime, endDate);
+            cq.where(cb.and(c1, c2));
+            cq.select(cb.count(rt));
+
+            Query q = getEntityManager().createQuery(cq);
+            count = ((Long) q.getSingleResult()).intValue();
+            logger.log(Level.INFO, "countDateRange:{0}", count);
+            return count;
+        } catch (Exception e) {
+            logger.log(Level.INFO, "countDateRange:", e);
+        }
+        return -1;
+
+    }
+
+    public List<T> loadDateRange(int first, int count, String sortField, SortOrder sortOrder, Map<String, Object> filters, Date startDate, Date endDate, String dateRangeFieldName) {
         List<T> resultList;
-        String message = "Lazy Loading: " + entityClass.getSimpleName()+",Rows="+count+", First="+first+", SortField="+sortField+", SortOrder="+sortOrder.name()+", dateRangeFieldName="+dateRangeFieldName+", startDate="+startDate.toString()+", endDate="+endDate.toString();
+        String message = "Lazy Loading: " + entityClass.getSimpleName() + ",Rows=" + count + ", First=" + first + ", SortField=" + sortField + ", SortOrder=" + sortOrder.name() + ", dateRangeFieldName=" + dateRangeFieldName + ", startDate=" + startDate.toString() + ", endDate=" + endDate.toString();
         logger.log(Level.INFO, message);
         CriteriaBuilder builder = getEntityManager().getCriteriaBuilder();
         CriteriaQuery<T> cq = builder.createQuery(entityClass);
         Root<T> root = cq.from(entityClass);
         cq.select(root);
+        ArrayList<Predicate> predicatesList = new ArrayList<>(2);
+        Expression<Date> stime = root.get(dateRangeFieldName);
+
+        Predicate condition1 = builder.greaterThanOrEqualTo(stime, startDate);
+        Predicate condition2 = builder.lessThan(stime, endDate);
+        predicatesList.add(condition1);
+        predicatesList.add(condition2);
         if (sortField != null) {
             if (sortOrder == SortOrder.ASCENDING) {
                 cq.orderBy(builder.asc(root.get(sortField)));
@@ -191,7 +225,7 @@ public abstract class AbstractFacade<T> implements Serializable {
         }
         if (filters != null) {
             Set<Map.Entry<String, Object>> entries = filters.entrySet();
-            ArrayList<Predicate> predicatesList = new ArrayList<>(entries.size());
+            predicatesList = new ArrayList<>(entries.size() + 2);
             for (Map.Entry<String, Object> filter : entries) {
                 String key = filter.getKey();
                 Expression expresskey = root.get(key);
@@ -209,15 +243,12 @@ public abstract class AbstractFacade<T> implements Serializable {
                     Logger.getLogger(AbstractFacade.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
-             Expression<Date> stime = root.get(dateRangeFieldName);
+            predicatesList.add(condition1);
+            predicatesList.add(condition2);
 
-            Predicate condition1 = builder.greaterThanOrEqualTo(stime, startDate);
-            Predicate condition2 = builder.lessThan(stime, endDate);
-            
-            
-            cq.where(builder.and(predicatesList.<Predicate>toArray(
-                    new Predicate[predicatesList.size()])),condition1,condition2);
         }
+        cq.where(builder.and(predicatesList.<Predicate>toArray(
+                new Predicate[predicatesList.size()])));
         javax.persistence.TypedQuery<T> query = getEntityManager().createQuery(cq);
 
         query.setFirstResult(first);
@@ -239,6 +270,5 @@ public abstract class AbstractFacade<T> implements Serializable {
 
         return resultList;
     }
-      
 
 }

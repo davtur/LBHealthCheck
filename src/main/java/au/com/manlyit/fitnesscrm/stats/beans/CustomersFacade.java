@@ -9,7 +9,6 @@ import au.com.manlyit.fitnesscrm.stats.db.CustomerState;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import au.com.manlyit.fitnesscrm.stats.db.Groups;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -17,7 +16,9 @@ import javax.inject.Inject;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceException;
 import javax.persistence.Query;
+import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
@@ -25,6 +26,7 @@ import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
+import javax.validation.ConstraintViolationException;
 import org.eclipse.persistence.internal.jpa.EJBQueryImpl;
 import org.eclipse.persistence.jpa.JpaEntityManager;
 import org.eclipse.persistence.queries.DatabaseQuery;
@@ -37,6 +39,8 @@ import org.eclipse.persistence.sessions.Session;
  */
 @Stateless
 public class CustomersFacade extends AbstractFacade<Customers> {
+
+    private static final long serialVersionUID = 1L;
 
     @Inject
     private ConfigMapFacade configMapFacade;
@@ -124,7 +128,7 @@ public class CustomersFacade extends AbstractFacade<Customers> {
     }
 
     public List<Customers> findCustomersByEmail(String email) {
-        List retList = null;
+        List<Customers> retList = null;
         try {
             CriteriaBuilder cb = em.getCriteriaBuilder();
             CriteriaQuery<Customers> cq = cb.createQuery(Customers.class);
@@ -133,8 +137,11 @@ public class CustomersFacade extends AbstractFacade<Customers> {
             Expression<String> custEmail = rt.get("emailAddress");
             cq.where(cb.equal(custEmail, email));
 
-            Query q = em.createQuery(cq);
+            TypedQuery<Customers> q = em.createQuery(cq);
             retList = q.getResultList();
+        } catch (ConstraintViolationException cve) {
+
+            JsfUtil.addErrorMessage(cve, configMapFacade.getConfig("PersistenceErrorOccured"));
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
         }
@@ -194,47 +201,57 @@ public class CustomersFacade extends AbstractFacade<Customers> {
 
     public Customers findById(int id) {
         Customers c = null;
+        /*  try {
+         c = em.find(Customers.class, id);
+         } catch (Exception e) {
+         logger.log(Level.WARNING, "CustomersFacade findById, Exception {1}, : Customer Id = {0}", new Object[]{id, e.getMessage()});
+         }
+         if (c == null) {
+         logger.log(Level.WARNING, "CustomersFacade findById, Customer not found : Customer Id = {0}", id);
+         }
+         return c;
+         Customers cm = null;
+         Expression<Integer> custId ;*/
         try {
-            c = em.find(Customers.class, id);
+            CriteriaBuilder cb = em.getCriteriaBuilder();
+            CriteriaQuery<Customers> cq = cb.createQuery(Customers.class);
+            Root<Customers> rt = cq.from(Customers.class);
+            Expression<Integer> custId;
+            custId = rt.get("id");
+            cq.where(cb.equal(custId, id));
+
+            TypedQuery<Customers> q = em.createQuery(cq);
+            List<Customers> retList = q.getResultList();
+            if (retList != null) {
+                int size = retList.size();
+                if (size == 1) {
+                    c = retList.get(0);
+                } else if (size == 0) {
+                    logger.log(Level.WARNING, "Customers findById, Customer not found : Customer Id = {0}", id);
+                } else if (size > 1) {
+                    logger.log(Level.WARNING, "Customers findById, Duplicate Customer id's found for Customer Id = {0}. The number of duplicates is {1}", new Object[]{id, size});
+                }
+            } else {
+                logger.log(Level.WARNING, "Customers findById, Customer not found, LIST IS NULL : Customer Id = {0}", id);
+            }
+
+        } catch (PersistenceException pe) {
+            Throwable e;
+            e = pe.getCause();
+            if (e.getClass() == ConstraintViolationException.class) {
+                ConstraintViolationException cve = (ConstraintViolationException) e;
+                logger.log(Level.WARNING, "Customers findById, An ConstraintViolationException occurred for customer id :{0}, Message: {1}" ,new Object[]{ id,cve.getConstraintViolations().toString()});
+            }
+
+            JsfUtil.addErrorMessage(pe, configMapFacade.getConfig("PersistenceErrorOccured"));
         } catch (Exception e) {
-            logger.log(Level.WARNING, "CustomersFacade findById, Exception {1}, : Customer Id = {0}", new Object[]{id, e.getMessage()});
-        }
-        if (c == null) {
-            logger.log(Level.WARNING, "CustomersFacade findById, Customer not found : Customer Id = {0}", id);
+            logger.log(Level.WARNING, "Customers findById, An exception occurred for customer id :" + id, e);
         }
         return c;
-        /*Customers cm = null;
-         Expression<Integer> custId ;
-         try {
-         CriteriaBuilder cb = em.getCriteriaBuilder();
-         CriteriaQuery<Customers> cq = cb.createQuery(Customers.class);
-         Root<Customers> rt = cq.from(Customers.class);
-
-         custId = rt.get("id");
-         cq.where(cb.equal(custId, id));
-
-         Query q = em.createQuery(cq);
-         List retList = q.getResultList();
-         if (retList != null) {
-         int size = retList.size();
-         if (size == 1) {
-         cm = (Customers) retList.get(0);
-         } else if (size == 0) {
-         logger.log(Level.WARNING, "Customers findById, Customer not found : Customer Id = {0}", id);
-         } else if (size > 1) {
-         logger.log(Level.WARNING, "Customers findById, Duplicate Customer id's found for Customer Id = {0}. The number of duplicates is {1}", new Object[]{id, size});
-         }
-         } else {
-         logger.log(Level.WARNING, "Customers findById, Customer not found, LIST IS NULL : Customer Id = {0}", id);
-         }
-         } catch (Exception e) {
-         logger.log(Level.WARNING, "Customers findById, An exception occurred for customer id :" + id, e);
-         }
-         return cm;*/
     }
 
     public List<Customers> findAllActiveCustomers2(boolean sortAsc) {
-        List retList = null;
+        List<Customers> retList = null;
         String state = "ACTIVE";//Active
         try {
             CriteriaBuilder cb = em.getCriteriaBuilder();
@@ -252,17 +269,18 @@ public class CustomersFacade extends AbstractFacade<Customers> {
             } else {
                 cq.orderBy(cb.desc(express));
             }
-            Query q = em.createQuery(cq);
+            TypedQuery<Customers> q = em.createQuery(cq);
             retList = q.getResultList();
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
         }
         return retList;
     }
+
     public List<Customers> findAllActiveCustomers(boolean sortAsc) {
         ArrayList<CustomerState> acs = new ArrayList<>();
-        acs.add(new CustomerState(0,"ACTIVE"));
-       return findFilteredCustomers(sortAsc,acs,false,false);
+        acs.add(new CustomerState(0, "ACTIVE"));
+        return findFilteredCustomers(sortAsc, acs, false, false);
     }
 
     //public List<Customers> findFilteredCustomers(boolean sortAsc, CustomerState[] selectedCustomerStates, boolean showStaff, boolean bypassCache) {
@@ -271,7 +289,7 @@ public class CustomersFacade extends AbstractFacade<Customers> {
         if (selectedCustomerStates == null || selectedCustomerStates.isEmpty()) {
             return new ArrayList<>();
         }
-         try {
+        try {
             ArrayList<Predicate> predicatesList = new ArrayList<>();
             ArrayList<Predicate> predicatesList2 = new ArrayList<>();
             CriteriaBuilder cb = em.getCriteriaBuilder();
@@ -312,7 +330,7 @@ public class CustomersFacade extends AbstractFacade<Customers> {
             } else {
                 cq.orderBy(cb.desc(express));
             }
-            Query q = em.createQuery(cq);
+            TypedQuery<Customers> q = em.createQuery(cq);
             if (bypassCache) {
                 q.setHint("javax.persistence.cache.retrieveMode", "BYPASS");
             }
@@ -333,75 +351,74 @@ public class CustomersFacade extends AbstractFacade<Customers> {
         return retList;
     }
 
- /*   public List<Customers> findFilteredCustomers(boolean sortAsc, CustomerState[] selectedCustomerStates, boolean showTrainers, boolean bypassCache) {
-        List<Customers> retList = null;
-        if (selectedCustomerStates == null || selectedCustomerStates.length == 0) {
-            return new ArrayList<>();
-        }
-        // String state = "ACTIVE";//Active
-        try {
-            ArrayList<Predicate> predicatesList = new ArrayList<>();
-            CriteriaBuilder cb = em.getCriteriaBuilder();
-            CriteriaQuery<Customers> cq = cb.createQuery(Customers.class);
+    /*   public List<Customers> findFilteredCustomers(boolean sortAsc, CustomerState[] selectedCustomerStates, boolean showTrainers, boolean bypassCache) {
+     List<Customers> retList = null;
+     if (selectedCustomerStates == null || selectedCustomerStates.length == 0) {
+     return new ArrayList<>();
+     }
+     // String state = "ACTIVE";//Active
+     try {
+     ArrayList<Predicate> predicatesList = new ArrayList<>();
+     CriteriaBuilder cb = em.getCriteriaBuilder();
+     CriteriaQuery<Customers> cq = cb.createQuery(Customers.class);
 
-            Root<Customers> rt = cq.from(Customers.class);
-            //Root<Groups> rt2 = cq.from(Groups.class);
-            // Predicate joinCondition = cb.equal(rt2.get("groupname"), "USER");
+     Root<Customers> rt = cq.from(Customers.class);
+     //Root<Groups> rt2 = cq.from(Groups.class);
+     // Predicate joinCondition = cb.equal(rt2.get("groupname"), "USER");
 
-            Join<Customers, CustomerState> jn = rt.join("active");// join customers.active to customer_state.id
-            // Join<Customers, Groups> jn2 = rt.join("username").on(joinCondition);
-            Expression<String> custState = jn.get("customerState");
-            // Expression<String> groupName = jn2.get("groupname");
+     Join<Customers, CustomerState> jn = rt.join("active");// join customers.active to customer_state.id
+     // Join<Customers, Groups> jn2 = rt.join("username").on(joinCondition);
+     Expression<String> custState = jn.get("customerState");
+     // Expression<String> groupName = jn2.get("groupname");
 
-            for (CustomerState cs : selectedCustomerStates) {
-                predicatesList.add(cb.equal(custState, cs.getCustomerState()));
-            }
-            //if (showTrainers == false) {
-            //     predicatesList.add(cb.equal(groupName, "USER"));
-            // }
-            cq.where(cb.or(predicatesList.<Predicate>toArray(
-                    new Predicate[predicatesList.size()])));
+     for (CustomerState cs : selectedCustomerStates) {
+     predicatesList.add(cb.equal(custState, cs.getCustomerState()));
+     }
+     //if (showTrainers == false) {
+     //     predicatesList.add(cb.equal(groupName, "USER"));
+     // }
+     cq.where(cb.or(predicatesList.<Predicate>toArray(
+     new Predicate[predicatesList.size()])));
 
-            cq.select(rt);
+     cq.select(rt);
 
-            Expression<String> express = rt.get("firstname");
-            if (sortAsc) {
-                cq.orderBy(cb.asc(express));
-            } else {
-                cq.orderBy(cb.desc(express));
-            }
-            Query q = em.createQuery(cq);
-            if (bypassCache) {
-                q.setHint("javax.persistence.cache.retrieveMode", "BYPASS");
-            }
+     Expression<String> express = rt.get("firstname");
+     if (sortAsc) {
+     cq.orderBy(cb.asc(express));
+     } else {
+     cq.orderBy(cb.desc(express));
+     }
+     Query q = em.createQuery(cq);
+     if (bypassCache) {
+     q.setHint("javax.persistence.cache.retrieveMode", "BYPASS");
+     }
 
-            retList = q.getResultList();
-            int k = retList.size();
-            if (showTrainers == false && k > 0) { // nasty workaround as I cant get the join on groups to work
-                //remove trainers
-                for (int y = k - 1; y > 0; y--) {
-                    Customers c = retList.get(y);
-                    Collection<Groups> grps = c.getGroupsCollection();
-                    boolean remove = false;
-                    for (Groups g : grps) {
-                        if (g.getGroupname().contains("USER") == false) {
-                            remove = true;
-                        }
-                    }
-                    if (remove) {
-                        retList.remove(y);
-                    }
-                }
+     retList = q.getResultList();
+     int k = retList.size();
+     if (showTrainers == false && k > 0) { // nasty workaround as I cant get the join on groups to work
+     //remove trainers
+     for (int y = k - 1; y > 0; y--) {
+     Customers c = retList.get(y);
+     Collection<Groups> grps = c.getGroupsCollection();
+     boolean remove = false;
+     for (Groups g : grps) {
+     if (g.getGroupname().contains("USER") == false) {
+     remove = true;
+     }
+     }
+     if (remove) {
+     retList.remove(y);
+     }
+     }
 
-            }
-        } catch (Exception e) {
-            JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
-        }
-        return retList;
-    }*/
-
+     }
+     } catch (Exception e) {
+     JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
+     }
+     return retList;
+     }*/
     public List<Customers> findAll(boolean sortAsc) {
-        List retList = null;
+        List<Customers> retList = null;
         try {
             CriteriaBuilder cb = em.getCriteriaBuilder();
             CriteriaQuery<Customers> cq = cb.createQuery(Customers.class);
@@ -416,7 +433,7 @@ public class CustomersFacade extends AbstractFacade<Customers> {
             } else {
                 cq.orderBy(cb.desc(express));
             }
-            Query q = em.createQuery(cq);
+            TypedQuery<Customers> q = em.createQuery(cq);
             retList = q.getResultList();
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
@@ -425,7 +442,7 @@ public class CustomersFacade extends AbstractFacade<Customers> {
     }
 
     public List<Customers> findAllByGroup(String group, boolean sortAsc) {
-        List retList = null;
+        List<Customers> retList = null;
         try {
 
             /*    CriteriaBuilder cb = em.getCriteriaBuilder();
@@ -450,7 +467,7 @@ public class CustomersFacade extends AbstractFacade<Customers> {
                 sort = "ASC";
             }
             Query q = em.createNativeQuery("SELECT c.id, c.gender, c.firstname, c.lastname, c.dob, c.email_address, c.preferred_contact, c.username, c.street_address, c.suburb, c.postcode, c.city, c.addr_state, c.country_id, c.telephone, c.fax, c.password, c.newsletter, c.group_pricing, c.email_format, c.auth, c.active, c.referredby, c.demographic FROM fitnessStats.customers c , fitnessStats.groups g  WHERE c.username = g.username and groupname = '" + group + "'  order By c.firstname " + sort + " ", Customers.class);
-            retList = q.getResultList();
+            retList = (List<Customers>) q.getResultList();
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
         }

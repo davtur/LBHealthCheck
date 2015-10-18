@@ -40,8 +40,8 @@
                         <a class="Animated05 CursPointer"><i class="fa fa-user"></i> #{customersController.selected.firstname} #{customersController.selected.lastname}, Welcome <i class="fa fa-chevron-down Fs14 Fright ShowOnMobile"></i></a>
                         <ul style="width:175px; margin-left:-10px;" class="Animated03 submenu">
                             <li><a class="Animated05"><i class="fa fa-user Fs30 Fleft"></i> <span class="Fright Fs20 TexAlRight">#{customersController.selected.firstname} #{customersController.selected.lastname}<span class="Fs10 DispBlock">Last login 18:50</span></span></a></li>
-                            <li> <h:commandLink action="/myDetails.xhtml" styleClass="Animated05"><i class="fa fa-user"></i> My Profile</h:commandLink></li>
-                            <li> <h:commandLink action="/index.xhtml" styleClass="Animated05"><i class="fa fa-dashboard"></i> My Statistics</h:commandLink></li>
+                            <li> <h:commandLink action="/myDetails.xhtml" styleClass="Animated05" ><i class="fa fa-user"></i> My Profile</h:commandLink></li>
+                            <li> <h:commandLink action="/index.xhtml" styleClass="Animated05" update="@(.parentOfUploadPhoto)  "><i class="fa fa-dashboard"></i> My Statistics</h:commandLink></li>
                             <li> <h:commandLink action="/mySessions.xhtml" styleClass="Animated05"><i class="fa fa-heart"></i> My Sessions</h:commandLink></li>
                         </ul>
                     </li>
