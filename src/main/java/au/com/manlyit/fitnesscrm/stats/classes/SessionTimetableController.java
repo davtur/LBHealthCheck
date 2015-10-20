@@ -4,6 +4,10 @@ import au.com.manlyit.fitnesscrm.stats.db.SessionTimetable;
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PaginationHelper;
 import au.com.manlyit.fitnesscrm.stats.beans.SessionTimetableFacade;
+import au.com.manlyit.fitnesscrm.stats.classes.util.TimetableRows;
+import au.com.manlyit.fitnesscrm.stats.db.Participants;
+import au.com.manlyit.fitnesscrm.stats.db.SessionHistory;
+import au.com.manlyit.fitnesscrm.stats.db.SessionTrainers;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -12,6 +16,8 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.enterprise.context.SessionScoped;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
@@ -31,20 +37,23 @@ import org.primefaces.model.SortOrder;
 @Named("sessionTimetableController")
 @SessionScoped
 public class SessionTimetableController implements Serializable {
-    private static final long serialVersionUID = 1L;
 
+    private static final long serialVersionUID = 1L;
+    private static final Logger logger = Logger.getLogger(SessionTimetableController.class.getName());
     private SessionTimetable current;
     private SessionTimetable selectedForDeletion;
     private DataModel<SessionTimetable> items = null;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.SessionTimetableFacade ejbFacade;
     @Inject
+    private au.com.manlyit.fitnesscrm.stats.beans.SessionHistoryFacade sessionHistoryFacade;
+    @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade configMapFacade;
     private PaginationHelper pagination;
     private int selectedItemIndex;
     private List<SessionTimetable> filteredItems;
     private SessionTimetable[] multiSelected;
-    private Date timetableStartDate ;
+    private Date timetableStartDate;
 
     public SessionTimetableController() {
     }
@@ -91,12 +100,64 @@ public class SessionTimetableController implements Serializable {
         }
         return pagination;
     }
-    public List<List<SessionTimetable>> getSessionForTheWeekItems() {
+    
+    public void populateSessions(){
         
-        ArrayList<List<SessionTimetable>> daysOfWeek = new ArrayList<>();
+        List<SessionTimetable> sessions = ejbFacade.findAll();
         
+        for(SessionTimetable st:sessions){
+            
+            cloneSessionsFromTimetable(st,90);
+            
+        }
+         
+    }
+    
+    private void cloneSessionsFromTimetable(SessionTimetable st,int daysIntoFuture){
         GregorianCalendar startCal = new GregorianCalendar();
-        startCal.setTime(timetableStartDate);
+        GregorianCalendar endCal = new GregorianCalendar();
+        endCal.add(Calendar.DAY_OF_YEAR ,daysIntoFuture);
+        GregorianCalendar templateTime =new GregorianCalendar();
+        templateTime.setTime(st.getSessiondate());
+        startCal.set(Calendar.HOUR, templateTime.get( Calendar.HOUR));
+        startCal.set(Calendar.MINUTE, templateTime.get( Calendar.MINUTE));
+        startCal.set(Calendar.SECOND, templateTime.get( Calendar.SECOND));
+        startCal.set(Calendar.MILLISECOND, templateTime.get( Calendar.MILLISECOND));
+        
+        try {
+            while (startCal.compareTo(endCal) < 0) {
+                
+                while (startCal.get(Calendar.DAY_OF_WEEK) != templateTime.get(Calendar.DAY_OF_WEEK)) {
+                    startCal.add(Calendar.DAY_OF_YEAR, -1);
+                }
+                SessionHistory sh = new SessionHistory(0, startCal.getTime());
+                ArrayList<SessionTrainers> ac = new ArrayList<>();
+                SessionTrainers trainers = new SessionTrainers(0);
+                trainers.setCustomerId(st.getTrainerId());
+                trainers.setSessionHistoryId(sh);
+                ac.add(trainers);
+                sh.setSessionTrainersCollection(ac);
+                sh.setParticipantsCollection(new ArrayList<>());
+                sh.setSessionTypesId(st.getSessionTypesId());
+                sh.setComments(st.getComments());
+                SessionHistory existing = sessionHistoryFacade.findSessionBySessionTimetable(sh,st);
+                if (existing == null) {
+                    sessionHistoryFacade.create(sh);
+                }
+                 startCal.add(Calendar.DAY_OF_YEAR, 7);
+            }
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "cloneSessionsFromTimetable",e);
+        }
+        
+    }
+
+    public List<TimetableRows> getSessionForTheWeekItems() {
+
+        ArrayList<TimetableRows> daysOfWeek = new ArrayList<>();
+
+        GregorianCalendar startCal = new GregorianCalendar();
+        startCal.setTime(getTimetableStartDate());
         startCal.set(Calendar.HOUR_OF_DAY, 0);
         startCal.set(Calendar.SECOND, 0);
         startCal.set(Calendar.MINUTE, 0);
@@ -104,21 +165,16 @@ public class SessionTimetableController implements Serializable {
         GregorianCalendar endCal = new GregorianCalendar();
         endCal.setTime(startCal.getTime());
         endCal.add(Calendar.DAY_OF_YEAR, 1);
-        
-        for(int index = 0; index < 7;index ++ ){
-           List<SessionTimetable> sessions ;
-            
-            sessions =  ejbFacade.loadDateRange(0, 100, "sessiondate", SortOrder.UNSORTED, null, startCal.getTime(), endCal.getTime(), "sessiondate");
-            daysOfWeek.add(sessions);
+
+        for (int index = 0; index < 7; index++) {
+            List<SessionHistory> sessions;
+
+            sessions = sessionHistoryFacade.loadDateRange(0, 100, "sessiondate", SortOrder.ASCENDING, null, startCal.getTime(), endCal.getTime(), "sessiondate");
+            daysOfWeek.add(new TimetableRows(startCal.getTime(), sessions));
             endCal.add(Calendar.DAY_OF_YEAR, 1);
             startCal.add(Calendar.DAY_OF_YEAR, 1);
         }
-       
-        
-       
-        
-        
-        
+
         return daysOfWeek;
     }
 
@@ -306,7 +362,7 @@ public class SessionTimetableController implements Serializable {
     }
 
     public SelectItem[] getItemsAvailableSelectMany() {
-       // file:///home/david/.netbeans/8.0/config/Templates/JSF/JSF_From_Entity_Wizard/StandardJSF/create.ftl
+        // file:///home/david/.netbeans/8.0/config/Templates/JSF/JSF_From_Entity_Wizard/StandardJSF/create.ftl
 
         return JsfUtil.getSelectItems(ejbFacade.findAll(), false);
     }
@@ -334,6 +390,14 @@ public class SessionTimetableController implements Serializable {
      * @return the timetableStartDate
      */
     public Date getTimetableStartDate() {
+        if (timetableStartDate == null) {
+            GregorianCalendar date1 = new GregorianCalendar();
+
+            while (date1.get(Calendar.DAY_OF_WEEK) != Calendar.MONDAY) {
+                date1.add(Calendar.DATE, -1);
+            }
+            timetableStartDate = date1.getTime();
+        }
         return timetableStartDate;
     }
 
@@ -344,7 +408,7 @@ public class SessionTimetableController implements Serializable {
         this.timetableStartDate = timetableStartDate;
     }
 
-    @FacesConverter(value="sessionTimetableControllerConverter", forClass = SessionTimetable.class)
+    @FacesConverter(value = "sessionTimetableControllerConverter", forClass = SessionTimetable.class)
     public static class SessionTimetableControllerConverter implements Converter {
 
         @Override

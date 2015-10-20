@@ -1,0 +1,63 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition template="/WEB-INF/template.xhtml" xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:p="http://primefaces.org/ui" >
+
+
+    <ui:define name="title">
+        <h:outputText value="#{configMapController.getKey('ListSessionTimetableTitle')}"></h:outputText>
+    </ui:define>
+    <ui:define name="body">
+        <div class="layout-portlets-box">
+            <h:form id="SessionTimetableListForm">
+                <div class="Container50 Responsive50">
+                    <div class="ContainerIndent">
+                        <h1 class="BigTopic">#{configMapController.getKey('Timetable_Title')}</h1>
+
+                        <ui:repeat value="#{sessionTimetableController.sessionForTheWeekItems}" var="dayOfWeek" >
+                            <div class="BorderedBox">
+                                <div class="ContainerIndent">
+                                    <h:outputText value="#{dayOfWeek.startDate}">
+                                        <f:convertDateTime pattern="EEEE,  dd/MMM/yyyy" />
+                                    </h:outputText>
+                                </div>
+                            </div>
+                            <p:dataGrid value="#{dayOfWeek.sessions}" var="sessHist" columns="10" rows="1" style="text-align: left">
+
+                                <p:panel header=" #{sessHist.sessionTypesId.name}"  style="max-width: 400px">
+                                    <h:panelGrid columns="1" >
+                                        <f:facet name="header">
+                                            <h:outputText value="#{sessHist.sessiondate}">
+                                                <f:convertDateTime pattern="EEEE H:mm a" />
+                                            </h:outputText>
+
+                                        </f:facet>
+                                        <h:panelGrid columns="2" >
+                                            <p:graphicImage value="#{customerImagesController.dynamicImage}" width="50px">
+                                                <f:param name="imageId" value="#{sessHist.sessionTrainersCollection[0].customerId.profileImage.id}"/>
+                                            </p:graphicImage>
+                                            <h:outputText value="Trainer: #{sessHist.sessionTrainersCollection[0].customerId.firstname} #{item.trainerId.lastname}"/>
+                                        </h:panelGrid>
+                                        <p:separator />
+                                        <h:outputText value="#{sessHist.comments}"/>
+                                    </h:panelGrid>
+                                </p:panel>
+                            </p:dataGrid>
+                             <p:separator />
+                        </ui:repeat>
+
+
+                    </div>
+                </div>
+
+
+            </h:form>
+        </div>
+
+    </ui:define>
+</ui:composition>
+<!--<p> Generated from template ( JSF_from_entity_wizard/StandardJSF/list.ftl  )- Dave 18th July 2015 </p>-->
+

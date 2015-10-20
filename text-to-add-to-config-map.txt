@@ -1157,3 +1157,5 @@ ListCustomersStatusButton=Status:
 (ShowAllUsersForSessionHistory_Title=All Users
 
 paymentsNextScheduledIsNull=No Scheduled Payments!
+
+Timetable_Title=Timetable

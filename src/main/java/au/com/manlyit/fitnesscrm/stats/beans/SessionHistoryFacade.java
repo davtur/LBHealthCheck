@@ -8,7 +8,10 @@ import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import au.com.manlyit.fitnesscrm.stats.db.Participants;
 import au.com.manlyit.fitnesscrm.stats.db.SessionHistory;
+import au.com.manlyit.fitnesscrm.stats.db.SessionTimetable;
 import au.com.manlyit.fitnesscrm.stats.db.SessionTrainers;
+import au.com.manlyit.fitnesscrm.stats.db.SessionTypes;
+import java.sql.Time;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -29,6 +32,7 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import org.eclipse.persistence.internal.jpa.EJBQueryImpl;
 import org.eclipse.persistence.jpa.JpaEntityManager;
+
 import org.eclipse.persistence.queries.DatabaseQuery;
 import org.eclipse.persistence.sessions.DatabaseRecord;
 import org.eclipse.persistence.sessions.Session;
@@ -128,7 +132,7 @@ public class SessionHistoryFacade extends AbstractFacade<SessionHistory> {
                 cq.orderBy(cb.desc(stime));
             }
             TypedQuery<SessionHistory> q = em.createQuery(cq);
-            retList =  q.getResultList();
+            retList = q.getResultList();
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
         }
@@ -241,6 +245,52 @@ public class SessionHistoryFacade extends AbstractFacade<SessionHistory> {
         }
 
         return retList;
+    }
+
+    public SessionHistory findSessionBySessionTimetable(SessionHistory template,SessionTimetable st) {
+        
+        
+        //Customers trainer, Date startDate, Date endDate, boolean sortAsc
+        List<SessionHistory> retList = null;
+        SessionHistory matchingSession = null;
+       // GregorianCalendar gc = new GregorianCalendar();
+       // gc.setTime(template.getSessiondate());
+        //SELECT * FROM fitnessStats.session_history h ,fitnessStats.session_timetable t  where t.id =2 AND  CAST(h.sessionDate as Time) = CAST(t.sessionDate as Time);
+       
+
+        try {
+            CriteriaBuilder cb = em.getCriteriaBuilder();
+            CriteriaQuery<SessionHistory> cq = cb.createQuery(SessionHistory.class);
+            Root<SessionHistory> rt = cq.from(SessionHistory.class);
+
+            Join<SessionHistory, SessionTrainers> jn = rt.joinCollection("sessionTrainersCollection");
+            Expression<Customers> sessionTrainer = jn.get("customerId");
+            Expression<Time> stime = rt.get("sessiondate");
+            Expression<SessionTypes> type = rt.get("sessionTypesId");
+
+            Predicate condition1 = cb.equal(stime, template.getSessiondate());
+            Predicate condition2 = cb.equal(type, template.getSessionTypesId());
+            Predicate condition3 = cb.equal(sessionTrainer, st.getTrainerId());
+            cq.where(cb.and(condition1, condition2, condition3));
+            cq.select(rt);
+
+            TypedQuery<SessionHistory> q = em.createQuery(cq);
+            retList = q.getResultList();
+            if(retList.size() == 1){
+                matchingSession = retList.get(0);
+            }else{
+                if(retList.size() > 1){
+                    matchingSession = retList.get(0);
+                    logger.log(Level.WARNING, "findSessionBySessionTimetable: more than 1 match found for session timetable: {0}",template.getSessiondate().toString());
+                }else{
+                    logger.log(Level.INFO, "findSessionBySessionTimetable: no sessions found for session timetable: {0}",template.getSessiondate().toString());
+                }
+            }
+        } catch (Exception e) {
+            JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
+        }
+
+        return matchingSession;
     }
 
     public List<SessionHistory> findFilteredSessions(Customers[] participants, Customers[] trainers, Date startDate, Date endDate, boolean sortAsc) {
