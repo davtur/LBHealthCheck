@@ -17,7 +17,7 @@
                     <div class="ContainerIndent">
                         <h1 class="BigTopic">#{configMapController.getKey('Timetable_Title')}</h1>
 
-                        <ui:repeat value="#{sessionTimetableController.sessionForTheWeekItems}" var="dayOfWeek" >
+                        <ui:repeat value="#{sessionTimetableController.sessionForTheWeekItems}"  var="dayOfWeek" >
                             <div class="BorderedBox">
                                 <div class="ContainerIndent">
                                     <h:outputText value="#{dayOfWeek.startDate}">
@@ -27,14 +27,14 @@
                             </div>
                             <p:dataGrid value="#{dayOfWeek.sessions}" var="sessHist" columns="10" rows="1" style="text-align: left">
 
-                                <p:panel header=" #{sessHist.sessionTypesId.name}"  style="max-width: 400px">
-                                    <h:panelGrid columns="1" >
-                                        <f:facet name="header">
-                                            <h:outputText value="#{sessHist.sessiondate}">
-                                                <f:convertDateTime pattern="EEEE H:mm a" />
-                                            </h:outputText>
+                                <p:panel header=" #{sessHist.sessionTypesId.name}"  style="max-width: 400px;height: 100%">
+                                    <h:panelGrid columns="1"  >
 
-                                        </f:facet>
+                                        <h:outputText value="#{sessHist.sessiondate}">
+                                            <f:convertDateTime pattern="EEEE h:mm a" />
+                                        </h:outputText>
+
+
                                         <h:panelGrid columns="2" >
                                             <p:graphicImage value="#{customerImagesController.dynamicImage}" width="50px">
                                                 <f:param name="imageId" value="#{sessHist.sessionTrainersCollection[0].customerId.profileImage.id}"/>
@@ -46,7 +46,7 @@
                                     </h:panelGrid>
                                 </p:panel>
                             </p:dataGrid>
-                             <p:separator />
+                            <p:separator />
                         </ui:repeat>
 
 

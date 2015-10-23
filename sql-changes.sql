@@ -87,3 +87,16 @@ ADD CONSTRAINT `fk_paymentParameters_1`
   REFERENCES `fitnessStats`.`customers` (`id`)
   ON DELETE NO ACTION
   ON UPDATE CASCADE;
+
+
+
+ALTER TABLE `fitnessStats`.`session_timetable` 
+ADD COLUMN `duration_minutes` INT(4) NOT NULL DEFAULT 60 AFTER `trainer_id`,
+ADD COLUMN `session_title` TEXT NOT NULL AFTER `duration_minutes`,
+ADD COLUMN `session_location_label` TEXT NOT NULL AFTER `session_title`,
+ADD COLUMN `session_location_gps` VARCHAR(128) NOT NULL AFTER `session_location_label`;
+
+
+
+ALTER TABLE `fitnessStats`.`session_history` 
+ADD COLUMN `session_template` INT(11) NULL AFTER `admin_notes`;

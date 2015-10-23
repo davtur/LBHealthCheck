@@ -119,7 +119,7 @@ public class SessionTimetableController implements Serializable {
         endCal.add(Calendar.DAY_OF_YEAR ,daysIntoFuture);
         GregorianCalendar templateTime =new GregorianCalendar();
         templateTime.setTime(st.getSessiondate());
-        startCal.set(Calendar.HOUR, templateTime.get( Calendar.HOUR));
+        startCal.set(Calendar.HOUR_OF_DAY, templateTime.get( Calendar.HOUR_OF_DAY));
         startCal.set(Calendar.MINUTE, templateTime.get( Calendar.MINUTE));
         startCal.set(Calendar.SECOND, templateTime.get( Calendar.SECOND));
         startCal.set(Calendar.MILLISECOND, templateTime.get( Calendar.MILLISECOND));
