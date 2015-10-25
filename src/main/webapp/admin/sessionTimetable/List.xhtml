@@ -188,6 +188,27 @@
 
 
                     </p:column>
+                    <p:column sortBy="#{item.showBookingButton}" filterBy="#{item.showBookingButton}" headerText="#{configMapController.getKey('ListSessionTimetableTitle_showBookingButton')}"   >
+                        <p:cellEditor> 
+                            <f:facet name="output">
+                                <p:selectBooleanCheckbox value="#{item.showBookingButton}" disabled="true"/>
+                            </f:facet>
+                            <f:facet name="input">
+                                <p:selectBooleanCheckbox value="#{item.showBookingButton}"  label="#{configMapController.getKey('ListSessionTimetableTitle_showBookingButton')}" />
+                            </f:facet>
+                        </p:cellEditor> 
+                    </p:column>
+                   <p:column sortBy="#{item.showSignupButton}" filterBy="#{item.showSignupButton}" headerText="#{configMapController.getKey('ListSessionTimetableTitle_showSignupButton')}"   >
+                        <p:cellEditor> 
+                            <f:facet name="output">
+                                <p:selectBooleanCheckbox value="#{item.showSignupButton}" disabled="true"/>
+                            </f:facet>
+                            <f:facet name="input">
+                                <p:selectBooleanCheckbox value="#{item.showSignupButton}"  label="#{configMapController.getKey('ListSessionTimetableTitle_showBookingButton')}" />
+                            </f:facet>
+                        </p:cellEditor> 
+                    </p:column>
+                   
                     <p:column rendered="#{sessionTimetableController.isUserInRole('ADMIN')}"  headerText="Edit" style="width:50px">  
                         <p:rowEditor />  
                     </p:column>  

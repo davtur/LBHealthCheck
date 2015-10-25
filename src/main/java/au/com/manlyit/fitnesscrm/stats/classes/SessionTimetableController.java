@@ -200,12 +200,30 @@ public class SessionTimetableController implements Serializable {
             daysOfWeek.add(new TimetableRows(startCal.getTime(), sessions));
             endCal.add(Calendar.DAY_OF_YEAR, 1);
             startCal.add(Calendar.DAY_OF_YEAR, 1);
-            if(sessions.size() > sessionForTheWeekMaxColumns){
+            if (sessions.size() > sessionForTheWeekMaxColumns) {
                 sessionForTheWeekMaxColumns = sessions.size();
             }
         }
 
         return daysOfWeek;
+    }
+
+    public void signUpFromTimetable(ActionEvent actionEvent) {
+        FacesContext context = FacesContext.getCurrentInstance();
+        String sessionHistoryId = context.getExternalContext().getRequestParameterMap().get("sessionHistorySignupId");
+        if (sessionHistoryId != null) {
+            SessionHistory sh = sessionHistoryFacade.find(Integer.valueOf(sessionHistoryId));
+            logger.log(Level.INFO, "signUpFromTimetable: {0}",new Object[]{ sh.getSessiondate().toString()});
+        }
+    }
+
+    public void bookFromTimetable(ActionEvent actionEvent) {
+        FacesContext context = FacesContext.getCurrentInstance();
+        String sessionHistoryId = context.getExternalContext().getRequestParameterMap().get("sessionHistoryBookingId");
+        if (sessionHistoryId != null) {
+            SessionHistory sh = sessionHistoryFacade.find(Integer.valueOf(sessionHistoryId));
+            logger.log(Level.INFO, "BookFromTimetable: {0}",new Object[]{ sh.getSessiondate().toString()});
+        }
     }
 
     /**

@@ -46,6 +46,10 @@ import org.primefaces.model.map.Marker;
     @NamedQuery(name = "SessionTimetable.findById", query = "SELECT s FROM SessionTimetable s WHERE s.id = :id"),
     @NamedQuery(name = "SessionTimetable.findBySessiondate", query = "SELECT s FROM SessionTimetable s WHERE s.sessiondate = :sessiondate")})
 public class SessionTimetable implements BaseEntity, Serializable {
+    @Column(name = "show_booking_button")
+    private Boolean showBookingButton;
+    @Column(name = "show_signup_button")
+    private Boolean showSignupButton;
 
     @OneToMany(mappedBy = "sessionTemplate")
     private Collection<SessionHistory> sessionHistoryCollection;
@@ -249,6 +253,22 @@ public class SessionTimetable implements BaseEntity, Serializable {
         }
 
         return simpleModel;
+    }
+
+    public Boolean getShowBookingButton() {
+        return showBookingButton;
+    }
+
+    public void setShowBookingButton(Boolean showBookingButton) {
+        this.showBookingButton = showBookingButton;
+    }
+
+    public Boolean getShowSignupButton() {
+        return showSignupButton;
+    }
+
+    public void setShowSignupButton(Boolean showSignupButton) {
+        this.showSignupButton = showSignupButton;
     }
 
 }

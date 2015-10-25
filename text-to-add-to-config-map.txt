@@ -1283,3 +1283,7 @@ ListSessionTimetableTitle_sessionLocationLabel=SessionLocationLabel
 ListSessionTimetableTitle_sessionLocationGps=SessionLocationGps
 Populate=Populate
 Timetable_MapsButtonTitle=Map
+ListSessionTimetableTitle_showBookingButton=Show Booking 
+ListSessionTimetableTitle_showSignupButton=Show Sign Up
+Timetable_SignUpButtonTitle=Sign Up Now
+Timetable_BookingButtonTitle=Book Now

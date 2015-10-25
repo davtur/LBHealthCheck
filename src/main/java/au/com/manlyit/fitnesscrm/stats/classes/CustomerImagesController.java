@@ -108,8 +108,10 @@ public class CustomerImagesController implements Serializable {
     @PostConstruct
     public void init() {
         String loggedInUser = FacesContext.getCurrentInstance().getExternalContext().getRemoteUser();
-        Customers cust = ejbCustomersFacade.findCustomerByUsername(loggedInUser);
-        createGallery(cust.getId());
+        if (loggedInUser != null) {
+            Customers cust = ejbCustomersFacade.findCustomerByUsername(loggedInUser);
+            createGallery(cust.getId());
+        }
     }
 
     private int getUser() {

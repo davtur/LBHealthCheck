@@ -1,0 +1,81 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:p="http://primefaces.org/ui" >
+
+
+        <div class="layout-portlets-box">
+            <h:form id="SessionTimetableListForm">
+
+                <div class="ContainerIndent">
+                    <h1 class="BigTopic">#{configMapController.getKey('Timetable_Title')}</h1>
+
+                    <ui:repeat value="#{sessionTimetableController.sessionForTheWeekItems}"  var="dayOfWeek" >
+                        <div class="BorderedBox">
+                            <div class="ContainerIndent">
+                                <h:outputText value="#{dayOfWeek.startDate}">
+                                    <f:convertDateTime pattern="EEEE,  d MMMMM yyyy" />
+                                </h:outputText>
+                            </div>
+                        </div>
+                        <p:dataGrid value="#{dayOfWeek.sessions}" var="sessHist" columns="#{sessionTimetableController.sessionForTheWeekMaxColumns}" rows="1" style="text-align: left" styleClass="timetable">
+
+                            <p:panel header=" #{sessHist.sessionTemplate.sessionTitle}"  style="max-width: 450px;height: 100%">
+
+
+                                <h:outputText value="#{sessHist.sessiondate}" styleClass=" Fs18 FontRalewayBold">
+                                    <f:convertDateTime pattern="EEEE h:mm a" />
+                                </h:outputText>
+
+                                <h:panelGrid columns="1"  >
+                                    <h:panelGrid columns="2" >
+                                        <h:panelGrid columns="1"  >
+                                            <p:graphicImage value="#{customerImagesController.dynamicImage}" height="80px">
+                                                <f:param name="imageId" value="#{sessHist.sessionTemplate.trainerId.profileImage.id}"/>
+                                            </p:graphicImage>
+
+                                        </h:panelGrid>
+                                        <h:panelGrid columns="1"  >
+
+                                            <span class="DispBlock " ><font class="bold  blue">Trainer: </font> #{sessHist.sessionTemplate.trainerId.firstname}</span>
+                                            <span class="DispBlock " ><font class="bold  blue">Location: </font> #{sessHist.sessionTemplate.sessionLocationLabel}</span>
+
+                                            <h:panelGrid columns="3"  >
+                                                <p:commandButton id="mapsBtn" value="#{configMapController.getKey('Timetable_MapsButtonTitle')}" type="button" />
+
+                                                <p:commandButton id="signUpBtn" styleClass="GreenButton animated pulse infinite" rendered="#{sessHist.sessionTemplate.showSignupButton and  empty  facesContext.externalContext.remoteUser}" value="#{configMapController.getKey('Timetable_SignUpButtonTitle')}" partialSubmit="true" process="@this" actionListener="#{sessionTimetableController.signUpFromTimetable}"  >
+                                                    <f:param name="sessionHistorySignupId" value="#{sessHist.id}"/>
+                                                </p:commandButton>
+
+                                                <p:commandButton id="bookBtn" styleClass="OrangeButton animated pulse infinite" rendered="#{sessHist.sessionTemplate.showBookingButton}" value="#{configMapController.getKey('Timetable_BookingButtonTitle')}" partialSubmit="true" process="@this" actionListener="#{sessionTimetableController.bookFromTimetable}">
+                                                    <f:param name="sessionHistoryBookingId" value="#{sessHist.id}"/>
+                                                </p:commandButton>
+                                                <p:overlayPanel id="mapPanel" for="mapsBtn" hideEffect="fade" dynamic="false" style="width:600px">
+                                                    <p:gmap id="map#{sessHist.sessionTemplate.id}" styleClass="BorderedBox" center="#{sessHist.sessionTemplate.sessionLocationGps}" zoom="16" model="#{sessHist.sessionTemplate.simpleModel}" type="HYBRID" style="width:100%;height:400px" />
+
+                                                </p:overlayPanel>
+                                            </h:panelGrid>
+                                        </h:panelGrid>
+
+                                    </h:panelGrid>
+                                    <p:separator />
+                                    <h:outputText value="#{sessHist.sessionTemplate.comments}"/>
+                                </h:panelGrid>
+                            </p:panel>
+                        </p:dataGrid>
+                        <p:separator />
+                    </ui:repeat>
+                </div>
+
+
+            </h:form>
+        </div>
+
+   
+</ui:composition>
+<!--<p> Generated from template ( JSF_from_entity_wizard/StandardJSF/list.ftl  )- Dave 18th July 2015 </p>-->
+
