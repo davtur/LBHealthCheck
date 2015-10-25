@@ -8,6 +8,7 @@ package au.com.manlyit.fitnesscrm.stats.db;
 import au.com.manlyit.fitnesscrm.stats.classes.util.BaseEntity;
 import au.com.manlyit.fitnesscrm.stats.db.SessionTypes;
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Date;
 import javax.persistence.Basic;
 import javax.persistence.Column;
@@ -20,12 +21,18 @@ import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
+import org.primefaces.model.map.DefaultMapModel;
+import org.primefaces.model.map.LatLng;
+import org.primefaces.model.map.MapModel;
+import org.primefaces.model.map.Marker;
 
 /**
  *
@@ -38,7 +45,31 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "SessionTimetable.findAll", query = "SELECT s FROM SessionTimetable s"),
     @NamedQuery(name = "SessionTimetable.findById", query = "SELECT s FROM SessionTimetable s WHERE s.id = :id"),
     @NamedQuery(name = "SessionTimetable.findBySessiondate", query = "SELECT s FROM SessionTimetable s WHERE s.sessiondate = :sessiondate")})
-public class SessionTimetable implements  BaseEntity, Serializable {
+public class SessionTimetable implements BaseEntity, Serializable {
+
+    @OneToMany(mappedBy = "sessionTemplate")
+    private Collection<SessionHistory> sessionHistoryCollection;
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "duration_minutes")
+    private int durationMinutes;
+    @Basic(optional = false)
+    @NotNull
+    @Lob
+    @Size(min = 1, max = 65535)
+    @Column(name = "session_title")
+    private String sessionTitle;
+    @Basic(optional = false)
+    @NotNull
+    @Lob
+    @Size(min = 1, max = 65535)
+    @Column(name = "session_location_label")
+    private String sessionLocationLabel;
+    @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 128)
+    @Column(name = "session_location_gps")
+    private String sessionLocationGps;
     @JoinColumn(name = "trainer_id", referencedColumnName = "id")
     @ManyToOne(optional = false)
     private Customers trainerId;
@@ -160,5 +191,64 @@ public class SessionTimetable implements  BaseEntity, Serializable {
     public void setTrainerId(Customers trainerId) {
         this.trainerId = trainerId;
     }
-    
+
+    public int getDurationMinutes() {
+        return durationMinutes;
+    }
+
+    public void setDurationMinutes(int durationMinutes) {
+        this.durationMinutes = durationMinutes;
+    }
+
+    public String getSessionTitle() {
+        return sessionTitle;
+    }
+
+    public void setSessionTitle(String sessionTitle) {
+        this.sessionTitle = sessionTitle;
+    }
+
+    public String getSessionLocationLabel() {
+        return sessionLocationLabel;
+    }
+
+    public void setSessionLocationLabel(String sessionLocationLabel) {
+        this.sessionLocationLabel = sessionLocationLabel;
+    }
+
+    public String getSessionLocationGps() {
+        return sessionLocationGps;
+    }
+
+    public void setSessionLocationGps(String sessionLocationGps) {
+        this.sessionLocationGps = sessionLocationGps;
+    }
+
+    @XmlTransient
+    public Collection<SessionHistory> getSessionHistoryCollection() {
+        return sessionHistoryCollection;
+    }
+
+    public void setSessionHistoryCollection(Collection<SessionHistory> sessionHistoryCollection) {
+        this.sessionHistoryCollection = sessionHistoryCollection;
+    }
+
+    public MapModel getSimpleModel() {
+
+        MapModel simpleModel = new DefaultMapModel();
+        if (sessionLocationGps != null && sessionLocationGps.trim().isEmpty() == false) {
+
+            String[] cooards = sessionLocationGps.split(",");
+            if (cooards.length == 2) {
+                Double lat = new Double(cooards[0]);
+                Double lng = new Double(cooards[1]);
+                LatLng coord1 = new LatLng(lat, lng);
+                 
+                simpleModel.addOverlay(new Marker(coord1, sessionLocationLabel));
+            }
+        }
+
+        return simpleModel;
+    }
+
 }

@@ -5,7 +5,6 @@ import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PaginationHelper;
 import au.com.manlyit.fitnesscrm.stats.beans.SessionTimetableFacade;
 import au.com.manlyit.fitnesscrm.stats.classes.util.TimetableRows;
-import au.com.manlyit.fitnesscrm.stats.db.Participants;
 import au.com.manlyit.fitnesscrm.stats.db.SessionHistory;
 import au.com.manlyit.fitnesscrm.stats.db.SessionTrainers;
 
@@ -33,6 +32,10 @@ import javax.inject.Named;
 import org.primefaces.event.RowEditEvent;
 import org.primefaces.event.SelectEvent;
 import org.primefaces.model.SortOrder;
+import org.primefaces.model.map.DefaultMapModel;
+import org.primefaces.model.map.LatLng;
+import org.primefaces.model.map.MapModel;
+import org.primefaces.model.map.Marker;
 
 @Named("sessionTimetableController")
 @SessionScoped
@@ -51,9 +54,11 @@ public class SessionTimetableController implements Serializable {
     private au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade configMapFacade;
     private PaginationHelper pagination;
     private int selectedItemIndex;
+    private int sessionForTheWeekMaxColumns = 1;
     private List<SessionTimetable> filteredItems;
     private SessionTimetable[] multiSelected;
     private Date timetableStartDate;
+    private MapModel simpleModel;
 
     public SessionTimetableController() {
     }
@@ -69,6 +74,27 @@ public class SessionTimetableController implements Serializable {
             selectedItemIndex = -1;
         }
         return current;
+    }
+
+    public MapModel getSimpleModel() {
+        if (simpleModel == null) {
+            simpleModel = new DefaultMapModel();
+
+            //Shared coordinates - Double
+            LatLng coord1 = new LatLng(36.879466, 30.667648);
+            //LatLng coord2 = new LatLng(36.883707, 30.689216);
+            // LatLng coord3 = new LatLng(36.879703, 30.706707);
+            // LatLng coord4 = new LatLng(36.885233, 30.702323);
+
+            //Basic marker
+            simpleModel.addOverlay(new Marker(coord1, "Konyaalti"));
+            //simpleModel.addOverlay(new Marker(coord2, "Ataturk Parki"));
+            //simpleModel.addOverlay(new Marker(coord3, "Karaalioglu Parki"));
+            //simpleModel.addOverlay(new Marker(coord4, "Kaleici"));  
+
+        }
+
+        return simpleModel;
     }
 
     public void setSelected(SessionTimetable selected) {
@@ -100,33 +126,33 @@ public class SessionTimetableController implements Serializable {
         }
         return pagination;
     }
-    
-    public void populateSessions(){
-        
+
+    public void populateSessions() {
+
         List<SessionTimetable> sessions = ejbFacade.findAll();
-        
-        for(SessionTimetable st:sessions){
-            
-            cloneSessionsFromTimetable(st,90);
-            
+
+        for (SessionTimetable st : sessions) {
+
+            cloneSessionsFromTimetable(st, 90);
+
         }
-         
+
     }
-    
-    private void cloneSessionsFromTimetable(SessionTimetable st,int daysIntoFuture){
+
+    private void cloneSessionsFromTimetable(SessionTimetable st, int daysIntoFuture) {
         GregorianCalendar startCal = new GregorianCalendar();
         GregorianCalendar endCal = new GregorianCalendar();
-        endCal.add(Calendar.DAY_OF_YEAR ,daysIntoFuture);
-        GregorianCalendar templateTime =new GregorianCalendar();
+        endCal.add(Calendar.DAY_OF_YEAR, daysIntoFuture);
+        GregorianCalendar templateTime = new GregorianCalendar();
         templateTime.setTime(st.getSessiondate());
-        startCal.set(Calendar.HOUR_OF_DAY, templateTime.get( Calendar.HOUR_OF_DAY));
-        startCal.set(Calendar.MINUTE, templateTime.get( Calendar.MINUTE));
-        startCal.set(Calendar.SECOND, templateTime.get( Calendar.SECOND));
-        startCal.set(Calendar.MILLISECOND, templateTime.get( Calendar.MILLISECOND));
-        
+        startCal.set(Calendar.HOUR_OF_DAY, templateTime.get(Calendar.HOUR_OF_DAY));
+        startCal.set(Calendar.MINUTE, templateTime.get(Calendar.MINUTE));
+        startCal.set(Calendar.SECOND, templateTime.get(Calendar.SECOND));
+        startCal.set(Calendar.MILLISECOND, templateTime.get(Calendar.MILLISECOND));
+
         try {
             while (startCal.compareTo(endCal) < 0) {
-                
+
                 while (startCal.get(Calendar.DAY_OF_WEEK) != templateTime.get(Calendar.DAY_OF_WEEK)) {
                     startCal.add(Calendar.DAY_OF_YEAR, -1);
                 }
@@ -137,25 +163,26 @@ public class SessionTimetableController implements Serializable {
                 trainers.setSessionHistoryId(sh);
                 ac.add(trainers);
                 sh.setSessionTrainersCollection(ac);
+                sh.setSessionTemplate(st);
                 sh.setParticipantsCollection(new ArrayList<>());
                 sh.setSessionTypesId(st.getSessionTypesId());
                 sh.setComments(st.getComments());
-                SessionHistory existing = sessionHistoryFacade.findSessionBySessionTimetable(sh,st);
+                SessionHistory existing = sessionHistoryFacade.findSessionBySessionTimetable(sh, st);
                 if (existing == null) {
                     sessionHistoryFacade.create(sh);
                 }
-                 startCal.add(Calendar.DAY_OF_YEAR, 7);
+                startCal.add(Calendar.DAY_OF_YEAR, 7);
             }
         } catch (Exception e) {
-            logger.log(Level.WARNING, "cloneSessionsFromTimetable",e);
+            logger.log(Level.WARNING, "cloneSessionsFromTimetable", e);
         }
-        
+
     }
 
     public List<TimetableRows> getSessionForTheWeekItems() {
 
         ArrayList<TimetableRows> daysOfWeek = new ArrayList<>();
-
+        sessionForTheWeekMaxColumns = 1;
         GregorianCalendar startCal = new GregorianCalendar();
         startCal.setTime(getTimetableStartDate());
         startCal.set(Calendar.HOUR_OF_DAY, 0);
@@ -173,6 +200,9 @@ public class SessionTimetableController implements Serializable {
             daysOfWeek.add(new TimetableRows(startCal.getTime(), sessions));
             endCal.add(Calendar.DAY_OF_YEAR, 1);
             startCal.add(Calendar.DAY_OF_YEAR, 1);
+            if(sessions.size() > sessionForTheWeekMaxColumns){
+                sessionForTheWeekMaxColumns = sessions.size();
+            }
         }
 
         return daysOfWeek;
@@ -406,6 +436,20 @@ public class SessionTimetableController implements Serializable {
      */
     public void setTimetableStartDate(Date timetableStartDate) {
         this.timetableStartDate = timetableStartDate;
+    }
+
+    /**
+     * @return the sessionForTheWeekMaxColumns
+     */
+    public int getSessionForTheWeekMaxColumns() {
+        return sessionForTheWeekMaxColumns;
+    }
+
+    /**
+     * @param sessionForTheWeekMaxColumns the sessionForTheWeekMaxColumns to set
+     */
+    public void setSessionForTheWeekMaxColumns(int sessionForTheWeekMaxColumns) {
+        this.sessionForTheWeekMaxColumns = sessionForTheWeekMaxColumns;
     }
 
     @FacesConverter(value = "sessionTimetableControllerConverter", forClass = SessionTimetable.class)

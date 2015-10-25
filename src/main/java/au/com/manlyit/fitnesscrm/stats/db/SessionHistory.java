@@ -29,6 +29,10 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
+import org.primefaces.model.map.DefaultMapModel;
+import org.primefaces.model.map.LatLng;
+import org.primefaces.model.map.MapModel;
+import org.primefaces.model.map.Marker;
 
 /**
  *
@@ -42,6 +46,9 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "SessionHistory.findById", query = "SELECT s FROM SessionHistory s WHERE s.id = :id"),
     @NamedQuery(name = "SessionHistory.findBySessiondate", query = "SELECT s FROM SessionHistory s WHERE s.sessiondate = :sessiondate")})
 public class SessionHistory implements BaseEntity, Serializable {
+    @JoinColumn(name = "session_template", referencedColumnName = "id")
+    @ManyToOne
+    private SessionTimetable sessionTemplate;
 
     private static final long serialVersionUID = 1L;
     @Id
@@ -187,5 +194,15 @@ public class SessionHistory implements BaseEntity, Serializable {
     public void setAdminNotes(String adminNotes) {
         this.adminNotes = adminNotes;
     }
+
+    public SessionTimetable getSessionTemplate() {
+        return sessionTemplate;
+    }
+
+    public void setSessionTemplate(SessionTimetable sessionTemplate) {
+        this.sessionTemplate = sessionTemplate;
+    }
+    
+    
 
 }

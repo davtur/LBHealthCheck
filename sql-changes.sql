@@ -100,3 +100,19 @@ ADD COLUMN `session_location_gps` VARCHAR(128) NOT NULL AFTER `session_location_
 
 ALTER TABLE `fitnessStats`.`session_history` 
 ADD COLUMN `session_template` INT(11) NULL AFTER `admin_notes`;
+
+
+ALTER TABLE `fitnessStats`.`session_history` 
+ADD INDEX `fk_session_history_2_idx` (`session_template` ASC);
+ALTER TABLE `fitnessStats`.`session_history` 
+ADD CONSTRAINT `fk_session_history_2`
+  FOREIGN KEY (`session_template`)
+  REFERENCES `fitnessStats`.`session_timetable` (`id`)
+  ON DELETE NO ACTION
+  ON UPDATE NO ACTION;
+
+ALTER TABLE `fitnessStats`.`customers` 
+ADD COLUMN `last_login_time` DATETIME NULL DEFAULT NULL AFTER `profile_image`,
+ADD COLUMN `login_attempts` INT(4) NULL DEFAULT 0 AFTER `last_login_time`,
+ADD COLUMN `must_reset_password` TINYINT(1) NULL DEFAULT 0 AFTER `login_attempts`;
+

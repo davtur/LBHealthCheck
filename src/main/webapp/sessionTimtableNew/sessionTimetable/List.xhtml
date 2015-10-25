@@ -67,7 +67,7 @@
                                 </h:outputText>
                             </f:facet>
                             <f:facet name="input">
-                                <p:calendar value="#{item.sessiondate}" pattern="dd/MM/yyyy,  EEE HH:mm"  >	
+                                <p:calendar value="#{item.sessiondate}">	
                                     <p:ajax event="dateSelect" listener= "#{sessionTimetableController.handleDateSelect}" update=":growl" />
                                 </p:calendar>
                             </f:facet>
@@ -198,7 +198,7 @@
                         <p:commandButton id="viewButton"   icon="ui-icon-search" value="#{configMapController.getKey('View')}" update=":SessionTimetableViewForm" oncomplete="PF('SessionTimetableViewDialog').show()" disabled="#{empty sessionTimetableController.selected}"/>
                         <p:commandButton rendered="#{sessionTimetableController.isUserInRole('ADMIN')}" id="editButton"   icon="ui-icon-pencil" value="#{configMapController.getKey('Edit')}" update=":SessionTimetableEditForm" oncomplete="PF('SessionTimetableEditDialog').show()" disabled="#{empty sessionTimetableController.selected}"/>
                         <p:commandButton rendered="#{sessionTimetableController.isUserInRole('ADMIN')}" id="deleteButton" icon="ui-icon-trash"  value="#{configMapController.getKey('Delete')}" actionListener="#{sessionTimetableController.destroy}" update=":growl,datalist" disabled="#{empty sessionTimetableController.selected}"/>
-                        <p:commandButton rendered="#{sessionTimetableController.isUserInRole('ADMIN')}" id="populateButton" icon="ui-icon-cog"  value="#{configMapController.getKey('Populate')}" actionListener="#{sessionTimetableController.populateSessions}" update=":growl,datalist" />
+                                            <p:commandButton rendered="#{sessionTimetableController.isUserInRole('ADMIN')}" id="deleteButton" icon="ui-icon-cog"  value="#{configMapController.getKey('Populate')}" actionListener="#{sessionTimetableController.populateSessions}" update=":growl,datalist" />
 
                     </f:facet>
 
@@ -212,5 +212,5 @@
 
     </ui:define>
 </ui:composition>
-<!-- Generated from template ( JSF_from_entity_wizard/StandardJSF/list.ftl  )- Dave 23rd October 2015 -->
+<p> Generated from template ( JSF_from_entity_wizard/StandardJSF/list.ftl  )- Dave 23rd October 2015 </p>
 

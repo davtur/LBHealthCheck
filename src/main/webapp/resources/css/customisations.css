@@ -23,3 +23,7 @@ and open the template in the editor.
     height: 37px;
     background: url(/FitnessStats/resources/templates/yoo_pace/images/tools/icons_social.png) 0 0 no-repeat;
 }
+
+.timetable .ui-datagrid-column {
+     height: 100px !important;
+}
