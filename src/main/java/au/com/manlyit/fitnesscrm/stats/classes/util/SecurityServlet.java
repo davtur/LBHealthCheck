@@ -9,7 +9,9 @@ import au.com.manlyit.fitnesscrm.stats.beans.util.CustomerStatus;
 import au.com.manlyit.fitnesscrm.stats.classes.PasswordService;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.faces.application.FacesMessage;
@@ -45,6 +47,8 @@ public class SecurityServlet extends HttpServlet {
     private au.com.manlyit.fitnesscrm.stats.beans.CustomersFacade ejbFacade;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade configMapFacade;
+    @Inject
+    private au.com.manlyit.fitnesscrm.stats.beans.AuditLogFacade ejbAuditLogFacade;
 
     public SecurityServlet() {
     }
@@ -67,7 +71,7 @@ public class SecurityServlet extends HttpServlet {
         String accessToken = getFacebookAccessToken(faceCode);
         Customers facebookUser = getUserMailAddressFromJsonResponse(accessToken, httpSession);
         String sessionID = httpSession.getId();
-         logger.log(Level.INFO, "SecurityServlet called: SessionId={0}, State:={1},FacebookCode={2}, Token from code:{3}",new Object[]{sessionID,state,faceCode,accessToken});
+        logger.log(Level.INFO, "SecurityServlet called: SessionId={0}, State:={1},FacebookCode={2}, Token from code:{3}", new Object[]{sessionID, state, faceCode, accessToken});
         if (state.equals(sessionID)) {
             String pfmEncrptedPassword = null;
             try {
@@ -112,6 +116,16 @@ public class SecurityServlet extends HttpServlet {
                             try {
                                 request.login(customer.getUsername(), passwd);
                                 customer.setPassword(pfmEncrptedPassword);
+                                String auditDetails = "Customer Login Successful:" + customer.getUsername() + " Details:  " + customer.getLastname() + " " + customer.getFirstname() + " ";
+                                String changedFrom = "UnAuthenticated";
+                                String changedTo = "Authenticated User:" + customer.getUsername();
+                                if (customer.getUsername().toLowerCase(Locale.getDefault()).equals("synthetic.tester")) {
+                                    logger.log(Level.INFO, "Synthetic Tester Logged In.");
+                                } else {
+                                    ejbAuditLogFacade.audit(customer, customer, "Logged In", auditDetails, changedFrom, changedTo);
+                                }
+                                customer.setLastLoginTime(new Date());
+                                customer.setLoginAttempts(0);
                                 ejbFacade.editAndFlush(customer);
                             } catch (ServletException servletException) {
                                 logger.log(Level.INFO, "Login failed!");
@@ -124,8 +138,8 @@ public class SecurityServlet extends HttpServlet {
                                     return;
                                 }
                             }
-                        }else{
-                            logger.log(Level.INFO, "A cancelled customer ({0}) was denied access - facebook login button.",customer.getUsername());
+                        } else {
+                            logger.log(Level.INFO, "A cancelled customer ({0}) was denied access - facebook login button.", customer.getUsername());
                             context.addMessage(null, new FacesMessage("Access Denied - Cancelled Status"));
                         }
                     } else {

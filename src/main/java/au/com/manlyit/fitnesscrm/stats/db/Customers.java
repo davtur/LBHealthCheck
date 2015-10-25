@@ -60,6 +60,13 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Customers.findByFacebookId", query = "SELECT c FROM Customers c WHERE c.facebookId = :facebookId"),
     @NamedQuery(name = "Customers.findByGoogleId", query = "SELECT c FROM Customers c WHERE c.googleId = :googleId")})
 public class Customers implements BaseEntity, Serializable {
+    @Column(name = "last_login_time")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date lastLoginTime;
+    @Column(name = "login_attempts")
+    private Integer loginAttempts;
+    @Column(name = "must_reset_password")
+    private Boolean mustResetPassword;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "trainerId")
     private Collection<SessionTimetable> sessionTimetableCollection;
    
@@ -590,6 +597,30 @@ public class Customers implements BaseEntity, Serializable {
 
     public void setSessionTimetableCollection(Collection<SessionTimetable> sessionTimetableCollection) {
         this.sessionTimetableCollection = sessionTimetableCollection;
+    }
+
+    public Date getLastLoginTime() {
+        return lastLoginTime;
+    }
+
+    public void setLastLoginTime(Date lastLoginTime) {
+        this.lastLoginTime = lastLoginTime;
+    }
+
+    public Integer getLoginAttempts() {
+        return loginAttempts;
+    }
+
+    public void setLoginAttempts(Integer loginAttempts) {
+        this.loginAttempts = loginAttempts;
+    }
+
+    public Boolean getMustResetPassword() {
+        return mustResetPassword;
+    }
+
+    public void setMustResetPassword(Boolean mustResetPassword) {
+        this.mustResetPassword = mustResetPassword;
     }
 
 }

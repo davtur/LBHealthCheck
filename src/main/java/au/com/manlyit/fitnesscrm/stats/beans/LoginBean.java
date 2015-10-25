@@ -288,7 +288,7 @@ import org.primefaces.application.exceptionhandler.PrimeExceptionHandlerELResolv
                     throw servletException;
                 }
             }
-            redirectToLandingPage();
+            
             Customers cust = ejbCustomerFacade.findCustomerByUsername(username);
             String auditDetails = "Customer Login Successful:" + cust.getUsername() + " Details:  " + cust.getLastname() + " " + cust.getFirstname() + " ";
             String changedFrom = "UnAuthenticated";
@@ -298,6 +298,10 @@ import org.primefaces.application.exceptionhandler.PrimeExceptionHandlerELResolv
             } else {
                 ejbAuditLogFacade.audit(cust, cust, "Logged In", auditDetails, changedFrom, changedTo);
             }
+            cust.setLastLoginTime(new Date());
+            cust.setLoginAttempts(0);
+            ejbCustomerFacade.edit(cust);
+            redirectToLandingPage();
 
         } catch (ServletException e) {
             JsfUtil.addErrorMessage(e, "Login Failed.");

@@ -116,3 +116,6 @@ ADD COLUMN `last_login_time` DATETIME NULL DEFAULT NULL AFTER `profile_image`,
 ADD COLUMN `login_attempts` INT(4) NULL DEFAULT 0 AFTER `last_login_time`,
 ADD COLUMN `must_reset_password` TINYINT(1) NULL DEFAULT 0 AFTER `login_attempts`;
 
+ALTER TABLE `fitnessStats`.`session_timetable` 
+ADD COLUMN `show_booking_button` TINYINT(1) NULL DEFAULT '0' AFTER `session_location_gps`,
+ADD COLUMN `show_signup_button` TINYINT(1) NULL DEFAULT '0' AFTER `show_booking_button`;
