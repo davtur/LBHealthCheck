@@ -24,6 +24,19 @@ and open the template in the editor.
     background: url(/FitnessStats/resources/templates/yoo_pace/images/tools/icons_social.png) 0 0 no-repeat;
 }
 
-.timetable .ui-datagrid-column {
-     height: 100px !important;
+
+
+.MarRight5 {
+    margin-right:  5px;
+}
+.MarRight10 {
+    margin-right:  10px;
+}
+.MarRight15 {
+    margin-right:  15px;
+}
+.TimetableTile{
+    width:25%;
+    min-width:450px !important ;
+  min-height: 100% !important ;
 }

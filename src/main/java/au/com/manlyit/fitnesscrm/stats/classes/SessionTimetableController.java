@@ -59,6 +59,7 @@ public class SessionTimetableController implements Serializable {
     private SessionTimetable[] multiSelected;
     private Date timetableStartDate;
     private MapModel simpleModel;
+    private SessionHistory selectedSessionHistory;
 
     public SessionTimetableController() {
     }
@@ -142,15 +143,15 @@ public class SessionTimetableController implements Serializable {
     private void cloneSessionsFromTimetable(SessionTimetable st, int daysIntoFuture) {
         GregorianCalendar startCal = new GregorianCalendar();
         GregorianCalendar endCal = new GregorianCalendar();
-        endCal.add(Calendar.DAY_OF_YEAR, daysIntoFuture);
-        GregorianCalendar templateTime = new GregorianCalendar();
-        templateTime.setTime(st.getSessiondate());
-        startCal.set(Calendar.HOUR_OF_DAY, templateTime.get(Calendar.HOUR_OF_DAY));
-        startCal.set(Calendar.MINUTE, templateTime.get(Calendar.MINUTE));
-        startCal.set(Calendar.SECOND, templateTime.get(Calendar.SECOND));
-        startCal.set(Calendar.MILLISECOND, templateTime.get(Calendar.MILLISECOND));
-
         try {
+            endCal.add(Calendar.DAY_OF_YEAR, daysIntoFuture);
+            GregorianCalendar templateTime = new GregorianCalendar();
+            templateTime.setTime(st.getSessiondate());
+            startCal.set(Calendar.HOUR_OF_DAY, templateTime.get(Calendar.HOUR_OF_DAY));
+            startCal.set(Calendar.MINUTE, templateTime.get(Calendar.MINUTE));
+            startCal.set(Calendar.SECOND, templateTime.get(Calendar.SECOND));
+            startCal.set(Calendar.MILLISECOND, templateTime.get(Calendar.MILLISECOND));
+
             while (startCal.compareTo(endCal) < 0) {
 
                 while (startCal.get(Calendar.DAY_OF_WEEK) != templateTime.get(Calendar.DAY_OF_WEEK)) {
@@ -208,22 +209,24 @@ public class SessionTimetableController implements Serializable {
         return daysOfWeek;
     }
 
-    public void signUpFromTimetable(ActionEvent actionEvent) {
+    public String signUpFromTimetable(ActionEvent actionEvent) {
         FacesContext context = FacesContext.getCurrentInstance();
         String sessionHistoryId = context.getExternalContext().getRequestParameterMap().get("sessionHistorySignupId");
         if (sessionHistoryId != null) {
             SessionHistory sh = sessionHistoryFacade.find(Integer.valueOf(sessionHistoryId));
-            logger.log(Level.INFO, "signUpFromTimetable: {0}",new Object[]{ sh.getSessiondate().toString()});
+            logger.log(Level.INFO, "signUpFromTimetable: {0}", new Object[]{sh.getSessiondate().toString()});
         }
+        return "index.xhtml";
     }
 
-    public void bookFromTimetable(ActionEvent actionEvent) {
+    public String bookFromTimetable(ActionEvent actionEvent) {
         FacesContext context = FacesContext.getCurrentInstance();
         String sessionHistoryId = context.getExternalContext().getRequestParameterMap().get("sessionHistoryBookingId");
         if (sessionHistoryId != null) {
             SessionHistory sh = sessionHistoryFacade.find(Integer.valueOf(sessionHistoryId));
-            logger.log(Level.INFO, "BookFromTimetable: {0}",new Object[]{ sh.getSessiondate().toString()});
+            logger.log(Level.INFO, "BookFromTimetable: {0}", new Object[]{sh.getSessiondate().toString()});
         }
+        return "index.xhtml";
     }
 
     /**
@@ -468,6 +471,20 @@ public class SessionTimetableController implements Serializable {
      */
     public void setSessionForTheWeekMaxColumns(int sessionForTheWeekMaxColumns) {
         this.sessionForTheWeekMaxColumns = sessionForTheWeekMaxColumns;
+    }
+
+    /**
+     * @return the selectedSessionHistory
+     */
+    public SessionHistory getSelectedSessionHistory() {
+        return selectedSessionHistory;
+    }
+
+    /**
+     * @param selectedSessionHistory the selectedSessionHistory to set
+     */
+    public void setSelectedSessionHistory(SessionHistory selectedSessionHistory) {
+        this.selectedSessionHistory = selectedSessionHistory;
     }
 
     @FacesConverter(value = "sessionTimetableControllerConverter", forClass = SessionTimetable.class)

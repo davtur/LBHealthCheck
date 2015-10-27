@@ -8,74 +8,115 @@
                 xmlns:p="http://primefaces.org/ui" >
 
 
-        <div class="layout-portlets-box">
-            <h:form id="SessionTimetableListForm">
-
+    <div class="layout-portlets-box">
+        <h:form id="SessionTimetableListForm">
+            <div class="Container100 Responsive100 ">
                 <div class="ContainerIndent">
                     <h1 class="BigTopic">#{configMapController.getKey('Timetable_Title')}</h1>
 
                     <ui:repeat value="#{sessionTimetableController.sessionForTheWeekItems}"  var="dayOfWeek" >
-                        <div class="BorderedBox">
+                        <div class="Container100 Responsive100 BorderedBox">
                             <div class="ContainerIndent">
                                 <h:outputText value="#{dayOfWeek.startDate}">
                                     <f:convertDateTime pattern="EEEE,  d MMMMM yyyy" />
                                 </h:outputText>
                             </div>
                         </div>
-                        <p:dataGrid value="#{dayOfWeek.sessions}" var="sessHist" columns="#{sessionTimetableController.sessionForTheWeekMaxColumns}" rows="1" style="text-align: left" styleClass="timetable">
+                       <!-- <p:dataGrid value="#{dayOfWeek.sessions}" var="sessHist" columns="#{sessionTimetableController.sessionForTheWeekMaxColumns}" rows="1" style="text-align: left" styleClass="timetable">
+                            
+                            <p:column >
+                                <p:panel header=" #{sessHist.sessionTemplate.sessionTitle}"  style="max-width: 450px;height: 100%">-->
+                        <div class="Container100 Responsive100">        
 
-                            <p:panel header=" #{sessHist.sessionTemplate.sessionTitle}"  style="max-width: 450px;height: 100%">
+                            <ui:repeat  value="#{dayOfWeek.sessions}" var="sessHist"  >
 
+                                <div class=" TimetableTile BorderedBox Fleft TexAlLeft HoverEffect MarRight15 "> 
+                                    <div class="ContainerIndent">
+                                        <div class="ContainerIndent">
+                                            <h2 class=" FontRalewayBold ">  #{sessHist.sessionTemplate.sessionTitle} </h2> 
+                                            <h:outputText value="#{sessHist.sessiondate}" styleClass=" Fs18 FontRalewayBold blue">
+                                                <f:convertDateTime pattern="EEEE h:mm a" />
+                                            </h:outputText>
+                                        </div>
+                                        <div class="EmptyBox10"></div>
+                                        <div class="Container100 Responsive100 gray">
+                                            <div class="ContainerIndent">
+                                                <div class="Container20 Responsive ">
+                                                    <div class="ContainerIndent">
+                                                        <p:graphicImage value="#{customerImagesController.dynamicImage}" width="55px">
+                                                            <f:param name="imageId" value="#{sessHist.sessionTemplate.trainerId.profileImage.id}"/>
+                                                        </p:graphicImage>
+                                                    </div>
+                                                </div>
+                                                <div class="Container80 Responsive ">
 
-                                <h:outputText value="#{sessHist.sessiondate}" styleClass=" Fs18 FontRalewayBold">
-                                    <f:convertDateTime pattern="EEEE h:mm a" />
-                                </h:outputText>
+                                                    <span class="DispBlock " ><font class="Fs14 FontRalewayBold black">Trainer: </font> #{sessHist.sessionTemplate.trainerId.firstname}</span>
+                                                    <span class="DispBlock " ><font class="Fs14 FontRalewayBold black">Location: </font> #{sessHist.sessionTemplate.sessionLocationLabel}</span>
 
-                                <h:panelGrid columns="1"  >
-                                    <h:panelGrid columns="2" >
-                                        <h:panelGrid columns="1"  >
-                                            <p:graphicImage value="#{customerImagesController.dynamicImage}" height="80px">
-                                                <f:param name="imageId" value="#{sessHist.sessionTemplate.trainerId.profileImage.id}"/>
-                                            </p:graphicImage>
+                                                    <div class="EmptyBox10"></div>
+                                                    <p:commandButton id="mapsBtn" styleClass="MarRight5" value="#{configMapController.getKey('Timetable_MapsButtonTitle')}" type="button" />
 
-                                        </h:panelGrid>
-                                        <h:panelGrid columns="1"  >
+                                                    <p:commandButton styleClass="MarRight5 GreenButton animated pulse infinite "  update=":SessionTimetableListForm:signupDetail" oncomplete="PF('signupDialog').show()" rendered="#{sessHist.sessionTemplate.showSignupButton and  empty  facesContext.externalContext.remoteUser}" value="#{configMapController.getKey('Timetable_SignUpButtonTitle')}"  actionListener="#{sessionTimetableController.signUpFromTimetable}"  >
+                                                      <!--  <f:param name="sessionHistorySignupId" value="#{sessHist.id}"/>-->
+                                                        <f:setPropertyActionListener value="#{sessHist}" target="#{sessionTimetableController.selectedSessionHistory}" />
+                                                    </p:commandButton>
 
-                                            <span class="DispBlock " ><font class="bold  blue">Trainer: </font> #{sessHist.sessionTemplate.trainerId.firstname}</span>
-                                            <span class="DispBlock " ><font class="bold  blue">Location: </font> #{sessHist.sessionTemplate.sessionLocationLabel}</span>
+                                                    <p:commandButton   styleClass=" OrangeButton animated pulse infinite" update=":SessionTimetableListForm:bookingDetail" oncomplete="PF('bookDialog').show()" rendered="#{sessHist.sessionTemplate.showBookingButton}" value="#{configMapController.getKey('Timetable_BookingButtonTitle')}"  actionListener="#{sessionTimetableController.bookFromTimetable}" >
+                                                       <!-- <f:param name="sessionHistoryBookingId" value="#{sessHist.id}"/>-->
+                                                        <f:setPropertyActionListener value="#{sessHist}" target="#{sessionTimetableController.selectedSessionHistory}" />
+                                                    </p:commandButton>
+                                                    <p:overlayPanel  for="mapsBtn" hideEffect="fade" dynamic="false" style="width:600px">
+                                                        <p:gmap styleClass="BorderedBox" center="#{sessHist.sessionTemplate.sessionLocationGps}" zoom="16" model="#{sessHist.sessionTemplate.simpleModel}" type="HYBRID" style="width:100%;height:400px" />
 
-                                            <h:panelGrid columns="3"  >
-                                                <p:commandButton id="mapsBtn" value="#{configMapController.getKey('Timetable_MapsButtonTitle')}" type="button" />
+                                                    </p:overlayPanel>
 
-                                                <p:commandButton id="signUpBtn" styleClass="GreenButton animated pulse infinite" rendered="#{sessHist.sessionTemplate.showSignupButton and  empty  facesContext.externalContext.remoteUser}" value="#{configMapController.getKey('Timetable_SignUpButtonTitle')}" partialSubmit="true" process="@this" actionListener="#{sessionTimetableController.signUpFromTimetable}"  >
-                                                    <f:param name="sessionHistorySignupId" value="#{sessHist.id}"/>
-                                                </p:commandButton>
+                                                </div>
 
-                                                <p:commandButton id="bookBtn" styleClass="OrangeButton animated pulse infinite" rendered="#{sessHist.sessionTemplate.showBookingButton}" value="#{configMapController.getKey('Timetable_BookingButtonTitle')}" partialSubmit="true" process="@this" actionListener="#{sessionTimetableController.bookFromTimetable}">
-                                                    <f:param name="sessionHistoryBookingId" value="#{sessHist.id}"/>
-                                                </p:commandButton>
-                                                <p:overlayPanel id="mapPanel" for="mapsBtn" hideEffect="fade" dynamic="false" style="width:600px">
-                                                    <p:gmap id="map#{sessHist.sessionTemplate.id}" styleClass="BorderedBox" center="#{sessHist.sessionTemplate.sessionLocationGps}" zoom="16" model="#{sessHist.sessionTemplate.simpleModel}" type="HYBRID" style="width:100%;height:400px" />
+                                            </div>
+                                        </div>
+                                        <div class="Seperator"></div>
+                                        <div class="Container100 Responsive100 gray ">
+                                            <div class="ContainerIndent">
+                                                <h:outputText value="#{sessHist.sessionTemplate.comments}"/>
+                                            </div>
 
-                                                </p:overlayPanel>
-                                            </h:panelGrid>
-                                        </h:panelGrid>
+                                        </div>
+                                        <div class="EmptyBox10"></div>
 
-                                    </h:panelGrid>
-                                    <p:separator />
-                                    <h:outputText value="#{sessHist.sessionTemplate.comments}"/>
-                                </h:panelGrid>
-                            </p:panel>
-                        </p:dataGrid>
+                                        <!--    </p:panel>
+                                        </p:column>-->
+                                    </div>
+                                </div>
+                            </ui:repeat >
+                        </div>
                         <p:separator />
                     </ui:repeat>
                 </div>
 
 
-            </h:form>
-        </div>
+                <p:dialog header="Booking Wizard" widgetVar="bookDialog" modal="true" showEffect="fade" hideEffect="fade" resizable="false">
+                    <p:outputPanel id="bookingDetail" style="text-align:center;">
+                        <p:panelGrid  columns="2" rendered="#{not empty sessionTimetableController.selectedSessionHistory}" columnClasses="label,value">
+                            <h:outputText value="Id:" />
+                            <h:outputText value="#{sessionTimetableController.selectedSessionHistory.id}" />
+                        </p:panelGrid>
+                    </p:outputPanel>
+                </p:dialog>
 
-   
+                <p:dialog header="Sign Up  Wizard" widgetVar="signupDialog" modal="true" showEffect="fade" hideEffect="fade" resizable="false">
+                    <p:outputPanel id="signupDetail" style="text-align:center;">
+                        <p:panelGrid  columns="2" rendered="#{not empty sessionTimetableController.selectedSessionHistory}" columnClasses="label,value">
+                            <h:outputText value="Id:" />
+                            <h:outputText value="#{sessionTimetableController.selectedSessionHistory.id}" />
+                        </p:panelGrid>
+                    </p:outputPanel>
+                </p:dialog>
+            </div>
+        </h:form>
+
+    </div>
+
+
 </ui:composition>
 <!--<p> Generated from template ( JSF_from_entity_wizard/StandardJSF/list.ftl  )- Dave 18th July 2015 </p>-->
 
