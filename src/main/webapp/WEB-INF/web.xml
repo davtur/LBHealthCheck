@@ -14,7 +14,14 @@
         <param-name>primefaces.SUBMIT</param-name>
         <param-value>partial</param-value>
     </context-param>
-    
+    <context-param>
+        <param-name>primefaces.PRIVATE_CAPTCHA_KEY</param-name>
+        <param-value>6Lf7awUTAAAAAMaawx8IS3dwud5yUtYqoc_ZhLq3</param-value>
+    </context-param>
+    <context-param>
+        <param-name>primefaces.PUBLIC_CAPTCHA_KEY</param-name>
+        <param-value>6Lf7awUTAAAAAEqamzR4gFWaguCHj1ZhgRi7n6Zz</param-value>
+    </context-param>
     <context-param>
         <param-name>primefaces.THEME</param-name>
         <param-value>spark-blue</param-value>
@@ -291,7 +298,7 @@
         <extension>woff</extension>
         <mime-type>application/x-font-woff</mime-type>
     </mime-mapping>
-     <mime-mapping>
+    <mime-mapping>
         <extension>woff2</extension>
         <mime-type>application/x-font-woff2</mime-type>
     </mime-mapping>

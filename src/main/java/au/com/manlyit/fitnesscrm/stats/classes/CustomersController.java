@@ -581,6 +581,14 @@ public class CustomersController implements Serializable {
         selectedItemIndex = -1;
         return "Create";
     }
+    
+    public String signUp(ActionEvent actionEvent){
+        
+        prepareCreateAjax( actionEvent);
+        logger.log(Level.INFO, "customersController  Sign Up Button Clicked, prepare create called. Returning to signup xhtml");
+         
+        return "/signup.xhtml";
+    }
 
     public void prepareCreateAjax(ActionEvent actionEvent) {
         setLastSelected(current);

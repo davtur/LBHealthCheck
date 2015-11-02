@@ -1287,3 +1287,7 @@ ListSessionTimetableTitle_showBookingButton=Show Booking
 ListSessionTimetableTitle_showSignupButton=Show Sign Up
 Timetable_SignUpButtonTitle=Sign Up Now
 Timetable_BookingButtonTitle=Book Now
+Timetable_decrementWeekButtonTitle=<<
+Timetable_incrementWeekButtonTitle=>>
+Timetable_setToCurrentWeekButtonTitle=Today
+Timetable_MinutesLabel=minutes

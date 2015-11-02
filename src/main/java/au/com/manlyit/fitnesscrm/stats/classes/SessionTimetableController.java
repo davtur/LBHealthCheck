@@ -208,7 +208,27 @@ public class SessionTimetableController implements Serializable {
 
         return daysOfWeek;
     }
+    
+    public void incrementWeek(){
+        GregorianCalendar startCal = new GregorianCalendar();
+        startCal.setTime(getTimetableStartDate());
+        startCal.add(Calendar.DAY_OF_YEAR, 7);
+        setTimetableStartDate(startCal.getTime());
+    }
+    public void decrementWeek(){
+        GregorianCalendar startCal = new GregorianCalendar();
+        startCal.setTime(getTimetableStartDate());
+        startCal.add(Calendar.DAY_OF_YEAR, -7);
+        setTimetableStartDate(startCal.getTime());
+    }
 
+    public void setToCurrentWeek(){
+       
+        setTimetableStartDate(new Date());
+    }
+
+    
+    
     public String signUpFromTimetable(ActionEvent actionEvent) {
         FacesContext context = FacesContext.getCurrentInstance();
         String sessionHistoryId = context.getExternalContext().getRequestParameterMap().get("sessionHistorySignupId");
