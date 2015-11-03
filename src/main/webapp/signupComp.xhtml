@@ -8,14 +8,14 @@
                 xmlns:p="http://primefaces.org/ui" >
 
 
+    <p:dialog header="Sign Up  Wizard" widgetVar="signupDialog" modal="true" showEffect="fade" hideEffect="fade"   resizable="false">
+        <h:form id="signUpForm">
 
-    <h:form id="signUpForm">
+            <h1 class="BigTopic">#{configMapController.getKey('SignUpDialogueHeader')}</h1>
+            <div class="Container100 Responsive100">
 
-        <h1 class="BigTopic">#{configMapController.getKey('ListCustomersTitle_CustomerDetailsHeader')}</h1>
-        <div class="Container100 Responsive100">
-           
                 <div class="ContainerIndent">
-
+                    <p:messages showDetail="true"/>
                     <h:panelGrid id="dialogueGrid" columns="2"  cellpadding="5" >
 
                         <p:outputLabel value="#{configMapController.getKey('EditCustomersLabel_firstname')}" for="firstname" />
@@ -46,18 +46,19 @@
                         </p:inputText>
 
                     </h:panelGrid>
-                    <p:captcha label="Captcha" />
-             </div>
-          </div>
-        <div class="Container100 Responsive100">
-                <div class="ContainerIndent">
-                    <p:commandButton icon="ui-icon-check fa fa-check white Fs14" id="dialogueSave" disabled="#{customersController.addUserButtonDisabled}" onclick="PF('customersCreateDialogue').hide()"  actionListener="#{customersController.createDialogue}"  value="#{configMapController.getKey('CreateCustomersSaveLink')}" update=":growl "/>                
-                    <p:commandButton icon=" fa fa-times-circle white Fs14" id="dialogueDiscard" onclick="PF('customersCreateDialogue').hide()"  actionListener="#{customersController.cancelCreateDialogue}" value="#{configMapController.getKey('CreateCustomersDiscardLink')}" update=":growl"/>                
+
                 </div>
-        </div>
+            </div>
+            <div class="Container100 Responsive100">
+                <div class="ContainerIndent">
+                    <p:commandButton icon="ui-icon-check fa fa-check white Fs14" id="dialogueSave" disabled="#{customersController.addUserButtonDisabled}"  actionListener="#{customersController.createFromSignup}"  value="#{configMapController.getKey('SendSignupVerificationEmailLink')}" update=":growl "/>                
+                    <p:commandButton icon=" fa fa-times-circle white Fs14" id="dialogueDiscard" onclick=" PF('signupDialog').hide()"  actionListener="#{customersController.cancelCreateDialogue}" value="#{configMapController.getKey('CancelSignupLink')}" update=":growl"/>                
+                </div>
+            </div>
 
-    </h:form>
 
+        </h:form>
+    </p:dialog>
 
 
 

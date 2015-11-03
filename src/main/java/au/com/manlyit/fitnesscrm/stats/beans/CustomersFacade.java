@@ -89,6 +89,30 @@ public class CustomersFacade extends AbstractFacade<Customers> {
         // Query q = em.createNativeQuery("SELECT * FROM customers where username = '" + username + "'", Customers.class);
         // return (Customers) q.getSingleResult();
     }
+      public Customers findCustomerByEmail(String email) {
+
+        // CriteriaBuilder cb = em.getCriteriaBuilder();
+        //CriteriaQuery<Customers> cq = cb.createQuery(Customers.class);
+        // Root<Customers> rt2 = cq.from(Customers.class);
+        // EntityType<Customers> customers_Et = rt2.getModel();
+        Customers cm = null;
+        try {
+            CriteriaBuilder cb = em.getCriteriaBuilder();
+            CriteriaQuery<Customers> cq = cb.createQuery(Customers.class);
+            Root<Customers> rt = cq.from(Customers.class);
+
+            Expression<String> emailAddress = rt.get("emailAddress");
+            cq.where(cb.equal(emailAddress, email));
+
+            Query q = em.createQuery(cq);
+            cm = (Customers) q.getSingleResult();
+        } catch (Exception e) {
+            logger.log(Level.INFO, "Customer not found:{0}", email);
+        }
+        return cm;
+        // Query q = em.createNativeQuery("SELECT * FROM customers where username = '" + username + "'", Customers.class);
+        // return (Customers) q.getSingleResult();
+    }
 
     public Customers findCustomerByName(String firstname, String lastname) {
 

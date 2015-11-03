@@ -99,6 +99,7 @@ import org.primefaces.application.exceptionhandler.PrimeExceptionHandlerELResolv
         props.put("mail.smtp.host", configMapFacade.getConfig("mail.smtp.host"));
         props.put("mail.smtp.auth", configMapFacade.getConfig("mail.smtp.auth"));
         props.put("mail.debug", configMapFacade.getConfig("mail.debug"));
+        props.put("mail.smtp.ssl.enable", configMapFacade.getConfig("mail.smtp.ssl.enable"));
         props.put("mail.smtp.port", configMapFacade.getConfig("mail.smtp.port"));
         props.put("mail.smtp.socketFactory.port", configMapFacade.getConfig("mail.smtp.socketFactory.port"));
         props.put("mail.smtp.socketFactory.class", configMapFacade.getConfig("mail.smtp.socketFactory.class"));

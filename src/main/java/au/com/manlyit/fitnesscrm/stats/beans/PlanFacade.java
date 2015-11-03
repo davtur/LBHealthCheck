@@ -99,5 +99,35 @@ public class PlanFacade extends AbstractFacade<Plan> {
         }
         return retList;
     }
+    public Plan findPLanByName(String name) {
+        List<Plan> retList = null;
+        try {
+            CriteriaBuilder cb = em.getCriteriaBuilder();
+            CriteriaQuery<Plan> cq = cb.createQuery(Plan.class);
+            Root<Plan> rt = cq.from(Plan.class);
+
+            Expression<String> plan = rt.get("planName");
+            cq.where(cb.equal(plan, name));
+
+            TypedQuery<Plan> q = em.createQuery(cq);
+
+            retList = q.getResultList();
+        } catch (Exception e) {
+
+            logger.log(Level.INFO, "Exception : Could not find plans by name.", e);
+        }
+        if(retList != null && retList.size() == 1){
+            return retList.get(0);
+        }
+        if(retList != null && retList.size() > 1){
+            logger.log(Level.SEVERE, " Found more than 1 plan with the same name .", name);
+            return retList.get(0);
+        }
+        if(retList == null){
+            logger.log(Level.WARNING, " Could not find plan by name .", name);
+            return null;
+        }
+        return null;
+    }
 
 }

@@ -58,7 +58,7 @@
                                                 </div>
                                             </div>
                                             <div class="Container80  ">
-                                                
+
                                                 <span class="DispBlock " ><font class="Fs14 FontRalewayBold black">Trainer: </font> #{sessHist.sessionTemplate.trainerId.firstname}</span>
                                                 <span class="DispBlock " ><font class="Fs14 FontRalewayBold black">Duration: </font> #{sessHist.sessionTemplate.durationMinutes} #{configMapController.getKey('Timetable_MinutesLabel')}</span>
                                                 <span class="DispBlock " ><font class="Fs14 FontRalewayBold black">Location: </font> #{sessHist.sessionTemplate.sessionLocationLabel}</span>
@@ -66,7 +66,7 @@
                                                 <div class="EmptyBox10"></div>
                                                 <p:commandButton id="mapsBtn" styleClass="MarRight5" value="#{configMapController.getKey('Timetable_MapsButtonTitle')}" type="button" />
 
-                                                <p:commandButton styleClass="MarRight5 GreenButton animated pulse infinite " ajax="false"  rendered="#{sessHist.sessionTemplate.showSignupButton and  empty  facesContext.externalContext.remoteUser}" value="#{configMapController.getKey('Timetable_SignUpButtonTitle')}"  actionListener="#{customersController.signUp}"  >
+                                                <p:commandButton styleClass="MarRight5 GreenButton animated pulse infinite "   update=":signUpForm" oncomplete="PF('signupDialog').show()" rendered="#{sessHist.sessionTemplate.showSignupButton and  empty  facesContext.externalContext.remoteUser}" value="#{configMapController.getKey('Timetable_SignUpButtonTitle')}"  actionListener="#{customersController.signUp}"  >
                                                   <!--  <f:param name="sessionHistorySignupId" value="#{sessHist.id}"/>-->
                                                     <f:setPropertyActionListener value="#{sessHist}" target="#{sessionTimetableController.selectedSessionHistory}" />
                                                 </p:commandButton>
@@ -104,29 +104,22 @@
             </div>
 
 
-            <p:dialog header="Booking Wizard" widgetVar="bookDialog" modal="true" showEffect="fade" hideEffect="fade" resizable="false">
-                <p:outputPanel id="bookingDetail" style="text-align:center;">
-                    <p:panelGrid  columns="2" rendered="#{not empty sessionTimetableController.selectedSessionHistory}" columnClasses="label,value">
-                        <h:outputText value="Id:" />
-                        <h:outputText value="#{sessionTimetableController.selectedSessionHistory.id}" />
-                    </p:panelGrid>
-                </p:outputPanel>
-            </p:dialog>
 
-            <p:dialog header="Sign Up  Wizard" widgetVar="signupDialog" modal="true" showEffect="fade" hideEffect="fade" resizable="false">
-                <p:outputPanel id="signupDetail" style="text-align:center;">
-                    <p:panelGrid  columns="2" rendered="#{not empty sessionTimetableController.selectedSessionHistory}" columnClasses="label,value">
-                        <h:outputText value="Id:" />
-                        <h:outputText value="#{sessionTimetableController.selectedSessionHistory.id}" />
-                    </p:panelGrid>
-                </p:outputPanel>
-            </p:dialog>
+
+          
         </div>
+         <p:dialog header="Booking Wizard" widgetVar="bookDialog" modal="true" showEffect="fade" hideEffect="fade" resizable="false">
+        <p:outputPanel id="bookingDetail" style="text-align:center;">
+            <div class="layout-portlets-box">
+                <ui:include src="signupComp.xhtml"/>
+            </div>
+        </p:outputPanel>
+    </p:dialog>
+
     </h:form>
 
-
-
-
+   
+<ui:include src="signupComp.xhtml"/>
 </ui:composition>
 <!--<p> Generated from template ( JSF_from_entity_wizard/StandardJSF/list.ftl  )- Dave 18th July 2015 </p>-->
 

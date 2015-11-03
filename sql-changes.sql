@@ -119,3 +119,9 @@ ADD COLUMN `must_reset_password` TINYINT(1) NULL DEFAULT 0 AFTER `login_attempts
 ALTER TABLE `fitnessStats`.`session_timetable` 
 ADD COLUMN `show_booking_button` TINYINT(1) NULL DEFAULT '0' AFTER `session_location_gps`,
 ADD COLUMN `show_signup_button` TINYINT(1) NULL DEFAULT '0' AFTER `show_booking_button`;
+
+
+ALTER TABLE `fitnessStats`.`customers` 
+ADD COLUMN `terms_conditions_accepted` TINYINT(1) NULL DEFAULT '0' AFTER `must_reset_password`;
+
+

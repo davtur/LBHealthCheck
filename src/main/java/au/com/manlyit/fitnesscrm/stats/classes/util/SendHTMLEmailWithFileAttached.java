@@ -243,18 +243,7 @@ public class SendHTMLEmailWithFileAttached implements Serializable {
              t.close();
              }*/
 
-            /* SMTPTransport t = (SMTPTransport) optusEmail.getTransport(ssl ? "smtps" : "smtp");
-             try {
-             if (auth) {
-             t.connect(host, user, password);
-             } else {
-             t.connect();
-             }
             
-             t.sendMessage(msg, msg.getAllRecipients());
-             } finally {
-             t.close();
-             }*/
         } catch (MessagingException mex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, "Send Email Messaging Exception: \r\n" + msg.toString(), mex);
             JsfUtil.addErrorMessage(mex, mex.getMessage());
@@ -274,7 +263,7 @@ public class SendHTMLEmailWithFileAttached implements Serializable {
 
     private InternetAddress[] iterateEmailAddressesIntoArray(String csvEmailAddresses) {
 
-        if (csvEmailAddresses.indexOf(",") == -1) {
+        if (!csvEmailAddresses.contains(",")) {
             InternetAddress[] inetAddresses = new InternetAddress[1];
             try {
                 inetAddresses[0] = new InternetAddress(csvEmailAddresses);
