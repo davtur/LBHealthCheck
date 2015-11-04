@@ -1,52 +1,53 @@
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:ui="http://java.sun.com/jsf/facelets"
-      xmlns:h="http://java.sun.com/jsf/html"
-      xmlns:f="http://java.sun.com/jsf/core"
-      xmlns:p="http://primefaces.org/ui" >
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:p="http://primefaces.org/ui" >
 
-   
-        <p:dialog id="SurveyquestionsEditDlg" widgetVar="SurveyquestionsEditDialog" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('EditSurveyquestionsTitle')}">
-            <h:form id="SurveyquestionsEditForm">
-                <h:panelGroup id="display">
-                    <p:panelGrid columns="2" rendered="#{surveyquestionsController.selected != null}">
-                        <h:outputLabel value="#{configMapController.getKey('EditSurveyquestionsLabel_questionType')}" for="questionType" />
-                        <p:selectOneMenu id="questionType" valueChangeListener="#{surveyquestionsController.selectOneMenuValueChangeListener}" value="#{surveyquestionsController.selected.questionType}" label="#{configMapController.getKey('EditSurveyquestionsTitle_questionType')}" required="true" requiredMessage="#{configMapController.getKey('EditSurveyquestionsRequiredMessage_questionType')}">
-                            <f:selectItems value="#{surveyquestiontypesController.itemsAvailableSelectOne}"/>
-                            <p:ajax   update=":SurveyquestionsEditForm"  />
-                        </p:selectOneMenu>
-                        <h:outputLabel value="#{configMapController.getKey('EditSurveyquestionsLabel_question')}" for="question" />
-                        <h:inputTextarea rows="4" cols="30" id="question" value="#{surveyquestionsController.selected.question}" title="#{configMapController.getKey('EditSurveyquestionsTitle_question')}" required="true" requiredMessage="#{configMapController.getKey('EditSurveyquestionsRequiredMessage_question')}"/>
 
-                    </p:panelGrid>
-                    <p:panelGrid columns="3">
-                        <p:outputLabel value="#{configMapController.getKey('CreateSurveyquestionsubitemsLabel_subitem')}" for="subItem2" />
-                        <p:inputText id="subItem2" value="#{surveyquestionsController.subItem.subitemText}"  >
-                            <p:ajax   update=":SurveyquestionsEditForm:subItemList2"  />
-                        </p:inputText>
-                        <p:commandButton actionListener="#{surveyquestionsController.addSubItem}" value="#{configMapController.getKey('Create')}" update="subItem2,:SurveyquestionsEditForm:subItemList2,:growl" />
+    <p:dialog id="SurveyquestionsEditDlg" widgetVar="SurveyquestionsEditDialog" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('EditSurveyquestionsTitle')}">
+        <h:form id="SurveyquestionsEditForm">
+            <h:panelGroup id="display">
+                <p:panelGrid columns="2" rendered="#{surveyquestionsController.selected != null}">
+                    <h:outputLabel value="#{configMapController.getKey('EditSurveyquestionsLabel_questionType')}" for="questionType" />
+                    <p:selectOneMenu id="questionType" valueChangeListener="#{surveyquestionsController.selectOneMenuValueChangeListener}"  converter="surveyQuestionTypesControllerConverter" value="#{surveyquestionsController.selected.questionType}"  label="#{configMapController.getKey('CreateSurveyquestionsTitle_questionType')}" required="true" requiredMessage="#{configMapController.getKey('CreateSurveyquestionsRequiredMessage_questionType')}">
+                        <f:selectItems value="#{surveyquestiontypesController.itemsAvailable}" var="sq" itemLabel="#{sq.type}" itemValue="#{sq}"/>
+                        <p:ajax   update=":SurveyquestionsEditForm"  />
+                    </p:selectOneMenu>
 
-                    </p:panelGrid>
-                    <p:dataList  id="subItemList2" value="#{surveyquestionsController.subItems}" var="subItem" type="unordered" itemType="none">
-                        <f:facet name="header">
-                            Sub Items 
-                        </f:facet>
-                        <p:commandLink update=":SurveyquestionsEditForm:subItemList2" title="Delete" styleClass="ui-icon ui-icon-trash" style="float:left;margin-right:10px;" immediate="true">
-                            <f:setPropertyActionListener value="#{subItem}" target="#{surveyquestionsController.deleteSubItem}" />
-                        </p:commandLink>
-                        <h:outputText value="#{subItem.subitemText}" style="display:inline-block"/> 
-                        <!-- <p:commandButton update=":SurveyquestionsEditForm:subItemList2" value="Delete" >
-                             <f:setPropertyActionListener value="#{subItem}" target="#{surveyquestionsController.deleteSubItem}" />
-                         </p:commandButton>-->
+                    <h:outputLabel value="#{configMapController.getKey('EditSurveyquestionsLabel_question')}" for="question" />
+                    <h:inputTextarea rows="4" cols="30" id="question" value="#{surveyquestionsController.selected.question}" title="#{configMapController.getKey('EditSurveyquestionsTitle_question')}" required="true" requiredMessage="#{configMapController.getKey('EditSurveyquestionsRequiredMessage_question')}"/>
 
- 
-                    </p:dataList>
-                    <p:commandButton actionListener="#{surveyquestionsController.update}" value="#{configMapController.getKey('Save')}" update="display,:SurveyquestionsListForm:datalist,:growl" oncomplete="handleSubmit(args, 'SurveyquestionsEditDialog');PF('surveyquestionsControllerTable').filter()"/>
-                    <p:commandButton value="#{configMapController.getKey('Cancel')}" onclick="PF('SurveyquestionsEditDialog').hide()"/>
-                </h:panelGroup>
-            </h:form>
-        </p:dialog>
+                </p:panelGrid>
+                <p:panelGrid columns="3">
+                    <p:outputLabel value="#{configMapController.getKey('CreateSurveyquestionsubitemsLabel_subitem')}" for="subItem2" />
+                    <p:inputText id="subItem2" value="#{surveyquestionsController.subItem.subitemText}"  >
+                        <p:ajax   update=":SurveyquestionsEditForm:subItemList2"  />
+                    </p:inputText>
+                    <p:commandButton actionListener="#{surveyquestionsController.addSubItem}" value="#{configMapController.getKey('Create')}" update="subItem2,:SurveyquestionsEditForm:subItemList2,:growl" />
 
-    </ui:composition>
+                </p:panelGrid>
+                <p:dataList  id="subItemList2" value="#{surveyquestionsController.subItems}" var="subItem" type="unordered" itemType="none">
+                    <f:facet name="header">
+                        Sub Items 
+                    </f:facet>
+                    <p:commandLink update=":SurveyquestionsEditForm:subItemList2" title="Delete" styleClass="ui-icon ui-icon-trash" style="float:left;margin-right:10px;" immediate="true">
+                        <f:setPropertyActionListener value="#{subItem}" target="#{surveyquestionsController.deleteSubItem}" />
+                    </p:commandLink>
+                    <h:outputText value="#{subItem.subitemText}" style="display:inline-block"/> 
+                    <!-- <p:commandButton update=":SurveyquestionsEditForm:subItemList2" value="Delete" >
+                         <f:setPropertyActionListener value="#{subItem}" target="#{surveyquestionsController.deleteSubItem}" />
+                     </p:commandButton>-->
+
+
+                </p:dataList>
+                <p:commandButton actionListener="#{surveyquestionsController.update}" value="#{configMapController.getKey('Save')}" update="display,:SurveyquestionsListForm:datalist,:growl" oncomplete="handleSubmit(args, 'SurveyquestionsEditDialog');PF('surveyquestionsControllerTable').filter()"/>
+                <p:commandButton value="#{configMapController.getKey('Cancel')}" onclick="PF('SurveyquestionsEditDialog').hide()"/>
+            </h:panelGroup>
+        </h:form>
+    </p:dialog>
+
+</ui:composition>
 

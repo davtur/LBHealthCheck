@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.el.ELException;
@@ -42,7 +43,8 @@ public class PasswordResetFilter implements Filter {
     private au.com.manlyit.fitnesscrm.stats.beans.ActivationFacade ejbActivationFacade;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.CustomersFacade ejbCustomerFacade;
-
+    @Inject
+    private au.com.manlyit.fitnesscrm.stats.beans.AuditLogFacade ejbAuditLogFacade;
     private final StringEncrypter encrypter = new StringEncrypter("(lqKdh^Gr$2F^KJHG654)");
 
     @Override
@@ -90,10 +92,18 @@ public class PasswordResetFilter implements Filter {
                                     try {
                                         req.login(user, paswd);
                                         logger.log(Level.INFO, "The reset password link executed successfully. User {0} has been logged in.", user);
+                                        String auditDetails = "Customer Login Successful:" + cst.getUsername() + " Details:  " + cst.getLastname() + " " + cst.getFirstname() + " ";
+                                        String changedFrom = "UnAuthenticated";
+                                        String changedTo = "Authenticated User:" + cst.getUsername();
+                                        if (cst.getUsername().toLowerCase(Locale.getDefault()).equals("synthetic.tester")) {
+                                            logger.log(Level.INFO, "Synthetic Tester Logged In.");
+                                        } else {
+                                            ejbAuditLogFacade.audit(cst, cst, "Logged In", auditDetails, changedFrom, changedTo);
+                                        }
                                     } catch (ServletException servletException) {
                                         if (servletException.getMessage().contains("This is request has already been authenticated") == false) {
                                             throw servletException;
-                                        }else{
+                                        } else {
                                             logger.log(Level.INFO, "This is request has already been authenticated. User {0} is already logged in.", user);
                                         }
                                     }
@@ -105,7 +115,12 @@ public class PasswordResetFilter implements Filter {
                                     try {
 
                                         String detailsURL = req.getContextPath() + "/myDetails.xhtml";
-                                        res.sendRedirect(detailsURL);
+                                        String surveysURL = req.getContextPath() + "/customerSurveys.xhtml";
+                                        if (cst.getTermsConditionsAccepted() == true) {
+                                            res.sendRedirect(detailsURL);
+                                        } else {
+                                            res.sendRedirect(surveysURL);
+                                        }
 
                                     } catch (IOException e) {
                                         logger.log(Level.SEVERE, "Redirect to MyDetails failed", e);

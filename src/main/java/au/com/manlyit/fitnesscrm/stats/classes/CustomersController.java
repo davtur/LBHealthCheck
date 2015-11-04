@@ -85,6 +85,9 @@ public class CustomersController implements Serializable {
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.AuditLogFacade ejbAuditLogFacade;
     @Inject
+    private au.com.manlyit.fitnesscrm.stats.beans.PreferedContactFacade ejbPreferedContactFacade;
+    
+    @Inject
     private ConfigMapFacade configMapFacade;
     @Inject
     private PaymentsFacade ejbPaymentsFacade;
@@ -320,10 +323,19 @@ public class CustomersController implements Serializable {
         c.setLastLoginTime(null);
         c.setMustResetPassword(true);
         c.setGroupPricing(ejbPlanFacade.findPLanByName(configMapFacade.getConfig("default.customer.plan")));
-        c.setEmailFormat(ejbEmailFormatFacade.findAll().get(0));
-        c.setAuth(ejbCustomerAuthFacade.findAll().get(0));
-        c.setActive(ejbCustomerStateFacade.findAll().get(0));
-        
+        try {
+            c.setEmailFormat(ejbEmailFormatFacade.findAll().get(Integer.parseInt(configMapFacade.getConfig("default.customer.details.emailformat"))));
+            c.setAuth(ejbCustomerAuthFacade.findAll().get(Integer.parseInt(configMapFacade.getConfig("default.customer.details.auth"))));
+            c.setActive(ejbCustomerStateFacade.findAll().get(Integer.parseInt(configMapFacade.getConfig("default.customer.details.active"))));
+            c.setTermsConditionsAccepted(false);
+            c.setPreferredContact(ejbPreferedContactFacade.findAll().get(Integer.parseInt(configMapFacade.getConfig("default.customer.details.prefferedcontact"))));
+            c.setDemographic(ejbDemoFacade.findAll().get(Integer.parseInt(configMapFacade.getConfig("default.customer.details.demographic"))));
+            
+        } catch (NumberFormatException numberFormatException) {
+                       logger.log(Level.SEVERE, "Number Format Exception for customer defaults.Check config map entry for default.customer.details.xxxx and a numeric value ");
+
+        }
+  
         GregorianCalendar gc = new GregorianCalendar();
         gc.add(Calendar.YEAR, -18);
         c.setDob(gc.getTime());
@@ -703,7 +715,8 @@ public class CustomersController implements Serializable {
                 controller.doPasswordReset("system.new.customer.template", c, configMapFacade.getConfig("sendCustomerOnBoardEmailEmailSubject"));
                 createCombinedAuditLogAndNote(c, c, "New Sign Up", details, "Did Not Exist", "New Lead");
                 logger.log(Level.INFO, "createFromSignup: {0}", new Object[]{details});
-                RequestContext.getCurrentInstance().closeDialog("signupDialog");
+                RequestContext.getCurrentInstance().execute("PF('signupDialog').hide();");
+                JsfUtil.addSuccessMessage("Info", configMapFacade.getConfig("SignUpSuccessfulFailed"));
             } else {
                 JsfUtil.addErrorMessage("Error", configMapFacade.getConfig("SignUpValidationEmailExistsFailed"));
             }

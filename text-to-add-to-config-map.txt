@@ -1298,3 +1298,10 @@ CancelSignupLink=Cancel
 SignUpValidationEmailExistsFailed=The email address entered is already in use. Try resetting your password or logging in with facebook.
 mail.smtp.ssl.enable=true
 default.customer.plan=Unlimited Group Training
+SignUpSuccessfulFailed=Account created successfully.
+
+default.customer.details.emailformat=0
+default.customer.details.auth=0
+default.customer.details.active=0
+default.customer.details.prefferedcontact=0
+default.customer.details.demographic=6

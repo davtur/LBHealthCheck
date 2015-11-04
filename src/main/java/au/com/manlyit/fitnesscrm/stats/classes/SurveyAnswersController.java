@@ -47,6 +47,8 @@ public class SurveyAnswersController implements Serializable {
     private au.com.manlyit.fitnesscrm.stats.beans.SurveyAnswersFacade ejbFacade;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade configMapFacade;
+    @Inject
+    private au.com.manlyit.fitnesscrm.stats.beans.CustomersFacade ejbCustomersFacade;
     private PaginationHelper pagination;
     private int selectedItemIndex;
     private List<SurveyAnswers> filteredItems;
@@ -180,6 +182,11 @@ public class SurveyAnswersController implements Serializable {
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
         }
+        FacesContext context = FacesContext.getCurrentInstance();
+        CustomersController customersController = context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
+        Customers c = customersController.getSelected();
+        c.setTermsConditionsAccepted(true);
+        ejbCustomersFacade.edit(c);
         return "/myDetails.xhtml?faces-redirect=true";
     }
       public String saveSurveyMobile() {

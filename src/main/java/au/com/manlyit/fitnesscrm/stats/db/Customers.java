@@ -60,6 +60,8 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Customers.findByFacebookId", query = "SELECT c FROM Customers c WHERE c.facebookId = :facebookId"),
     @NamedQuery(name = "Customers.findByGoogleId", query = "SELECT c FROM Customers c WHERE c.googleId = :googleId")})
 public class Customers implements BaseEntity, Serializable {
+    @Column(name = "terms_conditions_accepted")
+    private Boolean termsConditionsAccepted;
     @Column(name = "last_login_time")
     @Temporal(TemporalType.TIMESTAMP)
     private Date lastLoginTime;
@@ -621,6 +623,14 @@ public class Customers implements BaseEntity, Serializable {
 
     public void setMustResetPassword(Boolean mustResetPassword) {
         this.mustResetPassword = mustResetPassword;
+    }
+
+    public Boolean getTermsConditionsAccepted() {
+        return termsConditionsAccepted;
+    }
+
+    public void setTermsConditionsAccepted(Boolean termsConditionsAccepted) {
+        this.termsConditionsAccepted = termsConditionsAccepted;
     }
 
 }

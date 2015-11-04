@@ -13,13 +13,13 @@
                 <h:panelGroup id="display">
                     <p:panelGrid columns="2" rendered="#{surveyquestionsController.selected != null}">
                          <p:outputLabel value="#{configMapController.getKey('CreateSurveyanswersLabel_surveyId')}" for="surveyId" />
-                        <p:selectOneMenu id="surveyId" valueChangeListener="#{surveyquestiontypesController.selectOneMenuValueChangeListener}"  value="#{surveyquestionsController.selected.surveyId}"  label="#{configMapController.getKey('CreateSurveyanswersTitle_surveyId')}" required="true" requiredMessage="#{configMapController.getKey('CreateSurveyanswersRequiredMessage_surveyId')}">
-                            <f:selectItems value="#{surveysController.itemsAvailableSelectOne}"/>
+                         <p:selectOneMenu id="surveyId" valueChangeListener="#{surveyquestiontypesController.selectOneMenuValueChangeListener}" converter="surveysControllerConverter" value="#{surveyquestionsController.selected.surveyId}"  label="#{configMapController.getKey('CreateSurveyanswersTitle_surveyId')}" required="true" requiredMessage="#{configMapController.getKey('CreateSurveyanswersRequiredMessage_surveyId')}">
+                            <f:selectItems value="#{surveysController.itemsAvailable}"/>
                             <p:ajax   update=":SurveyquestionsCreateForm"  />
                         </p:selectOneMenu>
                         <p:outputLabel value="#{configMapController.getKey('CreateSurveyquestionsLabel_questionType')}" for="questionType" />
-                        <p:selectOneMenu id="questionType" valueChangeListener="#{surveyquestionsController.selectOneMenuValueChangeListener}"  value="#{surveyquestionsController.selected.questionType}"  label="#{configMapController.getKey('CreateSurveyquestionsTitle_questionType')}" required="true" requiredMessage="#{configMapController.getKey('CreateSurveyquestionsRequiredMessage_questionType')}">
-                            <f:selectItems value="#{surveyquestiontypesController.itemsAvailableSelectOne}" />
+                        <p:selectOneMenu id="questionType" valueChangeListener="#{surveyquestionsController.selectOneMenuValueChangeListener}" converter="surveyQuestionTypesControllerConverter" value="#{surveyquestionsController.selected.questionType}"  label="#{configMapController.getKey('CreateSurveyquestionsTitle_questionType')}" required="true" requiredMessage="#{configMapController.getKey('CreateSurveyquestionsRequiredMessage_questionType')}">
+                            <f:selectItems value="#{surveyquestiontypesController.itemsAvailable}"  var="sq" itemLabel="#{sq.type}" itemValue="#{sq}"/>
                             <p:ajax    />
                         </p:selectOneMenu>
                         <p:outputLabel value="#{configMapController.getKey('CreateSurveyquestionsLabel_question')}" for="question" />

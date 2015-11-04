@@ -45,7 +45,7 @@ public class SurveyQuestionSubitems implements  BaseEntity, Serializable {
     @Basic(optional = false)
     @NotNull
     @Lob
-    @Size(min = 1, max = 65535)
+    @Size(min = 0, max = 65535)
     @Column(name = "subitem_text")
     private String subitemText;
     @Column(name = "subitem_bool")
