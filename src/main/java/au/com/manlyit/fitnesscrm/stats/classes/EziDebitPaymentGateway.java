@@ -1998,7 +1998,7 @@ public class EziDebitPaymentGateway implements Serializable {
             }
         }
         //@(.parentOfUploadPhoto)
-       // RequestContext.getCurrentInstance().update("customerslistForm1");
+        // RequestContext.getCurrentInstance().update("customerslistForm1");
         sendUpdatesForPaymentComponents();
         // refreshFromDB = true;
         logger.log(Level.INFO, "processGetPayments completed");
@@ -2029,7 +2029,7 @@ public class EziDebitPaymentGateway implements Serializable {
                 setPaymentsDBListFilteredItems(null);
             }
         }
-       // RequestContext.getCurrentInstance().update("customerslistForm1");
+        // RequestContext.getCurrentInstance().update("customerslistForm1");
         sendUpdatesForPaymentComponents();
         //refreshFromDB = true;
         logger.log(Level.INFO, "processGetScheduledPayments completed");
@@ -2480,12 +2480,13 @@ public class EziDebitPaymentGateway implements Serializable {
         getCustomersController().recreateModel();
         logger.log(Level.INFO, "processGetCustomerDetails completed");
     }
-    private void sendUpdatesForPaymentComponents(){
+
+    private void sendUpdatesForPaymentComponents() {
         ArrayList<String> als = new ArrayList<>();
         als.add(":tv:customerslistForm1");
         als.add(":tv:NoteslistForm1");
         als.add("@(.updateMyDetailsPaymentInformation)");
-        
+
         RequestContext.getCurrentInstance().update(als);
         //RequestContext.getCurrentInstance().update("customerslistForm1");
         //RequestContext.getCurrentInstance().update("@(.updateGetPayments)");
@@ -2623,20 +2624,23 @@ public class EziDebitPaymentGateway implements Serializable {
         Long amount = (long) (paymentAmountInCents * (float) 100);
         Long amountLimit = paymentLimitAmountInCents * (long) 100;
         char spt = paymentSchedulePeriodType.charAt(0);
+        GregorianCalendar debitDate = new GregorianCalendar();
+        debitDate.setTime(paymentDebitDate);
+        SimpleDateFormat sdf2 = new SimpleDateFormat("E");
         GregorianCalendar endCal = new GregorianCalendar();
         //endCal.setTime(paymentDebitDate);// ezi debit only supports 1 year from current date
         endCal.add(Calendar.YEAR, 1);
-        String dom = Integer.toString(paymentDayOfMonth);
+        String dom = Integer.toString(debitDate.get(Calendar.DAY_OF_MONTH));
 
         pp = cust.getPaymentParameters();
-        if(pp ==null){
+        if (pp == null) {
             getCustomersController().createDefaultPaymentParameters(cust);
             pp = cust.getPaymentParameters();
         }
         pp.setContractStartDate(paymentDebitDate);
         pp.setPaymentPeriod(paymentSchedulePeriodType);
         pp.setPaymentPeriodDayOfMonth(dom);
-        pp.setPaymentPeriodDayOfWeek(paymentDayOfWeek);
+        pp.setPaymentPeriodDayOfWeek(sdf2.format(debitDate.getTime()).toUpperCase());
         pp.setNextScheduledPayment(null);
         pp.setPaymentRegularAmount(new BigDecimal(amount));
         pp.setPaymentRegularTotalPaymentsAmount(new BigDecimal(amountLimit));
@@ -2659,7 +2663,7 @@ public class EziDebitPaymentGateway implements Serializable {
         }
         ejbPaymentParametersFacade.edit(pp);
         customersFacade.edit(cust);
-
+        String urlPaymentPeriodFormat = convertPaymentPeriod(paymentSchedulePeriodType);
         NumberFormat nf = NumberFormat.getNumberInstance(Locale.US);
         nf.setMaximumFractionDigits(2);
         nf.setMinimumFractionDigits(2);
@@ -2706,8 +2710,8 @@ public class EziDebitPaymentGateway implements Serializable {
             widgetUrl += amp + "debits=2";
         }
 
-        widgetUrl += amp + "aFreq=" + paymentSchedulePeriodType;
-        widgetUrl += amp + "freq=" + paymentSchedulePeriodType;
+        widgetUrl += amp + "aFreq=" + urlPaymentPeriodFormat;
+        widgetUrl += amp + "freq=" + urlPaymentPeriodFormat;
         widgetUrl += amp + "aDur=" + pp.getPaymentRegularDuration().toString();
         widgetUrl += amp + "dur=" + dur;
         widgetUrl += amp + "businessOrPerson=1";
@@ -2729,21 +2733,52 @@ public class EziDebitPaymentGateway implements Serializable {
         createCombinedAuditLogAndNote(getLoggedInUser(), cust, "createEddrLink", "The Direct Debit Request form was modified.", oldUrl.replace(amp, ", "), widgetUrl.replace(amp, ", "));
     }
 
+    private String convertPaymentPeriod(String period) {
+        String rt = "";
+        switch (period) {
+            case "W":
+                rt = "1";
+                break;
+            case "F":
+                rt = "2";
+                break;
+            case "M":
+                rt = "4";
+                break;
+            case "4":
+                rt = "8";
+                break;
+            case "N":
+                rt = "";
+                break;
+            case "Q":
+                rt = "16";
+                break;
+            case "H":
+                rt = "32";
+                break;
+            case "Y":
+                rt = "64";
+                break;
+        }
+
+        return rt;
+    }
+
     public void updatePaymentScheduleForm() {
         PaymentParameters pp = getSelectedCustomer().getPaymentParameters();
-        if (pp != null 
-                && pp.getWebddrUrl() != null 
-                && pp.getWebddrUrl().isEmpty() == false 
-                && pp.getContractStartDate() != null 
-                && pp.getPaymentRegularAmount() != null 
-                && pp.getPaymentRegularTotalPaymentsAmount() != null 
-                && pp.getPaymentsRegularTotalNumberOfPayments() != null 
-                && pp.getPaymentPeriod() != null 
-                ) {
+        if (pp != null
+                && pp.getWebddrUrl() != null
+                && pp.getWebddrUrl().isEmpty() == false
+                && pp.getContractStartDate() != null
+                && pp.getPaymentRegularAmount() != null
+                && pp.getPaymentRegularTotalPaymentsAmount() != null
+                && pp.getPaymentsRegularTotalNumberOfPayments() != null
+                && pp.getPaymentPeriod() != null) {
 
             paymentDebitDate = pp.getContractStartDate();
-            paymentAmountInCents = pp.getPaymentRegularAmount().floatValue()/ (float) 100;
-            paymentLimitAmountInCents = pp.getPaymentRegularTotalPaymentsAmount().longValue()/ (long) 100;
+            paymentAmountInCents = pp.getPaymentRegularAmount().floatValue() / (float) 100;
+            paymentLimitAmountInCents = pp.getPaymentRegularTotalPaymentsAmount().longValue() / (long) 100;
             paymentLimitToNumberOfPayments = pp.getPaymentsRegularTotalNumberOfPayments();
             paymentSchedulePeriodType = pp.getPaymentPeriod();
 
@@ -2775,15 +2810,15 @@ public class EziDebitPaymentGateway implements Serializable {
                 }
 
             }
-        }else{
+        } else {
             //set to default values as this customer has not been set up yet
             paymentDebitDate = new Date();
-            paymentAmountInCents=0;
-            paymentLimitAmountInCents= (long)0;
-            paymentLimitToNumberOfPayments=0;
-            oneOffPaymentAmount=0;
-            oneOffPaymentDate= new Date();
-          
+            paymentAmountInCents = 0;
+            paymentLimitAmountInCents = (long) 0;
+            paymentLimitToNumberOfPayments = 0;
+            oneOffPaymentAmount = 0;
+            oneOffPaymentDate = new Date();
+
         }
 
     }
