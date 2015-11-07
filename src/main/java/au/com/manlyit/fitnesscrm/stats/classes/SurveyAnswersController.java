@@ -63,6 +63,10 @@ public class SurveyAnswersController implements Serializable {
         boolean inRole = FacesContext.getCurrentInstance().getExternalContext().isUserInRole(roleName);
         return inRole;
     }
+    
+    public void clearSurveyAnswers(){
+        surveyAnswers = null;
+    }
 
     public SurveyAnswers getSelected() {
         if (current == null) {
@@ -187,6 +191,7 @@ public class SurveyAnswersController implements Serializable {
         Customers c = customersController.getSelected();
         c.setTermsConditionsAccepted(true);
         ejbCustomersFacade.edit(c);
+        surveyAnswers = null;
         return "/myDetails.xhtml?faces-redirect=true";
     }
       public String saveSurveyMobile() {

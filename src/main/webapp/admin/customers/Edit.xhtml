@@ -27,7 +27,7 @@
                         <h:inputText id="lastname"  value="#{customersController.selected.lastname}" title="#{configMapController.getKey('EditCustomersTitle_lastname')}" required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_lastname')}"/>
                         <h:outputLabel value="#{configMapController.getKey('EditCustomersLabel_dob')}" for="dob" />
                         <h:inputText id="dob" value="#{customersController.selected.dob}" title="#{configMapController.getKey('EditCustomersTitle_dob')}" required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_dob')}">
-                            <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                            <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
                         </h:inputText>
                         <h:outputLabel value="#{configMapController.getKey('EditCustomersLabel_emailAddress')}" for="emailAddress" />
                         <h:inputText id="emailAddress"  value="#{customersController.selected.emailAddress}" title="#{configMapController.getKey('EditCustomersTitle_emailAddress')}" required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_emailAddress')}"/>

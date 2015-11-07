@@ -15,11 +15,11 @@
                         <h:inputText id="id"  value="#{paymentsController.selected.id}" title="#{configMapController.getKey('EditPaymentsTitle_id')}" required="true" requiredMessage="#{configMapController.getKey('EditPaymentsRequiredMessage_id')}"/>
                         <h:outputLabel value="#{configMapController.getKey('EditPaymentsLabel_createDatetime')}" for="createDatetime" />
                         <h:inputText id="createDatetime" value="#{paymentsController.selected.createDatetime}" title="#{configMapController.getKey('EditPaymentsTitle_createDatetime')}" required="true" requiredMessage="#{configMapController.getKey('EditPaymentsRequiredMessage_createDatetime')}">
-                            <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                            <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
                         </h:inputText>
                         <h:outputLabel value="#{configMapController.getKey('EditPaymentsLabel_lastUpdatedDatetime')}" for="lastUpdatedDatetime" />
                         <h:inputText id="lastUpdatedDatetime" value="#{paymentsController.selected.lastUpdatedDatetime}" title="#{configMapController.getKey('EditPaymentsTitle_lastUpdatedDatetime')}" required="true" requiredMessage="#{configMapController.getKey('EditPaymentsRequiredMessage_lastUpdatedDatetime')}">
-                            <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                            <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
                         </h:inputText>
                         <h:outputLabel value="#{configMapController.getKey('EditPaymentsLabel_bankFailedReason')}" for="bankFailedReason" />
                         <h:inputText id="bankFailedReason"  value="#{paymentsController.selected.bankFailedReason}" title="#{configMapController.getKey('EditPaymentsTitle_bankFailedReason')}" />
@@ -29,7 +29,7 @@
                         <h:inputText id="bankReturnCode"  value="#{paymentsController.selected.bankReturnCode}" title="#{configMapController.getKey('EditPaymentsTitle_bankReturnCode')}" />
                         <h:outputLabel value="#{configMapController.getKey('EditPaymentsLabel_debitDate')}" for="debitDate" />
                         <h:inputText id="debitDate" value="#{paymentsController.selected.debitDate}" title="#{configMapController.getKey('EditPaymentsTitle_debitDate')}" >
-                            <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                            <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
                         </h:inputText>
                         <h:outputLabel value="#{configMapController.getKey('EditPaymentsLabel_ezidebitCustomerID')}" for="ezidebitCustomerID" />
                         <h:inputText id="ezidebitCustomerID"  value="#{paymentsController.selected.ezidebitCustomerID}" title="#{configMapController.getKey('EditPaymentsTitle_ezidebitCustomerID')}" />
@@ -41,7 +41,7 @@
                         <h:inputText id="paymentAmount"  value="#{paymentsController.selected.paymentAmount}" title="#{configMapController.getKey('EditPaymentsTitle_paymentAmount')}" />
                         <h:outputLabel value="#{configMapController.getKey('EditPaymentsLabel_paymentDate')}" for="paymentDate" />
                         <h:inputText id="paymentDate" value="#{paymentsController.selected.paymentDate}" title="#{configMapController.getKey('EditPaymentsTitle_paymentDate')}" >
-                            <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                            <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
                         </h:inputText>
                         <h:outputLabel value="#{configMapController.getKey('EditPaymentsLabel_paymentID')}" for="paymentID" />
                         <h:inputText id="paymentID"  value="#{paymentsController.selected.paymentID}" title="#{configMapController.getKey('EditPaymentsTitle_paymentID')}" />
@@ -57,7 +57,7 @@
                         <h:inputText id="scheduledAmount"  value="#{paymentsController.selected.scheduledAmount}" title="#{configMapController.getKey('EditPaymentsTitle_scheduledAmount')}" />
                         <h:outputLabel value="#{configMapController.getKey('EditPaymentsLabel_settlementDate')}" for="settlementDate" />
                         <h:inputText id="settlementDate" value="#{paymentsController.selected.settlementDate}" title="#{configMapController.getKey('EditPaymentsTitle_settlementDate')}" >
-                            <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                            <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
                         </h:inputText>
                         <h:outputLabel value="#{configMapController.getKey('EditPaymentsLabel_transactionFeeClient')}" for="transactionFeeClient" />
                         <h:inputText id="transactionFeeClient"  value="#{paymentsController.selected.transactionFeeClient}" title="#{configMapController.getKey('EditPaymentsTitle_transactionFeeClient')}" />
@@ -65,7 +65,7 @@
                         <h:inputText id="transactionFeeCustomer"  value="#{paymentsController.selected.transactionFeeCustomer}" title="#{configMapController.getKey('EditPaymentsTitle_transactionFeeCustomer')}" />
                         <h:outputLabel value="#{configMapController.getKey('EditPaymentsLabel_transactionTime')}" for="transactionTime" />
                         <h:inputText id="transactionTime" value="#{paymentsController.selected.transactionTime}" title="#{configMapController.getKey('EditPaymentsTitle_transactionTime')}" >
-                            <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                            <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
                         </h:inputText>
                         <h:outputLabel value="#{configMapController.getKey('EditPaymentsLabel_yourGeneralReference')}" for="yourGeneralReference" />
                         <h:inputText id="yourGeneralReference"  value="#{paymentsController.selected.yourGeneralReference}" title="#{configMapController.getKey('EditPaymentsTitle_yourGeneralReference')}" />

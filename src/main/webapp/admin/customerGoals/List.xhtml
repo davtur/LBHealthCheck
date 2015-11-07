@@ -35,7 +35,7 @@
                             <h:outputText value="#{configMapController.getKey('ListCustomerGoalsTitle_startdate')}"/>
                         </f:facet>
                         <h:outputText value="#{item.startdate}">
-                            <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                            <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
                         </h:outputText>
                     </p:column>
                     <p:column sortBy="#{item.finishdate}" >
@@ -43,7 +43,7 @@
                             <h:outputText value="#{configMapController.getKey('ListCustomerGoalsTitle_finishdate')}"/>
                         </f:facet>
                         <h:outputText value="#{item.finishdate}">
-                            <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                            <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
                         </h:outputText>
                     </p:column>
                     <p:column sortBy="#{item.customerId}" >

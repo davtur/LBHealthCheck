@@ -23,7 +23,7 @@
                     <h:inputText id="customer" value="#{activationController.selected.customer}" title="#{configMapController.getKey('CreateActivationTitle_customer')}" required="true" requiredMessage="#{configMapController.getKey('CreateActivationRequiredMessage_customer')}"/>
                     <h:outputLabel value="#{configMapController.getKey('CreateActivationLabel_timestamp')}" for="timestamp" />
                     <h:inputText id="timestamp" value="#{activationController.selected.act_timestamp}" title="#{configMapController.getKey('CreateActivationTitle_timestamp')}" required="true" requiredMessage="#{configMapController.getKey('CreateActivationRequiredMessage_timestamp')}">
-                        <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                        <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
                     </h:inputText>
                 </h:panelGrid>
                 <br />

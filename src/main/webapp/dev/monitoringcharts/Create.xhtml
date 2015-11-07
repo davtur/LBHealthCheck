@@ -23,7 +23,7 @@
                         <h:inputText id="type" value="#{monitoringchartsController.selected.type}" title="#{configMapController.getKey('CreateMonitoringchartsTitle_type')}" required="true" requiredMessage="#{configMapController.getKey('CreateMonitoringchartsRequiredMessage_type')}"/>
                         <h:outputLabel value="#{configMapController.getKey('CreateMonitoringchartsLabel_date')}" for="date" />
                         <h:inputText id="date" value="#{monitoringchartsController.selected.date}" title="#{configMapController.getKey('CreateMonitoringchartsTitle_date')}" required="true" requiredMessage="#{configMapController.getKey('CreateMonitoringchartsRequiredMessage_date')}">
-                            <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                            <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
                         </h:inputText>
                         <h:outputLabel value="#{configMapController.getKey('CreateMonitoringchartsLabel_chart')}" for="chart" />
                         <h:inputTextarea rows="4" cols="30" id="chart" value="#{monitoringchartsController.selected.chart}" title="#{configMapController.getKey('CreateMonitoringchartsTitle_chart')}" required="true" requiredMessage="#{configMapController.getKey('CreateMonitoringchartsRequiredMessage_chart')}"/>

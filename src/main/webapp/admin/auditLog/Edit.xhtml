@@ -23,7 +23,7 @@
                         <h:inputText id="typeOfChange"  value="#{auditLogController.selected.typeOfChange}" title="#{configMapController.getKey('EditAuditLogTitle_typeOfChange')}" />
                         <h:outputLabel value="#{configMapController.getKey('EditAuditLogLabel_timestampOfChange')}" for="timestampOfChange" />
                         <h:inputText id="timestampOfChange" value="#{auditLogController.selected.timestampOfChange}" title="#{configMapController.getKey('EditAuditLogTitle_timestampOfChange')}" required="true" requiredMessage="#{configMapController.getKey('EditAuditLogRequiredMessage_timestampOfChange')}">
-                            <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                            <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
                         </h:inputText>
                         <h:outputLabel value="#{configMapController.getKey('EditAuditLogLabel_changedBy')}" for="changedBy" />
                         <p:selectOneMenu id="changedBy" valueChangeListener="#{auditLogController.selectOneMenuValueChangeListener}" value="#{auditLogController.selected.changedBy}" label="#{configMapController.getKey('EditAuditLogTitle_changedBy')}" >

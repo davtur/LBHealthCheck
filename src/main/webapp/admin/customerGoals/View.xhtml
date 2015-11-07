@@ -23,11 +23,11 @@
                     <h:outputText value="#{customerGoalsController.selected.goal}" title="#{configMapController.getKey('ViewCustomerGoalsTitle_goal')}"/>
                     <h:outputText value="#{configMapController.getKey('ViewCustomerGoalsLabel_startdate')}"/>
                     <h:outputText value="#{customerGoalsController.selected.startdate}" title="#{configMapController.getKey('ViewCustomerGoalsTitle_startdate')}">
-                        <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                        <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
                     </h:outputText>
                     <h:outputText value="#{configMapController.getKey('ViewCustomerGoalsLabel_finishdate')}"/>
                     <h:outputText value="#{customerGoalsController.selected.finishdate}" title="#{configMapController.getKey('ViewCustomerGoalsTitle_finishdate')}">
-                        <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                        <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
                     </h:outputText>
                     <h:outputText value="#{configMapController.getKey('ViewCustomerGoalsLabel_customerId')}"/>
                     <h:outputText value="#{customerGoalsController.selected.customerId}" title="#{configMapController.getKey('ViewCustomerGoalsTitle_customerId')}"/>

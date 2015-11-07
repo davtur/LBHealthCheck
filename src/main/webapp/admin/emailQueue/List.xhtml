@@ -65,7 +65,7 @@
                                 <h:outputText value="#{configMapController.getKey('ListEmailQueueTitle_sendDate')}"/>
                             </f:facet>
                             <h:outputText value="#{item.sendDate}">
-                                <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                                <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
                             </h:outputText>
                         </p:column>
                         <p:column sortBy="#{item.createDate}" >
@@ -73,7 +73,7 @@
                                 <h:outputText value="#{configMapController.getKey('ListEmailQueueTitle_createDate')}"/>
                             </f:facet>
                             <h:outputText value="#{item.createDate}">
-                                <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                                <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
                             </h:outputText>
                         </p:column>
                         <p:column>

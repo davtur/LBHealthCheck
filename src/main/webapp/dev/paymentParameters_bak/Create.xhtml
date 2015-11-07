@@ -17,7 +17,7 @@
                         <p:outputLabel value="#{configMapController.getKey('CreatePaymentParametersLabel_contractStartDate')}" for="contractStartDate" />
 
 
-                        <p:calendar id="contractStartDate" pattern="MM/dd/yyyy HH:mm:ss"  value="#{paymentParametersController.selected.contractStartDate}"  title="#{configMapController.getKey('CreatePaymentParametersTitle_contractStartDate')}" required="true" requiredMessage="#{configMapController.getKey('CreatePaymentParametersRequiredMessage_contractStartDate')}">
+                        <p:calendar id="contractStartDate" pattern="dd/MM/yyyy HH:mm:ss"  value="#{paymentParametersController.selected.contractStartDate}"  title="#{configMapController.getKey('CreatePaymentParametersTitle_contractStartDate')}" required="true" requiredMessage="#{configMapController.getKey('CreatePaymentParametersRequiredMessage_contractStartDate')}">
                             <p:ajax event="dateSelect" listener="#{paymentParametersController.handleDateSelect}" update=":PaymentParametersCreateForm" />
                         </p:calendar>
                         <p:outputLabel value="#{configMapController.getKey('CreatePaymentParametersLabel_mobilePhoneNumber')}" for="mobilePhoneNumber" />

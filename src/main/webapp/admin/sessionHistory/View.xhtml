@@ -30,7 +30,7 @@
                         <h:outputText value="#{sessionHistoryController.selected.id}" title="#{configMapController.getKey('ViewSessionHistoryTitle_id')}"/>
                         <h:outputLabel value="#{configMapController.getKey('ViewSessionHistoryLabel_sessiondate')}"/>
                         <h:outputText value="#{sessionHistoryController.selected.sessiondate}" title="#{configMapController.getKey('ViewSessionHistoryTitle_sessiondate')}">
-                            <f:convertDateTime pattern="MM/dd/yyyy HH:mm" />
+                            <f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
                         </h:outputText>
                         <h:outputLabel value="#{configMapController.getKey('ViewSessionHistoryLabel_sessionType')}"/>
                         <h:outputText value="#{sessionHistoryController.selected.sessionTypesId.name}" title="#{configMapController.getKey('ViewSessionHistoryTitle_sessionType')}"/>

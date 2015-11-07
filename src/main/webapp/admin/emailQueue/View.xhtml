@@ -33,11 +33,11 @@
                         <h:outputText value="#{emailQueueController.selected.status}" title="#{configMapController.getKey('ViewEmailQueueTitle_status')}"/>
                         <h:outputText value="#{configMapController.getKey('ViewEmailQueueLabel_sendDate')}"/>
                         <h:outputText value="#{emailQueueController.selected.sendDate}" title="#{configMapController.getKey('ViewEmailQueueTitle_sendDate')}">
-                            <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                            <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
                         </h:outputText>
                         <h:outputText value="#{configMapController.getKey('ViewEmailQueueLabel_createDate')}"/>
                         <h:outputText value="#{emailQueueController.selected.createDate}" title="#{configMapController.getKey('ViewEmailQueueTitle_createDate')}">
-                            <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                            <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
                         </h:outputText>
                     </h:panelGrid>
                 </p:panel>

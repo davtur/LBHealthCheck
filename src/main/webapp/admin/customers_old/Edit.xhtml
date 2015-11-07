@@ -50,7 +50,7 @@
                                     <f:validator validatorId="au.com.manlyit.fitnesscrm.stats.classes.util.EmailValidator" />
                                 </p:inputText>
                                 <h:outputLabel value="#{configMapController.getKey('EditCustomersLabel_dob')}" for="dob" />
-                                <p:calendar id="dob" value="#{customersController.selected.dob}" pattern="MM/dd/yyyy"  title="#{configMapController.getKey('EditCustomersTitle_dob')}"  required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_dob')}">
+                                <p:calendar id="dob" value="#{customersController.selected.dob}" pattern="dd/MM/yyyy"  title="#{configMapController.getKey('EditCustomersTitle_dob')}"  required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_dob')}">
   <p:ajax event="dateSelect" listener="#{customersController.dobChangeListener}" update=":growl :createCustomerForm:panel3"  />
 
                                 </p:calendar>   

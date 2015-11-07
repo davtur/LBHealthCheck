@@ -38,7 +38,7 @@
                                     <f:selectItem itemValue="F" itemLabel="Female" />
                                 </p:selectOneMenu>
                                 <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_dob')}" for="dob" />
-                                <p:calendar id="dob" pattern="MM/dd/yyyy" value="#{customersController.newCustomer.dob}" title="#{configMapController.getKey('CreateCustomersTitle_dob')}" required="true" requiredMessage="#{configMapController.getKey('CreateCustomersRequiredMessage_dob')}" />
+                                <p:calendar id="dob" pattern="dd/MM/yyyy" value="#{customersController.newCustomer.dob}" title="#{configMapController.getKey('CreateCustomersTitle_dob')}" required="true" requiredMessage="#{configMapController.getKey('CreateCustomersRequiredMessage_dob')}" />
                                 <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_emailAddress')}" for="emailAddress" />
                                 <p:inputText id="emailAddress" value="#{customersController.newCustomer.emailAddress}" title="#{configMapController.getKey('EditCustomersTitle_emailAddress')}" required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_emailAddress')}">
                                     <f:validator validatorId="au.com.manlyit.fitnesscrm.stats.classes.util.EmailValidator" />

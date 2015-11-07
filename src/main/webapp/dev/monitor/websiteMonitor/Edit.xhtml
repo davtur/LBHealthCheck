@@ -27,7 +27,7 @@
                         <h:inputText id="duration" value="#{websiteMonitorController.selected.duration}" title="#{configMapController.getKey('EditWebsiteMonitorTitle_duration')}" required="true" requiredMessage="#{configMapController.getKey('EditWebsiteMonitorRequiredMessage_duration')}"/>
                         <h:outputLabel value="#{configMapController.getKey('EditWebsiteMonitorLabel_startTime')}" for="startTime" />
                         <h:inputText id="startTime" value="#{websiteMonitorController.selected.startTime}" title="#{configMapController.getKey('EditWebsiteMonitorTitle_startTime')}" required="true" requiredMessage="#{configMapController.getKey('EditWebsiteMonitorRequiredMessage_startTime')}">
-                            <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                            <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
                         </h:inputText>
                         <h:outputLabel value="#{configMapController.getKey('EditWebsiteMonitorLabel_notify')}" for="notify" />
                         <h:inputText id="notify" value="#{websiteMonitorController.selected.notify}" title="#{configMapController.getKey('EditWebsiteMonitorTitle_notify')}" />

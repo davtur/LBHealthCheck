@@ -21,11 +21,11 @@
                     <h:inputText id="goal" value="#{customerGoalsController.selected.goal}" title="#{configMapController.getKey('CreateCustomerGoalsTitle_goal')}" required="true" requiredMessage="#{configMapController.getKey('CreateCustomerGoalsRequiredMessage_goal')}"/>
                     <h:outputLabel value="#{configMapController.getKey('CreateCustomerGoalsLabel_startdate')}" for="startdate" />
                     <h:inputText id="startdate" value="#{customerGoalsController.selected.startdate}" title="#{configMapController.getKey('CreateCustomerGoalsTitle_startdate')}" required="true" requiredMessage="#{configMapController.getKey('CreateCustomerGoalsRequiredMessage_startdate')}">
-                        <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                        <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
                     </h:inputText>
                     <h:outputLabel value="#{configMapController.getKey('CreateCustomerGoalsLabel_finishdate')}" for="finishdate" />
                     <h:inputText id="finishdate" value="#{customerGoalsController.selected.finishdate}" title="#{configMapController.getKey('CreateCustomerGoalsTitle_finishdate')}" required="true" requiredMessage="#{configMapController.getKey('CreateCustomerGoalsRequiredMessage_finishdate')}">
-                        <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                        <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
                     </h:inputText>
                     <h:outputLabel value="#{configMapController.getKey('CreateCustomerGoalsLabel_customerId')}" for="customerId" />
                     <h:selectOneMenu id="customerId" value="#{customerGoalsController.selected.customerId}" title="#{configMapController.getKey('CreateCustomerGoalsTitle_customerId')}" required="true" requiredMessage="#{configMapController.getKey('CreateCustomerGoalsRequiredMessage_customerId')}">

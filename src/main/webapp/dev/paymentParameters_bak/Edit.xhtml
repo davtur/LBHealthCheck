@@ -15,7 +15,7 @@
                         <h:inputText id="id"  value="#{paymentParametersController.selected.id}" title="#{configMapController.getKey('EditPaymentParametersTitle_id')}" required="true" requiredMessage="#{configMapController.getKey('EditPaymentParametersRequiredMessage_id')}"/>
                         <h:outputLabel value="#{configMapController.getKey('EditPaymentParametersLabel_contractStartDate')}" for="contractStartDate" />
                         <h:inputText id="contractStartDate" value="#{paymentParametersController.selected.contractStartDate}" title="#{configMapController.getKey('EditPaymentParametersTitle_contractStartDate')}" required="true" requiredMessage="#{configMapController.getKey('EditPaymentParametersRequiredMessage_contractStartDate')}">
-                            <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                            <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
                         </h:inputText>
                         <h:outputLabel value="#{configMapController.getKey('EditPaymentParametersLabel_mobilePhoneNumber')}" for="mobilePhoneNumber" />
                         <h:inputText id="mobilePhoneNumber"  value="#{paymentParametersController.selected.mobilePhoneNumber}" title="#{configMapController.getKey('EditPaymentParametersTitle_mobilePhoneNumber')}" required="true" requiredMessage="#{configMapController.getKey('EditPaymentParametersRequiredMessage_mobilePhoneNumber')}"/>

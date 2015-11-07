@@ -19,7 +19,7 @@
                     <h:inputText id="id" value="#{paymentParametersController.selected.id}" title="#{bundle.CreatePaymentParametersTitle_id}" required="true" requiredMessage="#{bundle.CreatePaymentParametersRequiredMessage_id}"/>
                     <h:outputLabel value="#{bundle.CreatePaymentParametersLabel_contractStartDate}" for="contractStartDate" />
                     <h:inputText id="contractStartDate" value="#{paymentParametersController.selected.contractStartDate}" title="#{bundle.CreatePaymentParametersTitle_contractStartDate}" required="true" requiredMessage="#{bundle.CreatePaymentParametersRequiredMessage_contractStartDate}">
-                        <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                        <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
                     </h:inputText>
                     <h:outputLabel value="#{bundle.CreatePaymentParametersLabel_mobilePhoneNumber}" for="mobilePhoneNumber" />
                     <h:inputText id="mobilePhoneNumber" value="#{paymentParametersController.selected.mobilePhoneNumber}" title="#{bundle.CreatePaymentParametersTitle_mobilePhoneNumber}" required="true" requiredMessage="#{bundle.CreatePaymentParametersRequiredMessage_mobilePhoneNumber}"/>

@@ -39,7 +39,7 @@
                         <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_dob')}" for="dob" />
 
 
-                        <p:calendar id="dob" pattern="MM/dd/yyyy" value="#{customersController.selected.dob}" title="#{configMapController.getKey('CreateCustomersTitle_dob')}" required="true" requiredMessage="#{configMapController.getKey('CreateCustomersRequiredMessage_dob')}">
+                        <p:calendar id="dob" pattern="dd/MM/yyyy" value="#{customersController.selected.dob}" title="#{configMapController.getKey('CreateCustomersTitle_dob')}" required="true" requiredMessage="#{configMapController.getKey('CreateCustomersRequiredMessage_dob')}">
                           <!--  <p:ajax event="dateSelect" listener="#{customersController.handleDateSelect}" update=":formCustomersCreate1" />-->
                         </p:calendar>
                         <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_emailAddress')}" for="emailAddress" />

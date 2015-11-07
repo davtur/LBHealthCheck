@@ -221,7 +221,7 @@
                                 <p:ajax update=":tv:formCustomersEdit1:username1" event="keyup" />
                             </p:inputText>
                             <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_dob')}" for="dob1" />
-                            <p:calendar id="dob1" pattern="MM/dd/yyyy" value="#{customersController.selected.dob}" title="#{configMapController.getKey('CreateCustomersTitle_dob')}" required="true" requiredMessage="#{configMapController.getKey('CreateCustomersRequiredMessage_dob')}">
+                            <p:calendar id="dob1" pattern="dd/MM/yyyy" value="#{customersController.selected.dob}" title="#{configMapController.getKey('CreateCustomersTitle_dob')}" required="true" requiredMessage="#{configMapController.getKey('CreateCustomersRequiredMessage_dob')}">
                             </p:calendar>
                             <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_emailAddress')}" for="emailAddress1" />
                             <p:inputText id="emailAddress1" value="#{customersController.selected.emailAddress}" title="#{configMapController.getKey('EditCustomersTitle_emailAddress')}" required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_emailAddress')}">

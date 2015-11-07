@@ -27,7 +27,7 @@
                         <h:outputText value="#{customersController.selected.lastname}" title="#{configMapController.getKey('ViewCustomersTitle_lastname')}"/>
                         <h:outputText value="#{configMapController.getKey('ViewCustomersLabel_dob')}"/>
                         <h:outputText value="#{customersController.selected.dob}" title="#{configMapController.getKey('ViewCustomersTitle_dob')}">
-                            <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                            <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
                         </h:outputText>
                         <h:outputText value="#{configMapController.getKey('ViewCustomersLabel_emailAddress')}"/>
                         <h:outputText value="#{customersController.selected.emailAddress}" title="#{configMapController.getKey('ViewCustomersTitle_emailAddress')}"/>

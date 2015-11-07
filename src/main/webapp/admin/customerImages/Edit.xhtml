@@ -21,7 +21,7 @@
                     <h:inputText id="imageType" value="#{customerImagesController.selected.imageType}" title="#{configMapController.getKey('EditCustomerImagesTitle_imageType')}" required="true" requiredMessage="#{configMapController.getKey('EditCustomerImagesRequiredMessage_imageType')}"/>
                     <h:outputLabel value="#{configMapController.getKey('EditCustomerImagesLabel_datetaken')}" for="datetaken" />
                     <h:inputText id="datetaken" value="#{customerImagesController.selected.datetaken}" title="#{configMapController.getKey('EditCustomerImagesTitle_datetaken')}" required="true" requiredMessage="#{configMapController.getKey('EditCustomerImagesRequiredMessage_datetaken')}">
-                        <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                        <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
                     </h:inputText>
                     <h:outputLabel value="#{configMapController.getKey('EditCustomerImagesLabel_image')}" for="image" />
                     <p:graphicImage  id="image" value="#{customerImagesController.selected.imageStream}" title="#{configMapController.getKey('EditCustomerImagesTitle_image')}" />

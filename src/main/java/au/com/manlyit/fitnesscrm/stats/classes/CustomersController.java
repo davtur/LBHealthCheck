@@ -196,6 +196,7 @@ public class CustomersController implements Serializable {
             current = cust;
             selectedGroups = ejbGroupsFacade.getCustomersGroups(cust);
             customerGroupsList = null;
+            
 
             /*customerGroupsList = new ArrayList<>();
              List<String> distinctGroups = ejbGroupsFacade.getGroups();
@@ -572,6 +573,8 @@ public class CustomersController implements Serializable {
         c4.recreateModel();
         ChartController c5 = context.getApplication().evaluateExpressionGet(context, "#{chartController}", ChartController.class);
         c5.recreateModel();
+        SurveyAnswersController sac = context.getApplication().evaluateExpressionGet(context, "#{surveyAnswersController}", SurveyAnswersController.class);
+        sac.clearSurveyAnswers();
     }
     
     public void handleUserChange() {

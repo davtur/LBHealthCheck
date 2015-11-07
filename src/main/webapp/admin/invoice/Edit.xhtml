@@ -21,7 +21,7 @@
                         <h:inputText id="id"  value="#{invoiceController.selected.id}" title="#{configMapController.getKey('EditInvoiceTitle_id')}" required="true" requiredMessage="#{configMapController.getKey('EditInvoiceRequiredMessage_id')}"/>
                         <h:outputLabel value="#{configMapController.getKey('EditInvoiceLabel_createDatetime')}" for="createDatetime" />
                         <h:inputText id="createDatetime" value="#{invoiceController.selected.createDatetime}" title="#{configMapController.getKey('EditInvoiceTitle_createDatetime')}" required="true" requiredMessage="#{configMapController.getKey('EditInvoiceRequiredMessage_createDatetime')}">
-                            <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                            <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
                         </h:inputText>
                         <h:outputLabel value="#{configMapController.getKey('EditInvoiceLabel_userId')}" for="userId" />
                         <h:inputText id="userId"  value="#{invoiceController.selected.userId}" title="#{configMapController.getKey('EditInvoiceTitle_userId')}" />
@@ -29,7 +29,7 @@
                         <h:inputText id="statusId"  value="#{invoiceController.selected.statusId}" title="#{configMapController.getKey('EditInvoiceTitle_statusId')}" required="true" requiredMessage="#{configMapController.getKey('EditInvoiceRequiredMessage_statusId')}"/>
                         <h:outputLabel value="#{configMapController.getKey('EditInvoiceLabel_dueDate')}" for="dueDate" />
                         <h:inputText id="dueDate" value="#{invoiceController.selected.dueDate}" title="#{configMapController.getKey('EditInvoiceTitle_dueDate')}" required="true" requiredMessage="#{configMapController.getKey('EditInvoiceRequiredMessage_dueDate')}">
-                            <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                            <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
                         </h:inputText>
                         <h:outputLabel value="#{configMapController.getKey('EditInvoiceLabel_total')}" for="total" />
                         <h:inputText id="total"  value="#{invoiceController.selected.total}" title="#{configMapController.getKey('EditInvoiceTitle_total')}" required="true" requiredMessage="#{configMapController.getKey('EditInvoiceRequiredMessage_total')}"/>
@@ -51,13 +51,13 @@
                         <h:inputText id="publicNumber"  value="#{invoiceController.selected.publicNumber}" title="#{configMapController.getKey('EditInvoiceTitle_publicNumber')}" />
                         <h:outputLabel value="#{configMapController.getKey('EditInvoiceLabel_lastReminder')}" for="lastReminder" />
                         <h:inputText id="lastReminder" value="#{invoiceController.selected.lastReminder}" title="#{configMapController.getKey('EditInvoiceTitle_lastReminder')}" >
-                            <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                            <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
                         </h:inputText>
                         <h:outputLabel value="#{configMapController.getKey('EditInvoiceLabel_overdueStep')}" for="overdueStep" />
                         <h:inputText id="overdueStep"  value="#{invoiceController.selected.overdueStep}" title="#{configMapController.getKey('EditInvoiceTitle_overdueStep')}" />
                         <h:outputLabel value="#{configMapController.getKey('EditInvoiceLabel_createTimestamp')}" for="createTimestamp" />
                         <h:inputText id="createTimestamp" value="#{invoiceController.selected.createTimestamp}" title="#{configMapController.getKey('EditInvoiceTitle_createTimestamp')}" required="true" requiredMessage="#{configMapController.getKey('EditInvoiceRequiredMessage_createTimestamp')}">
-                            <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                            <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
                         </h:inputText>
                         <h:outputLabel value="#{configMapController.getKey('EditInvoiceLabel_delegatedInvoiceId')}" for="delegatedInvoiceId" />
                         <p:selectOneMenu id="delegatedInvoiceId" valueChangeListener="#{invoiceController.selectOneMenuValueChangeListener}" value="#{invoiceController.selected.delegatedInvoiceId}" label="#{configMapController.getKey('EditInvoiceTitle_delegatedInvoiceId')}" >

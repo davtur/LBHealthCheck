@@ -23,7 +23,7 @@
                         <p:outputLabel value="#{configMapController.getKey('CreateInvoiceLabel_createDatetime')}" for="createDatetime" />
 
 
-                        <p:calendar id="createDatetime" pattern="MM/dd/yyyy HH:mm:ss" value="#{invoiceController.selected.createDatetime}" title="#{configMapController.getKey('CreateInvoiceTitle_createDatetime')}" required="true" requiredMessage="#{configMapController.getKey('CreateInvoiceRequiredMessage_createDatetime')}">
+                        <p:calendar id="createDatetime" pattern="dd/MM/yyyy HH:mm:ss" value="#{invoiceController.selected.createDatetime}" title="#{configMapController.getKey('CreateInvoiceTitle_createDatetime')}" required="true" requiredMessage="#{configMapController.getKey('CreateInvoiceRequiredMessage_createDatetime')}">
                             <p:ajax event="dateSelect" listener="#{invoiceController.handleDateSelect}" update=":formInvoiceCreate1" />
                         </p:calendar>
                         <p:outputLabel value="#{configMapController.getKey('CreateInvoiceLabel_userId')}" for="userId" />
@@ -33,7 +33,7 @@
                         <p:outputLabel value="#{configMapController.getKey('CreateInvoiceLabel_dueDate')}" for="dueDate" />
 
 
-                        <p:calendar id="dueDate" pattern="MM/dd/yyyy HH:mm:ss" value="#{invoiceController.selected.dueDate}" title="#{configMapController.getKey('CreateInvoiceTitle_dueDate')}" required="true" requiredMessage="#{configMapController.getKey('CreateInvoiceRequiredMessage_dueDate')}">
+                        <p:calendar id="dueDate" pattern="dd/MM/yyyy HH:mm:ss" value="#{invoiceController.selected.dueDate}" title="#{configMapController.getKey('CreateInvoiceTitle_dueDate')}" required="true" requiredMessage="#{configMapController.getKey('CreateInvoiceRequiredMessage_dueDate')}">
                             <p:ajax event="dateSelect" listener="#{invoiceController.handleDateSelect}"  />
                         </p:calendar>
                         <p:outputLabel value="#{configMapController.getKey('CreateInvoiceLabel_total')}" for="total" />
@@ -57,7 +57,7 @@
                         <p:outputLabel value="#{configMapController.getKey('CreateInvoiceLabel_lastReminder')}" for="lastReminder" />
 
 
-                        <p:calendar id="lastReminder" pattern="MM/dd/yyyy HH:mm:ss" value="#{invoiceController.selected.lastReminder}" title="#{configMapController.getKey('CreateInvoiceTitle_lastReminder')}" >
+                        <p:calendar id="lastReminder" pattern="dd/MM/yyyy HH:mm:ss" value="#{invoiceController.selected.lastReminder}" title="#{configMapController.getKey('CreateInvoiceTitle_lastReminder')}" >
                             <p:ajax event="dateSelect" listener="#{invoiceController.handleDateSelect}" update=":formInvoiceCreate1" />
                         </p:calendar>
                         <p:outputLabel value="#{configMapController.getKey('CreateInvoiceLabel_overdueStep')}" for="overdueStep" />
@@ -65,7 +65,7 @@
                         <p:outputLabel value="#{configMapController.getKey('CreateInvoiceLabel_createTimestamp')}" for="createTimestamp" />
 
 
-                        <p:calendar id="createTimestamp" pattern="MM/dd/yyyy HH:mm:ss" value="#{invoiceController.selected.createTimestamp}" title="#{configMapController.getKey('CreateInvoiceTitle_createTimestamp')}" required="true" requiredMessage="#{configMapController.getKey('CreateInvoiceRequiredMessage_createTimestamp')}">
+                        <p:calendar id="createTimestamp" pattern="dd/MM/yyyy HH:mm:ss" value="#{invoiceController.selected.createTimestamp}" title="#{configMapController.getKey('CreateInvoiceTitle_createTimestamp')}" required="true" requiredMessage="#{configMapController.getKey('CreateInvoiceRequiredMessage_createTimestamp')}">
                             <p:ajax event="dateSelect" listener="#{invoiceController.handleDateSelect}" update=":formInvoiceCreate1" />
                         </p:calendar>
                         <p:outputLabel value="#{configMapController.getKey('CreateInvoiceLabel_delegatedInvoiceId')}" for="delegatedInvoiceId" />
@@ -305,7 +305,7 @@
                             <p:cellEditor> 
                                 <f:facet name="output">
                                     <h:outputText value="#{item.lastReminder}">
-                                        <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                                        <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
                                     </h:outputText>
                                 </f:facet>
                                 <f:facet name="input">
@@ -333,7 +333,7 @@
                             <p:cellEditor> 
                                 <f:facet name="output">
                                     <h:outputText value="#{item.createTimestamp}">
-                                        <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                                        <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
                                     </h:outputText>
                                 </f:facet>
                                 <f:facet name="input">
