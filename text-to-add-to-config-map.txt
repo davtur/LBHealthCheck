@@ -1305,3 +1305,5 @@ default.customer.details.auth=0
 default.customer.details.active=0
 default.customer.details.prefferedcontact=0
 default.customer.details.demographic=6
+
+CreateToDoListLabel_done=done
