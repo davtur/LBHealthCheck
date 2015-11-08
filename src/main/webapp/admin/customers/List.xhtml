@@ -96,7 +96,7 @@
                             <h:outputText escape="false" value="#{configMapController.getKey('ListCustomersEmpty')}" rendered="#{customersController.items.rowCount == 0}"/>
                             <h:panelGroup rendered="#{customersController.items.rowCount > 0}">
                                 <p:dataTable id="customersTableList" 
-                                            
+
 
                                              selection="#{customersController.multiSelected}" 
                                              rowKey="#{item.id}" 
@@ -120,7 +120,7 @@
                                          <!--   <h:outputText  rendered="#{ customersController.filteredItems != null}" value="#{customersController.filteredItems.size} Records Found"/>-->
                                             <h:outputText  rendered="#{customersController.items != null}" value="#{customersController.items.rowCount} Records Found"/>
 
-                                            
+
                                         </h:panelGroup>
 
                                     </f:facet>
@@ -167,8 +167,8 @@
                                         <h:outputText rendered="#{not empty item.paymentParameters.nextScheduledPayment}"  value="#{item.paymentParameters.nextScheduledPayment.debitDate}">
                                             <f:convertDateTime pattern="E dd MMM yyyy" />
                                         </h:outputText>
-                                                <h:outputText rendered="#{empty item.paymentParameters.nextScheduledPayment}" styleClass="red FontBold animated pulse infinite" value="#{configMapController.getKey('paymentsNextScheduledIsNull')}"/>
-                               </p:column>
+                                        <h:outputText rendered="#{empty item.paymentParameters.nextScheduledPayment}" styleClass="red FontBold animated pulse infinite" value="#{configMapController.getKey('paymentsNextScheduledIsNull')}"/>
+                                    </p:column>
                                     <p:column sortBy="#{item.paymentParameters.nextScheduledPayment.paymentAmount}" filterBy="#{item.paymentParameters.nextScheduledPayment.paymentAmount}" headerText="#{configMapController.getKey('ListCustomersTitle_nextScheduledPaymentAmount')}"   >
                                         <h:outputText rendered="#{not empty item.paymentParameters.nextScheduledPayment}" value="#{item.paymentParameters.nextScheduledPayment.paymentAmount}">
                                             <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
@@ -243,6 +243,12 @@
                             <p:inputText id="countryId1" value="#{customersController.selected.countryId}" title="#{configMapController.getKey('CreateCustomersTitle_countryId')}" />
                             <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_telephone')}" for="telephone1" />
                             <p:inputText id="telephone1" value="#{customersController.selected.telephone}" title="#{configMapController.getKey('CreateCustomersTitle_telephone')}" required="true" >
+                                <f:validator validatorId="au.com.manlyit.fitnesscrm.stats.classes.util.PhoneNumberValidator" />
+                            </p:inputText>
+                            <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_emergencyContactName')}" for="emergencyContactName" />
+                            <p:inputText id="emergencyContactName" value="#{customersController.newCustomer.emergencyContactName}" title="#{configMapController.getKey('CreateCustomersTitle_emergencyContactName')}" />
+                            <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_emergencyContactPhone')}" for="emergencyContactPhone" />
+                            <p:inputText id="emergencyContactPhone" value="#{customersController.newCustomer.emergencyContactPhone}" title="#{configMapController.getKey('CreateCustomersTitle_emergencyContactPhone')}" >
                                 <f:validator validatorId="au.com.manlyit.fitnesscrm.stats.classes.util.PhoneNumberValidator" />
                             </p:inputText>
 

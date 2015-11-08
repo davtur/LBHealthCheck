@@ -1307,3 +1307,8 @@ default.customer.details.prefferedcontact=0
 default.customer.details.demographic=6
 
 CreateToDoListLabel_done=done
+
+CreateCustomersLabel_emergencyContactName=Emergency Contact Name
+CreateCustomersTitle_emergencyContactName=Emergency Contact Name
+CreateCustomersLabel_emergencyContactPhone=Emergency Contact Mobile
+CreateCustomersTitle_emergencyContactPhone=Emergency Contact Mobile Phone Number

@@ -60,6 +60,8 @@ public class SessionTimetableController implements Serializable {
     private Date timetableStartDate;
     private MapModel simpleModel;
     private SessionHistory selectedSessionHistory;
+    private SessionHistory bookingButtonSessionHistory;
+     private SessionHistory signupButtonSessionHistory;
 
     public SessionTimetableController() {
     }
@@ -505,6 +507,34 @@ public class SessionTimetableController implements Serializable {
      */
     public void setSelectedSessionHistory(SessionHistory selectedSessionHistory) {
         this.selectedSessionHistory = selectedSessionHistory;
+    }
+
+    /**
+     * @return the bookingButtonSessionHistory
+     */
+    public SessionHistory getBookingButtonSessionHistory() {
+        return bookingButtonSessionHistory;
+    }
+
+    /**
+     * @param bookingButtonSessionHistory the bookingButtonSessionHistory to set
+     */
+    public void setBookingButtonSessionHistory(SessionHistory bookingButtonSessionHistory) {
+        this.bookingButtonSessionHistory = bookingButtonSessionHistory;
+    }
+
+    /**
+     * @return the signupButtonSessionHistory
+     */
+    public SessionHistory getSignupButtonSessionHistory() {
+        return signupButtonSessionHistory;
+    }
+
+    /**
+     * @param signupButtonSessionHistory the signupButtonSessionHistory to set
+     */
+    public void setSignupButtonSessionHistory(SessionHistory signupButtonSessionHistory) {
+        this.signupButtonSessionHistory = signupButtonSessionHistory;
     }
 
     @FacesConverter(value = "sessionTimetableControllerConverter", forClass = SessionTimetable.class)

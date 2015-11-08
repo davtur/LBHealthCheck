@@ -125,3 +125,6 @@ ALTER TABLE `fitnessStats`.`customers`
 ADD COLUMN `terms_conditions_accepted` TINYINT(1) NULL DEFAULT '0' AFTER `must_reset_password`;
 
 
+ALTER TABLE `fitnessStats`.`customers` 
+ADD COLUMN `emergency_contact_name` VARCHAR(255) NOT NULL AFTER `terms_conditions_accepted`,
+ADD COLUMN `emergency_contact_phone` VARCHAR(45) NOT NULL AFTER `emergency_contact_name`;

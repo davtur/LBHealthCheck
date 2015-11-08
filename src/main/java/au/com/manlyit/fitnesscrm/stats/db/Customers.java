@@ -60,6 +60,16 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Customers.findByFacebookId", query = "SELECT c FROM Customers c WHERE c.facebookId = :facebookId"),
     @NamedQuery(name = "Customers.findByGoogleId", query = "SELECT c FROM Customers c WHERE c.googleId = :googleId")})
 public class Customers implements BaseEntity, Serializable {
+    @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 255)
+    @Column(name = "emergency_contact_name")
+    private String emergencyContactName;
+    @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 45)
+    @Column(name = "emergency_contact_phone")
+    private String emergencyContactPhone;
     @Column(name = "terms_conditions_accepted")
     private Boolean termsConditionsAccepted;
     @Column(name = "last_login_time")
@@ -631,6 +641,22 @@ public class Customers implements BaseEntity, Serializable {
 
     public void setTermsConditionsAccepted(Boolean termsConditionsAccepted) {
         this.termsConditionsAccepted = termsConditionsAccepted;
+    }
+
+    public String getEmergencyContactName() {
+        return emergencyContactName;
+    }
+
+    public void setEmergencyContactName(String emergencyContactName) {
+        this.emergencyContactName = emergencyContactName;
+    }
+
+    public String getEmergencyContactPhone() {
+        return emergencyContactPhone;
+    }
+
+    public void setEmergencyContactPhone(String emergencyContactPhone) {
+        this.emergencyContactPhone = emergencyContactPhone;
     }
 
 }
