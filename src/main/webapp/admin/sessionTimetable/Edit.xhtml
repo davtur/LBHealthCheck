@@ -37,7 +37,7 @@
                             <p:ajax  event="select"   />
                     </p:selectOneMenu>
                     <h:outputLabel value="#{configMapController.getKey('EditSessionTimetableLabel_recurranceId')}" for="recurranceId" />
-                    <p:selectOneMenu id="recurranceId" valueChangeListener="#{sessionTimetableController.selectOneMenuValueChangeListener}" value="#{sessionTimetableController.selected.recurranceId}" label="#{configMapController.getKey('EditSessionTimetableTitle_recurranceId')}" required="true" requiredMessage="#{configMapController.getKey('EditSessionTimetableRequiredMessage_recurranceId')}">
+                    <p:selectOneMenu id="recurranceId" valueChangeListener="#{sessionTimetableController.selectOneMenuValueChangeListener}"   value="#{sessionTimetableController.selected.recurranceId}" label="#{configMapController.getKey('EditSessionTimetableTitle_recurranceId')}" required="true" requiredMessage="#{configMapController.getKey('EditSessionTimetableRequiredMessage_recurranceId')}">
                         <f:selectItems value="#{sessionRecurranceController.itemsAvailableSelectOne}"/>
                             <p:ajax   event="select"  />
                     </p:selectOneMenu>
