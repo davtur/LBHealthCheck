@@ -54,6 +54,16 @@
                     <h:inputTextarea rows="4" cols="30" id="sessionLocationLabel" value="#{sessionTimetableController.selected.sessionLocationLabel}" title="#{configMapController.getKey('EditSessionTimetableTitle_sessionLocationLabel')}" required="true" requiredMessage="#{configMapController.getKey('EditSessionTimetableRequiredMessage_sessionLocationLabel')}"/>
                     <h:outputLabel value="#{configMapController.getKey('EditSessionTimetableLabel_sessionLocationGps')}" for="sessionLocationGps" />
                     <h:inputText id="sessionLocationGps"  value="#{sessionTimetableController.selected.sessionLocationGps}" title="#{configMapController.getKey('EditSessionTimetableTitle_sessionLocationGps')}" required="true" requiredMessage="#{configMapController.getKey('EditSessionTimetableRequiredMessage_sessionLocationGps')}"/>
+              
+                <p:outputLabel value="#{configMapController.getKey('AddPaymentLabel_sessionCasualRate')}" for="sessionCasualRate" />
+                    <p:inputText id="sessionCasualRate" value="#{sessionTimetableController.selected.sessionCasualRate}" title="#{configMapController.getKey('AddPaymentTitle_sessionCasualRate')}" required="true" requiredMessage="#{configMapController.getKey('AddPaymentRequiredMessage_sessionCasualRate')}">
+                        <f:convertNumber  minFractionDigits="2"/>
+                    </p:inputText>
+                <p:outputLabel value="#{configMapController.getKey('AddPaymentLabel_sessionMembersRate')}" for="sessionMembersRate" />
+                    <p:inputText id="sessionMembersRate" value="#{sessionTimetableController.selected.sessionMembersRate}" title="#{configMapController.getKey('AddPaymentTitle_sessionMembersRate')}" required="true" requiredMessage="#{configMapController.getKey('AddPaymentRequiredMessage_sessionMembersRate')}">
+                        <f:convertNumber  minFractionDigits="2"/>
+                    </p:inputText>     
+                
                 </p:panelGrid>
                 <p:commandButton actionListener="#{sessionTimetableController.update}" value="#{configMapController.getKey('Save')}" update="display,:SessionTimetableListForm:datalist,:growl" oncomplete="handleSubmit(args, 'SessionTimetableEditDialog');PF('sessionTimetableControllerTable').filter()"/>
                 <p:commandButton value="#{configMapController.getKey('Cancel')}" onclick="PF('SessionTimetableEditDialog').hide()"/>

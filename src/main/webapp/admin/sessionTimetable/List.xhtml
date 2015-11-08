@@ -152,6 +152,38 @@
 
 
                     </p:column>
+
+                    <p:column sortBy="#{item.sessionCasualRate}" filterBy="#{item.sessionCasualRate}" headerText="#{configMapController.getKey('ListSessionTimetableTitle_sessionCasualRate')}"   >
+                        <p:cellEditor> 
+                            <f:facet name="output">
+                                <h:outputText value="#{item.sessionCasualRate}">
+                                    <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
+                                </h:outputText>
+                            </f:facet>
+                            <f:facet name="input">
+                                <p:inputText value="#{item.sessionCasualRate}" label="#{configMapController.getKey('ListSessionTimetableTitle_sessionCasualRate')}" >
+                                    <f:convertNumber  minFractionDigits="2"/>
+                                </p:inputText> 
+                            </f:facet>
+                        </p:cellEditor> 
+                    </p:column>
+                    
+                      <p:column sortBy="#{item.sessionMembersRate}" filterBy="#{item.sessionMembersRate}" headerText="#{configMapController.getKey('ListSessionTimetableTitle_sessionMembersRate')}"   >
+                        <p:cellEditor> 
+                            <f:facet name="output">
+                                <h:outputText value="#{item.sessionMembersRate}">
+                                    <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
+                                </h:outputText>
+                            </f:facet>
+                            <f:facet name="input">
+                                <p:inputText value="#{item.sessionMembersRate}" label="#{configMapController.getKey('ListSessionTimetableTitle_sessionMembersRate')}" >
+                                    <f:convertNumber  minFractionDigits="2"/>
+                                </p:inputText> 
+                            </f:facet>
+                        </p:cellEditor> 
+                    </p:column>
+
+
                     <p:column sortBy="#{item.sessionTitle}" filterBy="#{item.sessionTitle}" headerText="#{configMapController.getKey('ListSessionTimetableTitle_sessionTitle')}"   >
                         <p:cellEditor> 
                             <f:facet name="output">
@@ -198,7 +230,7 @@
                             </f:facet>
                         </p:cellEditor> 
                     </p:column>
-                   <p:column sortBy="#{item.showSignupButton}" filterBy="#{item.showSignupButton}" headerText="#{configMapController.getKey('ListSessionTimetableTitle_showSignupButton')}"   >
+                    <p:column sortBy="#{item.showSignupButton}" filterBy="#{item.showSignupButton}" headerText="#{configMapController.getKey('ListSessionTimetableTitle_showSignupButton')}"   >
                         <p:cellEditor> 
                             <f:facet name="output">
                                 <p:selectBooleanCheckbox value="#{item.showSignupButton}" disabled="true"/>
@@ -208,7 +240,7 @@
                             </f:facet>
                         </p:cellEditor> 
                     </p:column>
-                   
+
                     <p:column rendered="#{sessionTimetableController.isUserInRole('ADMIN')}"  headerText="Edit" style="width:50px">  
                         <p:rowEditor />  
                     </p:column>  

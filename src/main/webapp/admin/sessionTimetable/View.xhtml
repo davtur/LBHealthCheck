@@ -37,6 +37,12 @@
                     <h:outputText value="#{sessionTimetableController.selected.sessionLocationLabel}" title="#{configMapController.getKey('ViewSessionTimetableTitle_sessionLocationLabel')}"/>
                     <h:outputText value="#{configMapController.getKey('ViewSessionTimetableLabel_sessionLocationGps')}"/>
                     <h:outputText value="#{sessionTimetableController.selected.sessionLocationGps}" title="#{configMapController.getKey('ViewSessionTimetableTitle_sessionLocationGps')}"/>
+                   
+                    
+                    <h:outputText value="#{configMapController.getKey('ViewSessionTimetableLabel_sessionMembersRate')}"/>
+                    <h:outputText value="#{sessionTimetableController.selected.sessionMembersRate}" title="#{configMapController.getKey('ViewSessionTimetableTitle_sessionMembersRate')}"/>
+                    <h:outputText value="#{configMapController.getKey('ViewSessionTimetableLabel_ssessionCasualRate')}"/>
+                    <h:outputText value="#{sessionTimetableController.selected.sessionCasualRate}" title="#{configMapController.getKey('ViewSessionTimetableTitle_ssessionCasualRate')}"/>
                 </p:panelGrid>
                 <p:commandButton value="#{configMapController.getKey('Close')}" onclick="PF('SessionTimetableViewDialog').hide()"/>
             </h:panelGroup>

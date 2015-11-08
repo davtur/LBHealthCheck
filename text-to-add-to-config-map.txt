@@ -1314,3 +1314,11 @@ CreateCustomersLabel_emergencyContactPhone=Emergency Contact Mobile
 CreateCustomersTitle_emergencyContactPhone=Emergency Contact Mobile Phone Number
 BookingDialogueHeader=Booking Form
 BookingFormPurchaseSessionLink=Pay Now
+
+AddPaymentLabel_sessionCasualRate=Casual Rate
+AddPaymentTitle_sessionCasualRate=Session Casual Rate
+AddPaymentRequiredMessage_sessionCasualRate=The casual price is required
+AddPaymentRequiredMessage_sessionMembersRate=The Members price is required
+AddPaymentTitle_sessionMembersRate=Members Rate
+AddPaymentLabel_sessionMembersRate=Members Rate
+
