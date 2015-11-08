@@ -56,7 +56,12 @@
                             <p:inputText id="telephone" value="#{customersController.selected.telephone}" title="#{configMapController.getKey('EditCustomersTitle_telephone')}" required="false" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_telephone')}"/>
                             <p:outputLabel value="#{configMapController.getKey('EditCustomersLabel_fax')}" for="fax" />
                             <p:inputText id="fax" value="#{customersController.selected.fax}" title="#{configMapController.getKey('EditCustomersTitle_fax')}" />
-
+                            <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_emergencyContactName')}" for="emergencyContactName" />
+                            <p:inputText id="emergencyContactName" value="#{customersController.newCustomer.emergencyContactName}" title="#{configMapController.getKey('CreateCustomersTitle_emergencyContactName')}" />
+                            <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_emergencyContactPhone')}" for="emergencyContactPhone" />
+                            <p:inputText id="emergencyContactPhone" value="#{customersController.newCustomer.emergencyContactPhone}" title="#{configMapController.getKey('CreateCustomersTitle_emergencyContactPhone')}" >
+                                <f:validator validatorId="au.com.manlyit.fitnesscrm.stats.classes.util.PhoneNumberValidator" />
+                            </p:inputText>
 
                             <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_preferredContact')}" for="preferredContact1" />
                             <p:selectOneMenu  styleClass="selectOneWidth" id="preferredContact1" valueChangeListener="#{customersController.selectOneMenuValueChangeListener}" converter="preferedContactControllerConverter" value="#{customersController.selected.preferredContact}" label="#{configMapController.getKey('CreateCustomersTitle_preferredContact')}" >

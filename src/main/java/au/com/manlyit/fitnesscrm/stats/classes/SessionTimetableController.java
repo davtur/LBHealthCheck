@@ -1,5 +1,6 @@
 package au.com.manlyit.fitnesscrm.stats.classes;
 
+import au.com.manlyit.fitnesscrm.stats.beans.LoginBean;
 import au.com.manlyit.fitnesscrm.stats.db.SessionTimetable;
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PaginationHelper;
@@ -29,6 +30,7 @@ import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
 import javax.inject.Inject;
 import javax.inject.Named;
+import org.primefaces.context.RequestContext;
 import org.primefaces.event.RowEditEvent;
 import org.primefaces.event.SelectEvent;
 import org.primefaces.model.SortOrder;
@@ -61,7 +63,7 @@ public class SessionTimetableController implements Serializable {
     private MapModel simpleModel;
     private SessionHistory selectedSessionHistory;
     private SessionHistory bookingButtonSessionHistory;
-     private SessionHistory signupButtonSessionHistory;
+    private SessionHistory signupButtonSessionHistory;
 
     public SessionTimetableController() {
     }
@@ -210,27 +212,26 @@ public class SessionTimetableController implements Serializable {
 
         return daysOfWeek;
     }
-    
-    public void incrementWeek(){
+
+    public void incrementWeek() {
         GregorianCalendar startCal = new GregorianCalendar();
         startCal.setTime(getTimetableStartDate());
         startCal.add(Calendar.DAY_OF_YEAR, 7);
         setTimetableStartDate(startCal.getTime());
     }
-    public void decrementWeek(){
+
+    public void decrementWeek() {
         GregorianCalendar startCal = new GregorianCalendar();
         startCal.setTime(getTimetableStartDate());
         startCal.add(Calendar.DAY_OF_YEAR, -7);
         setTimetableStartDate(startCal.getTime());
     }
 
-    public void setToCurrentWeek(){
-       
+    public void setToCurrentWeek() {
+
         setTimetableStartDate(new Date());
     }
 
-    
-    
     public String signUpFromTimetable(ActionEvent actionEvent) {
         FacesContext context = FacesContext.getCurrentInstance();
         String sessionHistoryId = context.getExternalContext().getRequestParameterMap().get("sessionHistorySignupId");
@@ -241,14 +242,14 @@ public class SessionTimetableController implements Serializable {
         return "index.xhtml";
     }
 
-    public String bookFromTimetable(ActionEvent actionEvent) {
-        FacesContext context = FacesContext.getCurrentInstance();
-        String sessionHistoryId = context.getExternalContext().getRequestParameterMap().get("sessionHistoryBookingId");
-        if (sessionHistoryId != null) {
-            SessionHistory sh = sessionHistoryFacade.find(Integer.valueOf(sessionHistoryId));
-            logger.log(Level.INFO, "BookFromTimetable: {0}", new Object[]{sh.getSessiondate().toString()});
-        }
-        return "index.xhtml";
+    public void bookFromTimetable(ActionEvent actionEvent) {
+       
+
+       // String sessionHistoryId = context.getExternalContext().getRequestParameterMap().get("sessionHistoryBookingId");
+        // if (getBookingButtonSessionHistory()!= null) {
+        //     SessionHistory sh = getBookingButtonSessionHistory();
+        //     logger.log(Level.INFO, "BookFromTimetable: {0}", new Object[]{sh.getSessiondate().toString()});
+        // }
     }
 
     /**
@@ -521,6 +522,25 @@ public class SessionTimetableController implements Serializable {
      */
     public void setBookingButtonSessionHistory(SessionHistory bookingButtonSessionHistory) {
         this.bookingButtonSessionHistory = bookingButtonSessionHistory;
+         FacesContext context = FacesContext.getCurrentInstance();
+        CustomersController controller = context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
+        if (context.getExternalContext().getRemoteUser() != null) {
+            // autheticated user
+            RequestContext.getCurrentInstance().execute("PF('bookingDialog').show();");
+            
+            controller.setSignupFromBookingInProgress(false);
+        } else {
+            //unauthenticated 
+            RequestContext.getCurrentInstance().execute("PF('signupDialog').show();");
+            //RequestContext.getCurrentInstance().update("signupDialog");
+            //CustomersController controller = (CustomersController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "customersController");
+
+            controller.setSignupFromBookingInProgress(true);
+        }
+    }
+    
+    public void purchaseSession(){
+        logger.log(Level.INFO, "Purchase Session button clicked.");
     }
 
     /**

@@ -128,3 +128,9 @@ ADD COLUMN `terms_conditions_accepted` TINYINT(1) NULL DEFAULT '0' AFTER `must_r
 ALTER TABLE `fitnessStats`.`customers` 
 ADD COLUMN `emergency_contact_name` VARCHAR(255) NOT NULL AFTER `terms_conditions_accepted`,
 ADD COLUMN `emergency_contact_phone` VARCHAR(45) NOT NULL AFTER `emergency_contact_name`;
+UPDATE fitnessStats.customers set emergency_contact_name = "Not Provided", emergency_contact_phone ="Not Provided" where emergency_contact_name ="";
+
+
+ALTER TABLE `fitnessStats`.`session_timetable` 
+ADD COLUMN `session_casual_rate` DECIMAL(22,2) NULL DEFAULT '25.00' AFTER `show_signup_button`,
+ADD COLUMN `session_members_rate` DECIMAL(22,2) NULL DEFAULT '20.00' AFTER `session_casual_rate`;

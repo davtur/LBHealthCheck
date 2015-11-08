@@ -1,0 +1,102 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:p="http://primefaces.org/ui" >
+
+
+    <p:dialog header="Booking  Wizard" widgetVar="bookingDialog" modal="true" showEffect="fade" hideEffect="fade"   resizable="false">
+        <h:form id="bookingForm" styleClass="bookingFormUpdate">
+
+            <h1 class="BigTopic">#{configMapController.getKey('BookingDialogueHeader')}</h1>
+            <div class="Container100 Responsive100">
+
+                <div class="ContainerIndent">
+
+                    <div class=" TimetableTile BorderedBox Fleft TexAlLeft HoverEffect MarRL5"> 
+                        <div class="ContainerIndent">
+                            <div class="ContainerIndent">
+                                <h2 class=" FontRalewayBold ">  #{sessionTimetableController.bookingButtonSessionHistory.sessionTemplate.sessionTitle} </h2> 
+                                <h:outputText value="#{sessionTimetableController.bookingButtonSessionHistory.sessiondate}" styleClass=" Fs18 FontRalewayBold blue">
+                                    <f:convertDateTime pattern="EEEE h:mm a" />
+                                </h:outputText>
+
+                            </div>
+                            <div class="EmptyBox10"></div>
+                            <div class="Container100  gray">
+                                <div class="ContainerIndent">
+                                    <div class="Container20  ">
+                                        <div class="ContainerIndent">
+                                            <p:graphicImage value="#{customerImagesController.dynamicImage}" width="55px">
+                                                <f:param name="imageId" value="#{sessionTimetableController.bookingButtonSessionHistory.sessionTemplate.trainerId.profileImage.id}"/>
+                                            </p:graphicImage>
+                                        </div>
+                                    </div>
+                                    <div class="Container80  ">
+
+                                        <span class="DispBlock " ><font class="Fs14 FontRalewayBold black">Trainer: </font> #{sessionTimetableController.bookingButtonSessionHistory.sessionTemplate.trainerId.firstname}</span>
+                                        <span class="DispBlock " ><font class="Fs14 FontRalewayBold black">Duration: </font> #{sessionTimetableController.bookingButtonSessionHistory.sessionTemplate.durationMinutes} #{configMapController.getKey('Timetable_MinutesLabel')}</span>
+                                        <span class="DispBlock " ><font class="Fs14 FontRalewayBold black">Location: </font> #{sessionTimetableController.bookingButtonSessionHistory.sessionTemplate.sessionLocationLabel}</span>
+                                        <span class="DispBlock " ><font class="Fs14 FontRalewayBold black">Casual Rate: </font> 
+                                            <h:outputText value="#{sessHist.sessionTemplate.sessionCasualRate}" rendered=" #{empty  facesContext.externalContext.remoteUser}">
+                                                <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
+                                            </h:outputText>
+                                            <h:outputText value="#{sessHist.sessionTemplate.sessionMembersRate}" rendered=" #{not empty  facesContext.externalContext.remoteUser}" >
+                                                <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
+                                            </h:outputText>
+                                        </span>
+                                        <div class="EmptyBox10"></div>
+                                        <p:commandButton id="mapsBtn" styleClass="MarRight5" value="#{configMapController.getKey('Timetable_MapsButtonTitle')}" type="button" />
+
+
+                                        <p:overlayPanel  for="mapsBtn" hideEffect="fade" dynamic="false" styleClass="timetableGmap" >
+                                            <p:gmap styleClass="BorderedBox" center="#{sessionTimetableController.bookingButtonSessionHistory.sessionTemplate.sessionLocationGps}" zoom="16" model="#{sessionTimetableController.bookingButtonSessionHistory.sessionTemplate.simpleModel}" type="HYBRID" style="width:100%;height:400px" />
+
+                                        </p:overlayPanel>
+
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="Seperator"></div>
+                            <div class="Container100  gray ">
+                                <div class="ContainerIndent">
+                                    <h:outputText value="#{sessionTimetableController.bookingButtonSessionHistory.sessionTemplate.comments}"/>
+                                </div>
+
+                            </div>
+                            <div class="EmptyBox10"></div>
+
+                            <!--      </p:panel>
+                              </p:column>-->
+                        </div>
+                    </div>
+
+                    <p:messages showDetail="true"/>
+                    <h:panelGrid id="dialogueGrid" columns="2"  cellpadding="5" >
+
+                        <p:outputLabel value="#{configMapController.getKey('EditCustomersLabel_firstname')}"  />
+
+                    </h:panelGrid>
+
+                </div>
+            </div>
+            <div class="Container100 Responsive100">
+                <div class="ContainerIndent">
+                    <p:commandButton icon="ui-icon-check fa fa-check white Fs14" id="dialogueSave"   actionListener="#{sessionTimetableController.purchaseSession}"  value="#{configMapController.getKey('BookingFormPurchaseSessionLink')}" update=":growl "/>                
+                    <p:commandButton icon=" fa fa-times-circle white Fs14" id="dialogueDiscard" onclick=" PF('bookingDialog').hide()"  actionListener="#{customersController.cancelCreateDialogue}" value="#{configMapController.getKey('CancelSignupLink')}" update=":growl"/>                
+                </div>
+            </div>
+
+
+        </h:form>
+    </p:dialog>
+
+
+
+</ui:composition>
+<!--<p> Generated from template ( JSF_from_entity_wizard/StandardJSF/list.ftl  )- Dave 18th July 2015 </p>-->
+

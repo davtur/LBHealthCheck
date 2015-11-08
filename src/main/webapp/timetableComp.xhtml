@@ -62,16 +62,21 @@
                                                 <span class="DispBlock " ><font class="Fs14 FontRalewayBold black">Trainer: </font> #{sessHist.sessionTemplate.trainerId.firstname}</span>
                                                 <span class="DispBlock " ><font class="Fs14 FontRalewayBold black">Duration: </font> #{sessHist.sessionTemplate.durationMinutes} #{configMapController.getKey('Timetable_MinutesLabel')}</span>
                                                 <span class="DispBlock " ><font class="Fs14 FontRalewayBold black">Location: </font> #{sessHist.sessionTemplate.sessionLocationLabel}</span>
+                                                <span class="DispBlock " ><font class="Fs14 FontRalewayBold black">Casual Rate: </font> 
+                                                    <h:outputText value="#{sessHist.sessionTemplate.sessionCasualRate}">
+                                                        <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
+                                                    </h:outputText>
+                                                </span>
 
                                                 <div class="EmptyBox10"></div>
                                                 <p:commandButton id="mapsBtn" styleClass="MarRight5" value="#{configMapController.getKey('Timetable_MapsButtonTitle')}" type="button" />
 
-                                                <p:commandButton styleClass="MarRight5 GreenButton animated pulse infinite "   update=":signUpForm" oncomplete="PF('signupDialog').show()" rendered="#{sessHist.sessionTemplate.showSignupButton and  empty  facesContext.externalContext.remoteUser}" value="#{configMapController.getKey('Timetable_SignUpButtonTitle')}"  actionListener="#{customersController.signUp}"  >
+                                                <p:commandButton styleClass="MarRight5 GreenButton animated pulse infinite "   update="@(.signUpFormUpdate)" oncomplete="PF('signupDialog').show()" rendered="#{sessHist.sessionTemplate.showSignupButton and  empty  facesContext.externalContext.remoteUser}" value="#{configMapController.getKey('Timetable_SignUpButtonTitle')}"  actionListener="#{customersController.signUp}"  >
                                                   <!-- <f:param name="sessionHistorySignupId" value="#{sessHist.id}"/>-->
                                                     <f:setPropertyActionListener value="#{sessHist}" target="#{sessionTimetableController.signupButtonSessionHistory}" />
                                                 </p:commandButton>
 
-                                                <p:commandButton   styleClass=" OrangeButton animated pulse infinite" update=":SessionTimetableListForm:bookingDetail" oncomplete="PF('bookDialog').show()" rendered="#{sessHist.sessionTemplate.showBookingButton}" value="#{configMapController.getKey('Timetable_BookingButtonTitle')}"  actionListener="#{sessionTimetableController.bookFromTimetable}" >
+                                                <p:commandButton   styleClass=" OrangeButton animated pulse infinite" update="@(.bookingFormUpdate)"  rendered="#{sessHist.sessionTemplate.showBookingButton}" value="#{configMapController.getKey('Timetable_BookingButtonTitle')}"  actionListener="#{sessionTimetableController.bookFromTimetable}" >
                                                     <!--<f:param name="sessionHistoryBookingId" value="#{sessHist.id}"/>-->
                                                     <f:setPropertyActionListener value="#{sessHist}" target="#{sessionTimetableController.bookingButtonSessionHistory}" />
                                                 </p:commandButton>
@@ -120,6 +125,7 @@
 
 
     <ui:include src="signupComp.xhtml"/>
+    <ui:include src="bookingComp.xhtml"/>
 </ui:composition>
 <!--<p> Generated from template ( JSF_from_entity_wizard/StandardJSF/list.ftl  )- Dave 18th July 2015 </p>-->
 

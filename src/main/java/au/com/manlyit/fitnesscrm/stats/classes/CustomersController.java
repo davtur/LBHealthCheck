@@ -112,6 +112,7 @@ public class CustomersController implements Serializable {
     private boolean refreshFromDB = false;
     private boolean addUserButtonDisabled = true;
     private boolean showNonUsers = false;
+    private boolean signupFromBookingInProgress = false;
     private static final Logger logger = Logger.getLogger(CustomersController.class.getName());
     
     public CustomersController() {
@@ -318,6 +319,8 @@ public class CustomersController implements Serializable {
         c.setEmailAddress(configMapFacade.getConfig("default.customer.details.email"));
         c.setFax(configMapFacade.getConfig("default.customer.details.fax"));
         c.setTelephone(configMapFacade.getConfig("default.customer.details.mobile"));
+        c.setEmergencyContactName("Not Provided");
+        c.setEmergencyContactPhone("Not Provided");
         c.setGender('F');
         c.setNewsletter(true);
         c.setLoginAttempts(0);
@@ -1761,6 +1764,20 @@ public class CustomersController implements Serializable {
      */
     public void setNewCustomerCheckedGroups(Boolean[] newCustomerCheckedGroups) {
         this.newCustomerCheckedGroups = newCustomerCheckedGroups;
+    }
+
+    /**
+     * @return the signupFromBookingInProgress
+     */
+    public boolean isSignupFromBookingInProgress() {
+        return signupFromBookingInProgress;
+    }
+
+    /**
+     * @param signupFromBookingInProgress the signupFromBookingInProgress to set
+     */
+    public void setSignupFromBookingInProgress(boolean signupFromBookingInProgress) {
+        this.signupFromBookingInProgress = signupFromBookingInProgress;
     }
     
     @FacesConverter(value = "customersControllerConverter", forClass = Customers.class)

@@ -8,6 +8,7 @@ package au.com.manlyit.fitnesscrm.stats.db;
 import au.com.manlyit.fitnesscrm.stats.classes.util.BaseEntity;
 import au.com.manlyit.fitnesscrm.stats.db.SessionTypes;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Date;
 import javax.persistence.Basic;
@@ -46,6 +47,11 @@ import org.primefaces.model.map.Marker;
     @NamedQuery(name = "SessionTimetable.findById", query = "SELECT s FROM SessionTimetable s WHERE s.id = :id"),
     @NamedQuery(name = "SessionTimetable.findBySessiondate", query = "SELECT s FROM SessionTimetable s WHERE s.sessiondate = :sessiondate")})
 public class SessionTimetable implements BaseEntity, Serializable {
+    // @Max(value=?)  @Min(value=?)//if you know range of your decimal fields consider using these annotations to enforce field validation
+    @Column(name = "session_casual_rate")
+    private BigDecimal sessionCasualRate;
+    @Column(name = "session_members_rate")
+    private BigDecimal sessionMembersRate;
     @Column(name = "show_booking_button")
     private Boolean showBookingButton;
     @Column(name = "show_signup_button")
@@ -269,6 +275,22 @@ public class SessionTimetable implements BaseEntity, Serializable {
 
     public void setShowSignupButton(Boolean showSignupButton) {
         this.showSignupButton = showSignupButton;
+    }
+
+    public BigDecimal getSessionCasualRate() {
+        return sessionCasualRate;
+    }
+
+    public void setSessionCasualRate(BigDecimal sessionCasualRate) {
+        this.sessionCasualRate = sessionCasualRate;
+    }
+
+    public BigDecimal getSessionMembersRate() {
+        return sessionMembersRate;
+    }
+
+    public void setSessionMembersRate(BigDecimal sessionMembersRate) {
+        this.sessionMembersRate = sessionMembersRate;
     }
 
 }

@@ -1312,3 +1312,5 @@ CreateCustomersLabel_emergencyContactName=Emergency Contact Name
 CreateCustomersTitle_emergencyContactName=Emergency Contact Name
 CreateCustomersLabel_emergencyContactPhone=Emergency Contact Mobile
 CreateCustomersTitle_emergencyContactPhone=Emergency Contact Mobile Phone Number
+BookingDialogueHeader=Booking Form
+BookingFormPurchaseSessionLink=Pay Now

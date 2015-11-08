@@ -43,8 +43,6 @@
                             <p:inputText id="emailAddress" value="#{customersController.newCustomer.emailAddress}" title="#{configMapController.getKey('EditCustomersTitle_emailAddress')}" required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_emailAddress')}">
                                 <f:validator validatorId="au.com.manlyit.fitnesscrm.stats.classes.util.EmailValidator" />
                             </p:inputText>
-                            <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_username')}" for="username" />
-                            <p:inputText id="username" value="#{customersController.newCustomer.username}" title="#{configMapController.getKey('CreateCustomersTitle_username')}" required="true" requiredMessage="#{configMapController.getKey('CreateCustomersRequiredMessage_username')}"/>
                             <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_streetAddress')}" for="streetAddress" />
                             <p:inputText id="streetAddress" value="#{customersController.newCustomer.streetAddress}" title="#{configMapController.getKey('CreateCustomersTitle_streetAddress')}" />
                             <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_suburb')}" for="suburb" />
@@ -60,10 +58,10 @@
 
                             <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_emergencyContactName')}" for="emergencyContactName" />
                             <p:inputText id="emergencyContactName" value="#{customersController.newCustomer.emergencyContactName}" title="#{configMapController.getKey('CreateCustomersTitle_emergencyContactName')}" />
-                            <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_emergencyContactPhone')}" for="emergencyContactPhone" />
-                            <p:inputText id="emergencyContactPhone" value="#{customersController.newCustomer.emergencyContactPhone}" title="#{configMapController.getKey('CreateCustomersTitle_emergencyContactPhone')}" >
-                                <f:validator validatorId="au.com.manlyit.fitnesscrm.stats.classes.util.PhoneNumberValidator" />
-                            </p:inputText>
+
+                            <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_username')}" for="username" />
+                            <p:inputText id="username" value="#{customersController.newCustomer.username}" title="#{configMapController.getKey('CreateCustomersTitle_username')}" required="true" requiredMessage="#{configMapController.getKey('CreateCustomersRequiredMessage_username')}"/>
+
                         </h:panelGrid>
                     </div>
                 </div>
@@ -109,8 +107,12 @@
                             <p:selectOneMenu styleClass="selectOneWidth"  id="preferredContact" valueChangeListener="#{customersController.selectOneMenuValueChangeListener}" converter="preferedContactControllerConverter" value="#{customersController.newCustomer.preferredContact}" label="#{configMapController.getKey('CreateCustomersTitle_preferredContact')}" >
                                 <f:selectItems value="#{preferedContactController.itemsAvailableAsObjects}"  var="prefContact" itemLabel="#{prefContact.preferedContactMethod}" itemValue="#{prefContact}"/>
                             </p:selectOneMenu>
-                            <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_password')}" for="password" />
-                            <p:password id="password"  value="#{customersController.checkPass}" onfocus="this.select()" feedback="true" title="#{configMapController.getKey('EditCustomersTitle_password')}" >
+                            <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_emergencyContactPhone')}" for="emergencyContactPhone" />
+                            <p:inputText id="emergencyContactPhone" value="#{customersController.newCustomer.emergencyContactPhone}" title="#{configMapController.getKey('CreateCustomersTitle_emergencyContactPhone')}" >
+                                <f:validator validatorId="au.com.manlyit.fitnesscrm.stats.classes.util.PhoneNumberValidator" />
+                            </p:inputText>
+                            <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_password')}" for="pword" />
+                            <p:password id="pword"  value="#{customersController.checkPass}" onfocus="this.select()" feedback="true" title="#{configMapController.getKey('EditCustomersTitle_password')}" >
                                 <p:ajax listener="#{customersController.checkPassChange}" event="keyup" />
                             </p:password>
 
