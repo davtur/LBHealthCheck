@@ -441,6 +441,7 @@ public class PaymentBean implements Serializable {
                 newPayment.setBankReturnCode("");
                 newPayment.setBankFailedReason("");
                 newPayment.setBankReceiptID("");
+                newPayment.setPaymentDate(debitDate);// we can use this timestamp to reference bookings with booking date as they will be identical
                 paymentsFacade.createAndFlush(newPayment);
 
                 String newPaymentID = newPayment.getId().toString();

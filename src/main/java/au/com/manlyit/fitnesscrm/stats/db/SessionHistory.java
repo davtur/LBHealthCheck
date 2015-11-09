@@ -46,6 +46,8 @@ import org.primefaces.model.map.Marker;
     @NamedQuery(name = "SessionHistory.findById", query = "SELECT s FROM SessionHistory s WHERE s.id = :id"),
     @NamedQuery(name = "SessionHistory.findBySessiondate", query = "SELECT s FROM SessionHistory s WHERE s.sessiondate = :sessiondate")})
 public class SessionHistory implements BaseEntity, Serializable {
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "sessionHistoryId")
+    private Collection<SessionBookings> sessionBookingsCollection;
     @JoinColumn(name = "session_template", referencedColumnName = "id")
     @ManyToOne
     private SessionTimetable sessionTemplate;
@@ -201,6 +203,15 @@ public class SessionHistory implements BaseEntity, Serializable {
 
     public void setSessionTemplate(SessionTimetable sessionTemplate) {
         this.sessionTemplate = sessionTemplate;
+    }
+
+    @XmlTransient
+    public Collection<SessionBookings> getSessionBookingsCollection() {
+        return sessionBookingsCollection;
+    }
+
+    public void setSessionBookingsCollection(Collection<SessionBookings> sessionBookingsCollection) {
+        this.sessionBookingsCollection = sessionBookingsCollection;
     }
     
     

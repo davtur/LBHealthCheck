@@ -1,0 +1,32 @@
+
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                >
+
+    <p:dialog id="SessionBookingsViewDlg" widgetVar="SessionBookingsViewDialog" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('ViewSessionBookingsTitle')}">
+        <h:form id="SessionBookingsViewForm">
+            <h:panelGroup id="display">
+                <p:panelGrid columns="2" rendered="#{sessionBookingsController.selected != null}">
+                    <h:outputText value="#{configMapController.getKey('ViewSessionBookingsLabel_id')}"/>
+                    <h:outputText value="#{sessionBookingsController.selected.id}" title="#{configMapController.getKey('ViewSessionBookingsTitle_id')}"/>
+                    <h:outputText value="#{configMapController.getKey('ViewSessionBookingsLabel_bookingTime')}"/>
+                    <h:outputText value="#{sessionBookingsController.selected.bookingTime}" title="#{configMapController.getKey('ViewSessionBookingsTitle_bookingTime')}">
+                        <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                    </h:outputText>
+                    <h:outputText value="#{configMapController.getKey('ViewSessionBookingsLabel_customerId')}"/>
+                    <h:outputText value="#{sessionBookingsController.selected.customerId}" title="#{configMapController.getKey('ViewSessionBookingsTitle_customerId')}"/>
+                    <h:outputText value="#{configMapController.getKey('ViewSessionBookingsLabel_sessionHistoryId')}"/>
+                    <h:outputText value="#{sessionBookingsController.selected.sessionHistoryId}" title="#{configMapController.getKey('ViewSessionBookingsTitle_sessionHistoryId')}"/>
+                    <h:outputText value="#{configMapController.getKey('ViewSessionBookingsLabel_paymentId')}"/>
+                    <h:outputText value="#{sessionBookingsController.selected.paymentId}" title="#{configMapController.getKey('ViewSessionBookingsTitle_paymentId')}"/>
+                </p:panelGrid>
+                <p:commandButton value="#{configMapController.getKey('Close')}" onclick="PF('SessionBookingsViewDialog').hide()"/>
+            </h:panelGroup>
+        </h:form>
+    </p:dialog>
+
+</ui:composition>
+

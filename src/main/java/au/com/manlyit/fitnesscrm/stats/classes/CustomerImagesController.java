@@ -1184,21 +1184,25 @@ public class CustomerImagesController implements Serializable {
         StreamedContent sc = null;
         String id = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("imageId");
 
-        if (id != null) {
-            Integer imageId = Integer.parseInt(id);
-            CustomerImages ci = ejbFacade.find(imageId);
-            current = ci;
-            RequestContext.getCurrentInstance().update(":myStatsForm:photo2");
-            sc = ci.getImageStream();
-        } else {
-            try {
+        try {
+            if (id != null && id.trim().isEmpty() == false) {
+                Integer imageId = Integer.parseInt(id);
+                CustomerImages ci = ejbFacade.find(imageId);
+                current = ci;
+                RequestContext.getCurrentInstance().update(":myStatsForm:photo2");
+                sc = ci.getImageStream();
+            } else {
+                try {
                 // get default image
-                //if you return null here then it won't work!!! You have to return something.
-                InputStream stream = FacesContext.getCurrentInstance().getExternalContext().getResourceAsStream("/resources/images/Barefoot-image_100_by_100.jpg");
-                sc = new DefaultStreamedContent(stream, "image/jpeg");
-            } catch (Exception e) {
-                JsfUtil.addErrorMessage(e, "Trying to set Barefoot-image_100_by_100.jpg as the defailt image failed!");
+                    //if you return null here then it won't work!!! You have to return something.
+                    InputStream stream = FacesContext.getCurrentInstance().getExternalContext().getResourceAsStream("/resources/images/Barefoot-image_100_by_100.jpg");
+                    sc = new DefaultStreamedContent(stream, "image/jpeg");
+                } catch (Exception e) {
+                    JsfUtil.addErrorMessage(e, "Trying to set Barefoot-image_100_by_100.jpg as the defailt image failed!");
+                }
             }
+        } catch (NumberFormatException numberFormatException) {
+            logger.log(Level.WARNING, "getDynamicImage number format exception for {0}",id);
         }
 
         return sc;

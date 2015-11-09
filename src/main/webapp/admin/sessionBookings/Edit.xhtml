@@ -1,0 +1,42 @@
+
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                >
+
+    <p:dialog id="SessionBookingsEditDlg" widgetVar="SessionBookingsEditDialog" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('EditSessionBookingsTitle')}">
+        <h:form id="SessionBookingsEditForm">
+            <h:panelGroup id="display">
+                <p:panelGrid columns="2" rendered="#{sessionBookingsController.selected != null}">
+                    <h:outputLabel value="#{configMapController.getKey('EditSessionBookingsLabel_id')}" for="id" />
+                    <h:inputText id="id"  value="#{sessionBookingsController.selected.id}" title="#{configMapController.getKey('EditSessionBookingsTitle_id')}" required="true" requiredMessage="#{configMapController.getKey('EditSessionBookingsRequiredMessage_id')}"/>
+                    <h:outputLabel value="#{configMapController.getKey('EditSessionBookingsLabel_bookingTime')}" for="bookingTime" />
+                    <h:inputText id="bookingTime" value="#{sessionBookingsController.selected.bookingTime}" title="#{configMapController.getKey('EditSessionBookingsTitle_bookingTime')}" >
+                        <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                    </h:inputText>
+                    <h:outputLabel value="#{configMapController.getKey('EditSessionBookingsLabel_customerId')}" for="customerId" />
+                    <p:selectOneMenu id="customerId" valueChangeListener="#{sessionBookingsController.selectOneMenuValueChangeListener}" value="#{sessionBookingsController.selected.customerId}" label="#{configMapController.getKey('EditSessionBookingsTitle_customerId')}" required="true" requiredMessage="#{configMapController.getKey('EditSessionBookingsRequiredMessage_customerId')}">
+                        <f:selectItems value="#{customersController.itemsAvailableSelectOne}"/>
+                        <p:ajax   update=":SessionBookingsEditForm"  />
+                    </p:selectOneMenu>
+                    <h:outputLabel value="#{configMapController.getKey('EditSessionBookingsLabel_sessionHistoryId')}" for="sessionHistoryId" />
+                    <p:selectOneMenu id="sessionHistoryId" valueChangeListener="#{sessionBookingsController.selectOneMenuValueChangeListener}" value="#{sessionBookingsController.selected.sessionHistoryId}" label="#{configMapController.getKey('EditSessionBookingsTitle_sessionHistoryId')}" required="true" requiredMessage="#{configMapController.getKey('EditSessionBookingsRequiredMessage_sessionHistoryId')}">
+                        <f:selectItems value="#{sessionHistoryController.itemsAvailableSelectOne}"/>
+                        <p:ajax   update=":SessionBookingsEditForm"  />
+                    </p:selectOneMenu>
+                    <h:outputLabel value="#{configMapController.getKey('EditSessionBookingsLabel_paymentId')}" for="paymentId" />
+                    <p:selectOneMenu id="paymentId" valueChangeListener="#{sessionBookingsController.selectOneMenuValueChangeListener}" value="#{sessionBookingsController.selected.paymentId}" label="#{configMapController.getKey('EditSessionBookingsTitle_paymentId')}" >
+                        <f:selectItems value="#{paymentsController.itemsAvailableSelectOne}"/>
+                        <p:ajax   update=":SessionBookingsEditForm"  />
+                    </p:selectOneMenu>
+                </p:panelGrid>
+                <p:commandButton actionListener="#{sessionBookingsController.update}" value="#{configMapController.getKey('Save')}" update="display,:SessionBookingsListForm:datalist,:growl" oncomplete="handleSubmit(args, 'SessionBookingsEditDialog');PF('sessionBookingsControllerTable').filter()"/>
+                <p:commandButton value="#{configMapController.getKey('Cancel')}" onclick="PF('SessionBookingsEditDialog').hide()"/>
+            </h:panelGroup>
+        </h:form>
+    </p:dialog>
+
+</ui:composition>
+

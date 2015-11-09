@@ -61,6 +61,8 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "Payments.findByYourGeneralReference", query = "SELECT p FROM Payments p WHERE p.yourGeneralReference = :yourGeneralReference"),
     @NamedQuery(name = "Payments.findByYourSystemReference", query = "SELECT p FROM Payments p WHERE p.yourSystemReference = :yourSystemReference")})
 public class Payments implements  BaseEntity,Serializable {
+    @OneToOne(mappedBy = "paymentId")
+    private SessionBookings sessionBookings;
     @OneToOne(mappedBy = "nextScheduledPayment")
     private PaymentParameters paymentParameters;
     @OneToOne(mappedBy = "lastSuccessfulScheduledPayment")
@@ -396,6 +398,14 @@ public class Payments implements  BaseEntity,Serializable {
 
     public void setPaymentParameters1(PaymentParameters paymentParameters1) {
         this.paymentParameters1 = paymentParameters1;
+    }
+
+    public SessionBookings getSessionBookings() {
+        return sessionBookings;
+    }
+
+    public void setSessionBookings(SessionBookings sessionBookings) {
+        this.sessionBookings = sessionBookings;
     }
     
 }

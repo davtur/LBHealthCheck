@@ -164,3 +164,8 @@ ADD CONSTRAINT `fk_session_bookings_3`
   ON DELETE NO ACTION
   ON UPDATE NO ACTION;
 
+ALTER TABLE `fitnessStats`.`session_bookings` 
+ADD COLUMN `status` VARCHAR(255) NULL AFTER `booking_time`;
+ALTER TABLE `fitnessStats`.`session_bookings` 
+CHANGE COLUMN `status` `status` VARCHAR(16) NOT NULL DEFAULT 'NEW' ,
+ADD COLUMN `status_description` VARCHAR(255) NULL AFTER `status`;

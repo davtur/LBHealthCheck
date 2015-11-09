@@ -188,6 +188,10 @@
                     id="sessionTimetable"                              
                     action="/admin/sessionTimetable/List.xhtml" ajax="false"  value="Session Timetable"    >                       
                 </p:menuitem>
+                <p:menuitem
+                    id="sessionBookings"                              
+                    action="/admin/sessionBookings/List.xhtml" ajax="false"  value="Session Bookings"    >                       
+                </p:menuitem>
             </p:submenu>
 
             <p:separator  rendered="#{customersController.isUserInRole('ADMIN')}" />

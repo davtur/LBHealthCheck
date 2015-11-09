@@ -60,6 +60,8 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Customers.findByFacebookId", query = "SELECT c FROM Customers c WHERE c.facebookId = :facebookId"),
     @NamedQuery(name = "Customers.findByGoogleId", query = "SELECT c FROM Customers c WHERE c.googleId = :googleId")})
 public class Customers implements BaseEntity, Serializable {
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "customerId")
+    private Collection<SessionBookings> sessionBookingsCollection;
     @Basic(optional = false)
     @NotNull
     @Size(min = 1, max = 255)
@@ -657,6 +659,15 @@ public class Customers implements BaseEntity, Serializable {
 
     public void setEmergencyContactPhone(String emergencyContactPhone) {
         this.emergencyContactPhone = emergencyContactPhone;
+    }
+
+    @XmlTransient
+    public Collection<SessionBookings> getSessionBookingsCollection() {
+        return sessionBookingsCollection;
+    }
+
+    public void setSessionBookingsCollection(Collection<SessionBookings> sessionBookingsCollection) {
+        this.sessionBookingsCollection = sessionBookingsCollection;
     }
 
 }

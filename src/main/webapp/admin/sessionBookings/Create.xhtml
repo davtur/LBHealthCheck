@@ -1,0 +1,43 @@
+
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                >
+    <p:dialog id="SessionBookingsCreateDlg" widgetVar="SessionBookingsCreateDialog" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('CreateSessionBookingsTitle')}">
+
+        <h:form id="SessionBookingsCreateForm">
+            <h:panelGroup id="display">
+                <p:panelGrid columns="2" rendered="#{sessionBookingsController.selected != null}">
+                    <p:outputLabel value="#{configMapController.getKey('CreateSessionBookingsLabel_bookingTime')}" for="bookingTime" />
+
+
+                    <p:calendar id="bookingTime" pattern="MM/dd/yyyy HH:mm:ss"  value="#{sessionBookingsController.selected.bookingTime}"  title="#{configMapController.getKey('CreateSessionBookingsTitle_bookingTime')}" >
+                        <p:ajax event="dateSelect" listener="#{sessionBookingsController.handleDateSelect}" update=":SessionBookingsCreateForm" />
+                    </p:calendar>
+                    <p:outputLabel value="#{configMapController.getKey('CreateSessionBookingsLabel_customerId')}" for="customerId" />
+                    <p:selectOneMenu id="customerId" valueChangeListener="#{sessionBookingsController.selectOneMenuValueChangeListener}"  value="#{sessionBookingsController.selected.customerId}"  label="#{configMapController.getKey('CreateSessionBookingsTitle_customerId')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionBookingsRequiredMessage_customerId')}">
+                        <f:selectItems value="#{customersController.itemsAvailableSelectOne}"/>
+                        <p:ajax   update=":SessionBookingsCreateForm"  />
+                    </p:selectOneMenu>
+                    <p:outputLabel value="#{configMapController.getKey('CreateSessionBookingsLabel_sessionHistoryId')}" for="sessionHistoryId" />
+                    <p:selectOneMenu id="sessionHistoryId" valueChangeListener="#{sessionBookingsController.selectOneMenuValueChangeListener}"  value="#{sessionBookingsController.selected.sessionHistoryId}"  label="#{configMapController.getKey('CreateSessionBookingsTitle_sessionHistoryId')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionBookingsRequiredMessage_sessionHistoryId')}">
+                        <f:selectItems value="#{sessionHistoryController.itemsAvailableSelectOne}"/>
+                        <p:ajax   update=":SessionBookingsCreateForm"  />
+                    </p:selectOneMenu>
+                    <p:outputLabel value="#{configMapController.getKey('CreateSessionBookingsLabel_paymentId')}" for="paymentId" />
+                    <p:selectOneMenu id="paymentId" valueChangeListener="#{sessionBookingsController.selectOneMenuValueChangeListener}"  value="#{sessionBookingsController.selected.paymentId}"  label="#{configMapController.getKey('CreateSessionBookingsTitle_paymentId')}" >
+                        <f:selectItems value="#{paymentsController.itemsAvailableSelectOne}"/>
+                        <p:ajax   update=":SessionBookingsCreateForm"  />
+                    </p:selectOneMenu>
+                </p:panelGrid>
+                <p:commandButton actionListener="#{sessionBookingsController.createDialogue}" value="#{configMapController.getKey('Save')}" update="display,:SessionBookingsListForm:datalist,:growl" oncomplete="handleSubmit(args,'SessionBookingsCreateDialog');PF('sessionBookingsControllerTable').filter()"/>
+                <p:commandButton value="#{configMapController.getKey('Cancel')}" onclick="PF('SessionBookingsCreateDialog').hide()"/>
+            </h:panelGroup>
+        </h:form>
+    </p:dialog>
+
+</ui:composition>    
+<p> Generated from template ( JSF_from_entity_wizard/StandardJSF/create.ftl  )- Dave 23rd October 2015 </p>
+

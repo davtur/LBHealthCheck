@@ -1,0 +1,131 @@
+
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/template.xhtml">
+    <ui:define name="title">
+        <h:outputText value="#{configMapController.getKey('ListSessionBookingsTitle')}"></h:outputText>
+    </ui:define>
+    <ui:define name="body">
+
+
+
+
+
+        <h:form id="SessionBookingsListForm">
+            <h:outputText escape="false" value="#{configMapController.getKey('ListSessionBookingsEmpty')}" rendered="#{sessionBookingsController.items.rowCount == 0}"/>
+            <h:panelGroup >
+                <p:dataTable  
+                    id="datalist"  
+                    editable="true" 
+                    value="#{sessionBookingsController.items}" 
+                    selection="#{sessionBookingsController.selected}" 
+                    rowKey="#{item.id}" 
+                    filteredValue="#{sessionBookingsController.filteredItems}"  
+                    widgetVar="sessionBookingsControllerTable" 
+                    var="item"  
+                    paginator="true" 
+                    rows="15"  
+                    paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  
+                    rowsPerPageTemplate="5,10,15,20,25,50,100" >
+                    <f:facet name="header">
+                        <p:outputPanel>
+                            <h:outputText value="Search all fields:" />
+                            <h:inputText id="globalFilter" onkeyup="PF('sessionBookingsControllerTable').filter()" />
+                        </p:outputPanel>
+                    </f:facet>
+                    <p:ajax event="rowEdit" listener="#{sessionBookingsController.onEdit}" update=":growl" oncomplete="PF('sessionBookingsControllerTable').filter()" />  
+                    <p:ajax event="rowEditCancel" listener="#{sessionBookingsController.onCancel}" update=":growl"  oncomplete="PF('sessionBookingsControllerTable').filter()" />  
+                    <p:ajax event="rowSelect"   update="createButton viewButton editButton deleteButton"/>
+                    <p:ajax event="rowUnselect" update="createButton viewButton editButton deleteButton"/>
+                    <p:column selectionMode="single"/>
+                    <p:column sortBy="#{item.id}" filterBy="#{item.id}" headerText="#{configMapController.getKey('ListSessionBookingsTitle_id')}"   >
+                        <p:cellEditor> 
+                            <f:facet name="output">
+                                <h:outputText value="#{item.id}"/>
+                            </f:facet>
+                            <f:facet name="input">
+                                <p:inputText value="#{item.id}" label="#{configMapController.getKey('ListSessionBookingsTitle_id')}" />
+                            </f:facet>
+                        </p:cellEditor> 
+
+
+                    </p:column>
+                    <p:column sortBy="#{item.bookingTime}" filterBy="#{item.bookingTime}" headerText="#{configMapController.getKey('ListSessionBookingsTitle_bookingTime')}"   >
+
+                        <p:cellEditor> 
+                            <f:facet name="output">
+                                <h:outputText value="#{item.bookingTime}">
+                                    <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                                </h:outputText>
+                            </f:facet>
+                            <f:facet name="input">
+                                <p:calendar value="#{item.bookingTime}">	
+                                    <p:ajax event="dateSelect" listener= "#{sessionBookingsController.handleDateSelect}" update=":growl" />
+                                </p:calendar>
+                            </f:facet>
+                        </p:cellEditor> 
+
+                    </p:column>
+                    <p:column sortBy="#{item.customerId}" filterBy="#{item.customerId}" headerText="#{configMapController.getKey('ListSessionBookingsTitle_customerId')}"   >
+                        <p:cellEditor> 
+                            <f:facet name="output">
+                                <h:outputText value="#{item.customerId}"/>
+                            </f:facet>
+                            <f:facet name="input">
+                                <p:inputText value="#{item.customerId}" label="#{configMapController.getKey('ListSessionBookingsTitle_customerId')}" />
+                            </f:facet>
+                        </p:cellEditor> 
+
+
+                    </p:column>
+                    <p:column sortBy="#{item.sessionHistoryId}" filterBy="#{item.sessionHistoryId}" headerText="#{configMapController.getKey('ListSessionBookingsTitle_sessionHistoryId')}"   >
+                        <p:cellEditor> 
+                            <f:facet name="output">
+                                <h:outputText value="#{item.sessionHistoryId}"/>
+                            </f:facet>
+                            <f:facet name="input">
+                                <p:inputText value="#{item.sessionHistoryId}" label="#{configMapController.getKey('ListSessionBookingsTitle_sessionHistoryId')}" />
+                            </f:facet>
+                        </p:cellEditor> 
+
+
+                    </p:column>
+                    <p:column sortBy="#{item.paymentId}" filterBy="#{item.paymentId}" headerText="#{configMapController.getKey('ListSessionBookingsTitle_paymentId')}"   >
+                        <p:cellEditor> 
+                            <f:facet name="output">
+                                <h:outputText value="#{item.paymentId}"/>
+                            </f:facet>
+                            <f:facet name="input">
+                                <p:inputText value="#{item.paymentId}" label="#{configMapController.getKey('ListSessionBookingsTitle_paymentId')}" />
+                            </f:facet>
+                        </p:cellEditor> 
+
+
+                    </p:column>
+                    <p:column rendered="#{sessionBookingsController.isUserInRole('ADMIN')}"  headerText="Edit" style="width:50px">  
+                        <p:rowEditor />  
+                    </p:column>  
+
+
+                    <f:facet name="footer">
+                        <p:commandButton rendered="#{sessionBookingsController.isUserInRole('ADMIN')}" id="createButton" icon="ui-icon-plus"   value="#{configMapController.getKey('Create')}" actionListener="#{sessionBookingsController.prepareCreate}" update=":SessionBookingsCreateForm" oncomplete="PF('SessionBookingsCreateDialog').show()"/>
+                        <p:commandButton id="viewButton"   icon="ui-icon-search" value="#{configMapController.getKey('View')}" update=":SessionBookingsViewForm" oncomplete="PF('SessionBookingsViewDialog').show()" disabled="#{empty sessionBookingsController.selected}"/>
+                        <p:commandButton rendered="#{sessionBookingsController.isUserInRole('ADMIN')}" id="editButton"   icon="ui-icon-pencil" value="#{configMapController.getKey('Edit')}" update=":SessionBookingsEditForm" oncomplete="PF('SessionBookingsEditDialog').show()" disabled="#{empty sessionBookingsController.selected}"/>
+                        <p:commandButton rendered="#{sessionBookingsController.isUserInRole('ADMIN')}" id="deleteButton" icon="ui-icon-trash"  value="#{configMapController.getKey('Delete')}" actionListener="#{sessionBookingsController.destroy}" update=":growl,datalist" disabled="#{empty sessionBookingsController.selected}"/>
+                    </f:facet>
+
+                </p:dataTable>
+            </h:panelGroup>
+        </h:form>
+
+        <ui:include src="Create.xhtml"/>
+        <ui:include src="Edit.xhtml"/>
+        <ui:include src="View.xhtml"/>
+
+    </ui:define>
+</ui:composition>
+<p> Generated from template ( JSF_from_entity_wizard/StandardJSF/list.ftl  )- Dave 23rd October 2015 </p>
+
