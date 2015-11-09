@@ -188,11 +188,27 @@ public class SurveyAnswersController implements Serializable {
         }
         FacesContext context = FacesContext.getCurrentInstance();
         CustomersController customersController = context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
+        SessionTimetableController sessionTimetableController = context.getApplication().evaluateExpressionGet(context, "#{sessionTimetableController}", SessionTimetableController.class);
+        EziDebitPaymentGateway eziDebitPaymentGateway = context.getApplication().evaluateExpressionGet(context, "#{ezidebit}", EziDebitPaymentGateway.class);
         Customers c = customersController.getSelected();
         c.setTermsConditionsAccepted(true);
         ejbCustomersFacade.edit(c);
         surveyAnswers = null;
-        return "/myDetails.xhtml?faces-redirect=true";
+        if(sessionTimetableController.getBookingButtonSessionHistory() !=null){
+            float bookingAmount = (float)10.00; // $10.00 for test
+            
+            // a booking is in progress for a new signup
+            // setup eddr url and payment
+            eziDebitPaymentGateway.setOneOffPaymentAmountInCents(bookingAmount);
+            eziDebitPaymentGateway.setOneOffPaymentDate(new Date());
+            eziDebitPaymentGateway.createEddrLink(null);
+            //call ezibeit controller
+            
+             eziDebitPaymentGateway.redirectToPaymentGateway();
+        }
+            return "/myDetails.xhtml?faces-redirect=true"; 
+        
+       
     }
       public String saveSurveyMobile() {
         try {

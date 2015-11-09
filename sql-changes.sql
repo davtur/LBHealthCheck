@@ -134,3 +134,33 @@ UPDATE fitnessStats.customers set emergency_contact_name = "Not Provided", emerg
 ALTER TABLE `fitnessStats`.`session_timetable` 
 ADD COLUMN `session_casual_rate` DECIMAL(22,2) NULL DEFAULT '25.00' AFTER `show_signup_button`,
 ADD COLUMN `session_members_rate` DECIMAL(22,2) NULL DEFAULT '20.00' AFTER `session_casual_rate`;
+
+CREATE TABLE `fitnessStats`.`session_bookings` (
+  `id` INT(11) NOT NULL AUTO_INCREMENT,
+  `customer_id` INT(11) NOT NULL,
+  `session_history_id` INT(11) NOT NULL,
+  `payment_id` INT(11) NULL,
+  `booking_time` DATETIME NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `payment_id_UNIQUE` (`payment_id` ASC));
+
+ALTER TABLE `fitnessStats`.`session_bookings` 
+ADD INDEX `fk_session_bookings_1_idx` (`customer_id` ASC),
+ADD INDEX `fk_session_bookings_2_idx` (`session_history_id` ASC);
+ALTER TABLE `fitnessStats`.`session_bookings` 
+ADD CONSTRAINT `fk_session_bookings_1`
+  FOREIGN KEY (`customer_id`)
+  REFERENCES `fitnessStats`.`customers` (`id`)
+  ON DELETE NO ACTION
+  ON UPDATE NO ACTION,
+ADD CONSTRAINT `fk_session_bookings_2`
+  FOREIGN KEY (`session_history_id`)
+  REFERENCES `fitnessStats`.`session_history` (`id`)
+  ON DELETE NO ACTION
+  ON UPDATE NO ACTION,
+ADD CONSTRAINT `fk_session_bookings_3`
+  FOREIGN KEY (`payment_id`)
+  REFERENCES `fitnessStats`.`payments` (`id`)
+  ON DELETE NO ACTION
+  ON UPDATE NO ACTION;
+

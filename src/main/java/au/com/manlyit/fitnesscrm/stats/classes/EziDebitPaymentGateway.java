@@ -899,7 +899,7 @@ public class EziDebitPaymentGateway implements Serializable {
             if (pp.getWebddrUrl() != null) {
 
                 ExternalContext ec = context.getExternalContext();
-                ec.redirect(eziDebitEDDRFormUrl);
+                ec.redirect(pp.getWebddrUrl());
             }
         } catch (IOException ex) {
             Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, null, ex);
