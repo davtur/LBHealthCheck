@@ -6,6 +6,9 @@
 package au.com.manlyit.fitnesscrm.stats.classes.util;
 
 import au.com.manlyit.fitnesscrm.stats.beans.util.CustomerStatus;
+import au.com.manlyit.fitnesscrm.stats.chartbeans.MySessionsChart1;
+import au.com.manlyit.fitnesscrm.stats.classes.CustomersController;
+import au.com.manlyit.fitnesscrm.stats.classes.EziDebitPaymentGateway;
 import au.com.manlyit.fitnesscrm.stats.classes.PasswordService;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import java.io.IOException;
@@ -14,6 +17,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.ejb.EJB;
 import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
@@ -49,6 +53,12 @@ public class SecurityServlet extends HttpServlet {
     private au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade configMapFacade;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.AuditLogFacade ejbAuditLogFacade;
+    @Inject
+    private CustomersController controller;
+    @Inject
+    private EziDebitPaymentGateway eziDebitPaymentGatewayController;
+    @Inject
+    private MySessionsChart1 mySessionsChart1Controller;
 
     public SecurityServlet() {
     }
@@ -127,6 +137,14 @@ public class SecurityServlet extends HttpServlet {
                                 customer.setLastLoginTime(new Date());
                                 customer.setLoginAttempts(0);
                                 ejbFacade.editAndFlush(customer);
+                                if (controller != null && eziDebitPaymentGatewayController != null && mySessionsChart1Controller != null) {
+                                    controller.updateSelectedCustomer(customer);
+                                    eziDebitPaymentGatewayController.setSessionId(sessionID);
+                                    eziDebitPaymentGatewayController.setSelectedCustomer(customer);
+                                    
+                                } else {
+                                    logger.log(Level.WARNING, "Customer Controller injection into security servlet failed!");
+                                }
                             } catch (ServletException servletException) {
                                 logger.log(Level.INFO, "Login failed!");
                                 customer.setPassword(pfmEncrptedPassword);

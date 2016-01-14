@@ -27,7 +27,7 @@
                 <div class="EmptyBox10"></div>
                 <ui:repeat value="#{sessionTimetableController.sessionForTheWeekItems}"  var="dayOfWeek" >
                     <div class="Container100  BorderedBox">
-                        <div class="ContainerIndent">
+                        <div id="timetableDivider" class="ContainerIndent ">
                             <h:outputText value="#{dayOfWeek.startDate}">
                                 <f:convertDateTime pattern="EEEE,  d MMMMM yyyy" />
                             </h:outputText>

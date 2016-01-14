@@ -386,7 +386,7 @@
                             <p:commandButton id="eddrButton" disabled="#{!ezidebit.showAddToPaymentGatewayButton}"  actionListener="#{ezidebit.updatePaymentScheduleForm}"  oncomplete="PF('createEddrLinkDialogueWidget').show();" update=":growl :tv:paymentsForm :createEddrLink @(.updateNotesDataTable) "   value="#{configMapController.getKey('WebDDRScheduleSetupButton')}" />
                             <p:commandButton  value="#{configMapController.getKey('sendCustomerOnBoardEmailButton')}"  actionListener="#{customersController.sendCustomerOnboardEmail}" update="@(.updateNotesDataTable) :growl"/>
 
-                            <p:commandButton id="editPaymentMethodButton" rendered="#{ezidebit.customerExistsInPaymentGateway == true and ezidebit.customerDetailsHaveBeenRetrieved == true and ezidebit.customerCancelledInPaymentGateway ==false}" onclick="changeiFrameCss" oncomplete="PF('editPaymentMethodDialogueWidget').show();"    value="#{configMapController.getKey('editPaymentMethodButtonLink')}" update=":growl :iFrameForm"  /> 
+                            <p:commandButton id="editPaymentMethodButton" rendered="#{ezidebit.customerExistsInPaymentGateway == true and ezidebit.customerDetailsHaveBeenRetrieved == true and ezidebit.customerCancelledInPaymentGateway ==false}" onclick="changeiFrameCss" oncomplete="PF('editPaymentMethodDialogueWidget').show();"    value="#{configMapController.getKey('editPaymentMethodButtonLink')}" update=":growl @(.updatePaymentInfo)"  /> 
 
                             <h:outputText rendered="#{ezidebit.waitingForPaymentDetails}" value="WAITING FOR BANK DETAILS - "/>
                             <h:outputText rendered="#{ezidebit.customerCancelledInPaymentGateway  }" value=" Customer CANCELLED - Payment details can't be modified  "/>
@@ -655,7 +655,7 @@
 
                             </p:panelGrid>
                         </p:panel>
-                        <p:remoteCommand name="taskCompleted"   actionListener="#{ezidebit.pollerListener}"  />
+                      <!--  <p:remoteCommand name="taskCompleted"   actionListener="#{ezidebit.pollerListener}"  />-->
                     </h:form>  
                 </p:tab>
 
@@ -745,7 +745,7 @@
             </p:tabView>  
 
 
-            <h:form id="remoteCommandForm">
+      <!--      <h:form id="remoteCommandForm">
                 <p:remoteCommand name="connectPushServer" actionListener="#{ezidebit.checkPushChannelIsOpen}" autoRun="true" />
             </h:form>
             <p:socket onMessage="handleMessage" onError="handleError" onTransportFailure="handleTransportFailure"  onClose="handleClose" channel="/payments" onOpen="" onReconnect="handleReconnect" autoConnect="false"  widgetVar="subscriber"/>
@@ -782,7 +782,7 @@
                     $('#ezidebitIframeView').find('#content').css('background-color', 'red');
                     alert('bugger3');
                 }
-            </script>
+            </script>-->
             <ui:include src="Create.xhtml"/>
             <ui:include src="CreateSchedule.xhtml"/>
             <ui:include src="ClearSchedule.xhtml"/>

@@ -13,10 +13,21 @@ and open the template in the editor.
 }
 
 .timetableGmap{
-   width:80%; 
-   max-width: 600px;
+    width:80%; 
+    max-width: 600px;
 }
+.timetableDataTable .ui-datatable .ui-datatable-header {
+    background-color: #33AFDE !important;
+    border-bottom: solid 1px #C6D6DF;
+    border-top: solid 1px #C6D6DF;
+   color: #FFFFFF;
 
+
+}
+div.timetableDataTable .ui-datatable table tbody .ui-state-highlight > td {
+    background-color: #FFFFFF;
+    color: #F1F6F9;
+}
 .myStatsChartsDatalist {
     border:none;
 }
@@ -46,5 +57,28 @@ and open the template in the editor.
 .TimetableTile{
     max-width:550px;
     min-width:150px !important ;
-  min-height: 100% !important ;
+    min-height: 100% !important ;
+}
+#timetableDivider {
+    background-color: #33AFDE;
+}
+.iFrameContainer {
+    content:"";
+    display:table;
+    clear:both; 
+    background-image:none;
+    background-color: #ffffff;
+    width: 97%;
+    padding: 1% 1.5%;
+    margin: 8px auto;
+    overflow: hidden;
+    float: left;
+
+    border-radius: 3px;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    -webkit-box-shadow: 0px 1px 0px 0px rgba(159,172,183,0.7);
+    -moz-box-shadow: 0px 1px 0px 0px rgba(159,172,183,0.7);
+    box-shadow: 0px 1px 0px 0px rgba(159,172,183,0.7);
+
 }

@@ -57,6 +57,7 @@ public class CallableExecutorWithTimeoutJob implements Job {
     public void execute(JobExecutionContext context)
             throws JobExecutionException {
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("FitnessStatsPU2");
+        
         entityManager = emf.createEntityManager();
 
         if (entityManager == null) {

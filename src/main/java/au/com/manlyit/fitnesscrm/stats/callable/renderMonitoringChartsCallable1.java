@@ -70,6 +70,7 @@ public class renderMonitoringChartsCallable1 implements Callable<CallableTaskRes
         CallableTaskResults result = new CallableTaskResults();
         try {
             EntityManagerFactory emf = Persistence.createEntityManagerFactory("FitnessStatsPU2");
+            
             entityManager = emf.createEntityManager();
 
             if (entityManager == null) {

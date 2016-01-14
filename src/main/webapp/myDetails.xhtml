@@ -14,7 +14,7 @@
             <h:panelGroup id="messagePanel" layout="block">
                 <h:messages errorStyle="color: red" infoStyle="color: green" layout="table"/>
             </h:panelGroup>
-            <h:form id="createCustomerForm">
+            <h:form id="createCustomerForm"  styleClass="updatePaymentInfo">
 
                 <div class="Container50 Responsive50">
                     <div class="ContainerIndent">
@@ -57,10 +57,10 @@
                             <p:outputLabel value="#{configMapController.getKey('EditCustomersLabel_fax')}" for="fax" />
                             <p:inputText id="fax" value="#{customersController.selected.fax}" title="#{configMapController.getKey('EditCustomersTitle_fax')}" />
                             <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_emergencyContactName')}" for="emergencyContactName" />
-                            <p:inputText id="emergencyContactName" value="#{customersController.newCustomer.emergencyContactName}" title="#{configMapController.getKey('CreateCustomersTitle_emergencyContactName')}" />
+                            <p:inputText id="emergencyContactName" value="#{customersController.newCustomer.emergencyContactName}" title="#{configMapController.getKey('CreateCustomersTitle_emergencyContactName')}"  />
                             <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_emergencyContactPhone')}" for="emergencyContactPhone" />
                             <p:inputText id="emergencyContactPhone" value="#{customersController.newCustomer.emergencyContactPhone}" title="#{configMapController.getKey('CreateCustomersTitle_emergencyContactPhone')}" >
-                                <f:validator validatorId="au.com.manlyit.fitnesscrm.stats.classes.util.PhoneNumberValidator" />
+                                <!-- <f:validator validatorId="au.com.manlyit.fitnesscrm.stats.classes.util.PhoneNumberValidator"  />-->
                             </p:inputText>
 
                             <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_preferredContact')}" for="preferredContact1" />
@@ -150,7 +150,9 @@
                             </h:outputText>
                         </p:panelGrid>
                         <div class="EmptyBox10"></div>
-                        <p:commandButton icon="fa fa-dollar  white Fs14" id="editPaymentMethodButton" disabled="#{!ezidebit.customerWebDDRFormEnabled}"  actionListener="#{ezidebit.redirectToPaymentGateway}"    value="#{configMapController.getKey('EnterPaymentDetailsButton')}" update=":growl :createCustomerForm"  /> 
+                        <p:commandButton icon="fa fa-dollar  white Fs14" id="directDebitFormButton" disabled="#{!ezidebit.customerWebDDRFormEnabled}"  actionListener="#{ezidebit.redirectToPaymentGateway}"    value="#{configMapController.getKey('EnterPaymentDetailsButton')}" update=":growl :createCustomerForm"  /> 
+                        <div class="EmptyBox10"></div>
+                        <p:commandButton id="editPaymentMethodButton" disabled="#{ezidebit.customerExistsInPaymentGateway == false or ezidebit.customerDetailsHaveBeenRetrieved == false or ezidebit.customerCancelledInPaymentGateway == true}" onclick="changeiFrameCss" oncomplete="PF('editPaymentMethodDialogueWidget').show();"    value="#{configMapController.getKey('editPaymentMethodButtonLink')}" update=":growl @(.updatePaymentInfo)"  /> 
 
                     </div>
                 </div>
@@ -158,6 +160,7 @@
             </h:form>
         </div>
         <ui:include src="myDetailsPaymentMethod.xhtml"/>
+         <ui:include src="EditPaymentMethod.xhtml"/>
         <ui:include src="UpdatePassword.xhtml"/>
         <ui:include src="uploadPhoto.xhtml"/>
     </ui:define>

@@ -1,0 +1,122 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:p="http://primefaces.org/ui" >
+
+
+
+    <h:form id="SessionTimetableListForm">
+        <div class="Container100 Responsive100 ">
+            <div class="ContainerIndent">
+                <h1 class="BigTopic">#{configMapController.getKey('Timetable_Title')}</h1>
+                <div class="Container100  gray ">
+                    <div class="ContainerIndent">
+
+                        <p:schedule value="#{sessionTimetableController.eventModel}" timeZone="Australia/Sydney" widgetVar="crmSchedule" aspectRatio="2.5" timeFormat="HH:mm" ignoreTimezone="false" allDaySlot="false" maxTime="20:00:00" minTime="06:00:00">
+
+                            <p:ajax event="dateSelect" listener="#{sessionTimetableController.onDateSelect}" update=":growl :eventDetails" oncomplete="PF('eventDialog').show()" />
+                            <p:ajax event="eventSelect" listener="#{sessionTimetableController.onEventSelect}" update=":growl :eventDetails" oncomplete="PF('eventDialog').show()" />
+                            <p:ajax event="eventMove" listener="#{sessionTimetableController.onEventMove}" update=":growl :eventDetails" />
+                            <p:ajax event="eventResize" listener="#{sessionTimetableController.onEventResize}" update=":growl :eventDetails" />
+
+                        </p:schedule>
+
+                    </div>
+                </div> 
+
+                <div class="Container100  gray ">
+                    <div class="ContainerIndent">
+                        <p:commandButton  styleClass="MarRight5 Fs24"  update=":SessionTimetableListForm"   value="#{configMapController.getKey('Timetable_decrementWeekButtonTitle')}"  actionListener="#{sessionTimetableController.decrementWeek}"  />
+
+                        <p:commandButton styleClass="MarRight5 Fs24"    update=":SessionTimetableListForm"   value="#{configMapController.getKey('Timetable_incrementWeekButtonTitle')}"  actionListener="#{sessionTimetableController.incrementWeek}" />
+                        <p:commandButton styleClass="MarRight5"  update=":SessionTimetableListForm"   value="#{configMapController.getKey('Timetable_setToCurrentWeekButtonTitle')}"  actionListener="#{sessionTimetableController.setToCurrentWeek}"  />
+                        <p:calendar value="#{sessionTimetableController.timetableStartDate}" mode="popup" pattern="d MMMMM yyyy"  showOn="both"  >
+                            <p:ajax  event="dateSelect" update=":SessionTimetableListForm"  />
+                        </p:calendar>
+                    </div>
+                </div>
+                <div class="EmptyBox10"></div>
+
+            </div>
+        </div>
+   </h:form>
+    
+    <p:dialog widgetVar="eventDialog" header="Event Details" showEffect="clip" hideEffect="clip">
+        <h:form  id="eventDetails" styleClass="bookingFormUpdate">
+            <div class=" TimetableTile BorderedBox Fleft TexAlLeft HoverEffect MarRL5"> 
+                <div class="ContainerIndent">
+                    <div class="ContainerIndent">
+                        <h2 class=" FontRalewayBold ">  #{sessionTimetableController.event.data.sessionTemplate.sessionTitle} </h2> 
+                        <h:outputText value="#{sessionTimetableController.event.data.sessiondate}" styleClass=" Fs18 FontRalewayBold blue">
+                            <f:convertDateTime pattern="EEEE h:mm a" />
+                        </h:outputText>
+
+                    </div>
+                    <div class="EmptyBox10"></div>
+                    <div class="Container100  gray">
+                        <div class="ContainerIndent">
+                            <div class="Container20  ">
+                                <div class="ContainerIndent">
+                                    <p:graphicImage value="#{customerImagesController.dynamicImage}" width="55px">
+                                        <f:param name="imageId" value="#{sessionTimetableController.event.data.sessionTemplate.trainerId.profileImage.id}"/>
+                                    </p:graphicImage>
+                                </div>
+                            </div>
+                            <div class="Container80  ">
+
+                                <span class="DispBlock " ><font class="Fs14 FontRalewayBold black">Trainer: </font> #{sessionTimetableController.event.data.sessionTemplate.trainerId.firstname}</span>
+                                <span class="DispBlock " ><font class="Fs14 FontRalewayBold black">Duration: </font> #{sessionTimetableController.event.data.sessionTemplate.durationMinutes} #{configMapController.getKey('Timetable_MinutesLabel')}</span>
+                                <span class="DispBlock " ><font class="Fs14 FontRalewayBold black">Location: </font> #{sessionTimetableController.event.data.sessionTemplate.sessionLocationLabel}</span>
+                                <span class="DispBlock " ><font class="Fs14 FontRalewayBold black">Casual Rate: </font> 
+                                    <h:outputText value="#{sessionTimetableController.event.data.sessionTemplate.sessionCasualRate}">
+                                        <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
+                                    </h:outputText>
+                                </span>
+
+                                <div class="EmptyBox10"></div>
+                                <p:commandButton id="mapsBtn" styleClass="MarRight5" value="#{configMapController.getKey('Timetable_MapsButtonTitle')}" type="button" />
+
+                                <p:commandButton styleClass="MarRight5 GreenButton animated pulse infinite "   update="@(.signUpFormUpdate)" oncomplete="PF('signupDialog').show()" rendered="#{sessionTimetableController.event.data.sessionTemplate.showSignupButton and  empty  facesContext.externalContext.remoteUser}" value="#{configMapController.getKey('Timetable_SignUpButtonTitle')}"  actionListener="#{customersController.signUp}"  >
+                                  <!-- <f:param name="sessionHistorySignupId" value="#{sessionTimetableController.event.data.id}"/>-->
+                                    <f:setPropertyActionListener value="#{sessionTimetableController.event.data}" target="#{sessionTimetableController.signupButtonSessionHistory}" />
+                                </p:commandButton>
+
+                                <p:commandButton   styleClass=" OrangeButton animated pulse infinite" update="@(.bookingFormUpdate)"  rendered="#{sessionTimetableController.event.data.sessionTemplate.showBookingButton}" value="#{configMapController.getKey('Timetable_BookingButtonTitle')}"  actionListener="#{sessionTimetableController.bookFromTimetable}" >
+                                    <!--<f:param name="sessionHistoryBookingId" value="#{sessionTimetableController.event.data.id}"/>-->
+                                    <f:setPropertyActionListener value="#{sessionTimetableController.event.data}" target="#{sessionTimetableController.bookingButtonSessionHistory}" />
+                                </p:commandButton>
+                                <p:overlayPanel  for="mapsBtn" hideEffect="fade" dynamic="false" styleClass="timetableGmap" >
+                                    <p:gmap styleClass="BorderedBox" center="#{sessionTimetableController.event.data.sessionTemplate.sessionLocationGps}" zoom="16" model="#{sessionTimetableController.event.data.sessionTemplate.simpleModel}" type="HYBRID" style="width:100%;height:400px" />
+
+                                </p:overlayPanel>
+
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="Seperator"></div>
+                    <div class="Container100  gray ">
+                        <div class="ContainerIndent">
+                            <h:outputText value="#{sessionTimetableController.event.data.sessionTemplate.comments}"/>
+                        </div>
+
+                    </div>
+                    <div class="EmptyBox10"></div>
+
+                    <!--      </p:panel>
+                      </p:column>-->
+                </div>
+            </div>
+        </h:form>
+    </p:dialog>
+
+
+    <ui:include src="signupComp.xhtml"/>
+    <ui:include src="bookingComp.xhtml"/>
+</ui:composition>
+<!--<p> Generated from template ( JSF_from_entity_wizard/StandardJSF/list.ftl  )- Dave 18th July 2015 </p>-->
+

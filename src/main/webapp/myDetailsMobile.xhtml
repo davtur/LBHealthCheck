@@ -208,7 +208,7 @@
         <pm:page id="updatePayment">
             <pm:header title="#{configMapController.getKey('EditPaymentMethodTitle')}"></pm:header>
             <pm:content>
-                <h:form id="iFrameForm" > 
+                <h:form id="iFrameForm"  styleClass="updatePaymentInfo" > 
                     <p:outputPanel id="iFramePanel" >
                         <p:panel id="viewPaymentsGrid" header="#{configMapController.getKey('EditPaymentMethodDialogueCustName')} #{customersController.selected.firstname} #{customersController.selected.lastname}" >
                             <iframe id="ezidebitIframeView" src="#{ezidebit.eziDebitEDDRFormUrl}"  width="800" height="600"/>

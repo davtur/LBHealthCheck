@@ -11,17 +11,17 @@
         <p:confirmDialog id="editPaymentMethodDialogue" message="#{configMapController.getKey('EditPaymentMethodDialogueTitle')}"  closable="false"  
                          header="#{configMapController.getKey('EditPaymentMethodTitle')}" severity="info" widgetVar="editPaymentMethodDialogueWidget" > 
 
-            <h:form id="iFrameForm" > 
+            <h:form id="iFrameForm"  styleClass="updatePaymentInfo"> 
                 <p:outputPanel id="iFramePanel" >
                     <p:panel id="viewPaymentsGrid" header="#{configMapController.getKey('EditPaymentMethodDialogueCustName')} #{customersController.selected.firstname} #{customersController.selected.lastname}"  >
 
-                        <iframe id="ezidebitIframeView"   src="#{ezidebit.getEziDebitWidgetUrl()}" class="editPaymentMethodIFrame" style="background-color: #ffffff;max-height: 450px;"/>
+                        <iframe id="ezidebitIframeView"   src="#{ezidebit.getEziDebitWidgetUrl()}" class="editPaymentMethodIFrame" style="background-color: #ffffff;width:400px;height: 450px;"/>
                     </p:panel>
                 </p:outputPanel>
 
                 <p:panel>
-                    <p:commandButton id="editPaymentMethoddialogueEdit"    actionListener="#{ezidebit.editPaymentMethodDialogue}" value="#{configMapController.getKey('EditPaymentMethodEditLink')}" update=":growl  :iFrameForm"/>                
-                    <p:commandButton id="editPaymentMethoddialogueClose" oncomplete="PF('editPaymentMethodDialogueWidget').hide()" actionListener="#{ezidebit.closeEditPaymentMethodDialogue}" value="#{configMapController.getKey('EditPaymentMethodDiscardLink')}" update=":growl :iFrameForm"/>                
+                    <p:commandButton id="editPaymentMethoddialogueEdit"    actionListener="#{ezidebit.editPaymentMethodDialogue}" value="#{configMapController.getKey('EditPaymentMethodEditLink')}" update=":growl  @(.updatePaymentInfo)"/>                
+                    <p:commandButton id="editPaymentMethoddialogueClose" oncomplete="PF('editPaymentMethodDialogueWidget').hide()" actionListener="#{ezidebit.closeEditPaymentMethodDialogue}" value="#{configMapController.getKey('EditPaymentMethodDiscardLink')}" update=":growl @(.updatePaymentInfo)"/>                
                 </p:panel>     
             </h:form>
         </p:confirmDialog>

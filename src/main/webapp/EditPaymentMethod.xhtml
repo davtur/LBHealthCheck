@@ -1,0 +1,31 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition  xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" >
+
+    
+        <!--<p:log />--> 
+        <p:dialog id="editPaymentMethodDialogue"  closable="false"  
+                  header="#{configMapController.getKey('EditPaymentMethodTitle')}" widgetVar="editPaymentMethodDialogueWidget" resizable="true"> 
+
+            <h:form id="editPaymentiFrameForm" styleClass="updatePaymentInfo"> 
+                <p:outputPanel id="editPaymentiFramePanel" >
+                    <p:panel id="editPaymentviewPaymentsGrid" header="#{configMapController.getKey('EditPaymentMethodDialogueCustName')} #{customersController.selected.firstname} #{customersController.selected.lastname}"  >
+
+                        <iframe id="editPaymentIframeView"   src="#{ezidebit.getEziDebitWidgetUrl()}" class="editPaymentMethodIFrame" style="background-color: #ffffff;width:400px;height: 450px;"/>
+                    </p:panel>
+                </p:outputPanel>
+
+                <p:panel>
+                    <p:commandButton   actionListener="#{ezidebit.editPaymentMethodDialogue}" value="#{configMapController.getKey('EditPaymentMethodEditLink')}" update=":growl  @(.updatePaymentInfo)"/>                
+                    <p:commandButton  oncomplete="PF('editPaymentMethodDialogueWidget').hide()" actionListener="#{ezidebit.closeEditPaymentMethodDialogue}" value="#{configMapController.getKey('EditPaymentMethodDiscardLink')}" update=":growl :editPaymentiFrameForm"/>                
+                </p:panel>     
+            </h:form>
+        </p:dialog>
+    </ui:composition> 
+
+
+

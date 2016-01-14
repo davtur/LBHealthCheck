@@ -44,6 +44,7 @@ import org.primefaces.model.*;
 public class ScheduleController implements Serializable {
 
     private static final Logger logger = Logger.getLogger(ScheduleController.class.getName());
+    private static final long serialVersionUID = 1L;
     private Schedule current;
     private Schedule selectedForDeletion;
     private DataModel items = null;
@@ -63,6 +64,7 @@ public class ScheduleController implements Serializable {
 
     public ScheduleController() {
         eventModel = new LazyScheduleModel() {
+            private static final long serialVersionUID = 1L;
 
             @Override
             public void loadEvents(Date start, Date end) {
@@ -141,7 +143,7 @@ public class ScheduleController implements Serializable {
     }
 
     public void persistEvent(CrmScheduleEvent event) {
-        CrmScheduleEvent ssievent = (CrmScheduleEvent) event;
+        CrmScheduleEvent ssievent = event;
         Schedule ss = new Schedule(0, ssievent.getTitle(), ssievent.getStartDate(), ssievent.getEndDate());
         ss.setShedAllday(ssievent.isAllDay());
         ss.setDataObject(ssievent.getData());
@@ -161,7 +163,7 @@ public class ScheduleController implements Serializable {
     }
 
     private void deleteEvent(CrmScheduleEvent event) {
-        CrmScheduleEvent ssievent = (CrmScheduleEvent) event;
+        CrmScheduleEvent ssievent = event;
         current = ejbFacade.find(ssievent.getDatabasePK());
         try {
             getFacade().remove(current);

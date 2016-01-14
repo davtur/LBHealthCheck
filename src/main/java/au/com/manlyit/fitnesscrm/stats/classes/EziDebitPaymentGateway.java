@@ -215,11 +215,16 @@ public class EziDebitPaymentGateway implements Serializable {
     @PostConstruct
     private void setSessionId() {
         FacesContext facesContext = FacesContext.getCurrentInstance();
-        this.sessionId = ((HttpSession) facesContext.getExternalContext().getSession(false)).getId();
+        if (facesContext != null) {
+            this.sessionId = ((HttpSession) facesContext.getExternalContext().getSession(false)).getId();
+        }
         GregorianCalendar cal = new GregorianCalendar();
         reportEndDate = cal.getTime();
         cal.add(Calendar.DAY_OF_YEAR, -7);
         reportStartDate = cal.getTime();
+    }
+    public void setSessionId(String sessionId){
+        this.sessionId = sessionId;
     }
 
     /**
@@ -644,7 +649,7 @@ public class EziDebitPaymentGateway implements Serializable {
             CustomersController controller = (CustomersController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "customersController");
             this.setSelectedCustomer(controller.getSelected());
             getPayments(18, 2);
-            RequestContext.getCurrentInstance().update("iFrameForm");
+            RequestContext.getCurrentInstance().update("@(.updatePaymentInfo)");
         }
         return asyncOperationRunning;
     }
@@ -1848,7 +1853,9 @@ public class EziDebitPaymentGateway implements Serializable {
         }
 
         if (isRefreshIFrames() == true) {
-            RequestContext.getCurrentInstance().update("iFrameForm");
+            RequestContext.getCurrentInstance().update("@(.updatePaymentInfo)");
+            //RequestContext.getCurrentInstance().update("editPaymentiFrameForm");
+            //RequestContext.getCurrentInstance().update("createCustomerForm");
             logger.log(Level.INFO, "Asking Request Context to update IFrame forms.");
             setRefreshIFrames(false);
         }
@@ -3049,16 +3056,19 @@ public class EziDebitPaymentGateway implements Serializable {
                     if (pay.getPaymentStatus().contentEquals(PaymentStatus.SCHEDULED.value()) || pay.getPaymentStatus().contentEquals(PaymentStatus.DELETE_REQUESTED.value()) || pay.getPaymentStatus().contentEquals(PaymentStatus.MISSING_IN_PGW.value())) {
 
                         if (pay.getPaymentStatus().contentEquals(PaymentStatus.MISSING_IN_PGW.value())) {
-                            pay.setBankFailedReason("MISSING");
-                        }
-                        pay.setPaymentStatus(PaymentStatus.DELETE_REQUESTED.value());
-                        paymentsFacade.edit(pay);
-                        updatePaymentLists(pay);
-                        startAsynchJob("DeletePayment", paymentBean.deletePayment(selectedCustomer, selectedScheduledPayment.getDebitDate(), amount.longValue(), selectedScheduledPayment.getId().toString(), loggedInUser, getDigitalKey()));
+                            pay.setBankFailedReason("DELETED");
 
-                        //paymentsFacade.remove(pay);
-                        //paymentDBList = null;
-                        //paymentsDBListFilteredItems = null;
+                            paymentDBList = null;
+                            paymentsDBListFilteredItems = null;
+                            logger.log(Level.INFO, "Deleted payment that was missing in payment gateway.The payment gateway can delete scheduled payemnts when a user is on hold. Payment ID:{0}", new Object[]{pay.getId()});
+                            paymentsFacade.remove(pay);
+                        } else {
+                            pay.setPaymentStatus(PaymentStatus.DELETE_REQUESTED.value());
+                            paymentsFacade.edit(pay);
+                            updatePaymentLists(pay);
+                            startAsynchJob("DeletePayment", paymentBean.deletePayment(selectedCustomer, selectedScheduledPayment.getDebitDate(), amount.longValue(), selectedScheduledPayment.getId().toString(), loggedInUser, getDigitalKey()));
+                        }
+
                     }
 
                 } else {

@@ -555,7 +555,7 @@ public class CustomerImagesController implements Serializable {
     }
 
     public void crop() {
-        if (uploadedImage == null) {
+        if (uploadedImage == null || imageAreaSelectEvent1 == null) {
             return;
         }
         BufferedImage oldImage;
@@ -1193,7 +1193,7 @@ public class CustomerImagesController implements Serializable {
                 sc = ci.getImageStream();
             } else {
                 try {
-                // get default image
+                    // get default image
                     //if you return null here then it won't work!!! You have to return something.
                     InputStream stream = FacesContext.getCurrentInstance().getExternalContext().getResourceAsStream("/resources/images/Barefoot-image_100_by_100.jpg");
                     sc = new DefaultStreamedContent(stream, "image/jpeg");
@@ -1202,7 +1202,7 @@ public class CustomerImagesController implements Serializable {
                 }
             }
         } catch (NumberFormatException numberFormatException) {
-            logger.log(Level.WARNING, "getDynamicImage number format exception for {0}",id);
+            logger.log(Level.WARNING, "getDynamicImage number format exception for {0}", id);
         }
 
         return sc;

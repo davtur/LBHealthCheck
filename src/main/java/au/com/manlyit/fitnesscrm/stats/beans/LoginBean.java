@@ -5,6 +5,7 @@
  */
 package au.com.manlyit.fitnesscrm.stats.beans;
 
+import au.com.manlyit.fitnesscrm.stats.classes.CustomersController;
 import au.com.manlyit.fitnesscrm.stats.classes.PasswordService;
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.classes.util.StringEncrypter;
@@ -302,6 +303,8 @@ import org.primefaces.application.exceptionhandler.PrimeExceptionHandlerELResolv
             cust.setLastLoginTime(new Date());
             cust.setLoginAttempts(0);
             ejbCustomerFacade.edit(cust);
+             CustomersController controller = (CustomersController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "customersController");
+            controller.setSelected(cust);
             redirectToLandingPage();
 
         } catch (ServletException e) {

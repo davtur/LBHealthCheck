@@ -10,9 +10,9 @@
         <h:outputText value="#{configMapController.getKey('ReportsTitle')}"></h:outputText>
     </ui:define>
     <ui:define name="body">
-        <h:form id="remoteCommandForm">
+       <!-- <h:form id="remoteCommandForm">
             <p:remoteCommand name="connectPushServer" actionListener="#{ezidebit.checkPushChannelIsOpen}" autoRun="true" />
-        </h:form>
+        </h:form>-->
         <div class="layout-portlets-box">
             <div class="Container100">
                 <div class="ContainerIndent">
@@ -328,7 +328,7 @@
 
 
 
-                        <p:remoteCommand name="taskCompleted" actionListener="#{ezidebit.pollerListener}" />
+                      <!--  <p:remoteCommand name="taskCompleted" actionListener="#{ezidebit.pollerListener}" />-->
                     </h:form>
                 </div>
             </div>

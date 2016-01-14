@@ -1,5 +1,6 @@
 package au.com.manlyit.fitnesscrm.stats.classes;
 
+import au.com.manlyit.fitnesscrm.stats.beans.ApplicationBean;
 import au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
@@ -10,7 +11,6 @@ import au.com.manlyit.fitnesscrm.stats.chartbeans.MySessionsChart1;
 import au.com.manlyit.fitnesscrm.stats.classes.util.DatatableSelectionHelper;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PfSelectableDataModel;
 import au.com.manlyit.fitnesscrm.stats.db.CustomerState;
-import au.com.manlyit.fitnesscrm.stats.db.EmailFormat;
 import au.com.manlyit.fitnesscrm.stats.db.Groups;
 import au.com.manlyit.fitnesscrm.stats.db.Notes;
 import au.com.manlyit.fitnesscrm.stats.db.PaymentParameters;
@@ -91,6 +91,8 @@ public class CustomersController implements Serializable {
     private ConfigMapFacade configMapFacade;
     @Inject
     private PaymentsFacade ejbPaymentsFacade;
+   
+    
     private DatatableSelectionHelper pagination;
     private DatatableSelectionHelper notesPagination;
     private int selectedItemIndex;
@@ -113,6 +115,7 @@ public class CustomersController implements Serializable {
     private boolean addUserButtonDisabled = true;
     private boolean showNonUsers = false;
     private boolean signupFromBookingInProgress = false;
+    private boolean signupFormSubmittedOK = false;
     private static final Logger logger = Logger.getLogger(CustomersController.class.getName());
     
     public CustomersController() {
@@ -213,13 +216,15 @@ public class CustomersController implements Serializable {
              checkedGroups[c] = true;
              }
              }
-             }
+             } 
              }*/
             FacesContext context = FacesContext.getCurrentInstance();
-            EziDebitPaymentGateway controller = (EziDebitPaymentGateway) context.getApplication().getELResolver().getValue(context.getELContext(), null, "ezidebit");
+           EziDebitPaymentGateway controller = (EziDebitPaymentGateway) context.getApplication().getELResolver().getValue(context.getELContext(), null, "ezidebit");
             controller.setSelectedCustomer(cust);
+            //eziDebitPaymentGatewayController.setSelectedCustomer(cust);
             MySessionsChart1 c2 = context.getApplication().evaluateExpressionGet(context, "#{mySessionsChart1}", MySessionsChart1.class);
-            c2.setSelectedCustomer(cust);
+           c2.setSelectedCustomer(cust);
+            //mySessionsChart1Controller.setSelectedCustomer(cust);
             selectedItemIndex = -1;
             checkPass = current.getPassword();
             if (cust.getProfileImage() == null) {
@@ -227,7 +232,7 @@ public class CustomersController implements Serializable {
             }
             recreateAllAffectedPageModels();
             setCustomerTabsEnabled(true);
-            RequestContext.getCurrentInstance().update("iFrameForm");
+            RequestContext.getCurrentInstance().update("@(.updatePaymentInfo)");
             
         }
     }
@@ -677,14 +682,19 @@ public class CustomersController implements Serializable {
     }
     
     private boolean validateNewSignup(String ipAddress, String emailAddress) {
-        
+        //TODO - this is still wide open , need a better strategy to stop evil spammers. MAybe recaptcha is a better option.
         Customers c = ejbFacade.findCustomerByEmail(emailAddress);
         int id = -1;
         if (c != null) {
             id = c.getId();
         }
+        FacesContext context = FacesContext.getCurrentInstance();
+        ApplicationBean appBean = context.getApplication().evaluateExpressionGet(context, "#{applicationBean}", ApplicationBean.class);
+        if(appBean.validateIP(ipAddress)==false){
+            // validation failed.multiple attempts fron the same IP in the past hour
+        }
         logger.log(Level.INFO, "validateNewSignup: ip:{0}, email:{1}, customerId if found:{2}", new Object[]{ipAddress, emailAddress, id});
-// change this to != null when finished testing to stop the same email signing up twice
+// TODO change this to != null when finished testing to stop the same email signing up twice
         return c == null;
     }
     
@@ -723,6 +733,7 @@ public class CustomersController implements Serializable {
                 logger.log(Level.INFO, "createFromSignup: {0}", new Object[]{details});
                 RequestContext.getCurrentInstance().execute("PF('signupDialog').hide();");
                 JsfUtil.addSuccessMessage("Info", configMapFacade.getConfig("SignUpSuccessfulFailed"));
+                setSignupFormSubmittedOK(true);
             } else {
                 JsfUtil.addErrorMessage("Error", configMapFacade.getConfig("SignUpValidationEmailExistsFailed"));
             }
@@ -1778,6 +1789,20 @@ public class CustomersController implements Serializable {
      */
     public void setSignupFromBookingInProgress(boolean signupFromBookingInProgress) {
         this.signupFromBookingInProgress = signupFromBookingInProgress;
+    }
+
+    /**
+     * @return the signupFormSubmittedOK
+     */
+    public boolean isSignupFormSubmittedOK() {
+        return signupFormSubmittedOK;
+    }
+
+    /**
+     * @param signupFormSubmittedOK the signupFormSubmittedOK to set
+     */
+    public void setSignupFormSubmittedOK(boolean signupFormSubmittedOK) {
+        this.signupFormSubmittedOK = signupFormSubmittedOK;
     }
     
     @FacesConverter(value = "customersControllerConverter", forClass = Customers.class)

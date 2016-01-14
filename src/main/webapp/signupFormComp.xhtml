@@ -1,0 +1,66 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:p="http://primefaces.org/ui" >
+
+
+  
+        <h:form id="signUpForm" styleClass="signUpFormUpdate">
+
+            <h1 class="BigTopic">#{configMapController.getKey('SignUpDialogueHeader')}</h1>
+            <div class="Container100 Responsive100">
+
+                <div class="ContainerIndent">
+                    <p:messages showDetail="true"/>
+                    <h:panelGrid id="dialogueGrid" columns="2"  cellpadding="5" >
+
+                        <p:outputLabel value="#{configMapController.getKey('EditCustomersLabel_firstname')}" for="firstname" />
+                        <p:inputText id="firstname"  value="#{customersController.newCustomer.firstname}" title="#{configMapController.getKey('EditCustomersTitle_firstname')}" valueChangeListener="#{customersController.dialogueFirstNameListener}" required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_firstname')}">
+                            <p:ajax update=":signUpForm:username :signUpForm:dialogueSave" event="keyup"/>
+                        </p:inputText>
+
+                        <p:outputLabel value="#{configMapController.getKey('EditCustomersLabel_lastname')}" for="lastname" />
+                        <p:inputText id="lastname" value="#{customersController.newCustomer.lastname}" title="#{configMapController.getKey('EditCustomersTitle_lastname')}" valueChangeListener="#{customersController.dialogueLastNameListener}" required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_lastname')}">
+                            <p:ajax update=":signUpForm:username  :signUpForm:dialogueSave" event="keyup" />
+                        </p:inputText>
+                        <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_gender')}" title="#{configMapController.getKey('EditCustomersTitle_gender')}" for="gender" />
+                        <p:selectOneMenu  styleClass="selectOneWidth" id="gender" value="#{customersController.newCustomer.gender}"   required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_gender')}">
+                            <f:selectItem itemValue="M" itemLabel="Male" />
+                            <f:selectItem itemValue="F" itemLabel="Female" />
+                        </p:selectOneMenu>
+                        <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_dob')}" for="dob" />
+                        <p:calendar id="dob" pattern="dd/MM/yyyy" value="#{customersController.newCustomer.dob}" title="#{configMapController.getKey('CreateCustomersTitle_dob')}" required="true" requiredMessage="#{configMapController.getKey('CreateCustomersRequiredMessage_dob')}" />
+                        <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_emailAddress')}" for="emailAddress" />
+                        <p:inputText id="emailAddress" value="#{customersController.newCustomer.emailAddress}" title="#{configMapController.getKey('EditCustomersTitle_emailAddress')}" required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_emailAddress')}">
+                            <f:validator validatorId="au.com.manlyit.fitnesscrm.stats.classes.util.EmailValidator" />
+                        </p:inputText>
+                        <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_username')}" for="username" />
+                        <p:inputText id="username" value="#{customersController.newCustomer.username}" title="#{configMapController.getKey('CreateCustomersTitle_username')}" required="true" requiredMessage="#{configMapController.getKey('CreateCustomersRequiredMessage_username')}"/>
+                        <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_telephone')}" for="telephone" />
+                        <p:inputText id="telephone" value="#{customersController.newCustomer.telephone}" title="#{configMapController.getKey('CreateCustomersTitle_telephone')}" >
+                            <f:validator validatorId="au.com.manlyit.fitnesscrm.stats.classes.util.PhoneNumberValidator" />
+                        </p:inputText>
+
+                    </h:panelGrid>
+
+                </div>
+            </div>
+            <div class="Container100 Responsive100">
+                <div class="ContainerIndent">
+                    <p:commandButton icon="ui-icon-check fa fa-check white Fs14" id="dialogueSave" disabled="#{customersController.addUserButtonDisabled}"  actionListener="#{customersController.createFromSignup}"  value="#{configMapController.getKey('SendSignupVerificationEmailLink')}" update=":growl "/>                
+                    <p:commandButton icon=" fa fa-times-circle white Fs14" id="dialogueDiscard" onclick=" PF('signupDialog').hide()"  actionListener="#{customersController.cancelCreateDialogue}" value="#{configMapController.getKey('CancelSignupLink')}" update=":growl"/>                
+                </div>
+            </div>
+
+
+        </h:form>
+    
+
+
+</ui:composition>
+<!--<p> Generated from template ( JSF_from_entity_wizard/StandardJSF/list.ftl  )- Dave 18th July 2015 </p>-->
+
