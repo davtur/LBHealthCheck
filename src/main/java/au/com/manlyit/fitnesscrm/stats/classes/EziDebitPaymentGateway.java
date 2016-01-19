@@ -194,7 +194,7 @@ public class EziDebitPaymentGateway implements Serializable {
     private String bulkvalue = "";
     private String duplicateValues = "";
     private String listOfIdsToImport;
-    private boolean customerExistsInPaymentGateway = false;
+    //private boolean customerExistsInPaymentGateway = false;
     private boolean editPaymentDetails = false;
     private boolean autoStartPoller = true;
     private boolean stopPoller = false;
@@ -223,7 +223,8 @@ public class EziDebitPaymentGateway implements Serializable {
         cal.add(Calendar.DAY_OF_YEAR, -7);
         reportStartDate = cal.getTime();
     }
-    public void setSessionId(String sessionId){
+
+    public void setSessionId(String sessionId) {
         this.sessionId = sessionId;
     }
 
@@ -324,7 +325,7 @@ public class EziDebitPaymentGateway implements Serializable {
     }
 
     public void editCustomerDetailsInEziDebit(Customers cust) {
-        if (customerExistsInPaymentGateway) {
+        if (isCustomerExistsInPaymentGateway()) {
             startAsynchJob("EditCustomerDetails", paymentBean.editCustomerDetails(cust, null, getLoggedInUser(), getDigitalKey()));
         }
 
@@ -649,7 +650,7 @@ public class EziDebitPaymentGateway implements Serializable {
             CustomersController controller = (CustomersController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "customersController");
             this.setSelectedCustomer(controller.getSelected());
             getPayments(18, 2);
-            RequestContext.getCurrentInstance().update("@(.updatePaymentInfo)");
+            RequestContext.getCurrentInstance().execute("updatePaymentForms();");
         }
         return asyncOperationRunning;
     }
@@ -1433,7 +1434,25 @@ public class EziDebitPaymentGateway implements Serializable {
      * @return the customerExistsInPaymentGateway
      */
     public boolean isCustomerExistsInPaymentGateway() {
-        return customerExistsInPaymentGateway;
+        FacesContext context = FacesContext.getCurrentInstance();
+        CustomersController controller = (CustomersController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "customersController");
+        PaymentParameters pp = controller.getSelectedCustomersPaymentParameters();
+        boolean stat = false;
+        if (pp != null) {
+            if (pp.getStatusCode().trim().isEmpty() || pp.getStatusCode().trim().contains("C")) {
+
+                //customer has never been added or is cancelled. If they are cancelled they must be added again like a new customer
+                stat = false;
+
+            } else if (pp.getStatusCode().trim().contains("A") || pp.getStatusCode().trim().contains("H") || pp.getStatusCode().trim().contains("W")) {
+                // They are on hold or active or waiting bank details
+                stat = true;
+            } else {
+                Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.WARNING, "Unkown ezidebit status code: {0}", new Object[]{pp.getStatusCode().trim()});
+            }
+        }
+
+        return stat;
     }
 
     public boolean isCustomerWebDDRFormEnabled() {
@@ -1442,13 +1461,16 @@ public class EziDebitPaymentGateway implements Serializable {
         CustomersController controller = (CustomersController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "customersController");
         PaymentParameters pp = controller.getSelectedCustomersPaymentParameters();
         String webDdrUrl = pp.getWebddrUrl();// contains payment information e.g 
-        return webDdrUrl != null;
+        if (webDdrUrl != null && pp.getStatusCode().trim().isEmpty()) {
+            return true;
+        }
+        return false;
 
     }
 
     public boolean isShowAddToPaymentGatewayButton() {
         if (customerDetailsHaveBeenRetrieved) {
-            if (customerCancelledInPaymentGateway || customerExistsInPaymentGateway == false) {
+            if (customerCancelledInPaymentGateway || isCustomerExistsInPaymentGateway() == false) {
                 if (selectedCustomer.getActive().getCustomerState().contains("ACTIVE")) {
 
                     return true;
@@ -1484,10 +1506,6 @@ public class EziDebitPaymentGateway implements Serializable {
      * @param customerExistsInPaymentGateway the customerExistsInPaymentGateway
      * to set
      */
-    public void setCustomerExistsInPaymentGateway(boolean customerExistsInPaymentGateway) {
-        this.customerExistsInPaymentGateway = customerExistsInPaymentGateway;
-    }
-
     /*  public void checkCustomerExistsInPaymentGateway(ActionEvent actionEvent) {
      CustomerDetails cd = getCustomerDetails(getSelectedCustomer());
      customerExistsInPaymentGateway = cd != null;
@@ -1642,6 +1660,13 @@ public class EziDebitPaymentGateway implements Serializable {
 
     }
 
+    public void createCustomerRecord(Customers cust) {
+        String authenticatedUser = FacesContext.getCurrentInstance().getExternalContext().getRemoteUser();
+        startAsynchJob("AddCustomer", paymentBean.addCustomer(cust, paymentGateway, getDigitalKey(), authenticatedUser));
+        JsfUtil.addSuccessMessage("Processing Add Customer to Payment Gateway Request.", "");
+
+    }
+
     public void testAjax(ActionEvent event) {
         testAjaxCounter++;
         RequestContext context = RequestContext.getCurrentInstance();
@@ -1660,7 +1685,7 @@ public class EziDebitPaymentGateway implements Serializable {
         }
         if (result == true) {
             JsfUtil.addSuccessMessage("Customer Added to Payment Gateway Successfully.", "Customer Added to Payment Gateway Successfully.");
-            customerExistsInPaymentGateway = true;
+
             startAsynchJob("GetCustomerDetails", paymentBean.getCustomerDetails(selectedCustomer, getDigitalKey()));
             getPayments(18, 2);
 
@@ -1796,8 +1821,8 @@ public class EziDebitPaymentGateway implements Serializable {
         futureMap.remove(sessionId, key);
     }
 
-    public void pollerListener() {
-        logger.log(Level.INFO, "Poller called backing bean listener method.");
+    public void remoteCommandListener() {
+        logger.log(Level.INFO, "ASYNC CALLBACK FROM FUTURE MAP BEAN. Components with updatePaymentInfo class will be updated via Request Context.");
 
         int k = futureMap.size(sessionId);
         if (k > 0) {
@@ -1853,13 +1878,14 @@ public class EziDebitPaymentGateway implements Serializable {
         }
 
         if (isRefreshIFrames() == true) {
-            RequestContext.getCurrentInstance().update("@(.updatePaymentInfo)");
+            //RequestContext.getCurrentInstance().update("@(.updatePaymentInfo)");
             //RequestContext.getCurrentInstance().update("editPaymentiFrameForm");
             //RequestContext.getCurrentInstance().update("createCustomerForm");
             logger.log(Level.INFO, "Asking Request Context to update IFrame forms.");
             setRefreshIFrames(false);
         }
-        RequestContext.getCurrentInstance().update("paymentsForm");
+        RequestContext.getCurrentInstance().execute("updatePaymentForms();");
+//RequestContext.getCurrentInstance().update("devForm");
         //  refreshFromDB = true;
     }
 
@@ -1868,7 +1894,6 @@ public class EziDebitPaymentGateway implements Serializable {
         try {
             if (key.contains("GetCustomerDetails")) {
                 processGetCustomerDetails(ft);
-                RequestContext.getCurrentInstance().update("customerslistForm1");
             }
             if (key.contains("AddPayment")) {
                 processAddPaymentResult(ft);
@@ -2315,9 +2340,9 @@ public class EziDebitPaymentGateway implements Serializable {
             Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, "Processing Async Results", ex);
         }
         if (result == true) {
-            JsfUtil.addSuccessMessage("Payment Gateway", "Successfully Changed Customer Status  .");
-            startAsynchJob("GetCustomerDetails", paymentBean.getCustomerDetails(selectedCustomer, getDigitalKey()));
-            //RequestContext.getCurrentInstance().update("customerslistForm1");
+            JsfUtil.addSuccessMessage("Payment Gateway", "Successfully Changed Customer Status.Sending request to refresh details and payments from payemnt gateway.");
+
+            getCustDetailsFromEzi();
             sendUpdatesForPaymentComponents();
             getPayments(18, 2);
         } else {
@@ -2436,7 +2461,6 @@ public class EziDebitPaymentGateway implements Serializable {
         if (result != null) {
             // do something with result
             setAutoStartPoller(false);
-            customerExistsInPaymentGateway = true;
 
             setCurrentCustomerDetails(result);
             String eziStatusCode = "Unknown";
@@ -2477,8 +2501,6 @@ public class EziDebitPaymentGateway implements Serializable {
                 }
             }
 
-        } else {
-            customerExistsInPaymentGateway = false;
         }
         //RequestContext.getCurrentInstance().update("customerslistForm1");
         sendUpdatesForPaymentComponents();
@@ -2489,14 +2511,7 @@ public class EziDebitPaymentGateway implements Serializable {
     }
 
     private void sendUpdatesForPaymentComponents() {
-        ArrayList<String> als = new ArrayList<>();
-        als.add(":tv:customerslistForm1");
-        als.add(":tv:NoteslistForm1");
-        als.add("@(.updateMyDetailsPaymentInformation)");
-
-        RequestContext.getCurrentInstance().update(als);
-        //RequestContext.getCurrentInstance().update("customerslistForm1");
-        //RequestContext.getCurrentInstance().update("@(.updateGetPayments)");
+        RequestContext.getCurrentInstance().update("@(.updatePaymentInfo)");
     }
 
     private CustomersController getCustomersController() {
@@ -3098,6 +3113,7 @@ public class EziDebitPaymentGateway implements Serializable {
 
         if (loggedInUser != null) {
             startAsynchJob("ChangeCustomerStatus", paymentBean.changeCustomerStatus(cust, eziStatus, loggedInUser, getDigitalKey()));
+            logger.log(Level.INFO, "Starting Async Job ChangeCustomerStatus.");
         } else {
             logger.log(Level.WARNING, "Logged in user is null. changeCustomerStatus aborted.");
         }

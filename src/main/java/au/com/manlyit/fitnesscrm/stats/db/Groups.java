@@ -69,10 +69,12 @@ public class Groups implements  BaseEntity, Serializable {
         this.groupname = groupname;
     }
 
+    @Override
     public Integer getId() {
         return id;
     }
 
+    @Override
     public void setId(Integer id) {
         this.id = id;
     }

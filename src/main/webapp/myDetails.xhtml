@@ -8,13 +8,13 @@
         <h:outputText value="#{configMapController.getKey('EditCustomersTitle')}"></h:outputText>
     </ui:define>
     <ui:define name="body">
-
+     
         <div class="layout-portlets-box">
 
             <h:panelGroup id="messagePanel" layout="block">
                 <h:messages errorStyle="color: red" infoStyle="color: green" layout="table"/>
             </h:panelGroup>
-            <h:form id="createCustomerForm"  styleClass="updatePaymentInfo">
+            <h:form id="createCustomerForm"  >
 
                 <div class="Container50 Responsive50">
                     <div class="ContainerIndent">
@@ -129,7 +129,7 @@
                     <div class="ContainerIndent">
                         <h1 class="BigTopic">#{configMapController.getKey('ListCustomersTitle_PanelHeader')}</h1>
 
-                        <p:panelGrid columns="3" class="updateMyDetailsPaymentInformation">
+                        <p:panelGrid styleClass="updatePaymentInfo" columns="3" class="updatePaymentInfo">
                             <h:outputLabel value="#{configMapController.getKey('ListCustomersTitle_activeEZI')}" />
                             <h:outputText value="#{customersController.selected.paymentParameters.statusDescription}"/> 
                             <h:outputText value=""/>
@@ -150,9 +150,9 @@
                             </h:outputText>
                         </p:panelGrid>
                         <div class="EmptyBox10"></div>
-                        <p:commandButton icon="fa fa-dollar  white Fs14" id="directDebitFormButton" disabled="#{!ezidebit.customerWebDDRFormEnabled}"  actionListener="#{ezidebit.redirectToPaymentGateway}"    value="#{configMapController.getKey('EnterPaymentDetailsButton')}" update=":growl :createCustomerForm"  /> 
+                        <p:commandButton styleClass="updatePaymentInfo" icon="fa fa-dollar  white Fs14" id="directDebitFormButton" disabled="#{!ezidebit.customerWebDDRFormEnabled}"  actionListener="#{ezidebit.redirectToPaymentGateway}"    value="#{configMapController.getKey('EnterPaymentDetailsButton')}" update=":growl :createCustomerForm"  /> 
                         <div class="EmptyBox10"></div>
-                        <p:commandButton id="editPaymentMethodButton" disabled="#{ezidebit.customerExistsInPaymentGateway == false or ezidebit.customerDetailsHaveBeenRetrieved == false or ezidebit.customerCancelledInPaymentGateway == true}" onclick="changeiFrameCss" oncomplete="PF('editPaymentMethodDialogueWidget').show();"    value="#{configMapController.getKey('editPaymentMethodButtonLink')}" update=":growl @(.updatePaymentInfo)"  /> 
+                        <p:commandButton styleClass="updatePaymentInfo" icon="fa fa-credit-card  white Fs14" id="editPaymentMethodButton" disabled="#{ezidebit.customerExistsInPaymentGateway == false or ezidebit.customerDetailsHaveBeenRetrieved == false or ezidebit.customerCancelledInPaymentGateway == true}" onclick="changeiFrameCss" oncomplete="PF('editPaymentMethodDialogueWidget').show();"    value="#{configMapController.getKey('editPaymentMethodButtonLink')}" update=":growl @(.updatePaymentInfo)"  /> 
 
                     </div>
                 </div>

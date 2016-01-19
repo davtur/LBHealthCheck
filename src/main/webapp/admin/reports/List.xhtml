@@ -42,6 +42,7 @@
                                 </p:selectOneMenu>
 
                                 <p:commandButton id="runReport"  actionListener="#{ezidebit.runReport}"  value="#{configMapController.getKey('ListReportRunReportLink')}" />
+                                
                             </p:panelGrid>
                             <p:panelGrid columns="4" >
                                 <p:outputLabel  value="#{configMapController.getKey('ListReportShowSuccessful')}" for="showSuccessful" />
@@ -328,7 +329,7 @@
 
 
 
-                      <!--  <p:remoteCommand name="taskCompleted" actionListener="#{ezidebit.pollerListener}" />-->
+                      <!--  <p:remoteCommand name="taskCompleted" actionListener="#{ezidebit.remoteCommandListener}" />-->
                     </h:form>
                 </div>
             </div>

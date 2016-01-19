@@ -47,8 +47,9 @@
             </f:facet>
         </p:ajaxStatus>
         <h:form id="remoteCommandForm">
-             <p:remoteCommand name="taskCompleted"   actionListener="#{ezidebit.pollerListener}"  />
+            <p:remoteCommand name="taskCompleted"   actionListener="#{ezidebit.remoteCommandListener}"  />
             <p:remoteCommand name="connectPushServer" actionListener="#{ezidebit.checkPushChannelIsOpen}" autoRun="true" />
+            <p:remoteCommand name="updatePaymentForms" update="@(.updatePaymentInfo)" />
         </h:form>
         <p:socket onMessage="handleMessage" onError="handleError" onTransportFailure="handleTransportFailure"  onClose="handleClose" channel="/payments" onOpen="" onReconnect="handleReconnect" autoConnect="false"  widgetVar="subscriber"/>
         <script type="text/javascript">

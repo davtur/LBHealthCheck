@@ -1403,3 +1403,9 @@ purchaseSessionDirectDebitPaymentProcessing=Payment Processing
 purchaseSessionDirectDebitPaymentProcessingFailedOnHold=Payment failed as you are On HOLD. Please contact staff to re-activate you.
 purchaseSessionDirectDebitPaymentProcessingFailedBankDetails=Payment failed as your bank details are not setup
 purchaseSessionDirectDebitPaymentProcessingFailedUnknown=Payment failed - Error 55 - please contact staff
+
+
+
+
+
+CustomersStateCreateNewFromCancelled=This customer was already cancelled in the payment gateway. Creating a new record. They will need to update their payment details.
