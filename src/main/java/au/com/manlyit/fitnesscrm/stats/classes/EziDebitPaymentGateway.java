@@ -764,7 +764,7 @@ public class EziDebitPaymentGateway implements Serializable {
      * @return the customerCancelledInPaymentGateway
      */
     public boolean isCustomerCancelledInPaymentGateway() {
-        return customerCancelledInPaymentGateway;
+        return !isCustomerExistsInPaymentGateway();
     }
 
     /**
@@ -2997,16 +2997,15 @@ public class EziDebitPaymentGateway implements Serializable {
         paymentsDBListFilteredItems = null;
     }
 
-    public void clearSchedule(ActionEvent actionEvent) {
-
+    private void clearSchedPayments(Customers cust, boolean keepManual) {
         String loggedInUser = FacesContext.getCurrentInstance().getExternalContext().getRemoteUser();
         if (loggedInUser != null) {
-            List<Payments> crmPaymentList = paymentsFacade.findScheduledPaymentsByCustomer(selectedCustomer);
-            if (paymentKeepManualPayments == false) {
-                startAsynchJob("ClearSchedule", paymentBean.clearSchedule(selectedCustomer, false, loggedInUser, getDigitalKey()));
+            List<Payments> crmPaymentList = paymentsFacade.findScheduledPaymentsByCustomer(cust);
+            if (keepManual == false) {
+                startAsynchJob("ClearSchedule", paymentBean.clearSchedule(cust, false, loggedInUser, getDigitalKey()));
             }
             if (crmPaymentList != null) {
-                logger.log(Level.INFO, "createSchedule - Found {0} existing scheduled payments for {1}", new Object[]{crmPaymentList.size(), selectedCustomer.getUsername()});
+                logger.log(Level.INFO, "createSchedule - Found {0} existing scheduled payments for {1}", new Object[]{crmPaymentList.size(), cust.getUsername()});
                 for (int x = crmPaymentList.size() - 1; x > -1; x--) {
                     Payments p = crmPaymentList.get(x);
                     String ref = p.getId().toString();
@@ -3015,23 +3014,23 @@ public class EziDebitPaymentGateway implements Serializable {
                         isManual = p.getManuallyAddedPayment();
                     }
 
-                    if (paymentKeepManualPayments == true && isManual) {
-                        logger.log(Level.INFO, "createSchedule - keeping manual payment: Cust={0}, Ref={1}, Manaul Payment = {2}", new Object[]{selectedCustomer.getUsername(), ref, isManual});
+                    if (keepManual == true && isManual) {
+                        logger.log(Level.INFO, "createSchedule - keeping manual payment: Cust={0}, Ref={1}, Manaul Payment = {2}", new Object[]{cust.getUsername(), ref, isManual});
                     } else {
-                        logger.log(Level.INFO, "createSchedule - Deleting payment: Cust={0}, Ref={1}, Manaul Payment = {2}", new Object[]{selectedCustomer.getUsername(), ref, isManual});
+                        logger.log(Level.INFO, "createSchedule - Deleting payment: Cust={0}, Ref={1}, Manaul Payment = {2}", new Object[]{cust.getUsername(), ref, isManual});
                         // if (paymentKeepManualPayments == false) {
                         //     paymentsFacade.remove(p);
                         //  } else {
                         p.setPaymentStatus(PaymentStatus.DELETE_REQUESTED.value());
                         paymentsFacade.edit(p);
                         updatePaymentLists(p);
-                        if (paymentKeepManualPayments == true) {
-                            startAsynchJob("DeletePayment", paymentBean.deletePayment(selectedCustomer, null, null, ref, loggedInUser, getDigitalKey()));
+                        if (keepManual == true) {
+                            startAsynchJob("DeletePayment", paymentBean.deletePayment(cust, null, null, ref, loggedInUser, getDigitalKey()));
                         }
                     }
                 }
             }
-            Customers c = selectedCustomer;
+            Customers c = cust;
             PaymentParameters pp = c.getPaymentParameters();
             pp.setPaymentPeriod("Z");
             pp.setPaymentPeriodDayOfMonth("-");
@@ -3045,6 +3044,15 @@ public class EziDebitPaymentGateway implements Serializable {
         } else {
             logger.log(Level.WARNING, "Logged in user is null. clearSchedule aborted.");
         }
+
+    }
+
+    public void clearEntireSchedule(Customers cust) {
+        clearSchedPayments(cust, false);
+    }
+
+    public void clearSchedule(ActionEvent actionEvent) {
+        clearSchedPayments(selectedCustomer, paymentKeepManualPayments);
 
     }
 

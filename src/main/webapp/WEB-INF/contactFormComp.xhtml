@@ -1,0 +1,65 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:p="http://primefaces.org/ui" >
+
+
+
+    <h:form id="contactForm" styleClass="signUpFormUpdate">
+
+
+        <div class="Container100 Responsive100">
+
+            <div class="ContainerIndent">
+                <p:messages showDetail="true"/>
+                <h:panelGrid  columns="2"  cellpadding="5" rendered="#{!customersController.leadFormSubmitted}">
+
+                    <p:outputLabel value="#{configMapController.getKey('EditCustomersLabel_firstname')}" for="firstname" />
+                    <p:inputText id="firstname"  value="#{customersController.newCustomer.firstname}" title="#{configMapController.getKey('EditCustomersTitle_firstname')}"  required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_firstname')}">
+                        <p:ajax update=" :contactForm:dialogueSave" event="keyup"/>
+                    </p:inputText>
+
+                    <p:outputLabel value="#{configMapController.getKey('EditCustomersLabel_lastname')}" for="lastname" />
+                    <p:inputText id="lastname" value="#{customersController.newCustomer.lastname}" title="#{configMapController.getKey('EditCustomersTitle_lastname')}"  required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_lastname')}">
+                        <p:ajax update=" :contactForm:dialogueSave" event="keyup" />
+                    </p:inputText>
+                    <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_emailAddress')}" for="emailAddress" />
+                    <p:inputText id="emailAddress" value="#{customersController.newCustomer.emailAddress}" title="#{configMapController.getKey('EditCustomersTitle_emailAddress')}" required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_emailAddress')}">
+                        <f:validator validatorId="au.com.manlyit.fitnesscrm.stats.classes.util.EmailValidator" />
+                        <p:ajax update=" :contactForm:dialogueSave" event="keyup"/>
+                    </p:inputText>
+                    <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_telephone')}" for="telephone" />
+                    <p:inputText id="telephone" value="#{customersController.newCustomer.telephone}" title="#{configMapController.getKey('CreateCustomersTitle_telephone')}" >
+                        <f:validator validatorId="au.com.manlyit.fitnesscrm.stats.classes.util.PhoneNumberValidator" />
+                        <p:ajax update=" :contactForm:dialogueSave" event="keyup"/>
+                    </p:inputText>
+
+                    <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_leadComments')}" for="leadComments" />
+                    <p:inputTextarea id="leadComments" value="#{customersController.leadComments}" rows="8" title="#{configMapController.getKey('CreateCustomersTitle_leadComments')}">
+                        <p:ajax update=" :contactForm:dialogueSave" event="keyup"/>
+                    </p:inputTextarea>
+                </h:panelGrid>
+                <h:panelGrid  columns="2"  cellpadding="5" rendered="#{customersController.leadFormSubmitted}">
+                    <h:outputText value="#{configMapController.getKey('LeadContactForm_Thankyou_message')}"/>
+                </h:panelGrid>
+
+            </div>
+        </div>
+        <div class="Container100 Responsive100">
+            <div class="ContainerIndent">
+                <p:commandButton icon="ui-icon-check fa fa-check white Fs14" id="dialogueSave" rendered="#{!customersController.leadFormSubmitted}"  partialSubmit="true" actionListener="#{customersController.createLeadFromSignup}"  value="#{configMapController.getKey('LeadContactForm_Thankyou_submitButtonText')}" update=":growl @form"/>                
+            </div>
+        </div>
+
+
+    </h:form>
+
+
+
+</ui:composition>
+<!--<p> Generated from template ( JSF_from_entity_wizard/StandardJSF/list.ftl  )- Dave 18th July 2015 </p>-->
+

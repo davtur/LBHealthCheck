@@ -129,7 +129,7 @@
             <div class="Container100 Responsive100">
                 <div class="Container50 Responsive50">
                     <div class="ContainerIndent">
-                        <p:commandButton icon="ui-icon-check fa fa-check white Fs14" id="dialogueSave" disabled="#{customersController.addUserButtonDisabled}" onclick="PF('customersCreateDialogue').hide()"  actionListener="#{customersController.createDialogue}"  value="#{configMapController.getKey('CreateCustomersSaveLink')}" update=":growl :tv:customerslistForm1 :tv:formCustomersEdit1 :formCustomersCreate1 :tv:paymentsForm :tv:NoteslistForm1"/>                
+                        <p:commandButton icon="ui-icon-check fa fa-check white Fs14" id="dialogueSave"  oncomplete="handleCreateCustomerComplete(xhr, status, args)" disabled="#{customersController.addUserButtonDisabled}"   actionListener="#{customersController.createDialogue}"  value="#{configMapController.getKey('CreateCustomersSaveLink')}" update=":growl :tv:customerslistForm1 :tv:formCustomersEdit1 :formCustomersCreate1 :tv:paymentsForm :tv:NoteslistForm1"/>                
                         <p:commandButton icon=" fa fa-times-circle white Fs14" id="dialogueDiscard" onclick="PF('customersCreateDialogue').hide()"  actionListener="#{customersController.cancelCreateDialogue}" value="#{configMapController.getKey('CreateCustomersDiscardLink')}" update=":growl"/>                
                     </div>
                 </div>
@@ -149,6 +149,13 @@
 
         </h:form>
     </p:dialog>
+    <h:outputScript id="handleCompleteScript" target="body">
+        function handleCreateCustomerComplete(xhr, status, args) {
+            if (args.validationFailed == false)) {
+                PF('customersCreateDialogue').hide();
+            }
+        };
+    </h:outputScript>
 </ui:composition>
 
 

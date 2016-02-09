@@ -694,7 +694,12 @@ public class FutureMapEJB implements Serializable {
                         logger.log(Level.WARNING, "Future Map processReport an ezidebit YourSystemReference string cannot be converted to a number.", numberFormatException);
 
                     }
-                    Customers cust = customersFacade.findById(custId);
+                    Customers cust =null;
+                    try {
+                        cust = customersFacade.findById(custId);
+                    } catch (Exception e) {
+                        logger.log(Level.WARNING, "Future Map processReport customersFacade.findById(custId) Error: custId={0}, Exception={1}",new Object[]{custId, e.getMessage()});
+                    }
                     if (cust != null) {
                         String paymentID = pay.getPaymentID().getValue();
                         String paymentReference;

@@ -1409,3 +1409,14 @@ purchaseSessionDirectDebitPaymentProcessingFailedUnknown=Payment failed - Error 
 
 
 CustomersStateCreateNewFromCancelled=This customer was already cancelled in the payment gateway. Creating a new record. They will need to update their payment details.
+
+CreateCustomersLabel_leadComments=Comments
+CreateCustomersTitle_leadComments=Comments
+LeadContactForm_Thankyou_message=Thanks for getting in touch!
+LeadContactForm_Thankyou_submitButtonText=Send
+system.email.notification.templateLinkPlaceholder=!!!NAME!!!
+system.email.notification.templateCommentsPlaceholder=!!!COMMENTS!!!
+EmailNotificationCCEmailAddress=david@manlyit.com.au
+EmailNotificationTOEmailAddress=david@manlyit.com.au
+EmailNotificationFromEmailAddress=sarah@purefitnessmanly.com.au
+LeadSignupSuccessfull=Your message was received.
