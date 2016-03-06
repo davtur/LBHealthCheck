@@ -1410,9 +1410,9 @@ purchaseSessionDirectDebitPaymentProcessingFailedUnknown=Payment failed - Error 
 
 CustomersStateCreateNewFromCancelled=This customer was already cancelled in the payment gateway. Creating a new record. They will need to update their payment details.
 
-CreateCustomersLabel_leadComments=Comments
-CreateCustomersTitle_leadComments=Comments
-LeadContactForm_Thankyou_message=Thanks for getting in touch!
+CreateCustomersLabel_leadComments=Message
+CreateCustomersTitle_leadComments=Message
+LeadContactForm_Thankyou_message=Thanks for getting in touch! 
 LeadContactForm_Thankyou_submitButtonText=Send
 system.email.notification.templateLinkPlaceholder=!!!NAME!!!
 system.email.notification.templateCommentsPlaceholder=!!!COMMENTS!!!

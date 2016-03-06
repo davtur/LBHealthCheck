@@ -22,15 +22,15 @@
     <h:body>   
         <div id="menu-mask"></div>
         <p:growl id="growl" widgetVar="growlWidget"    showDetail="true"    />
+        
+        
+       
+            <ui:insert name="body">
+                Template
+            </ui:insert>
 
-
-
-        <ui:insert name="body">
-            Template
-        </ui:insert>
-
-
-
+            
+       
 
         <p:ajaxStatus style="width:32px;height:32px;position:fixed;right:7px;bottom:7px">
             <f:facet name="start">
@@ -42,12 +42,12 @@
             </f:facet>
         </p:ajaxStatus>
 
-        <h:outputStylesheet name="css/core-layout.css" library="spark-layout" />
+     <!--   <h:outputStylesheet name="css/core-layout.css" library="spark-layout" />-->
         <h:outputStylesheet name="css/font-awesome.css" library="spark-layout" />
         <h:outputStylesheet name="css/animate.css" library="spark-layout" />
-        <h:outputStylesheet name="spark-layout-blue-iframe.css" library="css" />
+     <!--   <h:outputStylesheet name="spark-layout-blue-iframe.css" library="css" />-->
         <h:outputStylesheet name="customisations.css" library="css"/>
-
+        
     </h:body>
 
 </html>

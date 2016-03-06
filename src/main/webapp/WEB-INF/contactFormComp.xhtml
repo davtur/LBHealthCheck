@@ -39,7 +39,7 @@
                     </p:inputText>
 
                     <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_leadComments')}" for="leadComments" />
-                    <p:inputTextarea id="leadComments" value="#{customersController.leadComments}" rows="8" title="#{configMapController.getKey('CreateCustomersTitle_leadComments')}">
+                    <p:inputTextarea id="leadComments" value="#{customersController.leadComments}" rows="4" title="#{configMapController.getKey('CreateCustomersTitle_leadComments')}">
                         <p:ajax update=" :contactForm:dialogueSave" event="keyup"/>
                     </p:inputTextarea>
                 </h:panelGrid>
