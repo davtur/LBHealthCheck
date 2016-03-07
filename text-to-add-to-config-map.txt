@@ -1420,3 +1420,7 @@ EmailNotificationCCEmailAddress=david@manlyit.com.au
 EmailNotificationTOEmailAddress=david@manlyit.com.au
 EmailNotificationFromEmailAddress=sarah@purefitnessmanly.com.au
 LeadSignupSuccessfull=Your message was received.
+
+system.email.notification.templatePhonePlaceholder=!!!PHONE!!!
+system.email.notification.templateEmailPlaceholder=!!!EMAIL!!!
+

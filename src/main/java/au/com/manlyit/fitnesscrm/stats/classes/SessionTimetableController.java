@@ -355,13 +355,16 @@ public class SessionTimetableController implements Serializable {
                     for (SessionHistory ss : events) {
                         GregorianCalendar sessionDate = new GregorianCalendar();
                         sessionDate.setTime(ss.getSessiondate());
-                        sessionDate.add(Calendar.MINUTE, ss.getSessionTemplate().getDurationMinutes());
-                        TimetableScheduleEvent ev = new TimetableScheduleEvent(ss.getSessionTemplate().getSessionTitle(), ss.getSessiondate(), sessionDate.getTime(), false);
-                        ev.setDatabasePK(ss.getId());
-                        ev.setStyleClass(getEventStyleClass());
-                        ev.setData(ss);
+                        SessionTimetable template = ss.getSessionTemplate();
+                        if (template != null) {
+                            sessionDate.add(Calendar.MINUTE, template.getDurationMinutes());
+                            TimetableScheduleEvent ev = new TimetableScheduleEvent(template.getSessionTitle(), ss.getSessiondate(), sessionDate.getTime(), false);
+                            ev.setDatabasePK(ss.getId());
+                            ev.setStyleClass(getEventStyleClass());
+                            ev.setData(ss);
 
-                        addEvent(ev);
+                            addEvent(ev);
+                        }
                     }
 
                 }
@@ -773,7 +776,7 @@ public class SessionTimetableController implements Serializable {
 
                 } else {
                     if (paymentGatewayStatusDescription.contains("Hold")) {
-                    // customer is on hold notify them to contact staff and redirect customer to instant payment page
+                        // customer is on hold notify them to contact staff and redirect customer to instant payment page
                         // if we just take them off hold without comfirmation their regular payemts may restart
 
                         logger.log(Level.WARNING, "purchaseSession, Customer {0} is on Hold", c.getUsername());
@@ -782,7 +785,7 @@ public class SessionTimetableController implements Serializable {
                         sb.setStatusDescription("The purchase via Direct debit failed as the customer is On-Hold");
 
                     } else if (paymentGatewayStatusDescription.contains("Waiting Bank Details")) {
-                    // the customer has not set up their payment method
+                        // the customer has not set up their payment method
                         // notify them to contact staff or redirect to instant payment page
                         logger.log(Level.WARNING, "purchaseSession, Customer {0} is Waiting Bank Details", c.getUsername());
                         JsfUtil.addSuccessMessage(configMapFacade.getConfig("purchaseSessionDirectDebitPaymentProcessingFailedBankDetails"));

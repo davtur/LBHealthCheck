@@ -730,7 +730,7 @@ public class CustomersController implements Serializable {
                     nt.setUserId(c);
                     nt.setCreatedBy(c);
                     addToNotesDataTableLists(nt);
-                    String details = "New LEAD generated: Name: " + c.getFirstname() + ", Email:" + c.getEmailAddress() + ", Phone:" + c.getTelephone() + ", Username:" + c.getUsername() + ", Group:" + group + ", IP Address:" + ipAddress ;
+                    String details = "New LEAD generated: Name: " + c.getFirstname() + ", <br/>Email:  " + c.getEmailAddress() + ", <br/>Phone:   " + c.getTelephone() + ", <br/>Username:   " + c.getUsername() + ", <br/>Group:   " + group + ", IP Address:" + ipAddress ;
                     sendNotificationEmail(c, grp, "system.email.notification.template", "New LEAD from website",leadComments);
                     createCombinedAuditLogAndNote(c, c, "New Lead", details, "Did Not Exist", "New Lead");
                     logger.log(Level.INFO, "createFromLead: {0}", new Object[]{details});
@@ -785,12 +785,18 @@ public class CustomersController implements Serializable {
         //send email
         String templateNamePlaceholder = configMapFacade.getConfig("system.email.notification.templateLinkPlaceholder");
         String templateCommentsPlaceholder = configMapFacade.getConfig("system.email.notification.templateCommentsPlaceholder");
+        String templatePhonePlaceholder = configMapFacade.getConfig("system.email.notification.templatePhonePlaceholder");
+        String templateEmailPlaceholder = configMapFacade.getConfig("system.email.notification.templateEmailPlaceholder");
 
         //String htmlText = configMapFacade.getConfig(templateName);
         String htmlText = ejbEmailTemplatesFacade.findTemplateByName(templateName).getTemplate();
         String name = c.getFirstname() + " " + c.getLastname();
+        String phone = c.getTelephone() ;
+        String email = c.getEmailAddress();
         htmlText = htmlText.replace(templateNamePlaceholder, name);
         htmlText = htmlText.replace(templateCommentsPlaceholder, comments);
+        htmlText = htmlText.replace(templatePhonePlaceholder, phone);
+        htmlText = htmlText.replace(templateEmailPlaceholder, email);
         
         Future<Boolean> emailSendResult = ejbPaymentBean.sendAsynchEmail(configMapFacade.getConfig("EmailNotificationTOEmailAddress"), configMapFacade.getConfig("EmailNotificationCCEmailAddress"), configMapFacade.getConfig("EmailNotificationFromEmailAddress"), subject, htmlText, null, emailServerProperties(), false);
         

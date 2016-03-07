@@ -16,7 +16,7 @@
                 <div class="Container100  gray ">
                     <div class="ContainerIndent">
 
-                        <p:schedule value="#{sessionTimetableController.eventModel}" view="basicWeek"  timeZone="Australia/Sydney" widgetVar="crmSchedule" aspectRatio="5" timeFormat="HH:mm" ignoreTimezone="false" allDaySlot="false" maxTime="20:00:00" minTime="06:00:00" >
+                        <p:schedule value="#{sessionTimetableController.eventModel}" view="basicWeek" timeZone="Australia/Sydney" widgetVar="crmSchedule" aspectRatio="5" timeFormat="HH:mm" ignoreTimezone="false" allDaySlot="false" maxTime="20:00:00" minTime="06:00:00" >
 
                             <p:ajax event="dateSelect" listener="#{sessionTimetableController.onDateSelect}" update=":growl :eventDetails" oncomplete="PF('eventDialog').show()" />
                             <p:ajax event="eventSelect" listener="#{sessionTimetableController.onEventSelect}" update=":growl :eventDetails" oncomplete="PF('eventDialog').show()" />
