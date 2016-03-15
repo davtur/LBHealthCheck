@@ -45,6 +45,26 @@
                 </h:panelGrid>
                 <h:panelGrid  columns="2"  cellpadding="5" rendered="#{customersController.leadFormSubmitted}">
                     <h:outputText value="#{configMapController.getKey('LeadContactForm_Thankyou_message')}"/>
+                    <!-- Google Code for Enquiry Conversion Page -->
+                    <script type="text/javascript">
+                        /* <![CDATA[ */
+                        window.google_trackConversion(
+                        {
+                                google_conversion_id = 1044523443;
+                                google_conversion_language = "en";
+                                google_conversion_format = "2";
+                                google_conversion_color = "ffffff";
+                                google_conversion_label = "AHRLCPWR5gMQs9OI8gM";
+                                google_conversion_value = 1.00;
+                                google_conversion_currency = "AUD";
+                                google_remarketing_only = false;
+                        }
+                        );
+                                /* ]]> */
+                    </script>
+                    <script type="text/javascript" src="https://www.googleadservices.com/pagead/conversion_async.js" charset="utf-8">
+                    </script>
+
                 </h:panelGrid>
 
             </div>
