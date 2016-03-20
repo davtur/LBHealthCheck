@@ -11,6 +11,7 @@
 
         <h:form id="SessionTimetableCreateForm">
             <h:panelGroup id="display">
+                <p:messages />
                 <p:panelGrid columns="2" rendered="#{sessionTimetableController.selected != null}">
                     <p:outputLabel value="#{configMapController.getKey('CreateSessionTimetableLabel_sessiondate')}" for="sessiondate" />
 
@@ -20,34 +21,30 @@
                     </p:calendar>
                     <p:outputLabel value="#{configMapController.getKey('CreateSessionTimetableLabel_comments')}" for="comments" />
                     <p:inputTextarea rows="4" cols="30" id="comments"  value="#{sessionTimetableController.selected.comments}"  title="#{configMapController.getKey('CreateSessionTimetableTitle_comments')}" >
-                        <p:ajax  event="keyup"   />
+                        
                     </p:inputTextarea>
                     <p:outputLabel value="#{configMapController.getKey('CreateSessionTimetableLabel_adminNotes')}" for="adminNotes" />
                     <p:inputTextarea rows="4" cols="30" id="adminNotes"  value="#{sessionTimetableController.selected.adminNotes}"  title="#{configMapController.getKey('CreateSessionTimetableTitle_adminNotes')}" >
-                        <p:ajax  event="keyup"   />
+                       
                     </p:inputTextarea>
                     <p:outputLabel value="#{configMapController.getKey('CreateSessionHistoryLabel_trainer')}" for="trainer" />
 
                     <p:selectOneMenu id="trainer"  value="#{sessionTimetableController.selected.trainerId}" converter="customersControllerConverter"  label="#{configMapController.getKey('CreateSessionHistoryTitle_trainer')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionHistoryRequiredMessage_trainer')}">
                         <f:selectItems value="#{customersController.getCustomersByGroupObject('TRAINER',true)}" var="cust" itemLabel="#{cust.firstname} #{cust.lastname}" itemValue="#{cust}"/>
-                        <p:ajax   event="select"   />
+                        
                     </p:selectOneMenu>
 
                     <p:outputLabel value="#{configMapController.getKey('CreateSessionTimetableLabel_sessionTypesId')}" for="sessionTypesId" />
-                    <p:selectOneMenu id="sessionTypesId" valueChangeListener="#{sessionTimetableController.selectOneMenuValueChangeListener}"  value="#{sessionTimetableController.selected.sessionTypesId}"  label="#{configMapController.getKey('CreateSessionTimetableTitle_sessionTypesId')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionTimetableRequiredMessage_sessionTypesId')}">
-                        <f:selectItems value="#{sessionTypesController.itemsAvailableSelectOne}"/>
-                        <p:ajax   event="select"   />
+                    <p:selectOneMenu id="sessionTypesId" valueChangeListener="#{sessionTimetableController.selectOneMenuValueChangeListener}" converter="sessionTypesControllerConverter" value="#{sessionTimetableController.selected.sessionTypesId}"  label="#{configMapController.getKey('CreateSessionTimetableTitle_sessionTypesId')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionTimetableRequiredMessage_sessionTypesId')}">
+                        <f:selectItems value="#{sessionTypesController.itemsAvailable}"/>
+                        
                     </p:selectOneMenu>
                     <p:outputLabel value="#{configMapController.getKey('CreateSessionTimetableLabel_recurranceId')}" for="recurranceId" />
-                    <p:selectOneMenu id="recurranceId" valueChangeListener="#{sessionTimetableController.selectOneMenuValueChangeListener}"  value="#{sessionTimetableController.selected.recurranceId}"  label="#{configMapController.getKey('CreateSessionTimetableTitle_recurranceId')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionTimetableRequiredMessage_recurranceId')}">
-                        <f:selectItems value="#{sessionRecurranceController.itemsAvailableSelectOne}"/>
-                        <p:ajax   event="select"  />
+                    <p:selectOneMenu id="recurranceId" valueChangeListener="#{sessionTimetableController.selectOneMenuValueChangeListener}" converter="sessionRecurranceControllerConverter" value="#{sessionTimetableController.selected.recurranceId}"  label="#{configMapController.getKey('CreateSessionTimetableTitle_recurranceId')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionTimetableRequiredMessage_recurranceId')}">
+                        <f:selectItems value="#{sessionRecurranceController.itemsAvailable}"/>
+                        
                     </p:selectOneMenu>
-                    <p:outputLabel value="#{configMapController.getKey('CreateSessionTimetableLabel_trainerId')}" for="trainerId" />
-                    <p:selectOneMenu id="trainerId" valueChangeListener="#{sessionTimetableController.selectOneMenuValueChangeListener}"  value="#{sessionTimetableController.selected.trainerId}"  label="#{configMapController.getKey('CreateSessionTimetableTitle_trainerId')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionTimetableRequiredMessage_trainerId')}">
-                        <f:selectItems value="#{customersController.itemsAvailableSelectOne}"/>
-                        <p:ajax   update=":SessionTimetableCreateForm"  />
-                    </p:selectOneMenu>
+                    
                     <p:outputLabel value="#{configMapController.getKey('CreateSessionTimetableLabel_durationMinutes')}" for="durationMinutes" />
                     <p:inputText id="durationMinutes" value="#{sessionTimetableController.selected.durationMinutes}" title="#{configMapController.getKey('CreateSessionTimetableTitle_durationMinutes')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionTimetableRequiredMessage_durationMinutes')}"/>
                     <p:outputLabel value="#{configMapController.getKey('CreateSessionTimetableLabel_sessionTitle')}" for="sessionTitle" />
@@ -76,4 +73,3 @@
 
 </ui:composition>    
 <!-- Generated from template ( JSF_from_entity_wizard/StandardJSF/create.ftl  )- Dave 23rd October 2015 -->
-
