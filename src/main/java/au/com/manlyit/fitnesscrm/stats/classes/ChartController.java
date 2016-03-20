@@ -169,6 +169,7 @@ public class ChartController implements Serializable {
     private LineChartModel createModel(FitnessTestCharts chrt, Collection<StatTypes> stypes) {
         List<ChartSeries> seriesList = getChartDataForModel(new ArrayList<>(stypes));
         LineChartModel model = new LineChartModel();
+        model.setExtender("customUserStatsLineChartExtender");
         for (ChartSeries cs : seriesList) {
             if (cs.getData().isEmpty() == false) {
                 model.addSeries(cs);

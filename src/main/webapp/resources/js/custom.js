@@ -18,9 +18,27 @@ function handleCreateRequest(xhr, status, args, dialog, listTable) {
     }
 }
 
-function handlePollComplete(xhr, status, args,poller) {
+function handlePollComplete(xhr, status, args, poller) {
     if (args.stopPolling) {
         PF(poller).stop();
-       //alert('Stopping Poller');
+        //alert('Stopping Poller');
     }
 }
+
+function customUserStatsLineChartExtender() {
+    this.cfg.grid = {
+        background: 'transparent',
+        gridLineColor: '#a0a0a0',
+        drawBorder: false,
+    }
+}
+
+function customUserStatsBarChartExtender() {
+    this.cfg.grid = {
+        background: 'transparent',
+        gridLineColor: '#a0a0a0',
+        drawBorder: false,
+    }
+}
+
+//background: '#FFF' ,

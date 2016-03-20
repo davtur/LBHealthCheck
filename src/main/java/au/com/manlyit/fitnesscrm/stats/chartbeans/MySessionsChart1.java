@@ -199,6 +199,7 @@ public class MySessionsChart1 implements Serializable {
 
         for (SessionTypes st : sessionTypesList) {
             BarChartSeries barChartSeries = new BarChartSeries();
+
             barChartSeries.setLabel(st.getName());
             seriesList.add(barChartSeries);
         }
@@ -251,6 +252,7 @@ public class MySessionsChart1 implements Serializable {
             JsfUtil.addErrorMessage(e, "My Sessions Chart Critical Error", "Couldn't get customer session data from the database.");
         }
         ccModel = new BarChartModel();
+        
         int numberOfSeriesAddedToChart = 0;
         for (BarChartSeries bcs : seriesList) {
             Collection<Number> values = bcs.getData().values();
@@ -281,7 +283,7 @@ public class MySessionsChart1 implements Serializable {
         ccModel.setTitle(getSelectedCustomer().getFirstname() + " " + getSelectedCustomer().getLastname());
         ccModel.setLegendPosition("ne");
         ccModel.setStacked(true);
-        ccModel.setExtender("chartExtender");
+        ccModel.setExtender("customUserStatsBarChartExtender");
 
         Axis xAxis = ccModel.getAxis(AxisType.X);
         xAxis.setLabel(getXaxisLabel());
@@ -385,7 +387,7 @@ public class MySessionsChart1 implements Serializable {
     /**
      * @return the startDate
      */
-     public Date getStartDate() {
+    public Date getStartDate() {
         return startDate;
     }
 

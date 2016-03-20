@@ -1070,7 +1070,12 @@ public class CustomerImagesController implements Serializable {
             String imageId = context.getExternalContext().getRequestParameterMap().get("imageId");
             if (imageId != null) {
                 CustomerImages custImage = ejbFacade.find(Integer.valueOf(imageId));
-                return new DefaultStreamedContent(new ByteArrayInputStream(custImage.getImage()));
+                if (custImage.getCustomerId().getId().compareTo(getSelectedCustomer().getId()) == 0) {
+                    return new DefaultStreamedContent(new ByteArrayInputStream(custImage.getImage()));
+                } else {
+                    logger.log(Level.WARNING, "A customer is attempting to access anothers images by directly manipulating the URL posted parameters. It might be a hacker. Returning NULL instead of the image. Logged In Customer:{0},Imageid:{1}",new Object[]{getSelectedCustomer().getUsername(),imageId});
+                    return null;
+                }
             } else {
                 return null;
             }
