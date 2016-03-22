@@ -33,12 +33,12 @@
 
                     <h:outputLabel value="#{configMapController.getKey('EditSessionTimetableLabel_sessionTypesId')}" for="sessionTypesId" />
                     <p:selectOneMenu id="sessionTypesId" valueChangeListener="#{sessionTimetableController.selectOneMenuValueChangeListener}"  converter="sessionTypesControllerConverter" value="#{sessionTimetableController.selected.sessionTypesId}" label="#{configMapController.getKey('EditSessionTimetableTitle_sessionTypesId')}" required="true" requiredMessage="#{configMapController.getKey('EditSessionTimetableRequiredMessage_sessionTypesId')}">
-                        <f:selectItems value="#{sessionTypesController.itemsAvailableSelectOne}"/>
+                        <f:selectItems value="#{sessionTypesController.itemsAvailable}"/>
 
                     </p:selectOneMenu>
                     <h:outputLabel value="#{configMapController.getKey('EditSessionTimetableLabel_recurranceId')}" for="recurranceId" />
                     <p:selectOneMenu id="recurranceId" valueChangeListener="#{sessionTimetableController.selectOneMenuValueChangeListener}" converter="sessionRecurranceControllerConverter"  value="#{sessionTimetableController.selected.recurranceId}" label="#{configMapController.getKey('EditSessionTimetableTitle_recurranceId')}" required="true" requiredMessage="#{configMapController.getKey('EditSessionTimetableRequiredMessage_recurranceId')}">
-                        <f:selectItems value="#{sessionRecurranceController.itemsAvailableSelectOne}"/>
+                        <f:selectItems value="#{sessionRecurranceController.itemsAvailable}"/>
 
                     </p:selectOneMenu>
 
