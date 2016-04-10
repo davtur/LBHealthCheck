@@ -19,6 +19,10 @@
                     <p:inputTextarea rows="4" cols="30" id="comments" value="#{sessionTimetableController.selected.comments}" title="#{configMapController.getKey('EditSessionTimetableTitle_comments')}" >
 
                     </p:inputTextarea>
+                    <p:outputLabel value="#{configMapController.getKey('CreateSessionTimetableLabel_sessionStyleClasses')}" for="styleClasses" />
+                    <p:inputText id="styleClasses" value="#{sessionTimetableController.selected.sessionStyleClasses}" label="#{configMapController.getKey('ListSessionTimetableTitle_sessionStyleClasses')}" />
+
+
                     <h:outputLabel value="#{configMapController.getKey('EditSessionTimetableLabel_adminNotes')}" for="adminNotes" />
                     <p:inputTextarea rows="4" cols="30" id="adminNotes" value="#{sessionTimetableController.selected.adminNotes}" title="#{configMapController.getKey('EditSessionTimetableTitle_adminNotes')}" >
 

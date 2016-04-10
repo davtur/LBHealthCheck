@@ -169,3 +169,7 @@ ADD COLUMN `status` VARCHAR(255) NULL AFTER `booking_time`;
 ALTER TABLE `fitnessStats`.`session_bookings` 
 CHANGE COLUMN `status` `status` VARCHAR(16) NOT NULL DEFAULT 'NEW' ,
 ADD COLUMN `status_description` VARCHAR(255) NULL AFTER `status`;
+
+
+ALTER TABLE `fitnessStats`.`session_timetable` 
+ADD COLUMN `session_style_classes` TEXT NULL COMMENT '' AFTER `session_timetable_status`;

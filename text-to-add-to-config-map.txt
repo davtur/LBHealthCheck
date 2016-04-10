@@ -1424,3 +1424,14 @@ LeadSignupSuccessfull=Your message was received.
 system.email.notification.templatePhonePlaceholder=!!!PHONE!!!
 system.email.notification.templateEmailPlaceholder=!!!EMAIL!!!
 
+ListSessionTimetableTitle_sessionStyleClasses=Css Style Classes
+ViewSessionTimetableTitle_sessionStyleClasses=Css Style Classes
+EditSessionTimetableTitle_sessionStyleClasses=Css Style Classes
+CreateSessionTimetableTitle_sessionStyleClasses=Css Style Classes
+CreateSessionTimetableLabel_sessionStyleClasses=Css Style Classes
+ListSessionTimetableLabel_sessionStyleClasses=Css Style Classes
+ViewSessionTimetableLabel_sessionStyleClasses=Css Style Classes
+EditSessionTimetableLabel_sessionStyleClasses=Css Style Classes
+
+ViewSessionTimetableLabel_sessionMembersRate= Members Price
+(ViewSessionTimetableLabel_ssessionCasualRate=Casual Price

@@ -16,36 +16,37 @@
                 <div class="Container100  gray ">
                     <div class="ContainerIndent">
 
-                        <p:schedule value="#{sessionTimetableController.eventModel}" view="basicWeek" timeZone="Australia/Sydney" widgetVar="crmSchedule" aspectRatio="5" timeFormat="HH:mm" ignoreTimezone="false" allDaySlot="false" maxTime="20:00:00" minTime="06:00:00" >
+                        <p:schedule value="#{sessionTimetableController.eventModel}" 
+                                    view="basicWeek" 
+                                    draggable="false"
+                                    resizable="false"
+                                    columnFormat="ddd"
+                                    timeZone="Australia/Sydney" 
+                                    widgetVar="crmSchedule" 
+                                    styleClass="timetableSchedule"
+                                    timeFormat="HH:mm" 
+                                    ignoreTimezone="false" 
+                                    allDaySlot="false" 
+                                    tooltip="false"
+                                    maxTime="20:00:00" 
+                                    minTime="06:00:00" >
 
-                            <p:ajax event="dateSelect" listener="#{sessionTimetableController.onDateSelect}" update=":growl :eventDetails" oncomplete="PF('eventDialog').show()" />
-                            <p:ajax event="eventSelect" listener="#{sessionTimetableController.onEventSelect}" update=":growl :eventDetails" oncomplete="PF('eventDialog').show()" />
-                            <p:ajax event="eventMove" listener="#{sessionTimetableController.onEventMove}" update=":growl :eventDetails" />
-                            <p:ajax event="eventResize" listener="#{sessionTimetableController.onEventResize}" update=":growl :eventDetails" />
+                            <p:ajax event="eventSelect" listener="#{sessionTimetableController.onEventSelect}" update=":growl :eventDetails"  />
+                            
 
                         </p:schedule>
 
                     </div>
                 </div> 
 
-             <!--   <div class="Container100  gray ">
-                    <div class="ContainerIndent">
-                        <p:commandButton  styleClass="MarRight5 Fs24"  update=":SessionTimetableListForm"   value="#{configMapController.getKey('Timetable_decrementWeekButtonTitle')}"  actionListener="#{sessionTimetableController.decrementWeek}"  />
-
-                        <p:commandButton styleClass="MarRight5 Fs24"    update=":SessionTimetableListForm"   value="#{configMapController.getKey('Timetable_incrementWeekButtonTitle')}"  actionListener="#{sessionTimetableController.incrementWeek}" />
-                        <p:commandButton styleClass="MarRight5"  update=":SessionTimetableListForm"   value="#{configMapController.getKey('Timetable_setToCurrentWeekButtonTitle')}"  actionListener="#{sessionTimetableController.setToCurrentWeek}"  />
-                        <p:calendar value="#{sessionTimetableController.timetableStartDate}" mode="popup" pattern="d MMMMM yyyy"  showOn="both"  >
-                            <p:ajax  event="dateSelect" update=":SessionTimetableListForm"  />
-                        </p:calendar>
-                    </div>
-                </div>-->
+            
                 <div class="EmptyBox10"></div>
 
             </div>
         </div>
    </h:form>
     
-    <p:dialog widgetVar="eventDialog" header="Event Details" showEffect="clip" hideEffect="clip">
+    <p:dialog widgetVar="eventDialog" header="Event Details" showEffect="clip" hideEffect="clip" closeOnEscape="true" fitViewport="true" styleClass="timetableSchedule" >
         <h:form  id="eventDetails" styleClass="bookingFormUpdate">
             <div class=" TimetableTile BorderedBox Fleft TexAlLeft HoverEffect MarRL5"> 
                 <div class="ContainerIndent">
@@ -78,7 +79,7 @@
                                 </span>
 
                                 <div class="EmptyBox10"></div>
-                                <p:commandButton id="mapsBtn" styleClass="MarRight5" value="#{configMapController.getKey('Timetable_MapsButtonTitle')}" type="button" />
+                              <!--  <p:commandButton id="mapsBtn" styleClass="MarRight5" value="#{configMapController.getKey('Timetable_MapsButtonTitle')}" type="button" />-->
 
                                 <p:commandButton styleClass="MarRight5 GreenButton animated pulse infinite "   update="@(.signUpFormUpdate)" oncomplete="PF('signupDialog').show()" rendered="#{sessionTimetableController.event.data.sessionTemplate.showSignupButton and  empty  facesContext.externalContext.remoteUser}" value="#{configMapController.getKey('Timetable_SignUpButtonTitle')}"  actionListener="#{customersController.signUp}"  >
                                   <!-- <f:param name="sessionHistorySignupId" value="#{sessionTimetableController.event.data.id}"/>-->
@@ -89,10 +90,10 @@
                                     <!--<f:param name="sessionHistoryBookingId" value="#{sessionTimetableController.event.data.id}"/>-->
                                     <f:setPropertyActionListener value="#{sessionTimetableController.event.data}" target="#{sessionTimetableController.bookingButtonSessionHistory}" />
                                 </p:commandButton>
-                                <p:overlayPanel  for="mapsBtn" hideEffect="fade" dynamic="false" styleClass="timetableGmap" >
+                               <!-- <p:overlayPanel  for="mapsBtn" hideEffect="fade" dynamic="false" styleClass="timetableGmap" >
                                     <p:gmap styleClass="BorderedBox" center="#{sessionTimetableController.event.data.sessionTemplate.sessionLocationGps}" zoom="16" model="#{sessionTimetableController.event.data.sessionTemplate.simpleModel}" type="HYBRID" style="width:100%;height:400px" />
 
-                                </p:overlayPanel>
+                                </p:overlayPanel>-->
 
                             </div>
 
@@ -106,6 +107,7 @@
 
                     </div>
                     <div class="EmptyBox10"></div>
+                                   <p:gmap styleClass="BorderedBox timetableGmap" center="#{sessionTimetableController.event.data.sessionTemplate.sessionLocationGps}" zoom="18" model="#{sessionTimetableController.event.data.sessionTemplate.simpleModel}" type="HYBRID"  />
 
                     <!--      </p:panel>
                       </p:column>-->

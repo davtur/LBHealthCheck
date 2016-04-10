@@ -125,9 +125,20 @@
                                 <p:inputText value="#{item.comments}" label="#{configMapController.getKey('ListSessionTimetableTitle_comments')}" />
                             </f:facet>
                         </p:cellEditor> 
-
-
                     </p:column>
+ 
+                    <p:column sortBy="#{item.sessionStyleClasses}" filterBy="#{item.sessionStyleClasses}" headerText="#{configMapController.getKey('ListSessionTimetableTitle_sessionStyleClasses')}"   >
+                        <p:cellEditor> 
+                            <f:facet name="output">
+                                <h:outputText value="#{item.sessionStyleClasses}"/>
+                            </f:facet>
+                            <f:facet name="input">
+                                <p:inputText value="#{item.sessionStyleClasses}" label="#{configMapController.getKey('ListSessionTimetableTitle_sessionStyleClasses')}" />
+                            </f:facet>
+                        </p:cellEditor> 
+                    </p:column>
+
+                    
                     <p:column sortBy="#{item.adminNotes}" filterBy="#{item.adminNotes}" headerText="#{configMapController.getKey('ListSessionTimetableTitle_adminNotes')}"   >
                         <p:cellEditor> 
                             <f:facet name="output">

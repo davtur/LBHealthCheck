@@ -7,6 +7,86 @@ and open the template in the editor.
     Created on : 05/10/2015, 8:54:17 AM
     Author     : david
 */
+ 
+@media all and (max-width: 599px) and (min-width: 320px) {
+    .timetableSchedule  {
+        font-size: 10px;
+        height: 600px;
+    }
+    .bookingFormUpdate {
+      font-size: 12px;  
+    }
+    .fc-day-grid-event > .fc-content {
+        white-space: normal;
+    }
+    .timetableGmap {
+        height: 300px;
+        width: 100% !important ;
+
+    }
+ 
+}
+@media all and (max-width: 1200px) and (min-width: 600px) {
+    .timetableSchedule  {
+        font-size: 12px;
+        height: 800px;
+    }
+    .bookingFormUpdate {
+      font-size: 12px;  
+    }
+    .fc-day-grid-event > .fc-content {
+        white-space: normal;
+    }
+    .timetableGmap {
+        height: 400px;
+        width: 100% !important ;
+
+    }
+ 
+}
+@media all and  (min-width: 1201px) {
+    .timetableSchedule  {
+        font-size: 14px;
+        height: 1000px;
+    }
+    .bookingFormUpdate {
+      font-size: 12px;  
+    }
+    .fc-day-grid-event > .fc-content {
+        white-space: normal;
+    }
+    .timetableGmap {
+        height: 500px;
+        width: 100% !important ;
+
+    }
+ 
+}
+
+.greenBg {
+    background-color: green;
+}
+.blueBg {
+    background-color: cyan;
+}
+.orangeBg {
+    background-color: orange;
+}
+.redBg {
+    background-color: red;
+}
+
+
+.signupForm {
+    text-align: right;
+    padding-right: 10px;
+}  
+.signupForm.signupFormLabel  {
+    text-align: left;
+} 
+
+
+
 .cancellationDialogue{
     max-width: 400px;
 }

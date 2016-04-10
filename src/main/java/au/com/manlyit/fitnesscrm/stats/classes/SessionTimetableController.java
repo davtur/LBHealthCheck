@@ -20,6 +20,7 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -201,26 +202,32 @@ public class SessionTimetableController implements Serializable {
     }
 
     private void editEvent(ScheduleEvent event) {
-        CrmScheduleEvent ssievent = (CrmScheduleEvent) event;
+        CrmScheduleEvent ssievent = null;
 
-        Schedule ss = ejbScheduleFacade.find(ssievent.getDatabasePK());
-        ss.setShedEnddate(ssievent.getEndDate());
-        ss.setShedStartdate(ssievent.getStartDate());
-        ss.setShedTitle(ssievent.getTitle());
-        ss.setSchedRemindDate(ssievent.getReminderDate());
-        ss.setSchedReminder(ssievent.isAddReminder());
-        ss.setShedAllday(ssievent.isAllDay());
+        if (event != null) {
+            if (event.getClass() == CrmScheduleEvent.class) {
+                ssievent = (CrmScheduleEvent) event;
+                Schedule ss = ejbScheduleFacade.find(ssievent.getDatabasePK());
+                ss.setShedEnddate(ssievent.getEndDate());
+                ss.setShedStartdate(ssievent.getStartDate());
+                ss.setShedTitle(ssievent.getTitle());
+                ss.setSchedRemindDate(ssievent.getReminderDate());
+                ss.setSchedReminder(ssievent.isAddReminder());
+                ss.setShedAllday(ssievent.isAllDay());
 
-        ss.setDataObject(ssievent.getData());
+                ss.setDataObject(ssievent.getData());
 
-        selectedSchedule = ss;
-        try {
-            ejbScheduleFacade.edit(selectedSchedule);
-            JsfUtil.addSuccessMessage(configMapFacade.getConfig("ScheduleUpdated"));
+                selectedSchedule = ss;
+                try {
+                    ejbScheduleFacade.edit(selectedSchedule);
+                    JsfUtil.addSuccessMessage(configMapFacade.getConfig("ScheduleUpdated"));
 
-        } catch (Exception e) {
-            JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
+                } catch (Exception e) {
+                    JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
 
+                }
+
+            }
         }
         selectedSchedule = null;
     }
@@ -254,31 +261,69 @@ public class SessionTimetableController implements Serializable {
     }
 
     public void onEventSelect(SelectEvent selectEvent) {
-        setEvent((TimetableScheduleEvent) selectEvent.getObject());
+        Object o = selectEvent;
+        if (o != null) {
+            o = selectEvent.getObject();
+            if (o.getClass() == TimetableScheduleEvent.class) {
+                setEvent((TimetableScheduleEvent) selectEvent.getObject());
+                RequestContext.getCurrentInstance().execute("PF('eventDialog').show()");
+            }
+        }
     }
 
     public void onDateSelect(SelectEvent selectEvent) {
         Object o = selectEvent.getObject();
-        if (o.getClass() == Date.class) {
-            Date date = (Date) selectEvent.getObject();
-            GregorianCalendar cal = new GregorianCalendar();
-            cal.setTime(date);
+        if (o != null) {
+            if (o.getClass() == Date.class) {
+                Date date = (Date) selectEvent.getObject();
+                GregorianCalendar cal = new GregorianCalendar();
+                cal.setTime(date);
 
-            //   if (cal.get(Calendar.HOUR_OF_DAY) == 0 && cal.get(Calendar.MINUTE) == 0 && cal.get(Calendar.SECOND) == 0) {
-            cal.add(Calendar.HOUR_OF_DAY, 8); // set default hour to 9am
-            // }
-            Date start = cal.getTime();
-            cal.add(Calendar.HOUR_OF_DAY, 1);
-            Date end = cal.getTime();
-            cal.add(Calendar.HOUR_OF_DAY, -25);
-            Date remind = cal.getTime();
-            TimetableScheduleEvent sEvent = new TimetableScheduleEvent("New Event", start, end);
-            sEvent.setReminderDate(remind);
-            setEvent(sEvent);
+                //   if (cal.get(Calendar.HOUR_OF_DAY) == 0 && cal.get(Calendar.MINUTE) == 0 && cal.get(Calendar.SECOND) == 0) {
+                cal.add(Calendar.HOUR_OF_DAY, 8); // set default hour to 9am
+                // }
+                Date start = cal.getTime();
+                cal.add(Calendar.HOUR_OF_DAY, 1);
+                Date end = cal.getTime();
+                cal.add(Calendar.HOUR_OF_DAY, -25);
+                Date remind = cal.getTime();
+                TimetableScheduleEvent sEvent = new TimetableScheduleEvent("New Event", start, end);
+                sEvent.setReminderDate(remind);
+                setEvent(sEvent);
 
-            //Add facesmessage
-        } else {
-            logger.log(Level.WARNING, "onDateSelect - the Object returned by the evenet is not a date");
+                //Add facesmessage
+            } else {
+                logger.log(Level.WARNING, "onDateSelect - the Object returned by the evenet is not a date");
+            }
+        }
+
+    }
+
+    public void onTimetableEventSelect(SelectEvent selectEvent) {
+        Object o = selectEvent.getObject();
+        if (o != null) {
+            if (o.getClass() == Date.class) {
+                Date date = (Date) selectEvent.getObject();
+                GregorianCalendar cal = new GregorianCalendar();
+                cal.setTime(date);
+
+                //   if (cal.get(Calendar.HOUR_OF_DAY) == 0 && cal.get(Calendar.MINUTE) == 0 && cal.get(Calendar.SECOND) == 0) {
+                cal.add(Calendar.HOUR_OF_DAY, 8); // set default hour to 9am
+                // }
+                Date start = cal.getTime();
+                cal.add(Calendar.HOUR_OF_DAY, 1);
+                Date end = cal.getTime();
+                cal.add(Calendar.HOUR_OF_DAY, -25);
+                Date remind = cal.getTime();
+                TimetableScheduleEvent sEvent = new TimetableScheduleEvent("New Event", start, end);
+                sEvent.setReminderDate(remind);
+                setEvent(sEvent);
+                //RequestContext.getCurrentInstance().execute("PF('eventDialog').show()");
+
+                //Add facesmessage
+            } else {
+                logger.log(Level.WARNING, "onDateSelect - the Object returned by the evenet is not a date");
+            }
         }
 
     }
@@ -360,8 +405,9 @@ public class SessionTimetableController implements Serializable {
                             sessionDate.add(Calendar.MINUTE, template.getDurationMinutes());
                             TimetableScheduleEvent ev = new TimetableScheduleEvent(template.getSessionTitle(), ss.getSessiondate(), sessionDate.getTime(), false);
                             ev.setDatabasePK(ss.getId());
-                            ev.setStyleClass(getEventStyleClass());
+                            ev.setStyleClass(template.getSessionStyleClasses());
                             ev.setData(ss);
+                            ev.setDescription(template.getComments());
 
                             addEvent(ev);
                         }
@@ -570,11 +616,24 @@ public class SessionTimetableController implements Serializable {
 
     private void performDestroy() {
         try {
+            deleteFutureChildSessions();
             getFacade().remove(current);
             JsfUtil.addSuccessMessage(configMapFacade.getConfig("SessionTimetableDeleted"));
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
         }
+    }
+
+    private void deleteFutureChildSessions() {
+        Collection<SessionHistory> children = current.getSessionHistoryCollection();
+        for (Iterator<SessionHistory> iterator = children.iterator(); iterator.hasNext();) {
+            SessionHistory next = iterator.next();
+            if (next.getSessiondate().compareTo(new Date()) > 0) {
+                sessionHistoryFacade.remove(next);
+            }
+
+        }
+
     }
 
     private void updateCurrentItem() {

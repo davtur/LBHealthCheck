@@ -47,7 +47,9 @@ import org.primefaces.model.map.Marker;
     @NamedQuery(name = "SessionTimetable.findById", query = "SELECT s FROM SessionTimetable s WHERE s.id = :id"),
     @NamedQuery(name = "SessionTimetable.findBySessiondate", query = "SELECT s FROM SessionTimetable s WHERE s.sessiondate = :sessiondate")})
 public class SessionTimetable implements BaseEntity, Serializable {
+
     // @Max(value=?)  @Min(value=?)//if you know range of your decimal fields consider using these annotations to enforce field validation
+
     @Column(name = "session_casual_rate")
     private BigDecimal sessionCasualRate;
     @Column(name = "session_members_rate")
@@ -89,6 +91,9 @@ public class SessionTimetable implements BaseEntity, Serializable {
     @Basic(optional = false)
     @Column(name = "id")
     private Integer id;
+
+    @Column(name = "session_timetable_status")
+    private Integer sessionTimetableStatus;
     @Basic(optional = false)
     @NotNull
     @Column(name = "sessiondate")
@@ -98,6 +103,10 @@ public class SessionTimetable implements BaseEntity, Serializable {
     @Size(max = 65535)
     @Column(name = "comments")
     private String comments;
+    @Lob
+    @Size(max = 65535)
+    @Column(name = "session_style_classes")
+    private String sessionStyleClasses;
     @Lob
     @Size(max = 65535)
     @Column(name = "admin_notes")
@@ -253,7 +262,7 @@ public class SessionTimetable implements BaseEntity, Serializable {
                 Double lat = new Double(cooards[0]);
                 Double lng = new Double(cooards[1]);
                 LatLng coord1 = new LatLng(lat, lng);
-                 
+
                 simpleModel.addOverlay(new Marker(coord1, sessionLocationLabel));
             }
         }
@@ -291,6 +300,34 @@ public class SessionTimetable implements BaseEntity, Serializable {
 
     public void setSessionMembersRate(BigDecimal sessionMembersRate) {
         this.sessionMembersRate = sessionMembersRate;
+    }
+
+    /**
+     * @return the sessionTimetableStatus
+     */
+    public Integer getSessionTimetableStatus() {
+        return sessionTimetableStatus;
+    }
+
+    /**
+     * @param sessionTimetableStatus the sessionTimetableStatus to set
+     */
+    public void setSessionTimetableStatus(Integer sessionTimetableStatus) {
+        this.sessionTimetableStatus = sessionTimetableStatus;
+    }
+
+    /**
+     * @return the sessionStyleClasses
+     */
+    public String getSessionStyleClasses() {
+        return sessionStyleClasses;
+    }
+
+    /**
+     * @param sessionStyleClasses the sessionStyleClasses to set
+     */
+    public void setSessionStyleClasses(String sessionStyleClasses) {
+        this.sessionStyleClasses = sessionStyleClasses;
     }
 
 }
