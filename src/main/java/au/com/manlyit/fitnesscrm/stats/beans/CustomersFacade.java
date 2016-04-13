@@ -89,7 +89,8 @@ public class CustomersFacade extends AbstractFacade<Customers> {
         // Query q = em.createNativeQuery("SELECT * FROM customers where username = '" + username + "'", Customers.class);
         // return (Customers) q.getSingleResult();
     }
-      public Customers findCustomerByEmail(String email) {
+
+    public Customers findCustomerByEmail(String email) {
 
         // CriteriaBuilder cb = em.getCriteriaBuilder();
         //CriteriaQuery<Customers> cq = cb.createQuery(Customers.class);
@@ -264,7 +265,7 @@ public class CustomersFacade extends AbstractFacade<Customers> {
             e = pe.getCause();
             if (e.getClass() == ConstraintViolationException.class) {
                 ConstraintViolationException cve = (ConstraintViolationException) e;
-                       logger.log(Level.WARNING, "Customers findById, An ConstraintViolationException occurred for customer id :{0}, Message: {1}" ,new Object[]{ id,cve.getConstraintViolations().toString()});
+                logger.log(Level.WARNING, "Customers findById, An ConstraintViolationException occurred for customer id :{0}, Message: {1}", new Object[]{id, cve.getConstraintViolations().toString()});
             }
 
             JsfUtil.addErrorMessage(pe, configMapFacade.getConfig("PersistenceErrorOccured"));
@@ -299,6 +300,12 @@ public class CustomersFacade extends AbstractFacade<Customers> {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
         }
         return retList;
+    }
+
+    public List<Customers> findAllActiveCustomersAndStaff(boolean sortAsc) {
+        ArrayList<CustomerState> acs = new ArrayList<>();
+        acs.add(new CustomerState(0, "ACTIVE"));
+        return findFilteredCustomers(sortAsc, acs, true, false);
     }
 
     public List<Customers> findAllActiveCustomers(boolean sortAsc) {

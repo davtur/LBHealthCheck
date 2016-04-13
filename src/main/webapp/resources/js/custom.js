@@ -11,8 +11,7 @@ function handleCreateRequest(xhr, status, args, dialog, listTable) {
     var jqDialog = jQuery('#' + dialog);
     if (args.validationFailed) {
         jqDialog.jq.effect("shake", {times: 5}, 100);
-    }
-    else {
+    } else {
         PF(dialog).hide();
         PF(listTable).filter();
     }
@@ -29,16 +28,21 @@ function customUserStatsLineChartExtender() {
     this.cfg.grid = {
         background: 'transparent',
         gridLineColor: '#a0a0a0',
-        drawBorder: false,
-    }
+        drawBorder: false
+    };
 }
 
 function customUserStatsBarChartExtender() {
     this.cfg.grid = {
         background: 'transparent',
         gridLineColor: '#a0a0a0',
-        drawBorder: false,
-    }
+        drawBorder: false
+    };
+    this.cfg.legend = {
+        show: true,
+        location: 'ne',
+        placement: 'outsideGrid'
+    };
 }
 
 //background: '#FFF' ,

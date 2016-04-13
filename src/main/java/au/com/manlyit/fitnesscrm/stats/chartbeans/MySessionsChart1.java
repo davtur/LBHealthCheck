@@ -54,9 +54,10 @@ public class MySessionsChart1 implements Serializable {
     private BarChartModel model2;
     private BarChartModel customModel;
     private BarChartModel dashboardMonthlyRevenueModel;
+    private BarChartModel dashboardMonthlySessionsModel;
 
     private Customers selectedCustomer;
-    private String xAxisLabel = "Week Starting On";
+    
     private Date startDate;
     private Date endDate;
     private int dateInterval = 1;
@@ -104,7 +105,7 @@ public class MySessionsChart1 implements Serializable {
     private PaymentsFacade paymentsFacade;
 
     //@PostConstruct
-   /* public void createChart() {
+    /* public void createChart() {
      SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yy");
      FacesContext context = FacesContext.getCurrentInstance();
      Customers loggedInUser = null;
@@ -150,7 +151,7 @@ public class MySessionsChart1 implements Serializable {
      model.addSeries(ptSessionSeries);
 
      }*/
-    public Date getChartStartTime() {
+  /*  public Date getChartStartTime() {
         GregorianCalendar startCal = new GregorianCalendar();
         startCal.setTime(getStartDate());
         startCal.set(Calendar.HOUR_OF_DAY, 0);
@@ -170,7 +171,7 @@ public class MySessionsChart1 implements Serializable {
         endCal.set(Calendar.MILLISECOND, 999);
         setEndDate(endCal.getTime());
         return endCal.getTime();
-    }
+    }*/
 
     public Date zeroTimeField(Date d) {
         GregorianCalendar startCal = new GregorianCalendar();
@@ -192,8 +193,9 @@ public class MySessionsChart1 implements Serializable {
 
     }
 
-    private BarChartModel createSessionsChart(boolean isTrainer, Customers user, int dateInterval) {
-        BarChartModel ccModel;
+    private BarChartModel createSessionsChart(boolean isTrainer, Customers user, int dateInterval,Date startDate,Date endDate) {
+        BarChartModel ccModel = null;
+        String xAxisLabel = "";
         GregorianCalendar startCal = new GregorianCalendar();
         GregorianCalendar endCal = new GregorianCalendar();
         int calendarIncrementInterval;
@@ -220,45 +222,45 @@ public class MySessionsChart1 implements Serializable {
         }
         SimpleDateFormat sdf = new SimpleDateFormat(dateFormatString);
 
-        startCal.setTime(getChartStartTime());
-        endCal.setTime(getChartEndTime());
-
-        while (startCal.compareTo(endCal) < 0) {
-            startCal.add(calendarIncrementInterval, 1);
-            numberOfSeriesPoints++;
-        }
-        startCal.setTime(getStartDate());
-        endCal.setTime(getStartDate());
-        //endCal.set(Calendar.HOUR, 23);
-        //endCal.set(Calendar.SECOND, 59);
-        // endCal.set(Calendar.MINUTE, 59);
-        //endCal.set(Calendar.MILLISECOND, 999);
-        endCal.add(calendarIncrementInterval, 1);
-
-        List<BarChartSeries> seriesList = new ArrayList<>();
-        List<SessionHistory> sessions;//ejbSessionHistoryFacade.findSessionsByTrainerAndDateRange(user.getId(), top, bottom, ptSessionIDs);
-        List<SessionTypes> sessionTypesList = ejbSessionTypesFacade.findAll();
-
-        for (SessionTypes st : sessionTypesList) {
-            BarChartSeries barChartSeries = new BarChartSeries();
-
-            barChartSeries.setLabel(st.getName());
-            seriesList.add(barChartSeries);
-        }
         try {
-            for (int x = 0; x < numberOfSeriesPoints; x++) {
+            startCal.setTime(startDate);
+            endCal.setTime(endDate);
 
-                String xAxixValue = sdf.format(startCal.getTime());
-                for (BarChartSeries lcs : seriesList) {
-                    lcs.set(xAxixValue, (double) 0);
-                }
-                Date strt = startCal.getTime();
-                Date end = endCal.getTime();
-                if (user == null) {
-                    sessions = ejbSessionHistoryFacade.findSessionsByDateRange(strt, end, true);
-                    logger.log(Level.INFO, "Get ALL Sessions , No.Sessions:{1},startdate:{2},End date:{3}", new Object[]{sessions.size(), strt, end});
-                } else {
-                    if (isTrainer == false) {
+            while (startCal.compareTo(endCal) < 0) {
+                startCal.add(calendarIncrementInterval, 1);
+                numberOfSeriesPoints++;
+            }
+            startCal.setTime(startDate);
+            endCal.setTime(endDate);
+            //endCal.set(Calendar.HOUR, 23);
+            //endCal.set(Calendar.SECOND, 59);
+            // endCal.set(Calendar.MINUTE, 59);
+            //endCal.set(Calendar.MILLISECOND, 999);
+            endCal.add(calendarIncrementInterval, 1);
+
+            List<BarChartSeries> seriesList = new ArrayList<>();
+            List<SessionHistory> sessions;//ejbSessionHistoryFacade.findSessionsByTrainerAndDateRange(user.getId(), top, bottom, ptSessionIDs);
+            List<SessionTypes> sessionTypesList = ejbSessionTypesFacade.findAll();
+
+            for (SessionTypes st : sessionTypesList) {
+                BarChartSeries barChartSeries = new BarChartSeries();
+
+                barChartSeries.setLabel(st.getName());
+                seriesList.add(barChartSeries);
+            }
+            try {
+                for (int x = 0; x < numberOfSeriesPoints; x++) {
+
+                    String xAxixValue = sdf.format(startCal.getTime());
+                    for (BarChartSeries lcs : seriesList) {
+                        lcs.set(xAxixValue, (double) 0);
+                    }
+                    Date strt = startCal.getTime();
+                    Date end = endCal.getTime();
+                    if (user == null) {
+                        sessions = ejbSessionHistoryFacade.findSessionsByDateRange(strt, end, true);
+                        logger.log(Level.INFO, "Get ALL Sessions , No.Sessions:{1},startdate:{2},End date:{3}", new Object[]{sessions.size(), strt, end});
+                    } else if (isTrainer == false) {
                         sessions = ejbSessionHistoryFacade.findSessionsByParticipantAndDateRange(user, strt, end, true);
                         logger.log(Level.INFO, "Get Sessions for Participant:{0}, No.Sessions:{1},startdate:{2},End date:{3}", new Object[]{user.getUsername(), sessions.size(), strt, end});
 
@@ -266,78 +268,84 @@ public class MySessionsChart1 implements Serializable {
                         sessions = ejbSessionHistoryFacade.findSessionsByTrainerAndDateRange(user, strt, end, true);
                         logger.log(Level.INFO, "Get Sessions for Trainer:{0}, No.Sessions:{1},startdate:{2},End date:{3}", new Object[]{user.getUsername(), sessions.size(), strt, end});
                     }
-                }
 
-                for (SessionHistory sess : sessions) {
-                    String type = sess.getSessionTypesId().getName();
-                    for (BarChartSeries barChartSeries : seriesList) {
-                        if (barChartSeries.getLabel().compareTo(type) == 0) {
-                            Double c = (Double) barChartSeries.getData().get(xAxixValue);
+                    for (SessionHistory sess : sessions) {
+                        String type = sess.getSessionTypesId().getName();
+                        for (BarChartSeries barChartSeries : seriesList) {
+                            if (barChartSeries.getLabel().compareTo(type) == 0) {
+                                Double c = (Double) barChartSeries.getData().get(xAxixValue);
 
-                            if (c == null) {
-                                c = new Double(1);
-                            } else {
-                                c = c + (double) 1;
+                                if (c == null) {
+                                    c = new Double(1);
+                                } else {
+                                    c = c + (double) 1;
+                                }
+                                logger.log(Level.FINE, "Get Sessions for Trainer.Add chartpoint at {1}, Value:{1}", new Object[]{c.toString(), xAxixValue});
+                                barChartSeries.set(xAxixValue, c);
+                                int index = seriesList.indexOf(barChartSeries);
+                                seriesList.set(index, barChartSeries);
                             }
-                            logger.log(Level.FINE, "Get Sessions for Trainer.Add chartpoint at {1}, Value:{1}", new Object[]{c.toString(), xAxixValue});
-                            barChartSeries.set(xAxixValue, c);
-                            int index = seriesList.indexOf(barChartSeries);
-                            seriesList.set(index, barChartSeries);
                         }
                     }
+                    startCal.add(calendarIncrementInterval, 1);
+                    endCal.add(calendarIncrementInterval, 1);
+
                 }
-                startCal.add(calendarIncrementInterval, 1);
-                endCal.add(calendarIncrementInterval, 1);
+            } catch (Exception e) {
+                JsfUtil.addErrorMessage(e, "My Sessions Chart Critical Error", "Couldn't get customer session data from the database.");
+            }
+            ccModel = new BarChartModel();
+
+            int numberOfSeriesAddedToChart = 0;
+            for (BarChartSeries bcs : seriesList) {
+                Collection<Number> values = bcs.getData().values();
+                Double totalSessions = (double) 0;
+                Iterator i = values.iterator();
+                while (i.hasNext()) {
+                    totalSessions = totalSessions + (Double) i.next();
+                }
+
+                if (totalSessions.compareTo(new Double(0)) > 0) {
+                    ccModel.addSeries(bcs);
+                    numberOfSeriesAddedToChart++;
+                }
+            }
+            if (numberOfSeriesAddedToChart == 0) { // add an empty series with a label of empty
+                if (seriesList.isEmpty() == false) {
+                    BarChartSeries bcs = seriesList.get(0);
+                    bcs.setLabel("Empty");
+                    bcs.set(sdf.format(startDate), (double) 0);
+                    bcs.set(sdf.format(endDate), (double) 0);
+                    ccModel.addSeries(bcs);
+                    logger.log(Level.INFO, "The date range selected is for the seriesList is empty!");
+                } else {
+                    logger.log(Level.WARNING, "Cannot creat a chart model as the seriesList is empty!");
+                }
 
             }
+            if(user != null ){
+                ccModel.setTitle(getSelectedCustomer().getFirstname() + " " + getSelectedCustomer().getLastname());
+            }else{
+                ccModel.setTitle("All Sessions");
+            }
+            ccModel.setLegendPosition("ne");
+            ccModel.setStacked(true);
+            ccModel.setExtender("customUserStatsBarChartExtender");
+
+            Axis xAxis = ccModel.getAxis(AxisType.X);
+            xAxis.setLabel(xAxisLabel);
+            xAxis.setTickAngle(65);
+
         } catch (Exception e) {
-            JsfUtil.addErrorMessage(e, "My Sessions Chart Critical Error", "Couldn't get customer session data from the database.");
+            logger.log(Level.WARNING, "AN error occurred creating the customChart", e);
         }
-        ccModel = new BarChartModel();
-
-        int numberOfSeriesAddedToChart = 0;
-        for (BarChartSeries bcs : seriesList) {
-            Collection<Number> values = bcs.getData().values();
-            Double totalSessions = (double) 0;
-            Iterator i = values.iterator();
-            while (i.hasNext()) {
-                totalSessions = totalSessions + (Double) i.next();
-            }
-
-            if (totalSessions.compareTo(new Double(0)) > 0) {
-                ccModel.addSeries(bcs);
-                numberOfSeriesAddedToChart++;
-            }
-        }
-        if (numberOfSeriesAddedToChart == 0) { // add an empty series with a label of empty
-            if (seriesList.isEmpty() == false) {
-                BarChartSeries bcs = seriesList.get(0);
-                bcs.setLabel("Empty");
-                bcs.set(sdf.format(getChartStartTime()), (double) 0);
-                bcs.set(sdf.format(getChartEndTime()), (double) 0);
-                ccModel.addSeries(bcs);
-                logger.log(Level.INFO, "The date range selected is for the seriesList is empty!");
-            } else {
-                logger.log(Level.WARNING, "Cannot creat a chart model as the seriesList is empty!");
-            }
-
-        }
-        ccModel.setTitle(getSelectedCustomer().getFirstname() + " " + getSelectedCustomer().getLastname());
-        ccModel.setLegendPosition("ne");
-        ccModel.setStacked(true);
-        ccModel.setExtender("customUserStatsBarChartExtender");
-
-        Axis xAxis = ccModel.getAxis(AxisType.X);
-        xAxis.setLabel(getXaxisLabel());
-        xAxis.setTickAngle(65);
-
         // Axis yAxis = ccModel.getAxis(AxisType.Y);
         // yAxis.setLabel(getY);
         return ccModel;
 
     }
 
-    private BarChartModel createMonthlyRevenueChart() {
+    private BarChartModel createMonthlyRevenueChart(int datePeriodInterval,Date startDate,Date endDate) {
         BarChartModel ccModel = null;
         GregorianCalendar startCal = new GregorianCalendar();
         GregorianCalendar endCal = new GregorianCalendar();
@@ -347,24 +355,43 @@ public class MySessionsChart1 implements Serializable {
         int numberOfSeriesPoints = 0;
         String dateFormatString;
 
-        calendarIncrementInterval = Calendar.MONTH;
-        xAxisLabel = "Month";
-        dateFormatString = "MMM yy";
+        
+        String xAxisLabel ;
+       
+        switch (datePeriodInterval) {
+            case 1: //weekly
+            default:
+                calendarIncrementInterval = Calendar.WEEK_OF_YEAR;
+                xAxisLabel = "Week Starting On";
+                dateFormatString = "dd MMM yy";
+                break;
+            case 2: //monthly
+                calendarIncrementInterval = Calendar.MONTH;
+                xAxisLabel = "Month";
+                dateFormatString = "MMM yy";
+                break;
+            case 3: //daily
+                calendarIncrementInterval = Calendar.DAY_OF_YEAR;
+                xAxisLabel = "Day";
+                dateFormatString = "dd MMM yy";
+                break;
+
+        }
 
         SimpleDateFormat sdf = new SimpleDateFormat(dateFormatString);
 
         try {
-            startCal.setTime(getRolling12MonthRevenue());
+            startCal.setTime(startDate);
             comparisonCal.setTime(startCal.getTime());
-            endCal.setTime(startCal.getTime());
-            endCal.add(Calendar.MONTH, 12);
+            endCal.setTime(endDate);
+          
 
             while (comparisonCal.compareTo(endCal) < 0) {
                 comparisonCal.add(calendarIncrementInterval, 1);
                 numberOfSeriesPoints++;
             }
 
-            endCal.setTime(startCal.getTime());
+            endCal.setTime(startDate);
             //endCal.set(Calendar.HOUR, 23);
             //endCal.set(Calendar.SECOND, 59);
             // endCal.set(Calendar.MINUTE, 59);
@@ -385,9 +412,10 @@ public class MySessionsChart1 implements Serializable {
 
             LineChartSeries lineChartSeries1 = new LineChartSeries();
             lineChartSeries1.setLabel("Total");
-            seriesList.add(lineChartSeries1);
             lineChartSeries1.setYaxis(AxisType.Y2);
+            seriesList.add(lineChartSeries1);
 
+            double maxTotal = 0;
             try {
                 for (int x = 0; x < numberOfSeriesPoints; x++) {
 
@@ -402,6 +430,7 @@ public class MySessionsChart1 implements Serializable {
                     float reportTotalSuccessful = 0;
                     float reportTotalDishonoured = 0;
                     float reportTotalScheduled = 0;
+
                     boolean reportUseSettlementDate = false;
                     boolean reportShowSuccessful = true;
                     boolean reportShowFailed = false;
@@ -414,7 +443,6 @@ public class MySessionsChart1 implements Serializable {
                         for (Payments p : paymentList) {
                             if (p.getPaymentStatus().contains(PaymentStatus.SUCESSFUL.value()) || p.getPaymentStatus().contains(PaymentStatus.PENDING.value())) {
                                 reportTotalSuccessful = reportTotalSuccessful + p.getPaymentAmount().floatValue();
-                               
 
                             } else if (p.getPaymentStatus().contains(PaymentStatus.DISHONOURED.value()) || p.getPaymentStatus().contains(PaymentStatus.FATAL_DISHONOUR.value())) {
                                 reportTotalDishonoured = reportTotalDishonoured + p.getPaymentAmount().floatValue();
@@ -432,9 +460,14 @@ public class MySessionsChart1 implements Serializable {
                         seriesList.set(index, barChartSeries2);
 
                         double total = (double) reportTotalScheduled + (double) reportTotalSuccessful;
+
                         lineChartSeries1.set(xAxixValue, total);
                         index = seriesList.indexOf(lineChartSeries1);
                         seriesList.set(index, lineChartSeries1);
+
+                        if (total > maxTotal) {
+                            maxTotal = total;
+                        }
 
                         logger.log(Level.INFO, "Get ALL Payments , No.Payments:{1},startdate:{2},End date:{3}", new Object[]{paymentList.size(), strt, end});
 
@@ -477,30 +510,37 @@ public class MySessionsChart1 implements Serializable {
                 if (seriesList.isEmpty() == false) {
                     BarChartSeries bcs = (BarChartSeries) seriesList.get(0);
                     bcs.setLabel("Empty");
-                    bcs.set(sdf.format(getChartStartTime()), (double) 0);
-                    bcs.set(sdf.format(getChartEndTime()), (double) 0);
+                    bcs.set(sdf.format(startDate), (double) 0);
+                    bcs.set(sdf.format(endDate), (double) 0);
                     ccModel.addSeries(bcs);
                     logger.log(Level.INFO, "The date range selected is for the seriesList is empty!");
                 } else {
                     logger.log(Level.WARNING, "Cannot creat a chart model as the seriesList is empty!");
                 }
- 
+
             }
             ccModel.setTitle("Revenue Report");
             ccModel.setLegendPosition("ne");
             ccModel.setStacked(true);
             ccModel.setExtender("customUserStatsBarChartExtender");
- 
+
             Axis xAxis = ccModel.getAxis(AxisType.X);
-            xAxis.setLabel(getXaxisLabel());
+            xAxis.setLabel(xAxisLabel);
             xAxis.setTickAngle(65);
             Axis yAxis = ccModel.getAxis(AxisType.Y);
             yAxis.setLabel("Revenue $");
             yAxis.setMin(0);
-            Axis y2Axis = new LinearAxis("Revenue $");
+            Axis y2Axis = new LinearAxis("");
             y2Axis.setMin(0);
             ccModel.getAxes().put(AxisType.Y2, y2Axis);
- 
+            double yAxisHeght = 1000;
+            while (yAxisHeght < maxTotal) {
+                yAxisHeght = yAxisHeght + 1000;
+            }
+            yAxis.setMax(yAxisHeght);
+            y2Axis.setMax(yAxisHeght * 2);
+            
+
             // Axis yAxis = ccModel.getAxis(AxisType.Y);
         } catch (Exception e) {
             logger.log(Level.WARNING, "Monthly REvenue Chart Error", e);
@@ -514,13 +554,22 @@ public class MySessionsChart1 implements Serializable {
         model2 = null;
         customModel = null;
     }
+    
+    
+    public void recreateDashboardModels() {
+        dashboardMonthlyRevenueModel = null;
+        dashboardMonthlySessionsModel = null;
+       // RequestContext requestContext = RequestContext.getCurrentInstance();
+
+        // requestContext.execute("PF('sessionsDataTable').filter();");
+    }
 
     public BarChartModel getModel() {
         if (model == null) {
             try {
                 FacesContext context = FacesContext.getCurrentInstance();
                 CustomersController custController = context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
-                model = createSessionsChart(false, custController.getSelected(), getDateInterval());
+                model = createSessionsChart(false, custController.getSelected(), getDateInterval(),getStartDate(),getEndDate());
             } catch (ELException e) {
                 JsfUtil.addErrorMessage(e, "My Sessions Chart Critical Error", "Couldn't find the customer in the database.");
             }
@@ -533,7 +582,7 @@ public class MySessionsChart1 implements Serializable {
             try {
                 FacesContext context = FacesContext.getCurrentInstance();
                 CustomersController custController = context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
-                model2 = createSessionsChart(true, custController.getSelected(), getDateInterval());
+                model2 = createSessionsChart(true, custController.getSelected(), getDateInterval(),getStartDate(),getEndDate());
             } catch (ELException e) {
                 JsfUtil.addErrorMessage(e, "My Sessions Chart Critical Error", "Couldn't find the customer in the database.");
             }
@@ -548,23 +597,23 @@ public class MySessionsChart1 implements Serializable {
 
     public BarChartModel getDashboardMonthlyRevenueModel() {
         if (dashboardMonthlyRevenueModel == null) {
-            dashboardMonthlyRevenueModel = createMonthlyRevenueChart();
+            dashboardMonthlyRevenueModel = createMonthlyRevenueChart(getDashboardDateInterval(),getDashboardStartDate(),getDashboardEndDate());
         }
         return dashboardMonthlyRevenueModel;
     }
 
-    public BarChartModel getdashboardMonthlySessionsChartModel() {
-        if (customModel == null) {
+    public BarChartModel getDashboardMonthlySessionsChartModel() {
+        if (dashboardMonthlySessionsModel == null) {
             //boolean isTrainer = FacesContext.getCurrentInstance().getExternalContext().isUserInRole("TRAINER");
             boolean isTrainer = ejbGroupsFacade.isCustomerInGroup(getSelectedCustomer(), "TRAINER");
-            if (showAllUsers) {
-                customModel = createSessionsChart(isTrainer, null, getDashboardDateInterval());
+            if (dashboardShowAllUsers) {
+                dashboardMonthlySessionsModel = createSessionsChart(isTrainer, null, getDashboardDateInterval(),getDashboardStartDate(),getDashboardEndDate());
             } else {
-                customModel = createSessionsChart(isTrainer, getSelectedCustomer(), getDashboardDateInterval());
+                dashboardMonthlySessionsModel = createSessionsChart(isTrainer, getSelectedCustomer(), getDashboardDateInterval(),getDashboardStartDate(),getDashboardEndDate());
             }
-
+ 
         }
-        return customModel;
+        return dashboardMonthlySessionsModel;
     }
 
     public BarChartModel getCustomChartModel() {
@@ -572,9 +621,9 @@ public class MySessionsChart1 implements Serializable {
             //boolean isTrainer = FacesContext.getCurrentInstance().getExternalContext().isUserInRole("TRAINER");
             boolean isTrainer = ejbGroupsFacade.isCustomerInGroup(getSelectedCustomer(), "TRAINER");
             if (showAllUsers) {
-                customModel = createSessionsChart(isTrainer, null, getDateInterval());
+                customModel = createSessionsChart(isTrainer, null, getDateInterval(),getStartDate(),getEndDate());
             } else {
-                customModel = createSessionsChart(isTrainer, getSelectedCustomer(), getDateInterval());
+                customModel = createSessionsChart(isTrainer, getSelectedCustomer(), getDateInterval(),getStartDate(),getEndDate());
             }
 
         }
@@ -606,25 +655,13 @@ public class MySessionsChart1 implements Serializable {
         sessionHistoryController.setSessionHistoryExportFileName();
     }
 
-    /**
-     * @return the xAxisLabel
-     */
-    public String getXaxisLabel() {
-        return xAxisLabel;
-    }
-
-    /**
-     * @param xAxisLabel the xAxisLabel to set
-     */
-    public void setXaxisLabel(String xAxisLabel) {
-        this.xAxisLabel = xAxisLabel;
-    }
+   
 
     /**
      * @return the startDate
      */
     public Date getStartDate() {
-        return startDate;
+        return zeroTimeField(startDate);
     }
 
     /**
@@ -640,7 +677,7 @@ public class MySessionsChart1 implements Serializable {
      * @return the endDate
      */
     public Date getEndDate() {
-        return endDate;
+        return zeroTimeField(endDate);
     }
 
     /**

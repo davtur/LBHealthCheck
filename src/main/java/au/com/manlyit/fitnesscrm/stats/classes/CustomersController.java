@@ -1089,7 +1089,7 @@ public class CustomersController implements Serializable {
         session.invalidate();
 
         // redirect to the login / home page
-       /* try {
+        /* try {
          //ec.redirect(ec.getRequestContextPath());
 
          ec.redirect(configMapFacade.getConfig("WebsiteURL"));
@@ -1100,6 +1100,7 @@ public class CustomersController implements Serializable {
          }*/
         return "/index.xhtml?faces-redirect=true";
     }
+
     /*public String logout() {
      try {
      HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
@@ -1272,6 +1273,10 @@ public class CustomersController implements Serializable {
 
     public Collection<Customers> getCustomersAvailableSelectOneObject() {
         return ejbFacade.findAll(true);
+    }
+
+    public Collection<Customers> getActiveCustomersAndStaff() {
+        return ejbFacade.findAllActiveCustomersAndStaff(true);
     }
 
     public SelectItem[] getCustomersByGroupSelectOne(String group, boolean sortAsc) {

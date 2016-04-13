@@ -1,6 +1,6 @@
 
 @import url(/FitnessStats/resources/css/css/base.css);
-//@import url(/FitnessStats/resources/css/css/layout.css);
+/*@import url(/FitnessStats/resources/css/css/layout.css);*/
 @import url(/FitnessStats/resources/css/css/font1/arial.css);
 /*div.wrapper { 
     max-width: 980px !important; 
@@ -18,15 +18,15 @@
 .menu-dropdown a.level1 > span, .menu-dropdown span.level1 > span { width: 70px; }
 #header, #block-main { margin-left: 0px; }
 #maininner { width: 100%; }
-//#headerbar {
+/*//#headerbar {
 ////   background:  url(/FitnessStats/resources/images/logo.png) 50% 0 repeat-x; 
-//}
+//}*/
 div.emailTemplateEditor .ui-editor {
     height:100% ; 
 }
 
 .editPaymentMethodIFrame {
-    //background-color:  #ffffff !important;
+    /*//background-color:  #ffffff !important;*/
     max-height: 400px !important;
     height: 380px !important;
     width: 320px !important;  
@@ -55,9 +55,6 @@ div.emailTemplateEditor .ui-editor {
 .emailEditorInput{
     width:600px;  
 }
-//#page { background: #0e446a url(/FitnessStats/resources/images/background/ocean_bg.jpg) 50% 0 repeat-x; margin-top: 0px;}
-
-//#page-bg { background: url(/FitnessStats/resources/images/background/ocean_img.jpg) 50% 0 no-repeat; }
 
 .loginPanel { 
     background: #ffffff url(/FitnessStats/resources/images/ptlogin2.png) 50% 0 no-repeat;  

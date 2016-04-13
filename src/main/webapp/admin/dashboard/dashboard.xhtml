@@ -15,12 +15,12 @@
                 <p:panelGrid columns="4" style="width:100%"  >
                    <!-- <p:outputLabel value="#{configMapController.getKey('SelectCustomerForSessionHistory_Label')}" for="sessionstart" />-->
                     <h:panelGrid columns="3" >
-                        <p:selectOneMenu id="custForChart" disabled="#{mySessionsChart1.dashboardShowAllUsers}"  value="#{mySessionsChart1.selectedCustomer}" filter="true" converter="customersControllerConverter"  label="#{configMapController.getKey('SelectCustomerForSessionHistory_Title')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionHistoryRequiredMessage_trainer')}">
-                            <f:selectItems value="#{customersController.customersAvailableSelectOneObject}"   var="cust" itemLabel="#{cust.firstname} #{cust.lastname}" itemValue="#{cust}"/>
+                        <p:selectOneMenu id="custForChart" disabled="#{mySessionsChart1.dashboardShowAllUsers}"  value="#{mySessionsChart1.selectedCustomer}"  valueChangeListener="#{mySessionsChart1.recreateDashboardModels}"  filter="true" converter="customersControllerConverter"  label="#{configMapController.getKey('SelectCustomerForSessionHistory_Title')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionHistoryRequiredMessage_trainer')}">
+                            <f:selectItems value="#{customersController.activeCustomersAndStaff}"   var="cust" itemLabel="#{cust.firstname} #{cust.lastname}" itemValue="#{cust}"/>
                             <p:ajax   update=":listSessionHistoryForm1" />
                         </p:selectOneMenu>
 
-                        <p:selectBooleanCheckbox id="showAllUsers"   value="#{mySessionsChart1.dashboardShowAllUsers}" >  
+                        <p:selectBooleanCheckbox id="showAllUsers"   value="#{mySessionsChart1.dashboardShowAllUsers}" valueChangeListener="#{mySessionsChart1.recreateDashboardModels}" >  
                             <p:ajax update="@form"   />  
                         </p:selectBooleanCheckbox> 
 
@@ -29,26 +29,26 @@
                     <h:panelGrid columns="2" >
                     <p:outputLabel value="#{configMapController.getKey('SelectStartDateForSessionHistory_Label')}" for="sessionstart" />
                     <p:calendar id="sessionstart" value="#{mySessionsChart1.dashboardStartDate}" pattern="dd MMMM yyyy"
-                                title="#{configMapController.getKey('SelectStartDateForSessionHistory_Title')}"    >
+                                title="#{configMapController.getKey('SelectStartDateForSessionHistory_Title')}" valueChangeListener="#{mySessionsChart1.recreateDashboardModels}"   >
                         <p:ajax event="dateSelect"  update=":listSessionHistoryForm1"  />
                     </p:calendar> 
                     </h:panelGrid>
                      <h:panelGrid columns="2" >
                     <p:outputLabel value="#{configMapController.getKey('SelectEndDateForSessionHistory_Label')}" for="sessionend" />
-                    <p:calendar id="sessionend" value="#{mySessionsChart1.dashboardEndDate}"  pattern="dd MMMM yyyy"
+                    <p:calendar id="sessionend" value="#{mySessionsChart1.dashboardEndDate}"  pattern="dd MMMM yyyy" valueChangeListener="#{mySessionsChart1.recreateDashboardModels}"
                                 title="#{configMapController.getKey('SelectEndDateForSessionHistory_Title')}"    >
                         <p:ajax event="dateSelect"  update=":listSessionHistoryForm1"  />
                     </p:calendar> 
                     </h:panelGrid>
                    <!-- <p:outputLabel value="#{configMapController.getKey('SelectDateIntervalForSessionHistory_Label')}" for="chartInterval" />-->
-                    <p:selectOneMenu id="chartInterval"   value="#{mySessionsChart1.dashboardDateInterval}"   label="#{configMapController.getKey('CreateSessionHistoryTitle_trainer')}" >
+                    <p:selectOneMenu id="chartInterval"   value="#{mySessionsChart1.dashboardDateInterval}"   label="#{configMapController.getKey('CreateSessionHistoryTitle_trainer')}" valueChangeListener="#{mySessionsChart1.recreateDashboardModels}" >
                         <f:selectItems value="#{mySessionsChart1.dateIntervalItems}" />                         
                         <p:ajax   update=":listSessionHistoryForm1" />
                     </p:selectOneMenu>
                 </p:panelGrid>
 
                 <p:panel id="customChart" widgetVar="customChartWidget" header="Sessions Chart ">
-                    <p:chart type="bar"   styleClass="chartClass" model="#{mySessionsChart1.customChartModel}"     />
+                    <p:chart type="bar"   styleClass="chartClass" model="#{mySessionsChart1.dashboardMonthlySessionsChartModel}"     />
                 </p:panel>
 
 
