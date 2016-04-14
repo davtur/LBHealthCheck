@@ -198,6 +198,7 @@
 /home/david/NetBeansProjects/FitnessCRM/src/main/java/au/com/manlyit/fitnesscrm/stats/beans/CarouselBean.java
 /home/david/NetBeansProjects/FitnessCRM/src/main/java/au/com/manlyit/fitnesscrm/stats/converters/ConfigMapConverter.java
 /home/david/NetBeansProjects/FitnessCRM/src/main/java/au/com/manlyit/fitnesscrm/stats/db/Stat.java
+/home/david/NetBeansProjects/FitnessCRM/src/main/java/au/com/manlyit/fitnesscrm/stats/webservices/WordpressInterfaceWebService.java
 /home/david/NetBeansProjects/FitnessCRM/src/main/java/au/com/manlyit/fitnesscrm/stats/classes/QrtzSimpleTriggersController.java
 /home/david/NetBeansProjects/FitnessCRM/src/main/java/au/com/manlyit/fitnesscrm/stats/classes/util/ScheduledPaymentPojo.java
 /home/david/NetBeansProjects/FitnessCRM/target/generated-sources/jaxws-wsimport/au/com/manlyit/fitnesscrm/stats/webservices/EziResponseOfArrayOfPaymentTHgMB7OL.java

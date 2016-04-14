@@ -15,6 +15,7 @@ import au.com.manlyit.fitnesscrm.stats.db.CustomerState;
 import au.com.manlyit.fitnesscrm.stats.db.Groups;
 import au.com.manlyit.fitnesscrm.stats.db.Notes;
 import au.com.manlyit.fitnesscrm.stats.db.PaymentParameters;
+import au.com.manlyit.fitnesscrm.stats.db.Payments;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -269,7 +270,10 @@ public class CustomersController implements Serializable {
             ArrayList<String> als = new ArrayList<>();
             als.add("@(.updateNotesDataTable)");
             //als.add("growl");
-            RequestContext.getCurrentInstance().update(als);
+            RequestContext rc = RequestContext.getCurrentInstance();
+            if(rc != null){
+                rc.update(als);
+            }
             //  RequestContext.getCurrentInstance().update("@(.updateNotesDataTable)");
         } catch (Exception e) {
             logger.log(Level.WARNING, "Customers Controller, createCombinedAuditLogAndNote: ", e);
@@ -287,7 +291,7 @@ public class CustomersController implements Serializable {
         return current;
     }
 
-    private Customers setCustomerDefaults(Customers c) {
+    public Customers setCustomerDefaults(Customers c) {
 
         try {
             c.setCountryId(Integer.parseInt(configMapFacade.getConfig("default.customer.details.countryId")));
@@ -421,63 +425,67 @@ public class CustomersController implements Serializable {
             return;
         }
 
-        PaymentParameters pp;
+        PaymentParameters pp = current.getPaymentParameters();
+        if (pp == null) {
 
-        try {
+            try {
 
-            String phoneNumber = current.getTelephone();
-            if (phoneNumber == null) {
-                phoneNumber = "0000000000";
-                logger.log(Level.INFO, "Invalid Phone Number for Customer {0}. Setting it to empty string", current.getUsername());
+                String phoneNumber = current.getTelephone();
+                if (phoneNumber == null) {
+                    phoneNumber = "0000000000";
+                    logger.log(Level.INFO, "Invalid Phone Number for Customer {0}. Setting it to empty string", current.getUsername());
+                }
+                Pattern p = Pattern.compile("\\d{10}");
+                Matcher m = p.matcher(phoneNumber);
+                //ezidebit requires an australian mobile phone number that starts with 04
+                if (m.matches() == false || phoneNumber.startsWith("04") == false) {
+                    phoneNumber = "0000000000";
+                    logger.log(Level.INFO, "Invalid Phone Number for Customer {0}. Setting it to empty string", current.getUsername());
+                }
+                pp = new PaymentParameters();
+                pp.setId(0);
+                pp.setWebddrUrl(null);
+                pp.setLoggedInUser(current);
+                pp.setLastSuccessfulScheduledPayment(ejbPaymentsFacade.findLastSuccessfulScheduledPayment(current));
+                pp.setNextScheduledPayment(ejbPaymentsFacade.findNextScheduledPayment(current));
+                pp.setAddressLine1("");
+                pp.setAddressLine2("");
+                pp.setAddressPostCode("");
+                pp.setAddressState("");
+                pp.setAddressSuburb("");
+                pp.setContractStartDate(new Date());
+                pp.setCustomerFirstName("");
+                pp.setCustomerName("");
+                pp.setEmail("");
+                pp.setEzidebitCustomerID("");
+
+                pp.setMobilePhoneNumber(phoneNumber);
+                pp.setPaymentGatewayName("EZIDEBIT");
+                pp.setPaymentMethod("");
+                pp.setPaymentPeriod("");
+                pp.setPaymentPeriodDayOfMonth("");
+                pp.setPaymentPeriodDayOfWeek("");
+
+                pp.setSmsExpiredCard("YES");
+                pp.setSmsFailedNotification("YES");
+                pp.setSmsPaymentReminder("NO");
+                pp.setStatusCode("");
+                pp.setStatusDescription("");
+                pp.setTotalPaymentsFailed(0);
+                pp.setTotalPaymentsFailedAmount(new BigDecimal(0));
+                pp.setTotalPaymentsSuccessful(0);
+                pp.setTotalPaymentsSuccessfulAmount(new BigDecimal(0));
+                pp.setYourGeneralReference("");
+                pp.setYourSystemReference("");
+                ejbPaymentParametersFacade.create(pp);
+                current.setPaymentParameters(pp);
+                ejbFacade.editAndFlush(current);
+
+            } catch (Exception e) {
+                logger.log(Level.SEVERE, "createDefaultPaymentParameters Method in Customers Controller", e);
             }
-            Pattern p = Pattern.compile("\\d{10}");
-            Matcher m = p.matcher(phoneNumber);
-            //ezidebit requires an australian mobile phone number that starts with 04
-            if (m.matches() == false || phoneNumber.startsWith("04") == false) {
-                phoneNumber = "0000000000";
-                logger.log(Level.INFO, "Invalid Phone Number for Customer {0}. Setting it to empty string", current.getUsername());
-            }
-            pp = new PaymentParameters();
-            pp.setId(0);
-            pp.setWebddrUrl(null);
-            pp.setLoggedInUser(current);
-            pp.setLastSuccessfulScheduledPayment(ejbPaymentsFacade.findLastSuccessfulScheduledPayment(current));
-            pp.setNextScheduledPayment(ejbPaymentsFacade.findNextScheduledPayment(current));
-            pp.setAddressLine1("");
-            pp.setAddressLine2("");
-            pp.setAddressPostCode("");
-            pp.setAddressState("");
-            pp.setAddressSuburb("");
-            pp.setContractStartDate(new Date());
-            pp.setCustomerFirstName("");
-            pp.setCustomerName("");
-            pp.setEmail("");
-            pp.setEzidebitCustomerID("");
-
-            pp.setMobilePhoneNumber(phoneNumber);
-            pp.setPaymentGatewayName("EZIDEBIT");
-            pp.setPaymentMethod("");
-            pp.setPaymentPeriod("");
-            pp.setPaymentPeriodDayOfMonth("");
-            pp.setPaymentPeriodDayOfWeek("");
-
-            pp.setSmsExpiredCard("YES");
-            pp.setSmsFailedNotification("YES");
-            pp.setSmsPaymentReminder("NO");
-            pp.setStatusCode("");
-            pp.setStatusDescription("");
-            pp.setTotalPaymentsFailed(0);
-            pp.setTotalPaymentsFailedAmount(new BigDecimal(0));
-            pp.setTotalPaymentsSuccessful(0);
-            pp.setTotalPaymentsSuccessfulAmount(new BigDecimal(0));
-            pp.setYourGeneralReference("");
-            pp.setYourSystemReference("");
-            ejbPaymentParametersFacade.create(pp);
-            current.setPaymentParameters(pp);
-            ejbFacade.editAndFlush(current);
-
-        } catch (Exception e) {
-            logger.log(Level.SEVERE, "createDefaultPaymentParameters Method in Customers Controller", e);
+        } else {
+            logger.log(Level.WARNING, "createDefaultPaymentParameters - The payment parameters have already been created for this customer", current.getUsername());
         }
     }
 
@@ -557,6 +565,27 @@ public class CustomersController implements Serializable {
         JsfUtil.addSuccessMessage(configMapFacade.getConfig("ImpersonateCustomer") + getSelected().getUsername());
         String message = "Impersonated User: " + getSelected().getUsername() + " from  " + user;
         Logger.getLogger(getClass().getName()).log(Level.INFO, message);
+
+    }
+
+    private void updateASingleCustomersPaymentInfo(Customers cust) {
+        if (items != null) {
+            List<Customers> lp = (List<Customers>) items.getWrappedData();
+            int index = lp.indexOf(cust);
+            if (index == -1) {
+                lp.add(cust);
+            } else {
+                lp.set(index, cust);
+            }
+        }
+        if (filteredItems != null) {
+            int index = filteredItems.indexOf(cust);
+            if (index == -1) {
+                filteredItems.add(cust);
+            } else {
+                filteredItems.set(index, cust);
+            }
+        }
 
     }
 
@@ -695,70 +724,103 @@ public class CustomersController implements Serializable {
     }
 
     public void createLeadFromSignup(ActionEvent actionEvent) {
-        createFromUnauthenticated("LEAD");
-    }
-
-    public void createFromSignup(ActionEvent actionEvent) {
-        createFromUnauthenticated("USER");
-    }
-
-    private void createFromUnauthenticated(String group) {
         FacesContext context = FacesContext.getCurrentInstance();
         if (context.isValidationFailed() == false) {
-            //TODO validate email address to ensure spammers can't take down site
-            //max 3 emails 
-            Customers c = getNewCustomer();
-            HttpServletRequest request = (HttpServletRequest) context.getExternalContext().getRequest();
-            String ipAddress = request.getHeader("X-FORWARDED-FOR");
-            if (ipAddress == null) {
-                ipAddress = request.getRemoteAddr();
-            }
-            if (validateNewSignup(ipAddress, c.getEmailAddress()) == true) {
-                c.setId(0);
-                Groups grp = new Groups(0, group);
-                if (group.contains("LEAD")) {
-                    // new lead from contact form
-                    c.setUsername(getUniqueUsername(c.getFirstname() + "." + c.getLastname()));
-                    getFacade().create(c);
-
-                    grp.setUsername(c);
-                    ejbGroupsFacade.create(grp);
-                    createDefaultCustomerProfilePicture(c);
-                    Notes nt = new Notes(0);
-                    nt.setNote(leadComments);
-                    nt.setUserId(c);
-                    nt.setCreatedBy(c);
-                    addToNotesDataTableLists(nt);
-                    String details = "New LEAD generated: Name: " + c.getFirstname() + ", <br/>Email:  " + c.getEmailAddress() + ", <br/>Phone:   " + c.getTelephone() + ", <br/>Username:   " + c.getUsername() + ", <br/>Group:   " + group + ", IP Address:" + ipAddress;
-                    sendNotificationEmail(c, grp, "system.email.notification.template", "New LEAD from website", leadComments);
-                    createCombinedAuditLogAndNote(c, c, "New Lead", details, "Did Not Exist", "New Lead");
-                    logger.log(Level.INFO, "createFromLead: {0}", new Object[]{details});
-                    RequestContext.getCurrentInstance().execute("PF('signupDialog').hide();");
-                    JsfUtil.addSuccessMessage("Info", configMapFacade.getConfig("LeadSignupSuccessfull"));
-                    setLeadFormSubmitted(true);
-
-                } else {
-                    // new signup
-                    getFacade().create(c);
-                    grp.setUsername(c);
-                    ejbGroupsFacade.create(grp);
-                    createDefaultCustomerProfilePicture(c);
-                    String details = "Name: " + c.getFirstname() + ", Email:" + c.getEmailAddress() + ", Phone:" + c.getTelephone() + ", Username:" + c.getUsername() + ", Group:" + group + ", IP Address:" + ipAddress + ".Customer Onboard email sent";
-                    LoginBean controller = (LoginBean) context.getApplication().getELResolver().getValue(context.getELContext(), null, "loginBean");
-                    controller.doPasswordReset("system.new.customer.template", c, configMapFacade.getConfig("sendCustomerOnBoardEmailEmailSubject"));
-                    createCombinedAuditLogAndNote(c, c, "New Sign Up", details, "Did Not Exist", "New Lead");
-                    logger.log(Level.INFO, "createFromSignup: {0}", new Object[]{details});
-                    RequestContext.getCurrentInstance().execute("PF('signupDialog').hide();");
-                    JsfUtil.addSuccessMessage("Info", configMapFacade.getConfig("SignUpSuccessfulFailed"));
-                    setSignupFormSubmittedOK(true);
-                }
-                setNewCustomer(setCustomerDefaults(new Customers()));
-            } else {
-                JsfUtil.addErrorMessage("Error", configMapFacade.getConfig("SignUpValidationEmailExistsFailed"));
-            }
+            createFromUnauthenticated("LEAD", getNewCustomer(), leadComments, getHttpServletRequestFromFacesContext(), false);
         } else {
             JsfUtil.addErrorMessage("Error", configMapFacade.getConfig("SignUpValidationFailed"));
         }
+    }
+
+    public void createLeadFromWebservice(Customers c, String message, HttpServletRequest request) {
+        createFromUnauthenticated("LEAD", c, message, request, true);
+    }
+
+    public void createFromSignup(ActionEvent actionEvent) {
+        FacesContext context = FacesContext.getCurrentInstance();
+        if (context.isValidationFailed() == false) {
+            createFromUnauthenticated("USER", getNewCustomer(), leadComments, getHttpServletRequestFromFacesContext(), false);
+        } else {
+            JsfUtil.addErrorMessage("Error", configMapFacade.getConfig("SignUpValidationFailed"));
+        }
+    }
+
+    private HttpServletRequest getHttpServletRequestFromFacesContext() {
+        FacesContext context = FacesContext.getCurrentInstance();
+        return (HttpServletRequest) context.getExternalContext().getRequest();
+
+    }
+
+    private void createFromUnauthenticated(String group, Customers c, String message, HttpServletRequest request, boolean isWebserviceCall) {
+
+        //TODO validate email address to ensure spammers can't take down site
+        //max 3 emails 
+        boolean validIP = true;
+        String ipAddress = "";
+        if (isWebserviceCall == false) {
+
+            ipAddress = request.getHeader("X-FORWARDED-FOR");
+            if (ipAddress == null) {
+                ipAddress = request.getRemoteAddr();
+            }
+            if (ipAddress == null) {
+                ipAddress = "";
+            } else {
+                validIP = validateNewSignup(ipAddress, c.getEmailAddress());
+            }
+        }
+        if (validIP == true) {
+            c.setId(0);
+            Groups grp = new Groups(0, group);
+            if (group.contains("LEAD")) {
+                // new lead from contact form
+                c.setUsername(getUniqueUsername(c.getFirstname() + "." + c.getLastname()));
+                getFacade().create(c);
+
+                grp.setUsername(c);
+                ejbGroupsFacade.create(grp);
+                if (isWebserviceCall == false) {
+                    createDefaultCustomerProfilePicture(c);
+                }
+                Notes nt = new Notes(0);
+                nt.setNote(message);
+                nt.setUserId(c);
+                nt.setCreatedBy(c);
+                if (isWebserviceCall == false) {
+                    addToNotesDataTableLists(nt);
+                }
+                String details = "New LEAD generated: Name: " + c.getFirstname() + ", <br/>Email:  " + c.getEmailAddress() + ", <br/>Phone:   " + c.getTelephone() + ", <br/>Username:   " + c.getUsername() + ", <br/>Group:   " + group + ", IP Address:" + ipAddress;
+                sendNotificationEmail(c, grp, "system.email.notification.template", "New LEAD from website", message);
+                createCombinedAuditLogAndNote(c, c, "New Lead", details, "Did Not Exist", "New Lead");
+                logger.log(Level.INFO, "createFromLead: {0}", new Object[]{details});
+                if (isWebserviceCall == false) {
+                    RequestContext.getCurrentInstance().execute("PF('signupDialog').hide();");
+                    JsfUtil.addSuccessMessage("Info", configMapFacade.getConfig("LeadSignupSuccessfull"));
+                    setLeadFormSubmitted(true);
+                }
+
+            } else {
+                // new signup
+                // this cant be done from teh webservice due to contect lookup below
+                getFacade().create(c);
+                grp.setUsername(c);
+                ejbGroupsFacade.create(grp);
+                createDefaultCustomerProfilePicture(c);
+                String details = "Name: " + c.getFirstname() + ", Email:" + c.getEmailAddress() + ", Phone:" + c.getTelephone() + ", Username:" + c.getUsername() + ", Group:" + group + ", IP Address:" + ipAddress + ".Customer Onboard email sent";
+                FacesContext context = FacesContext.getCurrentInstance();
+                LoginBean controller = (LoginBean) context.getApplication().getELResolver().getValue(context.getELContext(), null, "loginBean");
+                controller.doPasswordReset("system.new.customer.template", c, configMapFacade.getConfig("sendCustomerOnBoardEmailEmailSubject"));
+                createCombinedAuditLogAndNote(c, c, "New Sign Up", details, "Did Not Exist", "New Lead");
+                logger.log(Level.INFO, "createFromSignup: {0}", new Object[]{details});
+                RequestContext.getCurrentInstance().execute("PF('signupDialog').hide();");
+                JsfUtil.addSuccessMessage("Info", configMapFacade.getConfig("SignUpSuccessfulFailed"));
+                setSignupFormSubmittedOK(true);
+            }
+            setNewCustomer(setCustomerDefaults(new Customers()));
+        } else {
+            JsfUtil.addErrorMessage("Error", configMapFacade.getConfig("SignUpValidationEmailExistsFailed"));
+        }
+
     }
 
     private String getUniqueUsername(String name) {
@@ -1114,7 +1176,6 @@ public class CustomersController implements Serializable {
      return null;
      }
      }*/
-
     public String destroy() {
         //current = (Customers) getItems().getRowData();
         // selectedItemIndex = pagination.getPageFirstItem() + getItems().getRowIndex();

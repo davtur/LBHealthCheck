@@ -283,6 +283,7 @@ au/com/manlyit/fitnesscrm/stats/classes/ActivationController$ActivationControlle
 au/com/manlyit/fitnesscrm/stats/callable/CronJobCallableThreadFactory.class
 au/com/manlyit/fitnesscrm/stats/beans/PaymentsFacade.class
 au/com/manlyit/fitnesscrm/stats/classes/SessionBookingsController$SessionBookingsControllerConverter.class
+au/com/manlyit/fitnesscrm/stats/webservices/WordpressInterfaceWebService.class
 au/com/manlyit/fitnesscrm/stats/webservices/PaymentDetailPlusNextPaymentInfo.class
 au/com/manlyit/fitnesscrm/stats/classes/PreferedContactController$1.class
 au/com/manlyit/fitnesscrm/stats/classes/ScheduleController.class

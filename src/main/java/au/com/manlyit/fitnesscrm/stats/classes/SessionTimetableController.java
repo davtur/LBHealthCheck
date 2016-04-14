@@ -375,6 +375,8 @@ public class SessionTimetableController implements Serializable {
                 SessionHistory existing = sessionHistoryFacade.findSessionBySessionTimetable(sh, st);
                 if (existing == null) {
                     sessionHistoryFacade.create(sh);
+                }else{
+                    
                 }
                 startCal.add(Calendar.DAY_OF_YEAR, 7);
             }

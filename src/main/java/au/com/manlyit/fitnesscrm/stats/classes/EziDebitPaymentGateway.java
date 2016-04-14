@@ -249,12 +249,10 @@ public class EziDebitPaymentGateway implements Serializable {
         String val = configMapFacade.getConfig("payment.ezidebit.enabled");
         if (val == null) {
             setPaymentGatewayEnabled(false);
+        } else if (val.trim().compareToIgnoreCase("true") == 0) {
+            setPaymentGatewayEnabled(true);
         } else {
-            if (val.trim().compareToIgnoreCase("true") == 0) {
-                setPaymentGatewayEnabled(true);
-            } else {
-                setPaymentGatewayEnabled(false);
-            }
+            setPaymentGatewayEnabled(false);
         }
         return paymentGatewayEnabled;
     }
@@ -1796,6 +1794,7 @@ public class EziDebitPaymentGateway implements Serializable {
     private void cleanUp() {
         futureMap.cancelFutures(sessionId);
     }
+
     /* private void cancelAllAsyncJobs() {
 
      Iterator it = futureMap.entrySet().iterator();
@@ -1807,7 +1806,6 @@ public class EziDebitPaymentGateway implements Serializable {
      }
      futureMap.clear();
      }*/
-
     private boolean futureMapContainsKey(String key) {
         return futureMap.containsKey(sessionId, key);
     }
@@ -2031,6 +2029,7 @@ public class EziDebitPaymentGateway implements Serializable {
         }
         //@(.parentOfUploadPhoto)
         // RequestContext.getCurrentInstance().update("customerslistForm1");
+        updateASingleCustomersPaymentInfo(getSelectedCustomer());
         sendUpdatesForPaymentComponents();
         // refreshFromDB = true;
         logger.log(Level.INFO, "processGetPayments completed");
@@ -2062,6 +2061,7 @@ public class EziDebitPaymentGateway implements Serializable {
             }
         }
         // RequestContext.getCurrentInstance().update("customerslistForm1");
+        updateASingleCustomersPaymentInfo(getSelectedCustomer());
         sendUpdatesForPaymentComponents();
         //refreshFromDB = true;
         logger.log(Level.INFO, "processGetScheduledPayments completed");
@@ -2071,11 +2071,19 @@ public class EziDebitPaymentGateway implements Serializable {
         if (paymentDBList != null) {
             List<Payments> lp = (List<Payments>) paymentDBList.getWrappedData();
             int index = lp.indexOf(pay);
-            lp.set(index, pay);
+            if (index == -1) {
+                lp.add(pay);
+            } else {
+                lp.set(index, pay);
+            }
         }
         if (paymentsDBListFilteredItems != null) {
             int index = paymentsDBListFilteredItems.indexOf(pay);
-            paymentsDBListFilteredItems.set(index, pay);
+            if (index == -1) {
+                paymentsDBListFilteredItems.add(pay);
+            } else {
+                paymentsDBListFilteredItems.set(index, pay);
+            }
         }
     }
 
@@ -2087,7 +2095,9 @@ public class EziDebitPaymentGateway implements Serializable {
         }
         if (paymentsDBListFilteredItems != null) {
             int index = paymentsDBListFilteredItems.indexOf(pay);
-            paymentsDBListFilteredItems.remove(index);
+            if (index >= 0) {
+                paymentsDBListFilteredItems.remove(index);
+            }
         }
     }
 
@@ -2449,7 +2459,8 @@ public class EziDebitPaymentGateway implements Serializable {
 
     private void processGetCustomerDetails(Future ft) {
         CustomerDetails result = null;
-        String cust = getSelectedCustomer().getUsername();
+        Customers selectedCust = getSelectedCustomer();
+        String cust = selectedCust.getUsername();
         setCustomerDetailsHaveBeenRetrieved(true);
         logger.log(Level.INFO, "Ezidebit Controller -  processing GetCustomerDetails Response Recieved from ezidebit for Customer  - {0}", cust);
 
@@ -2462,56 +2473,70 @@ public class EziDebitPaymentGateway implements Serializable {
             // do something with result
             setAutoStartPoller(false);
 
-            setCurrentCustomerDetails(result);
-            String eziStatusCode = "Unknown";
-            if (result.getStatusDescription() != null) {
-                eziStatusCode = result.getStatusDescription().getValue().toUpperCase().trim();
-            }
-            String ourStatus = getSelectedCustomer().getActive().getCustomerState().toUpperCase().trim();
-            String message = "";
-            if (ourStatus.contains(eziStatusCode) == false) {
-                // status codes don't match
+            String userId = result.getYourSystemReference().getValue();
+            if (userId.trim().matches(selectedCust.getId().toString())) {
+                setCurrentCustomerDetails(result);
 
-                message = "Customer Status codes dont match. Customer: " + cust + ", ezidebit status:" + eziStatusCode + ", Crm Status:" + ourStatus + "";
-                if (eziStatusCode.contains("WAITING BANK DETAILS")) {
-                    message = "The Customer does not have any banking details. Customer: " + cust + ", ezidebit status:" + eziStatusCode + ", Crm Status:" + ourStatus + "";
-                    logger.log(Level.INFO, message);
-                    setWaitingForPaymentDetails(true);
-                    JsfUtil.addSuccessMessage("Important!", "You must enter customer banking details before payments can be set up.");
-                } else {
-                    logger.log(Level.WARNING, message);
-                    setWaitingForPaymentDetails(false);
-                    JsfUtil.addErrorMessage(message, "");
+                String eziStatusCode = "Unknown";
+                if (result.getStatusDescription() != null) {
+                    eziStatusCode = result.getStatusDescription().getValue().toUpperCase().trim();
                 }
-                if (eziStatusCode.trim().toUpperCase().contains("CANCELLED")) {
-                    message = "The Customer is in a Cancelled status in the payment gateway";
-                    logger.log(Level.INFO, message);
-                    JsfUtil.addSuccessMessage("Important!", message);
-                    setCustomerCancelledInPaymentGateway(true);
+                String ourStatus = selectedCust.getActive().getCustomerState().toUpperCase().trim();
+                String message = "";
+                if (ourStatus.contains(eziStatusCode) == false) {
+                    // status codes don't match
+
+                    message = "Customer Status codes dont match. Customer: " + cust + ", ezidebit status:" + eziStatusCode + ", Crm Status:" + ourStatus + "";
+                    if (eziStatusCode.contains("WAITING BANK DETAILS")) {
+                        message = "The Customer does not have any banking details. Customer: " + cust + ", ezidebit status:" + eziStatusCode + ", Crm Status:" + ourStatus + "";
+                        logger.log(Level.INFO, message);
+                        setWaitingForPaymentDetails(true);
+                        JsfUtil.addSuccessMessage("Important!", "You must enter customer banking details before payments can be set up.");
+                    } else {
+                        logger.log(Level.WARNING, message);
+                        setWaitingForPaymentDetails(false);
+                        JsfUtil.addErrorMessage(message, "");
+                    }
+                    if (eziStatusCode.trim().toUpperCase().contains("CANCELLED")) {
+                        message = "The Customer is in a Cancelled status in the payment gateway";
+                        logger.log(Level.INFO, message);
+                        JsfUtil.addSuccessMessage("Important!", message);
+                        setCustomerCancelledInPaymentGateway(true);
+                    } else {
+                        setCustomerCancelledInPaymentGateway(false);
+                    }
                 } else {
-                    setCustomerCancelledInPaymentGateway(false);
+                    //status codes match
+                    setWaitingForPaymentDetails(false);
+                    if (eziStatusCode.toUpperCase().contains("CANCELLED")) {
+                        setCustomerCancelledInPaymentGateway(true);
+                    } else {
+                        setCustomerCancelledInPaymentGateway(false);
+                    }
                 }
             } else {
-                //status codes match
-                setWaitingForPaymentDetails(false);
-                if (eziStatusCode.toUpperCase().contains("CANCELLED")) {
-                    setCustomerCancelledInPaymentGateway(true);
-                } else {
-                    setCustomerCancelledInPaymentGateway(false);
-                }
+                String message = "The Customer data from teh payment gateway does not match the selected customer:" + selectedCust.getId().toString() + ", payment gateway reference No:" + result.getYourSystemReference();
+                logger.log(Level.SEVERE, message);
             }
 
         }
         //RequestContext.getCurrentInstance().update("customerslistForm1");
-        sendUpdatesForPaymentComponents();
+
         //refreshFromDB = true;
-        getCustomersController().setRefreshFromDB(true);
-        getCustomersController().recreateModel();
+        //getCustomersController().setRefreshFromDB(true);
+        //getCustomersController().recreateModel();
+        updateASingleCustomersPaymentInfo(selectedCust);
+        sendUpdatesForPaymentComponents();
         logger.log(Level.INFO, "processGetCustomerDetails completed");
     }
 
     private void sendUpdatesForPaymentComponents() {
         RequestContext.getCurrentInstance().update("@(.updatePaymentInfo)");
+    }
+
+    private void updateASingleCustomersPaymentInfo(Customers cust) {
+        CustomersController cc = getCustomersController();
+
     }
 
     private CustomersController getCustomersController() {
@@ -2605,7 +2630,7 @@ public class EziDebitPaymentGateway implements Serializable {
          } else {
          customerExistsInPaymentGateway = true;
          }*/
-        /*int pp = selectedCustomer.getPaymentParametersCollection().size();
+ /*int pp = selectedCustomer.getPaymentParametersCollection().size();
          if( pp > 0) {
          customerExistsInPaymentGateway = false;
          } else {
@@ -3030,15 +3055,18 @@ public class EziDebitPaymentGateway implements Serializable {
                     }
                 }
             }
-            Customers c = cust;
-            PaymentParameters pp = c.getPaymentParameters();
-            pp.setPaymentPeriod("Z");
-            pp.setPaymentPeriodDayOfMonth("-");
-            pp.setPaymentPeriodDayOfWeek("---");
-            pp.setNextScheduledPayment(null);
-            ejbPaymentParametersFacade.edit(pp);
-            customersFacade.edit(c);
 
+            PaymentParameters pp = cust.getPaymentParameters();
+            if (pp != null) {
+                
+
+                pp.setPaymentPeriod("Z");
+                pp.setPaymentPeriodDayOfMonth("-");
+                pp.setPaymentPeriodDayOfWeek("---");
+                pp.setNextScheduledPayment(null);
+                ejbPaymentParametersFacade.edit(pp);
+                customersFacade.edit(cust);
+            }
             // paymentDBList = null;
             //  paymentsDBListFilteredItems = null;
         } else {
