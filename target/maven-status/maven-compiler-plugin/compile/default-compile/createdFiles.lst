@@ -102,6 +102,7 @@ au/com/manlyit/fitnesscrm/stats/classes/ScheduleController$ScheduleControllerCon
 au/com/manlyit/fitnesscrm/stats/classes/ToDoListController.class
 au/com/manlyit/fitnesscrm/stats/db/SessionTimetable.class
 au/com/manlyit/fitnesscrm/stats/beans/QrtzJobDetailsFacade.class
+au/com/manlyit/fitnesscrm/stats/classes/SessionTimetableController$TimetableSessionStatus.class
 au/com/manlyit/fitnesscrm/stats/webservices/package-info.class
 au/com/manlyit/fitnesscrm/stats/classes/SessionTypesController.class
 au/com/manlyit/fitnesscrm/stats/converters/CustomerStateConverter.class

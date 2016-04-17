@@ -264,6 +264,7 @@ public class CustomersFacade extends AbstractFacade<Customers> {
             Throwable e;
             e = pe.getCause();
             if (e.getClass() == ConstraintViolationException.class) {
+
                 ConstraintViolationException cve = (ConstraintViolationException) e;
                 logger.log(Level.WARNING, "Customers findById, An ConstraintViolationException occurred for customer id :{0}, Message: {1}", new Object[]{id, cve.getConstraintViolations().toString()});
             }

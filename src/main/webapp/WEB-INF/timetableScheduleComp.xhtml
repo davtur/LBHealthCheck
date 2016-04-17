@@ -16,13 +16,14 @@
                 <div class="Container100  gray ">
                     <div class="ContainerIndent">
 
-                        <p:schedule value="#{sessionTimetableController.eventModel}" 
+                        <p:schedule id="timetable3Schedule"
+                                    value="#{sessionTimetableController.eventModel}" 
                                     view="basicWeek" 
                                     draggable="false"
                                     resizable="false"
                                     columnFormat="ddd"
                                     timeZone="Australia/Sydney" 
-                                    widgetVar="crmSchedule" 
+                                    widgetVar="timetable3Schedule" 
                                     styleClass="timetableSchedule"
                                     timeFormat="HH:mm" 
                                     ignoreTimezone="false" 
@@ -32,20 +33,59 @@
                                     minTime="06:00:00" >
 
                             <p:ajax event="eventSelect" listener="#{sessionTimetableController.onEventSelect}" update=":growl :eventDetails"  />
-                            
+
 
                         </p:schedule>
 
                     </div>
                 </div> 
 
-            
+
                 <div class="EmptyBox10"></div>
 
             </div>
         </div>
-   </h:form>
-    
+    </h:form>
+
+    <script>
+        //<![CDATA[
+        jQuery(document).ready(function () {
+            renderSchedule();
+        });
+
+
+        function renderSchedule() {
+            var schedule = PF('timetable3Schedule');
+            if (schedule) {
+                var height = $(window).height();
+                var width = $(window).width();
+                var aspectRatio = 1.5;
+                if (width < 320 ) {
+                    aspectRatio = 0.4;
+                }
+                if (width >= 320 && width < 600) {
+                    aspectRatio = 0.6;
+                }
+                if (width >= 600 && width <= 1200) {
+                    aspectRatio = 1.2;
+                }
+                if (width > 1200) {
+                    aspectRatio = 2.0;
+                }
+                // schedule.defineProperty('option', 'aspectRatio', aspectRatio);
+                PF('timetable3Schedule').jqc.fullCalendar('option', 'aspectRatio', aspectRatio);
+                PF('timetable3Schedule').jqc.fullCalendar('render');
+                //alert('Changing aspect ratio to ' + aspectRatio);
+
+            } else {
+                console.warn("Couldn't find schedule");
+            }
+            isRunning = false;
+        }
+        //]]>
+    </script>
+
+
     <p:dialog widgetVar="eventDialog" header="Event Details" showEffect="clip" hideEffect="clip" closeOnEscape="true" fitViewport="true" styleClass="timetableSchedule" >
         <h:form  id="eventDetails" styleClass="bookingFormUpdate">
             <div class=" TimetableTile BorderedBox Fleft TexAlLeft HoverEffect MarRL5"> 
@@ -90,10 +130,10 @@
                                     <!--<f:param name="sessionHistoryBookingId" value="#{sessionTimetableController.event.data.id}"/>-->
                                     <f:setPropertyActionListener value="#{sessionTimetableController.event.data}" target="#{sessionTimetableController.bookingButtonSessionHistory}" />
                                 </p:commandButton>
-                               <!-- <p:overlayPanel  for="mapsBtn" hideEffect="fade" dynamic="false" styleClass="timetableGmap" >
-                                    <p:gmap styleClass="BorderedBox" center="#{sessionTimetableController.event.data.sessionTemplate.sessionLocationGps}" zoom="16" model="#{sessionTimetableController.event.data.sessionTemplate.simpleModel}" type="HYBRID" style="width:100%;height:400px" />
-
-                                </p:overlayPanel>-->
+                                <!-- <p:overlayPanel  for="mapsBtn" hideEffect="fade" dynamic="false" styleClass="timetableGmap" >
+                                     <p:gmap styleClass="BorderedBox" center="#{sessionTimetableController.event.data.sessionTemplate.sessionLocationGps}" zoom="16" model="#{sessionTimetableController.event.data.sessionTemplate.simpleModel}" type="HYBRID" style="width:100%;height:400px" />
+ 
+                                 </p:overlayPanel>-->
 
                             </div>
 
@@ -107,7 +147,7 @@
 
                     </div>
                     <div class="EmptyBox10"></div>
-                                   <p:gmap styleClass="BorderedBox timetableGmap" center="#{sessionTimetableController.event.data.sessionTemplate.sessionLocationGps}" zoom="18" model="#{sessionTimetableController.event.data.sessionTemplate.simpleModel}" type="HYBRID"  />
+                    <p:gmap styleClass="BorderedBox timetableGmap" center="#{sessionTimetableController.event.data.sessionTemplate.sessionLocationGps}" zoom="18" model="#{sessionTimetableController.event.data.sessionTemplate.simpleModel}" type="HYBRID"  />
 
                     <!--      </p:panel>
                       </p:column>-->

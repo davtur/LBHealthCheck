@@ -1434,4 +1434,9 @@ ViewSessionTimetableLabel_sessionStyleClasses=Css Style Classes
 EditSessionTimetableLabel_sessionStyleClasses=Css Style Classes
 
 ViewSessionTimetableLabel_sessionMembersRate= Members Price
-(ViewSessionTimetableLabel_ssessionCasualRate=Casual Price
+ViewSessionTimetableLabel_ssessionCasualRate=Casual Price
+
+
+SessionTimetablePublish=Publish
+SessionTimetableUnPublish=Hide
+ListSessionTimetableTitle_Status=Status

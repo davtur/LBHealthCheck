@@ -11,8 +11,20 @@ and open the template in the editor.
 @media all and (max-width: 599px) and (min-width: 320px) {
     .timetableSchedule  {
         font-size: 10px;
-        height: 600px;
+        height: 800px;
     }
+     .timetableSchedule .fc-content {
+        padding: 1px !important;
+    }
+    .fc-day-grid-event > .fc-content {
+        white-space: normal;
+    }
+     #schedule3container {
+        height: 800px;
+    }
+   
+     
+   
     .bookingFormUpdate {
       font-size: 12px;  
     }
@@ -29,8 +41,12 @@ and open the template in the editor.
 @media all and (max-width: 1200px) and (min-width: 600px) {
     .timetableSchedule  {
         font-size: 12px;
-        height: 800px;
+        height: 890px;
     }
+    #schedule3container {
+        height: 900px;
+    }
+    
     .bookingFormUpdate {
       font-size: 12px;  
     }
@@ -47,8 +63,12 @@ and open the template in the editor.
 @media all and  (min-width: 1201px) {
     .timetableSchedule  {
         font-size: 14px;
-        height: 1000px;
+        height: 800px;
     }
+     #schedule3container {
+        height: 900px;
+    }
+     
     .bookingFormUpdate {
       font-size: 12px;  
     }
@@ -75,7 +95,25 @@ and open the template in the editor.
 .redBg {
     background-color: red !important ;
 }
-
+/* http://www.colorschemer.com/schemes/viewscheme.php?id=8293 southbeach pastel theme for timetable */
+.pastel1 {
+    background-color: #389090 !important ;
+}
+.pastel2 {
+    background-color: #F47E7D !important ;
+}
+.pastel3 {
+    background-color: #B5D045 !important ;
+}
+.pastel4 {
+    background-color: #FB8335 !important ;
+}
+.pastel5 {
+    background-color: #81C0C5 !important ;
+}
+.pastel6 {
+    background-color: #E0C7A8!important ;
+}
 
 .signupForm {
     text-align: right;

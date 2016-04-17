@@ -38,6 +38,8 @@ import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.servlet.http.HttpServletRequest;
 import org.primefaces.context.RequestContext;
 import org.primefaces.event.RowEditEvent;
@@ -52,13 +54,15 @@ import org.primefaces.model.map.DefaultMapModel;
 import org.primefaces.model.map.LatLng;
 import org.primefaces.model.map.MapModel;
 import org.primefaces.model.map.Marker;
+import org.primefaces.push.Status;
 
 @Named("sessionTimetableController")
 @SessionScoped
 public class SessionTimetableController implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    private static final Logger logger = Logger.getLogger(SessionTimetableController.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(SessionTimetableController.class.getName());
+    private static final int DAYS_AHEAD_TO_POPULATE_TIMETABLE = 90;
     private SessionTimetable current;
     private SessionTimetable selectedForDeletion;
     private SessionHistory selectedTimetableSession;
@@ -91,6 +95,29 @@ public class SessionTimetableController implements Serializable {
     private Schedule selectedSchedule;
 
     public SessionTimetableController() {
+    }
+
+    public enum TimetableSessionStatus {
+        PUBLISHED(0, "Published"), HIDDEN(1, "Hidden");
+        private final int value;
+        private final String label;
+
+        private TimetableSessionStatus(int value, String label) {
+            this.value = value;
+            this.label = label;
+        }
+
+        public int getValue() {
+            return value;
+        }
+
+        public String getLabel() {
+            return label;
+        }
+    }
+
+    public TimetableSessionStatus[] getTimetableSessionStatusValues() {
+        return TimetableSessionStatus.values();
     }
 
     public static boolean isUserInRole(String roleName) {
@@ -293,7 +320,7 @@ public class SessionTimetableController implements Serializable {
 
                 //Add facesmessage
             } else {
-                logger.log(Level.WARNING, "onDateSelect - the Object returned by the evenet is not a date");
+                LOGGER.log(Level.WARNING, "onDateSelect - the Object returned by the evenet is not a date");
             }
         }
 
@@ -322,7 +349,7 @@ public class SessionTimetableController implements Serializable {
 
                 //Add facesmessage
             } else {
-                logger.log(Level.WARNING, "onDateSelect - the Object returned by the evenet is not a date");
+                LOGGER.log(Level.WARNING, "onDateSelect - the Object returned by the evenet is not a date");
             }
         }
 
@@ -375,13 +402,13 @@ public class SessionTimetableController implements Serializable {
                 SessionHistory existing = sessionHistoryFacade.findSessionBySessionTimetable(sh, st);
                 if (existing == null) {
                     sessionHistoryFacade.create(sh);
-                }else{
-                    
+                } else {
+
                 }
                 startCal.add(Calendar.DAY_OF_YEAR, 7);
             }
         } catch (Exception e) {
-            logger.log(Level.WARNING, "cloneSessionsFromTimetable", e);
+            LOGGER.log(Level.WARNING, "cloneSessionsFromTimetable", e);
         }
 
     }
@@ -404,14 +431,16 @@ public class SessionTimetableController implements Serializable {
                         sessionDate.setTime(ss.getSessiondate());
                         SessionTimetable template = ss.getSessionTemplate();
                         if (template != null) {
-                            sessionDate.add(Calendar.MINUTE, template.getDurationMinutes());
-                            TimetableScheduleEvent ev = new TimetableScheduleEvent(template.getSessionTitle(), ss.getSessiondate(), sessionDate.getTime(), false);
-                            ev.setDatabasePK(ss.getId());
-                            ev.setStyleClass(template.getSessionStyleClasses());
-                            ev.setData(ss);
-                            ev.setDescription(template.getComments());
+                            if (template.getSessionTimetableStatus() == TimetableSessionStatus.PUBLISHED.getValue()) {
+                                sessionDate.add(Calendar.MINUTE, template.getDurationMinutes());
+                                TimetableScheduleEvent ev = new TimetableScheduleEvent(template.getSessionTitle(), ss.getSessiondate(), sessionDate.getTime(), false);
+                                ev.setDatabasePK(ss.getId());
+                                ev.setStyleClass(template.getSessionStyleClasses());
+                                ev.setData(ss);
+                                ev.setDescription(template.getComments());
 
-                            addEvent(ev);
+                                addEvent(ev);
+                            }
                         }
                     }
 
@@ -474,7 +503,7 @@ public class SessionTimetableController implements Serializable {
         String sessionHistoryId = context.getExternalContext().getRequestParameterMap().get("sessionHistorySignupId");
         if (sessionHistoryId != null) {
             SessionHistory sh = sessionHistoryFacade.find(Integer.valueOf(sessionHistoryId));
-            logger.log(Level.INFO, "signUpFromTimetable: {0}", new Object[]{sh.getSessiondate().toString()});
+            LOGGER.log(Level.INFO, "signUpFromTimetable: {0}", new Object[]{sh.getSessiondate().toString()});
         }
         return "index.xhtml";
     }
@@ -484,7 +513,7 @@ public class SessionTimetableController implements Serializable {
         // String sessionHistoryId = context.getExternalContext().getRequestParameterMap().get("sessionHistoryBookingId");
         // if (getBookingButtonSessionHistory()!= null) {
         //     SessionHistory sh = getBookingButtonSessionHistory();
-        //     logger.log(Level.INFO, "BookFromTimetable: {0}", new Object[]{sh.getSessiondate().toString()});
+        //     LOGGER.log(Level.INFO, "BookFromTimetable: {0}", new Object[]{sh.getSessiondate().toString()});
         // }
     }
 
@@ -539,6 +568,7 @@ public class SessionTimetableController implements Serializable {
                 current.setId(0);
             }
             getFacade().create(current);
+            cloneSessionsFromTimetable(current, DAYS_AHEAD_TO_POPULATE_TIMETABLE);
             JsfUtil.addSuccessMessage(configMapFacade.getConfig("SessionTimetableCreated"));
             return prepareCreate();
         } catch (Exception e) {
@@ -584,10 +614,32 @@ public class SessionTimetableController implements Serializable {
         }
     }
 
-    public void destroy() {
-        performDestroy();
+    public void unPublish() {
+        current.setSessionTimetableStatus(TimetableSessionStatus.HIDDEN.getValue());
+        getFacade().edit(current);
+        //delete any future sessions so they don't show up in the timetable
+        deleteFutureChildSessions();
         recreateModel();
-        current = null;
+    }
+
+    public void publish() {
+        current.setSessionTimetableStatus(TimetableSessionStatus.PUBLISHED.getValue());
+        getFacade().edit(current);
+        // add three months worth of sessions
+        cloneSessionsFromTimetable(current, DAYS_AHEAD_TO_POPULATE_TIMETABLE);
+        recreateModel();
+    }
+
+    public void destroy() {
+        if (current.getSessionHistoryCollection().isEmpty()) {
+            // we cant delete it if session still reference it
+            performDestroy();
+            recreateModel();
+            current = null;
+        } else {
+            LOGGER.log(Level.WARNING, "You are trying to delete a sessiontemplate when there are sessions that still reference it. Use hide instead to remove it from the timetable ahead.");
+            JsfUtil.addErrorMessage("You are trying to delete a sessiontemplate when there are sessions that still reference it. Use the hide button instead to unpublish it from the timetable ahead.");
+        }
     }
 
     public String destroyAndView() {
@@ -790,7 +842,7 @@ public class SessionTimetableController implements Serializable {
     }
 
     public void purchaseSession() {
-        logger.log(Level.INFO, "Purchase Session button clicked.");
+        LOGGER.log(Level.INFO, "Purchase Session button clicked.");
         FacesContext context = FacesContext.getCurrentInstance();
 
         //SessionTimetableController sessionTimetableController = context.getApplication().evaluateExpressionGet(context, "#{sessionTimetableController}", SessionTimetableController.class);
@@ -821,50 +873,48 @@ public class SessionTimetableController implements Serializable {
 
                 eziDebitPaymentGateway.redirectToPaymentGateway();
             } catch (Exception e) {
-                logger.log(Level.WARNING, "purchaseSession, customer  {0} New authenticated customer signup is being redirected to the payment gateway signup form", c.getUsername());
+                LOGGER.log(Level.WARNING, "purchaseSession, customer  {0} New authenticated customer signup is being redirected to the payment gateway signup form", c.getUsername());
             }
+            // TODO need to check the call back from ezidebit to add the payment id to the booking
             // TODO need to check the call back from ezidebit to add the payment id to the booking
         } else {
             try {
                 if (paymentGatewayStatusDescription.contains("Active") || paymentGatewayStatusDescription.contains("New")) {
                     // customer is set up just add a payment
-                    logger.log(Level.INFO, "purchaseSession, customer  {0}  active in payment gateway - adding payment", c.getUsername());
+                    LOGGER.log(Level.INFO, "purchaseSession, customer  {0}  active in payment gateway - adding payment", c.getUsername());
 
                     eziDebitPaymentGateway.addSinglePayment(c, bookingButtonSessionHistory.getSessionTemplate().getSessionCasualRate().floatValue(), sessionPurchaseTimestamp);
                     JsfUtil.addSuccessMessage(configMapFacade.getConfig("purchaseSessionDirectDebitPaymentProcessing"));
                     sb.setStatus("PURCHASE-ACTIVE");
                     sb.setStatusDescription("A new payment is being added for an existing customer");
 
+                } else if (paymentGatewayStatusDescription.contains("Hold")) {
+                    // customer is on hold notify them to contact staff and redirect customer to instant payment page
+                    // if we just take them off hold without comfirmation their regular payemts may restart
+
+                    LOGGER.log(Level.WARNING, "purchaseSession, Customer {0} is on Hold", c.getUsername());
+                    JsfUtil.addSuccessMessage(configMapFacade.getConfig("purchaseSessionDirectDebitPaymentProcessingFailedOnHold"));
+                    sb.setStatus("PURCHASE-HOLD");
+                    sb.setStatusDescription("The purchase via Direct debit failed as the customer is On-Hold");
+
+                } else if (paymentGatewayStatusDescription.contains("Waiting Bank Details")) {
+                    // the customer has not set up their payment method
+                    // notify them to contact staff or redirect to instant payment page
+                    LOGGER.log(Level.WARNING, "purchaseSession, Customer {0} is Waiting Bank Details", c.getUsername());
+                    JsfUtil.addSuccessMessage(configMapFacade.getConfig("purchaseSessionDirectDebitPaymentProcessingFailedBankDetails"));
+                    sb.setStatus("PURCHASE-WBD");
+                    sb.setStatusDescription("The purchase via Direct debit failed as the customer has not completed their payment method - Waiting Bank Details");
                 } else {
-                    if (paymentGatewayStatusDescription.contains("Hold")) {
-                        // customer is on hold notify them to contact staff and redirect customer to instant payment page
-                        // if we just take them off hold without comfirmation their regular payemts may restart
-
-                        logger.log(Level.WARNING, "purchaseSession, Customer {0} is on Hold", c.getUsername());
-                        JsfUtil.addSuccessMessage(configMapFacade.getConfig("purchaseSessionDirectDebitPaymentProcessingFailedOnHold"));
-                        sb.setStatus("PURCHASE-HOLD");
-                        sb.setStatusDescription("The purchase via Direct debit failed as the customer is On-Hold");
-
-                    } else if (paymentGatewayStatusDescription.contains("Waiting Bank Details")) {
-                        // the customer has not set up their payment method
-                        // notify them to contact staff or redirect to instant payment page
-                        logger.log(Level.WARNING, "purchaseSession, Customer {0} is Waiting Bank Details", c.getUsername());
-                        JsfUtil.addSuccessMessage(configMapFacade.getConfig("purchaseSessionDirectDebitPaymentProcessingFailedBankDetails"));
-                        sb.setStatus("PURCHASE-WBD");
-                        sb.setStatusDescription("The purchase via Direct debit failed as the customer has not completed their payment method - Waiting Bank Details");
-                    } else {
-                        // an unkown status is present log an error and redirect customer to instant payment page
-                        logger.log(Level.SEVERE, "purchaseSession, Customer {0} is in an unknown status:{1}", new Object[]{c.getUsername(), paymentGatewayStatusDescription});
-                        JsfUtil.addSuccessMessage(configMapFacade.getConfig("purchaseSessionDirectDebitPaymentProcessingFailedUnknown" + paymentGatewayStatusDescription));
-                        sb.setStatus("PURCHASE-FAIL");
-                        sb.setStatusDescription("The purchase via Direct debit failed as the customer is in an unknown status: " + paymentGatewayStatusDescription);
-                    }
-
+                    // an unkown status is present log an error and redirect customer to instant payment page
+                    LOGGER.log(Level.SEVERE, "purchaseSession, Customer {0} is in an unknown status:{1}", new Object[]{c.getUsername(), paymentGatewayStatusDescription});
+                    JsfUtil.addSuccessMessage(configMapFacade.getConfig("purchaseSessionDirectDebitPaymentProcessingFailedUnknown" + paymentGatewayStatusDescription));
+                    sb.setStatus("PURCHASE-FAIL");
+                    sb.setStatusDescription("The purchase via Direct debit failed as the customer is in an unknown status: " + paymentGatewayStatusDescription);
                 }
                 //persist sb
                 ejbSessionBookingsFacade.create(sb);
             } catch (Exception e) {
-                logger.log(Level.WARNING, "purchaseSession, customer  {0} existing customer setup in gateway", c.getUsername());
+                LOGGER.log(Level.WARNING, "purchaseSession, customer  {0} existing customer setup in gateway", c.getUsername());
             }
         }
         ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
@@ -872,7 +922,7 @@ public class SessionTimetableController implements Serializable {
         try {
             ec.redirect(request.getContextPath() + "/myDetails.xhtml");
         } catch (IOException iOException) {
-            logger.log(Level.WARNING, "purchaseSession, could not redirect to /myDetails page", iOException);
+            LOGGER.log(Level.WARNING, "purchaseSession, could not redirect to /myDetails page", iOException);
         }
 
     }

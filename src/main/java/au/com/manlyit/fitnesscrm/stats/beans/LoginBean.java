@@ -51,14 +51,14 @@ import org.primefaces.application.exceptionhandler.PrimeExceptionHandlerELResolv
  */
 @Named("loginBean")
 @SessionScoped
- public class LoginBean implements Serializable {
+public class LoginBean implements Serializable {
 
     private static final Logger logger = Logger.getLogger(LoginBean.class.getName());
     private static final long serialVersionUID = 1L;
     private String username;
     private String password;
     private boolean renderFacebook = false;
-   
+
     private String facebookId;
     private boolean mobileDeviceUserAgent = false;
     private String faceBookAccessToken;
@@ -142,8 +142,8 @@ import org.primefaces.application.exceptionhandler.PrimeExceptionHandlerELResolv
 
                 htmlText = htmlText.replace(templateLinkPlaceholder, urlLink);
                 htmlText = htmlText.replace(templateUsernamePlaceholder, current.getUsername());
-                String tempPassword = generateUniqueToken(8) ;
-                
+                String tempPassword = generateUniqueToken(8);
+
                 current.setPassword(PasswordService.getInstance().encrypt(tempPassword));
                 ejbCustomerFacade.editAndFlush(current);
                 htmlText = htmlText.replace(templateTemporaryPasswordPlaceholder, tempPassword);
@@ -165,14 +165,14 @@ import org.primefaces.application.exceptionhandler.PrimeExceptionHandlerELResolv
         }
 
     }
-    public void getHandleErrorFromErrorPage(){
-                FacesContext context = FacesContext.getCurrentInstance();
-                //todo
-       // PrimeExceptionHandlerELResolver handler = (PrimeExceptionHandlerELResolver) context.getApplication().getELResolver().getValue(context.getELContext(), null, "pfExceptionHandler");
-        
-       // String html = handler.
-      //                 Future<Boolean> emailSendResult = ejbPaymentBean.sendAsynchEmail(configMapFacade.getConfig("SystemErrorCCEmailAddress"), configMapFacade.getConfig("SystemErrorCCEmailAddress"), configMapFacade.getConfig("PasswordResetFromEmailAddress"), configMapFacade.getConfig("SystemErrorCCEmailAddress"), htmlText, null, emailServerProperties(), false);
- 
+
+    public void getHandleErrorFromErrorPage() {
+        FacesContext context = FacesContext.getCurrentInstance();
+        //todo
+        // PrimeExceptionHandlerELResolver handler = (PrimeExceptionHandlerELResolver) context.getApplication().getELResolver().getValue(context.getELContext(), null, "pfExceptionHandler");
+
+        // String html = handler.
+        //                 Future<Boolean> emailSendResult = ejbPaymentBean.sendAsynchEmail(configMapFacade.getConfig("SystemErrorCCEmailAddress"), configMapFacade.getConfig("SystemErrorCCEmailAddress"), configMapFacade.getConfig("PasswordResetFromEmailAddress"), configMapFacade.getConfig("SystemErrorCCEmailAddress"), htmlText, null, emailServerProperties(), false);
     }
 
     public String resetPassword() {
@@ -246,7 +246,7 @@ import org.primefaces.application.exceptionhandler.PrimeExceptionHandlerELResolv
     }
 
     private void redirectToLandingPage() {
-       
+
         ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
         HttpServletRequest request = (HttpServletRequest) ec.getRequest();
         try {
@@ -290,7 +290,7 @@ import org.primefaces.application.exceptionhandler.PrimeExceptionHandlerELResolv
                     throw servletException;
                 }
             }
-            
+
             Customers cust = ejbCustomerFacade.findCustomerByUsername(username);
             String auditDetails = "Customer Login Successful:" + cust.getUsername() + " Details:  " + cust.getLastname() + " " + cust.getFirstname() + " ";
             String changedFrom = "UnAuthenticated";
@@ -303,7 +303,7 @@ import org.primefaces.application.exceptionhandler.PrimeExceptionHandlerELResolv
             cust.setLastLoginTime(new Date());
             cust.setLoginAttempts(0);
             ejbCustomerFacade.edit(cust);
-             CustomersController controller = (CustomersController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "customersController");
+            CustomersController controller = (CustomersController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "customersController");
             controller.setSelected(cust);
             redirectToLandingPage();
 
@@ -451,12 +451,12 @@ import org.primefaces.application.exceptionhandler.PrimeExceptionHandlerELResolv
             }
         } catch (ClientProtocolException e) {
             logger.log(Level.WARNING, e.getMessage());
-        } catch (IOException e) {
+        } catch (Exception e) {
             logger.log(Level.WARNING, e.getMessage());
         } finally {
             try {
                 httpclient.close();
-            } catch (IOException ex) {
+            } catch (Exception ex) {
                 logger.log(Level.SEVERE, null, ex);
             }
         }

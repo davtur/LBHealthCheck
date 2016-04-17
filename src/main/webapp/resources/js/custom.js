@@ -44,5 +44,33 @@ function customUserStatsBarChartExtender() {
         placement: 'outsideGrid'
     };
 }
+/* $('#SessionTimetableListForm:j_idt11_container').load(function () {
+            renderSchedule();
+        });
+        
+    function renderSchedule() {
+            var schedule = PF('timetable3Schedule');
+            if (schedule) {
+                var height = $(window).height();
+                var width = $(window).width();
+                var aspectRatio = 1.5;
+                if (width > 320 && width < 600) {
+                    aspectRatio = 0.75;
+                }
+                if (width >= 600 && width <= 1200) {
+                    aspectRatio = 1;
+                }
+                if (width > 1200) {
+                    aspectRatio = 1.5;
+                }
+                schedule.defineProperty('option', 'aspectRatio', aspectRatio);
+                $('#SessionTimetableListForm\:j_idt11_container').fullCalendar('option', 'aspectRatio', aspectRatio);
 
+                alert('Changing aspect ratio to ' + aspectRatio);
+
+            } else {
+                console.warn("Couldn't find schedule");
+            }
+            isRunning = false;
+        }     */
 //background: '#FFF' ,

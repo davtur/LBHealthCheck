@@ -58,6 +58,25 @@
 
 
                     </p:column>
+                    <p:column sortBy="#{item.sessionTimetableStatus}" filterBy="#{item.sessionTimetableStatus}" headerText="#{configMapController.getKey('ListSessionTimetableTitle_Status')}"   >
+                        <p:cellEditor> 
+                            <f:facet name="output">
+                                
+                                <h:outputText value="Published" rendered="#{item.sessionTimetableStatus == 0}"/>
+                                <h:outputText value="Hidden" rendered="#{item.sessionTimetableStatus == 1}"/>
+                               
+                          
+                            </f:facet>
+                            <f:facet name="input">
+                                <p:selectOneMenu id="status"  value="#{item.sessionTimetableStatus}"   label="#{configMapController.getKey('CreateSessionHistoryTitle_trainer')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionHistoryRequiredMessage_trainer')}">
+                                    <f:selectItems value="#{sessionTimetableController.timetableSessionStatusValues}" var="status" itemLabel="#{status.label} " itemValue="#{status.value}"/>
+
+                                </p:selectOneMenu>
+                            </f:facet>
+                        </p:cellEditor> 
+
+
+                    </p:column>
                     <p:column sortBy="#{item.sessiondate}" filterBy="#{item.sessiondate}" headerText="#{configMapController.getKey('ListSessionTimetableTitle_sessiondate')}"   >
 
                         <p:cellEditor> 
@@ -261,8 +280,11 @@
                         <p:commandButton rendered="#{sessionTimetableController.isUserInRole('ADMIN')}" id="createButton" icon="ui-icon-plus"   value="#{configMapController.getKey('Create')}" actionListener="#{sessionTimetableController.prepareCreate}" update=":SessionTimetableCreateForm" oncomplete="PF('SessionTimetableCreateDialog').show()"/>
                         <p:commandButton id="viewButton"   icon="ui-icon-search" value="#{configMapController.getKey('View')}" update=":SessionTimetableViewForm" oncomplete="PF('SessionTimetableViewDialog').show()" disabled="#{empty sessionTimetableController.selected}"/>
                         <p:commandButton rendered="#{sessionTimetableController.isUserInRole('ADMIN')}" id="editButton"   icon="ui-icon-pencil" value="#{configMapController.getKey('Edit')}" update=":SessionTimetableEditForm" oncomplete="PF('SessionTimetableEditDialog').show()" disabled="#{empty sessionTimetableController.selected}"/>
+                        <p:commandButton rendered="#{sessionTimetableController.isUserInRole('ADMIN')}" id="publishButton" icon="ui-icon-circle-plus"  value="#{configMapController.getKey('SessionTimetablePublish')}" actionListener="#{sessionTimetableController.publish}" update=":growl,datalist" disabled="#{empty sessionTimetableController.selected}"/>
+                        <p:commandButton rendered="#{sessionTimetableController.isUserInRole('ADMIN')}" id="unPublishButton" icon="ui-icon-circle-minus"  value="#{configMapController.getKey('SessionTimetableUnPublish')}" actionListener="#{sessionTimetableController.unPublish}" update=":growl,datalist" disabled="#{empty sessionTimetableController.selected}"/>
                         <p:commandButton rendered="#{sessionTimetableController.isUserInRole('ADMIN')}" id="deleteButton" icon="ui-icon-trash"  value="#{configMapController.getKey('Delete')}" actionListener="#{sessionTimetableController.destroy}" update=":growl,datalist" disabled="#{empty sessionTimetableController.selected}"/>
-                        <p:commandButton rendered="#{sessionTimetableController.isUserInRole('ADMIN')}" id="populateButton" icon="ui-icon-cog"  value="#{configMapController.getKey('Populate')}" actionListener="#{sessionTimetableController.populateSessions}" update=":growl,datalist" />
+
+                       <!-- <p:commandButton rendered="#{sessionTimetableController.isUserInRole('ADMIN')}" id="populateButton" icon="ui-icon-cog"  value="#{configMapController.getKey('Populate')}" actionListener="#{sessionTimetableController.populateSessions}" update=":growl,datalist" />-->
 
                     </f:facet>
 
