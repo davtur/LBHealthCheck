@@ -1437,7 +1437,10 @@ public class EziDebitPaymentGateway implements Serializable {
         PaymentParameters pp = controller.getSelectedCustomersPaymentParameters();
         boolean stat = false;
         if (pp != null) {
-            if (pp.getStatusCode().trim().isEmpty() || pp.getStatusCode().trim().contains("C")) {
+            String statusCode = pp.getStatusCode();
+            if (statusCode == null) {
+                stat = false;
+            } else if (pp.getStatusCode().trim().isEmpty() || pp.getStatusCode().trim().contains("C")) {
 
                 //customer has never been added or is cancelled. If they are cancelled they must be added again like a new customer
                 stat = false;
@@ -1446,7 +1449,7 @@ public class EziDebitPaymentGateway implements Serializable {
                 // They are on hold or active or waiting bank details
                 stat = true;
             } else {
-                Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.WARNING, "Unkown ezidebit status code: {0}", new Object[]{pp.getStatusCode().trim()});
+                Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.WARNING, "Unkown ezidebit status code: {0}", new Object[]{statusCode});
             }
         }
 
@@ -3058,7 +3061,6 @@ public class EziDebitPaymentGateway implements Serializable {
 
             PaymentParameters pp = cust.getPaymentParameters();
             if (pp != null) {
-                
 
                 pp.setPaymentPeriod("Z");
                 pp.setPaymentPeriodDayOfMonth("-");

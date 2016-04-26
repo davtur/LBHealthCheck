@@ -1,0 +1,32 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition   xmlns="http://www.w3.org/1999/xhtml"
+                  xmlns:ui="http://java.sun.com/jsf/facelets"
+                  xmlns:h="http://java.sun.com/jsf/html"
+                  xmlns:f="http://java.sun.com/jsf/core"
+                  xmlns:p="http://primefaces.org/ui" >
+
+
+    <p:dialog id="ToDoListCreateDlg" widgetVar="ToDoListCreateDialog" modal="false" resizable="true" appendTo="@(body)" header="#{configMapController.getKey('CreateToDoListTitle')}">
+
+        <h:form id="ToDoListCreateForm">
+
+            <div class="Container100 Responsive100">
+
+                <div class="ContainerIndent">
+                    <p:panelGrid id="display" columns="1" layout="grid" rendered="#{toDoListController.selected != null}"  style="border:0px !important; background:none;" styleClass="FormContent">
+                        <p:inputText styleClass="Wid90" placeholder="#{configMapController.getKey('CreateToDoListLabel_task')}" value="#{toDoListController.selected.task}" title="#{configMapController.getKey('CreateToDoListTitle_task')}" required="true" requiredMessage="#{configMapController.getKey('CreateToDoListRequiredMessage_task')}"/>
+                        <p:inputTextarea  styleClass="Wid90" placeholder="#{configMapController.getKey('CreateToDoListLabel_description')}"  rows="4" cols="30" id="description"  value="#{toDoListController.selected.description}"  title="#{configMapController.getKey('CreateToDoListTitle_description')}" required="true" requiredMessage="#{configMapController.getKey('CreateToDoListRequiredMessage_description')}"/>
+                        <p:selectBooleanCheckbox styleClass="Fleft" itemLabel="#{configMapController.getKey('CreateToDoListTitle_done')}" value="#{toDoListController.selected.done}" />
+                    </p:panelGrid>
+                    <p:commandButton actionListener="#{toDoListController.createDialogue}" value="#{configMapController.getKey('Save')}" update="display,:ToDoListListForm:datalist,:growl" oncomplete="handleSubmit(args,'ToDoListCreateDialog');PF('toDoListControllerTable').filter()"/>
+                    <p:commandButton value="#{configMapController.getKey('Cancel')}" onclick="PF('ToDoListCreateDialog').hide()"/>
+                </div>
+            </div>
+
+        </h:form>
+    </p:dialog>
+
+</ui:composition>    
+<!--<p> Generated from template ( JSF_from_entity_wizard/StandardJSF/create.ftl  )- Dave 18th July 2015 </p>-->
+

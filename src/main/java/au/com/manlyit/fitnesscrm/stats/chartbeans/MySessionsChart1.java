@@ -231,11 +231,8 @@ public class MySessionsChart1 implements Serializable {
                 numberOfSeriesPoints++;
             }
             startCal.setTime(startDate);
-            endCal.setTime(endDate);
-            //endCal.set(Calendar.HOUR, 23);
-            //endCal.set(Calendar.SECOND, 59);
-            // endCal.set(Calendar.MINUTE, 59);
-            //endCal.set(Calendar.MILLISECOND, 999);
+            endCal.setTime(startDate);
+          
             endCal.add(calendarIncrementInterval, 1);
 
             List<BarChartSeries> seriesList = new ArrayList<>();
@@ -274,7 +271,7 @@ public class MySessionsChart1 implements Serializable {
                         for (BarChartSeries barChartSeries : seriesList) {
                             if (barChartSeries.getLabel().compareTo(type) == 0) {
                                 Double c = (Double) barChartSeries.getData().get(xAxixValue);
-
+ 
                                 if (c == null) {
                                     c = new Double(1);
                                 } else {
@@ -410,10 +407,10 @@ public class MySessionsChart1 implements Serializable {
             barChartSeries2.setLabel("Scheduled");
             seriesList.add(barChartSeries2);
 
-            LineChartSeries lineChartSeries1 = new LineChartSeries();
+           /* LineChartSeries lineChartSeries1 = new LineChartSeries();
             lineChartSeries1.setLabel("Total");
             lineChartSeries1.setYaxis(AxisType.Y2);
-            seriesList.add(lineChartSeries1);
+            seriesList.add(lineChartSeries1);*/
 
             double maxTotal = 0;
             try {
@@ -461,9 +458,9 @@ public class MySessionsChart1 implements Serializable {
 
                         double total = (double) reportTotalScheduled + (double) reportTotalSuccessful;
 
-                        lineChartSeries1.set(xAxixValue, total);
+                      /*  lineChartSeries1.set(xAxixValue, total);
                         index = seriesList.indexOf(lineChartSeries1);
-                        seriesList.set(index, lineChartSeries1);
+                        seriesList.set(index, lineChartSeries1);*/
 
                         if (total > maxTotal) {
                             maxTotal = total;
@@ -522,7 +519,7 @@ public class MySessionsChart1 implements Serializable {
             ccModel.setTitle("Revenue Report");
             ccModel.setLegendPosition("ne");
             ccModel.setStacked(true);
-            ccModel.setExtender("customUserStatsBarChartExtender");
+            ccModel.setExtender("monthlyRevenueBarChartExtender");
 
             Axis xAxis = ccModel.getAxis(AxisType.X);
             xAxis.setLabel(xAxisLabel);

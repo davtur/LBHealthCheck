@@ -61,30 +61,21 @@
 
             }
             function handleError() {
-                console.log("Handling primfaces push socket component faces ERROR message");
+                console.log("Handling primfaces push socket component  ERROR message");
             }
             function handleClose() {
-                console.log("Handling primfaces push socket component faces CLOSE message");
+                console.log("Handling primfaces push socket component  CLOSE message");
                 PF('subscriber').connect();
             }
-            function handleClose() {
-                console.log("Handling primfaces push socket component faces OPEN message");
-
-            }
+           
             function handleReconnect() {
-                console.log("Handling primfaces push socket component faces RECONNECT message");
+                console.log("Handling primfaces push socket component  RECONNECT message");
             }
             function handleTransportFailure() {
-                console.log("Handling primfaces push socket component faces TRANSPORT FAILURE message");
+                console.log("Handling primfaces push socket component  TRANSPORT FAILURE message");
                 PF('subscriber').connect();
             }
-            function changeiFrameCss() {
-                alert('bugger1');
-                $('#ezidebitIframeView').find('#wrapper').css('height', '380px');
-                alert('bugger2');
-                $('#ezidebitIframeView').find('#content').css('background-color', 'red');
-                alert('bugger3');
-            }
+            
         </script>
 
         <h:outputStylesheet name="css/core-layout.css" library="spark-layout" />

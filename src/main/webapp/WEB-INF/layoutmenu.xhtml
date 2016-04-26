@@ -8,19 +8,16 @@
 
     <h:form>
         <ps:menu id="mainmenubar1">
-         <!--   <f:facet name="options">
-                <p:commandButton type="button" icon="fa fa-search Fs18 white" styleClass="Fright"/>
-                <p:inputText placeholder="Search" styleClass="Fright"/>    
-            </f:facet>-->
+            <!--   <f:facet name="options">
+                   <p:commandButton type="button" icon="fa fa-search Fs18 white" styleClass="Fright"/>
+                   <p:inputText placeholder="Search" styleClass="Fright"/>    
+               </f:facet>-->
             <p:submenu icon="fa fa-bug" label="Developer" rendered="#{customersController.isUserInRole('DEVELOPER')}"  id="devMenu1" >
                 <p:menuitem
                     id="configMap"                              
                     action="/dev/configMap/List.xhtml" ajax="false" value="Configuration"    >                        
                 </p:menuitem>
-                <p:menuitem
-                    id="toDoList"                              
-                    action="/dev/toDoList/List.xhtml" ajax="false" value="ToDO List"    >                        
-                </p:menuitem>
+
                 <p:menuitem
                     id="currency"                              
                     action="/dev/currency/List.xhtml" ajax="false"  value="Currency"    >                       
@@ -126,7 +123,10 @@
                             id="reports"     
                             value="Reports">
                 </p:menuitem>
-
+                <p:menuitem
+                    id="toDoList"                              
+                    action="/admin/toDoList/List.xhtml" ajax="false" value="Admin Task List"    >                        
+                </p:menuitem>
                 <p:menuitem
                     id="NewInvoice"                              
                     action="/admin/invoice/Invoice.xhtml" ajax="false"  value="New Invoice"    >                       
@@ -221,10 +221,10 @@
                     id="mySessions"
                     action="/mySessions.xhtml" ajax="false" value="My Sessions"  >
                 </p:menuitem>
-               <!--  <p:menuitem
-                    id="timeTable"
-                    action="/timetable.xhtml" ajax="false" value="Timetable"  >
-                </p:menuitem>-->
+                <!--  <p:menuitem
+                     id="timeTable"
+                     action="/timetable.xhtml" ajax="false" value="Timetable"  >
+                 </p:menuitem>-->
                 <p:menuitem
                     id="mobileLink"
                     action="/mobileMenu.xhtml" ajax="false" value="Mobile Friendly Site"  >

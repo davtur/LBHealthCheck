@@ -4,7 +4,7 @@
 
     <groupId>au.com.manlyit</groupId>
     <artifactId>FitnessCRM</artifactId>
-    <version>3.1.6</version>
+    <version>3.2.0</version>
     <packaging>war</packaging>
 
     <name>FitnessCRM</name>
@@ -21,6 +21,12 @@
             <version>5.2</version>
             <type>jar</type>
         </dependency>
+        <dependency>
+            <groupId>org.atmosphere</groupId>
+            <artifactId>atmosphere-runtime</artifactId>
+            <version>2.3.7</version>
+            <type>jar</type>
+        </dependency> 
         <!--    <dependency>
             <groupId>org.primefaces.extensions</groupId>
             <artifactId>primefaces-extensions</artifactId>
@@ -43,12 +49,7 @@
             <version>2.3</version>
             <type>jar</type>
         </dependency> 
-        <dependency>
-            <groupId>org.atmosphere</groupId>
-            <artifactId>atmosphere-runtime</artifactId>
-            <version>2.3.7</version>
-            <type>jar</type>
-        </dependency> 
+        
         <dependency>
             <groupId>org.bytedeco</groupId>
             <artifactId>javacv</artifactId>
