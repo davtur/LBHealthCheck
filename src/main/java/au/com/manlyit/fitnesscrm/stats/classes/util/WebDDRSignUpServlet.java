@@ -58,6 +58,9 @@ public class WebDDRSignUpServlet extends HttpServlet {
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.PaymentParametersFacade ejbPaymentParametersFacade;
 
+    @Inject
+    private CustomersController controller;
+
     public WebDDRSignUpServlet() {
     }
 
@@ -120,12 +123,14 @@ public class WebDDRSignUpServlet extends HttpServlet {
                         }
 
                         PaymentParameters pp = current.getPaymentParameters();
+
                         if (pp != null) {
                             if (pp.getWebddrUrl() != null) {
                                 // the url is not null so this is the first time the customer has clicked the link -this should only happen once so it cant be abused.
                                 pp.setWebddrUrl(null);
                                 ejbPaymentParametersFacade.edit(pp);
-                                ejbFacade.editAndFlush(current);
+                                current.setPaymentParameters(pp);
+                                ejbFacade.edit(current);
                                 logger.log(Level.INFO, " Customer {0} has set up payment info. Setting Web DDR URL to NULL as it should only be used once.", new Object[]{current.getUsername()});
                                 //startAsynchJob("ConvertSchedule", paymentBean.clearSchedule(current, false, current.getUsername(), getDigitalKey()), futureMap.getFutureMapInternalSessionId());
 
@@ -134,26 +139,24 @@ public class WebDDRSignUpServlet extends HttpServlet {
                                 Date endDate = cal.getTime();
                                 cal.add(Calendar.MONTH, -24);
 
-                                //startAsynchJob("GetCustomerDetails", paymentBean.getCustomerDetails(current, getDigitalKey()), futureMap.getFutureMapInternalSessionId());
+                                //
                                 //startAsynchJob("GetPayments", paymentBean.getPayments(current, "ALL", "ALL", "ALL", "", cal.getTime(), endDate, false, getDigitalKey()), futureMap.getFutureMapInternalSessionId());
                                 startAsynchJob("ConvertSchedule", paymentBean.getScheduledPayments(current, cal.getTime(), endDate, getDigitalKey()), futureMap.getFutureMapInternalSessionId());
-
+                                startAsynchJob("GetCustomerDetails", paymentBean.getCustomerDetails(current, getDigitalKey()), sessionID);
                             }
-                        }
 
-                        try {
-                            CustomersController controller = (CustomersController) facesContext.getApplication().getELResolver().
-                                    getValue(facesContext.getELContext(), null, "customersController");
-                            controller.createCombinedAuditLogAndNote(controller.getLoggedInUser(), current, "Direct Debit Form", "The direct debit form has been completed and payments created.", "Not Registered in Payemnt Gateway", "Registered in payment gateway with scheduled payments");
                             try {
-                                controller.getSelected().getPaymentParameters().setWebddrUrl(null);
-                            } catch (Exception e) {
-                                logger.log(Level.INFO, " Customer {0} . Setting Web DDR URL to NULL.: {1}", new Object[]{current.getUsername(),e.getMessage()});
-                            }
-                        } catch (Exception e) {
-                            logger.log(Level.SEVERE, "Couldn't log payemnt form submitted.");
-                        }
 
+                                controller.createCombinedAuditLogAndNote(controller.getLoggedInUser(), current, "Direct Debit Form", "The direct debit form has been completed and payments created.", "Not Registered in Payemnt Gateway", "Registered in payment gateway with scheduled payments");
+                                /* try {
+                                    controller.getSelected().getPaymentParameters().setWebddrUrl(null);
+                                } catch (Exception e) {
+                                    logger.log(Level.WARNING, " Customer {0} . Setting Web DDR URL to NULL FAILED .: {1}", new Object[]{current.getUsername(), e.getMessage()});
+                                }*/
+                            } catch (Exception e) {
+                                logger.log(Level.SEVERE, "createCombinedAuditLogAndNote FAILED.", e);
+                            }
+                        }
                         if (loginBean.isMobileDeviceUserAgent() == false) {
                             response.sendRedirect(request.getContextPath() + getValueFromKey("payment.ezidebit.callback.redirect"));
                         } else {
@@ -171,7 +174,7 @@ public class WebDDRSignUpServlet extends HttpServlet {
     private Properties emailServerProperties() {
         Properties props = new Properties();
 
-       props.put("mail.smtp.host", configMapFacade.getConfig("mail.smtp.host"));
+        props.put("mail.smtp.host", configMapFacade.getConfig("mail.smtp.host"));
         props.put("mail.smtp.auth", configMapFacade.getConfig("mail.smtp.auth"));
         props.put("mail.debug", configMapFacade.getConfig("mail.debug"));
         props.put("mail.smtp.ssl.enable", configMapFacade.getConfig("mail.smtp.ssl.enable"));

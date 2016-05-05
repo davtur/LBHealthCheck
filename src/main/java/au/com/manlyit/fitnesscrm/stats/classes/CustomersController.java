@@ -110,6 +110,7 @@ public class CustomersController implements Serializable {
     private List<Customers> filteredCustomersWithoutScheduledPayments;
     private List<Notes> notesFilteredItems;
     private Customers[] multiSelected;
+    private Customers[] multiSelectedCustomersWithoutScheduledPayments;
     // private Groups[] selectedGroups;
     private List<Groups> selectedGroups;
     private String checkPass = "";
@@ -268,11 +269,11 @@ public class CustomersController implements Serializable {
             notesFilteredItems = null;
             notesItems = null;
 
-            ArrayList<String> als = new ArrayList<>();
-            als.add("@(.updateNotesDataTable)");
             //als.add("growl");
             RequestContext rc = RequestContext.getCurrentInstance();
             if (rc != null) {
+                ArrayList<String> als = new ArrayList<>();
+                als.add("@(.updateNotesDataTable)");
                 rc.update(als);
             }
             //  RequestContext.getCurrentInstance().update("@(.updateNotesDataTable)");
@@ -280,6 +281,12 @@ public class CustomersController implements Serializable {
             LOGGER.log(Level.WARNING, "Customers Controller, createCombinedAuditLogAndNote: ", e);
         }
 
+    }
+
+    public void refreshSelectedCustomerFromDB() {
+        if (current != null) {
+            current = ejbFacade.findById(current.getId());
+        }
     }
 
     public Customers getSelected() {
@@ -576,7 +583,7 @@ public class CustomersController implements Serializable {
 
     }
 
-    private void updateASingleCustomersPaymentInfo(Customers cust) {
+    public void updateASingleCustomersPaymentInfo(Customers cust) {
         if (items != null) {
             List<Customers> lp = (List<Customers>) items.getWrappedData();
             int index = lp.indexOf(cust);
@@ -1259,24 +1266,29 @@ public class CustomersController implements Serializable {
 
     public PfSelectableDataModel<Customers> getCustomersWithoutScheduledPayments() {
         if (customersWithoutScheduledPayments == null) {
+            ArrayList<CustomerState> acs = new ArrayList<>();
+            acs.add(new CustomerState(0, "ACTIVE"));
+            acs.add(new CustomerState(0, "LEAD"));
+            List<Customers> custListNoPaymentScheduled = new ArrayList<>();
+            List<Customers> custList = ejbFacade.findFilteredCustomers(true, acs, showNonUsers, isRefreshFromDB());
 
-            List<Customers> custList = ejbFacade.findFilteredCustomers(true, selectedCustomerStates, showNonUsers, isRefreshFromDB());
-
-            ListIterator<Customers> listIterator = custList.listIterator(custList.size());
+           
 
             try {
-                while (listIterator.hasPrevious()) {
-                    Customers c = listIterator.previous();
-                    if (c.getPaymentParameters().getNextScheduledPayment() != null) {
-                        custList.remove(c);
+                for (Customers c : custList) {
+                    if (c.getPaymentParameters() != null) {
+                        if (c.getPaymentParameters().getNextScheduledPayment() == null) {
+                            custListNoPaymentScheduled.add(c);
+                        }
+                    } else {
+                        custListNoPaymentScheduled.add(c);
                     }
-
                 }
 
             } catch (Exception e) {
                 LOGGER.log(Level.WARNING, "getCustomersWithoutScheduledPayments: Exception", e);
             }
-            customersWithoutScheduledPayments = new PfSelectableDataModel<>(custList);
+            customersWithoutScheduledPayments = new PfSelectableDataModel<>(custListNoPaymentScheduled);
         }
         if (customersWithoutScheduledPayments == null) {
             customersWithoutScheduledPayments = new PfSelectableDataModel<>(new ArrayList<Customers>());
@@ -2114,6 +2126,21 @@ public class CustomersController implements Serializable {
      */
     public void setFilteredCustomersWithoutScheduledPayments(List<Customers> filteredCustomersWithoutScheduledPayments) {
         this.filteredCustomersWithoutScheduledPayments = filteredCustomersWithoutScheduledPayments;
+    }
+
+    /**
+     * @return the multiSelectedCustomersWithoutScheduledPayments
+     */
+    public Customers[] getMultiSelectedCustomersWithoutScheduledPayments() {
+        return multiSelectedCustomersWithoutScheduledPayments;
+    }
+
+    /**
+     * @param multiSelectedCustomersWithoutScheduledPayments the
+     * multiSelectedCustomersWithoutScheduledPayments to set
+     */
+    public void setMultiSelectedCustomersWithoutScheduledPayments(Customers[] multiSelectedCustomersWithoutScheduledPayments) {
+        this.multiSelectedCustomersWithoutScheduledPayments = multiSelectedCustomersWithoutScheduledPayments;
     }
 
     @FacesConverter(value = "customersControllerConverter", forClass = Customers.class)

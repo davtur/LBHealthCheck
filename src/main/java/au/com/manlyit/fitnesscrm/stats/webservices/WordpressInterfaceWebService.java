@@ -120,6 +120,7 @@ public class WordpressInterfaceWebService {
                 c.setTelephone(phoneNumber);
 
                 cc.createLeadFromWebservice(c, message, req);
+                cc.updateASingleCustomersPaymentInfo(c);
                 LOGGER.log(Level.INFO, "Webservice call to add New Lead completed successfully:");
             }
         } catch (Exception e) {

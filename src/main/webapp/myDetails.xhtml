@@ -47,7 +47,7 @@
                                 <f:validator validatorId="au.com.manlyit.fitnesscrm.stats.classes.util.EmailValidator" />
                             </p:inputText>
                             <p:outputLabel value="#{configMapController.getKey('EditCustomersLabel_streetAddress')}" for="streetAddress" />
-                            <p:inputText id="streetAddress" value="#{customersController.selected.streetAddress}" title="#{configMapController.getKey('EditCustomersTitle_streetAddress')}" required="false" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_streetAddress')}"/>
+                            <p:inputText id="streetAddress" value="#{customersController.selected.streetAddress}" title="#{configMapController.getKey('EditCustomersTitle_streetAddress')}" required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_streetAddress')}"/>
                             <p:outputLabel value="#{configMapController.getKey('EditCustomersLabel_suburb')}" for="suburb" />
                             <p:inputText id="suburb" value="#{customersController.selected.suburb}" title="#{configMapController.getKey('EditCustomersTitle_suburb')}" required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_suburb')}"/>
                             <p:outputLabel value="#{configMapController.getKey('EditCustomersLabel_postcode')}" for="postcode" />
@@ -154,7 +154,7 @@
                         <div class="EmptyBox10"></div>
                         <p:commandButton styleClass="updatePaymentInfo" icon="fa fa-dollar  white Fs14" id="directDebitFormButton" disabled="#{!ezidebit.customerWebDDRFormEnabled}"  actionListener="#{ezidebit.redirectToPaymentGateway}"    value="#{configMapController.getKey('EnterPaymentDetailsButton')}" update=":growl :createCustomerForm"  /> 
                         <div class="EmptyBox10"></div>
-                        <p:commandButton styleClass="updatePaymentInfo" icon="fa fa-credit-card  white Fs14" id="editPaymentMethodButton" disabled="#{ezidebit.theCustomerProvisionedInThePaymentGateway == false or ezidebit.customerDetailsHaveBeenRetrieved == false or ezidebit.customerCancelledInPaymentGateway == true}" onclick="changeiFrameCss" oncomplete="PF('editPaymentMethodDialogueWidget').show();"    value="#{configMapController.getKey('editPaymentMethodButtonLink')}" update=":growl @(.updatePaymentInfo)"  /> 
+                        <p:commandButton styleClass="updatePaymentInfo" icon="fa fa-credit-card  white Fs14" id="editPaymentMethodButton" disabled="#{ezidebit.theCustomerProvisionedInThePaymentGateway == false or ezidebit.customerDetailsHaveBeenRetrieved == false or ezidebit.customerCancelledInPaymentGateway == true}"  oncomplete="PF('editPaymentMethodDialogueWidget').show();"    value="#{configMapController.getKey('editPaymentMethodButtonLink')}" update=":growl @(.updatePaymentInfo)"  /> 
 
                     </div>
                 </div>

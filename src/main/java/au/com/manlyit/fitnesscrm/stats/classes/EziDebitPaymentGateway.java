@@ -898,7 +898,9 @@ public class EziDebitPaymentGateway implements Serializable {
         try {
             FacesContext context = FacesContext.getCurrentInstance();
             CustomersController controller = (CustomersController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "customersController");
+            controller.update(null);
             controller.setSelected(customersFacade.find(getSelectedCustomer().getId()));
+
             PaymentParameters pp = controller.getSelectedCustomersPaymentParameters();
             if (pp.getWebddrUrl() != null) {
 
@@ -1460,11 +1462,17 @@ public class EziDebitPaymentGateway implements Serializable {
 
         FacesContext context = FacesContext.getCurrentInstance();
         CustomersController controller = (CustomersController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "customersController");
-        PaymentParameters pp = controller.getSelectedCustomersPaymentParameters();
-        if (pp != null) {
-            String webDdrUrl = pp.getWebddrUrl();// contains payment information e.g 
-            if (webDdrUrl != null && pp.getStatusCode().trim().isEmpty()) {
-                return true;
+        Customers stale = controller.getSelected();
+        if (stale != null) {
+            Customers cust = customersFacade.findById(stale.getId());
+            if (cust != null) {
+                if (cust.getPaymentParameters() != null) {
+                    String webDdrUrl = cust.getPaymentParameters().getWebddrUrl();// contains payment information e.g 
+                    if (webDdrUrl != null && cust.getPaymentParameters().getStatusCode().trim().isEmpty()) {
+                        logger.log(Level.INFO, "isCustomerWebDDRFormEnabled - YES customer direct debit button is enabled : ", webDdrUrl);
+                        return true;
+                    }
+                }
             }
         }
         return false;
@@ -1497,6 +1505,7 @@ public class EziDebitPaymentGateway implements Serializable {
     public Customers getSelectedCustomer() {
         FacesContext context = FacesContext.getCurrentInstance();
         CustomersController controller = (CustomersController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "customersController");
+        controller.refreshSelectedCustomerFromDB();
         /*if (refreshFromDB) {
          refreshFromDB = false;
          controller.updateSelectedCustomer(customersFacade.findByIdBypassCache(controller.getSelected().getId()));
@@ -2726,11 +2735,11 @@ public class EziDebitPaymentGateway implements Serializable {
         String widgetUrl = configMapFacade.getConfig("payment.ezidebit.webddr.baseurl");
         widgetUrl += "?" + "a=" + configMapFacade.getConfig("payment.ezidebit.webddr.hash");
         widgetUrl += amp + "uRefLabel=" + configMapFacade.getConfig("payment.ezidebit.webddr.uRefLabel");
-        widgetUrl += amp + "fName=" + cust.getFirstname();
-        widgetUrl += amp + "lName=" + cust.getLastname();
+        widgetUrl += amp + "fName=" + cust.getFirstname().trim();
+        widgetUrl += amp + "lName=" + cust.getLastname().trim();
         widgetUrl += amp + "uRef=" + cust.getId();
-        widgetUrl += amp + "email=" + cust.getEmailAddress();
-        widgetUrl += amp + "mobile=" + cust.getTelephone();
+        widgetUrl += amp + "email=" + cust.getEmailAddress().trim();
+        widgetUrl += amp + "mobile=" + cust.getTelephone().trim();
         if (pp.getSmsPaymentReminder().contains("YES")) {
             widgetUrl += amp + "sms=1";
         } else {
