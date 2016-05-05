@@ -1,0 +1,121 @@
+Appendix E
+E.1 - R EAL T IME T RANSACTION S AMPLE C REDIT C ARD N UMBERS
+The table below provides a list of dummy Credit Card Numbers that can be used in
+testing for real time transactions. An expiry date of 05/17 must be used with these
+cards. An expiry month and year in the past will not be accepted as valid.
+
+Visa
+4987 6543 2109 8769
+MasterCard
+5123 4567 8901 2346
+American Express
+3714 4963 5311 004
+Diners Club
+3012 3456 7890 19
+
+E.2 - D IRECT D EBIT TRANSACTION SAMPLE C REDIT C ARD N UMBERS
+In the Test Environment, customers whose credit card number ends in a '2' will have
+their test payment(s) dishonoured as "Insufficient Funds" and the customer will stay on
+a processing status. Customers whose credit card number ends in a '3' will have their
+test payment(s) dishonoured as "Incorrect Bank Account/Credit Card Number" (Fatal
+Dishonour) and the customer record will be moved to a non-processing status. All other
+payments will be marked as successful.
+
+Visa
+4434 1234 5678 9351
+4545 4432 6654 8144
+4478 1122 3344 5475
+4488 9876 5432 1406
+4040 2121 2121 2968
+4148 5331 6619 6092
+4252 9543 8022 0462
+4371 8955 4034 4682
+4476 4763 9626 9382
+4554 5595 3119 7892
+4679 8191 4598 2653
+4782 4555 1667 1593
+4834 7344 5048 2763
+
+MasterCard
+5434 1234 5678 9051
+5545 4432 6654 8844
+5478 1122 3344 5175
+5488 9876 5432 1106
+5140 2121 2121 2568
+5148 5331 6619 6792
+5252 9543 8022 0162
+5371 8955 4034 4382
+5476 4763 9626 9082
+5554 5595 3119 7592
+5579 8191 4598 2453
+5382 4555 1667 1693
+5234 7344 5048 2063
+
+American Express
+3741 2345 6789 351
+3754 4326 6548 444
+3781 1223 3445 375
+3789 8765 4321 506
+3702 1212 1212 768
+3785 3316 6196 992
+3729 5438 0220 762
+3718 9554 0344 482
+3764 7639 6269 282
+3745 5953 1197 492
+3798 1914 5982 753
+3724 5551 6671 993
+3747 3445 0482 163
+
+Diners Club
+3612 3456 7893 51
+3644 3266 5485 44
+3611 2233 4457 75
+3698 7654 3219 06
+3621 2121 2123 68
+3653 3166 1963 92
+3695 4380 2205 62
+3689 5540 3441 82
+3647 6396 2694 82
+3655 9531 1974 92
+3681 9145 9822 53
+3645 5516 6717 93
+3673 4450 4821 63
+ 
+
+E.4 - S AMPLE B ANK A CCOUNT /BSB N UMBERS
+Any bank account number can be used in combination with the sample BSB numbers.
+Valid Australian bank account numbers are numeric only between three (3) and nine (9)
+digits in length.
+The table below provides a list of valid and invalid Australian BSB Numbers that can be
+used in testing.
+
+Valid BSB Numbers
+012-003
+032-000
+064-000
+082-001
+092-000
+105-000
+112-100
+122-321
+152-147
+212-200
+
+Invalid BSB Numbers
+012-000
+032-009
+062-008
+081-000
+093-000
+104-000
+112-000
+122-000
+150-123
+200-000
+
+In the Test Environment, customers whose bank account number ends in a '2' will have
+their test payment(s) dishonoured as "Insufficient Funds" and the customer will stay on
+a processing status. Customers whose bank account number ends in a '3' will have their
+test payment(s) dishonoured as "Incorrect Bank Account/Credit Card Number" (Fatal
+Dishonour) and the customer record will be moved to a non-processing status. All other
+payments will be marked as successful.

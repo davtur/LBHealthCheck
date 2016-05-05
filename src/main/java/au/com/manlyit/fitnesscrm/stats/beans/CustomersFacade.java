@@ -46,7 +46,7 @@ public class CustomersFacade extends AbstractFacade<Customers> {
     private ConfigMapFacade configMapFacade;
     @PersistenceContext(unitName = "FitnessStatsPU")
     private EntityManager em;
-    private static final Logger logger = Logger.getLogger(CustomersFacade.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(CustomersFacade.class.getName());
 
     @Override
     protected EntityManager getEntityManager() {
@@ -83,7 +83,7 @@ public class CustomersFacade extends AbstractFacade<Customers> {
             Query q = em.createQuery(cq);
             cm = (Customers) q.getSingleResult();
         } catch (Exception e) {
-            logger.log(Level.INFO, "Customer not found:{0}", username);
+            LOGGER.log(Level.INFO, "Customer not found:{0}", username);
         }
         return cm;
         // Query q = em.createNativeQuery("SELECT * FROM customers where username = '" + username + "'", Customers.class);
@@ -108,7 +108,7 @@ public class CustomersFacade extends AbstractFacade<Customers> {
             Query q = em.createQuery(cq);
             cm = (Customers) q.getSingleResult();
         } catch (Exception e) {
-            logger.log(Level.INFO, "Customer not found:{0}", email);
+            LOGGER.log(Level.INFO, "Customer not found:{0}", email);
         }
         return cm;
         // Query q = em.createNativeQuery("SELECT * FROM customers where username = '" + username + "'", Customers.class);
@@ -140,12 +140,12 @@ public class CustomersFacade extends AbstractFacade<Customers> {
             if (size == 1) {
                 cm = (Customers) q.getSingleResult();
             } else if (size == 0) {
-                logger.log(Level.WARNING, "Customers findCustomerByName, Customer not found : Customer name  = {0} {1}", new Object[]{firstname, lastname, size});
+                LOGGER.log(Level.WARNING, "Customers findCustomerByName, Customer not found : Customer name  = {0} {1}", new Object[]{firstname, lastname, size});
             } else if (size > 1) {
-                logger.log(Level.WARNING, "Customers findCustomerByName, Duplicate Customer id's found for Customer facebookId = {0} {1}. The number of duplicates is {1}", new Object[]{firstname, lastname, size});
+                LOGGER.log(Level.WARNING, "Customers findCustomerByName, Duplicate Customer id's found for Customer facebookId = {0} {1}. The number of duplicates is {1}", new Object[]{firstname, lastname, size});
             }
         } catch (Exception e) {
-            logger.log(Level.INFO, "Customer not found:{0} {1} , {2}", new Object[]{firstname, lastname, e.getMessage()});
+            LOGGER.log(Level.INFO, "Customer not found:{0} {1} , {2}", new Object[]{firstname, lastname, e.getMessage()});
         }
         return cm;
         // Query q = em.createNativeQuery("SELECT * FROM customers where username = '" + username + "'", Customers.class);
@@ -188,12 +188,12 @@ public class CustomersFacade extends AbstractFacade<Customers> {
             if (size == 1) {
                 cm = (Customers) q.getSingleResult();
             } else if (size == 0) {
-                logger.log(Level.WARNING, "Customers findCustomerByFacebookId, Customer not found : Customer facebookId = {0}", fbId);
+                LOGGER.log(Level.WARNING, "Customers findCustomerByFacebookId, Customer not found : Customer facebookId = {0}", fbId);
             } else if (size > 1) {
-                logger.log(Level.WARNING, "Customers findCustomerByFacebookId, Duplicate Customer id's found for Customer facebookId = {0}. The number of duplicates is {1}", new Object[]{fbId, size});
+                LOGGER.log(Level.WARNING, "Customers findCustomerByFacebookId, Duplicate Customer id's found for Customer facebookId = {0}. The number of duplicates is {1}", new Object[]{fbId, size});
             }
         } catch (Exception e) {
-            logger.log(Level.INFO, "Customer not found or duplicate facebookId  found :" + fbId, e);
+            LOGGER.log(Level.INFO, "Customer not found or duplicate facebookId  found :" + fbId, e);
         }
         return cm;
     }
@@ -214,12 +214,12 @@ public class CustomersFacade extends AbstractFacade<Customers> {
             if (size == 1) {
                 cm = (Customers) q.getSingleResult();
             } else if (size == 0) {
-                logger.log(Level.WARNING, "Customers findById, Customer not found : Customer Id = {0}", id);
+                LOGGER.log(Level.WARNING, "Customers findById, Customer not found : Customer Id = {0}", id);
             } else if (size > 1) {
-                logger.log(Level.WARNING, "Customers findById, Duplicate Customer id's found for Customer Id = {0}. The number of duplicates is {1}", new Object[]{id, size});
+                LOGGER.log(Level.WARNING, "Customers findById, Duplicate Customer id's found for Customer Id = {0}. The number of duplicates is {1}", new Object[]{id, size});
             }
         } catch (Exception e) {
-            logger.log(Level.WARNING, "Customers findById, An exception occurred for customer id :" + id, e);
+            LOGGER.log(Level.WARNING, "Customers findById, An exception occurred for customer id :" + id, e);
         }
         return cm;
     }
@@ -229,10 +229,10 @@ public class CustomersFacade extends AbstractFacade<Customers> {
         /*  try {
          c = em.find(Customers.class, id);
          } catch (Exception e) {
-         logger.log(Level.WARNING, "CustomersFacade findById, Exception {1}, : Customer Id = {0}", new Object[]{id, e.getMessage()});
+         LOGGER.log(Level.WARNING, "CustomersFacade findById, Exception {1}, : Customer Id = {0}", new Object[]{id, e.getMessage()});
          }
          if (c == null) {
-         logger.log(Level.WARNING, "CustomersFacade findById, Customer not found : Customer Id = {0}", id);
+         LOGGER.log(Level.WARNING, "CustomersFacade findById, Customer not found : Customer Id = {0}", id);
          }
          return c;
          Customers cm = null;
@@ -252,12 +252,12 @@ public class CustomersFacade extends AbstractFacade<Customers> {
                 if (size == 1) {
                     c = retList.get(0);
                 } else if (size == 0) {
-                    logger.log(Level.WARNING, "Customers findById, Customer not found : Customer Id = {0}", id);
+                    LOGGER.log(Level.WARNING, "Customers findById, Customer not found : Customer Id = {0}", id);
                 } else if (size > 1) {
-                    logger.log(Level.WARNING, "Customers findById, Duplicate Customer id's found for Customer Id = {0}. The number of duplicates is {1}", new Object[]{id, size});
+                    LOGGER.log(Level.WARNING, "Customers findById, Duplicate Customer id's found for Customer Id = {0}. The number of duplicates is {1}", new Object[]{id, size});
                 }
             } else {
-                logger.log(Level.WARNING, "Customers findById, Customer not found, LIST IS NULL : Customer Id = {0}", id);
+                LOGGER.log(Level.WARNING, "Customers findById, Customer not found, LIST IS NULL : Customer Id = {0}", id);
             }
 
         } catch (PersistenceException pe) {
@@ -266,12 +266,12 @@ public class CustomersFacade extends AbstractFacade<Customers> {
             if (e.getClass() == ConstraintViolationException.class) {
 
                 ConstraintViolationException cve = (ConstraintViolationException) e;
-                logger.log(Level.WARNING, "Customers findById, An ConstraintViolationException occurred for customer id :{0}, Message: {1}", new Object[]{id, cve.getConstraintViolations().toString()});
+                LOGGER.log(Level.WARNING, "Customers findById, An ConstraintViolationException occurred for customer id :{0}, Message: {1}", new Object[]{id, cve.getConstraintViolations().toString()});
             }
 
             JsfUtil.addErrorMessage(pe, configMapFacade.getConfig("PersistenceErrorOccured"));
         } catch (Exception e) {
-            logger.log(Level.WARNING, "Customers findById, An exception occurred for customer id :" + id, e);
+            LOGGER.log(Level.WARNING, "Customers findById, An exception occurred for customer id :" + id, e);
         }
         return c;
     }
@@ -375,7 +375,7 @@ public class CustomersFacade extends AbstractFacade<Customers> {
             String sqlString = databaseQuery.getSQLString();
             //This SQL will contain ? for parameters. To get the SQL translated with the arguments you need a DatabaseRecord with the parameter values.
             // String sqlString2 = databaseQuery.getTranslatedSQLString(session, recordWithValues);
-            logger.log(Level.INFO, "Payment/Settlement Report SQL Query String: {0}  -----------------Records Found:{1},", new Object[]{sqlString, retList.size()});
+            LOGGER.log(Level.INFO, "Payment/Settlement Report SQL Query String: {0}  -----------------Records Found:{1},", new Object[]{sqlString, retList.size()});
 
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));

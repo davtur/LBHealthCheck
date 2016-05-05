@@ -145,7 +145,11 @@ public class WebDDRSignUpServlet extends HttpServlet {
                             CustomersController controller = (CustomersController) facesContext.getApplication().getELResolver().
                                     getValue(facesContext.getELContext(), null, "customersController");
                             controller.createCombinedAuditLogAndNote(controller.getLoggedInUser(), current, "Direct Debit Form", "The direct debit form has been completed and payments created.", "Not Registered in Payemnt Gateway", "Registered in payment gateway with scheduled payments");
-
+                            try {
+                                controller.getSelected().getPaymentParameters().setWebddrUrl(null);
+                            } catch (Exception e) {
+                                logger.log(Level.INFO, " Customer {0} . Setting Web DDR URL to NULL.: {1}", new Object[]{current.getUsername(),e.getMessage()});
+                            }
                         } catch (Exception e) {
                             logger.log(Level.SEVERE, "Couldn't log payemnt form submitted.");
                         }

@@ -253,10 +253,20 @@ public class LoginBean implements Serializable {
 
             HttpSession httpSession = request.getSession();
             String landingPage;
+            String adminRole = getValueFromKey("facebook.redirect.adminRole");
+            if(adminRole == null || adminRole.isEmpty()){
+                adminRole = "ADMIN"; //default
+            }
             if (mobileDevice(request)) {
                 httpSession.setAttribute("MOBILE_DEVICE", "TRUE");
                 logger.log(Level.INFO, "Mobile Device user agent detected. Redirecting to the mobile landing page.");
-                landingPage = getValueFromKey("facebook.redirect.mobilelandingpage");
+                if (FacesContext.getCurrentInstance().getExternalContext().isUserInRole(adminRole) == true) {
+                    landingPage = getValueFromKey("facebook.redirect.mobileadminlandingpage");
+                } else {
+                    landingPage = getValueFromKey("facebook.redirect.mobilelandingpage");
+                }
+            } else if (FacesContext.getCurrentInstance().getExternalContext().isUserInRole(adminRole) == true) {
+                landingPage = getValueFromKey("facebook.redirect.adminlandingpage");
             } else {
                 landingPage = getValueFromKey("facebook.redirect.landingpage");
             }

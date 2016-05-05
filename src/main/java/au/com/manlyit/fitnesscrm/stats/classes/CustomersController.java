@@ -6,7 +6,6 @@ import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.beans.CustomersFacade;
 import au.com.manlyit.fitnesscrm.stats.beans.LoginBean;
-import static au.com.manlyit.fitnesscrm.stats.beans.LoginBean.generateUniqueToken;
 import au.com.manlyit.fitnesscrm.stats.beans.PaymentsFacade;
 import au.com.manlyit.fitnesscrm.stats.chartbeans.MySessionsChart1;
 import au.com.manlyit.fitnesscrm.stats.classes.util.DatatableSelectionHelper;
@@ -15,7 +14,6 @@ import au.com.manlyit.fitnesscrm.stats.db.CustomerState;
 import au.com.manlyit.fitnesscrm.stats.db.Groups;
 import au.com.manlyit.fitnesscrm.stats.db.Notes;
 import au.com.manlyit.fitnesscrm.stats.db.PaymentParameters;
-import au.com.manlyit.fitnesscrm.stats.db.Payments;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -29,6 +27,7 @@ import java.util.logging.Logger;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Properties;
 import java.util.concurrent.Future;
 import java.util.regex.Matcher;
@@ -67,6 +66,7 @@ public class CustomersController implements Serializable {
     private List<Groups> customerGroupsList;
     private List<Groups> newCustomerGroupsList;
     private PfSelectableDataModel<Customers> items = null;
+    private PfSelectableDataModel<Customers> customersWithoutScheduledPayments = null;
     private Date testTime;
     private PfSelectableDataModel<Notes> notesItems = null;
     @Inject
@@ -107,6 +107,7 @@ public class CustomersController implements Serializable {
     private int selectedItemIndex;
 
     private List<Customers> filteredItems;
+    private List<Customers> filteredCustomersWithoutScheduledPayments;
     private List<Notes> notesFilteredItems;
     private Customers[] multiSelected;
     // private Groups[] selectedGroups;
@@ -127,7 +128,7 @@ public class CustomersController implements Serializable {
     private boolean showNonUsers = false;
     private boolean signupFromBookingInProgress = false;
     private boolean signupFormSubmittedOK = false;
-    private static final Logger logger = Logger.getLogger(CustomersController.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(CustomersController.class.getName());
 
     public CustomersController() {
     }
@@ -139,14 +140,14 @@ public class CustomersController implements Serializable {
     }
 
     /* private void sanityCheckCustomersForDefaultItems() {
-     logger.log(Level.INFO, "Performing Sanity Checks on Customers");
+     LOGGER.log(Level.INFO, "Performing Sanity Checks on Customers");
      List<Customers> cl = ejbFacade.findAll();
      for (Customers c : cl) {
      if (c.getProfileImage() == null) {
      createDefaultCustomerProfilePicture(c);
      }
      }
-     logger.log(Level.INFO, "FINISHED Performing Sanity Checks on Customers");
+     LOGGER.log(Level.INFO, "FINISHED Performing Sanity Checks on Customers");
      }*/
     public static boolean isUserInRole(String roleName) {
         boolean inRole = false;
@@ -244,7 +245,7 @@ public class CustomersController implements Serializable {
             url = url.substring(a, b);
             auditDetails += "\r\n" + url;
         } catch (Exception e) {
-            logger.log(Level.WARNING, "sendCustomerOnboardEmail: Couldn't get the payment details from the webDDR Url for the audit log and cutomer notes");
+            LOGGER.log(Level.WARNING, "sendCustomerOnboardEmail: Couldn't get the payment details from the webDDR Url for the audit log and cutomer notes");
         }
         addCustomerToUsersGroup(current);
         createCombinedAuditLogAndNote(loggedInUser, current, "sendCustomerOnboardEmail", auditDetails, changedFrom, changedTo);
@@ -254,7 +255,7 @@ public class CustomersController implements Serializable {
         try {
             if (adminUser == null) {
                 adminUser = customer;
-                logger.log(Level.WARNING, "Customers Controller, createCombinedAuditLogAndNote: The logged in user is NULL");
+                LOGGER.log(Level.WARNING, "Customers Controller, createCombinedAuditLogAndNote: The logged in user is NULL");
             }
             ejbAuditLogFacade.audit(adminUser, customer, title, message, changedFrom, ChangedTo);
             Notes note = new Notes(0);
@@ -271,12 +272,12 @@ public class CustomersController implements Serializable {
             als.add("@(.updateNotesDataTable)");
             //als.add("growl");
             RequestContext rc = RequestContext.getCurrentInstance();
-            if(rc != null){
+            if (rc != null) {
                 rc.update(als);
             }
             //  RequestContext.getCurrentInstance().update("@(.updateNotesDataTable)");
         } catch (Exception e) {
-            logger.log(Level.WARNING, "Customers Controller, createCombinedAuditLogAndNote: ", e);
+            LOGGER.log(Level.WARNING, "Customers Controller, createCombinedAuditLogAndNote: ", e);
         }
 
     }
@@ -296,7 +297,7 @@ public class CustomersController implements Serializable {
         try {
             c.setCountryId(Integer.parseInt(configMapFacade.getConfig("default.customer.details.countryId")));
         } catch (NumberFormatException e) {
-            logger.log(Level.SEVERE, "Number Format Exception for Country ID in customer deaults.Check config map entry for default.customer.details.countryId and value {0}", configMapFacade.getConfig("default.customer.details.countryId"));
+            LOGGER.log(Level.SEVERE, "Number Format Exception for Country ID in customer deaults.Check config map entry for default.customer.details.countryId and value {0}", configMapFacade.getConfig("default.customer.details.countryId"));
         }
         c.setCity(configMapFacade.getConfig("default.customer.details.city"));
         c.setStreetAddress(configMapFacade.getConfig("default.customer.details.street"));
@@ -306,7 +307,7 @@ public class CustomersController implements Serializable {
         try {
             c.setReferredby(Integer.parseInt(configMapFacade.getConfig("default.customer.details.referredby")));
         } catch (NumberFormatException e) {
-            logger.log(Level.SEVERE, "Number Format Exception for Referred by customer ID in customer deaults.Check config map entry for default.customer.details.referredby and value {0}", configMapFacade.getConfig("default.customer.details.referredby"));
+            LOGGER.log(Level.SEVERE, "Number Format Exception for Referred by customer ID in customer deaults.Check config map entry for default.customer.details.referredby and value {0}", configMapFacade.getConfig("default.customer.details.referredby"));
         }
 
         //for debug
@@ -334,7 +335,7 @@ public class CustomersController implements Serializable {
             c.setDemographic(ejbDemoFacade.findAll().get(Integer.parseInt(configMapFacade.getConfig("default.customer.details.demographic"))));
 
         } catch (NumberFormatException numberFormatException) {
-            logger.log(Level.SEVERE, "Number Format Exception for customer defaults.Check config map entry for default.customer.details.xxxx and a numeric value ");
+            LOGGER.log(Level.SEVERE, "Number Format Exception for customer defaults.Check config map entry for default.customer.details.xxxx and a numeric value ");
 
         }
 
@@ -401,9 +402,9 @@ public class CustomersController implements Serializable {
          filteredItems = new ArrayList<>();
          }*/
         if (filteredItems != null) {
-            logger.log(Level.FINE, "FILTERED ITEMS SIZE", filteredItems.size());
+            LOGGER.log(Level.FINE, "FILTERED ITEMS SIZE", filteredItems.size());
         }
-        logger.log(Level.FINE, "GET FILTERED ITEMS", filteredItems);
+        LOGGER.log(Level.FINE, "GET FILTERED ITEMS", filteredItems);
         return filteredItems;
     }
 
@@ -417,75 +418,82 @@ public class CustomersController implements Serializable {
     protected void createDefaultPaymentParameters(Customers current) {
 
         if (current == null) {
-            logger.log(Level.WARNING, "Future Map createDefaultPaymentParameters . Customer is NULL.");
+            LOGGER.log(Level.WARNING, "Future Map createDefaultPaymentParameters . Customer is NULL.");
             return;
         }
         if (current.getId() == null) {
-            logger.log(Level.WARNING, "Future Map createDefaultPaymentParameters . Customer.getId is NULL.");
+            LOGGER.log(Level.WARNING, "Future Map createDefaultPaymentParameters . Customer.getId is NULL.");
             return;
         }
 
         PaymentParameters pp = current.getPaymentParameters();
+
         if (pp == null) {
+            pp = ejbPaymentParametersFacade.findPaymentParametersByCustomer(current);
+            if (pp == null) {
+                try {
 
-            try {
+                    String phoneNumber = current.getTelephone();
+                    if (phoneNumber == null) {
+                        phoneNumber = "0000000000";
+                        LOGGER.log(Level.INFO, "Invalid Phone Number for Customer {0}. Setting it to empty string", current.getUsername());
+                    }
+                    Pattern p = Pattern.compile("\\d{10}");
+                    Matcher m = p.matcher(phoneNumber);
+                    //ezidebit requires an australian mobile phone number that starts with 04
+                    if (m.matches() == false || phoneNumber.startsWith("04") == false) {
+                        phoneNumber = "0000000000";
+                        LOGGER.log(Level.INFO, "Invalid Phone Number for Customer {0}. Setting it to empty string", current.getUsername());
+                    }
+                    pp = new PaymentParameters();
+                    pp.setId(0);
+                    pp.setWebddrUrl(null);
+                    pp.setLoggedInUser(current);
+                    pp.setLastSuccessfulScheduledPayment(ejbPaymentsFacade.findLastSuccessfulScheduledPayment(current));
+                    pp.setNextScheduledPayment(ejbPaymentsFacade.findNextScheduledPayment(current));
+                    pp.setAddressLine1("");
+                    pp.setAddressLine2("");
+                    pp.setAddressPostCode("");
+                    pp.setAddressState("");
+                    pp.setAddressSuburb("");
+                    pp.setContractStartDate(new Date());
+                    pp.setCustomerFirstName("");
+                    pp.setCustomerName("");
+                    pp.setEmail("");
+                    pp.setEzidebitCustomerID("");
 
-                String phoneNumber = current.getTelephone();
-                if (phoneNumber == null) {
-                    phoneNumber = "0000000000";
-                    logger.log(Level.INFO, "Invalid Phone Number for Customer {0}. Setting it to empty string", current.getUsername());
+                    pp.setMobilePhoneNumber(phoneNumber);
+                    pp.setPaymentGatewayName("EZIDEBIT");
+                    pp.setPaymentMethod("");
+                    pp.setPaymentPeriod("");
+                    pp.setPaymentPeriodDayOfMonth("");
+                    pp.setPaymentPeriodDayOfWeek("");
+
+                    pp.setSmsExpiredCard("YES");
+                    pp.setSmsFailedNotification("YES");
+                    pp.setSmsPaymentReminder("NO");
+                    pp.setStatusCode("");
+                    pp.setStatusDescription("");
+                    pp.setTotalPaymentsFailed(0);
+                    pp.setTotalPaymentsFailedAmount(new BigDecimal(0));
+                    pp.setTotalPaymentsSuccessful(0);
+                    pp.setTotalPaymentsSuccessfulAmount(new BigDecimal(0));
+                    pp.setYourGeneralReference("");
+                    pp.setYourSystemReference("");
+                    ejbPaymentParametersFacade.create(pp);
+                    current.setPaymentParameters(pp);
+                    ejbFacade.editAndFlush(current);
+
+                } catch (Exception e) {
+                    LOGGER.log(Level.SEVERE, "createDefaultPaymentParameters Method in Customers Controller", e);
                 }
-                Pattern p = Pattern.compile("\\d{10}");
-                Matcher m = p.matcher(phoneNumber);
-                //ezidebit requires an australian mobile phone number that starts with 04
-                if (m.matches() == false || phoneNumber.startsWith("04") == false) {
-                    phoneNumber = "0000000000";
-                    logger.log(Level.INFO, "Invalid Phone Number for Customer {0}. Setting it to empty string", current.getUsername());
-                }
-                pp = new PaymentParameters();
-                pp.setId(0);
-                pp.setWebddrUrl(null);
-                pp.setLoggedInUser(current);
-                pp.setLastSuccessfulScheduledPayment(ejbPaymentsFacade.findLastSuccessfulScheduledPayment(current));
-                pp.setNextScheduledPayment(ejbPaymentsFacade.findNextScheduledPayment(current));
-                pp.setAddressLine1("");
-                pp.setAddressLine2("");
-                pp.setAddressPostCode("");
-                pp.setAddressState("");
-                pp.setAddressSuburb("");
-                pp.setContractStartDate(new Date());
-                pp.setCustomerFirstName("");
-                pp.setCustomerName("");
-                pp.setEmail("");
-                pp.setEzidebitCustomerID("");
-
-                pp.setMobilePhoneNumber(phoneNumber);
-                pp.setPaymentGatewayName("EZIDEBIT");
-                pp.setPaymentMethod("");
-                pp.setPaymentPeriod("");
-                pp.setPaymentPeriodDayOfMonth("");
-                pp.setPaymentPeriodDayOfWeek("");
-
-                pp.setSmsExpiredCard("YES");
-                pp.setSmsFailedNotification("YES");
-                pp.setSmsPaymentReminder("NO");
-                pp.setStatusCode("");
-                pp.setStatusDescription("");
-                pp.setTotalPaymentsFailed(0);
-                pp.setTotalPaymentsFailedAmount(new BigDecimal(0));
-                pp.setTotalPaymentsSuccessful(0);
-                pp.setTotalPaymentsSuccessfulAmount(new BigDecimal(0));
-                pp.setYourGeneralReference("");
-                pp.setYourSystemReference("");
-                ejbPaymentParametersFacade.create(pp);
+            } else {
                 current.setPaymentParameters(pp);
                 ejbFacade.editAndFlush(current);
-
-            } catch (Exception e) {
-                logger.log(Level.SEVERE, "createDefaultPaymentParameters Method in Customers Controller", e);
+                LOGGER.log(Level.WARNING, "createDefaultPaymentParameters - The payment parameters existed for this customer but were not linked with this customers foreign key", current.getUsername());
             }
         } else {
-            logger.log(Level.WARNING, "createDefaultPaymentParameters - The payment parameters have already been created for this customer", current.getUsername());
+            LOGGER.log(Level.WARNING, "createDefaultPaymentParameters - The payment parameters have already been created for this customer", current.getUsername());
         }
     }
 
@@ -496,7 +504,7 @@ public class CustomersController implements Serializable {
         }
         pp = getSelected().getPaymentParameters();
         if (pp == null) {
-            logger.log(Level.SEVERE, " Customer {0} has NULL Payment parameters.", new Object[]{current.getUsername()});
+            LOGGER.log(Level.SEVERE, " Customer {0} has NULL Payment parameters.", new Object[]{current.getUsername()});
         }
         return pp;
     }
@@ -647,7 +655,7 @@ public class CustomersController implements Serializable {
 
         setNewCustomer(setCustomerDefaults(new Customers()));
 
-        logger.log(Level.INFO, "customersController  Sign Up Button Clicked, prepare create called. Returning to signup xhtml");
+        LOGGER.log(Level.INFO, "customersController  Sign Up Button Clicked, prepare create called. Returning to signup xhtml");
 
     }
 
@@ -718,7 +726,7 @@ public class CustomersController implements Serializable {
         if (appBean.validateIP(ipAddress) == false) {
             // validation failed.multiple attempts fron the same IP in the past hour
         }
-        logger.log(Level.INFO, "validateNewSignup: ip:{0}, email:{1}, customerId if found:{2}", new Object[]{ipAddress, emailAddress, id});
+        LOGGER.log(Level.INFO, "validateNewSignup: ip:{0}, email:{1}, customerId if found:{2}", new Object[]{ipAddress, emailAddress, id});
 // TODO change this to != null when finished testing to stop the same email signing up twice
         return c == null;
     }
@@ -792,7 +800,7 @@ public class CustomersController implements Serializable {
                 String details = "New LEAD generated: Name: " + c.getFirstname() + ", <br/>Email:  " + c.getEmailAddress() + ", <br/>Phone:   " + c.getTelephone() + ", <br/>Username:   " + c.getUsername() + ", <br/>Group:   " + group + ", IP Address:" + ipAddress;
                 sendNotificationEmail(c, grp, "system.email.notification.template", "New LEAD from website", message);
                 createCombinedAuditLogAndNote(c, c, "New Lead", details, "Did Not Exist", "New Lead");
-                logger.log(Level.INFO, "createFromLead: {0}", new Object[]{details});
+                LOGGER.log(Level.INFO, "createFromLead: {0}", new Object[]{details});
                 if (isWebserviceCall == false) {
                     RequestContext.getCurrentInstance().execute("PF('signupDialog').hide();");
                     JsfUtil.addSuccessMessage("Info", configMapFacade.getConfig("LeadSignupSuccessfull"));
@@ -811,7 +819,7 @@ public class CustomersController implements Serializable {
                 LoginBean controller = (LoginBean) context.getApplication().getELResolver().getValue(context.getELContext(), null, "loginBean");
                 controller.doPasswordReset("system.new.customer.template", c, configMapFacade.getConfig("sendCustomerOnBoardEmailEmailSubject"));
                 createCombinedAuditLogAndNote(c, c, "New Sign Up", details, "Did Not Exist", "New Lead");
-                logger.log(Level.INFO, "createFromSignup: {0}", new Object[]{details});
+                LOGGER.log(Level.INFO, "createFromSignup: {0}", new Object[]{details});
                 RequestContext.getCurrentInstance().execute("PF('signupDialog').hide();");
                 JsfUtil.addSuccessMessage("Info", configMapFacade.getConfig("SignUpSuccessfulFailed"));
                 setSignupFormSubmittedOK(true);
@@ -1026,7 +1034,18 @@ public class CustomersController implements Serializable {
 
     public void update(ActionEvent event) {
         try {
-            getFacade().edit(getSelected());
+            Customers selected = getSelected();
+            getFacade().edit(selected);
+            if (selected.getPaymentParameters() != null) {
+                if (selected.getPaymentParameters().getWebddrUrl() != null) {
+                    // update the customers details in the direct debit form. If they update their details online before they submit the form we need to update the form
+                    // otherwise the address or other fields may  be blank
+                    FacesContext context = FacesContext.getCurrentInstance();
+                    EziDebitPaymentGateway controller = (EziDebitPaymentGateway) context.getApplication().getELResolver().getValue(context.getELContext(), null, "ezidebit");
+                    controller.updatePaymentScheduleForm();
+                    controller.createEddrLink(event);
+                }
+            }
             JsfUtil.addSuccessMessage(configMapFacade.getConfig("CustomersUpdated"));
 
         } catch (Exception e) {
@@ -1236,6 +1255,33 @@ public class CustomersController implements Serializable {
             items = new PfSelectableDataModel<>(new ArrayList<Customers>());
         }
         return items;
+    }
+
+    public PfSelectableDataModel<Customers> getCustomersWithoutScheduledPayments() {
+        if (customersWithoutScheduledPayments == null) {
+
+            List<Customers> custList = ejbFacade.findFilteredCustomers(true, selectedCustomerStates, showNonUsers, isRefreshFromDB());
+
+            ListIterator<Customers> listIterator = custList.listIterator(custList.size());
+
+            try {
+                while (listIterator.hasPrevious()) {
+                    Customers c = listIterator.previous();
+                    if (c.getPaymentParameters().getNextScheduledPayment() != null) {
+                        custList.remove(c);
+                    }
+
+                }
+
+            } catch (Exception e) {
+                LOGGER.log(Level.WARNING, "getCustomersWithoutScheduledPayments: Exception", e);
+            }
+            customersWithoutScheduledPayments = new PfSelectableDataModel<>(custList);
+        }
+        if (customersWithoutScheduledPayments == null) {
+            customersWithoutScheduledPayments = new PfSelectableDataModel<>(new ArrayList<Customers>());
+        }
+        return customersWithoutScheduledPayments;
     }
 
     public PfSelectableDataModel<Notes> getNotesItems() {
@@ -1684,10 +1730,10 @@ public class CustomersController implements Serializable {
                 if (name != null) {
                     loggedInUser = ejbFacade.findCustomerByUsername(name);
                     if (loggedInUser == null) {
-                        logger.log(Level.INFO, "getLoggedInUser: a call to findCustomerByUsername(name) returned NULL. Name looked up =", name);
+                        LOGGER.log(Level.INFO, "getLoggedInUser: a call to findCustomerByUsername(name) returned NULL. Name looked up =", name);
                     }
                 } else {
-                    logger.log(Level.INFO, "getLoggedInUser: a call to facesContext.getExternalContext().getRemoteUser() returned NULL. User not authenticated");
+                    LOGGER.log(Level.INFO, "getLoggedInUser: a call to facesContext.getExternalContext().getRemoteUser() returned NULL. User not authenticated");
                 }
             } catch (Exception e) {
                 JsfUtil.addErrorMessage(e, "Couldn't get customer " + name);
@@ -1696,7 +1742,7 @@ public class CustomersController implements Serializable {
 
             HttpServletRequest req = (HttpServletRequest) facesContext.getExternalContext().getRequest(); //request;
             String uaString = req.getHeader("User-Agent");
-            logger.log(Level.INFO, "The User-Agent of this session is :{0}", uaString);
+            LOGGER.log(Level.INFO, "The User-Agent of this session is :{0}", uaString);
         }
         return loggedInUser;
     }
@@ -2053,6 +2099,21 @@ public class CustomersController implements Serializable {
      */
     public void setLeadFormSubmitted(boolean leadFormSubmitted) {
         this.leadFormSubmitted = leadFormSubmitted;
+    }
+
+    /**
+     * @return the filteredCustomersWithoutScheduledPayments
+     */
+    public List<Customers> getFilteredCustomersWithoutScheduledPayments() {
+        return filteredCustomersWithoutScheduledPayments;
+    }
+
+    /**
+     * @param filteredCustomersWithoutScheduledPayments the
+     * filteredCustomersWithoutScheduledPayments to set
+     */
+    public void setFilteredCustomersWithoutScheduledPayments(List<Customers> filteredCustomersWithoutScheduledPayments) {
+        this.filteredCustomersWithoutScheduledPayments = filteredCustomersWithoutScheduledPayments;
     }
 
     @FacesConverter(value = "customersControllerConverter", forClass = Customers.class)

@@ -1440,3 +1440,9 @@ ViewSessionTimetableLabel_ssessionCasualRate=Casual Price
 SessionTimetablePublish=Publish
 SessionTimetableUnPublish=Hide
 ListSessionTimetableTitle_Status=Status
+
+MyDetailsCallToFillOutPaymentDetails=Please fill out your payment details.
+
+facebook.redirect.adminRole=ADMIN
+facebook.redirect.mobileadminlandingpage=/mobileMenu.xhtml
+facebook.redirect.adminlandingpage=/admin/dashboard/dashboard.xhtml

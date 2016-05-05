@@ -194,7 +194,7 @@ public class EziDebitPaymentGateway implements Serializable {
     private String bulkvalue = "";
     private String duplicateValues = "";
     private String listOfIdsToImport;
-    //private boolean customerExistsInPaymentGateway = false;
+    //private boolean theCustomerProvisionedInThePaymentGateway = false;
     private boolean editPaymentDetails = false;
     private boolean autoStartPoller = true;
     private boolean stopPoller = false;
@@ -323,7 +323,7 @@ public class EziDebitPaymentGateway implements Serializable {
     }
 
     public void editCustomerDetailsInEziDebit(Customers cust) {
-        if (isCustomerExistsInPaymentGateway()) {
+        if (isTheCustomerProvisionedInThePaymentGateway()) {
             startAsynchJob("EditCustomerDetails", paymentBean.editCustomerDetails(cust, null, getLoggedInUser(), getDigitalKey()));
         }
 
@@ -762,7 +762,7 @@ public class EziDebitPaymentGateway implements Serializable {
      * @return the customerCancelledInPaymentGateway
      */
     public boolean isCustomerCancelledInPaymentGateway() {
-        return !isCustomerExistsInPaymentGateway();
+        return !isTheCustomerProvisionedInThePaymentGateway();
     }
 
     /**
@@ -1429,9 +1429,9 @@ public class EziDebitPaymentGateway implements Serializable {
 
      }*/
     /**
-     * @return the customerExistsInPaymentGateway
+     * @return the theCustomerProvisionedInThePaymentGateway
      */
-    public boolean isCustomerExistsInPaymentGateway() {
+    public boolean isTheCustomerProvisionedInThePaymentGateway() {
         FacesContext context = FacesContext.getCurrentInstance();
         CustomersController controller = (CustomersController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "customersController");
         PaymentParameters pp = controller.getSelectedCustomersPaymentParameters();
@@ -1445,7 +1445,7 @@ public class EziDebitPaymentGateway implements Serializable {
                 //customer has never been added or is cancelled. If they are cancelled they must be added again like a new customer
                 stat = false;
 
-            } else if (pp.getStatusCode().trim().contains("A") || pp.getStatusCode().trim().contains("H") || pp.getStatusCode().trim().contains("W")) {
+            } else if (pp.getStatusCode().trim().contains("A") || pp.getStatusCode().trim().contains("H") || pp.getStatusCode().trim().contains("N") || pp.getStatusCode().trim().contains("W")) {
                 // They are on hold or active or waiting bank details
                 stat = true;
             } else {
@@ -1461,9 +1461,11 @@ public class EziDebitPaymentGateway implements Serializable {
         FacesContext context = FacesContext.getCurrentInstance();
         CustomersController controller = (CustomersController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "customersController");
         PaymentParameters pp = controller.getSelectedCustomersPaymentParameters();
-        String webDdrUrl = pp.getWebddrUrl();// contains payment information e.g 
-        if (webDdrUrl != null && pp.getStatusCode().trim().isEmpty()) {
-            return true;
+        if (pp != null) {
+            String webDdrUrl = pp.getWebddrUrl();// contains payment information e.g 
+            if (webDdrUrl != null && pp.getStatusCode().trim().isEmpty()) {
+                return true;
+            }
         }
         return false;
 
@@ -1471,7 +1473,7 @@ public class EziDebitPaymentGateway implements Serializable {
 
     public boolean isShowAddToPaymentGatewayButton() {
         if (customerDetailsHaveBeenRetrieved) {
-            if (customerCancelledInPaymentGateway || isCustomerExistsInPaymentGateway() == false) {
+            if (customerCancelledInPaymentGateway || isTheCustomerProvisionedInThePaymentGateway() == false) {
                 if (selectedCustomer.getActive().getCustomerState().contains("ACTIVE")) {
 
                     return true;
@@ -1504,12 +1506,12 @@ public class EziDebitPaymentGateway implements Serializable {
     }
 
     /**
-     * @param customerExistsInPaymentGateway the customerExistsInPaymentGateway
-     * to set
+     * @param theCustomerProvisionedInThePaymentGateway the
+     * theCustomerProvisionedInThePaymentGateway to set
      */
-    /*  public void checkCustomerExistsInPaymentGateway(ActionEvent actionEvent) {
+    /*  public void checktheCustomerProvisionedInThePaymentGateway(ActionEvent actionEvent) {
      CustomerDetails cd = getCustomerDetails(getSelectedCustomer());
-     customerExistsInPaymentGateway = cd != null;
+     theCustomerProvisionedInThePaymentGateway = cd != null;
      }*/
     /**
      *
@@ -2485,8 +2487,9 @@ public class EziDebitPaymentGateway implements Serializable {
                     eziStatusCode = result.getStatusDescription().getValue().toUpperCase().trim();
                 }
                 String ourStatus = selectedCust.getActive().getCustomerState().toUpperCase().trim();
-                String message = "";
-                if (ourStatus.contains(eziStatusCode) == false) {
+                String message = "Processing customer status codes. Customer: " + cust + ", ezidebit status:" + eziStatusCode + ", Crm Status:" + ourStatus + "";
+                logger.log(Level.INFO, message);
+                if (ourStatus.contains(eziStatusCode) == false && (ourStatus.contains("ACTIVE") == true && eziStatusCode.contains("NEW") == true) == false) {
                     // status codes don't match
 
                     message = "Customer Status codes dont match. Customer: " + cust + ", ezidebit status:" + eziStatusCode + ", Crm Status:" + ourStatus + "";
@@ -2629,15 +2632,15 @@ public class EziDebitPaymentGateway implements Serializable {
 
         /*CustomerDetails cd = getCustomerDetails(selectedCustomer);
          if (cd == null) {
-         customerExistsInPaymentGateway = false;
+         theCustomerProvisionedInThePaymentGateway = false;
          } else {
-         customerExistsInPaymentGateway = true;
+         theCustomerProvisionedInThePaymentGateway = true;
          }*/
  /*int pp = selectedCustomer.getPaymentParametersCollection().size();
          if( pp > 0) {
-         customerExistsInPaymentGateway = false;
+         theCustomerProvisionedInThePaymentGateway = false;
          } else {
-         customerExistsInPaymentGateway = true;
+         theCustomerProvisionedInThePaymentGateway = true;
          }*/
     }
 

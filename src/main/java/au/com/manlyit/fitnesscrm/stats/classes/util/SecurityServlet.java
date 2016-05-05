@@ -18,6 +18,7 @@ import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.faces.application.FacesMessage;
+import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 
@@ -169,25 +170,58 @@ public class SecurityServlet extends HttpServlet {
                 response.sendRedirect(request.getContextPath() + "/facebookError.html");
                 return;
             }
-            if (mobileDevice(request)) {
+            redirectToLandingPage(request,response);
+            /*if (mobileDevice(request)) {
                 httpSession.setAttribute("MOBILE_DEVICE", "TRUE");
                 response.sendRedirect(request.getContextPath() + getValueFromKey("facebook.redirect.mobilelandingpage"));
             } else {
                 response.sendRedirect(request.getContextPath() + getValueFromKey("facebook.redirect.landingpage"));
-            }
+            }*/
 
         } else {
             logger.log(Level.WARNING, "CSRF protection validation - The Session ID passed to the original request was does not match the one in the post to this servlet");
-            if (mobileDevice(request)) {
+            redirectToLandingPage(request,response);
+            /*if (mobileDevice(request)) {
                 httpSession.setAttribute("MOBILE_DEVICE", "TRUE");
                 response.sendRedirect(request.getContextPath() + getValueFromKey("facebook.redirect.mobilelandingpage"));
             } else {
                 response.sendRedirect(request.getContextPath() + getValueFromKey("facebook.redirect.landingpage"));
-            }
+            }*/
 
         }
     }
+      private void redirectToLandingPage(HttpServletRequest request,HttpServletResponse response) {
 
+        
+        try {
+
+            HttpSession httpSession = request.getSession();
+            String landingPage;
+            String adminRole = getValueFromKey("facebook.redirect.adminRole");
+            if(adminRole == null || adminRole.isEmpty()){
+                adminRole = "ADMIN"; //default
+            }
+            if (mobileDevice(request)) {
+                httpSession.setAttribute("MOBILE_DEVICE", "TRUE");
+                logger.log(Level.INFO, "Mobile Device user agent detected. Redirecting to the mobile landing page.");
+                if (request.isUserInRole(adminRole) == true) {
+                    landingPage = getValueFromKey("facebook.redirect.mobileadminlandingpage");
+                } else {
+                    landingPage = getValueFromKey("facebook.redirect.mobilelandingpage");
+                }
+            } else if (request.isUserInRole(adminRole) == true) {
+                landingPage = getValueFromKey("facebook.redirect.adminlandingpage");
+            } else {
+                landingPage = getValueFromKey("facebook.redirect.landingpage");
+            }
+            response.sendRedirect(request.getContextPath() + landingPage);
+            logger.log(Level.INFO, "Redirecting to Landing Page:", landingPage);
+        } catch (Exception e) {
+            JsfUtil.addErrorMessage(e, "Redirect to landing page at Login Failed.");
+            logger.log(Level.WARNING, "Redirect to landing page at Login Failed", e);
+        }
+    }
+  
     private boolean mobileDevice(HttpServletRequest req) {
         //FacesContext context = FacesContext.getCurrentInstance();
         //HttpServletRequest req = (HttpServletRequest) context.getExternalContext().getRequest();

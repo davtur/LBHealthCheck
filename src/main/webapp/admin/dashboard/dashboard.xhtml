@@ -55,7 +55,83 @@
                 <p:panel id="dashboardMonthlyRevenueChart" widgetVar="dashboardMonthlyRevenueWidget" header="Monthly Revenue Chart ( Rolling 12 month )">
                     <p:chart type="bar"   styleClass="chartClass" model="#{mySessionsChart1.dashboardMonthlyRevenueModel}"     />
                 </p:panel>
+                        <div class="Container100">
+                            <h:outputText escape="false" value="#{configMapController.getKey('ListCustomersEmpty')}" rendered="#{customersController.customersWithoutScheduledPayments.rowCount == 0}"/>
+                            <h:panelGroup rendered="#{customersController.customersWithoutScheduledPayments.rowCount > 0}">
+                                <p:dataTable id="customersTableList" 
 
+
+                                             selection="#{customersController.multiSelected}" 
+                                             rowKey="#{item.id}" 
+                                             value="#{customersController.customersWithoutScheduledPayments}" 
+                                             filteredValue="#{customersController.filteredCustomersWithoutScheduledPayments}" 
+                                             widgetVar="customersControllerTable" 
+                                             editable="false" 
+
+                                             var="item"  
+                                             scrollHeight="400"
+                                             scrollable="true" >
+                                    <f:facet name="header">
+
+
+                                        <h:panelGroup>
+                                            <h:outputText value="Search all fields:" />
+                                            <p:inputText id="globalFilter" onkeyup="PF('customersControllerTable').filter();" />
+                                        </h:panelGroup>
+                                        <h:outputText value="   " />
+                                        <h:panelGroup>
+                                         <!--   <h:outputText  rendered="#{ customersController.filteredItems != null}" value="#{customersController.filteredItems.size} Records Found"/>-->
+                                            <h:outputText  rendered="#{customersController.items != null}" value="#{customersController.items.rowCount} Records Found"/>
+
+
+                                        </h:panelGroup>
+
+                                    </f:facet>
+                                    <p:ajax event="rowSelect"  listener="#{customersController.setSelecteDblClick}" update=":growl :tv:customerslistForm1:selectedUser :tv:formCustomersEdit1 :formCustomersCreate1 :tv:paymentsForm :tv:NoteslistForm1 :confirmCancellation :confirmDialogNotesCreate1"  />  
+                                    <p:column selectionMode="multiple" />
+                                    <p:column sortBy="#{item.id}" filterBy="#{item.id}" headerText="#{configMapController.getKey('ListCustomersTitle_id')}"   >
+                                        <h:outputText value="#{item.id}"/>
+                                    </p:column>
+
+                                    <p:column sortBy="#{item.firstname}" filterBy="#{item.firstname}" headerText="#{configMapController.getKey('ListCustomersTitle_firstname')}"   >
+                                        <h:outputText value="#{item.firstname}"/>
+                                    </p:column>
+                                    <p:column sortBy="#{item.lastname}" filterBy="#{item.lastname}" headerText="#{configMapController.getKey('ListCustomersTitle_lastname')}"   >
+                                        <h:outputText value="#{item.lastname}"/>
+                                    </p:column>
+                                    <p:column sortBy="#{item.active.customerState}" filterBy="#{item.active.customerState}" headerText="#{configMapController.getKey('ListCustomersTitle_activeCRM')}"   >
+                                       <h:outputText value="LEAD, " rendered="#{customersController.isCustomerInRole(item,'LEAD')}" />  <h:outputText value="TRAINER, " rendered="#{customersController.isCustomerInRole(item,'TRAINER')}" /> <h:outputText value="#{item.active.customerState}"/>                                       
+                                    </p:column>
+                                    <p:column sortBy="#{item.paymentParameters.statusDescription}" filterBy="#{item.paymentParameters.statusDescription}" headerText="#{configMapController.getKey('ListCustomersTitle_activeEZI')}"   >
+                                        <h:outputText value="#{item.paymentParameters.statusDescription}"/> 
+                                    </p:column>
+                                    <p:column sortBy="#{item.paymentParameters.contractStartDate}" filterBy="#{item.paymentParameters.contractStartDate}" headerText="#{configMapController.getKey('ListCustomersTitle_contractStartDate')}"   >
+                                        <h:outputText value="#{item.paymentParameters.contractStartDate}">
+                                            <f:convertDateTime pattern="dd MMM yyyy" />
+                                        </h:outputText>
+                                    </p:column>
+                                    <p:column sortBy="#{item.paymentParameters.paymentPeriod}" filterBy="#{item.paymentParameters.paymentPeriod}" headerText="#{configMapController.getKey('ListCustomersTitle_paymentPeriod')}"   >
+
+                                        <h:outputText  rendered="#{item.paymentParameters.paymentPeriod == 'F'}"  value="Fortnightly" />
+                                        <h:outputText  rendered="#{item.paymentParameters.paymentPeriod == 'M'}"  value="Monthly" />
+                                        <h:outputText  rendered="#{item.paymentParameters.paymentPeriod == '4'}"  value="4 Weekly" />
+                                        <h:outputText  rendered="#{item.paymentParameters.paymentPeriod == 'N'}"  value="Weekday in Month" />
+                                        <h:outputText  rendered="#{item.paymentParameters.paymentPeriod == 'Q'}"  value="Quarterly" />
+                                        <h:outputText  rendered="#{item.paymentParameters.paymentPeriod == 'H'}"  value="Half Yearly" />
+                                        <h:outputText  rendered="#{item.paymentParameters.paymentPeriod == 'Y'}"  value="Annually" />
+                                        <h:outputText  rendered="#{item.paymentParameters.paymentPeriod == 'W'}"  value="Weekly" />
+                                        <h:outputText  rendered="#{item.paymentParameters.paymentPeriod == 'Z'}"  value="No Schedule" />
+                                        <h:outputText  rendered="#{item.paymentParameters.paymentPeriod != 'Z' and item.paymentParameters.paymentPeriod != 'M' and item.paymentParameters.paymentPeriod != 'Q' and item.paymentParameters.paymentPeriod != 'H' and item.paymentParameters.paymentPeriod != 'Y' }"  value=" - #{item.paymentParameters.paymentPeriodDayOfWeek}"/> 
+                                        <h:outputText  rendered="#{item.paymentParameters.paymentPeriod != 'Z' and item.paymentParameters.paymentPeriod == 'M' }"  value=", day-#{item.paymentParameters.paymentPeriodDayOfMonth}"/> 
+
+                                    </p:column>
+
+                                    
+                                    
+
+                                </p:dataTable>
+                            </h:panelGroup>
+                        </div>
 
             </h:form>
            
