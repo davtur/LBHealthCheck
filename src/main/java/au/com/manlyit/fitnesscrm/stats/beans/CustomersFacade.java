@@ -306,17 +306,19 @@ public class CustomersFacade extends AbstractFacade<Customers> {
     public List<Customers> findAllActiveCustomersAndStaff(boolean sortAsc) {
         ArrayList<CustomerState> acs = new ArrayList<>();
         acs.add(new CustomerState(0, "ACTIVE"));
-        return findFilteredCustomers(sortAsc, acs, true, false);
+        String sortField = "firstname";
+        return findFilteredCustomers(sortAsc,sortField, acs, true, false);
     }
 
     public List<Customers> findAllActiveCustomers(boolean sortAsc) {
         ArrayList<CustomerState> acs = new ArrayList<>();
         acs.add(new CustomerState(0, "ACTIVE"));
-        return findFilteredCustomers(sortAsc, acs, false, false);
+        String sortField = "firstname";
+        return findFilteredCustomers(sortAsc,sortField, acs, false, false);
     }
 
     //public List<Customers> findFilteredCustomers(boolean sortAsc, CustomerState[] selectedCustomerStates, boolean showStaff, boolean bypassCache) {
-    public List<Customers> findFilteredCustomers(boolean sortAsc, List<CustomerState> selectedCustomerStates, boolean showStaff, boolean bypassCache) {
+    public List<Customers> findFilteredCustomers(boolean sortAsc,String sortField, List<CustomerState> selectedCustomerStates, boolean showStaff, boolean bypassCache) {
         List<Customers> retList = null;
         if (selectedCustomerStates == null || selectedCustomerStates.isEmpty()) {
             return new ArrayList<>();
@@ -356,7 +358,7 @@ public class CustomersFacade extends AbstractFacade<Customers> {
             } else {
                 cq.where(cb.or(predicatesList.<Predicate>toArray(new Predicate[predicatesList.size()])));
             }
-            Expression<String> express = rt.get("firstname");
+            Expression<String> express = rt.get(sortField);
             if (sortAsc) {
                 cq.orderBy(cb.asc(express));
             } else {

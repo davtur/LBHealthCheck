@@ -12,25 +12,25 @@
     </ui:define>
     <ui:define name="body">
         <div class="layout-portlets-box">
-          <!--  <h:form id="devForm">
-                <p:outputPanel id="devPanel" rendered="#{customersController.isUserInRole('DEVELOPER')}" styleClass=" DispBlock Fright" >
-
-                    <p:panel id="devEffectPanel" styleClass="updatePaymentInfo">
-                        <h:outputText id="devTimeUpdate"  value="Last Payment Update:       #{customersController.testTime} "       styleClass="Fs10">
-                            <f:convertDateTime pattern="yyyy-MM-dd hh:mm:ss"  />
-
-                        </h:outputText>
-                        <p:effect type="highlight" event="load" delay="0" speed="300"> 
-                            <f:param name="mode" value="'show'" />
-                        </p:effect>
-                    </p:panel>
-                    <p:commandButton id="devButton1"     actionListener="#{customersController.dev1}" value="Test1"  update="@(.updatePaymentInfo) :growl" /> 
-                    <p:commandButton id="devButton2"     actionListener="#{customersController.dev2}" value="Test2"  update=" :growl" /> 
-                    <p:commandButton id="devButton3"     actionListener="#{customersController.dev3}" value="Test3"  update=" :growl" /> 
-
-
-                </p:outputPanel>
-            </h:form>-->
+            <!--  <h:form id="devForm">
+                  <p:outputPanel id="devPanel" rendered="#{customersController.isUserInRole('DEVELOPER')}" styleClass=" DispBlock Fright" >
+  
+                      <p:panel id="devEffectPanel" styleClass="updatePaymentInfo">
+                          <h:outputText id="devTimeUpdate"  value="Last Payment Update:       #{customersController.testTime} "       styleClass="Fs10">
+                              <f:convertDateTime pattern="yyyy-MM-dd hh:mm:ss"  />
+  
+                          </h:outputText>
+                          <p:effect type="highlight" event="load" delay="0" speed="300"> 
+                              <f:param name="mode" value="'show'" />
+                          </p:effect>
+                      </p:panel>
+                      <p:commandButton id="devButton1"     actionListener="#{customersController.dev1}" value="Test1"  update="@(.updatePaymentInfo) :growl" /> 
+                      <p:commandButton id="devButton2"     actionListener="#{customersController.dev2}" value="Test2"  update=" :growl" /> 
+                      <p:commandButton id="devButton3"     actionListener="#{customersController.dev3}" value="Test3"  update=" :growl" /> 
+  
+  
+                  </p:outputPanel>
+              </h:form>-->
 
             <p:tabView id="tv" cache="false" prependId="false" class="layout-portlets-box"> 
                 <p:ajax  event="tabChange"  listener="#{ezidebit.onTabChange}"  />  
@@ -156,11 +156,18 @@
                                         <h:outputText value="#{item.lastname}"/>
                                     </p:column>
                                     <p:column sortBy="#{item.active.customerState}" filterBy="#{item.active.customerState}" headerText="#{configMapController.getKey('ListCustomersTitle_activeCRM')}"   >
-                                       <h:outputText value="LEAD, " rendered="#{customersController.isCustomerInRole(item,'LEAD')}" />  <h:outputText value="TRAINER, " rendered="#{customersController.isCustomerInRole(item,'TRAINER')}" /> <h:outputText value="#{item.active.customerState}"/>                                       
+                                        <h:outputText value="LEAD, " rendered="#{customersController.isCustomerInRole(item,'LEAD')}" />  
+                                        <h:outputText value="TRAINER, " rendered="#{customersController.isCustomerInRole(item,'TRAINER')}" /> 
+                                        <h:outputText value="#{item.active.customerState}"/>  
+                                        <h:outputText value=", PG=#{item.paymentParameters.statusDescription}"/> 
                                     </p:column>
-                                    <p:column sortBy="#{item.paymentParameters.statusDescription}" filterBy="#{item.paymentParameters.statusDescription}" headerText="#{configMapController.getKey('ListCustomersTitle_activeEZI')}"   >
+                                   <!-- <p:column sortBy="#{item.paymentParameters.statusDescription}" filterBy="#{item.paymentParameters.statusDescription}" headerText="#{configMapController.getKey('ListCustomersTitle_activeEZI')}"   >
                                         <h:outputText value="#{item.paymentParameters.statusDescription}"/> 
+                                    </p:column>-->
+                                    <p:column sortBy="#{item.groupPricing.planName}" filterBy="#{item.groupPricing.planName}" headerText="#{configMapController.getKey('CreateCustomersTitle_groupPricing')}"   >
+                                        <h:outputText value="#{item.groupPricing.planName} - #{item.groupPricing.planPrice}"/> 
                                     </p:column>
+
                                     <p:column sortBy="#{item.paymentParameters.contractStartDate}" filterBy="#{item.paymentParameters.contractStartDate}" headerText="#{configMapController.getKey('ListCustomersTitle_contractStartDate')}"   >
                                         <h:outputText value="#{item.paymentParameters.contractStartDate}">
                                             <f:convertDateTime pattern="dd MMM yyyy" />
@@ -268,7 +275,7 @@
                             <p:inputText id="emergencyContactName" value="#{customersController.newCustomer.emergencyContactName}" title="#{configMapController.getKey('CreateCustomersTitle_emergencyContactName')}" />
                             <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_emergencyContactPhone')}" for="emergencyContactPhone" />
                             <p:inputText id="emergencyContactPhone" value="#{customersController.newCustomer.emergencyContactPhone}" title="#{configMapController.getKey('CreateCustomersTitle_emergencyContactPhone')}" >
-                                
+
                             </p:inputText>
 
                             <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_fax')}" for="fax1" />
@@ -405,10 +412,10 @@
                             <p:commandButton id="eddrButton" disabled="#{!ezidebit.showAddToPaymentGatewayButton}"  actionListener="#{ezidebit.updatePaymentScheduleForm}"  oncomplete="PF('createEddrLinkDialogueWidget').show();" update=":growl :tv:paymentsForm :createEddrLink @(.updateNotesDataTable) "   value="#{configMapController.getKey('WebDDRScheduleSetupButton')}" />
                             <p:commandButton  value="#{configMapController.getKey('sendCustomerOnBoardEmailButton')}"  actionListener="#{customersController.sendCustomerOnboardEmail}" update="@(.updateNotesDataTable) :growl"/>
 
-                            <p:commandButton id="editPaymentMethodButton" rendered="#{ezidebit.theCustomerProvisionedInThePaymentGateway == true and ezidebit.customerDetailsHaveBeenRetrieved == true and ezidebit.customerCancelledInPaymentGateway ==false}" onclick="changeiFrameCss" oncomplete="PF('editPaymentMethodDialogueWidget').show();"    value="#{configMapController.getKey('editPaymentMethodButtonLink')}" update=":growl @(.updatePaymentInfo)"  /> 
+                            <p:commandButton id="editPaymentMethodButton" rendered="#{ezidebit.theCustomerProvisionedInThePaymentGateway == true }"  oncomplete="PF('editPaymentMethodDialogueWidget').show();"    value="#{configMapController.getKey('editPaymentMethodButtonLink')}" update=":growl @(.updatePaymentInfo)"  /> 
 
                             <h:outputText rendered="#{ezidebit.waitingForPaymentDetails}" value="WAITING FOR BANK DETAILS - "/>
-                            <h:outputText rendered="#{ezidebit.customerCancelledInPaymentGateway  }" value=" Customer CANCELLED - Payment details can't be modified  "/>
+                            <h:outputText rendered="#{!ezidebit.theCustomerProvisionedInThePaymentGateway  }" value=" Customer Is Not Provisioned on Payment Gateway!"/>
                             <h:outputText rendered="#{!ezidebit.asyncOperationRunning}" value=" Status: Idle"/>
                             <h:outputText rendered="#{ezidebit.asyncOperationRunning}" value="Status: Busy"/>
                         </p:outputPanel>
@@ -746,10 +753,10 @@
                             <p:column sortBy="#{item.note}" filterBy="#{item.note}"  filterMatchMode="contains" headerText="#{configMapController.getKey('ListNotesTitle_note')}"   >
                                 <p:cellEditor> 
                                     <f:facet name="output">
-                                        <h:outputText value="#{item.note}"/>
+                                        <h:outputText value="#{item.note}" escape="false"/>
                                     </f:facet>
                                     <f:facet name="input">
-                                        <p:inputText value="#{item.note}" label="#{configMapController.getKey('ListNotesTitle_note')}" />
+                                        <p:editor value="#{item.note}"   />
                                     </f:facet>
                                 </p:cellEditor> 
 

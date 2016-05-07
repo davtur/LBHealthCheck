@@ -1434,27 +1434,34 @@ public class EziDebitPaymentGateway implements Serializable {
      * @return the theCustomerProvisionedInThePaymentGateway
      */
     public boolean isTheCustomerProvisionedInThePaymentGateway() {
-        FacesContext context = FacesContext.getCurrentInstance();
-        CustomersController controller = (CustomersController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "customersController");
-        PaymentParameters pp = controller.getSelectedCustomersPaymentParameters();
         boolean stat = false;
-        if (pp != null) {
-            String statusCode = pp.getStatusCode();
-            if (statusCode == null) {
-                stat = false;
-            } else if (pp.getStatusCode().trim().isEmpty() || pp.getStatusCode().trim().contains("C")) {
 
-                //customer has never been added or is cancelled. If they are cancelled they must be added again like a new customer
-                stat = false;
+        if (selectedCustomer != null) {
+            Customers cust = customersFacade.findById(selectedCustomer.getId());
 
-            } else if (pp.getStatusCode().trim().contains("A") || pp.getStatusCode().trim().contains("H") || pp.getStatusCode().trim().contains("N") || pp.getStatusCode().trim().contains("W")) {
-                // They are on hold or active or waiting bank details
-                stat = true;
+            PaymentParameters pp = cust.getPaymentParameters();
+
+            if (pp != null) {
+                String statusCode = pp.getStatusCode();
+                if (statusCode == null) {
+                    stat = false;
+                } else if (pp.getStatusCode().trim().isEmpty() || pp.getStatusCode().trim().contains("C")) {
+
+                    //customer has never been added or is cancelled. If they are cancelled they must be added again like a new customer
+                    stat = false;
+
+                } else if (pp.getStatusCode().trim().contains("A") || pp.getStatusCode().trim().contains("H") || pp.getStatusCode().trim().contains("N") || pp.getStatusCode().trim().contains("W")) {
+                    // They are on hold or active or waiting bank details
+                    stat = true;
+                } else {
+                    Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.WARNING, "Unkown ezidebit status code: {0}", new Object[]{statusCode});
+                }
             } else {
-                Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.WARNING, "Unkown ezidebit status code: {0}", new Object[]{statusCode});
-            }
-        }
+                logger.log(Level.WARNING, "isTheCustomerProvisionedInThePaymentGateway - PaymentParameters are null returning false by default. ");
 
+            }
+            selectedCustomer = cust;
+        }
         return stat;
     }
 
@@ -1666,9 +1673,7 @@ public class EziDebitPaymentGateway implements Serializable {
     }
 
     public void createCustomerRecord() {
-        String authenticatedUser = FacesContext.getCurrentInstance().getExternalContext().getRemoteUser();
-        startAsynchJob("AddCustomer", paymentBean.addCustomer(getSelectedCustomer(), paymentGateway, getDigitalKey(), authenticatedUser));
-        JsfUtil.addSuccessMessage("Processing Add Customer to Payment Gateway Request.", "");
+        createCustomerRecord(getSelectedCustomer());
 
     }
 
@@ -2621,7 +2626,7 @@ public class EziDebitPaymentGateway implements Serializable {
         setScheduledPaymentsList(null);
         setScheduledPaymentsListFilteredItems(null);
 
-        setCustomerDetailsHaveBeenRetrieved(false);
+        //setCustomerDetailsHaveBeenRetrieved(false);
         setCurrentCustomerDetails(null);
 
     }
@@ -2634,9 +2639,13 @@ public class EziDebitPaymentGateway implements Serializable {
         this.currentCustomerDetails = null;
         refreshIFrames = true;
         futureMap.cancelFutures(sessionId);
-        getCustDetailsFromEzi();
+        if (isTheCustomerProvisionedInThePaymentGateway()) {
+            getCustDetailsFromEzi();
 
-        getPayments(18, 2);
+            getPayments(18, 2);
+        } else {
+            setCustomerDetailsHaveBeenRetrieved(true);
+        }
         this.progress = 0;
 
         /*CustomerDetails cd = getCustomerDetails(selectedCustomer);

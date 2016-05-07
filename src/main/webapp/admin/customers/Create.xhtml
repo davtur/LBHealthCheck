@@ -109,7 +109,7 @@
                             </p:selectOneMenu>
                             <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_emergencyContactPhone')}" for="emergencyContactPhone" />
                             <p:inputText id="emergencyContactPhone" value="#{customersController.newCustomer.emergencyContactPhone}" title="#{configMapController.getKey('CreateCustomersTitle_emergencyContactPhone')}" >
-                                <f:validator validatorId="au.com.manlyit.fitnesscrm.stats.classes.util.PhoneNumberValidator" />
+                              <!--  <f:validator validatorId="au.com.manlyit.fitnesscrm.stats.classes.util.PhoneNumberValidator" />-->
                             </p:inputText>
                             <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_password')}" for="pword" />
                             <p:password id="pword"  value="#{customersController.checkPass}" onfocus="this.select()" feedback="true" title="#{configMapController.getKey('EditCustomersTitle_password')}" >
@@ -129,7 +129,7 @@
             <div class="Container100 Responsive100">
                 <div class="Container50 Responsive50">
                     <div class="ContainerIndent">
-                        <p:commandButton icon="ui-icon-check fa fa-check white Fs14" id="dialogueSave"  oncomplete="handleCreateCustomerComplete(xhr, status, args)" disabled="#{customersController.addUserButtonDisabled}"   actionListener="#{customersController.createDialogue}"  value="#{configMapController.getKey('CreateCustomersSaveLink')}" update=":growl :tv:customerslistForm1 :tv:formCustomersEdit1 :formCustomersCreate1 :tv:paymentsForm :tv:NoteslistForm1"/>                
+                        <p:commandButton icon="ui-icon-check fa fa-check white Fs14" id="dialogueSave" process="@this @form" oncomplete="handleCreateCustomerComplete(xhr, status, args);" disabled="#{customersController.addUserButtonDisabled}"   actionListener="#{customersController.createDialogue}"  value="#{configMapController.getKey('CreateCustomersSaveLink')}" update=":growl :tv:customerslistForm1 :tv:formCustomersEdit1 :formCustomersCreate1 :tv:paymentsForm :tv:NoteslistForm1"/>                
                         <p:commandButton icon=" fa fa-times-circle white Fs14" id="dialogueDiscard" onclick="PF('customersCreateDialogue').hide()"  actionListener="#{customersController.cancelCreateDialogue}" value="#{configMapController.getKey('CreateCustomersDiscardLink')}" update=":growl"/>                
                     </div>
                 </div>
@@ -150,11 +150,18 @@
         </h:form>
     </p:dialog>
     <h:outputScript id="handleCompleteScript" target="body">
+         /* <![CDATA[ */
         function handleCreateCustomerComplete(xhr, status, args) {
-            if (args.validationFailed == false) {
-                PF('customersCreateDialogue').hide();
+        alert("Checking Validation:" + args.validationFailed );
+            if (args.validationFailed == true) {
+                
+            }else{
+            PF('customersCreateDialogue').hide();
+                alert("Validation OK");
             }
-        };
+        }
+        
+          /* ]]> */
     </h:outputScript>
 </ui:composition>
 

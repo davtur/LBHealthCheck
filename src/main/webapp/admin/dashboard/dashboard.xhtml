@@ -52,7 +52,7 @@
             </p:panel>
 
 
-            <p:panel id="dashboardMonthlyRevenueChart" widgetVar="dashboardMonthlyRevenueWidget" header="Monthly Revenue Chart ( Rolling 12 month )">
+            <p:panel id="dashboardMonthlyRevenueChart" widgetVar="dashboardMonthlyRevenueWidget" header=" Revenue Chart ">
                 <p:chart type="bar"   styleClass="chartClass" model="#{mySessionsChart1.dashboardMonthlyRevenueModel}"     />
             </p:panel>
             <div class="Container100">
@@ -73,17 +73,20 @@
                                      scrollHeight="400"
                                      scrollable="true" >
                             <f:facet name="header">
+                                <p:ajax event="filter" listener="#{customersController.onTableFiltered}"   update="@this"  />  
 
 
                                 <h:panelGroup>
-                                    <h:outputText value="Search all fields:" />
-                                    <p:inputText id="globalFilter" onkeyup="PF('customersControllerTable').filter();" />
+                                    <h:outputText value="Search all fields: " />
+                                    <p:inputText id="globalFilter" onkeyup="PF('customersControllerTable').filter();"  />
                                 </h:panelGroup>
                                 <h:outputText value="   " />
-                                <h:panelGroup>
+                                <h:panelGroup  >
 
-                                    <h:outputText  rendered="#{customersController.filteredCustomersWithoutScheduledPayments != null}" value="#{customersController.filteredCustomersWithoutScheduledPayments.rowCount} Records Found"/>
-
+                                    <h:outputText  rendered="#{customersController.customersWithoutScheduledPayments != null}" value=" Records : #{customersController.customersWithoutScheduledPayments.rowCount}"/>
+                                   <h:outputText  value="   (Filtered Records : #{customersController.filteredCustomersWithoutScheduledPayments.size()})">
+                                        
+                                    </h:outputText>
 
                                 </h:panelGroup>
 
@@ -104,6 +107,9 @@
                             <p:column sortBy="#{item.paymentParameters.statusDescription}" filterBy="#{item.paymentParameters.statusDescription}" headerText="#{configMapController.getKey('ListCustomersTitle_activeEZI')}"   >
                                 <h:outputText value="#{item.paymentParameters.statusDescription}"/> 
                             </p:column>
+                            <p:column sortBy="#{item.groupPricing.planName}" filterBy="#{item.groupPricing.planName}" headerText="#{configMapController.getKey('CreateCustomersTitle_groupPricing')}"   >
+                                <h:outputText value="#{item.groupPricing.planName} - #{item.groupPricing.planPrice}"/> 
+                            </p:column>
                             <p:column sortBy="#{item.paymentParameters.contractStartDate}" filterBy="#{item.paymentParameters.contractStartDate}" headerText="#{configMapController.getKey('ListCustomersTitle_contractStartDate')}"   >
                                 <h:outputText value="#{item.paymentParameters.contractStartDate}">
                                     <f:convertDateTime pattern="dd MMM yyyy" />
@@ -123,6 +129,24 @@
                                 <h:outputText  rendered="#{item.paymentParameters.paymentPeriod != 'Z' and item.paymentParameters.paymentPeriod != 'M' and item.paymentParameters.paymentPeriod != 'Q' and item.paymentParameters.paymentPeriod != 'H' and item.paymentParameters.paymentPeriod != 'Y' }"  value=" - #{item.paymentParameters.paymentPeriodDayOfWeek}"/> 
                                 <h:outputText  rendered="#{item.paymentParameters.paymentPeriod != 'Z' and item.paymentParameters.paymentPeriod == 'M' }"  value=", day-#{item.paymentParameters.paymentPeriodDayOfMonth}"/> 
 
+                            </p:column>
+                            <p:column sortBy="#{item.paymentParameters.lastSuccessfulScheduledPayment.lastUpdatedDatetime}" filterBy="#{item.paymentParameters.lastSuccessfulScheduledPayment.lastUpdatedDatetime}" headerText="#{configMapController.getKey('ListCustomersTitle_lastUpdated')}"   >
+                                <h:outputText  rendered="#{not empty item.paymentParameters.lastSuccessfulScheduledPayment}"  value="#{item.paymentParameters.lastSuccessfulScheduledPayment.lastUpdatedDatetime}">
+                                    <f:convertDateTime  pattern="yyyy-MM-dd hh:mm:ss" />
+                                </h:outputText>
+                                <h:outputText rendered="#{empty item.paymentParameters.lastSuccessfulScheduledPayment}" value="---"/>
+                            </p:column>
+
+                            <p:column sortBy="#{item.paymentParameters.lastSuccessfulScheduledPayment.paymentAmount}" filterBy="#{item.paymentParameters.lastSuccessfulScheduledPayment.paymentAmount}" headerText="#{configMapController.getKey('ListCustomersTitle_totalPaymentsSuccessfulAmount')}"   >
+                                <h:outputText rendered="#{not empty item.paymentParameters.lastSuccessfulScheduledPayment}" value="#{item.paymentParameters.lastSuccessfulScheduledPayment.paymentAmount}">
+                                    <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
+                                </h:outputText>
+                            </p:column>
+                            <p:column  sortBy="#{item.paymentParameters.lastSuccessfulScheduledPayment.debitDate}" filterBy="#{item.paymentParameters.lastSuccessfulScheduledPayment.debitDate}" headerText="#{configMapController.getKey('ListCustomersTitle_lastSuccessfulScheduledPayment')}"   >
+                                <h:outputText rendered="#{not empty item.paymentParameters.lastSuccessfulScheduledPayment}" value="#{item.paymentParameters.lastSuccessfulScheduledPayment.debitDate}">
+                                    <f:convertDateTime pattern="E dd MMM yyyy" />
+                                </h:outputText>
+                                <h:outputText rendered="#{empty item.paymentParameters.lastSuccessfulScheduledPayment}" value="---"/>
                             </p:column>
 
 

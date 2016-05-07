@@ -119,74 +119,78 @@ public class CustomerImagesController implements Serializable {
     }
 
     protected void createDefaultProfilePic(Customers cust) {
-        String placeholderImage = configMapFacade.getConfig("system.default.profile.image");
-        String fileExtension = placeholderImage.substring(placeholderImage.lastIndexOf(".")).toLowerCase();
-        int imgType = -1;
-        if (fileExtension.contains("jpeg") || fileExtension.contains("jpg")) {
-            imgType = 2;
-            fileExtension = "jpeg";
-        }
-        if (fileExtension.contains("png")) {
-            imgType = 1;
-            fileExtension = "png";
-        }
-        if (fileExtension.contains("gif")) {
-            imgType = 0;
-            fileExtension = "gif";
-        }
-        if (imgType == -1) {
-            logger.log(Level.WARNING, "createDefaultProfilePic , Cannot add default profile pic for customer {1} due the picture not being in jpeg, gif or png. resource:{0}", new Object[]{placeholderImage, cust.getUsername()});
-            return;
-        }
-        if (cust != null) {
-            if (cust.getProfileImage() == null) {
-                CustomerImages ci;
-                BufferedImage img;
-                //InputStream stream;
-                try {
-                    ci = new CustomerImages(0);
-                    ci.setMimeType("image/jpeg");
-                    ci.setImageFileName("defaultProfilePic.jpg");
-                    ci.setImageDescription("Default Avatar");
-                    img = null;
-                    //FacesContext context =  FacesContext.getCurrentInstance();
-                    //String servPath = context.getExternalContext().getRequestServletPath() + placeholderImage;
-                    //stream = FacesContext.getCurrentInstance().getExternalContext().getResourceAsStream(servPath) ;
-                    try {
-                        //img = ImageIO.read(stream);
-                        img = ImageIO.read(new URL(placeholderImage));
-                    } catch (IOException e) {
-                        if (e.getCause().getClass() == FileNotFoundException.class) {
-                            Logger.getLogger(CustomerImagesController.class.getName()).log(Level.SEVERE, "createDefaultProfilePic, File not found!!: {0}", placeholderImage);
-
-                        } else {
-                            Logger.getLogger(CustomerImagesController.class.getName()).log(Level.SEVERE, "createDefaultProfilePic, Loading image into buffer error!!", e);
-                        }
-                    }
-                    img = resizeImageWithHintKeepAspect(img, 0, PROFILE_PIC_HEIGHT_IN_PIX);
-                    // ByteArrayOutputStream os = new ByteArrayOutputStream();
-                    // try {
-                    //      ImageIO.write(img, fileExtension, os);
-                    //  } catch (IOException ex) {
-                    //       Logger.getLogger(CustomerImagesController.class.getName()).log(Level.SEVERE, "createDefaultProfilePic, write image  error!!", ex);
-                    //   }
-
-                    ci.setImage(convertBufferedImageToByteArray(img, fileExtension));
-                    ci.setImageType(imgType);
-                    ci.setCustomers(cust);
-                    ci.setCustomerId(cust);
-                    ci.setDatetaken(new Date());
-
-                    ejbFacade.edit(ci);
-                    cust.setProfileImage(ci);
-                    ejbCustomersFacade.edit(cust);
-                } catch (Exception e) {
-                    logger.log(Level.WARNING, "createDefaultProfilePic , Cannot add default profile pic for customer {1} due to an exception:{0}", new Object[]{e, cust.getUsername()});
-
-                }
+        if (cust.getCustomerImagesCollection() != null && cust.getCustomerImagesCollection().isEmpty() == true) {
+            String placeholderImage = configMapFacade.getConfig("system.default.profile.image");
+            String fileExtension = placeholderImage.substring(placeholderImage.lastIndexOf(".")).toLowerCase();
+            int imgType = -1;
+            if (fileExtension.contains("jpeg") || fileExtension.contains("jpg")) {
+                imgType = 2;
+                fileExtension = "jpeg";
             }
-        } else {
-            logger.log(Level.WARNING, "createDefaultProfilePic ERROR, Cannot add default profile pic to a null customer object");
+            if (fileExtension.contains("png")) {
+                imgType = 1;
+                fileExtension = "png";
+            }
+            if (fileExtension.contains("gif")) {
+                imgType = 0;
+                fileExtension = "gif";
+            }
+            if (imgType == -1) {
+                logger.log(Level.WARNING, "createDefaultProfilePic , Cannot add default profile pic for customer {1} due the picture not being in jpeg, gif or png. resource:{0}", new Object[]{placeholderImage, cust.getUsername()});
+                return;
+            }
+            if (cust != null) {
+                if (cust.getProfileImage() == null) {
+                    CustomerImages ci;
+                    BufferedImage img;
+                    //InputStream stream;
+                    try {
+                        ci = new CustomerImages(0);
+                        ci.setMimeType("image/jpeg");
+                        ci.setImageFileName("defaultProfilePic.jpg");
+                        ci.setImageDescription("Default Avatar");
+                        img = null;
+                        //FacesContext context =  FacesContext.getCurrentInstance();
+                        //String servPath = context.getExternalContext().getRequestServletPath() + placeholderImage;
+                        //stream = FacesContext.getCurrentInstance().getExternalContext().getResourceAsStream(servPath) ;
+                        try {
+                            //img = ImageIO.read(stream);
+                            InputStream stream = FacesContext.getCurrentInstance().getExternalContext().getResourceAsStream(placeholderImage);
+                            //img = ImageIO.read(new URL(placeholderImage));
+                            img = ImageIO.read(stream);
+                        } catch (IOException e) {
+                            if (e.getCause().getClass() == FileNotFoundException.class) {
+                                Logger.getLogger(CustomerImagesController.class.getName()).log(Level.SEVERE, "createDefaultProfilePic, File not found!!: {0}", placeholderImage);
+
+                            } else {
+                                Logger.getLogger(CustomerImagesController.class.getName()).log(Level.SEVERE, "createDefaultProfilePic, Loading image into buffer error!!", e);
+                            }
+                        }
+                        // img = resizeImageWithHintKeepAspect(img, 0, PROFILE_PIC_HEIGHT_IN_PIX);
+                        // ByteArrayOutputStream os = new ByteArrayOutputStream();
+                        // try {
+                        //      ImageIO.write(img, fileExtension, os);
+                        //  } catch (IOException ex) {
+                        //       Logger.getLogger(CustomerImagesController.class.getName()).log(Level.SEVERE, "createDefaultProfilePic, write image  error!!", ex);
+                        //   }
+
+                        ci.setImage(convertBufferedImageToByteArray(img, fileExtension));
+                        ci.setImageType(imgType);
+                        ci.setCustomers(cust);
+                        ci.setCustomerId(cust);
+                        ci.setDatetaken(new Date());
+
+                        ejbFacade.edit(ci);
+                        cust.setProfileImage(ci);
+                        ejbCustomersFacade.edit(cust);
+                    } catch (Exception e) {
+                        logger.log(Level.WARNING, "createDefaultProfilePic , Cannot add default profile pic for customer {1} due to an exception:{0}", new Object[]{e, cust.getUsername()});
+
+                    }
+                }
+            } else {
+                logger.log(Level.WARNING, "createDefaultProfilePic ERROR, Cannot add default profile pic to a null customer object");
+            }
         }
     }
 
@@ -374,7 +378,7 @@ public class CustomerImagesController implements Serializable {
         //BufferedImage scaledImg = resizeImageKeepAspect(img, new_width);
         BufferedImage scaledImg = resizeImageWithHintKeepAspect(img, 0, new_height);// use a 0 for heigh or width to keep aspect
         updateUploadedImage(scaledImg, fileExtension);
-       //jpeg
+        //jpeg
 
         //BufferedImage data = null;
         //Iterator readers = ImageIO.getImageReadersByFormatName("jpeg");
@@ -1022,6 +1026,7 @@ public class CustomerImagesController implements Serializable {
     public SelectItem[] getItemsAvailableSelectOne() {
         return JsfUtil.getSelectItems(ejbFacade.findAll(), true);
     }
+
     /*
     
     
@@ -1073,7 +1078,7 @@ public class CustomerImagesController implements Serializable {
                 if (custImage.getCustomerId().getId().compareTo(getSelectedCustomer().getId()) == 0) {
                     return new DefaultStreamedContent(new ByteArrayInputStream(custImage.getImage()));
                 } else {
-                    logger.log(Level.WARNING, "A customer is attempting to access anothers images by directly manipulating the URL posted parameters. It might be a hacker. Returning NULL instead of the image. Logged In Customer:{0},Imageid:{1}",new Object[]{getSelectedCustomer().getUsername(),imageId});
+                    logger.log(Level.WARNING, "A customer is attempting to access anothers images by directly manipulating the URL posted parameters. It might be a hacker. Returning NULL instead of the image. Logged In Customer:{0},Imageid:{1}", new Object[]{getSelectedCustomer().getUsername(), imageId});
                     return null;
                 }
             } else {
@@ -1097,16 +1102,14 @@ public class CustomerImagesController implements Serializable {
                         if (Objects.equals(custImage.getCustomerId().getProfileImage().getId(), custImage.getId())) {
                             JsfUtil.addSuccessMessage("Photo Not Removed", "Your profile photo cannot be deleted. Upload a new picture to enable deletion of this one.");
 
+                        } else if (custImage.getCustomerId().getCustomerImagesCollection().size() == 1) {
+                            JsfUtil.addSuccessMessage("Photo Not Removed", "The last photo cannot be removed");
+
                         } else {
-                            if (custImage.getCustomerId().getCustomerImagesCollection().size() == 1) {
-                                JsfUtil.addSuccessMessage("Photo Not Removed", "The last photo cannot be removed");
 
-                            } else {
+                            ejbFacade.remove(custImage);
+                            controller.removeImageFromList(custImage);
 
-                                ejbFacade.remove(custImage);
-                                controller.removeImageFromList(custImage);
-
-                            }
                         }
                     } catch (Exception e) {
                         logger.log(Level.WARNING, "Failed To Remove Photo!", e);

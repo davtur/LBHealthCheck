@@ -27,7 +27,6 @@ import java.util.logging.Logger;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Properties;
 import java.util.concurrent.Future;
 import java.util.regex.Matcher;
@@ -39,15 +38,18 @@ import javax.faces.context.FacesContext;
 import javax.faces.convert.Converter;
 import javax.faces.convert.FacesConverter;
 import javax.faces.event.ActionEvent;
+import javax.faces.event.AjaxBehaviorEvent;
 import javax.faces.event.ValueChangeEvent;
 import javax.faces.model.SelectItem;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import org.primefaces.component.datatable.DataTable;
 import org.primefaces.component.tabview.Tab;
 import org.primefaces.context.RequestContext;
 import org.primefaces.event.RowEditEvent;
 import org.primefaces.event.SelectEvent;
 import org.primefaces.event.TabChangeEvent;
+import org.primefaces.event.data.FilterEvent;
 
 @Named("customersController")
 @SessionScoped
@@ -68,6 +70,7 @@ public class CustomersController implements Serializable {
     private PfSelectableDataModel<Customers> items = null;
     private PfSelectableDataModel<Customers> customersWithoutScheduledPayments = null;
     private Date testTime;
+
     private PfSelectableDataModel<Notes> notesItems = null;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.CustomersFacade ejbFacade;
@@ -160,6 +163,28 @@ public class CustomersController implements Serializable {
         return ejbGroupsFacade.isCustomerInGroup(cust, roleName);
     }
 
+    public void onTableFiltered(FilterEvent event) {
+        LOGGER.log(Level.FINE, "tableFiltered");
+        DataTable table = (DataTable) event.getSource();
+
+        try {
+
+            int size = table.getFilteredValue().size();
+            LOGGER.log(Level.INFO, "onTableFiltered: Filtered Rows={0}", size);
+        } catch (Exception e) {
+            LOGGER.log(Level.INFO, "onTableFiltered, couldn't get the number of filtered records.");
+        }
+
+    }
+
+    /*   public Map<String, String> onFilter(AjaxBehaviorEvent event) {
+        DataTable table = (DataTable) event.getSource();
+        // List<Screenshot> obj =   table.getFilteredData();
+
+        // Do your stuff here
+        Map<String, String> filters = table.getFilters();
+        return filters;
+    }*/
     public void setSelecteDblClick(SelectEvent event) {
         Object o = event.getObject();
         if (o.getClass() == Customers.class) {
@@ -371,7 +396,7 @@ public class CustomersController implements Serializable {
                 @Override
                 public PfSelectableDataModel<Customers> createPageDataModel() {
 
-                    return new PfSelectableDataModel<>(ejbFacade.findFilteredCustomers(true, selectedCustomerStates, showNonUsers, true));
+                    return new PfSelectableDataModel<>(ejbFacade.findFilteredCustomers(true, "firstname", selectedCustomerStates, showNonUsers, true));
 
                 }
 
@@ -504,16 +529,27 @@ public class CustomersController implements Serializable {
         }
     }
 
+    protected PaymentParameters getCustomersPaymentParameters(Customers cust) {
+        if (cust != null) {
+            PaymentParameters pp = cust.getPaymentParameters();
+            if (pp == null) {
+                createDefaultPaymentParameters(cust);
+            }
+            pp = cust.getPaymentParameters();
+            if (pp == null) {
+                LOGGER.log(Level.SEVERE, " Customer {0} has NULL Payment parameters.", new Object[]{cust.getUsername()});
+            }
+            return pp;
+        } else {
+            LOGGER.log(Level.SEVERE, " getCustomersPaymentParameters Customer is  NULL Payment .");
+            return null;
+        }
+
+    }
+
     protected PaymentParameters getSelectedCustomersPaymentParameters() {
-        PaymentParameters pp = getSelected().getPaymentParameters();
-        if (pp == null) {
-            createDefaultPaymentParameters(getSelected());
-        }
-        pp = getSelected().getPaymentParameters();
-        if (pp == null) {
-            LOGGER.log(Level.SEVERE, " Customer {0} has NULL Payment parameters.", new Object[]{current.getUsername()});
-        }
-        return pp;
+        return getCustomersPaymentParameters(getSelected());
+
     }
 
     public boolean getPaymentParametersSmsPaymentReminder() {
@@ -830,6 +866,11 @@ public class CustomersController implements Serializable {
                 RequestContext.getCurrentInstance().execute("PF('signupDialog').hide();");
                 JsfUtil.addSuccessMessage("Info", configMapFacade.getConfig("SignUpSuccessfulFailed"));
                 setSignupFormSubmittedOK(true);
+                PaymentParameters pp = getCustomersPaymentParameters(c);
+                if (pp == null) {
+                    LOGGER.log(Level.WARNING, "createFromSignup: Failed to create payement parameters. Null returned from call to getSelectedCustomersPaymentParameters()");
+                    
+                }
             }
             setNewCustomer(setCustomerDefaults(new Customers()));
         } else {
@@ -921,6 +962,11 @@ public class CustomersController implements Serializable {
                 setSelected(c);
 
                 setNewCustomer(setCustomerDefaults(new Customers()));
+                PaymentParameters pp = getCustomersPaymentParameters(c);
+                if (pp == null) {
+                    LOGGER.log(Level.WARNING, "createFromSignup: Failed to create payement parameters. Null returned from call to getSelectedCustomersPaymentParameters()");
+                    
+                }
 
                 JsfUtil.addSuccessMessage(configMapFacade.getConfig("CustomersCreated"));
             } catch (Exception e) {
@@ -1254,7 +1300,7 @@ public class CustomersController implements Serializable {
     public PfSelectableDataModel<Customers> getItems() {
         if (items == null) {
 
-            items = new PfSelectableDataModel<>(ejbFacade.findFilteredCustomers(true, selectedCustomerStates, showNonUsers, isRefreshFromDB()));
+            items = new PfSelectableDataModel<>(ejbFacade.findFilteredCustomers(false, "id", selectedCustomerStates, showNonUsers, isRefreshFromDB()));
             setRefreshFromDB(false);
             // items = getPagination().createPageDataModel();
         }
@@ -1270,9 +1316,7 @@ public class CustomersController implements Serializable {
             acs.add(new CustomerState(0, "ACTIVE"));
             acs.add(new CustomerState(0, "LEAD"));
             List<Customers> custListNoPaymentScheduled = new ArrayList<>();
-            List<Customers> custList = ejbFacade.findFilteredCustomers(true, acs, showNonUsers, isRefreshFromDB());
-
-           
+            List<Customers> custList = ejbFacade.findFilteredCustomers(false, "id", acs, showNonUsers, isRefreshFromDB());
 
             try {
                 for (Customers c : custList) {

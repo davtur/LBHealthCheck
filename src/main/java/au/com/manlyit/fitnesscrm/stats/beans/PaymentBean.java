@@ -994,13 +994,13 @@ public class PaymentBean implements Serializable {
             phoneNumber = "";
             logger.log(Level.INFO, "Invalid Phone Number for Customer {0}. Setting it to empty string", cust.getUsername());
         }
-        Pattern p = Pattern.compile("\\d{10}");
+        /*Pattern p = Pattern.compile("\\d{10}");
         Matcher m = p.matcher(phoneNumber);
         //ezidebit requires an australian mobile phone number that starts with 04
         if (m.matches() == false || phoneNumber.startsWith("04") == false) {
             phoneNumber = "";
             logger.log(Level.INFO, "Invalid Phone Number for Customer {0}. Setting it to empty string", cust.getUsername());
-        }
+        }*/
 
         EziResponseOfNewCustomerXcXH3LiW addCustomerResponse = getWs().addCustomer(digitalKey, cust.getId().toString(), humanFriendlyReference, cust.getLastname(), cust.getFirstname(), cust.getStreetAddress(), addresssLine2, cust.getSuburb(), cust.getAddrState(), cust.getPostcode(), cust.getEmailAddress(), phoneNumber, sdf.format(payParams.getContractStartDate()), payParams.getSmsPaymentReminder(), payParams.getSmsFailedNotification(), payParams.getSmsExpiredCard(), payParams.getLoggedInUser().getUsername());
 
