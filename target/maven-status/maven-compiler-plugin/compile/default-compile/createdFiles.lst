@@ -48,6 +48,7 @@ au/com/manlyit/fitnesscrm/stats/webservices/CustomerDetails.class
 au/com/manlyit/fitnesscrm/stats/classes/CustomersController.class
 au/com/manlyit/fitnesscrm/stats/chartbeans/WeightChart.class
 au/com/manlyit/fitnesscrm/stats/classes/SessionHistoryController$1.class
+au/com/manlyit/fitnesscrm/stats/beans/GraphicImageBean.class
 au/com/manlyit/fitnesscrm/stats/beans/SessionBookingsFacade.class
 au/com/manlyit/fitnesscrm/stats/classes/CustomerStateController$1.class
 au/com/manlyit/fitnesscrm/stats/beans/LoginBean.class
@@ -120,6 +121,7 @@ au/com/manlyit/fitnesscrm/stats/webservices/GetPayments.class
 au/com/manlyit/fitnesscrm/stats/webservices/EziResponseOfPaymentDetailTHgMB7OL.class
 au/com/manlyit/fitnesscrm/stats/classes/util/PushComponentUpdateResource.class
 au/com/manlyit/fitnesscrm/stats/webservices/ChangeScheduledAmountResponse.class
+au/com/manlyit/fitnesscrm/stats/classes/StreamGraphicImage.class
 au/com/manlyit/fitnesscrm/stats/classes/SessionRecurranceController$1.class
 au/com/manlyit/fitnesscrm/stats/classes/SessionRecurranceController$SessionRecurranceControllerConverter.class
 au/com/manlyit/fitnesscrm/stats/classes/PaymentsController.class

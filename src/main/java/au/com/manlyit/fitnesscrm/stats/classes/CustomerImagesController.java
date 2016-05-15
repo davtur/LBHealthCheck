@@ -18,7 +18,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
-import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.ParsePosition;
@@ -41,6 +40,7 @@ import javax.faces.context.FacesContext;
 import javax.faces.convert.Converter;
 import javax.faces.convert.FacesConverter;
 import javax.faces.event.ActionEvent;
+import javax.faces.event.PhaseId;
 import javax.faces.event.ValueChangeEvent;
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
@@ -111,6 +111,7 @@ public class CustomerImagesController implements Serializable {
         if (loggedInUser != null) {
             Customers cust = ejbCustomersFacade.findCustomerByUsername(loggedInUser);
             createGallery(cust.getId());
+            RequestContext.getCurrentInstance().update("@(.parentOfUploadPhoto) ");
         }
     }
 
@@ -686,7 +687,7 @@ public class CustomerImagesController implements Serializable {
     }
 
     public static boolean isUserInRole(String roleName) {
-        boolean inRole = false;
+        boolean inRole;
         inRole = FacesContext.getCurrentInstance().getExternalContext().isUserInRole(roleName);
         return inRole;
 
@@ -702,8 +703,8 @@ public class CustomerImagesController implements Serializable {
                 }
 
                 @Override
-                public DataModel createPageDataModel() {
-                    return new ListDataModel(getFacade().findRange(new int[]{getPageFirstItem(), getPageFirstItem() + getPageSize()}));
+                public DataModel<CustomerImages> createPageDataModel() {
+                    return new ListDataModel<>(getFacade().findRange(new int[]{getPageFirstItem(), getPageFirstItem() + getPageSize()}));
                 }
             };
         }
@@ -804,6 +805,7 @@ public class CustomerImagesController implements Serializable {
         current = uploadedImage;
         createFromDialogue();
         uploadedImage = null;
+        RequestContext.getCurrentInstance().update("@(.parentOfUploadPhoto) ");
     }
 
     public void createFromDialogue() {
@@ -1054,7 +1056,6 @@ public class CustomerImagesController implements Serializable {
     
     
      */
-
     public void carouselImageClicked(ActionEvent event) {
         FacesContext context = FacesContext.getCurrentInstance();
         String imageId = context.getExternalContext().getRequestParameterMap().get("imageId");
@@ -1065,6 +1066,38 @@ public class CustomerImagesController implements Serializable {
     }
 
     public StreamedContent getImage() throws IOException {
+        FacesContext context = FacesContext.getCurrentInstance();
+        String imageId;
+        if (context != null) {
+            //if (context.getRenderResponse()) {
+            if (context.getCurrentPhaseId() == PhaseId.RENDER_RESPONSE) {
+                // So, we're rendering the HTML. Return a stub StreamedContent so that it will generate right URL.
+                logger.log(Level.INFO, "getImage: we're rendering the HTML. Return a stub StreamedContent so that it will generate right URL.");
+                return new DefaultStreamedContent();
+            } else // So, browser is requesting the image. Return a real StreamedContent with the image bytes.
+            {
+                imageId = context.getExternalContext().getRequestParameterMap().get("imageId");
+                if (imageId != null) {
+                    CustomerImages custImage = ejbFacade.find(Integer.valueOf(imageId));
+                    if (custImage.getCustomerId().getId().compareTo(getSelectedCustomer().getId()) == 0) {
+                        logger.log(Level.INFO, "getImage - returning image:{0},size:{1}, name:{2}, Encoding:{3}, Content Type: {4} ", new Object[]{imageId, custImage.getImage().length, custImage.getImageFileName(), custImage.getImageStream().getContentEncoding(), custImage.getImageStream().getContentType()});
+                        return new DefaultStreamedContent(new ByteArrayInputStream(custImage.getImage()));
+                    } else {
+                        logger.log(Level.WARNING, "A customer is attempting to access anothers images by directly manipulating the URL posted parameters. It might be a hacker. Returning NULL instead of the image. Logged In Customer:{0},Imageid:{1}", new Object[]{getSelectedCustomer().getUsername(), imageId});
+                        return null;
+                    }
+                } else {
+                    logger.log(Level.WARNING, "getImage: imageId is NULL");
+                    return null;
+                }
+            }
+        }
+        return null;
+    }
+
+    /*
+    //old version of get image
+     public StreamedContent getImage() throws IOException {
         FacesContext context = FacesContext.getCurrentInstance();
 
         if (context.getRenderResponse()) {
@@ -1086,7 +1119,7 @@ public class CustomerImagesController implements Serializable {
             }
         }
     }
-
+     */
     public void removePicture() {
         FacesContext context = FacesContext.getCurrentInstance();
         Map<String, String[]> paramValues = context.getExternalContext().getRequestParameterValuesMap();
@@ -1109,6 +1142,7 @@ public class CustomerImagesController implements Serializable {
 
                             ejbFacade.remove(custImage);
                             controller.removeImageFromList(custImage);
+                            RequestContext.getCurrentInstance().update("@(.parentOfUploadPhoto) ");
 
                         }
                     } catch (Exception e) {
@@ -1243,6 +1277,7 @@ public class CustomerImagesController implements Serializable {
 
         images.remove(image);
         imageListSize = images.size();
+        RequestContext.getCurrentInstance().update("@(.parentOfUploadPhoto) ");
 
     }
 
@@ -1252,8 +1287,9 @@ public class CustomerImagesController implements Serializable {
             if (images == null) {
                 images = new ArrayList<>();
             }
-        }
 
+        }
+        RequestContext.getCurrentInstance().update("@(.parentOfUploadPhoto) ");
         return images;
     }
 

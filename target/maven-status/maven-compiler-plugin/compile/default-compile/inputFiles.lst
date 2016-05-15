@@ -113,6 +113,7 @@
 /home/david/NetBeansProjects/FitnessCRM/target/generated-sources/jaxws-wsimport/au/com/manlyit/fitnesscrm/stats/webservices/TestFunctionResponse.java
 /home/david/NetBeansProjects/FitnessCRM/src/main/java/au/com/manlyit/fitnesscrm/stats/db/PreferedContact.java
 /home/david/NetBeansProjects/FitnessCRM/src/main/java/au/com/manlyit/fitnesscrm/stats/classes/util/WebDDRSignUpServlet.java
+/home/david/NetBeansProjects/FitnessCRM/src/main/java/au/com/manlyit/fitnesscrm/stats/classes/StreamGraphicImage.java
 /home/david/NetBeansProjects/FitnessCRM/src/main/java/au/com/manlyit/fitnesscrm/stats/converters/CustomerGroupsConverter.java
 /home/david/NetBeansProjects/FitnessCRM/src/main/java/au/com/manlyit/fitnesscrm/stats/beans/QrtzSimpleTriggersFacade.java
 /home/david/NetBeansProjects/FitnessCRM/src/main/java/au/com/manlyit/fitnesscrm/stats/classes/util/StringEncrypter.java
@@ -183,6 +184,7 @@
 /home/david/NetBeansProjects/FitnessCRM/src/main/java/au/com/manlyit/fitnesscrm/stats/beans/AbstractFacade.java
 /home/david/NetBeansProjects/FitnessCRM/src/main/java/au/com/manlyit/fitnesscrm/stats/db/Schedule.java
 /home/david/NetBeansProjects/FitnessCRM/target/generated-sources/jaxws-wsimport/au/com/manlyit/fitnesscrm/stats/webservices/GetPayments.java
+/home/david/NetBeansProjects/FitnessCRM/src/main/java/au/com/manlyit/fitnesscrm/stats/beans/GraphicImageBean.java
 /home/david/NetBeansProjects/FitnessCRM/src/main/java/au/com/manlyit/fitnesscrm/stats/classes/ActivationController.java
 /home/david/NetBeansProjects/FitnessCRM/src/main/java/au/com/manlyit/fitnesscrm/stats/classes/util/UAgentInfo.java
 /home/david/NetBeansProjects/FitnessCRM/target/generated-sources/jaxws-wsimport/au/com/manlyit/fitnesscrm/stats/webservices/NewCustomer.java

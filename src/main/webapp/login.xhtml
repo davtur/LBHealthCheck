@@ -27,15 +27,15 @@
     </h:head>
 
     <h:body>
-        <p:growl id="growl"/>
+        <p:growl id="growl" showDetail="true"/>
         <div id="layout-portlets-cover">
-            <div class="other-pages-box Container40 Responsive50 MarAuto Fnone TexAlCenter ShadowGray MarTop10"
-                 style="margin-top:5%; background-image:url(/spark/resources/spark-layout/images/loginpageillust.svg); background-repeat:no-repeat; background-position:center; background-size:cover;">
+            <div class="other-pages-box Container40 Responsive50 MarAuto Fnone TexAlCenter ShadowGray MarTop10" style="margin-top:5%;  background-repeat:no-repeat; background-position:center; background-size:cover;" >
                 <div class="Container90 Fnone MarAuto TexAlCenter">
                     <h:form id="mainLoginForm">
                         <div class="EmptyBox50"></div>
                         <h:graphicImage name="images/logo.png" styleClass="MarAuto MarTop20 MarBot10"/>
                         <div class="EmptyBox20"></div>
+                       <p:messages showDetail="true"/>
                         <p:inputText value="#{loginBean.username}"  placeholder="Username" styleClass="Container80 Fnone MarAuto Fs18">
                             <p:ajax event="change" update=":loginForm" />
                         </p:inputText>
@@ -92,6 +92,7 @@
         <h:outputStylesheet name="css/font-awesome.css" library="spark-layout" />
         <h:outputStylesheet name="css/animate.css" library="spark-layout" />
         <h:outputStylesheet name="css/spark-layout.css" library="spark-layout" />
+         <h:outputStylesheet library="css" name="customisations.css"/>
     </h:body>
 
 </html>

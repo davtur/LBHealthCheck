@@ -183,13 +183,18 @@ public class LoginBean implements Serializable {
          Logger.getLogger(LoginBean.class.getName()).log(Level.SEVERE, "Failed to redirect to password reset URL", ex);
          }*/
         Customers current = ejbCustomerFacade.findCustomerByUsername(username);
-        doPasswordReset("system.reset.password.template", current, configMapFacade.getConfig("PasswordResetEmailSubject"));
-        return "activation";
+        if (current != null) {
+            doPasswordReset("system.reset.password.template", current, configMapFacade.getConfig("PasswordResetEmailSubject"));
+            return "activation";
+        } else {
+            JsfUtil.addErrorMessage("Error", configMapFacade.getConfig("PasswordResetErrorValidUsernameRequired"));
+        }
         /* if (this.isMobileDeviceUserAgent() == true) {
          return "/mobileMenu";
          } else {
          return "/index";
          }*/
+        return "login";
 
     }
 
@@ -254,7 +259,7 @@ public class LoginBean implements Serializable {
             HttpSession httpSession = request.getSession();
             String landingPage;
             String adminRole = getValueFromKey("facebook.redirect.adminRole");
-            if(adminRole == null || adminRole.isEmpty()){
+            if (adminRole == null || adminRole.isEmpty()) {
                 adminRole = "ADMIN"; //default
             }
             if (mobileDevice(request)) {

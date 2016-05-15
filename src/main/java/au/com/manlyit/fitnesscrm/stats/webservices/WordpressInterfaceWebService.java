@@ -60,15 +60,19 @@ public class WordpressInterfaceWebService {
         //TODO write your implementation code here:
         String result = "OK";
         if (firstname == null) {
-            firstname = "";
+            firstname = " ";
 
+        } else if (firstname.trim().isEmpty()) {
+            firstname = " ";
         }
         if (lastname == null) {
-            lastname = "";
+            lastname = " ";
 
+        } else if (lastname.trim().isEmpty()) {
+            lastname = " ";
         }
         if (email == null) {
-            email = "";
+            email = " ";
 
         }
         if (mobile == null) {
@@ -76,14 +80,22 @@ public class WordpressInterfaceWebService {
 
         }
         if (message == null) {
-            message = "";
+            message = "No Message";
 
+        } else if (message.trim().isEmpty()) {
+            message = "No Message";
         }
         LOGGER.log(Level.INFO, "ADD New LEAD Webservice Called: Name: {0} {1}, email: {2}, Phone: {3}, Message: {4}", new Object[]{firstname, lastname, email, mobile, message});
         if (mobile.trim().isEmpty() && email.trim().isEmpty()) {
             result = "ERROR: No email or phone details sent - no way to contact the lead - Fail.";
             LOGGER.log(Level.WARNING, "addNewLead Failed:{0}", result);
             return result;
+        }
+        if (mobile.trim().isEmpty()) {
+            mobile = "0400000000";
+        }
+        if (email.trim().isEmpty()) {
+            email = "no.email.given@noreply.com";
         }
         try {
             // validate input
@@ -103,12 +115,16 @@ public class WordpressInterfaceWebService {
             String phoneNumber = mobile;
             phoneNumber = phoneNumber.replaceAll("[^\\d.]", "");
 
-       
-           
             // replace any non word characters -  A word character: [a-zA-Z_0-9]
             firstname = firstname.replaceAll("\\W", " ");
             lastname = lastname.replaceAll("\\W", " ");
-            
+            if (firstname.trim().isEmpty()) {
+                firstname = " ";
+            }
+            if (lastname.trim().isEmpty()) {
+                lastname = " ";
+            }
+
             MessageContext msgCtxt = context.getMessageContext();
             HttpServletRequest req = (HttpServletRequest) msgCtxt.get(MessageContext.SERVLET_REQUEST);
 

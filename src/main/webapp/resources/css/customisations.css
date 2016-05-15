@@ -7,6 +7,22 @@ and open the template in the editor.
     Created on : 05/10/2015, 8:54:17 AM
     Author     : david
 */
+body{
+    background-image: url("/FitnessStats/javax.faces.resource/images/background-wood-and-weights.jpg") !important;
+}
+
+div.ui-carousel-viewport .myStatsCarousel div.ui-carousel-viewport .myStatsCarousel{
+  width:100% !important;
+height: 300px !important; 
+
+    
+}
+
+.myStatsCarouselItem .ui-carousel-item {
+height: 300px !important; 
+  
+    
+}
  
 @media all and (max-width: 599px) and (min-width: 320px) {
     .timetableSchedule  {
