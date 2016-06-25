@@ -7,6 +7,7 @@ package au.com.manlyit.fitnesscrm.stats.beans;
 
 import au.com.manlyit.fitnesscrm.stats.classes.CustomersController;
 import au.com.manlyit.fitnesscrm.stats.classes.PasswordService;
+import au.com.manlyit.fitnesscrm.stats.classes.RandomString;
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.classes.util.StringEncrypter;
 import au.com.manlyit.fitnesscrm.stats.classes.util.UAgentInfo;
@@ -142,10 +143,11 @@ public class LoginBean implements Serializable {
 
                 htmlText = htmlText.replace(templateLinkPlaceholder, urlLink);
                 htmlText = htmlText.replace(templateUsernamePlaceholder, current.getUsername());
-                String tempPassword = generateUniqueToken(8);
-
-                current.setPassword(PasswordService.getInstance().encrypt(tempPassword));
-                ejbCustomerFacade.editAndFlush(current);
+                //  String tempPassword = generateUniqueToken(8);
+                //String tempPassword = RandomString.generateRandomString(new Random(), 8);
+                String tempPassword = " Please reset your password at the login page.";
+                //current.setPassword(PasswordService.getInstance().encrypt(tempPassword));
+               // ejbCustomerFacade.editAndFlush(current);
                 htmlText = htmlText.replace(templateTemporaryPasswordPlaceholder, tempPassword);
                 //String htmlText = "<table width=\"600\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\">  <tr>    <td><img src=\"cid:logoimg_cid\"/></td>  </tr>  <tr>    <td height=\"220\"> <p>Pure Fitness Manly</p>      <p>Please click the following link to reset your password:</p><p>To reset your password click <a href=\"" + urlLink + "\">here</a>.</p></td>  </tr>  <tr>    <td height=\"50\" align=\"center\" valign=\"middle\" bgcolor=\"#CCCCCC\">www.purefitnessmanly.com.au | sarah@purefitnessmanly.com.au | +61433818067</td>  </tr></table>";
 

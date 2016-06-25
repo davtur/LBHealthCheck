@@ -28,6 +28,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import java.util.List;
 import java.util.Properties;
+import java.util.Random;
 import java.util.concurrent.Future;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -38,7 +39,6 @@ import javax.faces.context.FacesContext;
 import javax.faces.convert.Converter;
 import javax.faces.convert.FacesConverter;
 import javax.faces.event.ActionEvent;
-import javax.faces.event.AjaxBehaviorEvent;
 import javax.faces.event.ValueChangeEvent;
 import javax.faces.model.SelectItem;
 import javax.servlet.http.HttpServletRequest;
@@ -254,6 +254,27 @@ public class CustomersController implements Serializable {
 
         }
     }
+    public void  sendPaymentFormEmail() {
+        FacesContext context = FacesContext.getCurrentInstance();
+        LoginBean controller = (LoginBean) context.getApplication().getELResolver().getValue(context.getELContext(), null, "loginBean");
+        controller.doPasswordReset("system.new.paymentForm.template", current, configMapFacade.getConfig("sendPaymentFormEmailSubject"));
+        JsfUtil.addSuccessMessage(configMapFacade.getConfig("sendPaymentFormEmailSuccessMessage") + " " + current.getFirstname() + " " + current.getLastname() + ".");
+        String auditDetails = "Customer Payment Form Email Sent For:" + current.getFirstname() + " " + current.getLastname() + ".";
+        String changedFrom = "N/A";
+        String changedTo = "On Board Email Sent";
+
+        try {
+            String url = current.getPaymentParameters().getWebddrUrl();
+            int a = url.indexOf("rAmount");
+            int b = url.indexOf("businessOrPerson");
+            url = url.substring(a, b);
+            auditDetails += "\r\n" + url;
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "sendPaymentFormEmail: Couldn't get the payment details from the webDDR Url for the audit log and cutomer notes");
+        }
+        addCustomerToUsersGroup(current);
+        createCombinedAuditLogAndNote(loggedInUser, current, "sendPaymentFormEmail", auditDetails, changedFrom, changedTo);
+    }
 
     public void sendCustomerOnboardEmail() {
         FacesContext context = FacesContext.getCurrentInstance();
@@ -346,7 +367,7 @@ public class CustomersController implements Serializable {
         c.setUsername(configMapFacade.getConfig("default.customer.details.username"));
         c.setFirstname(configMapFacade.getConfig("default.customer.details.firstname"));
         c.setLastname(configMapFacade.getConfig("default.customer.details.lastname"));
-        c.setPassword(configMapFacade.getConfig("default.customer.details.password"));
+        c.setPassword(PasswordService.getInstance().encrypt(RandomString.generateRandomString(new Random(), 10)));
         c.setEmailAddress(configMapFacade.getConfig("default.customer.details.email"));
         c.setFax(configMapFacade.getConfig("default.customer.details.fax"));
         c.setTelephone(configMapFacade.getConfig("default.customer.details.mobile"));
@@ -1314,7 +1335,7 @@ public class CustomersController implements Serializable {
         if (customersWithoutScheduledPayments == null) {
             ArrayList<CustomerState> acs = new ArrayList<>();
             acs.add(new CustomerState(0, "ACTIVE"));
-            acs.add(new CustomerState(0, "LEAD"));
+            //acs.add(new CustomerState(0, "LEAD"));
             List<Customers> custListNoPaymentScheduled = new ArrayList<>();
             List<Customers> custList = ejbFacade.findFilteredCustomers(false, "id", acs, showNonUsers, isRefreshFromDB());
 
@@ -1781,8 +1802,13 @@ public class CustomersController implements Serializable {
         if (loggedInUser == null) {
             String name = "Unknown";
             FacesContext facesContext = FacesContext.getCurrentInstance();
+             HttpServletRequest req = (HttpServletRequest) facesContext.getExternalContext().getRequest(); //request;
             try {
+                if(facesContext != null){
                 name = facesContext.getExternalContext().getRemoteUser();
+                }else{
+                    
+                }
                 if (name != null) {
                     loggedInUser = ejbFacade.findCustomerByUsername(name);
                     if (loggedInUser == null) {
@@ -1796,7 +1822,7 @@ public class CustomersController implements Serializable {
             }
             // get user agent and redirect if its a mobile
 
-            HttpServletRequest req = (HttpServletRequest) facesContext.getExternalContext().getRequest(); //request;
+           
             String uaString = req.getHeader("User-Agent");
             LOGGER.log(Level.INFO, "The User-Agent of this session is :{0}", uaString);
         }

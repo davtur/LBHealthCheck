@@ -146,8 +146,13 @@ public class WebDDRSignUpServlet extends HttpServlet {
                             }
 
                             try {
+                                String sUser = request.getRemoteUser();
+                                Customers user = null;
+                                if (sUser != null) {
+                                    user = ejbFacade.findCustomerByUsername(sUser);
+                                }
 
-                                controller.createCombinedAuditLogAndNote(controller.getLoggedInUser(), current, "Direct Debit Form", "The direct debit form has been completed and payments created.", "Not Registered in Payemnt Gateway", "Registered in payment gateway with scheduled payments");
+                                controller.createCombinedAuditLogAndNote(user, current, "Direct Debit Form", "The direct debit form has been completed and payments created.", "Not Registered in Payemnt Gateway", "Registered in payment gateway with scheduled payments");
                                 /* try {
                                     controller.getSelected().getPaymentParameters().setWebddrUrl(null);
                                 } catch (Exception e) {

@@ -1457,7 +1457,7 @@ public class EziDebitPaymentGateway implements Serializable {
                     Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.WARNING, "Unkown ezidebit status code: {0}", new Object[]{statusCode});
                 }
             } else {
-                logger.log(Level.WARNING, "isTheCustomerProvisionedInThePaymentGateway - PaymentParameters are null returning false by default. ");
+                logger.log(Level.FINE, "isTheCustomerProvisionedInThePaymentGateway - PaymentParameters are null returning false by default. ");
 
             }
             selectedCustomer = cust;
@@ -2639,6 +2639,7 @@ public class EziDebitPaymentGateway implements Serializable {
         this.currentCustomerDetails = null;
         refreshIFrames = true;
         futureMap.cancelFutures(sessionId);
+        setAsyncOperationRunning(false);
         if (isTheCustomerProvisionedInThePaymentGateway()) {
             getCustDetailsFromEzi();
 

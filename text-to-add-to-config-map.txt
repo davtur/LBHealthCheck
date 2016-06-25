@@ -1446,3 +1446,8 @@ MyDetailsCallToFillOutPaymentDetails=Please fill out your payment details.
 facebook.redirect.adminRole=ADMIN
 facebook.redirect.mobileadminlandingpage=/mobileMenu.xhtml
 facebook.redirect.adminlandingpage=/admin/dashboard/dashboard.xhtml
+
+
+sendPaymentFormEmailButton=Send Payment Form Email
+sendPaymentFormEmailSubject=Pure Fitness Manly Payment Form
+sendPaymentFormEmailSuccessMessage= Payment form sent successfully

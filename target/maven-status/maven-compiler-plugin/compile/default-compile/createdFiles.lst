@@ -368,6 +368,7 @@ au/com/manlyit/fitnesscrm/stats/db/Stat.class
 au/com/manlyit/fitnesscrm/stats/classes/EmailTemplatesController$1.class
 au/com/manlyit/fitnesscrm/stats/classes/CustomersController$1.class
 au/com/manlyit/fitnesscrm/stats/webservices/ScheduledPayment.class
+au/com/manlyit/fitnesscrm/stats/classes/RandomString.class
 au/com/manlyit/fitnesscrm/stats/webservices/EziResponseOfArrayOfPaymentTHgMB7OL.class
 au/com/manlyit/fitnesscrm/stats/classes/QrtzJobDetailsController$1.class
 au/com/manlyit/fitnesscrm/stats/webservices/ChangeCustomerStatusResponse.class
