@@ -1,0 +1,178 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition  xmlns="http://www.w3.org/1999/xhtml"
+                 xmlns:ui="http://java.sun.com/jsf/facelets"
+                 xmlns:h="http://java.sun.com/jsf/html"
+                 xmlns:f="http://java.sun.com/jsf/core"
+                 xmlns:p="http://primefaces.org/ui" >
+
+
+    <!--<p:log />--> 
+    <p:confirmDialog id="changePlanDialogue" message="Add a Payment Schedule."  closable="false"
+                     header="#{configMapController.getKey('changePlanDialogueTitle')}" severity="info" widgetVar="changePlanDialogueWidget" width="800px"> 
+        <h:form id="changePlanForm">   
+            <h3 >#{configMapController.getKey('ChangePlanNamesHeaderTitle')}</h3>
+            
+            <p:panelGrid id="changePlanAddPaymentScheduleGrid" columns="4" >
+                <p:outputLabel value="#{configMapController.getKey('ChangePlanOldPlanLabel')}"  />
+                <h:outputText value="#{customersController.selected.groupPricing}" title="#{configMapController.getKey('ChangePlanOldPlanTitle')}"/>
+                <p:outputLabel value="#{configMapController.getKey('ChangePlanNewPlanLabel')}"  />
+                <h:outputText value="#{customersController.customersNewPlan.planName}" title="#{configMapController.getKey('ChangePlanNewPlanTitle')}"/>
+            </p:panelGrid>
+            
+            <h3 >#{configMapController.getKey('ChangePlanNewScheduleHeaderTitle')}</h3>
+            <p:panelGrid id="changePlanAddPaymentScheduleGrid1" columns="4">
+
+                <p:outputLabel value="#{configMapController.getKey('AddPaymentScheduleLabel_debitdate')}" for="changePlanDebitDate2" />
+                <p:calendar id="changePlanDebitDate2" pattern="dd MMM yyyy" value="#{ezidebit.paymentDebitDate}" title="#{configMapController.getKey('AddPaymentScheduleTitle_debitdate')}" required="true" requiredMessage="#{configMapController.getKey('AddPaymentScheduleRequiredMessage_debitdate')}" />
+                <p:outputLabel value="#{configMapController.getKey('AddPaymentScheduleLabel_paymentAmount')}" for="changePlanPayAmount2" />
+                <p:inputText id="changePlanPayAmount2" value="#{ezidebit.paymentAmountInCents}" title="#{configMapController.getKey('AddPaymentScheduleTitle_paymentAmount')}" required="true" requiredMessage="#{configMapController.getKey('AddPaymentScheduleRequiredMessage_paymentAmount')}">
+                    <f:convertNumber minFractionDigits="2"/>
+                </p:inputText>
+                <p:outputLabel value="#{configMapController.getKey('AddPaymentScheduleLabel_limitPayAmount')}" for="changePlanLimitPayAmount" />
+                <p:inputText id="changePlanLimitPayAmount" value="#{ezidebit.paymentLimitAmountInCents}" title="#{configMapController.getKey('AddPaymentScheduleTitle_paymentLimitAmount')}" >
+                    <f:convertNumber minFractionDigits="2"/>
+                </p:inputText>
+                <p:outputLabel value="#{configMapController.getKey('AddPaymentScheduleLabel_limitNumberPayments')}" for="changePlanLimitNumberPayments" />
+                <p:inputText id="changePlanLimitNumberPayments" value="#{ezidebit.paymentLimitToNumberOfPayments}" title="#{configMapController.getKey('AddPaymentScheduleTitle_limitNumberPayments')}" >
+                    <f:convertNumber minFractionDigits="0"/>
+                </p:inputText>
+            </p:panelGrid>
+            <p:panelGrid id="changePlanAddPaymentScheduleGrid2" columns="4"> 
+
+                <p:outputLabel value="#{configMapController.getKey('AddPaymentScheduleLabel_paymentPeriodType')}" for="changePlanPeriodType" />
+
+                <p:selectOneMenu id="changePlanPeriodType" value="#{ezidebit.paymentSchedulePeriodType}"  >
+                    <f:selectItem itemValue="W" itemLabel="Weekly" />
+                    <f:selectItem itemValue="F" itemLabel="Fortnightly" />
+                    <f:selectItem itemValue="M" itemLabel="Monthly" />
+                    <f:selectItem itemValue="4" itemLabel="4 Weekly" />
+                    <f:selectItem itemValue="N" itemLabel="Weekday in Month" />
+                    <f:selectItem itemValue="Q" itemLabel="Quarterly" />
+                    <f:selectItem itemValue="H" itemLabel="Half Yearly" />
+                    <f:selectItem itemValue="Y" itemLabel="Annually" />
+                    <p:ajax update="changePlanAddPaymentScheduleGrid2" /> 
+                </p:selectOneMenu>
+
+                <p:outputLabel rendered="#{ezidebit.paymentSchedulePeriodType == 'W' ||ezidebit.paymentSchedulePeriodType == 'F' || ezidebit.paymentSchedulePeriodType == '4' || ezidebit.paymentSchedulePeriodType == 'N'}" value="#{configMapController.getKey('AddPaymentScheduleLabel_paymentDayOfWeek')}" for="changePlanDayOfWeek" />
+
+                <p:selectOneMenu rendered="#{ezidebit.paymentSchedulePeriodType == 'W' ||ezidebit.paymentSchedulePeriodType == 'F' || ezidebit.paymentSchedulePeriodType == '4' || ezidebit.paymentSchedulePeriodType == 'N'}" id="changePlanDayOfWeek" value="#{ezidebit.paymentDayOfWeek}"  >
+                    <f:selectItem itemValue="MON" itemLabel="Monday" />
+                    <f:selectItem itemValue="TUE" itemLabel="Tuesday" />
+                    <f:selectItem itemValue="WED" itemLabel="Wednesday" />
+                    <f:selectItem itemValue="THU" itemLabel="Thursday" />
+                    <f:selectItem itemValue="FRI" itemLabel="Friday" />
+                    <p:ajax update="changePlanAddPaymentScheduleGrid2" /> 
+                </p:selectOneMenu>
+
+                <p:outputLabel  rendered="#{ezidebit.paymentSchedulePeriodType == 'M' }" value="#{configMapController.getKey('AddPaymentScheduleLabel_paymentDayOfMonth')}" for="changePlanDayOfMonth" />
+
+                <p:selectOneMenu  rendered="#{ezidebit.paymentSchedulePeriodType == 'M' }" id="changePlanDayOfMonth" value="#{ezidebit.paymentDayOfMonth}"  >
+                    <f:selectItems value="#{ezidebit.daysInMonth}" var="num" itemValue="#{num}" /> 
+
+                </p:selectOneMenu> 
+
+                <p:outputLabel  rendered="#{ezidebit.paymentSchedulePeriodType == 'N'}" value="#{configMapController.getKey('AddPaymentScheduleLabel_paymentFirstWeekOfMonth')}" for="changePlanFirstWeekOfMonth" />
+                <p:selectBooleanCheckbox id="changePlanFirstWeekOfMonth"  rendered="#{ezidebit.paymentSchedulePeriodType == 'N'}" value="#{ezidebit.paymentFirstWeekOfMonth}">  
+                    <p:ajax update="changePlanAddPaymentScheduleGrid2" />  
+                </p:selectBooleanCheckbox> 
+                <p:outputLabel  rendered="#{ezidebit.paymentSchedulePeriodType == 'N'}" value="#{configMapController.getKey('AddPaymentScheduleLabel_paymentSecondWeekOfMonth')}" for="changePlanSecondWeekOfMonth" />
+                <p:selectBooleanCheckbox id="changePlanSecondWeekOfMonth"  rendered="#{ezidebit.paymentSchedulePeriodType == 'N'}" value="#{ezidebit.paymentSecondWeekOfMonth}">  
+                    <p:ajax update="changePlanAddPaymentScheduleGrid2" />  
+                </p:selectBooleanCheckbox>  
+                <p:outputLabel  rendered="#{ezidebit.paymentSchedulePeriodType == 'N'}" value="#{configMapController.getKey('AddPaymentScheduleLabel_paymentThirdWeekOfMonth')}" for="changePlanThirdWeekOfMonth" />
+                <p:selectBooleanCheckbox id="changePlanThirdWeekOfMonth"  rendered="#{ezidebit.paymentSchedulePeriodType == 'N'}" value="#{ezidebit.paymentThirdWeekOfMonth}">  
+                    <p:ajax update="changePlanAddPaymentScheduleGrid2" />  
+                </p:selectBooleanCheckbox>  
+                <p:outputLabel rendered="#{ezidebit.paymentSchedulePeriodType == 'N'}" value="#{configMapController.getKey('AddPaymentScheduleLabel_paymentFourthWeekOfMonth')}" for="changePlanFourthWeekOfMonth" />
+                <p:selectBooleanCheckbox  rendered="#{ezidebit.paymentSchedulePeriodType == 'N'}" id="changePlanFourthWeekOfMonth" value="#{ezidebit.paymentFourthWeekOfMonth}">  
+                    <p:ajax update="changePlanAddPaymentScheduleGrid2" />  
+                </p:selectBooleanCheckbox>  
+
+                <p:outputLabel value="#{configMapController.getKey('AddPaymentScheduleLabel_paymentKeepManualPayments')}" for="changePlanPaymentKeepManualPayments" />
+                <p:selectBooleanCheckbox id="changePlanPaymentKeepManualPayments" value="#{ezidebit.paymentKeepManualPayments}">  
+                    <p:ajax update="changePlanAddPaymentScheduleGrid2" />  
+                </p:selectBooleanCheckbox>  
+
+
+            </p:panelGrid>
+           
+             <h3 >#{configMapController.getKey('ChangePlanExistingPaymentsHeaderTitle')}</h3>
+            <p:dataTable  id="changePlanPaymentsTable"
+                          selectionMode="single"
+                          selection="#{ezidebit.selectedScheduledPayment}" 
+                          value="#{ezidebit.paymentDBList}" 
+                          filteredValue="#{ezidebit.paymentsDBListFilteredItems}"  
+                          widgetVar="changePlanPaymentsTableWidgetVar"
+                          var="pay"  
+                          rowKey="#{pay.id}"
+                          scrollHeight="200"
+                          scrollable="true" 
+
+                          >
+                <f:facet name="header">
+                    <p:outputPanel>
+                        <p:outputPanel>
+                            <h:outputText  rendered="#{ezidebit.paymentDBList != null}" value="#{ezidebit.paymentDBList.rowCount} Records Found" />
+                        </p:outputPanel>
+                        <h:outputText value="Payments" />
+                    </p:outputPanel>
+                </f:facet>
+
+                <p:ajax event="rowSelect"  listener="#{ezidebit.updateSelectedScheduledPayment}" />
+                <p:ajax event="rowUnselect" /> 
+                <p:column  sortBy="#{pay.paymentID}" filterBy="#{pay.paymentID}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentID')}"   >
+                    <h:outputText value="#{pay.paymentID}"/>
+                    <h:outputText  rendered="#{empty pay.paymentID}"  value="Scheduled" style="background-color: lightseagreen;"/>
+                </p:column>
+
+                <p:column  sortBy="#{pay.customerName.lastname}" filterBy="#{pay.customerName.lastname}" headerText="#{configMapController.getKey('ListPaymentsTitle_customerName')}"   >
+                    <h:outputText value="#{pay.customerName.firstname} #{pay.customerName.lastname}"/>
+                </p:column>
+                <p:column  sortBy="#{pay.manuallyAddedPayment}" filterBy="#{pay.manuallyAddedPayment}" headerText="#{configMapController.getKey('ListPaymentsTitle_manual')}"   >
+                    <h:outputText rendered="#{pay.manuallyAddedPayment}" value="Manual"/>
+                    <h:outputText rendered="#{!pay.manuallyAddedPayment}" value="Auto"/>
+                </p:column>
+
+                <p:column  sortBy="#{pay.paymentAmount}" filterBy="#{pay.paymentAmount}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentAmount')}"   >
+                    <h:outputText value="#{pay.paymentAmount}">
+                        <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
+                    </h:outputText>
+                </p:column>
+
+                <p:column  sortBy="#{pay.debitDate}" filterBy="#{pay.debitDate}" headerText="#{configMapController.getKey('ListPaymentsTitle_debitDate')}"   >
+                    <h:outputText value="#{pay.debitDate}">
+                        <f:convertDateTime pattern="E dd MMM yyyy" />
+                    </h:outputText>
+                </p:column>
+
+                <p:column  sortBy="#{pay.paymentStatus}" filterBy="#{pay.paymentStatus}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentStatus')}"   >
+
+                    <h:outputText  rendered="#{pay.paymentStatus == 'W'}"  value="#{pay.paymentStatus} -- Waiting"/>
+                    <h:outputText  rendered="#{pay.paymentStatus == 'N'}"  value="#{pay.paymentStatus} -- Scheduled"/>
+                    <h:outputText  rendered="#{pay.paymentStatus == 'U'}"  value="#{pay.paymentStatus} -- Processing" style="color: orange"/>
+                    <h:outputText  rendered="#{pay.paymentStatus == 'P'}"  value="#{pay.paymentStatus} -- Pending"/>
+                    <h:outputText  rendered="#{pay.paymentStatus == 'S'}"  value="#{pay.paymentStatus} -- Successful" style="color: green"/>
+                    <h:outputText  rendered="#{pay.paymentStatus == 'D'}"  value="#{pay.paymentStatus} -- Dis.Insufficient Funds" style="color: red"/>
+                    <h:outputText  rendered="#{pay.paymentStatus == 'F'}"  value="#{pay.paymentStatus} -- Dishonoured" style="color: red"/>
+                    <h:outputText  rendered="#{pay.paymentStatus == 'X'}"  value="#{pay.paymentStatus} -- Deleted In PGW" style="color: red"/>
+                    <h:outputText  rendered="#{pay.paymentStatus == 'Y'}"  value="#{pay.paymentStatus} -- Delete Requested" style="color: orange"/>
+                </p:column>
+
+
+            </p:dataTable>
+
+
+
+            <p:panel>
+                <p:commandButton  onclick="PF('changePlanDialogueWidget').hide();"  actionListener="#{ezidebit.executeChangePlan}" value="#{configMapController.getKey('AddPaymentScheduleSaveLink')}" update=" :growl :tv:paymentsForm"/>                
+                <p:commandButton  onclick="PF('changePlanDialogueWidget').hide()"  value="#{configMapController.getKey('AddPaymentScheduleDiscardLink')}" update=":growl"/>                
+
+            </p:panel>
+        </h:form>
+    </p:confirmDialog>
+
+
+</ui:composition>
+
+

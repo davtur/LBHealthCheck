@@ -1,46 +1,60 @@
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <ui:composition  xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:ui="http://java.sun.com/jsf/facelets"
-      xmlns:h="http://java.sun.com/jsf/html"
-      xmlns:f="http://java.sun.com/jsf/core"
-      xmlns:p="http://primefaces.org/ui" >
+                 xmlns:ui="http://java.sun.com/jsf/facelets"
+                 xmlns:h="http://java.sun.com/jsf/html"
+                 xmlns:f="http://java.sun.com/jsf/core"
+                 xmlns:p="http://primefaces.org/ui" >
 
-    
-        <p:dialog id="PlanEditDlg" widgetVar="PlanEditDialog" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('EditPlanTitle')}">
-            <h:form id="PlanEditForm">
-                <h:panelGroup id="display">
-                    <p:panelGrid columns="2" rendered="#{planController.selected != null}">
-                        <h:outputLabel value="#{configMapController.getKey('EditPlanLabel_id')}" for="id" />
-                        <h:inputText id="id"  value="#{planController.selected.id}" title="#{configMapController.getKey('EditPlanTitle_id')}" required="true" requiredMessage="#{configMapController.getKey('EditPlanRequiredMessage_id')}"/>
-                        <h:outputLabel value="#{configMapController.getKey('EditPlanLabel_planName')}" for="planName" />
-                        <h:inputText id="planName"  value="#{planController.selected.planName}" title="#{configMapController.getKey('EditPlanTitle_planName')}" required="true" requiredMessage="#{configMapController.getKey('EditPlanRequiredMessage_planName')}"/>
-                        <h:outputLabel value="#{configMapController.getKey('EditPlanLabel_planPrice')}" for="planPrice" />
-                        <h:inputText id="planPrice"  value="#{planController.selected.planPrice}" title="#{configMapController.getKey('EditPlanTitle_planPrice')}" required="true" requiredMessage="#{configMapController.getKey('EditPlanRequiredMessage_planPrice')}"/>
-                        <h:outputLabel value="#{configMapController.getKey('EditPlanLabel_planDescription')}" for="planDescription" />
-                        <h:inputTextarea rows="4" cols="30" id="planDescription" value="#{planController.selected.planDescription}" title="#{configMapController.getKey('EditPlanTitle_planDescription')}" />
-                        <h:outputLabel value="#{configMapController.getKey('EditPlanLabel_planActive')}" for="planActive" />
-                        <h:inputText id="planActive"  value="#{planController.selected.planActive}" title="#{configMapController.getKey('EditPlanTitle_planActive')}" required="true" requiredMessage="#{configMapController.getKey('EditPlanRequiredMessage_planActive')}"/>
-                        <h:outputLabel value="#{configMapController.getKey('EditPlanLabel_planDiscount')}" for="planDiscount" />
-                        <h:inputText id="planDiscount"  value="#{planController.selected.planDiscount}" title="#{configMapController.getKey('EditPlanTitle_planDiscount')}" />
-                        <h:outputLabel value="#{configMapController.getKey('EditPlanLabel_planCollectionModel')}" for="planCollectionModel" />
-                        <h:inputText id="planCollectionModel"  value="#{planController.selected.planCollectionModel}" title="#{configMapController.getKey('EditPlanTitle_planCollectionModel')}" />
-                        <h:outputLabel value="#{configMapController.getKey('EditPlanLabel_parent')}" for="parent" />
-                        <p:selectOneMenu id="parent" valueChangeListener="#{planController.selectOneMenuValueChangeListener}" value="#{planController.selected.parent}" label="#{configMapController.getKey('EditPlanTitle_parent')}" >
-                            <f:selectItems value="#{planController.itemsAvailableSelectOne}"/>
-                            <p:ajax   update=":PlanEditForm"  />
-                        </p:selectOneMenu>
-                        <h:outputLabel value="#{configMapController.getKey('EditPlanLabel_sessionType')}" for="sessionType" />
-                        <p:selectOneMenu id="sessionType" valueChangeListener="#{planController.selectOneMenuValueChangeListener}" value="#{planController.selected.sessionType}" label="#{configMapController.getKey('EditPlanTitle_sessionType')}" >
-                            <f:selectItems value="#{sessionTypesController.itemsAvailableSelectOne}"/>
-                            <p:ajax   update=":PlanEditForm"  />
-                        </p:selectOneMenu>
-                    </p:panelGrid>
-                    <p:commandButton actionListener="#{planController.update}" value="#{configMapController.getKey('Save')}" update="display,:PlanListForm:datalist,:growl" oncomplete="handleSubmit(args, 'PlanEditDialog');planControllerTable.filter()"/>
-                    <p:commandButton value="#{configMapController.getKey('Cancel')}" onclick="PlanEditDialog.hide()"/>
-                </h:panelGroup>
-            </h:form>
-        </p:dialog>
 
-    </ui:composition>
+    <p:dialog id="PlanEditDlg" widgetVar="PlanEditDialog" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('EditPlanTitle')}">
+        <h:form id="PlanEditForm">
+            <h:panelGroup id="display">
+                <p:panelGrid columns="2" rendered="#{planController.selected != null}">
+                    <h:outputLabel value="#{configMapController.getKey('EditPlanLabel_id')}" for="id" />
+                    <h:inputText id="id"  value="#{planController.selected.id}" title="#{configMapController.getKey('EditPlanTitle_id')}" required="true" requiredMessage="#{configMapController.getKey('EditPlanRequiredMessage_id')}"/>
+                    <h:outputLabel value="#{configMapController.getKey('EditPlanLabel_planName')}" for="planName" />
+                    <h:inputText id="planName"  value="#{planController.selected.planName}" title="#{configMapController.getKey('EditPlanTitle_planName')}" required="true" requiredMessage="#{configMapController.getKey('EditPlanRequiredMessage_planName')}"/>
+                    <h:outputLabel value="#{configMapController.getKey('EditPlanLabel_planPrice')}" for="planPrice" />
+                    <h:inputText id="planPrice"  value="#{planController.selected.planPrice}" title="#{configMapController.getKey('EditPlanTitle_planPrice')}" required="true" requiredMessage="#{configMapController.getKey('EditPlanRequiredMessage_planPrice')}"/>
+                    <p:outputLabel value="#{configMapController.getKey('CreatePlanPeriodTypeLabel')}" for="changePlanPeriodType" />
+
+                    <p:selectOneMenu id="changePlanPeriodType" value="#{planController.selected.planTimePeriod}" title="#{configMapController.getKey('CreatePlanPeriodTypeTitle')}" >
+                        <f:selectItem itemValue="W" itemLabel="Weekly" />
+                        <f:selectItem itemValue="F" itemLabel="Fortnightly" />
+                        <f:selectItem itemValue="M" itemLabel="Monthly" />
+                        <f:selectItem itemValue="4" itemLabel="4 Weekly" />
+                        <f:selectItem itemValue="N" itemLabel="Weekday in Month" />
+                        <f:selectItem itemValue="Q" itemLabel="Quarterly" />
+                        <f:selectItem itemValue="H" itemLabel="Half Yearly" />
+                        <f:selectItem itemValue="Y" itemLabel="Annually" />
+                        
+                    </p:selectOneMenu>
+
+                    <h:outputLabel value="#{configMapController.getKey('EditPlanLabel_planDescription')}" for="planDescription" />
+                    <h:inputTextarea rows="4" cols="30" id="planDescription" value="#{planController.selected.planDescription}" title="#{configMapController.getKey('EditPlanTitle_planDescription')}" />
+                    <h:outputLabel value="#{configMapController.getKey('EditPlanLabel_planActive')}" for="planActive" />
+                    <h:inputText id="planActive"  value="#{planController.selected.planActive}" title="#{configMapController.getKey('EditPlanTitle_planActive')}" required="true" requiredMessage="#{configMapController.getKey('EditPlanRequiredMessage_planActive')}"/>
+                    <h:outputLabel value="#{configMapController.getKey('EditPlanLabel_planDiscount')}" for="planDiscount" />
+                    <h:inputText id="planDiscount"  value="#{planController.selected.planDiscount}" title="#{configMapController.getKey('EditPlanTitle_planDiscount')}" />
+                    <h:outputLabel value="#{configMapController.getKey('EditPlanLabel_planCollectionModel')}" for="planCollectionModel" />
+                    <h:inputText id="planCollectionModel"  value="#{planController.selected.planCollectionModel}" title="#{configMapController.getKey('EditPlanTitle_planCollectionModel')}" />
+                    <h:outputLabel value="#{configMapController.getKey('EditPlanLabel_parent')}" for="parent" />
+                    <p:selectOneMenu id="parent" valueChangeListener="#{planController.selectOneMenuValueChangeListener}" value="#{planController.selected.parent}" label="#{configMapController.getKey('EditPlanTitle_parent')}" >
+                        <f:selectItems value="#{planController.itemsAvailableSelectOne}"/>
+                        <p:ajax   update=":PlanEditForm"  />
+                    </p:selectOneMenu>
+                    <h:outputLabel value="#{configMapController.getKey('EditPlanLabel_sessionType')}" for="sessionType" />
+                    <p:selectOneMenu id="sessionType" valueChangeListener="#{planController.selectOneMenuValueChangeListener}" value="#{planController.selected.sessionType}" label="#{configMapController.getKey('EditPlanTitle_sessionType')}" >
+                        <f:selectItems value="#{sessionTypesController.itemsAvailableSelectOne}"/>
+                        <p:ajax   update=":PlanEditForm"  />
+                    </p:selectOneMenu>
+                </p:panelGrid>
+                <p:commandButton actionListener="#{planController.update}" value="#{configMapController.getKey('Save')}" update="display,:PlanListForm:datalist,:growl" oncomplete="handleSubmit(args, 'PlanEditDialog');planControllerTable.filter()"/>
+                <p:commandButton value="#{configMapController.getKey('Cancel')}" onclick="PlanEditDialog.hide()"/>
+            </h:panelGroup>
+        </h:form>
+    </p:dialog>
+
+</ui:composition>
 

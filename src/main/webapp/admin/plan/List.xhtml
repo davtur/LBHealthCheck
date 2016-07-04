@@ -15,7 +15,7 @@
 
         <h:form id="formPlanCreate1">
             <div class="Container100 Responsive100">
-                
+
                 <div class="ContainerIndent">
                     <p:dialog id="confirmDialogPlanCreate1"  resizable="true" fitViewport="true "
                               header="#{configMapController.getKey('CreatePlanTitle')}"  widgetVar="planCreateDialogue"> 
@@ -35,6 +35,19 @@
                             <p:inputText id="planPrice" value="#{planController.newPlan.planPrice}" title="#{configMapController.getKey('CreatePlanTitle_planPrice')}" required="true" requiredMessage="#{configMapController.getKey('CreatePlanRequiredMessage_planPrice')}">
                                 <f:convertNumber minFractionDigits="2" currencySymbol="$" type="currency"/>
                             </p:inputText>
+                            <p:outputLabel value="#{configMapController.getKey('CreatePlanPeriodTypeLabel')}" for="changePlanPeriodType" />
+
+                            <p:selectOneMenu id="changePlanPeriodType" value="#{planController.newPlan.planTimePeriod}" title="#{configMapController.getKey('CreatePlanPeriodTypeTitle')}" >
+                                <f:selectItem itemValue="W" itemLabel="Weekly" />
+                                <f:selectItem itemValue="F" itemLabel="Fortnightly" />
+                                <f:selectItem itemValue="M" itemLabel="Monthly" />
+                                <f:selectItem itemValue="4" itemLabel="4 Weekly" />
+                                <f:selectItem itemValue="N" itemLabel="Weekday in Month" />
+                                <f:selectItem itemValue="Q" itemLabel="Quarterly" />
+                                <f:selectItem itemValue="H" itemLabel="Half Yearly" />
+                                <f:selectItem itemValue="Y" itemLabel="Annually" />
+                                
+                            </p:selectOneMenu>
                             <p:outputLabel value="#{configMapController.getKey('CreatePlanLabel_planDiscount')}" for="planDiscount" />
                             <p:inputText id="planDiscount"  value="#{planController.newPlan.planDiscount}" title="#{configMapController.getKey('CreatePlanTitle_planDiscount')}" >
                                 <f:convertNumber minFractionDigits="2" currencySymbol="$" type="currency"/>
@@ -146,6 +159,38 @@
                             </f:facet>
                             <f:facet name="input">
                                 <p:inputText value="#{item.planPrice}" label="#{configMapController.getKey('ListPlanTitle_planPrice')}" />
+                            </f:facet>
+                        </p:cellEditor> 
+
+
+                    </p:column>
+                    <p:column sortBy="#{item.planTimePeriod}" filterBy="#{item.planTimePeriod}" headerText="#{configMapController.getKey('CreatePlanPeriodTypeLabel')}"   >
+                        <p:cellEditor> 
+                            <f:facet name="output">
+                                
+                                <h:outputText  rendered="#{item.planTimePeriod == 'F'}"  value="Fortnightly" />
+                                <h:outputText  rendered="#{item.planTimePeriod == 'M'}"  value="Monthly" />
+                                <h:outputText  rendered="#{item.planTimePeriod == '4'}"  value="4 Weekly" />
+                                <h:outputText  rendered="#{item.planTimePeriod == 'N'}"  value="Weekday in Month" />
+                                <h:outputText  rendered="#{item.planTimePeriod == 'Q'}"  value="Quarterly" />
+                                <h:outputText  rendered="#{item.planTimePeriod == 'H'}"  value="Half Yearly" />
+                                <h:outputText  rendered="#{item.planTimePeriod == 'Y'}"  value="Annually" />
+                                <h:outputText  rendered="#{item.planTimePeriod == 'W'}"  value="Weekly" />
+
+                            </f:facet>
+                            <f:facet name="input">
+
+                                <p:selectOneMenu  value="#{item.planTimePeriod}" title="#{configMapController.getKey('CreatePlanPeriodTypeTitle')}" >
+                                    <f:selectItem itemValue="W" itemLabel="Weekly" />
+                                    <f:selectItem itemValue="F" itemLabel="Fortnightly" />
+                                    <f:selectItem itemValue="M" itemLabel="Monthly" />
+                                    <f:selectItem itemValue="4" itemLabel="4 Weekly" />
+                                    <f:selectItem itemValue="N" itemLabel="Weekday in Month" />
+                                    <f:selectItem itemValue="Q" itemLabel="Quarterly" />
+                                    <f:selectItem itemValue="H" itemLabel="Half Yearly" />
+                                    <f:selectItem itemValue="Y" itemLabel="Annually" />
+                                    
+                                </p:selectOneMenu>
                             </f:facet>
                         </p:cellEditor> 
 

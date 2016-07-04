@@ -111,6 +111,7 @@ public class EziDebitPaymentGateway implements Serializable {
     private static final String paymentGateway = "EZIDEBIT";
     private final static String CHANNEL = "/payments/";
     private static final long serialVersionUID = 1L;
+    private final static int MONTHS_IN_ADVANCE_FOR_PAYMENT_SCHEDULE = 9;
     private int testAjaxCounter = 0;
     @Inject
     private FutureMapEJB futureMap;
@@ -2911,15 +2912,22 @@ public class EziDebitPaymentGateway implements Serializable {
         return props;
 
     }
+    public void executeChangePlan(ActionEvent actionEvent) {
+logger.log(Level.INFO, "Executing Plan Change - Clear Schedule then create new schedule operations will be called..");
+        clearSchedule(actionEvent);
+        createPaymentSchedule(actionEvent);
+    }
+
 
     public void createPaymentSchedule(ActionEvent actionEvent) {
+        
         String loggedInUser = FacesContext.getCurrentInstance().getExternalContext().getRemoteUser();
         Long amount = (long) (paymentAmountInCents * (float) 100);
         Long amountLimit = paymentLimitAmountInCents * (long) 100;
         char spt = paymentSchedulePeriodType.charAt(0);
         GregorianCalendar endCal = new GregorianCalendar();
-        //endCal.setTime(paymentDebitDate);// ezi debit only supports 1 year from current date
-        endCal.add(Calendar.YEAR, 1);
+        //endCal.setTime(paymentDebitDate);// ezi debit only supports 1 year from current date so only add 9 months in advance. A cronjob will keep add new payments each week if necessary to keep it a 9 months
+        endCal.add(Calendar.MONTH, MONTHS_IN_ADVANCE_FOR_PAYMENT_SCHEDULE);
         int dow = Calendar.MONDAY;
         if (paymentDayOfWeek.contains("TUE")) {
             dow = Calendar.TUESDAY;

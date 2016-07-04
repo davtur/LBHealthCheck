@@ -45,12 +45,12 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Plan.findByPlanActive", query = "SELECT p FROM Plan p WHERE p.planActive = :planActive"),
     @NamedQuery(name = "Plan.findByPlanDiscount", query = "SELECT p FROM Plan p WHERE p.planDiscount = :planDiscount")})
 public class Plan implements BaseEntity, Serializable {
+
     @JoinColumn(name = "session_Type", referencedColumnName = "id")
     @ManyToOne
     private SessionTypes sessionType;
 
     // @Max(value=?)  @Min(value=?)//if you know range of your decimal fields consider using these annotations to enforce field validation
-
     @Basic(optional = false)
     @NotNull
     @Column(name = "plan_price")
@@ -83,6 +83,9 @@ public class Plan implements BaseEntity, Serializable {
     private short planActive;
     @OneToMany(mappedBy = "groupPricing")
     private Collection<Customers> customersCollection;
+    @Size(min = 0, max = 1)
+    @Column(name = "plan_time_period")
+    private String planTimePeriod;
 
     public Plan() {
     }
@@ -211,6 +214,20 @@ public class Plan implements BaseEntity, Serializable {
 
     public void setSessionType(SessionTypes sessionType) {
         this.sessionType = sessionType;
+    }
+
+    /**
+     * @return the planTimePeriod
+     */
+    public String getPlanTimePeriod() {
+        return planTimePeriod;
+    }
+
+    /**
+     * @param planTimePeriod the planTimePeriod to set
+     */
+    public void setPlanTimePeriod(String planTimePeriod) {
+        this.planTimePeriod = planTimePeriod;
     }
 
 }

@@ -7,6 +7,7 @@ import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.beans.CustomersFacade;
 import au.com.manlyit.fitnesscrm.stats.beans.LoginBean;
 import au.com.manlyit.fitnesscrm.stats.beans.PaymentsFacade;
+import au.com.manlyit.fitnesscrm.stats.beans.util.PaymentPeriod;
 import au.com.manlyit.fitnesscrm.stats.chartbeans.MySessionsChart1;
 import au.com.manlyit.fitnesscrm.stats.classes.util.DatatableSelectionHelper;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PfSelectableDataModel;
@@ -14,6 +15,7 @@ import au.com.manlyit.fitnesscrm.stats.db.CustomerState;
 import au.com.manlyit.fitnesscrm.stats.db.Groups;
 import au.com.manlyit.fitnesscrm.stats.db.Notes;
 import au.com.manlyit.fitnesscrm.stats.db.PaymentParameters;
+import au.com.manlyit.fitnesscrm.stats.db.Plan;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -27,6 +29,7 @@ import java.util.logging.Logger;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.util.List;
+import java.util.Locale;
 import java.util.Properties;
 import java.util.Random;
 import java.util.concurrent.Future;
@@ -108,7 +111,7 @@ public class CustomersController implements Serializable {
     private DatatableSelectionHelper pagination;
     private DatatableSelectionHelper notesPagination;
     private int selectedItemIndex;
-
+    private Plan customersNewPlan;
     private List<Customers> filteredItems;
     private List<Customers> filteredCustomersWithoutScheduledPayments;
     private List<Notes> notesFilteredItems;
@@ -254,7 +257,8 @@ public class CustomersController implements Serializable {
 
         }
     }
-    public void  sendPaymentFormEmail() {
+
+    public void sendPaymentFormEmail() {
         FacesContext context = FacesContext.getCurrentInstance();
         LoginBean controller = (LoginBean) context.getApplication().getELResolver().getValue(context.getELContext(), null, "loginBean");
         controller.doPasswordReset("system.new.paymentForm.template", current, configMapFacade.getConfig("sendPaymentFormEmailSubject"));
@@ -844,8 +848,13 @@ public class CustomersController implements Serializable {
         if (validIP == true) {
             c.setId(0);
             Groups grp = new Groups(0, group);
-            if (group.contains("LEAD")) {
+            //Check if they already Exist
+            Customers custCheck = ejbFacade.findCustomerByName(c.getFirstname(), c.getLastname());
+            if (custCheck != null) {
+                sendNotificationEmail(c, grp, "system.email.notification.template", "New LEAD from website, customer already exists in DB. They may be cancelled or on-hold.", message);
+            } else if (group.contains("LEAD")) {
                 // new lead from contact form
+
                 c.setUsername(getUniqueUsername(c.getFirstname() + "." + c.getLastname()));
                 getFacade().create(c);
 
@@ -890,7 +899,7 @@ public class CustomersController implements Serializable {
                 PaymentParameters pp = getCustomersPaymentParameters(c);
                 if (pp == null) {
                     LOGGER.log(Level.WARNING, "createFromSignup: Failed to create payement parameters. Null returned from call to getSelectedCustomersPaymentParameters()");
-                    
+
                 }
             }
             setNewCustomer(setCustomerDefaults(new Customers()));
@@ -986,7 +995,7 @@ public class CustomersController implements Serializable {
                 PaymentParameters pp = getCustomersPaymentParameters(c);
                 if (pp == null) {
                     LOGGER.log(Level.WARNING, "createFromSignup: Failed to create payement parameters. Null returned from call to getSelectedCustomersPaymentParameters()");
-                    
+
                 }
 
                 JsfUtil.addSuccessMessage(configMapFacade.getConfig("CustomersCreated"));
@@ -1100,6 +1109,153 @@ public class CustomersController implements Serializable {
 
     public void selectOneMenuValueChangeListener(ValueChangeEvent vce) {
         Object o = vce.getNewValue();
+    }
+
+    public void selectOneChangePlanListener(ValueChangeEvent vce) {
+        Object newValueObject = vce.getNewValue();
+        // Object oldValueObject = vce.getOldValue();
+        Plan oldPlan = null;
+        Plan newPlan = null;
+        if (current.getGroupPricing() != null) {
+            oldPlan = current.getGroupPricing();
+        } else {
+            LOGGER.log(Level.WARNING, "selectOneChangePlanListener: The old plan is null. This shouldn't happen!!");
+            // set to default for new customers
+            oldPlan = ejbPlanFacade.findPLanByName(configMapFacade.getConfig("default.customer.plan"));
+        }
+        if (newValueObject.getClass().equals(Plan.class)) {
+            newPlan = (Plan) newValueObject;
+        }
+        if (newPlan == null) {
+            LOGGER.log(Level.WARNING, "selectOneChangePlanListener: The new plan is null. The plan cannot be changed!");
+            JsfUtil.addErrorMessage("Change Plan Failed. The new Plan is NULL");
+
+        } else {
+            LOGGER.log(Level.INFO, "selectOneChangePlanListener: Changing Plans from:{0} to {1}.", new Object[]{oldPlan.getPlanName(), newPlan.getPlanName()});
+            setCustomersNewPlan(newPlan);
+            //update the dialogue create schedule parameters
+
+            //start date should be next scheduled payment if not default to tomorrow
+            FacesContext context = FacesContext.getCurrentInstance();
+            EziDebitPaymentGateway ezi = context.getApplication().evaluateExpressionGet(context, "#{ezidebit}", EziDebitPaymentGateway.class);
+
+            PaymentParameters pp = current.getPaymentParameters();
+            GregorianCalendar cal = new GregorianCalendar();
+
+            String newPaymentPeriod = newPlan.getPlanTimePeriod();
+            double newPlanPrice = newPlan.getPlanPrice().doubleValue();
+            double oldPlanPrice = oldPlan.getPlanPrice().doubleValue();
+            if (pp != null && pp.getNextScheduledPayment() != null) {
+                ezi.setPaymentDebitDate(pp.getNextScheduledPayment().getDebitDate());
+                String oldPaymentPeriod = pp.getPaymentPeriod();
+                if (oldPaymentPeriod.compareTo(newPaymentPeriod) != 0) {
+                    //plan time periods do not match. Convert the plan to teh existing customers payment period 
+                    //i.e if the customer likes to pay weekly and the plan is monthly, convert the monthly plan price to a weekly payment
+                    double oldNumberOfDaysBilledPerPayment = convertPaymentPeriodToAverageDays(oldPaymentPeriod);
+                    double newNumberOfDaysBilledPerPayment = convertPaymentPeriodToAverageDays(newPaymentPeriod);
+                    double ratio = newNumberOfDaysBilledPerPayment / oldNumberOfDaysBilledPerPayment;
+                    double newPriceForOldPeriod;
+                    if (oldNumberOfDaysBilledPerPayment < newNumberOfDaysBilledPerPayment) {
+                        //i.e 4 weekly (28 days) billing to weekly (7 days) plan price .. convert the weekly plan price to be billed monthly
+                        newPriceForOldPeriod = newPlanPrice / ratio;
+
+                    } else {
+                        //i.e weekly to monthly
+                        newPriceForOldPeriod = newPlanPrice * ratio;
+                    }
+                    // keep customers existing payement period preference . i.e if they pay weekly keep them on weekly
+                    ezi.setPaymentSchedulePeriodType(oldPaymentPeriod);
+                    ezi.setPaymentAmountInCents(Float.parseFloat(Double.toString(newPriceForOldPeriod)));
+                    LOGGER.log(Level.INFO, "selectOneChangePlanListener: Converted price to suit customers old payment period:{0}, plan payment period  {1}, plan price={2}, new converted price={3}.", new Object[]{oldPaymentPeriod, newPaymentPeriod, newPlanPrice, newPriceForOldPeriod});
+                } else {
+                    // payment period are the same so no need to convert
+                    ezi.setPaymentAmountInCents(Float.parseFloat(Double.toString(newPlanPrice)));
+                    ezi.setPaymentSchedulePeriodType(newPlan.getPlanTimePeriod());
+
+                    LOGGER.log(Level.INFO, "selectOneChangePlanListener: payment period are the same so no need to convert: Old={0}, new={1}.Old plan price = {2}, newplan price = {3}", new Object[]{oldPaymentPeriod, newPaymentPeriod, oldPlanPrice, newPlanPrice});
+
+                }
+
+            } else {
+
+                cal.add(Calendar.DAY_OF_YEAR, 1);
+                ezi.setPaymentDebitDate(cal.getTime());
+                // BigDecimal amount = newPlan.getPlanPrice().multiply(BigDecimal.valueOf((long) 100));
+                BigDecimal amount = newPlan.getPlanPrice();
+                ezi.setPaymentAmountInCents(amount.floatValue());
+                ezi.setPaymentSchedulePeriodType(newPlan.getPlanTimePeriod());
+                LOGGER.log(Level.INFO, "selectOneChangePlanListener: No scheduled payments: Old Plan Name={0}, new payment period ={1} .Old plan price = {2}, newplan price = {3}", new Object[]{oldPlan.getPlanName(), newPaymentPeriod, oldPlanPrice, newPlanPrice});
+
+            }
+
+            ezi.setPaymentDayOfMonth(cal.get(Calendar.DAY_OF_MONTH));
+            if (cal.get(Calendar.DAY_OF_WEEK) == Calendar.MONDAY
+                    || cal.get(Calendar.DAY_OF_WEEK) == Calendar.TUESDAY
+                    || cal.get(Calendar.DAY_OF_WEEK) == Calendar.WEDNESDAY
+                    || cal.get(Calendar.DAY_OF_WEEK) == Calendar.THURSDAY
+                    || cal.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY) {
+                ezi.setPaymentDayOfWeek(cal.getDisplayName(Calendar.DAY_OF_WEEK, Calendar.SHORT, Locale.US));
+
+            } else {
+                if (cal.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) {
+                    cal.add(Calendar.DAY_OF_YEAR, 2);
+                } else {
+                    cal.add(Calendar.DAY_OF_YEAR, 1);
+                }
+                ezi.setPaymentDayOfWeek(cal.getDisplayName(Calendar.DAY_OF_WEEK, Calendar.SHORT, Locale.US));
+            }
+
+            //show dialogue
+            RequestContext.getCurrentInstance().execute("PF('changePlanDialogueWidget').show();");
+            RequestContext.getCurrentInstance().update("changePlanDialogue");
+        }
+    }
+
+    private double convertPaymentPeriodToAverageDays(String period) {
+        GregorianCalendar cal = new GregorianCalendar();
+        boolean isLeapYear = cal.isLeapYear(cal.get(Calendar.YEAR));
+
+        if (period.compareTo(PaymentPeriod.WEEKLY.value()) == 0) {
+            return (double) 7;
+        }
+        if (period.compareTo(PaymentPeriod.FORTNIGHTLY.value()) == 0) {
+            return (double) 14;
+        }
+        if (period.compareTo(PaymentPeriod.FOUR_WEEKLY.value()) == 0) {
+            return (double) 28;
+        }
+        if (period.compareTo(PaymentPeriod.MONTHLY.value()) == 0) {
+            if (isLeapYear) {
+                return 30.50;
+            }
+            return 30.42;
+        }
+        if (period.compareTo(PaymentPeriod.WEEKDAY_IN_MONTH.value()) == 0) {
+            if (isLeapYear) {
+                return 30.50;
+            }
+            return 30.42;
+        }
+        if (period.compareTo(PaymentPeriod.QUARTERLY.value()) == 0) {
+            if (isLeapYear) {
+                return 91.5;
+            }
+            return 91.25;
+        }
+        if (period.compareTo(PaymentPeriod.SIX_MONTHLY.value()) == 0) {
+            if (isLeapYear) {
+                return (double) 183;
+            }
+            return 182.5;
+        }
+        if (period.compareTo(PaymentPeriod.ANNUALLY.value()) == 0) {
+            if (isLeapYear) {
+                return (double) 366;
+            }
+            return (double) 365;
+        }
+
+        return -1;
     }
 
     public void selectManyMenuValueChangeListener(ValueChangeEvent vce) {
@@ -1802,12 +1958,12 @@ public class CustomersController implements Serializable {
         if (loggedInUser == null) {
             String name = "Unknown";
             FacesContext facesContext = FacesContext.getCurrentInstance();
-             HttpServletRequest req = (HttpServletRequest) facesContext.getExternalContext().getRequest(); //request;
+            HttpServletRequest req = (HttpServletRequest) facesContext.getExternalContext().getRequest(); //request;
             try {
-                if(facesContext != null){
-                name = facesContext.getExternalContext().getRemoteUser();
-                }else{
-                    
+                if (facesContext != null) {
+                    name = facesContext.getExternalContext().getRemoteUser();
+                } else {
+
                 }
                 if (name != null) {
                     loggedInUser = ejbFacade.findCustomerByUsername(name);
@@ -1822,7 +1978,6 @@ public class CustomersController implements Serializable {
             }
             // get user agent and redirect if its a mobile
 
-           
             String uaString = req.getHeader("User-Agent");
             LOGGER.log(Level.INFO, "The User-Agent of this session is :{0}", uaString);
         }
@@ -2211,6 +2366,20 @@ public class CustomersController implements Serializable {
      */
     public void setMultiSelectedCustomersWithoutScheduledPayments(Customers[] multiSelectedCustomersWithoutScheduledPayments) {
         this.multiSelectedCustomersWithoutScheduledPayments = multiSelectedCustomersWithoutScheduledPayments;
+    }
+
+    /**
+     * @return the customersNewPlan
+     */
+    public Plan getCustomersNewPlan() {
+        return customersNewPlan;
+    }
+
+    /**
+     * @param customersNewPlan the customersNewPlan to set
+     */
+    public void setCustomersNewPlan(Plan customersNewPlan) {
+        this.customersNewPlan = customersNewPlan;
     }
 
     @FacesConverter(value = "customersControllerConverter", forClass = Customers.class)

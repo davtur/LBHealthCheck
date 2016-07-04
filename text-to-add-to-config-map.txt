@@ -1451,3 +1451,14 @@ facebook.redirect.adminlandingpage=/admin/dashboard/dashboard.xhtml
 sendPaymentFormEmailButton=Send Payment Form Email
 sendPaymentFormEmailSubject=Pure Fitness Manly Payment Form
 sendPaymentFormEmailSuccessMessage= Payment form sent successfully
+
+changePlanDialogueTitle=Change Plan
+ChangePlanOldPlanLabel=Old Plan
+ChangePlanNewPlanLabel=New Plan
+ChangePlanOldPlanTitle=This is the name of the old existing plan that the customer is on.
+ChangePlanNewPlanTitle=This is the name of the plan that you wish to move the customer to.
+ChangePlanExistingPaymentsHeaderTitle=Below are the existing scheduled payments for this customer that will be deleted.
+ChangePlanNewScheduleHeaderTitle=Below is the new payment schedule for the new plan that will be added.
+ChangePlanNamesHeaderTitle=Below are the names of the old and new plans.
+CreatePlanPeriodTypeLabel=Plan Time Period
+CreatePlanPeriodTypeTitle=The time Period that the plan price covers.

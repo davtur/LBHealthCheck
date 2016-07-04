@@ -1,48 +1,63 @@
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <ui:composition   xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:ui="http://java.sun.com/jsf/facelets"
-      xmlns:h="http://java.sun.com/jsf/html"
-      xmlns:f="http://java.sun.com/jsf/core"
-      xmlns:p="http://primefaces.org/ui" >
+                  xmlns:ui="http://java.sun.com/jsf/facelets"
+                  xmlns:h="http://java.sun.com/jsf/html"
+                  xmlns:f="http://java.sun.com/jsf/core"
+                  xmlns:p="http://primefaces.org/ui" >
 
-    
-        <p:dialog id="PlanCreateDlg" widgetVar="PlanCreateDialog" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('CreatePlanTitle')}">
 
-            <h:form id="PlanCreateForm">
-                <h:panelGroup id="display">
-                    <p:panelGrid columns="2" rendered="#{planController.selected != null}">
-                        <p:outputLabel value="#{configMapController.getKey('CreatePlanLabel_id')}" for="id" />
-                        <p:inputText id="id" value="#{planController.selected.id}" title="#{configMapController.getKey('CreatePlanTitle_id')}" required="true" requiredMessage="#{configMapController.getKey('CreatePlanRequiredMessage_id')}"/>
-                        <p:outputLabel value="#{configMapController.getKey('CreatePlanLabel_planName')}" for="planName" />
-                        <p:inputText id="planName" value="#{planController.selected.planName}" title="#{configMapController.getKey('CreatePlanTitle_planName')}" required="true" requiredMessage="#{configMapController.getKey('CreatePlanRequiredMessage_planName')}"/>
-                        <p:outputLabel value="#{configMapController.getKey('CreatePlanLabel_planPrice')}" for="planPrice" />
-                        <p:inputText id="planPrice" value="#{planController.selected.planPrice}" title="#{configMapController.getKey('CreatePlanTitle_planPrice')}" required="true" requiredMessage="#{configMapController.getKey('CreatePlanRequiredMessage_planPrice')}"/>
-                        <p:outputLabel value="#{configMapController.getKey('CreatePlanLabel_planDescription')}" for="planDescription" />
-                        <p:inputTextarea rows="4" cols="30" id="planDescription"  value="#{planController.selected.planDescription}"  title="#{configMapController.getKey('CreatePlanTitle_planDescription')}" />
-                        <p:outputLabel value="#{configMapController.getKey('CreatePlanLabel_planActive')}" for="planActive" />
-                        <p:inputText id="planActive" value="#{planController.selected.planActive}" title="#{configMapController.getKey('CreatePlanTitle_planActive')}" required="true" requiredMessage="#{configMapController.getKey('CreatePlanRequiredMessage_planActive')}"/>
-                        <p:outputLabel value="#{configMapController.getKey('CreatePlanLabel_planDiscount')}" for="planDiscount" />
-                        <p:inputText id="planDiscount" value="#{planController.selected.planDiscount}" title="#{configMapController.getKey('CreatePlanTitle_planDiscount')}" />
-                        <p:outputLabel value="#{configMapController.getKey('CreatePlanLabel_planCollectionModel')}" for="planCollectionModel" />
-                        <p:inputText id="planCollectionModel" value="#{planController.selected.planCollectionModel}" title="#{configMapController.getKey('CreatePlanTitle_planCollectionModel')}" />
-                        <p:outputLabel value="#{configMapController.getKey('CreatePlanLabel_parent')}" for="parent" />
-                        <p:selectOneMenu id="parent" valueChangeListener="#{planController.selectOneMenuValueChangeListener}"  value="#{planController.selected.parent}"  label="#{configMapController.getKey('CreatePlanTitle_parent')}" >
-                            <f:selectItems value="#{planController.itemsAvailableSelectOne}"/>
-                            <p:ajax   update=":PlanCreateForm"  />
-                        </p:selectOneMenu>
-                        <p:outputLabel value="#{configMapController.getKey('CreatePlanLabel_sessionType')}" for="sessionType" />
-                        <p:selectOneMenu id="sessionType" valueChangeListener="#{planController.selectOneMenuValueChangeListener}"  value="#{planController.selected.sessionType}"  label="#{configMapController.getKey('CreatePlanTitle_sessionType')}" >
-                            <f:selectItems value="#{sessionTypesController.itemsAvailableSelectOne}"/>
-                            <p:ajax   update=":PlanCreateForm"  />
-                        </p:selectOneMenu>
-                    </p:panelGrid>
-                    <p:commandButton actionListener="#{planController.createDialogue}" value="#{configMapController.getKey('Save')}" update="display,:PlanListForm:datalist,:growl" oncomplete="handleSubmit(args,'PlanCreateDialog');PF('planControllerTable').filter()"/>
-                    <p:commandButton value="#{configMapController.getKey('Cancel')}" onclick="PF('PlanCreateDialog').hide()"/>
-                </h:panelGroup>
-            </h:form>
-        </p:dialog>
+    <p:dialog id="PlanCreateDlg" widgetVar="PlanCreateDialog" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('CreatePlanTitle')}">
 
-    </ui:composition>    
-    <!--<p> Generated from template ( JSF_from_entity_wizard/StandardJSF/create.ftl  )- Dave 18th July 2015 </p>-->
+        <h:form id="PlanCreateForm">
+            <h:panelGroup id="display">
+                <p:panelGrid columns="2" rendered="#{planController.selected != null}">
+                    <p:outputLabel value="#{configMapController.getKey('CreatePlanLabel_id')}" for="id" />
+                    <p:inputText id="id" value="#{planController.selected.id}" title="#{configMapController.getKey('CreatePlanTitle_id')}" required="true" requiredMessage="#{configMapController.getKey('CreatePlanRequiredMessage_id')}"/>
+                    <p:outputLabel value="#{configMapController.getKey('CreatePlanLabel_planName')}" for="planName" />
+                    <p:inputText id="planName" value="#{planController.selected.planName}" title="#{configMapController.getKey('CreatePlanTitle_planName')}" required="true" requiredMessage="#{configMapController.getKey('CreatePlanRequiredMessage_planName')}"/>
+                    <p:outputLabel value="#{configMapController.getKey('CreatePlanLabel_planPrice')}" for="planPrice" />
+                    <p:inputText id="planPrice" value="#{planController.selected.planPrice}" title="#{configMapController.getKey('CreatePlanTitle_planPrice')}" required="true" requiredMessage="#{configMapController.getKey('CreatePlanRequiredMessage_planPrice')}"/>
+
+                    <p:outputLabel value="#{configMapController.getKey('CreatePlanPeriodTypeLabel')}" for="changePlanPeriodType" />
+
+                    <p:selectOneMenu id="changePlanPeriodType" value="#{planController.selected.planTimePeriod}" title="#{configMapController.getKey('CreatePlanPeriodTypeTitle')}" >
+                        <f:selectItem itemValue="W" itemLabel="Weekly" />
+                        <f:selectItem itemValue="F" itemLabel="Fortnightly" />
+                        <f:selectItem itemValue="M" itemLabel="Monthly" />
+                        <f:selectItem itemValue="4" itemLabel="4 Weekly" />
+                        <f:selectItem itemValue="N" itemLabel="Weekday in Month" />
+                        <f:selectItem itemValue="Q" itemLabel="Quarterly" />
+                        <f:selectItem itemValue="H" itemLabel="Half Yearly" />
+                        <f:selectItem itemValue="Y" itemLabel="Annually" />
+                        
+                    </p:selectOneMenu>
+
+                    <p:outputLabel value="#{configMapController.getKey('CreatePlanLabel_planDescription')}" for="planDescription" />
+                    <p:inputTextarea rows="4" cols="30" id="planDescription"  value="#{planController.selected.planDescription}"  title="#{configMapController.getKey('CreatePlanTitle_planDescription')}" />
+                    <p:outputLabel value="#{configMapController.getKey('CreatePlanLabel_planActive')}" for="planActive" />
+                    <p:inputText id="planActive" value="#{planController.selected.planActive}" title="#{configMapController.getKey('CreatePlanTitle_planActive')}" required="true" requiredMessage="#{configMapController.getKey('CreatePlanRequiredMessage_planActive')}"/>
+                    <p:outputLabel value="#{configMapController.getKey('CreatePlanLabel_planDiscount')}" for="planDiscount" />
+                    <p:inputText id="planDiscount" value="#{planController.selected.planDiscount}" title="#{configMapController.getKey('CreatePlanTitle_planDiscount')}" />
+                    <p:outputLabel value="#{configMapController.getKey('CreatePlanLabel_planCollectionModel')}" for="planCollectionModel" />
+                    <p:inputText id="planCollectionModel" value="#{planController.selected.planCollectionModel}" title="#{configMapController.getKey('CreatePlanTitle_planCollectionModel')}" />
+                    <p:outputLabel value="#{configMapController.getKey('CreatePlanLabel_parent')}" for="parent" />
+                    <p:selectOneMenu id="parent" valueChangeListener="#{planController.selectOneMenuValueChangeListener}"  value="#{planController.selected.parent}"  label="#{configMapController.getKey('CreatePlanTitle_parent')}" >
+                        <f:selectItems value="#{planController.itemsAvailableSelectOne}"/>
+                        <p:ajax   update=":PlanCreateForm"  />
+                    </p:selectOneMenu>
+                    <p:outputLabel value="#{configMapController.getKey('CreatePlanLabel_sessionType')}" for="sessionType" />
+                    <p:selectOneMenu id="sessionType" valueChangeListener="#{planController.selectOneMenuValueChangeListener}"  value="#{planController.selected.sessionType}"  label="#{configMapController.getKey('CreatePlanTitle_sessionType')}" >
+                        <f:selectItems value="#{sessionTypesController.itemsAvailableSelectOne}"/>
+                        <p:ajax   update=":PlanCreateForm"  />
+                    </p:selectOneMenu>
+                </p:panelGrid>
+                <p:commandButton actionListener="#{planController.createDialogue}" value="#{configMapController.getKey('Save')}" update="display,:PlanListForm:datalist,:growl" oncomplete="handleSubmit(args,'PlanCreateDialog');PF('planControllerTable').filter()"/>
+                <p:commandButton value="#{configMapController.getKey('Cancel')}" onclick="PF('PlanCreateDialog').hide()"/>
+            </h:panelGroup>
+        </h:form>
+    </p:dialog>
+
+</ui:composition>    
+<!--<p> Generated from template ( JSF_from_entity_wizard/StandardJSF/create.ftl  )- Dave 18th July 2015 </p>-->
 
