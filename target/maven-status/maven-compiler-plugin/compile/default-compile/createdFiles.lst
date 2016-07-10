@@ -137,6 +137,7 @@ au/com/manlyit/fitnesscrm/stats/classes/util/CrmScheduleEvent.class
 au/com/manlyit/fitnesscrm/stats/chartbeans/RunTimeChart.class
 au/com/manlyit/fitnesscrm/stats/webservices/GetPaymentStatusResponse.class
 au/com/manlyit/fitnesscrm/stats/classes/ConfigMapController$1.class
+au/com/manlyit/fitnesscrm/stats/classes/util/PaymentGatewayResponse.class
 au/com/manlyit/fitnesscrm/stats/beans/ToDoListFacade.class
 au/com/manlyit/fitnesscrm/stats/classes/NotesController$1.class
 au/com/manlyit/fitnesscrm/stats/classes/ToDoListController$1.class

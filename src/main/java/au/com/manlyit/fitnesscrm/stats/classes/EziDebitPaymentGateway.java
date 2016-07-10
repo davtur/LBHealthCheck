@@ -16,6 +16,7 @@ import au.com.manlyit.fitnesscrm.stats.classes.util.AsyncJob;
 import au.com.manlyit.fitnesscrm.stats.classes.util.DatatableSelectionHelper;
 import au.com.manlyit.fitnesscrm.stats.classes.util.FutureMapEJB;
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
+import au.com.manlyit.fitnesscrm.stats.classes.util.PaymentGatewayResponse;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PfSelectableDataModel;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PushComponentUpdateBean;
 import au.com.manlyit.fitnesscrm.stats.classes.util.ScheduledPaymentPojo;
@@ -1694,7 +1695,7 @@ public class EziDebitPaymentGateway implements Serializable {
 
     }
 
-    private void processAddCustomer(Future ft) {
+    /*  private void processAddCustomer(Future ft) {
         boolean result = false;
         try {
             result = (boolean) ft.get();
@@ -1710,9 +1711,9 @@ public class EziDebitPaymentGateway implements Serializable {
         } else {
             JsfUtil.addErrorMessage("Couldn't add Customer To Payment Gateway. Check logs");
         }
-    }
+    }*/
 
-    /*   private boolean addBulkCustomersToPaymentGateway() {
+ /*   private boolean addBulkCustomersToPaymentGateway() {
      boolean result = false;
      logger.log(Level.INFO, "Starting tests!");
      List<Customers> custList = customersFacade.findAllActiveCustomers(result);
@@ -1914,20 +1915,22 @@ public class EziDebitPaymentGateway implements Serializable {
                 processGetCustomerDetails(ft);
             }
             if (key.contains("AddPayment")) {
-                processAddPaymentResult(ft);
+                processAddPaymentResult((Future<PaymentGatewayResponse>) ft);
             }
             if (key.contains("GetPayments")) {
-                processGetPayments(ft);
+                processGetPayments((Future<PaymentGatewayResponse>) ft);
             }
             if (key.contains("GetScheduledPayments")) {
-                processGetScheduledPayments(ft);
+                processGetScheduledPayments((Future<PaymentGatewayResponse>) ft);
             }
             if (key.contains("CreateSchedule")) {
                 processCreateSchedule(ft);
             }
+            /*moved to FutureMap
+            
             if (key.contains("AddCustomer")) {
                 processAddCustomer(ft);
-            }
+            }*/
             if (key.contains("EditCustomerDetails")) {
                 processEditCustomerDetails(ft);
             }
@@ -2028,62 +2031,83 @@ public class EziDebitPaymentGateway implements Serializable {
         logger.log(Level.INFO, "processSettlementReport completed");
     }
 
-    private void processGetPayments(Future ft) {
-        ArrayOfPayment result = null;
+    private void processGetPayments(Future<PaymentGatewayResponse> ft) {
+        ArrayOfPayment result;
+        PaymentGatewayResponse pgr = null;
         String cust = getSelectedCustomer().getUsername();
         logger.log(Level.INFO, "Ezidebit Controller -  processing GetPayments Response Recieved from ezidebit for Customer  - {0}", cust);
 
         try {
-            result = (ArrayOfPayment) ft.get();
-        } catch (InterruptedException | ExecutionException ex) {
-            Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        if (result != null) {
-            List<Payment> payList = result.getPayment();
-            if (payList != null) {
-                setPaymentsList(payList);
-                setPaymentsListFilteredItems(null);
-                setPaymentDBList(null);
-                setPaymentsDBListFilteredItems(null);
+            // if successful it should return a ArrayOfPayment Object from the getData method;
+            Object resultObject = ft.get();
+            if (resultObject.getClass() == PaymentGatewayResponse.class) {
+                pgr = (PaymentGatewayResponse) resultObject;
+
             }
+
+            if (pgr != null) {
+                result = (ArrayOfPayment) pgr.getData();
+                if (result != null) {
+
+                    List<Payment> payList = result.getPayment();
+                    if (payList != null) {
+                        setPaymentsList(payList);
+                        setPaymentsListFilteredItems(null);
+                        setPaymentDBList(null);
+                        setPaymentsDBListFilteredItems(null);
+                    }
+                }
+                //@(.parentOfUploadPhoto)
+                // RequestContext.getCurrentInstance().update("customerslistForm1");
+                updateASingleCustomersPaymentInfo(getSelectedCustomer());
+                sendUpdatesForPaymentComponents();
+            }
+            // refreshFromDB = true;
+        } catch (InterruptedException | ExecutionException ex) {
+            Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, "processGetPayments FAILED", ex);
         }
-        //@(.parentOfUploadPhoto)
-        // RequestContext.getCurrentInstance().update("customerslistForm1");
-        updateASingleCustomersPaymentInfo(getSelectedCustomer());
-        sendUpdatesForPaymentComponents();
-        // refreshFromDB = true;
         logger.log(Level.INFO, "processGetPayments completed");
     }
 
-    private void processGetScheduledPayments(Future ft) {
-        ArrayOfScheduledPayment result = null;
+    private void processGetScheduledPayments(Future<PaymentGatewayResponse> ft) {
+        ArrayOfScheduledPayment result;
+        PaymentGatewayResponse pgr = null;
         String cust = getSelectedCustomer().getUsername();
-        logger.log(Level.INFO, "Ezidebit Controller -  processing GetScheduledPayments Response Recieved from ezidebit for Customer  - {0}", cust);
+        logger.log(Level.INFO, "Ezidebit Controller -  processing GetScheduledPayments Response to update components for the Customer  - {0}", cust);
         try {
-            result = (ArrayOfScheduledPayment) ft.get();
-        } catch (InterruptedException | ExecutionException ex) {
-            Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        if (result != null) {
-            List<ScheduledPayment> payList = result.getScheduledPayment();
-            if (payList != null) {
-                // 
-                List<ScheduledPaymentPojo> pojoList = new ArrayList<>();
-                int id = 1;
-                for (ScheduledPayment sp : payList) {
-                    pojoList.add(new ScheduledPaymentPojo(id, sp.getEzidebitCustomerID().getValue(), sp.isManuallyAddedPayment(), sp.getPaymentAmount(), sp.getPaymentDate().toGregorianCalendar().getTime(), sp.getPaymentReference().getValue(), sp.getYourGeneralReference().getValue(), sp.getYourSystemReference().getValue()));
-                    id++;
-                }
-                setScheduledPaymentsList(pojoList);
-                setScheduledPaymentsListFilteredItems(null);
-                setPaymentDBList(null);
-                setPaymentsDBListFilteredItems(null);
+            // if successful it should return a ArrayOfPayment Object from the getData method;
+            Object resultObject = ft.get();
+            if (resultObject.getClass() == PaymentGatewayResponse.class) {
+                pgr = (PaymentGatewayResponse) resultObject;
+
             }
+
+            if (pgr != null) {
+                result = (ArrayOfScheduledPayment) pgr.getData();
+                if (result != null) {
+                    List<ScheduledPayment> payList = result.getScheduledPayment();
+                    if (payList != null) {
+                        // 
+                        List<ScheduledPaymentPojo> pojoList = new ArrayList<>();
+                        int id = 1;
+                        for (ScheduledPayment sp : payList) {
+                            pojoList.add(new ScheduledPaymentPojo(id, sp.getEzidebitCustomerID().getValue(), sp.isManuallyAddedPayment(), sp.getPaymentAmount(), sp.getPaymentDate().toGregorianCalendar().getTime(), sp.getPaymentReference().getValue(), sp.getYourGeneralReference().getValue(), sp.getYourSystemReference().getValue()));
+                            id++;
+                        }
+                        setScheduledPaymentsList(pojoList);
+                        setScheduledPaymentsListFilteredItems(null);
+                        setPaymentDBList(null);
+                        setPaymentsDBListFilteredItems(null);
+                    }
+                }
+            }
+            // RequestContext.getCurrentInstance().update("customerslistForm1");
+            updateASingleCustomersPaymentInfo(getSelectedCustomer());
+            sendUpdatesForPaymentComponents();
+            //refreshFromDB = true;
+        } catch (InterruptedException | ExecutionException ex) {
+            Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, "processGetScheduledPayments FAILED", ex);
         }
-        // RequestContext.getCurrentInstance().update("customerslistForm1");
-        updateASingleCustomersPaymentInfo(getSelectedCustomer());
-        sendUpdatesForPaymentComponents();
-        //refreshFromDB = true;
         logger.log(Level.INFO, "processGetScheduledPayments completed");
     }
 
@@ -2122,87 +2146,45 @@ public class EziDebitPaymentGateway implements Serializable {
     }
 
     private void processAddPaymentResult(Future ft) {
-        String result = "";
+        String paymentRef;
+        boolean result = false;
+        PaymentGatewayResponse pgr = null;
         try {
-            result = (String) ft.get();
-        } catch (InterruptedException | ExecutionException | EJBException ex) {
-            Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, "processAddPaymentResult FAILED - Async Task Exception ", ex);
-        }
-        if (result == null) {
-            logger.log(Level.WARNING, "processAddPaymentResult FAILED - RESULT IS NULL ");
-            return;
-        }
-        if (result.startsWith("ERROR:")) {
-
-            String errorMessage = result.substring(6);
-            int k = errorMessage.indexOf(':');
-            String paymentRef = errorMessage.substring(0, k);
-            errorMessage = errorMessage.substring(k + 1);
-            int id = 0;
-            try {
-                id = Integer.parseInt(paymentRef);
-            } catch (NumberFormatException numberFormatException) {
-                logger.log(Level.INFO, "processAddPaymentResult FAILED - PaymentReference could not be converted to a number. It should be the primary key of teh payments table row ", result);
+            // if successful it should return a Customers Object from the getData method;
+            Object resultObject = ft.get();
+            if (resultObject.getClass() == PaymentGatewayResponse.class) {
+                pgr = (PaymentGatewayResponse) resultObject;
+                result = pgr.isOperationSuccessful();
             }
-            Payments pay = paymentsFacade.findPaymentById(id);
-            if (pay != null) {
-                if (errorMessage.contains("Your update could not be processed at this time")) {
-                    if (pay.getBankReturnCode() == null) {
-                        pay.setBankReturnCode("");
-                    }
-                    if (pay.getBankReturnCode().trim().isEmpty()) {
-                        // firts attempt at retry so set counter to 0
-                        pay.setBankReturnCode("0");
-                    } else {
-                        int retries = Integer.parseInt(pay.getBankReturnCode().trim());
-                        retries++;
-                        pay.setBankReturnCode(Integer.toString(retries));
-                        paymentsFacade.edit(pay);
-                        if (retries < 10) {
-                            retryAddPayment(pay);
-                            logger.log(Level.INFO, "processAddPaymentResult PAYMENT GATEWAY BUSY - ATTEMPTING RETRY - ", result);
-                        } else {
-                            pay.setPaymentStatus(PaymentStatus.MISSING_IN_PGW.value());
-                            paymentsFacade.edit(pay);
-                            updatePaymentLists(pay);
-                        }
-                    }
-                } else if (errorMessage.contains("This customer already has two payments on this date.")) {
-                    JsfUtil.addErrorMessage("Add Payment", "Payment ID:" + pay.getId().toString() + " for Amount:$" + pay.getPaymentAmount().toPlainString() + " on Date:" + pay.getDebitDate().toString() + " could not be added as teh customer already has two existing payments on this date!!.");
-                    paymentsFacade.remove(pay);
-                    updatePaymentLists(pay);
-                } else {
-                    pay.setPaymentStatus(PaymentStatus.MISSING_IN_PGW.value());
-                    pay.setPaymentReference(Integer.toString(id));
-                    paymentsFacade.edit(pay);
-                    updatePaymentLists(pay);
+
+            if (pgr != null) {
+                paymentRef = pgr.getTextData();
+
+                if (paymentRef == null) {
+                    logger.log(Level.WARNING, "processAddPaymentResult FAILED - RESULT IS NULL ");
+                    return;
                 }
-            } else {
-                logger.log(Level.INFO, "processAddPaymentResult FAILED - ERROR processing could not find payment id ", result);
-            }
-        } else if (result.isEmpty() == false) {
-            JsfUtil.addSuccessMessage("Add Payment", "Payment (" + result + ") submitted successfully.");
-            int id = 0;
-            try {
-                id = Integer.parseInt(result);
-            } catch (NumberFormatException numberFormatException) {
-            }
-            Payments pay = paymentsFacade.findPaymentById(id);
-            if (pay != null) {
-                pay.setPaymentStatus(PaymentStatus.SCHEDULED.value());
-                pay.setPaymentReference(Integer.toString(id));
-                paymentsFacade.edit(pay);
-                updatePaymentLists(pay);
-                // if (pay.getManuallyAddedPayment()) {
-                //     getPayments(18, 2);
-                // }
-            } else {
-                logger.log(Level.INFO, "processAddPaymentResult FAILED - could not find payment id ", result);
-            }
-        } else {
-            JsfUtil.addErrorMessage("Add Payment", "Payment Failed! Is the customer active with valid account/card details?");
-        }
 
+                int id = 0;
+                try {
+                    id = Integer.parseInt(paymentRef);
+                } catch (NumberFormatException numberFormatException) {
+                    logger.log(Level.INFO, "processAddPaymentResult FAILED - PaymentReference could not be converted to a number. It should be the primary key of teh payments table row ", result);
+                }
+                Payments pay = paymentsFacade.findPaymentById(id);
+                if (pay != null) {
+                    updatePaymentLists(pay);
+
+                } else {
+                    logger.log(Level.INFO, "processAddPaymentResult FAILED - ERROR processing could not find payment id ", paymentRef);
+                }
+
+                JsfUtil.addErrorMessage("Add Payment", "Payment Failed! Is the customer active with valid account/card details?");
+
+            }
+        } catch (InterruptedException | ExecutionException | EJBException ex) {
+            Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, "process AddPayment  FAILED - Exception ", ex);
+        }
         logger.log(Level.INFO, "processAddPaymentResult completed");
     }
 
@@ -2912,15 +2894,15 @@ public class EziDebitPaymentGateway implements Serializable {
         return props;
 
     }
+
     public void executeChangePlan(ActionEvent actionEvent) {
-logger.log(Level.INFO, "Executing Plan Change - Clear Schedule then create new schedule operations will be called..");
+        logger.log(Level.INFO, "Executing Plan Change - Clear Schedule then create new schedule operations will be called..");
         clearSchedule(actionEvent);
         createPaymentSchedule(actionEvent);
     }
 
-
     public void createPaymentSchedule(ActionEvent actionEvent) {
-        
+
         String loggedInUser = FacesContext.getCurrentInstance().getExternalContext().getRemoteUser();
         Long amount = (long) (paymentAmountInCents * (float) 100);
         Long amountLimit = paymentLimitAmountInCents * (long) 100;
