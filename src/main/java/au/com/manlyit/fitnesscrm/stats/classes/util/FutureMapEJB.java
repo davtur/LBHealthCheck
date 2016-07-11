@@ -1334,10 +1334,12 @@ public class FutureMapEJB implements Serializable {
             }
 
             if (pgr != null) {
+                //we have a response 
                 paymentRef = pgr.getTextData();
 
-                if (paymentRef == null) {
-                    logger.log(Level.WARNING, "processAddPaymentResult FAILED - RESULT IS NULL ");
+                if (paymentRef == null || paymentRef.isEmpty()) {
+                    //this should always be set and will be the primary key of teh row in the payments table
+                    logger.log(Level.WARNING, "processAddPaymentResult FAILED - RESULT IS NULL or Empty");
                     return;
                 }
                 if (result == false) {
@@ -1364,13 +1366,13 @@ public class FutureMapEJB implements Serializable {
                                 pay.setBankReturnCode(Integer.toString(retries));
                                 paymentsFacade.edit(pay);
                                 if (retries < 10) {
-                                    // retryAddPayment(pay);
+                                    
                                     startAsynchJob(sessionId, "AddPayment", paymentBean.addPayment(pay.getCustomerName(), pay.getDebitDate(), pay.getPaymentAmount().movePointRight(2).longValue(), pay.getId().toString(), "Auto Retry", getDigitalKey()));
                                     logger.log(Level.INFO, "processAddPaymentResult PAYMENT GATEWAY BUSY - ATTEMPTING RETRY - ", paymentRef);
                                 } else {
-                                    pay.setPaymentStatus(PaymentStatus.MISSING_IN_PGW.value());
+                                    pay.setPaymentStatus(PaymentStatus.REJECTED_BY_GATEWAY.value());
                                     paymentsFacade.edit(pay);
-                                    // updatePaymentLists(pay);
+                                   
                                 }
                             }
                         } else if (errorMessage.contains("This customer already has two payments on this date.")) {
@@ -1378,21 +1380,19 @@ public class FutureMapEJB implements Serializable {
                             String message = "Payment ID:" + pay.getId().toString() + " for Amount:$" + pay.getPaymentAmount().toPlainString() + " on Date:" + pay.getDebitDate().toString() + " could not be added as teh customer already has two existing payments on this date!!.";
                             sendMessage(sessionId, "Add Payment Error!", message);
 
-                            //updatePaymentLists(pay);
-                        } else {
-                            pay.setPaymentStatus(PaymentStatus.MISSING_IN_PGW.value());
-                            pay.setPaymentReference(Integer.toString(id));
-                            paymentsFacade.edit(pay);
-                            //updatePaymentLists(pay);
+                           
+                        } else{
+                        pay.setPaymentStatus(PaymentStatus.REJECTED_BY_GATEWAY.value());
+                        pay.setPaymentReference(Integer.toString(id));
+                        paymentsFacade.edit(pay);
                         }
+                        
                     } else {
                         logger.log(Level.INFO, "processAddPaymentResult FAILED - ERROR processing could not find payment id ", paymentRef);
                     }
                 } else if (paymentRef.isEmpty() == false) {
-                    JsfUtil.addSuccessMessage("Add Payment", "Payment (" + paymentRef + ") submitted successfully.");
-                    String message = "The Payment (" + paymentRef + ") was submitted successfully.";
-                    sendMessage(sessionId, "Add Payment", message);
-
+                    
+                   
                     int id = 0;
                     try {
                         id = Integer.parseInt(paymentRef);
@@ -1403,18 +1403,16 @@ public class FutureMapEJB implements Serializable {
                         pay.setPaymentStatus(PaymentStatus.SCHEDULED.value());
                         pay.setPaymentReference(Integer.toString(id));
                         paymentsFacade.edit(pay);
-                        //updatePaymentLists(pay);
-                        // if (pay.getManuallyAddedPayment()) {
-                        //     getPayments(18, 2);
-                        // }
-                    } else {
-                        logger.log(Level.INFO, "processAddPaymentResult FAILED - could not find payment id ", paymentRef);
+                     } else {
+                        logger.log(Level.INFO, "processAddPaymentResult FAILED - paymentsFacade.findPaymentById(id) failed to find the record:{0} ", paymentRef);
                     }
+                    String message = "The Payment (ref:" + paymentRef + ") was submitted successfully.";
+                    sendMessage(sessionId, "Add Payment", message);
                 } else {
-                    JsfUtil.addErrorMessage("Add Payment", "Payment Failed! Is the customer active with valid account/card details?");
+                    Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, "Add Payment Failed! The payment Reference is empty! This should not happen as its taken from the primary key of the row in teh payments table. ");
                 }
             } else {
-                String message = "The information returned by the payment gateway was empty!";
+                String message = "The information returned by the payment gateway was empty! (pgr = NULL)";
                 sendMessage(sessionId, "Add Payment Error!", message);
             }
         } catch (InterruptedException | ExecutionException | EJBException ex) {

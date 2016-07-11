@@ -377,7 +377,7 @@ public class CustomersFacade extends AbstractFacade<Customers> {
             String sqlString = databaseQuery.getSQLString();
             //This SQL will contain ? for parameters. To get the SQL translated with the arguments you need a DatabaseRecord with the parameter values.
             // String sqlString2 = databaseQuery.getTranslatedSQLString(session, recordWithValues);
-            LOGGER.log(Level.INFO, "Payment/Settlement Report SQL Query String: {0}  -----------------Records Found:{1},", new Object[]{sqlString, retList.size()});
+            LOGGER.log(Level.INFO, "CustomersFacade.findFilteredCustomers SQL Query String: {0}  -----------------Records Found:{1},", new Object[]{sqlString, retList.size()});
 
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
