@@ -80,34 +80,6 @@ public class PaymentBean implements Serializable {
         return new NonPCIService(url).getBasicHttpBindingINonPCIService();
     }
 
-    @Asynchronous
-    public Future<CustomerDetails> getCustomerDetails(Customers cust, String digitalKey) {
-
-        CustomerDetails cd = null;
-        if (cust == null || digitalKey == null) {
-            return new AsyncResult<>(cd);
-        }
-        if (cust.getId() == null || digitalKey.trim().isEmpty()) {
-            return new AsyncResult<>(cd);
-        }
-
-        LOGGER.log(Level.INFO, "Payment Bean - Running async task - Getting Customer Details {0}", cust.getUsername());
-
-        EziResponseOfCustomerDetailsTHgMB7OL customerdetails = getWs().getCustomerDetails(digitalKey, "", cust.getId().toString());
-        if (customerdetails.getError() == 0) {// any errors will be a non zero value
-
-            cd = customerdetails.getData().getValue();
-            if (cd != null) {
-                LOGGER.log(Level.INFO, "Payment Bean - Get Customer Details Response: Customer  - {0}, Ezidebit Name : {1} {2}", new Object[]{cust.getUsername(), cd.getCustomerFirstName().getValue(), cd.getCustomerName().getValue()});
-            }
-        } else {
-            LOGGER.log(Level.WARNING, "Get Customer Details Response: Error - {0}", customerdetails.getErrorMessage().getValue());
-
-        }
-        return new AsyncResult<>(cd);
-
-    }
-
     public synchronized void createCRMPaymentSchedule(Customers cust, Date scheduleStartDate, Date scheduleEndDate, char schedulePeriodType, int payDayOfWeek, int dayOfMonth, long amountInCents, int limitToNumberOfPayments, long paymentAmountLimitInCents, boolean keepManualPayments, boolean firstWeekOfMonth, boolean secondWeekOfMonth, boolean thirdWeekOfMonth, boolean fourthWeekOfMonth, String loggedInUser, String sessionId, String digitalKey, FutureMapEJB futureMap, PaymentBean payBean) {
 
         if (schedulePeriodType == 'W' || schedulePeriodType == 'F' || schedulePeriodType == 'N' || schedulePeriodType == '4') {
@@ -145,7 +117,7 @@ public class PaymentBean implements Serializable {
         }
 
         //delete all existing scheduled payments
-        List<Payments> crmPaymentList = paymentsFacade.findScheduledPaymentsByCustomer(cust);
+        List<Payments> crmPaymentList = paymentsFacade.findScheduledPaymentsByCustomer(cust, true);
         if (crmPaymentList != null) {
             LOGGER.log(Level.INFO, "createSchedule - Found {0} existing scheduled payments for {1}", new Object[]{crmPaymentList.size(), cust.getUsername()});
             for (int x = crmPaymentList.size() - 1; x > -1; x--) {
@@ -585,12 +557,12 @@ public class PaymentBean implements Serializable {
     }
 
     @Asynchronous
-    public Future<String> clearSchedule(Customers cust, boolean keepManualPayments, String loggedInUser, String digitalKey) {
+    public Future<PaymentGatewayResponse> clearSchedule(Customers cust, boolean keepManualPayments, String loggedInUser, String digitalKey) {
         // This method will remove payments that exist in the payment schedule for the given
         // customer. You can control whether all payments are deleted, or if you wish to preserve
         // any manually added payments, and delete an ongoing cyclic schedule.
+        PaymentGatewayResponse pgr;
 
-        String result = cust.getId().toString() + ",FAILED";
         String eziDebitCustomerId = ""; // use our reference instead. THis must be an empty string.
 
         String ourSystemCustomerReference = cust.getId().toString();
@@ -612,21 +584,26 @@ public class PaymentBean implements Serializable {
                 String changedFrom = "From Date:" + cust.getPaymentParameters().getPaymentPeriod();
                 String changedTo = "Cleared Schedule";
                 auditLogFacade.audit(customersFacade.findCustomerByUsername(loggedInUser), cust, "clearSchedule", auditDetails, changedFrom, changedTo);
-                result = cust.getId().toString() + ",OK";
-                return new AsyncResult<>(result);
+
+                pgr = new PaymentGatewayResponse(true, cust, "The Customers Payment Schedule was cleared successfully in the payment gateway.", "0", "");
+
+                return new AsyncResult<>(pgr);
             } else {
-                LOGGER.log(Level.WARNING, "clearSchedule Response Data value should be S ( Successful ) : Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
+                pgr = new PaymentGatewayResponse(false, null, "The Customers Payment Schedule was not cleared in the payment gateway due to an error.", eziResponse.getError().toString(), eziResponse.getErrorMessage().getValue());
+                LOGGER.log(Level.WARNING, "The Customers Payment Schedule was not cleared in the payment gateway due to an error. : Error - {0}, Message - {1}", new Object[]{eziResponse.getError().toString(), eziResponse.getErrorMessage().getValue()});
+
             }
         } else {
-            LOGGER.log(Level.WARNING, "clearSchedule Response: Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
+            pgr = new PaymentGatewayResponse(false, null, "The Customers Payment Schedule was not cleared in the payment gateway due to an error.", eziResponse.getError().toString(), eziResponse.getErrorMessage().getValue());
+            LOGGER.log(Level.WARNING, "Clear Customers Payment Schedule FAILED: Error - {0}, Message - {1}", new Object[]{eziResponse.getError().toString(), eziResponse.getErrorMessage().getValue()});
 
         }
 
-        return new AsyncResult<>(result);
+        return new AsyncResult<>(pgr);
     }
 
     @Asynchronous
-    public Future<String> deletePayment(Customers cust, Date debitDate, Long paymentAmountInCents, String paymentReference, String loggedInUser, String digitalKey) {
+    public Future<PaymentGatewayResponse> deletePayment(Customers cust, Date debitDate, Long paymentAmountInCents, String paymentReference, String loggedInUser, String digitalKey) {
         //  This method will delete a single payment from the Customer's payment schedule.
         //  It is important to note the following when deleting a payment:
 
@@ -644,12 +621,13 @@ public class PaymentBean implements Serializable {
         if (paymentAmountInCents == null) {
             paymentAmountInCents = (long) -1;
         }
+        PaymentGatewayResponse pgr = new PaymentGatewayResponse(false, null, "", "-1", "An unhandled error occurred!");
 
-        String result = "ERROR:" + paymentReference + ":";
         if (paymentReference.isEmpty() && (debitDate == null || cust == null || paymentAmountInCents < 0)) {
-            LOGGER.log(Level.WARNING, "deletePayment NULL parameter of Amount < 0. cust {0}, date {1}, Amount {2}", new Object[]{cust, debitDate, paymentAmountInCents});
-            result += "NULL parameter";
-            return new AsyncResult<>(result);
+            String eMessage = "deletePayment NULL parameter of Amount < 0. cust {0}, date {1}, Amount {2}";
+            LOGGER.log(Level.WARNING, eMessage, new Object[]{cust, debitDate, paymentAmountInCents});
+
+            return new AsyncResult<>(new PaymentGatewayResponse(false, null, "", "-1", eMessage));
         }
 
         String eziDebitCustomerId = ""; // use our reference instead. THis must be an empty string.
@@ -691,39 +669,40 @@ public class PaymentBean implements Serializable {
             if (e.getMessage() != null) {
                 errorMessage += e.getMessage();
             }
-            return new AsyncResult<>(errorMessage);
+            String eMessage = "changeCustomerStatus Response: Error - " + e.getMessage();
+            return new AsyncResult<>(new PaymentGatewayResponse(false, null, "", "-1", eMessage));
+
         }
         if (eziResponse != null) {
             if (eziResponse.getError() == 0) {// any errors will be a non zero value
                 LOGGER.log(Level.INFO, "deletePayment Response: OK Data - {0}", new Object[]{eziResponse.getData().getValue()});
                 if (eziResponse.getData().getValue().compareTo("S") == 0) {
-                    result = paymentReference;
+
                     String auditDetails = "Debit Date:" + debitDateString + ", Amount (cents): " + paymentAmountInCents.toString() + ", Payment Ref:" + paymentReference;
                     String changedFrom = "Ref:" + paymentReference;
                     String changedTo = "Deleted";
+                    pgr = new PaymentGatewayResponse(true, paymentReference, "The payment was deleted successfully. Ref. No. " + paymentReference, "-1", "");
                     try {
                         auditLogFacade.audit(customersFacade.findCustomerByUsername(loggedInUser), cust, "deletePayment", auditDetails, changedFrom, changedTo);
 
                     } catch (Exception e) {
                         LOGGER.log(Level.WARNING, "deletePayment Audit logging failed : Customer - {0}, logged In User - {1}", new Object[]{cust.getUsername(), loggedInUser});
                     }
-                    return new AsyncResult<>(result);
+                    return new AsyncResult<>(pgr);
                 } else {
                     LOGGER.log(Level.WARNING, "deletePayment Response Data value should be S ( Successful ) : Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
                 }
             } else {
                 LOGGER.log(Level.WARNING, "deletePayment Response: Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
-                String errorMessage = "ERROR:" + paymentReference + ":";
-                if (eziResponse.getErrorMessage() != null) {
-                    errorMessage += eziResponse.getErrorMessage();
-                }
-                return new AsyncResult<>(errorMessage);
+                pgr = new PaymentGatewayResponse(false, null, "The Customers Payment was not deleted in the payment gateway due to an error.", eziResponse.getError().toString(), eziResponse.getErrorMessage().getValue());
+
+                return new AsyncResult<>(pgr);
             }
         } else {
             LOGGER.log(Level.WARNING, "deletePayment - the EziResponseOfstring is  NULL ");
         }
 
-        return new AsyncResult<>(result);
+        return new AsyncResult<>(pgr);
     }
 
     /*   @Asynchronous
@@ -815,57 +794,66 @@ public class PaymentBean implements Serializable {
      return new AsyncResult<>(result);
      }*/
     @Asynchronous
-    public Future<Boolean> changeCustomerStatus(Customers cust, String newStatus, String loggedInUser, String digitalKey) {
-
+    public Future<PaymentGatewayResponse> changeCustomerStatus(Customers cust, String newStatus, String loggedInUser, String digitalKey) {
+        PaymentGatewayResponse pgr = new PaymentGatewayResponse(false, null, "", "-1", "An unhandled error occurred!");
         if (cust == null || newStatus == null || loggedInUser == null) {
             LOGGER.log(Level.WARNING, "changeCustomerStatus ABORTED because cust ==null || newStatus == null || loggedInUser == null");
-            return new AsyncResult<>(false);
+            return new AsyncResult<>(new PaymentGatewayResponse(false, null, "", "-1", "changeCustomerStatus ABORTED because cust ==null || newStatus == null || loggedInUser == null"));
         }
-
-        // note: cancelled status cannot be changed with this method. i.e. cancelled is final like deleted.
-        LOGGER.log(Level.INFO, "{2} changed customer ({0}) status to {1}", new Object[]{cust.getUsername(), newStatus, loggedInUser});
-
-        boolean result = false;
-        String eziDebitCustomerId = ""; // use our reference instead. THis must be an empty string.
-        String ourSystemCustomerReference = cust.getId().toString();
-        String oldStatus = "Does not exist in payment gateway.";
-        if (cust.getPaymentParameters() != null) {
-            oldStatus = cust.getPaymentParameters().getStatusDescription();
-        }
-        if (newStatus.compareTo("A") == 0 || newStatus.compareTo("H") == 0 || newStatus.compareTo("C") == 0) {
-            if (loggedInUser.length() > 50) {
-                loggedInUser = loggedInUser.substring(0, 50);
-                LOGGER.log(Level.WARNING, "changeCustomerStatus loggedInUser is greater than the allowed 50 characters. Truncating! to 50 chars");
+        try {
+            // note: cancelled status cannot be changed with this method. i.e. cancelled is final like deleted.
+            LOGGER.log(Level.INFO, "{2} changed customer ({0}) status to {1}", new Object[]{cust.getUsername(), newStatus, loggedInUser});
+            String eziDebitCustomerId = ""; // use our reference instead. THis must be an empty string.
+            String ourSystemCustomerReference = cust.getId().toString();
+            String oldStatus = "Does not exist in payment gateway.";
+            if (cust.getPaymentParameters() != null) {
+                oldStatus = cust.getPaymentParameters().getStatusDescription();
             }
-            EziResponseOfstring eziResponse = null;
-            try {
-                eziResponse = getWs().changeCustomerStatus(digitalKey, eziDebitCustomerId, ourSystemCustomerReference, newStatus, loggedInUser);
-            } catch (Exception e) {
-                LOGGER.log(Level.INFO, "changeCustomerStatus Response: Error - {0}, Data - {1}", e);
-                return new AsyncResult<>(result);
-            }
-            LOGGER.log(Level.INFO, "changeCustomerStatus Response: Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
-            if (eziResponse.getError() == 0) {// any errors will be a non zero value
-                if (eziResponse.getData().getValue().compareTo("S") == 0) {
-                    result = true;
-                    String auditDetails = "Changed the status for :" + cust.getUsername() + " to  " + newStatus + " from " + oldStatus;
-                    String changedFrom = "Old Status:" + oldStatus;
-                    String changedTo = "New Status:" + newStatus;
-                    auditLogFacade.audit(customersFacade.findCustomerByUsername(loggedInUser), cust, "changeCustomerStatus", auditDetails, changedFrom, changedTo);
+            if (newStatus.compareTo("A") == 0 || newStatus.compareTo("H") == 0 || newStatus.compareTo("C") == 0) {
+                if (loggedInUser.length() > 50) {
+                    loggedInUser = loggedInUser.substring(0, 50);
+                    LOGGER.log(Level.WARNING, "changeCustomerStatus loggedInUser is greater than the allowed 50 characters. Truncating! to 50 chars");
+                }
+                EziResponseOfstring eziResponse;
+                try {
+                    eziResponse = getWs().changeCustomerStatus(digitalKey, eziDebitCustomerId, ourSystemCustomerReference, newStatus, loggedInUser);
+                } catch (Exception e) {
+                    LOGGER.log(Level.WARNING, "changeCustomerStatus Response: Error - {0}", e);
+                    String eMessage = "changeCustomerStatus Response: Error - " + e.getMessage();
+                    return new AsyncResult<>(new PaymentGatewayResponse(false, null, "", "-1", eMessage));
+                }
+                LOGGER.log(Level.INFO, "changeCustomerStatus Response: Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
+                if (eziResponse.getError() == 0) {// any errors will be a non zero value
+                    if (eziResponse.getData().getValue().compareTo("S") == 0) {
 
-                    LOGGER.log(Level.INFO, "changeCustomerStatus  Successful  : ErrorCode - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
+                        String auditDetails = "Changed the status for :" + cust.getUsername() + " to  " + newStatus + " from " + oldStatus;
+                        String changedFrom = "Old Status:" + oldStatus;
+                        String changedTo = "New Status:" + newStatus;
+                        auditLogFacade.audit(customersFacade.findCustomerByUsername(loggedInUser), cust, "changeCustomerStatus", auditDetails, changedFrom, changedTo);
+                        pgr = new PaymentGatewayResponse(true, cust, auditDetails, "-1", "");
+                        LOGGER.log(Level.INFO, "changeCustomerStatus  Successful  : ErrorCode - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
+
+                    } else {
+                        LOGGER.log(Level.WARNING, "changeCustomerStatus Response Data value should be S ( Successful ) : Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
+                        pgr = new PaymentGatewayResponse(false, null, "Could not change the customer status in the payment gateway due to an error.", eziResponse.getError().toString(), eziResponse.getErrorMessage().getValue());
+
+                    }
 
                 } else {
-                    LOGGER.log(Level.WARNING, "changeCustomerStatus Response Data value should be S ( Successful ) : Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
-                }
+                    LOGGER.log(Level.WARNING, "changeCustomerStatus Response: Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
+                    pgr = new PaymentGatewayResponse(false, null, "Could not change the customer status in the payment gateway due to an error.", eziResponse.getError().toString(), eziResponse.getErrorMessage().getValue());
 
+                }
             } else {
-                LOGGER.log(Level.WARNING, "changeCustomerStatus Response: Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
+                String eMessage = "changeCustomerStatus: newStatus should be A ( Active ), H ( Hold ) or C (Cancelled)  : Error - " + newStatus;
+                LOGGER.log(Level.WARNING, eMessage);
+                pgr = new PaymentGatewayResponse(false, null, "", "-1", eMessage);
             }
-        } else {
-            LOGGER.log(Level.WARNING, "changeCustomerStatus: newStatus should be A ( Active ), H ( Hold ) or C (Cancelled)  : Error - {0}", newStatus);
+        } catch (Exception e) {
+            String eMessage = "changeCustomerStatus Caught Unhandled Error - " + e.getMessage();
+            pgr = new PaymentGatewayResponse(false, null, "", "-1", eMessage);
         }
-        return new AsyncResult<>(result);
+        return new AsyncResult<>(pgr);
     }
 
     @Asynchronous
@@ -897,7 +885,7 @@ public class PaymentBean implements Serializable {
                 result = eziResponse.getData().getValue();
                 if (result != null) {
                     LOGGER.log(Level.INFO, "Payment Bean - Get Customer Scheduled Payments Response Recieved from ezidebit for Customer  - {0}, Number of Payments : {1} ", new Object[]{cust.getUsername(), result.getScheduledPayment().size()});
-                    pgr = new PaymentGatewayResponse(true, result, "", "-1", "Updated Scheduled Payment Information was recieved from the payment gateway.");
+                    pgr = new PaymentGatewayResponse(true, result, "Updated Scheduled Payment Information was recieved from the payment gateway.", "-1", "");
                 } else {
                     LOGGER.log(Level.WARNING, "getScheduledPayments Response: Error - NULL Result ");
                     pgr = new PaymentGatewayResponse(false, null, "", "-1", "Scheduled Payment information was not recieved from the payment gateway due to an error.");
@@ -1265,7 +1253,38 @@ public class PaymentBean implements Serializable {
     }
 
     @Asynchronous
-    public synchronized Future<ArrayOfPayment> getAllPaymentsBySystemSinceDate(Date fromDate, Date endDate, boolean useSettlementDate, String digitalKey) {
+    public Future<PaymentGatewayResponse> getCustomerDetails(Customers cust, String digitalKey) {
+
+        PaymentGatewayResponse pgr = new PaymentGatewayResponse(false, null, "", "-1", "An unhandled error occurred!");
+        CustomerDetails cd = null;
+        if (cust == null || digitalKey == null) {
+            return new AsyncResult<>(new PaymentGatewayResponse(false, null, "", "-1", "The customer or digital key is NULL!"));
+        }
+        if (cust.getId() == null || digitalKey.trim().isEmpty()) {
+            return new AsyncResult<>(new PaymentGatewayResponse(false, null, "", "-1", "The customer or digital key is empty!"));
+        }
+
+        LOGGER.log(Level.INFO, "Payment Bean - Running async task - Getting Customer Details {0}", cust.getUsername());
+
+        EziResponseOfCustomerDetailsTHgMB7OL customerdetails = getWs().getCustomerDetails(digitalKey, "", cust.getId().toString());
+        if (customerdetails.getError() == 0) {// any errors will be a non zero value
+
+            cd = customerdetails.getData().getValue();
+            if (cd != null) {
+                pgr = new PaymentGatewayResponse(true, cd, "The Customers details were retrieved from the payment gateway", "0", "");
+                LOGGER.log(Level.INFO, "Payment Bean - Get Customer Details Response: Customer  - {0}, Ezidebit Name : {1} {2}", new Object[]{cust.getUsername(), cd.getCustomerFirstName().getValue(), cd.getCustomerName().getValue()});
+            }
+        } else {
+            pgr = new PaymentGatewayResponse(false, null, "The Customers details were not retrieved from the payment gateway due to an error.", customerdetails.getError().toString(), customerdetails.getErrorMessage().getValue());
+            LOGGER.log(Level.WARNING, "Get Customer Details Response: Error - {0}", customerdetails.getErrorMessage().getValue());
+
+        }
+        return new AsyncResult<>(pgr);
+
+    }
+
+    @Asynchronous
+    public synchronized Future<PaymentGatewayResponse> getAllPaymentsBySystemSinceDate(Date fromDate, Date endDate, boolean useSettlementDate, String digitalKey) {
         //  Description
         //  	  
         //  This method allows you to retrieve payment information from across Ezidebit's various
@@ -1291,36 +1310,42 @@ public class PaymentBean implements Serializable {
         //  DateTo={currentDate}
         //  will provide you with all payments that have been made to the client since the
         //  last time your system received payment information.
-        ArrayOfPayment result = new ArrayOfPayment();
+        ArrayOfPayment result;
+        PaymentGatewayResponse pgr = new PaymentGatewayResponse(false, null, "", "-1", "An unhandled error occurred!");
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         String fromDateString = ""; // The exact date on which the payment that you wish to move is scheduled to be deducted from your Customer's bank account or credit card.
-        if (fromDate != null) {
-            fromDateString = sdf.format(fromDate);
-        }
-        String toDate = sdf.format(endDate);
+        try {
+            if (fromDate != null) {
+                fromDateString = sdf.format(fromDate);
+            }
+            String toDate = sdf.format(endDate);
 
-        String dateField = "PAYMENT";
-        if (useSettlementDate == true) {
-            dateField = "SETTLEMENT";
-        }
-        LOGGER.log(Level.INFO, "getAllPaymentsBySystemSinceDate - Calling ezidebit WS, From Date {0}, To Date {1}, report Type {2}", new Object[]{fromDateString, toDate, dateField});
+            String dateField = "PAYMENT";
+            if (useSettlementDate == true) {
+                dateField = "SETTLEMENT";
+            }
+            LOGGER.log(Level.INFO, "getAllPaymentsBySystemSinceDate - Calling ezidebit WS, From Date {0}, To Date {1}, report Type {2}", new Object[]{fromDateString, toDate, dateField});
 
-        EziResponseOfArrayOfPaymentTHgMB7OL eziResponse = getWs().getPayments(digitalKey, "ALL", "ALL", "ALL", "", fromDateString, toDate, dateField, "", "");
-        if (eziResponse.getError() == 0) {// any errors will be a non zero value
-            LOGGER.log(Level.INFO, "getAllPaymentsBySystemSinceDate Response:OK - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
+            EziResponseOfArrayOfPaymentTHgMB7OL eziResponse = getWs().getPayments(digitalKey, "ALL", "ALL", "ALL", "", fromDateString, toDate, dateField, "", "");
+            if (eziResponse.getError() == 0) {// any errors will be a non zero value
+                LOGGER.log(Level.INFO, "getAllPaymentsBySystemSinceDate Response:OK - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
 
-            result = eziResponse.getData().getValue();
-            if (result.getPayment() != null) {
-                LOGGER.log(Level.INFO, "getAllPaymentsBySystemSinceDate Response: OK {0}, No of Payments in List = {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue().getPayment().size()});
+                result = eziResponse.getData().getValue();
+                if (result.getPayment() != null) {
+                    pgr = new PaymentGatewayResponse(true, result, "The Customers details were retrieved from the payment gateway", "0", "");
+                    LOGGER.log(Level.INFO, "getAllPaymentsBySystemSinceDate Response: OK {0}, No of Payments in List = {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue().getPayment().size()});
+
+                }
+
+            } else {
+                LOGGER.log(Level.WARNING, "getAllPaymentsBySystemSinceDate Response: Error - {0}, ", eziResponse.getErrorMessage().getValue());
+                pgr = new PaymentGatewayResponse(false, null, "getAllPaymentsBySystemSinceDate FAILED due to an error.", eziResponse.getError().toString(), eziResponse.getErrorMessage().getValue());
 
             }
-
-        } else {
-            LOGGER.log(Level.WARNING, "getAllPaymentsBySystemSinceDate Response: Error - {0}, ", eziResponse.getErrorMessage().getValue());
-
+        } catch (Exception e) {
+            pgr = new PaymentGatewayResponse(false, null, "getAllPaymentsBySystemSinceDate FAILED due to an error.", "-1", e.getMessage());
         }
-
-        return new AsyncResult<>(result);
+        return new AsyncResult<>(pgr);
     }
 
     @Asynchronous
@@ -1328,13 +1353,13 @@ public class PaymentBean implements Serializable {
         // paymentReference Max 50 chars. It can be search with with a wildcard in other methods. Use invoice number or other payment identifier
         LOGGER.log(Level.INFO, "running asychronous task addPayment Customer {0}, debitDate {1}, paymentAmountInCents {2}", new Object[]{cust, debitDate, paymentAmountInCents});
         PaymentGatewayResponse pgr = new PaymentGatewayResponse(false, null, paymentReference, "-1", "An unhandled error occurred!");
-        
+
         String eziDebitCustomerId = ""; // use our reference instead. THis must be an empty string.
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         try {
             String debitDateString = sdf.format(debitDate);
             String ourSystemCustomerReference = cust.getId().toString();
-            
+
             if (paymentReference.length() > 50) {
                 paymentReference = paymentReference.substring(0, 50);
                 LOGGER.log(Level.WARNING, "addPayment paymentReference is greater than the allowed 50 characters. Truncating! to 50 chars");
@@ -1361,20 +1386,20 @@ public class PaymentBean implements Serializable {
                     }
                     LOGGER.log(Level.WARNING, "addPayment Method FAILED: ", eMessage);
                 }
-                return new AsyncResult<>(new PaymentGatewayResponse(false, null,paymentReference, "-1", eMessage));
+                return new AsyncResult<>(new PaymentGatewayResponse(false, null, paymentReference, "-1", eMessage));
             }
             if (eziResponse.getError() == 0) {// any errors will be a non zero value
                 LOGGER.log(Level.INFO, "addPayment Response: Successful. Reference:{0}, Customer: {2}, Return Value: - {1}", new Object[]{paymentReference, eziResponse.getData().getValue(), cust.getUsername()});
-                
+
                 if (eziResponse.getData().getValue().compareTo("S") == 0) {
                     pgr = new PaymentGatewayResponse(true, "S", paymentReference, "0", "The payment was added to the payment gateway successfully");
                     String auditDetails = "Payment Added - Debit Date:" + debitDateString + ", Amount (cents): " + paymentAmountInCents.toString() + ", Payment Ref:" + paymentReference;
                     String changedFrom = "non-existent";
                     String changedTo = "Ref:" + paymentReference;
                     auditLogFacade.audit(customersFacade.findCustomerByUsername(loggedInUser), cust, "addPayment", auditDetails, changedFrom, changedTo);
-                    
+
                 } else {
-                    
+
                     LOGGER.log(Level.WARNING, "addPayment Response Data value should be S ( Successful ) : Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
                     String errorMessage = "ERROR:" + paymentReference + ":";
                     String errorCode = "-1";
@@ -1383,7 +1408,7 @@ public class PaymentBean implements Serializable {
                         errorCode = eziResponse.getError().toString();
                     }
                     pgr = new PaymentGatewayResponse(false, "", paymentReference, errorCode, errorMessage);
-                    
+
                 }
             } else {
                 LOGGER.log(Level.WARNING, "addPayment Response: Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
@@ -1394,7 +1419,7 @@ public class PaymentBean implements Serializable {
                     errorCode = eziResponse.getError().toString();
                 }
                 pgr = new PaymentGatewayResponse(false, "", paymentReference, errorCode, errorMessage);
-                
+
             }
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, "addPayment Response: Error:", e);
