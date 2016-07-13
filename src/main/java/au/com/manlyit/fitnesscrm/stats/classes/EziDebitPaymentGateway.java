@@ -1843,7 +1843,7 @@ public class EziDebitPaymentGateway implements Serializable {
     public void remoteCommandListener() {
         logger.log(Level.INFO, "ASYNC CALLBACK FROM FUTURE MAP BEAN. Components with updatePaymentInfo class will be updated via Request Context.");
 
-        int k = futureMap.size(sessionId);
+        int k = futureMap.getComponentsToUpdate(sessionId).size();
         if (k > 0) {
             logger.log(Level.INFO, "{0} jobs are running. Checking to see if asych jobs have finished so their results can be processed.", k);
             if (isAsyncOperationRunning() == false) {
@@ -1878,7 +1878,7 @@ public class EziDebitPaymentGateway implements Serializable {
 
             // checkIfAsyncJobsHaveFinishedAndUpdate();
         }
-        k = futureMap.size(sessionId);
+        k = futureMap.getComponentsToUpdate(sessionId).size();
         if (k == 0) {
             setAsyncOperationRunning(false);
             logger.log(Level.INFO, "Asking request context to update components.");
@@ -2013,10 +2013,10 @@ public class EziDebitPaymentGateway implements Serializable {
         logger.log(Level.INFO, "Ezidebit Controller -  processing GetPayments Response Recieved from ezidebit for Customer  - {0}", cust);
 
         recreatePaymentTableData();
-
+updatePaymentTableComponents();
         //@(.parentOfUploadPhoto)
         // RequestContext.getCurrentInstance().update("customerslistForm1");
-        RequestContext.getCurrentInstance().update("@(.updatePaymentInfo)");
+       // RequestContext.getCurrentInstance().update("@(.updatePaymentInfo)");
 
         logger.log(Level.INFO, "processGetPayments completed");
     }
@@ -2026,6 +2026,18 @@ public class EziDebitPaymentGateway implements Serializable {
         setScheduledPaymentsListFilteredItems(null);
         setPaymentDBList(null);
         setPaymentsDBListFilteredItems(null);
+    }
+
+    private void updatePaymentTableComponents() {
+        ArrayList<String> als = new ArrayList<>();
+        als.add(":tv:paymentsForm:paymentsTable2");
+        als.add(":tv:paymentsForm:customerDetailsPanel");
+        als.add(":tv:paymentsForm:paymentsTable");
+        als.add(":tv:paymentsForm:scheduledPaymentsTable");
+        als.add(":tv:paymentsForm:customersTableList");
+        als.add(":createCustomerForm:myDetailsPaymentInfo");
+        RequestContext.getCurrentInstance().update(als);
+
     }
 
     private void processGetScheduledPayments(PaymentGatewayResponse pgr) {
@@ -2046,7 +2058,9 @@ public class EziDebitPaymentGateway implements Serializable {
     }
 
     private void updatePaymentLists(Payments pay) {
+        logger.log(Level.INFO, "updatePaymentLists started for {0}", pay.getId());
         if (paymentDBList != null) {
+            logger.log(Level.INFO, "updatePaymentList  paymentDBList : {0}", pay.getId());
             List<Payments> lp = (List<Payments>) paymentDBList.getWrappedData();
             int index = lp.indexOf(pay);
             if (index == -1) {
@@ -2056,6 +2070,7 @@ public class EziDebitPaymentGateway implements Serializable {
             }
         }
         if (paymentsDBListFilteredItems != null) {
+            logger.log(Level.INFO, "updatePaymentList  paymentsDBListFilteredItems : {0}", pay.getId());
             int index = paymentsDBListFilteredItems.indexOf(pay);
             if (index == -1) {
                 paymentsDBListFilteredItems.add(pay);
@@ -2063,6 +2078,7 @@ public class EziDebitPaymentGateway implements Serializable {
                 paymentsDBListFilteredItems.set(index, pay);
             }
         }
+        logger.log(Level.INFO, "updatePaymentLists completed for {0}", pay.getId());
     }
 
     private void removeFromPaymentLists(Payments pay) {
@@ -2080,8 +2096,19 @@ public class EziDebitPaymentGateway implements Serializable {
     }
 
     private void processAddPaymentResult(PaymentGatewayResponse pgr) {
+        int id = 0;
         logger.log(Level.INFO, "processAddPaymentResult started");
-        recreatePaymentTableData();
+        try {
+            id = Integer.parseInt(pgr.getTextData());
+        } catch (NumberFormatException numberFormatException) {
+            logger.log(Level.WARNING, "processAddPaymentResult - Payment reference could not convert to a number!");
+        }
+        Payments pay = paymentsFacade.findPaymentById(id);
+        if (pay != null) {
+            updatePaymentLists(pay);
+        }
+        updatePaymentTableComponents();
+        //recreatePaymentTableData();
         logger.log(Level.INFO, "processAddPaymentResult completed");
     }
 
@@ -2237,7 +2264,21 @@ public class EziDebitPaymentGateway implements Serializable {
 
             }
         }*/
-        recreatePaymentTableData();
+        int reference = -1;
+        try {
+            reference = Integer.parseInt(pgr.getTextData());
+
+        } catch (NumberFormatException numberFormatException) {
+            logger.log(Level.WARNING, "Process deletePayment - Thepayment reference could not be converted to a number: {0}", new Object[]{pgr.getTextData()});
+        }
+        Payments pay = paymentsFacade.findPaymentById(reference);
+        if (pay != null) {
+            removeFromPaymentLists(pay);
+
+        } else {
+            logger.log(Level.WARNING, "Process deletePayment - Payment that was deleted could not be found in the our DB key={0}", new Object[]{reference});
+        }
+        updatePaymentTableComponents();
         logger.log(Level.INFO, "processDeletePayment completed");
     }
 
@@ -2348,7 +2389,7 @@ public class EziDebitPaymentGateway implements Serializable {
 
     private void processGetPaymentExchangeVersion(PaymentGatewayResponse pgr) {
         String result = "";
-       
+
         try {
             result = pgr.getTextData();
         } catch (Exception ex) {
@@ -2370,7 +2411,7 @@ public class EziDebitPaymentGateway implements Serializable {
         setCustomerDetailsHaveBeenRetrieved(true);
         logger.log(Level.INFO, "Ezidebit Controller -  processing GetCustomerDetails Response Recieved from ezidebit for Customer  - {0}", cust);
 
-       try {
+        try {
             result = (CustomerDetails) pgr.getData();
         } catch (Exception ex) {
             Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, "GetCustomerDetails", ex);

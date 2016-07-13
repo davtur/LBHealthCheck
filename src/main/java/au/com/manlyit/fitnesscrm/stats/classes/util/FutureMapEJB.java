@@ -1211,12 +1211,13 @@ public class FutureMapEJB implements Serializable {
                 logger.log(Level.INFO, "Future Map processGetPayments completed");
                 if (result == true) {
                     String message = "Payment Information has been updated.";
+                                        // send the gateway response object back to the hashmap that can be accessed by the session bean
+                    storeResponseForSessionBeenToRetrieve("GetPayments", sessionId, pgr);
+
                     sendMessage(sessionId, "Get Payments", message);
                 } else {
                     String message = "Error Code:" + pgr.getErrorCode() + " : " + pgr.getErrorMessage();
 
-                    // send the gateway response object back to the hashmap that can be accessed by the session bean
-                    storeResponseForSessionBeenToRetrieve("GetPayments", sessionId, pgr);
                     sendMessage(sessionId, "Get Payments Error", message);
 
                 }
