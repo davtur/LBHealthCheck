@@ -15,6 +15,7 @@ public class PaymentGatewayResponse {
     private String textData;
     private String errorCode;
     private String errorMessage;
+    private String operationName;
     private boolean operationSuccessful;
     
     public PaymentGatewayResponse(boolean isOperationSuccessful,Object data,String textData,String errorCode,String errorMessage){
@@ -23,6 +24,7 @@ public class PaymentGatewayResponse {
         this.errorCode = errorCode;
         this.errorMessage = errorMessage;
         this.operationSuccessful = isOperationSuccessful;
+        
     }
 
     /**
@@ -93,6 +95,20 @@ public class PaymentGatewayResponse {
      */
     public void setTextData(String textData) {
         this.textData = textData;
+    }
+
+    /**
+     * @return the operationName
+     */
+    public String getOperationName() {
+        return operationName;
+    }
+
+    /**
+     * @param operationName the operationName to set
+     */
+    public void setOperationName(String operationName) {
+        this.operationName = operationName;
     }
     
     
