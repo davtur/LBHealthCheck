@@ -12,6 +12,7 @@ import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import au.com.manlyit.fitnesscrm.stats.db.Payments;
 import au.com.manlyit.fitnesscrm.stats.webservices.ScheduledPayment;
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -59,10 +60,38 @@ public class PaymentsFacade extends AbstractFacade<Payments> {
         super(Payments.class);
     }
 
+    /*
+    
+    
+    
+
+The ID is only guaranteed to be generated at flush time. Persisting an entity only makes it "attached" to the persistence context. So, either flush the entity manager explicitely:
+
+em.persist(abc);
+em.flush();
+return abc.getId();
+or return the entity itself rather than its ID. When the transaction ends, the flush will happen, and users of the entity outside of the transaction will thus see the generated ID in the entity.
+
+@Override
+public ABC addNewABC(ABC abc) {
+    abcDao.insertABC(abc);
+    return abc;
+}
+
+     */
     public void createAndFlush(Payments entity) {
         getEntityManager().persist(entity);
         getEntityManager().flush();
-        String message = "Entity Created: " + entity.toString();
+        String message = "Payment Entity CREATED and flushed  to database: " + entity.getId() +"" + new SimpleDateFormat("dd/MM/yy HH:mm:ss.SSS").format(new Date());
+ 
+        logger.log(Level.INFO, message);
+
+    }
+
+    public void editAndFlush(Payments entity) {
+        getEntityManager().merge(entity);
+        getEntityManager().flush();
+       String message = "Payment Entity MERGED and flushed  to database: " + entity.getId() +"" + new SimpleDateFormat("dd/MM/yy HH:mm:ss.SSS").format(new Date());
         logger.log(Level.INFO, message);
 
     }
@@ -134,7 +163,7 @@ public class PaymentsFacade extends AbstractFacade<Payments> {
             }
 
         } catch (Exception e) {
-            logger.log(Level.INFO, "findLastSuccessfulPayment error customer:{0} " + customer, e);
+            logger.log(Level.WARNING, "findLastSuccessfulPayment error customer:{0} " + customer, e);
         }
         return cm;
     }
@@ -164,7 +193,7 @@ public class PaymentsFacade extends AbstractFacade<Payments> {
         return cm;
     }
 
-    public Payments findPaymentById(int id) {
+    public Payments findPaymentById(int id,boolean bypassCache) {
         Payments cm = null;
         try {
             CriteriaBuilder cb = em.getCriteriaBuilder();
@@ -175,6 +204,9 @@ public class PaymentsFacade extends AbstractFacade<Payments> {
             cq.where(cb.equal(payId, id));
 
             TypedQuery<Payments> q = em.createQuery(cq);
+            if (bypassCache) {
+                q.setHint("javax.persistence.cache.retrieveMode", "BYPASS");
+            }
             List<Payments> pList = q.getResultList();
             if (pList != null) {
                 if (pList.size() > 0) {

@@ -1841,7 +1841,7 @@ public class EziDebitPaymentGateway implements Serializable {
     }
 
     public void remoteCommandListener() {
-        logger.log(Level.INFO, "ASYNC CALLBACK FROM FUTURE MAP BEAN. Components with updatePaymentInfo class will be updated via Request Context.");
+        logger.log(Level.INFO, "MESSAGE RECIEVED FROM FUTURE MAP BEAN. Checking for updates to process.");
 
         int k = futureMap.getComponentsToUpdate(sessionId).size();
         if (k > 0) {
@@ -1881,7 +1881,7 @@ public class EziDebitPaymentGateway implements Serializable {
         k = futureMap.getComponentsToUpdate(sessionId).size();
         if (k == 0) {
             setAsyncOperationRunning(false);
-            logger.log(Level.INFO, "Asking request context to update components.");
+            //logger.log(Level.INFO, "Asking request context to update components.");
 
             //ArrayList<String> componentsToUpdate = new ArrayList<>();
             //componentsToUpdate.add(":tv:paymentsForm:progressBarPanel");
@@ -1892,12 +1892,12 @@ public class EziDebitPaymentGateway implements Serializable {
             //componentsToUpdate.add("tv:paymentsForm");
             // requestContext.execute("PF('paymentPoller').stop();");
             //pushComponentUpdateBean.sendMessage("Notification", "Payment Gateway Request Completed");
-            logger.log(Level.INFO, "All asych jobs have finished.");
+            logger.log(Level.INFO, "All ipdates from teh future map have been pocessed.");
         }
 
         if (isRefreshIFrames() == true) {
             //RequestContext.getCurrentInstance().update("@(.updatePaymentInfo)");
-            //RequestContext.getCurrentInstance().update("editPaymentiFrameForm");
+            RequestContext.getCurrentInstance().update("\\:iFrameForm");
             //RequestContext.getCurrentInstance().update("createCustomerForm");
             logger.log(Level.INFO, "Asking Request Context to update IFrame forms.");
             setRefreshIFrames(false);
@@ -2029,14 +2029,17 @@ updatePaymentTableComponents();
     }
 
     private void updatePaymentTableComponents() {
-        ArrayList<String> als = new ArrayList<>();
-        als.add(":tv:paymentsForm:paymentsTable2");
-        als.add(":tv:paymentsForm:customerDetailsPanel");
-        als.add(":tv:paymentsForm:paymentsTable");
-        als.add(":tv:paymentsForm:scheduledPaymentsTable");
-        als.add(":tv:paymentsForm:customersTableList");
-        als.add(":createCustomerForm:myDetailsPaymentInfo");
-        RequestContext.getCurrentInstance().update(als);
+        /*ArrayList<String> als = new ArrayList<>();
+        als.add("\\:tv\\:paymentsForm\\:paymentsTable2");
+        als.add("\\:tv\\:paymentsForm\\:customerDetailsPanel");
+        als.add("\\:tv\\:paymentsForm\\:paymentsTable");
+        als.add("\\:tv\\:paymentsForm\\:scheduledPaymentsTable");
+        als.add("\\:tv\\:paymentsForm\\:customersTableList");
+        als.add("\\:createCustomerForm\\:myDetailsPaymentInfo");
+        RequestContext.getCurrentInstance().update(als);*/
+        //RequestContext.getCurrentInstance().update("@(.updatePaymentInfo)");
+        RequestContext.getCurrentInstance().execute("updatePaymentForms();");
+        logger.log(Level.INFO, "RequestContext - Update Components with class updatePaymentInfo ");
 
     }
 
@@ -2103,11 +2106,13 @@ updatePaymentTableComponents();
         } catch (NumberFormatException numberFormatException) {
             logger.log(Level.WARNING, "processAddPaymentResult - Payment reference could not convert to a number!");
         }
-        Payments pay = paymentsFacade.findPaymentById(id);
+        Payments pay = paymentsFacade.findPaymentById(id,false);
         if (pay != null) {
             updatePaymentLists(pay);
+        }else{
+           logger.log(Level.WARNING, "processAddPaymentResult - Payment could not be found with reference {0}",id); 
         }
-        updatePaymentTableComponents();
+       // updatePaymentTableComponents();
         //recreatePaymentTableData();
         logger.log(Level.INFO, "processAddPaymentResult completed");
     }
@@ -2271,7 +2276,8 @@ updatePaymentTableComponents();
         } catch (NumberFormatException numberFormatException) {
             logger.log(Level.WARNING, "Process deletePayment - Thepayment reference could not be converted to a number: {0}", new Object[]{pgr.getTextData()});
         }
-        Payments pay = paymentsFacade.findPaymentById(reference);
+        //Payments pay = paymentsFacade.findPaymentById(reference,false);
+        Payments pay = (Payments) pgr.getData();
         if (pay != null) {
             removeFromPaymentLists(pay);
 
@@ -2901,7 +2907,7 @@ updatePaymentTableComponents();
              startAsynchJob("CreateSchedule", paymentBean.createSchedule(selectedCustomer, paymentDebitDate, spt, paymentDayOfWeek, paymentDayOfMonth, paymentFirstWeekOfMonth, paymentSecondWeekOfMonth, paymentThirdWeekOfMonth, paymentFourthWeekOfMonth, amount, paymentLimitToNumberOfPayments, amountLimit, paymentKeepManualPayments, loggedInUser, getDigitalKey()));
              */
             JsfUtil.addSuccessMessage("Sending CreateSchedule Request to Payment Gateway.");
-            startAsynchJob("GetScheduledPayments", paymentBean.getScheduledPayments(selectedCustomer, paymentDebitDate, endCal.getTime(), getDigitalKey()));
+            //startAsynchJob("GetScheduledPayments", paymentBean.getScheduledPayments(selectedCustomer, paymentDebitDate, endCal.getTime(), getDigitalKey()));
         } else {
             logger.log(Level.WARNING, "Logged in user is null. Add Single Payment aborted.");
         }
@@ -3009,7 +3015,7 @@ updatePaymentTableComponents();
                         paymentsFacade.edit(p);
                         updatePaymentLists(p);
                         if (keepManual == true) {
-                            startAsynchJob("DeletePayment", paymentBean.deletePayment(cust, null, null, ref, loggedInUser, getDigitalKey()));
+                            startAsynchJob("DeletePayment", paymentBean.deletePayment(cust, null, null, p, loggedInUser, getDigitalKey()));
                         }
                     }
                 }
@@ -3059,7 +3065,7 @@ updatePaymentTableComponents();
             String loggedInUser = FacesContext.getCurrentInstance().getExternalContext().getRemoteUser();
             Double amount = selectedScheduledPayment.getPaymentAmount().floatValue() * (double) 100;
             if (loggedInUser != null) {
-                Payments pay = paymentsFacade.findPaymentById(selectedScheduledPayment.getId());
+                Payments pay = paymentsFacade.findPaymentById(selectedScheduledPayment.getId(),false);
 
                 if (pay != null) {
                     if (pay.getPaymentStatus().contentEquals(PaymentStatus.SCHEDULED.value()) || pay.getPaymentStatus().contentEquals(PaymentStatus.DELETE_REQUESTED.value()) || pay.getPaymentStatus().contentEquals(PaymentStatus.MISSING_IN_PGW.value())) {
@@ -3075,7 +3081,7 @@ updatePaymentTableComponents();
                             pay.setPaymentStatus(PaymentStatus.DELETE_REQUESTED.value());
                             paymentsFacade.edit(pay);
                             updatePaymentLists(pay);
-                            startAsynchJob("DeletePayment", paymentBean.deletePayment(selectedCustomer, selectedScheduledPayment.getDebitDate(), amount.longValue(), selectedScheduledPayment.getId().toString(), loggedInUser, getDigitalKey()));
+                            startAsynchJob("DeletePayment", paymentBean.deletePayment(selectedCustomer, selectedScheduledPayment.getDebitDate(), amount.longValue(), selectedScheduledPayment, loggedInUser, getDigitalKey()));
                         }
 
                     }

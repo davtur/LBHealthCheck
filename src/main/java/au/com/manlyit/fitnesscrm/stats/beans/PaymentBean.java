@@ -132,7 +132,7 @@ public class PaymentBean implements Serializable {
                     p.setPaymentStatus(PaymentStatus.DELETE_REQUESTED.value());
                     paymentsFacade.edit(p);
 
-                    AsyncJob aj = new AsyncJob("DeletePayment", payBean.deletePayment(cust, null, null, ref, loggedInUser, digitalKey));
+                    AsyncJob aj = new AsyncJob("DeletePayment", payBean.deletePayment(cust, null, null, p, loggedInUser, digitalKey));
                     futureMap.put(sessionId, aj);
                     try {
                         Thread.sleep(100);// the payment gateway has some concurrency throttling so we don't want to exceed our number of txns per second.
@@ -358,7 +358,7 @@ public class PaymentBean implements Serializable {
                 long amountInCents = pay.getPaymentAmount().movePointRight(2).longValue();// convert to cents
                 String newPaymentID = pay.getId().toString();
                 LOGGER.log(Level.INFO, "retryDeletePayment for customer {0} with paymentID: {1}", new Object[]{cust.getUsername(), newPaymentID});
-                AsyncJob aj = new AsyncJob("DeletePayment", payBean.deletePayment(cust, debitDate, amountInCents, newPaymentID, user, digitalKey));
+                AsyncJob aj = new AsyncJob("DeletePayment", payBean.deletePayment(cust, debitDate, amountInCents, pay, user, digitalKey));
                 futureMap.put(sessionId, aj);
             } catch (Exception e) {
                 LOGGER.log(Level.WARNING, "retryDeletePayment failed due to exception:", e);
@@ -381,7 +381,7 @@ public class PaymentBean implements Serializable {
                 long amountInCents = pay.getPaymentAmount().movePointRight(2).longValue();// convert to cents
                 String newPaymentID = pay.getId().toString();
                 LOGGER.log(Level.INFO, "retryAddNewPayment for customer {0} with paymentID: {1}", new Object[]{cust.getUsername(), newPaymentID});
-                AsyncJob aj = new AsyncJob("AddPayment", payBean.addPayment(cust, debitDate, amountInCents, newPaymentID, user, digitalKey));
+                AsyncJob aj = new AsyncJob("AddPayment", payBean.addPayment(cust, debitDate, amountInCents, pay, user, digitalKey));
                 futureMap.put(sessionId, aj);
             } catch (Exception e) {
                 LOGGER.log(Level.WARNING, "retryAddNewPayment failed due to exception:", e);
@@ -399,7 +399,7 @@ public class PaymentBean implements Serializable {
         if (user != null) {
 
             try {
-                Payments newPayment = new Payments(0);
+                Payments newPayment = new Payments(-1);
                 newPayment.setDebitDate(debitDate);
                 newPayment.setCreateDatetime(new Date());
                 newPayment.setLastUpdatedDatetime(new Date());
@@ -414,12 +414,17 @@ public class PaymentBean implements Serializable {
                 newPayment.setPaymentDate(debitDate);// we can use this timestamp to reference bookings with booking date as they will be identical
                 paymentsFacade.createAndFlush(newPayment);
 
-                String newPaymentID = newPayment.getId().toString();
-                newPayment.setPaymentReference(newPaymentID);
-                paymentsFacade.edit(newPayment);
-                LOGGER.log(Level.INFO, "New Payment Created for customer {0} with paymentID: {1}", new Object[]{cust.getUsername(), newPaymentID});
-                AsyncJob aj = new AsyncJob("AddPayment", payBean.addPayment(cust, debitDate, amountInCents, newPaymentID, user, digitalKey));
-                futureMap.put(sessionId, aj);
+                int newId = newPayment.getId();
+                if (newId != -1) {
+                    String newPaymentID = Integer.toString(newId);
+                    newPayment.setPaymentReference(newPaymentID);
+                    paymentsFacade.editAndFlush(newPayment);
+                    LOGGER.log(Level.INFO, "New Payment Created for customer {0} with paymentID: {1}, time: {2}", new Object[]{cust.getUsername(), newPaymentID, new SimpleDateFormat("dd/MM/yy HH:mm:ss.SSS").format(new Date())});
+                    AsyncJob aj = new AsyncJob("AddPayment", payBean.addPayment(cust, debitDate, amountInCents, newPayment, user, digitalKey));
+                    futureMap.put(sessionId, aj);
+                } else {
+                    LOGGER.log(Level.SEVERE, "Could not get an id from a newly persisted payment. Possible JPA caching issues. {0} ", new Object[]{cust.getUsername(),});
+                }
 
             } catch (Exception e) {
                 LOGGER.log(Level.WARNING, "Add Single Payment failed due to exception:", e);
@@ -603,7 +608,7 @@ public class PaymentBean implements Serializable {
     }
 
     @Asynchronous
-    public Future<PaymentGatewayResponse> deletePayment(Customers cust, Date debitDate, Long paymentAmountInCents, String paymentReference, String loggedInUser, String digitalKey) {
+    public Future<PaymentGatewayResponse> deletePayment(Customers cust, Date debitDate, Long paymentAmountInCents, Payments payment, String loggedInUser, String digitalKey) {
         //  This method will delete a single payment from the Customer's payment schedule.
         //  It is important to note the following when deleting a payment:
 
@@ -615,19 +620,22 @@ public class PaymentBean implements Serializable {
         //  If you provide values for DebitDate and PaymentAmountInCents and there is more
         //  than one payment for PaymentAmountInCents scheduled on DebitDate, then only
         //  one of the payments will be deleted.
-        if (paymentReference == null) {
-            paymentReference = "";
-        }
+        String paymentReference = "";
+        
         if (paymentAmountInCents == null) {
             paymentAmountInCents = (long) -1;
         }
-        PaymentGatewayResponse pgr = new PaymentGatewayResponse(false, null, "", "-1", "An unhandled error occurred!");
+        if (payment != null) {
+            paymentReference = payment.getId().toString();
+        }
+
+        PaymentGatewayResponse pgr = new PaymentGatewayResponse(false, payment, paymentReference, "-1", "An unhandled error occurred!");
 
         if (paymentReference.isEmpty() && (debitDate == null || cust == null || paymentAmountInCents < 0)) {
             String eMessage = "deletePayment NULL parameter of Amount < 0. cust {0}, date {1}, Amount {2}";
             LOGGER.log(Level.WARNING, eMessage, new Object[]{cust, debitDate, paymentAmountInCents});
 
-            return new AsyncResult<>(new PaymentGatewayResponse(false, null, "", "-1", eMessage));
+            return new AsyncResult<>(new PaymentGatewayResponse(false, payment, paymentReference, "-1", eMessage));
         }
 
         String eziDebitCustomerId = ""; // use our reference instead. THis must be an empty string.
@@ -670,7 +678,7 @@ public class PaymentBean implements Serializable {
                 errorMessage += e.getMessage();
             }
             String eMessage = "changeCustomerStatus Response: Error - " + e.getMessage();
-            return new AsyncResult<>(new PaymentGatewayResponse(false, null, "", "-1", eMessage));
+            return new AsyncResult<>(new PaymentGatewayResponse(false, payment, paymentReference, "-1", eMessage));
 
         }
         if (eziResponse != null) {
@@ -681,7 +689,7 @@ public class PaymentBean implements Serializable {
                     String auditDetails = "Debit Date:" + debitDateString + ", Amount (cents): " + paymentAmountInCents.toString() + ", Payment Ref:" + paymentReference;
                     String changedFrom = "Ref:" + paymentReference;
                     String changedTo = "Deleted";
-                    pgr = new PaymentGatewayResponse(true, paymentReference, "The payment was deleted successfully. Ref. No. " + paymentReference, "-1", "");
+                    pgr = new PaymentGatewayResponse(true, payment,  paymentReference, "-1", "");
                     try {
                         auditLogFacade.audit(customersFacade.findCustomerByUsername(loggedInUser), cust, "deletePayment", auditDetails, changedFrom, changedTo);
 
@@ -694,7 +702,7 @@ public class PaymentBean implements Serializable {
                 }
             } else {
                 LOGGER.log(Level.WARNING, "deletePayment Response: Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
-                pgr = new PaymentGatewayResponse(false, null, "The Customers Payment was not deleted in the payment gateway due to an error.", eziResponse.getError().toString(), eziResponse.getErrorMessage().getValue());
+                pgr = new PaymentGatewayResponse(false, payment, paymentReference, eziResponse.getError().toString(), eziResponse.getErrorMessage().getValue());
 
                 return new AsyncResult<>(pgr);
             }
@@ -1349,10 +1357,11 @@ public class PaymentBean implements Serializable {
     }
 
     @Asynchronous
-    public Future<PaymentGatewayResponse> addPayment(Customers cust, Date debitDate, Long paymentAmountInCents, String paymentReference, String loggedInUser, String digitalKey) {
+    public Future<PaymentGatewayResponse> addPayment(Customers cust, Date debitDate, Long paymentAmountInCents, Payments payment, String loggedInUser, String digitalKey) {
         // paymentReference Max 50 chars. It can be search with with a wildcard in other methods. Use invoice number or other payment identifier
         LOGGER.log(Level.INFO, "running asychronous task addPayment Customer {0}, debitDate {1}, paymentAmountInCents {2}", new Object[]{cust, debitDate, paymentAmountInCents});
-        PaymentGatewayResponse pgr = new PaymentGatewayResponse(false, null, paymentReference, "-1", "An unhandled error occurred!");
+        String paymentReference = payment.getId().toString();
+        PaymentGatewayResponse pgr = new PaymentGatewayResponse(false, payment, paymentReference, "-1", "An unhandled error occurred!");
 
         String eziDebitCustomerId = ""; // use our reference instead. THis must be an empty string.
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
@@ -1386,13 +1395,13 @@ public class PaymentBean implements Serializable {
                     }
                     LOGGER.log(Level.WARNING, "addPayment Method FAILED: ", eMessage);
                 }
-                return new AsyncResult<>(new PaymentGatewayResponse(false, null, paymentReference, "-1", eMessage));
+                return new AsyncResult<>(new PaymentGatewayResponse(false, payment, paymentReference, "-1", eMessage));
             }
             if (eziResponse.getError() == 0) {// any errors will be a non zero value
                 LOGGER.log(Level.INFO, "addPayment Response: Successful. Reference:{0}, Customer: {2}, Return Value: - {1}", new Object[]{paymentReference, eziResponse.getData().getValue(), cust.getUsername()});
 
                 if (eziResponse.getData().getValue().compareTo("S") == 0) {
-                    pgr = new PaymentGatewayResponse(true, "S", paymentReference, "0", "The payment was added to the payment gateway successfully");
+                    pgr = new PaymentGatewayResponse(true, payment, paymentReference, "0", "The payment was added to the payment gateway successfully");
                     String auditDetails = "Payment Added - Debit Date:" + debitDateString + ", Amount (cents): " + paymentAmountInCents.toString() + ", Payment Ref:" + paymentReference;
                     String changedFrom = "non-existent";
                     String changedTo = "Ref:" + paymentReference;
@@ -1407,7 +1416,7 @@ public class PaymentBean implements Serializable {
                         errorMessage += eziResponse.getErrorMessage();
                         errorCode = eziResponse.getError().toString();
                     }
-                    pgr = new PaymentGatewayResponse(false, "", paymentReference, errorCode, errorMessage);
+                    pgr = new PaymentGatewayResponse(false, payment, paymentReference, errorCode, errorMessage);
 
                 }
             } else {
@@ -1418,7 +1427,7 @@ public class PaymentBean implements Serializable {
                     errorMessage += eziResponse.getErrorMessage();
                     errorCode = eziResponse.getError().toString();
                 }
-                pgr = new PaymentGatewayResponse(false, "", paymentReference, errorCode, errorMessage);
+                pgr = new PaymentGatewayResponse(false, payment, paymentReference, errorCode, errorMessage);
 
             }
         } catch (Exception e) {

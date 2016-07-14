@@ -115,7 +115,7 @@
                                      <f:setPropertyActionListener value="#{item}" target="#{configMapController.selected}" />
                                  </p:commandButton>                        
                                  <h:outputText value=" "/>-->
-                            <p:commandButton rendered="#{configMapController.isUserInRole('ADMIN')}"  update="@form" value="#{configMapController.getKey('ListConfigMapDestroyLink')}">
+                            <p:commandButton rendered="#{configMapController.isUserInRole('ADMIN')}"  update=":listForm1" value="#{configMapController.getKey('ListConfigMapDestroyLink')}">
                                 <f:setPropertyActionListener value="#{item}" target="#{configMapController.selectedForDeletion}" />
                                
                             </p:commandButton>                        

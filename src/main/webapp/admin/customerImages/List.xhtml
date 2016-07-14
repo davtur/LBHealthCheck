@@ -71,7 +71,7 @@
                             </p:commandButton>
 
                             <h:outputText value=" "/>
-                            <p:commandButton rendered="#{customerImagesController.isUserInRole('ADMIN')}" update="@form"  value="#{configMapController.getKey('ListCustomerImagesDestroyLink')}">
+                            <p:commandButton rendered="#{customerImagesController.isUserInRole('ADMIN')}" update=":listCustomerImagesForm1"  value="#{configMapController.getKey('ListCustomerImagesDestroyLink')}">
                                 <f:setPropertyActionListener value="#{item}" target="#{customerImagesController.selectedForDeletion}" />
                             </p:commandButton>
                         </p:column>

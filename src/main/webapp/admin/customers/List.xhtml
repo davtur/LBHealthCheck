@@ -85,7 +85,7 @@
                                             <p:ajax event="change"   update=":tv:customerslistForm1"  /> 
                                         </p:selectManyCheckbox>
                                         <p:selectBooleanCheckbox id="showNonUsers"   value="#{customersController.showNonUsers}" >  
-                                            <p:ajax update="@form"   />  
+                                            <p:ajax update=":customerslistForm1"   />  
                                         </p:selectBooleanCheckbox> 
                                         <p:outputLabel  value="TRAINERS" for="showNonUsers"/>
                                     </div>

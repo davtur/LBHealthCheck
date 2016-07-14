@@ -27,8 +27,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Serializable;
+import static java.lang.Thread.sleep;
 import java.math.BigDecimal;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -143,7 +145,7 @@ public class FutureMapEJB implements Serializable {
 
     }
 
-    @PostConstruct
+ /*   @PostConstruct
     private void applicationSetup() {
         logger.log(Level.INFO, "Application Setup Running");
         try {
@@ -153,7 +155,7 @@ public class FutureMapEJB implements Serializable {
             logger.log(Level.SEVERE, " @PostConstruct Future Map - applicationSetup(). Exception in sanityCheckCustomersForDefaultItems: ", e);
         }
         logger.log(Level.INFO, "Application Setup Completed");
-    }
+    }*/
 
     /**
      * @return the FUTUREMAP_INTERNALID
@@ -496,7 +498,6 @@ public class FutureMapEJB implements Serializable {
                                         fmap.remove(x);
                                         logger.log(Level.INFO, "SessionId {0} async job {1} has timed out ({2} seconds )  and been cancelled.", new Object[]{key, sessionId, TIMEOUT_SECONDS});
                                     }*/
-
                                 }
                             } catch (Exception e) {
                                 logger.log(Level.SEVERE, "checkRunningJobsAndNotifyIfComplete,  {0} async jobs for sessionId {1} have finished.Exception {2}", new Object[]{Integer.toString(y), sessionId, e});
@@ -613,7 +614,7 @@ public class FutureMapEJB implements Serializable {
                                     } catch (InterruptedException ex) {
                                         Logger.getLogger(FutureMapEJB.class.getName()).log(Level.SEVERE, "Thread Sleep interrupted", ex);
                                     }
-                                    paymentBean.addPayment(cust, crmPay.getDebitDate(), amountLong, crmPay.getPaymentReference(), cust.getUsername(), getDigitalKey());
+                                    paymentBean.addPayment(cust, crmPay.getDebitDate(), amountLong, crmPay, cust.getUsername(), getDigitalKey());
 
                                 }
 
@@ -993,7 +994,7 @@ public class FutureMapEJB implements Serializable {
                             if (paymentReference.contains("-") == false && paymentReference.length() > 0) {
                                 try {
                                     paymentRefInt = Integer.parseInt(paymentReference);
-                                    crmPay = paymentsFacade.findPaymentById(paymentRefInt);
+                                    crmPay = paymentsFacade.findPaymentById(paymentRefInt, false);
                                     if (crmPay != null) {
                                         validReference = true;
                                     }
@@ -1155,7 +1156,7 @@ public class FutureMapEJB implements Serializable {
                                             if (paymentReference.contains("-") == false && paymentReference.length() > 0) {
                                                 try {
                                                     paymentRefInt = Integer.parseInt(paymentReference);
-                                                    crmPay = paymentsFacade.findPaymentById(paymentRefInt);
+                                                    crmPay = paymentsFacade.findPaymentById(paymentRefInt, false);
                                                     if (crmPay != null) {
                                                         validReference = true;
                                                     }
@@ -1211,7 +1212,7 @@ public class FutureMapEJB implements Serializable {
                 logger.log(Level.INFO, "Future Map processGetPayments completed");
                 if (result == true) {
                     String message = "Payment Information has been updated.";
-                                        // send the gateway response object back to the hashmap that can be accessed by the session bean
+                    // send the gateway response object back to the hashmap that can be accessed by the session bean
                     storeResponseForSessionBeenToRetrieve("GetPayments", sessionId, pgr);
 
                     sendMessage(sessionId, "Get Payments", message);
@@ -1276,11 +1277,16 @@ public class FutureMapEJB implements Serializable {
                             if (cust != null) {
                                 logger.log(Level.INFO, "Future Map processGetScheduledPayments. Processing {0} payments for customer {1}.", new Object[]{payList.size(), cust.getUsername()});
                                 for (ScheduledPayment pay : payList) {
-                                    if (customerRef.compareTo(pay.getYourSystemReference().getValue().trim()) != 0) {
+                                    int paymentCustRef;
+                                    try {
+                                        paymentCustRef = Integer.parseInt(pay.getYourSystemReference().getValue());
+                                    } catch (NumberFormatException numberFormatException) {
+                                        paymentCustRef = -1;
+                                    }
+                                    if (custId != paymentCustRef) {
                                         logger.log(Level.WARNING, "Future Map processGetScheduledPayments . The list being processed contains multiple customers.It should only contain one for this method. Aborting.");
                                         abort = true;
                                     }
-
                                 }
                                 if (abort == false) {
                                     for (ScheduledPayment pay : payList) {
@@ -1288,7 +1294,7 @@ public class FutureMapEJB implements Serializable {
                                         int id = -1;
                                         try {
                                             id = Integer.parseInt(pay.getPaymentReference().getValue());
-                                            crmPay = paymentsFacade.findPaymentById(id);
+                                            crmPay = paymentsFacade.findPaymentById(id, false);
                                         } catch (NumberFormatException numberFormatException) {
                                             logger.log(Level.INFO, "Future Map processGetScheduledPayments  - found a payment without a valid reference", id);
                                         }
@@ -1322,7 +1328,7 @@ public class FutureMapEJB implements Serializable {
                                                 } catch (Exception e) {
                                                     logger.log(Level.WARNING, "Arithemtic error.");
                                                 }
-                                                paymentBean.deletePayment(cust, crmPay.getDebitDate(), amountLong, "", cust.getUsername(), getDigitalKey());
+                                                paymentBean.deletePayment(cust, crmPay.getDebitDate(), amountLong, null, cust.getUsername(), getDigitalKey());
                                                 try {
                                                     Thread.sleep(250);
 
@@ -1330,7 +1336,7 @@ public class FutureMapEJB implements Serializable {
                                                     Logger.getLogger(FutureMapEJB.class
                                                             .getName()).log(Level.SEVERE, "Thread Sleep interrupted", ex);
                                                 }
-                                                paymentBean.addPayment(cust, crmPay.getDebitDate(), amountLong, crmPay.getPaymentReference(), cust.getUsername(), getDigitalKey());
+                                                paymentBean.addPayment(cust, crmPay.getDebitDate(), amountLong, crmPay, cust.getUsername(), getDigitalKey());
                                             }
                                         }
 
@@ -1636,6 +1642,7 @@ public class FutureMapEJB implements Serializable {
 
         String paymentRef = null;
         boolean result = false;
+        Payments pay = null;
         String message = "The delete payment operation failed!.";
         logger.log(Level.INFO, "FutureMap - processAddPaymentResult started");
         PaymentGatewayResponse pgr = null;
@@ -1648,6 +1655,7 @@ public class FutureMapEJB implements Serializable {
                     result = pgr.isOperationSuccessful();
                     //we have a response 
                     paymentRef = pgr.getTextData();
+                     pay = (Payments) pgr.getData();
                 }
             }
 
@@ -1664,9 +1672,9 @@ public class FutureMapEJB implements Serializable {
                     reference = Integer.parseInt(paymentRef);
 
                 } catch (NumberFormatException numberFormatException) {
-                    logger.log(Level.WARNING, "Process deletePayment - Thepayment reference could not be converted to a number: {0}", new Object[]{result});
+                    logger.log(Level.WARNING, "Process deletePayment - Thepayment reference could not be converted to a number: {0}", new Object[]{paymentRef});
                 }
-                Payments pay = paymentsFacade.findPaymentById(reference);
+                //Payments pay = paymentsFacade.findPaymentById(reference, false);
                 if (pay != null) {
                     //removeFromPaymentLists(pay);
                     paymentsFacade.remove(pay);
@@ -1691,7 +1699,7 @@ public class FutureMapEJB implements Serializable {
                 } catch (NumberFormatException numberFormatException) {
                     logger.log(Level.WARNING, "Process deletePayment  FAILED - PaymentReference could not be converted to a number. It should be the primary key of the payments table row ", result);
                 }
-                Payments pay = paymentsFacade.findPaymentById(id);
+                //Payments pay = paymentsFacade.findPaymentById(id, false);
                 if (pay != null) {
 
                     if (errorMessage.contains("Payment selected for deletion could not be found")) {
@@ -1718,7 +1726,7 @@ public class FutureMapEJB implements Serializable {
                             pay.setBankReturnCode(Integer.toString(retries));
                             paymentsFacade.edit(pay);
                             if (retries < 10) {
-                                startAsynchJob(sessionId, "AddPayment", paymentBean.deletePayment(pay.getCustomerName(), pay.getDebitDate(), pay.getPaymentAmount().movePointRight(2).longValue(), pay.getId().toString(), "Auto Retry", getDigitalKey()));
+                                startAsynchJob(sessionId, "AddPayment", paymentBean.deletePayment(pay.getCustomerName(), pay.getDebitDate(), pay.getPaymentAmount().movePointRight(2).longValue(), pay, "Auto Retry", getDigitalKey()));
 
                                 //retryDeletePayment(pay);
                             } else {
@@ -1747,6 +1755,7 @@ public class FutureMapEJB implements Serializable {
     @Asynchronous
     private void processAddPaymentResult(String sessionId, Future<PaymentGatewayResponse> ft) {
         String paymentRef;
+        Payments pay = null;
         boolean result = false;
         logger.log(Level.INFO, "FutureMap - processAddPaymentResult started");
         PaymentGatewayResponse pgr = null;
@@ -1756,6 +1765,7 @@ public class FutureMapEJB implements Serializable {
             if (resultObject.getClass() == PaymentGatewayResponse.class) {
                 pgr = (PaymentGatewayResponse) resultObject;
                 result = pgr.isOperationSuccessful();
+                pay = (Payments) pgr.getData();
             }
 
             if (pgr != null) {
@@ -1776,7 +1786,7 @@ public class FutureMapEJB implements Serializable {
                     } catch (NumberFormatException numberFormatException) {
                         logger.log(Level.INFO, "processAddPaymentResult FAILED - PaymentReference could not be converted to a number. It should be the primary key of teh payments table row ", paymentRef);
                     }
-                    Payments pay = paymentsFacade.findPaymentById(id);
+                    //Payments pay = paymentsFacade.findPaymentById(id, false);
                     if (pay != null) {
                         logger.log(Level.INFO, "FutureMap - processAddPaymentResult FAILED TO ADD PAYMENT - processing error for:{0}", new Object[]{paymentRef});
                         if (errorMessage.contains("cannot process your add payment request at this time.")) {
@@ -1793,7 +1803,7 @@ public class FutureMapEJB implements Serializable {
                                 paymentsFacade.edit(pay);
                                 if (retries < 10) {
 
-                                    startAsynchJob(sessionId, "AddPayment", paymentBean.addPayment(pay.getCustomerName(), pay.getDebitDate(), pay.getPaymentAmount().movePointRight(2).longValue(), pay.getId().toString(), "Auto Retry", getDigitalKey()));
+                                    startAsynchJob(sessionId, "AddPayment", paymentBean.addPayment(pay.getCustomerName(), pay.getDebitDate(), pay.getPaymentAmount().movePointRight(2).longValue(), pay, "Auto Retry", getDigitalKey()));
                                     logger.log(Level.INFO, "processAddPaymentResult PAYMENT GATEWAY BUSY - ATTEMPTING RETRY - ", paymentRef);
                                 } else {
                                     pay.setPaymentStatus(PaymentStatus.REJECTED_BY_GATEWAY.value());
@@ -1813,7 +1823,7 @@ public class FutureMapEJB implements Serializable {
                         }
 
                     } else {
-                        logger.log(Level.WARNING, "processAddPaymentResult FAILED - ERROR processing could not find payment id ", paymentRef);
+                        logger.log(Level.WARNING, "processAddPaymentResult FAILED - ERROR processing could not find payment id {0}, time: {1}", new Object[]{paymentRef, new Date().toString()});
                     }
                 } else if (paymentRef.isEmpty() == false) {
 
@@ -1821,14 +1831,35 @@ public class FutureMapEJB implements Serializable {
                     try {
                         id = Integer.parseInt(paymentRef);
                     } catch (NumberFormatException numberFormatException) {
+                        logger.log(Level.SEVERE, "processAddPaymentResult FAILED - Successful result but PaymentReference could not be converted to a number. It should be the primary key of the payments table row ", paymentRef);
+
                     }
-                    Payments pay = paymentsFacade.findPaymentById(id);
+
+                    //if the response is very fast we may need to wait for the object to be persisted 
+                  /*  boolean waitForObjectToArriveInDB = true;
+                    int c = 0;
+                    Payments pay = null;
+                    while (waitForObjectToArriveInDB) {
+                        c++;
+                        pay = paymentsFacade.findPaymentById(id, false);
+                        if (pay != null) {
+                            waitForObjectToArriveInDB = false;
+                        }
+                        if (c > 30) { // wait up to 3 seconds in case DB is running slow with the from a separate thread.
+                            waitForObjectToArriveInDB = false;
+                        }
+                        logger.log(Level.INFO, "processAddPaymentResult FAILED - paymentsFacade.findPaymentById(id) failed to find the record:{0}, RETRYING {2}   ---------->>> time: {1}", new Object[]{paymentRef, new SimpleDateFormat("dd/MM/yy HH:mm:ss.SSS").format(new Date()), c});
+                        sleep(100);
+                    }*/
+
+                    //Payments pay = paymentsFacade.findScheduledPayment(paymentRef);
                     if (pay != null) {
                         pay.setPaymentStatus(PaymentStatus.SCHEDULED.value());
                         pay.setPaymentReference(Integer.toString(id));
                         paymentsFacade.edit(pay);
+                        logger.log(Level.INFO, "processAddPaymentResult - Updated payment status to SCHEDULED in CRM DB -  record:{0}, ---------->>> time: {1}", new Object[]{paymentRef, new SimpleDateFormat("dd/MM/yy HH:mm:ss.SSS").format(new Date())});
                     } else {
-                        logger.log(Level.INFO, "processAddPaymentResult FAILED - paymentsFacade.findPaymentById(id) failed to find the record:{0} ", paymentRef);
+                        logger.log(Level.SEVERE, "processAddPaymentResult FAILED - paymentsFacade.findPaymentById(id) failed to find the record:{0}, ---------->>> time: {1}", new Object[]{paymentRef, new SimpleDateFormat("dd/MM/yy HH:mm:ss.SSS").format(new Date())});
                     }
                     logger.log(Level.INFO, "FutureMap - processAddPaymentResult Scheduled Successfully in payment gateway - processed:{0}", new Object[]{paymentRef});
                     String message = "The Payment (ref:" + paymentRef + ") was submitted successfully.";
@@ -2498,7 +2529,7 @@ public class FutureMapEJB implements Serializable {
         }
     }
 
-    private void sanityCheckCustomersForDefaultItems() {
+  /*  private void sanityCheckCustomersForDefaultItems() {
         logger.log(Level.INFO, "Performing Sanity Checks on Customers");
         if (customersFacade != null) {
             List<Customers> cl = customersFacade.findAll();
@@ -2509,6 +2540,7 @@ public class FutureMapEJB implements Serializable {
                     }
                     if (c.getPaymentParameters() == null) {
                         createDefaultPaymentParameters(c);
+                        logger.log(Level.INFO, "Creating default payment parameters");
                     }
                 }
                 logger.log(Level.INFO, "FINISHED Performing Sanity Checks on Customers");
@@ -2518,9 +2550,9 @@ public class FutureMapEJB implements Serializable {
         } else {
             logger.log(Level.WARNING, "FAILED Performing Sanity Checks on Customers.Customer Facade null. HAs it been initialised yet?");
         }
-    }
+    }*/
 
-    private void createDefaultProfilePic(Customers cust) {
+/*    private void createDefaultProfilePic(Customers cust) {
         String placeholderImage = configMapFacade.getConfig("system.default.profile.image");
         String fileExtension = placeholderImage.substring(placeholderImage.lastIndexOf('.')).toLowerCase(Locale.getDefault());
         int imgType = -1;
@@ -2596,6 +2628,6 @@ public class FutureMapEJB implements Serializable {
         } else {
             logger.log(Level.WARNING, "createDefaultProfilePic ERROR, Cannot add default profile pic to a null customer object");
         }
-    }
+    }*/
 
 }

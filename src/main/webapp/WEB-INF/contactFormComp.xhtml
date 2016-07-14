@@ -71,7 +71,7 @@
         </div>
         <div class="Container100 Responsive100">
             <div class="ContainerIndent">
-                <p:commandButton icon="ui-icon-check fa fa-check white Fs14" id="dialogueSave" rendered="#{!customersController.leadFormSubmitted}"  partialSubmit="true" actionListener="#{customersController.createLeadFromSignup}"  value="#{configMapController.getKey('LeadContactForm_Thankyou_submitButtonText')}" update=":growl @form"/>                
+                <p:commandButton icon="ui-icon-check fa fa-check white Fs14" id="dialogueSave" rendered="#{!customersController.leadFormSubmitted}"  partialSubmit="true" actionListener="#{customersController.createLeadFromSignup}"  value="#{configMapController.getKey('LeadContactForm_Thankyou_submitButtonText')}" update=":growl :contactForm"/>                
             </div>
         </div>
 

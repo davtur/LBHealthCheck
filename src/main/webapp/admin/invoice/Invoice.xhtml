@@ -23,12 +23,12 @@
                         <p:outputLabel value="#{configMapController.getKey('SelectStartDateForReport_Label')}" for="sessionstart" />
                         <p:calendar id="sessionstart" value="#{invoiceController.invoiceStartDate}" pattern="dd MMMM yyyy" 
                                     title="#{configMapController.getKey('SelectStartDateForReport_Title')}"    >
-                            <p:ajax event="dateSelect"  update="@form"   listener="#{invoiceController.invoiceParametersChanged}"/>
+                            <p:ajax event="dateSelect"  update=":invoiceDataForm1"   listener="#{invoiceController.invoiceParametersChanged}"/>
                         </p:calendar> 
                         <p:outputLabel value="#{configMapController.getKey('SelectEndDateForReport_Label')}" for="sessionend" />
                         <p:calendar id="sessionend" value="#{invoiceController.invoiceEndDate}"  pattern="dd MMMM yyyy"  
                                     title="#{configMapController.getKey('SelectEndDateForReport_Title')}"    >
-                            <p:ajax event="dateSelect"  update="@form"   listener="#{invoiceController.invoiceParametersChanged}"/>
+                            <p:ajax event="dateSelect"  update=":invoiceDataForm1"   listener="#{invoiceController.invoiceParametersChanged}"/>
                         </p:calendar> 
                     </p:panelGrid>
                     <p:panelGrid columns="1" >
@@ -38,14 +38,14 @@
                             <f:selectItem itemValue="#{1}" itemLabel="No GST"/> 
 
 
-                            <p:ajax   update="@form"  listener="#{invoiceController.invoiceParametersChanged}"   />
+                            <p:ajax   update=":invoiceDataForm1"  listener="#{invoiceController.invoiceParametersChanged}"   />
                         </p:selectOneMenu>
                         <p:selectOneMenu id="custForChart"   value="#{invoiceController.selectedCustomer}" filter="true"   converter="customersControllerConverter"  label="#{configMapController.getKey('SelectCustomerForSessionHistory_Title')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionHistoryRequiredMessage_trainer')}">
                             <f:selectItems value="#{customersController.customersAvailableSelectOneObject}"   var="cust" itemLabel="#{cust.firstname} #{cust.lastname}" itemValue="#{cust}"/>
-                            <p:ajax   update="@form" listener="#{invoiceController.invoiceParametersChanged}"  />
+                            <p:ajax   update=":invoiceDataForm1" listener="#{invoiceController.invoiceParametersChanged}"  />
                         </p:selectOneMenu>
 
-                        <p:commandButton id="runReport"  actionListener="#{invoiceController.generateInvoice}"  value="#{configMapController.getKey('ListInvoiceCreateInvoiceLink')}" update="@form,:previewHtmlInvoice,:growl"/>
+                        <p:commandButton id="runReport"  actionListener="#{invoiceController.generateInvoice}"  value="#{configMapController.getKey('ListInvoiceCreateInvoiceLink')}" update=":invoiceDataForm1,:previewHtmlInvoice,:growl"/>
                         <p:commandButton disabled="#{empty invoiceController.selected}"  id="doExprt" ajax="false"  value="#{configMapController.getKey('ListInvoiceExportInvoiceLink')}" >
                             <p:fileDownload value="#{invoiceController.exportExcel}" />
                         </p:commandButton>

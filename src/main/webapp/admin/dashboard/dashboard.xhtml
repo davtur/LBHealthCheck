@@ -21,7 +21,7 @@
                     </p:selectOneMenu>
 
                     <p:selectBooleanCheckbox id="showAllUsers"   value="#{mySessionsChart1.dashboardShowAllUsers}" valueChangeListener="#{mySessionsChart1.recreateDashboardModels}" >  
-                        <p:ajax update="@form"   />  
+                        <p:ajax update=":listSessionHistoryForm1"   />  
                     </p:selectBooleanCheckbox> 
 
                     <p:outputLabel  value="#{configMapController.getKey('ShowAllUsersForSessionHistory_Title')}" for="showAllUsers"/>
