@@ -22,7 +22,6 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -30,6 +29,8 @@ import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import org.eclipse.persistence.config.CacheUsage;
+import org.eclipse.persistence.config.QueryHints;
 import org.eclipse.persistence.internal.jpa.EJBQueryImpl;
 import org.eclipse.persistence.jpa.JpaEntityManager;
 import org.eclipse.persistence.queries.DatabaseQuery;
@@ -47,7 +48,7 @@ public class PaymentsFacade extends AbstractFacade<Payments> {
 
     @PersistenceContext(unitName = "FitnessStatsPU")
     private EntityManager em;
-    private static final Logger logger = Logger.getLogger(PaymentsFacade.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(PaymentsFacade.class.getName());
     @Inject
     private ConfigMapFacade configMapFacade;
 
@@ -80,19 +81,23 @@ public ABC addNewABC(ABC abc) {
 
      */
     public void createAndFlush(Payments entity) {
+        
         getEntityManager().persist(entity);
         getEntityManager().flush();
-        String message = "Payment Entity CREATED and flushed  to database: " + entity.getId() +"" + new SimpleDateFormat("dd/MM/yy HH:mm:ss.SSS").format(new Date());
+        
+  //      String message = "Payment Entity CREATED and flushed  to database: " + entity.getId() +"" + new SimpleDateFormat("dd/MM/yy HH:mm:ss.SSS").format(new Date());
  
-        logger.log(Level.INFO, message);
+   //     LOGGER.log(Level.INFO, message);
 
     }
 
     public void editAndFlush(Payments entity) {
+        
         getEntityManager().merge(entity);
         getEntityManager().flush();
-       String message = "Payment Entity MERGED and flushed  to database: " + entity.getId() +"" + new SimpleDateFormat("dd/MM/yy HH:mm:ss.SSS").format(new Date());
-        logger.log(Level.INFO, message);
+        
+   //    String message = "Payment Entity MERGED and flushed  to database: " + entity.getId() +"" + new SimpleDateFormat("dd/MM/yy HH:mm:ss.SSS").format(new Date());
+   //     LOGGER.log(Level.INFO, message);
 
     }
 
@@ -113,7 +118,7 @@ public ABC addNewABC(ABC abc) {
             retList = q.getResultList();
         } catch (Exception e) {
 
-            logger.log(Level.INFO, "Could not find customers Payments.", e);
+            LOGGER.log(Level.INFO, "Could not find customers Payments.", e);
         }
         return retList;
     }
@@ -134,7 +139,7 @@ public ABC addNewABC(ABC abc) {
             retList = q.getResultList();
         } catch (Exception e) {
 
-            logger.log(Level.INFO, "Could not find customers Payments.", e);
+            LOGGER.log(Level.INFO, "Could not find customers Payments.", e);
         }
         return retList;
     }
@@ -163,7 +168,7 @@ public ABC addNewABC(ABC abc) {
             }
 
         } catch (Exception e) {
-            logger.log(Level.WARNING, "findLastSuccessfulPayment error customer:{0} " + customer, e);
+            LOGGER.log(Level.WARNING, "findLastSuccessfulPayment error customer:{0} " + customer, e);
         }
         return cm;
     }
@@ -185,10 +190,10 @@ public ABC addNewABC(ABC abc) {
             if (q.getResultList().size() > 0) {
                 cm = q.getResultList().get(0);
             } else {
-                logger.log(Level.INFO, "findNextScheduledPayment did not find any scheduled payments for customer:{0}", customer.getUsername());
+                LOGGER.log(Level.INFO, "findNextScheduledPayment did not find any scheduled payments for customer:{0}", customer.getUsername());
             }
         } catch (Exception e) {
-            logger.log(Level.INFO, "findNextScheduledPayment error customer:{0} " + customer, e);
+            LOGGER.log(Level.INFO, "findNextScheduledPayment error customer:{0} " + customer, e);
         }
         return cm;
     }
@@ -204,6 +209,7 @@ public ABC addNewABC(ABC abc) {
             cq.where(cb.equal(payId, id));
 
             TypedQuery<Payments> q = em.createQuery(cq);
+            q.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheByExactPrimaryKey);
             if (bypassCache) {
                 q.setHint("javax.persistence.cache.retrieveMode", "BYPASS");
             }
@@ -214,7 +220,7 @@ public ABC addNewABC(ABC abc) {
                 }
             }
         } catch (Exception e) {
-            logger.log(Level.INFO, "payment  not found or duplicate paymentID  found :" + id, e);
+            LOGGER.log(Level.INFO, "payment  not found or duplicate paymentID  found :" + id, e);
         }
         return cm;
     }
@@ -234,7 +240,7 @@ public ABC addNewABC(ABC abc) {
                 cm = q.getSingleResult();
             }
         } catch (Exception e) {
-            logger.log(Level.INFO, "paymentID not found or duplicate paymentID  found :" + paymentId, e);
+            LOGGER.log(Level.INFO, "paymentID not found or duplicate paymentID  found :" + paymentId, e);
         }
         return cm;
     }
@@ -245,7 +251,7 @@ public ABC addNewABC(ABC abc) {
         try {
             id = Integer.parseInt(paymentReference);
         } catch (NumberFormatException numberFormatException) {
-            logger.log(Level.WARNING, "findScheduledPayment by reference. Reference is not a valid number :{0}", paymentReference);
+            LOGGER.log(Level.WARNING, "findScheduledPayment by reference. Reference is not a valid number :{0}", paymentReference);
             return null;
         }
         ArrayList<Predicate> predicatesList1 = new ArrayList<>();
@@ -272,14 +278,14 @@ public ABC addNewABC(ABC abc) {
                 cm = q.getSingleResult();
             } else if (q.getResultList().size() > 1) {
                 cm = q.getResultList().get(0);
-                logger.log(Level.WARNING, "findScheduledPayment Multiple payments found , Amount:{0},Date:{1},Ref:{2},Manual:{3}", new Object[]{paymentReference});
+                LOGGER.log(Level.WARNING, "findScheduledPayment Multiple payments found , Amount:{0},Date:{1},Ref:{2},Manual:{3}", new Object[]{paymentReference});
 
             } else {
-                logger.log(Level.INFO, "findScheduledPayment not found , Amount:{0},Date:{1},Ref:{2},Manual:{3}", new Object[]{paymentReference});
+                LOGGER.log(Level.INFO, "findScheduledPayment not found , Amount:{0},Date:{1},Ref:{2},Manual:{3}", new Object[]{paymentReference});
 
             }
         } catch (Exception e) {
-            logger.log(Level.INFO, "findScheduledPayment not found , Amount:{0},Date:{1},Ref:{2},Manual:{3}, error:{4}", new Object[]{paymentReference, e.getMessage()});
+            LOGGER.log(Level.INFO, "findScheduledPayment not found , Amount:{0},Date:{1},Ref:{2},Manual:{3}, error:{4}", new Object[]{paymentReference, e.getMessage()});
         }
         return cm;
     }
@@ -296,7 +302,7 @@ public ABC addNewABC(ABC abc) {
             try {
                 id = Integer.parseInt(paymentReference);
             } catch (NumberFormatException numberFormatException) {
-                logger.log(Level.WARNING, "findScheduledPayment by reference. Reference is not a valid number :{0}", paymentReference);
+                LOGGER.log(Level.WARNING, "findScheduledPayment by reference. Reference is not a valid number :{0}", paymentReference);
                 return null;
             }
         }
@@ -329,14 +335,14 @@ public ABC addNewABC(ABC abc) {
                 cm = q.getSingleResult();
             } else if (q.getResultList().size() > 1) {
                 cm = q.getResultList().get(0);
-                logger.log(Level.WARNING, "findScheduledPayment Multiple payments found , Amount:{0},Date:{1},Ref:{2},Manual:{3}", new Object[]{paymentAmount.toString(), debitDate, paymentReference, manuallyAddedPayment});
+                LOGGER.log(Level.WARNING, "findScheduledPayment Multiple payments found , Amount:{0},Date:{1},Ref:{2},Manual:{3}", new Object[]{paymentAmount.toString(), debitDate, paymentReference, manuallyAddedPayment});
 
             } else {
-                logger.log(Level.INFO, "findScheduledPayment not found , Amount:{0},Date:{1},Ref:{2},Manual:{3}", new Object[]{paymentAmount.toString(), debitDate, paymentReference, manuallyAddedPayment});
+                LOGGER.log(Level.INFO, "findScheduledPayment not found , Amount:{0},Date:{1},Ref:{2},Manual:{3}", new Object[]{paymentAmount.toString(), debitDate, paymentReference, manuallyAddedPayment});
 
             }
         } catch (Exception e) {
-            logger.log(Level.INFO, "findScheduledPayment not found , Amount:{0},Date:{1},Ref:{2},Manual:{3}, error:{4}", new Object[]{paymentAmount.toString(), debitDate, paymentReference, manuallyAddedPayment, e.getMessage()});
+            LOGGER.log(Level.INFO, "findScheduledPayment not found , Amount:{0},Date:{1},Ref:{2},Manual:{3}, error:{4}", new Object[]{paymentAmount.toString(), debitDate, paymentReference, manuallyAddedPayment, e.getMessage()});
         }
         return cm;
     }
@@ -353,11 +359,11 @@ public ABC addNewABC(ABC abc) {
             try {
                 id = Integer.parseInt(ref);
             } catch (NumberFormatException numberFormatException) {
-                logger.log(Level.WARNING, "findScheduledPayment by reference. Reference is not a valid number :{0}", ref);
+                LOGGER.log(Level.WARNING, "findScheduledPayment by reference. Reference is not a valid number :{0}", ref);
                 return null;
             }
         } else {
-            logger.log(Level.WARNING, "findScheduledPayment . Reference is not a valid  :{0}", pay.getYourSystemReference());
+            LOGGER.log(Level.WARNING, "findScheduledPayment . Reference is not a valid  :{0}", pay.getYourSystemReference());
         }
         ArrayList<Predicate> predicatesList1 = new ArrayList<>();
         try {
@@ -387,15 +393,15 @@ public ABC addNewABC(ABC abc) {
                 cm = q.getSingleResult();
             } else if (q.getResultList().size() > 1) {
                 cm = q.getResultList().get(0);
-                logger.log(Level.WARNING, "findScheduledPayment Multiple payments found , Amount:{0},Date:{1},Ref:{2},Manual:{3}", new Object[]{pay.getPaymentAmount().toString(), pay.getPaymentDate().toGregorianCalendar().getTime(), pay.getPaymentReference().getValue(), pay.isManuallyAddedPayment().toString()});
+                LOGGER.log(Level.WARNING, "findScheduledPayment Multiple payments found , Amount:{0},Date:{1},Ref:{2},Manual:{3}", new Object[]{pay.getPaymentAmount().toString(), pay.getPaymentDate().toGregorianCalendar().getTime(), pay.getPaymentReference().getValue(), pay.isManuallyAddedPayment().toString()});
 
             } else {
 
-                logger.log(Level.INFO, "findScheduledPayment not found , Amount:{0},Date:{1},Ref:{2},Manual:{3}", new Object[]{pay.getPaymentAmount().toString(), pay.getPaymentDate().toGregorianCalendar().getTime(), pay.getPaymentReference().getValue(), pay.isManuallyAddedPayment().toString()});
+                LOGGER.log(Level.INFO, "findScheduledPayment not found , Amount:{0},Date:{1},Ref:{2},Manual:{3}", new Object[]{pay.getPaymentAmount().toString(), pay.getPaymentDate().toGregorianCalendar().getTime(), pay.getPaymentReference().getValue(), pay.isManuallyAddedPayment().toString()});
 
             }
         } catch (Exception e) {
-            logger.log(Level.INFO, "findScheduledPayment not found , Amount:{0},Date:{1},Ref:{2},Manual:{3}, error:{4}", new Object[]{pay.getPaymentAmount().toString(), pay.getPaymentDate().toGregorianCalendar().getTime(), pay.getPaymentReference().getValue(), pay.isManuallyAddedPayment().toString(), e.getMessage()});
+            LOGGER.log(Level.INFO, "findScheduledPayment not found , Amount:{0},Date:{1},Ref:{2},Manual:{3}, error:{4}", new Object[]{pay.getPaymentAmount().toString(), pay.getPaymentDate().toGregorianCalendar().getTime(), pay.getPaymentReference().getValue(), pay.isManuallyAddedPayment().toString(), e.getMessage()});
         }
         return cm;
     }
@@ -412,11 +418,11 @@ public ABC addNewABC(ABC abc) {
             try {
                 id = Integer.parseInt(ref);
             } catch (NumberFormatException numberFormatException) {
-                logger.log(Level.WARNING, "findScheduledPayment by reference. Reference is not a valid number :{0}", ref);
+                LOGGER.log(Level.WARNING, "findScheduledPayment by reference. Reference is not a valid number :{0}", ref);
                 return null;
             }
         } else {
-            logger.log(Level.WARNING, "findScheduledPayment . Reference is not a valid  :{0}", pay.getYourSystemReference().getValue());
+            LOGGER.log(Level.WARNING, "findScheduledPayment . Reference is not a valid  :{0}", pay.getYourSystemReference().getValue());
         }
         ArrayList<Predicate> predicatesList1 = new ArrayList<>();
         try {
@@ -448,15 +454,15 @@ public ABC addNewABC(ABC abc) {
                 cm = q.getSingleResult();
             } else if (q.getResultList().size() > 1) {
                 cm = q.getResultList().get(0);
-                logger.log(Level.WARNING, "findScheduledPayment Multiple payments found , Amount:{0},Date:{1},Ref:{2},Manual:{3}", new Object[]{pay.getPaymentAmount().toString(), pay.getPaymentDate().toGregorianCalendar().getTime(), pay.getPaymentReference().getValue(), pay.isManuallyAddedPayment().toString()});
+                LOGGER.log(Level.WARNING, "findScheduledPayment Multiple payments found , Amount:{0},Date:{1},Ref:{2},Manual:{3}", new Object[]{pay.getPaymentAmount().toString(), pay.getPaymentDate().toGregorianCalendar().getTime(), pay.getPaymentReference().getValue(), pay.isManuallyAddedPayment().toString()});
 
             } else {
 
-                logger.log(Level.INFO, "findScheduledPayment not found , Amount:{0},Date:{1},Ref:{2},Manual:{3}", new Object[]{pay.getPaymentAmount().toString(), pay.getPaymentDate().toGregorianCalendar().getTime(), pay.getPaymentReference().getValue(), pay.isManuallyAddedPayment().toString()});
+                LOGGER.log(Level.INFO, "findScheduledPayment not found , Amount:{0},Date:{1},Ref:{2},Manual:{3}", new Object[]{pay.getPaymentAmount().toString(), pay.getPaymentDate().toGregorianCalendar().getTime(), pay.getPaymentReference().getValue(), pay.isManuallyAddedPayment().toString()});
 
             }
         } catch (Exception e) {
-            logger.log(Level.INFO, "findScheduledPayment not found , Amount:{0},Date:{1},Ref:{2},Manual:{3}, error:{4}", new Object[]{pay.getPaymentAmount().toString(), pay.getPaymentDate().toGregorianCalendar().getTime(), pay.getPaymentReference().getValue(), pay.isManuallyAddedPayment().toString(), e.getMessage()});
+            LOGGER.log(Level.INFO, "findScheduledPayment not found , Amount:{0},Date:{1},Ref:{2},Manual:{3}, error:{4}", new Object[]{pay.getPaymentAmount().toString(), pay.getPaymentDate().toGregorianCalendar().getTime(), pay.getPaymentReference().getValue(), pay.isManuallyAddedPayment().toString(), e.getMessage()});
         }
         return cm;
     }
@@ -486,7 +492,7 @@ public ABC addNewABC(ABC abc) {
             cm = q.getResultList();
 
         } catch (Exception e) {
-            logger.log(Level.INFO, "findScheduledPaymentsByCustomer not found , Customer:{0}, error:{1}", new Object[]{cust.getUsername(), e.getMessage()});
+            LOGGER.log(Level.INFO, "findScheduledPaymentsByCustomer not found , Customer:{0}, error:{1}", new Object[]{cust.getUsername(), e.getMessage()});
         }
         return cm;
     }
@@ -572,7 +578,7 @@ public ABC addNewABC(ABC abc) {
             String sqlString = databaseQuery.getSQLString();
             //This SQL will contain ? for parameters. To get the SQL translated with the arguments you need a DatabaseRecord with the parameter values.
             // String sqlString2 = databaseQuery.getTranslatedSQLString(session, recordWithValues);
-            logger.log(Level.FINE, "Payment/Settlement Report SQL Query String: {0}  -----------------Records Found:{8}, useSettlement: {1},showSuccessful: {2},showFailed: {3},showPending: {4},showScheduled: {5},startDate: {6},endDate: {7}", new Object[]{sqlString, useSettlement, showSuccessful, showFailed, showPending, showScheduled, startDate, endDate, retList.size()});
+            LOGGER.log(Level.FINE, "Payment/Settlement Report SQL Query String: {0}  -----------------Records Found:{8}, useSettlement: {1},showSuccessful: {2},showFailed: {3},showPending: {4},showScheduled: {5},startDate: {6},endDate: {7}", new Object[]{sqlString, useSettlement, showSuccessful, showFailed, showPending, showScheduled, startDate, endDate, retList.size()});
 
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));

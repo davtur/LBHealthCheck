@@ -34,13 +34,15 @@ import org.primefaces.model.LazyDataModel;
 @SessionScoped
 public class ConfigMapController implements Serializable {
 
+    private static final long serialVersionUID = 1L;
+
     private ConfigMap current;
     private ConfigMap selectedForDeletion;
-    private DataModel items = null;
+    private DataModel<ConfigMap> items = null;
     private String password1 = "";
     private String password2 = "";
     private boolean password = false;
-    private LazyDataModel lazyModel;
+    private LazyDataModel<ConfigMap> lazyModel;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade ejbFacade;
     @Inject
@@ -51,7 +53,7 @@ public class ConfigMapController implements Serializable {
     private String duplicateValues = "";
     private List<ConfigMap> filteredItems;
     private ConfigMap[] multiSelected;
-    private static final Logger logger = Logger.getLogger(ConfigMapController.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(ConfigMapController.class.getName());
 
     public ConfigMapController() {
     }
@@ -79,9 +81,10 @@ public class ConfigMapController implements Serializable {
 
     }
    
+   
     public LazyDataModel<ConfigMap> getLazyModel() {
         if(lazyModel == null){
-            lazyModel = new LazyLoadingDataModel(ejbFacade);
+            lazyModel = new LazyLoadingDataModel<>(ejbFacade);
         }
         return lazyModel;
     }
@@ -103,8 +106,8 @@ public class ConfigMapController implements Serializable {
                 }
 
                 @Override
-                public DataModel createPageDataModel() {
-                    return new ListDataModel(getFacade().findRange(new int[]{getPageFirstItem(), getPageFirstItem() + getPageSize()}));
+                public DataModel<ConfigMap> createPageDataModel() {
+                    return new ListDataModel<>(getFacade().findRange(new int[]{getPageFirstItem(), getPageFirstItem() + getPageSize()}));
                 }
             };
         }
@@ -209,10 +212,10 @@ public class ConfigMapController implements Serializable {
                             count--;
                             duplicateLines += line + "\r\n";
                         } else {
-                            logger.log(Level.SEVERE, "Bulk Config Insert Failed:" + line + "\r\n", e);
+                            LOGGER.log(Level.SEVERE, "Bulk Config Insert Failed:" + line + "\r\n", e);
                         }
                     }catch (Exception e) {
-                        logger.log(Level.SEVERE, "Bulk Config Insert Failed:" + line + "\r\n", e);
+                        LOGGER.log(Level.SEVERE, "Bulk Config Insert Failed:" + line + "\r\n", e);
                     }
 
                 } else {
@@ -222,7 +225,7 @@ public class ConfigMapController implements Serializable {
             setDuplicateValues(duplicateLines);
 
 
-            logger.log(Level.INFO, "Bulk Insert to config map completed. Updated or created count={0}", count);
+            LOGGER.log(Level.INFO, "Bulk Insert to config map completed. Updated or created count={0}", count);
             JsfUtil.addSuccessMessage(count + ", " + configMapFacade.getConfig("ConfigMapCreated"));
             return prepareCreate();
         } catch (Exception e) {
@@ -317,7 +320,7 @@ public class ConfigMapController implements Serializable {
         }
     }
 
-    public DataModel getItems() {
+    public DataModel<ConfigMap> getItems() {
         if (items == null) {
             items = getPagination().createPageDataModel();
         }

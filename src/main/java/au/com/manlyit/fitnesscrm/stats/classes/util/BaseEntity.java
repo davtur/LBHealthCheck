@@ -15,12 +15,7 @@ import org.eclipse.persistence.annotations.CacheType;
  * @author david
  * 
  */
-@Cache(
-  type=CacheType.SOFT, // Cache everything until the JVM decides memory is low.
-  size=64000,  // Use 64,000 as the initial cache size.
-  expiry=36000000,  // 10 minutes
-  coordinationType=CacheCoordinationType.INVALIDATE_CHANGED_OBJECTS  
-)
+
 public interface BaseEntity {
     public Integer getId();
     public void setId(Integer id);

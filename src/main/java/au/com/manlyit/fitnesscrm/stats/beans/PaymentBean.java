@@ -35,7 +35,9 @@ import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
+
 import java.util.logging.Logger;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.ejb.AsyncResult;
@@ -412,19 +414,19 @@ public class PaymentBean implements Serializable {
                 newPayment.setBankFailedReason("");
                 newPayment.setBankReceiptID("");
                 newPayment.setPaymentDate(debitDate);// we can use this timestamp to reference bookings with booking date as they will be identical
-                paymentsFacade.createAndFlush(newPayment);
+                paymentsFacade.createAndFlush(newPayment);// need to flush to ensure the id is generated as this onlyoccurs at flush time.
 
-                int newId = newPayment.getId();
-                if (newId != -1) {
-                    String newPaymentID = Integer.toString(newId);
-                    newPayment.setPaymentReference(newPaymentID);
-                    paymentsFacade.editAndFlush(newPayment);
-                    LOGGER.log(Level.INFO, "New Payment Created for customer {0} with paymentID: {1}, time: {2}", new Object[]{cust.getUsername(), newPaymentID, new SimpleDateFormat("dd/MM/yy HH:mm:ss.SSS").format(new Date())});
+                //int newId = newPayment.getId();
+               // if (newId != -1) {
+                //    String newPaymentID = Integer.toString(newId);
+                //    newPayment.setPaymentReference(newPaymentID);
+                   // paymentsFacade.edit(newPayment);
+                    LOGGER.log(Level.INFO, "New Payment Created for customer {0} with paymentID: {1}, time: {2}", new Object[]{cust.getUsername(), newPayment.getId(), new SimpleDateFormat("dd/MM/yy HH:mm:ss.SSS").format(new Date())});
                     AsyncJob aj = new AsyncJob("AddPayment", payBean.addPayment(cust, debitDate, amountInCents, newPayment, user, digitalKey));
                     futureMap.put(sessionId, aj);
-                } else {
-                    LOGGER.log(Level.SEVERE, "Could not get an id from a newly persisted payment. Possible JPA caching issues. {0} ", new Object[]{cust.getUsername(),});
-                }
+              //  } else {
+               //     LOGGER.log(Level.SEVERE, "Could not get an id from a newly persisted payment. Possible JPA caching issues. {0} ", new Object[]{cust.getUsername(),});
+              //  }
 
             } catch (Exception e) {
                 LOGGER.log(Level.WARNING, "Add Single Payment failed due to exception:", e);
@@ -1361,6 +1363,7 @@ public class PaymentBean implements Serializable {
         // paymentReference Max 50 chars. It can be search with with a wildcard in other methods. Use invoice number or other payment identifier
         LOGGER.log(Level.INFO, "running asychronous task addPayment Customer {0}, debitDate {1}, paymentAmountInCents {2}", new Object[]{cust, debitDate, paymentAmountInCents});
         String paymentReference = payment.getId().toString();
+        payment.setPaymentReference(paymentReference);
         PaymentGatewayResponse pgr = new PaymentGatewayResponse(false, payment, paymentReference, "-1", "An unhandled error occurred!");
 
         String eziDebitCustomerId = ""; // use our reference instead. THis must be an empty string.

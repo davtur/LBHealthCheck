@@ -21,6 +21,8 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Root;
+import org.eclipse.persistence.config.CacheUsage;
+import org.eclipse.persistence.config.QueryHints;
 
 /**
  *
@@ -75,6 +77,8 @@ public class ConfigMapFacade extends AbstractFacade<ConfigMap> {
                 Expression<String> expresskey = rt.get("configkey");
                 cq.where(cb.equal(expresskey, configkey));
                 Query q = em.createQuery(cq);
+                // this is a very intensive call as it is called manay times for each page refresh - only use the cache as its mostly read only and doesn't get updated very often.
+                 q.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase);
                 //Query q = em.createNativeQuery("SELECT * FROM configMap where key = '" + configkey + "'", ConfigMap.class);
                 ConfigMap cm = (ConfigMap) q.getSingleResult();
                 if (cm != null) {

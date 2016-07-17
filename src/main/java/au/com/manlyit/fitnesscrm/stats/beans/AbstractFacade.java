@@ -46,11 +46,13 @@ public abstract class AbstractFacade<T> implements Serializable {
     protected abstract EntityManager getEntityManager();
 
     public void create(T entity) {
-        try {
+       // try {
+            
             getEntityManager().persist(entity);
+            
             String message = "Entity Created: " + entity.toString();
-            logger.log(Level.INFO, message);
-        } catch (Exception e) {
+            //logger.log(Level.INFO, message);
+      /*  } catch (Exception e) {
             logger.log(Level.WARNING, "<-------------------------------------------------- Abstract Facade - could not create Entity ------------------------------------------------------------------------>");
             logger.log(Level.WARNING, e.getMessage(), e);
             logger.log(Level.WARNING, "<---------------------------------------------------------------------------------------------------------------------------------------------------------------------->");
@@ -65,21 +67,23 @@ public abstract class AbstractFacade<T> implements Serializable {
             }
             logger.log(Level.WARNING, "<---------------------------------------------------------------------------------------------------------------------------------------------------------------------->");
 
-        }
+        }*/
     }
 
     public void edit(T entity) {
+        
         getEntityManager().merge(entity);
-        String message = "Entity Merged: " + entity.toString();
-        logger.log(Level.INFO, message);
+     
+       // String message = "Entity Merged: " + entity.toString();
+       // logger.log(Level.INFO, message);
 
     }
 
     public void remove(T entity) {
 
         getEntityManager().remove(getEntityManager().merge(entity));
-        String message = "Entity Removed: " + entity.toString();
-        logger.log(Level.INFO, message);
+      //  String message = "Entity Removed: " + entity.toString();
+      //  logger.log(Level.INFO, message);
     }
 
     public T find(Object id) {

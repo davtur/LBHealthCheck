@@ -2071,7 +2071,7 @@ public class FutureMapEJB implements Serializable {
             } else {
                 returnedMessage = "Error - the response from the payment gateway was empty";
             }
-        } catch (InterruptedException | ExecutionException e) {
+        } catch (InterruptedException | ExecutionException | NullPointerException e) {
             logger.log(Level.WARNING, "Future Map processGetCustomerDetails FAILED", e);
         }
 

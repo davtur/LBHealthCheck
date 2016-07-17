@@ -19,6 +19,8 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import org.eclipse.persistence.config.CacheUsage;
+import org.eclipse.persistence.config.QueryHints;
 
 /**
  *
@@ -27,9 +29,11 @@ import javax.persistence.criteria.Root;
 @Stateless
 public class GroupsFacade extends AbstractFacade<Groups> {
 
+    private static final long serialVersionUID = 1L;
+
     @PersistenceContext(unitName = "FitnessStatsPU")
     private EntityManager em;
-    private static final Logger logger = Logger.getLogger(GroupsFacade.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(GroupsFacade.class.getName());
 
     @Override
     protected EntityManager getEntityManager() {
@@ -40,22 +44,23 @@ public class GroupsFacade extends AbstractFacade<Groups> {
         super(Groups.class);
     }
 
-    public List<String>  getGroups() {
+    public List<Groups> getGroups() {
 
-        List<String>  ga = null;
+        List<Groups> ga = null;
         try {
             CriteriaBuilder cb = em.getCriteriaBuilder();
-            CriteriaQuery cq = cb.createQuery();
+            CriteriaQuery<Groups> cq = cb.createQuery(Groups.class);
             Root<Groups> rt = cq.from(Groups.class);
             Expression<String> gname = rt.get("groupname");
 
             cq.select(rt.get("groupname")).distinct(true);
-            Query q = em.createQuery(cq);
-
-            ga = (List<String> ) q.getResultList();
+            TypedQuery<Groups> q = em.createQuery(cq);
+// this is a very intensive call as it is called manay times for each page refresh - only use the cache as its mostly read only and doesn't get updated very often.
+            q.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase);
+            ga =  q.getResultList();
 
         } catch (Exception e) {
-            logger.log(Level.SEVERE, "getGroups error: ", e.getMessage());
+            LOGGER.log(Level.SEVERE, "getGroups error: ", e.getMessage());
         }
         return ga;
 
@@ -70,15 +75,16 @@ public class GroupsFacade extends AbstractFacade<Groups> {
             Root<Groups> rt = cq.from(Groups.class);
             Expression<Customers> customer = rt.get("username");
             Predicate condition1 = cb.equal(customer, cust);
-            
+
             cq.where(condition1);
             cq.distinct(true);
             TypedQuery<Groups> q = em.createQuery(cq);
-
+// this is a very intensive call as it is called manay times for each page refresh - only use the cache as its mostly read only and doesn't get updated very often.
+            q.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase);
             ga = q.getResultList();
 
         } catch (Exception e) {
-            logger.log(Level.SEVERE, "getCustomersGroups error: ", e.getMessage());
+            LOGGER.log(Level.SEVERE, "getCustomersGroups error: ", e.getMessage());
         }
         return ga;
 
@@ -96,12 +102,14 @@ public class GroupsFacade extends AbstractFacade<Groups> {
             Predicate condition2 = cb.equal(customer, cust);
             cq.where(cb.and(condition1, condition2));
             Query q = em.createQuery(cq);
+            // this is a very intensive call as it is called manay times for each page refresh - only use the cache as its mostly read only and doesn't get updated very often.
+            q.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase);
             List retList = q.getResultList();
             if (retList.size() > 0) {
                 return true;
             }
         } catch (Exception e) {
-            logger.log(Level.SEVERE, "isCustomerInGroup error:{0} {1} ", new Object[]{cust.getUsername(), group, e.getMessage()});
+            LOGGER.log(Level.SEVERE, "isCustomerInGroup error:{0} {1} ", new Object[]{cust.getUsername(), group, e.getMessage()});
         }
         return false;
     }
@@ -118,17 +126,18 @@ public class GroupsFacade extends AbstractFacade<Groups> {
             Predicate condition2 = cb.equal(customer, cust);
             cq.where(cb.and(condition1, condition2));
             Query q = em.createQuery(cq);
-
+// this is a very intensive call as it is called manay times for each page refresh - only use the cache as its mostly read only and doesn't get updated very often.
+            q.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase);
             List retList = q.getResultList();
             int k = retList.size();
             if (k > 0) {
                 cm = (Groups) retList.get(0);
             }
             if (k > 1) {
-                logger.log(Level.SEVERE, "getCustomerGroup. {2} duplicates returned. User:{0}, Group:{1} ", new Object[]{cust.getUsername(), group, k});
+                LOGGER.log(Level.SEVERE, "getCustomerGroup. {2} duplicates returned. User:{0}, Group:{1} ", new Object[]{cust.getUsername(), group, k});
             }
         } catch (Exception e) {
-            logger.log(Level.SEVERE, "isCustomerInGroup error:{0} {1} ", new Object[]{cust.getUsername(), group, e.getMessage()});
+            LOGGER.log(Level.SEVERE, "isCustomerInGroup error:{0} {1} ", new Object[]{cust.getUsername(), group, e.getMessage()});
         }
         return cm;
     }

@@ -244,7 +244,7 @@ public class EmailTemplatesController implements Serializable {
         }
     }
 
-    public DataModel getItems() {
+    public DataModel<EmailTemplates> getItems() {
         if (items == null) {
             items = getPagination().createPageDataModel();
         }

@@ -2149,16 +2149,20 @@ public class CustomersController implements Serializable {
     public List<Groups> getCustomerGroupsList() {
         if (customerGroupsList == null) {
             customerGroupsList = new ArrayList<>();
-            List<String> distinctGroups = ejbGroupsFacade.getGroups();
+            List<Groups> distinctGroups = ejbGroupsFacade.getGroups();
             if (distinctGroups != null) {
-                distinctGroups.remove("DEVELOPER");
-                for (String g : distinctGroups) {
-                    customerGroupsList.add(new Groups(0, g));
+               // distinctGroups.remove("DEVELOPER");
+                
+                for (Groups g : distinctGroups) {
+                   if(g.getGroupname().contains("DEVELOPER") == false){
+                       customerGroupsList.add(g);
+                   }
                 }
+                 //customerGroupsList.add(new Groups(0, g));
                 checkedGroups = new Boolean[distinctGroups.size()];
                 for (int c = 0; c < distinctGroups.size(); c++) {
                     for (Groups g : getSelectedGroups()) {
-                        if (distinctGroups.get(c).contains(g.getGroupname())) {
+                        if (distinctGroups.get(c).getGroupname().contains(g.getGroupname())) {
                             checkedGroups[c] = true;
                         }
                     }
@@ -2174,17 +2178,19 @@ public class CustomersController implements Serializable {
     public List<Groups> getNewCustomerGroupsList() {
         if (newCustomerGroupsList == null) {
             newCustomerGroupsList = new ArrayList<>();
-            List<String> distinctGroups = ejbGroupsFacade.getGroups();
+            List<Groups> distinctGroups = ejbGroupsFacade.getGroups();
             if (distinctGroups != null) {
-                distinctGroups.remove("DEVELOPER");
-                for (String g : distinctGroups) {
-                    newCustomerGroupsList.add(new Groups(0, g));
+                //distinctGroups.remove("DEVELOPER");
+                for (Groups g : distinctGroups) {
+                   if(g.getGroupname().contains("DEVELOPER") == false){
+                       customerGroupsList.add(g);
+                   }
                 }
                 newCustomerCheckedGroups = new Boolean[distinctGroups.size()];
 
                 for (int c = 0; c < distinctGroups.size(); c++) {
 
-                    if (distinctGroups.get(c).contains("USER")) {
+                    if (distinctGroups.get(c).getGroupname().contains("USER")) {
                         newCustomerCheckedGroups[c] = true;
                     }
 

@@ -2101,12 +2101,13 @@ updatePaymentTableComponents();
     private void processAddPaymentResult(PaymentGatewayResponse pgr) {
         int id = 0;
         logger.log(Level.INFO, "processAddPaymentResult started");
-        try {
+        /*try {
             id = Integer.parseInt(pgr.getTextData());
         } catch (NumberFormatException numberFormatException) {
             logger.log(Level.WARNING, "processAddPaymentResult - Payment reference could not convert to a number!");
-        }
-        Payments pay = paymentsFacade.findPaymentById(id,false);
+        }*/
+        //Payments pay = paymentsFacade.findPaymentById(id,false);
+        Payments pay = (Payments) pgr.getData();
         if (pay != null) {
             updatePaymentLists(pay);
         }else{

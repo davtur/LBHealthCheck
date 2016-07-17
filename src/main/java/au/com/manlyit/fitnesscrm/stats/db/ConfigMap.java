@@ -19,11 +19,22 @@ import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
+import org.eclipse.persistence.annotations.Cache;
+import org.eclipse.persistence.annotations.CacheCoordinationType;
+import org.eclipse.persistence.annotations.CacheType;
+import org.eclipse.persistence.config.CacheIsolationType;
 
 /**
  *
  * @author david
  */
+@Cache(
+        type = CacheType.FULL, // Cache everything in memory as this object is mostly read only and will be called hundreds of time on each page.
+        size = 64000, // Use 64,000 as the initial cache size.
+        //expiry = 36000000, // 10 minutes // by default it never expires which is what we want for this table
+        coordinationType = CacheCoordinationType.INVALIDATE_CHANGED_OBJECTS,
+        isolation = CacheIsolationType.SHARED
+)
 @Entity
 @Table(name = "configMap")
 @XmlRootElement
@@ -31,7 +42,8 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "ConfigMap.findAll", query = "SELECT c FROM ConfigMap c"),
     @NamedQuery(name = "ConfigMap.findById", query = "SELECT c FROM ConfigMap c WHERE c.id = :id"),
     @NamedQuery(name = "ConfigMap.findByConfigkey", query = "SELECT c FROM ConfigMap c WHERE c.configkey = :configkey")})
-public class ConfigMap implements  BaseEntity, Serializable {
+public class ConfigMap implements BaseEntity, Serializable {
+
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -114,5 +126,5 @@ public class ConfigMap implements  BaseEntity, Serializable {
     public String toString() {
         return configkey;
     }
-    
+
 }
