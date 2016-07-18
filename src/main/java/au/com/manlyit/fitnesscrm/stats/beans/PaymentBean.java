@@ -43,6 +43,9 @@ import java.util.regex.Pattern;
 import javax.ejb.AsyncResult;
 import javax.ejb.Asynchronous;
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
+import static javax.ejb.TransactionAttributeType.REQUIRES_NEW;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.xml.ws.WebServiceException;
@@ -82,248 +85,260 @@ public class PaymentBean implements Serializable {
         return new NonPCIService(url).getBasicHttpBindingINonPCIService();
     }
 
-    public synchronized void createCRMPaymentSchedule(Customers cust, Date scheduleStartDate, Date scheduleEndDate, char schedulePeriodType, int payDayOfWeek, int dayOfMonth, long amountInCents, int limitToNumberOfPayments, long paymentAmountLimitInCents, boolean keepManualPayments, boolean firstWeekOfMonth, boolean secondWeekOfMonth, boolean thirdWeekOfMonth, boolean fourthWeekOfMonth, String loggedInUser, String sessionId, String digitalKey, FutureMapEJB futureMap, PaymentBean payBean) {
+    @TransactionAttribute(TransactionAttributeType.NEVER)// we don't want a transaction for this method as teh call within this method will invoke their own transactions
+   @Asynchronous
+    public Future<PaymentGatewayResponse>  createCRMPaymentSchedule(Customers cust, Date scheduleStartDate, Date scheduleEndDate, char schedulePeriodType, int payDayOfWeek, int dayOfMonth, long amountInCents, int limitToNumberOfPayments, long paymentAmountLimitInCents, boolean keepManualPayments, boolean firstWeekOfMonth, boolean secondWeekOfMonth, boolean thirdWeekOfMonth, boolean fourthWeekOfMonth, String loggedInUser, String sessionId, String digitalKey, FutureMapEJB futureMap, PaymentBean payBean) {
 
-        if (schedulePeriodType == 'W' || schedulePeriodType == 'F' || schedulePeriodType == 'N' || schedulePeriodType == '4') {
-            if (payDayOfWeek < 1 || payDayOfWeek > 7) {
-                LOGGER.log(Level.WARNING, "createSchedule  FAILED: A value must be provided for dayOfWeek  when the SchedulePeriodType is  W,F,4,N");
-                return;
+        PaymentGatewayResponse pgr = new PaymentGatewayResponse(false, cust, "", "-1", "An unhandled error occurred!");
+        
+        try {
+            if (schedulePeriodType == 'W' || schedulePeriodType == 'F' || schedulePeriodType == 'N' || schedulePeriodType == '4') {
+                if (payDayOfWeek < 1 || payDayOfWeek > 7) {
+                    LOGGER.log(Level.WARNING, "createSchedule  FAILED: A value must be provided for dayOfWeek  when the SchedulePeriodType is  W,F,4,N");
+                    return new AsyncResult<>(new PaymentGatewayResponse(false, cust, "", "-1", "createSchedule  FAILED: A value must be provided for dayOfWeek  when the SchedulePeriodType is  W,F,4,N"));
+                }
+                if (payDayOfWeek < 2 || payDayOfWeek > 6) {
+                    payDayOfWeek = 2;// can't debit on weekends only weekdays
+                }
             }
-            if (payDayOfWeek < 2 || payDayOfWeek > 6) {
-                payDayOfWeek = 2;// can't debit on weekends only weekdays
+            if (schedulePeriodType == 'M') {
+                if (dayOfMonth < 1 || dayOfMonth > 31) {
+                    LOGGER.log(Level.WARNING, "createSchedule FAILED: A value must be provided for dayOfMonth (1..31 )\n" + " when the\n" + "SchedulePeriodType is in\n" + "M");
+                    return new AsyncResult<>(new PaymentGatewayResponse(false, cust, "", "-1", "createSchedule FAILED: A value must be provided for dayOfMonth (1..31 )\n" + " when the\n" + "SchedulePeriodType is in\n" + "M"));
+                }
             }
-        }
-        if (schedulePeriodType == 'M') {
-            if (dayOfMonth < 1 || dayOfMonth > 31) {
-                LOGGER.log(Level.WARNING, "createSchedule FAILED: A value must be provided for dayOfMonth (1..31 )\n" + " when the\n" + "SchedulePeriodType is in\n" + "M");
-                return;
+            
+            int check = 0;
+            if (firstWeekOfMonth) {
+                check++;
             }
-        }
+            if (secondWeekOfMonth) {
+                check++;
+            }
+            if (thirdWeekOfMonth) {
+                check++;
+            }
+            if (fourthWeekOfMonth) {
+                check++;
+            }
+            if (schedulePeriodType == 'N' && check == 0) {
+                LOGGER.log(Level.WARNING, "createSchedule FAILED: A value must be provided for week Of Month  when the SchedulePeriodType is N");
+                return new AsyncResult<>(new PaymentGatewayResponse(false, cust, "", "-1", "createSchedule FAILED: A value must be provided for week Of Month  when the SchedulePeriodType is N"));
+            }
 
-        int check = 0;
-        if (firstWeekOfMonth) {
-            check++;
-        }
-        if (secondWeekOfMonth) {
-            check++;
-        }
-        if (thirdWeekOfMonth) {
-            check++;
-        }
-        if (fourthWeekOfMonth) {
-            check++;
-        }
-        if (schedulePeriodType == 'N' && check == 0) {
-            LOGGER.log(Level.WARNING, "createSchedule FAILED: A value must be provided for week Of Month  when the SchedulePeriodType is N");
-            return;
-        }
-
-        //delete all existing scheduled payments
-        List<Payments> crmPaymentList = paymentsFacade.findScheduledPaymentsByCustomer(cust, true);
-        if (crmPaymentList != null) {
-            LOGGER.log(Level.INFO, "createSchedule - Found {0} existing scheduled payments for {1}", new Object[]{crmPaymentList.size(), cust.getUsername()});
-            for (int x = crmPaymentList.size() - 1; x > -1; x--) {
-                Payments p = crmPaymentList.get(x);
-                String ref = p.getId().toString();
-                boolean isManual = p.getManuallyAddedPayment();
-                if (keepManualPayments == true && isManual) {
-                    LOGGER.log(Level.INFO, "createSchedule - keeping manual payment: Cust={0}, Ref={1}, Manaul Payment = {2}", new Object[]{cust.getUsername(), ref, isManual});
-                } else {
-                    LOGGER.log(Level.INFO, "createSchedule - Deleting payment: Cust={0}, Ref={1}, Manaul Payment = {2}", new Object[]{cust.getUsername(), ref, isManual});
-                    //paymentsFacade.remove(p); will be deleted once processed
-                    p.setPaymentStatus(PaymentStatus.DELETE_REQUESTED.value());
-                    paymentsFacade.edit(p);
-
-                    AsyncJob aj = new AsyncJob("DeletePayment", payBean.deletePayment(cust, null, null, p, loggedInUser, digitalKey));
-                    futureMap.put(sessionId, aj);
-                    try {
+            //delete all existing scheduled payments
+            List<Payments> crmPaymentList = paymentsFacade.findScheduledPaymentsByCustomer(cust, true);
+            if (crmPaymentList != null) {
+                LOGGER.log(Level.INFO, "createSchedule - Found {0} existing scheduled payments for {1}", new Object[]{crmPaymentList.size(), cust.getUsername()});
+                for (int x = crmPaymentList.size() - 1; x > -1; x--) {
+                    Payments p = crmPaymentList.get(x);
+                    String ref = p.getId().toString();
+                    boolean isManual = p.getManuallyAddedPayment();
+                    if (keepManualPayments == true && isManual) {
+                        LOGGER.log(Level.INFO, "createSchedule - keeping manual payment: Cust={0}, Ref={1}, Manaul Payment = {2}", new Object[]{cust.getUsername(), ref, isManual});
+                    } else {
+                        LOGGER.log(Level.INFO, "createSchedule - Deleting payment: Cust={0}, Ref={1}, Manaul Payment = {2}", new Object[]{cust.getUsername(), ref, isManual});
+                        //paymentsFacade.remove(p); will be deleted once processed
+                        p.setPaymentStatus(PaymentStatus.DELETE_REQUESTED.value());
+                        paymentsFacade.edit(p);
+                        
+                        AsyncJob aj = new AsyncJob("DeletePayment", payBean.deletePayment(cust, null, null, p, loggedInUser, digitalKey));
+                        futureMap.put(sessionId, aj);
+                        /*  try {
                         Thread.sleep(100);// the payment gateway has some concurrency throttling so we don't want to exceed our number of txns per second.
                     } catch (InterruptedException ex) {
                         Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, null, ex);
+                    }*/
                     }
                 }
             }
-        }
-        // startAsynchJob("ClearSchedule", paymentBean.clearSchedule(cust, false, loggedInUser, getDigitalKey()));// work around failsafe until migration complete. THere are styill scheduled payments without a payment reference from DB
-        // try {
-        //     Thread.sleep(200);// work around to ensure clearschedule workaround doesn't impact new payments being added 
-        // } catch (InterruptedException interruptedException) {
-        //  }
-        GregorianCalendar startCal = new GregorianCalendar();
-        GregorianCalendar endCal = new GregorianCalendar();
-        startCal.setTime(scheduleStartDate);
-        endCal.setTime(scheduleEndDate);
-        int calendarField = 0;
-        int calendarAmount = 0;
-        int currentDay = startCal.get(Calendar.DAY_OF_MONTH);
-        int calendarDow = startCal.get(Calendar.DAY_OF_WEEK);
-        if (schedulePeriodType != 'M') {
-            dayOfMonth = currentDay;
-        }
-
-        switch (schedulePeriodType) {
-            case 'W'://weekly
-                calendarField = Calendar.DAY_OF_YEAR;
-                calendarAmount = 7;
-                if (calendarDow > payDayOfWeek) {
-                    int d = (payDayOfWeek + 7) - calendarDow;
-                    startCal.add(Calendar.DAY_OF_YEAR, d);
-                } else {
-                    int d = payDayOfWeek - calendarDow;
-                    startCal.add(Calendar.DAY_OF_YEAR, d);
-                }//sunday = 1 , monday = 2 ...saturday = 7
-                break;
-            case 'F'://fortnightly
-                calendarField = Calendar.DAY_OF_YEAR;
-                calendarAmount = 14;
-                if (calendarDow > payDayOfWeek) {
-                    int d = (payDayOfWeek + 7) - calendarDow;
-                    startCal.add(Calendar.DAY_OF_YEAR, d);
-                } else {
-                    int d = payDayOfWeek - calendarDow;
-                    startCal.add(Calendar.DAY_OF_YEAR, d);
-                }
-                break;
-            case 'M':// monthly
-                calendarField = Calendar.MONTH;
-                calendarAmount = 1;
-
-                if (currentDay > dayOfMonth) {
-                    startCal.add(calendarField, 1);
-                }
-                startCal.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-                break;
-            case '4': // 4 weekly
-                calendarField = Calendar.DAY_OF_YEAR;
-                calendarAmount = 28;
-                //startCal.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-                //if (currentDay > dayOfMonth) {
-                //    startCal.add(Calendar.MONTH, 1);
-                //}
-                calendarDow = startCal.get(Calendar.DAY_OF_WEEK);
-                if (calendarDow > payDayOfWeek) {
-                    int d = (payDayOfWeek + 7) - calendarDow;
-                    startCal.add(Calendar.DAY_OF_YEAR, d);
-                } else {
-                    int d = payDayOfWeek - calendarDow;
-                    startCal.add(Calendar.DAY_OF_YEAR, d);
-                }
-
-                break;
-            case 'N': //Weekday in month (e.g. Monday in the third week of every month)
-                calendarField = Calendar.DAY_OF_YEAR;
-                calendarAmount = 7;
-                calendarDow = startCal.get(Calendar.DAY_OF_WEEK);
-                if (calendarDow > payDayOfWeek) {
-                    int d = (payDayOfWeek + 7) - calendarDow;
-                    startCal.add(Calendar.DAY_OF_YEAR, d);
-                } else {
-                    int d = payDayOfWeek - calendarDow;
-                    startCal.add(Calendar.DAY_OF_YEAR, d);
-                }
-                break;
-            case 'Q': // quarterly
-                calendarField = Calendar.MONTH;
-                calendarAmount = 3;
-                //if (currentDay > dayOfMonth) {
-                //     startCal.add(Calendar.MONTH, 1);
-                // }
-                // startCal.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-                break;
-            case 'H': // 6 monthly
-                calendarField = Calendar.MONTH;
-                calendarAmount = 6;
-                // if (currentDay > dayOfMonth) {
-                //     startCal.add(Calendar.MONTH, 1);
-                // }
-                //  startCal.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-                break;
-            case 'Y'://yearly
-                calendarField = Calendar.YEAR;
-                calendarAmount = 1;
-                // if (currentDay > dayOfMonth) {
-                //      startCal.add(Calendar.MONTH, 1);
-                //  }
-                //  startCal.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-                break;
-        }
-        int numberOfpayments = 0;
-        long cumulativeAmountInCents = 0;
-        Date newDebitDate = startCal.getTime();
-
-        while (startCal.compareTo(endCal) < 0) {
-
-            if (schedulePeriodType == 'N') {
-                //TODO fix this 
-                //if (startCal.get(Calendar.WEEK_OF_MONTH) == 1 && firstWeekOfMonth == true) {
-                if (startCal.get(Calendar.DAY_OF_MONTH) >= 1 && startCal.get(Calendar.DAY_OF_MONTH) <= 7 && firstWeekOfMonth == true) {
-                    if (arePaymentsWithinLimits(limitToNumberOfPayments, paymentAmountLimitInCents, cumulativeAmountInCents, amountInCents, numberOfpayments)) {
-                        addNewPayment(cust, newDebitDate, amountInCents, false, loggedInUser, sessionId, digitalKey, futureMap, payBean);
-                        numberOfpayments++;
-                    }
-
-                }
-                if (startCal.get(Calendar.DAY_OF_MONTH) >= 8 && startCal.get(Calendar.DAY_OF_MONTH) <= 14 && secondWeekOfMonth == true) {
-                    if (arePaymentsWithinLimits(limitToNumberOfPayments, paymentAmountLimitInCents, cumulativeAmountInCents, amountInCents, numberOfpayments)) {
-                        addNewPayment(cust, newDebitDate, amountInCents, false, loggedInUser, sessionId, digitalKey, futureMap, payBean);
-                        numberOfpayments++;
-                    }
-
-                }
-                if (startCal.get(Calendar.DAY_OF_MONTH) >= 15 && startCal.get(Calendar.DAY_OF_MONTH) <= 21 && thirdWeekOfMonth == true) {
-                    if (arePaymentsWithinLimits(limitToNumberOfPayments, paymentAmountLimitInCents, cumulativeAmountInCents, amountInCents, numberOfpayments)) {
-                        addNewPayment(cust, newDebitDate, amountInCents, false, loggedInUser, sessionId, digitalKey, futureMap, payBean);
-                        numberOfpayments++;
-                    }
-
-                }
-                if (startCal.get(Calendar.DAY_OF_MONTH) >= 22 && startCal.get(Calendar.DAY_OF_MONTH) <= 28 && fourthWeekOfMonth == true) {
-                    if (arePaymentsWithinLimits(limitToNumberOfPayments, paymentAmountLimitInCents, cumulativeAmountInCents, amountInCents, numberOfpayments)) {
-                        addNewPayment(cust, newDebitDate, amountInCents, false, loggedInUser, sessionId, digitalKey, futureMap, payBean);
-                        numberOfpayments++;
-                    }
-
-                }
-                startCal.add(calendarField, calendarAmount);
-                Date placeholder = startCal.getTime();
-
-                calendarDow = startCal.get(Calendar.DAY_OF_WEEK);
-                if (calendarDow > payDayOfWeek) {
-                    int d = calendarDow - (payDayOfWeek + 7);
-                    startCal.add(Calendar.DAY_OF_YEAR, d);
-                } else {
-                    int d = payDayOfWeek - calendarDow;
-                    startCal.add(Calendar.DAY_OF_YEAR, d);
-                }
-                newDebitDate = startCal.getTime();
-                startCal.setTime(placeholder);// set it back to correct day of month as we may have changed the day of the week.
-            } else {
-                if (arePaymentsWithinLimits(limitToNumberOfPayments, paymentAmountLimitInCents, cumulativeAmountInCents, amountInCents, numberOfpayments)) {
-                    addNewPayment(cust, newDebitDate, amountInCents, false, loggedInUser, sessionId, digitalKey, futureMap, payBean);
-                    numberOfpayments++;
-                }
-                startCal.add(calendarField, calendarAmount);
-                Date placeholder = startCal.getTime();
-                // we can only schedule payments for business days
-                if (startCal.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) {
-                    startCal.add(Calendar.DAY_OF_YEAR, 2);
-                }
-                if (startCal.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
-                    startCal.add(Calendar.DAY_OF_YEAR, 1);
-                }
-                newDebitDate = startCal.getTime();
-                startCal.setTime(placeholder);// set it back to correct day of month as we may have changed the day of the week.
+            // startAsynchJob("ClearSchedule", paymentBean.clearSchedule(cust, false, loggedInUser, getDigitalKey()));// work around failsafe until migration complete. THere are styill scheduled payments without a payment reference from DB
+            // try {
+            //     Thread.sleep(200);// work around to ensure clearschedule workaround doesn't impact new payments being added 
+            // } catch (InterruptedException interruptedException) {
+            //  }
+            GregorianCalendar startCal = new GregorianCalendar();
+            GregorianCalendar endCal = new GregorianCalendar();
+            startCal.setTime(scheduleStartDate);
+            endCal.setTime(scheduleEndDate);
+            int calendarField = 0;
+            int calendarAmount = 0;
+            int currentDay = startCal.get(Calendar.DAY_OF_MONTH);
+            int calendarDow = startCal.get(Calendar.DAY_OF_WEEK);
+            if (schedulePeriodType != 'M') {
+                dayOfMonth = currentDay;
             }
-            try {
+            
+            switch (schedulePeriodType) {
+                case 'W'://weekly
+                    calendarField = Calendar.DAY_OF_YEAR;
+                    calendarAmount = 7;
+                    if (calendarDow > payDayOfWeek) {
+                        int d = (payDayOfWeek + 7) - calendarDow;
+                        startCal.add(Calendar.DAY_OF_YEAR, d);
+                    } else {
+                        int d = payDayOfWeek - calendarDow;
+                        startCal.add(Calendar.DAY_OF_YEAR, d);
+                    }//sunday = 1 , monday = 2 ...saturday = 7
+                    break;
+                case 'F'://fortnightly
+                    calendarField = Calendar.DAY_OF_YEAR;
+                    calendarAmount = 14;
+                    if (calendarDow > payDayOfWeek) {
+                        int d = (payDayOfWeek + 7) - calendarDow;
+                        startCal.add(Calendar.DAY_OF_YEAR, d);
+                    } else {
+                        int d = payDayOfWeek - calendarDow;
+                        startCal.add(Calendar.DAY_OF_YEAR, d);
+                    }
+                    break;
+                case 'M':// monthly
+                    calendarField = Calendar.MONTH;
+                    calendarAmount = 1;
+                    
+                    if (currentDay > dayOfMonth) {
+                        startCal.add(calendarField, 1);
+                    }
+                    startCal.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                    break;
+                case '4': // 4 weekly
+                    calendarField = Calendar.DAY_OF_YEAR;
+                    calendarAmount = 28;
+                    //startCal.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                    //if (currentDay > dayOfMonth) {
+                    //    startCal.add(Calendar.MONTH, 1);
+                    //}
+                    calendarDow = startCal.get(Calendar.DAY_OF_WEEK);
+                    if (calendarDow > payDayOfWeek) {
+                        int d = (payDayOfWeek + 7) - calendarDow;
+                        startCal.add(Calendar.DAY_OF_YEAR, d);
+                    } else {
+                        int d = payDayOfWeek - calendarDow;
+                        startCal.add(Calendar.DAY_OF_YEAR, d);
+                    }
+                    
+                    break;
+                case 'N': //Weekday in month (e.g. Monday in the third week of every month)
+                    calendarField = Calendar.DAY_OF_YEAR;
+                    calendarAmount = 7;
+                    calendarDow = startCal.get(Calendar.DAY_OF_WEEK);
+                    if (calendarDow > payDayOfWeek) {
+                        int d = (payDayOfWeek + 7) - calendarDow;
+                        startCal.add(Calendar.DAY_OF_YEAR, d);
+                    } else {
+                        int d = payDayOfWeek - calendarDow;
+                        startCal.add(Calendar.DAY_OF_YEAR, d);
+                    }
+                    break;
+                case 'Q': // quarterly
+                    calendarField = Calendar.MONTH;
+                    calendarAmount = 3;
+                    //if (currentDay > dayOfMonth) {
+                    //     startCal.add(Calendar.MONTH, 1);
+                    // }
+                    // startCal.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                    break;
+                case 'H': // 6 monthly
+                    calendarField = Calendar.MONTH;
+                    calendarAmount = 6;
+                    // if (currentDay > dayOfMonth) {
+                    //     startCal.add(Calendar.MONTH, 1);
+                    // }
+                    //  startCal.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                    break;
+                case 'Y'://yearly
+                    calendarField = Calendar.YEAR;
+                    calendarAmount = 1;
+                    // if (currentDay > dayOfMonth) {
+                    //      startCal.add(Calendar.MONTH, 1);
+                    //  }
+                    //  startCal.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                    break;
+            }
+            int numberOfpayments = 0;
+            long cumulativeAmountInCents = 0;
+            Date newDebitDate = startCal.getTime();
+            
+            while (startCal.compareTo(endCal) < 0) {
+                
+                if (schedulePeriodType == 'N') {
+                    //TODO fix this 
+                    //if (startCal.get(Calendar.WEEK_OF_MONTH) == 1 && firstWeekOfMonth == true) {
+                    if (startCal.get(Calendar.DAY_OF_MONTH) >= 1 && startCal.get(Calendar.DAY_OF_MONTH) <= 7 && firstWeekOfMonth == true) {
+                        if (arePaymentsWithinLimits(limitToNumberOfPayments, paymentAmountLimitInCents, cumulativeAmountInCents, amountInCents, numberOfpayments)) {
+                            addNewPayment(cust, newDebitDate, amountInCents, false, loggedInUser, sessionId, digitalKey, futureMap, payBean);
+                            numberOfpayments++;
+                        }
+                        
+                    }
+                    if (startCal.get(Calendar.DAY_OF_MONTH) >= 8 && startCal.get(Calendar.DAY_OF_MONTH) <= 14 && secondWeekOfMonth == true) {
+                        if (arePaymentsWithinLimits(limitToNumberOfPayments, paymentAmountLimitInCents, cumulativeAmountInCents, amountInCents, numberOfpayments)) {
+                            addNewPayment(cust, newDebitDate, amountInCents, false, loggedInUser, sessionId, digitalKey, futureMap, payBean);
+                            numberOfpayments++;
+                        }
+                        
+                    }
+                    if (startCal.get(Calendar.DAY_OF_MONTH) >= 15 && startCal.get(Calendar.DAY_OF_MONTH) <= 21 && thirdWeekOfMonth == true) {
+                        if (arePaymentsWithinLimits(limitToNumberOfPayments, paymentAmountLimitInCents, cumulativeAmountInCents, amountInCents, numberOfpayments)) {
+                            addNewPayment(cust, newDebitDate, amountInCents, false, loggedInUser, sessionId, digitalKey, futureMap, payBean);
+                            numberOfpayments++;
+                        }
+                        
+                    }
+                    if (startCal.get(Calendar.DAY_OF_MONTH) >= 22 && startCal.get(Calendar.DAY_OF_MONTH) <= 28 && fourthWeekOfMonth == true) {
+                        if (arePaymentsWithinLimits(limitToNumberOfPayments, paymentAmountLimitInCents, cumulativeAmountInCents, amountInCents, numberOfpayments)) {
+                            addNewPayment(cust, newDebitDate, amountInCents, false, loggedInUser, sessionId, digitalKey, futureMap, payBean);
+                            numberOfpayments++;
+                        }
+                        
+                    }
+                    startCal.add(calendarField, calendarAmount);
+                    Date placeholder = startCal.getTime();
+                    
+                    calendarDow = startCal.get(Calendar.DAY_OF_WEEK);
+                    if (calendarDow > payDayOfWeek) {
+                        int d = calendarDow - (payDayOfWeek + 7);
+                        startCal.add(Calendar.DAY_OF_YEAR, d);
+                    } else {
+                        int d = payDayOfWeek - calendarDow;
+                        startCal.add(Calendar.DAY_OF_YEAR, d);
+                    }
+                    newDebitDate = startCal.getTime();
+                    startCal.setTime(placeholder);// set it back to correct day of month as we may have changed the day of the week.
+                } else {
+                    if (arePaymentsWithinLimits(limitToNumberOfPayments, paymentAmountLimitInCents, cumulativeAmountInCents, amountInCents, numberOfpayments)) {
+                        addNewPayment(cust, newDebitDate, amountInCents, false, loggedInUser, sessionId, digitalKey, futureMap, payBean);
+                        numberOfpayments++;
+                    }
+                    startCal.add(calendarField, calendarAmount);
+                    Date placeholder = startCal.getTime();
+                    // we can only schedule payments for business days
+                    if (startCal.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) {
+                        startCal.add(Calendar.DAY_OF_YEAR, 2);
+                    }
+                    if (startCal.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
+                        startCal.add(Calendar.DAY_OF_YEAR, 1);
+                    }
+                    newDebitDate = startCal.getTime();
+                    startCal.setTime(placeholder);// set it back to correct day of month as we may have changed the day of the week.
+                }
+                /*try {
                 Thread.sleep(200);
             } catch (InterruptedException ex) {
                 Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, null, ex);
+            }*/
             }
+            
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "createSchedule FAILED: Error",e);
+            pgr.setErrorMessage(e.getMessage());
+            return new AsyncResult<>(pgr);
         }
-
+       return new AsyncResult<>(new PaymentGatewayResponse(true, cust, "", "-1", ""));
+        
     }
 
-    private synchronized boolean arePaymentsWithinLimits(int limitToNumberOfPayments, long paymentAmountLimitInCents, long cumulativeAmountInCents, long amountInCents, int numberOfpayments) {
+    private boolean arePaymentsWithinLimits(int limitToNumberOfPayments, long paymentAmountLimitInCents, long cumulativeAmountInCents, long amountInCents, int numberOfpayments) {
         if (limitToNumberOfPayments > 0 || paymentAmountLimitInCents > 0) {
             cumulativeAmountInCents += amountInCents;
             if (limitToNumberOfPayments > 0 && paymentAmountLimitInCents > 0) {
@@ -349,7 +364,7 @@ public class PaymentBean implements Serializable {
 
     }
 
-    public synchronized boolean retryDeletePayment(Payments pay, String user, String sessionId, String digitalKey, FutureMapEJB futureMap, PaymentBean payBean) {
+    public boolean retryDeletePayment(Payments pay, String user, String sessionId, String digitalKey, FutureMapEJB futureMap, PaymentBean payBean) {
         //String user = FacesContext.getCurrentInstance().getExternalContext().getRemoteUser();
         if (user != null) {
 
@@ -373,7 +388,7 @@ public class PaymentBean implements Serializable {
         return true;
     }
 
-    public synchronized boolean retryAddNewPayment(Payments pay, String user, String sessionId, String digitalKey, FutureMapEJB futureMap, PaymentBean payBean) {
+    public boolean retryAddNewPayment(Payments pay, String user, String sessionId, String digitalKey, FutureMapEJB futureMap, PaymentBean payBean) {
         //String user = FacesContext.getCurrentInstance().getExternalContext().getRemoteUser();
         if (user != null) {
 
@@ -396,7 +411,8 @@ public class PaymentBean implements Serializable {
         return true;
     }
 
-    public synchronized void addNewPayment(Customers cust, Date debitDate, long amountInCents, boolean manualPayment, String user, String sessionId, String digitalKey, FutureMapEJB futureMap, PaymentBean payBean) {
+    @TransactionAttribute(REQUIRES_NEW)
+    public void addNewPayment(Customers cust, Date debitDate, long amountInCents, boolean manualPayment, String user, String sessionId, String digitalKey, FutureMapEJB futureMap, PaymentBean payBean) {
         //String user = FacesContext.getCurrentInstance().getExternalContext().getRemoteUser();
         if (user != null) {
 
@@ -417,16 +433,16 @@ public class PaymentBean implements Serializable {
                 paymentsFacade.createAndFlush(newPayment);// need to flush to ensure the id is generated as this onlyoccurs at flush time.
 
                 //int newId = newPayment.getId();
-               // if (newId != -1) {
+                // if (newId != -1) {
                 //    String newPaymentID = Integer.toString(newId);
                 //    newPayment.setPaymentReference(newPaymentID);
-                   // paymentsFacade.edit(newPayment);
-                    LOGGER.log(Level.INFO, "New Payment Created for customer {0} with paymentID: {1}, time: {2}", new Object[]{cust.getUsername(), newPayment.getId(), new SimpleDateFormat("dd/MM/yy HH:mm:ss.SSS").format(new Date())});
-                    AsyncJob aj = new AsyncJob("AddPayment", payBean.addPayment(cust, debitDate, amountInCents, newPayment, user, digitalKey));
-                    futureMap.put(sessionId, aj);
-              //  } else {
-               //     LOGGER.log(Level.SEVERE, "Could not get an id from a newly persisted payment. Possible JPA caching issues. {0} ", new Object[]{cust.getUsername(),});
-              //  }
+                // paymentsFacade.edit(newPayment);
+                LOGGER.log(Level.INFO, "New Payment Created for customer {0} with paymentID: {1}, time: {2}", new Object[]{cust.getUsername(), newPayment.getId(), new SimpleDateFormat("dd/MM/yy HH:mm:ss.SSS").format(new Date())});
+                AsyncJob aj = new AsyncJob("AddPayment", payBean.addPayment(cust, debitDate, amountInCents, newPayment, user, digitalKey));
+                futureMap.put(sessionId, aj);
+                //  } else {
+                //     LOGGER.log(Level.SEVERE, "Could not get an id from a newly persisted payment. Possible JPA caching issues. {0} ", new Object[]{cust.getUsername(),});
+                //  }
 
             } catch (Exception e) {
                 LOGGER.log(Level.WARNING, "Add Single Payment failed due to exception:", e);
@@ -610,6 +626,7 @@ public class PaymentBean implements Serializable {
     }
 
     @Asynchronous
+    @TransactionAttribute(REQUIRES_NEW) //see this for an explanation. we want a new transaction http://docs.oracle.com/javaee/6/tutorial/doc/bncij.html
     public Future<PaymentGatewayResponse> deletePayment(Customers cust, Date debitDate, Long paymentAmountInCents, Payments payment, String loggedInUser, String digitalKey) {
         //  This method will delete a single payment from the Customer's payment schedule.
         //  It is important to note the following when deleting a payment:
@@ -623,7 +640,7 @@ public class PaymentBean implements Serializable {
         //  than one payment for PaymentAmountInCents scheduled on DebitDate, then only
         //  one of the payments will be deleted.
         String paymentReference = "";
-        
+
         if (paymentAmountInCents == null) {
             paymentAmountInCents = (long) -1;
         }
@@ -691,7 +708,7 @@ public class PaymentBean implements Serializable {
                     String auditDetails = "Debit Date:" + debitDateString + ", Amount (cents): " + paymentAmountInCents.toString() + ", Payment Ref:" + paymentReference;
                     String changedFrom = "Ref:" + paymentReference;
                     String changedTo = "Deleted";
-                    pgr = new PaymentGatewayResponse(true, payment,  paymentReference, "-1", "");
+                    pgr = new PaymentGatewayResponse(true, payment, paymentReference, "-1", "");
                     try {
                         auditLogFacade.audit(customersFacade.findCustomerByUsername(loggedInUser), cust, "deletePayment", auditDetails, changedFrom, changedTo);
 
@@ -867,7 +884,7 @@ public class PaymentBean implements Serializable {
     }
 
     @Asynchronous
-    public synchronized Future<PaymentGatewayResponse> getScheduledPayments(Customers cust, Date fromDate, Date toDate, String digitalKey) {
+    public Future<PaymentGatewayResponse> getScheduledPayments(Customers cust, Date fromDate, Date toDate, String digitalKey) {
 
         ArrayOfScheduledPayment result = new ArrayOfScheduledPayment();
         PaymentGatewayResponse pgr = new PaymentGatewayResponse(false, result, "", "-1", "An unhandled error occurred!");
@@ -1166,7 +1183,7 @@ public class PaymentBean implements Serializable {
     }
 
     @Asynchronous
-    public synchronized Future<PaymentGatewayResponse> getPayments(Customers cust, String paymentType, String paymentMethod, String paymentSource, String paymentReference, Date fromDate, Date toDate, boolean useSettlementDate, String digitalKey) {
+    public Future<PaymentGatewayResponse> getPayments(Customers cust, String paymentType, String paymentMethod, String paymentSource, String paymentReference, Date fromDate, Date toDate, boolean useSettlementDate, String digitalKey) {
         //  Description
         //  	  
         //  This method allows you to retrieve payment information from across Ezidebit's various
@@ -1294,7 +1311,7 @@ public class PaymentBean implements Serializable {
     }
 
     @Asynchronous
-    public synchronized Future<PaymentGatewayResponse> getAllPaymentsBySystemSinceDate(Date fromDate, Date endDate, boolean useSettlementDate, String digitalKey) {
+    public Future<PaymentGatewayResponse> getAllPaymentsBySystemSinceDate(Date fromDate, Date endDate, boolean useSettlementDate, String digitalKey) {
         //  Description
         //  	  
         //  This method allows you to retrieve payment information from across Ezidebit's various
@@ -1359,6 +1376,7 @@ public class PaymentBean implements Serializable {
     }
 
     @Asynchronous
+    @TransactionAttribute(REQUIRES_NEW)
     public Future<PaymentGatewayResponse> addPayment(Customers cust, Date debitDate, Long paymentAmountInCents, Payments payment, String loggedInUser, String digitalKey) {
         // paymentReference Max 50 chars. It can be search with with a wildcard in other methods. Use invoice number or other payment identifier
         LOGGER.log(Level.INFO, "running asychronous task addPayment Customer {0}, debitDate {1}, paymentAmountInCents {2}", new Object[]{cust, debitDate, paymentAmountInCents});
@@ -1388,7 +1406,7 @@ public class PaymentBean implements Serializable {
                 if (e.getMessage().contains("Your update could not be processed at this time")) {
                     eMessage = "The Gateway is busy and cannot process your add payment request at this time.";
                     LOGGER.log(Level.WARNING, eMessage);
-                } else if (e.getMessage().contains("This customer already has two payments on this date")) {
+                } else if (e.getMessage().contains("This customer already has 2 payments on this date")) {
                     eMessage = "Add payment DENIED - This customer already has two payments on this date. This is an ezidebit payment gateway restriction";
                     LOGGER.log(Level.WARNING, eMessage);
                 } else {

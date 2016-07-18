@@ -81,24 +81,21 @@ public ABC addNewABC(ABC abc) {
 
      */
     public void createAndFlush(Payments entity) {
-        
+
         getEntityManager().persist(entity);
         getEntityManager().flush();
-        
-  //      String message = "Payment Entity CREATED and flushed  to database: " + entity.getId() +"" + new SimpleDateFormat("dd/MM/yy HH:mm:ss.SSS").format(new Date());
- 
-   //     LOGGER.log(Level.INFO, message);
 
+        //      String message = "Payment Entity CREATED and flushed  to database: " + entity.getId() +"" + new SimpleDateFormat("dd/MM/yy HH:mm:ss.SSS").format(new Date());
+        //     LOGGER.log(Level.INFO, message);
     }
 
     public void editAndFlush(Payments entity) {
-        
+
         getEntityManager().merge(entity);
         getEntityManager().flush();
-        
-   //    String message = "Payment Entity MERGED and flushed  to database: " + entity.getId() +"" + new SimpleDateFormat("dd/MM/yy HH:mm:ss.SSS").format(new Date());
-   //     LOGGER.log(Level.INFO, message);
 
+        //    String message = "Payment Entity MERGED and flushed  to database: " + entity.getId() +"" + new SimpleDateFormat("dd/MM/yy HH:mm:ss.SSS").format(new Date());
+        //     LOGGER.log(Level.INFO, message);
     }
 
     public List<Payments> findPaymentsByCustomer(Customers customer, boolean bypassCache) {
@@ -112,9 +109,10 @@ public ABC addNewABC(ABC abc) {
             cq.where(cb.equal(cust, customer));
             cq.orderBy(cb.desc(dDate));
             TypedQuery<Payments> q = em.createQuery(cq);
-            if (bypassCache) {
+            //q.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase);
+            /* if (bypassCache) {
                 q.setHint("javax.persistence.cache.retrieveMode", "BYPASS");
-            }
+            }*/
             retList = q.getResultList();
         } catch (Exception e) {
 
@@ -136,6 +134,7 @@ public ABC addNewABC(ABC abc) {
             cq.where(cb.and(cb.equal(cust, customer), cb.equal(paymentStatus, status)));
             cq.orderBy(cb.asc(dDate));
             TypedQuery<Payments> q = em.createQuery(cq);
+            //q.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase);
             retList = q.getResultList();
         } catch (Exception e) {
 
@@ -157,6 +156,7 @@ public ABC addNewABC(ABC abc) {
             cq.orderBy(cb.desc(dDate));
 
             TypedQuery<Payments> q = em.createQuery(cq);
+            //q.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase);
             List<Payments> pl;
             pl = q.getResultList();
             if (pl == null) {
@@ -186,7 +186,7 @@ public ABC addNewABC(ABC abc) {
             cq.orderBy(cb.asc(dDate));
 
             TypedQuery<Payments> q = em.createQuery(cq);
-
+            //q.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase);
             if (q.getResultList().size() > 0) {
                 cm = q.getResultList().get(0);
             } else {
@@ -198,7 +198,7 @@ public ABC addNewABC(ABC abc) {
         return cm;
     }
 
-    public Payments findPaymentById(int id,boolean bypassCache) {
+    public Payments findPaymentById(int id, boolean bypassCache) {
         Payments cm = null;
         try {
             CriteriaBuilder cb = em.getCriteriaBuilder();
@@ -209,10 +209,10 @@ public ABC addNewABC(ABC abc) {
             cq.where(cb.equal(payId, id));
 
             TypedQuery<Payments> q = em.createQuery(cq);
-            q.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheByExactPrimaryKey);
-            if (bypassCache) {
+            //q.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase);
+            /* if (bypassCache) {
                 q.setHint("javax.persistence.cache.retrieveMode", "BYPASS");
-            }
+            }*/
             List<Payments> pList = q.getResultList();
             if (pList != null) {
                 if (pList.size() > 0) {
@@ -237,6 +237,7 @@ public ABC addNewABC(ABC abc) {
 
             TypedQuery<Payments> q = em.createQuery(cq);
             if (q.getResultList().size() > 0) {
+                //q.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase);
                 cm = q.getSingleResult();
             }
         } catch (Exception e) {
@@ -274,6 +275,7 @@ public ABC addNewABC(ABC abc) {
             cq.where(predicatesList1.<Predicate>toArray(new Predicate[predicatesList1.size()]));
 
             TypedQuery<Payments> q = em.createQuery(cq);
+            //q.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase);
             if (q.getResultList().size() == 1) {
                 cm = q.getSingleResult();
             } else if (q.getResultList().size() > 1) {
@@ -331,6 +333,7 @@ public ABC addNewABC(ABC abc) {
             cq.where(predicatesList1.<Predicate>toArray(new Predicate[predicatesList1.size()]));
 
             TypedQuery<Payments> q = em.createQuery(cq);
+            //q.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase);
             if (q.getResultList().size() == 1) {
                 cm = q.getSingleResult();
             } else if (q.getResultList().size() > 1) {
@@ -389,6 +392,7 @@ public ABC addNewABC(ABC abc) {
             cq.where(predicatesList1.<Predicate>toArray(new Predicate[predicatesList1.size()]));
 
             TypedQuery<Payments> q = em.createQuery(cq);
+            //q.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase);
             if (q.getResultList().size() == 1) {
                 cm = q.getSingleResult();
             } else if (q.getResultList().size() > 1) {
@@ -450,6 +454,7 @@ public ABC addNewABC(ABC abc) {
             cq.where(predicatesList1.<Predicate>toArray(new Predicate[predicatesList1.size()]));
 
             TypedQuery<Payments> q = em.createQuery(cq);
+            //q.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase);
             if (q.getResultList().size() == 1) {
                 cm = q.getSingleResult();
             } else if (q.getResultList().size() > 1) {
@@ -489,6 +494,7 @@ public ABC addNewABC(ABC abc) {
             cq.where(predicatesList1.<Predicate>toArray(new Predicate[predicatesList1.size()]));
 
             TypedQuery<Payments> q = em.createQuery(cq);
+            //q.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase);
             cm = q.getResultList();
 
         } catch (Exception e) {
@@ -569,6 +575,7 @@ public ABC addNewABC(ABC abc) {
                 cq.orderBy(cb.desc(stime));
             }
             TypedQuery<Payments> q = em.createQuery(cq);
+            //q.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase);
             retList = q.getResultList();
 
             // for debugging

@@ -50,7 +50,7 @@ public abstract class AbstractFacade<T> implements Serializable {
             
             getEntityManager().persist(entity);
             
-            String message = "Entity Created: " + entity.toString();
+           // String message = "Entity Created: " + entity.toString();
             //logger.log(Level.INFO, message);
       /*  } catch (Exception e) {
             logger.log(Level.WARNING, "<-------------------------------------------------- Abstract Facade - could not create Entity ------------------------------------------------------------------------>");

@@ -17,6 +17,8 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Root;
+import org.eclipse.persistence.config.CacheUsage;
+import org.eclipse.persistence.config.QueryHints;
 
 /**
  *
@@ -51,6 +53,7 @@ public class PaymentParametersFacade extends AbstractFacade<PaymentParameters> {
             cq.where(cb.equal(loggedInUser, cust));
 
             Query q = em.createQuery(cq);
+            //q.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase);
             paymentParams = (PaymentParameters) q.getSingleResult();
         } catch (Exception e) {
             LOGGER.log(Level.INFO, "Payment Parameters for customer not found:{0}", cust);

@@ -2132,6 +2132,7 @@ updatePaymentTableComponents();
         } else {
             JsfUtil.addErrorMessage("Payment", "The Create Schedule operation failed!.");
         }*/
+        updatePaymentTableComponents() ;
         logger.log(Level.INFO, "processCreateSchedule completed");
     }
 
@@ -2898,7 +2899,7 @@ updatePaymentTableComponents();
             }
             ejbPaymentParametersFacade.edit(pp);
             customersFacade.edit(c);
-            paymentBean.createCRMPaymentSchedule(selectedCustomer, paymentDebitDate, endCal.getTime(), spt, dow, paymentDayOfMonth, amount, paymentLimitToNumberOfPayments, amountLimit, paymentKeepManualPayments, paymentFirstWeekOfMonth, paymentSecondWeekOfMonth, paymentThirdWeekOfMonth, paymentFourthWeekOfMonth, loggedInUser, sessionId, getDigitalKey(), futureMap, paymentBean);
+             startAsynchJob("CreateSchedule", paymentBean.createCRMPaymentSchedule(selectedCustomer, paymentDebitDate, endCal.getTime(), spt, dow, paymentDayOfMonth, amount, paymentLimitToNumberOfPayments, amountLimit, paymentKeepManualPayments, paymentFirstWeekOfMonth, paymentSecondWeekOfMonth, paymentThirdWeekOfMonth, paymentFourthWeekOfMonth, loggedInUser, sessionId, getDigitalKey(), futureMap, paymentBean));
             /* List<Payments> crmPaymentList = paymentsFacade.findPaymentsByCustomerAndStatus(selectedCustomer, PaymentStatus.SCHEDULED.value());
              for (Payments p : crmPaymentList) {
              if (!(paymentKeepManualPayments && p.getManuallyAddedPayment())) {

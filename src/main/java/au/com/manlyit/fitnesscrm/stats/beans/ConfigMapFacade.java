@@ -17,6 +17,7 @@ import javax.persistence.NoResultException;
 import javax.persistence.NonUniqueResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
+import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
@@ -31,9 +32,11 @@ import org.eclipse.persistence.config.QueryHints;
 @Stateless
 public class ConfigMapFacade extends AbstractFacade<ConfigMap> {
 
+    private static final long serialVersionUID = 1L;
+
     @PersistenceContext(unitName = "FitnessStatsPU")
     private EntityManager em;
-    private static final Logger logger = Logger.getLogger(ConfigMapFacade.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(ConfigMapFacade.class.getName());
     private final StringEncrypter encrypter = new StringEncrypter("(H6%efRdswWw2@8j&6yvFdsP)");
     private static final String ETAG = "{!-ENCRYPT-!}";
 
@@ -68,7 +71,7 @@ public class ConfigMapFacade extends AbstractFacade<ConfigMap> {
         String value = null;
         String ky = null;
         if (configkey == null || configkey.trim().isEmpty()) {
-            logger.log(Level.WARNING, "Refusing to get a config value from the ConfigMap database table as the key supplied is NULL or empty :(");
+            LOGGER.log(Level.WARNING, "Refusing to get a config value from the ConfigMap database table as the key supplied is NULL or empty :(");
         } else {
             try {
                 CriteriaBuilder cb = em.getCriteriaBuilder();
@@ -85,9 +88,9 @@ public class ConfigMapFacade extends AbstractFacade<ConfigMap> {
                     value = cm.getConfigvalue();
                     ky = cm.getConfigkey();
                 }
-                logger.log(Level.FINER, "Key={0}, Value={1}", new Object[]{ky, value});
+                LOGGER.log(Level.FINER, "Key={0}, Value={1}", new Object[]{ky, value});
             } catch (NoResultException e) {
-                logger.log(Level.WARNING, "NoResultException: Failed to find this key ({0}) in the ConfigMap database table :(", configkey);
+                LOGGER.log(Level.WARNING, "NoResultException: Failed to find this key ({0}) in the ConfigMap database table :(", configkey);
                 value = "??? ConfigMap key not found (" + configkey + ")";
                 getEntityManager().persist(new ConfigMap(0, configkey, value));
             } catch (NonUniqueResultException e) {
@@ -98,15 +101,15 @@ public class ConfigMapFacade extends AbstractFacade<ConfigMap> {
                 Expression<String> expresskey = rt.get("configkey");
                 cq.where(cb.equal(expresskey, configkey));
 
-                Query q = em.createQuery(cq);
-                List<ConfigMap> cmList = (List<ConfigMap>) q.getResultList();
+                TypedQuery<ConfigMap> q = em.createQuery(cq);
+                List<ConfigMap> cmList =  q.getResultList();
                 ConfigMap cm = cmList.get(0);
                 value = cm.getConfigvalue();
                 int numberOfDups = cmList.size();
-                logger.log(Level.SEVERE, "Found {0} duplicate keys for key {1} in the ConfigMap database table. Using the first one found :(", new Object[]{numberOfDups, configkey});
+                LOGGER.log(Level.SEVERE, "Found {0} duplicate keys for key {1} in the ConfigMap database table. Using the first one found :(", new Object[]{numberOfDups, configkey});
             } catch (Exception e) {
-                logger.log(Level.INFO, "Key={0}, Value={1}", new Object[]{ky, value});
-                logger.log(Level.WARNING, "Failed to get this key " + configkey + " from the ConfigMap database table due to an exception:(", e);
+                LOGGER.log(Level.INFO, "Key={0}, Value={1}", new Object[]{ky, value});
+                LOGGER.log(Level.WARNING, "Failed to get this key " + configkey + " from the ConfigMap database table due to an exception:(", e);
             }
         }
         return value;
@@ -117,7 +120,7 @@ public class ConfigMapFacade extends AbstractFacade<ConfigMap> {
         String value = null;
         String ky = null;
         if (configkey == null || configkey.trim().isEmpty()) {
-            logger.log(Level.WARNING, "Refusing to get a config value from the ConfigMap database table as the key supplied is NULL or empty :(");
+            LOGGER.log(Level.WARNING, "Refusing to get a config value from the ConfigMap database table as the key supplied is NULL or empty :(");
         } else {
             try {
                 CriteriaBuilder cb = em.getCriteriaBuilder();
@@ -126,16 +129,17 @@ public class ConfigMapFacade extends AbstractFacade<ConfigMap> {
                 Expression<String> expresskey = rt.get("configkey");
                 cq.where(cb.equal(expresskey, configkey));
                 Query q = em.createQuery(cq);
+                q.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase);
                 cm = (ConfigMap) q.getSingleResult();
                 if (cm != null) {
                     value = cm.getConfigvalue();
                     ky = cm.getConfigkey();
                 }
 
-                logger.log(Level.FINER, "Key={0}, Value={1}", new Object[]{ky, value});
+                LOGGER.log(Level.FINER, "Key={0}, Value={1}", new Object[]{ky, value});
 
             } catch (NoResultException e) {
-                logger.log(Level.WARNING, "NoResultException: Failed to find this key ({0}) in the ConfigMap database table :(", configkey);
+                LOGGER.log(Level.WARNING, "NoResultException: Failed to find this key ({0}) in the ConfigMap database table :(", configkey);
                 value = "??? ConfigMap key not found (" + configkey + ")";
                 getEntityManager().persist(new ConfigMap(0, configkey, value));
                 CriteriaBuilder cb = em.getCriteriaBuilder();
@@ -143,9 +147,9 @@ public class ConfigMapFacade extends AbstractFacade<ConfigMap> {
                 Root<ConfigMap> rt = cq.from(ConfigMap.class);
                 Expression<String> expresskey = rt.get("configkey");
                 cq.where(cb.equal(expresskey, configkey));
-                Query q = em.createQuery(cq);
+                TypedQuery<ConfigMap> q = em.createQuery(cq);
 
-                cm = (ConfigMap) q.getSingleResult();
+                cm =  q.getSingleResult();
             } catch (NonUniqueResultException e) {
 
                 CriteriaBuilder cb = em.getCriteriaBuilder();
@@ -154,23 +158,26 @@ public class ConfigMapFacade extends AbstractFacade<ConfigMap> {
                 Expression<String> expresskey = rt.get("configkey");
                 cq.where(cb.equal(expresskey, configkey));
 
-                Query q = em.createQuery(cq);
-                List<ConfigMap> cmList = (List<ConfigMap>) q.getResultList();
+                TypedQuery<ConfigMap> q = em.createQuery(cq);
+                List<ConfigMap> cmList =  q.getResultList();
                 cm = cmList.get(0);
-                value = cm.getConfigvalue();
+               
                 int numberOfDups = cmList.size();
-                logger.log(Level.SEVERE, "Found {0} duplicate keys for key {1} in the ConfigMap database table. Using the first one found :(", new Object[]{numberOfDups, configkey});
+                LOGGER.log(Level.SEVERE, "Found {0} duplicate keys for key {1} in the ConfigMap database table. Using the first one found :(", new Object[]{numberOfDups, configkey});
 
             } catch (Exception e) {
-                logger.log(Level.INFO, "Key={0}, Value={1}", new Object[]{ky, value});
-                logger.log(Level.WARNING, "Failed to get this key " + configkey + " from the ConfigMap database table due to an exception:(", e);
+                if(cm != null){
+                   value = cm.getConfigvalue();  
+                }
+                LOGGER.log(Level.INFO, "Key={0}, Value={1}", new Object[]{ky, value});
+                LOGGER.log(Level.WARNING, "Failed to get this key " + configkey + " from the ConfigMap database table due to an exception:(", e);
             }
         }
         return cm;
     }
 
     public List<ConfigMap> findAllByConfigKey(String configKey, boolean sortAsc) {
-        List retList = null;
+        List<ConfigMap> retList = null;
         try {
 
             CriteriaBuilder cb = em.getCriteriaBuilder();
@@ -178,7 +185,8 @@ public class ConfigMapFacade extends AbstractFacade<ConfigMap> {
             Root<ConfigMap> rt = cq.from(ConfigMap.class);
             Expression<String> expresskey = rt.get("configkey");
             cq.where(cb.like(expresskey, configKey));
-            Query q = em.createQuery(cq);
+            TypedQuery<ConfigMap> q = em.createQuery(cq);
+            q.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase);
             //Query q = em.createNativeQuery("SELECT * FROM configMap where key = '" + configkey + "'", ConfigMap.class);
             retList = q.getResultList();
             /*

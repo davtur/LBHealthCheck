@@ -6,9 +6,7 @@
 
 package au.com.manlyit.fitnesscrm.stats.classes.util;
 
-import org.eclipse.persistence.annotations.Cache;
-import org.eclipse.persistence.annotations.CacheCoordinationType;
-import org.eclipse.persistence.annotations.CacheType;
+
 
 /**
  *

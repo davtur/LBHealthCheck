@@ -17,10 +17,13 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
+import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Root;
+import org.eclipse.persistence.config.CacheUsage;
+import org.eclipse.persistence.config.QueryHints;
 
 /**
  *
@@ -29,10 +32,12 @@ import javax.persistence.criteria.Root;
 @Stateless
 public class NotesFacade extends AbstractFacade<Notes> {
 
+    private static final long serialVersionUID = 1L;
+
     @PersistenceContext(unitName = "FitnessStatsPU")
     private EntityManager em;
 
-    private static final Logger logger = Logger.getLogger(NotesFacade.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(NotesFacade.class.getName());
 
     @Inject
     private ConfigMapFacade configMapFacade;
@@ -58,10 +63,11 @@ public class NotesFacade extends AbstractFacade<Notes> {
             Expression<Date> express = rt.get("createTimestamp");
 
             cq.orderBy(cb.desc(express));
-            Query q = em.createQuery(cq);
-            notes = (List<Notes>) q.getResultList();
+            TypedQuery<Notes> q = em.createQuery(cq);
+            //q.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase);
+            notes =  q.getResultList();
         } catch (Exception e) {
-            logger.log(Level.INFO, "Customer not found:" + cust.toString(), e);
+            LOGGER.log(Level.INFO, "Customer not found:" + cust.toString(), e);
         }
         return notes;
     }
@@ -80,13 +86,13 @@ public class NotesFacade extends AbstractFacade<Notes> {
             Query q = em.createQuery(cq);
             return ((Long) q.getSingleResult()).intValue();
         } catch (Exception e) {
-            logger.log(Level.INFO, "Customer not found:" + cust.toString(), e);
+            LOGGER.log(Level.INFO, "Customer not found:" + cust.toString(), e);
         }
         return -1;
     }
 
     public List<Notes> findByUserId(Customers user, boolean sortAsc) {
-        List retList = null;
+        List<Notes> retList = null;
         try {
             CriteriaBuilder cb = em.getCriteriaBuilder();
             CriteriaQuery<Notes> cq = cb.createQuery(Notes.class);
@@ -100,7 +106,8 @@ public class NotesFacade extends AbstractFacade<Notes> {
             } else {
                 cq.orderBy(cb.desc(express));
             }
-            Query q = em.createQuery(cq);
+            TypedQuery<Notes> q = em.createQuery(cq);
+            //q.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase);
             retList = q.getResultList();
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));

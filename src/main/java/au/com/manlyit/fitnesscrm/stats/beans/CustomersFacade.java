@@ -27,6 +27,8 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
 import javax.validation.ConstraintViolationException;
+import org.eclipse.persistence.config.CacheUsage;
+import org.eclipse.persistence.config.QueryHints;
 import org.eclipse.persistence.internal.jpa.EJBQueryImpl;
 import org.eclipse.persistence.jpa.JpaEntityManager;
 import org.eclipse.persistence.queries.DatabaseQuery;
@@ -81,6 +83,7 @@ public class CustomersFacade extends AbstractFacade<Customers> {
             cq.where(cb.equal(custUsername, username));
 
             Query q = em.createQuery(cq);
+            //q.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase);
             cm = (Customers) q.getSingleResult();
         } catch (Exception e) {
             LOGGER.log(Level.INFO, "Customer not found:{0}", username);
@@ -106,6 +109,7 @@ public class CustomersFacade extends AbstractFacade<Customers> {
             cq.where(cb.equal(emailAddress, email));
 
             Query q = em.createQuery(cq);
+            //q.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase);
             cm = (Customers) q.getSingleResult();
         } catch (Exception e) {
             LOGGER.log(Level.INFO, "Customer not found:{0}", email);
@@ -136,6 +140,7 @@ public class CustomersFacade extends AbstractFacade<Customers> {
 
             //Query q = em.createQuery(cq);
             Query q = em.createNativeQuery("SELECT * FROM customers where upper(firstname) = upper('" + firstname.trim() + "') and upper(lastname) = upper('" + lastname.trim() + "') ", Customers.class);
+            //q.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase);
             int size = q.getResultList().size();
             if (size == 1) {
                 cm = (Customers) q.getSingleResult();
@@ -163,6 +168,7 @@ public class CustomersFacade extends AbstractFacade<Customers> {
             cq.where(cb.equal(custEmail, email));
 
             TypedQuery<Customers> q = em.createQuery(cq);
+           // q.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase);
             retList = q.getResultList();
         } catch (ConstraintViolationException cve) {
 
@@ -184,6 +190,7 @@ public class CustomersFacade extends AbstractFacade<Customers> {
             cq.where(cb.equal(facebookId, fbId));
 
             Query q = em.createQuery(cq);
+            //q.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase);
             int size = q.getResultList().size();
             if (size == 1) {
                 cm = (Customers) q.getSingleResult();
@@ -246,6 +253,7 @@ public class CustomersFacade extends AbstractFacade<Customers> {
             cq.where(cb.equal(custId, id));
 
             TypedQuery<Customers> q = em.createQuery(cq);
+            //q.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase);
             List<Customers> retList = q.getResultList();
             if (retList != null) {
                 int size = retList.size();
@@ -296,6 +304,7 @@ public class CustomersFacade extends AbstractFacade<Customers> {
                 cq.orderBy(cb.desc(express));
             }
             TypedQuery<Customers> q = em.createQuery(cq);
+            //q.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase);
             retList = q.getResultList();
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
@@ -307,18 +316,18 @@ public class CustomersFacade extends AbstractFacade<Customers> {
         ArrayList<CustomerState> acs = new ArrayList<>();
         acs.add(new CustomerState(0, "ACTIVE"));
         String sortField = "firstname";
-        return findFilteredCustomers(sortAsc,sortField, acs, true, false);
+        return findFilteredCustomers(sortAsc, sortField, acs, true, false);
     }
 
     public List<Customers> findAllActiveCustomers(boolean sortAsc) {
         ArrayList<CustomerState> acs = new ArrayList<>();
         acs.add(new CustomerState(0, "ACTIVE"));
         String sortField = "firstname";
-        return findFilteredCustomers(sortAsc,sortField, acs, false, false);
+        return findFilteredCustomers(sortAsc, sortField, acs, false, false);
     }
 
     //public List<Customers> findFilteredCustomers(boolean sortAsc, CustomerState[] selectedCustomerStates, boolean showStaff, boolean bypassCache) {
-    public List<Customers> findFilteredCustomers(boolean sortAsc,String sortField, List<CustomerState> selectedCustomerStates, boolean showStaff, boolean bypassCache) {
+    public List<Customers> findFilteredCustomers(boolean sortAsc, String sortField, List<CustomerState> selectedCustomerStates, boolean showStaff, boolean bypassCache) {
         List<Customers> retList = null;
         if (selectedCustomerStates == null || selectedCustomerStates.isEmpty()) {
             return new ArrayList<>();
@@ -367,6 +376,8 @@ public class CustomersFacade extends AbstractFacade<Customers> {
             TypedQuery<Customers> q = em.createQuery(cq);
             if (bypassCache) {
                 q.setHint("javax.persistence.cache.retrieveMode", "BYPASS");
+            } else {
+               // q.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase);
             }
 
             retList = q.getResultList();
@@ -468,6 +479,7 @@ public class CustomersFacade extends AbstractFacade<Customers> {
                 cq.orderBy(cb.desc(express));
             }
             TypedQuery<Customers> q = em.createQuery(cq);
+            //q.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase);
             retList = q.getResultList();
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));

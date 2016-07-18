@@ -36,7 +36,7 @@ import org.eclipse.persistence.config.CacheIsolationType;
  * @author david
  */
 @Cache(
-        type = CacheType.SOFT_WEAK,// Cache everything in memory as this object is mostly read only and will be called hundreds of time on each page.
+        type = CacheType.SOFT_WEAK,
         size = 64000, // Use 64,000 as the initial cache size.
         //expiry = 36000000, // 10 minutes // by default it never expires which is what we want for this table
         coordinationType = CacheCoordinationType.INVALIDATE_CHANGED_OBJECTS,
