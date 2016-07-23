@@ -30,7 +30,6 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.concurrent.CancellationException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -57,6 +56,7 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.datatype.XMLGregorianCalendar;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.primefaces.push.EventBus;
+import org.primefaces.push.EventBus.Reply;
 import org.primefaces.push.EventBusFactory;
 import org.primefaces.push.RemoteEndpoint;
 import org.primefaces.push.annotation.OnClose;
@@ -447,24 +447,22 @@ public class FutureMapEJB implements Serializable {
             final String broadcastChannel = CHANNEL + sessionChannel;
             // final String summ = summary;
             EventBus eventBus = EventBusFactory.getDefault().eventBus();
-            /* Reply rep = new EventBus.Reply() {
-             @Override
-             public void completed(String message) {
-
-             logger.log(Level.INFO, "Message Delivered:Channel={0}, Summary={1}.", new Object[]{broadcastChannel, summ});
-             }
-             };*/
+            //Reply rep = (String message) -> {
+           //     logger.log(Level.INFO, "Message Delivered:Channel={0}, Summary={1}.", new Object[]{broadcastChannel, summary});
+           // };
             // eventBus.publish(channels.getChannel(getUser()), new FacesMessage(StringEscapeUtils.escapeHtml(summary), StringEscapeUtils.escapeHtml(detail)));
             eventBus.publish(broadcastChannel, new FacesMessage(StringEscapeUtils.escapeHtml(summary), StringEscapeUtils.escapeHtml(detail)));
             logger.log(Level.INFO, "Sending Async Message, summary:{0}, details:{1}", new Object[]{summary, detail});
+        }else{
+            logger.log(Level.INFO, "NOT Sending Async Message as the session is internal, summary:{0}, details:{1}", new Object[]{summary, detail});
         }
         //   }
-        logger.log(Level.INFO, "NOT Sending Async Message as the session is internal, summary:{0}, details:{1}", new Object[]{summary, detail});
+        
     }
 
     //@Schedule(dayOfMonth = "*", hour = "*", minute = "*", second = "0")//debug
     @Schedule(dayOfMonth = "*", hour = "6", minute = "0", second = "0")
-    public synchronized void retrievePaymentsReportFromPaymentGateway(Timer t) {
+    public  void retrievePaymentsReportFromPaymentGateway(Timer t) {
         try {
             // run every day at 5am seconds
             GregorianCalendar cal = new GregorianCalendar();

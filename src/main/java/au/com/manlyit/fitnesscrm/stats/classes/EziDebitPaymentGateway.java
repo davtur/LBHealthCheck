@@ -2055,7 +2055,8 @@ public class EziDebitPaymentGateway implements Serializable {
         als.add("\\:createCustomerForm\\:myDetailsPaymentInfo");
         RequestContext.getCurrentInstance().update(als);*/
         //RequestContext.getCurrentInstance().update("@(.updatePaymentInfo)");
-        RequestContext.getCurrentInstance().execute("updatePaymentForms();");
+        RequestContext.getCurrentInstance().update("\\:tv\\:paymentsForm");
+       // RequestContext.getCurrentInstance().execute("updatePaymentForms();");
         logger.log(Level.INFO, "Session BEAN RequestContext - Update Components with class updatePaymentInfo ");
 
     }
