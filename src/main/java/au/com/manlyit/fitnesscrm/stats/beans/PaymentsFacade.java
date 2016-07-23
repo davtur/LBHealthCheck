@@ -210,9 +210,11 @@ public ABC addNewABC(ABC abc) {
 
             TypedQuery<Payments> q = em.createQuery(cq);
             //q.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase);
-            /* if (bypassCache) {
+             if (bypassCache) {
                 q.setHint("javax.persistence.cache.retrieveMode", "BYPASS");
-            }*/
+            }else{
+                 //q.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase);
+             }
             List<Payments> pList = q.getResultList();
             if (pList != null) {
                 if (pList.size() > 0) {

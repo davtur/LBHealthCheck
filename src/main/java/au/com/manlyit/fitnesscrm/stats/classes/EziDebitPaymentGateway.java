@@ -650,17 +650,20 @@ public class EziDebitPaymentGateway implements Serializable {
             CustomersController controller = (CustomersController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "customersController");
             this.setSelectedCustomer(controller.getSelected());
             getPayments(18, 2);
-            RequestContext.getCurrentInstance().execute("updatePaymentForms();");
+            updatePaymentTableComponents();
         }
-        return asyncOperationRunning;
+     
+            return futureMap.isAnAsyncOperationRunning(sessionId);
+        
+        //return asyncOperationRunning;
     }
 
     /**
      * @param asyncOperationRunning the asyncOperationRunning to set
      */
-    public void setAsyncOperationRunning(boolean asyncOperationRunning) {
+    /*public void setAsyncOperationRunning(boolean asyncOperationRunning) {
         this.asyncOperationRunning = asyncOperationRunning;
-    }
+    }*/
 
     /**
      * @return the testAjaxCounter
@@ -917,12 +920,18 @@ public class EziDebitPaymentGateway implements Serializable {
 
     public void refreshAllActiveCustomers() {
         List<Customers> acl = customersFacade.findAllActiveCustomers(true);
-        AsyncJob aj2;
+
         for (Customers c : acl) {
             try {
-                startAsynchJob("GetCustomerDetails", paymentBean.getCustomerDetails(c, getDigitalKey()));
+                PaymentParameters pp = c.getPaymentParameters();
+                if (pp != null) {
+                    String sr = pp.getYourSystemReference();
+                    if (sr != null && sr.trim().isEmpty() == false) {
+                        startAsynchJob("GetCustomerDetails", paymentBean.getCustomerDetails(c, getDigitalKey()));
 
-                Thread.sleep(300);//sleeping for a long time wont affect performance (the warning is there for a short sleep of say 5ms ) but we don't want to overload the payment gateway or they may get upset.
+                        Thread.sleep(300);//sleeping for a long time wont affect performance (the warning is there for a short sleep of say 5ms ) but we don't want to overload the payment gateway or they may get upset.
+                    }
+                }
             } catch (InterruptedException ex) {
                 Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -1843,12 +1852,13 @@ public class EziDebitPaymentGateway implements Serializable {
     public void remoteCommandListener() {
         logger.log(Level.INFO, "MESSAGE RECIEVED FROM FUTURE MAP BEAN. Checking for updates to process.");
 
-        int k = futureMap.getComponentsToUpdate(sessionId).size();
+        // int k = futureMap.getComponentsToUpdate(sessionId).size();
+        int k = futureMap.getFutureMap(sessionId).size();
         if (k > 0) {
             logger.log(Level.INFO, "{0} jobs are running. Checking to see if asych jobs have finished so their results can be processed.", k);
             if (isAsyncOperationRunning() == false) {
                 logger.log(Level.WARNING, "{0} jobs are running but asychOperationRunning flag is false!!", k);
-                setAsyncOperationRunning(true);
+               // setAsyncOperationRunning(true);
             }
 
             int y = 0;
@@ -1878,9 +1888,9 @@ public class EziDebitPaymentGateway implements Serializable {
 
             // checkIfAsyncJobsHaveFinishedAndUpdate();
         }
-        k = futureMap.getComponentsToUpdate(sessionId).size();
+        k = futureMap.getFutureMap(sessionId).size();
         if (k == 0) {
-            setAsyncOperationRunning(false);
+           // setAsyncOperationRunning(false);
             //logger.log(Level.INFO, "Asking request context to update components.");
 
             //ArrayList<String> componentsToUpdate = new ArrayList<>();
@@ -1892,7 +1902,7 @@ public class EziDebitPaymentGateway implements Serializable {
             //componentsToUpdate.add("tv:paymentsForm");
             // requestContext.execute("PF('paymentPoller').stop();");
             //pushComponentUpdateBean.sendMessage("Notification", "Payment Gateway Request Completed");
-            logger.log(Level.INFO, "All ipdates from teh future map have been pocessed.");
+            logger.log(Level.INFO, "All asych jobs have been processed");
         }
 
         if (isRefreshIFrames() == true) {
@@ -1920,6 +1930,13 @@ public class EziDebitPaymentGateway implements Serializable {
             if (key.contains("AddPayment")) {
                 processAddPaymentResult(pgr);
             }
+             if (key.contains("DeletePaymentBatch")) {
+                processDeletePaymentBatch(pgr);
+            }
+              if (key.contains("AddPaymentBatch")) {
+                processAddPaymentBatch(pgr);
+            }
+            
             if (key.contains("GetPayments")) {
                 processGetPayments(pgr);
             }
@@ -1993,7 +2010,7 @@ public class EziDebitPaymentGateway implements Serializable {
         //getCustomersController().setRefreshFromDB(true);
         getCustomersController().recreateModel();
 
-        logger.log(Level.INFO, "processPaymentReport completed");
+        logger.log(Level.INFO, "Session BEAN processPaymentReport completed");
     }
 
     private void processSettlementReport(PaymentGatewayResponse pgr) {
@@ -2004,21 +2021,21 @@ public class EziDebitPaymentGateway implements Serializable {
         // getCustomersController().setRefreshFromDB(true);
         getCustomersController().recreateModel();
 
-        logger.log(Level.INFO, "processSettlementReport completed");
+        logger.log(Level.INFO, "Session BEAN processSettlementReport completed");
     }
 
     private void processGetPayments(PaymentGatewayResponse pgr) {
 
         String cust = getSelectedCustomer().getUsername();
-        logger.log(Level.INFO, "Ezidebit Controller -  processing GetPayments Response Recieved from ezidebit for Customer  - {0}", cust);
+        logger.log(Level.INFO, "Session BEAN   processing GetPayments Response Recieved from ezidebit for Customer  - {0}", cust);
 
         recreatePaymentTableData();
-updatePaymentTableComponents();
+        updatePaymentTableComponents();
         //@(.parentOfUploadPhoto)
         // RequestContext.getCurrentInstance().update("customerslistForm1");
-       // RequestContext.getCurrentInstance().update("@(.updatePaymentInfo)");
+        // RequestContext.getCurrentInstance().update("@(.updatePaymentInfo)");
 
-        logger.log(Level.INFO, "processGetPayments completed");
+        logger.log(Level.INFO, "Session BEAN processGetPayments completed");
     }
 
     private void recreatePaymentTableData() {
@@ -2039,25 +2056,25 @@ updatePaymentTableComponents();
         RequestContext.getCurrentInstance().update(als);*/
         //RequestContext.getCurrentInstance().update("@(.updatePaymentInfo)");
         RequestContext.getCurrentInstance().execute("updatePaymentForms();");
-        logger.log(Level.INFO, "RequestContext - Update Components with class updatePaymentInfo ");
+        logger.log(Level.INFO, "Session BEAN RequestContext - Update Components with class updatePaymentInfo ");
 
     }
 
     private void processGetScheduledPayments(PaymentGatewayResponse pgr) {
 
         String cust = getSelectedCustomer().getUsername();
-        logger.log(Level.INFO, "Ezidebit Controller -  processing GetScheduledPayments Response to update components for the Customer  - {0}", cust);
+        logger.log(Level.INFO, "Session BEAN   processing GetScheduledPayments Response to update components for the Customer  - {0}", cust);
         try {
             // if successful it should return a ArrayOfPayment Object from the getData method;
 
             recreatePaymentTableData();
             // RequestContext.getCurrentInstance().update("customerslistForm1");
-            RequestContext.getCurrentInstance().update("@(.updatePaymentInfo)");
+            updatePaymentTableComponents();
             //refreshFromDB = true;
         } catch (Exception ex) {
             Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, "processGetScheduledPayments FAILED", ex);
         }
-        logger.log(Level.INFO, "processGetScheduledPayments completed");
+        logger.log(Level.INFO, "Session BEAN processGetScheduledPayments completed");
     }
 
     private void updatePaymentLists(Payments pay) {
@@ -2097,25 +2114,45 @@ updatePaymentTableComponents();
             }
         }
     }
+    
+    private void processAddPaymentBatch(PaymentGatewayResponse pgr) {
+        
+        logger.log(Level.INFO, "Session BEAN processAddPaymentBatch started");
+        recreatePaymentTableData();
+        RequestContext.getCurrentInstance().update("\\:tv\\:paymentsForm");
+        logger.log(Level.INFO, "Session BEAN processAddPaymentBatch completed");
+    }
+ private void processDeletePaymentBatch(PaymentGatewayResponse pgr) {
+        
+        logger.log(Level.INFO, "Session BEAN processDeletePaymentBatch started");
+        recreatePaymentTableData();
+        RequestContext.getCurrentInstance().update("\\:tv\\:paymentsForm");
+        logger.log(Level.INFO, "Session BEAN processDeletePaymentBatch completed");
+    }
+
 
     private void processAddPaymentResult(PaymentGatewayResponse pgr) {
         int id = 0;
-        logger.log(Level.INFO, "processAddPaymentResult started");
+        logger.log(Level.INFO, "Session BEAN processAddPaymentResult started");
         /*try {
             id = Integer.parseInt(pgr.getTextData());
         } catch (NumberFormatException numberFormatException) {
             logger.log(Level.WARNING, "processAddPaymentResult - Payment reference could not convert to a number!");
         }*/
-        //Payments pay = paymentsFacade.findPaymentById(id,false);
+
         Payments pay = (Payments) pgr.getData();
+        id = pay.getId();
+        pay = paymentsFacade.find(pay.getId());
         if (pay != null) {
             updatePaymentLists(pay);
-        }else{
-           logger.log(Level.WARNING, "processAddPaymentResult - Payment could not be found with reference {0}",id); 
+            logger.log(Level.INFO, "Session BEAN process Add Payment Result - updatePaymentLists ---> reference {0}", id);
+        } else {
+            logger.log(Level.WARNING, "Session BEAN processAddPaymentResult - Payment could not be found in the cache or DB with reference {0}", id);
         }
-       // updatePaymentTableComponents();
+         //updatePaymentTableComponents();
         //recreatePaymentTableData();
-        logger.log(Level.INFO, "processAddPaymentResult completed");
+        RequestContext.getCurrentInstance().update("\\:tv\\:paymentsForm\\:paymentsTable2");
+        logger.log(Level.INFO, "Session BEAN processAddPaymentResult completed");
     }
 
     private void processCreateSchedule(PaymentGatewayResponse pgr) {
@@ -2132,7 +2169,8 @@ updatePaymentTableComponents();
         } else {
             JsfUtil.addErrorMessage("Payment", "The Create Schedule operation failed!.");
         }*/
-        updatePaymentTableComponents() ;
+        //recreatePaymentTableData();
+     //   updatePaymentTableComponents();
         logger.log(Level.INFO, "processCreateSchedule completed");
     }
 
@@ -2280,13 +2318,17 @@ updatePaymentTableComponents();
         }
         //Payments pay = paymentsFacade.findPaymentById(reference,false);
         Payments pay = (Payments) pgr.getData();
+
+        pay = paymentsFacade.find(pay.getId());
         if (pay != null) {
             removeFromPaymentLists(pay);
 
         } else {
             logger.log(Level.WARNING, "Process deletePayment - Payment that was deleted could not be found in the our DB key={0}", new Object[]{reference});
         }
-        updatePaymentTableComponents();
+        //updatePaymentTableComponents();
+        RequestContext.getCurrentInstance().update("\\:tv\\:paymentsForm\\:paymentsTable2");
+        
         logger.log(Level.INFO, "processDeletePayment completed");
     }
 
@@ -2482,12 +2524,8 @@ updatePaymentTableComponents();
         //getCustomersController().setRefreshFromDB(true);
         //getCustomersController().recreateModel();
         // updateASingleCustomersPaymentInfo(selectedCust);
-        RequestContext.getCurrentInstance().update("@(.updatePaymentInfo)");
+        updatePaymentTableComponents();
         logger.log(Level.INFO, "processGetCustomerDetails completed");
-    }
-
-    private void sendUpdatesForPaymentComponents() {
-        RequestContext.getCurrentInstance().update("@(.updatePaymentInfo)");
     }
 
     /* private void updateASingleCustomersPaymentInfo(Customers cust) {
@@ -2503,6 +2541,8 @@ updatePaymentTableComponents();
     public void refreshPaymentsPage(ActionEvent actionEvent) {
         loginToPushServer();
         setSelectedCustomer(selectedCustomer);
+        paymentDBList = null;
+        paymentsList = null;
 
     }
 
@@ -2574,7 +2614,7 @@ updatePaymentTableComponents();
         this.currentCustomerDetails = null;
         refreshIFrames = true;
         futureMap.cancelFutures(sessionId);
-        setAsyncOperationRunning(false);
+       // setAsyncOperationRunning(false);
         if (isTheCustomerProvisionedInThePaymentGateway()) {
             getCustDetailsFromEzi();
 
@@ -2614,7 +2654,7 @@ updatePaymentTableComponents();
     }
 
     private void startAsynchJob(String key, Future future) {
-        setAsyncOperationRunning(true);
+       // setAsyncOperationRunning(true);
         AsyncJob aj = new AsyncJob(key, future);
         futureMap.put(sessionId, aj);
 
@@ -2899,7 +2939,7 @@ updatePaymentTableComponents();
             }
             ejbPaymentParametersFacade.edit(pp);
             customersFacade.edit(c);
-             startAsynchJob("CreateSchedule", paymentBean.createCRMPaymentSchedule(selectedCustomer, paymentDebitDate, endCal.getTime(), spt, dow, paymentDayOfMonth, amount, paymentLimitToNumberOfPayments, amountLimit, paymentKeepManualPayments, paymentFirstWeekOfMonth, paymentSecondWeekOfMonth, paymentThirdWeekOfMonth, paymentFourthWeekOfMonth, loggedInUser, sessionId, getDigitalKey(), futureMap, paymentBean));
+            startAsynchJob("CreateSchedule", paymentBean.createCRMPaymentSchedule(selectedCustomer, paymentDebitDate, endCal.getTime(), spt, dow, paymentDayOfMonth, amount, paymentLimitToNumberOfPayments, amountLimit, paymentKeepManualPayments, paymentFirstWeekOfMonth, paymentSecondWeekOfMonth, paymentThirdWeekOfMonth, paymentFourthWeekOfMonth, loggedInUser, sessionId, getDigitalKey(), futureMap, paymentBean));
             /* List<Payments> crmPaymentList = paymentsFacade.findPaymentsByCustomerAndStatus(selectedCustomer, PaymentStatus.SCHEDULED.value());
              for (Payments p : crmPaymentList) {
              if (!(paymentKeepManualPayments && p.getManuallyAddedPayment())) {
@@ -2913,12 +2953,12 @@ updatePaymentTableComponents();
         } else {
             logger.log(Level.WARNING, "Logged in user is null. Add Single Payment aborted.");
         }
-        getPayments(18, 2);
-        paymentDBList = null;
-        paymentsDBListFilteredItems = null;
+        //getPayments(18, 2);
+        //paymentDBList = null;
+        //paymentsDBListFilteredItems = null;
     }
 
-    private void retryAddPayment(Payments pay) {
+   /* private void retryAddPayment(Payments pay) {
         String loggedInUser = FacesContext.getCurrentInstance().getExternalContext().getRemoteUser();
         logger.log(Level.INFO, "Retry Payment Created for customer {0} with paymentID: {1}", new Object[]{pay.getCustomerName().getUsername(), pay.getId()});
         setAsyncOperationRunning(paymentBean.retryAddNewPayment(pay, loggedInUser, sessionId, getDigitalKey(), futureMap, paymentBean));
@@ -2936,13 +2976,13 @@ updatePaymentTableComponents();
         paymentDBList = null;
         paymentsDBListFilteredItems = null;
 
-    }
+    }*/
 
     public void addSinglePayment(Customers cust, float paymentAmount, Date debitDate) {
         String loggedInUser = FacesContext.getCurrentInstance().getExternalContext().getRemoteUser();
         Long amount = (long) (paymentAmount * (float) 100);
-        setAsyncOperationRunning(true);
-        paymentBean.addNewPayment(cust, debitDate, amount, true, loggedInUser, sessionId, getDigitalKey(), futureMap, paymentBean);
+       // setAsyncOperationRunning(true);
+        paymentBean.addNewPayment(cust, debitDate, amount, true, loggedInUser, sessionId, getDigitalKey(), futureMap, paymentBean,0);
         paymentDBList = null;
         paymentsDBListFilteredItems = null;
     }
@@ -2950,8 +2990,8 @@ updatePaymentTableComponents();
     public void addSinglePayment(ActionEvent actionEvent) {
         String loggedInUser = FacesContext.getCurrentInstance().getExternalContext().getRemoteUser();
         Long amount = (long) (paymentAmountInCents * (float) 100);
-        setAsyncOperationRunning(true);
-        paymentBean.addNewPayment(selectedCustomer, paymentDebitDate, amount, true, loggedInUser, sessionId, getDigitalKey(), futureMap, paymentBean);
+       // setAsyncOperationRunning(true);
+        paymentBean.addNewPayment(selectedCustomer, paymentDebitDate, amount, true, loggedInUser, sessionId, getDigitalKey(), futureMap, paymentBean,0);
         paymentDBList = null;
         paymentsDBListFilteredItems = null;
     }
@@ -3067,7 +3107,7 @@ updatePaymentTableComponents();
             String loggedInUser = FacesContext.getCurrentInstance().getExternalContext().getRemoteUser();
             Double amount = selectedScheduledPayment.getPaymentAmount().floatValue() * (double) 100;
             if (loggedInUser != null) {
-                Payments pay = paymentsFacade.findPaymentById(selectedScheduledPayment.getId(),false);
+                Payments pay = paymentsFacade.findPaymentById(selectedScheduledPayment.getId(), false);
 
                 if (pay != null) {
                     if (pay.getPaymentStatus().contentEquals(PaymentStatus.SCHEDULED.value()) || pay.getPaymentStatus().contentEquals(PaymentStatus.DELETE_REQUESTED.value()) || pay.getPaymentStatus().contentEquals(PaymentStatus.MISSING_IN_PGW.value())) {

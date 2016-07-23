@@ -3,28 +3,28 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package au.com.manlyit.fitnesscrm.stats.classes.util;
 
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.concurrent.Future;
 
 /**
  *
  * @author david
  */
-public class AsyncJob {
-    private final String jobName;
-    private final Future<PaymentGatewayResponse> future;
-    private final Date startTime;
-    private  long batchId;
+public class BatchOfPaymentJobs {
     
-    public AsyncJob(String key,Future<PaymentGatewayResponse> ft){
-        this.jobName = key;
-        this.future=ft;
+    
+    private final String jobName;
+    private final long batchId;
+    private final Date startTime;
+    private final ArrayList<Integer> jobs;
+    
+    public BatchOfPaymentJobs(String jobName,ArrayList<Integer> jobs){
+        this.jobName = jobName;
         this.startTime = new Date();
-        // zero means it does not belong to a batch
-        this.batchId = 0;
+        this.jobs = jobs;
+        this.batchId = System.nanoTime();
         
     }
 
@@ -36,17 +36,17 @@ public class AsyncJob {
     }
 
     /**
-     * @return the future
-     */
-    public Future<PaymentGatewayResponse> getFuture() {
-        return future;
-    }
-
-    /**
      * @return the startTime
      */
     public Date getStartTime() {
         return startTime;
+    }
+
+    /**
+     * @return the jobs
+     */
+    public ArrayList<Integer> getJobs() {
+        return jobs;
     }
 
     /**
@@ -55,12 +55,6 @@ public class AsyncJob {
     public long getBatchId() {
         return batchId;
     }
-
-    /**
-     * @param batchId the batchId to set
-     */
-    public void setBatchId(long batchId) {
-        this.batchId = batchId;
-    }
+    
     
 }

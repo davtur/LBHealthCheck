@@ -173,6 +173,7 @@
 /home/david/NetBeansProjects/FitnessCRM/src/main/java/au/com/manlyit/fitnesscrm/stats/beans/NotesFacade.java
 /home/david/NetBeansProjects/FitnessCRM/src/main/java/au/com/manlyit/fitnesscrm/stats/classes/util/TimetableRows.java
 /home/david/NetBeansProjects/FitnessCRM/src/main/java/au/com/manlyit/fitnesscrm/stats/classes/ChartMeasureItem.java
+/home/david/NetBeansProjects/FitnessCRM/src/main/java/au/com/manlyit/fitnesscrm/stats/classes/util/BatchOfPaymentJobs.java
 /home/david/NetBeansProjects/FitnessCRM/src/main/java/au/com/manlyit/fitnesscrm/stats/beans/LoginBean.java
 /home/david/NetBeansProjects/FitnessCRM/src/main/java/au/com/manlyit/fitnesscrm/stats/db/SessionHistory.java
 /home/david/NetBeansProjects/FitnessCRM/src/main/java/au/com/manlyit/fitnesscrm/stats/beans/util/CustomerStatus.java
