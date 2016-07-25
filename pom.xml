@@ -4,7 +4,7 @@
 
     <groupId>au.com.manlyit</groupId>
     <artifactId>FitnessCRM</artifactId>
-    <version>4.0.1</version>
+    <version>4.0.2</version>
     <packaging>war</packaging>
 
     <name>FitnessCRM</name>
@@ -26,17 +26,14 @@
             <artifactId>atmosphere-runtime</artifactId>
             <version>2.3.8</version>
             <type>jar</type>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency> 
-        <!--    <dependency>
-            <groupId>org.primefaces.extensions</groupId>
-            <artifactId>primefaces-extensions</artifactId>
-            <version>2.0.0</version>
-        </dependency>
-        <dependency>  
-            <groupId>org.primefaces</groupId>  
-            <artifactId>primefaces-mobile</artifactId>  
-            <version>1.0-SNAPSHOT</version>  
-        </dependency>   -->
+       
         <dependency>
             <groupId>org.webjars</groupId>
             <artifactId>font-awesome</artifactId>
@@ -72,6 +69,12 @@
             <artifactId>pdfbox</artifactId>
             <version>1.8.2</version>
             <type>jar</type>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <!--        <dependency>
             <groupId>net.sourceforge.htmlunit</groupId>
@@ -84,6 +87,12 @@
             <artifactId>quartz</artifactId>
             <version>2.2.1</version>
             <type>jar</type>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>javax.mail</groupId>
@@ -96,6 +105,12 @@
             <artifactId>poi</artifactId>
             <version>3.9</version>
             <type>jar</type>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-codec</groupId>
+                    <artifactId>commons-codec</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.lowagie</groupId>
@@ -151,6 +166,12 @@
             <artifactId>json-lib</artifactId>
             <version>2.4</version>
             <classifier>jdk15</classifier>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
@@ -178,7 +199,7 @@
         </dependency>
  
         <!-- it help to get slf4j and log4j -->
-     <dependency>
+        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>
             <version>1.7.21</version>

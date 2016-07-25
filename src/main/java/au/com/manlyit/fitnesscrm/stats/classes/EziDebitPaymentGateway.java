@@ -1031,9 +1031,11 @@ public class EziDebitPaymentGateway implements Serializable {
         InvoiceController controller = (InvoiceController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "invoiceController");
 
         for (Customers cust : customerList) {
-
-            invoices.add(controller.generateInvoiceForCustomer(cust, reportUseSettlementDate, reportShowSuccessful, reportShowFailed, reportShowPending, isReportShowScheduled(), reportStartDate, reportEndDate));
-
+            if (cust.getGroupPricing() != null) {
+                invoices.add(controller.generateInvoiceForCustomer(cust, reportUseSettlementDate, reportShowSuccessful, reportShowFailed, reportShowPending, isReportShowScheduled(), reportStartDate, reportEndDate));
+            } else {
+                Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, "generateEndOfMonthReport - Customers PLAN is null, name = {0}", new Object[]{cust.getUsername()});
+            }
         }
         if (invoices.isEmpty() == false) {
             reportEndOfMonthList = new PfSelectableDataModel<>(invoices);
@@ -2194,9 +2196,9 @@ public class EziDebitPaymentGateway implements Serializable {
         } else {
             LOGGER.log(Level.WARNING, "Session BEAN processAddPaymentResult - Payment could not be found in the cache or DB with reference {0}", id);
         }
-        //updatePaymentTableComponents();
+        updatePaymentTableComponents();
         //recreatePaymentTableData();
-        RequestContext.getCurrentInstance().update("\\:tv\\:paymentsForm");
+        //RequestContext.getCurrentInstance().update(":tv:paymentsForm");
         LOGGER.log(Level.INFO, "Session BEAN processAddPaymentResult completed");
     }
 
@@ -2371,8 +2373,8 @@ public class EziDebitPaymentGateway implements Serializable {
         } else {
             LOGGER.log(Level.WARNING, "Process deletePayment - Payment that was deleted could not be found in the our DB key={0}", new Object[]{reference});
         }
-        //updatePaymentTableComponents();
-        RequestContext.getCurrentInstance().update("\\:tv\\:paymentsForm");
+        updatePaymentTableComponents();
+        //RequestContext.getCurrentInstance().update("\\:tv\\:paymentsForm");
 
         LOGGER.log(Level.INFO, "processDeletePayment completed");
     }

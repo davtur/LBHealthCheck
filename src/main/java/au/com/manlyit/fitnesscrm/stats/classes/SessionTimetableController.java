@@ -8,6 +8,7 @@ import au.com.manlyit.fitnesscrm.stats.classes.util.CrmScheduleEvent;
 import au.com.manlyit.fitnesscrm.stats.classes.util.TimetableRows;
 import au.com.manlyit.fitnesscrm.stats.classes.util.TimetableScheduleEvent;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
+import au.com.manlyit.fitnesscrm.stats.db.Participants;
 import au.com.manlyit.fitnesscrm.stats.db.Schedule;
 import au.com.manlyit.fitnesscrm.stats.db.SessionBookings;
 import au.com.manlyit.fitnesscrm.stats.db.SessionHistory;
@@ -38,8 +39,6 @@ import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.servlet.http.HttpServletRequest;
 import org.primefaces.context.RequestContext;
 import org.primefaces.event.RowEditEvent;
@@ -54,7 +53,6 @@ import org.primefaces.model.map.DefaultMapModel;
 import org.primefaces.model.map.LatLng;
 import org.primefaces.model.map.MapModel;
 import org.primefaces.model.map.Marker;
-import org.primefaces.push.Status;
 
 @Named("sessionTimetableController")
 @SessionScoped
@@ -287,6 +285,14 @@ public class SessionTimetableController implements Serializable {
         this.event = event;
     }
 
+    public void onRowSelect(SelectEvent selectEvent) {
+        Object o = selectEvent.getObject();
+        if (o.getClass() == SessionTimetable.class) {
+            SessionTimetable st = (SessionTimetable) o;
+            LOGGER.log(Level.INFO, "SessionTimetable - Row Selected, Name={0}, Date{1}, number of selected items={2}", new Object[]{st.getSessionTitle(), st.getSessiondate(), getMultiSelected().length});
+        }
+    }
+
     public void onEventSelect(SelectEvent selectEvent) {
         Object o = selectEvent;
         if (o != null) {
@@ -403,6 +409,22 @@ public class SessionTimetableController implements Serializable {
                 if (existing == null) {
                     sessionHistoryFacade.create(sh);
                 } else {
+                    // future session exists 
+
+                    Collection<Participants> participants;
+                    participants = existing.getParticipantsCollection();
+                    boolean hasBookingAssociatedWithIt = false;
+                    if (participants != null) {
+                        if (participants.isEmpty() == false) {
+                            //TODO make sure there are no bookings against it before deleteing it.
+                            // this session has already got participants associtaed with it so dont delete it
+                            hasBookingAssociatedWithIt = true;
+                        }
+                    }
+                    if (hasBookingAssociatedWithIt == false) {
+                        sessionHistoryFacade.remove(existing);
+                        sessionHistoryFacade.create(sh);
+                    }
 
                 }
                 startCal.add(Calendar.DAY_OF_YEAR, 7);
@@ -539,6 +561,17 @@ public class SessionTimetableController implements Serializable {
     }
 
     /**
+     * @return the multiSelected
+     */
+    public int getMultiSelectedLength() {
+        if (multiSelected == null) {
+            return 0;
+        } else {
+            return getMultiSelected().length;
+        }
+    }
+
+    /**
      * @param multiSelected the multiSelected to set
      */
     public void setMultiSelected(SessionTimetable[] multiSelected) {
@@ -615,31 +648,41 @@ public class SessionTimetableController implements Serializable {
     }
 
     public void unPublish() {
-        current.setSessionTimetableStatus(TimetableSessionStatus.HIDDEN.getValue());
-        getFacade().edit(current);
-        //delete any future sessions so they don't show up in the timetable
-        deleteFutureChildSessions();
-        recreateModel();
+        for (SessionTimetable st : getMultiSelected()) {
+            st.setSessionTimetableStatus(TimetableSessionStatus.HIDDEN.getValue());
+            getFacade().edit(st);
+            //delete any future sessions so they don't show up in the timetable
+            deleteFutureChildSessions(st);
+        }
+        //recreateModel();
     }
 
     public void publish() {
-        current.setSessionTimetableStatus(TimetableSessionStatus.PUBLISHED.getValue());
-        getFacade().edit(current);
-        // add three months worth of sessions
-        cloneSessionsFromTimetable(current, DAYS_AHEAD_TO_POPULATE_TIMETABLE);
-        recreateModel();
+
+        for (SessionTimetable st : getMultiSelected()) {
+            st.setSessionTimetableStatus(TimetableSessionStatus.PUBLISHED.getValue());
+            getFacade().edit(st);
+            // add three months worth of sessions
+            cloneSessionsFromTimetable(st, DAYS_AHEAD_TO_POPULATE_TIMETABLE);
+        }
+        //recreateModel();
     }
 
     public void destroy() {
-        if (current.getSessionHistoryCollection().isEmpty()) {
-            // we cant delete it if session still reference it
-            performDestroy();
-            recreateModel();
-            current = null;
-        } else {
-            LOGGER.log(Level.WARNING, "You are trying to delete a sessiontemplate when there are sessions that still reference it. Use hide instead to remove it from the timetable ahead.");
-            JsfUtil.addErrorMessage("You are trying to delete a sessiontemplate when there are sessions that still reference it. Use the hide button instead to unpublish it from the timetable ahead.");
+        for (SessionTimetable st : getMultiSelected()) {
+            if (st.getSessionHistoryCollection().isEmpty()) {
+                // we cant delete it if session still reference it
+
+                deleteFutureChildSessions(st);
+                getFacade().remove(st);
+
+            } else {
+                LOGGER.log(Level.WARNING, "You are trying to delete a sessiontemplate when there are sessions that still reference it. Use hide instead to remove it from the timetable ahead.");
+                JsfUtil.addErrorMessage("You are trying to delete a sessiontemplate when there are sessions that still reference it. Use the hide button instead to unpublish it from the timetable ahead.");
+            }
         }
+        recreateModel();
+        current = null;
     }
 
     public String destroyAndView() {
@@ -670,7 +713,7 @@ public class SessionTimetableController implements Serializable {
 
     private void performDestroy() {
         try {
-            deleteFutureChildSessions();
+            deleteFutureChildSessions(current);
             getFacade().remove(current);
             JsfUtil.addSuccessMessage(configMapFacade.getConfig("SessionTimetableDeleted"));
         } catch (Exception e) {
@@ -678,8 +721,8 @@ public class SessionTimetableController implements Serializable {
         }
     }
 
-    private void deleteFutureChildSessions() {
-        Collection<SessionHistory> children = current.getSessionHistoryCollection();
+    private void deleteFutureChildSessions(SessionTimetable st) {
+        Collection<SessionHistory> children = st.getSessionHistoryCollection();
         for (Iterator<SessionHistory> iterator = children.iterator(); iterator.hasNext();) {
             SessionHistory next = iterator.next();
             if (next.getSessiondate().compareTo(new Date()) > 0) {
