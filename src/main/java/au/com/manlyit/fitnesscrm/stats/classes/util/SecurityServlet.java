@@ -140,6 +140,7 @@ public class SecurityServlet extends HttpServlet {
                                 if (controller != null && eziDebitPaymentGatewayController != null && mySessionsChart1Controller != null) {
                                     controller.updateSelectedCustomer(customer);
                                     eziDebitPaymentGatewayController.setSessionId(sessionID);
+                                    logger.log(Level.INFO, "SecurityServlet - SET SESSION ID = {0} for user : {1}",new Object[]{sessionID,customer.getUsername()});
                                     eziDebitPaymentGatewayController.setSelectedCustomer(customer);
                                     
                                 } else {

@@ -116,9 +116,9 @@
         <!--  <init-param>
             <param-name>org.atmosphere.disableOnStateEvent</param-name>
             <param-value>true</param-value>
-        </init-param>
+        </init-param>-->
         
-        <load-on-startup>1</load-on-startup>-->
+       
         <async-supported>true</async-supported>
     </servlet>
     <servlet-mapping>

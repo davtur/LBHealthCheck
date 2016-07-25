@@ -420,6 +420,11 @@
                             <h:outputText rendered="#{!ezidebit.theCustomerProvisionedInThePaymentGateway  }" value=" Customer Is Not Provisioned on Payment Gateway!"/>
                             <h:outputText rendered="#{!ezidebit.asyncOperationRunning}" value=" Status: Idle"/>
                             <h:outputText rendered="#{ezidebit.asyncOperationRunning}" value="Status: Busy"/>
+ 
+                            <h:outputText  id="testPaymentUpdate"  value="Time:#{ezidebit.testAjaxUpdateTime}">
+                                 <f:convertDateTime pattern="yyyy-MM-dd hh:mm:ss.SSS" />                              
+                            </h:outputText>
+                            
                         </p:outputPanel>
 
                         <p:panel  id="paymentsTablePanel2" rendered="#{ezidebit.paymentDBList != null}" >
@@ -452,6 +457,9 @@
 
                                         <p:commandButton  process=":tv:paymentsForm:paymentsTable2" rendered="#{fitnessTestChartsController.isUserInRole('ADMIN')}" id="deleteButton" icon="ui-icon-trash"  value="#{configMapController.getKey('Delete')}" actionListener="#{ezidebit.deleteScheduledPayment}" update=":growl :tv:paymentsForm:scheduledPaymentsTable :tv:paymentsForm:paymentsTable2 " disabled="#{empty fitnessTestChartsController.selected}"/>
                                         <p:commandButton id="addNoteDialogButton2"  value="#{configMapController.getKey('ListNotesCreateLink')}" onclick="PF('NotesCreateDialogue').show()" type="button"/> 
+                                        <h:outputText  id="testPaymentUpdate2"  value="Time:#{ezidebit.testAjaxUpdateTime}">
+                                 <f:convertDateTime pattern="yyyy-MM-dd hh:mm:ss.SSS" />                              
+                            </h:outputText>
                                     </p:outputPanel>
                                 </f:facet>
 

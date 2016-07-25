@@ -1,0 +1,86 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition template="/WEB-INF/iFrameMinimalTemplate.xhtml" xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:p="http://primefaces.org/ui" >
+
+
+    <ui:define name="title">
+        <h:outputText value="#{configMapController.getKey('ListCustomersTitle')}"></h:outputText>
+    </ui:define>
+    <ui:define name="body">
+       
+
+        <h:form id="form">
+            <p:remoteCommand name="updateList" update="users" process="@this" />
+
+            <p:fieldset id="container" legend="PrimeChat" toggleable="true">
+
+                <h:panelGroup rendered="#{pushMessageView.loggedIn}">
+                    <h:panelGrid columns="2" columnClasses="publicColumn,usersColumn" style="width:100%">
+                        <p:outputPanel id="public" layout="block" styleClass="ui-corner-all ui-widget-content chatlogs" />
+
+                        <p:dataList id="users" var="user" value="#{pushMessageUsers.users}" styleClass="usersList">
+                            <f:facet name="header">
+                                Users
+                            </f:facet>
+
+                            <p:commandButton title="Chat" icon="ui-icon-comment" oncomplete="PF('pChat').show()" update=":form:privateChatContainer">
+                                <f:setPropertyActionListener value="#{user}" target="#{pushMessageView.privateUser}" />
+                            </p:commandButton>
+                            #{user}
+                        </p:dataList>
+                    </h:panelGrid>
+
+                    <p:separator />
+
+                    <p:inputText value="#{pushMessageView.globalMessage}" styleClass="messageInput" />
+                    <p:spacer width="5" />
+                    <p:commandButton value="Send" actionListener="#{pushMessageView.sendGlobal}" oncomplete="$('.messageInput').val('').focus()" />
+                    <p:spacer width="5" />
+                    <p:commandButton value="Disconnect" actionListener="#{pushMessageView.disconnect}" global="false" update="container" />
+                </h:panelGroup>
+
+                <h:panelGroup rendered="#{not pushMessageView.loggedIn}" >
+                    Username: <p:inputText value="#{pushMessageView.username}"  />
+
+                    <p:spacer width="5" />
+                    <p:commandButton value="Login" actionListener="#{pushMessageView.login}" update="container"
+                                     icon="ui-icon-person" />
+                </h:panelGroup>
+
+            </p:fieldset>
+
+            <p:dialog widgetVar="pChat" header="Private Chat" modal="true" showEffect="fade" hideEffect="fade">
+                <h:panelGrid id="privateChatContainer" columns="2" columnClasses="vtop,vtop">
+                    <p:outputLabel for="pChatInput" value="To: #{pushMessageView.privateUser}" />
+                    <p:inputTextarea id="pChatInput" value="#{pushMessageView.privateMessage}" rows="5" cols="30" />
+
+                    <p:spacer />
+                    <p:commandButton value="Send" actionListener="#{pushMessageView.sendPrivate}" oncomplete="PF('pChat').hide()" />
+                </h:panelGrid>
+            </p:dialog>
+        </h:form>
+
+        <p:socket onMessage="handleMessage" channel="/test" autoConnect="false" widgetVar='chatTest' />
+
+        <script type="text/javascript">
+            function handleMessage(message)
+                {
+                    var chatContent = $(PrimeFaces.escapeClientId('form:public')),
+                            text = (message.user) ? message.user + ':' + message.text : message.text;
+
+                    chatContent.append(text + '<br />');
+
+                    //keep scroll
+                    chatContent.scrollTop(chatContent.height());
+
+                    if (message.updateList)
+                        {
+                            updateList();
+                        }
+                }
+        </script>
+    </ui:define>
+</ui:composition>

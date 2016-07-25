@@ -4,7 +4,7 @@
 
     <groupId>au.com.manlyit</groupId>
     <artifactId>FitnessCRM</artifactId>
-    <version>4.0.0</version>
+    <version>4.0.1</version>
     <packaging>war</packaging>
 
     <name>FitnessCRM</name>
@@ -18,13 +18,13 @@
         <dependency>
             <groupId>org.primefaces</groupId>
             <artifactId>primefaces</artifactId>
-            <version>6.0</version>
+            <version>5.2</version>
             <type>jar</type>
         </dependency>
         <dependency>
             <groupId>org.atmosphere</groupId>
             <artifactId>atmosphere-runtime</artifactId>
-            <version>2.4.3</version>
+            <version>2.3.8</version>
             <type>jar</type>
         </dependency> 
         <!--    <dependency>
@@ -178,11 +178,11 @@
         </dependency>
  
         <!-- it help to get slf4j and log4j -->
-      <!--  <dependency>
+     <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>
             <version>1.7.21</version>
-        </dependency>-->
+        </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-api</artifactId>

@@ -107,9 +107,9 @@ import org.primefaces.event.TabChangeEvent;
 
 public class EziDebitPaymentGateway implements Serializable {
 
-    private static final Logger logger = Logger.getLogger(EziDebitPaymentGateway.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(EziDebitPaymentGateway.class.getName());
     //private static final String digitalKey = "78F14D92-76F1-45B0-815B-C3F0F239F624";// test
-    private static final String paymentGateway = "EZIDEBIT";
+    private static final String PAYMENT_GATEWAY = "EZIDEBIT";
     private final static String CHANNEL = "/payments/";
     private static final long serialVersionUID = 1L;
     private final static int MONTHS_IN_ADVANCE_FOR_PAYMENT_SCHEDULE = 9;
@@ -159,6 +159,7 @@ public class EziDebitPaymentGateway implements Serializable {
     private Date paymentDebitDate = new Date();
     private DatatableSelectionHelper pagination;
     private Date changeFromDate = new Date();
+    private Date testAjaxUpdateTime = new Date();
     private float paymentAmountInCents = (float) 0;
     private float oneOffPaymentAmount = (float) 0;
     private Date oneOffPaymentDate = new Date();
@@ -224,10 +225,32 @@ public class EziDebitPaymentGateway implements Serializable {
         reportEndDate = cal.getTime();
         cal.add(Calendar.DAY_OF_YEAR, -7);
         reportStartDate = cal.getTime();
+        LOGGER.log(Level.INFO, "Payment Gateway BEAN CREATED - SESSION ID = {0}", new Object[]{sessionId});
     }
 
     public void setSessionId(String sessionId) {
         this.sessionId = sessionId;
+
+    }
+
+    public String getSessionId() {
+        /*String sessId = null;
+        FacesContext facesContext = FacesContext.getCurrentInstance();
+        if (facesContext != null) {
+           sessId =    ((HttpSession) facesContext.getExternalContext().getSession(false)).getId();
+           LOGGER.log(Level.INFO, "Payment Gateway BEAN getSessionId - SESSION ID = {0}",new Object[]{sessId});
+        }
+       
+        return sessId;*/
+        return this.sessionId;
+    }
+
+    public String getPushChannel() {
+
+        String channel = CHANNEL + getSessionId();
+
+        LOGGER.log(Level.INFO, "Payment Gateway BEAN - GET PUSH CHANNELL: {0}", new Object[]{channel});
+        return channel;
     }
 
     /**
@@ -282,7 +305,7 @@ public class EziDebitPaymentGateway implements Serializable {
         try {
             if (adminUser == null) {
                 adminUser = customer;
-                logger.log(Level.WARNING, "Payment Gateway Controller, createCombinedAuditLogAndNote: The logged in user is NULL");
+                LOGGER.log(Level.WARNING, "Payment Gateway Controller, createCombinedAuditLogAndNote: The logged in user is NULL");
             }
             ejbAuditLogFacade.audit(adminUser, customer, title, message, changedFrom, ChangedTo);
             Notes note = new Notes(0);
@@ -294,7 +317,7 @@ public class EziDebitPaymentGateway implements Serializable {
             customersFacade.editAndFlush(customer);
 
         } catch (Exception e) {
-            logger.log(Level.WARNING, "Payment Gateway, createCombinedAuditLogAndNote: ", e);
+            LOGGER.log(Level.WARNING, "Payment Gateway, createCombinedAuditLogAndNote: ", e);
         }
 
     }
@@ -304,7 +327,7 @@ public class EziDebitPaymentGateway implements Serializable {
         Customers cust = customersFacade.findCustomerByUsername(user);
 
         if (cust == null) {
-            logger.log(Level.SEVERE, "getLoggedInUser - the remote user couldn't be found in the database. This shouldn't happen. We may have been hacked!!");
+            LOGGER.log(Level.SEVERE, "getLoggedInUser - the remote user couldn't be found in the database. This shouldn't happen. We may have been hacked!!");
         }
         return cust;
     }
@@ -652,9 +675,9 @@ public class EziDebitPaymentGateway implements Serializable {
             getPayments(18, 2);
             updatePaymentTableComponents();
         }
-     
-            return futureMap.isAnAsyncOperationRunning(sessionId);
-        
+
+        return futureMap.isAnAsyncOperationRunning(sessionId);
+
         //return asyncOperationRunning;
     }
 
@@ -664,7 +687,6 @@ public class EziDebitPaymentGateway implements Serializable {
     /*public void setAsyncOperationRunning(boolean asyncOperationRunning) {
         this.asyncOperationRunning = asyncOperationRunning;
     }*/
-
     /**
      * @return the testAjaxCounter
      */
@@ -879,7 +901,7 @@ public class EziDebitPaymentGateway implements Serializable {
         try {
             pdf.add(Image.getInstance(new URL(urlForLogo)));
         } catch (IOException | DocumentException iOException) {
-            logger.log(Level.WARNING, "Logo URL error", iOException);
+            LOGGER.log(Level.WARNING, "Logo URL error", iOException);
         }
         SimpleDateFormat sdf = new SimpleDateFormat("EEE, d MMM yyyy");
         String type = "Settlement";
@@ -1398,6 +1420,20 @@ public class EziDebitPaymentGateway implements Serializable {
         this.cashPaymentReceiptReference = cashPaymentReceiptReference;
     }
 
+    /**
+     * @return the testAjaxUpdateTime
+     */
+    public Date getTestAjaxUpdateTime() {
+        return new Date();
+    }
+
+    /**
+     * @param testAjaxUpdateTime the testAjaxUpdateTime to set
+     */
+    public void setTestAjaxUpdateTime(Date testAjaxUpdateTime) {
+        this.testAjaxUpdateTime = testAjaxUpdateTime;
+    }
+
     private class eziDebitThreadFactory implements ThreadFactory {
 
         @Override
@@ -1468,7 +1504,7 @@ public class EziDebitPaymentGateway implements Serializable {
                     Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.WARNING, "Unkown ezidebit status code: {0}", new Object[]{statusCode});
                 }
             } else {
-                logger.log(Level.FINE, "isTheCustomerProvisionedInThePaymentGateway - PaymentParameters are null returning false by default. ");
+                LOGGER.log(Level.FINE, "isTheCustomerProvisionedInThePaymentGateway - PaymentParameters are null returning false by default. ");
 
             }
             selectedCustomer = cust;
@@ -1487,7 +1523,7 @@ public class EziDebitPaymentGateway implements Serializable {
                 if (cust.getPaymentParameters() != null) {
                     String webDdrUrl = cust.getPaymentParameters().getWebddrUrl();// contains payment information e.g 
                     if (webDdrUrl != null && cust.getPaymentParameters().getStatusCode().trim().isEmpty()) {
-                        logger.log(Level.INFO, "isCustomerWebDDRFormEnabled - YES customer direct debit button is enabled : ", webDdrUrl);
+                        LOGGER.log(Level.INFO, "isCustomerWebDDRFormEnabled - YES customer direct debit button is enabled : ", webDdrUrl);
                         return true;
                     }
                 }
@@ -1664,7 +1700,7 @@ public class EziDebitPaymentGateway implements Serializable {
 
     private void addDefaultPaymentParametersIfEmpty(Customers cust, Date contractStartDate) {
         if (cust == null) {
-            logger.log(Level.WARNING, "Customer is null: addDefaultPaymentParametersIfEmpty(Customers cust)");
+            LOGGER.log(Level.WARNING, "Customer is null: addDefaultPaymentParametersIfEmpty(Customers cust)");
             return;
         }
         PaymentParameters pay = cust.getPaymentParameters();
@@ -1674,10 +1710,10 @@ public class EziDebitPaymentGateway implements Serializable {
         }
 
         if (pay == null) {
-            pay = new PaymentParameters(0, contractStartDate, cust.getTelephone(), "NO", "NO", "NO", paymentGateway);
+            pay = new PaymentParameters(0, contractStartDate, cust.getTelephone(), "NO", "NO", "NO", PAYMENT_GATEWAY);
             pay.setLoggedInUser(cust);
             cust.setPaymentParameters(pay);
-            logger.log(Level.INFO, "Adding default payment gateway parameters for this customer as they don't have any.");
+            LOGGER.log(Level.INFO, "Adding default payment gateway parameters for this customer as they don't have any.");
             customersFacade.editAndFlush(cust);
         }
 
@@ -1690,7 +1726,7 @@ public class EziDebitPaymentGateway implements Serializable {
 
     public void createCustomerRecord(Customers cust) {
         String authenticatedUser = FacesContext.getCurrentInstance().getExternalContext().getRemoteUser();
-        startAsynchJob("AddCustomer", paymentBean.addCustomer(cust, paymentGateway, getDigitalKey(), authenticatedUser));
+        startAsynchJob("AddCustomer", paymentBean.addCustomer(cust, PAYMENT_GATEWAY, getDigitalKey(), authenticatedUser));
         JsfUtil.addSuccessMessage("Processing Add Customer to Payment Gateway Request.", "");
 
     }
@@ -1709,7 +1745,7 @@ public class EziDebitPaymentGateway implements Serializable {
         try {
             result = (boolean) ft.get();
         } catch (InterruptedException | ExecutionException ex) {
-            logger.log(Level.WARNING, "processAddCustomer", ex);
+            LOGGER.log(Level.WARNING, "processAddCustomer", ex);
         }
         if (result == true) {
             JsfUtil.addSuccessMessage("Customer Added to Payment Gateway Successfully.", "Customer Added to Payment Gateway Successfully.");
@@ -1724,16 +1760,16 @@ public class EziDebitPaymentGateway implements Serializable {
 
  /*   private boolean addBulkCustomersToPaymentGateway() {
      boolean result = false;
-     logger.log(Level.INFO, "Starting tests!");
+     LOGGER.log(Level.INFO, "Starting tests!");
      List<Customers> custList = customersFacade.findAllActiveCustomers(result);
      String user = FacesContext.getCurrentInstance().getExternalContext().getRemoteUser();
      for (Customers c : custList) {
      PaymentParameters pp = new PaymentParameters(0, new Date(), c.getTelephone(), "NO", "NO", "NO", user);
      c.getPaymentParametersCollection().add(pp);
      customersFacade.edit(c);
-     boolean success = addCustomer(c, paymentGateway);
+     boolean success = addCustomer(c, PAYMENT_GATEWAY);
      if (!success) {
-     logger.log(Level.WARNING, "Add customer failed! {0}", c.getUsername());
+     LOGGER.log(Level.WARNING, "Add customer failed! {0}", c.getUsername());
      }
      }
      return result;
@@ -1803,7 +1839,7 @@ public class EziDebitPaymentGateway implements Serializable {
 
      }*/
     public void checkPushChannelIsOpen() {
-        logger.log(Level.INFO, "Checking if push channel is open. sessionID {0}", sessionId);
+        LOGGER.log(Level.INFO, "Checking if push channel is open. sessionID {0}", sessionId);
         loginToPushServer();
     }
 
@@ -1817,7 +1853,7 @@ public class EziDebitPaymentGateway implements Serializable {
         RequestContext requestContext = RequestContext.getCurrentInstance();
 
         requestContext.execute("PF('subscriber').connect('/" + sessionId + "')");
-        logger.log(Level.INFO, "Adding connect request to primefaces requestcontext. PF(\'subscriber\').connect(\'/{0}\')", sessionId);
+        LOGGER.log(Level.INFO, "Adding connect request to primefaces requestcontext. PF(\'subscriber\').connect(\'/{0}\')", sessionId);
     }
 
     @PreDestroy
@@ -1850,47 +1886,18 @@ public class EziDebitPaymentGateway implements Serializable {
     }
 
     public void remoteCommandListener() {
-        logger.log(Level.INFO, "MESSAGE RECIEVED FROM FUTURE MAP BEAN. Checking for updates to process.");
+        LOGGER.log(Level.INFO, "MESSAGE RECIEVED FROM FUTURE MAP BEAN. Checking for updates to process.");
 
         // int k = futureMap.getComponentsToUpdate(sessionId).size();
         int k = futureMap.getFutureMap(sessionId).size();
         if (k > 0) {
-            logger.log(Level.INFO, "{0} jobs are running. Checking to see if asych jobs have finished so their results can be processed.", k);
+            LOGGER.log(Level.INFO, "{0} jobs are running. Checking to see if asych jobs have finished so their results can be processed.", k);
             if (isAsyncOperationRunning() == false) {
-                logger.log(Level.WARNING, "{0} jobs are running but asychOperationRunning flag is false!!", k);
-               // setAsyncOperationRunning(true);
+                LOGGER.log(Level.WARNING, "{0} jobs are running but asychOperationRunning flag is false!!", k);
+                // setAsyncOperationRunning(true);
             }
-
-            int y = 0;
-            //String details = "";
-            PaymentGatewayResponse pgr;
-            ArrayList<PaymentGatewayResponse> fmap = futureMap.getComponentsToUpdate(sessionId);
-            try {
-
-                for (int x = fmap.size() - 1; x >= 0; x--) {
-                    pgr = fmap.get(x);
-
-                    // Future<?> ft = pgr.getFuture();
-                    String key = pgr.getOperationName();
-                    //if (ft.isDone()) {
-                    y++;
-                    logger.log(Level.INFO, "SessionId {0} Future Map async job {1} has finished.", new Object[]{key, sessionId});
-                    //details += key + " ";
-                    checkIfAsyncJobsHaveFinishedAndUpdate(key, pgr);
-
-                    fmap.remove(x);
-
-                    // }
-                }
-            } catch (Exception e) {
-                logger.log(Level.SEVERE, "checkRunningJobsAndNotifyIfComplete,  {0} async jobs for sessionId {1} have finished.Exception {2}", new Object[]{Integer.toString(y), sessionId, e});
-            }
-
-            // checkIfAsyncJobsHaveFinishedAndUpdate();
-        }
-        k = futureMap.getFutureMap(sessionId).size();
-        if (k == 0) {
-           // setAsyncOperationRunning(false);
+        } else {
+            // setAsyncOperationRunning(false);
             //logger.log(Level.INFO, "Asking request context to update components.");
 
             //ArrayList<String> componentsToUpdate = new ArrayList<>();
@@ -1902,14 +1909,45 @@ public class EziDebitPaymentGateway implements Serializable {
             //componentsToUpdate.add("tv:paymentsForm");
             // requestContext.execute("PF('paymentPoller').stop();");
             //pushComponentUpdateBean.sendMessage("Notification", "Payment Gateway Request Completed");
-            logger.log(Level.INFO, "All asych jobs have been processed");
+            LOGGER.log(Level.INFO, "All asych jobs have been processed. Will continue to process any component updates.");
         }
 
+        int y = 0;
+        //String details = "";
+        PaymentGatewayResponse pgr;
+        ArrayList<PaymentGatewayResponse> fmap = futureMap.getComponentsToUpdate(sessionId);
+        if (fmap.isEmpty() == false) {
+            try {
+
+                for (int x = fmap.size() - 1; x >= 0; x--) {
+                    pgr = fmap.get(x);
+
+                    // Future<?> ft = pgr.getFuture();
+                    String key = pgr.getOperationName();
+                    //if (ft.isDone()) {
+                    y++;
+                    LOGGER.log(Level.INFO, "PAYMENT EJB - Update Components key={0}, Session ID = {1} .", new Object[]{key, sessionId});
+                    //details += key + " ";
+                    checkIfAsyncJobsHaveFinishedAndUpdate(key, pgr);
+
+                    fmap.remove(x);
+
+                    // }
+                }
+            } catch (Exception e) {
+                LOGGER.log(Level.SEVERE, "checkRunningJobsAndNotifyIfComplete,  {0} async jobs for sessionId {1} have finished.Exception {2}", new Object[]{Integer.toString(y), sessionId, e});
+            }
+        } else {
+            LOGGER.log(Level.INFO, "PAYMENT EJB - No Components retrieved from FutureMap components to Update List");
+        }
+
+        // checkIfAsyncJobsHaveFinishedAndUpdate();
+        //k = futureMap.getFutureMap(sessionId).size();
         if (isRefreshIFrames() == true) {
             //RequestContext.getCurrentInstance().update("@(.updatePaymentInfo)");
             RequestContext.getCurrentInstance().update("\\:iFrameForm");
             //RequestContext.getCurrentInstance().update("createCustomerForm");
-            logger.log(Level.INFO, "Asking Request Context to update IFrame forms.");
+            LOGGER.log(Level.INFO, "Asking Request Context to update IFrame forms.");
             setRefreshIFrames(false);
         }
         /*  ArrayList<PaymentGatewayResponse> ctu = futureMap.getComponentsToUpdate(sessionId);
@@ -1930,13 +1968,13 @@ public class EziDebitPaymentGateway implements Serializable {
             if (key.contains("AddPayment")) {
                 processAddPaymentResult(pgr);
             }
-             if (key.contains("DeletePaymentBatch")) {
+            if (key.contains("DeletePaymentBatch")) {
                 processDeletePaymentBatch(pgr);
             }
-              if (key.contains("AddPaymentBatch")) {
+            if (key.contains("AddPaymentBatch")) {
                 processAddPaymentBatch(pgr);
             }
-            
+
             if (key.contains("GetPayments")) {
                 processGetPayments(pgr);
             }
@@ -1998,7 +2036,7 @@ public class EziDebitPaymentGateway implements Serializable {
             }
 
         } catch (CancellationException ex) {
-            logger.log(Level.WARNING, key + ":", ex);
+            LOGGER.log(Level.WARNING, key + ":", ex);
 
         }
     }
@@ -2010,7 +2048,7 @@ public class EziDebitPaymentGateway implements Serializable {
         //getCustomersController().setRefreshFromDB(true);
         getCustomersController().recreateModel();
 
-        logger.log(Level.INFO, "Session BEAN processPaymentReport completed");
+        LOGGER.log(Level.INFO, "Session BEAN processPaymentReport completed");
     }
 
     private void processSettlementReport(PaymentGatewayResponse pgr) {
@@ -2021,13 +2059,13 @@ public class EziDebitPaymentGateway implements Serializable {
         // getCustomersController().setRefreshFromDB(true);
         getCustomersController().recreateModel();
 
-        logger.log(Level.INFO, "Session BEAN processSettlementReport completed");
+        LOGGER.log(Level.INFO, "Session BEAN processSettlementReport completed");
     }
 
     private void processGetPayments(PaymentGatewayResponse pgr) {
 
         String cust = getSelectedCustomer().getUsername();
-        logger.log(Level.INFO, "Session BEAN   processing GetPayments Response Recieved from ezidebit for Customer  - {0}", cust);
+        LOGGER.log(Level.INFO, "Session BEAN   processing GetPayments Response Recieved from ezidebit for Customer  - {0}", cust);
 
         recreatePaymentTableData();
         updatePaymentTableComponents();
@@ -2035,7 +2073,7 @@ public class EziDebitPaymentGateway implements Serializable {
         // RequestContext.getCurrentInstance().update("customerslistForm1");
         // RequestContext.getCurrentInstance().update("@(.updatePaymentInfo)");
 
-        logger.log(Level.INFO, "Session BEAN processGetPayments completed");
+        LOGGER.log(Level.INFO, "Session BEAN processGetPayments completed");
     }
 
     private void recreatePaymentTableData() {
@@ -2046,25 +2084,29 @@ public class EziDebitPaymentGateway implements Serializable {
     }
 
     private void updatePaymentTableComponents() {
-        /*ArrayList<String> als = new ArrayList<>();
-        als.add("\\:tv\\:paymentsForm\\:paymentsTable2");
-        als.add("\\:tv\\:paymentsForm\\:customerDetailsPanel");
-        als.add("\\:tv\\:paymentsForm\\:paymentsTable");
-        als.add("\\:tv\\:paymentsForm\\:scheduledPaymentsTable");
-        als.add("\\:tv\\:paymentsForm\\:customersTableList");
-        als.add("\\:createCustomerForm\\:myDetailsPaymentInfo");
-        RequestContext.getCurrentInstance().update(als);*/
+        //ArrayList<String> als = new ArrayList<>();
+        //als.add("\\:tv\\:paymentsForm");
+        //als.add("\\:tv\\:paymentsForm\\:paymentsTable2");
+        //als.add("\\:tv\\:paymentsForm\\:customerDetailsPanel");
+        //als.add("\\:tv\\:paymentsForm\\:paymentsTable");
+        //als.add("\\:tv\\:paymentsForm\\:scheduledPaymentsTable");
+        //als.add("\\:tv\\:paymentsForm\\:customersTableList");
+        //als.add("\\:createCustomerForm\\:myDetailsPaymentInfo");
+        // als.add("\\:tv\\:paymentsForm\\:testPaymentUpdate");
+        // als.add("\\:tv\\:paymentsForm\\:testPaymentUpdate2");
+        //RequestContext.getCurrentInstance().update(als);
         //RequestContext.getCurrentInstance().update("@(.updatePaymentInfo)");
-        RequestContext.getCurrentInstance().update("\\:tv\\:paymentsForm");
-       // RequestContext.getCurrentInstance().execute("updatePaymentForms();");
-        logger.log(Level.INFO, "Session BEAN RequestContext - Update Components with class updatePaymentInfo ");
-
+        //RequestContext.getCurrentInstance().update("\\:tv\\:paymentsForm");
+        RequestContext.getCurrentInstance().execute("updatePaymentForms();");
+        LOGGER.log(Level.INFO, "Session BEAN RequestContext --------------------------------------------------");
+        LOGGER.log(Level.INFO, "Session BEAN RequestContext -------- Update Payment Table Components ---------");
+        LOGGER.log(Level.INFO, "Session BEAN RequestContext --------------------------------------------------");
     }
 
     private void processGetScheduledPayments(PaymentGatewayResponse pgr) {
 
         String cust = getSelectedCustomer().getUsername();
-        logger.log(Level.INFO, "Session BEAN   processing GetScheduledPayments Response to update components for the Customer  - {0}", cust);
+        LOGGER.log(Level.INFO, "Session BEAN   processing GetScheduledPayments Response to update components for the Customer  - {0}", cust);
         try {
             // if successful it should return a ArrayOfPayment Object from the getData method;
 
@@ -2075,13 +2117,13 @@ public class EziDebitPaymentGateway implements Serializable {
         } catch (Exception ex) {
             Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, "processGetScheduledPayments FAILED", ex);
         }
-        logger.log(Level.INFO, "Session BEAN processGetScheduledPayments completed");
+        LOGGER.log(Level.INFO, "Session BEAN processGetScheduledPayments completed");
     }
 
     private void updatePaymentLists(Payments pay) {
-        logger.log(Level.INFO, "updatePaymentLists started for {0}", pay.getId());
+        LOGGER.log(Level.INFO, "updatePaymentLists started for {0}", pay.getId());
         if (paymentDBList != null) {
-            logger.log(Level.INFO, "updatePaymentList  paymentDBList : {0}", pay.getId());
+            LOGGER.log(Level.INFO, "updatePaymentList  paymentDBList : {0}", pay.getId());
             List<Payments> lp = (List<Payments>) paymentDBList.getWrappedData();
             int index = lp.indexOf(pay);
             if (index == -1) {
@@ -2091,7 +2133,7 @@ public class EziDebitPaymentGateway implements Serializable {
             }
         }
         if (paymentsDBListFilteredItems != null) {
-            logger.log(Level.INFO, "updatePaymentList  paymentsDBListFilteredItems : {0}", pay.getId());
+            LOGGER.log(Level.INFO, "updatePaymentList  paymentsDBListFilteredItems : {0}", pay.getId());
             int index = paymentsDBListFilteredItems.indexOf(pay);
             if (index == -1) {
                 paymentsDBListFilteredItems.add(pay);
@@ -2099,7 +2141,7 @@ public class EziDebitPaymentGateway implements Serializable {
                 paymentsDBListFilteredItems.set(index, pay);
             }
         }
-        logger.log(Level.INFO, "updatePaymentLists completed for {0}", pay.getId());
+        LOGGER.log(Level.INFO, "updatePaymentLists completed for {0}", pay.getId());
     }
 
     private void removeFromPaymentLists(Payments pay) {
@@ -2115,30 +2157,32 @@ public class EziDebitPaymentGateway implements Serializable {
             }
         }
     }
-    
+
     private void processAddPaymentBatch(PaymentGatewayResponse pgr) {
-        
-        logger.log(Level.INFO, "Session BEAN processAddPaymentBatch started");
+
+        LOGGER.log(Level.INFO, "Session BEAN processAddPaymentBatch started");
         recreatePaymentTableData();
-        RequestContext.getCurrentInstance().update("\\:tv\\:paymentsForm");
-        logger.log(Level.INFO, "Session BEAN processAddPaymentBatch completed");
-    }
- private void processDeletePaymentBatch(PaymentGatewayResponse pgr) {
-        
-        logger.log(Level.INFO, "Session BEAN processDeletePaymentBatch started");
-        recreatePaymentTableData();
-        RequestContext.getCurrentInstance().update("\\:tv\\:paymentsForm");
-        logger.log(Level.INFO, "Session BEAN processDeletePaymentBatch completed");
+        updatePaymentTableComponents();
+        //RequestContext.getCurrentInstance().update("\\:tv\\:paymentsForm");
+        LOGGER.log(Level.INFO, "Session BEAN processAddPaymentBatch completed");
     }
 
+    private void processDeletePaymentBatch(PaymentGatewayResponse pgr) {
+
+        LOGGER.log(Level.INFO, "Session BEAN processDeletePaymentBatch started");
+        recreatePaymentTableData();
+        updatePaymentTableComponents();
+        //RequestContext.getCurrentInstance().update("\\:tv\\:paymentsForm");
+        LOGGER.log(Level.INFO, "Session BEAN processDeletePaymentBatch completed");
+    }
 
     private void processAddPaymentResult(PaymentGatewayResponse pgr) {
         int id = 0;
-        logger.log(Level.INFO, "Session BEAN processAddPaymentResult started");
+        LOGGER.log(Level.INFO, "Session BEAN processAddPaymentResult started");
         /*try {
             id = Integer.parseInt(pgr.getTextData());
         } catch (NumberFormatException numberFormatException) {
-            logger.log(Level.WARNING, "processAddPaymentResult - Payment reference could not convert to a number!");
+            LOGGER.log(Level.WARNING, "processAddPaymentResult - Payment reference could not convert to a number!");
         }*/
 
         Payments pay = (Payments) pgr.getData();
@@ -2146,14 +2190,14 @@ public class EziDebitPaymentGateway implements Serializable {
         pay = paymentsFacade.find(pay.getId());
         if (pay != null) {
             updatePaymentLists(pay);
-            logger.log(Level.INFO, "Session BEAN process Add Payment Result - updatePaymentLists ---> reference {0}", id);
+            LOGGER.log(Level.INFO, "Session BEAN process Add Payment Result - updatePaymentLists ---> reference {0}", id);
         } else {
-            logger.log(Level.WARNING, "Session BEAN processAddPaymentResult - Payment could not be found in the cache or DB with reference {0}", id);
+            LOGGER.log(Level.WARNING, "Session BEAN processAddPaymentResult - Payment could not be found in the cache or DB with reference {0}", id);
         }
-         //updatePaymentTableComponents();
+        //updatePaymentTableComponents();
         //recreatePaymentTableData();
-        RequestContext.getCurrentInstance().update("\\:tv\\:paymentsForm\\:paymentsTable2");
-        logger.log(Level.INFO, "Session BEAN processAddPaymentResult completed");
+        RequestContext.getCurrentInstance().update("\\:tv\\:paymentsForm");
+        LOGGER.log(Level.INFO, "Session BEAN processAddPaymentResult completed");
     }
 
     private void processCreateSchedule(PaymentGatewayResponse pgr) {
@@ -2171,8 +2215,8 @@ public class EziDebitPaymentGateway implements Serializable {
             JsfUtil.addErrorMessage("Payment", "The Create Schedule operation failed!.");
         }*/
         //recreatePaymentTableData();
-     //   updatePaymentTableComponents();
-        logger.log(Level.INFO, "processCreateSchedule completed");
+        updatePaymentTableComponents();
+        LOGGER.log(Level.INFO, "processCreateSchedule completed");
     }
 
     private void processEditCustomerDetails(PaymentGatewayResponse pgr) {
@@ -2189,7 +2233,7 @@ public class EziDebitPaymentGateway implements Serializable {
         } else {
             JsfUtil.addErrorMessage("Payment Gateway", "The operation failed!.");
         }*/
-        logger.log(Level.INFO, "processEditCustomerDetails completed");
+        LOGGER.log(Level.INFO, "processEditCustomerDetails completed");
     }
 
     /*  private void processClearSchedule(Future ft) {
@@ -2220,7 +2264,7 @@ public class EziDebitPaymentGateway implements Serializable {
         } else {
             JsfUtil.addErrorMessage("Payment Gateway", "The operation failed!.");
         }
-        logger.log(Level.INFO, "processClearSchedule completed");
+        LOGGER.log(Level.INFO, "processClearSchedule completed");
     }*/
     private void processDeletePayment(PaymentGatewayResponse pgr) {
         /* String result = "0,FAILED";
@@ -2230,7 +2274,7 @@ public class EziDebitPaymentGateway implements Serializable {
         } catch (InterruptedException | ExecutionException | EJBException ex) {
             String causedBy = ex.getCause().getCause().getMessage();
             if (causedBy.contains("Payment selected for deletion could not be found")) {
-                logger.log(Level.WARNING, "deletePayment - Payment selected for deletion could not be found..");
+                LOGGER.log(Level.WARNING, "deletePayment - Payment selected for deletion could not be found..");
                 message = "The payment selected for deletion could not be found!";
             } else {
                 Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, "Processing Async Results", ex);
@@ -2243,7 +2287,7 @@ public class EziDebitPaymentGateway implements Serializable {
                 reference = Integer.parseInt(result);
 
             } catch (NumberFormatException numberFormatException) {
-                logger.log(Level.WARNING, "Process deletePayment - Thepayment reference could not be converted to a number: {0}", new Object[]{result});
+                LOGGER.log(Level.WARNING, "Process deletePayment - Thepayment reference could not be converted to a number: {0}", new Object[]{result});
             }
             Payments pay = paymentsFacade.findPaymentById(reference);
             if (pay != null) {
@@ -2251,7 +2295,7 @@ public class EziDebitPaymentGateway implements Serializable {
                 paymentsFacade.remove(pay);
 
             } else {
-                logger.log(Level.WARNING, "Process deletePayment - Payment that was deleted could not be found in the our DB key={0}", new Object[]{reference});
+                LOGGER.log(Level.WARNING, "Process deletePayment - Payment that was deleted could not be found in the our DB key={0}", new Object[]{reference});
             }
             setSelectedScheduledPayment(null);
             JsfUtil.addSuccessMessage("Payment Gateway", "Successfully Deleted Payment  .");
@@ -2259,7 +2303,7 @@ public class EziDebitPaymentGateway implements Serializable {
 
         } else {
 
-            logger.log(Level.WARNING, "Process deletePayment - DELETE PAYMENT FAILED: {0}", new Object[]{result});
+            LOGGER.log(Level.WARNING, "Process deletePayment - DELETE PAYMENT FAILED: {0}", new Object[]{result});
             String errorMessage = result.substring(6);
             int k = errorMessage.indexOf(':');
             String paymentRef = errorMessage.substring(0, k);
@@ -2268,7 +2312,7 @@ public class EziDebitPaymentGateway implements Serializable {
             try {
                 id = Integer.parseInt(paymentRef);
             } catch (NumberFormatException numberFormatException) {
-                logger.log(Level.WARNING, "Process deletePayment  FAILED - PaymentReference could not be converted to a number. It should be the primary key of the payments table row ", result);
+                LOGGER.log(Level.WARNING, "Process deletePayment  FAILED - PaymentReference could not be converted to a number. It should be the primary key of the payments table row ", result);
             }
             Payments pay = paymentsFacade.findPaymentById(id);
             if (pay != null) {
@@ -2304,7 +2348,7 @@ public class EziDebitPaymentGateway implements Serializable {
                         }
                     }
                 } else {
-                    logger.log(Level.WARNING, "Process deletePayment  FAILED - Unhandled error ", result);
+                    LOGGER.log(Level.WARNING, "Process deletePayment  FAILED - Unhandled error ", result);
                     JsfUtil.addSuccessMessage("Payment Gateway", "Deleted Payment Error - see logs for more details .");
                 }
 
@@ -2315,7 +2359,7 @@ public class EziDebitPaymentGateway implements Serializable {
             reference = Integer.parseInt(pgr.getTextData());
 
         } catch (NumberFormatException numberFormatException) {
-            logger.log(Level.WARNING, "Process deletePayment - Thepayment reference could not be converted to a number: {0}", new Object[]{pgr.getTextData()});
+            LOGGER.log(Level.WARNING, "Process deletePayment - Thepayment reference could not be converted to a number: {0}", new Object[]{pgr.getTextData()});
         }
         //Payments pay = paymentsFacade.findPaymentById(reference,false);
         Payments pay = (Payments) pgr.getData();
@@ -2325,12 +2369,12 @@ public class EziDebitPaymentGateway implements Serializable {
             removeFromPaymentLists(pay);
 
         } else {
-            logger.log(Level.WARNING, "Process deletePayment - Payment that was deleted could not be found in the our DB key={0}", new Object[]{reference});
+            LOGGER.log(Level.WARNING, "Process deletePayment - Payment that was deleted could not be found in the our DB key={0}", new Object[]{reference});
         }
         //updatePaymentTableComponents();
-        RequestContext.getCurrentInstance().update("\\:tv\\:paymentsForm\\:paymentsTable2");
-        
-        logger.log(Level.INFO, "processDeletePayment completed");
+        RequestContext.getCurrentInstance().update("\\:tv\\:paymentsForm");
+
+        LOGGER.log(Level.INFO, "processDeletePayment completed");
     }
 
     /*
@@ -2351,7 +2395,7 @@ public class EziDebitPaymentGateway implements Serializable {
         } else {
             JsfUtil.addErrorMessage("Payment Gateway", "The change status operation failed!.");
         }
-        logger.log(Level.INFO, "processChangeCustomerStatus completed");
+        LOGGER.log(Level.INFO, "processChangeCustomerStatus completed");
     }*/
     private void processGetPaymentStatus(PaymentGatewayResponse pgr) {
         /*boolean result = false;
@@ -2367,7 +2411,7 @@ public class EziDebitPaymentGateway implements Serializable {
             JsfUtil.addErrorMessage("Payment Gateway", "The getPayment status operation failed!.");
         }*/
         recreatePaymentTableData();
-        logger.log(Level.INFO, "processGetPaymentStatus completed");
+        LOGGER.log(Level.INFO, "processGetPaymentStatus completed");
     }
 
     private void processChangeScheduledAmount(PaymentGatewayResponse pgr) {
@@ -2384,7 +2428,7 @@ public class EziDebitPaymentGateway implements Serializable {
             JsfUtil.addErrorMessage("Payment Gateway", "The operation failed!.");
         }*/
         recreatePaymentTableData();
-        logger.log(Level.INFO, "processChangeScheduledAmount completed");
+        LOGGER.log(Level.INFO, "processChangeScheduledAmount completed");
     }
 
     private void processChangeScheduledDate(PaymentGatewayResponse pgr) {
@@ -2401,7 +2445,7 @@ public class EziDebitPaymentGateway implements Serializable {
             JsfUtil.addErrorMessage("Payment Gateway", "The operation failed!.");
         }*/
         recreatePaymentTableData();
-        logger.log(Level.INFO, "processChangeScheduledDate completed");
+        LOGGER.log(Level.INFO, "processChangeScheduledDate completed");
     }
 
     private void processIsBsbValid(PaymentGatewayResponse pgr) {
@@ -2419,7 +2463,7 @@ public class EziDebitPaymentGateway implements Serializable {
         }*/
 
         //this is only called on success
-        logger.log(Level.INFO, "processIsBsbValid completed: BSB Is Valid");
+        LOGGER.log(Level.INFO, "processIsBsbValid completed: BSB Is Valid");
     }
 
     private void processIsSystemLocked(PaymentGatewayResponse pgr) {
@@ -2435,7 +2479,7 @@ public class EziDebitPaymentGateway implements Serializable {
         } else {
             JsfUtil.addErrorMessage("Payment Gateway", "The operation failed!.");
         }
-        logger.log(Level.INFO, "processIsSystemLocked completed");
+        LOGGER.log(Level.INFO, "processIsSystemLocked completed");
     }
 
     private void processGetPaymentExchangeVersion(PaymentGatewayResponse pgr) {
@@ -2452,7 +2496,7 @@ public class EziDebitPaymentGateway implements Serializable {
         } else {
             JsfUtil.addErrorMessage("Payment Gateway", "The operation failed!.");
         }
-        logger.log(Level.INFO, "processGetPaymentExchangeVersion completed");
+        LOGGER.log(Level.INFO, "processGetPaymentExchangeVersion completed");
     }
 
     private void processGetCustomerDetails(PaymentGatewayResponse pgr) {
@@ -2460,7 +2504,7 @@ public class EziDebitPaymentGateway implements Serializable {
         Customers selectedCust = getSelectedCustomer();
         String cust = selectedCust.getUsername();
         setCustomerDetailsHaveBeenRetrieved(true);
-        logger.log(Level.INFO, "Ezidebit Controller -  processing GetCustomerDetails Response Recieved from ezidebit for Customer  - {0}", cust);
+        LOGGER.log(Level.INFO, "Ezidebit Controller -  processing GetCustomerDetails Response Recieved from ezidebit for Customer  - {0}", cust);
 
         try {
             result = (CustomerDetails) pgr.getData();
@@ -2481,24 +2525,24 @@ public class EziDebitPaymentGateway implements Serializable {
                 }
                 String ourStatus = selectedCust.getActive().getCustomerState().toUpperCase().trim();
                 String message = "Processing customer status codes. Customer: " + cust + ", ezidebit status:" + eziStatusCode + ", Crm Status:" + ourStatus + "";
-                logger.log(Level.INFO, message);
+                LOGGER.log(Level.INFO, message);
                 if (ourStatus.contains(eziStatusCode) == false && (ourStatus.contains("ACTIVE") == true && eziStatusCode.contains("NEW") == true) == false) {
                     // status codes don't match
 
                     message = "Customer Status codes dont match. Customer: " + cust + ", ezidebit status:" + eziStatusCode + ", Crm Status:" + ourStatus + "";
                     if (eziStatusCode.contains("WAITING BANK DETAILS")) {
                         message = "The Customer does not have any banking details. Customer: " + cust + ", ezidebit status:" + eziStatusCode + ", Crm Status:" + ourStatus + "";
-                        logger.log(Level.INFO, message);
+                        LOGGER.log(Level.INFO, message);
                         setWaitingForPaymentDetails(true);
                         JsfUtil.addSuccessMessage("Important!", "You must enter customer banking details before payments can be set up.");
                     } else {
-                        logger.log(Level.WARNING, message);
+                        LOGGER.log(Level.WARNING, message);
                         setWaitingForPaymentDetails(false);
                         JsfUtil.addErrorMessage(message, "");
                     }
                     if (eziStatusCode.trim().toUpperCase().contains("CANCELLED")) {
                         message = "The Customer is in a Cancelled status in the payment gateway";
-                        logger.log(Level.INFO, message);
+                        LOGGER.log(Level.INFO, message);
                         JsfUtil.addSuccessMessage("Important!", message);
                         setCustomerCancelledInPaymentGateway(true);
                     } else {
@@ -2515,7 +2559,7 @@ public class EziDebitPaymentGateway implements Serializable {
                 }
             } else {
                 String message = "The Customer data from teh payment gateway does not match the selected customer:" + selectedCust.getId().toString() + ", payment gateway reference No:" + result.getYourSystemReference();
-                logger.log(Level.SEVERE, message);
+                LOGGER.log(Level.SEVERE, message);
             }
 
         }
@@ -2526,7 +2570,7 @@ public class EziDebitPaymentGateway implements Serializable {
         //getCustomersController().recreateModel();
         // updateASingleCustomersPaymentInfo(selectedCust);
         updatePaymentTableComponents();
-        logger.log(Level.INFO, "processGetCustomerDetails completed");
+        LOGGER.log(Level.INFO, "processGetCustomerDetails completed");
     }
 
     /* private void updateASingleCustomersPaymentInfo(Customers cust) {
@@ -2557,7 +2601,7 @@ public class EziDebitPaymentGateway implements Serializable {
         if (result != null) {
             // do something with result
         }
-        logger.log(Level.INFO, "processGetCustomerDetailsFromEziDebitId completed");
+        LOGGER.log(Level.INFO, "processGetCustomerDetailsFromEziDebitId completed");
     }
 
     private void processGetPaymentDetail(PaymentGatewayResponse pgr) {
@@ -2570,7 +2614,7 @@ public class EziDebitPaymentGateway implements Serializable {
         if (result != null) {
             // do something with result
         }
-        logger.log(Level.INFO, "processGetPaymentDetail completed");
+        LOGGER.log(Level.INFO, "processGetPaymentDetail completed");
     }
 
     private void processGetPaymentDetailPlusNextPaymentInfo(PaymentGatewayResponse pgr) {
@@ -2583,7 +2627,7 @@ public class EziDebitPaymentGateway implements Serializable {
         if (result != null) {
             // do something with result
         }
-        logger.log(Level.INFO, "processGetPaymentDetailPlusNextPaymentInfo completed");
+        LOGGER.log(Level.INFO, "processGetPaymentDetailPlusNextPaymentInfo completed");
     }
 
     private void stopPoller() {
@@ -2615,7 +2659,7 @@ public class EziDebitPaymentGateway implements Serializable {
         this.currentCustomerDetails = null;
         refreshIFrames = true;
         futureMap.cancelFutures(sessionId);
-       // setAsyncOperationRunning(false);
+        // setAsyncOperationRunning(false);
         if (isTheCustomerProvisionedInThePaymentGateway()) {
             getCustDetailsFromEzi();
 
@@ -2655,7 +2699,7 @@ public class EziDebitPaymentGateway implements Serializable {
     }
 
     private void startAsynchJob(String key, Future future) {
-       // setAsyncOperationRunning(true);
+        // setAsyncOperationRunning(true);
         AsyncJob aj = new AsyncJob(key, future);
         futureMap.put(sessionId, aj);
 
@@ -2664,7 +2708,7 @@ public class EziDebitPaymentGateway implements Serializable {
     public void createEddrLink(ActionEvent actionEvent) {
         Customers cust = getSelectedCustomer();
         if (cust == null || cust.getId() == null) {
-            logger.log(Level.WARNING, "Create EDDR Link cannot be completed as the selected customer is null.");
+            LOGGER.log(Level.WARNING, "Create EDDR Link cannot be completed as the selected customer is null.");
             return;
         }
 
@@ -2777,7 +2821,7 @@ public class EziDebitPaymentGateway implements Serializable {
         }
         ejbPaymentParametersFacade.edit(pp);
         customersFacade.edit(cust);
-        logger.log(Level.INFO, "eddr request url:{0}.", widgetUrl);
+        LOGGER.log(Level.INFO, "eddr request url:{0}.", widgetUrl);
         createCombinedAuditLogAndNote(getLoggedInUser(), cust, "createEddrLink", "The Direct Debit Request form was modified.", oldUrl.replace(amp, ", "), widgetUrl.replace(amp, ", "));
     }
 
@@ -2852,7 +2896,7 @@ public class EziDebitPaymentGateway implements Serializable {
                             oneOffPaymentDate = sdf.parse(v);
                         }
                     } catch (ParseException parseException) {
-                        logger.log(Level.FINE, "updatePaymentScheduleForm - could not parse one off payment info from getWebddrUrl for user", getSelectedCustomer().getUsername());
+                        LOGGER.log(Level.FINE, "updatePaymentScheduleForm - could not parse one off payment info from getWebddrUrl for user", getSelectedCustomer().getUsername());
                     }
 
                 }
@@ -2889,7 +2933,7 @@ public class EziDebitPaymentGateway implements Serializable {
     }
 
     public void executeChangePlan(ActionEvent actionEvent) {
-        logger.log(Level.INFO, "Executing Plan Change - Clear Schedule then create new schedule operations will be called..");
+        LOGGER.log(Level.INFO, "Executing Plan Change - Clear Schedule then create new schedule operations will be called..");
         clearSchedule(actionEvent);
         createPaymentSchedule(actionEvent);
     }
@@ -2952,16 +2996,16 @@ public class EziDebitPaymentGateway implements Serializable {
             JsfUtil.addSuccessMessage("Sending CreateSchedule Request to Payment Gateway.");
             //startAsynchJob("GetScheduledPayments", paymentBean.getScheduledPayments(selectedCustomer, paymentDebitDate, endCal.getTime(), getDigitalKey()));
         } else {
-            logger.log(Level.WARNING, "Logged in user is null. Add Single Payment aborted.");
+            LOGGER.log(Level.WARNING, "Logged in user is null. Add Single Payment aborted.");
         }
         //getPayments(18, 2);
         //paymentDBList = null;
         //paymentsDBListFilteredItems = null;
     }
 
-   /* private void retryAddPayment(Payments pay) {
+    /* private void retryAddPayment(Payments pay) {
         String loggedInUser = FacesContext.getCurrentInstance().getExternalContext().getRemoteUser();
-        logger.log(Level.INFO, "Retry Payment Created for customer {0} with paymentID: {1}", new Object[]{pay.getCustomerName().getUsername(), pay.getId()});
+        LOGGER.log(Level.INFO, "Retry Payment Created for customer {0} with paymentID: {1}", new Object[]{pay.getCustomerName().getUsername(), pay.getId()});
         setAsyncOperationRunning(paymentBean.retryAddNewPayment(pay, loggedInUser, sessionId, getDigitalKey(), futureMap, paymentBean));
 
         paymentDBList = null;
@@ -2971,19 +3015,18 @@ public class EziDebitPaymentGateway implements Serializable {
 
     private void retryDeletePayment(Payments pay) {
         String loggedInUser = FacesContext.getCurrentInstance().getExternalContext().getRemoteUser();
-        logger.log(Level.INFO, "Retry Payment Created for customer {0} with paymentID: {1}", new Object[]{pay.getCustomerName().getUsername(), pay.getId()});
+        LOGGER.log(Level.INFO, "Retry Payment Created for customer {0} with paymentID: {1}", new Object[]{pay.getCustomerName().getUsername(), pay.getId()});
         setAsyncOperationRunning(paymentBean.retryDeletePayment(pay, loggedInUser, sessionId, getDigitalKey(), futureMap, paymentBean));
 
         paymentDBList = null;
         paymentsDBListFilteredItems = null;
 
     }*/
-
     public void addSinglePayment(Customers cust, float paymentAmount, Date debitDate) {
         String loggedInUser = FacesContext.getCurrentInstance().getExternalContext().getRemoteUser();
         Long amount = (long) (paymentAmount * (float) 100);
-       // setAsyncOperationRunning(true);
-        paymentBean.addNewPayment(cust, debitDate, amount, true, loggedInUser, sessionId, getDigitalKey(), futureMap, paymentBean,0);
+        // setAsyncOperationRunning(true);
+        paymentBean.addNewPayment(cust, debitDate, amount, true, loggedInUser, sessionId, getDigitalKey(), futureMap, paymentBean, 0);
         paymentDBList = null;
         paymentsDBListFilteredItems = null;
     }
@@ -2991,8 +3034,8 @@ public class EziDebitPaymentGateway implements Serializable {
     public void addSinglePayment(ActionEvent actionEvent) {
         String loggedInUser = FacesContext.getCurrentInstance().getExternalContext().getRemoteUser();
         Long amount = (long) (paymentAmountInCents * (float) 100);
-       // setAsyncOperationRunning(true);
-        paymentBean.addNewPayment(selectedCustomer, paymentDebitDate, amount, true, loggedInUser, sessionId, getDigitalKey(), futureMap, paymentBean,0);
+        // setAsyncOperationRunning(true);
+        paymentBean.addNewPayment(selectedCustomer, paymentDebitDate, amount, true, loggedInUser, sessionId, getDigitalKey(), futureMap, paymentBean, 0);
         paymentDBList = null;
         paymentsDBListFilteredItems = null;
     }
@@ -3020,10 +3063,10 @@ public class EziDebitPaymentGateway implements Serializable {
             newPayment.setPaymentReference(newPaymentID);
             newPayment.setPaymentID("Cash_Payment" + "_" + newPaymentID);
             paymentsFacade.edit(newPayment);
-            logger.log(Level.INFO, "Cash/Direct Deposit Payment Created for customer {0} with paymentID: {1}", new Object[]{selectedCustomer.getUsername(), newPaymentID});
+            LOGGER.log(Level.INFO, "Cash/Direct Deposit Payment Created for customer {0} with paymentID: {1}", new Object[]{selectedCustomer.getUsername(), newPaymentID});
 
         } catch (Exception e) {
-            logger.log(Level.WARNING, "Cash/Direct Deposit Payment Payment failed due to exception:", e);
+            LOGGER.log(Level.WARNING, "Cash/Direct Deposit Payment Payment failed due to exception:", e);
         }
 
         paymentDBList = null;
@@ -3038,7 +3081,7 @@ public class EziDebitPaymentGateway implements Serializable {
                 startAsynchJob("ClearSchedule", paymentBean.clearSchedule(cust, false, loggedInUser, getDigitalKey()));
             }
             if (crmPaymentList != null) {
-                logger.log(Level.INFO, "createSchedule - Found {0} existing scheduled payments for {1}", new Object[]{crmPaymentList.size(), cust.getUsername()});
+                LOGGER.log(Level.INFO, "createSchedule - Found {0} existing scheduled payments for {1}", new Object[]{crmPaymentList.size(), cust.getUsername()});
                 for (int x = crmPaymentList.size() - 1; x > -1; x--) {
                     Payments p = crmPaymentList.get(x);
                     String ref = p.getId().toString();
@@ -3048,9 +3091,9 @@ public class EziDebitPaymentGateway implements Serializable {
                     }
 
                     if (keepManual == true && isManual) {
-                        logger.log(Level.INFO, "createSchedule - keeping manual payment: Cust={0}, Ref={1}, Manaul Payment = {2}", new Object[]{cust.getUsername(), ref, isManual});
+                        LOGGER.log(Level.INFO, "createSchedule - keeping manual payment: Cust={0}, Ref={1}, Manaul Payment = {2}", new Object[]{cust.getUsername(), ref, isManual});
                     } else {
-                        logger.log(Level.INFO, "createSchedule - Deleting payment: Cust={0}, Ref={1}, Manaul Payment = {2}", new Object[]{cust.getUsername(), ref, isManual});
+                        LOGGER.log(Level.INFO, "createSchedule - Deleting payment: Cust={0}, Ref={1}, Manaul Payment = {2}", new Object[]{cust.getUsername(), ref, isManual});
                         // if (paymentKeepManualPayments == false) {
                         //     paymentsFacade.remove(p);
                         //  } else {
@@ -3077,7 +3120,7 @@ public class EziDebitPaymentGateway implements Serializable {
             // paymentDBList = null;
             //  paymentsDBListFilteredItems = null;
         } else {
-            logger.log(Level.WARNING, "Logged in user is null. clearSchedule aborted.");
+            LOGGER.log(Level.WARNING, "Logged in user is null. clearSchedule aborted.");
         }
 
     }
@@ -3096,9 +3139,9 @@ public class EziDebitPaymentGateway implements Serializable {
         if (o.getClass() == Payments.class) {
             Payments pay = (Payments) o;
             selectedScheduledPayment = pay;
-            logger.log(Level.INFO, "Paymenmt Table Payment Selected. Payment Id :{0}", selectedScheduledPayment.getId().toString());
+            LOGGER.log(Level.INFO, "Paymenmt Table Payment Selected. Payment Id :{0}", selectedScheduledPayment.getId().toString());
         } else {
-            logger.log(Level.WARNING, "Payment Table Payment Select Failed.");
+            LOGGER.log(Level.WARNING, "Payment Table Payment Select Failed.");
         }
 
     }
@@ -3118,7 +3161,7 @@ public class EziDebitPaymentGateway implements Serializable {
 
                             paymentDBList = null;
                             paymentsDBListFilteredItems = null;
-                            logger.log(Level.INFO, "Deleted payment that was missing in payment gateway.The payment gateway can delete scheduled payemnts when a user is on hold. Payment ID:{0}", new Object[]{pay.getId()});
+                            LOGGER.log(Level.INFO, "Deleted payment that was missing in payment gateway.The payment gateway can delete scheduled payemnts when a user is on hold. Payment ID:{0}", new Object[]{pay.getId()});
                             paymentsFacade.remove(pay);
                         } else {
                             pay.setPaymentStatus(PaymentStatus.DELETE_REQUESTED.value());
@@ -3130,10 +3173,10 @@ public class EziDebitPaymentGateway implements Serializable {
                     }
 
                 } else {
-                    logger.log(Level.WARNING, "deleteScheduledPayment , cant't find the local scheduled payment in our DB.");
+                    LOGGER.log(Level.WARNING, "deleteScheduledPayment , cant't find the local scheduled payment in our DB.");
                 }
             } else {
-                logger.log(Level.WARNING, "Logged in user is null. Delete Payment aborted.");
+                LOGGER.log(Level.WARNING, "Logged in user is null. Delete Payment aborted.");
             }
         }
     }
@@ -3150,15 +3193,15 @@ public class EziDebitPaymentGateway implements Serializable {
             eziStatus = "C";
             startAsynchJob("ClearSchedule", paymentBean.clearSchedule(cust, false, loggedInUser, getDigitalKey()));
         } else {
-            logger.log(Level.WARNING, "Customer status is not one of ACTIVE,ON HOLD or CANCELLED. changeCustomerStatus aborted.");
+            LOGGER.log(Level.WARNING, "Customer status is not one of ACTIVE,ON HOLD or CANCELLED. changeCustomerStatus aborted.");
             return;
         }
 
         if (loggedInUser != null) {
             startAsynchJob("ChangeCustomerStatus", paymentBean.changeCustomerStatus(cust, eziStatus, loggedInUser, getDigitalKey()));
-            logger.log(Level.INFO, "Starting Async Job ChangeCustomerStatus.");
+            LOGGER.log(Level.INFO, "Starting Async Job ChangeCustomerStatus.");
         } else {
-            logger.log(Level.WARNING, "Logged in user is null. changeCustomerStatus aborted.");
+            LOGGER.log(Level.WARNING, "Logged in user is null. changeCustomerStatus aborted.");
         }
     }
 
@@ -3174,7 +3217,7 @@ public class EziDebitPaymentGateway implements Serializable {
             }
             startAsynchJob("ChangeScheduledAmount", paymentBean.changeScheduledAmount(selectedCustomer, paymentDebitDate, amount, paymentLimitToNumberOfPayments, applyToAllFuturePayments, paymentKeepManualPayments, loggedInUser, getDigitalKey()));
         } else {
-            logger.log(Level.WARNING, "Logged in user is null. Add Single Payment aborted.");
+            LOGGER.log(Level.WARNING, "Logged in user is null. Add Single Payment aborted.");
         }
     }
 
@@ -3185,7 +3228,7 @@ public class EziDebitPaymentGateway implements Serializable {
         if (loggedInUser != null) {
             startAsynchJob("ChangeScheduledDate", paymentBean.changeScheduledDate(selectedCustomer, changeFromDate, paymentDebitDate, paymentReference, paymentKeepManualPayments, loggedInUser, getDigitalKey()));
         } else {
-            logger.log(Level.WARNING, "Logged in user is null. Add Single Payment aborted.");
+            LOGGER.log(Level.WARNING, "Logged in user is null. Add Single Payment aborted.");
         }
     }
 
@@ -3237,9 +3280,9 @@ public class EziDebitPaymentGateway implements Serializable {
                                                 // duplicate found
                                                 if (cells2[1].contains("Cancelled") == true) {
                                                     duplicaterows.add(y);
-                                                    logger.log(Level.INFO, "Duplicate Found: {0}", line2);
+                                                    LOGGER.log(Level.INFO, "Duplicate Found: {0}", line2);
                                                 } else {
-                                                    logger.log(Level.WARNING, "Non Cancelled Duplicate Found: {0}", line2);
+                                                    LOGGER.log(Level.WARNING, "Non Cancelled Duplicate Found: {0}", line2);
                                                 }
                                             }
                                         }
@@ -3259,7 +3302,7 @@ public class EziDebitPaymentGateway implements Serializable {
             for (int z = sta.size() - 1; z >= 0; z--) {
                 if (duplicaterows.contains(z)) {
                     String message = "REMOVING DUPLICATE: " + sta.get(z);
-                    logger.log(Level.INFO, message);
+                    LOGGER.log(Level.INFO, message);
                     duplicateLines += message + "\r\n";
                     sta.remove(z);
                 }
@@ -3292,7 +3335,7 @@ public class EziDebitPaymentGateway implements Serializable {
                                 firstname = name[1].replaceAll("[^a-zA-Z0-9\\s]", "").trim();
 
                             } else {
-                                logger.log(Level.INFO, "No firstname for {0}", references[0]);
+                                LOGGER.log(Level.INFO, "No firstname for {0}", references[0]);
                             }
                             String ezidebitRef = references[1].substring(references[1].indexOf(":") + 1);
                             SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yy");
@@ -3300,21 +3343,21 @@ public class EziDebitPaymentGateway implements Serializable {
 
                             // check for existing customer in our database
                             Customers localCustomer = customersFacade.findCustomerByName(firstname, lastname);
-                            logger.log(Level.INFO, "Looking for {0} {1} in the local CRM database", new Object[]{firstname, lastname});
+                            LOGGER.log(Level.INFO, "Looking for {0} {1} in the local CRM database", new Object[]{firstname, lastname});
 
                             if (localCustomer != null) {
-                                logger.log(Level.INFO, "Found {0} {1} in the local CRM database with CRM id:{2}", new Object[]{firstname, lastname, localCustomer.getId()});
+                                LOGGER.log(Level.INFO, "Found {0} {1} in the local CRM database with CRM id:{2}", new Object[]{firstname, lastname, localCustomer.getId()});
                                 addDefaultPaymentParametersIfEmpty(localCustomer, contractStartDate);
-                                logger.log(Level.INFO, "Looking for {0} {1} in the payment Gateway database using Ezidebit reference:{2} database", new Object[]{firstname, lastname, ezidebitRef});
+                                LOGGER.log(Level.INFO, "Looking for {0} {1} in the payment Gateway database using Ezidebit reference:{2} database", new Object[]{firstname, lastname, ezidebitRef});
 
                                 EziResponseOfCustomerDetailsTHgMB7OL customerdetails = getWs().getCustomerDetails(getDigitalKey(), ezidebitRef, "");
                                 if (customerdetails.getError() == 0) {// any errors will be a non zero value
-                                    logger.log(Level.INFO, "Get Customer (EziId) Details Response: Name - {0}", customerdetails.getData().getValue().getCustomerName().getValue());
-                                    logger.log(Level.INFO, "Found {0} {1} in the Payment Gateway database with Ezidebit id:{2}", new Object[]{firstname, lastname, ezidebitRef});
+                                    LOGGER.log(Level.INFO, "Get Customer (EziId) Details Response: Name - {0}", customerdetails.getData().getValue().getCustomerName().getValue());
+                                    LOGGER.log(Level.INFO, "Found {0} {1} in the Payment Gateway database with Ezidebit id:{2}", new Object[]{firstname, lastname, ezidebitRef});
                                     cd = customerdetails.getData().getValue();
 
                                 } else {
-                                    logger.log(Level.WARNING, "Get Customer (EziId) Details Response: Error - {0}", customerdetails.getErrorMessage().getValue());
+                                    LOGGER.log(Level.WARNING, "Get Customer (EziId) Details Response: Error - {0}", customerdetails.getErrorMessage().getValue());
                                 }
                                 if (cd != null) {
                                     boolean updateSystemRefInEzidebit = false;
@@ -3322,13 +3365,13 @@ public class EziDebitPaymentGateway implements Serializable {
                                     int key = localCustomer.getId();
                                     String eziYourSysRef = cd.getYourSystemReference().getValue();
                                     String eziSysRef = cd.getEzidebitCustomerID().getValue();
-                                    logger.log(Level.INFO, "Customer {0}, Our primary Key: {1},EziYourSysRef {3}, Ezidebit Ref: {2}", new Object[]{references[0], key, eziSysRef, eziYourSysRef});
+                                    LOGGER.log(Level.INFO, "Customer {0}, Our primary Key: {1},EziYourSysRef {3}, Ezidebit Ref: {2}", new Object[]{references[0], key, eziSysRef, eziYourSysRef});
                                     try {
                                         int eziRef = Integer.parseInt(eziYourSysRef);
                                         if (eziRef == key) {
-                                            logger.log(Level.INFO, "Keys already match. Nothing to do.", new Object[]{references[0], key, eziYourSysRef});
+                                            LOGGER.log(Level.INFO, "Keys already match. Nothing to do.", new Object[]{references[0], key, eziYourSysRef});
                                         } else {
-                                            logger.log(Level.SEVERE, "The system references don't match!  Possible Duplicate!");
+                                            LOGGER.log(Level.SEVERE, "The system references don't match!  Possible Duplicate!");
                                             duplicateLines += "The system references don't match! Possible Duplicate! Customer " + references[0] + ", Our primary Key:" + key + ", Ezidebit Ref: " + eziSysRef + "\r\n";
                                             updateSystemRefInEzidebit = true;
                                         }
@@ -3341,19 +3384,19 @@ public class EziDebitPaymentGateway implements Serializable {
                                             Future<Boolean> res = paymentBean.editCustomerDetails(localCustomer, eziSysRef, getLoggedInUser(), getDigitalKey());
 
                                             if (res.get(180, TimeUnit.SECONDS) == true) {
-                                                logger.log(Level.INFO, "System reference updated");
+                                                LOGGER.log(Level.INFO, "System reference updated");
                                             } else {
-                                                logger.log(Level.WARNING, "System reference update Failed");
+                                                LOGGER.log(Level.WARNING, "System reference update Failed");
                                                 duplicateLines += "The System reference update Failed ! Customer " + references[0] + ", Our primary Key:" + key + ", Ezidebit Ref: " + eziSysRef + "\r\n";
 
                                             }
                                         } catch (InterruptedException | ExecutionException | TimeoutException interruptedException) {
-                                            logger.log(Level.WARNING, "System reference update Failed due to timeout, execution or interuption exception!");
+                                            LOGGER.log(Level.WARNING, "System reference update Failed due to timeout, execution or interuption exception!");
                                             duplicateLines += "The System reference update Failed ! Customer " + references[0] + ", Our primary Key:" + key + ", Ezidebit Ref: " + eziSysRef + "\r\n";
 
                                         } catch (EJBException ex) {
                                             Exception causedByEx = ex.getCausedByException();
-                                            logger.log(Level.WARNING, "System reference update Failed due to EJB Excpetion:", causedByEx.getMessage());
+                                            LOGGER.log(Level.WARNING, "System reference update Failed due to EJB Excpetion:", causedByEx.getMessage());
                                             duplicateLines += "The System reference update Failed ! System Error " + causedByEx.getMessage() + "\r\n";
 
                                         }
@@ -3373,18 +3416,18 @@ public class EziDebitPaymentGateway implements Serializable {
                                             if (localCustomer.getActive().getCustomerState().contains(cs.getCustomerState()) == false) {
                                                 localCustomer.setActive(cs);
                                                 customersFacade.editAndFlush(localCustomer);
-                                                logger.log(Level.INFO, "Updating CRM Status to: {0}. EziDebit Status: {1}", new Object[]{cs.getCustomerState(), status});
+                                                LOGGER.log(Level.INFO, "Updating CRM Status to: {0}. EziDebit Status: {1}", new Object[]{cs.getCustomerState(), status});
                                             }
                                         }
                                     }
 
                                 } else {
 
-                                    logger.log(Level.WARNING, "Could not find the customer in ezidebit {0}", line);
+                                    LOGGER.log(Level.WARNING, "Could not find the customer in ezidebit {0}", line);
 
                                 }
                             } else {
-                                logger.log(Level.WARNING, "Customer does not exist in local system! Customer {0}\r\n", references[0]);
+                                LOGGER.log(Level.WARNING, "Customer does not exist in local system! Customer {0}\r\n", references[0]);
                                 duplicateLines += "Customer does not exist in local system! Customer " + references[0] + "\r\n";
 
                             }
@@ -3396,7 +3439,7 @@ public class EziDebitPaymentGateway implements Serializable {
             }
             setDuplicateValues(duplicateLines);
 
-            logger.log(Level.INFO, "Customer sync with Ezidebit completed. Updated or created count={0}", count);
+            LOGGER.log(Level.INFO, "Customer sync with Ezidebit completed. Updated or created count={0}", count);
             JsfUtil.addSuccessMessage(count + ", " + configMapFacade.getConfig("EzidebitImportCreated"));
             return "/admin/customers/List";
         } catch (ParseException e) {

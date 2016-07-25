@@ -25,6 +25,7 @@ au/com/manlyit/fitnesscrm/stats/db/InvoiceLine.class
 au/com/manlyit/fitnesscrm/stats/classes/ItemController$1.class
 au/com/manlyit/fitnesscrm/stats/converters/GenericConverter.class
 au/com/manlyit/fitnesscrm/stats/classes/InvoiceLineController$InvoiceLineControllerConverter.class
+au/com/manlyit/fitnesscrm/stats/classes/util/MessageDecoder.class
 au/com/manlyit/fitnesscrm/stats/db/InvoiceLineType.class
 au/com/manlyit/fitnesscrm/stats/webservices/NewCustomer.class
 au/com/manlyit/fitnesscrm/stats/beans/SessionTimetableFacade.class
@@ -166,6 +167,7 @@ au/com/manlyit/fitnesscrm/stats/classes/PreferedContactController.class
 au/com/manlyit/fitnesscrm/stats/db/PreferedContact.class
 au/com/manlyit/fitnesscrm/stats/beans/util/JsfUtil.class
 au/com/manlyit/fitnesscrm/stats/converters/CustomerNotesConverter.class
+au/com/manlyit/fitnesscrm/stats/classes/util/Message.class
 au/com/manlyit/fitnesscrm/stats/db/QrtzCronTriggers.class
 au/com/manlyit/fitnesscrm/stats/classes/SessionTimetableController$1.class
 au/com/manlyit/fitnesscrm/stats/db/Activation.class
@@ -324,6 +326,7 @@ au/com/manlyit/fitnesscrm/stats/beans/PreferedContactFacade.class
 au/com/manlyit/fitnesscrm/stats/classes/CustomerImagesController$CustomerImagesControllerConverter.class
 au/com/manlyit/fitnesscrm/stats/classes/SurveyAnswersController.class
 au/com/manlyit/fitnesscrm/stats/classes/SurveyquestiontypesController$SurveyquestiontypesControllerConverter.class
+au/com/manlyit/fitnesscrm/stats/classes/util/MessageEncoder.class
 au/com/manlyit/fitnesscrm/stats/classes/util/UAgentInfo.class
 au/com/manlyit/fitnesscrm/stats/beans/util/PaymentPeriod.class
 au/com/manlyit/fitnesscrm/stats/chartbeans/MaxHeartRateChart.class
@@ -361,6 +364,7 @@ au/com/manlyit/fitnesscrm/stats/classes/PaymentParametersController$PaymentParam
 au/com/manlyit/fitnesscrm/stats/beans/InvoiceFacade.class
 au/com/manlyit/fitnesscrm/stats/beans/util/PaginationHelper.class
 au/com/manlyit/fitnesscrm/stats/classes/CurrencyController$CurrencyControllerConverter.class
+au/com/manlyit/fitnesscrm/stats/classes/util/PushMessageView.class
 au/com/manlyit/fitnesscrm/stats/classes/CustomerAuthController$1.class
 au/com/manlyit/fitnesscrm/stats/webservices/DeletePayment.class
 au/com/manlyit/fitnesscrm/stats/classes/DemographicTypesController.class
@@ -378,6 +382,7 @@ au/com/manlyit/fitnesscrm/stats/db/AuditLog.class
 au/com/manlyit/fitnesscrm/stats/classes/util/WebDDRSignUpServlet.class
 au/com/manlyit/fitnesscrm/stats/classes/util/NoSpecialCharStringValidator.class
 au/com/manlyit/fitnesscrm/stats/converters/ParticpantConverter.class
+au/com/manlyit/fitnesscrm/stats/classes/util/PushMessageResource.class
 au/com/manlyit/fitnesscrm/stats/beans/CustomersFacade.class
 au/com/manlyit/fitnesscrm/stats/classes/StatTypesController$1.class
 au/com/manlyit/fitnesscrm/stats/webservices/GetPaymentDetail.class
@@ -386,6 +391,7 @@ au/com/manlyit/fitnesscrm/stats/classes/util/TestEziDebitModule.class
 au/com/manlyit/fitnesscrm/stats/db/SessionBookings.class
 au/com/manlyit/fitnesscrm/stats/db/QrtzCronTriggersPK.class
 au/com/manlyit/fitnesscrm/stats/classes/EmailTemplatesController$EmailTemplatesControllerConverter.class
+au/com/manlyit/fitnesscrm/stats/classes/util/PushMessageUsers.class
 au/com/manlyit/fitnesscrm/stats/classes/TasksController.class
 au/com/manlyit/fitnesscrm/stats/webservices/EziResponseOfArrayOfScheduledPaymentTHgMB7OL.class
 au/com/manlyit/fitnesscrm/stats/beans/CustomerImagesFacade.class
