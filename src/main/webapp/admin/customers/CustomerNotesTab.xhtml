@@ -1,0 +1,85 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition  xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui" >
+
+    
+      <h:form id="NoteslistForm1" styleClass="updatePaymentInfo">
+
+                        <h:outputText id="selectedUser3" value=" #{customersController.selected.firstname} #{customersController.selected.lastname} " />
+                        <h:outputText escape="false" value="#{configMapController.getKey('ListNotesEmpty')}" rendered="#{customersController.notesItems.rowCount == 0}"/>
+
+                        <p:dataTable  editable="true" 
+                                      styleClass="updateNotesDataTable"
+                                      value="#{customersController.notesItems}" 
+                                      filteredValue="#{customersController.notesFilteredItems}"  
+                                      widgetVar="notesControllerTable" 
+                                      rendered="#{customersController.notesItems.rowCount > 0}"
+                                      var="item" 
+                                      selection="#{customersController.selectedNoteForDeletion}" 
+                                      rowKey="#{item.id}"
+                                      paginator="true" 
+                                      selectionMode="single"
+                                      rows="15"   
+                                      paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  
+                                      rowsPerPageTemplate="5,10,15,20,25,50,100" >
+                            <f:facet name="header">
+                                <p:outputPanel>
+                                    <h:outputText value="Notes" />
+
+                                </p:outputPanel>
+                                <p:outputPanel>
+                                    <p:commandButton rendered="#{notesController.isUserInRole('ADMIN')}"  oncomplete="PF('notesControllerTable').filter()" update=":growl"  value="#{configMapController.getKey('ListNotesDestroyLink')}" actionListener="#{customersController.deleteNote}"/>
+                                    <p:commandButton id="showDialogButton2"  value="#{configMapController.getKey('ListNotesCreateLink')}" onclick="PF('NotesCreateDialogue').show()" type="button"/> 
+                                   <!-- <p:commandButton   value="TEST" update="@(.updateNotesDataTable)" actionListener="#{customersController.testRequestContext}" /> -->
+                                </p:outputPanel>
+                            </f:facet>
+                            <p:ajax event="rowEdit" listener="#{customersController.onNotesEdit}" update=":growl" oncomplete="PF('notesControllerTable').filter()" />  
+                            <p:ajax event="rowDblselect"  update=":growl :NoteslistForm1:customerNotesPopupDialogue" oncomplete="PF('customerNotesPopupDialogueWidget').show()" /> 
+                            <p:ajax event="rowEditCancel" listener="#{customersController.onNotesCancel}" update=":growl" />  
+                           
+                            <p:column rendered="#{notesController.isUserInRole('ADMIN')}"  headerText="Edit" style="width:50px">  
+                                <p:rowEditor />  
+                            </p:column>  
+                            <p:column sortBy="#{item.createTimestamp}" filterOptions="" filterBy="#{item.createTimestamp}" headerText="#{configMapController.getKey('ListNotesTitle_createTimestamp')}"  width="150" >
+
+                                <p:cellEditor> 
+                                    <f:facet name="output">
+                                        <h:outputText value="#{item.createTimestamp}">
+                                            <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
+                                        </h:outputText>
+                                    </f:facet>
+                                    <f:facet name="input">
+                                        <p:calendar value="#{item.createTimestamp}">	
+                                            <p:ajax event="dateSelect" listener= "#{notesController.handleDateSelect}" update=":growl" />
+                                        </p:calendar>
+                                    </f:facet>
+                                </p:cellEditor> 
+
+                            </p:column>
+                            <p:column  sortBy="#{item.createdBy.lastname}" filterBy="#{item.createdBy.lastname}" headerText="#{configMapController.getKey('ListNotesTitle_createdBY')}"   >
+                                <h:outputText value="#{item.createdBy.firstname} #{item.createdBy.lastname}"/>
+                            </p:column>
+                            <p:column sortBy="#{item.note}" filterBy="#{item.note}"  filterMatchMode="contains" headerText="#{configMapController.getKey('ListNotesTitle_note')}"   >
+                                <p:cellEditor> 
+                                    <f:facet name="output">
+                                        <h:outputText value="#{item.note}" escape="false"/>
+                                    </f:facet>
+                                    <f:facet name="input">
+                                        <p:editor value="#{item.note}"   />
+                                    </f:facet>
+                                </p:cellEditor> 
+
+
+                            </p:column>
+
+                        </p:dataTable>
+                        <ui:include src="NotesPopup.xhtml"/>
+
+                    </h:form>
+
+    
+    </ui:composition>

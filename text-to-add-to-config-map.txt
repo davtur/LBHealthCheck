@@ -1462,3 +1462,4 @@ ChangePlanNewScheduleHeaderTitle=Below is the new payment schedule for the new p
 ChangePlanNamesHeaderTitle=Below are the names of the old and new plans.
 CreatePlanPeriodTypeLabel=Plan Time Period
 CreatePlanPeriodTypeTitle=The time Period that the plan price covers.
+customerNotesPopupTitle=Customer Note

@@ -1486,9 +1486,9 @@ public class EziDebitPaymentGateway implements Serializable {
         boolean stat = false;
 
         if (selectedCustomer != null) {
-            Customers cust = customersFacade.findById(selectedCustomer.getId());
+           // Customers cust = customersFacade.findById(selectedCustomer.getId());
 
-            PaymentParameters pp = cust.getPaymentParameters();
+            PaymentParameters pp = selectedCustomer.getPaymentParameters();
 
             if (pp != null) {
                 String statusCode = pp.getStatusCode();
@@ -1509,7 +1509,7 @@ public class EziDebitPaymentGateway implements Serializable {
                 LOGGER.log(Level.FINE, "isTheCustomerProvisionedInThePaymentGateway - PaymentParameters are null returning false by default. ");
 
             }
-            selectedCustomer = cust;
+            //selectedCustomer = cust;
         }
         return stat;
     }

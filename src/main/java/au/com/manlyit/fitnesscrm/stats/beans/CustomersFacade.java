@@ -27,13 +27,6 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
 import javax.validation.ConstraintViolationException;
-import org.eclipse.persistence.config.CacheUsage;
-import org.eclipse.persistence.config.QueryHints;
-import org.eclipse.persistence.internal.jpa.EJBQueryImpl;
-import org.eclipse.persistence.jpa.JpaEntityManager;
-import org.eclipse.persistence.queries.DatabaseQuery;
-import org.eclipse.persistence.sessions.DatabaseRecord;
-import org.eclipse.persistence.sessions.Session;
 
 /**
  *
@@ -49,6 +42,7 @@ public class CustomersFacade extends AbstractFacade<Customers> {
     @PersistenceContext(unitName = "FitnessStatsPU")
     private EntityManager em;
     private static final Logger LOGGER = Logger.getLogger(CustomersFacade.class.getName());
+    private static final boolean DEBUG = true;
 
     @Override
     protected EntityManager getEntityManager() {
@@ -84,6 +78,9 @@ public class CustomersFacade extends AbstractFacade<Customers> {
 
             Query q = em.createQuery(cq);
             //q.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase);
+            if (DEBUG) {
+                debug(q);
+            }
             cm = (Customers) q.getSingleResult();
         } catch (Exception e) {
             LOGGER.log(Level.INFO, "Customer not found:{0}", username);
@@ -110,6 +107,9 @@ public class CustomersFacade extends AbstractFacade<Customers> {
 
             Query q = em.createQuery(cq);
             //q.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase);
+            if (DEBUG) {
+                debug(q);
+            }
             cm = (Customers) q.getSingleResult();
         } catch (Exception e) {
             LOGGER.log(Level.INFO, "Customer not found:{0}", email);
@@ -141,6 +141,9 @@ public class CustomersFacade extends AbstractFacade<Customers> {
             //Query q = em.createQuery(cq);
             Query q = em.createNativeQuery("SELECT * FROM customers where upper(firstname) = upper('" + firstname.trim() + "') and upper(lastname) = upper('" + lastname.trim() + "') ", Customers.class);
             //q.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase);
+            if (DEBUG) {
+                debug(q);
+            }
             int size = q.getResultList().size();
             if (size == 1) {
                 cm = (Customers) q.getSingleResult();
@@ -168,7 +171,10 @@ public class CustomersFacade extends AbstractFacade<Customers> {
             cq.where(cb.equal(custEmail, email));
 
             TypedQuery<Customers> q = em.createQuery(cq);
-           // q.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase);
+            if (DEBUG) {
+                debug(q);
+            }
+            // q.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase);
             retList = q.getResultList();
         } catch (ConstraintViolationException cve) {
 
@@ -191,6 +197,9 @@ public class CustomersFacade extends AbstractFacade<Customers> {
 
             Query q = em.createQuery(cq);
             //q.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase);
+            if (DEBUG) {
+                debug(q);
+            }
             int size = q.getResultList().size();
             if (size == 1) {
                 cm = (Customers) q.getSingleResult();
@@ -217,6 +226,9 @@ public class CustomersFacade extends AbstractFacade<Customers> {
 
             Query q = em.createQuery(cq);
             q.setHint("javax.persistence.cache.retrieveMode", "BYPASS");
+            if (DEBUG) {
+                debug(q);
+            }
             int size = q.getResultList().size();
             if (size == 1) {
                 cm = (Customers) q.getSingleResult();
@@ -254,6 +266,9 @@ public class CustomersFacade extends AbstractFacade<Customers> {
 
             TypedQuery<Customers> q = em.createQuery(cq);
             //q.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase);
+            if (DEBUG) {
+                debug(q);
+            }
             List<Customers> retList = q.getResultList();
             if (retList != null) {
                 int size = retList.size();
@@ -305,6 +320,9 @@ public class CustomersFacade extends AbstractFacade<Customers> {
             }
             TypedQuery<Customers> q = em.createQuery(cq);
             //q.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase);
+            if (DEBUG) {
+                debug(q);
+            }
             retList = q.getResultList();
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
@@ -376,19 +394,20 @@ public class CustomersFacade extends AbstractFacade<Customers> {
             TypedQuery<Customers> q = em.createQuery(cq);
             if (bypassCache) {
                 q.setHint("javax.persistence.cache.retrieveMode", "BYPASS");
-            } else {
-               // q.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase);
+            } else // q.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase);
+            if (DEBUG) {
+                debug(q);
             }
 
             retList = q.getResultList();
             // for debugging
-            Session session = getEntityManager().unwrap(JpaEntityManager.class).getActiveSession();
-            DatabaseQuery databaseQuery = ((EJBQueryImpl) q).getDatabaseQuery();
-            databaseQuery.prepareCall(session, new DatabaseRecord());
-            String sqlString = databaseQuery.getSQLString();
+            // Session session = getEntityManager().unwrap(JpaEntityManager.class).getActiveSession();
+            // DatabaseQuery databaseQuery = ((EJBQueryImpl) q).getDatabaseQuery();
+            // databaseQuery.prepareCall(session, new DatabaseRecord());
+            // String sqlString = databaseQuery.getSQLString();
             //This SQL will contain ? for parameters. To get the SQL translated with the arguments you need a DatabaseRecord with the parameter values.
             // String sqlString2 = databaseQuery.getTranslatedSQLString(session, recordWithValues);
-            LOGGER.log(Level.INFO, "CustomersFacade.findFilteredCustomers SQL Query String: {0}  -----------------Records Found:{1},", new Object[]{sqlString, retList.size()});
+            // LOGGER.log(Level.INFO, "CustomersFacade.findFilteredCustomers SQL Query String: {0}  -----------------Records Found:{1},", new Object[]{sqlString, retList.size()});
 
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
@@ -480,6 +499,9 @@ public class CustomersFacade extends AbstractFacade<Customers> {
             }
             TypedQuery<Customers> q = em.createQuery(cq);
             //q.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase);
+            if (DEBUG) {
+                debug(q);
+            }
             retList = q.getResultList();
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
@@ -513,6 +535,9 @@ public class CustomersFacade extends AbstractFacade<Customers> {
                 sort = "ASC";
             }
             Query q = em.createNativeQuery("SELECT c.id, c.gender, c.firstname, c.lastname, c.dob, c.email_address, c.preferred_contact, c.username, c.street_address, c.suburb, c.postcode, c.city, c.addr_state, c.country_id, c.telephone, c.fax, c.password, c.newsletter, c.group_pricing, c.email_format, c.auth, c.active, c.referredby, c.demographic FROM fitnessStats.customers c , fitnessStats.groups g  WHERE c.username = g.username and groupname = '" + group + "'  order By c.firstname " + sort + " ", Customers.class);
+            if (DEBUG) {
+                debug(q);
+            }
             retList = (List<Customers>) q.getResultList();
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));

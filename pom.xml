@@ -4,7 +4,7 @@
 
     <groupId>au.com.manlyit</groupId>
     <artifactId>FitnessCRM</artifactId>
-    <version>4.0.2</version>
+    <version>4.0.3</version>
     <packaging>war</packaging>
 
     <name>FitnessCRM</name>
@@ -127,19 +127,19 @@
         <dependency>
             <groupId>org.xhtmlrenderer</groupId>
             <artifactId>flying-saucer-core</artifactId>
-            <version>9.0.4</version>
+            <version>9.0.9</version>
             <type>jar</type>
         </dependency>
         <dependency>
             <groupId>org.xhtmlrenderer</groupId>
             <artifactId>flying-saucer-pdf</artifactId>
-            <version>9.0.4</version>
+            <version>9.0.9</version>
             <type>jar</type>
         </dependency>
         <dependency>
             <groupId>org.xhtmlrenderer</groupId>
             <artifactId>flying-saucer-pdf-itext5</artifactId>
-            <version>9.0.4</version>
+            <version>9.0.9</version>
             <type>jar</type>
         </dependency>
         <!--<dependency>

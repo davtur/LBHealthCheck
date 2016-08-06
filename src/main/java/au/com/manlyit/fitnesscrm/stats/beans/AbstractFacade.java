@@ -77,7 +77,21 @@ public abstract class AbstractFacade<T> implements Serializable {
        // String message = "Entity Merged: " + entity.toString();
        // logger.log(Level.INFO, message);
 
+    } 
+    public void debug(Query query) {
+        // for debugging
+        Session session = getEntityManager().unwrap(JpaEntityManager.class).getActiveSession();
+        DatabaseQuery databaseQuery = ((EJBQueryImpl) query).getDatabaseQuery();
+        databaseQuery.prepareCall(session, new DatabaseRecord());
+        String sqlString = databaseQuery.getSQLString();
+        //This SQL will contain ? for parameters. To get the SQL translated with the arguments you need a DatabaseRecord with the parameter values.
+        String sqlString2 = databaseQuery.getTranslatedSQLString(session, databaseQuery.getTranslationRow());
+        String sqlString3 = databaseQuery.getEJBQLString();
+        String sqlString4 = databaseQuery.getJPQLString();
+        //logger.log(Level.INFO, "DEBUG ( Turn this off if not needed ) SQL Query String: {0}  ----------------- {1}", new Object[]{sqlString, sqlString2});
+         logger.log(Level.INFO, "DEBUG SQL Query String: -------------> {0} ,  ( Turn this off if not needed )", new Object[]{sqlString2});
     }
+    
 
     public void remove(T entity) {
 

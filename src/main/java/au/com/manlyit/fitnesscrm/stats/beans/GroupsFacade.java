@@ -6,6 +6,7 @@ package au.com.manlyit.fitnesscrm.stats.beans;
 
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import au.com.manlyit.fitnesscrm.stats.db.Groups;
+import java.util.Collection;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -19,8 +20,11 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import org.eclipse.persistence.config.CacheUsage;
-import org.eclipse.persistence.config.QueryHints;
+import org.eclipse.persistence.internal.jpa.EJBQueryImpl;
+import org.eclipse.persistence.jpa.JpaEntityManager;
+import org.eclipse.persistence.queries.DatabaseQuery;
+import org.eclipse.persistence.sessions.DatabaseRecord;
+import org.eclipse.persistence.sessions.Session;
 
 /**
  *
@@ -30,6 +34,7 @@ import org.eclipse.persistence.config.QueryHints;
 public class GroupsFacade extends AbstractFacade<Groups> {
 
     private static final long serialVersionUID = 1L;
+    private static final boolean DEBUG = false;
 
     @PersistenceContext(unitName = "FitnessStatsPU")
     private EntityManager em;
@@ -44,6 +49,8 @@ public class GroupsFacade extends AbstractFacade<Groups> {
         super(Groups.class);
     }
 
+   
+
     public List<String> getGroups() {
 
         List<String> ga = null;
@@ -51,13 +58,16 @@ public class GroupsFacade extends AbstractFacade<Groups> {
             CriteriaBuilder cb = em.getCriteriaBuilder();
             CriteriaQuery<String> cq = cb.createQuery(String.class);
             Root<Groups> rt = cq.from(Groups.class);
-           // Expression<String> gname = rt.get("groupname");
+            // Expression<String> gname = rt.get("groupname");
 
             cq.select(rt.get("groupname")).distinct(true);
             TypedQuery<String> q = em.createQuery(cq);
 // this is a very intensive call as it is called manay times for each page refresh - only use the cache as its mostly read only and doesn't get updated very often.
-           // q.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase);
-            ga =  q.getResultList();
+            // q.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase);
+            ga = q.getResultList();
+            if(DEBUG){
+               debug(q); 
+            }
 
         } catch (Exception e) {
             logger.log(Level.SEVERE, "getGroups error: ", e.getMessage());
@@ -82,7 +92,9 @@ public class GroupsFacade extends AbstractFacade<Groups> {
 // this is a very intensive call as it is called manay times for each page refresh - only use the cache as its mostly read only and doesn't get updated very often.
             //q.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase);
             ga = q.getResultList();
-
+if(DEBUG){
+               debug(q); 
+            }
         } catch (Exception e) {
             logger.log(Level.SEVERE, "getCustomersGroups error: ", e.getMessage());
         }
@@ -91,7 +103,24 @@ public class GroupsFacade extends AbstractFacade<Groups> {
     }
 
     public boolean isCustomerInGroup(Customers cust, String group) {
-        Groups cm = null;
+        if(cust == null || group == null ){
+            return false;
+        }
+        if(group.trim().isEmpty()){
+            return false;
+        }
+        Collection<Groups> grpColl = cust.getGroupsCollection();
+        if(grpColl == null){
+            return false;
+        }
+        
+        for(Groups g: grpColl){
+            if(g.getGroupname().contentEquals(group) == true){
+                return true;
+            }
+        }
+        
+       /* Groups cm = null;
         try {
             CriteriaBuilder cb = em.getCriteriaBuilder();
             CriteriaQuery<Groups> cq = cb.createQuery(Groups.class);
@@ -104,13 +133,14 @@ public class GroupsFacade extends AbstractFacade<Groups> {
             Query q = em.createQuery(cq);
             // this is a very intensive call as it is called manay times for each page refresh - only use the cache as its mostly read only and doesn't get updated very often.
             //q.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase);
+debug(q);
             List retList = q.getResultList();
             if (retList.size() > 0) {
                 return true;
             }
         } catch (Exception e) {
             logger.log(Level.SEVERE, "isCustomerInGroup error:{0} {1} ", new Object[]{cust.getUsername(), group, e.getMessage()});
-        }
+        }*/
         return false;
     }
 
@@ -128,6 +158,9 @@ public class GroupsFacade extends AbstractFacade<Groups> {
             Query q = em.createQuery(cq);
 // this is a very intensive call as it is called manay times for each page refresh - only use the cache as its mostly read only and doesn't get updated very often.
             //q.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase);
+if(DEBUG){
+               debug(q); 
+            }
             List retList = q.getResultList();
             int k = retList.size();
             if (k > 0) {
