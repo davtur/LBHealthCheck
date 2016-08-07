@@ -114,15 +114,19 @@
                         <h1 class="BigTopic">#{configMapController.getKey('MyDetailsSurveyPanel_title')}</h1>
 
 
-                         <!--   <p:outputLabel value="#{configMapController.getKey('CreateSurveyanswersLabel_surveyId')}" for="surveyId" />-->
+ <!--   <p:outputLabel value="#{configMapController.getKey('CreateSurveyanswersLabel_surveyId')}" for="surveyId" />
                         <p:selectOneMenu id="surveyId" valueChangeListener="#{surveyanswersController.selectOneMenuValueChangeListener}" converter="surveysControllerConverter"  value="#{surveyanswersController.selectedSurvey}"  label="#{configMapController.getKey('CreateSurveyanswersTitle_surveyId')}">
                             <f:selectItems value="#{surveysController.itemsAvailableSelectMany}"/>
                             <p:ajax   update=":createCustomerForm"  />
-                        </p:selectOneMenu>
+                        </p:selectOneMenu>-->
+                        <ui:repeat value="#{customersController.selected.questionnaireMapCollection}" var="qMap">
+                            <div class="EmptyBox10"></div>
+                                                <!--   <p:commandButton icon="fa fa-edit  white Fs14" id="viewSurveyButton" disabled="#{empty surveyanswersController.selectedSurvey}"  action="customerSurveys"    value="#{configMapController.getKey('MyDeatilsSurveys_viewSurveyLabel')}" update=":growl :createCustomerForm"  /> -->
 
-                        <div class="EmptyBox10"></div>
-                        <p:commandButton icon="fa fa-edit  white Fs14" id="viewSurveyButton" disabled="#{empty surveyanswersController.selectedSurvey}"  action="customerSurveys"    value="#{configMapController.getKey('MyDeatilsSurveys_viewSurveyLabel')}" update=":growl :createCustomerForm"  /> 
-
+                            <p:commandButton icon="fa fa-edit  white Fs14"   action="customerSurveys" rendered="#{qMap.enabled}"   value="#{qMap.surveysId.name}" update=":growl :createCustomerForm"  >
+                                <f:setPropertyActionListener value="#{qMap.surveysId}" target="#{surveyanswersController.selectedSurvey}" />
+                            </p:commandButton> 
+                        </ui:repeat>
                     </div>
                 </div>
                 <div class="Container50 Responsive50">

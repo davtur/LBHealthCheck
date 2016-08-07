@@ -48,9 +48,9 @@
                 <f:validator validatorId="au.com.manlyit.fitnesscrm.stats.classes.util.PhoneNumberValidator" />
             </p:inputText>
             <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_emergencyContactName')}" for="emergencyContactName" />
-            <p:inputText id="emergencyContactName" value="#{customersController.newCustomer.emergencyContactName}" title="#{configMapController.getKey('CreateCustomersTitle_emergencyContactName')}" />
+            <p:inputText id="emergencyContactName" value="#{customersController.selected.emergencyContactName}" title="#{configMapController.getKey('CreateCustomersTitle_emergencyContactName')}" />
             <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_emergencyContactPhone')}" for="emergencyContactPhone" />
-            <p:inputText id="emergencyContactPhone" value="#{customersController.newCustomer.emergencyContactPhone}" title="#{configMapController.getKey('CreateCustomersTitle_emergencyContactPhone')}" >
+            <p:inputText id="emergencyContactPhone" value="#{customersController.selected.emergencyContactPhone}" title="#{configMapController.getKey('CreateCustomersTitle_emergencyContactPhone')}" >
 
             </p:inputText>
 
@@ -152,6 +152,68 @@
             <p:commandButton  value="#{configMapController.getKey('sendCustomerOnBoardEmailButton')}"  actionListener="#{customersController.sendCustomerOnboardEmail}" update="@(.updateNotesDataTable) :growl"/>
 
         </p:panel>
+
+        <p:dataTable  
+            id="questionnaireMapDatatable"  
+            editable="true" 
+            value="#{customersController.selected.questionnaireMapCollection}" 
+
+            rowKey="#{item.id}" 
+
+            widgetVar="questionnaireMapDatatableWidget" 
+            var="item"  
+            scrollHeight="200"
+
+            >
+
+            <p:ajax event="rowEdit" listener="#{surveysController.onEditQMap}" update=":growl"  />  
+            <p:ajax event="rowEditCancel" listener="#{surveysController.onCancelQMap}" update=":growl"   />  
+
+            <!--<p:column selectionMode="single"/>-->
+
+            <p:column sortBy="#{item.surveysId.name}"  headerText="#{configMapController.getKey('EditCustomerSurvey_Name')}"   >
+                <p:cellEditor> 
+                    <f:facet name="output">
+                        <h:outputText value="#{item.surveysId.name}"  />
+                    </f:facet>
+                    <f:facet name="input">
+                         <h:outputText value="#{item.surveysId.name}"  />
+                    </f:facet>
+                </p:cellEditor> 
+
+
+            </p:column>
+            <p:column sortBy="#{item.enabled}"  headerText="#{configMapController.getKey('EditCustomerSurvey_Enabled')}"   >
+                <p:cellEditor> 
+                    <f:facet name="output">
+                        <p:selectBooleanCheckbox value="#{item.enabled}" disabled="true"/>
+                    </f:facet>
+                    <f:facet name="input">
+                        <p:selectBooleanCheckbox value="#{item.enabled}" itemLabel="#{configMapController.getKey('EditCustomerSurvey_Enabled')}" />
+                    </f:facet>
+                </p:cellEditor> 
+            </p:column>
+            <p:column sortBy="#{item.questionnaireCompleted}"  headerText="#{configMapController.getKey('EditCustomerSurvey_Completed')}"   >
+                <p:cellEditor> 
+                    <f:facet name="output">
+                        <p:selectBooleanCheckbox value="#{item.questionnaireCompleted}" disabled="true"/>
+                    </f:facet>
+                    <f:facet name="input">
+                        <p:selectBooleanCheckbox value="#{item.questionnaireCompleted}" itemLabel="#{configMapController.getKey('EditCustomerSurvey_Completed')}" />
+                    </f:facet>
+                </p:cellEditor> 
+
+
+            </p:column>
+            <p:column rendered="#{toDoListController.isUserInRole('ADMIN')}"  headerText="Edit" style="width:50px">  
+                <p:rowEditor />  
+            </p:column>  
+
+
+
+        </p:dataTable>
+
+
 
     </h:form>
 

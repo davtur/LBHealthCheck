@@ -84,6 +84,11 @@ public class Notes implements BaseEntity,Serializable {
     public Notes(Integer id) {
         this.id = id;
     }
+    
+    public Notes(Integer id,String note) {
+        this.id = id;
+        this.note = note;
+    }
 
     public Notes(Integer id, Date createTimestamp, short deleted) {
         this.id = id;

@@ -22,7 +22,7 @@
                                     <h:outputText class="" value="#{answer.questionId.question}" style="font-weight: bold"/> 
                                 </h:panelGroup>
                                 <h:panelGroup rendered="#{answer.answerTypeid.type == 'Text'}">
-                                    <p:inputTextarea value="#{answer.answer}" valueChangeListener="#{surveyanswersController.textAnswerValueChange}" rows="3" cols="129" style="padding-bottom: 20px">
+                                    <p:inputTextarea   value="#{answer.answer}" valueChangeListener="#{surveyanswersController.textAnswerValueChange}" rows="3" cols="129" style="padding-bottom: 20px">
                                         <p:ajax />
                                     </p:inputTextarea>
                                 </h:panelGroup>

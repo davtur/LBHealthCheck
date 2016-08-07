@@ -7,6 +7,7 @@ import au.com.manlyit.fitnesscrm.stats.classes.util.PaginationHelper;
 import au.com.manlyit.fitnesscrm.stats.beans.SurveysFacade;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import au.com.manlyit.fitnesscrm.stats.db.QuestionnaireMap;
+import au.com.manlyit.fitnesscrm.stats.db.ToDoList;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -45,6 +46,7 @@ public class SurveysController implements Serializable {
     private CustomersFacade customersFacade;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.QuestionnaireMapFacade questionnaireMapFacade;
+    
     private PaginationHelper pagination;
     private int selectedItemIndex;
     private List<Surveys> filteredItems;
@@ -137,6 +139,18 @@ public class SurveysController implements Serializable {
         }
         
     }
+    
+    
+    public void onEditQMap(RowEditEvent event) {
+        QuestionnaireMap cm = (QuestionnaireMap) event.getObject();
+        questionnaireMapFacade.edit(cm);
+        recreateModel();
+        JsfUtil.addSuccessMessage("Row Edit Successful");
+    }
+
+    public void onCancelQMap(RowEditEvent event) {
+        JsfUtil.addSuccessMessage("Row Edit Cancelled");
+    }
 
     /**
      * @return the filteredItems
@@ -189,6 +203,7 @@ public class SurveysController implements Serializable {
                 current.setId(0);
             }
             getFacade().create(current);
+            updateSurveyToCustomerMap();
             JsfUtil.addSuccessMessage(configMapFacade.getConfig("SurveysCreated"));
             return prepareCreate();
         } catch (Exception e) {
@@ -201,6 +216,7 @@ public class SurveysController implements Serializable {
         try {
             current.setId(0);
             getFacade().create(current);
+            updateSurveyToCustomerMap();
             recreateModel();
             JsfUtil.addSuccessMessage(configMapFacade.getConfig("SurveysCreated"));
         } catch (Exception e) {

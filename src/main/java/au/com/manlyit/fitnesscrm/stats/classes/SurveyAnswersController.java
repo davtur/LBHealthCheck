@@ -6,6 +6,8 @@ import au.com.manlyit.fitnesscrm.stats.classes.util.PaginationHelper;
 import au.com.manlyit.fitnesscrm.stats.beans.SurveyAnswersFacade;
 import au.com.manlyit.fitnesscrm.stats.classes.util.SurveyMap;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
+import au.com.manlyit.fitnesscrm.stats.db.Notes;
+import au.com.manlyit.fitnesscrm.stats.db.QuestionnaireMap;
 import au.com.manlyit.fitnesscrm.stats.db.SurveyAnswerSubitems;
 import au.com.manlyit.fitnesscrm.stats.db.SurveyQuestions;
 import au.com.manlyit.fitnesscrm.stats.db.SurveyQuestionSubitems;
@@ -37,7 +39,7 @@ import org.primefaces.event.SelectEvent;
 @SessionScoped
 public class SurveyAnswersController implements Serializable {
 
-    private static final Logger logger = Logger.getLogger(SurveyAnswersController.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(SurveyAnswersController.class.getName());
     private SurveyAnswers current;
     private Surveys selectedSurvey;
     private SurveyAnswers selectedForDeletion;
@@ -49,6 +51,8 @@ public class SurveyAnswersController implements Serializable {
     private au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade configMapFacade;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.CustomersFacade ejbCustomersFacade;
+    @Inject
+    private au.com.manlyit.fitnesscrm.stats.beans.QuestionnaireMapFacade questionnaireMapFacade;
     private PaginationHelper pagination;
     private int selectedItemIndex;
     private List<SurveyAnswers> filteredItems;
@@ -63,8 +67,8 @@ public class SurveyAnswersController implements Serializable {
         boolean inRole = FacesContext.getCurrentInstance().getExternalContext().isUserInRole(roleName);
         return inRole;
     }
-    
-    public void clearSurveyAnswers(){
+
+    public void clearSurveyAnswers() {
         surveyAnswers = null;
     }
 
@@ -178,39 +182,84 @@ public class SurveyAnswersController implements Serializable {
     }
 
     public String saveSurvey() {
+
+        boolean disclaimerAccepted = false;
+        Surveys s = null;
         try {
+
             for (SurveyAnswers sa : surveyAnswers) {
+                s = sa.getQuestionId().getSurveyId();
                 getFacade().edit(sa);
+                if (sa.getAnswerTypeid().getType().contains("Disclaimer") == true) {
+                    Collection<SurveyAnswerSubitems> subItems = sa.getSurveyAnswerSubitemsCollection();
+                    for (SurveyAnswerSubitems sasi : subItems) {
+                        if (sasi.getSubitemBool() != null) {
+                            if (sasi.getSubitemBool() == true) {
+                                //disclaimer has been accepted , mark this as completed
+                                disclaimerAccepted = true;
+                            }
+                        }
+                    }
+                }
             }
             JsfUtil.addSuccessMessage(configMapFacade.getConfig("SurveyAnswersCreated"));
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
         }
+        if (s == null) {
+            // nothing to do as no questions have been answered
+            return "/customerSurveys.xhtml";
+        }
         FacesContext context = FacesContext.getCurrentInstance();
+        NotesController notesController = context.getApplication().evaluateExpressionGet(context, "#{notesController}", NotesController.class);
         CustomersController customersController = context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
         SessionTimetableController sessionTimetableController = context.getApplication().evaluateExpressionGet(context, "#{sessionTimetableController}", SessionTimetableController.class);
         EziDebitPaymentGateway eziDebitPaymentGateway = context.getApplication().evaluateExpressionGet(context, "#{ezidebit}", EziDebitPaymentGateway.class);
+
+        //check if the disclaimer checkbox has been ticked
         Customers c = customersController.getSelected();
-        c.setTermsConditionsAccepted(true);
-        ejbCustomersFacade.edit(c);
+        if (disclaimerAccepted == true) {
+            Collection<QuestionnaireMap> qmc = c.getQuestionnaireMapCollection();
+            if (qmc != null) {
+                if (qmc.isEmpty() == false) {
+                    for (QuestionnaireMap qm : qmc) {
+                        if (qm.getSurveysId().getId().compareTo(s.getId()) == 0) {
+
+                            qm.setQuestionnaireCompleted(true);
+                            String note = "The survey named \"" + qm.getSurveysId().getName() + "\" has been completed and the disclaimer has been accepted.";
+                            notesController.createNoteForCustomer(new Notes(0, note));
+                            ejbCustomersFacade.edit(c);
+                        }
+                    }
+
+                } else {
+                    LOGGER.log(Level.WARNING, "This customer has no surveys linked to them: {0}", c.getUsername());
+                }
+
+            } else {
+                LOGGER.log(Level.WARNING, "This customer has no surveys linked to them: {0}", c.getUsername());
+            }
+            c.setTermsConditionsAccepted(true);
+            ejbCustomersFacade.edit(c);
+        }
         surveyAnswers = null;
-        if(sessionTimetableController.getBookingButtonSessionHistory() !=null){
-            float bookingAmount = (float)10.00; // $10.00 for test
-            
+        if (sessionTimetableController.getBookingButtonSessionHistory() != null) {
+            float bookingAmount = (float) 10.00; // $10.00 for test
+
             // a booking is in progress for a new signup
             // setup eddr url and payment
             eziDebitPaymentGateway.setOneOffPaymentAmountInCents(bookingAmount);
             eziDebitPaymentGateway.setOneOffPaymentDate(new Date());
             eziDebitPaymentGateway.createEddrLink(null);
             //call ezibeit controller
-            
-             eziDebitPaymentGateway.redirectToPaymentGateway();
+
+            eziDebitPaymentGateway.redirectToPaymentGateway();
         }
-            return "/myDetails.xhtml?faces-redirect=true"; 
-        
-       
+        return "/myDetails.xhtml?faces-redirect=true";
+
     }
-      public String saveSurveyMobile() {
+
+    public String saveSurveyMobile() {
         try {
             for (SurveyAnswers sa : surveyAnswers) {
                 getFacade().edit(sa);
@@ -223,7 +272,7 @@ public class SurveyAnswersController implements Serializable {
     }
 
     public void surveyBooleanChangeListener() {
-        logger.log(Level.FINE, "Boolean Answer modified");
+        LOGGER.log(Level.FINE, "Boolean Answer modified");
     }
 
     public String prepareEdit() {
@@ -343,7 +392,7 @@ public class SurveyAnswersController implements Serializable {
                 //  getUsersSurveys().add(new SurveyMap(s, lsa));
             }
         } catch (Exception e) {
-            logger.log(Level.WARNING, "prepareSurveysForSelectedCustomer()", e);
+            LOGGER.log(Level.WARNING, "prepareSurveysForSelectedCustomer()", e);
         }
     }
 
@@ -391,7 +440,7 @@ public class SurveyAnswersController implements Serializable {
                 if (sa != null) {
                     surveyAnswers.add(sa);
                 } else {
-                    logger.log(Level.WARNING, "getSurveyList , answer for question \"{0}\" is null", quest.getQuestion());
+                    LOGGER.log(Level.WARNING, "getSurveyList , answer for question \"{0}\" is null", quest.getQuestion());
                 }
             }
         }
@@ -491,8 +540,8 @@ public class SurveyAnswersController implements Serializable {
             if (sia.isEmpty() == false) {
                 selectedSurvey = sia.get(0);
             }
-         }
-         return selectedSurvey;
+        }
+        return selectedSurvey;
     }
 
     /**
@@ -502,7 +551,7 @@ public class SurveyAnswersController implements Serializable {
         this.selectedSurvey = selectedSurvey;
     }
 
-    @FacesConverter(value="surveyAnswersControllerConverter", forClass = SurveyAnswers.class)
+    @FacesConverter(value = "surveyAnswersControllerConverter", forClass = SurveyAnswers.class)
     public static class SurveyAnswersControllerConverter implements Converter {
 
         public Object getAsObject(FacesContext facesContext, UIComponent component, String value) {

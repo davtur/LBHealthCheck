@@ -16,6 +16,8 @@ import au.com.manlyit.fitnesscrm.stats.db.Groups;
 import au.com.manlyit.fitnesscrm.stats.db.Notes;
 import au.com.manlyit.fitnesscrm.stats.db.PaymentParameters;
 import au.com.manlyit.fitnesscrm.stats.db.Plan;
+import au.com.manlyit.fitnesscrm.stats.db.QuestionnaireMap;
+import au.com.manlyit.fitnesscrm.stats.db.Surveys;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -83,7 +85,10 @@ public class CustomersController implements Serializable {
     private au.com.manlyit.fitnesscrm.stats.beans.PaymentBean ejbPaymentBean;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.EmailTemplatesFacade ejbEmailTemplatesFacade;
-
+    @Inject
+    private au.com.manlyit.fitnesscrm.stats.beans.QuestionnaireMapFacade questionnaireMapFacade;
+    @Inject
+    private au.com.manlyit.fitnesscrm.stats.beans.SurveysFacade surveysFacade;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.EmailFormatFacade ejbEmailFormatFacade;
     @Inject
@@ -139,7 +144,7 @@ public class CustomersController implements Serializable {
     private boolean signupFormSubmittedOK = false;
     private static final Logger LOGGER = Logger.getLogger(CustomersController.class.getName());
 
-    public CustomersController()  {
+    public CustomersController() {
     }
 
     //@PostConstruct
@@ -250,6 +255,10 @@ public class CustomersController implements Serializable {
             //mySessionsChart1Controller.setSelectedCustomer(cust);
             selectedItemIndex = -1;
             checkPass = current.getPassword();
+            if (cust.getQuestionnaireMapCollection() == null) {
+                addQuestionnaireMapItemsToCustomer(cust);
+            }
+
             if (cust.getProfileImage() == null) {
                 createDefaultCustomerProfilePicture(cust);
             }
@@ -258,6 +267,46 @@ public class CustomersController implements Serializable {
             RequestContext.getCurrentInstance().execute("updatePaymentForms();");
 
         }
+    }
+
+    private void addQuestionnaireMapItemsToCustomer(Customers cust) {
+
+        List<Surveys> surveyList = surveysFacade.findAll();
+        String defaulSurveyName = configMapFacade.getConfig("DefaultSurveyName");
+        for (Surveys s : surveyList) {
+
+            boolean foundSurveyMap = false;
+            boolean isDefaultSurvey = false;
+            if(s.getName().contentEquals(defaulSurveyName)){
+                isDefaultSurvey = true;
+            }
+
+            Collection<QuestionnaireMap> qmc = cust.getQuestionnaireMapCollection();
+            if (qmc != null) {
+                if (qmc.isEmpty() == false) {
+                    for (QuestionnaireMap qm : qmc) {
+                        if (qm.getSurveysId().getId().compareTo(s.getId()) == 0) {
+                            foundSurveyMap = true;
+                        }
+                    }
+                }
+
+            }
+            if (foundSurveyMap == false) {
+                QuestionnaireMap qmNew = new QuestionnaireMap(0, isDefaultSurvey);
+                qmNew.setCustomerId(cust);
+                qmNew.setSurveysId(s);
+                qmNew.setQuestionnaireCompleted(false);
+                cust.getQuestionnaireMapCollection().add(qmNew);
+                //questionnaireMapFacade.create(qmNew);
+                ejbFacade.edit(cust);
+                
+
+                LOGGER.log(Level.INFO, "A new QuestionnaireMap was created for survey {1} and Customer {0}.", new Object[]{cust.getUsername(), s.getName()});
+            }
+
+        }
+
     }
 
     public void sendPaymentFormEmail() {
@@ -759,6 +808,7 @@ public class CustomersController implements Serializable {
                 ejbGroupsFacade.create(grp);
                 createDefaultCustomerProfilePicture(c);
                 createDefaultPaymentParameters(c);
+               addQuestionnaireMapItemsToCustomer(c);
                 recreateModel();
                 JsfUtil.addSuccessMessage(configMapFacade.getConfig("CustomersCreated"));
                 return prepareCreate();
@@ -891,6 +941,8 @@ public class CustomersController implements Serializable {
                 createDefaultCustomerProfilePicture(c);
                 String details = "Name: " + c.getFirstname() + ", Email:" + c.getEmailAddress() + ", Phone:" + c.getTelephone() + ", Username:" + c.getUsername() + ", Group:" + group + ", IP Address:" + ipAddress + ".Customer Onboard email sent";
                 FacesContext context = FacesContext.getCurrentInstance();
+                //SurveysController surveyCon = context.getApplication().evaluateExpressionGet(context, "#{surveysController}", SurveysController.class);
+                // SurveysController surveyCon = (SurveysController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "surveysController");
                 LoginBean controller = (LoginBean) context.getApplication().getELResolver().getValue(context.getELContext(), null, "loginBean");
                 controller.doPasswordReset("system.new.customer.template", c, configMapFacade.getConfig("sendCustomerOnBoardEmailEmailSubject"));
                 createCombinedAuditLogAndNote(c, c, "New Sign Up", details, "Did Not Exist", "New Lead");
@@ -903,8 +955,10 @@ public class CustomersController implements Serializable {
                     LOGGER.log(Level.WARNING, "createFromSignup: Failed to create payement parameters. Null returned from call to getSelectedCustomersPaymentParameters()");
 
                 }
+
             }
             setNewCustomer(setCustomerDefaults(new Customers()));
+            addQuestionnaireMapItemsToCustomer(c);
         } else {
             JsfUtil.addErrorMessage("Error", configMapFacade.getConfig("SignUpValidationEmailExistsFailed"));
         }
@@ -980,6 +1034,7 @@ public class CustomersController implements Serializable {
         Customers c = getNewCustomer();
 
         EziDebitPaymentGateway ezi = context.getApplication().evaluateExpressionGet(context, "#{ezidebit}", EziDebitPaymentGateway.class);
+        // SurveysController surveyCon = context.getApplication().evaluateExpressionGet(context, "#{surveysController}", SurveysController.class);
 
         if (c.getId() == null || getFacade().find(c.getId()) == null) {
             // does not exist so create a new customer
@@ -988,7 +1043,7 @@ public class CustomersController implements Serializable {
                 getFacade().create(c);
                 setSelected(c);
                 updateCustomersGroupMembership(c);
-
+                addQuestionnaireMapItemsToCustomer(c);
                 createDefaultCustomerProfilePicture(c);
                 // createDefaultPaymentParameters(paymentGateway);
                 setSelected(c);
@@ -2156,7 +2211,7 @@ public class CustomersController implements Serializable {
                 distinctGroups.remove("DEVELOPER");
                 for (String g : distinctGroups) {
                     customerGroupsList.add(new Groups(0, g));
-                   }
+                }
                 checkedGroups = new Boolean[distinctGroups.size()];
                 for (int c = 0; c < distinctGroups.size(); c++) {
                     for (Groups g : getSelectedGroups()) {
@@ -2181,7 +2236,7 @@ public class CustomersController implements Serializable {
                 distinctGroups.remove("DEVELOPER");
                 for (String g : distinctGroups) {
                     newCustomerGroupsList.add(new Groups(0, g));
-                   }
+                }
                 newCustomerCheckedGroups = new Boolean[distinctGroups.size()];
 
                 for (int c = 0; c < distinctGroups.size(); c++) {

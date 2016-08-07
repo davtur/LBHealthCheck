@@ -168,7 +168,7 @@ public class NotesController implements Serializable {
     }
 
     private void createNote() {
-        if (current.getId() == null) {
+       /* if (current.getId() == null) {
             current.setId(0);
         }
         current.setCreateTimestamp(new Date());
@@ -177,7 +177,20 @@ public class NotesController implements Serializable {
         CustomersController controller = (CustomersController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "customersController");
         current.setUserId(controller.getSelected());
         current.setCreatedBy(controller.getLoggedInUser());
-        getFacade().create(current);
+        getFacade().create(current);*/
+        createNoteForCustomer(current);
+    }
+    protected void createNoteForCustomer(Notes note) {
+        if (note.getId() == null) {
+            note.setId(0);
+        }
+        note.setCreateTimestamp(new Date());
+        note.setDeleted(new Short("0"));
+        FacesContext context = FacesContext.getCurrentInstance();
+        CustomersController controller = (CustomersController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "customersController");
+        note.setUserId(controller.getSelected());
+        note.setCreatedBy(controller.getLoggedInUser());
+        getFacade().create(note);
     }
 
     public String createFromMobile() {

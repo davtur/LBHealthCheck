@@ -1464,3 +1464,8 @@ CreatePlanPeriodTypeLabel=Plan Time Period
 CreatePlanPeriodTypeTitle=The time Period that the plan price covers.
 customerNotesPopupTitle=Customer Note
 SystemSettingsPageTitle=System Settings
+
+EditCustomerSurvey_Name=Survey Name
+EditCustomerSurvey_Enabled=Survey Enabled
+EditCustomerSurvey_Completed=Survey Completed
+DefaultSurveyName=Health Questionnaire
