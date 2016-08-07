@@ -37,6 +37,9 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Surveys.findById", query = "SELECT s FROM Surveys s WHERE s.id = :id"),
     @NamedQuery(name = "Surveys.findByName", query = "SELECT s FROM Surveys s WHERE s.name = :name")})
 public class Surveys implements  BaseEntity, Serializable {
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "surveysId")
+    private Collection<QuestionnaireMap> questionnaireMapCollection;
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -137,6 +140,15 @@ public class Surveys implements  BaseEntity, Serializable {
     @Override
     public String toString() {
         return name;
+    }
+
+    @XmlTransient
+    public Collection<QuestionnaireMap> getQuestionnaireMapCollection() {
+        return questionnaireMapCollection;
+    }
+
+    public void setQuestionnaireMapCollection(Collection<QuestionnaireMap> questionnaireMapCollection) {
+        this.questionnaireMapCollection = questionnaireMapCollection;
     }
     
 }

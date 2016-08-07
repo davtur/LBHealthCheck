@@ -49,6 +49,7 @@ au/com/manlyit/fitnesscrm/stats/webservices/CustomerDetails.class
 au/com/manlyit/fitnesscrm/stats/classes/CustomersController.class
 au/com/manlyit/fitnesscrm/stats/chartbeans/WeightChart.class
 au/com/manlyit/fitnesscrm/stats/classes/SessionHistoryController$1.class
+au/com/manlyit/fitnesscrm/stats/beans/QuestionnaireMapFacade.class
 au/com/manlyit/fitnesscrm/stats/beans/GraphicImageBean.class
 au/com/manlyit/fitnesscrm/stats/beans/SessionBookingsFacade.class
 au/com/manlyit/fitnesscrm/stats/classes/CustomerStateController$1.class
@@ -88,6 +89,7 @@ au/com/manlyit/fitnesscrm/stats/webservices/ClearSchedule.class
 au/com/manlyit/fitnesscrm/stats/classes/SurveyQuestionsController$1.class
 au/com/manlyit/fitnesscrm/stats/classes/NotesController.class
 au/com/manlyit/fitnesscrm/stats/webservices/CreateSchedule.class
+au/com/manlyit/fitnesscrm/stats/db/QuestionnaireMap.class
 au/com/manlyit/fitnesscrm/stats/beans/DemographicTypesFacade.class
 au/com/manlyit/fitnesscrm/stats/beans/StatsTakenFacade.class
 au/com/manlyit/fitnesscrm/stats/webservices/GetPaymentDetailPlusNextPaymentInfoResponse.class

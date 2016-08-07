@@ -71,6 +71,9 @@ import org.eclipse.persistence.config.CacheIsolationType;
     @NamedQuery(name = "Customers.findByFacebookId", query = "SELECT c FROM Customers c WHERE c.facebookId = :facebookId"),
     @NamedQuery(name = "Customers.findByGoogleId", query = "SELECT c FROM Customers c WHERE c.googleId = :googleId")})
 public class Customers implements BaseEntity, Serializable {
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "customerId")
+    private Collection<QuestionnaireMap> questionnaireMapCollection;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "customerId")
     private Collection<SessionBookings> sessionBookingsCollection;
     @Basic(optional = false)
@@ -679,6 +682,15 @@ public class Customers implements BaseEntity, Serializable {
 
     public void setSessionBookingsCollection(Collection<SessionBookings> sessionBookingsCollection) {
         this.sessionBookingsCollection = sessionBookingsCollection;
+    }
+
+    @XmlTransient
+    public Collection<QuestionnaireMap> getQuestionnaireMapCollection() {
+        return questionnaireMapCollection;
+    }
+
+    public void setQuestionnaireMapCollection(Collection<QuestionnaireMap> questionnaireMapCollection) {
+        this.questionnaireMapCollection = questionnaireMapCollection;
     }
 
 }
