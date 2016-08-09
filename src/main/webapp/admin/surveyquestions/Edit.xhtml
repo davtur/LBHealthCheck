@@ -18,7 +18,9 @@
                     </p:selectOneMenu>
 
                     <h:outputLabel value="#{configMapController.getKey('EditSurveyquestionsLabel_question')}" for="question" />
-                    <h:inputTextarea rows="4" cols="30" id="question" value="#{surveyquestionsController.selected.question}" title="#{configMapController.getKey('EditSurveyquestionsTitle_question')}" required="true" requiredMessage="#{configMapController.getKey('EditSurveyquestionsRequiredMessage_question')}"/>
+                    <h:inputTextarea rows="4" cols="30" id="question" value="#{surveyquestionsController.selected.question}" title="#{configMapController.getKey('EditSurveyquestionsTitle_question')}" required="true" requiredMessage="#{configMapController.getKey('EditSurveyquestionsRequiredMessage_question')}">
+                    <p:ajax   update=":SurveyquestionsEditForm"  />
+                    </h:inputTextarea>
 
                 </p:panelGrid>
                 <p:panelGrid columns="3">
@@ -29,11 +31,11 @@
                     <p:commandButton actionListener="#{surveyquestionsController.addSubItem}" value="#{configMapController.getKey('Create')}" update="subItem2,:SurveyquestionsEditForm:subItemList2,:growl" />
 
                 </p:panelGrid>
-                <p:dataList  id="subItemList2" value="#{surveyquestionsController.subItems}" var="subItem" type="unordered" itemType="none">
+                <p:dataList  id="subItemList2" value="#{surveyquestionsController.selected.surveyQuestionSubitemsCollection}" var="subItem" type="unordered" itemType="none" >
                     <f:facet name="header">
                         Sub Items 
                     </f:facet>
-                    <p:commandLink update=":SurveyquestionsEditForm:subItemList2" title="Delete" styleClass="ui-icon ui-icon-trash" style="float:left;margin-right:10px;" immediate="true">
+                    <p:commandLink update=":SurveyquestionsEditForm:subItemList2" title="Delete" styleClass="ui-icon ui-icon-trash"  style="float:left;margin-right:10px;" immediate="true">
                         <f:setPropertyActionListener value="#{subItem}" target="#{surveyquestionsController.deleteSubItem}" />
                     </p:commandLink>
                     <h:outputText value="#{subItem.subitemText}" style="display:inline-block"/> 
@@ -43,7 +45,7 @@
 
 
                 </p:dataList>
-                <p:commandButton actionListener="#{surveyquestionsController.update}" value="#{configMapController.getKey('Save')}" update="display,:SurveyquestionsListForm:datalist,:growl" oncomplete="handleSubmit(args, 'SurveyquestionsEditDialog');PF('surveyquestionsControllerTable').filter()"/>
+                <p:commandButton actionListener="#{surveyquestionsController.editSurveyQuestion}" value="#{configMapController.getKey('Save')}" update="display :SurveyquestionsListForm :growl" oncomplete="PF('SurveyquestionsEditDialog').hide()"/>
                 <p:commandButton value="#{configMapController.getKey('Cancel')}" onclick="PF('SurveyquestionsEditDialog').hide()"/>
             </h:panelGroup>
         </h:form>

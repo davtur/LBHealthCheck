@@ -17,6 +17,13 @@
 
 
             <h:form id="SurveyquestionsListForm">
+                 <h:panelGroup >
+                <p:outputLabel value="#{configMapController.getKey('CreateSurveyanswersLabel_surveyId')}" for="surveyId" />
+                        <p:selectOneMenu id="surveyId" valueChangeListener="#{surveyquestionsController.selectOneMenuSurveyValueChangeListener}" converter="surveysControllerConverter"  value="#{surveyquestionsController.selectedSurvey}"  label="#{configMapController.getKey('CreateSurveyanswersTitle_surveyId')}">
+                            <f:selectItems value="#{surveysController.itemsAvailableSelectMany}"/>
+                            <p:ajax   update=":SurveyquestionsListForm"  />
+                        </p:selectOneMenu>
+                </h:panelGroup>
                 <h:outputText escape="false" value="#{configMapController.getKey('ListSurveyquestionsEmpty')}" rendered="#{surveyquestionsController.items.rowCount == 0}"/>
                 <h:panelGroup >
                     <p:dataTable  
@@ -43,6 +50,18 @@
                         <p:ajax event="rowSelect"   update="createButton viewButton editButton deleteButton"/>
                         <p:ajax event="rowUnselect" update="createButton viewButton editButton deleteButton"/>
                         <p:column selectionMode="single"/>
+                        <p:column sortBy="#{item.id}" filterBy="#{item.id}" headerText="#{configMapController.getKey('ListSurveyquestionsTitle_id')}"   >
+                            <p:cellEditor> 
+                                <f:facet name="output">
+                                    <h:outputText value="#{item.id}"/>
+                                </f:facet>
+                                <f:facet name="input">
+                                    <p:inputText value="#{item.id}" label="#{configMapController.getKey('ListSurveyquestionsTitle_id')}" />
+                                </f:facet>
+                            </p:cellEditor> 
+
+
+                        </p:column>
                         <p:column sortBy="#{item.id}" filterBy="#{item.id}" headerText="#{configMapController.getKey('ListSurveyquestionsTitle_id')}"   >
                             <p:cellEditor> 
                                 <f:facet name="output">
@@ -93,6 +112,64 @@
 
                     </p:dataTable>
                 </h:panelGroup>
+                <p:panel >
+                <h1 class="BigTopic">#{surveyquestionsController.selectedSurvey.description}</h1>
+                <div class="Container100 Responsive100">
+                    <div class="ContainerIndent">
+
+
+                        <p:dataList  id="surveyList" value="#{surveyquestionsController.surveyDemoList}" var="answer" type="unordered" itemType="none" >
+
+                            <h:panelGrid columns="1" >
+                                <h:panelGroup>
+                                    <h:outputText rendered="#{!(answer.answerTypeid.type == 'Heading')}" value="#{answer.questionId.question}" style="font-weight: bold"/> 
+                                </h:panelGroup>
+                                <h:panelGroup rendered="#{answer.answerTypeid.type == 'Heading'}">
+                                    <h:outputText class="BigTopic" value="#{answer.questionId.question}" style="font-weight: bold"/> 
+                                </h:panelGroup>
+                                <h:panelGroup rendered="#{answer.answerTypeid.type == 'Paragraph'}">
+                                    <p:separator />
+                                </h:panelGroup>
+                                <h:panelGroup rendered="#{answer.answerTypeid.type == 'Text'}">
+                                    <p:inputTextarea   value="#{answer.answer}" valueChangeListener="#{surveyanswersController.textAnswerValueChange}" rows="3" cols="129" style="padding-bottom: 20px">
+                                        <p:ajax />
+                                    </p:inputTextarea>
+                                </h:panelGroup>
+
+                                <h:panelGroup rendered="#{answer.answerTypeid.type == 'Yes/No'}">
+                                    <p:dataGrid var="subItem" value="#{answer.surveyAnswerSubitemsCollection}" columns="3" layout="grid" style="width:800px;padding-bottom: 20px">
+                                        <p:selectBooleanCheckbox value="#{subItem.subitemBool}" valueChangeListener="#{surveyanswersController.textAnswerValueChange}">
+                                            <p:ajax />
+                                        </p:selectBooleanCheckbox>
+                                        <h:outputText value="#{subItem.subitemText}" style="display:inline-block;padding-left: 5px"/> 
+                                    </p:dataGrid>
+                                </h:panelGroup>
+
+                                <!-- TODO Add Multiple Choice -->
+                                <h:panelGroup rendered="#{answer.answerTypeid.type == 'Multiple Choice'}">
+                                    <p:dataGrid var="subItem" value="#{answer.surveyAnswerSubitemsCollection}" columns="3" layout="grid" style="width:800px;padding-bottom: 20px">
+                                        <p:selectBooleanCheckbox value="#{subItem.subitemBool}" valueChangeListener="#{surveyanswersController.textAnswerValueChange}">
+                                            <p:ajax />
+                                        </p:selectBooleanCheckbox>
+                                        <h:outputText value="#{subItem.subitemText}" style="display:inline-block;padding-left: 5px"/> 
+                                    </p:dataGrid>
+                                </h:panelGroup>
+                                <!-- TODO Add Disclaimer -->
+                                <h:panelGroup rendered="#{answer.answerTypeid.type == 'Disclaimer'}">
+                                    <p:selectBooleanCheckbox value="#{answer.surveyAnswerSubitemsCollection[0].subitemBool}" valueChangeListener="#{surveyanswersController.disclaimerAnswerValueChange}" required="true" requiredMessage="#{configMapController.getKey('MyDeatilsSurveys_disclaimerRequiredMessage')}">
+                                        <p:ajax />
+                                    </p:selectBooleanCheckbox>
+                                    <h:outputText value="#{answer.surveyAnswerSubitemsCollection[0].subitemText}" style="display:inline-block;padding-left: 5px"/> 
+
+                                </h:panelGroup>
+                            </h:panelGrid>
+
+
+                        </p:dataList>
+                    </div>
+                </div>
+</p:panel>
+
             </h:form>
 
             <ui:include src="Create.xhtml"/>

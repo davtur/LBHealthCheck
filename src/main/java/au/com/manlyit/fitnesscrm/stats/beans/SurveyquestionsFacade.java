@@ -16,6 +16,8 @@ import javax.persistence.PersistenceContext;
  */
 @Stateless
 public class SurveyquestionsFacade extends AbstractFacade<SurveyQuestions> {
+
+    private static final long serialVersionUID = 1L;
     @PersistenceContext(unitName = "FitnessStatsPU")
     private EntityManager em;
 

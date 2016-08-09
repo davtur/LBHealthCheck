@@ -13,10 +13,11 @@
                 <h:panelGroup id="display">
                     <p:panelGrid columns="2" rendered="#{surveyquestionsController.selected != null}">
                          <p:outputLabel value="#{configMapController.getKey('CreateSurveyanswersLabel_surveyId')}" for="surveyId" />
-                         <p:selectOneMenu id="surveyId" valueChangeListener="#{surveyquestiontypesController.selectOneMenuValueChangeListener}" converter="surveysControllerConverter" value="#{surveyquestionsController.selected.surveyId}"  label="#{configMapController.getKey('CreateSurveyanswersTitle_surveyId')}" required="true" requiredMessage="#{configMapController.getKey('CreateSurveyanswersRequiredMessage_surveyId')}">
+                        <!-- <p:selectOneMenu id="surveyId" valueChangeListener="#{surveyquestiontypesController.selectOneMenuValueChangeListener}" converter="surveysControllerConverter" value="#{surveyquestionsController.selected.surveyId}"  label="#{configMapController.getKey('CreateSurveyanswersTitle_surveyId')}" required="true" requiredMessage="#{configMapController.getKey('CreateSurveyanswersRequiredMessage_surveyId')}">
                             <f:selectItems value="#{surveysController.itemsAvailable}"/>
                             <p:ajax   update=":SurveyquestionsCreateForm"  />
-                        </p:selectOneMenu>
+                        </p:selectOneMenu>-->
+                         <p:outputLabel  id="surveyId" value="#{surveyquestionsController.selectedSurvey}"  />
                         <p:outputLabel value="#{configMapController.getKey('CreateSurveyquestionsLabel_questionType')}" for="questionType" />
                         <p:selectOneMenu id="questionType" valueChangeListener="#{surveyquestionsController.selectOneMenuValueChangeListener}" converter="surveyQuestionTypesControllerConverter" value="#{surveyquestionsController.selected.questionType}"  label="#{configMapController.getKey('CreateSurveyquestionsTitle_questionType')}" required="true" requiredMessage="#{configMapController.getKey('CreateSurveyquestionsRequiredMessage_questionType')}">
                             <f:selectItems value="#{surveyquestiontypesController.itemsAvailable}"  var="sq" itemLabel="#{sq.type}" itemValue="#{sq}"/>
@@ -36,7 +37,7 @@
                         <p:commandButton actionListener="#{surveyquestionsController.addSubItem}" value="#{configMapController.getKey('Create')}" update="subItem,:SurveyquestionsCreateForm:subItemList,:growl" />
 
                     </p:panelGrid>
-                    <p:dataList  id="subItemList" value="#{surveyquestionsController.subItems}"  var="subItem" type="ordered" itemType="none" >
+                    <p:dataList  id="subItemList" value="#{surveyquestionsController.selected.surveyQuestionSubitemsCollection}"  var="subItem" type="ordered" itemType="none" >
                         <f:facet name="header">
                             Sub Items
                         </f:facet>
@@ -46,7 +47,7 @@
                         </p:commandLink>
                         <h:outputText value="#{subItem.subitemText}" />
                     </p:dataList>
-                    <p:commandButton actionListener="#{surveyquestionsController.createDialogue}" value="#{configMapController.getKey('Save')}" update="display,:SurveyquestionsListForm:datalist,:growl" oncomplete="handleSubmit(args,'SurveyquestionsCreateDialog');PF('surveyquestionsControllerTable').filter()"/>
+                    <p:commandButton actionListener="#{surveyquestionsController.createDialogue}" value="#{configMapController.getKey('Save')}" update="display :SurveyquestionsListForm :growl" oncomplete="PF('SurveyquestionsCreateDialog').hide();"/>
                     <p:commandButton value="#{configMapController.getKey('Cancel')}" onclick="PF('SurveyquestionsCreateDialog').hide()"/>
                 </h:panelGroup>
             </h:form>

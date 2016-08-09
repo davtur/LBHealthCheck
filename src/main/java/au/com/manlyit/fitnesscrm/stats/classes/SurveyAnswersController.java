@@ -40,11 +40,13 @@ import org.primefaces.event.SelectEvent;
 public class SurveyAnswersController implements Serializable {
 
     private static final Logger LOGGER = Logger.getLogger(SurveyAnswersController.class.getName());
+    private static final long serialVersionUID = 1L;
     private SurveyAnswers current;
     private Surveys selectedSurvey;
     private SurveyAnswers selectedForDeletion;
     private SurveyMap selectSurvey;
-    private DataModel items = null;
+    private boolean surveySaveEnabled = false;
+    private DataModel<SurveyAnswers> items = null;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.SurveyAnswersFacade ejbFacade;
     @Inject
@@ -102,8 +104,8 @@ public class SurveyAnswersController implements Serializable {
                 }
 
                 @Override
-                public DataModel createPageDataModel() {
-                    return new ListDataModel(getFacade().findRange(new int[]{getPageFirstItem(), getPageFirstItem() + getPageSize()}));
+                public DataModel<SurveyAnswers> createPageDataModel() {
+                    return new ListDataModel<>(getFacade().findRange(new int[]{getPageFirstItem(), getPageFirstItem() + getPageSize()}));
                 }
             };
         }
@@ -208,7 +210,7 @@ public class SurveyAnswersController implements Serializable {
         }
         if (s == null) {
             // nothing to do as no questions have been answered
-            return "/customerSurveys.xhtml";
+            return "customerSurveys";
         }
         FacesContext context = FacesContext.getCurrentInstance();
         NotesController notesController = context.getApplication().evaluateExpressionGet(context, "#{notesController}", NotesController.class);
@@ -294,6 +296,15 @@ public class SurveyAnswersController implements Serializable {
 
     }
 
+    public void disclaimerAnswerValueChange(ValueChangeEvent vce) {
+        Object o = vce.getNewValue();
+        if (o.getClass().equals(Boolean.class)) {
+            Boolean b = (Boolean) o;
+            setSurveySaveEnabled(b);
+        }
+
+    }
+
     public String update() {
         try {
             getFacade().edit(current);
@@ -340,8 +351,8 @@ public class SurveyAnswersController implements Serializable {
     private void prepareSurveysForSelectedCustomer() {
 
         FacesContext context = FacesContext.getCurrentInstance();
-        CustomersController customersController = (CustomersController) context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
-        SurveysController surveysController = (SurveysController) context.getApplication().evaluateExpressionGet(context, "#{surveysController}", SurveysController.class);
+        CustomersController customersController = context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
+        SurveysController surveysController = context.getApplication().evaluateExpressionGet(context, "#{surveysController}", SurveysController.class);
         Customers selectedCustomer = customersController.getSelected();
 
         Collection<Surveys> surveys = surveysController.getItemsAvailable();
@@ -396,6 +407,8 @@ public class SurveyAnswersController implements Serializable {
         }
     }
 
+
+
     private void performDestroy() {
         try {
             getFacade().remove(current);
@@ -433,7 +446,7 @@ public class SurveyAnswersController implements Serializable {
             surveyAnswers = new ArrayList<>();
             prepareSurveysForSelectedCustomer();
             FacesContext context = FacesContext.getCurrentInstance();
-            CustomersController customersController = (CustomersController) context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
+            CustomersController customersController = context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
             Collection<SurveyQuestions> lsq = selectedSurvey.getSurveyQuestionsCollection();
             for (SurveyQuestions quest : lsq) {
                 SurveyAnswers sa = ejbFacade.findSurveyAnswersByCustomerAndQuestion(customersController.getSelected(), quest);
@@ -548,7 +561,22 @@ public class SurveyAnswersController implements Serializable {
      * @param selectedSurvey the selectedSurvey to set
      */
     public void setSelectedSurvey(Surveys selectedSurvey) {
+        surveyAnswers = null;
         this.selectedSurvey = selectedSurvey;
+    }
+
+    /**
+     * @return the surveySaveEnabled
+     */
+    public boolean isSurveySaveEnabled() {
+        return surveySaveEnabled;
+    }
+
+    /**
+     * @param surveySaveEnabled the surveySaveEnabled to set
+     */
+    public void setSurveySaveEnabled(boolean surveySaveEnabled) {
+        this.surveySaveEnabled = surveySaveEnabled;
     }
 
     @FacesConverter(value = "surveyAnswersControllerConverter", forClass = SurveyAnswers.class)

@@ -4,7 +4,7 @@
 
     <groupId>au.com.manlyit</groupId>
     <artifactId>FitnessCRM</artifactId>
-    <version>4.0.3</version>
+    <version>4.0.6</version>
     <packaging>war</packaging>
 
     <name>FitnessCRM</name>
@@ -121,7 +121,7 @@
         <dependency>
             <groupId>com.jcraft</groupId>
             <artifactId>jsch</artifactId>
-            <version>0.1.50</version>
+            <version>0.1.53</version>
             <type>jar</type>
         </dependency>
         <dependency>
@@ -197,8 +197,6 @@
             <artifactId>log4j-jul</artifactId>
             <version>2.6.1</version>
         </dependency>
- 
-        <!-- it help to get slf4j and log4j -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>

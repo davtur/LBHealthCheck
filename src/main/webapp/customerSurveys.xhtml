@@ -19,7 +19,13 @@
 
                             <h:panelGrid columns="1" >
                                 <h:panelGroup>
-                                    <h:outputText class="" value="#{answer.questionId.question}" style="font-weight: bold"/> 
+                                    <h:outputText rendered="#{!(answer.answerTypeid.type == 'Heading')}" value="#{answer.questionId.question}" style="font-weight: bold"/> 
+                                </h:panelGroup>
+                                <h:panelGroup rendered="#{answer.answerTypeid.type == 'Heading'}">
+                                    <h:outputText class="BigTopic" value="#{answer.questionId.question}" style="font-weight: bold"/> 
+                                </h:panelGroup>
+                                <h:panelGroup rendered="#{answer.answerTypeid.type == 'Paragraph'}">
+                                    <p:separator />
                                 </h:panelGroup>
                                 <h:panelGroup rendered="#{answer.answerTypeid.type == 'Text'}">
                                     <p:inputTextarea   value="#{answer.answer}" valueChangeListener="#{surveyanswersController.textAnswerValueChange}" rows="3" cols="129" style="padding-bottom: 20px">
@@ -47,11 +53,11 @@
                                 </h:panelGroup>
                                 <!-- TODO Add Disclaimer -->
                                 <h:panelGroup rendered="#{answer.answerTypeid.type == 'Disclaimer'}">
-                                    <p:selectBooleanCheckbox value="#{answer.surveyAnswerSubitemsCollection[0].subitemBool}" valueChangeListener="#{surveyanswersController.textAnswerValueChange}" required="true" requiredMessage="#{configMapController.getKey('MyDeatilsSurveys_disclaimerRequiredMessage')}">
-                                            <p:ajax />
-                                        </p:selectBooleanCheckbox>
-                                        <h:outputText value="#{answer.surveyAnswerSubitemsCollection[0].subitemText}" style="display:inline-block;padding-left: 5px"/> 
-                                   
+                                    <p:selectBooleanCheckbox value="#{answer.surveyAnswerSubitemsCollection[0].subitemBool}" valueChangeListener="#{surveyanswersController.disclaimerAnswerValueChange}" required="true" requiredMessage="#{configMapController.getKey('MyDeatilsSurveys_disclaimerRequiredMessage')}">
+                                        <p:ajax />
+                                    </p:selectBooleanCheckbox>
+                                    <h:outputText value="#{answer.surveyAnswerSubitemsCollection[0].subitemText}" style="display:inline-block;padding-left: 5px"/> 
+
                                 </h:panelGroup>
                             </h:panelGrid>
 
@@ -61,7 +67,7 @@
 
                         <div class="Container100 Responsive100">
                             <div class="ContainerIndent">
-                                <p:commandButton id="saveSurveyButton2" icon="ui-icon-check fa fa-check white Fs14"  action="#{surveyanswersController.saveSurvey}"    value="#{configMapController.getKey('MyDeatilsSurveys_saveSurveyLabel')}" update=":growl" style="padding:5px"  /> 
+                                <p:commandButton id="saveSurveyButton2" icon="ui-icon-check fa fa-check white Fs14" disabled="#{!surveyanswersController.surveySaveEnabled}" action="#{surveyanswersController.saveSurvey}"    value="#{configMapController.getKey('MyDeatilsSurveys_saveSurveyLabel')}" update=":growl" style="padding:5px"  /> 
                             </div>
                         </div>
 

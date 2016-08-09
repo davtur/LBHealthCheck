@@ -17,6 +17,13 @@
 
 
             <h:form id="SurveyanswersListForm">
+                <h:panelGroup >
+                <p:outputLabel value="#{configMapController.getKey('CreateSurveyanswersLabel_surveyId')}" for="surveyId" />
+                        <p:selectOneMenu id="surveyId" valueChangeListener="#{surveyanswersController.selectOneMenuValueChangeListener}" converter="surveysControllerConverter"  value="#{surveyanswersController.selectedSurvey}"  label="#{configMapController.getKey('CreateSurveyanswersTitle_surveyId')}">
+                            <f:selectItems value="#{surveysController.itemsAvailableSelectMany}"/>
+                            <p:ajax   update=":SurveyanswersListForm"  />
+                        </p:selectOneMenu>
+                </h:panelGroup>
                 <h:outputText escape="false" value="#{configMapController.getKey('ListSurveyanswersEmpty')}" rendered="#{surveyanswersController.items.rowCount == 0}"/>
                 <h:panelGroup >
                     <p:dataTable  
