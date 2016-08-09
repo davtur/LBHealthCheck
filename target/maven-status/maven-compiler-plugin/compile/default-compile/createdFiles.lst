@@ -21,6 +21,7 @@ au/com/manlyit/fitnesscrm/stats/beans/SessionTrainersFacade.class
 au/com/manlyit/fitnesscrm/stats/classes/util/ScheduledPaymentPojo.class
 au/com/manlyit/fitnesscrm/stats/db/SurveyAnswers.class
 au/com/manlyit/fitnesscrm/stats/classes/StatTypesController$StatTypesControllerConverter.class
+au/com/manlyit/fitnesscrm/stats/classes/SurveyAnswersController$2.class
 au/com/manlyit/fitnesscrm/stats/db/InvoiceLine.class
 au/com/manlyit/fitnesscrm/stats/classes/ItemController$1.class
 au/com/manlyit/fitnesscrm/stats/converters/GenericConverter.class
@@ -228,6 +229,7 @@ au/com/manlyit/fitnesscrm/stats/classes/CrmContextListener$1.class
 au/com/manlyit/fitnesscrm/stats/db/Plan.class
 au/com/manlyit/fitnesscrm/stats/classes/InvoiceLineController.class
 au/com/manlyit/fitnesscrm/stats/classes/util/PaymentPojo.class
+au/com/manlyit/fitnesscrm/stats/classes/SurveyQuestionsController$2.class
 au/com/manlyit/fitnesscrm/stats/classes/FitnessTestChartsController$FitnessTestChartsControllerConverter.class
 au/com/manlyit/fitnesscrm/stats/db/QrtzSimpleTriggersPK.class
 au/com/manlyit/fitnesscrm/stats/classes/EmailQueueController$1.class

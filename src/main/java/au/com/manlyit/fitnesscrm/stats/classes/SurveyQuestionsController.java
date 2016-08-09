@@ -13,6 +13,8 @@ import au.com.manlyit.fitnesscrm.stats.db.Surveys;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
@@ -111,7 +113,7 @@ public class SurveyQuestionsController implements Serializable {
 
     public DataModel<SurveyQuestions> getItems() {
         if (items == null) {
-            items = new ListDataModel<>(new ArrayList<>(getSelectedSurvey().getSurveyQuestionsCollection()));
+            items = new ListDataModel<>(new ArrayList<>(sortQuestionsByOrderField((List<SurveyQuestions>) getSelectedSurvey().getSurveyQuestionsCollection())));
         }
         return items;
     }
@@ -330,6 +332,17 @@ public class SurveyQuestionsController implements Serializable {
         return "Edit";
     }
 
+    private List<SurveyQuestions> sortQuestionsByOrderField(List<SurveyQuestions> lsq) {
+        Comparator<SurveyQuestions> idComparator = new Comparator<SurveyQuestions>() {
+            @Override
+            public int compare(SurveyQuestions o1, SurveyQuestions o2) {
+                return Integer.valueOf(o1.getQuestionOrder()).compareTo(o2.getQuestionOrder());
+            }
+        };
+        Collections.sort(lsq, idComparator);
+        return lsq;
+    }
+
     private List<SurveyAnswers> prepareSurveysForDemo() {
 
         FacesContext context = FacesContext.getCurrentInstance();
@@ -340,7 +353,7 @@ public class SurveyQuestionsController implements Serializable {
         try {
 
             List<SurveyQuestions> lsq = new ArrayList<>(getSelectedSurvey().getSurveyQuestionsCollection());
-
+            sortQuestionsByOrderField(lsq);
             // if (lsa == null || lsa.isEmpty()) {// the survey hasn't been taken so add blank answers
             for (SurveyQuestions quest : lsq) {
                 // ArrayList<SurveyAnswers> lsa = new ArrayList<>(quest.getSurveyAnswersCollection());
@@ -433,9 +446,16 @@ public class SurveyQuestionsController implements Serializable {
     }
 
     public void destroy() {
-        performDestroy();
-        recreateModel();
-        current = null;
+        getSelectedSurvey().getSurveyQuestionsCollection().remove(getSelected());
+        try {
+            surveysFacade.edit(getSelectedSurvey());
+            current = null;
+            subItems = null;
+            recreateModel();
+            JsfUtil.addSuccessMessage(configMapFacade.getConfig("SurveyquestionsDeleted"));
+        } catch (Exception e) {
+            JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
+        }
     }
 
     public String destroyAndView() {
@@ -514,7 +534,7 @@ public class SurveyQuestionsController implements Serializable {
     }
 
     public SelectItem[] getItemsAvailableSelectMany() {
-        file:///home/david/.netbeans/8.0/config/Templates/JSF/JSF_From_Entity_Wizard/StandardJSF/create.ftl
+       // file:///home/david/.netbeans/8.0/config/Templates/JSF/JSF_From_Entity_Wizard/StandardJSF/create.ftl
 
         return JsfUtil.getSelectItems(ejbFacade.findAll(), false);
     }

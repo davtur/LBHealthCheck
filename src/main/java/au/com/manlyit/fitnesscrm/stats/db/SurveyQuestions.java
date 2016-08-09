@@ -37,22 +37,31 @@ import javax.xml.bind.annotation.XmlTransient;
 @NamedQueries({
     @NamedQuery(name = "SurveyQuestions.findAll", query = "SELECT s FROM SurveyQuestions s"),
     @NamedQuery(name = "SurveyQuestions.findById", query = "SELECT s FROM SurveyQuestions s WHERE s.id = :id")})
-public class SurveyQuestions implements  BaseEntity, Serializable {
+public class SurveyQuestions implements BaseEntity, Serializable {
+
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "id")
     private Integer id;
+    
     @Basic(optional = false)
     @NotNull
     @Lob
     @Size(min = 1, max = 65535)
     @Column(name = "question")
     private String question;
+
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "question_order")
+    private int questionOrder;
+
     @JoinColumn(name = "question_type", referencedColumnName = "id")
     @ManyToOne(optional = false)
     private SurveyQuestionTypes questionType;
+    
     @JoinColumn(name = "survey_id", referencedColumnName = "id")
     @ManyToOne(optional = false)
     private Surveys surveyId;
@@ -147,5 +156,13 @@ public class SurveyQuestions implements  BaseEntity, Serializable {
     public String toString() {
         return "au.com.manlyit.fitnesscrm.stats.db.SurveyQuestions[ id=" + id + " ]";
     }
-    
+
+    public int getQuestionOrder() {
+        return questionOrder;
+    }
+
+    public void setQuestionOrder(int questionOrder) {
+        this.questionOrder = questionOrder;
+    }
+
 }

@@ -16,6 +16,8 @@ import au.com.manlyit.fitnesscrm.stats.db.Surveys;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
@@ -65,6 +67,19 @@ public class SurveyAnswersController implements Serializable {
     public SurveyAnswersController() {
     }
 
+    
+     private List<SurveyQuestions> sortQuestionsByOrderField(List<SurveyQuestions> lsq) {
+        Comparator<SurveyQuestions> idComparator = new Comparator<SurveyQuestions>() {
+            @Override
+            public int compare(SurveyQuestions o1, SurveyQuestions o2) {
+                return Integer.valueOf(o1.getQuestionOrder()).compareTo(o2.getQuestionOrder());
+            }
+        };
+        Collections.sort(lsq, idComparator);
+        return lsq;
+    }
+
+    
     public static boolean isUserInRole(String roleName) {
         boolean inRole = FacesContext.getCurrentInstance().getExternalContext().isUserInRole(roleName);
         return inRole;
@@ -448,6 +463,7 @@ public class SurveyAnswersController implements Serializable {
             FacesContext context = FacesContext.getCurrentInstance();
             CustomersController customersController = context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
             Collection<SurveyQuestions> lsq = selectedSurvey.getSurveyQuestionsCollection();
+            sortQuestionsByOrderField((List<SurveyQuestions>)lsq);
             for (SurveyQuestions quest : lsq) {
                 SurveyAnswers sa = ejbFacade.findSurveyAnswersByCustomerAndQuestion(customersController.getSelected(), quest);
                 if (sa != null) {
