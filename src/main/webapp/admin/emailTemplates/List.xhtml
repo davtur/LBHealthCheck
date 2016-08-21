@@ -39,6 +39,8 @@
                                 <h:outputText value="Search all fields:" />
                                 <p:inputText id="globalFilter" onkeyup="PF('emailTemplatesControllerTable').filter()" />
                                 <p:commandButton rendered="#{emailTemplatesController.isUserInRole('ADMIN')}" id="createButton" icon="ui-icon-plus"   value="#{configMapController.getKey('Create')}" action="#{emailTemplatesController.prepareCreate}"  />
+                                <p:commandButton disabled="#{emailTemplatesController.selected eq null}"  rendered="#{emailTemplatesController.isUserInRole('ADMIN')}" id="cloneButton" icon="ui-icon-plus"   value="#{configMapController.getKey('Clone')}" action="#{emailTemplatesController.prepareClone}"  />
+
                                 <p:commandButton id="viewButton"   icon="ui-icon-search" value="#{configMapController.getKey('View')}" update=":EmailTemplatesViewForm" oncomplete="PF('EmailTemplatesViewDialog').show()" disabled="#{empty emailTemplatesController.selected}"/>
                                 <p:commandButton rendered="#{emailTemplatesController.isUserInRole('ADMIN')}" id="editButton"   icon="ui-icon-pencil" value="#{configMapController.getKey('Edit')}" action="#{emailTemplatesController.prepareEdit}"  disabled="#{empty emailTemplatesController.selected}"/>
                                 <p:commandButton rendered="#{emailTemplatesController.isUserInRole('ADMIN')}" id="deleteButton" icon="ui-icon-trash"  value="#{configMapController.getKey('Delete')}" actionListener="#{emailTemplatesController.destroy}" update=":growl,datalist" disabled="#{empty emailTemplatesController.selected}"/>

@@ -1470,3 +1470,8 @@ EditCustomerSurvey_Enabled=Survey Enabled
 EditCustomerSurvey_Completed=Survey Completed
 DefaultSurveyName=Health Questionnaire
 ListSurveyquestionsTitle_questionOrder=Order
+
+ViewEmailTemplatesTitle_customerName=Client:
+ViewEmailTemplatesTitle_recipientEmail=Recipient:
+Clone=Clone
+adminEmailTemplatesHelp=The template name must begin with system.email.admin as this is the filter for email templates displayed to admins emailing customers.

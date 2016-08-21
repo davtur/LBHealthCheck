@@ -1,0 +1,53 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition  xmlns="http://www.w3.org/1999/xhtml"
+                 xmlns:h="http://java.sun.com/jsf/html"
+                 xmlns:f="http://java.sun.com/jsf/core"
+                 xmlns:p="http://primefaces.org/ui" 
+                 xmlns:ui="http://java.sun.com/jsf/facelets" >
+
+
+    <p:dialog id="SendEmailToCustomerDlg" widgetVar="SendEmailToCustomerDialog" modal="true" resizable="true"  fitViewport="true" appendTo="@(body)" header="#{configMapController.getKey('ViewEmailTemplatesTitle')}">
+        <h:form id="SendEmailToCustomerForm">
+            <h:panelGroup >
+                <h:panelGrid columns="3" rendered="#{emailTemplatesController.selected != null}">
+                    <h:panelGrid columns="2" rendered="#{emailTemplatesController.selected != null}">
+
+                        <p:outputLabel value="#{configMapController.getKey('ViewEmailTemplatesTitle_name')}" for="selectTemplate" />
+                        <p:selectOneMenu  id="selectTemplate" valueChangeListener="#{emailTemplatesController.selectOneMenuValueChangeListener}"  converter="emailTemplatesControllerConverter"  value="#{emailTemplatesController.selected}" label="#{configMapController.getKey('ViewEmailTemplatesTitle_name')}" >
+                            <f:selectItems value="#{emailTemplatesController.adminEmailTemplates}"  var="template" itemLabel="#{template.name}" itemValue="#{template}"/>
+                            <p:ajax update=":SendEmailToCustomerForm:sendEmailDisplayPanel" event="change"/>
+                        </p:selectOneMenu>
+                    </h:panelGrid>
+
+                    <p:commandButton disabled="#{emailTemplatesController.selected eq null}" value="#{configMapController.getKey('sendCustomerOnBoardEmailButton')}" oncomplete="PF('SendEmailToCustomerDialog').hide()"  actionListener="#{customersController.sendEmailToCustomerFromTemplate}" update="@(.updateNotesDataTable)  :growl"/>
+                    <p:commandButton value="#{configMapController.getKey('Close')}" onclick="PF('SendEmailToCustomerDialog').hide()"/>
+                </h:panelGrid>
+                <p:panel id="sendEmailDisplayPanel">
+                    <h:panelGrid columns="2" rendered="#{emailTemplatesController.selected != null}">
+                        
+
+
+                        <h:outputText value="#{configMapController.getKey('ViewEmailTemplatesLabel_id')}"/>
+                        <h:outputText value="#{emailTemplatesController.selected.id}" title="#{configMapController.getKey('ViewEmailTemplatesTitle_id')}"/>
+                        <h:outputText value="#{configMapController.getKey('ViewEmailTemplatesLabel_name')}"/>
+                        <h:outputText value="#{emailTemplatesController.selected.name}" title="#{configMapController.getKey('ViewEmailTemplatesTitle_name')}"/>
+                        <h:outputText value="#{configMapController.getKey('ViewEmailTemplatesLabel_description')}"/>
+                        <p:scrollPanel style="width:600px;height:50px" mode="native">
+                            <h:outputText  value="#{emailTemplatesController.selected.description}" title="#{configMapController.getKey('ViewEmailTemplatesTitle_description')}"/>
+                        </p:scrollPanel>
+                        <h:outputText value="#{configMapController.getKey('ViewEmailTemplatesLabel_template')}"/>
+                        <p:scrollPanel style="width:600px;height:200px" mode="native">
+                            <h:outputText value="#{emailTemplatesController.selected.template}"  escape="false" title="#{configMapController.getKey('ViewEmailTemplatesTitle_template')}"/>
+                        </p:scrollPanel>
+                        <h:outputText value="#{configMapController.getKey('ViewEmailTemplatesTitle_recipientEmail')}"/>
+                        <h:outputText value="#{customersController.selected.emailAddress}" title="#{configMapController.getKey('ViewEmailTemplatesTitle_recipientEmail')}"/>
+                        <h:outputText value="#{configMapController.getKey('ViewEmailTemplatesTitle_customerName')}"/>
+                        <h:outputText value="#{customersController.selected.firstname} #{customersController.selected.lastname}" title="#{configMapController.getKey('ViewEmailTemplatesTitle_customerName')}"/>
+                    </h:panelGrid>
+                </p:panel>
+            </h:panelGroup>
+        </h:form>
+    </p:dialog>
+
+</ui:composition>
+

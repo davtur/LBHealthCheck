@@ -4,8 +4,10 @@ import au.com.manlyit.fitnesscrm.stats.db.EmailTemplates;
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PaginationHelper;
 import au.com.manlyit.fitnesscrm.stats.beans.EmailTemplatesFacade;
+import au.com.manlyit.fitnesscrm.stats.db.CustomerAuth;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -28,6 +30,7 @@ import org.primefaces.event.SelectEvent;
 @Named("emailTemplatesController")
 @SessionScoped
 public class EmailTemplatesController implements Serializable {
+
     private static final long serialVersionUID = 1L;
 
     private EmailTemplates current;
@@ -48,6 +51,22 @@ public class EmailTemplatesController implements Serializable {
     public static boolean isUserInRole(String roleName) {
         boolean inRole = FacesContext.getCurrentInstance().getExternalContext().isUserInRole(roleName);
         return inRole;
+    }
+
+    public List<EmailTemplates> getItemsAvailableAsObjects() {
+        return ejbFacade.findAll();
+    }
+     public List<EmailTemplates> getAdminEmailTemplates() {
+        List<EmailTemplates> etl = ejbFacade.findAll();
+        List<EmailTemplates> etlFiltered = new ArrayList<>();
+        //system.email.admin
+        for(EmailTemplates et:etl){
+            if(et.getName().startsWith("system.email.admin")){
+                etlFiltered.add(et);
+            }
+        }
+         
+        return etlFiltered;
     }
 
     public EmailTemplates getSelected() {
@@ -129,6 +148,17 @@ public class EmailTemplatesController implements Serializable {
 
     public String prepareCreate() {
         current = new EmailTemplates();
+        selectedItemIndex = -1;
+        return "Create";
+    }
+
+    public String prepareClone() {
+        EmailTemplates clone = new EmailTemplates();
+        clone.setDescription(current.getDescription());
+        clone.setName(current.getName() + ".cloned");
+        clone.setTemplate(current.getTemplate());
+        clone.setId(0);
+        current = clone;
         selectedItemIndex = -1;
         return "Create";
     }
@@ -300,9 +330,10 @@ public class EmailTemplatesController implements Serializable {
         JsfUtil.addErrorMessage("Row Edit Cancelled");
     }
 
-    @FacesConverter(value="emailTemplatesControllerConverter", forClass = EmailTemplates.class)
+    @FacesConverter(value = "emailTemplatesControllerConverter", forClass = EmailTemplates.class)
     public static class EmailTemplatesControllerConverter implements Converter {
 
+        @Override
         public Object getAsObject(FacesContext facesContext, UIComponent component, String value) {
             if (value == null || value.length() == 0) {
                 return null;

@@ -312,7 +312,7 @@ public class CustomersController implements Serializable {
     public void sendPaymentFormEmail() {
         FacesContext context = FacesContext.getCurrentInstance();
         LoginBean controller = (LoginBean) context.getApplication().getELResolver().getValue(context.getELContext(), null, "loginBean");
-        controller.doPasswordReset("system.new.paymentForm.template", current, configMapFacade.getConfig("sendPaymentFormEmailSubject"));
+        controller.doPasswordReset("system.email.admin.paymentForm.template", current, configMapFacade.getConfig("sendPaymentFormEmailSubject"));
         JsfUtil.addSuccessMessage(configMapFacade.getConfig("sendPaymentFormEmailSuccessMessage") + " " + current.getFirstname() + " " + current.getLastname() + ".");
         String auditDetails = "Customer Payment Form Email Sent For:" + current.getFirstname() + " " + current.getLastname() + ".";
         String changedFrom = "N/A";
@@ -330,11 +330,34 @@ public class CustomersController implements Serializable {
         addCustomerToUsersGroup(current);
         createCombinedAuditLogAndNote(loggedInUser, current, "sendPaymentFormEmail", auditDetails, changedFrom, changedTo);
     }
+    
+     public void sendEmailToCustomerFromTemplate() {
+        FacesContext context = FacesContext.getCurrentInstance();
+        LoginBean controller = (LoginBean) context.getApplication().getELResolver().getValue(context.getELContext(), null, "loginBean");
+        EmailTemplatesController emailTemplatescontroller = (EmailTemplatesController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "emailTemplatesController");
+        controller.doPasswordReset(emailTemplatescontroller.getSelected().getName(), current, configMapFacade.getConfig("sendCustomerOnBoardEmailEmailSubject"));
+        JsfUtil.addSuccessMessage(configMapFacade.getConfig("sendEmailToCustomerFromTemplate") + " " + current.getFirstname() + " " + current.getLastname() + ".");
+        String auditDetails = "Customer Email Sent For:" + current.getFirstname() + " " + current.getLastname() + ".Template Used = " + emailTemplatescontroller.getSelected().getName();
+        String changedFrom = "N/A";
+        String changedTo = "Email Sent to Customer";
+
+        try {
+            String url = current.getPaymentParameters().getWebddrUrl();
+            int a = url.indexOf("rAmount");
+            int b = url.indexOf("businessOrPerson");
+            url = url.substring(a, b);
+            auditDetails += "\r\n" + url;
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "sendCustomerTemplateEmail: Couldn't get the payment details from the webDDR Url for the audit log and cutomer notes");
+        }
+        addCustomerToUsersGroup(current);
+        createCombinedAuditLogAndNote(loggedInUser, current, "sendCustomerTemplateEmail", auditDetails, changedFrom, changedTo);
+    }
 
     public void sendCustomerOnboardEmail() {
         FacesContext context = FacesContext.getCurrentInstance();
         LoginBean controller = (LoginBean) context.getApplication().getELResolver().getValue(context.getELContext(), null, "loginBean");
-        controller.doPasswordReset("system.new.customer.template", current, configMapFacade.getConfig("sendCustomerOnBoardEmailEmailSubject"));
+        controller.doPasswordReset("system.email.admin.onboardcustomer.template", current, configMapFacade.getConfig("sendCustomerOnBoardEmailEmailSubject"));
         JsfUtil.addSuccessMessage(configMapFacade.getConfig("sendCustomerOnBoardEmail") + " " + current.getFirstname() + " " + current.getLastname() + ".");
         String auditDetails = "Customer On Board Email Sent For:" + current.getFirstname() + " " + current.getLastname() + ".";
         String changedFrom = "N/A";
@@ -944,7 +967,7 @@ public class CustomersController implements Serializable {
                 //SurveysController surveyCon = context.getApplication().evaluateExpressionGet(context, "#{surveysController}", SurveysController.class);
                 // SurveysController surveyCon = (SurveysController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "surveysController");
                 LoginBean controller = (LoginBean) context.getApplication().getELResolver().getValue(context.getELContext(), null, "loginBean");
-                controller.doPasswordReset("system.new.customer.template", c, configMapFacade.getConfig("sendCustomerOnBoardEmailEmailSubject"));
+                controller.doPasswordReset("system.email.admin.onboardcustomer.template", c, configMapFacade.getConfig("sendCustomerOnBoardEmailEmailSubject"));
                 createCombinedAuditLogAndNote(c, c, "New Sign Up", details, "Did Not Exist", "New Lead");
                 LOGGER.log(Level.INFO, "createFromSignup: {0}", new Object[]{details});
                 RequestContext.getCurrentInstance().execute("PF('signupDialog').hide();");

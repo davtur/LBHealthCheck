@@ -23,6 +23,8 @@
 
                 <p:panel>
                     <p:panelGrid columns="2" rendered="#{emailTemplatesController.selected != null}">
+                       <p:outputLabel value="Note:" />
+                       <p:outputLabel value="#{configMapController.getKey('adminEmailTemplatesHelp')}" />
                         <p:outputLabel value="#{configMapController.getKey('CreateEmailTemplatesLabel_name')}" for="name" />
                         <p:inputText id="name" value="#{emailTemplatesController.selected.name}" title="#{configMapController.getKey('CreateEmailTemplatesTitle_name')}" required="true" requiredMessage="#{configMapController.getKey('CreateEmailTemplatesRequiredMessage_name')}"/>
                         <p:outputLabel value="#{configMapController.getKey('CreateEmailTemplatesLabel_description')}" for="description" />

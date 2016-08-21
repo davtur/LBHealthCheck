@@ -4,7 +4,7 @@
 
     <groupId>au.com.manlyit</groupId>
     <artifactId>FitnessCRM</artifactId>
-    <version>4.0.9</version>
+    <version>4.1.0</version>
     <packaging>war</packaging>
 
     <name>FitnessCRM</name>
