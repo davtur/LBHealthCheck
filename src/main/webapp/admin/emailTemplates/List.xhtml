@@ -61,6 +61,10 @@
                             <h:outputText value="#{item.name}"/>
 
                         </p:column>
+                         <p:column sortBy="#{item.subject}" filterBy="#{item.subject}" headerText="#{configMapController.getKey('ViewEmailTemplatesLabel_subject')}"   >
+                            <h:outputText value="#{item.subject}"/>
+
+                        </p:column>
                         <p:column sortBy="#{item.description}" filterBy="#{item.description}" headerText="#{configMapController.getKey('ListEmailTemplatesTitle_description')}"   >
                             <h:outputText value="#{item.description}"/>
 

@@ -335,7 +335,7 @@ public class CustomersController implements Serializable {
         FacesContext context = FacesContext.getCurrentInstance();
         LoginBean controller = (LoginBean) context.getApplication().getELResolver().getValue(context.getELContext(), null, "loginBean");
         EmailTemplatesController emailTemplatescontroller = (EmailTemplatesController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "emailTemplatesController");
-        controller.doPasswordReset(emailTemplatescontroller.getSelected().getName(), current, configMapFacade.getConfig("sendCustomerOnBoardEmailEmailSubject"));
+        controller.doPasswordReset(emailTemplatescontroller.getSelected().getName(), current, emailTemplatescontroller.getSelected().getSubject());
         JsfUtil.addSuccessMessage(configMapFacade.getConfig("sendEmailToCustomerFromTemplate") + " " + current.getFirstname() + " " + current.getLastname() + ".");
         String auditDetails = "Customer Email Sent For:" + current.getFirstname() + " " + current.getLastname() + ".Template Used = " + emailTemplatescontroller.getSelected().getName();
         String changedFrom = "N/A";

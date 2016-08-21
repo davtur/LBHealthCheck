@@ -7,6 +7,7 @@ package au.com.manlyit.fitnesscrm.stats.db;
 
 import au.com.manlyit.fitnesscrm.stats.classes.util.BaseEntity;
 import java.io.Serializable;
+import java.util.Date;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -17,6 +18,8 @@ import javax.persistence.Lob;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -33,6 +36,22 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "EmailTemplates.findById", query = "SELECT e FROM EmailTemplates e WHERE e.id = :id"),
     @NamedQuery(name = "EmailTemplates.findByName", query = "SELECT e FROM EmailTemplates e WHERE e.name = :name")})
 public class EmailTemplates implements  BaseEntity, Serializable {
+
+    @Basic(optional = false)
+    @NotNull
+    @Lob
+    @Size(min = 1, max = 65535)
+    @Column(name = "subject")
+    private String subject;
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "type")
+    private int type;
+    @Column(name = "deleted")
+    private Boolean deleted;
+    @Column(name = "deletedDate")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date deletedDate;
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -123,6 +142,38 @@ public class EmailTemplates implements  BaseEntity, Serializable {
     @Override
     public String toString() {
         return name;
+    }
+
+    public String getSubject() {
+        return subject;
+    }
+
+    public void setSubject(String subject) {
+        this.subject = subject;
+    }
+
+    public int getType() {
+        return type;
+    }
+
+    public void setType(int type) {
+        this.type = type;
+    }
+
+    public Boolean getDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(Boolean deleted) {
+        this.deleted = deleted;
+    }
+
+    public Date getDeletedDate() {
+        return deletedDate;
+    }
+
+    public void setDeletedDate(Date deletedDate) {
+        this.deletedDate = deletedDate;
     }
     
 }

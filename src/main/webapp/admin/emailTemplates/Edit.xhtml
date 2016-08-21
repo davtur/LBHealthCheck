@@ -13,6 +13,8 @@
                     <p:panelGrid columns="2" rendered="#{emailTemplatesController.selected != null}">
                          <p:outputLabel value="#{configMapController.getKey('EditEmailTemplatesLabel_name')}" for="name" />
                         <p:inputText id="name"  value="#{emailTemplatesController.selected.name}" title="#{configMapController.getKey('EditEmailTemplatesTitle_name')}" required="true" requiredMessage="#{configMapController.getKey('EditEmailTemplatesRequiredMessage_name')}"/>
+                        <p:outputLabel value="#{configMapController.getKey('ViewEmailTemplatesLabel_subject')}"/>
+                        <p:inputText value="#{emailTemplatesController.selected.subject}" title="#{configMapController.getKey('ViewEmailTemplatesTitle_subject')}"/>
                         <p:outputLabel value="#{configMapController.getKey('EditEmailTemplatesLabel_description')}" for="description" />
                         <p:inputTextarea rows="4" cols="30" id="description" value="#{emailTemplatesController.selected.description}" title="#{configMapController.getKey('EditEmailTemplatesTitle_description')}" />
                         <p:outputLabel value="#{configMapController.getKey('EditEmailTemplatesLabel_template')}" for="template" />

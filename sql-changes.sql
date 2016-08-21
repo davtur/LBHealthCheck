@@ -173,3 +173,10 @@ ADD COLUMN `status_description` VARCHAR(255) NULL AFTER `status`;
 
 ALTER TABLE `fitnessStats`.`session_timetable` 
 ADD COLUMN `session_style_classes` TEXT NULL COMMENT '' AFTER `session_timetable_status`;
+
+
+ALTER TABLE `fitnessStats`.`email_templates` 
+ADD COLUMN `subject` TEXT NOT NULL AFTER `template`,
+ADD COLUMN `type` INT(11) NOT NULL DEFAULT 0 AFTER `subject`,
+ADD COLUMN `deleted` BIT(1) NULL AFTER `type`,
+ADD COLUMN `deletedDate` DATETIME NULL AFTER `deleted`;
