@@ -180,3 +180,11 @@ ADD COLUMN `subject` TEXT NOT NULL AFTER `template`,
 ADD COLUMN `type` INT(11) NOT NULL DEFAULT 0 AFTER `subject`,
 ADD COLUMN `deleted` BIT(1) NULL AFTER `type`,
 ADD COLUMN `deletedDate` DATETIME NULL AFTER `deleted`;
+
+
+ALTER TABLE `fitnessStats`.`customers` 
+CHANGE COLUMN `street_address` `street_address` VARCHAR(127) NULL DEFAULT '' ,
+CHANGE COLUMN `suburb` `suburb` VARCHAR(127) NULL DEFAULT '' ,
+CHANGE COLUMN `postcode` `postcode` VARCHAR(10) NULL DEFAULT '' ,
+CHANGE COLUMN `city` `city` VARCHAR(127) NULL DEFAULT '' ,
+CHANGE COLUMN `addr_state` `addr_state` VARCHAR(32) NULL DEFAULT '' ;

@@ -67,6 +67,8 @@ public class CustomersController implements Serializable {
     private Customers newCustomer;
     private Customers selectedForDeletion;
     private CustomerState selectedState;
+    private CustomerState selectedForImpersonation;
+    private boolean impersonationOn;
     private Notes selectedNoteForDeletion;
     private static final String paymentGateway = "EZIDEBIT";
     //private CustomerState[] selectedCustomerStates;
@@ -256,7 +258,8 @@ public class CustomersController implements Serializable {
             selectedItemIndex = -1;
             checkPass = current.getPassword();
             if (cust.getQuestionnaireMapCollection() == null) {
-                addQuestionnaireMapItemsToCustomer(cust);
+                //addQuestionnaireMapItemsToCustomer(cust);
+                LOGGER.log(Level.SEVERE, "The customers questionaire collection is NULL. THis shouldn't happen as it is created when the customer is created.", cust.getUsername());
             }
 
             if (cust.getProfileImage() == null) {
@@ -277,7 +280,7 @@ public class CustomersController implements Serializable {
 
             boolean foundSurveyMap = false;
             boolean isDefaultSurvey = false;
-            if(s.getName().contentEquals(defaulSurveyName)){
+            if (s.getName().contentEquals(defaulSurveyName)) {
                 isDefaultSurvey = true;
             }
 
@@ -299,8 +302,7 @@ public class CustomersController implements Serializable {
                 qmNew.setQuestionnaireCompleted(false);
                 cust.getQuestionnaireMapCollection().add(qmNew);
                 //questionnaireMapFacade.create(qmNew);
-                ejbFacade.edit(cust);
-                
+                ejbFacade.editAndFlush(cust);
 
                 LOGGER.log(Level.INFO, "A new QuestionnaireMap was created for survey {1} and Customer {0}.", new Object[]{cust.getUsername(), s.getName()});
             }
@@ -330,8 +332,8 @@ public class CustomersController implements Serializable {
         addCustomerToUsersGroup(current);
         createCombinedAuditLogAndNote(loggedInUser, current, "sendPaymentFormEmail", auditDetails, changedFrom, changedTo);
     }
-    
-     public void sendEmailToCustomerFromTemplate() {
+
+    public void sendEmailToCustomerFromTemplate() {
         FacesContext context = FacesContext.getCurrentInstance();
         LoginBean controller = (LoginBean) context.getApplication().getELResolver().getValue(context.getELContext(), null, "loginBean");
         EmailTemplatesController emailTemplatescontroller = (EmailTemplatesController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "emailTemplatesController");
@@ -831,7 +833,7 @@ public class CustomersController implements Serializable {
                 ejbGroupsFacade.create(grp);
                 createDefaultCustomerProfilePicture(c);
                 createDefaultPaymentParameters(c);
-               addQuestionnaireMapItemsToCustomer(c);
+                addQuestionnaireMapItemsToCustomer(c);
                 recreateModel();
                 JsfUtil.addSuccessMessage(configMapFacade.getConfig("CustomersCreated"));
                 return prepareCreate();
@@ -1711,6 +1713,10 @@ public class CustomersController implements Serializable {
         return ejbFacade.findAllActiveCustomers(sortAsc);
     }
 
+    public Collection<Customers> getActiveCustomers() {
+        return ejbFacade.findAllActiveCustomers(true);
+    }
+
     public void onEdit(RowEditEvent event) {
         Customers cm = (Customers) event.getObject();
         getFacade().edit(cm);
@@ -1752,6 +1758,7 @@ public class CustomersController implements Serializable {
         Object o = vce.getNewValue();
         if (o.getClass().equals(String.class)) {
             String newVal = (String) o;
+            newVal = newVal.trim();
             updateUsername(newVal, null, newCustomer);
 
         }
@@ -1761,6 +1768,7 @@ public class CustomersController implements Serializable {
         Object o = vce.getNewValue();
         if (o.getClass().equals(String.class)) {
             String newVal = (String) o;
+            newVal = newVal.trim();
             updateUsername(null, newVal, newCustomer);
 
         }
@@ -1770,6 +1778,7 @@ public class CustomersController implements Serializable {
         Object o = vce.getNewValue();
         if (o.getClass().equals(String.class)) {
             String newVal = (String) o;
+            newVal = newVal.trim();
             updateUsername(newVal, null, current);
 
         }
@@ -1779,6 +1788,7 @@ public class CustomersController implements Serializable {
         Object o = vce.getNewValue();
         if (o.getClass().equals(String.class)) {
             String newVal = (String) o;
+            newVal = newVal.trim();
             updateUsername(null, newVal, current);
 
         }
@@ -2460,6 +2470,51 @@ public class CustomersController implements Serializable {
      */
     public void setCustomersNewPlan(Plan customersNewPlan) {
         this.customersNewPlan = customersNewPlan;
+    }
+
+    /**
+     * @return the selectedForImpersonation
+     */
+    public CustomerState getSelectedForImpersonation() {
+        return selectedForImpersonation;
+    }
+
+    /**
+     * @param selectedForImpersonation the selectedForImpersonation to set
+     */
+    public void setSelectedForImpersonation(CustomerState selectedForImpersonation) {
+        this.selectedForImpersonation = selectedForImpersonation;
+    }
+
+    /**
+     * @return the impersonationOn
+     */
+    public boolean isImpersonationOn() {
+        return impersonationOn;
+    }
+
+    /**
+     * @param impersonationOn the impersonationOn to set
+     */
+    public void setImpersonationOn(boolean impersonationOn) {
+        this.impersonationOn = impersonationOn;
+    }
+
+    public void impersonationToggled(ValueChangeEvent vce) {
+        Object newObject = vce.getNewValue();
+
+        if (newObject.getClass().equals(Boolean.class)) {
+            boolean newValue = (boolean) newObject;
+            if (newValue == false) {
+
+                setSelected(getLoggedInUser());
+                FacesContext context = FacesContext.getCurrentInstance();
+                MySessionsChart1 c2 = context.getApplication().evaluateExpressionGet(context, "#{mySessionsChart1}", MySessionsChart1.class);
+                c2.recreateModel();
+            }
+
+        }
+
     }
 
     @FacesConverter(value = "customersControllerConverter", forClass = Customers.class)

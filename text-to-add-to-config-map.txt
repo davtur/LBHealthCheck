@@ -1476,3 +1476,11 @@ ViewEmailTemplatesTitle_recipientEmail=Recipient:
 Clone=Clone
 adminEmailTemplatesHelp=The template name must begin with system.email.admin as this is the filter for email templates displayed to admins emailing customers.
 ViewEmailTemplatesLabel_subject=Subject
+
+
+
+Trainer_Impersonate_Select_Label=Customer
+Trainer_Impersonate_Select_Title=Select the customer whose details you would like to view.
+Trainer_Impersonate_checkbox_Label=Impersonate
+Trainer_Impersonate_heading_Label=View Customer Information
+Trainer_Impersonate_message_Label=Currently Viewing:

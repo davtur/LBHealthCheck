@@ -122,10 +122,18 @@
                         <ui:repeat value="#{customersController.selected.questionnaireMapCollection}" var="qMap">
                             <div class="EmptyBox10"></div>
                                                 <!--   <p:commandButton icon="fa fa-edit  white Fs14" id="viewSurveyButton" disabled="#{empty surveyanswersController.selectedSurvey}"  action="customerSurveys"    value="#{configMapController.getKey('MyDeatilsSurveys_viewSurveyLabel')}" update=":growl :createCustomerForm"  /> -->
+                            
+                                <h:panelGrid columns="2" cellpadding="5" >
+                                    <p:commandButton icon="fa fa-edit  white Fs14"   action="customerSurveys" rendered="#{qMap.enabled}"   value="#{qMap.surveysId.name}" update=":growl :createCustomerForm"  >
+                                        <f:setPropertyActionListener value="#{qMap.surveysId}" target="#{surveyanswersController.selectedSurvey}" />
+                                    </p:commandButton> 
 
-                            <p:commandButton icon="fa fa-edit  white Fs14"   action="customerSurveys" rendered="#{qMap.enabled}"   value="#{qMap.surveysId.name}" update=":growl :createCustomerForm"  >
-                                <f:setPropertyActionListener value="#{qMap.surveysId}" target="#{surveyanswersController.selectedSurvey}" />
-                            </p:commandButton> 
+
+                                    <h:outputText  rendered="#{qMap.questionnaireCompleted and qMap.enabled}" value="Completed" />   
+                                    <h:outputText  rendered="#{!qMap.questionnaireCompleted and qMap.enabled}" value="Please complete this form." />   
+
+                                </h:panelGrid>
+                            
                         </ui:repeat>
                     </div>
                 </div>

@@ -15,6 +15,38 @@
             <h:form id="listSessionHistoryForm1">
                 <div class="Container100 Responsive100">
                     <div class="ContainerIndent">
+                        <h1 class="BigTopic">#{configMapController.getKey('Trainer_Impersonate_heading_Label')}</h1>
+
+
+                        <div class="Container20 Responsive">
+
+                            <h:panelGrid columns="2" cellpadding="5" >
+                                <p:outputLabel value="#{configMapController.getKey('Trainer_Impersonate_Select_Label')}" for="c1" />
+                                <p:selectOneMenu id="c1" disabled="#{!customersController.impersonationOn}"  value="#{customersController.selected}" filter="true" converter="customersControllerConverter"  label="#{configMapController.getKey('Trainer_Impersonate_Select_Title')}" >
+                                    <f:selectItems value="#{customersController.activeCustomers}"   var="cust" itemLabel="#{cust.firstname} #{cust.lastname}" itemValue="#{cust}"/>
+                                    <p:ajax   update=":listSessionHistoryForm1:text1" event="change"/>
+                                </p:selectOneMenu>
+                           </h:panelGrid>
+                        </div>
+                        <div class="Container20 Responsive">
+                            <h:panelGrid columns="2" cellpadding="5" >
+                                <p:outputLabel value="#{configMapController.getKey('Trainer_Impersonate_checkbox_Label')}" for="enableImp" />
+                                <p:selectBooleanCheckbox id="enableImp"   value="#{customersController.impersonationOn}" valueChangeListener="#{customersController.impersonationToggled}" >  
+                                    <p:ajax update=":listSessionHistoryForm1:c1 :listSessionHistoryForm1:text1 :listSessionHistoryForm1:sessionChart"   event="change"/>  
+                                </p:selectBooleanCheckbox> 
+                            </h:panelGrid>
+                        </div>
+                        <div class="Container20 Responsive">
+                            <h:panelGrid columns="2" cellpadding="5" >
+                                <p:outputLabel value="#{configMapController.getKey('Trainer_Impersonate_message_Label')}" for="text1" />
+                                <h:outputText id="text1"   value="#{customersController.selected.firstname} #{customersController.selected.lastname}" />   
+                                   
+                            </h:panelGrid>
+                        </div>
+                    </div>
+                </div>
+                <div class="Container100 Responsive100">
+                    <div class="ContainerIndent">
                         <h1 class="BigTopic">#{configMapController.getKey('ListSessionHistoryTitle')}</h1>
 
 
@@ -70,14 +102,15 @@
 
 
                         <script >
-                            function chartExtender() {
+                            function chartExtender()
+                                {
 
-                                this.cfg.legend = {
-                                    show: true,
-                                    location: 'ne',
-                                    placement: 'outsideGrid'
-                                };
-                            }
+                                    this.cfg.legend = {
+                                        show: true,
+                                        location: 'ne',
+                                        placement: 'outsideGrid'
+                                    };
+                                }
                         </script>
                         <div class="EmptyBox10"></div>
 
@@ -101,9 +134,9 @@
                                         <p:outputPanel>
                                             <h:outputText  value="#{configMapController.getKey('ListSessionHistoryShowTrainerSessions')}"  rendered="#{not empty sessionHistoryController.customerItems}"/>
 
-                                        <p:selectBooleanCheckbox id="allSessionsSelected"   value="#{sessionHistoryController.showAllSessionsByTrainer}" rendered="#{not empty sessionHistoryController.customerItems}">  
-                                            <p:ajax update="sessionsDataTable" />  
-                                        </p:selectBooleanCheckbox> 
+                                            <p:selectBooleanCheckbox id="allSessionsSelected"   value="#{sessionHistoryController.showAllSessionsByTrainer}" rendered="#{not empty sessionHistoryController.customerItems}">  
+                                                <p:ajax update="sessionsDataTable" />  
+                                            </p:selectBooleanCheckbox> 
                                             <h:outputText  rendered="#{not empty sessionHistoryController.filteredItems}" value="#{sessionHistoryController.filteredItems.size} Records Found"/>
                                             <h:outputText  rendered="#{empty sessionHistoryController.filteredItems}" value="#{sessionHistoryController.customerItems.rowCount} Records Found"/>
                                         </p:outputPanel>
@@ -118,7 +151,7 @@
                                         </p:commandButton>
                                         <p:spacer/>
 
-                                        
+
 
 
                                     </p:outputPanel>
