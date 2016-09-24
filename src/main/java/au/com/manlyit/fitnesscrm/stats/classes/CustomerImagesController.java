@@ -59,6 +59,7 @@ import org.primefaces.context.RequestContext;
 import org.primefaces.event.SelectEvent;
 import org.primefaces.event.FileUploadEvent;
 import org.primefaces.extensions.event.ImageAreaSelectEvent;
+
 import org.primefaces.mobile.event.SwipeEvent;
 import org.primefaces.model.CroppedImage;
 import org.primefaces.model.DefaultStreamedContent;
@@ -77,7 +78,7 @@ public class CustomerImagesController implements Serializable {
     private static final int new_height = 500;// must match panelheight on gallery component
     private static final int PROFILE_PIC_HEIGHT_IN_PIX = 100;
     private StreamedContent streamedCroppedImage;
-    private ImageAreaSelectEvent imageAreaSelectEvent1;
+    private boolean imageAreaSelectEvent1 = false;
     private CroppedImage croppedImage;
     private BufferedImage currentImage;
     private int imageListSize = 0;
@@ -99,8 +100,14 @@ public class CustomerImagesController implements Serializable {
     private boolean saveButtonDisabled = true;
     private UploadedFile uploadedFile;
     private boolean profilePhoto = false;
-    int numberOfMobileImagesToDisplay = 3;
-    int offsetOfMobileImagesToDisplay = 0;
+    private int numberOfMobileImagesToDisplay = 3;
+    private int offsetOfMobileImagesToDisplay = 0;
+    private int selectionheight = 0;
+    private int selectionwidth = 0;
+    private int imageHeight = 0;
+    private int imageWidth = 0;
+    private int x1 = 0;
+    private int y1 = 0;
 
     public CustomerImagesController() {
     }
@@ -445,11 +452,19 @@ public class CustomerImagesController implements Serializable {
         } catch (IOException | ImageReadException e) {
             JsfUtil.addErrorMessage(e, "Couldnt get the date the photo was taken from the image file! No EXIF data in the photo.");
         }
-
+        imageAreaSelectEvent1 = false;
     }
 
     public void selectEndListener(final ImageAreaSelectEvent e) {
-        imageAreaSelectEvent1 = e;
+
+        selectionheight = e.getHeight();
+        selectionwidth = e.getWidth();
+        imageHeight = e.getImgHeight();
+        imageWidth = e.getImgWidth();
+        x1 = e.getX1();
+        y1 = e.getY1();
+        imageAreaSelectEvent1 = true;
+
     }
 
     private byte[] convertBufferedImageToByteArray(BufferedImage img, String fileType) {
@@ -557,10 +572,14 @@ public class CustomerImagesController implements Serializable {
         }
         updateUploadedImage(scaledImg, type);
         JsfUtil.addSuccessMessage(configMapFacade.getConfig("IMageRotateSuccessful"));
+        imageAreaSelectEvent1 = false;
     }
 
     public void crop() {
-        if (uploadedImage == null || imageAreaSelectEvent1 == null) {
+        if (uploadedImage == null) {
+            return;
+        }
+        if (imageAreaSelectEvent1 == false) {
             return;
         }
         BufferedImage oldImage;
@@ -570,15 +589,14 @@ public class CustomerImagesController implements Serializable {
 
             oldImage = ImageIO.read(is);
 
-            int selectionheight = imageAreaSelectEvent1.getHeight();
-            int selectionwidth = imageAreaSelectEvent1.getWidth();
-            int imageHeight = imageAreaSelectEvent1.getImgHeight();
-            int imageWidth = imageAreaSelectEvent1.getImgWidth();
-            int x1 = imageAreaSelectEvent1.getX1();
-            int y1 = imageAreaSelectEvent1.getY1();
+            // int selectionheight = imageAreaSelectEvent1.getHeight();
+            // int selectionwidth = imageAreaSelectEvent1.getWidth();
+            // int imageHeight = imageAreaSelectEvent1.getImgHeight();
+            //  int imageWidth = imageAreaSelectEvent1.getImgWidth();
+            // int x1 = imageAreaSelectEvent1.getX1();
+            // int y1 = imageAreaSelectEvent1.getY1();
             //int x2 = imageAreaSelectEvent1.getX2();
             //int y2 = imageAreaSelectEvent1.getY2();
-
             int oldImageWidth = oldImage.getWidth();
             int oldImageHeight = oldImage.getHeight();
             float heightScaleFactor = (float) imageHeight / (float) oldImageHeight;
@@ -645,7 +663,7 @@ public class CustomerImagesController implements Serializable {
          Logger.getLogger(CustomerImagesController.class.getName()).log(Level.SEVERE, null, ex);
          JsfUtil.addErrorMessage(ex, "Update image error!!");
          }*/
-
+        imageAreaSelectEvent1 = false;
     }
 
     public void handleFileUpload(FileUploadEvent event) {
@@ -668,7 +686,9 @@ public class CustomerImagesController implements Serializable {
         } else {
             logger.log(Level.WARNING, "rotateImage failed as the image to be rotated is NULL");
         }
+        imageAreaSelectEvent1 = false;
         return newImage;
+
     }
 
     private static void printTagValue(JpegImageMetadata jpegMetadata,
@@ -925,6 +945,7 @@ public class CustomerImagesController implements Serializable {
                 JsfUtil.addErrorMessage(message);
                 logger.log(Level.WARNING, message, e);
             }
+            imageAreaSelectEvent1 = false;
         } else {
             return ci;
             //ByteArrayInputStream is = new ByteArrayInputStream(ci.getImage());
@@ -1006,6 +1027,7 @@ public class CustomerImagesController implements Serializable {
         items = null;
         filteredItems = null;
         images = null;
+        imageAreaSelectEvent1 = false;
 
     }
 
@@ -1152,6 +1174,7 @@ public class CustomerImagesController implements Serializable {
                 }
             }
         }
+        imageAreaSelectEvent1 = false;
     }
 
     public StreamedContent getUploadedImageAsStream() throws IOException {
@@ -1465,20 +1488,6 @@ public class CustomerImagesController implements Serializable {
     }
 
     /**
-     * @return the imageAreaSelectEvent1
-     */
-    public ImageAreaSelectEvent getImageAreaSelectEvent1() {
-        return imageAreaSelectEvent1;
-    }
-
-    /**
-     * @param imageAreaSelectEvent1 the imageAreaSelectEvent1 to set
-     */
-    public void setImageAreaSelectEvent1(ImageAreaSelectEvent imageAreaSelectEvent1) {
-        this.imageAreaSelectEvent1 = imageAreaSelectEvent1;
-    }
-
-    /**
      * @return the lightBoxImage
      */
     public CustomerImages getLightBoxImage() {
@@ -1504,6 +1513,90 @@ public class CustomerImagesController implements Serializable {
      */
     public void setImageListSize(int imageListSize) {
         this.imageListSize = imageListSize;
+    }
+
+    /**
+     * @return the selectionheight
+     */
+    public int getSelectionheight() {
+        return selectionheight;
+    }
+
+    /**
+     * @param selectionheight the selectionheight to set
+     */
+    public void setSelectionheight(int selectionheight) {
+        this.selectionheight = selectionheight;
+    }
+
+    /**
+     * @return the selectionwidth
+     */
+    public int getSelectionwidth() {
+        return selectionwidth;
+    }
+
+    /**
+     * @param selectionwidth the selectionwidth to set
+     */
+    public void setSelectionwidth(int selectionwidth) {
+        this.selectionwidth = selectionwidth;
+    }
+
+    /**
+     * @return the imageHeight
+     */
+    public int getImageHeight() {
+        return imageHeight;
+    }
+
+    /**
+     * @param imageHeight the imageHeight to set
+     */
+    public void setImageHeight(int imageHeight) {
+        this.imageHeight = imageHeight;
+    }
+
+    /**
+     * @return the imageWidth
+     */
+    public int getImageWidth() {
+        return imageWidth;
+    }
+
+    /**
+     * @param imageWidth the imageWidth to set
+     */
+    public void setImageWidth(int imageWidth) {
+        this.imageWidth = imageWidth;
+    }
+
+    /**
+     * @return the x1
+     */
+    public int getX1() {
+        return x1;
+    }
+
+    /**
+     * @param x1 the x1 to set
+     */
+    public void setX1(int x1) {
+        this.x1 = x1;
+    }
+
+    /**
+     * @return the y1
+     */
+    public int getY1() {
+        return y1;
+    }
+
+    /**
+     * @param y1 the y1 to set
+     */
+    public void setY1(int y1) {
+        this.y1 = y1;
     }
 
     @FacesConverter(value = "customerImagesControllerConverter", forClass = CustomerImages.class)

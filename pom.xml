@@ -4,7 +4,7 @@
 
     <groupId>au.com.manlyit</groupId>
     <artifactId>FitnessCRM</artifactId>
-    <version>4.1.1</version>
+    <version>4.1.2</version>
     <packaging>war</packaging>
 
     <name>FitnessCRM</name>
@@ -18,7 +18,19 @@
         <dependency>
             <groupId>org.primefaces</groupId>
             <artifactId>primefaces</artifactId>
-            <version>5.2</version>
+            <version>5.2.22</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>org.primefaces.extensions</groupId>
+            <artifactId>primefaces-extensions</artifactId>
+            <version>4.0.0</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>org.primefaces.themes</groupId>
+            <artifactId>spark</artifactId>
+            <version>2.1.1</version>
             <type>jar</type>
         </dependency>
         <dependency>
@@ -229,12 +241,7 @@
             <version>3.9</version>
             <type>jar</type>
         </dependency>
-        <dependency>
-            <groupId>org.primefaces.extensions</groupId>
-            <artifactId>primefaces-extensions</artifactId>
-            <version>3.2.0</version>
-            <type>jar</type>
-        </dependency>
+        
         <dependency>
             <groupId>javax</groupId>
             <artifactId>javaee-web-api</artifactId>
