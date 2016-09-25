@@ -11,36 +11,53 @@
     <ui:define name="body">
         <div class="layout-portlets-box">
             <h:form id="myStatsForm" >
+                <div class="Container100 Responsive100">
+                    <div class="ContainerIndent ">
+                    <!--  <p:panel class="customerDetailsPanel parentOfUploadPhoto profilePictureContainer" header="#{configMapController.getKey('ListCustomersTitle_ProfilePic')}" >
+    
+                          <p:graphicImage id="photo1"  value="#{customersController.selected.profileImage.imageStream}"  cache="false" class="profilePicture"/>
+                          <p:commandButton  id="photoUploadButton" ajax="true"  onclick="PF('uploadPhotoDialogueWidget').show();" update=":growl @(.parentOfUploadPhoto) "    value="#{configMapController.getKey('EditCustomersUploadPhotoButton')}" immediate="true"/>
+    
+                      </p:panel>
+                      <p:panel id ="contentFlowPanel"  header="My Pictures : #{customerImagesController.imageListSize} loaded." >-->
+                        <h1  class="BigTopic">#{configMapController.getKey('MyStats_MyPicturesHeader')} (<h:outputText id="heading1"  styleClass="myStatsCarousel parentOfUploadPhoto" value="#{customerImagesController.imageListSize}" />)</h1>
+                       <!-- <p:contentFlow id="mainCarousel" styleClass="myStatsCarousel parentOfUploadPhoto"  value="#{customerImagesController.images}" var="photo"   widgetVar="contentFlowWidget" >
+    
+                            <p:graphicImage  styleClass="content" value="#{graphicImageBean.image}" onclick="clickFlow(this, event)" title="#{configMapController.getKey('ListMyStats_photoTakenText')} #{photo.formattedDate}" alt="#{customerImagesController.dynamicTitle}" >
+                                <f:param name="imageId" value="#{photo.id}"/>
+                            </p:graphicImage>
+                          
+    
+                            <div class="caption">#{photo.formattedDate}</div>
+                            <div class="hiddenId" style="display: none;">#{photo.id}</div>
+                        </p:contentFlow>-->
+                        <!-- <p:contextMenu  for="mainCarousel"  >
+                        <!-<p:menuitem value="Refresh" update="@(.parentOfUploadPhoto)  "  />->
+                           <p:menuitem value="Refresh" update=":myStatsForm:mainCarousel"  />
+                           <p:separator/>
+                           <p:menuitem value="Add New" onclick="PF('uploadPhotoDialogueWidget').show()" />
+                           <p:menuitem value="Delete" oncomplete="removePicture([{name:'selectedImage', value: $('.item.active div.hiddenId').text()}]);" />
+                       </p:contextMenu>-->
+                        <p:remoteCommand name="removePicture" actionListener="#{customerImagesController.removePicture}" update=":growl :myStatsForm:mainCarousel :myStatsForm:heading1"/>
+                        <!-- </p:panel> -->
+                        <p:galleria id="mainCarousel" styleClass="galleriaFrame parentOfUploadPhoto"  widgetVar="galleriaWidget" var="image" value="#{customerImagesController.images}"  showCaption="true" effect="fade" >
+                            <p:panelGrid columns="1" styleClass="wf" style="text-align: center;">
+                                <p:commandButton id="delete_pic_button"
+                                                 update=":myStatsForm :growl"
+                                                 value="Delete" process="@this"
+                                                 actionListener="#{customerImagesController.removePicture}">
+                                    <f:param name="selectedImage" value="#{image.id}"/>
+                                </p:commandButton>
+                            </p:panelGrid>
+                            <p:graphicImage  styleClass="galleriaImage" value="#{graphicImageBean.image}" onclick="clickFlow(this, event)" title="#{configMapController.getKey('ListMyStats_photoTakenText')} #{image.formattedDate}"  >
+                                <f:param name="imageId" value="#{image.id}"/>
+                            </p:graphicImage>
+                            <div class="caption">#{image.formattedDate}</div>
+                           <!-- <div class="hiddenId" style="display: none;">#{image.id}</div>-->
+                        </p:galleria>
+                        <p:commandButton  id="photoUploadButton" ajax="true"  onclick="PF('uploadPhotoDialogueWidget').show();" update=":growl :myStatsForm:mainCarousel "    value="#{configMapController.getKey('EditCustomersUploadPhotoButton')}" immediate="true"/>
 
-                <div class="ContainerIndent">
-                <!--  <p:panel class="customerDetailsPanel parentOfUploadPhoto profilePictureContainer" header="#{configMapController.getKey('ListCustomersTitle_ProfilePic')}" >
-
-                      <p:graphicImage id="photo1"  value="#{customersController.selected.profileImage.imageStream}"  cache="false" class="profilePicture"/>
-                      <p:commandButton  id="photoUploadButton" ajax="true"  onclick="PF('uploadPhotoDialogueWidget').show();" update=":growl @(.parentOfUploadPhoto) "    value="#{configMapController.getKey('EditCustomersUploadPhotoButton')}" immediate="true"/>
-
-                  </p:panel>
-                  <p:panel id ="contentFlowPanel"  header="My Pictures : #{customerImagesController.imageListSize} loaded." >-->
-                    <h1  class="BigTopic">#{configMapController.getKey('MyStats_MyPicturesHeader')} (<h:outputText id="heading1"  styleClass="myStatsCarousel parentOfUploadPhoto" value="#{customerImagesController.imageListSize}" />)</h1>
-                    <p:contentFlow id="mainCarousel" styleClass="myStatsCarousel parentOfUploadPhoto"  value="#{customerImagesController.images}" var="photo"   widgetVar="contentFlowWidget" >
-
-                               <p:graphicImage  styleClass="content" value="#{graphicImageBean.image}" onclick="clickFlow(this, event)" title="#{configMapController.getKey('ListMyStats_photoTakenText')} #{photo.formattedDate}" alt="#{customerImagesController.dynamicTitle}" >
-                                    <f:param name="imageId" value="#{photo.id}"/>
-                                </p:graphicImage>
-                              <!--      <p:graphicImage  styleClass="content"  value="/StreamImage?imageId=#{photo.id}" onclick="clickFlow(this, event)" title="#{configMapController.getKey('ListMyStats_photoTakenText')} #{photo.formattedDate}"  />-->
-
-                                <div class="caption">#{photo.formattedDate}</div>
-                                <div class="hiddenId" style="display: none;">#{photo.id}</div>
-                    </p:contentFlow>
-                    <p:contextMenu  for="mainCarousel"  >
-                        <p:menuitem value="Refresh" update="@(.parentOfUploadPhoto)  "  />
-                        <p:separator/>
-                        <p:menuitem value="Add New" onclick="PF('uploadPhotoDialogueWidget').show()" />
-                        <p:menuitem value="Delete" oncomplete="removePicture([{name:'selectedImage', value: $('.item.active div.hiddenId').text()}]);" />
-                    </p:contextMenu>
-                    <p:remoteCommand name="removePicture" actionListener="#{customerImagesController.removePicture}" update=":growl :myStatsForm:mainCarousel :myStatsForm:heading1"/>
-                    <!-- </p:panel> -->
-
-
+                    </div>
                 </div>
                 <p:remoteCommand  actionListener="#{customerImagesController.carouselImageClicked}"  name="carouselClicked" immediate="true"/>
 
@@ -54,6 +71,8 @@
 
                     /* ]]> */
                 </h:outputScript>
+
+
                 <!-- <p:panel >
                       <p:lightBox styleClass="imagebox" height="400">
                           <ui:repeat var="image" value="#{customerImagesController.images}" >
@@ -145,17 +164,19 @@
             </h:form>
             <h:form>
 
-
-                <h1 class="BigTopic">#{configMapController.getKey('ListMyStats_StatsPanelHeader')}</h1>
-                <p:dataList  value="#{chartController.modelList}"  var="chart" id="chartsList"  styleClass="myStatsChartsDatalist"
-                             paginator="false" rows="10"  
-                             paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink} {RowsPerPageDropdown}" 
-                             rowsPerPageTemplate="5,10,15" 
-                             type="none">
-                    <div class="EmptyBox10"></div>
-                    <p:chart type="line" styleClass="chartClass"  model="#{chart}"/>
-                </p:dataList>
-
+                <div class="Container100 Responsive100">
+                    <div class="ContainerIndent">
+                        <h1 class="BigTopic">#{configMapController.getKey('ListMyStats_StatsPanelHeader')}</h1>
+                        <p:dataList  value="#{chartController.modelList}"  var="chart" id="chartsList"  styleClass="myStatsChartsDatalist"
+                                     paginator="false" rows="10"  
+                                     paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink} {RowsPerPageDropdown}" 
+                                     rowsPerPageTemplate="5,10,15" 
+                                     type="none">
+                            <div class="EmptyBox10"></div>
+                            <p:chart type="line" styleClass="chartClass"  model="#{chart}"/>
+                        </p:dataList>
+                    </div>
+                </div>
             </h:form>
         </div>
         <ui:include src="/WEB-INF/uploadPhoto.xhtml"/>

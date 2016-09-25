@@ -5,6 +5,14 @@ i.e for the spark theme use :
  mvn install:install-file -Dfile=/home/david/NetBeansProjects/libraries/Primefaces-purchased-themes/spark-layout-1.3.1/spark-layout-1.3.1.jar -DgroupId=org.primefaces.themes -DartifactId=spark -Dversion=1.3.1 -Dpackaging=jar -DgeneratePom=true
 
 
+mvn install:install-file -Dfile=/home/david/NetBeansProjects/libraries/Primefaces-purchased-themes/spark-layout-2.1.1/spark-layout-2.1.1.jar -DgroupId=org.primefaces.themes -DartifactId=spark -Dversion=2.1.1 -Dpackaging=jar -DgeneratePom=true
+
+# install a new build from primefaces elite download 
+mvn install:install-file -Dfile=/home/david/NetBeansProjects/libraries/primefaces-5.2.22/primefaces-5.2.22.jar -DgroupId=org.primefaces -DartifactId=primefaces -Dversion=5.2.22 -Dpackaging=jar -DgeneratePom=true
+
+
+
+
 mvn install:install-file
 -Dfile=<path-to-file>
 -DgroupId=<group-id>

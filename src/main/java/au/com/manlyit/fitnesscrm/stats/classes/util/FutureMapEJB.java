@@ -71,6 +71,7 @@ import org.primefaces.push.impl.JSONEncoder;
  * @author david
  */
 @PushEndpoint("/payments/{user}")
+//@PushEndpoint("/payments/")
 @ConcurrencyManagement(BEAN)
 @Singleton
 @LocalBean
@@ -116,6 +117,7 @@ public class FutureMapEJB implements Serializable {
     private PaymentParametersFacade paymentParametersFacade;
     @Inject
     private PaymentBean paymentBean;
+
     @PathParam("user")
     private String username;
 
@@ -131,12 +133,13 @@ public class FutureMapEJB implements Serializable {
     public void onOpen(RemoteEndpoint rEndPoint, EventBus e) {
         rEndPoint.address();
 
-        LOGGER.log(Level.INFO, "Atmosphere Push Connection Opened. Transport Type = {0}", rEndPoint.address());
+        LOGGER.log(Level.INFO, "Atmosphere Push Connection OPENED. Transport Type = {0}, Address = {1}, Path = {2}, URI = {3}, Status = {4}", new Object[]{rEndPoint.transport().name(), rEndPoint.address(), rEndPoint.path(), rEndPoint.uri(), rEndPoint.status()});
     }
 
     @OnClose
-    public void onClose(RemoteEndpoint r, EventBus e) {
-        LOGGER.log(Level.INFO, "Atmosphere Push Connection Closed.");
+    public void onClose(RemoteEndpoint rEndPoint, EventBus e) {
+
+        LOGGER.log(Level.INFO, "Atmosphere Push Connection CLOSED. Transport Type = {0}, Address = {1}, Path = {2}, URI = {3}, Status = {4}", new Object[]{rEndPoint.transport().name(), rEndPoint.address(), rEndPoint.path(), rEndPoint.uri(), rEndPoint.status()});
 
     }
 
@@ -1125,7 +1128,8 @@ public class FutureMapEJB implements Serializable {
                                 }
                             }
                         } else // old payment without a primary key reference
-                         if (paymentID.toUpperCase(Locale.getDefault()).contains("SCHEDULED")) {
+                        {
+                            if (paymentID.toUpperCase(Locale.getDefault()).contains("SCHEDULED")) {
                                 // scheduled payment no paymentID
                                 LOGGER.log(Level.INFO, "Future Map processReport scheduled payment .", pay.toString());
                             } else {
@@ -1156,6 +1160,7 @@ public class FutureMapEJB implements Serializable {
                                     }
                                 }
                             }
+                        }
                         /* String paymentID = pay.getPaymentID().getValue();
                          if (paymentID.toUpperCase().contains("SCHEDULED")) {
                          // scheduled payment no paymentID
@@ -1280,7 +1285,8 @@ public class FutureMapEJB implements Serializable {
                                                 paymentsFacade.edit(crmPay);
                                             }
                                         } else // old payment without a primary key reference
-                                         if (paymentID.toUpperCase(Locale.getDefault()).contains("SCHEDULED")) {
+                                        {
+                                            if (paymentID.toUpperCase(Locale.getDefault()).contains("SCHEDULED")) {
                                                 // scheduled payment no paymentID
                                                 LOGGER.log(Level.INFO, "Future Map processGetPayments scheduled payment .", pay.toString());
                                             } else {
@@ -1301,6 +1307,7 @@ public class FutureMapEJB implements Serializable {
                                                     paymentsFacade.createAndFlush(crmPay);
                                                 }
                                             }
+                                        }
                                     }
                                 }
                             } else {
@@ -1787,7 +1794,7 @@ public class FutureMapEJB implements Serializable {
                     paymentsFacade.remove(pay);
 
                 } else {
-                     LOGGER.log(Level.WARNING, "FutureMap - Process deletePayment - Payment that was deleted could not be found in the our DB key={0}, RETRYING - BYPASSING CACHE", new Object[]{reference});
+                    LOGGER.log(Level.WARNING, "FutureMap - Process deletePayment - Payment that was deleted could not be found in the our DB key={0}, RETRYING - BYPASSING CACHE", new Object[]{reference});
                     pay = paymentsFacade.findPaymentById(reference, true);
                     if (pay != null) {
                         //removeFromPaymentLists(pay);
@@ -1796,7 +1803,7 @@ public class FutureMapEJB implements Serializable {
                     } else {
                         LOGGER.log(Level.WARNING, "FutureMap - Process deletePayment - Payment that was deleted could not be found in the our DB key={0}", new Object[]{reference});
                     }
-                    
+
                 }
                 // setSelectedScheduledPayment(null);
                 //JsfUtil.addSuccessMessage("Payment Gateway", "Successfully Deleted Payment  .");

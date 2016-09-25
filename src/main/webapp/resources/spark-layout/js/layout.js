@@ -503,3 +503,14 @@ var Spark = {
 $(function() {
     Spark.init();
 });
+
+/* Issue #924 is fixed for 5.3+ and 6.0. (compatibility with 5.3) */
+PrimeFaces.widget.Dialog = PrimeFaces.widget.Dialog.extend({
+    enableModality: function () {
+        this._super();
+        $(document.body).children(this.jqId + '_modal').addClass('ui-dialog-mask');
+    },
+    syncWindowResize: function () {
+
+    }
+});

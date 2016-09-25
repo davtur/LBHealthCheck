@@ -39,7 +39,6 @@ au/com/manlyit/fitnesscrm/stats/classes/util/PushComponentUpdateBean.class
 au/com/manlyit/fitnesscrm/stats/classes/StatController.class
 au/com/manlyit/fitnesscrm/stats/classes/util/LazySorter.class
 au/com/manlyit/fitnesscrm/stats/classes/util/PhaseListenerImpl.class
-.netbeans_automatic_build
 au/com/manlyit/fitnesscrm/stats/beans/AuditLogFacade.class
 au/com/manlyit/fitnesscrm/stats/classes/SessionTimetableController.class
 au/com/manlyit/fitnesscrm/stats/classes/SessionTimetableController$2.class

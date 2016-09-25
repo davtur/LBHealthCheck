@@ -3,13 +3,16 @@
     <distributable/>
     <context-param>
         <param-name>javax.faces.PROJECT_STAGE</param-name>
-        <param-value>Production</param-value>
+        <param-value>Development</param-value>
     </context-param>
-    
     <context-param>
         <param-name>javax.faces.FACELETS_BUFFER_SIZE</param-name>
         <param-value>1048576</param-value>
     </context-param>
+    <!--<context-param>
+        <param-name>primefaces.PUSH_SERVER_URL</param-name>
+        <param-value>https://test-services.purefitnessmanly.com.au</param-value>
+    </context-param>-->
     <context-param>
         <param-name>primefaces.SUBMIT</param-name>
         <param-value>partial</param-value>
@@ -91,7 +94,7 @@
     <servlet>
         <servlet-name>Push Servlet</servlet-name>
         <servlet-class>org.primefaces.push.PushServlet</servlet-class>
-         <!--<init-param>
+        <!--<init-param>
             <param-name>org.atmosphere.cpr.broadcasterCacheClass</param-name>
             <param-value>org.atmosphere.cache.UUIDBroadcasterCache</param-value>
         </init-param>
@@ -117,8 +120,6 @@
             <param-name>org.atmosphere.disableOnStateEvent</param-name>
             <param-value>true</param-value>
         </init-param>-->
-        
-       
         <async-supported>true</async-supported>
     </servlet>
     <servlet-mapping>
@@ -132,12 +133,10 @@
         <description>Context Listener</description>
         <listener-class>au.com.manlyit.fitnesscrm.stats.classes.CrmContextListener</listener-class>
     </listener>
-  <!--  <listener>
+    <!--  <listener>
         <description>Atmosphere Session Support Listener</description>
         <listener-class>org.atmosphere.cpr.SessionSupport</listener-class>
     </listener>-->
-    
-   
     <error-page>
         <exception-type>java.lang.Throwable</exception-type>
         <location>/errorJsf.xhtml</location>
@@ -193,7 +192,6 @@
             <description/>
             <url-pattern>/mySessionsMobile.xhtml</url-pattern>
         </web-resource-collection>
-   
         <web-resource-collection>
             <web-resource-name>Customer Surveys</web-resource-name>
             <description/>

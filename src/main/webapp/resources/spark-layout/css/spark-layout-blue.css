@@ -1,5 +1,5 @@
 /*
-* SENTINEL LAYOUT & THEME
+* SPARK LAYOUT & THEME
 * Designed by Cem ALTUN - jamaltun@gmail.com
 * Supported Browsers > Google Chrome 3+ , Mozilla Firefox 3+ , Safari 3+ , Opera 3+ , Yandex Browser , Inernet Explorer 9+
 * Copyright 2014 - PrimeFaces Theme Market - PrimeTek */
@@ -98,9 +98,9 @@ body{margin:0px; background-image:url("#{resource['spark-layout:images/backgroun
 #layout-topbar{height:100px; width:100%; border-top:solid 6px #33AFDE; background-color:#F6FAFC/*#F1F6F9*/; display:table;}
 	#layout-topbar-indent{width:92%; margin:0px auto;}
 		#logo{height:50px; margin-top:26px;}
-		#mobile-menu-button{padding:10px 15px; background-color:#33AFDE; float:right; margin-top:20px; font-size:14px; position:relative; z-index:999999;}
+		#mobile-menu-button{padding:10px 15px; background-color:#33AFDE; float:right; margin-top:20px; font-size:14px; position:relative; z-index:999;}
 		#mobile-menu-button:hover{color:#A6D9ED;}
-		#mobile-menu-button-gray{background-color:#778D9B; padding:8px 13px; float:right; margin-top:20px; font-size:14px; margin-right:10px; position:relative; z-index:999999;}
+		#mobile-menu-button-gray{background-color:#778D9B; padding:8px 13px; float:right; margin-top:20px; font-size:14px; margin-right:10px; position:relative; z-index:999;}
 		#mobile-menu-button-gray:hover{opacity:0.8;}
 		#layout-topbar-menu{float:right; padding:0px; margin-top:35px; max-width:800px; height:auto;}
 			#layout-topbar-menu>li{float:right; text-align:center; padding-bottom:10px;}
@@ -471,3 +471,6 @@ box-shadow: 0px 1px 0px 0px rgba(70,145,91,0.8);}
 .layout-portlets-box:after{
     clear: both; 
 }
+
+.animated.fa{display:inline-block !important;}
+.fa-spin.fa{display:inline-block !important;}

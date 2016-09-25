@@ -42,7 +42,7 @@
 
 
                                     <!--    <p:outputLabel value="#{configMapController.getKey('CreateSurveyanswersLabel_surveyId')}" for="surveyId" />-->
-                                    <p:selectOneMenu id="surveyId" valueChangeListener="#{surveyanswersController.selectOneMenuValueChangeListener}"  value="#{surveyanswersController.selectedSurvey}"  label="#{configMapController.getKey('CreateSurveyanswersTitle_surveyId')}">
+                                    <p:selectOneMenu id="surveyId" valueChangeListener="#{surveyanswersController.selectOneMenuValueChangeListener}"  converter="surveysControllerConverter" value="#{surveyanswersController.selectedSurvey}"  label="#{configMapController.getKey('CreateSurveyanswersTitle_surveyId')}">
                                         <f:selectItems value="#{surveysController.itemsAvailableSelectMany}"/>
                                         <p:ajax   update=":main:createCustomerForm"  />
                                     </p:selectOneMenu>

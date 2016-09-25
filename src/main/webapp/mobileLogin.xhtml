@@ -10,7 +10,7 @@
 
     <h:head>
     </h:head>
-   
+
     <h:body>
         <pm:page id="mobileLogin"  >
             <!-- Main View  -->
@@ -29,17 +29,19 @@
                     <p:outputLabel value="#{facebookLoginBean.userFromSession}"></p:outputLabel>
 
                     <h3 >Or use your PFM account</h3>
-                    <h4>Username</h4>  
-
-                    <p:inputText id="usernameInput" value="#{loginBean.username}" 
-                                 required="true" requiredMessage="Please enter your username"/>
-
-                    <h4>Password</h4>
-
-                    <p:password id="passwordInput" value="#{loginBean.password}" 
-                                />
+                    
+                    <pm:field>
+                        <p:outputLabel value="Username"></p:outputLabel>
+                        <p:inputText id="usernameInput" value="#{loginBean.username}" required="true" requiredMessage="Please enter your username"/>
+                    </pm:field>
+                    
+                    <pm:field>
+                        <p:outputLabel value="Password"></p:outputLabel>
+                        <h:inputSecret id="passwordInput" value="#{loginBean.password}"  required="true" requiredMessage="Please enter your password" />
+                    </pm:field>
+                    
                     <br />
-                    <p:commandButton value="Submit" 
+                    <p:commandButton value="Login" 
                                      actionListener="#{loginBean.login}" /> 
                     <p:commandButton value="Reset Password" ajax="false"
                                      action="#{loginBean.resetPassword}" update=":growl"/>

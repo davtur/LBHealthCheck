@@ -63,20 +63,25 @@
             }
             function handleError() {
                 console.log("Handling primfaces push socket component  ERROR message");
+                alert('Error');
+                PF('subscriber').connect();
             }
               function handleOpen() {
                 console.log("Handling primfaces push socket component  OPEN message");
             }
             function handleClose() {
                 console.log("Handling primfaces push socket component  CLOSE message");
+                alert('Close');
                 PF('subscriber').connect();
             }
            
             function handleReconnect() {
+                alert('handleReconnect');
                 console.log("Handling primfaces push socket component  RECONNECT message");
             }
             function handleTransportFailure() {
                 console.log("Handling primfaces push socket component  TRANSPORT FAILURE message");
+                alert('handleTransportFailure');
                 PF('subscriber').connect();
             }
             

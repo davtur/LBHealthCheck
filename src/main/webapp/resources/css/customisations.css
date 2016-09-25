@@ -18,6 +18,14 @@ height: 300px !important;
     
 }
 
+.galleriaFrame  {
+    max-width: 100%;
+}
+.galleriaImage {
+    max-width: 100%;
+    min-width: 100%;
+}
+
 .myStatsCarouselItem .ui-carousel-item {
 height: 300px !important; 
   
