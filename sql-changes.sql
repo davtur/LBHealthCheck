@@ -188,3 +188,77 @@ CHANGE COLUMN `suburb` `suburb` VARCHAR(127) NULL DEFAULT '' ,
 CHANGE COLUMN `postcode` `postcode` VARCHAR(10) NULL DEFAULT '' ,
 CHANGE COLUMN `city` `city` VARCHAR(127) NULL DEFAULT '' ,
 CHANGE COLUMN `addr_state` `addr_state` VARCHAR(32) NULL DEFAULT '' ;
+
+
+
+CREATE TABLE `expense_types` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `expense_type_name` varchar(127) DEFAULT NULL, 
+  `description` text,
+
+  PRIMARY KEY (`id`)
+  
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=latin1;
+
+
+CREATE TABLE `payment_methods` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `ayment_method_name` varchar(127) DEFAULT NULL, 
+  `description` text,
+
+  PRIMARY KEY (`id`)
+  
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=latin1;
+
+CREATE TABLE `suppliers` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `supplier_name` varchar(127) DEFAULT NULL, 
+  `description` text,
+  `supplier_company_number` varchar(127) DEFAULT NULL, 
+  `supplier_company_number_type` varchar(127) DEFAULT NULL, 
+
+  PRIMARY KEY (`id`)
+  
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=latin1;
+
+CREATE TABLE `invoice_images` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `created_timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `expense_id` int(11) NOT NULL,
+  `image_type` int(4) NOT NULL DEFAULT '0',
+  
+  `image` longblob NOT NULL,
+  `mimeType` varchar(127) NOT NULL,
+  `image_file_name` varchar(127) NOT NULL,
+  `image_description` text,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=latin1;
+
+
+CREATE TABLE `expenses` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `created_timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `expense_incurred_timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `expense_type_id` int(11) NOT NULL,
+  `invoice_image_id` int(11) DEFAULT NULL,
+  `invoice_number` varchar(70) DEFAULT NULL,
+  `supplier_id` int(11) NOT NULL,
+  `payment_method_id` int(11) NOT NULL,
+  `receipt_number` varchar(70) DEFAULT NULL,
+  `expense_amount` decimal(22,10) NOT NULL,
+  `business_use_amount` decimal(22,10) NOT NULL,
+  `description` text,
+  `percent_for_business_use` float DEFAULT '100',
+  `expense_amount_gst` decimal(22,10) NOT NULL,
+  `business_use_amount_gst` decimal(22,10) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `fk_expenses_1_idx` (`payment_method_id`),
+  KEY `fk_expenses_2_idx` (`expense_type_id`),
+  KEY `fk_expenses_3_idx` (`invoice_image_id`),
+  KEY `fk_expenses_4_idx` (`supplier_id`),
+  CONSTRAINT `fk_expenses_1` FOREIGN KEY (`payment_method_id`) REFERENCES `payment_methods` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT `fk_expenses_2` FOREIGN KEY (`expense_type_id`) REFERENCES `expense_types` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT `fk_expenses_3` FOREIGN KEY (`invoice_image_id`) REFERENCES `invoice_images` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT `fk_expenses_4` FOREIGN KEY (`supplier_id`) REFERENCES `suppliers` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;

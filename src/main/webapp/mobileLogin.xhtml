@@ -21,7 +21,7 @@
                     <f:event type="preRenderView" listener="#{loginBean.checkAlreadyLoggedin}" />
                 </f:metadata>
                 <h:form id="mobileLoginForm">  
-                    <p:growl/>
+                    <p:growl id="growl" autoUpdate="true" showDetail="true"/>
                     <h3>Login with Facebook</h3>
 
                     <p:button value="Facebook Connect" href="#{facebookLoginBean.facebookUrlAuth}" />
@@ -41,8 +41,8 @@
                     </pm:field>
                     
                     <br />
-                    <p:commandButton value="Login" 
-                                     actionListener="#{loginBean.login}" /> 
+                    <p:commandButton value="Login" ajax="false"
+                                     action="#{loginBean.login}"  update=":growl"/> 
                     <p:commandButton value="Reset Password" ajax="false"
                                      action="#{loginBean.resetPassword}" update=":growl"/>
                 </h:form>
