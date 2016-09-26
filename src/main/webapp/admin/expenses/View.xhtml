@@ -1,0 +1,58 @@
+
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                >
+
+    <p:dialog id="ExpensesViewDlg" widgetVar="ExpensesViewDialog" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('ViewExpensesTitle')}">
+        <h:form id="ExpensesViewForm">
+            <h:panelGroup id="display">
+                <p:panelGrid columns="2" rendered="#{expensesController.selected != null}">
+                    <h:outputText value="#{configMapController.getKey('ViewExpensesLabel_id')}"/>
+                    <h:outputText value="#{expensesController.selected.id}" title="#{configMapController.getKey('ViewExpensesTitle_id')}"/>
+                    <h:outputText value="#{configMapController.getKey('ViewExpensesLabel_createdTimestamp')}"/>
+                    <h:outputText value="#{expensesController.selected.createdTimestamp}" title="#{configMapController.getKey('ViewExpensesTitle_createdTimestamp')}">
+                        <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                    </h:outputText>
+                    <h:outputText value="#{configMapController.getKey('ViewExpensesLabel_updatedTimestamp')}"/>
+                    <h:outputText value="#{expensesController.selected.updatedTimestamp}" title="#{configMapController.getKey('ViewExpensesTitle_updatedTimestamp')}">
+                        <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                    </h:outputText>
+                    <h:outputText value="#{configMapController.getKey('ViewExpensesLabel_expenseIncurredTimestamp')}"/>
+                    <h:outputText value="#{expensesController.selected.expenseIncurredTimestamp}" title="#{configMapController.getKey('ViewExpensesTitle_expenseIncurredTimestamp')}">
+                        <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                    </h:outputText>
+                    <h:outputText value="#{configMapController.getKey('ViewExpensesLabel_invoiceNumber')}"/>
+                    <h:outputText value="#{expensesController.selected.invoiceNumber}" title="#{configMapController.getKey('ViewExpensesTitle_invoiceNumber')}"/>
+                    <h:outputText value="#{configMapController.getKey('ViewExpensesLabel_receiptNumber')}"/>
+                    <h:outputText value="#{expensesController.selected.receiptNumber}" title="#{configMapController.getKey('ViewExpensesTitle_receiptNumber')}"/>
+                    <h:outputText value="#{configMapController.getKey('ViewExpensesLabel_expenseAmount')}"/>
+                    <h:outputText value="#{expensesController.selected.expenseAmount}" title="#{configMapController.getKey('ViewExpensesTitle_expenseAmount')}"/>
+                    <h:outputText value="#{configMapController.getKey('ViewExpensesLabel_businessUseAmount')}"/>
+                    <h:outputText value="#{expensesController.selected.businessUseAmount}" title="#{configMapController.getKey('ViewExpensesTitle_businessUseAmount')}"/>
+                    <h:outputText value="#{configMapController.getKey('ViewExpensesLabel_description')}"/>
+                    <h:outputText value="#{expensesController.selected.description}" title="#{configMapController.getKey('ViewExpensesTitle_description')}"/>
+                    <h:outputText value="#{configMapController.getKey('ViewExpensesLabel_percentForBusinessUse')}"/>
+                    <h:outputText value="#{expensesController.selected.percentForBusinessUse}" title="#{configMapController.getKey('ViewExpensesTitle_percentForBusinessUse')}"/>
+                    <h:outputText value="#{configMapController.getKey('ViewExpensesLabel_expenseAmountGst')}"/>
+                    <h:outputText value="#{expensesController.selected.expenseAmountGst}" title="#{configMapController.getKey('ViewExpensesTitle_expenseAmountGst')}"/>
+                    <h:outputText value="#{configMapController.getKey('ViewExpensesLabel_businessUseAmountGst')}"/>
+                    <h:outputText value="#{expensesController.selected.businessUseAmountGst}" title="#{configMapController.getKey('ViewExpensesTitle_businessUseAmountGst')}"/>
+                    <h:outputText value="#{configMapController.getKey('ViewExpensesLabel_paymentMethodId')}"/>
+                    <h:outputText value="#{expensesController.selected.paymentMethodId}" title="#{configMapController.getKey('ViewExpensesTitle_paymentMethodId')}"/>
+                    <h:outputText value="#{configMapController.getKey('ViewExpensesLabel_expenseTypeId')}"/>
+                    <h:outputText value="#{expensesController.selected.expenseTypeId}" title="#{configMapController.getKey('ViewExpensesTitle_expenseTypeId')}"/>
+                    <h:outputText value="#{configMapController.getKey('ViewExpensesLabel_invoiceImageId')}"/>
+                    <h:outputText value="#{expensesController.selected.invoiceImageId}" title="#{configMapController.getKey('ViewExpensesTitle_invoiceImageId')}"/>
+                    <h:outputText value="#{configMapController.getKey('ViewExpensesLabel_supplierId')}"/>
+                    <h:outputText value="#{expensesController.selected.supplierId}" title="#{configMapController.getKey('ViewExpensesTitle_supplierId')}"/>
+                </p:panelGrid>
+                <p:commandButton value="#{configMapController.getKey('Close')}" onclick="PF('ExpensesViewDialog').hide()"/>
+            </h:panelGroup>
+        </h:form>
+    </p:dialog>
+
+</ui:composition>
+

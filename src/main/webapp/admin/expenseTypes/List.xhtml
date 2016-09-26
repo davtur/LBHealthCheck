@@ -1,0 +1,103 @@
+
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/template.xhtml">
+    <ui:define name="title">
+        <h:outputText value="#{configMapController.getKey('ListExpenseTypesTitle')}"></h:outputText>
+    </ui:define>
+    <ui:define name="body">
+
+
+
+
+
+        <h:form id="ExpenseTypesListForm">
+            <h:outputText escape="false" value="#{configMapController.getKey('ListExpenseTypesEmpty')}" rendered="#{expenseTypesController.items.rowCount == 0}"/>
+            <h:panelGroup >
+                <p:dataTable  
+                    id="datalist"  
+                    editable="true" 
+                    value="#{expenseTypesController.items}" 
+                    selection="#{expenseTypesController.selected}" 
+                    rowKey="#{item.id}" 
+                    filteredValue="#{expenseTypesController.filteredItems}"  
+                    widgetVar="expenseTypesControllerTable" 
+                    var="item"  
+                    paginator="true" 
+                    rows="15"  
+                    paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  
+                    rowsPerPageTemplate="5,10,15,20,25,50,100" >
+                    <f:facet name="header">
+                        <p:outputPanel>
+                            <h:outputText value="Search all fields:" />
+                            <h:inputText id="globalFilter" onkeyup="PF('expenseTypesControllerTable').filter()" />
+                        </p:outputPanel>
+                    </f:facet>
+                    <p:ajax event="rowEdit" listener="#{expenseTypesController.onEdit}" update=":growl" oncomplete="PF('expenseTypesControllerTable').filter()" />  
+                    <p:ajax event="rowEditCancel" listener="#{expenseTypesController.onCancel}" update=":growl"  oncomplete="PF('expenseTypesControllerTable').filter()" />  
+                    <p:ajax event="rowSelect"   update="createButton viewButton editButton deleteButton"/>
+                    <p:ajax event="rowUnselect" update="createButton viewButton editButton deleteButton"/>
+                    <p:column selectionMode="single"/>
+                    <p:column sortBy="#{item.id}" filterBy="#{item.id}" headerText="#{configMapController.getKey('ListExpenseTypesTitle_id')}"   >
+                        <p:cellEditor> 
+                            <f:facet name="output">
+                                <h:outputText value="#{item.id}"/>
+                            </f:facet>
+                            <f:facet name="input">
+                                <p:inputText value="#{item.id}" label="#{configMapController.getKey('ListExpenseTypesTitle_id')}" />
+                            </f:facet>
+                        </p:cellEditor> 
+
+
+                    </p:column>
+                    <p:column sortBy="#{item.expenseTypeName}" filterBy="#{item.expenseTypeName}" headerText="#{configMapController.getKey('ListExpenseTypesTitle_expenseTypeName')}"   >
+                        <p:cellEditor> 
+                            <f:facet name="output">
+                                <h:outputText value="#{item.expenseTypeName}"/>
+                            </f:facet>
+                            <f:facet name="input">
+                                <p:inputText value="#{item.expenseTypeName}" label="#{configMapController.getKey('ListExpenseTypesTitle_expenseTypeName')}" />
+                            </f:facet>
+                        </p:cellEditor> 
+
+
+                    </p:column>
+                    <p:column sortBy="#{item.description}" filterBy="#{item.description}" headerText="#{configMapController.getKey('ListExpenseTypesTitle_description')}"   >
+                        <p:cellEditor> 
+                            <f:facet name="output">
+                                <h:outputText value="#{item.description}"/>
+                            </f:facet>
+                            <f:facet name="input">
+                                <p:inputText value="#{item.description}" label="#{configMapController.getKey('ListExpenseTypesTitle_description')}" />
+                            </f:facet>
+                        </p:cellEditor> 
+
+
+                    </p:column>
+                    <p:column rendered="#{expenseTypesController.isUserInRole('ADMIN')}"  headerText="Edit" style="width:50px">  
+                        <p:rowEditor />  
+                    </p:column>  
+
+
+                    <f:facet name="footer">
+                        <p:commandButton rendered="#{expenseTypesController.isUserInRole('ADMIN')}" id="createButton" icon="ui-icon-plus"   value="#{configMapController.getKey('Create')}" actionListener="#{expenseTypesController.prepareCreate}" update=":ExpenseTypesCreateForm" oncomplete="PF('ExpenseTypesCreateDialog').show()"/>
+                        <p:commandButton id="viewButton"   icon="ui-icon-search" value="#{configMapController.getKey('View')}" update=":ExpenseTypesViewForm" oncomplete="PF('ExpenseTypesViewDialog').show()" disabled="#{empty expenseTypesController.selected}"/>
+                        <p:commandButton rendered="#{expenseTypesController.isUserInRole('ADMIN')}" id="editButton"   icon="ui-icon-pencil" value="#{configMapController.getKey('Edit')}" update=":ExpenseTypesEditForm" oncomplete="PF('ExpenseTypesEditDialog').show()" disabled="#{empty expenseTypesController.selected}"/>
+                        <p:commandButton rendered="#{expenseTypesController.isUserInRole('ADMIN')}" id="deleteButton" icon="ui-icon-trash"  value="#{configMapController.getKey('Delete')}" actionListener="#{expenseTypesController.destroy}" update=":growl,datalist" disabled="#{empty expenseTypesController.selected}"/>
+                    </f:facet>
+
+                </p:dataTable>
+            </h:panelGroup>
+        </h:form>
+
+        <ui:include src="Create.xhtml"/>
+        <ui:include src="Edit.xhtml"/>
+        <ui:include src="View.xhtml"/>
+
+    </ui:define>
+</ui:composition>
+
+

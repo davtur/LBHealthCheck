@@ -1,0 +1,28 @@
+
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                >
+    <p:dialog id="PaymentMethodsCreateDlg" widgetVar="PaymentMethodsCreateDialog" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('CreatePaymentMethodsTitle')}">
+
+        <h:form id="PaymentMethodsCreateForm">
+            <h:panelGroup id="display">
+                <p:panelGrid columns="2" rendered="#{paymentMethodsController.selected != null}">
+                    <p:outputLabel value="#{configMapController.getKey('CreatePaymentMethodsLabel_id')}" for="id" />
+                    <p:inputText id="id" value="#{paymentMethodsController.selected.id}" title="#{configMapController.getKey('CreatePaymentMethodsTitle_id')}" required="true" requiredMessage="#{configMapController.getKey('CreatePaymentMethodsRequiredMessage_id')}"/>
+                    <p:outputLabel value="#{configMapController.getKey('CreatePaymentMethodsLabel_paymentMethodName')}" for="paymentMethodName" />
+                    <p:inputText id="paymentMethodName" value="#{paymentMethodsController.selected.paymentMethodName}" title="#{configMapController.getKey('CreatePaymentMethodsTitle_paymentMethodName')}" />
+                    <p:outputLabel value="#{configMapController.getKey('CreatePaymentMethodsLabel_description')}" for="description" />
+                    <p:inputTextarea rows="4" cols="30" id="description"  value="#{paymentMethodsController.selected.description}"  title="#{configMapController.getKey('CreatePaymentMethodsTitle_description')}" />
+                </p:panelGrid>
+                <p:commandButton actionListener="#{paymentMethodsController.createDialogue}" value="#{configMapController.getKey('Save')}" update="display,:PaymentMethodsListForm:datalist,:growl" oncomplete="handleSubmit(args,'PaymentMethodsCreateDialog');PF('paymentMethodsControllerTable').filter()"/>
+                <p:commandButton value="#{configMapController.getKey('Cancel')}" onclick="PF('PaymentMethodsCreateDialog').hide()"/>
+            </h:panelGroup>
+        </h:form>
+    </p:dialog>
+
+</ui:composition>    
+
+

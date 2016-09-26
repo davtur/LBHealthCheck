@@ -1,0 +1,167 @@
+
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/template.xhtml">
+    <ui:define name="title">
+        <h:outputText value="#{configMapController.getKey('ListInvoiceImagesTitle')}"></h:outputText>
+    </ui:define>
+    <ui:define name="body">
+
+
+
+
+
+        <h:form id="InvoiceImagesListForm">
+            <h:outputText escape="false" value="#{configMapController.getKey('ListInvoiceImagesEmpty')}" rendered="#{invoiceImagesController.items.rowCount == 0}"/>
+            <h:panelGroup >
+                <p:dataTable  
+                    id="datalist"  
+                    editable="true" 
+                    value="#{invoiceImagesController.items}" 
+                    selection="#{invoiceImagesController.selected}" 
+                    rowKey="#{item.id}" 
+                    filteredValue="#{invoiceImagesController.filteredItems}"  
+                    widgetVar="invoiceImagesControllerTable" 
+                    var="item"  
+                    paginator="true" 
+                    rows="15"  
+                    paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  
+                    rowsPerPageTemplate="5,10,15,20,25,50,100" >
+                    <f:facet name="header">
+                        <p:outputPanel>
+                            <h:outputText value="Search all fields:" />
+                            <h:inputText id="globalFilter" onkeyup="PF('invoiceImagesControllerTable').filter()" />
+                        </p:outputPanel>
+                    </f:facet>
+                    <p:ajax event="rowEdit" listener="#{invoiceImagesController.onEdit}" update=":growl" oncomplete="PF('invoiceImagesControllerTable').filter()" />  
+                    <p:ajax event="rowEditCancel" listener="#{invoiceImagesController.onCancel}" update=":growl"  oncomplete="PF('invoiceImagesControllerTable').filter()" />  
+                    <p:ajax event="rowSelect"   update="createButton viewButton editButton deleteButton"/>
+                    <p:ajax event="rowUnselect" update="createButton viewButton editButton deleteButton"/>
+                    <p:column selectionMode="single"/>
+                    <p:column sortBy="#{item.id}" filterBy="#{item.id}" headerText="#{configMapController.getKey('ListInvoiceImagesTitle_id')}"   >
+                        <p:cellEditor> 
+                            <f:facet name="output">
+                                <h:outputText value="#{item.id}"/>
+                            </f:facet>
+                            <f:facet name="input">
+                                <p:inputText value="#{item.id}" label="#{configMapController.getKey('ListInvoiceImagesTitle_id')}" />
+                            </f:facet>
+                        </p:cellEditor> 
+
+
+                    </p:column>
+                    <p:column sortBy="#{item.createdTimestamp}" filterBy="#{item.createdTimestamp}" headerText="#{configMapController.getKey('ListInvoiceImagesTitle_createdTimestamp')}"   >
+
+                        <p:cellEditor> 
+                            <f:facet name="output">
+                                <h:outputText value="#{item.createdTimestamp}">
+                                    <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                                </h:outputText>
+                            </f:facet>
+                            <f:facet name="input">
+                                <p:calendar value="#{item.createdTimestamp}">	
+                                    <p:ajax event="dateSelect" listener= "#{invoiceImagesController.handleDateSelect}" update=":growl" />
+                                </p:calendar>
+                            </f:facet>
+                        </p:cellEditor> 
+
+                    </p:column>
+                    <p:column sortBy="#{item.expenseId}" filterBy="#{item.expenseId}" headerText="#{configMapController.getKey('ListInvoiceImagesTitle_expenseId')}"   >
+                        <p:cellEditor> 
+                            <f:facet name="output">
+                                <h:outputText value="#{item.expenseId}"/>
+                            </f:facet>
+                            <f:facet name="input">
+                                <p:inputText value="#{item.expenseId}" label="#{configMapController.getKey('ListInvoiceImagesTitle_expenseId')}" />
+                            </f:facet>
+                        </p:cellEditor> 
+
+
+                    </p:column>
+                    <p:column sortBy="#{item.imageType}" filterBy="#{item.imageType}" headerText="#{configMapController.getKey('ListInvoiceImagesTitle_imageType')}"   >
+                        <p:cellEditor> 
+                            <f:facet name="output">
+                                <h:outputText value="#{item.imageType}"/>
+                            </f:facet>
+                            <f:facet name="input">
+                                <p:inputText value="#{item.imageType}" label="#{configMapController.getKey('ListInvoiceImagesTitle_imageType')}" />
+                            </f:facet>
+                        </p:cellEditor> 
+
+
+                    </p:column>
+                    <p:column sortBy="#{item.image}" filterBy="#{item.image}" headerText="#{configMapController.getKey('ListInvoiceImagesTitle_image')}"   >
+                        <p:cellEditor> 
+                            <f:facet name="output">
+                                <h:outputText value="#{item.image}"/>
+                            </f:facet>
+                            <f:facet name="input">
+                                <p:inputText value="#{item.image}" label="#{configMapController.getKey('ListInvoiceImagesTitle_image')}" />
+                            </f:facet>
+                        </p:cellEditor> 
+
+
+                    </p:column>
+                    <p:column sortBy="#{item.mimeType}" filterBy="#{item.mimeType}" headerText="#{configMapController.getKey('ListInvoiceImagesTitle_mimeType')}"   >
+                        <p:cellEditor> 
+                            <f:facet name="output">
+                                <h:outputText value="#{item.mimeType}"/>
+                            </f:facet>
+                            <f:facet name="input">
+                                <p:inputText value="#{item.mimeType}" label="#{configMapController.getKey('ListInvoiceImagesTitle_mimeType')}" />
+                            </f:facet>
+                        </p:cellEditor> 
+
+
+                    </p:column>
+                    <p:column sortBy="#{item.imageFileName}" filterBy="#{item.imageFileName}" headerText="#{configMapController.getKey('ListInvoiceImagesTitle_imageFileName')}"   >
+                        <p:cellEditor> 
+                            <f:facet name="output">
+                                <h:outputText value="#{item.imageFileName}"/>
+                            </f:facet>
+                            <f:facet name="input">
+                                <p:inputText value="#{item.imageFileName}" label="#{configMapController.getKey('ListInvoiceImagesTitle_imageFileName')}" />
+                            </f:facet>
+                        </p:cellEditor> 
+
+
+                    </p:column>
+                    <p:column sortBy="#{item.imageDescription}" filterBy="#{item.imageDescription}" headerText="#{configMapController.getKey('ListInvoiceImagesTitle_imageDescription')}"   >
+                        <p:cellEditor> 
+                            <f:facet name="output">
+                                <h:outputText value="#{item.imageDescription}"/>
+                            </f:facet>
+                            <f:facet name="input">
+                                <p:inputText value="#{item.imageDescription}" label="#{configMapController.getKey('ListInvoiceImagesTitle_imageDescription')}" />
+                            </f:facet>
+                        </p:cellEditor> 
+
+
+                    </p:column>
+                    <p:column rendered="#{invoiceImagesController.isUserInRole('ADMIN')}"  headerText="Edit" style="width:50px">  
+                        <p:rowEditor />  
+                    </p:column>  
+
+
+                    <f:facet name="footer">
+                        <p:commandButton rendered="#{invoiceImagesController.isUserInRole('ADMIN')}" id="createButton" icon="ui-icon-plus"   value="#{configMapController.getKey('Create')}" actionListener="#{invoiceImagesController.prepareCreate}" update=":InvoiceImagesCreateForm" oncomplete="PF('InvoiceImagesCreateDialog').show()"/>
+                        <p:commandButton id="viewButton"   icon="ui-icon-search" value="#{configMapController.getKey('View')}" update=":InvoiceImagesViewForm" oncomplete="PF('InvoiceImagesViewDialog').show()" disabled="#{empty invoiceImagesController.selected}"/>
+                        <p:commandButton rendered="#{invoiceImagesController.isUserInRole('ADMIN')}" id="editButton"   icon="ui-icon-pencil" value="#{configMapController.getKey('Edit')}" update=":InvoiceImagesEditForm" oncomplete="PF('InvoiceImagesEditDialog').show()" disabled="#{empty invoiceImagesController.selected}"/>
+                        <p:commandButton rendered="#{invoiceImagesController.isUserInRole('ADMIN')}" id="deleteButton" icon="ui-icon-trash"  value="#{configMapController.getKey('Delete')}" actionListener="#{invoiceImagesController.destroy}" update=":growl,datalist" disabled="#{empty invoiceImagesController.selected}"/>
+                    </f:facet>
+
+                </p:dataTable>
+            </h:panelGroup>
+        </h:form>
+
+        <ui:include src="Create.xhtml"/>
+        <ui:include src="Edit.xhtml"/>
+        <ui:include src="View.xhtml"/>
+
+    </ui:define>
+</ui:composition>
+
+

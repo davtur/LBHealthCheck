@@ -1,0 +1,31 @@
+
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                >
+
+    <p:dialog id="SuppliersEditDlg" widgetVar="SuppliersEditDialog" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('EditSuppliersTitle')}">
+        <h:form id="SuppliersEditForm">
+            <h:panelGroup id="display">
+                <p:panelGrid columns="2" rendered="#{suppliersController.selected != null}">
+                    <h:outputLabel value="#{configMapController.getKey('EditSuppliersLabel_id')}" for="id" />
+                    <h:inputText id="id"  value="#{suppliersController.selected.id}" title="#{configMapController.getKey('EditSuppliersTitle_id')}" required="true" requiredMessage="#{configMapController.getKey('EditSuppliersRequiredMessage_id')}"/>
+                    <h:outputLabel value="#{configMapController.getKey('EditSuppliersLabel_supplierName')}" for="supplierName" />
+                    <h:inputText id="supplierName"  value="#{suppliersController.selected.supplierName}" title="#{configMapController.getKey('EditSuppliersTitle_supplierName')}" />
+                    <h:outputLabel value="#{configMapController.getKey('EditSuppliersLabel_description')}" for="description" />
+                    <h:inputTextarea rows="4" cols="30" id="description" value="#{suppliersController.selected.description}" title="#{configMapController.getKey('EditSuppliersTitle_description')}" />
+                    <h:outputLabel value="#{configMapController.getKey('EditSuppliersLabel_supplierCompanyNumber')}" for="supplierCompanyNumber" />
+                    <h:inputText id="supplierCompanyNumber"  value="#{suppliersController.selected.supplierCompanyNumber}" title="#{configMapController.getKey('EditSuppliersTitle_supplierCompanyNumber')}" />
+                    <h:outputLabel value="#{configMapController.getKey('EditSuppliersLabel_supplierCompanyNumberType')}" for="supplierCompanyNumberType" />
+                    <h:inputText id="supplierCompanyNumberType"  value="#{suppliersController.selected.supplierCompanyNumberType}" title="#{configMapController.getKey('EditSuppliersTitle_supplierCompanyNumberType')}" />
+                </p:panelGrid>
+                <p:commandButton actionListener="#{suppliersController.update}" value="#{configMapController.getKey('Save')}" update="display,:SuppliersListForm:datalist,:growl" oncomplete="handleSubmit(args, 'SuppliersEditDialog');PF('suppliersControllerTable').filter()"/>
+                <p:commandButton value="#{configMapController.getKey('Cancel')}" onclick="PF('SuppliersEditDialog').hide()"/>
+            </h:panelGroup>
+        </h:form>
+    </p:dialog>
+
+</ui:composition>
+

@@ -1,0 +1,42 @@
+
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                >
+    <p:dialog id="InvoiceImagesCreateDlg" widgetVar="InvoiceImagesCreateDialog" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('CreateInvoiceImagesTitle')}">
+
+        <h:form id="InvoiceImagesCreateForm">
+            <h:panelGroup id="display">
+                <p:panelGrid columns="2" rendered="#{invoiceImagesController.selected != null}">
+                    <p:outputLabel value="#{configMapController.getKey('CreateInvoiceImagesLabel_id')}" for="id" />
+                    <p:inputText id="id" value="#{invoiceImagesController.selected.id}" title="#{configMapController.getKey('CreateInvoiceImagesTitle_id')}" required="true" requiredMessage="#{configMapController.getKey('CreateInvoiceImagesRequiredMessage_id')}"/>
+                    <p:outputLabel value="#{configMapController.getKey('CreateInvoiceImagesLabel_createdTimestamp')}" for="createdTimestamp" />
+
+
+                    <p:calendar id="createdTimestamp" pattern="MM/dd/yyyy HH:mm:ss"  value="#{invoiceImagesController.selected.createdTimestamp}"  title="#{configMapController.getKey('CreateInvoiceImagesTitle_createdTimestamp')}" required="true" requiredMessage="#{configMapController.getKey('CreateInvoiceImagesRequiredMessage_createdTimestamp')}">
+                        <p:ajax event="dateSelect" listener="#{invoiceImagesController.handleDateSelect}" update=":InvoiceImagesCreateForm" />
+                    </p:calendar>
+                    <p:outputLabel value="#{configMapController.getKey('CreateInvoiceImagesLabel_expenseId')}" for="expenseId" />
+                    <p:inputText id="expenseId" value="#{invoiceImagesController.selected.expenseId}" title="#{configMapController.getKey('CreateInvoiceImagesTitle_expenseId')}" required="true" requiredMessage="#{configMapController.getKey('CreateInvoiceImagesRequiredMessage_expenseId')}"/>
+                    <p:outputLabel value="#{configMapController.getKey('CreateInvoiceImagesLabel_imageType')}" for="imageType" />
+                    <p:inputText id="imageType" value="#{invoiceImagesController.selected.imageType}" title="#{configMapController.getKey('CreateInvoiceImagesTitle_imageType')}" required="true" requiredMessage="#{configMapController.getKey('CreateInvoiceImagesRequiredMessage_imageType')}"/>
+                    <p:outputLabel value="#{configMapController.getKey('CreateInvoiceImagesLabel_image')}" for="image" />
+                    <p:inputTextarea rows="4" cols="30" id="image"  value="#{invoiceImagesController.selected.image}"  title="#{configMapController.getKey('CreateInvoiceImagesTitle_image')}" required="true" requiredMessage="#{configMapController.getKey('CreateInvoiceImagesRequiredMessage_image')}"/>
+                    <p:outputLabel value="#{configMapController.getKey('CreateInvoiceImagesLabel_mimeType')}" for="mimeType" />
+                    <p:inputText id="mimeType" value="#{invoiceImagesController.selected.mimeType}" title="#{configMapController.getKey('CreateInvoiceImagesTitle_mimeType')}" required="true" requiredMessage="#{configMapController.getKey('CreateInvoiceImagesRequiredMessage_mimeType')}"/>
+                    <p:outputLabel value="#{configMapController.getKey('CreateInvoiceImagesLabel_imageFileName')}" for="imageFileName" />
+                    <p:inputText id="imageFileName" value="#{invoiceImagesController.selected.imageFileName}" title="#{configMapController.getKey('CreateInvoiceImagesTitle_imageFileName')}" required="true" requiredMessage="#{configMapController.getKey('CreateInvoiceImagesRequiredMessage_imageFileName')}"/>
+                    <p:outputLabel value="#{configMapController.getKey('CreateInvoiceImagesLabel_imageDescription')}" for="imageDescription" />
+                    <p:inputTextarea rows="4" cols="30" id="imageDescription"  value="#{invoiceImagesController.selected.imageDescription}"  title="#{configMapController.getKey('CreateInvoiceImagesTitle_imageDescription')}" />
+                </p:panelGrid>
+                <p:commandButton actionListener="#{invoiceImagesController.createDialogue}" value="#{configMapController.getKey('Save')}" update="display,:InvoiceImagesListForm:datalist,:growl" oncomplete="handleSubmit(args,'InvoiceImagesCreateDialog');PF('invoiceImagesControllerTable').filter()"/>
+                <p:commandButton value="#{configMapController.getKey('Cancel')}" onclick="PF('InvoiceImagesCreateDialog').hide()"/>
+            </h:panelGroup>
+        </h:form>
+    </p:dialog>
+
+</ui:composition>    
+
+

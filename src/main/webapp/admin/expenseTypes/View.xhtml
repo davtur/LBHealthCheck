@@ -1,0 +1,26 @@
+
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                >
+
+    <p:dialog id="ExpenseTypesViewDlg" widgetVar="ExpenseTypesViewDialog" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('ViewExpenseTypesTitle')}">
+        <h:form id="ExpenseTypesViewForm">
+            <h:panelGroup id="display">
+                <p:panelGrid columns="2" rendered="#{expenseTypesController.selected != null}">
+                    <h:outputText value="#{configMapController.getKey('ViewExpenseTypesLabel_id')}"/>
+                    <h:outputText value="#{expenseTypesController.selected.id}" title="#{configMapController.getKey('ViewExpenseTypesTitle_id')}"/>
+                    <h:outputText value="#{configMapController.getKey('ViewExpenseTypesLabel_expenseTypeName')}"/>
+                    <h:outputText value="#{expenseTypesController.selected.expenseTypeName}" title="#{configMapController.getKey('ViewExpenseTypesTitle_expenseTypeName')}"/>
+                    <h:outputText value="#{configMapController.getKey('ViewExpenseTypesLabel_description')}"/>
+                    <h:outputText value="#{expenseTypesController.selected.description}" title="#{configMapController.getKey('ViewExpenseTypesTitle_description')}"/>
+                </p:panelGrid>
+                <p:commandButton value="#{configMapController.getKey('Close')}" onclick="PF('ExpenseTypesViewDialog').hide()"/>
+            </h:panelGroup>
+        </h:form>
+    </p:dialog>
+
+</ui:composition>
+

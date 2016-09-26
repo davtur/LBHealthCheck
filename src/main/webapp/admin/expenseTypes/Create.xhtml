@@ -1,0 +1,28 @@
+
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                >
+    <p:dialog id="ExpenseTypesCreateDlg" widgetVar="ExpenseTypesCreateDialog" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('CreateExpenseTypesTitle')}">
+
+        <h:form id="ExpenseTypesCreateForm">
+            <h:panelGroup id="display">
+                <p:panelGrid columns="2" rendered="#{expenseTypesController.selected != null}">
+                    <p:outputLabel value="#{configMapController.getKey('CreateExpenseTypesLabel_id')}" for="id" />
+                    <p:inputText id="id" value="#{expenseTypesController.selected.id}" title="#{configMapController.getKey('CreateExpenseTypesTitle_id')}" required="true" requiredMessage="#{configMapController.getKey('CreateExpenseTypesRequiredMessage_id')}"/>
+                    <p:outputLabel value="#{configMapController.getKey('CreateExpenseTypesLabel_expenseTypeName')}" for="expenseTypeName" />
+                    <p:inputText id="expenseTypeName" value="#{expenseTypesController.selected.expenseTypeName}" title="#{configMapController.getKey('CreateExpenseTypesTitle_expenseTypeName')}" />
+                    <p:outputLabel value="#{configMapController.getKey('CreateExpenseTypesLabel_description')}" for="description" />
+                    <p:inputTextarea rows="4" cols="30" id="description"  value="#{expenseTypesController.selected.description}"  title="#{configMapController.getKey('CreateExpenseTypesTitle_description')}" />
+                </p:panelGrid>
+                <p:commandButton actionListener="#{expenseTypesController.createDialogue}" value="#{configMapController.getKey('Save')}" update="display,:ExpenseTypesListForm:datalist,:growl" oncomplete="handleSubmit(args,'ExpenseTypesCreateDialog');PF('expenseTypesControllerTable').filter()"/>
+                <p:commandButton value="#{configMapController.getKey('Cancel')}" onclick="PF('ExpenseTypesCreateDialog').hide()"/>
+            </h:panelGroup>
+        </h:form>
+    </p:dialog>
+
+</ui:composition>    
+
+

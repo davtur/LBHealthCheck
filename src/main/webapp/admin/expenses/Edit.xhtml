@@ -1,0 +1,71 @@
+
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                >
+
+    <p:dialog id="ExpensesEditDlg" widgetVar="ExpensesEditDialog" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('EditExpensesTitle')}">
+        <h:form id="ExpensesEditForm">
+            <h:panelGroup id="display">
+                <p:panelGrid columns="2" rendered="#{expensesController.selected != null}">
+                    <h:outputLabel value="#{configMapController.getKey('EditExpensesLabel_id')}" for="id" />
+                    <h:inputText id="id"  value="#{expensesController.selected.id}" title="#{configMapController.getKey('EditExpensesTitle_id')}" required="true" requiredMessage="#{configMapController.getKey('EditExpensesRequiredMessage_id')}"/>
+                    <h:outputLabel value="#{configMapController.getKey('EditExpensesLabel_createdTimestamp')}" for="createdTimestamp" />
+                    <h:inputText id="createdTimestamp" value="#{expensesController.selected.createdTimestamp}" title="#{configMapController.getKey('EditExpensesTitle_createdTimestamp')}" required="true" requiredMessage="#{configMapController.getKey('EditExpensesRequiredMessage_createdTimestamp')}">
+                        <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                    </h:inputText>
+                    <h:outputLabel value="#{configMapController.getKey('EditExpensesLabel_updatedTimestamp')}" for="updatedTimestamp" />
+                    <h:inputText id="updatedTimestamp" value="#{expensesController.selected.updatedTimestamp}" title="#{configMapController.getKey('EditExpensesTitle_updatedTimestamp')}" required="true" requiredMessage="#{configMapController.getKey('EditExpensesRequiredMessage_updatedTimestamp')}">
+                        <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                    </h:inputText>
+                    <h:outputLabel value="#{configMapController.getKey('EditExpensesLabel_expenseIncurredTimestamp')}" for="expenseIncurredTimestamp" />
+                    <h:inputText id="expenseIncurredTimestamp" value="#{expensesController.selected.expenseIncurredTimestamp}" title="#{configMapController.getKey('EditExpensesTitle_expenseIncurredTimestamp')}" required="true" requiredMessage="#{configMapController.getKey('EditExpensesRequiredMessage_expenseIncurredTimestamp')}">
+                        <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                    </h:inputText>
+                    <h:outputLabel value="#{configMapController.getKey('EditExpensesLabel_invoiceNumber')}" for="invoiceNumber" />
+                    <h:inputText id="invoiceNumber"  value="#{expensesController.selected.invoiceNumber}" title="#{configMapController.getKey('EditExpensesTitle_invoiceNumber')}" />
+                    <h:outputLabel value="#{configMapController.getKey('EditExpensesLabel_receiptNumber')}" for="receiptNumber" />
+                    <h:inputText id="receiptNumber"  value="#{expensesController.selected.receiptNumber}" title="#{configMapController.getKey('EditExpensesTitle_receiptNumber')}" />
+                    <h:outputLabel value="#{configMapController.getKey('EditExpensesLabel_expenseAmount')}" for="expenseAmount" />
+                    <h:inputText id="expenseAmount"  value="#{expensesController.selected.expenseAmount}" title="#{configMapController.getKey('EditExpensesTitle_expenseAmount')}" required="true" requiredMessage="#{configMapController.getKey('EditExpensesRequiredMessage_expenseAmount')}"/>
+                    <h:outputLabel value="#{configMapController.getKey('EditExpensesLabel_businessUseAmount')}" for="businessUseAmount" />
+                    <h:inputText id="businessUseAmount"  value="#{expensesController.selected.businessUseAmount}" title="#{configMapController.getKey('EditExpensesTitle_businessUseAmount')}" required="true" requiredMessage="#{configMapController.getKey('EditExpensesRequiredMessage_businessUseAmount')}"/>
+                    <h:outputLabel value="#{configMapController.getKey('EditExpensesLabel_description')}" for="description" />
+                    <h:inputTextarea rows="4" cols="30" id="description" value="#{expensesController.selected.description}" title="#{configMapController.getKey('EditExpensesTitle_description')}" />
+                    <h:outputLabel value="#{configMapController.getKey('EditExpensesLabel_percentForBusinessUse')}" for="percentForBusinessUse" />
+                    <h:inputText id="percentForBusinessUse"  value="#{expensesController.selected.percentForBusinessUse}" title="#{configMapController.getKey('EditExpensesTitle_percentForBusinessUse')}" />
+                    <h:outputLabel value="#{configMapController.getKey('EditExpensesLabel_expenseAmountGst')}" for="expenseAmountGst" />
+                    <h:inputText id="expenseAmountGst"  value="#{expensesController.selected.expenseAmountGst}" title="#{configMapController.getKey('EditExpensesTitle_expenseAmountGst')}" required="true" requiredMessage="#{configMapController.getKey('EditExpensesRequiredMessage_expenseAmountGst')}"/>
+                    <h:outputLabel value="#{configMapController.getKey('EditExpensesLabel_businessUseAmountGst')}" for="businessUseAmountGst" />
+                    <h:inputText id="businessUseAmountGst"  value="#{expensesController.selected.businessUseAmountGst}" title="#{configMapController.getKey('EditExpensesTitle_businessUseAmountGst')}" required="true" requiredMessage="#{configMapController.getKey('EditExpensesRequiredMessage_businessUseAmountGst')}"/>
+                    <h:outputLabel value="#{configMapController.getKey('EditExpensesLabel_paymentMethodId')}" for="paymentMethodId" />
+                    <p:selectOneMenu id="paymentMethodId" valueChangeListener="#{expensesController.selectOneMenuValueChangeListener}" value="#{expensesController.selected.paymentMethodId}" label="#{configMapController.getKey('EditExpensesTitle_paymentMethodId')}" required="true" requiredMessage="#{configMapController.getKey('EditExpensesRequiredMessage_paymentMethodId')}">
+                        <f:selectItems value="#{paymentMethodsController.itemsAvailableSelectOne}"/>
+                        <p:ajax   update=":ExpensesEditForm"  />
+                    </p:selectOneMenu>
+                    <h:outputLabel value="#{configMapController.getKey('EditExpensesLabel_expenseTypeId')}" for="expenseTypeId" />
+                    <p:selectOneMenu id="expenseTypeId" valueChangeListener="#{expensesController.selectOneMenuValueChangeListener}" value="#{expensesController.selected.expenseTypeId}" label="#{configMapController.getKey('EditExpensesTitle_expenseTypeId')}" required="true" requiredMessage="#{configMapController.getKey('EditExpensesRequiredMessage_expenseTypeId')}">
+                        <f:selectItems value="#{expenseTypesController.itemsAvailableSelectOne}"/>
+                        <p:ajax   update=":ExpensesEditForm"  />
+                    </p:selectOneMenu>
+                    <h:outputLabel value="#{configMapController.getKey('EditExpensesLabel_invoiceImageId')}" for="invoiceImageId" />
+                    <p:selectOneMenu id="invoiceImageId" valueChangeListener="#{expensesController.selectOneMenuValueChangeListener}" value="#{expensesController.selected.invoiceImageId}" label="#{configMapController.getKey('EditExpensesTitle_invoiceImageId')}" >
+                        <f:selectItems value="#{invoiceImagesController.itemsAvailableSelectOne}"/>
+                        <p:ajax   update=":ExpensesEditForm"  />
+                    </p:selectOneMenu>
+                    <h:outputLabel value="#{configMapController.getKey('EditExpensesLabel_supplierId')}" for="supplierId" />
+                    <p:selectOneMenu id="supplierId" valueChangeListener="#{expensesController.selectOneMenuValueChangeListener}" value="#{expensesController.selected.supplierId}" label="#{configMapController.getKey('EditExpensesTitle_supplierId')}" required="true" requiredMessage="#{configMapController.getKey('EditExpensesRequiredMessage_supplierId')}">
+                        <f:selectItems value="#{suppliersController.itemsAvailableSelectOne}"/>
+                        <p:ajax   update=":ExpensesEditForm"  />
+                    </p:selectOneMenu>
+                </p:panelGrid>
+                <p:commandButton actionListener="#{expensesController.update}" value="#{configMapController.getKey('Save')}" update="display,:ExpensesListForm:datalist,:growl" oncomplete="handleSubmit(args, 'ExpensesEditDialog');PF('expensesControllerTable').filter()"/>
+                <p:commandButton value="#{configMapController.getKey('Cancel')}" onclick="PF('ExpensesEditDialog').hide()"/>
+            </h:panelGroup>
+        </h:form>
+    </p:dialog>
+
+</ui:composition>
+

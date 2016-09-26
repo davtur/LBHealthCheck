@@ -1,0 +1,32 @@
+
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                >
+    <p:dialog id="SuppliersCreateDlg" widgetVar="SuppliersCreateDialog" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('CreateSuppliersTitle')}">
+
+        <h:form id="SuppliersCreateForm">
+            <h:panelGroup id="display">
+                <p:panelGrid columns="2" rendered="#{suppliersController.selected != null}">
+                    <p:outputLabel value="#{configMapController.getKey('CreateSuppliersLabel_id')}" for="id" />
+                    <p:inputText id="id" value="#{suppliersController.selected.id}" title="#{configMapController.getKey('CreateSuppliersTitle_id')}" required="true" requiredMessage="#{configMapController.getKey('CreateSuppliersRequiredMessage_id')}"/>
+                    <p:outputLabel value="#{configMapController.getKey('CreateSuppliersLabel_supplierName')}" for="supplierName" />
+                    <p:inputText id="supplierName" value="#{suppliersController.selected.supplierName}" title="#{configMapController.getKey('CreateSuppliersTitle_supplierName')}" />
+                    <p:outputLabel value="#{configMapController.getKey('CreateSuppliersLabel_description')}" for="description" />
+                    <p:inputTextarea rows="4" cols="30" id="description"  value="#{suppliersController.selected.description}"  title="#{configMapController.getKey('CreateSuppliersTitle_description')}" />
+                    <p:outputLabel value="#{configMapController.getKey('CreateSuppliersLabel_supplierCompanyNumber')}" for="supplierCompanyNumber" />
+                    <p:inputText id="supplierCompanyNumber" value="#{suppliersController.selected.supplierCompanyNumber}" title="#{configMapController.getKey('CreateSuppliersTitle_supplierCompanyNumber')}" />
+                    <p:outputLabel value="#{configMapController.getKey('CreateSuppliersLabel_supplierCompanyNumberType')}" for="supplierCompanyNumberType" />
+                    <p:inputText id="supplierCompanyNumberType" value="#{suppliersController.selected.supplierCompanyNumberType}" title="#{configMapController.getKey('CreateSuppliersTitle_supplierCompanyNumberType')}" />
+                </p:panelGrid>
+                <p:commandButton actionListener="#{suppliersController.createDialogue}" value="#{configMapController.getKey('Save')}" update="display,:SuppliersListForm:datalist,:growl" oncomplete="handleSubmit(args,'SuppliersCreateDialog');PF('suppliersControllerTable').filter()"/>
+                <p:commandButton value="#{configMapController.getKey('Cancel')}" onclick="PF('SuppliersCreateDialog').hide()"/>
+            </h:panelGroup>
+        </h:form>
+    </p:dialog>
+
+</ui:composition>    
+<p> Generated from template ( JSF_from_entity_wizard/StandardJSF/create.ftl  )- Dave 23rd October 2015 </p>
+

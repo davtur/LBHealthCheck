@@ -1,0 +1,39 @@
+
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                >
+
+    <p:dialog id="InvoiceImagesEditDlg" widgetVar="InvoiceImagesEditDialog" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('EditInvoiceImagesTitle')}">
+        <h:form id="InvoiceImagesEditForm">
+            <h:panelGroup id="display">
+                <p:panelGrid columns="2" rendered="#{invoiceImagesController.selected != null}">
+                    <h:outputLabel value="#{configMapController.getKey('EditInvoiceImagesLabel_id')}" for="id" />
+                    <h:inputText id="id"  value="#{invoiceImagesController.selected.id}" title="#{configMapController.getKey('EditInvoiceImagesTitle_id')}" required="true" requiredMessage="#{configMapController.getKey('EditInvoiceImagesRequiredMessage_id')}"/>
+                    <h:outputLabel value="#{configMapController.getKey('EditInvoiceImagesLabel_createdTimestamp')}" for="createdTimestamp" />
+                    <h:inputText id="createdTimestamp" value="#{invoiceImagesController.selected.createdTimestamp}" title="#{configMapController.getKey('EditInvoiceImagesTitle_createdTimestamp')}" required="true" requiredMessage="#{configMapController.getKey('EditInvoiceImagesRequiredMessage_createdTimestamp')}">
+                        <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                    </h:inputText>
+                    <h:outputLabel value="#{configMapController.getKey('EditInvoiceImagesLabel_expenseId')}" for="expenseId" />
+                    <h:inputText id="expenseId"  value="#{invoiceImagesController.selected.expenseId}" title="#{configMapController.getKey('EditInvoiceImagesTitle_expenseId')}" required="true" requiredMessage="#{configMapController.getKey('EditInvoiceImagesRequiredMessage_expenseId')}"/>
+                    <h:outputLabel value="#{configMapController.getKey('EditInvoiceImagesLabel_imageType')}" for="imageType" />
+                    <h:inputText id="imageType"  value="#{invoiceImagesController.selected.imageType}" title="#{configMapController.getKey('EditInvoiceImagesTitle_imageType')}" required="true" requiredMessage="#{configMapController.getKey('EditInvoiceImagesRequiredMessage_imageType')}"/>
+                    <h:outputLabel value="#{configMapController.getKey('EditInvoiceImagesLabel_image')}" for="image" />
+                    <h:inputTextarea rows="4" cols="30" id="image" value="#{invoiceImagesController.selected.image}" title="#{configMapController.getKey('EditInvoiceImagesTitle_image')}" required="true" requiredMessage="#{configMapController.getKey('EditInvoiceImagesRequiredMessage_image')}"/>
+                    <h:outputLabel value="#{configMapController.getKey('EditInvoiceImagesLabel_mimeType')}" for="mimeType" />
+                    <h:inputText id="mimeType"  value="#{invoiceImagesController.selected.mimeType}" title="#{configMapController.getKey('EditInvoiceImagesTitle_mimeType')}" required="true" requiredMessage="#{configMapController.getKey('EditInvoiceImagesRequiredMessage_mimeType')}"/>
+                    <h:outputLabel value="#{configMapController.getKey('EditInvoiceImagesLabel_imageFileName')}" for="imageFileName" />
+                    <h:inputText id="imageFileName"  value="#{invoiceImagesController.selected.imageFileName}" title="#{configMapController.getKey('EditInvoiceImagesTitle_imageFileName')}" required="true" requiredMessage="#{configMapController.getKey('EditInvoiceImagesRequiredMessage_imageFileName')}"/>
+                    <h:outputLabel value="#{configMapController.getKey('EditInvoiceImagesLabel_imageDescription')}" for="imageDescription" />
+                    <h:inputTextarea rows="4" cols="30" id="imageDescription" value="#{invoiceImagesController.selected.imageDescription}" title="#{configMapController.getKey('EditInvoiceImagesTitle_imageDescription')}" />
+                </p:panelGrid>
+                <p:commandButton actionListener="#{invoiceImagesController.update}" value="#{configMapController.getKey('Save')}" update="display,:InvoiceImagesListForm:datalist,:growl" oncomplete="handleSubmit(args, 'InvoiceImagesEditDialog');PF('invoiceImagesControllerTable').filter()"/>
+                <p:commandButton value="#{configMapController.getKey('Cancel')}" onclick="PF('InvoiceImagesEditDialog').hide()"/>
+            </h:panelGroup>
+        </h:form>
+    </p:dialog>
+
+</ui:composition>
+

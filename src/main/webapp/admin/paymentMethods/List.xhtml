@@ -1,0 +1,103 @@
+
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/template.xhtml">
+    <ui:define name="title">
+        <h:outputText value="#{configMapController.getKey('ListPaymentMethodsTitle')}"></h:outputText>
+    </ui:define>
+    <ui:define name="body">
+
+
+
+
+
+        <h:form id="PaymentMethodsListForm">
+            <h:outputText escape="false" value="#{configMapController.getKey('ListPaymentMethodsEmpty')}" rendered="#{paymentMethodsController.items.rowCount == 0}"/>
+            <h:panelGroup >
+                <p:dataTable  
+                    id="datalist"  
+                    editable="true" 
+                    value="#{paymentMethodsController.items}" 
+                    selection="#{paymentMethodsController.selected}" 
+                    rowKey="#{item.id}" 
+                    filteredValue="#{paymentMethodsController.filteredItems}"  
+                    widgetVar="paymentMethodsControllerTable" 
+                    var="item"  
+                    paginator="true" 
+                    rows="15"  
+                    paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  
+                    rowsPerPageTemplate="5,10,15,20,25,50,100" >
+                    <f:facet name="header">
+                        <p:outputPanel>
+                            <h:outputText value="Search all fields:" />
+                            <h:inputText id="globalFilter" onkeyup="PF('paymentMethodsControllerTable').filter()" />
+                        </p:outputPanel>
+                    </f:facet>
+                    <p:ajax event="rowEdit" listener="#{paymentMethodsController.onEdit}" update=":growl" oncomplete="PF('paymentMethodsControllerTable').filter()" />  
+                    <p:ajax event="rowEditCancel" listener="#{paymentMethodsController.onCancel}" update=":growl"  oncomplete="PF('paymentMethodsControllerTable').filter()" />  
+                    <p:ajax event="rowSelect"   update="createButton viewButton editButton deleteButton"/>
+                    <p:ajax event="rowUnselect" update="createButton viewButton editButton deleteButton"/>
+                    <p:column selectionMode="single"/>
+                    <p:column sortBy="#{item.id}" filterBy="#{item.id}" headerText="#{configMapController.getKey('ListPaymentMethodsTitle_id')}"   >
+                        <p:cellEditor> 
+                            <f:facet name="output">
+                                <h:outputText value="#{item.id}"/>
+                            </f:facet>
+                            <f:facet name="input">
+                                <p:inputText value="#{item.id}" label="#{configMapController.getKey('ListPaymentMethodsTitle_id')}" />
+                            </f:facet>
+                        </p:cellEditor> 
+
+
+                    </p:column>
+                    <p:column sortBy="#{item.paymentMethodName}" filterBy="#{item.paymentMethodName}" headerText="#{configMapController.getKey('ListPaymentMethodsTitle_paymentMethodName')}"   >
+                        <p:cellEditor> 
+                            <f:facet name="output">
+                                <h:outputText value="#{item.paymentMethodName}"/>
+                            </f:facet>
+                            <f:facet name="input">
+                                <p:inputText value="#{item.paymentMethodName}" label="#{configMapController.getKey('ListPaymentMethodsTitle_paymentMethodName')}" />
+                            </f:facet>
+                        </p:cellEditor> 
+
+
+                    </p:column>
+                    <p:column sortBy="#{item.description}" filterBy="#{item.description}" headerText="#{configMapController.getKey('ListPaymentMethodsTitle_description')}"   >
+                        <p:cellEditor> 
+                            <f:facet name="output">
+                                <h:outputText value="#{item.description}"/>
+                            </f:facet>
+                            <f:facet name="input">
+                                <p:inputText value="#{item.description}" label="#{configMapController.getKey('ListPaymentMethodsTitle_description')}" />
+                            </f:facet>
+                        </p:cellEditor> 
+
+
+                    </p:column>
+                    <p:column rendered="#{paymentMethodsController.isUserInRole('ADMIN')}"  headerText="Edit" style="width:50px">  
+                        <p:rowEditor />  
+                    </p:column>  
+
+
+                    <f:facet name="footer">
+                        <p:commandButton rendered="#{paymentMethodsController.isUserInRole('ADMIN')}" id="createButton" icon="ui-icon-plus"   value="#{configMapController.getKey('Create')}" actionListener="#{paymentMethodsController.prepareCreate}" update=":PaymentMethodsCreateForm" oncomplete="PF('PaymentMethodsCreateDialog').show()"/>
+                        <p:commandButton id="viewButton"   icon="ui-icon-search" value="#{configMapController.getKey('View')}" update=":PaymentMethodsViewForm" oncomplete="PF('PaymentMethodsViewDialog').show()" disabled="#{empty paymentMethodsController.selected}"/>
+                        <p:commandButton rendered="#{paymentMethodsController.isUserInRole('ADMIN')}" id="editButton"   icon="ui-icon-pencil" value="#{configMapController.getKey('Edit')}" update=":PaymentMethodsEditForm" oncomplete="PF('PaymentMethodsEditDialog').show()" disabled="#{empty paymentMethodsController.selected}"/>
+                        <p:commandButton rendered="#{paymentMethodsController.isUserInRole('ADMIN')}" id="deleteButton" icon="ui-icon-trash"  value="#{configMapController.getKey('Delete')}" actionListener="#{paymentMethodsController.destroy}" update=":growl,datalist" disabled="#{empty paymentMethodsController.selected}"/>
+                    </f:facet>
+
+                </p:dataTable>
+            </h:panelGroup>
+        </h:form>
+
+        <ui:include src="Create.xhtml"/>
+        <ui:include src="Edit.xhtml"/>
+        <ui:include src="View.xhtml"/>
+
+    </ui:define>
+</ui:composition>
+
+

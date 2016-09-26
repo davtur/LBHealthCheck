@@ -1,0 +1,30 @@
+
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                >
+
+    <p:dialog id="SuppliersViewDlg" widgetVar="SuppliersViewDialog" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('ViewSuppliersTitle')}">
+        <h:form id="SuppliersViewForm">
+            <h:panelGroup id="display">
+                <p:panelGrid columns="2" rendered="#{suppliersController.selected != null}">
+                    <h:outputText value="#{configMapController.getKey('ViewSuppliersLabel_id')}"/>
+                    <h:outputText value="#{suppliersController.selected.id}" title="#{configMapController.getKey('ViewSuppliersTitle_id')}"/>
+                    <h:outputText value="#{configMapController.getKey('ViewSuppliersLabel_supplierName')}"/>
+                    <h:outputText value="#{suppliersController.selected.supplierName}" title="#{configMapController.getKey('ViewSuppliersTitle_supplierName')}"/>
+                    <h:outputText value="#{configMapController.getKey('ViewSuppliersLabel_description')}"/>
+                    <h:outputText value="#{suppliersController.selected.description}" title="#{configMapController.getKey('ViewSuppliersTitle_description')}"/>
+                    <h:outputText value="#{configMapController.getKey('ViewSuppliersLabel_supplierCompanyNumber')}"/>
+                    <h:outputText value="#{suppliersController.selected.supplierCompanyNumber}" title="#{configMapController.getKey('ViewSuppliersTitle_supplierCompanyNumber')}"/>
+                    <h:outputText value="#{configMapController.getKey('ViewSuppliersLabel_supplierCompanyNumberType')}"/>
+                    <h:outputText value="#{suppliersController.selected.supplierCompanyNumberType}" title="#{configMapController.getKey('ViewSuppliersTitle_supplierCompanyNumberType')}"/>
+                </p:panelGrid>
+                <p:commandButton value="#{configMapController.getKey('Close')}" onclick="PF('SuppliersViewDialog').hide()"/>
+            </h:panelGroup>
+        </h:form>
+    </p:dialog>
+
+</ui:composition>
+

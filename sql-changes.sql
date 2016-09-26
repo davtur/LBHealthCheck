@@ -262,3 +262,23 @@ CREATE TABLE `expenses` (
   CONSTRAINT `fk_expenses_3` FOREIGN KEY (`invoice_image_id`) REFERENCES `invoice_images` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `fk_expenses_4` FOREIGN KEY (`supplier_id`) REFERENCES `suppliers` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+
+INSERT INTO `fitnessStats`.`payment_methods`
+(`id`,
+`payment_method_name`,
+`description`)
+VALUES
+(1,
+'Cash',
+'Cash was used to pay for the expense'),
+(2,
+'Credit Card',
+'A Credit Card was used to pay for the expense'),
+(3,
+'Direct Deposit',
+'A Direct Deposit was used to pay for the expense'),
+(4,
+'Cheque',
+'A Cheque was used to pay for the expense')
+;
