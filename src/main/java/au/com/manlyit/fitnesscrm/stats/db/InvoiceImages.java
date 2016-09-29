@@ -5,9 +5,13 @@
  */
 package au.com.manlyit.fitnesscrm.stats.db;
 
+import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
+import javax.faces.context.FacesContext;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -25,6 +29,8 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
+import org.primefaces.model.DefaultStreamedContent;
+import org.primefaces.model.StreamedContent;
 
 /**
  *
@@ -163,6 +169,35 @@ public class InvoiceImages implements Serializable {
 
     public void setImageDescription(String imageDescription) {
         this.imageDescription = imageDescription;
+    }
+    public StreamedContent getImageStream() {
+        StreamedContent sc = null;
+        if (getImage() == null) {
+            try {
+                // get default image
+                InputStream stream = FacesContext.getCurrentInstance().getExternalContext().getResourceAsStream("/resources/images/Barefoot-image_100_by_100.jpg");
+                sc = new DefaultStreamedContent(stream, "image/jpeg");
+            } catch (Exception e) {
+                JsfUtil.addErrorMessage(e, "Trying to set Barefoot-image_100_by_100.jpg as the defailt image failed!");
+            }
+        } else {
+            String type = "image/jpeg";
+            switch (getImageType()) {
+                case 0:
+                    type = "image/gif";
+                    break;
+                case 1:
+                    type = "image/png";
+                    break;
+                case 2:
+                    type = "image/jpeg";
+                    break;
+            }
+            ByteArrayInputStream is = new ByteArrayInputStream(getImage());
+            sc = new DefaultStreamedContent(is, type);
+        }
+
+        return sc;
     }
 
     @XmlTransient

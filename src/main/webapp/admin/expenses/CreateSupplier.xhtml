@@ -8,7 +8,7 @@
     <p:dialog id="SuppliersCreateDlg" widgetVar="SuppliersCreateDialog" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('CreateSuppliersTitle')}">
 
         <h:form id="SuppliersCreateForm">
-            <h:panelGroup id="display">
+            
                 <p:panelGrid columns="2" rendered="#{suppliersController.selected != null}">
                     <p:outputLabel value="#{configMapController.getKey('CreateSuppliersLabel_supplierName')}" for="supplierName" />
                     <p:inputText id="supplierName" value="#{suppliersController.selected.supplierName}" title="#{configMapController.getKey('CreateSuppliersTitle_supplierName')}" />
@@ -19,9 +19,9 @@
                     <p:outputLabel value="#{configMapController.getKey('CreateSuppliersLabel_supplierCompanyNumberType')}" for="supplierCompanyNumberType" />
                     <p:inputText id="supplierCompanyNumberType" value="#{suppliersController.selected.supplierCompanyNumberType}" title="#{configMapController.getKey('CreateSuppliersTitle_supplierCompanyNumberType')}" />
                 </p:panelGrid>
-                <p:commandButton actionListener="#{suppliersController.createDialogue}" value="#{configMapController.getKey('Save')}" update="display,:SuppliersListForm:datalist,:growl" oncomplete="handleSubmit(args,'SuppliersCreateDialog');PF('suppliersControllerTable').filter()"/>
+                <p:commandButton actionListener="#{suppliersController.createDialogue}" value="#{configMapController.getKey('Save')}" update=":ExpensesCreateForm :growl" oncomplete="handleSubmit(args,'SuppliersCreateDialog');PF('suppliersControllerTable').filter()"/>
                 <p:commandButton value="#{configMapController.getKey('Cancel')}" onclick="PF('SuppliersCreateDialog').hide()"/>
-            </h:panelGroup>
+            
         </h:form>
     </p:dialog>
 

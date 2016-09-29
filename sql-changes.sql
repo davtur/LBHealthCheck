@@ -282,3 +282,22 @@ VALUES
 'Cheque',
 'A Cheque was used to pay for the expense')
 ;
+
+INSERT INTO `fitnessStats`.`expense_types`
+(`id`,
+`expense_type_name`,
+`description`)
+VALUES
+(1,
+'Fuel for Car',
+'Fuel used in work vehicle'),
+(2,
+'Work Vehicle Loan Repayment',
+'A loan or lease payment on a vehicle used by the business'),
+(3,
+'Office Supplies',
+'Stationary and office supplies such as paper, printer cartridges etc.'),
+(4,
+'Home Offices Expense',
+'Home office related expenses such as phones, electricty, rent,internet etc.')
+;

@@ -1899,3 +1899,8 @@ ListSuppliersTitle_supplierName=SupplierName
 ListSuppliersTitle_description=Description
 ListSuppliersTitle_supplierCompanyNumber=SupplierCompanyNumber
 ListSuppliersTitle_supplierCompanyNumberType=SupplierCompanyNumberType
+
+
+CreateExpensesLabel_gstIncluded=GST Included
+CreateNew_Supplier=New Supplier
+CreateNew_ExpenseType=New Expense Type

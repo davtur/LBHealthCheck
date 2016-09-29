@@ -40,6 +40,7 @@ public class ExpensesController implements Serializable {
     private int selectedItemIndex;
     private List<Expenses> filteredItems;
     private Expenses[] multiSelected;
+    private boolean gstIncluded = false;
 
     public ExpensesController() {
     }
@@ -292,6 +293,20 @@ public class ExpensesController implements Serializable {
 
     public void onCancel(RowEditEvent event) {
         JsfUtil.addErrorMessage("Row Edit Cancelled");
+    }
+
+    /**
+     * @return the gstIncluded
+     */
+    public boolean isGstIncluded() {
+        return gstIncluded;
+    }
+
+    /**
+     * @param gstIncluded the gstIncluded to set
+     */
+    public void setGstIncluded(boolean gstIncluded) {
+        this.gstIncluded = gstIncluded;
     }
 
     @FacesConverter(value = "expensesControllerConverter")

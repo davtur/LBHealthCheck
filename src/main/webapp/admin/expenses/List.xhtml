@@ -197,25 +197,25 @@
 
 
                     </p:column>
-                    <p:column sortBy="#{item.paymentMethodId}" filterBy="#{item.paymentMethodId}" headerText="#{configMapController.getKey('ListExpensesTitle_paymentMethodId')}"   >
+                    <p:column sortBy="#{item.paymentMethodId.paymentMethodName}" filterBy="#{item.paymentMethodId.paymentMethodName}" headerText="#{configMapController.getKey('ListExpensesTitle_paymentMethodId')}"   >
                         <p:cellEditor> 
                             <f:facet name="output">
-                                <h:outputText value="#{item.paymentMethodId}"/>
+                                <h:outputText value="#{item.paymentMethodId.paymentMethodName}"/>
                             </f:facet>
                             <f:facet name="input">
-                                <p:inputText value="#{item.paymentMethodId}" label="#{configMapController.getKey('ListExpensesTitle_paymentMethodId')}" />
+                                <p:inputText value="#{item.paymentMethodId.paymentMethodName}" label="#{configMapController.getKey('ListExpensesTitle_paymentMethodId')}" />
                             </f:facet>
                         </p:cellEditor> 
 
 
                     </p:column>
-                    <p:column sortBy="#{item.expenseTypeId}" filterBy="#{item.expenseTypeId}" headerText="#{configMapController.getKey('ListExpensesTitle_expenseTypeId')}"   >
+                    <p:column sortBy="#{item.expenseTypeId.expenseTypeName}" filterBy="#{item.expenseTypeId.expenseTypeName}" headerText="#{configMapController.getKey('ListExpensesTitle_expenseTypeId')}"   >
                         <p:cellEditor> 
                             <f:facet name="output">
-                                <h:outputText value="#{item.expenseTypeId}"/>
+                                <h:outputText value="#{item.expenseTypeId.expenseTypeName}"/>
                             </f:facet>
                             <f:facet name="input">
-                                <p:inputText value="#{item.expenseTypeId}" label="#{configMapController.getKey('ListExpensesTitle_expenseTypeId')}" />
+                                <p:inputText value="#{item.expenseTypeId.expenseTypeName}" label="#{configMapController.getKey('ListExpensesTitle_expenseTypeId')}" />
                             </f:facet>
                         </p:cellEditor> 
 
@@ -251,8 +251,8 @@
 
 
                     <f:facet name="footer">
-                        <p:commandButton rendered="#{expensesController.isUserInRole('ADMIN')}" id="createButton" icon="ui-icon-plus"   value="#{configMapController.getKey('Create')}" actionListener="#{expensesController.prepareCreate}" update=":ExpensesCreateForm" oncomplete="PF('ExpensesCreateDialog').show()"/>
-                        <p:commandButton id="viewButton"   icon="ui-icon-search" value="#{configMapController.getKey('View')}" update=":ExpensesViewForm" oncomplete="PF('ExpensesViewDialog').show()" disabled="#{empty expensesController.selected}"/>
+                        <p:commandButton rendered="#{expensesController.isUserInRole('ADMIN')}" id="createButton" icon="ui-icon-plus"   value="#{configMapController.getKey('Create')}" actionListener="#{expensesController.prepareCreate}" update=":ExpensesCreateForm" oncomplete="PF('ExpensesCreateDialogWidget').show()"/>
+                        <p:commandButton id="viewButton"   icon="ui-icon-search" value="#{configMapController.getKey('View')}" update=":ExpensesViewForm" oncomplete="PF('ExpensesViewDialogWidget').show()" disabled="#{empty expensesController.selected}"/>
                         <p:commandButton rendered="#{expensesController.isUserInRole('ADMIN')}" id="editButton"   icon="ui-icon-pencil" value="#{configMapController.getKey('Edit')}" update=":ExpensesEditForm" oncomplete="PF('ExpensesEditDialog').show()" disabled="#{empty expensesController.selected}"/>
                         <p:commandButton rendered="#{expensesController.isUserInRole('ADMIN')}" id="deleteButton" icon="ui-icon-trash"  value="#{configMapController.getKey('Delete')}" actionListener="#{expensesController.destroy}" update=":growl,datalist" disabled="#{empty expensesController.selected}"/>
                     </f:facet>
@@ -261,7 +261,7 @@
             </h:panelGroup>
         </h:form>
 
-        <ui:include src="Create.xhtml"/>
+       <ui:include src="Create.xhtml"/>
         <ui:include src="Edit.xhtml"/>
         <ui:include src="View.xhtml"/>
 
