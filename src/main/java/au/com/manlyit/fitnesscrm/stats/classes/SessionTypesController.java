@@ -298,7 +298,7 @@ public class SessionTypesController implements Serializable {
         JsfUtil.addErrorMessage("Row Edit Cancelled");
     }
 
-    @FacesConverter(value = "sessionTypesControllerConverter", forClass = SessionTypes.class)
+    @FacesConverter(value = "sessionTypesControllerConverter")
     public static class SessionTypesControllerConverter implements Converter {
 
         public Object getAsObject(FacesContext facesContext, UIComponent component, String value) {

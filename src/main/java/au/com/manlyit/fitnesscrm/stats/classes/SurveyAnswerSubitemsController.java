@@ -290,7 +290,7 @@ public class SurveyAnswerSubitemsController implements Serializable {
         JsfUtil.addErrorMessage("Row Edit Cancelled");
     }
 
-    @FacesConverter(value="surveyAnswerSubitemsControllerConverter", forClass=SurveyAnswerSubitems.class)
+    @FacesConverter(value="surveyAnswerSubitemsControllerConverter")
     public static class SurveyanswersubitemsControllerConverter implements Converter {
 
         public Object getAsObject(FacesContext facesContext, UIComponent component, String value) {

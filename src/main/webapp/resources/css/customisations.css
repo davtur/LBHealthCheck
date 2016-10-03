@@ -17,6 +17,17 @@ height: 300px !important;
 
     
 }
+.expenseImagePanel {
+    
+}
+.expensesPhoto{
+    
+}
+
+
+.selectOneButton .ui-button-text  {
+   padding: 20px 22px 8px 20px !important;
+}
 
 .galleriaFrame  {
     max-width: 100%;

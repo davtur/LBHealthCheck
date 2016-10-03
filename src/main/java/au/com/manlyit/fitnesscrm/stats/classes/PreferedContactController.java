@@ -295,7 +295,7 @@ public class PreferedContactController implements Serializable {
         JsfUtil.addErrorMessage("Row Edit Cancelled");
     }
 
-    @FacesConverter(value="preferedContactControllerConverter", forClass = PreferedContact.class)
+    @FacesConverter(value="preferedContactControllerConverter")
     public static class PreferedContactControllerConverter implements Converter {
 
         public Object getAsObject(FacesContext facesContext, UIComponent component, String value) {

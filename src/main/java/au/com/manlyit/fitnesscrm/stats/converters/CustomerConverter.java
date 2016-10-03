@@ -13,7 +13,7 @@ import javax.faces.convert.FacesConverter;
  * @author david
  */
 //@Named(value="custConverter")
-@FacesConverter(value = "customersConverter",forClass=Customers.class)
+@FacesConverter(value = "customersConverter")
 public class CustomerConverter extends GenericConverter<Customers> implements Serializable {
     private static final long serialVersionUID = 1L;
 

@@ -328,7 +328,7 @@ public class StatController implements Serializable {
     //   public void setSelected(Stat selected) {
 //        this.current = selected;
     //   }
-    @FacesConverter(value="statControllerConverter", forClass = Stat.class)
+    @FacesConverter(value="statControllerConverter")
     public static class StatControllerConverter implements Converter {
 
         @Override

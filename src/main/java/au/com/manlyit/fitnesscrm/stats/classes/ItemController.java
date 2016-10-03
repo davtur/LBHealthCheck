@@ -258,7 +258,7 @@ public class ItemController implements Serializable {
         JsfUtil.addErrorMessage("Row Edit Cancelled");
     }
 
-    @FacesConverter(value="itemControllerConverter", forClass = Item.class)
+    @FacesConverter(value="itemControllerConverter")
     public static class ItemControllerConverter implements Converter {
 
         @Override

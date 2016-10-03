@@ -295,7 +295,7 @@ public class PaymentsController implements Serializable {
         JsfUtil.addErrorMessage("Row Edit Cancelled");
     }
 
-    @FacesConverter(value="paymentsControllerConverter", forClass = Payments.class)
+    @FacesConverter(value="paymentsControllerConverter")
     public static class PaymentsControllerConverter implements Converter {
 
         public Object getAsObject(FacesContext facesContext, UIComponent component, String value) {

@@ -301,3 +301,33 @@ VALUES
 'Home Offices Expense',
 'Home office related expenses such as phones, electricty, rent,internet etc.')
 ;
+
+ALTER TABLE `fitnessStats`.`expenses` 
+CHANGE COLUMN `expense_amount` `expense_amount` DECIMAL(22,10) NOT NULL DEFAULT 0 ,
+CHANGE COLUMN `business_use_amount` `business_use_amount` DECIMAL(22,10) NOT NULL DEFAULT 0 ,
+CHANGE COLUMN `expense_amount_gst` `expense_amount_gst` DECIMAL(22,10) NOT NULL DEFAULT 0 ,
+CHANGE COLUMN `business_use_amount_gst` `business_use_amount_gst` DECIMAL(22,10) NOT NULL DEFAULT 0 ;
+
+
+ALTER TABLE `fitnessStats`.`expenses` 
+DROP FOREIGN KEY `fk_expenses_3`;
+ALTER TABLE `fitnessStats`.`expenses` 
+ADD CONSTRAINT `fk_expenses_3`
+  FOREIGN KEY (`invoice_image_id`)
+  REFERENCES `fitnessStats`.`invoice_images` (`id`)
+  ON DELETE CASCADE
+  ON UPDATE CASCADE;
+
+
+ALTER TABLE `fitnessStats`.`invoice_images` 
+ADD CONSTRAINT `fk_invoice_images_1`
+  FOREIGN KEY (`id`)
+  REFERENCES `fitnessStats`.`expenses` (`invoice_image_id`)
+  ON DELETE CASCADE
+  ON UPDATE CASCADE;
+
+DELETE FROM   `fitnessStats`.`invoice_images`;
+ALTER TABLE `fitnessStats`.`expenses` 
+DROP FOREIGN KEY `fk_expenses_3`;
+ALTER TABLE `fitnessStats`.`expenses` 
+DROP INDEX `fk_expenses_3_idx` ;

@@ -192,7 +192,7 @@ public class StatTypesController implements Serializable {
         return JsfUtil.getSelectItems(ejbFacade.findAll(), true);
     }
 
-    @FacesConverter(value="statTypesControllerConverter", forClass = StatTypes.class)
+    @FacesConverter(value="statTypesControllerConverter")
     public static class StatTypesControllerConverter implements Converter {
 
         public Object getAsObject(FacesContext facesContext, UIComponent component, String value) {

@@ -13,6 +13,7 @@ import java.util.Collection;
 import java.util.Date;
 import javax.faces.context.FacesContext;
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -29,6 +30,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
+import org.eclipse.persistence.jpa.config.Cascade;
 import org.primefaces.model.DefaultStreamedContent;
 import org.primefaces.model.StreamedContent;
 
@@ -48,6 +50,12 @@ import org.primefaces.model.StreamedContent;
     @NamedQuery(name = "InvoiceImages.findByMimeType", query = "SELECT i FROM InvoiceImages i WHERE i.mimeType = :mimeType"),
     @NamedQuery(name = "InvoiceImages.findByImageFileName", query = "SELECT i FROM InvoiceImages i WHERE i.imageFileName = :imageFileName")})
 public class InvoiceImages implements Serializable {
+
+    @Basic(optional = false)
+    @NotNull
+    @Lob
+    @Column(name = "image")
+    private byte[] image;
 
     private static final long serialVersionUID = 1L;
     @Id
@@ -70,11 +78,6 @@ public class InvoiceImages implements Serializable {
     private int imageType;
     @Basic(optional = false)
     @NotNull
-    @Lob
-    @Column(name = "image")
-    private byte[] image;
-    @Basic(optional = false)
-    @NotNull
     @Size(min = 1, max = 127)
     @Column(name = "mimeType")
     private String mimeType;
@@ -87,7 +90,7 @@ public class InvoiceImages implements Serializable {
     @Size(max = 65535)
     @Column(name = "image_description")
     private String imageDescription;
-    @OneToMany(mappedBy = "invoiceImageId")
+    @OneToMany(mappedBy = "invoiceImageId",cascade = CascadeType.PERSIST)
     private Collection<Expenses> expensesCollection;
 
     public InvoiceImages() {
@@ -139,13 +142,6 @@ public class InvoiceImages implements Serializable {
         this.imageType = imageType;
     }
 
-    public byte[] getImage() {
-        return image;
-    }
-
-    public void setImage(byte[] image) {
-        this.image = image;
-    }
 
     public String getMimeType() {
         return mimeType;
@@ -232,6 +228,14 @@ public class InvoiceImages implements Serializable {
     @Override
     public String toString() {
         return "au.com.manlyit.fitnesscrm.stats.beans.InvoiceImages[ id=" + id + " ]";
+    }
+
+    public byte[] getImage() {
+        return image;
+    }
+
+    public void setImage(byte[] image) {
+        this.image = image;
     }
     
 }

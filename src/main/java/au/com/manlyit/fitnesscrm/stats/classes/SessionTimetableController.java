@@ -1012,7 +1012,7 @@ public class SessionTimetableController implements Serializable {
         this.selectedTimetableSession = selectedTimetableSession;
     }
 
-    @FacesConverter(value = "sessionTimetableControllerConverter", forClass = SessionTimetable.class)
+    @FacesConverter(value = "sessionTimetableControllerConverter")
     public static class SessionTimetableControllerConverter implements Converter {
 
         @Override

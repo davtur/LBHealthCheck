@@ -1599,7 +1599,7 @@ public class CustomerImagesController implements Serializable {
         this.y1 = y1;
     }
 
-    @FacesConverter(value = "customerImagesControllerConverter", forClass = CustomerImages.class)
+    @FacesConverter(value = "customerImagesControllerConverter")
     public static class CustomerImagesControllerConverter implements Converter {
 
         public Object getAsObject(FacesContext facesContext, UIComponent component, String value) {

@@ -2517,7 +2517,7 @@ public class CustomersController implements Serializable {
 
     }
 
-    @FacesConverter(value = "customersControllerConverter", forClass = Customers.class)
+    @FacesConverter(value = "customersControllerConverter")
     public static class CustomersControllerConverter implements Converter {
 
         @Override

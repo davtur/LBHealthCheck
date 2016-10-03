@@ -19,12 +19,14 @@ import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
+import org.eclipse.persistence.annotations.CascadeOnDelete;
 
 /**
  *
@@ -104,8 +106,9 @@ public class Expenses implements Serializable {
     @JoinColumn(name = "expense_type_id", referencedColumnName = "id")
     @ManyToOne(optional = false)
     private ExpenseTypes expenseTypeId;
-    @JoinColumn(name = "invoice_image_id", referencedColumnName = "id")
-    @ManyToOne
+    @JoinColumn(name = "invoice_image_id")
+    @OneToOne
+    @CascadeOnDelete
     private InvoiceImages invoiceImageId;
     @JoinColumn(name = "supplier_id", referencedColumnName = "id")
     @ManyToOne(optional = false)
@@ -178,6 +181,9 @@ public class Expenses implements Serializable {
     }
 
     public BigDecimal getExpenseAmount() {
+        if(expenseAmount == null){
+            expenseAmount = BigDecimal.ZERO;
+        }
         return expenseAmount;
     }
 
@@ -186,6 +192,9 @@ public class Expenses implements Serializable {
     }
 
     public BigDecimal getBusinessUseAmount() {
+         if(businessUseAmount == null){
+            businessUseAmount = BigDecimal.ZERO;
+        }
         return businessUseAmount;
     }
 
@@ -202,6 +211,9 @@ public class Expenses implements Serializable {
     }
 
     public Float getPercentForBusinessUse() {
+         if(percentForBusinessUse == null){
+            percentForBusinessUse = (float)1;
+        }
         return percentForBusinessUse;
     }
 
@@ -210,6 +222,9 @@ public class Expenses implements Serializable {
     }
 
     public BigDecimal getExpenseAmountGst() {
+         if(expenseAmountGst == null){
+            expenseAmountGst = BigDecimal.ZERO;
+        }
         return expenseAmountGst;
     }
 
@@ -218,6 +233,9 @@ public class Expenses implements Serializable {
     }
 
     public BigDecimal getBusinessUseAmountGst() {
+         if(businessUseAmountGst == null){
+            businessUseAmountGst = BigDecimal.ZERO;
+        }
         return businessUseAmountGst;
     }
 

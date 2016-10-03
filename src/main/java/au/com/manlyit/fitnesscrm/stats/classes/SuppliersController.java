@@ -137,6 +137,8 @@ public class SuppliersController implements Serializable {
             if (current.getId() == null) {
                 current.setId(0);
             }
+            
+            
             getFacade().create(current);
             JsfUtil.addSuccessMessage(configMapFacade.getConfig("SuppliersCreated"));
             return prepareCreate();
@@ -151,6 +153,7 @@ public class SuppliersController implements Serializable {
             current.setId(0);
             getFacade().create(current);
             recreateModel();
+            current = new Suppliers();
             JsfUtil.addSuccessMessage(configMapFacade.getConfig("SuppliersCreated"));
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));

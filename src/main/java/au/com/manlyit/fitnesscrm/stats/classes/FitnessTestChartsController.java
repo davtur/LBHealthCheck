@@ -295,7 +295,7 @@ public class FitnessTestChartsController implements Serializable {
         JsfUtil.addErrorMessage("Row Edit Cancelled");
     }
 
-    @FacesConverter(value="fitnessTestChartsControllerConverter", forClass = FitnessTestCharts.class)
+    @FacesConverter(value="fitnessTestChartsControllerConverter")
     public static class FitnessTestChartsControllerConverter implements Converter {
 
         public Object getAsObject(FacesContext facesContext, UIComponent component, String value) {

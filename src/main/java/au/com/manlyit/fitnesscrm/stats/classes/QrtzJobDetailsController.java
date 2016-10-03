@@ -838,7 +838,7 @@ public class QrtzJobDetailsController implements Serializable {
         recreateModel();
     }
 
-    @FacesConverter(value="qrtzJobDetailsControllerConverter", forClass = QrtzJobDetails.class)
+    @FacesConverter(value="qrtzJobDetailsControllerConverter")
     public static class QrtzJobDetailsControllerConverter implements Converter {
 
         private static final String SEPARATOR = "#";

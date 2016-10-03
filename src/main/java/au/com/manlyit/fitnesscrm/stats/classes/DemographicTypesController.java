@@ -199,7 +199,7 @@ public class DemographicTypesController implements Serializable {
         return ejbFacade.findAll();
     }
 
-    @FacesConverter(value="demographicTypesControllerConverter", forClass = DemographicTypes.class)
+    @FacesConverter(value="demographicTypesControllerConverter")
     public static class demographicTypesControllerConverter implements Converter {
 
         @Override

@@ -220,7 +220,7 @@ public class GroupsController implements Serializable {
         this.selectedUser = selectedUser;
     }
 
-    @FacesConverter(value="groupsControllerConverter", forClass = Groups.class)
+    @FacesConverter(value="groupsControllerConverter")
     public static class GroupsControllerConverter implements Converter {
 
         public Object getAsObject(FacesContext facesContext, UIComponent component, String value) {

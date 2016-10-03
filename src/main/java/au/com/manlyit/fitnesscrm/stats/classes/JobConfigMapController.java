@@ -426,7 +426,7 @@ public class JobConfigMapController implements Serializable {
         this.duplicateValues = duplicateValues;
     }
     
-    @FacesConverter(value="jobConfigMapControllerConverter", forClass = JobConfigMap.class)
+    @FacesConverter(value="jobConfigMapControllerConverter")
     public static class JobConfigMapControllerConverter implements Converter {
         
         public Object getAsObject(FacesContext facesContext, UIComponent component, String value) {

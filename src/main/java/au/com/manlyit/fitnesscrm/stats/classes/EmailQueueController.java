@@ -383,7 +383,7 @@ public class EmailQueueController implements Serializable {
         this.templateDescription = templateDescription;
     }
 
-    @FacesConverter(value="emailQueueControllerConverter", forClass = EmailQueue.class)
+    @FacesConverter(value="emailQueueControllerConverter")
     public static class EmailQueueControllerConverter implements Converter {
 
         public Object getAsObject(FacesContext facesContext, UIComponent component, String value) {

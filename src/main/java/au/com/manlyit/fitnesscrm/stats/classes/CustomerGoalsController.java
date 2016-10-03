@@ -193,7 +193,7 @@ public class CustomerGoalsController implements Serializable {
         return JsfUtil.getSelectItems(ejbFacade.findAll(), true);
     }
 
-    @FacesConverter(value="customerGoalsControllerConverter", forClass = CustomerGoals.class)
+    @FacesConverter(value="customerGoalsControllerConverter")
     public static class CustomerGoalsControllerConverter implements Converter {
 
         public Object getAsObject(FacesContext facesContext, UIComponent component, String value) {

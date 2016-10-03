@@ -374,7 +374,7 @@ public class AuditLogController implements Serializable {
         this.endDate = endDate;
     }
 
-    @FacesConverter(value = "auditLogControllerConverter", forClass = AuditLog.class)
+    @FacesConverter(value = "auditLogControllerConverter")
     public static class AuditLogControllerConverter implements Converter {
 
         public Object getAsObject(FacesContext facesContext, UIComponent component, String value) {
