@@ -9,28 +9,25 @@ import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.Serializable;
-import java.util.Collection;
 import java.util.Date;
 import javax.faces.context.FacesContext;
 import javax.persistence.Basic;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
-import org.eclipse.persistence.jpa.config.Cascade;
 import org.primefaces.model.DefaultStreamedContent;
 import org.primefaces.model.StreamedContent;
 
@@ -50,12 +47,6 @@ import org.primefaces.model.StreamedContent;
     @NamedQuery(name = "InvoiceImages.findByMimeType", query = "SELECT i FROM InvoiceImages i WHERE i.mimeType = :mimeType"),
     @NamedQuery(name = "InvoiceImages.findByImageFileName", query = "SELECT i FROM InvoiceImages i WHERE i.imageFileName = :imageFileName")})
 public class InvoiceImages implements Serializable {
-
-    @Basic(optional = false)
-    @NotNull
-    @Lob
-    @Column(name = "image")
-    private byte[] image;
 
     private static final long serialVersionUID = 1L;
     @Id
@@ -78,6 +69,11 @@ public class InvoiceImages implements Serializable {
     private int imageType;
     @Basic(optional = false)
     @NotNull
+    @Lob
+    @Column(name = "image")
+    private byte[] image;
+    @Basic(optional = false)
+    @NotNull
     @Size(min = 1, max = 127)
     @Column(name = "mimeType")
     private String mimeType;
@@ -90,8 +86,9 @@ public class InvoiceImages implements Serializable {
     @Size(max = 65535)
     @Column(name = "image_description")
     private String imageDescription;
-    @OneToMany(mappedBy = "invoiceImageId",cascade = CascadeType.PERSIST)
-    private Collection<Expenses> expensesCollection;
+    @JoinColumn(name = "id", referencedColumnName = "id", insertable = false, updatable = false)
+    @OneToOne(optional = false)
+    private Expenses expenses;
 
     public InvoiceImages() {
     }
@@ -142,6 +139,13 @@ public class InvoiceImages implements Serializable {
         this.imageType = imageType;
     }
 
+    public byte[] getImage() {
+        return image;
+    }
+
+    public void setImage(byte[] image) {
+        this.image = image;
+    }
 
     public String getMimeType() {
         return mimeType;
@@ -192,17 +196,15 @@ public class InvoiceImages implements Serializable {
             ByteArrayInputStream is = new ByteArrayInputStream(getImage());
             sc = new DefaultStreamedContent(is, type);
         }
-
         return sc;
     }
-
-    @XmlTransient
-    public Collection<Expenses> getExpensesCollection() {
-        return expensesCollection;
+    
+    public Expenses getExpenses() {
+        return expenses;
     }
 
-    public void setExpensesCollection(Collection<Expenses> expensesCollection) {
-        this.expensesCollection = expensesCollection;
+    public void setExpenses(Expenses expenses) {
+        this.expenses = expenses;
     }
 
     @Override
@@ -227,15 +229,7 @@ public class InvoiceImages implements Serializable {
 
     @Override
     public String toString() {
-        return "au.com.manlyit.fitnesscrm.stats.beans.InvoiceImages[ id=" + id + " ]";
-    }
-
-    public byte[] getImage() {
-        return image;
-    }
-
-    public void setImage(byte[] image) {
-        this.image = image;
+        return "au.com.manlyit.fitnesscrm.stats.db.InvoiceImages[ id=" + id + " ]";
     }
     
 }

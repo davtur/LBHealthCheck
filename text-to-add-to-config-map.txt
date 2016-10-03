@@ -1905,3 +1905,4 @@ CreateExpensesLabel_gstIncluded=GST Included
 CreateNew_Supplier=New Supplier
 CreateNew_ExpenseType=New Expense Type
 CreateExpensesimageUpload_label=Upload Receipt
+ReconcileSessionsButtonLabel=Reconcile Sessions

@@ -331,3 +331,28 @@ ALTER TABLE `fitnessStats`.`expenses`
 DROP FOREIGN KEY `fk_expenses_3`;
 ALTER TABLE `fitnessStats`.`expenses` 
 DROP INDEX `fk_expenses_3_idx` ;
+
+ALTER TABLE `fitnessStats`.`invoice_images` 
+DROP FOREIGN KEY `fk_invoice_images_1`;
+ALTER TABLE `fitnessStats`.`invoice_images` 
+ADD CONSTRAINT `fk_invoice_images_1`
+  FOREIGN KEY (`id`)
+  REFERENCES `fitnessStats`.`expenses` (`id`)
+  ON DELETE NO ACTION
+  ON UPDATE NO ACTION;
+
+ALTER TABLE `fitnessStats`.`expenses` 
+DROP COLUMN `invoice_image_id`,
+DROP INDEX `fk_expenses_3_idx` ;
+
+ALTER TABLE `fitnessStats`.`session_history` 
+ADD COLUMN `expense_id` INT(11) NULL AFTER `session_template`,
+ADD UNIQUE INDEX `expense_id_UNIQUE` (`expense_id` ASC);
+
+
+ALTER TABLE `fitnessStats`.`session_history` 
+ADD CONSTRAINT `fk_session_history_3`
+  FOREIGN KEY (`expense_id`)
+  REFERENCES `fitnessStats`.`expenses` (`id`)
+  ON DELETE CASCADE
+  ON UPDATE CASCADE;

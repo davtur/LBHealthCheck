@@ -248,13 +248,13 @@
 
 
                     </p:column>
-                    <p:column sortBy="#{item.invoiceImageId}" filterBy="#{item.invoiceImageId}" headerText="#{configMapController.getKey('ListExpensesTitle_invoiceImageId')}"   >
+                    <p:column sortBy="#{item.invoiceImages.imageFileName}" filterBy="#{item.invoiceImages.imageFileName}" headerText="#{configMapController.getKey('ListExpensesTitle_invoiceImageId')}"   >
                         <p:cellEditor> 
                             <f:facet name="output">
-                                <h:outputText value="#{item.invoiceImageId}"/>
+                                <h:outputText value="#{item.invoiceImages.imageFileName}"/>
                             </f:facet>
                             <f:facet name="input">
-                                <p:inputText value="#{item.invoiceImageId}" label="#{configMapController.getKey('ListExpensesTitle_invoiceImageId')}" />
+                                <p:inputText value="#{item.invoiceImages.imageFileName}" label="#{configMapController.getKey('ListExpensesTitle_invoiceImageId')}" />
                             </f:facet>
                         </p:cellEditor> 
 
@@ -271,6 +271,8 @@
                         <p:commandButton id="viewButton"   icon="fa fa-search white Fs14" value="#{configMapController.getKey('View')}" update=":ExpensesViewForm" oncomplete="PF('ExpensesViewDialogWidget').show()" disabled="#{empty expensesController.selected}"/>
                         <p:commandButton rendered="#{expensesController.isUserInRole('ADMIN')}" id="editButton"   icon="fa fa-pencil white Fs14" value="#{configMapController.getKey('Edit')}" update=":ExpensesEditForm" oncomplete="PF('ExpensesEditDialog').show()" disabled="#{empty expensesController.selected}"/>
                         <p:commandButton rendered="#{expensesController.isUserInRole('ADMIN')}" id="deleteButton" icon="fa fa-trash white Fs14"  value="#{configMapController.getKey('Delete')}" actionListener="#{expensesController.destroy}" update=":growl,datalist" disabled="#{empty expensesController.selected}"/>
+                        <p:commandButton rendered="#{expensesController.isUserInRole('ADMIN')}" id="reconcileSessionsButton" icon="fa fa-cog white Fs14"  value="#{configMapController.getKey('ReconcileSessionsButtonLabel')}" actionListener="#{expensesController.reconcileSessions}" update=":growl,datalist" disabled="#{empty expensesController.selected}"/>
+ 
                     </f:facet>
 
                 </p:dataTable>

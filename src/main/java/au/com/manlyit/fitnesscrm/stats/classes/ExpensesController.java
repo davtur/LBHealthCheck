@@ -60,13 +60,12 @@ public class ExpensesController implements Serializable {
 
     private static Logger LOGGER = Logger.getLogger(ExpensesController.class.getName());
 
-   
     private Expenses current;
     private Expenses selectedForDeletion;
     private DataModel items = null;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.ExpensesFacade ejbFacade;
-     @Inject
+    @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.InvoiceImagesFacade invoiceImagesFacade;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade configMapFacade;
@@ -88,12 +87,11 @@ public class ExpensesController implements Serializable {
     private int imageWidth = 0;
     private int x1 = 0;
     private int y1 = 0;
-    
 
     public ExpensesController() {
     }
 
-     /**
+    /**
      * @return the LOGGER
      */
     public static Logger getLOGGER() {
@@ -134,6 +132,7 @@ public class ExpensesController implements Serializable {
     public static void setNew_height(int aNew_height) {
         new_height = aNew_height;
     }
+
     public static boolean isUserInRole(String roleName) {
         boolean inRole = FacesContext.getCurrentInstance().getExternalContext().isUserInRole(roleName);
         return inRole;
@@ -241,7 +240,7 @@ public class ExpensesController implements Serializable {
             getCurrent().setId(0);
             getCurrent().setCreatedTimestamp(new Date());
             getCurrent().setUpdatedTimestamp(new Date());
-            getCurrent().setInvoiceImageId(uploadedImage);
+            getCurrent().setInvoiceImages(uploadedImage);
             //invoiceImagesFacade.create(getCurrent().getInvoiceImageId());
             getFacade().create(getCurrent());
             recreateModel();
@@ -699,6 +698,12 @@ public class ExpensesController implements Serializable {
         setCurrent(null);
     }
 
+    public void reconcileSessions() {
+        //find any sessions that dont have a corresponding expense entry and add them.
+        
+
+    }
+
     public String destroyAndView() {
         performDestroy();
         recreateModel();
@@ -947,22 +952,20 @@ public class ExpensesController implements Serializable {
             // So, we're rendering the HTML. Return a stub StreamedContent so that it will generate right URL.
             return new DefaultStreamedContent();
         } else // So, browser is requesting the image. Return a real StreamedContent with the image bytes.
-        {
-            if (getUploadedImage() != null && getUploadedImage().getImage() != null) {
+         if (getUploadedImage() != null && getUploadedImage().getImage() != null) {
                 return new DefaultStreamedContent(new ByteArrayInputStream(getUploadedImage().getImage()));
             } else {
                 //getConfigMapFacade().getConfig("PersistenceErrorOccured")
                 //InputStream iStream = FacesContext.getCurrentInstance().getExternalContext().getResourceAsStream("/resources/images/upload-invoice.png");
-                return new  DefaultStreamedContent(FacesContext.getCurrentInstance().getExternalContext().getResourceAsStream("/resources/images/upload-invoice.png"));
+                return new DefaultStreamedContent(FacesContext.getCurrentInstance().getExternalContext().getResourceAsStream("/resources/images/upload-invoice.png"));
             }
-        }
     }
 
     public void handleFileUpload(FileUploadEvent event) {
-       
-        current.setInvoiceImageId(processUploadedFile(event.getFile()));
+
+        current.setInvoiceImages(processUploadedFile(event.getFile()));
         setSaveButtonDisabled(false);
-        
+
         //RequestContext.getCurrentInstance().update("createCustomerForm");
     }
 
@@ -1071,7 +1074,6 @@ public class ExpensesController implements Serializable {
         this.y1 = y1;
     }
 
-  
     @FacesConverter(value = "expensesControllerConverter")
     public static class ExpensesControllerConverter implements Converter {
 

@@ -51,7 +51,7 @@
                         <p:ajax   update=":ExpensesEditForm"  />
                     </p:selectOneMenu>
                     <h:outputLabel value="#{configMapController.getKey('EditExpensesLabel_invoiceImageId')}" for="invoiceImageId" />
-                    <p:selectOneMenu id="invoiceImageId" valueChangeListener="#{expensesController.selectOneMenuValueChangeListener}" value="#{expensesController.selected.invoiceImageId}" label="#{configMapController.getKey('EditExpensesTitle_invoiceImageId')}" >
+                    <p:selectOneMenu id="invoiceImageId" valueChangeListener="#{expensesController.selectOneMenuValueChangeListener}" value="#{expensesController.selected.invoiceImages}" label="#{configMapController.getKey('EditExpensesTitle_invoiceImageId')}" >
                         <f:selectItems value="#{invoiceImagesController.itemsAvailableSelectOne}"/>
                         <p:ajax   update=":ExpensesEditForm"  />
                     </p:selectOneMenu>

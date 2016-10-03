@@ -9,6 +9,7 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -26,7 +27,6 @@ import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
-import org.eclipse.persistence.annotations.CascadeOnDelete;
 
 /**
  *
@@ -100,16 +100,14 @@ public class Expenses implements Serializable {
     @NotNull
     @Column(name = "business_use_amount_gst")
     private BigDecimal businessUseAmountGst;
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "expenses")
+    private InvoiceImages invoiceImages;
     @JoinColumn(name = "payment_method_id", referencedColumnName = "id")
     @ManyToOne(optional = false)
     private PaymentMethods paymentMethodId;
     @JoinColumn(name = "expense_type_id", referencedColumnName = "id")
     @ManyToOne(optional = false)
     private ExpenseTypes expenseTypeId;
-    @JoinColumn(name = "invoice_image_id")
-    @OneToOne
-    @CascadeOnDelete
-    private InvoiceImages invoiceImageId;
     @JoinColumn(name = "supplier_id", referencedColumnName = "id")
     @ManyToOne(optional = false)
     private Suppliers supplierId;
@@ -243,6 +241,14 @@ public class Expenses implements Serializable {
         this.businessUseAmountGst = businessUseAmountGst;
     }
 
+    public InvoiceImages getInvoiceImages() {
+        return invoiceImages;
+    }
+
+    public void setInvoiceImages(InvoiceImages invoiceImages) {
+        this.invoiceImages = invoiceImages;
+    }
+
     public PaymentMethods getPaymentMethodId() {
         return paymentMethodId;
     }
@@ -257,14 +263,6 @@ public class Expenses implements Serializable {
 
     public void setExpenseTypeId(ExpenseTypes expenseTypeId) {
         this.expenseTypeId = expenseTypeId;
-    }
-
-    public InvoiceImages getInvoiceImageId() {
-        return invoiceImageId;
-    }
-
-    public void setInvoiceImageId(InvoiceImages invoiceImageId) {
-        this.invoiceImageId = invoiceImageId;
     }
 
     public Suppliers getSupplierId() {
@@ -297,7 +295,7 @@ public class Expenses implements Serializable {
 
     @Override
     public String toString() {
-        return "au.com.manlyit.fitnesscrm.stats.beans.Expenses[ id=" + id + " ]";
+        return "au.com.manlyit.fitnesscrm.stats.db.Expenses[ id=" + id + " ]";
     }
     
 }
