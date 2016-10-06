@@ -14,10 +14,13 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
+import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -37,6 +40,10 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Suppliers.findBySupplierCompanyNumber", query = "SELECT s FROM Suppliers s WHERE s.supplierCompanyNumber = :supplierCompanyNumber"),
     @NamedQuery(name = "Suppliers.findBySupplierCompanyNumberType", query = "SELECT s FROM Suppliers s WHERE s.supplierCompanyNumberType = :supplierCompanyNumberType")})
 public class Suppliers implements Serializable {
+
+    @JoinColumn(name = "internal_contractor_id", referencedColumnName = "id")
+    @ManyToOne
+    private Customers internalContractorId;
 
     private static final long serialVersionUID = 1L;
     @Id
@@ -59,6 +66,7 @@ public class Suppliers implements Serializable {
     private String supplierCompanyNumberType;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "supplierId")
     private Collection<Expenses> expensesCollection;
+    
 
     public Suppliers() {
     }
@@ -140,5 +148,15 @@ public class Suppliers implements Serializable {
     public String toString() {
         return "au.com.manlyit.fitnesscrm.stats.beans.Suppliers[ id=" + id + " ]";
     }
+
+    public Customers getInternalContractorId() {
+        return internalContractorId;
+    }
+
+    public void setInternalContractorId(Customers internalContractorId) {
+        this.internalContractorId = internalContractorId;
+    }
+
+   
     
 }

@@ -6,6 +6,7 @@ package au.com.manlyit.fitnesscrm.stats.beans;
 
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
+import au.com.manlyit.fitnesscrm.stats.db.Expenses;
 import au.com.manlyit.fitnesscrm.stats.db.Participants;
 import au.com.manlyit.fitnesscrm.stats.db.SessionHistory;
 import au.com.manlyit.fitnesscrm.stats.db.SessionTimetable;
@@ -193,6 +194,36 @@ public class SessionHistoryFacade extends AbstractFacade<SessionHistory> {
 
         return retList;
     }
+    public List<SessionHistory> findSessionsWithoutExpenseLogged( boolean sortAsc) {
+        List<SessionHistory> retList = null;
+
+        try {
+            CriteriaBuilder cb = em.getCriteriaBuilder();
+            CriteriaQuery<SessionHistory> cq = cb.createQuery(SessionHistory.class);
+            Root<SessionHistory> rt = cq.from(SessionHistory.class);
+
+           
+            Expression<Expenses> expense = rt.get("expenseId");
+            Expression<Date> stime = rt.get("sessiondate");
+
+            Predicate condition = cb.isNull(expense);
+            cq.where(condition);
+            cq.select(rt);
+
+            if (sortAsc) {
+                cq.orderBy(cb.asc(stime));
+            } else {
+                cq.orderBy(cb.desc(stime));
+            }
+            TypedQuery<SessionHistory> q = em.createQuery(cq);
+            retList = q.getResultList();
+        } catch (Exception e) {
+            JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
+        }
+
+        return retList;
+    }
+
 
     public int countSessionsByParticipant(Customers participant) {
 

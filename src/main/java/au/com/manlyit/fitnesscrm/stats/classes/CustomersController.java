@@ -1107,43 +1107,63 @@ public class CustomersController implements Serializable {
     }
 
     private void updateCustomersGroupMembership(Customers c) {
-
         //modify customers groups
-        List<Groups> customersExistingGroups = ejbGroupsFacade.getCustomersGroups(c);
-        for (Groups g : customersExistingGroups) {
+        Groups[] grps = new Groups[c.getGroupsCollection().size()];
+        c.getGroupsCollection().toArray(grps);
+       // have to use a reverse loop as we are removing components
+        for (int i = grps.length -1; i >= 0; i--) {
+            Groups g = grps[i];
             boolean exists = false;
             for (Groups sg : selectedGroups) {
-                if (sg.equals(g)) {
+                if (sg.getGroupname().trim().equalsIgnoreCase(g.getGroupname().trim())) {
                     exists = true;
                 }
             }
             if (exists == false) {
-                ejbGroupsFacade.remove(g);
+                c.getGroupsCollection().remove(g);
+                //ejbGroupsFacade.remove(g);
             }
         }
+        Collection<Groups> customersExistingGroups = c.getGroupsCollection();
         for (Groups g : selectedGroups) {
             boolean exists = false;
+
             for (Groups eg : customersExistingGroups) {
-                if (eg.equals(g)) {
+                if (eg.getGroupname().trim().equalsIgnoreCase(g.getGroupname().trim())) {
                     exists = true;
                 }
             }
             if (exists == false) {
                 Groups grp = new Groups(0, g.getGroupname());
                 grp.setUsername(c);
-                ejbGroupsFacade.create(grp);
+                // ejbGroupsFacade.create(grp);
+                c.getGroupsCollection().add(grp);
+
             }
         }
 
-        addCustomerToUsersGroup(c);
+        // the customer must be a member of the user base group to login
+        ejbFacade.edit(c);
+        //addCustomerToUsersGroup(c);
 
     }
 
     private void addCustomerToUsersGroup(Customers c) {
-        if (ejbGroupsFacade.isCustomerInGroup(c, "USER") == false) {
+        Collection<Groups> customersExistingGroups = c.getGroupsCollection();
+        boolean exists = false;
+        for (Groups eg : customersExistingGroups) {
+            if (eg.getGroupname().trim().equalsIgnoreCase("USER")) {
+                exists = true;
+            }
+
+        }
+        if (exists == false) {
+            // if (ejbGroupsFacade.isCustomerInGroup(c, "USER") == false) {
             Groups grp = new Groups(0, "USER");
             grp.setUsername(c);
-            ejbGroupsFacade.create(grp);
+            c.getGroupsCollection().add(grp);
+            ejbFacade.edit(c);
+            //ejbGroupsFacade.create(grp);
             JsfUtil.addSuccessMessage(configMapFacade.getConfig("CustomersCreatedMustBeInUserGroup"));
         }
     }
@@ -1417,8 +1437,9 @@ public class CustomersController implements Serializable {
                 cust.setActive(selectedState);
                 getFacade().edit(cust);
                 count++;
-                recreateModel();
+
             }
+            recreateModel();
             controller.setCustomerCancellationConfirmed(false);
             String message = count + " " + configMapFacade.getConfig("CustomersStateChanged") + " " + selectedState.getCustomerState() + ".";
             JsfUtil.addSuccessMessage(message);

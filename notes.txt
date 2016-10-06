@@ -53,3 +53,5 @@ increase max save post size to 8192
 How to clean up survey answers when there are multiple subitems
 #DELETE FROM fitnessStats.survey_answer_subitems where answer_id IN(SELECT id FROM fitnessStats.survey_answers where user_id = 3);
 #DELETE FROM fitnessStats.survey_answers where user_id = 3;
+
+mysqldiff   --server1=root:Surf2day@vms --server2=root:Surf2day@localhost  --changes-for=server1 --show-reverse  fitnessStats:fitnessStats --force --difftype=sql 

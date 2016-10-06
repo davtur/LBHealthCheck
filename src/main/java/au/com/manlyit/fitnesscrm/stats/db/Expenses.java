@@ -50,6 +50,9 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "Expenses.findByBusinessUseAmountGst", query = "SELECT e FROM Expenses e WHERE e.businessUseAmountGst = :businessUseAmountGst")})
 public class Expenses implements Serializable {
 
+    @OneToOne(mappedBy = "expenseId")
+    private SessionHistory sessionHistory;
+
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -296,6 +299,14 @@ public class Expenses implements Serializable {
     @Override
     public String toString() {
         return "au.com.manlyit.fitnesscrm.stats.db.Expenses[ id=" + id + " ]";
+    }
+
+    public SessionHistory getSessionHistory() {
+        return sessionHistory;
+    }
+
+    public void setSessionHistory(SessionHistory sessionHistory) {
+        this.sessionHistory = sessionHistory;
     }
     
 }

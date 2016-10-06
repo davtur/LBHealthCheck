@@ -4,8 +4,13 @@ import au.com.manlyit.fitnesscrm.stats.db.Expenses;
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PaginationHelper;
 import au.com.manlyit.fitnesscrm.stats.beans.ExpensesFacade;
-import au.com.manlyit.fitnesscrm.stats.db.CustomerImages;
+import au.com.manlyit.fitnesscrm.stats.db.Customers;
+import au.com.manlyit.fitnesscrm.stats.db.ExpenseTypes;
 import au.com.manlyit.fitnesscrm.stats.db.InvoiceImages;
+import au.com.manlyit.fitnesscrm.stats.db.PaymentMethods;
+import au.com.manlyit.fitnesscrm.stats.db.SessionHistory;
+import au.com.manlyit.fitnesscrm.stats.db.SessionTrainers;
+import au.com.manlyit.fitnesscrm.stats.db.Suppliers;
 import java.awt.AlphaComposite;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
@@ -69,6 +74,14 @@ public class ExpensesController implements Serializable {
     private au.com.manlyit.fitnesscrm.stats.beans.InvoiceImagesFacade invoiceImagesFacade;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade configMapFacade;
+    @Inject
+    private au.com.manlyit.fitnesscrm.stats.beans.SessionHistoryFacade sessionHistoryFacade;
+    @Inject
+    private au.com.manlyit.fitnesscrm.stats.beans.SuppliersFacade suppliersFacade;
+    @Inject
+    private au.com.manlyit.fitnesscrm.stats.beans.PaymentMethodsFacade paymentMethodsFacade;
+    @Inject
+    private au.com.manlyit.fitnesscrm.stats.beans.ExpenseTypesFacade expenseTypesFacade;
     private PaginationHelper pagination;
     private int selectedItemIndex;
     private List<Expenses> filteredItems;
@@ -700,8 +713,115 @@ public class ExpensesController implements Serializable {
 
     public void reconcileSessions() {
         //find any sessions that dont have a corresponding expense entry and add them.
-        
+        List<SessionHistory> sessionsWithNullExpense = sessionHistoryFacade.findSessionsWithoutExpenseLogged(true);
+        for (SessionHistory sh : sessionsWithNullExpense) {
+            if (sh.getSessionTrainersCollection().size() > 0) {
 
+                if (sh.getParticipantsCollection().size() > 0) {
+// TODO - cant use the plan price for this - need a rate card for each trainer for each session type.
+                    if (sh.getSessionTypesId().getPlan() != null) {
+                        ejbFacade.create(createNewDefaultSessionExpense(sh));
+                    } else {
+                        LOGGER.log(Level.WARNING, "findTrainerSupplierDetails - no price found for session! date:{0},id:{1}",new Object[]{sh.getSessiondate(),sh.getId()});
+                    }
+                } else {
+                    LOGGER.log(Level.WARNING, "findTrainerSupplierDetails - no participants found for session! date:{0},id:{1}",new Object[]{sh.getSessiondate(),sh.getId()});
+                }
+            } else {
+                LOGGER.log(Level.WARNING, "findTrainerSupplierDetails - no trainer found for session! date:{0},id:{1}",new Object[]{sh.getSessiondate(),sh.getId()});
+            }
+        }
+
+    }
+
+    private Expenses createNewDefaultSessionExpense(SessionHistory sh) {
+        Expenses e = new Expenses(0);
+        e.setCreatedTimestamp(sh.getSessiondate());
+        e.setExpenseIncurredTimestamp(sh.getSessiondate());
+        e.setUpdatedTimestamp(sh.getSessiondate());
+
+        BigDecimal expenseAmount = calculateSessionCost(sh.getParticipantsCollection().size(), sh.getSessionTypesId().getPlan().getPlanPrice());
+        BigDecimal multiplyPercent = new BigDecimal((getSelected().getPercentForBusinessUse()));
+        BigDecimal divideGstIncluded = new BigDecimal(11);
+
+        e.setBusinessUseAmount(expenseAmount.multiply(multiplyPercent));
+        e.setExpenseAmountGst(expenseAmount.divide(divideGstIncluded, 2, RoundingMode.HALF_UP));
+        e.setBusinessUseAmountGst(getSelected().getBusinessUseAmount().divide(divideGstIncluded, 2, RoundingMode.HALF_UP));
+        e.setExpenseAmount(expenseAmount);
+        e.setSessionHistory(sh);
+
+        e.setExpenseTypeId(defaultExpenseTypeForSession(sh));
+        e.setSupplierId(findTrainerSupplierDetails(sh));
+        e.setPaymentMethodId(defaultpaymentMethodForTrainers("Direct Deposit"));
+
+        return e;
+    }
+
+    private PaymentMethods defaultpaymentMethodForTrainers(String name) {
+
+        PaymentMethods et = paymentMethodsFacade.findPaymentMethodByName(name);
+        if (et == null) {
+             LOGGER.log(Level.INFO, "Creating a new payment Method as it wasn't found in the DB. Payment Method:{0}",new Object[]{name});
+            et = new PaymentMethods(0);
+            et.setPaymentMethodName(name);
+            et.setDescription("Default payment Method For Trainers");
+            paymentMethodsFacade.create(et);
+        }
+        return et;
+    }
+
+    private ExpenseTypes defaultExpenseTypeForSession(SessionHistory sh) {
+        String sessionType = sh.getSessionTypesId().getName();
+
+        ExpenseTypes et = expenseTypesFacade.findSessionExpenseType(sessionType);
+        if (et == null) {
+            LOGGER.log(Level.INFO, "Creating a new expense type as it wasn't found in the DB. ExpenseType:{0}",new Object[]{sessionType});
+            et = new ExpenseTypes(0);
+            et.setExpenseTypeName(sessionType);
+            et.setDescription(sessionType);
+            expenseTypesFacade.create(et);
+        }
+        return et;
+    }
+
+    private Suppliers findTrainerSupplierDetails(SessionHistory sh) {
+        Suppliers sup = null;
+
+        SessionTrainers[] sha = new SessionTrainers[sh.getSessionTrainersCollection().size()];
+        sh.getSessionTrainersCollection().toArray(sha);
+        SessionTrainers trainers = sha[0];
+        Customers trainer = trainers.getCustomerId();
+
+        sup = suppliersFacade.findSupplierByTrainerCustomerId(trainer);
+
+        if (sup == null) {
+            LOGGER.log(Level.INFO, "Creating  new supplier details for contractor as it wasn't found in the DB. TContractor username:{0}",new Object[]{trainer.getUsername()});
+            sup = new Suppliers(0);
+            sup.setSupplierName(trainer.getFirstname() + "" + trainer.getLastname());
+            sup.setDescription("Internal Contractor");
+            sup.setInternalContractorId(trainer);
+            sup.setSupplierCompanyNumber(" ");
+            sup.setSupplierCompanyNumberType("ABN");
+            suppliersFacade.create(sup);
+        }
+
+        return sup;
+    }
+
+    private BigDecimal calculateSessionCost(int numberOfParticipants, BigDecimal planPrice) {
+        BigDecimal expenseAmount = planPrice;
+        BigDecimal bonusAmount = new BigDecimal(getConfigMapFacade().getConfig("TrainersGroupBonusPerFiveParticipants"));
+        if (numberOfParticipants > 5) {
+            expenseAmount.add(bonusAmount);
+        }
+        if (numberOfParticipants > 10) {
+            expenseAmount.add(bonusAmount);
+        }
+        if (numberOfParticipants > 15) {
+            expenseAmount.add(bonusAmount);
+        }
+
+        return expenseAmount;
     }
 
     public String destroyAndView() {
@@ -952,13 +1072,15 @@ public class ExpensesController implements Serializable {
             // So, we're rendering the HTML. Return a stub StreamedContent so that it will generate right URL.
             return new DefaultStreamedContent();
         } else // So, browser is requesting the image. Return a real StreamedContent with the image bytes.
-         if (getUploadedImage() != null && getUploadedImage().getImage() != null) {
+        {
+            if (getUploadedImage() != null && getUploadedImage().getImage() != null) {
                 return new DefaultStreamedContent(new ByteArrayInputStream(getUploadedImage().getImage()));
             } else {
                 //getConfigMapFacade().getConfig("PersistenceErrorOccured")
                 //InputStream iStream = FacesContext.getCurrentInstance().getExternalContext().getResourceAsStream("/resources/images/upload-invoice.png");
                 return new DefaultStreamedContent(FacesContext.getCurrentInstance().getExternalContext().getResourceAsStream("/resources/images/upload-invoice.png"));
             }
+        }
     }
 
     public void handleFileUpload(FileUploadEvent event) {

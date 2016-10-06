@@ -350,9 +350,47 @@ ADD COLUMN `expense_id` INT(11) NULL AFTER `session_template`,
 ADD UNIQUE INDEX `expense_id_UNIQUE` (`expense_id` ASC);
 
 
+
+
+ALTER TABLE `fitnessStats`.`suppliers` 
+ADD COLUMN `internal_contractor_id` INT(11) NULL AFTER `supplier_company_number_type`;
+
+
+ALTER TABLE `fitnessStats`.`suppliers` 
+ADD INDEX `fk_suppliers_1_idx` (`internal_contractor_id` ASC);
+ALTER TABLE `fitnessStats`.`suppliers` 
+ADD CONSTRAINT `fk_suppliers_1`
+  FOREIGN KEY (`internal_contractor_id`)
+  REFERENCES `fitnessStats`.`customers` (`id`)
+  ON DELETE NO ACTION
+  ON UPDATE NO ACTION;
+
+
+ALTER TABLE `fitnessStats`.`session_history` 
+DROP FOREIGN KEY `fk_session_history_3`;
 ALTER TABLE `fitnessStats`.`session_history` 
 ADD CONSTRAINT `fk_session_history_3`
   FOREIGN KEY (`expense_id`)
   REFERENCES `fitnessStats`.`expenses` (`id`)
+  ON DELETE NO ACTION
+  ON UPDATE NO ACTION;
+
+CREATE TABLE `contractor_rates` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `rate` decimal(22,10) NOT NULL DEFAULT '0.0000000000',
+  `bonusAmount` decimal(22,10) NOT NULL DEFAULT '0.0000000000',
+  `bonusInteger` int(11) NOT NULL,
+  `name` varchar(127) DEFAULT NULL,
+  `description` text,
+  `supplier_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=latin1;
+
+ALTER TABLE `fitnessStats`.`contractor_rates` 
+ADD INDEX `fk_contractor_rates_1_idx` (`supplier_id` ASC);
+ALTER TABLE `fitnessStats`.`contractor_rates` 
+ADD CONSTRAINT `fk_contractor_rates_1`
+  FOREIGN KEY (`supplier_id`)
+  REFERENCES `fitnessStats`.`suppliers` (`id`)
   ON DELETE CASCADE
   ON UPDATE CASCADE;

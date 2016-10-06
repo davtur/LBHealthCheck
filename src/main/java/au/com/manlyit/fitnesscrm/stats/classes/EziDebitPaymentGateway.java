@@ -3193,15 +3193,19 @@ public class EziDebitPaymentGateway implements Serializable {
             eziStatus = "H";
         } else if (cs.getCustomerState().contains("CANCELLED")) {
             eziStatus = "C";
+             if(isTheCustomerProvisionedInThePaymentGateway() == true){
             startAsynchJob("ClearSchedule", paymentBean.clearSchedule(cust, false, loggedInUser, getDigitalKey()));
+             }
         } else {
             LOGGER.log(Level.WARNING, "Customer status is not one of ACTIVE,ON HOLD or CANCELLED. changeCustomerStatus aborted.");
             return;
         }
 
         if (loggedInUser != null) {
+            if(isTheCustomerProvisionedInThePaymentGateway() == true){
             startAsynchJob("ChangeCustomerStatus", paymentBean.changeCustomerStatus(cust, eziStatus, loggedInUser, getDigitalKey()));
             LOGGER.log(Level.INFO, "Starting Async Job ChangeCustomerStatus.");
+            }
         } else {
             LOGGER.log(Level.WARNING, "Logged in user is null. changeCustomerStatus aborted.");
         }
