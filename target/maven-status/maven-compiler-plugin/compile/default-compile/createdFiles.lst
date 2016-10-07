@@ -42,6 +42,7 @@ au/com/manlyit/fitnesscrm/stats/classes/util/LazySorter.class
 au/com/manlyit/fitnesscrm/stats/classes/util/PhaseListenerImpl.class
 au/com/manlyit/fitnesscrm/stats/beans/AuditLogFacade.class
 au/com/manlyit/fitnesscrm/stats/classes/SessionTimetableController.class
+au/com/manlyit/fitnesscrm/stats/db/ContractorRates.class
 au/com/manlyit/fitnesscrm/stats/classes/SessionTimetableController$2.class
 au/com/manlyit/fitnesscrm/stats/classes/util/AsyncJob.class
 au/com/manlyit/fitnesscrm/stats/webservices/Payment.class
@@ -69,6 +70,7 @@ au/com/manlyit/fitnesscrm/stats/beans/EmailQueueFacade.class
 au/com/manlyit/fitnesscrm/stats/beans/CurrencyFacade.class
 au/com/manlyit/fitnesscrm/stats/classes/EmailQueueController$EmailQueueControllerConverter.class
 au/com/manlyit/fitnesscrm/stats/webservices/ChangeScheduledDate.class
+au/com/manlyit/fitnesscrm/stats/beans/ContractorRateToTaskMapFacade.class
 au/com/manlyit/fitnesscrm/stats/db/Participants.class
 au/com/manlyit/fitnesscrm/stats/chartbeans/MySessionsChart1.class
 au/com/manlyit/fitnesscrm/stats/webservices/EziResponseOfNewCustomerXcXH3LiW.class
@@ -189,6 +191,7 @@ au/com/manlyit/fitnesscrm/stats/webservices/INonPCIService.class
 au/com/manlyit/fitnesscrm/stats/beans/QrtzCronTriggersFacade.class
 au/com/manlyit/fitnesscrm/stats/classes/InvoiceController$1.class
 au/com/manlyit/fitnesscrm/stats/webservices/DeletePaymentResponse.class
+au/com/manlyit/fitnesscrm/stats/classes/ContractorRateToTaskMapController.class
 au/com/manlyit/fitnesscrm/stats/classes/util/ChannelsBean.class
 au/com/manlyit/fitnesscrm/stats/db/SurveyQuestions.class
 au/com/manlyit/fitnesscrm/stats/classes/util/ViewExpiredExceptionExceptionHandler.class
@@ -200,6 +203,7 @@ au/com/manlyit/fitnesscrm/stats/webservices/ChangeScheduledDateResponse.class
 au/com/manlyit/fitnesscrm/stats/classes/QrtzSimpleTriggersController.class
 au/com/manlyit/fitnesscrm/stats/classes/ConfigMapController.class
 au/com/manlyit/fitnesscrm/stats/beans/AbstractFacade.class
+au/com/manlyit/fitnesscrm/stats/beans/ContractorRatesFacade.class
 au/com/manlyit/fitnesscrm/stats/classes/ExpensesController.class
 au/com/manlyit/fitnesscrm/stats/db/SurveyQuestionSubitems.class
 au/com/manlyit/fitnesscrm/stats/classes/InvoiceController$InvoiceControllerConverter.class
@@ -344,10 +348,12 @@ au/com/manlyit/fitnesscrm/stats/classes/StatController$StatControllerConverter.c
 au/com/manlyit/fitnesscrm/stats/classes/PlanController.class
 au/com/manlyit/fitnesscrm/stats/webservices/ChangeCustomerStatus.class
 au/com/manlyit/fitnesscrm/stats/callable/renderMonitoringChartsCallable1_old.class
+au/com/manlyit/fitnesscrm/stats/classes/ContractorRatesController.class
 au/com/manlyit/fitnesscrm/stats/beans/PreferedContactFacade.class
 au/com/manlyit/fitnesscrm/stats/classes/CustomerImagesController$CustomerImagesControllerConverter.class
 au/com/manlyit/fitnesscrm/stats/classes/SurveyAnswersController.class
 au/com/manlyit/fitnesscrm/stats/classes/SurveyquestiontypesController$SurveyquestiontypesControllerConverter.class
+au/com/manlyit/fitnesscrm/stats/classes/ContractorRatesController$1.class
 au/com/manlyit/fitnesscrm/stats/classes/ExpenseTypesController.class
 au/com/manlyit/fitnesscrm/stats/classes/util/MessageEncoder.class
 au/com/manlyit/fitnesscrm/stats/classes/util/UAgentInfo.class
@@ -362,6 +368,7 @@ au/com/manlyit/fitnesscrm/stats/classes/CustomerAuthController.class
 au/com/manlyit/fitnesscrm/stats/db/ToDoList.class
 au/com/manlyit/fitnesscrm/stats/db/SessionTypes.class
 au/com/manlyit/fitnesscrm/stats/classes/StatsTakenController$StatsTakenControllerConverter.class
+au/com/manlyit/fitnesscrm/stats/db/ContractorRateToTaskMap.class
 au/com/manlyit/fitnesscrm/stats/converters/TaskConverter.class
 au/com/manlyit/fitnesscrm/stats/beans/WebsiteMonitorFacade.class
 au/com/manlyit/fitnesscrm/stats/db/QrtzSimpleTriggers.class
@@ -431,6 +438,8 @@ au/com/manlyit/fitnesscrm/stats/classes/EmailFormatController.class
 au/com/manlyit/fitnesscrm/stats/classes/ScheduleController$2.class
 au/com/manlyit/fitnesscrm/stats/beans/InvoiceLineFacade.class
 au/com/manlyit/fitnesscrm/stats/beans/JobConfigMapFacade.class
+au/com/manlyit/fitnesscrm/stats/classes/ContractorRateToTaskMapController$ContractorRateToTaskMapControllerConverter.class
+au/com/manlyit/fitnesscrm/stats/classes/ContractorRateToTaskMapController$1.class
 au/com/manlyit/fitnesscrm/stats/beans/SessionHistoryFacade.class
 au/com/manlyit/fitnesscrm/stats/classes/LineChartPointsVertical.class
 au/com/manlyit/fitnesscrm/stats/classes/GroupsController$1.class
@@ -453,6 +462,7 @@ au/com/manlyit/fitnesscrm/stats/classes/CustomersController$2.class
 au/com/manlyit/fitnesscrm/stats/webservices/AddPayment.class
 au/com/manlyit/fitnesscrm/stats/converters/ColorPickerConverter.class
 au/com/manlyit/fitnesscrm/stats/classes/EmailQueueController.class
+au/com/manlyit/fitnesscrm/stats/classes/ContractorRatesController$ContractorRatesControllerConverter.class
 au/com/manlyit/fitnesscrm/stats/beans/SurveyAnswerSubitemsFacade.class
 au/com/manlyit/fitnesscrm/stats/converters/SessionHistoryConverter.class
 au/com/manlyit/fitnesscrm/stats/db/CustomerGoals.class

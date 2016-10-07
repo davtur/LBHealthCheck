@@ -1,0 +1,34 @@
+
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                >
+
+    <p:dialog id="ContractorRatesViewDlg" widgetVar="ContractorRatesViewDialog" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('ViewContractorRatesTitle')}">
+        <h:form id="ContractorRatesViewForm">
+            <h:panelGroup id="display">
+                <p:panelGrid columns="2" rendered="#{contractorRatesController.selected != null}">
+                    <h:outputText value="#{configMapController.getKey('ViewContractorRatesLabel_id')}"/>
+                    <h:outputText value="#{contractorRatesController.selected.id}" title="#{configMapController.getKey('ViewContractorRatesTitle_id')}"/>
+                    <h:outputText value="#{configMapController.getKey('ViewContractorRatesLabel_rate')}"/>
+                    <h:outputText value="#{contractorRatesController.selected.rate}" title="#{configMapController.getKey('ViewContractorRatesTitle_rate')}"/>
+                    <h:outputText value="#{configMapController.getKey('ViewContractorRatesLabel_bonusAmount')}"/>
+                    <h:outputText value="#{contractorRatesController.selected.bonusAmount}" title="#{configMapController.getKey('ViewContractorRatesTitle_bonusAmount')}"/>
+                    <h:outputText value="#{configMapController.getKey('ViewContractorRatesLabel_bonusInteger')}"/>
+                    <h:outputText value="#{contractorRatesController.selected.bonusInteger}" title="#{configMapController.getKey('ViewContractorRatesTitle_bonusInteger')}"/>
+                    <h:outputText value="#{configMapController.getKey('ViewContractorRatesLabel_name')}"/>
+                    <h:outputText value="#{contractorRatesController.selected.name}" title="#{configMapController.getKey('ViewContractorRatesTitle_name')}"/>
+                    <h:outputText value="#{configMapController.getKey('ViewContractorRatesLabel_description')}"/>
+                    <h:outputText value="#{contractorRatesController.selected.description}" title="#{configMapController.getKey('ViewContractorRatesTitle_description')}"/>
+                    <h:outputText value="#{configMapController.getKey('ViewContractorRatesLabel_supplierId')}"/>
+                    <h:outputText value="#{contractorRatesController.selected.supplierId}" title="#{configMapController.getKey('ViewContractorRatesTitle_supplierId')}"/>
+                </p:panelGrid>
+                <p:commandButton value="#{configMapController.getKey('Close')}" onclick="PF('ContractorRatesViewDialog').hide()"/>
+            </h:panelGroup>
+        </h:form>
+    </p:dialog>
+
+</ui:composition>
+

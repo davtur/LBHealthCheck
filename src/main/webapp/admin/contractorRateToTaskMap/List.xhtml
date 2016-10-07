@@ -1,0 +1,103 @@
+
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/template.xhtml">
+    <ui:define name="title">
+        <h:outputText value="#{configMapController.getKey('ListContractorRateToTaskMapTitle')}"></h:outputText>
+    </ui:define>
+    <ui:define name="body">
+
+
+
+
+
+        <h:form id="ContractorRateToTaskMapListForm">
+            <h:outputText escape="false" value="#{configMapController.getKey('ListContractorRateToTaskMapEmpty')}" rendered="#{contractorRateToTaskMapController.items.rowCount == 0}"/>
+            <h:panelGroup >
+                <p:dataTable  
+                    id="datalist"  
+                    editable="true" 
+                    value="#{contractorRateToTaskMapController.items}" 
+                    selection="#{contractorRateToTaskMapController.selected}" 
+                    rowKey="#{item.id}" 
+                    filteredValue="#{contractorRateToTaskMapController.filteredItems}"  
+                    widgetVar="contractorRateToTaskMapControllerTable" 
+                    var="item"  
+                    paginator="true" 
+                    rows="15"  
+                    paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  
+                    rowsPerPageTemplate="5,10,15,20,25,50,100" >
+                    <f:facet name="header">
+                        <p:outputPanel>
+                            <h:outputText value="Search all fields:" />
+                            <h:inputText id="globalFilter" onkeyup="PF('contractorRateToTaskMapControllerTable').filter()" />
+                        </p:outputPanel>
+                    </f:facet>
+                    <p:ajax event="rowEdit" listener="#{contractorRateToTaskMapController.onEdit}" update=":growl" oncomplete="PF('contractorRateToTaskMapControllerTable').filter()" />  
+                    <p:ajax event="rowEditCancel" listener="#{contractorRateToTaskMapController.onCancel}" update=":growl"  oncomplete="PF('contractorRateToTaskMapControllerTable').filter()" />  
+                    <p:ajax event="rowSelect"   update="createButton viewButton editButton deleteButton"/>
+                    <p:ajax event="rowUnselect" update="createButton viewButton editButton deleteButton"/>
+                    <p:column selectionMode="single"/>
+                    <p:column sortBy="#{item.id}" filterBy="#{item.id}" headerText="#{configMapController.getKey('ListContractorRateToTaskMapTitle_id')}"   >
+                        <p:cellEditor> 
+                            <f:facet name="output">
+                                <h:outputText value="#{item.id}"/>
+                            </f:facet>
+                            <f:facet name="input">
+                                <p:inputText value="#{item.id}" label="#{configMapController.getKey('ListContractorRateToTaskMapTitle_id')}" />
+                            </f:facet>
+                        </p:cellEditor> 
+
+
+                    </p:column>
+                    <p:column sortBy="#{item.contractorRateId}" filterBy="#{item.contractorRateId}" headerText="#{configMapController.getKey('ListContractorRateToTaskMapTitle_contractorRateId')}"   >
+                        <p:cellEditor> 
+                            <f:facet name="output">
+                                <h:outputText value="#{item.contractorRateId}"/>
+                            </f:facet>
+                            <f:facet name="input">
+                                <p:inputText value="#{item.contractorRateId}" label="#{configMapController.getKey('ListContractorRateToTaskMapTitle_contractorRateId')}" />
+                            </f:facet>
+                        </p:cellEditor> 
+
+
+                    </p:column>
+                    <p:column sortBy="#{item.taskId}" filterBy="#{item.taskId}" headerText="#{configMapController.getKey('ListContractorRateToTaskMapTitle_taskId')}"   >
+                        <p:cellEditor> 
+                            <f:facet name="output">
+                                <h:outputText value="#{item.taskId}"/>
+                            </f:facet>
+                            <f:facet name="input">
+                                <p:inputText value="#{item.taskId}" label="#{configMapController.getKey('ListContractorRateToTaskMapTitle_taskId')}" />
+                            </f:facet>
+                        </p:cellEditor> 
+
+
+                    </p:column>
+                    <p:column rendered="#{contractorRateToTaskMapController.isUserInRole('ADMIN')}"  headerText="Edit" style="width:50px">  
+                        <p:rowEditor />  
+                    </p:column>  
+
+
+                    <f:facet name="footer">
+                        <p:commandButton rendered="#{contractorRateToTaskMapController.isUserInRole('ADMIN')}" id="createButton" icon="ui-icon-plus"   value="#{configMapController.getKey('Create')}" actionListener="#{contractorRateToTaskMapController.prepareCreate}" update=":ContractorRateToTaskMapCreateForm" oncomplete="PF('ContractorRateToTaskMapCreateDialog').show()"/>
+                        <p:commandButton id="viewButton"   icon="ui-icon-search" value="#{configMapController.getKey('View')}" update=":ContractorRateToTaskMapViewForm" oncomplete="PF('ContractorRateToTaskMapViewDialog').show()" disabled="#{empty contractorRateToTaskMapController.selected}"/>
+                        <p:commandButton rendered="#{contractorRateToTaskMapController.isUserInRole('ADMIN')}" id="editButton"   icon="ui-icon-pencil" value="#{configMapController.getKey('Edit')}" update=":ContractorRateToTaskMapEditForm" oncomplete="PF('ContractorRateToTaskMapEditDialog').show()" disabled="#{empty contractorRateToTaskMapController.selected}"/>
+                        <p:commandButton rendered="#{contractorRateToTaskMapController.isUserInRole('ADMIN')}" id="deleteButton" icon="ui-icon-trash"  value="#{configMapController.getKey('Delete')}" actionListener="#{contractorRateToTaskMapController.destroy}" update=":growl,datalist" disabled="#{empty contractorRateToTaskMapController.selected}"/>
+                    </f:facet>
+
+                </p:dataTable>
+            </h:panelGroup>
+        </h:form>
+
+        <ui:include src="Create.xhtml"/>
+        <ui:include src="Edit.xhtml"/>
+        <ui:include src="View.xhtml"/>
+
+    </ui:define>
+</ui:composition>
+<p> Generated from template ( JSF_from_entity_wizard/StandardJSF/list.ftl  )- Dave 23rd October 2015 </p>
+

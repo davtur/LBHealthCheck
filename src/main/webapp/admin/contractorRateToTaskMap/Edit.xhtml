@@ -1,0 +1,33 @@
+
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                >
+
+    <p:dialog id="ContractorRateToTaskMapEditDlg" widgetVar="ContractorRateToTaskMapEditDialog" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('EditContractorRateToTaskMapTitle')}">
+        <h:form id="ContractorRateToTaskMapEditForm">
+            <h:panelGroup id="display">
+                <p:panelGrid columns="2" rendered="#{contractorRateToTaskMapController.selected != null}">
+                    <h:outputLabel value="#{configMapController.getKey('EditContractorRateToTaskMapLabel_id')}" for="id" />
+                    <h:inputText id="id"  value="#{contractorRateToTaskMapController.selected.id}" title="#{configMapController.getKey('EditContractorRateToTaskMapTitle_id')}" required="true" requiredMessage="#{configMapController.getKey('EditContractorRateToTaskMapRequiredMessage_id')}"/>
+                    <h:outputLabel value="#{configMapController.getKey('EditContractorRateToTaskMapLabel_contractorRateId')}" for="contractorRateId" />
+                    <p:selectOneMenu id="contractorRateId" valueChangeListener="#{contractorRateToTaskMapController.selectOneMenuValueChangeListener}" value="#{contractorRateToTaskMapController.selected.contractorRateId}" label="#{configMapController.getKey('EditContractorRateToTaskMapTitle_contractorRateId')}" required="true" requiredMessage="#{configMapController.getKey('EditContractorRateToTaskMapRequiredMessage_contractorRateId')}">
+                        <f:selectItems value="#{contractorRatesController.itemsAvailableSelectOne}"/>
+                        <p:ajax   update=":ContractorRateToTaskMapEditForm"  />
+                    </p:selectOneMenu>
+                    <h:outputLabel value="#{configMapController.getKey('EditContractorRateToTaskMapLabel_taskId')}" for="taskId" />
+                    <p:selectOneMenu id="taskId" valueChangeListener="#{contractorRateToTaskMapController.selectOneMenuValueChangeListener}" value="#{contractorRateToTaskMapController.selected.taskId}" label="#{configMapController.getKey('EditContractorRateToTaskMapTitle_taskId')}" required="true" requiredMessage="#{configMapController.getKey('EditContractorRateToTaskMapRequiredMessage_taskId')}">
+                        <f:selectItems value="#{sessionTypesController.itemsAvailableSelectOne}"/>
+                        <p:ajax   update=":ContractorRateToTaskMapEditForm"  />
+                    </p:selectOneMenu>
+                </p:panelGrid>
+                <p:commandButton actionListener="#{contractorRateToTaskMapController.update}" value="#{configMapController.getKey('Save')}" update="display,:ContractorRateToTaskMapListForm:datalist,:growl" oncomplete="handleSubmit(args, 'ContractorRateToTaskMapEditDialog');PF('contractorRateToTaskMapControllerTable').filter()"/>
+                <p:commandButton value="#{configMapController.getKey('Cancel')}" onclick="PF('ContractorRateToTaskMapEditDialog').hide()"/>
+            </h:panelGroup>
+        </h:form>
+    </p:dialog>
+
+</ui:composition>
+

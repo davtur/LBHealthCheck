@@ -26,6 +26,7 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Inject;
@@ -1108,11 +1109,14 @@ public class CustomersController implements Serializable {
 
     private void updateCustomersGroupMembership(Customers c) {
         //modify customers groups
-        Groups[] grps = new Groups[c.getGroupsCollection().size()];
-        c.getGroupsCollection().toArray(grps);
-       // have to use a reverse loop as we are removing components
-        for (int i = grps.length -1; i >= 0; i--) {
-            Groups g = grps[i];
+        //Groups[] grps = new Groups[c.getGroupsCollection().size()];
+        //c.getGroupsCollection().toArray(grps);
+        // have to use an iterator as we are removing components
+        Collection<Groups> customersExistingGroups = c.getGroupsCollection();
+        Iterator<Groups> i = customersExistingGroups.iterator();
+        while (i.hasNext()) {
+            // for (int i = grps.length -1; i >= 0; i--) {
+            Groups g = i.next();
             boolean exists = false;
             for (Groups sg : selectedGroups) {
                 if (sg.getGroupname().trim().equalsIgnoreCase(g.getGroupname().trim())) {
@@ -1124,7 +1128,7 @@ public class CustomersController implements Serializable {
                 //ejbGroupsFacade.remove(g);
             }
         }
-        Collection<Groups> customersExistingGroups = c.getGroupsCollection();
+        customersExistingGroups = c.getGroupsCollection();
         for (Groups g : selectedGroups) {
             boolean exists = false;
 

@@ -1,0 +1,39 @@
+
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                >
+    <p:dialog id="ContractorRatesCreateDlg" widgetVar="ContractorRatesCreateDialog" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('CreateContractorRatesTitle')}">
+
+        <h:form id="ContractorRatesCreateForm">
+            <h:panelGroup id="display">
+                <p:panelGrid columns="2" rendered="#{contractorRatesController.selected != null}">
+                    <p:outputLabel value="#{configMapController.getKey('CreateContractorRatesLabel_id')}" for="id" />
+                    <p:inputText id="id" value="#{contractorRatesController.selected.id}" title="#{configMapController.getKey('CreateContractorRatesTitle_id')}" required="true" requiredMessage="#{configMapController.getKey('CreateContractorRatesRequiredMessage_id')}"/>
+                    <p:outputLabel value="#{configMapController.getKey('CreateContractorRatesLabel_rate')}" for="rate" />
+                    <p:inputText id="rate" value="#{contractorRatesController.selected.rate}" title="#{configMapController.getKey('CreateContractorRatesTitle_rate')}" required="true" requiredMessage="#{configMapController.getKey('CreateContractorRatesRequiredMessage_rate')}"/>
+                    <p:outputLabel value="#{configMapController.getKey('CreateContractorRatesLabel_bonusAmount')}" for="bonusAmount" />
+                    <p:inputText id="bonusAmount" value="#{contractorRatesController.selected.bonusAmount}" title="#{configMapController.getKey('CreateContractorRatesTitle_bonusAmount')}" required="true" requiredMessage="#{configMapController.getKey('CreateContractorRatesRequiredMessage_bonusAmount')}"/>
+                    <p:outputLabel value="#{configMapController.getKey('CreateContractorRatesLabel_bonusInteger')}" for="bonusInteger" />
+                    <p:inputText id="bonusInteger" value="#{contractorRatesController.selected.bonusInteger}" title="#{configMapController.getKey('CreateContractorRatesTitle_bonusInteger')}" required="true" requiredMessage="#{configMapController.getKey('CreateContractorRatesRequiredMessage_bonusInteger')}"/>
+                    <p:outputLabel value="#{configMapController.getKey('CreateContractorRatesLabel_name')}" for="name" />
+                    <p:inputText id="name" value="#{contractorRatesController.selected.name}" title="#{configMapController.getKey('CreateContractorRatesTitle_name')}" />
+                    <p:outputLabel value="#{configMapController.getKey('CreateContractorRatesLabel_description')}" for="description" />
+                    <p:inputTextarea rows="4" cols="30" id="description"  value="#{contractorRatesController.selected.description}"  title="#{configMapController.getKey('CreateContractorRatesTitle_description')}" />
+                    <p:outputLabel value="#{configMapController.getKey('CreateContractorRatesLabel_supplierId')}" for="supplierId" />
+                    <p:selectOneMenu id="supplierId" valueChangeListener="#{contractorRatesController.selectOneMenuValueChangeListener}"  value="#{contractorRatesController.selected.supplierId}"  label="#{configMapController.getKey('CreateContractorRatesTitle_supplierId')}" required="true" requiredMessage="#{configMapController.getKey('CreateContractorRatesRequiredMessage_supplierId')}">
+                        <f:selectItems value="#{suppliersController.itemsAvailableSelectOne}"/>
+                        <p:ajax   update=":ContractorRatesCreateForm"  />
+                    </p:selectOneMenu>
+                </p:panelGrid>
+                <p:commandButton actionListener="#{contractorRatesController.createDialogue}" value="#{configMapController.getKey('Save')}" update="display,:ContractorRatesListForm:datalist,:growl" oncomplete="handleSubmit(args,'ContractorRatesCreateDialog');PF('contractorRatesControllerTable').filter()"/>
+                <p:commandButton value="#{configMapController.getKey('Cancel')}" onclick="PF('ContractorRatesCreateDialog').hide()"/>
+            </h:panelGroup>
+        </h:form>
+    </p:dialog>
+
+</ui:composition>    
+<p> Generated from template ( JSF_from_entity_wizard/StandardJSF/create.ftl  )- Dave 23rd October 2015 </p>
+

@@ -1,0 +1,26 @@
+
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                >
+
+    <p:dialog id="ContractorRateToTaskMapViewDlg" widgetVar="ContractorRateToTaskMapViewDialog" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('ViewContractorRateToTaskMapTitle')}">
+        <h:form id="ContractorRateToTaskMapViewForm">
+            <h:panelGroup id="display">
+                <p:panelGrid columns="2" rendered="#{contractorRateToTaskMapController.selected != null}">
+                    <h:outputText value="#{configMapController.getKey('ViewContractorRateToTaskMapLabel_id')}"/>
+                    <h:outputText value="#{contractorRateToTaskMapController.selected.id}" title="#{configMapController.getKey('ViewContractorRateToTaskMapTitle_id')}"/>
+                    <h:outputText value="#{configMapController.getKey('ViewContractorRateToTaskMapLabel_contractorRateId')}"/>
+                    <h:outputText value="#{contractorRateToTaskMapController.selected.contractorRateId}" title="#{configMapController.getKey('ViewContractorRateToTaskMapTitle_contractorRateId')}"/>
+                    <h:outputText value="#{configMapController.getKey('ViewContractorRateToTaskMapLabel_taskId')}"/>
+                    <h:outputText value="#{contractorRateToTaskMapController.selected.taskId}" title="#{configMapController.getKey('ViewContractorRateToTaskMapTitle_taskId')}"/>
+                </p:panelGrid>
+                <p:commandButton value="#{configMapController.getKey('Close')}" onclick="PF('ContractorRateToTaskMapViewDialog').hide()"/>
+            </h:panelGroup>
+        </h:form>
+    </p:dialog>
+
+</ui:composition>
+

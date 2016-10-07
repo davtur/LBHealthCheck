@@ -39,6 +39,9 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "SessionTypes.findByName", query = "SELECT s FROM SessionTypes s WHERE s.name = :name"),
     @NamedQuery(name = "SessionTypes.findByDescription", query = "SELECT s FROM SessionTypes s WHERE s.description = :description")})
 public class SessionTypes implements  BaseEntity, Serializable {
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "taskId")
+    private Collection<ContractorRateToTaskMap> contractorRateToTaskMapCollection;
     @Basic(optional = false)
     @NotNull
     @Column(name = "session_duration_minutes")
@@ -163,6 +166,15 @@ public class SessionTypes implements  BaseEntity, Serializable {
 
     public void setSessionTimetableCollection(Collection<SessionTimetable> sessionTimetableCollection) {
         this.sessionTimetableCollection = sessionTimetableCollection;
+    }
+
+    @XmlTransient
+    public Collection<ContractorRateToTaskMap> getContractorRateToTaskMapCollection() {
+        return contractorRateToTaskMapCollection;
+    }
+
+    public void setContractorRateToTaskMapCollection(Collection<ContractorRateToTaskMap> contractorRateToTaskMapCollection) {
+        this.contractorRateToTaskMapCollection = contractorRateToTaskMapCollection;
     }
 
 }

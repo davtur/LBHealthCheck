@@ -1,0 +1,38 @@
+
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                >
+
+    <p:dialog id="ContractorRatesEditDlg" widgetVar="ContractorRatesEditDialog" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('EditContractorRatesTitle')}">
+        <h:form id="ContractorRatesEditForm">
+            <h:panelGroup id="display">
+                <p:panelGrid columns="2" rendered="#{contractorRatesController.selected != null}">
+                    <h:outputLabel value="#{configMapController.getKey('EditContractorRatesLabel_id')}" for="id" />
+                    <h:inputText id="id"  value="#{contractorRatesController.selected.id}" title="#{configMapController.getKey('EditContractorRatesTitle_id')}" required="true" requiredMessage="#{configMapController.getKey('EditContractorRatesRequiredMessage_id')}"/>
+                    <h:outputLabel value="#{configMapController.getKey('EditContractorRatesLabel_rate')}" for="rate" />
+                    <h:inputText id="rate"  value="#{contractorRatesController.selected.rate}" title="#{configMapController.getKey('EditContractorRatesTitle_rate')}" required="true" requiredMessage="#{configMapController.getKey('EditContractorRatesRequiredMessage_rate')}"/>
+                    <h:outputLabel value="#{configMapController.getKey('EditContractorRatesLabel_bonusAmount')}" for="bonusAmount" />
+                    <h:inputText id="bonusAmount"  value="#{contractorRatesController.selected.bonusAmount}" title="#{configMapController.getKey('EditContractorRatesTitle_bonusAmount')}" required="true" requiredMessage="#{configMapController.getKey('EditContractorRatesRequiredMessage_bonusAmount')}"/>
+                    <h:outputLabel value="#{configMapController.getKey('EditContractorRatesLabel_bonusInteger')}" for="bonusInteger" />
+                    <h:inputText id="bonusInteger"  value="#{contractorRatesController.selected.bonusInteger}" title="#{configMapController.getKey('EditContractorRatesTitle_bonusInteger')}" required="true" requiredMessage="#{configMapController.getKey('EditContractorRatesRequiredMessage_bonusInteger')}"/>
+                    <h:outputLabel value="#{configMapController.getKey('EditContractorRatesLabel_name')}" for="name" />
+                    <h:inputText id="name"  value="#{contractorRatesController.selected.name}" title="#{configMapController.getKey('EditContractorRatesTitle_name')}" />
+                    <h:outputLabel value="#{configMapController.getKey('EditContractorRatesLabel_description')}" for="description" />
+                    <h:inputTextarea rows="4" cols="30" id="description" value="#{contractorRatesController.selected.description}" title="#{configMapController.getKey('EditContractorRatesTitle_description')}" />
+                    <h:outputLabel value="#{configMapController.getKey('EditContractorRatesLabel_supplierId')}" for="supplierId" />
+                    <p:selectOneMenu id="supplierId" valueChangeListener="#{contractorRatesController.selectOneMenuValueChangeListener}" value="#{contractorRatesController.selected.supplierId}" label="#{configMapController.getKey('EditContractorRatesTitle_supplierId')}" required="true" requiredMessage="#{configMapController.getKey('EditContractorRatesRequiredMessage_supplierId')}">
+                        <f:selectItems value="#{suppliersController.itemsAvailableSelectOne}"/>
+                        <p:ajax   update=":ContractorRatesEditForm"  />
+                    </p:selectOneMenu>
+                </p:panelGrid>
+                <p:commandButton actionListener="#{contractorRatesController.update}" value="#{configMapController.getKey('Save')}" update="display,:ContractorRatesListForm:datalist,:growl" oncomplete="handleSubmit(args, 'ContractorRatesEditDialog');PF('contractorRatesControllerTable').filter()"/>
+                <p:commandButton value="#{configMapController.getKey('Cancel')}" onclick="PF('ContractorRatesEditDialog').hide()"/>
+            </h:panelGroup>
+        </h:form>
+    </p:dialog>
+
+</ui:composition>
+

@@ -1,0 +1,151 @@
+
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/template.xhtml">
+    <ui:define name="title">
+        <h:outputText value="#{configMapController.getKey('ListContractorRatesTitle')}"></h:outputText>
+    </ui:define>
+    <ui:define name="body">
+
+
+
+
+
+        <h:form id="ContractorRatesListForm">
+            <h:outputText escape="false" value="#{configMapController.getKey('ListContractorRatesEmpty')}" rendered="#{contractorRatesController.items.rowCount == 0}"/>
+            <h:panelGroup >
+                <p:dataTable  
+                    id="datalist"  
+                    editable="true" 
+                    value="#{contractorRatesController.items}" 
+                    selection="#{contractorRatesController.selected}" 
+                    rowKey="#{item.id}" 
+                    filteredValue="#{contractorRatesController.filteredItems}"  
+                    widgetVar="contractorRatesControllerTable" 
+                    var="item"  
+                    paginator="true" 
+                    rows="15"  
+                    paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  
+                    rowsPerPageTemplate="5,10,15,20,25,50,100" >
+                    <f:facet name="header">
+                        <p:outputPanel>
+                            <h:outputText value="Search all fields:" />
+                            <h:inputText id="globalFilter" onkeyup="PF('contractorRatesControllerTable').filter()" />
+                        </p:outputPanel>
+                    </f:facet>
+                    <p:ajax event="rowEdit" listener="#{contractorRatesController.onEdit}" update=":growl" oncomplete="PF('contractorRatesControllerTable').filter()" />  
+                    <p:ajax event="rowEditCancel" listener="#{contractorRatesController.onCancel}" update=":growl"  oncomplete="PF('contractorRatesControllerTable').filter()" />  
+                    <p:ajax event="rowSelect"   update="createButton viewButton editButton deleteButton"/>
+                    <p:ajax event="rowUnselect" update="createButton viewButton editButton deleteButton"/>
+                    <p:column selectionMode="single"/>
+                    <p:column sortBy="#{item.id}" filterBy="#{item.id}" headerText="#{configMapController.getKey('ListContractorRatesTitle_id')}"   >
+                        <p:cellEditor> 
+                            <f:facet name="output">
+                                <h:outputText value="#{item.id}"/>
+                            </f:facet>
+                            <f:facet name="input">
+                                <p:inputText value="#{item.id}" label="#{configMapController.getKey('ListContractorRatesTitle_id')}" />
+                            </f:facet>
+                        </p:cellEditor> 
+
+
+                    </p:column>
+                    <p:column sortBy="#{item.rate}" filterBy="#{item.rate}" headerText="#{configMapController.getKey('ListContractorRatesTitle_rate')}"   >
+                        <p:cellEditor> 
+                            <f:facet name="output">
+                                <h:outputText value="#{item.rate}"/>
+                            </f:facet>
+                            <f:facet name="input">
+                                <p:inputText value="#{item.rate}" label="#{configMapController.getKey('ListContractorRatesTitle_rate')}" />
+                            </f:facet>
+                        </p:cellEditor> 
+
+
+                    </p:column>
+                    <p:column sortBy="#{item.bonusAmount}" filterBy="#{item.bonusAmount}" headerText="#{configMapController.getKey('ListContractorRatesTitle_bonusAmount')}"   >
+                        <p:cellEditor> 
+                            <f:facet name="output">
+                                <h:outputText value="#{item.bonusAmount}"/>
+                            </f:facet>
+                            <f:facet name="input">
+                                <p:inputText value="#{item.bonusAmount}" label="#{configMapController.getKey('ListContractorRatesTitle_bonusAmount')}" />
+                            </f:facet>
+                        </p:cellEditor> 
+
+
+                    </p:column>
+                    <p:column sortBy="#{item.bonusInteger}" filterBy="#{item.bonusInteger}" headerText="#{configMapController.getKey('ListContractorRatesTitle_bonusInteger')}"   >
+                        <p:cellEditor> 
+                            <f:facet name="output">
+                                <h:outputText value="#{item.bonusInteger}"/>
+                            </f:facet>
+                            <f:facet name="input">
+                                <p:inputText value="#{item.bonusInteger}" label="#{configMapController.getKey('ListContractorRatesTitle_bonusInteger')}" />
+                            </f:facet>
+                        </p:cellEditor> 
+
+
+                    </p:column>
+                    <p:column sortBy="#{item.name}" filterBy="#{item.name}" headerText="#{configMapController.getKey('ListContractorRatesTitle_name')}"   >
+                        <p:cellEditor> 
+                            <f:facet name="output">
+                                <h:outputText value="#{item.name}"/>
+                            </f:facet>
+                            <f:facet name="input">
+                                <p:inputText value="#{item.name}" label="#{configMapController.getKey('ListContractorRatesTitle_name')}" />
+                            </f:facet>
+                        </p:cellEditor> 
+
+
+                    </p:column>
+                    <p:column sortBy="#{item.description}" filterBy="#{item.description}" headerText="#{configMapController.getKey('ListContractorRatesTitle_description')}"   >
+                        <p:cellEditor> 
+                            <f:facet name="output">
+                                <h:outputText value="#{item.description}"/>
+                            </f:facet>
+                            <f:facet name="input">
+                                <p:inputText value="#{item.description}" label="#{configMapController.getKey('ListContractorRatesTitle_description')}" />
+                            </f:facet>
+                        </p:cellEditor> 
+
+
+                    </p:column>
+                    <p:column sortBy="#{item.supplierId}" filterBy="#{item.supplierId}" headerText="#{configMapController.getKey('ListContractorRatesTitle_supplierId')}"   >
+                        <p:cellEditor> 
+                            <f:facet name="output">
+                                <h:outputText value="#{item.supplierId}"/>
+                            </f:facet>
+                            <f:facet name="input">
+                                <p:inputText value="#{item.supplierId}" label="#{configMapController.getKey('ListContractorRatesTitle_supplierId')}" />
+                            </f:facet>
+                        </p:cellEditor> 
+
+
+                    </p:column>
+                    <p:column rendered="#{contractorRatesController.isUserInRole('ADMIN')}"  headerText="Edit" style="width:50px">  
+                        <p:rowEditor />  
+                    </p:column>  
+
+
+                    <f:facet name="footer">
+                        <p:commandButton rendered="#{contractorRatesController.isUserInRole('ADMIN')}" id="createButton" icon="ui-icon-plus"   value="#{configMapController.getKey('Create')}" actionListener="#{contractorRatesController.prepareCreate}" update=":ContractorRatesCreateForm" oncomplete="PF('ContractorRatesCreateDialog').show()"/>
+                        <p:commandButton id="viewButton"   icon="ui-icon-search" value="#{configMapController.getKey('View')}" update=":ContractorRatesViewForm" oncomplete="PF('ContractorRatesViewDialog').show()" disabled="#{empty contractorRatesController.selected}"/>
+                        <p:commandButton rendered="#{contractorRatesController.isUserInRole('ADMIN')}" id="editButton"   icon="ui-icon-pencil" value="#{configMapController.getKey('Edit')}" update=":ContractorRatesEditForm" oncomplete="PF('ContractorRatesEditDialog').show()" disabled="#{empty contractorRatesController.selected}"/>
+                        <p:commandButton rendered="#{contractorRatesController.isUserInRole('ADMIN')}" id="deleteButton" icon="ui-icon-trash"  value="#{configMapController.getKey('Delete')}" actionListener="#{contractorRatesController.destroy}" update=":growl,datalist" disabled="#{empty contractorRatesController.selected}"/>
+                    </f:facet>
+
+                </p:dataTable>
+            </h:panelGroup>
+        </h:form>
+
+        <ui:include src="Create.xhtml"/>
+        <ui:include src="Edit.xhtml"/>
+        <ui:include src="View.xhtml"/>
+
+    </ui:define>
+</ui:composition>
+<p> Generated from template ( JSF_from_entity_wizard/StandardJSF/list.ftl  )- Dave 23rd October 2015 </p>
+
