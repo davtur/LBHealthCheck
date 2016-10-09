@@ -286,6 +286,9 @@ public class SessionTypesController implements Serializable {
     public Collection<SessionTypes> getItemsAvailable() {
         return ejbFacade.findAllSessionTypesOrderByName(true);
     }
+     public List<SessionTypes> getAllSessionTypes() {
+        return ejbFacade.findAllSessionTypesOrderByName(true);
+    }
 
     public void onEdit(RowEditEvent event) {
         SessionTypes cm = (SessionTypes) event.getObject();

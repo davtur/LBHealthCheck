@@ -10,9 +10,7 @@
         <h:form id="ContractorRatesCreateForm">
             <h:panelGroup id="display">
                 <p:panelGrid columns="2" rendered="#{contractorRatesController.selected != null}">
-                    <p:outputLabel value="#{configMapController.getKey('CreateContractorRatesLabel_id')}" for="id" />
-                    <p:inputText id="id" value="#{contractorRatesController.selected.id}" title="#{configMapController.getKey('CreateContractorRatesTitle_id')}" required="true" requiredMessage="#{configMapController.getKey('CreateContractorRatesRequiredMessage_id')}"/>
-                    <p:outputLabel value="#{configMapController.getKey('CreateContractorRatesLabel_rate')}" for="rate" />
+                     <p:outputLabel value="#{configMapController.getKey('CreateContractorRatesLabel_rate')}" for="rate" />
                     <p:inputText id="rate" value="#{contractorRatesController.selected.rate}" title="#{configMapController.getKey('CreateContractorRatesTitle_rate')}" required="true" requiredMessage="#{configMapController.getKey('CreateContractorRatesRequiredMessage_rate')}"/>
                     <p:outputLabel value="#{configMapController.getKey('CreateContractorRatesLabel_bonusAmount')}" for="bonusAmount" />
                     <p:inputText id="bonusAmount" value="#{contractorRatesController.selected.bonusAmount}" title="#{configMapController.getKey('CreateContractorRatesTitle_bonusAmount')}" required="true" requiredMessage="#{configMapController.getKey('CreateContractorRatesRequiredMessage_bonusAmount')}"/>
@@ -23,8 +21,8 @@
                     <p:outputLabel value="#{configMapController.getKey('CreateContractorRatesLabel_description')}" for="description" />
                     <p:inputTextarea rows="4" cols="30" id="description"  value="#{contractorRatesController.selected.description}"  title="#{configMapController.getKey('CreateContractorRatesTitle_description')}" />
                     <p:outputLabel value="#{configMapController.getKey('CreateContractorRatesLabel_supplierId')}" for="supplierId" />
-                    <p:selectOneMenu id="supplierId" valueChangeListener="#{contractorRatesController.selectOneMenuValueChangeListener}"  value="#{contractorRatesController.selected.supplierId}"  label="#{configMapController.getKey('CreateContractorRatesTitle_supplierId')}" required="true" requiredMessage="#{configMapController.getKey('CreateContractorRatesRequiredMessage_supplierId')}">
-                        <f:selectItems value="#{suppliersController.itemsAvailableSelectOne}"/>
+                    <p:selectOneMenu id="supplierId" valueChangeListener="#{contractorRatesController.selectOneMenuValueChangeListener}" converter="suppliersControllerConverter"  value="#{contractorRatesController.selected.supplierId}"  label="#{configMapController.getKey('CreateContractorRatesTitle_supplierId')}" required="true" requiredMessage="#{configMapController.getKey('CreateContractorRatesRequiredMessage_supplierId')}">
+                        <f:selectItems value="#{suppliersController.itemsAvailable}" var="supplier" itemLabel="#{supplier.supplierName}" itemValue="#{supplier}"/>
                         <p:ajax   update=":ContractorRatesCreateForm"  />
                     </p:selectOneMenu>
                 </p:panelGrid>
@@ -35,5 +33,5 @@
     </p:dialog>
 
 </ui:composition>    
-<p> Generated from template ( JSF_from_entity_wizard/StandardJSF/create.ftl  )- Dave 23rd October 2015 </p>
+
 

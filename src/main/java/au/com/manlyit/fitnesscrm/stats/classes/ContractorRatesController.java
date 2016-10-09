@@ -36,6 +36,8 @@ public class ContractorRatesController implements Serializable {
     private au.com.manlyit.fitnesscrm.stats.beans.ContractorRatesFacade ejbFacade;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade configMapFacade;
+    @Inject
+    private au.com.manlyit.fitnesscrm.stats.beans.SuppliersFacade suppliersFacade;
     private PaginationHelper pagination;
     private int selectedItemIndex;
     private List<ContractorRates> filteredItems;
@@ -138,6 +140,7 @@ public class ContractorRatesController implements Serializable {
                 current.setId(0);
             }
             getFacade().create(current);
+            suppliersFacade.edit(current.getSupplierId());
             JsfUtil.addSuccessMessage(configMapFacade.getConfig("ContractorRatesCreated"));
             return prepareCreate();
         } catch (Exception e) {
@@ -175,6 +178,7 @@ public class ContractorRatesController implements Serializable {
     public String update() {
         try {
             getFacade().edit(current);
+            suppliersFacade.edit(current.getSupplierId());
             JsfUtil.addSuccessMessage(configMapFacade.getConfig("ContractorRatesUpdated"));
             return "View";
         } catch (Exception e) {

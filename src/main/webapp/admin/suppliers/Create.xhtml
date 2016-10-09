@@ -23,6 +23,45 @@
                 <p:commandButton value="#{configMapController.getKey('Cancel')}" onclick="PF('SuppliersCreateDialog').hide()"/>
             </h:panelGroup>
         </h:form>
+        
+          <h:form id="carForm">
+            <p:fieldset id="availableCarsField" legend="Available Session Types">
+                <p:dataGrid id="availableCars" var="sessionType" value="#{suppliersController.sessionTypesArray}" columns="3">
+                    <p:panel id="pnl" header="#{sessionType.name}" style="text-align:center">
+                        <h:outputText value="#{sessionType.description}" title="#{configMapController.getKey('ViewSessionTypesTitle_description')}"/>
+                    </p:panel>
+                    <p:draggable for="pnl" revert="true" handle=".ui-panel-titlebar" stack=".ui-panel"/>
+                </p:dataGrid>
+            </p:fieldset>
+            <ui:repeat value="#{suppliersController.selected.contractorRatesCollection}" var="contractorRate">
+                <p:fieldset id="selectedCars#{contractorRate.id}" legend="Rate" style="margin-top:20px">
+                    <p:outputPanel id="dropArea">
+                        <h:outputText value="!!!Drop here!!!" rendered="#{empty contractorRate.contractorRateToTaskMapCollection}" style="font-size:24px;" />
+                        <p:dataTable id="selectedCarsTable" var="sessionType" value="#{contractorRate.contractorRateToTaskMapCollection}" rendered="#{not empty contractorRate.contractorRateToTaskMapCollection}">
+                            <p:column headerText="Id">
+                                <h:outputText value="#{sessionType.id}" />
+                            </p:column>
+
+                            <p:column headerText="Year">
+                                <h:outputText value="#{sessionType.name}" />
+                            </p:column>
+
+                            <p:column headerText="Brand">
+                                <h:outputText value="#{sessionType.description}" />
+                            </p:column>
+
+                           
+                        </p:dataTable>
+                    </p:outputPanel>
+                </p:fieldset>
+
+                <p:droppable for="selectedCars#{contractorRate.id}" tolerance="touch" activeStyleClass="ui-state-highlight" datasource="availableCars" onDrop="handleDrop">
+                    <p:ajax listener="#{suppliersController.onSessionTypeDrop}" update="dropArea availableCars" />
+                    <f:setPropertyActionListener value="#{contractorRate}" target="#{suppliersController.selectedContractorRate}" />
+                </p:droppable>
+            </ui:repeat>
+
+        </h:form>
     </p:dialog>
 
 </ui:composition>    

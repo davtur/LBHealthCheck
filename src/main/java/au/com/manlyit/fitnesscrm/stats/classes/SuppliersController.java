@@ -4,13 +4,21 @@ import au.com.manlyit.fitnesscrm.stats.db.Suppliers;
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PaginationHelper;
 import au.com.manlyit.fitnesscrm.stats.beans.SuppliersFacade;
+import au.com.manlyit.fitnesscrm.stats.classes.util.ContractorRateToDualListModelMap;
+import au.com.manlyit.fitnesscrm.stats.db.ContractorRateToTaskMap;
+import au.com.manlyit.fitnesscrm.stats.db.ContractorRates;
+import au.com.manlyit.fitnesscrm.stats.db.SessionTypes;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import java.util.ResourceBundle;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.enterprise.context.SessionScoped;
+import javax.faces.application.FacesMessage;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 import javax.faces.convert.Converter;
@@ -22,13 +30,17 @@ import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
 import javax.inject.Inject;
 import javax.inject.Named;
+import org.primefaces.event.DragDropEvent;
 import org.primefaces.event.RowEditEvent;
 import org.primefaces.event.SelectEvent;
+import org.primefaces.event.TransferEvent;
+import org.primefaces.model.DualListModel;
 
 @Named("suppliersController")
 @SessionScoped
 public class SuppliersController implements Serializable {
 
+    private static final Logger LOGGER = Logger.getLogger(SuppliersController.class.getName());
     private Suppliers current;
     private Suppliers selectedForDeletion;
     private DataModel items = null;
@@ -36,10 +48,20 @@ public class SuppliersController implements Serializable {
     private au.com.manlyit.fitnesscrm.stats.beans.SuppliersFacade ejbFacade;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade configMapFacade;
+
+    @Inject
+    private au.com.manlyit.fitnesscrm.stats.beans.ContractorRateToTaskMapFacade contractorRateToTaskMapFacade;
+    @Inject
+    private au.com.manlyit.fitnesscrm.stats.beans.ContractorRatesFacade contractorRatesFacade;
     private PaginationHelper pagination;
     private int selectedItemIndex;
     private List<Suppliers> filteredItems;
     private Suppliers[] multiSelected;
+    private SessionTypes selectedSessionTypeDrop;
+    private ContractorRates selectedContractorRate;
+    private List<SessionTypes> sessionTypesArray;
+    private DualListModel<SessionTypes> rateItems;
+    private List<ContractorRateToDualListModelMap> rateItemsList;
 
     public SuppliersController() {
     }
@@ -132,13 +154,108 @@ public class SuppliersController implements Serializable {
         return "Create";
     }
 
+    public void onTransfer(TransferEvent event) {
+        boolean add = event.isAdd();
+        if (add) {
+            for (Object item : event.getItems()) {
+                SessionTypes st = (SessionTypes) item;
+                ContractorRateToTaskMap crtm = new ContractorRateToTaskMap(0, st, getSelectedContractorRate());
+                contractorRateToTaskMapFacade.create(crtm);
+                //st.getContractorRateToTaskMapCollection().add(crtm);
+
+                getSessionTypesArray().remove(st);
+                //rateItems.getTarget().add(st);
+
+            }
+        } else {
+            for (Object item : event.getItems()) {
+                SessionTypes st = (SessionTypes) item;
+                Collection<ContractorRateToTaskMap> stl = st.getContractorRateToTaskMapCollection();
+                ContractorRateToTaskMap mapToRemove = contractorRateToTaskMapFacade.findBySessionTypeAndContractorRate(st, getSelectedContractorRate());
+                if (mapToRemove != null) {
+                    stl.remove(mapToRemove);
+                    st.setContractorRateToTaskMapCollection(stl);
+                }
+
+                getSessionTypesArray().add(st);
+                //rateItems.getTarget().remove(st);
+
+            }
+        }
+
+    }
+
+    public void addSessionType(ActionEvent actionEvent) {
+
+    }
+
+    public void contractorRatesChangeListener(ValueChangeEvent vce) {
+        Object o = vce.getNewValue();
+        rateItems = null;
+    }
+
+    /**
+     * @return the rateItems
+     */
+    public DualListModel<SessionTypes> getRateItems() {
+        if (rateItems == null) {
+            if (getSelectedContractorRate() == null) {
+                List<SessionTypes> source = getSessionTypesArray();
+                List<SessionTypes> destination = new ArrayList<>();
+                rateItems = new DualListModel<>(source, destination);
+                LOGGER.log(Level.WARNING, "getRateItems - the call to getSelectedContractorRate() returned a NULL value");
+            } else {
+
+                List<SessionTypes> source = getSessionTypesArray();
+                List<SessionTypes> removeFromSource = contractorRateToTaskMapFacade.findBySessionTypesByContractorRateAndSupplier(getSelectedContractorRate().getSupplierId());
+                for (SessionTypes stRem : removeFromSource) {
+                    source.remove(stRem);
+                }
+                List<SessionTypes> destination = contractorRateToTaskMapFacade.findBySessionTypesByContractorRate(getSelectedContractorRate());
+                if (destination == null) {
+                    destination = new ArrayList<>();
+                    LOGGER.log(Level.WARNING, "getRateItems - the call to contractorRateToTaskMapFacade.findBySessionTypesByContractorRate(getSelectedContractorRate()) returned a NULL value");
+                }
+                rateItems = new DualListModel<>(source, destination);
+            }
+        }
+        return rateItems;
+    }
+
+    /**
+     * @param rateItems the rateItems to set
+     */
+    public void setRateItems(DualListModel<SessionTypes> rateItems) {
+        this.rateItems = rateItems;
+    }
+
+  /*  public void onSessionTypeDrop(DragDropEvent ddEvent) {
+        SessionTypes st = ((SessionTypes) ddEvent.getData());
+
+        FacesContext context = FacesContext.getCurrentInstance();
+        try {
+            int contractorRateId = Integer.parseInt(context.getExternalContext().getRequestParameterMap().get("contractorRate"));
+            ContractorRates cr = contractorRatesFacade.find(contractorRateId);
+            //ContractorRates cr = getSelectedContractorRate();
+            Suppliers sup = getSelected();
+            getSessionTypesArray().remove(st);
+            ContractorRateToTaskMap crtm = new ContractorRateToTaskMap(0);
+            crtm.setContractorRateId(cr);
+            crtm.setTaskId(st);
+            contractorRateToTaskMapFacade.create(crtm);
+
+        } catch (NumberFormatException numberFormatException) {
+            LOGGER.log(Level.SEVERE, "onSessionTypeDrop Method, contractorRateId is NULL or not a number!");
+        }
+
+    }*/
+
     public String create() {
         try {
             if (current.getId() == null) {
                 current.setId(0);
             }
-            
-            
+
             getFacade().create(current);
             JsfUtil.addSuccessMessage(configMapFacade.getConfig("SuppliersCreated"));
             return prepareCreate();
@@ -295,6 +412,69 @@ public class SuppliersController implements Serializable {
 
     public void onCancel(RowEditEvent event) {
         JsfUtil.addErrorMessage("Row Edit Cancelled");
+    }
+
+    /**
+     * @return the selectedSessionTypeDrop
+     */
+    public SessionTypes getSelectedSessionTypeDrop() {
+        return selectedSessionTypeDrop;
+    }
+
+    /**
+     * @param selectedSessionTypeDrop the selectedSessionTypeDrop to set
+     */
+    public void setSelectedSessionTypeDrop(SessionTypes selectedSessionTypeDrop) {
+        this.selectedSessionTypeDrop = selectedSessionTypeDrop;
+    }
+
+    /**
+     * @return the selectedContractorRate
+     */
+    public ContractorRates getSelectedContractorRate() {
+        return selectedContractorRate;
+    }
+
+    /**
+     * @param selectedContractorRate the selectedContractorRate to set
+     */
+    public void setSelectedContractorRate(ContractorRates selectedContractorRate) {
+        this.selectedContractorRate = selectedContractorRate;
+    }
+
+    /**
+     * @return the sessionTypesArray
+     */
+    public List<SessionTypes> getSessionTypesArray() {
+        if (sessionTypesArray == null) {
+            FacesContext context = FacesContext.getCurrentInstance();
+            SessionTypesController controller = (SessionTypesController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "sessionTypesController");
+            //sessionTypesArray = new SessionTypes[controller.getItemsAvailable().size()];
+            //controller.getItemsAvailable().toArray(sessionTypesArray);
+            sessionTypesArray = controller.getAllSessionTypes();
+        }
+        return sessionTypesArray;
+    }
+
+    /**
+     * @param sessionTypesArray the sessionTypesArray to set
+     */
+    public void setSessionTypesArray(List<SessionTypes> sessionTypesArray) {
+        this.sessionTypesArray = sessionTypesArray;
+    }
+
+    /**
+     * @return the rateItemsList
+     */
+    public List<ContractorRateToDualListModelMap> getRateItemsList() {
+        return rateItemsList;
+    }
+
+    /**
+     * @param rateItemsList the rateItemsList to set
+     */
+    public void setRateItemsList(List<ContractorRateToDualListModelMap> rateItemsList) {
+        this.rateItemsList = rateItemsList;
     }
 
     @FacesConverter(value = "suppliersControllerConverter")

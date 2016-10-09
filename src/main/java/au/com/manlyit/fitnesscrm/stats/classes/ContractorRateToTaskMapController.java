@@ -36,6 +36,7 @@ public class ContractorRateToTaskMapController implements Serializable {
     private au.com.manlyit.fitnesscrm.stats.beans.ContractorRateToTaskMapFacade ejbFacade;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade configMapFacade;
+
     private PaginationHelper pagination;
     private int selectedItemIndex;
     private List<ContractorRateToTaskMap> filteredItems;
@@ -150,6 +151,8 @@ public class ContractorRateToTaskMapController implements Serializable {
         try {
             current.setId(0);
             getFacade().create(current);
+             
+          
             recreateModel();
             JsfUtil.addSuccessMessage(configMapFacade.getConfig("ContractorRateToTaskMapCreated"));
         } catch (Exception e) {

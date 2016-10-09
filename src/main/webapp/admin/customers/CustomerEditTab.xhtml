@@ -213,10 +213,74 @@
 
 
         </p:dataTable>
-
+        <p:fieldset  legend="Available Session Types" rendered="#{customersController.isUserInRole('ADMIN')}" >
+             <p:selectOneMenu id="supplierId" valueChangeListener="#{suppliersController.contractorRatesChangeListener}" converter="contractorRatesControllerConverter"  value="#{suppliersController.selectedContractorRate}"  label="#{configMapController.getKey('CreateContractorRatesTitle_supplierId')}" required="true" requiredMessage="#{configMapController.getKey('CreateContractorRatesRequiredMessage_supplierId')}">
+                 <f:selectItems value="#{contractorRatesController.itemsAvailable}" var="contractorRates" itemLabel="#{contractorRates.name}" itemValue="#{contractorRates}"/>
+                        <p:ajax   update=":growl :formCustomersEdit1:contractorRatePicklist"  />
+                    </p:selectOneMenu>
+             
+             
+            <p:pickList id="contractorRatePicklist" value="#{suppliersController.rateItems}" var="rateItems" converter="sessionTypesControllerConverter" itemLabel="#{rateItems.name}" itemValue="#{rateItems}" >
+                    <f:facet name="sourceCaption">Available Session Types</f:facet>
+                    <f:facet name="targetCaption">#{suppliersController.selectedContractorRate.name}</f:facet>
+                   
+                    <p:ajax event="transfer" listener="#{suppliersController.onTransfer}" update=":growl :formCustomersEdit1:contractorRatePicklist" />
+                   
+               
+                </p:pickList>
+         
+        </p:fieldset>
 
 
     </h:form>
 
+   <!--    <h:form id="carForm" rendered="#{not empty suppliersController.selected}">
+        <p:fieldset id="availableCarsField" legend="Available Session Types">
+            <p:dataGrid id="availableCars" var="sessionType" value="#{suppliersController.sessionTypesArray}" columns="3">
+                <p:panel id="pnl" header="#{sessionType.name}" style="text-align:center">
+                    <h:outputText value="#{sessionType.description}" title="#{configMapController.getKey('ViewSessionTypesTitle_description')}"/>
+                </p:panel>
+                <p:draggable for="pnl" revert="true" handle=".ui-panel-titlebar" stack=".ui-panel"/>
+            </p:dataGrid>
+        </p:fieldset>
+
+        <p:outputPanel id="dropArea">
+            <ui:repeat value="#{suppliersController.selected.contractorRatesCollection}" id="dropTarget" var="contractorRate">
+                <p:fieldset  legend="#{contractorRate.name}" style="margin-top:20px">
+                    <h:outputText value="!!!Drop here!!!"  style="font-size:24px;" />
+
+                <p:dataTable  var="sessionType" value="#{contractorRate.contractorRateToTaskMapCollection}" rendered="#{not empty contractorRate.contractorRateToTaskMapCollection}">
+                        <p:column headerText="Id">
+                            <h:outputText value="#{sessionType.id}" />
+                        </p:column>
+
+                        <p:column headerText="Year">
+                            <h:outputText value="#{sessionType.name}" />
+                        </p:column>
+
+                        <p:column headerText="Brand">
+                            <h:outputText value="#{sessionType.description}" />
+                        </p:column>
+
+                    </p:dataTable>
+
+                    <p:dataGrid id="selectedRates_#{sessionType.id}" var="sessionType" value="#{contractorRate.contractorRateToTaskMapCollection}" columns="3" >
+                        <p:panel  header="#{sessionType.name}" style="text-align:center">
+                            <h:outputText value="#{sessionType.description}" title="#{configMapController.getKey('ViewSessionTypesTitle_description')}"/>
+                        </p:panel>
+
+                    </p:dataGrid>
+
+                </p:fieldset>
+
+
+            </ui:repeat>
+            <p:droppable  for="dropTarget" tolerance="touch" activeStyleClass="ui-state-highlight" datasource="availableCars" >
+                <p:ajax listener="#{suppliersController.onSessionTypeDrop}" update=":carForm:dropArea :carForm:availableCars " >
+
+                </p:ajax>
+            </p:droppable>
+        </p:outputPanel>
+    </h:form>-->
 
 </ui:composition>

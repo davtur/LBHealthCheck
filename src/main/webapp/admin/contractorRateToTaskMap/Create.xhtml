@@ -10,16 +10,14 @@
         <h:form id="ContractorRateToTaskMapCreateForm">
             <h:panelGroup id="display">
                 <p:panelGrid columns="2" rendered="#{contractorRateToTaskMapController.selected != null}">
-                    <p:outputLabel value="#{configMapController.getKey('CreateContractorRateToTaskMapLabel_id')}" for="id" />
-                    <p:inputText id="id" value="#{contractorRateToTaskMapController.selected.id}" title="#{configMapController.getKey('CreateContractorRateToTaskMapTitle_id')}" required="true" requiredMessage="#{configMapController.getKey('CreateContractorRateToTaskMapRequiredMessage_id')}"/>
                     <p:outputLabel value="#{configMapController.getKey('CreateContractorRateToTaskMapLabel_contractorRateId')}" for="contractorRateId" />
-                    <p:selectOneMenu id="contractorRateId" valueChangeListener="#{contractorRateToTaskMapController.selectOneMenuValueChangeListener}"  value="#{contractorRateToTaskMapController.selected.contractorRateId}"  label="#{configMapController.getKey('CreateContractorRateToTaskMapTitle_contractorRateId')}" required="true" requiredMessage="#{configMapController.getKey('CreateContractorRateToTaskMapRequiredMessage_contractorRateId')}">
-                        <f:selectItems value="#{contractorRatesController.itemsAvailableSelectOne}"/>
+                    <p:selectOneMenu id="contractorRateId" valueChangeListener="#{contractorRateToTaskMapController.selectOneMenuValueChangeListener}" converter="contractorRatesControllerConverter" value="#{contractorRateToTaskMapController.selected.contractorRateId}"  label="#{configMapController.getKey('CreateContractorRateToTaskMapTitle_contractorRateId')}" required="true" requiredMessage="#{configMapController.getKey('CreateContractorRateToTaskMapRequiredMessage_contractorRateId')}">
+                        <f:selectItems value="#{contractorRatesController.itemsAvailable}"  var="contractorRates" itemLabel="#{contractorRates.name}" itemValue="#{contractorRates}"/>
                         <p:ajax   update=":ContractorRateToTaskMapCreateForm"  />
                     </p:selectOneMenu>
                     <p:outputLabel value="#{configMapController.getKey('CreateContractorRateToTaskMapLabel_taskId')}" for="taskId" />
-                    <p:selectOneMenu id="taskId" valueChangeListener="#{contractorRateToTaskMapController.selectOneMenuValueChangeListener}"  value="#{contractorRateToTaskMapController.selected.taskId}"  label="#{configMapController.getKey('CreateContractorRateToTaskMapTitle_taskId')}" required="true" requiredMessage="#{configMapController.getKey('CreateContractorRateToTaskMapRequiredMessage_taskId')}">
-                        <f:selectItems value="#{sessionTypesController.itemsAvailableSelectOne}"/>
+                    <p:selectOneMenu id="taskId" valueChangeListener="#{contractorRateToTaskMapController.selectOneMenuValueChangeListener}" converter="sessionTypesControllerConverter" value="#{contractorRateToTaskMapController.selected.taskId}"  label="#{configMapController.getKey('CreateContractorRateToTaskMapTitle_taskId')}" required="true" requiredMessage="#{configMapController.getKey('CreateContractorRateToTaskMapRequiredMessage_taskId')}">
+                        <f:selectItems value="#{sessionTypesController.itemsAvailable}"  var="sessionTypes" itemLabel="#{sessionTypes.name}" itemValue="#{sessionTypes}"/>
                         <p:ajax   update=":ContractorRateToTaskMapCreateForm"  />
                     </p:selectOneMenu>
                 </p:panelGrid>
@@ -30,5 +28,5 @@
     </p:dialog>
 
 </ui:composition>    
-<p> Generated from template ( JSF_from_entity_wizard/StandardJSF/create.ftl  )- Dave 23rd October 2015 </p>
+
 

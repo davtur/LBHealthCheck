@@ -51,6 +51,11 @@ public class ContractorRateToTaskMap implements Serializable {
     public ContractorRateToTaskMap(Integer id) {
         this.id = id;
     }
+     public ContractorRateToTaskMap(Integer id,SessionTypes taskId,ContractorRates contractorRateId) {
+        this.id = id;
+        this.taskId = taskId;
+        this.contractorRateId = contractorRateId;
+    }
 
     public Integer getId() {
         return id;
