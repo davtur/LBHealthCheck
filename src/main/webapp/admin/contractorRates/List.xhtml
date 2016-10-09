@@ -113,18 +113,7 @@
 
 
                     </p:column>
-                    <p:column sortBy="#{item.supplierId}" filterBy="#{item.supplierId}" headerText="#{configMapController.getKey('ListContractorRatesTitle_supplierId')}"   >
-                        <p:cellEditor> 
-                            <f:facet name="output">
-                                <h:outputText value="#{item.supplierId}"/>
-                            </f:facet>
-                            <f:facet name="input">
-                                <p:inputText value="#{item.supplierId}" label="#{configMapController.getKey('ListContractorRatesTitle_supplierId')}" />
-                            </f:facet>
-                        </p:cellEditor> 
-
-
-                    </p:column>
+                 
                     <p:column rendered="#{contractorRatesController.isUserInRole('ADMIN')}"  headerText="Edit" style="width:50px">  
                         <p:rowEditor />  
                     </p:column>  

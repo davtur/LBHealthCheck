@@ -22,11 +22,8 @@
                     <h:inputText id="name"  value="#{contractorRatesController.selected.name}" title="#{configMapController.getKey('EditContractorRatesTitle_name')}" />
                     <h:outputLabel value="#{configMapController.getKey('EditContractorRatesLabel_description')}" for="description" />
                     <h:inputTextarea rows="4" cols="30" id="description" value="#{contractorRatesController.selected.description}" title="#{configMapController.getKey('EditContractorRatesTitle_description')}" />
-                    <h:outputLabel value="#{configMapController.getKey('EditContractorRatesLabel_supplierId')}" for="supplierId" />
-                    <p:selectOneMenu id="supplierId" valueChangeListener="#{contractorRatesController.selectOneMenuValueChangeListener}" value="#{contractorRatesController.selected.supplierId}" label="#{configMapController.getKey('EditContractorRatesTitle_supplierId')}" required="true" requiredMessage="#{configMapController.getKey('EditContractorRatesRequiredMessage_supplierId')}">
-                        <f:selectItems value="#{suppliersController.itemsAvailableSelectOne}"/>
-                        <p:ajax   update=":ContractorRatesEditForm"  />
-                    </p:selectOneMenu>
+                   
+                   
                 </p:panelGrid>
                 <p:commandButton actionListener="#{contractorRatesController.update}" value="#{configMapController.getKey('Save')}" update="display,:ContractorRatesListForm:datalist,:growl" oncomplete="handleSubmit(args, 'ContractorRatesEditDialog');PF('contractorRatesControllerTable').filter()"/>
                 <p:commandButton value="#{configMapController.getKey('Cancel')}" onclick="PF('ContractorRatesEditDialog').hide()"/>

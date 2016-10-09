@@ -22,6 +22,11 @@
                         <f:selectItems value="#{sessionTypesController.itemsAvailableSelectOne}"/>
                         <p:ajax   update=":ContractorRateToTaskMapEditForm"  />
                     </p:selectOneMenu>
+                     <h:outputLabel value="#{configMapController.getKey('EditContractorRatesLabel_supplierId')}" for="supplierId" />
+                    <p:selectOneMenu id="supplierId" valueChangeListener="#{contractorRatesController.selectOneMenuValueChangeListener}" value="#{contractorRateToTaskMapController.selected.supplierId}" label="#{configMapController.getKey('EditContractorRatesTitle_supplierId')}" required="true" requiredMessage="#{configMapController.getKey('EditContractorRatesRequiredMessage_supplierId')}">
+                        <f:selectItems value="#{suppliersController.itemsAvailableSelectOne}"/>
+                        <p:ajax   update=":ContractorRateToTaskMapEditForm"  />
+                    </p:selectOneMenu>
                 </p:panelGrid>
                 <p:commandButton actionListener="#{contractorRateToTaskMapController.update}" value="#{configMapController.getKey('Save')}" update="display,:ContractorRateToTaskMapListForm:datalist,:growl" oncomplete="handleSubmit(args, 'ContractorRateToTaskMapEditDialog');PF('contractorRateToTaskMapControllerTable').filter()"/>
                 <p:commandButton value="#{configMapController.getKey('Cancel')}" onclick="PF('ContractorRateToTaskMapEditDialog').hide()"/>

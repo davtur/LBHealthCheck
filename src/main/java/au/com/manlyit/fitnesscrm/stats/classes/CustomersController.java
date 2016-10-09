@@ -11,6 +11,7 @@ import au.com.manlyit.fitnesscrm.stats.beans.util.PaymentPeriod;
 import au.com.manlyit.fitnesscrm.stats.chartbeans.MySessionsChart1;
 import au.com.manlyit.fitnesscrm.stats.classes.util.DatatableSelectionHelper;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PfSelectableDataModel;
+import au.com.manlyit.fitnesscrm.stats.db.ContractorRateToTaskMap;
 import au.com.manlyit.fitnesscrm.stats.db.ContractorRates;
 import au.com.manlyit.fitnesscrm.stats.db.CustomerState;
 import au.com.manlyit.fitnesscrm.stats.db.Groups;
@@ -255,6 +256,7 @@ public class CustomersController implements Serializable {
             EziDebitPaymentGateway controller = (EziDebitPaymentGateway) context.getApplication().getELResolver().getValue(context.getELContext(), null, "ezidebit");
             controller.setSelectedCustomer(cust);
             //eziDebitPaymentGatewayController.setSelectedCustomer(cust);
+            SuppliersController suppliersController = (SuppliersController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "suppliersController");
             if (cust.getSuppliersCollection() != null) {
                 Suppliers sup = null;
 
@@ -267,24 +269,15 @@ public class CustomersController implements Serializable {
                 if (cust.getSuppliersCollection().size() > 1) {
                     LOGGER.log(Level.WARNING, "There should only be one Supplier allocated to one customer. Username = {0}", new Object[]{cust.getUsername()});
                 }
-                SuppliersController suppliersController = (SuppliersController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "suppliersController");
+                
                 if (sup != null) {
                     suppliersController.setSelected(sup);
-                    if (sup.getContractorRatesCollection() != null) {
-                        ContractorRates cr = null;
-
-                        if (sup.getContractorRatesCollection().size() >= 1) {
-                            Iterator<ContractorRates> i = sup.getContractorRatesCollection().iterator();
-                            if (i.hasNext()) {
-                                cr = i.next();
-                                suppliersController.setSelectedContractorRate(cr);
-                            }
-                        }
-                        if (sup.getContractorRatesCollection().size() > 1) {
-                            LOGGER.log(Level.WARNING, "The  Supplier has no contractor Rates. Supplier Name = {0}", new Object[]{sup.getSupplierName()});
-                        }
-                    }
+                    
                 }
+            }else{
+              suppliersController.setSelected(null); 
+              suppliersController.setSelectedContractorRate(null);
+              suppliersController.setRateItems(null);
             }
             MySessionsChart1 c2 = context.getApplication().evaluateExpressionGet(context, "#{mySessionsChart1}", MySessionsChart1.class);
             c2.setSelectedCustomer(cust);

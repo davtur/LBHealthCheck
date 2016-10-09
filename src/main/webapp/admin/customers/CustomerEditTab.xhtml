@@ -213,9 +213,9 @@
 
 
         </p:dataTable>
-        <p:fieldset  legend="Available Session Types" rendered="#{customersController.isUserInRole('ADMIN')}" >
+        <p:fieldset  legend="Available Session Types" rendered="#{customersController.isUserInRole('ADMIN') and not empty suppliersController.selected}" >
              <p:selectOneMenu id="supplierId" valueChangeListener="#{suppliersController.contractorRatesChangeListener}" converter="contractorRatesControllerConverter"  value="#{suppliersController.selectedContractorRate}"  label="#{configMapController.getKey('CreateContractorRatesTitle_supplierId')}" required="true" requiredMessage="#{configMapController.getKey('CreateContractorRatesRequiredMessage_supplierId')}">
-                 <f:selectItems value="#{suppliersController.selected.contractorRatesCollection}" var="contractorRates" itemLabel="#{contractorRates.name}" itemValue="#{contractorRates}"/>
+                 <f:selectItems value="#{suppliersController.contractRatesByCurrentSupplier}" var="contractorRates" itemLabel="#{contractorRates.name}" itemValue="#{contractorRates}"/>
                         <p:ajax   update=":growl :formCustomersEdit1:contractorRatePicklist"  />
                     </p:selectOneMenu>
              

@@ -20,6 +20,12 @@
                         <f:selectItems value="#{sessionTypesController.itemsAvailable}"  var="sessionTypes" itemLabel="#{sessionTypes.name}" itemValue="#{sessionTypes}"/>
                         <p:ajax   update=":ContractorRateToTaskMapCreateForm"  />
                     </p:selectOneMenu>
+                
+                <p:outputLabel value="#{configMapController.getKey('CreateContractorRatesLabel_supplierId')}" for="supplierId" />
+                <p:selectOneMenu id="supplierId" valueChangeListener="#{contractorRatesController.selectOneMenuValueChangeListener}" converter="suppliersControllerConverter"  value="#{contractorRateToTaskMapController.selected.supplierId}"  label="#{configMapController.getKey('CreateContractorRatesTitle_supplierId')}" required="true" requiredMessage="#{configMapController.getKey('CreateContractorRatesRequiredMessage_supplierId')}">
+                    <f:selectItems value="#{suppliersController.itemsAvailable}" var="supplier" itemLabel="#{supplier.supplierName}" itemValue="#{supplier}"/>
+                    <p:ajax   update=":ContractorRateToTaskMapCreateForm"  />
+                </p:selectOneMenu>
                 </p:panelGrid>
                 <p:commandButton actionListener="#{contractorRateToTaskMapController.createDialogue}" value="#{configMapController.getKey('Save')}" update="display,:ContractorRateToTaskMapListForm:datalist,:growl" oncomplete="handleSubmit(args,'ContractorRateToTaskMapCreateDialog');PF('contractorRateToTaskMapControllerTable').filter()"/>
                 <p:commandButton value="#{configMapController.getKey('Cancel')}" onclick="PF('ContractorRateToTaskMapCreateDialog').hide()"/>

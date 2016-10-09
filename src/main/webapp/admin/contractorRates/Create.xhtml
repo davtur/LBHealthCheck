@@ -20,11 +20,11 @@
                     <p:inputText id="name" value="#{contractorRatesController.selected.name}" title="#{configMapController.getKey('CreateContractorRatesTitle_name')}" />
                     <p:outputLabel value="#{configMapController.getKey('CreateContractorRatesLabel_description')}" for="description" />
                     <p:inputTextarea rows="4" cols="30" id="description"  value="#{contractorRatesController.selected.description}"  title="#{configMapController.getKey('CreateContractorRatesTitle_description')}" />
-                    <p:outputLabel value="#{configMapController.getKey('CreateContractorRatesLabel_supplierId')}" for="supplierId" />
-                    <p:selectOneMenu id="supplierId" valueChangeListener="#{contractorRatesController.selectOneMenuValueChangeListener}" converter="suppliersControllerConverter"  value="#{contractorRatesController.selected.supplierId}"  label="#{configMapController.getKey('CreateContractorRatesTitle_supplierId')}" required="true" requiredMessage="#{configMapController.getKey('CreateContractorRatesRequiredMessage_supplierId')}">
+                    
+                 <!--   <p:selectOneMenu id="supplierId" valueChangeListener="#{contractorRatesController.selectOneMenuValueChangeListener}" converter="suppliersControllerConverter"  value="#{contractorRatesController.selected.supplierId}"  label="#{configMapController.getKey('CreateContractorRatesTitle_supplierId')}" required="true" requiredMessage="#{configMapController.getKey('CreateContractorRatesRequiredMessage_supplierId')}">
                         <f:selectItems value="#{suppliersController.itemsAvailable}" var="supplier" itemLabel="#{supplier.supplierName}" itemValue="#{supplier}"/>
                         <p:ajax   update=":ContractorRatesCreateForm"  />
-                    </p:selectOneMenu>
+                    </p:selectOneMenu>-->
                 </p:panelGrid>
                 <p:commandButton actionListener="#{contractorRatesController.createDialogue}" value="#{configMapController.getKey('Save')}" update="display,:ContractorRatesListForm:datalist,:growl" oncomplete="handleSubmit(args,'ContractorRatesCreateDialog');PF('contractorRatesControllerTable').filter()"/>
                 <p:commandButton value="#{configMapController.getKey('Cancel')}" onclick="PF('ContractorRatesCreateDialog').hide()"/>

@@ -13,10 +13,13 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.enterprise.context.SessionScoped;
 import javax.faces.application.FacesMessage;
 import javax.faces.component.UIComponent;
@@ -53,6 +56,8 @@ public class SuppliersController implements Serializable {
     private au.com.manlyit.fitnesscrm.stats.beans.ContractorRateToTaskMapFacade contractorRateToTaskMapFacade;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.ContractorRatesFacade contractorRatesFacade;
+    @Inject
+    private au.com.manlyit.fitnesscrm.stats.beans.SessionTypesFacade sessionTypesFacade;
     private PaginationHelper pagination;
     private int selectedItemIndex;
     private List<Suppliers> filteredItems;
@@ -79,10 +84,27 @@ public class SuppliersController implements Serializable {
         return current;
     }
 
-    public void setSelected(Suppliers selected) {
-        if (selected != null) {
-            current = selected;
+    public void setSelected(Suppliers sup) {
+        if (sup != null) {
+            current = sup;
             selectedItemIndex = -1;
+            rateItems = null;
+
+            if (sup.getContractorRateToTaskMapCollection() != null) {
+                ContractorRateToTaskMap cr;
+
+                if (sup.getContractorRateToTaskMapCollection().size() >= 1) {
+                    Iterator<ContractorRateToTaskMap> i = sup.getContractorRateToTaskMapCollection().iterator();
+                    if (i.hasNext()) {
+                        cr = i.next();
+                        setSelectedContractorRate(cr.getContractorRateId());
+                    }
+                }
+                if (sup.getContractorRateToTaskMapCollection().size() > 1) {
+                    LOGGER.log(Level.WARNING, "The  Supplier has no contractor Rates. Supplier Name = {0}", new Object[]{sup.getSupplierName()});
+                }
+            }
+
         }
 
     }
@@ -159,7 +181,7 @@ public class SuppliersController implements Serializable {
         if (add) {
             for (Object item : event.getItems()) {
                 SessionTypes st = (SessionTypes) item;
-                ContractorRateToTaskMap crtm = new ContractorRateToTaskMap(0, st, getSelectedContractorRate(),getSelected());
+                ContractorRateToTaskMap crtm = new ContractorRateToTaskMap(0, st, getSelectedContractorRate(), getSelected());
                 contractorRateToTaskMapFacade.create(crtm);
                 //st.getContractorRateToTaskMapCollection().add(crtm);
 
@@ -170,11 +192,12 @@ public class SuppliersController implements Serializable {
         } else {
             for (Object item : event.getItems()) {
                 SessionTypes st = (SessionTypes) item;
-                Collection<ContractorRateToTaskMap> stl = st.getContractorRateToTaskMapCollection();
-                ContractorRateToTaskMap mapToRemove = contractorRateToTaskMapFacade.findBySessionTypeAndContractorRate(st, getSelectedContractorRate(),getSelected());
+                //Collection<ContractorRateToTaskMap> stl = st.getContractorRateToTaskMapCollection();
+                ContractorRateToTaskMap mapToRemove = contractorRateToTaskMapFacade.findBySessionTypeAndContractorRate(st, getSelectedContractorRate(), getSelected());
                 if (mapToRemove != null) {
-                    stl.remove(mapToRemove);
-                    st.setContractorRateToTaskMapCollection(stl);
+                    //stl.remove(mapToRemove);
+                    //st.setContractorRateToTaskMapCollection(stl);
+                    contractorRateToTaskMapFacade.remove(mapToRemove);
                 }
 
                 getSessionTypesArray().add(st);
@@ -194,6 +217,51 @@ public class SuppliersController implements Serializable {
         rateItems = null;
     }
 
+    public List<ContractorRates> getContractRatesByCurrentSupplier() {
+
+        List<ContractorRates> lcr = contractorRateToTaskMapFacade.findContractorRatesBySupplier(current);
+        if (lcr == null) {
+            if (current != null) {
+                if (current.getId() != null) {
+                    return addDefaultContractorRates(current);
+                }
+            }
+        }
+        if (lcr.isEmpty()) {
+            if (current != null) {
+                 if (current.getId() != null) {
+                return addDefaultContractorRates(current);
+                 }
+            }
+        }
+        return lcr;
+    }
+ @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    protected List<ContractorRates> addDefaultContractorRates(Suppliers sup) {
+        List<ContractorRates> lcr = new ArrayList<>();
+        String def1 = configMapFacade.getConfig("system.default.contractorRate.sessiontype.group");
+        String def2 = configMapFacade.getConfig("system.default.contractorRate.group");
+        String def3 = configMapFacade.getConfig("system.default.contractorRate.sessiontype.pt");
+        String def4 = configMapFacade.getConfig("system.default.contractorRate.pt");
+
+        ContractorRateToTaskMap crtm = new ContractorRateToTaskMap(0, sessionTypesFacade.findASessionTypeByName(def1), contractorRatesFacade.findAContractorRateByName(def2), sup);
+        contractorRateToTaskMapFacade.create(crtm);
+        ContractorRateToTaskMap crtm2 = new ContractorRateToTaskMap(0, sessionTypesFacade.findASessionTypeByName(def3), contractorRatesFacade.findAContractorRateByName(def4), sup);
+        contractorRateToTaskMapFacade.create(crtm2);
+        lcr.add(crtm.getContractorRateId());
+        lcr.add(crtm2.getContractorRateId());
+        setSessionTypesArray(null);
+        List<SessionTypes> source = getSessionTypesArray();
+        List<SessionTypes> removeFromSource = contractorRateToTaskMapFacade.findBySessionTypesByContractorRateAndSupplier(sup);
+        for (SessionTypes stRem : removeFromSource) {
+            source.remove(stRem);
+        }
+        for (SessionTypes st : source) {
+            contractorRateToTaskMapFacade.create(new ContractorRateToTaskMap(0, st, contractorRatesFacade.findAContractorRateByName(def4), sup));
+        }
+        return lcr;
+    } 
+
     /**
      * @return the rateItems
      */
@@ -211,7 +279,7 @@ public class SuppliersController implements Serializable {
                 for (SessionTypes stRem : removeFromSource) {
                     source.remove(stRem);
                 }
-                List<SessionTypes> destination = contractorRateToTaskMapFacade.findBySessionTypesByContractorRate(getSelectedContractorRate(),getSelected());
+                List<SessionTypes> destination = contractorRateToTaskMapFacade.findBySessionTypesByContractorRate(getSelectedContractorRate(), getSelected());
                 if (destination == null) {
                     destination = new ArrayList<>();
                     LOGGER.log(Level.WARNING, "getRateItems - the call to contractorRateToTaskMapFacade.findBySessionTypesByContractorRate(getSelectedContractorRate()) returned a NULL value");
@@ -229,7 +297,7 @@ public class SuppliersController implements Serializable {
         this.rateItems = rateItems;
     }
 
-  /*  public void onSessionTypeDrop(DragDropEvent ddEvent) {
+    /*  public void onSessionTypeDrop(DragDropEvent ddEvent) {
         SessionTypes st = ((SessionTypes) ddEvent.getData());
 
         FacesContext context = FacesContext.getCurrentInstance();
@@ -249,7 +317,6 @@ public class SuppliersController implements Serializable {
         }
 
     }*/
-
     public String create() {
         try {
             if (current.getId() == null) {

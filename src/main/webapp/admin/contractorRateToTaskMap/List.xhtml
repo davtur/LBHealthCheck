@@ -53,25 +53,37 @@
 
 
                     </p:column>
-                    <p:column sortBy="#{item.contractorRateId}" filterBy="#{item.contractorRateId}" headerText="#{configMapController.getKey('ListContractorRateToTaskMapTitle_contractorRateId')}"   >
+                    <p:column sortBy="#{item.contractorRateId.name}" filterBy="#{item.contractorRateId.name}" headerText="#{configMapController.getKey('ListContractorRateToTaskMapTitle_contractorRateId')}"   >
                         <p:cellEditor> 
                             <f:facet name="output">
-                                <h:outputText value="#{item.contractorRateId}"/>
+                                <h:outputText value="#{item.contractorRateId.name}"/>
                             </f:facet>
                             <f:facet name="input">
-                                <p:inputText value="#{item.contractorRateId}" label="#{configMapController.getKey('ListContractorRateToTaskMapTitle_contractorRateId')}" />
+                                <p:inputText value="#{item.contractorRateId.name}" label="#{configMapController.getKey('ListContractorRateToTaskMapTitle_contractorRateId')}" />
                             </f:facet>
                         </p:cellEditor> 
 
 
                     </p:column>
-                    <p:column sortBy="#{item.taskId}" filterBy="#{item.taskId}" headerText="#{configMapController.getKey('ListContractorRateToTaskMapTitle_taskId')}"   >
+                    <p:column sortBy="#{item.taskId.name}" filterBy="#{item.taskId.name}" headerText="#{configMapController.getKey('ListContractorRateToTaskMapTitle_taskId')}"   >
                         <p:cellEditor> 
                             <f:facet name="output">
-                                <h:outputText value="#{item.taskId}"/>
+                                <h:outputText value="#{item.taskId.name}"/>
                             </f:facet>
                             <f:facet name="input">
-                                <p:inputText value="#{item.taskId}" label="#{configMapController.getKey('ListContractorRateToTaskMapTitle_taskId')}" />
+                                <p:inputText value="#{item.taskId.name}" label="#{configMapController.getKey('ListContractorRateToTaskMapTitle_taskId')}" />
+                            </f:facet>
+                        </p:cellEditor> 
+
+
+                    </p:column>
+                    <p:column sortBy="#{item.supplierId.supplierName}" filterBy="#{item.supplierId.supplierName}" headerText="#{configMapController.getKey('ListContractorRatesTitle_supplierId')}"   >
+                        <p:cellEditor> 
+                            <f:facet name="output">
+                                <h:outputText value="#{item.supplierId.supplierName}"/>
+                            </f:facet>
+                            <f:facet name="input">
+                                <p:inputText value="#{item.supplierId.supplierName}" label="#{configMapController.getKey('ListContractorRatesTitle_supplierId')}" />
                             </f:facet>
                         </p:cellEditor> 
 

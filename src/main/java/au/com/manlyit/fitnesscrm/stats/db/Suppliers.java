@@ -20,7 +20,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -41,6 +40,8 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Suppliers.findBySupplierCompanyNumberType", query = "SELECT s FROM Suppliers s WHERE s.supplierCompanyNumberType = :supplierCompanyNumberType")})
 public class Suppliers implements Serializable {
 
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "supplierId")
+    private Collection<ContractorRateToTaskMap> contractorRateToTaskMapCollection;
     
 
     @JoinColumn(name = "internal_contractor_id", referencedColumnName = "id")
@@ -159,7 +160,14 @@ public class Suppliers implements Serializable {
         this.internalContractorId = internalContractorId;
     }
 
+    @XmlTransient
+    public Collection<ContractorRateToTaskMap> getContractorRateToTaskMapCollection() {
+        return contractorRateToTaskMapCollection;
+    }
   
+    public void setContractorRateToTaskMapCollection(Collection<ContractorRateToTaskMap> contractorRateToTaskMapCollection) {
+        this.contractorRateToTaskMapCollection = contractorRateToTaskMapCollection;
+    }
 
    
     

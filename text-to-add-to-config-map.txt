@@ -2045,3 +2045,10 @@ ListContractorRatesTitle_bonusInteger=BonusInteger
 ListContractorRatesTitle_name=Name
 ListContractorRatesTitle_description=Description
 ListContractorRatesTitle_supplierId=SupplierId
+
+
+
+system.default.contractorRate.sessiontype.group=Group Training
+system.default.contractorRate.group=Default Rate Groups
+system.default.contractorRate.sessiontype.pt=Personal Training 1 hour
+system.default.contractorRate.pt=Default Rate PT

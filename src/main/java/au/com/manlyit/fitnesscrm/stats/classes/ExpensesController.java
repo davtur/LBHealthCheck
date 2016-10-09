@@ -4,6 +4,7 @@ import au.com.manlyit.fitnesscrm.stats.db.Expenses;
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PaginationHelper;
 import au.com.manlyit.fitnesscrm.stats.beans.ExpensesFacade;
+import au.com.manlyit.fitnesscrm.stats.db.ContractorRates;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import au.com.manlyit.fitnesscrm.stats.db.ExpenseTypes;
 import au.com.manlyit.fitnesscrm.stats.db.InvoiceImages;
@@ -27,6 +28,7 @@ import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -82,6 +84,8 @@ public class ExpensesController implements Serializable {
     private au.com.manlyit.fitnesscrm.stats.beans.PaymentMethodsFacade paymentMethodsFacade;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.ExpenseTypesFacade expenseTypesFacade;
+    @Inject
+    private au.com.manlyit.fitnesscrm.stats.beans.ContractorRateToTaskMapFacade contractorRateToTaskMapFacade;
     private PaginationHelper pagination;
     private int selectedItemIndex;
     private List<Expenses> filteredItems;
@@ -722,13 +726,13 @@ public class ExpensesController implements Serializable {
                     if (sh.getSessionTypesId().getPlan() != null) {
                         ejbFacade.create(createNewDefaultSessionExpense(sh));
                     } else {
-                        LOGGER.log(Level.WARNING, "findTrainerSupplierDetails - no price found for session! date:{0},id:{1}",new Object[]{sh.getSessiondate(),sh.getId()});
+                        LOGGER.log(Level.WARNING, "findTrainerSupplierDetails - no price found for session! date:{0},id:{1}", new Object[]{sh.getSessiondate(), sh.getId()});
                     }
                 } else {
-                    LOGGER.log(Level.WARNING, "findTrainerSupplierDetails - no participants found for session! date:{0},id:{1}",new Object[]{sh.getSessiondate(),sh.getId()});
+                    LOGGER.log(Level.WARNING, "findTrainerSupplierDetails - no participants found for session! date:{0},id:{1}", new Object[]{sh.getSessiondate(), sh.getId()});
                 }
             } else {
-                LOGGER.log(Level.WARNING, "findTrainerSupplierDetails - no trainer found for session! date:{0},id:{1}",new Object[]{sh.getSessiondate(),sh.getId()});
+                LOGGER.log(Level.WARNING, "findTrainerSupplierDetails - no trainer found for session! date:{0},id:{1}", new Object[]{sh.getSessiondate(), sh.getId()});
             }
         }
 
@@ -740,7 +744,65 @@ public class ExpensesController implements Serializable {
         e.setExpenseIncurredTimestamp(sh.getSessiondate());
         e.setUpdatedTimestamp(sh.getSessiondate());
 
-        BigDecimal expenseAmount = calculateSessionCost(sh.getParticipantsCollection().size(), sh.getSessionTypesId().getPlan().getPlanPrice());
+        //get supplier
+        SessionTrainers strain = null;
+        Suppliers sup = null;
+        if (sh.getSessionTrainersCollection().size() >= 1) {
+            Iterator<SessionTrainers> i = sh.getSessionTrainersCollection().iterator();
+            if (i.hasNext()) {
+                strain = i.next();
+            }
+        }
+        if (sh.getSessionTrainersCollection().size() > 1) {
+            LOGGER.log(Level.WARNING, "There is more than 1 trainer for this session. SessionHistory id = {0}", new Object[]{sh.getId()});
+        }
+        if (strain != null) {
+            if (strain.getCustomerId().getSuppliersCollection() != null) {
+
+                if (strain.getCustomerId().getSuppliersCollection().size() >= 1) {
+                    Iterator<Suppliers> i = strain.getCustomerId().getSuppliersCollection().iterator();
+                    if (i.hasNext()) {
+                        sup = i.next();
+                    }
+                }
+                if (strain.getCustomerId().getSuppliersCollection().size() > 1) {
+                    LOGGER.log(Level.WARNING, "There should only be one Supplier allocated to one customer. Username = {0}", new Object[]{strain.getCustomerId().getUsername()});
+                }
+
+            }
+        }
+        if (sup == null) {
+            LOGGER.log(Level.SEVERE, "The Supplier is NULL, expense information can't be calculated. SessionHistory id = {0}", new Object[]{sh.getId()});
+            return null;
+        }
+        ContractorRates cr = contractorRateToTaskMapFacade.findContractorRateBySupplierAndSessionType(sup, sh.getSessionTypesId());
+        if (cr == null) {
+            FacesContext context = FacesContext.getCurrentInstance();
+            SuppliersController suppliersController = (SuppliersController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "suppliersController");
+            List<ContractorRates> crl = suppliersController.addDefaultContractorRates(sup);
+
+            cr = contractorRateToTaskMapFacade.findContractorRateBySupplierAndSessionType(sup, sh.getSessionTypesId());
+            if (cr == null) {
+                if (crl != null) {
+                    if (crl.size() > 0) {
+                        cr = crl.get(0);
+                        LOGGER.log(Level.WARNING, "The ContractorRate is NULL - addDefaultContractorRates also failed!,Using the default returned from add defaults. expense information may be inaacurate for this supplier. SessionHistory id = {0}", new Object[]{sh.getId()});
+
+                    }
+                }
+            }
+            if (cr == null) {
+                LOGGER.log(Level.SEVERE, "The ContractorRate is NULL - addDefaultContractorRates also failed!, expense information can't be calculated. SessionHistory id = {0}", new Object[]{sh.getId()});
+                return null;
+            }
+        }
+        int numberOfParticipants = sh.getParticipantsCollection().size();
+        int bonusAmountMultiplyer = numberOfParticipants / cr.getBonusInteger();
+        BigDecimal bonusAmount = cr.getBonusAmount().multiply(new BigDecimal(bonusAmountMultiplyer));
+        BigDecimal fullAmount = cr.getRate().add(bonusAmount);
+
+        //BigDecimal expenseAmount = calculateSessionCost(sh.getParticipantsCollection().size(), sh.getSessionTypesId().getPlan().getPlanPrice());
+        BigDecimal expenseAmount = calculateSessionCost(sh.getParticipantsCollection().size(), fullAmount);
         BigDecimal multiplyPercent = new BigDecimal((getSelected().getPercentForBusinessUse()));
         BigDecimal divideGstIncluded = new BigDecimal(11);
 
@@ -761,7 +823,7 @@ public class ExpensesController implements Serializable {
 
         PaymentMethods et = paymentMethodsFacade.findPaymentMethodByName(name);
         if (et == null) {
-             LOGGER.log(Level.INFO, "Creating a new payment Method as it wasn't found in the DB. Payment Method:{0}",new Object[]{name});
+            LOGGER.log(Level.INFO, "Creating a new payment Method as it wasn't found in the DB. Payment Method:{0}", new Object[]{name});
             et = new PaymentMethods(0);
             et.setPaymentMethodName(name);
             et.setDescription("Default payment Method For Trainers");
@@ -775,7 +837,7 @@ public class ExpensesController implements Serializable {
 
         ExpenseTypes et = expenseTypesFacade.findSessionExpenseType(sessionType);
         if (et == null) {
-            LOGGER.log(Level.INFO, "Creating a new expense type as it wasn't found in the DB. ExpenseType:{0}",new Object[]{sessionType});
+            LOGGER.log(Level.INFO, "Creating a new expense type as it wasn't found in the DB. ExpenseType:{0}", new Object[]{sessionType});
             et = new ExpenseTypes(0);
             et.setExpenseTypeName(sessionType);
             et.setDescription(sessionType);
@@ -795,7 +857,7 @@ public class ExpensesController implements Serializable {
         sup = suppliersFacade.findSupplierByTrainerCustomerId(trainer);
 
         if (sup == null) {
-            LOGGER.log(Level.INFO, "Creating  new supplier details for contractor as it wasn't found in the DB. TContractor username:{0}",new Object[]{trainer.getUsername()});
+            LOGGER.log(Level.INFO, "Creating  new supplier details for contractor as it wasn't found in the DB. TContractor username:{0}", new Object[]{trainer.getUsername()});
             sup = new Suppliers(0);
             sup.setSupplierName(trainer.getFirstname() + "" + trainer.getLastname());
             sup.setDescription("Internal Contractor");

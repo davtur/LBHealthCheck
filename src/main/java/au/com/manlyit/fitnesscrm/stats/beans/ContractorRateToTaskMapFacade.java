@@ -10,17 +10,18 @@ import au.com.manlyit.fitnesscrm.stats.db.ContractorRates;
 import au.com.manlyit.fitnesscrm.stats.db.SessionTypes;
 import au.com.manlyit.fitnesscrm.stats.db.Suppliers;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
@@ -32,7 +33,7 @@ import javax.persistence.criteria.Root;
 public class ContractorRateToTaskMapFacade extends AbstractFacade<ContractorRateToTaskMap> {
 
     private static final Logger LOGGER = Logger.getLogger(ContractorRateToTaskMapFacade.class.getName());
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
     @PersistenceContext(unitName = "FitnessStatsPU")
     private EntityManager em;
 
@@ -80,7 +81,85 @@ public class ContractorRateToTaskMapFacade extends AbstractFacade<ContractorRate
         return stl;
 
     }
+    
+  public List<ContractorRates> findContractorRatesBySupplier( Suppliers sup) {
 
+        List<ContractorRates> stl = new ArrayList<>();
+        Collection<ContractorRates>  cml;
+        try {
+            CriteriaBuilder cb = em.getCriteriaBuilder();
+            CriteriaQuery<ContractorRateToTaskMap> cq = cb.createQuery(ContractorRateToTaskMap.class);
+            Root<ContractorRateToTaskMap> rt = cq.from(ContractorRateToTaskMap.class);
+
+           // Join<ContractorRateToTaskMap, ContractorRates> jn = rt.join("contractorRateId");// join customers.active to customer_state.id
+            Expression<Suppliers> supplier = rt.get("supplierId");
+
+            Expression<ContractorRates> contractorRates = rt.get("contractorRateId");
+
+           // Predicate condition1 = cb.equal(contractorRates, cr);
+            Predicate condition2 = cb.equal(supplier, sup);
+           // cq.where(cb.equal(condition1, condition2));
+            cq.where(condition2);
+            cq.select(rt.get("contractorRateId")).distinct(true);
+            //Query q = em.createQuery(cq);
+            Query q = em.createQuery(cq);
+            //q.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase);
+            if (DEBUG) {
+                debug(q);
+            }
+            cml = q.getResultList();
+            for (ContractorRates cr : cml) {
+                stl.add(cr);
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "findContractorRatesBySupplier ERROR :{0} {1} ", new Object[]{sup.getSupplierName(), e.getMessage()});
+        }
+        return stl;
+
+    }
+  
+  
+  public ContractorRates findContractorRateBySupplierAndSessionType( Suppliers sup, SessionTypes st) {
+List<ContractorRates> stl = new ArrayList<>();
+        
+        Collection<ContractorRates>  cml;
+        try {
+            CriteriaBuilder cb = em.getCriteriaBuilder();
+            CriteriaQuery<ContractorRateToTaskMap> cq = cb.createQuery(ContractorRateToTaskMap.class);
+            Root<ContractorRateToTaskMap> rt = cq.from(ContractorRateToTaskMap.class);
+
+           // Join<ContractorRateToTaskMap, ContractorRates> jn = rt.join("contractorRateId");// join customers.active to customer_state.id
+            Expression<Suppliers> supplier = rt.get("supplierId");
+Expression<SessionTypes> sessionTypes = rt.get("taskId");
+            Expression<ContractorRates> contractorRates = rt.get("contractorRateId");
+
+           Predicate condition1 = cb.equal(sessionTypes, st);
+            Predicate condition2 = cb.equal(supplier, sup);
+           cq.where(cb.equal(condition1, condition2));
+            //cq.where(condition2);
+            cq.select(rt.get("contractorRateId")).distinct(true);
+            //Query q = em.createQuery(cq);
+            Query q = em.createQuery(cq);
+            //q.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase);
+            if (DEBUG) {
+                debug(q);
+            }
+            cml = q.getResultList();
+            if(stl.size() == 1){
+                for (ContractorRates cr : cml) {
+                stl.add(cr);
+               }
+            }else{
+               LOGGER.log(Level.WARNING, "findContractorRatesBySupplier ERROR :{0} {1} ", new Object[]{sup.getSupplierName(), st.getName()}); 
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "findContractorRateBySupplierAndSessionType ERROR No Session Types match teh contractor Rate for Supplier:{0} {1} ", new Object[]{sup.getSupplierName(), e.getMessage()});
+        }
+        return null;
+
+    }
+ 
+  
     public List<SessionTypes> findBySessionTypesByContractorRate(ContractorRates cr,Suppliers sup) {
 
         List<SessionTypes> stl = new ArrayList<>();
