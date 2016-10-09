@@ -1439,7 +1439,7 @@ public class CustomersController implements Serializable {
             for (Customers cust : multiSelected) {
                 if (cust.getActive().getCustomerState().contains("CANCELLED") == false) {
                     // Cancelled customers canot be reinstated in the payment gateway they must be added as new, so only attempt to change in the payment gateway if customer is active or on hold.
-                    if (selectedState.getCustomerState().contains("CANCELLED") == true) {
+                    if (selectedState.getCustomerState().contains("CANCELLED") == true && controller.isTheCustomerProvisionedInThePaymentGateway() == true) {
                         //clear all scheduled payments before cancellation to clean up db
                         controller.setPaymentKeepManualPayments(false);
                         //set our db staus for this customer to cancelled...On second thought get the status from teh payment gateway to be sure.
@@ -1452,6 +1452,7 @@ public class CustomersController implements Serializable {
                          ejbPaymentParametersFacade.edit(pp);
                          ejbFacade.edit(cust);*/
                         controller.clearEntireSchedule(cust);
+                        //removeFromCustomersTableLists(cust);
                     }
                     controller.changeCustomerStatus(cust, selectedState);
 
@@ -1470,6 +1471,7 @@ public class CustomersController implements Serializable {
 
             }
             recreateModel();
+            //RequestContext.getCurrentInstance().update(":tv:customerslistForm1:customersTableList");
             controller.setCustomerCancellationConfirmed(false);
             String message = count + " " + configMapFacade.getConfig("CustomersStateChanged") + " " + selectedState.getCustomerState() + ".";
             JsfUtil.addSuccessMessage(message);
@@ -1711,6 +1713,27 @@ public class CustomersController implements Serializable {
         }
         if (notesFilteredItems != null) {
             notesFilteredItems.add(note);
+        }
+    }
+     private void removeFromCustomersTableLists(Customers cust) {
+        if (items != null) {
+            List<Customers> lp = (List<Customers>) items.getWrappedData();
+            int index = lp.indexOf(cust);
+            lp.remove(index);
+        }
+        if (filteredItems != null) {
+            int index = filteredItems.indexOf(cust);
+            filteredItems.remove(index);
+        }
+    }
+
+    public void addToCustomersTableLists(Customers cust) {
+        if (items != null) {
+            List<Customers> lp = (List<Customers>) items.getWrappedData();
+            lp.add(0, cust);//insert at the top of the list
+        }
+        if (filteredItems != null) {
+            filteredItems.add(cust);
         }
     }
 

@@ -23,7 +23,7 @@
                 <p:selectBooleanCheckbox id="confirmCancellationCheckbox1" value="#{ezidebit.customerCancellationConfirmed}"  label="Tick to Confirm" />
             </p:panelGrid>
             <p:panel>
-                <p:commandButton id="confirmCancellationDialogueSave"  oncomplete="PF('confirmCancellationDialogueWidget').hide();"  actionListener="#{customersController.changeCustomersState}" value="#{configMapController.getKey('confirmCancellationSaveLink')}" update=":growl  "/>                
+                <p:commandButton id="confirmCancellationDialogueSave"  oncomplete="PF('confirmCancellationDialogueWidget').hide();"  actionListener="#{customersController.changeCustomersState}" value="#{configMapController.getKey('confirmCancellationSaveLink')}" update=":growl :tv:customerslistForm1:customersTableList "/>                
                 <p:commandButton id="confirmCancellationDialogueDiscard" onclick="PF('confirmCancellationDialogueWidget').hide()"  value="#{configMapController.getKey('confirmCancellationDiscardLink')}" update=":growl"/>                
             </p:panel>   
         </h:form>

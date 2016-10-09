@@ -124,7 +124,7 @@
                     <p:column sortBy="#{item.lastname}" filterBy="#{item.lastname}" headerText="#{configMapController.getKey('ListCustomersTitle_lastname')}"   >
                         <h:outputText value="#{item.lastname}"/>
                     </p:column>
-                    <p:column sortBy="#{item.active.customerState}" filterBy="#{item.active.customerState}" headerText="#{configMapController.getKey('ListCustomersTitle_activeCRM')}"   >
+                    <p:column sortBy="#{item.active.customerState}" filterBy="#{item.active.customerState}" headerText="#{configMapController.getKey('ListCustomersTitle_activeCRM')}" filterMatchMode="contains"  >
                         <!-- <h:outputText value="LEAD, " rendered="#{customersController.isCustomerInRole(item,'LEAD')}" />  
                         <h:outputText value="TRAINER, " rendered="#{customersController.isCustomerInRole(item,'TRAINER')}" /> -->
                         <ui:repeat value="#{item.groupsCollection}" var="group">

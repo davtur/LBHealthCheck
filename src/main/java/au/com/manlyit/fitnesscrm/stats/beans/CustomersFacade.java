@@ -382,9 +382,16 @@ public class CustomersFacade extends AbstractFacade<Customers> {
                 subquery.where(cb.or(predicatesList2.<Predicate>toArray(new Predicate[predicatesList2.size()])));
                 Predicate pred = cb.not(user.in(subquery));
                 cq.where(cb.and(cb.or(predicatesList.<Predicate>toArray(new Predicate[predicatesList.size()])), pred));
-            } else {
-                cq.where(cb.or(predicatesList.<Predicate>toArray(new Predicate[predicatesList.size()])));
+            } 
+            //else {
+             //   cq.where(cb.or(predicatesList.<Predicate>toArray(new Predicate[predicatesList.size()])));
+           // }
+            else {
+                subquery.where(cb.or(predicatesList2.<Predicate>toArray(new Predicate[predicatesList2.size()])));
+                Predicate pred = user.in(subquery);
+                cq.where(cb.and(cb.or(predicatesList.<Predicate>toArray(new Predicate[predicatesList.size()])),pred));
             }
+            
             Expression<String> express = rt.get(sortField);
             if (sortAsc) {
                 cq.orderBy(cb.asc(express));
