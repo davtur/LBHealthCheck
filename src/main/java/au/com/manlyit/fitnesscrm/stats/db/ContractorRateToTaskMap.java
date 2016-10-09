@@ -44,6 +44,9 @@ public class ContractorRateToTaskMap implements Serializable {
     @JoinColumn(name = "task_id", referencedColumnName = "id")
     @ManyToOne(optional = false)
     private SessionTypes taskId;
+    @JoinColumn(name = "supplier_id", referencedColumnName = "id")
+    @ManyToOne(optional = false)
+    private Suppliers supplierId;
 
     public ContractorRateToTaskMap() {
     }
@@ -51,10 +54,12 @@ public class ContractorRateToTaskMap implements Serializable {
     public ContractorRateToTaskMap(Integer id) {
         this.id = id;
     }
-     public ContractorRateToTaskMap(Integer id,SessionTypes taskId,ContractorRates contractorRateId) {
+
+    public ContractorRateToTaskMap(Integer id, SessionTypes taskId, ContractorRates contractorRateId, Suppliers supplierId) {
         this.id = id;
         this.taskId = taskId;
         this.contractorRateId = contractorRateId;
+        this.supplierId = supplierId;
     }
 
     public Integer getId() {
@@ -81,6 +86,14 @@ public class ContractorRateToTaskMap implements Serializable {
         this.taskId = taskId;
     }
 
+    public Suppliers getSupplierId() {
+        return supplierId;
+    }
+
+    public void setSupplierId(Suppliers supplierId) {
+        this.supplierId = supplierId;
+    }
+
     @Override
     public int hashCode() {
         int hash = 0;
@@ -105,5 +118,5 @@ public class ContractorRateToTaskMap implements Serializable {
     public String toString() {
         return "au.com.manlyit.fitnesscrm.stats.beans.ContractorRateToTaskMap[ id=" + id + " ]";
     }
-    
+
 }

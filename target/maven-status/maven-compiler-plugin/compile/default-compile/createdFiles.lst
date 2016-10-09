@@ -207,6 +207,7 @@ au/com/manlyit/fitnesscrm/stats/beans/ContractorRatesFacade.class
 au/com/manlyit/fitnesscrm/stats/classes/ExpensesController.class
 au/com/manlyit/fitnesscrm/stats/db/SurveyQuestionSubitems.class
 au/com/manlyit/fitnesscrm/stats/classes/InvoiceController$InvoiceControllerConverter.class
+au/com/manlyit/fitnesscrm/stats/classes/util/ContractorRateToDualListModelMap.class
 au/com/manlyit/fitnesscrm/stats/classes/util/GoogleTest$1.class
 au/com/manlyit/fitnesscrm/stats/converters/CustomImageConverter.class
 au/com/manlyit/fitnesscrm/stats/classes/ParticipantsController.class

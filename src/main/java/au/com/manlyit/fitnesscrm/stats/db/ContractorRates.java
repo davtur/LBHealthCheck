@@ -70,9 +70,7 @@ public class ContractorRates implements Serializable {
     @Size(max = 65535)
     @Column(name = "description")
     private String description;
-    @JoinColumn(name = "supplier_id", referencedColumnName = "id")
-    @ManyToOne(optional = false)
-    private Suppliers supplierId;
+    
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "contractorRateId")
     private Collection<ContractorRateToTaskMap> contractorRateToTaskMapCollection;
 
@@ -138,14 +136,7 @@ public class ContractorRates implements Serializable {
         this.description = description;
     }
 
-    public Suppliers getSupplierId() {
-        return supplierId;
-    }
-
-    public void setSupplierId(Suppliers supplierId) {
-        this.supplierId = supplierId;
-    }
-
+   
     @XmlTransient
     public Collection<ContractorRateToTaskMap> getContractorRateToTaskMapCollection() {
         return contractorRateToTaskMapCollection;

@@ -159,7 +159,7 @@ public class SuppliersController implements Serializable {
         if (add) {
             for (Object item : event.getItems()) {
                 SessionTypes st = (SessionTypes) item;
-                ContractorRateToTaskMap crtm = new ContractorRateToTaskMap(0, st, getSelectedContractorRate());
+                ContractorRateToTaskMap crtm = new ContractorRateToTaskMap(0, st, getSelectedContractorRate(),getSelected());
                 contractorRateToTaskMapFacade.create(crtm);
                 //st.getContractorRateToTaskMapCollection().add(crtm);
 
@@ -171,7 +171,7 @@ public class SuppliersController implements Serializable {
             for (Object item : event.getItems()) {
                 SessionTypes st = (SessionTypes) item;
                 Collection<ContractorRateToTaskMap> stl = st.getContractorRateToTaskMapCollection();
-                ContractorRateToTaskMap mapToRemove = contractorRateToTaskMapFacade.findBySessionTypeAndContractorRate(st, getSelectedContractorRate());
+                ContractorRateToTaskMap mapToRemove = contractorRateToTaskMapFacade.findBySessionTypeAndContractorRate(st, getSelectedContractorRate(),getSelected());
                 if (mapToRemove != null) {
                     stl.remove(mapToRemove);
                     st.setContractorRateToTaskMapCollection(stl);
@@ -207,11 +207,11 @@ public class SuppliersController implements Serializable {
             } else {
 
                 List<SessionTypes> source = getSessionTypesArray();
-                List<SessionTypes> removeFromSource = contractorRateToTaskMapFacade.findBySessionTypesByContractorRateAndSupplier(getSelectedContractorRate().getSupplierId());
+                List<SessionTypes> removeFromSource = contractorRateToTaskMapFacade.findBySessionTypesByContractorRateAndSupplier(getSelected());
                 for (SessionTypes stRem : removeFromSource) {
                     source.remove(stRem);
                 }
-                List<SessionTypes> destination = contractorRateToTaskMapFacade.findBySessionTypesByContractorRate(getSelectedContractorRate());
+                List<SessionTypes> destination = contractorRateToTaskMapFacade.findBySessionTypesByContractorRate(getSelectedContractorRate(),getSelected());
                 if (destination == null) {
                     destination = new ArrayList<>();
                     LOGGER.log(Level.WARNING, "getRateItems - the call to contractorRateToTaskMapFacade.findBySessionTypesByContractorRate(getSelectedContractorRate()) returned a NULL value");

@@ -54,8 +54,8 @@ public class ContractorRateToTaskMapFacade extends AbstractFacade<ContractorRate
             CriteriaQuery<ContractorRateToTaskMap> cq = cb.createQuery(ContractorRateToTaskMap.class);
             Root<ContractorRateToTaskMap> rt = cq.from(ContractorRateToTaskMap.class);
 
-            Join<ContractorRateToTaskMap, ContractorRates> jn = rt.join("contractorRateId");// join customers.active to customer_state.id
-            Expression<Suppliers> supplier = jn.get("supplierId");
+           // Join<ContractorRateToTaskMap, ContractorRates> jn = rt.join("contractorRateId");// join customers.active to customer_state.id
+            Expression<Suppliers> supplier = rt.get("supplierId");
 
             //Expression<ContractorRates> contractorRates = rt.get("contractorRateId");
 
@@ -81,7 +81,7 @@ public class ContractorRateToTaskMapFacade extends AbstractFacade<ContractorRate
 
     }
 
-    public List<SessionTypes> findBySessionTypesByContractorRate(ContractorRates cr) {
+    public List<SessionTypes> findBySessionTypesByContractorRate(ContractorRates cr,Suppliers sup) {
 
         List<SessionTypes> stl = new ArrayList<>();
         List<ContractorRateToTaskMap> cml;
@@ -91,9 +91,11 @@ public class ContractorRateToTaskMapFacade extends AbstractFacade<ContractorRate
             Root<ContractorRateToTaskMap> rt = cq.from(ContractorRateToTaskMap.class);
 
             Expression<ContractorRates> contractorRates = rt.get("contractorRateId");
+            Expression<Suppliers> suppliers = rt.get("supplierId");
 
             Predicate condition1 = cb.equal(contractorRates, cr);
-            cq.where(condition1);
+            Predicate condition2 = cb.equal(suppliers, sup);
+            cq.where(cb.and(condition1,condition2));
 
             //Query q = em.createQuery(cq);
             TypedQuery<ContractorRateToTaskMap> q = em.createQuery(cq);
@@ -113,7 +115,7 @@ public class ContractorRateToTaskMapFacade extends AbstractFacade<ContractorRate
 
     }
 
-    public ContractorRateToTaskMap findBySessionTypeAndContractorRate(SessionTypes st, ContractorRates cr) {
+    public ContractorRateToTaskMap findBySessionTypeAndContractorRate(SessionTypes st, ContractorRates cr,Suppliers sup) {
 
         ContractorRateToTaskMap cm = null;
         try {
@@ -123,9 +125,11 @@ public class ContractorRateToTaskMapFacade extends AbstractFacade<ContractorRate
 
             Expression<SessionTypes> sessionTypes = rt.get("taskId");
             Expression<ContractorRates> contractorRates = rt.get("contractorRateId");
+            Expression<Suppliers> suppliers = rt.get("supplierId");
             Predicate condition1 = cb.equal(sessionTypes, st);
             Predicate condition2 = cb.equal(contractorRates, cr);
-            cq.where(cb.and(condition1, condition2));
+            Predicate condition3 = cb.equal(suppliers, sup);
+            cq.where(cb.and(condition1, condition2,condition3));
 
             //Query q = em.createQuery(cq);
             TypedQuery<ContractorRateToTaskMap> q = em.createQuery(cq);

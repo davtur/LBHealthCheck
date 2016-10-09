@@ -144,6 +144,7 @@
 /home/david/NetBeansProjects/FitnessCRM/src/main/java/au/com/manlyit/fitnesscrm/stats/db/SurveyQuestions.java
 /home/david/NetBeansProjects/FitnessCRM/src/main/java/au/com/manlyit/fitnesscrm/stats/classes/ItemController.java
 /home/david/NetBeansProjects/FitnessCRM/target/generated-sources/jaxws-wsimport/au/com/manlyit/fitnesscrm/stats/webservices/Payment.java
+/home/david/NetBeansProjects/FitnessCRM/src/main/java/au/com/manlyit/fitnesscrm/stats/classes/util/ContractorRateToDualListModelMap.java
 /home/david/NetBeansProjects/FitnessCRM/src/main/java/au/com/manlyit/fitnesscrm/stats/beans/SessionTrainersFacade.java
 /home/david/NetBeansProjects/FitnessCRM/target/generated-sources/jaxws-wsimport/au/com/manlyit/fitnesscrm/stats/webservices/IsBsbValidResponse.java
 /home/david/NetBeansProjects/FitnessCRM/src/main/java/au/com/manlyit/fitnesscrm/stats/classes/util/EmailValidator.java

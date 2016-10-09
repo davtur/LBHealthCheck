@@ -140,7 +140,7 @@ public class ContractorRatesController implements Serializable {
                 current.setId(0);
             }
             getFacade().create(current);
-            suppliersFacade.edit(current.getSupplierId());
+           // suppliersFacade.edit(current.);
             JsfUtil.addSuccessMessage(configMapFacade.getConfig("ContractorRatesCreated"));
             return prepareCreate();
         } catch (Exception e) {
@@ -178,7 +178,7 @@ public class ContractorRatesController implements Serializable {
     public String update() {
         try {
             getFacade().edit(current);
-            suppliersFacade.edit(current.getSupplierId());
+           // suppliersFacade.edit(current.getSupplierId());
             JsfUtil.addSuccessMessage(configMapFacade.getConfig("ContractorRatesUpdated"));
             return "View";
         } catch (Exception e) {
