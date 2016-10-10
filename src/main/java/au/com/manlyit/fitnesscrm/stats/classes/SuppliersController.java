@@ -463,8 +463,9 @@ public class SuppliersController implements Serializable {
     }
 
     public SelectItem[] getItemsAvailableSelectOne() {
-        return JsfUtil.getSelectItems(ejbFacade.findAll(), true);
+        return JsfUtil.getSelectItemsBaseEntity(ejbFacade.findAll(), true);
     }
+   
 
     public Collection<Suppliers> getItemsAvailable() {
         return ejbFacade.findAll();

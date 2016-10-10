@@ -26,9 +26,8 @@
                             <h:panelGrid columns="2" cellpadding="5" >
 
                                 <p:outputLabel value="#{configMapController.getKey('SelectStartDateForSessionHistory_Label')}" for="sessionstart" />
-                                <p:calendar id="sessionstart" value="#{auditLogController.startDate}" pattern="dd MMMM yyyy" valueChangeListener="#{auditLogController.datesChangedOnAuditLogTable}"
-                                            title="#{configMapController.getKey('SelectStartDateForSessionHistory_Title')}"    >
-                                    <p:ajax event="dateSelect"  update="datalist" />
+                                <p:calendar id="sessionstart" value="#{auditLogController.startDate}" pattern="dd MMMM yyyy" title="#{configMapController.getKey('SelectStartDateForSessionHistory_Title')}"    >
+                                    <p:ajax event="dateSelect"  update="datalist" listener="#{auditLogController.startDateChangedOnAuditLogTable}" />
                                 </p:calendar> 
                             </h:panelGrid>
 
@@ -37,9 +36,8 @@
 
                             <h:panelGrid columns="2" cellpadding="5" >
                                 <p:outputLabel value="#{configMapController.getKey('SelectEndDateForSessionHistory_Label')}" for="sessionend" />
-                                <p:calendar id="sessionend" value="#{auditLogController.endDate}"  pattern="dd MMMM yyyy" valueChangeListener="#{auditLogController.datesChangedOnAuditLogTable}"
-                                            title="#{configMapController.getKey('SelectEndDateForSessionHistory_Title')}"    >
-                                    <p:ajax event="dateSelect"  update="datalist" />
+                                <p:calendar id="sessionend" value="#{auditLogController.endDate}"  pattern="dd MMMM yyyy" title="#{configMapController.getKey('SelectEndDateForSessionHistory_Title')}"    >
+                                    <p:ajax event="dateSelect"  update="datalist" listener="#{auditLogController.endDateChangedOnAuditLogTable}"/>
                                 </p:calendar> 
                             </h:panelGrid>
 
@@ -58,29 +56,21 @@
                             sortOrder="descending"
                             value="#{auditLogController.lazyModel}" 
                             selection="#{auditLogController.selected}" 
-
                             rowKey="#{item.id}" 
 
                             widgetVar="auditLogControllerTable" 
                             selectionMode="single"
                             var="item" 
-
-
-                            paginator="true"
-
                             rows="10"
 
-                            paginatorTemplate="{RowsPerPageDropdown} {FirstPageLink} {PreviousPageLink} {CurrentPageReport} {NextPageLink} {LastPageLink}"
-
-                            rowsPerPageTemplate="10,50,100"
+                            scrollable="true"
+                            scrollHeight="400"
+                            scrollRows="50"
+                            liveScroll="true"
 
                             >
 
-                            <!--  scrollable="true"
-                              scrollHeight="400"
-                              scrollRows="50"
-                              liveScroll="true"-->
-
+                           
 
 
                             <f:facet name="footer">
@@ -105,7 +95,7 @@
                             </p:column>
                             <p:column sortBy="#{item.changedBy}" filterBy="#{item.changedBy}"  filterMatchMode="exact"  headerText="#{configMapController.getKey('ListAuditLogTitle_changedBy')}"   >
                                 <f:facet name="filter">
-                                    <p:selectOneMenu onchange="PF('auditLogControllerTable').filter()" filter="true" >
+                                    <p:selectOneMenu onchange="PF('auditLogControllerTable').filter()" filter="true" class="selectOneWidth">
 
                                         <f:selectItems value="#{customersController.itemsAvailableSelectOne}" />
                                     </p:selectOneMenu>
@@ -114,7 +104,7 @@
                             </p:column>
                             <p:column sortBy="#{item.customer}" filterBy="#{item.customer}" filterMatchMode="exact"  headerText="#{configMapController.getKey('ListAuditLogTitle_customer')}"   >
                                 <f:facet name="filter">
-                                    <p:selectOneMenu onchange="PF('auditLogControllerTable').filter()" filter="true" >
+                                    <p:selectOneMenu onchange="PF('auditLogControllerTable').filter()" filter="true" class="selectOneWidth">
                                         <!--<f:selectItem itemLabel="Select One" itemValue="#{null}" noSelectionOption="true" />-->
                                         <f:selectItems value="#{customersController.itemsAvailableSelectOne}" />
                                     </p:selectOneMenu>

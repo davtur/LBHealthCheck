@@ -5,6 +5,7 @@
  */
 package au.com.manlyit.fitnesscrm.stats.db;
 
+import au.com.manlyit.fitnesscrm.stats.classes.util.BaseEntity;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
@@ -48,7 +49,7 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "Expenses.findByPercentForBusinessUse", query = "SELECT e FROM Expenses e WHERE e.percentForBusinessUse = :percentForBusinessUse"),
     @NamedQuery(name = "Expenses.findByExpenseAmountGst", query = "SELECT e FROM Expenses e WHERE e.expenseAmountGst = :expenseAmountGst"),
     @NamedQuery(name = "Expenses.findByBusinessUseAmountGst", query = "SELECT e FROM Expenses e WHERE e.businessUseAmountGst = :businessUseAmountGst")})
-public class Expenses implements Serializable {
+public class Expenses implements BaseEntity,Serializable {
 
     @OneToOne(mappedBy = "expenseId")
     private SessionHistory sessionHistory;

@@ -170,12 +170,25 @@ public class AuditLogController implements Serializable {
         return "Create";
     }
 
-    public void datesChangedOnAuditLogTable() {
+    public void startDateChangedOnAuditLogTable(SelectEvent event) {
         //items = null;
         //filteredItems = null;
-        lazyModel.setFromDate(startDate);
-        lazyModel.setToDate(endDate);
-        recreateModel();
+        Object o = event.getObject();
+        Date newDate = (Date)o;
+        lazyModel.setFromDate(newDate);
+       // lazyModel.setToDate(endDate);
+         RequestContext.getCurrentInstance().execute("PF('auditLogControllerTable').filter();");
+       // RequestContext requestContext = RequestContext.getCurrentInstance();
+
+    }
+    public void endDateChangedOnAuditLogTable(SelectEvent event) {
+        //items = null;
+        //filteredItems = null;
+        Object o = event.getObject();
+        Date newDate = (Date)o;
+        //lazyModel.setFromDate(startDate);
+        lazyModel.setToDate(newDate);
+         RequestContext.getCurrentInstance().execute("PF('auditLogControllerTable').filter();");
        // RequestContext requestContext = RequestContext.getCurrentInstance();
 
     }

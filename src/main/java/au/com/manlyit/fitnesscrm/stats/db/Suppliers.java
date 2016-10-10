@@ -5,6 +5,7 @@
  */
 package au.com.manlyit.fitnesscrm.stats.db;
 
+import au.com.manlyit.fitnesscrm.stats.classes.util.BaseEntity;
 import java.io.Serializable;
 import java.util.Collection;
 import javax.persistence.Basic;
@@ -38,7 +39,7 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Suppliers.findBySupplierName", query = "SELECT s FROM Suppliers s WHERE s.supplierName = :supplierName"),
     @NamedQuery(name = "Suppliers.findBySupplierCompanyNumber", query = "SELECT s FROM Suppliers s WHERE s.supplierCompanyNumber = :supplierCompanyNumber"),
     @NamedQuery(name = "Suppliers.findBySupplierCompanyNumberType", query = "SELECT s FROM Suppliers s WHERE s.supplierCompanyNumberType = :supplierCompanyNumberType")})
-public class Suppliers implements Serializable {
+public class Suppliers implements Serializable,BaseEntity {
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "supplierId")
     private Collection<ContractorRateToTaskMap> contractorRateToTaskMapCollection;
@@ -149,7 +150,7 @@ public class Suppliers implements Serializable {
 
     @Override
     public String toString() {
-        return "au.com.manlyit.fitnesscrm.stats.beans.Suppliers[ id=" + id + " ]";
+        return supplierName;
     }
 
     public Customers getInternalContractorId() {

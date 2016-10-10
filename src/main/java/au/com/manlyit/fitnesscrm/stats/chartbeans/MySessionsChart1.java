@@ -4,6 +4,7 @@
  */
 package au.com.manlyit.fitnesscrm.stats.chartbeans;
 
+import au.com.manlyit.fitnesscrm.stats.beans.ExpensesFacade;
 import au.com.manlyit.fitnesscrm.stats.beans.PaymentsFacade;
 import au.com.manlyit.fitnesscrm.stats.beans.util.PaymentStatus;
 import au.com.manlyit.fitnesscrm.stats.classes.CustomersController;
@@ -11,6 +12,7 @@ import au.com.manlyit.fitnesscrm.stats.classes.EziDebitPaymentGateway;
 import au.com.manlyit.fitnesscrm.stats.classes.SessionHistoryController;
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
+import au.com.manlyit.fitnesscrm.stats.db.Expenses;
 import au.com.manlyit.fitnesscrm.stats.db.Payments;
 import au.com.manlyit.fitnesscrm.stats.db.SessionHistory;
 import au.com.manlyit.fitnesscrm.stats.db.SessionTypes;
@@ -103,6 +105,8 @@ public class MySessionsChart1 implements Serializable {
     private au.com.manlyit.fitnesscrm.stats.beans.GroupsFacade ejbGroupsFacade;
     @Inject
     private PaymentsFacade paymentsFacade;
+     @Inject
+    private ExpensesFacade expensesFacade;
 
     //@PostConstruct
     /* public void createChart() {
@@ -398,6 +402,7 @@ public class MySessionsChart1 implements Serializable {
             List<ChartSeries> seriesList = new ArrayList<>();
 
             List<Payments> paymentList;
+            List<Expenses> expenseList;
 
             BarChartSeries barChartSeries1 = new BarChartSeries();
             barChartSeries1.setLabel("Payments");
@@ -427,6 +432,7 @@ public class MySessionsChart1 implements Serializable {
                     float reportTotalSuccessful = 0;
                     float reportTotalDishonoured = 0;
                     float reportTotalScheduled = 0;
+                    float reportTotalExpenses = 0;
 
                     boolean reportUseSettlementDate = false;
                     boolean reportShowSuccessful = true;
@@ -436,15 +442,22 @@ public class MySessionsChart1 implements Serializable {
 
                     paymentList = paymentsFacade.findPaymentsByDateRange(reportUseSettlementDate, reportShowSuccessful, reportShowFailed, reportShowPending, isReportShowScheduled, strt, end, false, null);
 
+                    expenseList = expensesFacade.findExpensesByDateRange(strt, end, false);
+                    
                     if (paymentList != null) {
                         for (Payments p : paymentList) {
                             if (p.getPaymentStatus().contains(PaymentStatus.SUCESSFUL.value()) || p.getPaymentStatus().contains(PaymentStatus.PENDING.value())) {
-                                reportTotalSuccessful = reportTotalSuccessful + p.getPaymentAmount().floatValue();
+                                reportTotalSuccessful += p.getPaymentAmount().floatValue();
 
                             } else if (p.getPaymentStatus().contains(PaymentStatus.DISHONOURED.value()) || p.getPaymentStatus().contains(PaymentStatus.FATAL_DISHONOUR.value())) {
-                                reportTotalDishonoured = reportTotalDishonoured + p.getPaymentAmount().floatValue();
+                                reportTotalDishonoured += p.getPaymentAmount().floatValue();
                             } else if (p.getPaymentStatus().contains(PaymentStatus.SCHEDULED.value())) {
-                                reportTotalScheduled = reportTotalScheduled + p.getPaymentAmount().floatValue();
+                                reportTotalScheduled += p.getPaymentAmount().floatValue();
+                            }
+                        }
+                        if(expenseList != null) {
+                            for (Expenses e : expenseList) {
+                                reportTotalExpenses += e.getExpenseAmount().floatValue();
                             }
                         }
 
@@ -472,6 +485,7 @@ public class MySessionsChart1 implements Serializable {
 
                         Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.WARNING, "Report Failed - paymentsFacade.findPaymentsByDateRange returned NULL");
                     }
+                    
 
                     startCal.add(calendarIncrementInterval, 1);
                     endCal.add(calendarIncrementInterval, 1);

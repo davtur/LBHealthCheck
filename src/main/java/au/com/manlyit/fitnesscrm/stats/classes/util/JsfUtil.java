@@ -3,6 +3,7 @@ package au.com.manlyit.fitnesscrm.stats.classes.util;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import java.io.Serializable;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Inject;
 import javax.faces.application.FacesMessage;
@@ -16,7 +17,7 @@ import org.primefaces.push.EventBusFactory;
 
 public  class JsfUtil implements Serializable {
     private static final long serialVersionUID = 1L;
-
+    private static final Logger LOGGER = Logger.getLogger(JsfUtil.class.getName());
   
 
     public static SelectItem[] getSelectItems(List<?> entities, boolean selectOne) {
@@ -29,6 +30,26 @@ public  class JsfUtil implements Serializable {
         }
         for (Object x : entities) {
             items[i++] = new SelectItem(x, x.toString());
+        }
+        return items;
+    }
+    
+    public static SelectItem[] getSelectItemsBaseEntity(List<?> entities, boolean selectOne) {
+        int size = selectOne ? entities.size() + 1 : entities.size();
+        SelectItem[] items = new SelectItem[size];
+        int i = 0;
+        if (selectOne) {
+            items[0] = new SelectItem("", "---");
+            i++;
+        }
+        try {
+            for (Object x : entities) {
+                BaseEntity entity = (BaseEntity) x;
+                items[i++] = new SelectItem(entity.getId(), entity.toString());
+            }
+        } catch (Exception e) {
+            addErrorMessage(e, "JSFUtil.getSelectItemsBaseEntity - The Objects passed to this method don't implement the BaseEntity Class!");
+            LOGGER.log(Level.WARNING, "JSFUtil.getSelectItemsBaseEntity - The Objects passed to this method don't implement the BaseEntity Class!",e);
         }
         return items;
     }

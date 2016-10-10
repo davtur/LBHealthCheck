@@ -137,7 +137,7 @@ public abstract class AbstractFacade<T> implements Serializable {
 
     public List<T> load(int first, int count, String sortField, SortOrder sortOrder, Map<String, Object> filters) {
         List<T> resultList;
-        String message = "Lazy Loading: " + entityClass.getSimpleName() + ",Rows=" + count + ", First=" + first + ", SortField=" + sortField + ", SortOrder=" + sortOrder.name();
+        String message = "Abstract Facade: load method - Lazy Loading: " + entityClass.getSimpleName() + ",Rows=" + count + ", First=" + first + ", SortField=" + sortField + ", SortOrder=" + sortOrder.name();
         logger.log(Level.INFO, message);
         CriteriaBuilder builder = getEntityManager().getCriteriaBuilder();
         CriteriaQuery<T> cq = builder.createQuery(entityClass);
@@ -221,7 +221,7 @@ public abstract class AbstractFacade<T> implements Serializable {
 
     public List<T> loadDateRange(int first, int count, String sortField, SortOrder sortOrder, Map<String, Object> filters, Date startDate, Date endDate, String dateRangeFieldName) {
         List<T> resultList;
-        String message = "Lazy Loading: " + entityClass.getSimpleName() + ",Rows=" + count + ", First=" + first + ", SortField=" + sortField + ", SortOrder=" + sortOrder.name() + ", dateRangeFieldName=" + dateRangeFieldName + ", startDate=" + startDate.toString() + ", endDate=" + endDate.toString();
+        String message = "Abstract Facade: loadDateRange  method -Lazy Loading: " + entityClass.getSimpleName() + ",Rows=" + count + ", First=" + first + ", SortField=" + sortField + ", SortOrder=" + sortOrder.name() + ", dateRangeFieldName=" + dateRangeFieldName + ", startDate=" + startDate.toString() + ", endDate=" + endDate.toString();
         logger.log(Level.INFO, message);
         CriteriaBuilder builder = getEntityManager().getCriteriaBuilder();
         CriteriaQuery<T> cq = builder.createQuery(entityClass);

@@ -4,6 +4,8 @@ import au.com.manlyit.fitnesscrm.stats.db.Expenses;
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PaginationHelper;
 import au.com.manlyit.fitnesscrm.stats.beans.ExpensesFacade;
+import au.com.manlyit.fitnesscrm.stats.classes.util.LazyLoadingDataModel;
+import au.com.manlyit.fitnesscrm.stats.db.AuditLog;
 import au.com.manlyit.fitnesscrm.stats.db.ContractorRates;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import au.com.manlyit.fitnesscrm.stats.db.ExpenseTypes;
@@ -26,12 +28,15 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.SessionScoped;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
@@ -52,6 +57,7 @@ import org.apache.sanselan.formats.jpeg.JpegImageMetadata;
 import org.apache.sanselan.formats.tiff.TiffField;
 import org.apache.sanselan.formats.tiff.constants.TagInfo;
 import org.apache.sanselan.formats.tiff.constants.TiffConstants;
+import org.primefaces.context.RequestContext;
 import org.primefaces.event.FileUploadEvent;
 import org.primefaces.event.RowEditEvent;
 import org.primefaces.event.SelectEvent;
@@ -104,8 +110,27 @@ public class ExpensesController implements Serializable {
     private int imageWidth = 0;
     private int x1 = 0;
     private int y1 = 0;
+    private LazyLoadingDataModel<Expenses> lazyModel;
+    private Date startDate;
+    private Date endDate;
 
     public ExpensesController() {
+    }
+
+    @PostConstruct
+    private void initDates() {
+        GregorianCalendar cal1 = new GregorianCalendar();
+        cal1.add(Calendar.DAY_OF_YEAR, 1);
+        setEndDate(cal1.getTime());
+        cal1.add(Calendar.DAY_OF_YEAR, -1);
+        cal1.add(Calendar.MONTH, -1);
+        setStartDate(cal1.getTime());
+        //items = new PfSelectableDataModel<>(ejbFacade.findAuditLogsByDateRange(startDate, endDate, true));
+        lazyModel = new LazyLoadingDataModel<>(ejbFacade);
+        lazyModel.setFromDate(getStartDate());
+        lazyModel.setToDate(getEndDate());
+        lazyModel.setDateRangeEntityFieldName("expenseIncurredTimestamp");
+        lazyModel.setUseDateRange(true);
     }
 
     /**
@@ -173,6 +198,41 @@ public class ExpensesController implements Serializable {
 
     private ExpensesFacade getFacade() {
         return getEjbFacade();
+    }
+
+    public void startDateChangedOnAuditLogTable(SelectEvent event) {
+        //items = null;
+        //filteredItems = null;
+        Object o = event.getObject();
+        Date newDate = (Date) o;
+        lazyModel.setFromDate(newDate);
+        // lazyModel.setToDate(endDate);
+        RequestContext.getCurrentInstance().execute("PF('expensesControllerTable').filter();");
+        // RequestContext requestContext = RequestContext.getCurrentInstance();
+
+    }
+
+    public void endDateChangedOnAuditLogTable(SelectEvent event) {
+        //items = null;
+        //filteredItems = null;
+        Object o = event.getObject();
+        Date newDate = (Date) o;
+        //lazyModel.setFromDate(startDate);
+        lazyModel.setToDate(newDate);
+        RequestContext.getCurrentInstance().execute("PF('expensesControllerTable').filter();");
+        // RequestContext requestContext = RequestContext.getCurrentInstance();
+
+    }
+
+    public LazyLoadingDataModel<Expenses> getLazyModel() {
+        if (lazyModel == null) {
+            lazyModel = new LazyLoadingDataModel<>(ejbFacade);
+            lazyModel.setFromDate(getStartDate());
+            lazyModel.setToDate(getEndDate());
+            lazyModel.setDateRangeEntityFieldName("expenseIncurredTimestamp");
+            lazyModel.setUseDateRange(true);
+        }
+        return lazyModel;
     }
 
     public PaginationHelper getPagination() {
@@ -1134,15 +1194,13 @@ public class ExpensesController implements Serializable {
             // So, we're rendering the HTML. Return a stub StreamedContent so that it will generate right URL.
             return new DefaultStreamedContent();
         } else // So, browser is requesting the image. Return a real StreamedContent with the image bytes.
-        {
-            if (getUploadedImage() != null && getUploadedImage().getImage() != null) {
+         if (getUploadedImage() != null && getUploadedImage().getImage() != null) {
                 return new DefaultStreamedContent(new ByteArrayInputStream(getUploadedImage().getImage()));
             } else {
                 //getConfigMapFacade().getConfig("PersistenceErrorOccured")
                 //InputStream iStream = FacesContext.getCurrentInstance().getExternalContext().getResourceAsStream("/resources/images/upload-invoice.png");
                 return new DefaultStreamedContent(FacesContext.getCurrentInstance().getExternalContext().getResourceAsStream("/resources/images/upload-invoice.png"));
             }
-        }
     }
 
     public void handleFileUpload(FileUploadEvent event) {
@@ -1256,6 +1314,34 @@ public class ExpensesController implements Serializable {
      */
     public void setY1(int y1) {
         this.y1 = y1;
+    }
+
+    /**
+     * @return the startDate
+     */
+    public Date getStartDate() {
+        return startDate;
+    }
+
+    /**
+     * @param startDate the startDate to set
+     */
+    public void setStartDate(Date startDate) {
+        this.startDate = startDate;
+    }
+
+    /**
+     * @return the endDate
+     */
+    public Date getEndDate() {
+        return endDate;
+    }
+
+    /**
+     * @param endDate the endDate to set
+     */
+    public void setEndDate(Date endDate) {
+        this.endDate = endDate;
     }
 
     @FacesConverter(value = "expensesControllerConverter")

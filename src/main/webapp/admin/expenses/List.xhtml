@@ -12,273 +12,329 @@
 
 
 
+        <div class="layout-portlets-box">
 
 
-        <h:form id="ExpensesListForm">
-            <h:outputText escape="false" value="#{configMapController.getKey('ListExpensesEmpty')}" rendered="#{expensesController.items.rowCount == 0}"/>
-            <h:panelGroup >
-                <p:dataTable  
-                    id="datalist"  
-                    editable="true" 
-                    value="#{expensesController.items}" 
-                    selection="#{expensesController.selected}" 
-                    rowKey="#{item.id}" 
-                    filteredValue="#{expensesController.filteredItems}"  
-                    widgetVar="expensesControllerTable" 
-                    var="item"  
-                    paginator="true" 
-                    rows="15"  
-                    paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  
-                    rowsPerPageTemplate="5,10,15,20,25,50,100" >
-                    <f:facet name="header">
-                        <p:outputPanel>
-                            <h:outputText value="Search all fields:" />
-                            <h:inputText id="globalFilter" onkeyup="PF('expensesControllerTable').filter()" />
-                        </p:outputPanel>
-                    </f:facet>
-                    <p:ajax event="rowEdit" listener="#{expensesController.onEdit}" update=":growl" oncomplete="PF('expensesControllerTable').filter()" />  
-                    <p:ajax event="rowEditCancel" listener="#{expensesController.onCancel}" update=":growl"  oncomplete="PF('expensesControllerTable').filter()" />  
-                    <p:ajax event="rowSelect"   update="createButton viewButton editButton deleteButton"/>
-                    <p:ajax event="rowUnselect" update="createButton viewButton editButton deleteButton"/>
-                    <p:column selectionMode="single"/>
-                    <p:column sortBy="#{item.id}" filterBy="#{item.id}" headerText="#{configMapController.getKey('ListExpensesTitle_id')}"   >
-                        <p:cellEditor> 
-                            <f:facet name="output">
-                                <h:outputText value="#{item.id}"/>
-                            </f:facet>
-                            <f:facet name="input">
-                                <p:inputText value="#{item.id}" label="#{configMapController.getKey('ListExpensesTitle_id')}" />
-                            </f:facet>
-                        </p:cellEditor> 
+            <h:form id="ExpensesListForm">
+                <div class="Container100 Responsive100">
+                    <div class="ContainerIndent">
+                        <h1 class="BigTopic">#{configMapController.getKey('ListExpensesTitle')}</h1>
+
+                        <div class="Container20 Responsive">
+
+                            <h:panelGrid columns="2" cellpadding="5" >
+
+                                <p:outputLabel value="#{configMapController.getKey('SelectStartDateForSessionHistory_Label')}" for="sessionstart" />
+                                <p:calendar id="sessionstart" value="#{expensesController.startDate}" pattern="dd MMMM yyyy" title="#{configMapController.getKey('SelectStartDateForSessionHistory_Title')}"    >
+                                    <p:ajax event="dateSelect"  update="datalist" listener="#{expensesController.startDateChangedOnAuditLogTable}" />
+                                </p:calendar> 
+                            </h:panelGrid>
+
+                        </div>
+                        <div class="Container20 Responsive">
+
+                            <h:panelGrid columns="2" cellpadding="5" >
+                                <p:outputLabel value="#{configMapController.getKey('SelectEndDateForSessionHistory_Label')}" for="sessionend" />
+                                <p:calendar id="sessionend" value="#{expensesController.endDate}"  pattern="dd MMMM yyyy" title="#{configMapController.getKey('SelectEndDateForSessionHistory_Title')}"    >
+                                    <p:ajax event="dateSelect"  update="datalist" listener="#{expensesController.endDateChangedOnAuditLogTable}"/>
+                                </p:calendar> 
+                            </h:panelGrid>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="Container100 Responsive100">
+                    <div class="ContainerIndent">
+                        <h:outputText escape="false" value="#{configMapController.getKey('ListExpensesEmpty')}" rendered="#{expensesController.items.rowCount == 0}"/>
+                        <h:panelGroup >
+                            <!-- Note: you cant sort or filter from foreign keys with lazy loading and abstract facade method. You have to use a selectOne Menu in the column filter -->
+                            <p:dataTable  
+                                id="datalist"  
+                                lazy="true"
+                                editable="false" 
+                                sortBy="#{item.id}"
+                                sortOrder="descending"
+                                value="#{expensesController.lazyModel}" 
+                                selection="#{expensesController.selected}" 
+                                rowKey="#{item.id}" 
+                                filteredValue="#{expensesController.filteredItems}"  
+                                widgetVar="expensesControllerTable" 
+                                selectionMode="single"
+                                var="item"  
+                                rows="15"  
+                                scrollable="true"
+                                scrollHeight="400"
+                                scrollRows="50"
+                                liveScroll="true">
+                                <!--<f:facet name="header">
+                                    <p:outputPanel>
+                                        <h:outputText value="Search all fields:" />
+                                        <h:inputText id="globalFilter" onkeyup="PF('expensesControllerTable').filter()" />
+                                    </p:outputPanel>
+                                </f:facet>-->
+                                <p:ajax event="rowEdit" listener="#{expensesController.onEdit}" update=":growl" oncomplete="PF('expensesControllerTable').filter()" />  
+                                <p:ajax event="rowEditCancel" listener="#{expensesController.onCancel}" update=":growl"  oncomplete="PF('expensesControllerTable').filter()" />  
+                                <p:ajax event="rowSelect"   update="createButton viewButton editButton deleteButton"/>
+                                <p:ajax event="rowUnselect" update="createButton viewButton editButton deleteButton"/>
+                                <!--<p:column selectionMode="single"/>-->
+                                <p:column sortBy="#{item.id}" filterBy="#{item.id}" headerText="#{configMapController.getKey('ListExpensesTitle_id')}"   >
+                                    <p:cellEditor> 
+                                        <f:facet name="output">
+                                            <h:outputText value="#{item.id}"/>
+                                        </f:facet>
+                                        <f:facet name="input">
+                                            <p:inputText value="#{item.id}" label="#{configMapController.getKey('ListExpensesTitle_id')}" />
+                                        </f:facet>
+                                    </p:cellEditor> 
 
 
-                    </p:column>
-                    <p:column sortBy="#{item.createdTimestamp}" filterBy="#{item.createdTimestamp}" headerText="#{configMapController.getKey('ListExpensesTitle_createdTimestamp')}"   >
+                                </p:column>
+                              <!--  <p:column sortBy="#{item.createdTimestamp}" filterBy="#{item.createdTimestamp}" headerText="#{configMapController.getKey('ListExpensesTitle_createdTimestamp')}"   >
 
-                        <p:cellEditor> 
-                            <f:facet name="output">
-                                <h:outputText value="#{item.createdTimestamp}">
-                                    <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
-                                </h:outputText>
-                            </f:facet>
-                            <f:facet name="input">
-                                <p:calendar value="#{item.createdTimestamp}">	
-                                    <p:ajax event="dateSelect" listener= "#{expensesController.handleDateSelect}" update=":growl" />
-                                </p:calendar>
-                            </f:facet>
-                        </p:cellEditor> 
+                                    <p:cellEditor> 
+                                        <f:facet name="output">
+                                            <h:outputText value="#{item.createdTimestamp}">
+                                                <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                                            </h:outputText>
+                                        </f:facet>
+                                        <f:facet name="input">
+                                            <p:calendar value="#{item.createdTimestamp}">	
+                                                <p:ajax event="dateSelect" listener= "#{expensesController.handleDateSelect}" update=":growl" />
+                                            </p:calendar>
+                                        </f:facet>
+                                    </p:cellEditor> 
 
-                    </p:column>
-                    <p:column sortBy="#{item.updatedTimestamp}" filterBy="#{item.updatedTimestamp}" headerText="#{configMapController.getKey('ListExpensesTitle_updatedTimestamp')}"   >
+                                </p:column>
+                                <p:column sortBy="#{item.updatedTimestamp}" filterBy="#{item.updatedTimestamp}" headerText="#{configMapController.getKey('ListExpensesTitle_updatedTimestamp')}"   >
 
-                        <p:cellEditor> 
-                            <f:facet name="output">
-                                <h:outputText value="#{item.updatedTimestamp}">
-                                    <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
-                                </h:outputText>
-                            </f:facet>
-                            <f:facet name="input">
-                                <p:calendar value="#{item.updatedTimestamp}">	
-                                    <p:ajax event="dateSelect" listener= "#{expensesController.handleDateSelect}" update=":growl" />
-                                </p:calendar>
-                            </f:facet>
-                        </p:cellEditor> 
+                                    <p:cellEditor> 
+                                        <f:facet name="output">
+                                            <h:outputText value="#{item.updatedTimestamp}">
+                                                <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                                            </h:outputText>
+                                        </f:facet>
+                                        <f:facet name="input">
+                                            <p:calendar value="#{item.updatedTimestamp}">	
+                                                <p:ajax event="dateSelect" listener= "#{expensesController.handleDateSelect}" update=":growl" />
+                                            </p:calendar>
+                                        </f:facet>
+                                    </p:cellEditor> 
 
-                    </p:column>
-                    <p:column sortBy="#{item.expenseIncurredTimestamp}" filterBy="#{item.expenseIncurredTimestamp}" headerText="#{configMapController.getKey('ListExpensesTitle_expenseIncurredTimestamp')}"   >
+                                </p:column>-->
+                                <p:column sortBy="#{item.expenseIncurredTimestamp}" filterBy="#{item.expenseIncurredTimestamp}" headerText="#{configMapController.getKey('ListExpensesTitle_expenseIncurredTimestamp')}"   >
 
-                        <p:cellEditor> 
-                            <f:facet name="output">
-                                <h:outputText value="#{item.expenseIncurredTimestamp}">
-                                    <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
-                                </h:outputText>
-                            </f:facet>
-                            <f:facet name="input">
-                                <p:calendar value="#{item.expenseIncurredTimestamp}">	
-                                    <p:ajax event="dateSelect" listener= "#{expensesController.handleDateSelect}" update=":growl" />
-                                </p:calendar>
-                            </f:facet>
-                        </p:cellEditor> 
+                                    <p:cellEditor> 
+                                        <f:facet name="output">
+                                            <h:outputText value="#{item.expenseIncurredTimestamp}">
+                                                <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
+                                            </h:outputText>
+                                        </f:facet>
+                                        <f:facet name="input">
+                                            <p:calendar value="#{item.expenseIncurredTimestamp}">	
+                                                <p:ajax event="dateSelect" listener= "#{expensesController.handleDateSelect}" update=":growl" />
+                                            </p:calendar>
+                                        </f:facet>
+                                    </p:cellEditor> 
 
-                    </p:column>
-                     <p:column sortBy="#{item.supplierId.supplierName}" filterBy="#{item.supplierId.supplierName}" headerText="#{configMapController.getKey('ListExpensesTitle_supplierId')}"   >
-                        <p:cellEditor> 
-                            <f:facet name="output">
-                                <h:outputText value="#{item.supplierId.supplierName}"/>
-                            </f:facet>
-                            <f:facet name="input">
-                                <p:inputText value="#{item.supplierId.supplierName}" label="#{configMapController.getKey('ListExpensesTitle_supplierId')}" />
-                            </f:facet>
-                        </p:cellEditor> 
-
-
-                    </p:column>
-                    <p:column sortBy="#{item.expenseTypeId.expenseTypeName}" filterBy="#{item.expenseTypeId.expenseTypeName}" headerText="#{configMapController.getKey('ListExpensesTitle_expenseTypeId')}"   >
-                        <p:cellEditor> 
-                            <f:facet name="output">
-                                <h:outputText value="#{item.expenseTypeId.expenseTypeName}"/>
-                            </f:facet>
-                            <f:facet name="input">
-                                <p:inputText value="#{item.expenseTypeId.expenseTypeName}" label="#{configMapController.getKey('ListExpensesTitle_expenseTypeId')}" />
-                            </f:facet>
-                        </p:cellEditor> 
-
-
-                    </p:column>
-                     <p:column sortBy="#{item.description}" filterBy="#{item.description}" headerText="#{configMapController.getKey('ListExpensesTitle_description')}"   >
-                        <p:cellEditor> 
-                            <f:facet name="output">
-                                <h:outputText value="#{item.description}"/>
-                            </f:facet>
-                            <f:facet name="input">
-                                <p:inputText value="#{item.description}" label="#{configMapController.getKey('ListExpensesTitle_description')}" />
-                            </f:facet>
-                        </p:cellEditor> 
-
-
-                    </p:column>
-                    
-                   
-                    <p:column sortBy="#{item.expenseAmount}" filterBy="#{item.expenseAmount}" headerText="#{configMapController.getKey('ListExpensesTitle_expenseAmount')}"   >
-                        <p:cellEditor> 
-                            <f:facet name="output">
-                                <h:outputText value="#{item.expenseAmount}">
-                                    <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
-                                </h:outputText>
-                            </f:facet>
-                            <f:facet name="input">
-                                <p:inputText value="#{item.expenseAmount}" label="#{configMapController.getKey('ListExpensesTitle_expenseAmount')}" />
-                            </f:facet>
-                        </p:cellEditor> 
-
-
-                    </p:column>
-                    
-                   
-                    <p:column sortBy="#{item.percentForBusinessUse}" filterBy="#{item.percentForBusinessUse}" headerText="#{configMapController.getKey('ListExpensesTitle_percentForBusinessUse')}"   >
-                        <p:cellEditor> 
-                            <f:facet name="output">
-                                <h:outputText value="#{item.percentForBusinessUse}">
-                                    <f:convertNumber type="percent" minFractionDigits="2" />
-                                </h:outputText>
-                            </f:facet>
-                            <f:facet name="input">
-                                <p:inputText value="#{item.percentForBusinessUse}" label="#{configMapController.getKey('ListExpensesTitle_percentForBusinessUse')}" />
-                            </f:facet>
-                        </p:cellEditor> 
-
-
-                    </p:column>
-                    <p:column sortBy="#{item.businessUseAmount}" filterBy="#{item.businessUseAmount}" headerText="#{configMapController.getKey('ListExpensesTitle_businessUseAmount')}"   >
-                        <p:cellEditor> 
-                            <f:facet name="output">
-                                <h:outputText value="#{item.businessUseAmount}">
-                                    <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
-                                </h:outputText>
-                            </f:facet>
-                            <f:facet name="input">
-                                <p:inputText value="#{item.businessUseAmount}" label="#{configMapController.getKey('ListExpensesTitle_businessUseAmount')}" />
-                            </f:facet>
-                        </p:cellEditor> 
-
-
-                    </p:column>
-                    
-                    <p:column sortBy="#{item.businessUseAmountGst}" filterBy="#{item.businessUseAmountGst}" headerText="#{configMapController.getKey('ListExpensesTitle_businessUseAmountGst')}"   >
-                        <p:cellEditor> 
-                            <f:facet name="output">
-                                <h:outputText value="#{item.businessUseAmountGst}">
-                                    <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
-                                </h:outputText>
-                            </f:facet>
-                            <f:facet name="input">
-                                <p:inputText value="#{item.businessUseAmountGst}" label="#{configMapController.getKey('ListExpensesTitle_businessUseAmountGst')}" />
-                            </f:facet>
-                        </p:cellEditor> 
-
-
-                    </p:column>
-                    <p:column sortBy="#{item.expenseAmountGst}" filterBy="#{item.expenseAmountGst}" headerText="#{configMapController.getKey('ListExpensesTitle_expenseAmountGst')}"   >
-                        <p:cellEditor> 
-                            <f:facet name="output">
-                                <h:outputText value="#{item.expenseAmountGst}">
-                                    <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
-                                </h:outputText>
-                            </f:facet>
-                            <f:facet name="input">
-                                <p:inputText value="#{item.expenseAmountGst}" label="#{configMapController.getKey('ListExpensesTitle_expenseAmountGst')}" />
-                            </f:facet>
-                        </p:cellEditor> 
-
-
-                    </p:column>
-                    <p:column sortBy="#{item.paymentMethodId.paymentMethodName}" filterBy="#{item.paymentMethodId.paymentMethodName}" headerText="#{configMapController.getKey('ListExpensesTitle_paymentMethodId')}"   >
-                        <p:cellEditor> 
-                            <f:facet name="output">
-                                <h:outputText value="#{item.paymentMethodId.paymentMethodName}"/>
-                            </f:facet>
-                            <f:facet name="input">
-                                <p:inputText value="#{item.paymentMethodId.paymentMethodName}" label="#{configMapController.getKey('ListExpensesTitle_paymentMethodId')}" />
-                            </f:facet>
-                        </p:cellEditor> 
-
-
-                    </p:column>
-                     <p:column sortBy="#{item.invoiceNumber}" filterBy="#{item.invoiceNumber}" headerText="#{configMapController.getKey('ListExpensesTitle_invoiceNumber')}"   >
-                        <p:cellEditor> 
-                            <f:facet name="output">
-                                <h:outputText value="#{item.invoiceNumber}"/>
-                            </f:facet>
-                            <f:facet name="input">
-                                <p:inputText value="#{item.invoiceNumber}" label="#{configMapController.getKey('ListExpensesTitle_invoiceNumber')}" />
-                            </f:facet>
-                        </p:cellEditor> 
-
-
-                    </p:column>
-                    <p:column sortBy="#{item.receiptNumber}" filterBy="#{item.receiptNumber}" headerText="#{configMapController.getKey('ListExpensesTitle_receiptNumber')}"   >
-                        <p:cellEditor> 
-                            <f:facet name="output">
-                                <h:outputText value="#{item.receiptNumber}"/>
-                            </f:facet>
-                            <f:facet name="input">
-                                <p:inputText value="#{item.receiptNumber}" label="#{configMapController.getKey('ListExpensesTitle_receiptNumber')}" />
-                            </f:facet>
-                        </p:cellEditor> 
-
-
-                    </p:column>
-                    <p:column sortBy="#{item.invoiceImages.imageFileName}" filterBy="#{item.invoiceImages.imageFileName}" headerText="#{configMapController.getKey('ListExpensesTitle_invoiceImageId')}"   >
-                        <p:cellEditor> 
-                            <f:facet name="output">
-                                <h:outputText value="#{item.invoiceImages.imageFileName}"/>
-                            </f:facet>
-                            <f:facet name="input">
-                                <p:inputText value="#{item.invoiceImages.imageFileName}" label="#{configMapController.getKey('ListExpensesTitle_invoiceImageId')}" />
-                            </f:facet>
-                        </p:cellEditor> 
-
-
-                    </p:column>
-                   
-                    <p:column rendered="#{expensesController.isUserInRole('ADMIN')}"  headerText="Edit" style="width:50px">  
-                        <p:rowEditor />  
-                    </p:column>  
-
-
-                    <f:facet name="footer">
-                        <p:commandButton rendered="#{expensesController.isUserInRole('ADMIN')}" id="createButton" icon="fa fa-plus white Fs14"   value="#{configMapController.getKey('Create')}" actionListener="#{expensesController.prepareCreate}" update=":ExpensesCreateForm" oncomplete="PF('ExpensesCreateDialogWidget').show()"/>
-                        <p:commandButton id="viewButton"   icon="fa fa-search white Fs14" value="#{configMapController.getKey('View')}" update=":ExpensesViewForm" oncomplete="PF('ExpensesViewDialogWidget').show()" disabled="#{empty expensesController.selected}"/>
-                        <p:commandButton rendered="#{expensesController.isUserInRole('ADMIN')}" id="editButton"   icon="fa fa-pencil white Fs14" value="#{configMapController.getKey('Edit')}" update=":ExpensesEditForm" oncomplete="PF('ExpensesEditDialog').show()" disabled="#{empty expensesController.selected}"/>
-                        <p:commandButton rendered="#{expensesController.isUserInRole('ADMIN')}" id="deleteButton" icon="fa fa-trash white Fs14"  value="#{configMapController.getKey('Delete')}" actionListener="#{expensesController.destroy}" update=":growl,datalist" disabled="#{empty expensesController.selected}"/>
-                        <p:commandButton rendered="#{expensesController.isUserInRole('ADMIN')}" id="reconcileSessionsButton" icon="fa fa-cog white Fs14"  value="#{configMapController.getKey('ReconcileSessionsButtonLabel')}" actionListener="#{expensesController.reconcileSessions}" update=":growl,datalist" disabled="#{empty expensesController.selected}"/>
+                                </p:column>
+                                <!-- Note: you cant sort or filter from foreign keys with lazy loading and abstract facade method. You have to use a selectOne Menu in the column filter -->
+                                <p:column sortBy="#{item.supplierId}" filterBy="#{item.supplierId}" filterMatchMode="exact" headerText="#{configMapController.getKey('ListExpensesTitle_supplierId')}"   >
  
-                    </f:facet>
+                                    <f:facet name="filter">
+                                        <p:selectOneMenu onchange="PF('expensesControllerTable').filter()" filter="true" >
+                                            <f:selectItems value="#{suppliersController.itemsAvailableSelectOne}" />
+                                        </p:selectOneMenu>
+                                    </f:facet>
+ 
+                                    <p:cellEditor> 
+                                        <f:facet name="output">
+                                            <h:outputText value="#{item.supplierId.supplierName}"/>
+                                        </f:facet>
+                                        <f:facet name="input">
+                                            <p:inputText value="#{item.supplierId.supplierName}" label="#{configMapController.getKey('ListExpensesTitle_supplierId')}" />
+                                        </f:facet>
+                                    </p:cellEditor> 
 
-                </p:dataTable>
-            </h:panelGroup>
-        </h:form>
 
+                                </p:column>
+                                <!-- Note: you cant sort or filter from foreign keys with lazy loading and abstract facade method. You have to use a selectOne Menu in the column filter -->
+                                  <p:column sortBy="#{item.expenseTypeId}" filterBy="#{item.expenseTypeId}" filterMatchMode="exact" headerText="#{configMapController.getKey('ListExpensesTitle_expenseTypeId')}"   >
+ 
+                                    <f:facet name="filter">
+                                        <p:selectOneMenu onchange="PF('expensesControllerTable').filter()" filter="true" >
+                                            <f:selectItems value="#{expenseTypesController.itemsAvailableSelectOne}" />
+                                        </p:selectOneMenu>
+                                    </f:facet>
+ 
+ 
+                                    <p:cellEditor> 
+                                        <f:facet name="output">
+                                            <h:outputText value="#{item.expenseTypeId.expenseTypeName}"/>
+                                        </f:facet>
+                                        <f:facet name="input">
+                                            <p:inputText value="#{item.expenseTypeId.expenseTypeName}" label="#{configMapController.getKey('ListExpensesTitle_expenseTypeId')}" />
+                                        </f:facet>
+                                    </p:cellEditor> 
+
+
+                                </p:column>
+                                <p:column sortBy="#{item.description}" filterBy="#{item.description}" headerText="#{configMapController.getKey('ListExpensesTitle_description')}"   >
+                                    <p:cellEditor> 
+                                        <f:facet name="output">
+                                            <h:outputText value="#{item.description}"/>
+                                        </f:facet>
+                                        <f:facet name="input">
+                                            <p:inputText value="#{item.description}" label="#{configMapController.getKey('ListExpensesTitle_description')}" />
+                                        </f:facet>
+                                    </p:cellEditor> 
+
+
+                                </p:column>
+
+
+                                <p:column sortBy="#{item.expenseAmount}" filterBy="#{item.expenseAmount}" headerText="#{configMapController.getKey('ListExpensesTitle_expenseAmount')}"   >
+                                    <p:cellEditor> 
+                                        <f:facet name="output">
+                                            <h:outputText value="#{item.expenseAmount}">
+                                                <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
+                                            </h:outputText>
+                                        </f:facet>
+                                        <f:facet name="input">
+                                            <p:inputText value="#{item.expenseAmount}" label="#{configMapController.getKey('ListExpensesTitle_expenseAmount')}" />
+                                        </f:facet>
+                                    </p:cellEditor> 
+
+
+                                </p:column>
+
+
+                                <p:column sortBy="#{item.percentForBusinessUse}" filterBy="#{item.percentForBusinessUse}" headerText="#{configMapController.getKey('ListExpensesTitle_percentForBusinessUse')}"   >
+                                    <p:cellEditor> 
+                                        <f:facet name="output">
+                                            <h:outputText value="#{item.percentForBusinessUse}">
+                                                <f:convertNumber type="percent" minFractionDigits="2" />
+                                            </h:outputText>
+                                        </f:facet>
+                                        <f:facet name="input">
+                                            <p:inputText value="#{item.percentForBusinessUse}" label="#{configMapController.getKey('ListExpensesTitle_percentForBusinessUse')}" />
+                                        </f:facet>
+                                    </p:cellEditor> 
+
+
+                                </p:column>
+                              <!--  <p:column sortBy="#{item.businessUseAmount}" filterBy="#{item.businessUseAmount}" headerText="#{configMapController.getKey('ListExpensesTitle_businessUseAmount')}"   >
+                                    <p:cellEditor> 
+                                        <f:facet name="output">
+                                            <h:outputText value="#{item.businessUseAmount}">
+                                                <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
+                                            </h:outputText>
+                                        </f:facet>
+                                        <f:facet name="input">
+                                            <p:inputText value="#{item.businessUseAmount}" label="#{configMapController.getKey('ListExpensesTitle_businessUseAmount')}" />
+                                        </f:facet>
+                                    </p:cellEditor> 
+
+
+                                </p:column>
+
+                                <p:column sortBy="#{item.businessUseAmountGst}" filterBy="#{item.businessUseAmountGst}" headerText="#{configMapController.getKey('ListExpensesTitle_businessUseAmountGst')}"   >
+                                    <p:cellEditor> 
+                                        <f:facet name="output">
+                                            <h:outputText value="#{item.businessUseAmountGst}">
+                                                <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
+                                            </h:outputText>
+                                        </f:facet>
+                                        <f:facet name="input">
+                                            <p:inputText value="#{item.businessUseAmountGst}" label="#{configMapController.getKey('ListExpensesTitle_businessUseAmountGst')}" />
+                                        </f:facet>
+                                    </p:cellEditor> 
+
+
+                                </p:column>
+                                <p:column sortBy="#{item.expenseAmountGst}" filterBy="#{item.expenseAmountGst}" headerText="#{configMapController.getKey('ListExpensesTitle_expenseAmountGst')}"   >
+                                    <p:cellEditor> 
+                                        <f:facet name="output">
+                                            <h:outputText value="#{item.expenseAmountGst}">
+                                                <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
+                                            </h:outputText>
+                                        </f:facet>
+                                        <f:facet name="input">
+                                            <p:inputText value="#{item.expenseAmountGst}" label="#{configMapController.getKey('ListExpensesTitle_expenseAmountGst')}" />
+                                        </f:facet>
+                                    </p:cellEditor> 
+
+
+                                </p:column>-->
+                                <p:column sortBy="#{item.paymentMethodId.paymentMethodName}" filterBy="#{item.paymentMethodId.paymentMethodName}" headerText="#{configMapController.getKey('ListExpensesTitle_paymentMethodId')}"   >
+                                    <p:cellEditor> 
+                                        <f:facet name="output">
+                                            <h:outputText value="#{item.paymentMethodId.paymentMethodName}"/>
+                                        </f:facet>
+                                        <f:facet name="input">
+                                            <p:inputText value="#{item.paymentMethodId.paymentMethodName}" label="#{configMapController.getKey('ListExpensesTitle_paymentMethodId')}" />
+                                        </f:facet>
+                                    </p:cellEditor> 
+
+
+                                </p:column>
+                                <p:column sortBy="#{item.invoiceNumber}" filterBy="#{item.invoiceNumber}" headerText="#{configMapController.getKey('ListExpensesTitle_invoiceNumber')}"   >
+                                    <p:cellEditor> 
+                                        <f:facet name="output">
+                                            <h:outputText value="#{item.invoiceNumber}"/>
+                                        </f:facet>
+                                        <f:facet name="input">
+                                            <p:inputText value="#{item.invoiceNumber}" label="#{configMapController.getKey('ListExpensesTitle_invoiceNumber')}" />
+                                        </f:facet>
+                                    </p:cellEditor> 
+
+
+                                </p:column>
+                                <p:column sortBy="#{item.receiptNumber}" filterBy="#{item.receiptNumber}" headerText="#{configMapController.getKey('ListExpensesTitle_receiptNumber')}"   >
+                                    <p:cellEditor> 
+                                        <f:facet name="output">
+                                            <h:outputText value="#{item.receiptNumber}"/>
+                                        </f:facet>
+                                        <f:facet name="input">
+                                            <p:inputText value="#{item.receiptNumber}" label="#{configMapController.getKey('ListExpensesTitle_receiptNumber')}" />
+                                        </f:facet>
+                                    </p:cellEditor> 
+
+
+                                </p:column>
+                              <!--  <p:column sortBy="#{item.invoiceImages.imageFileName}" filterBy="#{item.invoiceImages.imageFileName}" headerText="#{configMapController.getKey('ListExpensesTitle_invoiceImageId')}"   >
+                                    <p:cellEditor> 
+                                        <f:facet name="output">
+                                            <h:outputText value="#{item.invoiceImages.imageFileName}"/>
+                                        </f:facet>
+                                        <f:facet name="input">
+                                            <p:inputText value="#{item.invoiceImages.imageFileName}" label="#{configMapController.getKey('ListExpensesTitle_invoiceImageId')}" />
+                                        </f:facet>
+                                    </p:cellEditor> 
+
+
+                                </p:column>
+
+                                <p:column rendered="#{expensesController.isUserInRole('ADMIN')}"  headerText="Edit" style="width:50px">  
+                                    <p:rowEditor />  
+                                </p:column>  -->
+
+
+                                <f:facet name="header">
+                                    <div class="EmptyBox10" />
+                                    <p:commandButton rendered="#{expensesController.isUserInRole('ADMIN')}" id="createButton" icon="fa fa-plus white Fs14"   value="#{configMapController.getKey('Create')}" actionListener="#{expensesController.prepareCreate}" update=":ExpensesCreateForm" oncomplete="PF('ExpensesCreateDialogWidget').show()"/>
+                                    <p:commandButton id="viewButton"   icon="fa fa-search white Fs14" value="#{configMapController.getKey('View')}" update=":ExpensesViewForm" oncomplete="PF('ExpensesViewDialogWidget').show()" disabled="#{empty expensesController.selected}"/>
+                                    <p:commandButton rendered="#{expensesController.isUserInRole('ADMIN')}" id="editButton"   icon="fa fa-pencil white Fs14" value="#{configMapController.getKey('Edit')}" update=":ExpensesEditForm" oncomplete="PF('ExpensesEditDialog').show()" disabled="#{empty expensesController.selected}"/>
+                                    <p:commandButton rendered="#{expensesController.isUserInRole('ADMIN')}" id="deleteButton" icon="fa fa-trash white Fs14"  value="#{configMapController.getKey('Delete')}" actionListener="#{expensesController.destroy}" update=":growl,datalist" disabled="#{empty expensesController.selected}"/>
+                                    <p:commandButton rendered="#{expensesController.isUserInRole('ADMIN')}" id="reconcileSessionsButton" icon="fa fa-cog white Fs14"  value="#{configMapController.getKey('ReconcileSessionsButtonLabel')}" actionListener="#{expensesController.reconcileSessions}" update=":growl,datalist" disabled="#{empty expensesController.selected}"/>
+
+                                </f:facet>
+
+                            </p:dataTable>
+                        </h:panelGroup>
+                    </div>
+                </div>
+            </h:form>
+        </div>
         <ui:include src="Create.xhtml"/>
         <ui:include src="Edit.xhtml"/>
         <ui:include src="View.xhtml"/>

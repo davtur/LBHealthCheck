@@ -5,6 +5,7 @@
  */
 package au.com.manlyit.fitnesscrm.stats.db;
 
+import au.com.manlyit.fitnesscrm.stats.classes.util.BaseEntity;
 import java.io.Serializable;
 import java.util.Collection;
 import javax.persistence.Basic;
@@ -34,7 +35,7 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "ExpenseTypes.findAll", query = "SELECT e FROM ExpenseTypes e"),
     @NamedQuery(name = "ExpenseTypes.findById", query = "SELECT e FROM ExpenseTypes e WHERE e.id = :id"),
     @NamedQuery(name = "ExpenseTypes.findByExpenseTypeName", query = "SELECT e FROM ExpenseTypes e WHERE e.expenseTypeName = :expenseTypeName")})
-public class ExpenseTypes implements Serializable {
+public class ExpenseTypes implements Serializable,BaseEntity {
 
     private static final long serialVersionUID = 1L;
     @Id
@@ -114,7 +115,7 @@ public class ExpenseTypes implements Serializable {
 
     @Override
     public String toString() {
-        return "au.com.manlyit.fitnesscrm.stats.beans.ExpenseTypes[ id=" + id + " ]";
+        return expenseTypeName;
     }
     
 }
