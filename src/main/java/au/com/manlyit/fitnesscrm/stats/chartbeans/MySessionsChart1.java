@@ -59,7 +59,7 @@ public class MySessionsChart1 implements Serializable {
     private BarChartModel dashboardMonthlySessionsModel;
 
     private Customers selectedCustomer;
-    
+
     private Date startDate;
     private Date endDate;
     private int dateInterval = 1;
@@ -105,7 +105,7 @@ public class MySessionsChart1 implements Serializable {
     private au.com.manlyit.fitnesscrm.stats.beans.GroupsFacade ejbGroupsFacade;
     @Inject
     private PaymentsFacade paymentsFacade;
-     @Inject
+    @Inject
     private ExpensesFacade expensesFacade;
 
     //@PostConstruct
@@ -155,7 +155,7 @@ public class MySessionsChart1 implements Serializable {
      model.addSeries(ptSessionSeries);
 
      }*/
-  /*  public Date getChartStartTime() {
+ /*  public Date getChartStartTime() {
         GregorianCalendar startCal = new GregorianCalendar();
         startCal.setTime(getStartDate());
         startCal.set(Calendar.HOUR_OF_DAY, 0);
@@ -176,7 +176,6 @@ public class MySessionsChart1 implements Serializable {
         setEndDate(endCal.getTime());
         return endCal.getTime();
     }*/
-
     public Date zeroTimeField(Date d) {
         GregorianCalendar startCal = new GregorianCalendar();
         startCal.setTime(d);
@@ -197,7 +196,7 @@ public class MySessionsChart1 implements Serializable {
 
     }
 
-    private BarChartModel createSessionsChart(boolean isTrainer, Customers user, int dateInterval,Date startDate,Date endDate) {
+    private BarChartModel createSessionsChart(boolean isTrainer, Customers user, int dateInterval, Date startDate, Date endDate) {
         BarChartModel ccModel = null;
         String xAxisLabel = "";
         GregorianCalendar startCal = new GregorianCalendar();
@@ -236,7 +235,7 @@ public class MySessionsChart1 implements Serializable {
             }
             startCal.setTime(startDate);
             endCal.setTime(startDate);
-          
+
             endCal.add(calendarIncrementInterval, 1);
 
             List<BarChartSeries> seriesList = new ArrayList<>();
@@ -275,7 +274,7 @@ public class MySessionsChart1 implements Serializable {
                         for (BarChartSeries barChartSeries : seriesList) {
                             if (barChartSeries.getLabel().compareTo(type) == 0) {
                                 Double c = (Double) barChartSeries.getData().get(xAxixValue);
- 
+
                                 if (c == null) {
                                     c = new Double(1);
                                 } else {
@@ -324,9 +323,9 @@ public class MySessionsChart1 implements Serializable {
                 }
 
             }
-            if(user != null ){
+            if (user != null) {
                 ccModel.setTitle(getSelectedCustomer().getFirstname() + " " + getSelectedCustomer().getLastname());
-            }else{
+            } else {
                 ccModel.setTitle("All Sessions");
             }
             ccModel.setLegendPosition("ne");
@@ -346,8 +345,9 @@ public class MySessionsChart1 implements Serializable {
 
     }
 
-    private BarChartModel createMonthlyRevenueChart(int datePeriodInterval,Date startDate,Date endDate) {
+    private BarChartModel createMonthlyRevenueChart(int datePeriodInterval, Date startDate, Date endDate) {
         BarChartModel ccModel = null;
+
         GregorianCalendar startCal = new GregorianCalendar();
         GregorianCalendar endCal = new GregorianCalendar();
         GregorianCalendar comparisonCal = new GregorianCalendar();
@@ -356,9 +356,8 @@ public class MySessionsChart1 implements Serializable {
         int numberOfSeriesPoints = 0;
         String dateFormatString;
 
-        
-        String xAxisLabel ;
-       
+        String xAxisLabel;
+
         switch (datePeriodInterval) {
             case 1: //weekly
             default:
@@ -385,7 +384,6 @@ public class MySessionsChart1 implements Serializable {
             startCal.setTime(startDate);
             comparisonCal.setTime(startCal.getTime());
             endCal.setTime(endDate);
-          
 
             while (comparisonCal.compareTo(endCal) < 0) {
                 comparisonCal.add(calendarIncrementInterval, 1);
@@ -412,10 +410,15 @@ public class MySessionsChart1 implements Serializable {
             barChartSeries2.setLabel("Scheduled");
             seriesList.add(barChartSeries2);
 
-           /* LineChartSeries lineChartSeries1 = new LineChartSeries();
-            lineChartSeries1.setLabel("Total");
+            LineChartSeries lineChartSeries1 = new LineChartSeries();
+            lineChartSeries1.setLabel("Expenses");
             lineChartSeries1.setYaxis(AxisType.Y2);
-            seriesList.add(lineChartSeries1);*/
+            seriesList.add(lineChartSeries1);
+
+            LineChartSeries lineChartSeries2 = new LineChartSeries();
+            lineChartSeries2.setLabel("Profit");
+            lineChartSeries2.setYaxis(AxisType.Y2);
+            seriesList.add(lineChartSeries2);
 
             double maxTotal = 0;
             try {
@@ -443,7 +446,7 @@ public class MySessionsChart1 implements Serializable {
                     paymentList = paymentsFacade.findPaymentsByDateRange(reportUseSettlementDate, reportShowSuccessful, reportShowFailed, reportShowPending, isReportShowScheduled, strt, end, false, null);
 
                     expenseList = expensesFacade.findExpensesByDateRange(strt, end, false);
-                    
+
                     if (paymentList != null) {
                         for (Payments p : paymentList) {
                             if (p.getPaymentStatus().contains(PaymentStatus.SUCESSFUL.value()) || p.getPaymentStatus().contains(PaymentStatus.PENDING.value())) {
@@ -455,7 +458,7 @@ public class MySessionsChart1 implements Serializable {
                                 reportTotalScheduled += p.getPaymentAmount().floatValue();
                             }
                         }
-                        if(expenseList != null) {
+                        if (expenseList != null) {
                             for (Expenses e : expenseList) {
                                 reportTotalExpenses += e.getExpenseAmount().floatValue();
                             }
@@ -470,13 +473,21 @@ public class MySessionsChart1 implements Serializable {
                         seriesList.set(index, barChartSeries2);
 
                         double total = (double) reportTotalScheduled + (double) reportTotalSuccessful;
+                        double reportTotalProfit = total - (double) reportTotalExpenses;
 
-                      /*  lineChartSeries1.set(xAxixValue, total);
+                        lineChartSeries1.set(xAxixValue, reportTotalExpenses );// as the chart is stacked we need to subract the total for teh line charts
                         index = seriesList.indexOf(lineChartSeries1);
-                        seriesList.set(index, lineChartSeries1);*/
+                        seriesList.set(index, lineChartSeries1);
+
+                        lineChartSeries2.set(xAxixValue, reportTotalProfit );// as the chart is stacked we need to subract the total for teh line charts
+                        index = seriesList.indexOf(lineChartSeries2);
+                        seriesList.set(index, lineChartSeries2);
 
                         if (total > maxTotal) {
                             maxTotal = total;
+                        }
+                        if (reportTotalProfit > maxTotal) {
+                            maxTotal = reportTotalProfit;
                         }
 
                         logger.log(Level.INFO, "Get ALL Payments , No.Payments:{1},startdate:{2},End date:{3}", new Object[]{paymentList.size(), strt, end});
@@ -485,7 +496,6 @@ public class MySessionsChart1 implements Serializable {
 
                         Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.WARNING, "Report Failed - paymentsFacade.findPaymentsByDateRange returned NULL");
                     }
-                    
 
                     startCal.add(calendarIncrementInterval, 1);
                     endCal.add(calendarIncrementInterval, 1);
@@ -500,18 +510,18 @@ public class MySessionsChart1 implements Serializable {
             for (ChartSeries bcs : seriesList) {
                 Collection<Number> values = bcs.getData().values();
                 Double totalSessions = (double) 0;
-                Iterator i = values.iterator();
+                Iterator<Number> i = values.iterator();
                 while (i.hasNext()) {
-                    totalSessions = totalSessions + (Double) i.next();
+                    totalSessions += i.next().doubleValue();
                 }
 
                 if (totalSessions.compareTo(new Double(0)) > 0) {
                     if (bcs.getClass() == BarChartSeries.class) {
-                        ccModel.addSeries((BarChartSeries) bcs);
+                        ccModel.addSeries(bcs);
                         numberOfSeriesAddedToChart++;
                     }
                     if (bcs.getClass() == LineChartSeries.class) {
-                        ccModel.addSeries((LineChartSeries) bcs);
+                        ccModel.addSeries(bcs);
                         numberOfSeriesAddedToChart++;
                     }
 
@@ -532,7 +542,7 @@ public class MySessionsChart1 implements Serializable {
             }
             ccModel.setTitle("Revenue Report");
             ccModel.setLegendPosition("ne");
-            ccModel.setStacked(true);
+            ccModel.setStacked(false);
             ccModel.setExtender("monthlyRevenueBarChartExtender");
 
             Axis xAxis = ccModel.getAxis(AxisType.X);
@@ -546,11 +556,10 @@ public class MySessionsChart1 implements Serializable {
             ccModel.getAxes().put(AxisType.Y2, y2Axis);
             double yAxisHeght = 1000;
             while (yAxisHeght < maxTotal) {
-                yAxisHeght = yAxisHeght + 1000;
+                yAxisHeght += 1000;
             }
             yAxis.setMax(yAxisHeght);
-            y2Axis.setMax(yAxisHeght * 2);
-            
+            y2Axis.setMax(yAxisHeght);
 
             // Axis yAxis = ccModel.getAxis(AxisType.Y);
         } catch (Exception e) {
@@ -565,12 +574,11 @@ public class MySessionsChart1 implements Serializable {
         model2 = null;
         customModel = null;
     }
-    
-    
+
     public void recreateDashboardModels() {
         dashboardMonthlyRevenueModel = null;
         dashboardMonthlySessionsModel = null;
-       // RequestContext requestContext = RequestContext.getCurrentInstance();
+        // RequestContext requestContext = RequestContext.getCurrentInstance();
 
         // requestContext.execute("PF('sessionsDataTable').filter();");
     }
@@ -580,7 +588,7 @@ public class MySessionsChart1 implements Serializable {
             try {
                 FacesContext context = FacesContext.getCurrentInstance();
                 CustomersController custController = context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
-                model = createSessionsChart(false, custController.getSelected(), getDateInterval(),getStartDate(),getEndDate());
+                model = createSessionsChart(false, custController.getSelected(), getDateInterval(), getStartDate(), getEndDate());
             } catch (ELException e) {
                 JsfUtil.addErrorMessage(e, "My Sessions Chart Critical Error", "Couldn't find the customer in the database.");
             }
@@ -593,7 +601,7 @@ public class MySessionsChart1 implements Serializable {
             try {
                 FacesContext context = FacesContext.getCurrentInstance();
                 CustomersController custController = context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
-                model2 = createSessionsChart(true, custController.getSelected(), getDateInterval(),getStartDate(),getEndDate());
+                model2 = createSessionsChart(true, custController.getSelected(), getDateInterval(), getStartDate(), getEndDate());
             } catch (ELException e) {
                 JsfUtil.addErrorMessage(e, "My Sessions Chart Critical Error", "Couldn't find the customer in the database.");
             }
@@ -608,7 +616,7 @@ public class MySessionsChart1 implements Serializable {
 
     public BarChartModel getDashboardMonthlyRevenueModel() {
         if (dashboardMonthlyRevenueModel == null) {
-            dashboardMonthlyRevenueModel = createMonthlyRevenueChart(getDashboardDateInterval(),getDashboardStartDate(),getDashboardEndDate());
+            dashboardMonthlyRevenueModel = createMonthlyRevenueChart(getDashboardDateInterval(), getDashboardStartDate(), getDashboardEndDate());
         }
         return dashboardMonthlyRevenueModel;
     }
@@ -618,11 +626,11 @@ public class MySessionsChart1 implements Serializable {
             //boolean isTrainer = FacesContext.getCurrentInstance().getExternalContext().isUserInRole("TRAINER");
             boolean isTrainer = ejbGroupsFacade.isCustomerInGroup(getSelectedCustomer(), "TRAINER");
             if (dashboardShowAllUsers) {
-                dashboardMonthlySessionsModel = createSessionsChart(isTrainer, null, getDashboardDateInterval(),getDashboardStartDate(),getDashboardEndDate());
+                dashboardMonthlySessionsModel = createSessionsChart(isTrainer, null, getDashboardDateInterval(), getDashboardStartDate(), getDashboardEndDate());
             } else {
-                dashboardMonthlySessionsModel = createSessionsChart(isTrainer, getSelectedCustomer(), getDashboardDateInterval(),getDashboardStartDate(),getDashboardEndDate());
+                dashboardMonthlySessionsModel = createSessionsChart(isTrainer, getSelectedCustomer(), getDashboardDateInterval(), getDashboardStartDate(), getDashboardEndDate());
             }
- 
+
         }
         return dashboardMonthlySessionsModel;
     }
@@ -632,9 +640,9 @@ public class MySessionsChart1 implements Serializable {
             //boolean isTrainer = FacesContext.getCurrentInstance().getExternalContext().isUserInRole("TRAINER");
             boolean isTrainer = ejbGroupsFacade.isCustomerInGroup(getSelectedCustomer(), "TRAINER");
             if (showAllUsers) {
-                customModel = createSessionsChart(isTrainer, null, getDateInterval(),getStartDate(),getEndDate());
+                customModel = createSessionsChart(isTrainer, null, getDateInterval(), getStartDate(), getEndDate());
             } else {
-                customModel = createSessionsChart(isTrainer, getSelectedCustomer(), getDateInterval(),getStartDate(),getEndDate());
+                customModel = createSessionsChart(isTrainer, getSelectedCustomer(), getDateInterval(), getStartDate(), getEndDate());
             }
 
         }
@@ -665,8 +673,6 @@ public class MySessionsChart1 implements Serializable {
         sessionHistoryController.recreateModel();
         sessionHistoryController.setSessionHistoryExportFileName();
     }
-
-   
 
     /**
      * @return the startDate

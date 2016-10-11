@@ -55,3 +55,10 @@ How to clean up survey answers when there are multiple subitems
 #DELETE FROM fitnessStats.survey_answers where user_id = 3;
 
 mysqldiff   --server1=root:Surf2day@vms --server2=root:Surf2day@localhost  --changes-for=server1 --show-reverse  fitnessStats:fitnessStats --force --difftype=sql --skip-table-options
+
+
+
+This is teh diff command to execute on homeserver to show changes to make to vms ( prod )
+
+mysqldiff   --server2=root:Surf2day@vms --server1=root:Surf2day@localhost  --changes-for=server2   fitnessStats:fitnessStats --force --difftype=sql --skip-table-options
+

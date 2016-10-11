@@ -47,14 +47,18 @@
                 </p:selectOneMenu>
             </p:panelGrid>
 
+           <p:panel id="dashboardMonthlyRevenueChart" widgetVar="dashboardMonthlyRevenueWidget" header=" Revenue, Expenses and Profit Chart ">
+                <p:chart type="bar"   styleClass="chartClass" model="#{mySessionsChart1.dashboardMonthlyRevenueModel}"     />
+            </p:panel>
+  
+
             <p:panel id="customChart" widgetVar="customChartWidget" header="Sessions Chart ">
                 <p:chart type="bar"   styleClass="chartClass" model="#{mySessionsChart1.dashboardMonthlySessionsChartModel}"     />
             </p:panel>
 
 
-            <p:panel id="dashboardMonthlyRevenueChart" widgetVar="dashboardMonthlyRevenueWidget" header=" Revenue Chart ">
-                <p:chart type="bar"   styleClass="chartClass" model="#{mySessionsChart1.dashboardMonthlyRevenueModel}"     />
-            </p:panel>
+           
+            
             <div class="Container100">
                 <h:outputText escape="false" value="#{configMapController.getKey('ListCustomersEmpty')}" rendered="#{customersController.customersWithoutScheduledPayments.rowCount == 0}"/>
                 <h:panelGroup rendered="#{customersController.customersWithoutScheduledPayments.rowCount > 0}">

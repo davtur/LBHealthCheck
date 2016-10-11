@@ -121,7 +121,8 @@
                                     </p:cellEditor> 
 
                                 </p:column>-->
-                                <p:column sortBy="#{item.expenseIncurredTimestamp}" filterBy="#{item.expenseIncurredTimestamp}" headerText="#{configMapController.getKey('ListExpensesTitle_expenseIncurredTimestamp')}"   >
+                                <p:column sortBy="#{item.expenseIncurredTimestamp}" headerText="#{configMapController.getKey('ListExpensesTitle_expenseIncurredTimestamp')}"   >
+                             <!--  <p:column sortBy="#{item.expenseIncurredTimestamp}" filterBy="#{item.expenseIncurredTimestamp}"  headerText="#{configMapController.getKey('ListExpensesTitle_expenseIncurredTimestamp')}"   >-->
 
                                     <p:cellEditor> 
                                         <f:facet name="output">
