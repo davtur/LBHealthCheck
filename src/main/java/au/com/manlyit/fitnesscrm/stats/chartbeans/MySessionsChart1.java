@@ -6,16 +6,19 @@ package au.com.manlyit.fitnesscrm.stats.chartbeans;
 
 import au.com.manlyit.fitnesscrm.stats.beans.ExpensesFacade;
 import au.com.manlyit.fitnesscrm.stats.beans.PaymentsFacade;
+import au.com.manlyit.fitnesscrm.stats.beans.SuppliersFacade;
 import au.com.manlyit.fitnesscrm.stats.beans.util.PaymentStatus;
 import au.com.manlyit.fitnesscrm.stats.classes.CustomersController;
 import au.com.manlyit.fitnesscrm.stats.classes.EziDebitPaymentGateway;
 import au.com.manlyit.fitnesscrm.stats.classes.SessionHistoryController;
+import au.com.manlyit.fitnesscrm.stats.classes.util.ChartSeriesToObjectMap;
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import au.com.manlyit.fitnesscrm.stats.db.Expenses;
 import au.com.manlyit.fitnesscrm.stats.db.Payments;
 import au.com.manlyit.fitnesscrm.stats.db.SessionHistory;
 import au.com.manlyit.fitnesscrm.stats.db.SessionTypes;
+import au.com.manlyit.fitnesscrm.stats.db.Suppliers;
 import javax.inject.Inject;
 import javax.faces.context.FacesContext;
 
@@ -44,6 +47,7 @@ import org.primefaces.model.chart.AxisType;
 import org.primefaces.model.chart.BarChartModel;
 import org.primefaces.model.chart.BarChartSeries;
 import org.primefaces.model.chart.ChartSeries;
+import org.primefaces.model.chart.LineChartModel;
 import org.primefaces.model.chart.LineChartSeries;
 import org.primefaces.model.chart.LinearAxis;
 
@@ -57,6 +61,7 @@ public class MySessionsChart1 implements Serializable {
     private BarChartModel customModel;
     private BarChartModel dashboardMonthlyRevenueModel;
     private BarChartModel dashboardMonthlySessionsModel;
+    private BarChartModel expensesBySupplierModel;
 
     private Customers selectedCustomer;
 
@@ -107,6 +112,8 @@ public class MySessionsChart1 implements Serializable {
     private PaymentsFacade paymentsFacade;
     @Inject
     private ExpensesFacade expensesFacade;
+    @Inject
+    private SuppliersFacade suppliersFacade;
 
     //@PostConstruct
     /* public void createChart() {
@@ -475,11 +482,11 @@ public class MySessionsChart1 implements Serializable {
                         double total = (double) reportTotalScheduled + (double) reportTotalSuccessful;
                         double reportTotalProfit = total - (double) reportTotalExpenses;
 
-                        lineChartSeries1.set(xAxixValue, reportTotalExpenses );// as the chart is stacked we need to subract the total for teh line charts
+                        lineChartSeries1.set(xAxixValue, reportTotalExpenses);// as the chart is stacked we need to subract the total for teh line charts
                         index = seriesList.indexOf(lineChartSeries1);
                         seriesList.set(index, lineChartSeries1);
 
-                        lineChartSeries2.set(xAxixValue, reportTotalProfit );// as the chart is stacked we need to subract the total for teh line charts
+                        lineChartSeries2.set(xAxixValue, reportTotalProfit);// as the chart is stacked we need to subract the total for teh line charts
                         index = seriesList.indexOf(lineChartSeries2);
                         seriesList.set(index, lineChartSeries2);
 
@@ -569,6 +576,166 @@ public class MySessionsChart1 implements Serializable {
         return ccModel;
     }
 
+    private BarChartModel createSupplierExpensesChart(int datePeriodInterval, Date startDate, Date endDate) {
+        BarChartModel ccModel = null;
+
+        GregorianCalendar startCal = new GregorianCalendar();
+        GregorianCalendar endCal = new GregorianCalendar();
+        GregorianCalendar comparisonCal = new GregorianCalendar();
+
+        int calendarIncrementInterval;
+        int numberOfSeriesPoints = 0;
+        String dateFormatString;
+
+        String xAxisLabel;
+
+        switch (datePeriodInterval) {
+            case 1: //weekly
+            default:
+                calendarIncrementInterval = Calendar.WEEK_OF_YEAR;
+                xAxisLabel = "Week Starting On";
+                dateFormatString = "dd MMM yy";
+                break;
+            case 2: //monthly
+                calendarIncrementInterval = Calendar.MONTH;
+                xAxisLabel = "Month";
+                dateFormatString = "MMM yy";
+                break;
+            case 3: //daily
+                calendarIncrementInterval = Calendar.DAY_OF_YEAR;
+                xAxisLabel = "Day";
+                dateFormatString = "dd MMM yy";
+                break;
+
+        }
+
+        SimpleDateFormat sdf = new SimpleDateFormat(dateFormatString);
+
+        try {
+            startCal.setTime(startDate);
+            comparisonCal.setTime(startCal.getTime());
+            endCal.setTime(endDate);
+
+            while (comparisonCal.compareTo(endCal) < 0) {
+                comparisonCal.add(calendarIncrementInterval, 1);
+                numberOfSeriesPoints++;
+            }
+
+            endCal.setTime(startDate);
+            //endCal.set(Calendar.HOUR, 23);
+            //endCal.set(Calendar.SECOND, 59);
+            // endCal.set(Calendar.MINUTE, 59);
+            //endCal.set(Calendar.MILLISECOND, 999);
+            endCal.add(calendarIncrementInterval, 1);
+
+            List<ChartSeriesToObjectMap> seriesList = new ArrayList<>();
+
+            List<Suppliers> suppliersList = suppliersFacade.findAll();
+            ccModel = new BarChartModel();
+            for (Suppliers sup : suppliersList) {
+                LineChartSeries lcs = new LineChartSeries();
+                lcs.setLabel(sup.getSupplierName());
+                seriesList.add(new ChartSeriesToObjectMap(sup, lcs));
+
+            }
+
+            double maxTotal = 0;
+
+            try {
+                for (int x = 0; x < numberOfSeriesPoints; x++) {
+
+                    String xAxixValue = sdf.format(startCal.getTime());
+                    /*for (ChartSeriesToObjectMap lcs : seriesList) {
+                        LineChartSeries cs = (LineChartSeries) lcs.getChartSeries();
+                        cs.set(xAxixValue, (double) 0);
+                        lcs.setChartSeries(cs);
+                        seriesList.set(seriesList.indexOf(lcs), lcs);
+                    }*/
+                    Date strt = startCal.getTime();
+                    Date end = endCal.getTime();
+
+                    for (ChartSeriesToObjectMap lcs : seriesList) {
+                        LineChartSeries lineChartSeries = (LineChartSeries) lcs.getChartSeries();
+                        Double total = expensesFacade.findSumOfExpensesByDateRangeAndSupplier(strt, end, (Suppliers) lcs.getEntity());
+                        if (total > maxTotal) {
+                            maxTotal = total;
+                        }
+                        lineChartSeries.set(xAxixValue, total);
+                        lcs.setChartSeries(lineChartSeries);
+                        seriesList.set(seriesList.indexOf(lcs), lcs);
+                    }
+                    startCal.add(calendarIncrementInterval, 1);
+                    endCal.add(calendarIncrementInterval, 1);
+
+                }
+            } catch (Exception e) {
+                JsfUtil.addErrorMessage(e, "Supplier expenses by time period  Chart Critical Error", "Couldn't get customer session data from the database.");
+            }
+
+            int numberOfSeriesAddedToChart = 0;
+            for (ChartSeriesToObjectMap mbcs : seriesList) {
+                ChartSeries bcs = mbcs.getChartSeries();
+                Collection<Number> values = bcs.getData().values();
+                Double totalSessions = (double) 0;
+                Iterator<Number> i = values.iterator();
+                while (i.hasNext()) {
+                    totalSessions += i.next().doubleValue();
+                }
+
+                if (totalSessions.compareTo(new Double(0)) > 0) {
+                    if (bcs.getClass() == BarChartSeries.class) {
+                        ccModel.addSeries(bcs);
+                        numberOfSeriesAddedToChart++;
+                    }
+                    if (bcs.getClass() == LineChartSeries.class) {
+                        ccModel.addSeries(bcs);
+                        numberOfSeriesAddedToChart++;
+                    }
+
+                }
+            }
+            if (numberOfSeriesAddedToChart == 0) { // add an empty series with a label of empty 
+                if (seriesList.isEmpty() == false) {
+                    LineChartSeries bcs = new LineChartSeries();
+                    bcs.setLabel("Empty");
+                    bcs.set(sdf.format(startDate), (double) 0);
+                    bcs.set(sdf.format(endDate), (double) 0);
+                    ccModel.addSeries(bcs);
+                    logger.log(Level.INFO, "The date range selected is for the seriesList is empty!");
+                } else {
+                    logger.log(Level.WARNING, "Cannot creat a chart model as the seriesList is empty!");
+                }
+
+            }
+            ccModel.setTitle("Supplier Expenses Report");
+            ccModel.setLegendPosition("ne");
+            ccModel.setStacked(false);
+            ccModel.setExtender("monthlyRevenueBarChartExtender");
+
+            Axis xAxis = ccModel.getAxis(AxisType.X);
+            xAxis.setLabel(xAxisLabel);
+            xAxis.setTickAngle(65);
+            Axis yAxis = ccModel.getAxis(AxisType.Y);
+            yAxis.setLabel("Expense $");
+            yAxis.setMin(0);
+            // Axis y2Axis = new LinearAxis("");
+            //  y2Axis.setMin(0);
+            //  ccModel.getAxes().put(AxisType.Y2, y2Axis);
+            double yAxisHeght = 1000;
+            while (yAxisHeght < maxTotal) {
+                yAxisHeght += 1000;
+            }
+            yAxis.setMax(yAxisHeght);
+            //   y2Axis.setMax(yAxisHeght);
+
+            // Axis yAxis = ccModel.getAxis(AxisType.Y);
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "Monthly REvenue Chart Error", e);
+        }
+        // yAxis.setLabel(getY);
+        return ccModel;
+    }
+
     public void recreateModel() {
         model = null;
         model2 = null;
@@ -619,6 +786,16 @@ public class MySessionsChart1 implements Serializable {
             dashboardMonthlyRevenueModel = createMonthlyRevenueChart(getDashboardDateInterval(), getDashboardStartDate(), getDashboardEndDate());
         }
         return dashboardMonthlyRevenueModel;
+    }
+
+    /**
+     * @return the expensesBySupplierModel
+     */
+    public BarChartModel getExpensesBySupplierModel() {
+        if (expensesBySupplierModel == null) {
+            expensesBySupplierModel = createSupplierExpensesChart(getDashboardDateInterval(), getDashboardStartDate(), getDashboardEndDate());
+        }
+        return expensesBySupplierModel;
     }
 
     public BarChartModel getDashboardMonthlySessionsChartModel() {
@@ -816,5 +993,12 @@ public class MySessionsChart1 implements Serializable {
      */
     public void setDashboardShowAllUsers(boolean dashboardShowAllUsers) {
         this.dashboardShowAllUsers = dashboardShowAllUsers;
+    }
+
+    /**
+     * @param expensesBySupplierModel the expensesBySupplierModel to set
+     */
+    public void setExpensesBySupplierModel(BarChartModel expensesBySupplierModel) {
+        this.expensesBySupplierModel = expensesBySupplierModel;
     }
 }

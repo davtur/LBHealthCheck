@@ -51,6 +51,9 @@
                 <p:chart type="bar"   styleClass="chartClass" model="#{mySessionsChart1.dashboardMonthlyRevenueModel}"     />
             </p:panel>
   
+           <p:panel id="supplierExpensesChart" widgetVar="dashboardExpensesBySupplierWidget" header="Expenses by Supplier Chart ">
+               <p:chart type="bar"   styleClass="chartClass" model="#{mySessionsChart1.expensesBySupplierModel}"     />
+            </p:panel>
 
             <p:panel id="customChart" widgetVar="customChartWidget" header="Sessions Chart ">
                 <p:chart type="bar"   styleClass="chartClass" model="#{mySessionsChart1.dashboardMonthlySessionsChartModel}"     />

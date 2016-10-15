@@ -46,7 +46,7 @@ public class ContractorRateToTaskMapFacade extends AbstractFacade<ContractorRate
         super(ContractorRateToTaskMap.class);
     }
 
-    public List<SessionTypes> findBySessionTypesByContractorRateAndSupplier( Suppliers sup) {
+    public List<SessionTypes> findBySessionTypesBySupplier( Suppliers sup) {
 
         List<SessionTypes> stl = new ArrayList<>();
         List<ContractorRateToTaskMap> cml;
@@ -120,9 +120,7 @@ public class ContractorRateToTaskMapFacade extends AbstractFacade<ContractorRate
   
   
   public ContractorRates findContractorRateBySupplierAndSessionType( Suppliers sup, SessionTypes st) {
-List<ContractorRates> stl = new ArrayList<>();
-        
-        Collection<ContractorRates>  cml;
+       ContractorRates conRate = null;
         try {
             CriteriaBuilder cb = em.getCriteriaBuilder();
             CriteriaQuery<ContractorRateToTaskMap> cq = cb.createQuery(ContractorRateToTaskMap.class);
@@ -130,32 +128,32 @@ List<ContractorRates> stl = new ArrayList<>();
 
            // Join<ContractorRateToTaskMap, ContractorRates> jn = rt.join("contractorRateId");// join customers.active to customer_state.id
             Expression<Suppliers> supplier = rt.get("supplierId");
-Expression<SessionTypes> sessionTypes = rt.get("taskId");
-            Expression<ContractorRates> contractorRates = rt.get("contractorRateId");
+            Expression<SessionTypes> sessionTypes = rt.get("taskId");
+            //Expression<ContractorRates> contractorRates = rt.get("contractorRateId");
 
-           Predicate condition1 = cb.equal(sessionTypes, st);
+            Predicate condition1 = cb.equal(sessionTypes, st);
             Predicate condition2 = cb.equal(supplier, sup);
-           cq.where(cb.equal(condition1, condition2));
+            cq.where(cb.and(condition1, condition2));
             //cq.where(condition2);
-            cq.select(rt.get("contractorRateId")).distinct(true);
+           // cq.select(rt.get("contractorRateId")).distinct(true);
             //Query q = em.createQuery(cq);
-            Query q = em.createQuery(cq);
+           TypedQuery<ContractorRateToTaskMap> q = em.createQuery(cq);
             //q.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase);
             if (DEBUG) {
                 debug(q);
             }
-            cml = q.getResultList();
-            if(stl.size() == 1){
-                for (ContractorRates cr : cml) {
-                stl.add(cr);
-               }
+            ContractorRateToTaskMap crttm = q.getSingleResult();
+            if(crttm != null){
+                
+                conRate = crttm.getContractorRateId();
+               
             }else{
                LOGGER.log(Level.WARNING, "findContractorRatesBySupplier ERROR :{0} {1} ", new Object[]{sup.getSupplierName(), st.getName()}); 
             }
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "findContractorRateBySupplierAndSessionType ERROR No Session Types match teh contractor Rate for Supplier:{0} {1} ", new Object[]{sup.getSupplierName(), e.getMessage()});
         }
-        return null;
+        return conRate;
 
     }
  

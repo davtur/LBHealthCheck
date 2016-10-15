@@ -88,6 +88,8 @@ public class CustomersController implements Serializable {
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.CustomersFacade ejbFacade;
     @Inject
+    private au.com.manlyit.fitnesscrm.stats.beans.SuppliersFacade suppliersFacade;
+    @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.PaymentBean ejbPaymentBean;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.EmailTemplatesFacade ejbEmailTemplatesFacade;
@@ -132,10 +134,10 @@ public class CustomersController implements Serializable {
     private Customers[] multiSelectedCustomersWithoutScheduledPayments;
     // private Groups[] selectedGroups;
     private List<Groups> selectedGroups;
-    private String checkPass = "";
+    private String checkPass ;
     private Boolean[] checkedGroups;
     private Boolean[] newCustomerCheckedGroups;
-    private String checkPass2 = "";
+    private String checkPass2 ;
     private String leadComments = "";
     private Customers impersonate;
     private Customers loggedInUser;
@@ -257,8 +259,8 @@ public class CustomersController implements Serializable {
             controller.setSelectedCustomer(cust);
             //eziDebitPaymentGatewayController.setSelectedCustomer(cust);
             SuppliersController suppliersController = (SuppliersController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "suppliersController");
+            Suppliers sup = null;
             if (cust.getSuppliersCollection() != null) {
-                Suppliers sup = null;
 
                 if (cust.getSuppliersCollection().size() >= 1) {
                     Iterator<Suppliers> i = cust.getSuppliersCollection().iterator();
@@ -269,15 +271,31 @@ public class CustomersController implements Serializable {
                 if (cust.getSuppliersCollection().size() > 1) {
                     LOGGER.log(Level.WARNING, "There should only be one Supplier allocated to one customer. Username = {0}", new Object[]{cust.getUsername()});
                 }
-                
+
                 if (sup != null) {
                     suppliersController.setSelected(sup);
-                    
+
                 }
-            }else{
-              suppliersController.setSelected(null); 
-              suppliersController.setSelectedContractorRate(null);
-              suppliersController.setRateItems(null);
+            }
+
+            if (sup == null) {
+
+                if (isCustomerInRole(cust, "TRAINER")) {
+                    LOGGER.log(Level.INFO, "Creating  new supplier details for contractor as it wasn't found in the DB. Contractor username:{0}", new Object[]{cust.getUsername()});
+                    sup = new Suppliers(0);
+                    sup.setSupplierName(cust.getFirstname() + "" + cust.getLastname());
+                    sup.setDescription("Internal Contractor");
+                    sup.setInternalContractorId(cust);
+                    sup.setSupplierCompanyNumber(" ");
+                    sup.setSupplierCompanyNumberType("ABN");
+                    suppliersFacade.create(sup);
+                    suppliersController.setSelected(sup);
+                } else {
+                    suppliersController.setSelected(null);
+                    suppliersController.setSelectedContractorRate(null);
+                    suppliersController.setRateItems(null);
+                    suppliersController.setSessionTypesArray(null);
+                }
             }
             MySessionsChart1 c2 = context.getApplication().evaluateExpressionGet(context, "#{mySessionsChart1}", MySessionsChart1.class);
             c2.setSelectedCustomer(cust);
@@ -286,7 +304,7 @@ public class CustomersController implements Serializable {
             checkPass = current.getPassword();
             if (cust.getQuestionnaireMapCollection() == null) {
                 //addQuestionnaireMapItemsToCustomer(cust);
-                LOGGER.log(Level.SEVERE, "The customers questionaire collection is NULL. THis shouldn't happen as it is created when the customer is created.", cust.getUsername());
+                LOGGER.log(Level.SEVERE, "The customers questionaire collection is NULL. This shouldn't happen as it is created when the customer is created.", cust.getUsername());
             }
 
             if (cust.getProfileImage() == null) {
@@ -1715,7 +1733,8 @@ public class CustomersController implements Serializable {
             notesFilteredItems.add(note);
         }
     }
-     private void removeFromCustomersTableLists(Customers cust) {
+
+    private void removeFromCustomersTableLists(Customers cust) {
         if (items != null) {
             List<Customers> lp = (List<Customers>) items.getWrappedData();
             int index = lp.indexOf(cust);
@@ -1805,6 +1824,9 @@ public class CustomersController implements Serializable {
     public void checkPassChange() {
 
         passwordsMatch = checkPass.equals(checkPass2);
+       // if(checkPass.length() < 8){
+      //      passwordsMatch = false;
+      //  }
     }
 
     /**
@@ -1826,6 +1848,13 @@ public class CustomersController implements Serializable {
      */
     public String getCheckPass2() {
         return checkPass2;
+    }
+    
+ /**
+     * @param checkPass2 the checkPass2 to set
+     */
+    public void setCheckPass2(String checkPass2) {
+        this.checkPass2 = checkPass2;
     }
 
     public void dialogueFirstNameListener(ValueChangeEvent vce) {
@@ -2001,13 +2030,7 @@ public class CustomersController implements Serializable {
         }
     }
 
-    /**
-     * @param checkPass2 the checkPass2 to set
-     */
-    public void setCheckPass2(String checkPass2) {
-        this.checkPass2 = checkPass2;
-    }
-
+   
     /**
      * @return the impersonate
      */

@@ -40,7 +40,8 @@
                        </p:contextMenu>-->
                         <p:remoteCommand name="removePicture" actionListener="#{customerImagesController.removePicture}" update=":growl :myStatsForm:mainCarousel :myStatsForm:heading1"/>
                         <!-- </p:panel> -->
-                        <p:galleria id="mainCarousel" styleClass="galleriaFrame parentOfUploadPhoto"  widgetVar="galleriaWidget" var="image" value="#{customerImagesController.images}"  showCaption="true" effect="fade" >
+                        <div class="galleriaFrame">
+                        <p:galleria id="mainCarousel" styleClass="galleriaFrame parentOfUploadPhoto" widgetVar="galleriaWidget"  var="image" value="#{customerImagesController.images}"  showCaption="true" effect="fade" >
                             <p:panelGrid columns="1" styleClass="wf" style="text-align: center;">
                                 <p:commandButton id="delete_pic_button"
                                                  update=":myStatsForm :growl"
@@ -55,6 +56,7 @@
                             <div class="caption">#{image.formattedDate}</div>
                            <!-- <div class="hiddenId" style="display: none;">#{image.id}</div>-->
                         </p:galleria>
+                        </div>
                         <p:commandButton  id="photoUploadButton" ajax="true"  onclick="PF('uploadPhotoDialogueWidget').show();" update=":growl :myStatsForm:mainCarousel "    value="#{configMapController.getKey('EditCustomersUploadPhotoButton')}" immediate="true"/>
 
                     </div>

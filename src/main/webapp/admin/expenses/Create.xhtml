@@ -73,7 +73,7 @@
                                     <f:selectItems value="#{suppliersController.itemsAvailable}" var="supplier" itemLabel="#{supplier.supplierName}" itemValue="#{supplier}"/>
                                     <!-- <p:ajax   update=":ExpensesCreateForm"  />-->
                                 </p:selectOneMenu>
-                                <p:commandButton  styleClass="selectOneButton"  rendered="#{suppliersController.isUserInRole('ADMIN')}" id="createButtonSupplier" icon="fa fa-plus white Fs14"   value="#{configMapController.getKey('CreateNew_Supplier')}" actionListener="#{suppliersController.createDialogue}" update=":SuppliersCreateForm :ExpensesCreateForm:supplierId" oncomplete="PF('SuppliersCreateDialog').show()"/>
+                                <p:commandButton  styleClass="selectOneButton"  rendered="#{suppliersController.isUserInRole('ADMIN')}" id="createButtonSupplier" icon="fa fa-plus white Fs14"   value="#{configMapController.getKey('CreateNew_Supplier')}" actionListener="#{suppliersController.prepareCreateDialogue}" update=":SuppliersCreateForm :ExpensesCreateForm:supplierId" oncomplete="PF('SuppliersCreateDialog').show()"/>
                             </h:panelGrid>
                             <p:outputLabel value="#{configMapController.getKey('CreateExpensesLabel_expenseTypeId')}" for="expenseTypeId" />
                             <h:panelGrid  columns="2"  >

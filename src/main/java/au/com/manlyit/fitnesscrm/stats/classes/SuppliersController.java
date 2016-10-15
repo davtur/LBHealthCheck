@@ -77,10 +77,10 @@ public class SuppliersController implements Serializable {
     }
 
     public Suppliers getSelected() {
-        if (current == null) {
-            current = new Suppliers();
-            selectedItemIndex = -1;
-        }
+        // if (current == null) {
+        //     current = new Suppliers();
+        //     selectedItemIndex = -1;
+        // }
         return current;
     }
 
@@ -89,6 +89,11 @@ public class SuppliersController implements Serializable {
             current = sup;
             selectedItemIndex = -1;
             rateItems = null;
+            sessionTypesArray = null;
+            if (contractorRateToTaskMapFacade.findContractorRatesBySupplier(sup).isEmpty()) {
+                LOGGER.log(Level.WARNING, "The  Supplier has no contractor Rates.Creating defaults pay rate to session type map for Supplier Name = {0}", new Object[]{sup.getSupplierName()});
+                addDefaultContractorRates(sup);
+            }
 
             if (sup.getContractorRateToTaskMapCollection() != null) {
                 ContractorRateToTaskMap cr;
@@ -100,9 +105,12 @@ public class SuppliersController implements Serializable {
                         setSelectedContractorRate(cr.getContractorRateId());
                     }
                 }
-                if (sup.getContractorRateToTaskMapCollection().size() > 1) {
-                    LOGGER.log(Level.WARNING, "The  Supplier has no contractor Rates. Supplier Name = {0}", new Object[]{sup.getSupplierName()});
+                if (sup.getContractorRateToTaskMapCollection().isEmpty()) {
+
                 }
+            } else {
+                LOGGER.log(Level.SEVERE, "The  Supplier has no contractor Rates.This shouldn't happen as the defaults should already be added. Supplier Name = {0}", new Object[]{sup.getSupplierName()});
+
             }
 
         }
@@ -217,7 +225,7 @@ public class SuppliersController implements Serializable {
         rateItems = null;
     }
 
-    public List<ContractorRates> getContractRatesByCurrentSupplier() {
+    /*   public List<ContractorRates> getContractRatesByCurrentSupplier() {
 
         List<ContractorRates> lcr = contractorRateToTaskMapFacade.findContractorRatesBySupplier(current);
         if (lcr == null) {
@@ -229,14 +237,14 @@ public class SuppliersController implements Serializable {
         }
         if (lcr.isEmpty()) {
             if (current != null) {
-                 if (current.getId() != null) {
-                return addDefaultContractorRates(current);
-                 }
+                if (current.getId() != null) {
+                    return addDefaultContractorRates(current);
+                }
             }
         }
         return lcr;
-    }
- @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    }*/
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     protected List<ContractorRates> addDefaultContractorRates(Suppliers sup) {
         List<ContractorRates> lcr = new ArrayList<>();
         String def1 = configMapFacade.getConfig("system.default.contractorRate.sessiontype.group");
@@ -252,7 +260,7 @@ public class SuppliersController implements Serializable {
         lcr.add(crtm2.getContractorRateId());
         setSessionTypesArray(null);
         List<SessionTypes> source = getSessionTypesArray();
-        List<SessionTypes> removeFromSource = contractorRateToTaskMapFacade.findBySessionTypesByContractorRateAndSupplier(sup);
+        List<SessionTypes> removeFromSource = contractorRateToTaskMapFacade.findBySessionTypesBySupplier(sup);
         for (SessionTypes stRem : removeFromSource) {
             source.remove(stRem);
         }
@@ -260,7 +268,7 @@ public class SuppliersController implements Serializable {
             contractorRateToTaskMapFacade.create(new ContractorRateToTaskMap(0, st, contractorRatesFacade.findAContractorRateByName(def4), sup));
         }
         return lcr;
-    } 
+    }
 
     /**
      * @return the rateItems
@@ -275,7 +283,7 @@ public class SuppliersController implements Serializable {
             } else {
 
                 List<SessionTypes> source = getSessionTypesArray();
-                List<SessionTypes> removeFromSource = contractorRateToTaskMapFacade.findBySessionTypesByContractorRateAndSupplier(getSelected());
+                List<SessionTypes> removeFromSource = contractorRateToTaskMapFacade.findBySessionTypesBySupplier(getSelected());
                 for (SessionTypes stRem : removeFromSource) {
                     source.remove(stRem);
                 }
@@ -330,6 +338,10 @@ public class SuppliersController implements Serializable {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
             return null;
         }
+    }
+    
+    public void prepareCreateDialogue(ActionEvent actionEvent) {
+        current = new Suppliers(0);
     }
 
     public void createDialogue(ActionEvent actionEvent) {
@@ -465,7 +477,6 @@ public class SuppliersController implements Serializable {
     public SelectItem[] getItemsAvailableSelectOne() {
         return JsfUtil.getSelectItemsBaseEntity(ejbFacade.findAll(), true);
     }
-   
 
     public Collection<Suppliers> getItemsAvailable() {
         return ejbFacade.findAll();
@@ -515,11 +526,13 @@ public class SuppliersController implements Serializable {
      */
     public List<SessionTypes> getSessionTypesArray() {
         if (sessionTypesArray == null) {
-            FacesContext context = FacesContext.getCurrentInstance();
-            SessionTypesController controller = (SessionTypesController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "sessionTypesController");
+            sessionTypesArray = sessionTypesFacade.findAll();
+            //FacesContext context = FacesContext.getCurrentInstance();
+            // SessionTypesController controller = (SessionTypesController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "sessionTypesController");
             //sessionTypesArray = new SessionTypes[controller.getItemsAvailable().size()];
             //controller.getItemsAvailable().toArray(sessionTypesArray);
-            sessionTypesArray = controller.getAllSessionTypes();
+            // sessionTypesArray = controller.getAllSessionTypes();
+
         }
         return sessionTypesArray;
     }

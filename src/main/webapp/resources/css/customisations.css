@@ -11,57 +11,72 @@ body{
     background-image: url("/FitnessStats/javax.faces.resource/images/background-wood-and-weights.jpg") !important;
 }
 
-div.ui-carousel-viewport .myStatsCarousel div.ui-carousel-viewport .myStatsCarousel{
+/*div.ui-carousel-viewport .myStatsCarousel div.ui-carousel-viewport .myStatsCarousel{
   width:100% !important;
 height: 300px !important; 
 
     
-}
+}*/
 .expenseImagePanel {
-    
+
 }
 .expensesPhoto{
-    
+
 }
 
 
 .selectOneButton .ui-button-text  {
-   padding: 20px 22px 8px 20px !important;
+    padding: 20px 22px 8px 20px !important;
 }
+.ui-galleria  {
+    content: " ";
+    display: block; 
+    width: 100%  !important; 
+   /* padding-top: 56.25%; /* for a final 16:9 aspect ratio: 9 / 16 * 100 = padding-top: 56.25%; */
+}
+
+.ui-galleria-panel {
+    
+    width:100%  !important;
+}
+.ui-galleria-panel-wrapper  {
+    width:100%  !important;
+}
+
 
 .galleriaFrame  {
-    max-width: 100%;
+   width: 100% !important;
 }
 .galleriaImage {
-    max-width: 100%;
-    min-width: 100%;
+     width:100% !important;
+
 }
 
-.myStatsCarouselItem .ui-carousel-item {
+/*.myStatsCarouselItem .ui-carousel-item {
 height: 300px !important; 
-  
-    
-}
  
+    
+} */
+
 @media all and (max-width: 599px) and (min-width: 320px) {
     .timetableSchedule  {
         font-size: 10px;
         height: 800px;
     }
-     .timetableSchedule .fc-content {
+    .timetableSchedule .fc-content {
         padding: 1px !important;
     }
     .fc-day-grid-event > .fc-content {
         white-space: normal;
     }
-     #schedule3container {
+    #schedule3container {
         height: 800px;
     }
-   
-     
-   
+
+
+
     .bookingFormUpdate {
-      font-size: 12px;  
+        font-size: 12px;  
     }
     .fc-day-grid-event > .fc-content {
         white-space: normal;
@@ -71,7 +86,7 @@ height: 300px !important;
         width: 100% !important ;
 
     }
- 
+
 }
 @media all and (max-width: 1200px) and (min-width: 600px) {
     .timetableSchedule  {
@@ -81,9 +96,9 @@ height: 300px !important;
     #schedule3container {
         height: 900px;
     }
-    
+
     .bookingFormUpdate {
-      font-size: 12px;  
+        font-size: 12px;  
     }
     .fc-day-grid-event > .fc-content {
         white-space: normal;
@@ -93,19 +108,19 @@ height: 300px !important;
         width: 100% !important ;
 
     }
- 
+
 }
 @media all and  (min-width: 1201px) {
     .timetableSchedule  {
         font-size: 14px;
         height: 800px;
     }
-     #schedule3container {
+    #schedule3container {
         height: 900px;
     }
-     
+
     .bookingFormUpdate {
-      font-size: 12px;  
+        font-size: 12px;  
     }
     .fc-day-grid-event > .fc-content {
         white-space: normal;
@@ -115,7 +130,7 @@ height: 300px !important;
         width: 100% !important ;
 
     }
- 
+
 }
 
 .greenBg {
@@ -175,7 +190,7 @@ height: 300px !important;
     background-color: #33AFDE !important;
     border-bottom: solid 1px #C6D6DF;
     border-top: solid 1px #C6D6DF;
-   color: #FFFFFF;
+    color: #FFFFFF;
 
 
 }

@@ -322,11 +322,11 @@
 
                                 <f:facet name="header">
                                     <div class="EmptyBox10" />
-                                    <p:commandButton rendered="#{expensesController.isUserInRole('ADMIN')}" id="createButton" icon="fa fa-plus white Fs14"   value="#{configMapController.getKey('Create')}" actionListener="#{expensesController.prepareCreate}" update=":ExpensesCreateForm" oncomplete="PF('ExpensesCreateDialogWidget').show()"/>
+                                    <p:commandButton rendered="#{expensesController.isUserInRole('ADMIN')}" id="createButton" icon="fa fa-plus white Fs14"   value="#{configMapController.getKey('Create')}" actionListener="#{expensesController.prepareCreate}" update=":growl :ExpensesListForm:datalist" oncomplete="PF('ExpensesCreateDialogWidget').show()"/>
                                     <p:commandButton id="viewButton"   icon="fa fa-search white Fs14" value="#{configMapController.getKey('View')}" update=":ExpensesViewForm" oncomplete="PF('ExpensesViewDialogWidget').show()" disabled="#{empty expensesController.selected}"/>
                                     <p:commandButton rendered="#{expensesController.isUserInRole('ADMIN')}" id="editButton"   icon="fa fa-pencil white Fs14" value="#{configMapController.getKey('Edit')}" update=":ExpensesEditForm" oncomplete="PF('ExpensesEditDialog').show()" disabled="#{empty expensesController.selected}"/>
-                                    <p:commandButton rendered="#{expensesController.isUserInRole('ADMIN')}" id="deleteButton" icon="fa fa-trash white Fs14"  value="#{configMapController.getKey('Delete')}" actionListener="#{expensesController.destroy}" update=":growl,datalist" disabled="#{empty expensesController.selected}"/>
-                                    <p:commandButton rendered="#{expensesController.isUserInRole('ADMIN')}" id="reconcileSessionsButton" icon="fa fa-cog white Fs14"  value="#{configMapController.getKey('ReconcileSessionsButtonLabel')}" actionListener="#{expensesController.reconcileSessions}" update=":growl,datalist" disabled="#{empty expensesController.selected}"/>
+                                    <p:commandButton rendered="#{expensesController.isUserInRole('ADMIN')}" id="deleteButton" icon="fa fa-trash white Fs14"  value="#{configMapController.getKey('Delete')}" actionListener="#{expensesController.destroy}" update=":growl :ExpensesListForm:datalist" disabled="#{empty expensesController.selected}"/>
+                                    <p:commandButton rendered="#{expensesController.isUserInRole('ADMIN')}" id="reconcileSessionsButton" icon="fa fa-cog white Fs14"  value="#{configMapController.getKey('ReconcileSessionsButtonLabel')}" actionListener="#{expensesController.reconcileSessions}" update=":growl :ExpensesListForm:datalist" disabled="#{empty expensesController.selected}"/>
 
                                 </f:facet>
 

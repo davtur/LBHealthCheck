@@ -2,7 +2,6 @@
       xmlns:h="http://java.sun.com/jsf/html"
       xmlns:f="http://java.sun.com/jsf/core"
       xmlns:p="http://primefaces.org/ui"
-      xmlns:pe="http://primefaces.org/ui/extensions"
       xmlns:pm="http://primefaces.org/mobile">
 
     <f:view renderKitId="PRIMEFACES_MOBILE" />
@@ -40,9 +39,7 @@
 
                                 <p:panel    header="#{configMapController.getKey('MyDetailsSurveyPanel_title')}">
 
-
-                                    <!--    <p:outputLabel value="#{configMapController.getKey('CreateSurveyanswersLabel_surveyId')}" for="surveyId" />-->
-                                    <p:selectOneMenu id="surveyId" valueChangeListener="#{surveyanswersController.selectOneMenuValueChangeListener}"  converter="surveysControllerConverter" value="#{surveyanswersController.selectedSurvey}"  label="#{configMapController.getKey('CreateSurveyanswersTitle_surveyId')}">
+                                   <p:selectOneMenu id="surveyId" valueChangeListener="#{surveyanswersController.selectOneMenuValueChangeListener}"  converter="surveysControllerConverter" value="#{surveyanswersController.selectedSurvey}"  label="#{configMapController.getKey('CreateSurveyanswersTitle_surveyId')}">
                                         <f:selectItems value="#{surveysController.itemsAvailableSelectMany}"/>
                                         <p:ajax   update=":main:createCustomerForm"  />
                                     </p:selectOneMenu>
@@ -186,13 +183,13 @@
                         <p:messages id="messages" showDetail="true" autoUpdate="true"  />
                         <h:panelGrid columns="1" id="matchGrid" cellpadding="5">                   
                             <h:outputLabel for="pwd1" value="Enter New Password" />
-                            <p:password id="pwd1" value="#{customersController.checkPass}"  label="Password 1" feedback="true" required="true" >
-                                <p:ajax  event="keyup" listener="#{customersController.checkPassChange}" update=":updatePassword:updatePass:enableUpdatePanel"/>
-                            </p:password>
+                            <h:inputSecret id="pwd1" value="#{customersController.checkPass}" label="Password 1"  required="true" redisplay="true" >
+                                <p:ajax  event="keyup" listener="#{customersController.checkPassChange}"  update=":updatePassword:updatePass:enableUpdatePanel"/>
+                            </h:inputSecret>
                             <h:outputLabel for="pwd2" value="Verify Password" />
-                            <p:password id="pwd2" value="#{customersController.checkPass2}" label="Password 2" feedback="true" required="true" >
-                                <p:ajax  event="keyup" listener="#{customersController.checkPassChange}" update=":updatePassword:updatePass:enableUpdatePanel"/>
-                            </p:password>
+                            <h:inputSecret id="pwd2" value="#{customersController.checkPass2}" label="Password 2"  required="true" >
+                                <p:ajax  event="keyup" listener="#{customersController.checkPassChange}"  update=":updatePassword:updatePass:enableUpdatePanel"/>
+                            </h:inputSecret>
                         </h:panelGrid>
                         <!-- <p:commandButton update="matchGrid" value="Save" />-->
                     </h:panelGrid>   

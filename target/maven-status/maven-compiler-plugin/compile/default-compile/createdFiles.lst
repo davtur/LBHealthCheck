@@ -201,6 +201,7 @@ au/com/manlyit/fitnesscrm/stats/webservices/PaymentDetail.class
 au/com/manlyit/fitnesscrm/stats/beans/CustomerGoalsFacade.class
 au/com/manlyit/fitnesscrm/stats/webservices/ChangeScheduledDateResponse.class
 au/com/manlyit/fitnesscrm/stats/classes/QrtzSimpleTriggersController.class
+au/com/manlyit/fitnesscrm/stats/classes/util/ChartSeriesToObjectMap.class
 au/com/manlyit/fitnesscrm/stats/classes/ConfigMapController.class
 au/com/manlyit/fitnesscrm/stats/beans/AbstractFacade.class
 au/com/manlyit/fitnesscrm/stats/beans/ContractorRatesFacade.class

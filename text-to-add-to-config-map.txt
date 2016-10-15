@@ -2049,6 +2049,6 @@ ListContractorRatesTitle_supplierId=SupplierId
 
 
 system.default.contractorRate.sessiontype.group=Group Training
-system.default.contractorRate.group=Default Rate Groups
+system.default.contractorRate.group=Default Group Training
 system.default.contractorRate.sessiontype.pt=Personal Training 1 hour
-system.default.contractorRate.pt=Default Rate PT
+system.default.contractorRate.pt=Default 1 hour PT
