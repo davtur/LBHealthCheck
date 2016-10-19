@@ -24,34 +24,46 @@ height: 300px !important;
 
 }
 
-
 .selectOneButton .ui-button-text  {
     padding: 20px 22px 8px 20px !important;
-}
-.ui-galleria  {
-    content: " ";
-    display: block; 
-    width: 100%  !important; 
-   /* padding-top: 56.25%; /* for a final 16:9 aspect ratio: 9 / 16 * 100 = padding-top: 56.25%; */
-}
-
-.ui-galleria-panel {
-    
-    width:100%  !important;
-}
-.ui-galleria-panel-wrapper  {
-    width:100%  !important;
 }
 
 
 .galleriaFrame  {
-   width: 100% !important;
+    width: 100% !important;
+}
+
+.ui-galleria  {
+    content: " ";
+    display: block;  
+    width: 100%  !important; 
+}
+
+.ui-galleria-panel-wrapper  { /*Container of panels.*/
+    width:100%  !important;
+    text-align:center !important;
+}
+.ui-galleria-panel { /* Container of each image.*/
+    width: 100%;
+    padding-bottom: 56.25%;   /* padding-top: 56.25%; /* for a final 16:9 aspect ratio: 9 / 16 * 100 = padding-top: 56.25%; */
+    text-align:center !important;
+    /* display: block;*/
+    max-width: 100%;
+    position: absolute;
+    bottom:0;
+    left:50%;
+    transform:translateX(-50%);
 }
 .galleriaImage {
-     width:100% !important;
+    /* position: absolute;
+     top: 0; bottom: 0; left: 0; right: 0;*/
 
 }
-
+.galleriaImageButton{
+    float:left;
+    position: absolute;
+    /*top: 0; bottom: 0; left: 0; right: 0;*/
+}
 /*.myStatsCarouselItem .ui-carousel-item {
 height: 300px !important; 
  
@@ -59,6 +71,35 @@ height: 300px !important;
 } */
 
 @media all and (max-width: 599px) and (min-width: 320px) {
+
+    .selectOneWidth {
+        min-width:100px; 
+        max-width:220px;
+    }
+
+    /*file upload component*/
+    .ui-fileupload-files td{
+        display: inline-block;
+    }
+
+    .ui-fileupload-buttonbar .ui-button{
+        padding: 5px 5px 5px 20px !important
+    }
+    .ui-fileupload-buttonbar {
+        padding: 0.1 !important
+    }
+
+    .ui-fileupload-buttonbar .ui-button .ui-button-text {
+        /* display: none;*/
+    }
+
+    .ui-fileupload-buttonbar .ui-button .ui-icon{
+        margin-left: 20px !important;
+    }
+
+
+
+
     .timetableSchedule  {
         font-size: 10px;
         height: 800px;
@@ -86,6 +127,38 @@ height: 300px !important;
         width: 100% !important ;
 
     }
+    .galleriaFrame  {
+        width: 100% !important;
+        height:300px !important;
+    }
+
+    .ui-galleria  {
+        content: " ";
+        display: block;  
+        width: 100%  !important; 
+        height:300px !important;
+    }
+
+    .ui-galleria-panel-wrapper  { /*Container of panels.*/
+        width:100%  !important;
+        height:300px !important;
+        text-align:center !important;
+    }
+    .ui-galleria-panel { /* Container of each image.*/
+        width:100%  !important;
+        height:300px !important;
+        /*padding-top: 56.25%; */  /* padding-top: 56.25%; /* for a final 16:9 aspect ratio: 9 / 16 * 100 = padding-top: 56.25%; */
+        text-align:center !important;
+        /* display: block;*/
+        /* max-width: 100%;
+         position: absolute;
+         bottom:0;
+         left:50%;
+         transform:translateX(-50%);*/
+    }
+    .ui-galleria-panel img {
+        width: 100% !important ;
+    }
 
 }
 @media all and (max-width: 1200px) and (min-width: 600px) {
@@ -108,6 +181,11 @@ height: 300px !important;
         width: 100% !important ;
 
     }
+    .selectOneWidth {
+        min-width:200px; 
+        width:220px;
+    }
+
 
 }
 @media all and  (min-width: 1201px) {
@@ -130,6 +208,11 @@ height: 300px !important;
         width: 100% !important ;
 
     }
+    .selectOneWidth {
+        min-width:200px; 
+        width:220px;
+    }
+
 
 }
 
@@ -177,9 +260,6 @@ height: 300px !important;
 
 .cancellationDialogue{
     max-width: 400px;
-}
-.selectOneWidth {
-    min-width:200px; width:220px;
 }
 
 .timetableGmap{

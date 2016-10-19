@@ -17,13 +17,15 @@ import au.com.manlyit.fitnesscrm.stats.db.Payments;
 import au.com.manlyit.fitnesscrm.stats.db.Plan;
 import au.com.manlyit.fitnesscrm.stats.db.SessionHistory;
 import au.com.manlyit.fitnesscrm.stats.db.SessionTypes;
-import com.lowagie.text.BadElementException;
-import com.lowagie.text.Document;
-import com.lowagie.text.DocumentException;
-import com.lowagie.text.Image;
-import com.lowagie.text.PageSize;
+import com.itextpdf.text.BadElementException;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.FontFactory;
+import com.itextpdf.text.Image;
+//import com.itextpdf.text.Font;
+import com.itextpdf.text.PageSize;
+import com.itextpdf.text.Paragraph;
 
-import com.lowagie.text.Paragraph;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -442,7 +444,8 @@ public class InvoiceController implements Serializable {
         pdf.addTitle(reportTitle);
         pdf.add(new Paragraph(reportTitle));
         pdf.add(new Paragraph(" "));
-        com.lowagie.text.Font font = new com.lowagie.text.Font(com.lowagie.text.Font.NORMAL);
+        com.itextpdf.text.Font font = FontFactory.getFont(FontFactory.HELVETICA, 12, com.itextpdf.text.Font.NORMAL);
+        //Font font = new Font(Font.COLOR_NORMAL) {};
         font.setSize(8);
     }
 
@@ -1409,6 +1412,7 @@ public class InvoiceController implements Serializable {
     private static Map<String, CellStyle> createStyles(Workbook wb) {
         Map<String, CellStyle> styles = new HashMap<>();
         CellStyle style;
+        //com.itextpdf.text.Font font = FontFactory.getFont(FontFactory.HELVETICA, 12, Font.NORMAL);
         Font titleFont = wb.createFont();
         titleFont.setFontHeightInPoints((short) 18);
         titleFont.setBoldweight(Font.BOLDWEIGHT_BOLD);

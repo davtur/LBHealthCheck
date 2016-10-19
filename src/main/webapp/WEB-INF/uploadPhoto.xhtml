@@ -1,48 +1,61 @@
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <ui:composition   xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:ui="http://java.sun.com/jsf/facelets"
-      xmlns:h="http://java.sun.com/jsf/html"
-      xmlns:f="http://java.sun.com/jsf/core"
-      xmlns:p="http://primefaces.org/ui" 
-      xmlns:pe="http://primefaces.org/ui/extensions">
-    
-        <!--<p:log />--> 
-        <p:dialog id="uploadPhotoDialogue"  closable="true" 
-                  header="#{configMapController.getKey('uploadPhotoDialogueTitle')}" fitViewport="true" widgetVar="uploadPhotoDialogueWidget"> 
+                  xmlns:ui="http://java.sun.com/jsf/facelets"
+                  xmlns:h="http://java.sun.com/jsf/html"
+                  xmlns:f="http://java.sun.com/jsf/core"
+                  xmlns:p="http://primefaces.org/ui" 
+                  xmlns:pe="http://primefaces.org/ui/extensions">
+
+    <!--<p:log />--> 
+    <p:dialog id="uploadPhotoDialogue"  closable="true" 
+              header="#{configMapController.getKey('uploadPhotoDialogueTitle')}" fitViewport="true" widgetVar="uploadPhotoDialogueWidget" responsive="true"> 
+        <div class="Container100 Responsive100">
+            <div class="Container100 Responsive100">
+                <div class="ContainerIndent">
 
 
-            <h:form id="uploadPhotoForm">                   
-                <p:fileUpload  invalidSizeMessage="The size of the picture is too big! ( > 10MB )" fileLimitMessage="You have exceeded the limit of 100 files uploaded" fileLimit="100" auto="true" fileUploadListener="#{customerImagesController.handleFileUpload}"  update="@(.parentOfUploadPhoto) :growl" allowTypes="/(\.|\/)(gif|jpe?g|png)$/" sizeLimit="10000000" />
+                    <h:form id="uploadPhotoForm" > 
+
+                        <p:fileUpload  invalidSizeMessage="The size of the picture is too big! ( > 10MB )" class="parentOfUploadPhoto"
+                                       fileLimitMessage="You have exceeded the limit of 100 files uploaded" fileLimit="100" auto="true" 
+                                       fileUploadListener="#{customerImagesController.handleFileUpload}"  
+                                       update="@(.parentOfUploadPhoto) :growl" 
+                                       allowTypes="/(\.|\/)(gif|jpe?g|png)$/"
+                                       
+                                       sizeLimit="10000000" />
 
 
-                <p:panel id="panel3" class="parentOfUploadPhoto" >
-                    <h:panelGrid columns="1">
-                        <p:graphicImage id="uploadedPhoto"  class="dialoguePhoto parentOfUploadPhoto" value="#{customerImagesController.uploadedImageAsStream}" style="max-width: 400px" cache="false" >
+
+
+                        <p:graphicImage id="uploadedPhoto"  class="dialoguePhoto parentOfUploadPhoto" value="#{customerImagesController.uploadedImageAsStream}" style="max-width: 300px;max-height: 300px" cache="false" >
 
                         </p:graphicImage>
 
                         <pe:imageAreaSelect id="areaSelect" class="dialoguePhoto parentOfUploadPhoto"  for="uploadedPhoto"  handles="true"  widgetVar="areaSelectWidget"  >  
                             <p:ajax event="selectEnd" listener="#{customerImagesController.selectEndListener}" update=":growl"/>  
                         </pe:imageAreaSelect> 
+                        <div class="Container100 Responsive100">
+                            <div class="ContainerIndent">
+                                <p:outputLabel  value="#{configMapController.getKey('CreateCustomerImagesLabel_profilephoto')}" for="profilephoto" />
+                                <p:selectBooleanCheckbox id="profilephoto"  class="parentOfUploadPhoto" disabled="#{customerImagesController.saveButtonDisabled}"  value="#{customerImagesController.profilePhoto}" style="padding: 5px" >
+                                    <p:ajax event="change" />
+                                </p:selectBooleanCheckbox> 
+                            </div>
+                        </div>
 
-                    </h:panelGrid>
-                    <h:panelGrid columns="5">
-                        <p:outputLabel  value="#{configMapController.getKey('CreateCustomerImagesLabel_profilephoto')}" for="profilephoto" />
-                        <p:selectBooleanCheckbox id="profilephoto"  class="parentOfUploadPhoto" disabled="#{customerImagesController.saveButtonDisabled}"  value="#{customerImagesController.profilePhoto}" >
-                            <p:ajax event="change" />
-
-                        </p:selectBooleanCheckbox>  
-                        <p:commandButton id="saveButton" icon="fa fa-check white Fs14" class="parentOfUploadPhoto" disabled="#{customerImagesController.saveButtonDisabled}"  actionListener="#{customerImagesController.createFromUploadDialogue}" update="@(.parentOfUploadPhoto) :growl"   value="#{configMapController.getKey('CreateCustomerImagesSaveLink')}" />
                         <p:commandButton id="rotateButton" icon="fa fa-rotate-right white Fs14"  class="parentOfUploadPhoto"  disabled="#{customerImagesController.saveButtonDisabled}"   actionListener="#{customerImagesController.rotateStreamedContent90degrees}" update="@(.parentOfUploadPhoto) :growl"  value="#{configMapController.getKey('CreateCustomerImagesRotateImage90Link')}" />
+
                         <p:commandButton id="cropButton" icon=" fa fa-crop white Fs14" class="parentOfUploadPhoto" disabled="#{customerImagesController.saveButtonDisabled}" actionListener="#{customerImagesController.crop}"  update="@(.parentOfUploadPhoto)  :growl"  value="#{configMapController.getKey('CreateCustomerImagesCropLink')}"  />
 
+                        <p:commandButton id="saveButton"  icon="fa fa-check white Fs14" class="parentOfUploadPhoto" disabled="#{customerImagesController.saveButtonDisabled}"  actionListener="#{customerImagesController.createFromUploadDialogue}" update="@(.parentOfUploadPhoto) :growl"   value="#{configMapController.getKey('CreateCustomerImagesSaveLink')}" />
 
-                    </h:panelGrid>
-                </p:panel>
-                <p:commandButton  id="closeDialogueButton" icon=" fa fa-remove-sign white Fs14"   ajax="true" oncomplete="PF('uploadPhotoDialogueWidget').hide();"  update=":growl "   value="#{configMapController.getKey('EditCustomersuploadPhoto')}" immediate="true"/>
-            </h:form>
-        </p:dialog>
-    </ui:composition> 
+                        <p:commandButton  id="closeDialogueButton" icon="fa fa-trash white Fs14"   ajax="true" oncomplete="PF('uploadPhotoDialogueWidget').hide();"  update=":growl "   value="#{configMapController.getKey('EditCustomersuploadPhoto')}" immediate="true"/>
+                    </h:form>
+                </div>
+            </div>
+        </div>
+    </p:dialog>
+</ui:composition> 
 
 

@@ -42,14 +42,15 @@ import javax.annotation.PostConstruct;
 import javax.el.ELException;
 import javax.enterprise.context.SessionScoped;
 import javax.faces.model.SelectItem;
+import org.primefaces.event.ItemSelectEvent;
 import org.primefaces.model.chart.Axis;
 import org.primefaces.model.chart.AxisType;
 import org.primefaces.model.chart.BarChartModel;
 import org.primefaces.model.chart.BarChartSeries;
 import org.primefaces.model.chart.ChartSeries;
-import org.primefaces.model.chart.LineChartModel;
 import org.primefaces.model.chart.LineChartSeries;
 import org.primefaces.model.chart.LinearAxis;
+import org.primefaces.model.chart.PieChartModel;
 
 @Named("mySessionsChart1")
 @SessionScoped
@@ -62,6 +63,7 @@ public class MySessionsChart1 implements Serializable {
     private BarChartModel dashboardMonthlyRevenueModel;
     private BarChartModel dashboardMonthlySessionsModel;
     private BarChartModel expensesBySupplierModel;
+    private List<PieChartModel> expensesBySupplierPieChartModels;
 
     private Customers selectedCustomer;
 
@@ -748,6 +750,13 @@ public class MySessionsChart1 implements Serializable {
         // RequestContext requestContext = RequestContext.getCurrentInstance();
 
         // requestContext.execute("PF('sessionsDataTable').filter();");
+    }
+
+    public void supplierChartItemSelect(ItemSelectEvent event) {
+        JsfUtil.addSuccessMessage("Item selected",
+                "Item Index:" + event.getItemIndex()
+                + ", Series Index: " + event.getSeriesIndex());
+       // expensesBySupplierModel.getSeries().
     }
 
     public BarChartModel getModel() {

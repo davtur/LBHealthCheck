@@ -11,13 +11,13 @@ import au.com.manlyit.fitnesscrm.stats.classes.util.PfSelectableDataModel;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import au.com.manlyit.fitnesscrm.stats.db.Participants;
 import au.com.manlyit.fitnesscrm.stats.db.SessionTrainers;
-import com.lowagie.text.BadElementException;
+import com.itextpdf.text.BadElementException;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.Image;
+import com.itextpdf.text.PageSize;
+import com.itextpdf.text.Paragraph;
 
-import com.lowagie.text.Document;
-import com.lowagie.text.DocumentException;
-import com.lowagie.text.Image;
-import com.lowagie.text.PageSize;
-import com.lowagie.text.Paragraph;
 
 import java.awt.event.ActionEvent;
 import java.io.File;

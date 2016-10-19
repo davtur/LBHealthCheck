@@ -60,7 +60,7 @@
                             <span class="facebook"><a target="_blank" href="https://www.facebook.com/PureFitnessManly"></a></span>
                         </div>
                         <p:panel rendered="#{not empty loginBean.facebookId}" style="width:73px">
-                            <img src="https://graph.facebook.com/#{loginBean.facebookId}/picture"/>
+                            <img src="https://graph.facebook.com/v2.8/#{loginBean.facebookId}/picture"/>
                         </p:panel>
                         <p:commandButton widgetVar="fbLogin" onclick="PF('fbLogin').disable()" styleClass="loginButtonFacebook" value="Facebook Connect"  actionListener="#{facebookLoginBean.facebookRedirect}" />
 

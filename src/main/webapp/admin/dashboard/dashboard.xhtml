@@ -47,12 +47,14 @@
                 </p:selectOneMenu>
             </p:panelGrid>
 
-           <p:panel id="dashboardMonthlyRevenueChart" widgetVar="dashboardMonthlyRevenueWidget" header=" Revenue, Expenses and Profit Chart ">
+            <p:panel id="dashboardMonthlyRevenueChart" widgetVar="dashboardMonthlyRevenueWidget" header=" Revenue, Expenses and Profit Chart ">
                 <p:chart type="bar"   styleClass="chartClass" model="#{mySessionsChart1.dashboardMonthlyRevenueModel}"     />
             </p:panel>
-  
-           <p:panel id="supplierExpensesChart" widgetVar="dashboardExpensesBySupplierWidget" header="Expenses by Supplier Chart ">
-               <p:chart type="bar"   styleClass="chartClass" model="#{mySessionsChart1.expensesBySupplierModel}"     />
+
+            <p:panel id="supplierExpensesChart" widgetVar="dashboardExpensesBySupplierWidget" header="Expenses by Supplier Chart ">
+                <p:chart type="bar"   styleClass="chartClass" model="#{mySessionsChart1.expensesBySupplierModel}"     >
+                    <p:ajax listener="#{mySessionsChart1.supplierChartItemSelect}" event="itemSelect" update=":growl " />
+                </p:chart>
             </p:panel>
 
             <p:panel id="customChart" widgetVar="customChartWidget" header="Sessions Chart ">
@@ -60,8 +62,8 @@
             </p:panel>
 
 
-           
-            
+
+
             <div class="Container100">
                 <h:outputText escape="false" value="#{configMapController.getKey('ListCustomersEmpty')}" rendered="#{customersController.customersWithoutScheduledPayments.rowCount == 0}"/>
                 <h:panelGroup rendered="#{customersController.customersWithoutScheduledPayments.rowCount > 0}">
@@ -91,8 +93,8 @@
                                 <h:panelGroup  >
 
                                     <h:outputText  rendered="#{customersController.customersWithoutScheduledPayments != null}" value=" Records : #{customersController.customersWithoutScheduledPayments.rowCount}"/>
-                                   <h:outputText  value="   (Filtered Records : #{customersController.filteredCustomersWithoutScheduledPayments.size()})">
-                                        
+                                    <h:outputText  value="   (Filtered Records : #{customersController.filteredCustomersWithoutScheduledPayments.size()})">
+
                                     </h:outputText>
 
                                 </h:panelGroup>

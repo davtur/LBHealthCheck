@@ -26,8 +26,6 @@ import au.com.manlyit.fitnesscrm.stats.db.Invoice;
 import au.com.manlyit.fitnesscrm.stats.db.Notes;
 import au.com.manlyit.fitnesscrm.stats.db.PaymentParameters;
 import au.com.manlyit.fitnesscrm.stats.db.Payments;
-import au.com.manlyit.fitnesscrm.stats.webservices.ArrayOfPayment;
-import au.com.manlyit.fitnesscrm.stats.webservices.ArrayOfScheduledPayment;
 import au.com.manlyit.fitnesscrm.stats.webservices.CustomerDetails;
 import au.com.manlyit.fitnesscrm.stats.webservices.EziResponseOfCustomerDetailsTHgMB7OL;
 import au.com.manlyit.fitnesscrm.stats.webservices.INonPCIService;
@@ -35,14 +33,14 @@ import au.com.manlyit.fitnesscrm.stats.webservices.NonPCIService;
 import au.com.manlyit.fitnesscrm.stats.webservices.Payment;
 import au.com.manlyit.fitnesscrm.stats.webservices.PaymentDetail;
 import au.com.manlyit.fitnesscrm.stats.webservices.PaymentDetailPlusNextPaymentInfo;
-import au.com.manlyit.fitnesscrm.stats.webservices.ScheduledPayment;
-import com.lowagie.text.BadElementException;
-import com.lowagie.text.Document;
-import com.lowagie.text.DocumentException;
-import com.lowagie.text.Font;
-import com.lowagie.text.Image;
-import com.lowagie.text.PageSize;
-import com.lowagie.text.Paragraph;
+import com.itextpdf.text.BadElementException;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.Font;
+import com.itextpdf.text.Image;
+import com.itextpdf.text.PageSize;
+import com.itextpdf.text.Paragraph;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
@@ -912,7 +910,7 @@ public class EziDebitPaymentGateway implements Serializable {
         pdf.addTitle(reportTitle);
         pdf.add(new Paragraph(reportTitle));
         pdf.add(new Paragraph(" "));
-        Font font = new Font(Font.NORMAL);
+        Font font = new Font();
         font.setSize(8);
     }
 
