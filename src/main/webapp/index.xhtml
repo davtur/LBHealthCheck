@@ -41,7 +41,17 @@
                         <p:remoteCommand name="removePicture" actionListener="#{customerImagesController.removePicture}" update=":growl :myStatsForm:mainCarousel :myStatsForm:heading1"/>
                         <!-- </p:panel> -->
                         <div class="galleriaFrame">
-                            <p:galleria id="mainCarousel" styleClass="galleriaFrame parentOfUploadPhoto" widgetVar="galleriaWidget"  var="image" value="#{customerImagesController.images}"  showCaption="true" effect="fade" effectSpeed="2000">
+                            <p:galleria id="mainCarousel" 
+                                        styleClass="galleriaFrame 
+                                        parentOfUploadPhoto" 
+                                        widgetVar="galleriaWidget"  
+                                        var="image" 
+                                        value="#{customerImagesController.images}"  
+                                        showCaption="true"
+                                        autoPlay="false" 
+                                        transitionInterval="1000" 
+                                        effect="fade" 
+                                        effectSpeed="500">
 
                                 <p:commandButton id="delete_pic_button" styleClass="galleriaImageButton"  icon="fa fa-trash white Fs14"
                                                  update=":myStatsForm :growl"
@@ -50,11 +60,12 @@
                                     <f:param name="selectedImage" value="#{image.id}"/>
                                 </p:commandButton>
 
-                                <p:graphicImage  styleClass="galleriaImage" value="#{graphicImageBean.image}" onclick="clickFlow(this, event)" title="#{configMapController.getKey('ListMyStats_photoTakenText')} #{image.formattedDate}"  >
+                                <p:graphicImage  styleClass="galleriaImage" value="#{graphicImageBean.image}" title="#{configMapController.getKey('ListMyStats_photoTakenText')} #{image.formattedDate}"  >
                                     <f:param name="imageId" value="#{image.id}"/>
                                 </p:graphicImage>
-                                <div class="caption">#{image.formattedDate}</div>
-                               <!-- <div class="hiddenId" style="display: none;">#{image.id}</div>-->
+                               <!-- <div class="caption">#{image.formattedDate}</div>
+                                <div class="hiddenId" style="display: none;">#{image.id}</div>-->
+                                     <!--onclick="clickFlow(this, event)"--> 
                             </p:galleria>
                         </div>
                         <p:commandButton  id="photoUploadButton" ajax="true"  onclick="PF('uploadPhotoDialogueWidget').show();" update=":growl :myStatsForm:mainCarousel "    value="#{configMapController.getKey('EditCustomersUploadPhotoButton')}" immediate="true"/>
