@@ -1,95 +1,132 @@
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <ui:composition template="/WEB-INF/template.xhtml" xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:ui="http://java.sun.com/jsf/facelets"
-      xmlns:h="http://java.sun.com/jsf/html"
-      xmlns:f="http://java.sun.com/jsf/core"
-      xmlns:p="http://primefaces.org/ui" >
-
-    
-        <ui:define name="title">
-            <h:outputText value="#{configMapController.getKey('ListStatsTakenTitle')}"></h:outputText>
-        </ui:define>
-        <ui:define name="body">
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:p="http://primefaces.org/ui" >
 
 
+    <ui:define name="title">
+        <h:outputText value="#{configMapController.getKey('ListStatsTakenTitle')}"></h:outputText>
+    </ui:define>
+    <ui:define name="body">
 
+
+        <div class="layout-portlets-box">
 
 
             <h:form id="StatsTakenListForm">
-                
-                <h:outputText escape="false" value="#{configMapController.getKey('ListStatsTakenEmpty')}" rendered="#{statsTakenController.items.rowCount == 0}"/>
-                <h:panelGroup rendered="#{statsTakenController.items.rowCount > 0}">
-                    <p:dataTable  
-                        id="datalist"  
-                        editable="true" 
-                        value="#{statsTakenController.items}" 
-                        selection="#{statsTakenController.selected}" 
-                        rowKey="#{item.id}" 
-                        filteredValue="#{statsTakenController.filteredItems}"  
-                        widgetVar="statsTakenControllerTable" 
-                        var="item"  
-                        paginator="true" 
-                        rows="15"  
-                        paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  
-                        rowsPerPageTemplate="5,10,15,20,25,50,100" >
-                        <f:facet name="header">
-                            <p:outputPanel>
-                                <h:outputText value="Search all fields:" />
-                                <h:inputText id="globalFilter" onkeyup="PF('statsTakenControllerTable').filter()" />
-                            </p:outputPanel>
-                        </f:facet>
-                        <p:ajax event="rowEdit" listener="#{statsTakenController.onEdit}" update=":growl" oncomplete="PF('statsTakenControllerTable').filter()" />  
-                        <p:ajax event="rowEditCancel" listener="#{statsTakenController.onCancel}" update=":growl"  />  
-                        <p:ajax event="rowSelect"   update="createButton viewButton editButton deleteButton"/>
-                        <p:ajax event="rowUnselect" update="createButton viewButton editButton deleteButton"/>
-                        <p:column selectionMode="single"/>
-                        <p:column sortBy="#{item.id}">
-                            <f:facet name="header">
-                                <h:outputText value="#{configMapController.getKey('ListStatsTakenTitle_id')}"/>
-                            </f:facet>
-                            <h:outputText value="#{item.id}"/>
-                        </p:column>
-                        <p:column sortBy="#{item.dateRecorded}">
-                            <f:facet name="header">
-                                <h:outputText value="#{configMapController.getKey('ListStatsTakenTitle_dateRecorded')}"/>
-                            </f:facet>
-                            <h:outputText value="#{item.dateRecorded}">
-                                <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
-                            </h:outputText>
-                        </p:column>
-                        <p:column sortBy="#{item.trainerComments}">
-                            <f:facet name="header">
-                                <h:outputText value="#{configMapController.getKey('ListStatsTakenTitle_trainerComments')}"/>
-                            </f:facet>
-                            <h:outputText value="#{item.trainerComments}"/>
-                        </p:column>
-                        <p:column sortBy="#{item.customerId.username}"  filterBy="#{item.customerId.username}"  headerText="#{configMapController.getKey('ListStatsTakenTitle_customerId')}" >
-                            <f:facet name="header">
-                                <h:outputText value="#{configMapController.getKey('ListStatsTakenTitle_customerId')}"/>
-                            </f:facet>
-                            <h:outputText value="#{item.customerId.username}"/>
-                        </p:column>
+                <div class="Container100 Responsive100">
+                    <div class="ContainerIndent">
+                        <h1 class="BigTopic">#{configMapController.getKey('ListExpensesTitle')}</h1>
+
+                        <div class="Container20 Responsive">
+
+                            <h:panelGrid columns="2" cellpadding="5" >
+
+                                <p:outputLabel value="#{configMapController.getKey('SelectStartDateForSessionHistory_Label')}" for="sessionstart" />
+                                <p:calendar id="sessionstart" value="#{statsTakenController.startDate}" pattern="dd MMMM yyyy" title="#{configMapController.getKey('SelectStartDateForSessionHistory_Title')}"    >
+                                    <p:ajax event="dateSelect"  update="datalist" listener="#{statsTakenController.startDateChangedOnStatsTable}" />
+                                </p:calendar> 
+                            </h:panelGrid>
+
+                        </div>
+                        <div class="Container20 Responsive">
+
+                            <h:panelGrid columns="2" cellpadding="5" >
+                                <p:outputLabel value="#{configMapController.getKey('SelectEndDateForSessionHistory_Label')}" for="sessionend" />
+                                <p:calendar id="sessionend" value="#{statsTakenController.endDate}"  pattern="dd MMMM yyyy" title="#{configMapController.getKey('SelectEndDateForSessionHistory_Title')}"    >
+                                    <p:ajax event="dateSelect"  update="datalist" listener="#{statsTakenController.endDateChangedOnStatsTable}"/>
+                                </p:calendar> 
+                            </h:panelGrid>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="Container100 Responsive100">
+                    <div class="ContainerIndent">
+
+                        <h:outputText escape="false" value="#{configMapController.getKey('ListStatsTakenEmpty')}" rendered="#{statsTakenController.items.rowCount == 0}"/>
+                        <h:panelGroup rendered="#{statsTakenController.items.rowCount > 0}">
+                            <p:dataTable  
+                                id="datalist"  
+                                styleClass="statsTakenDatalist"
+                                lazy="true"
+                                editable="false" 
+                                value="#{statsTakenController.lazyModel}" 
+                                selection="#{statsTakenController.selected}" 
+                                rowKey="#{item.id}" 
+                                filteredValue="#{statsTakenController.filteredItems}"  
+                                widgetVar="statsTakenControllerTable" 
+                                var="item"  
+                                rows="15"  
+                                scrollable="true"
+                                scrollHeight="400"
+                                scrollRows="50"
+                                liveScroll="true">
+                                
+                                <p:ajax event="rowEdit" listener="#{statsTakenController.onEdit}" update=":growl" oncomplete="PF('statsTakenControllerTable').filter()" />  
+                                <p:ajax event="rowEditCancel" listener="#{statsTakenController.onCancel}" update=":growl"  />  
+                                <p:ajax event="rowSelect"   update="createButton viewButton editButton deleteButton"/>
+                                <p:ajax event="rowUnselect" update="createButton viewButton editButton deleteButton"/>
+                                <p:column selectionMode="single"/>
+                                <p:column sortBy="#{item.id}">
+                                    <f:facet name="header">
+                                        <h:outputText value="#{configMapController.getKey('ListStatsTakenTitle_id')}"/>
+                                    </f:facet>
+                                    <h:outputText value="#{item.id}"/>
+                                </p:column>
+                                <p:column sortBy="#{item.dateRecorded}">
+                                    <f:facet name="header">
+                                        <h:outputText value="#{configMapController.getKey('ListStatsTakenTitle_dateRecorded')}"/>
+                                    </f:facet>
+                                    <h:outputText value="#{item.dateRecorded}">
+                                        <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
+                                    </h:outputText>
+                                </p:column>
+                                <p:column sortBy="#{item.trainerComments}">
+                                    <f:facet name="header">
+                                        <h:outputText value="#{configMapController.getKey('ListStatsTakenTitle_trainerComments')}"/>
+                                    </f:facet>
+                                    <h:outputText value="#{item.trainerComments}"/>
+                                </p:column>
+
+                                <p:column sortBy="#{item.customerId}"  filterBy="#{item.customerId}" filterMatchMode="exact" headerText="#{configMapController.getKey('ListStatsTakenTitle_customerId')}" >
+                                    <f:facet name="filter">
+                                        <p:selectOneMenu onchange="PF('statsTakenControllerTable').filter()" filter="true" >
+                                            <f:selectItems value="#{customersController.itemsAvailableSelectOne}" />
+                                        </p:selectOneMenu>
+                                    </f:facet>
+
+                                    <f:facet name="header">
+                                        <h:outputText value="#{configMapController.getKey('ListStatsTakenTitle_customerId')}"/>
+                                    </f:facet>
+                                    <h:outputText value="#{item.customerId.username}"/>
+                                </p:column>
 
 
 
-                        <f:facet name="footer">
-                            <p:commandButton rendered="#{statsTakenController.isUserInRole('ADMIN')}" id="createButton" icon="ui-icon-plus"   value="#{configMapController.getKey('Create')}" actionListener="#{statsTakenController.prepareCreate}" update=":StatsTakenCreateForm" oncomplete="PF('StatsTakenCreateDialog').show()"/>
-                            <p:commandButton id="viewButton"   icon="ui-icon-search" value="#{configMapController.getKey('View')}" update=":StatsTakenViewForm" oncomplete="PF('StatsTakenViewDialog').show()" disabled="#{empty statsTakenController.selected}"/>
-                            <p:commandButton rendered="#{statsTakenController.isUserInRole('ADMIN')}" id="editButton"   icon="ui-icon-pencil" value="#{configMapController.getKey('Edit')}" update=":StatsTakenEditForm" oncomplete="PF('StatsTakenEditDialog').show()" disabled="#{empty statsTakenController.selected}"/>
-                            <p:commandButton rendered="#{statsTakenController.isUserInRole('ADMIN')}" id="deleteButton" icon="ui-icon-trash"  value="#{configMapController.getKey('Delete')}" actionListener="#{statsTakenController.destroy}" update=":growl,datalist" disabled="#{empty statsTakenController.selected}"/>
-                        </f:facet>
+                                <f:facet name="footer">
+                                    <p:commandButton rendered="#{statsTakenController.isUserInRole('ADMIN')}" id="createButton" icon="ui-icon-plus"   value="#{configMapController.getKey('Create')}" actionListener="#{statsTakenController.prepareCreate}" update=":StatsTakenCreateForm" oncomplete="PF('StatsTakenCreateDialog').show()"/>
+                                    <p:commandButton id="viewButton"   icon="ui-icon-search" value="#{configMapController.getKey('View')}" update=":StatsTakenViewForm" oncomplete="PF('StatsTakenViewDialog').show()" disabled="#{empty statsTakenController.selected}"/>
+                                    <p:commandButton rendered="#{statsTakenController.isUserInRole('ADMIN')}" id="editButton"   icon="ui-icon-pencil" value="#{configMapController.getKey('Edit')}" update=":StatsTakenEditForm" oncomplete="PF('StatsTakenEditDialog').show()" disabled="#{empty statsTakenController.selected}"/>
+                                    <p:commandButton rendered="#{statsTakenController.isUserInRole('ADMIN')}" id="deleteButton" icon="ui-icon-trash"  value="#{configMapController.getKey('Delete')}" actionListener="#{statsTakenController.destroy}" update=":growl,datalist" disabled="#{empty statsTakenController.selected}"/>
+                                </f:facet>
 
-                    </p:dataTable>
-                </h:panelGroup>
+                            </p:dataTable>
+                        </h:panelGroup>
+                    </div>
+                </div>
             </h:form>
+        </div>
 
-            <ui:include src="Create.xhtml"/>
-            <ui:include src="View.xhtml"/>
-            <ui:include src="Edit.xhtml"/>
+        <ui:include src="Create.xhtml"/>
+        <ui:include src="View.xhtml"/>
+        <ui:include src="Edit.xhtml"/>
 
 
-        </ui:define>
-    </ui:composition>
+    </ui:define>
+</ui:composition>
 
 

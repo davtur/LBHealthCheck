@@ -64,6 +64,11 @@ height: 300px !important;
     position: absolute;
     /*top: 0; bottom: 0; left: 0; right: 0;*/
 }
+.galleriaEditButton{
+    float:left;
+    position: absolute;
+    right: 20px;
+}
 /*.myStatsCarouselItem .ui-carousel-item {
 height: 300px !important; 
  

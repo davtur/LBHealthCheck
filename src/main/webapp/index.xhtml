@@ -54,10 +54,16 @@
                                         effectSpeed="500">
 
                                 <p:commandButton id="delete_pic_button" styleClass="galleriaImageButton"  icon="fa fa-trash white Fs14"
-                                                 update=":myStatsForm :growl"
+                                                 update=":myStatsForm :growl" title="Delete"
                                                  value=" " process="@this"
                                                  actionListener="#{customerImagesController.removePicture}">
                                     <f:param name="selectedImage" value="#{image.id}"/>
+                                </p:commandButton>
+                                <p:commandButton id="edit_pic_button" styleClass="galleriaEditButton"  icon="fa fa-edit white Fs14"
+                                                 update=":myStatsForm :growl :editPhotoForm" title="Edit"
+                                                 value=" " process="@this" 
+                                                 actionListener="#{customerImagesController.editPictureListener}">
+                                    <f:param name="editImage" value="#{image.id}"/>
                                 </p:commandButton>
 
                                 <p:graphicImage  styleClass="galleriaImage" value="#{graphicImageBean.image}" title="#{configMapController.getKey('ListMyStats_photoTakenText')} #{image.formattedDate}"  >
@@ -65,10 +71,10 @@
                                 </p:graphicImage>
                                <!-- <div class="caption">#{image.formattedDate}</div>
                                 <div class="hiddenId" style="display: none;">#{image.id}</div>-->
-                                     <!--onclick="clickFlow(this, event)"--> 
+                                <!--onclick="clickFlow(this, event)"--> 
                             </p:galleria>
                         </div>
-                        <p:commandButton  id="photoUploadButton" ajax="true"  onclick="PF('uploadPhotoDialogueWidget').show();" update=":growl :myStatsForm:mainCarousel "    value="#{configMapController.getKey('EditCustomersUploadPhotoButton')}" immediate="true"/>
+                        <p:commandButton  id="photoUploadButton" ajax="true" actionListener="#{customerImagesController.uploadPictureListener}" onclick="PF('uploadPhotoDialogueWidget').show();" update=":growl :myStatsForm:mainCarousel "    value="#{configMapController.getKey('EditCustomersUploadPhotoButton')}" immediate="true"/>
 
                     </div>
                 </div>
@@ -77,11 +83,11 @@
                 <h:outputScript id="stopImageClick" target="body">
                     /* <![CDATA[ */
                     function clickFlow(item, e) {
-                        if ($(item).parent().hasClass('active')) {
-                             e.stopImmediatePropagation();
-                        }
+                    if ($(item).parent().hasClass('active')) {
+                    e.stopImmediatePropagation();
                     }
-                    
+                    }
+
 
                     /* ]]> */
                 </h:outputScript>
@@ -194,6 +200,7 @@
             </h:form>
         </div>
         <ui:include src="/WEB-INF/uploadPhoto.xhtml"/>
+        <ui:include src="/WEB-INF/editPhoto.xhtml"/>
     </ui:define>
 </ui:composition>
 

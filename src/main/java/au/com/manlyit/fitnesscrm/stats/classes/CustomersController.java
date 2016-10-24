@@ -134,10 +134,10 @@ public class CustomersController implements Serializable {
     private Customers[] multiSelectedCustomersWithoutScheduledPayments;
     // private Groups[] selectedGroups;
     private List<Groups> selectedGroups;
-    private String checkPass ;
+    private String checkPass;
     private Boolean[] checkedGroups;
     private Boolean[] newCustomerCheckedGroups;
-    private String checkPass2 ;
+    private String checkPass2;
     private String leadComments = "";
     private Customers impersonate;
     private Customers loggedInUser;
@@ -1824,9 +1824,9 @@ public class CustomersController implements Serializable {
     public void checkPassChange() {
 
         passwordsMatch = checkPass.equals(checkPass2);
-       // if(checkPass.length() < 8){
-      //      passwordsMatch = false;
-      //  }
+        // if(checkPass.length() < 8){
+        //      passwordsMatch = false;
+        //  }
     }
 
     /**
@@ -1849,8 +1849,8 @@ public class CustomersController implements Serializable {
     public String getCheckPass2() {
         return checkPass2;
     }
-    
- /**
+
+    /**
      * @param checkPass2 the checkPass2 to set
      */
     public void setCheckPass2(String checkPass2) {
@@ -1899,18 +1899,26 @@ public class CustomersController implements Serializable {
 
     private void updateUsername(String firstname, String lastname, Customers customer) {
         String updatedUsername = "";
-        if (firstname == null) {
-            updatedUsername = customer.getFirstname() + "." + lastname;
+        if (firstname == null && lastname == null) {
+            return;
         }
-        if (lastname == null) {
-            updatedUsername = firstname + "." + customer.getLastname();
+        if (firstname == null || lastname == null) {
+            if (firstname == null) {
+                updatedUsername = customer.getFirstname().trim() + "." + lastname.trim();
+
+            }
+            if (lastname == null) {
+                updatedUsername = firstname.trim() + "." + customer.getLastname().trim();
+            }
+        } else {
+            updatedUsername = firstname.trim() + "." + lastname.trim();
         }
-        String newUsername = updatedUsername.toLowerCase().replace(' ', '_');
+        String newUsername = updatedUsername.toLowerCase().replaceAll(" ", "");
         customer.setUsername(newUsername);
         Customers cust = getFacade().findCustomerByUsername(newUsername);
         if (cust != null) {
             setAddUserButtonDisabled(true);
-            JsfUtil.addErrorMessage("Error", "That username is already taken!");
+            JsfUtil.addErrorMessage("Error", "The username:"+ newUsername+" is already in use!");
         } else {
             setAddUserButtonDisabled(false);
         }
@@ -2030,7 +2038,6 @@ public class CustomersController implements Serializable {
         }
     }
 
-   
     /**
      * @return the impersonate
      */

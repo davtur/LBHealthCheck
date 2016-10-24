@@ -5,8 +5,10 @@ import au.com.manlyit.fitnesscrm.stats.db.StatsTaken;
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PaginationHelper;
 import au.com.manlyit.fitnesscrm.stats.beans.StatsTakenFacade;
+import au.com.manlyit.fitnesscrm.stats.classes.util.LazyLoadingDataModel;
 import au.com.manlyit.fitnesscrm.stats.db.CustomerImages;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
+import au.com.manlyit.fitnesscrm.stats.db.Expenses;
 import au.com.manlyit.fitnesscrm.stats.db.Stat;
 import au.com.manlyit.fitnesscrm.stats.db.StatTypes;
 import java.io.IOException;
@@ -14,11 +16,14 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.faces.application.FacesMessage;
 import javax.inject.Named;
@@ -34,6 +39,7 @@ import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
 import javax.servlet.http.HttpServletRequest;
+import org.primefaces.context.RequestContext;
 import org.primefaces.event.RowEditEvent;
 import org.primefaces.event.SelectEvent;
 
@@ -42,6 +48,7 @@ import org.primefaces.event.SelectEvent;
 public class StatsTakenController implements Serializable {
 
     private StatsTaken current;
+    private LazyLoadingDataModel<StatsTaken> lazyModel;
     private StatsTaken selectedForDeletion;
     private Stat currentStat;
     private DataModel items = null;
@@ -61,8 +68,26 @@ public class StatsTakenController implements Serializable {
     private int selectedItemIndex;
     private List<StatsTaken> filteredItems;
     private StatsTaken[] multiSelected;
+     private Date startDate;
+    private Date endDate;
 
     public StatsTakenController() {
+    }
+    
+    @PostConstruct
+    private void initDates() {
+        GregorianCalendar cal1 = new GregorianCalendar();
+        cal1.add(Calendar.DAY_OF_YEAR, 1);
+        setEndDate(cal1.getTime());
+        cal1.add(Calendar.DAY_OF_YEAR, -1);
+        cal1.add(Calendar.MONTH, -1);
+        setStartDate(cal1.getTime());
+        //items = new PfSelectableDataModel<>(ejbFacade.findAuditLogsByDateRange(startDate, endDate, true));
+        lazyModel = new LazyLoadingDataModel<>(ejbFacade);
+        lazyModel.setFromDate(getStartDate());
+        lazyModel.setToDate(getEndDate());
+        lazyModel.setDateRangeEntityFieldName("dateRecorded");
+        lazyModel.setUseDateRange(true);
     }
 
     public StatsTaken getSelected() {
@@ -112,6 +137,39 @@ public class StatsTakenController implements Serializable {
 
     private StatsTakenFacade getFacade() {
         return ejbFacade;
+    }
+     public void startDateChangedOnStatsTable(SelectEvent event) {
+        //items = null;
+        //filteredItems = null;
+        Object o = event.getObject();
+        Date newDate = (Date) o;
+        lazyModel.setFromDate(newDate);
+        // lazyModel.setToDate(endDate);
+        RequestContext.getCurrentInstance().execute("PF('statsTakenControllerTable').filter();");
+        // RequestContext requestContext = RequestContext.getCurrentInstance();
+
+    }
+
+    public void endDateChangedOnStatsTable(SelectEvent event) {
+        //items = null;
+        //filteredItems = null;
+        Object o = event.getObject();
+        Date newDate = (Date) o;
+        //lazyModel.setFromDate(startDate);
+        lazyModel.setToDate(newDate);
+        RequestContext.getCurrentInstance().execute("PF('statsTakenControllerTable').filter();");
+        // RequestContext requestContext = RequestContext.getCurrentInstance();
+
+    }
+      public LazyLoadingDataModel<StatsTaken> getLazyModel() {
+        if (lazyModel == null) {
+            lazyModel = new LazyLoadingDataModel<>(ejbFacade);
+            lazyModel.setFromDate(getStartDate());
+            lazyModel.setToDate(getEndDate());
+            lazyModel.setDateRangeEntityFieldName("dateRecorded");
+            lazyModel.setUseDateRange(true);
+        }
+        return lazyModel;
     }
 
     public PaginationHelper getPagination() {
@@ -485,6 +543,41 @@ public class StatsTakenController implements Serializable {
 
     public void onCancel(RowEditEvent event) {
         JsfUtil.addErrorMessage("Row Edit Cancelled");
+    }
+
+    /**
+     * @param lazyModel the lazyModel to set
+     */
+    public void setLazyModel(LazyLoadingDataModel<StatsTaken> lazyModel) {
+        this.lazyModel = lazyModel;
+    }
+
+    /**
+     * @return the startDate
+     */
+    public Date getStartDate() {
+        return startDate;
+    }
+
+    /**
+     * @param startDate the startDate to set
+     */
+    public void setStartDate(Date startDate) {
+        this.startDate = startDate;
+    }
+
+    /**
+     * @return the endDate
+     */
+    public Date getEndDate() {
+        return endDate;
+    }
+
+    /**
+     * @param endDate the endDate to set
+     */
+    public void setEndDate(Date endDate) {
+        this.endDate = endDate;
     }
 
     @FacesConverter(value="statsTakenControllerConverter")

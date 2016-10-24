@@ -84,11 +84,12 @@
                                 </p:selectOneMenu>
                             </h:panelGrid> </div>
                         <div class="Container20 Responsive">
-                            <p:commandButton id="createButtonDialogue"  onclick="PF('createSessionDialogueWidget').show()" type="button" value="#{configMapController.getKey('ListSessionHistoryCreateLink')}"/>
+                            <p:commandButton id="createButtonDialogue"  onclick="PF('createSessionDialogueWidget').show()" icon="fa fa-plus white Fs14" type="button" value="#{configMapController.getKey('ListSessionHistoryCreateLink')}"/>
+                            <p:commandButton rendered="#{statsTakenController.isUserInRole('ADMIN')}" id="createStatButton" icon="fa fa-plus white Fs14"   value="#{configMapController.getKey('ListSessionHistoryCreateStatLink')}" actionListener="#{statsTakenController.prepareCreate}" update=":StatsTakenCreateForm" oncomplete="PF('StatsTakenCreateDialog').show()"/>
 
                         </div>
                         <div class="Container20 Responsive">
-                            <p:commandButton id="createButtonMobile" ajax="false" action="#{sessionHistoryController.prepareCreateMobileReturnCreate}" value="#{configMapController.getKey('ListSessionHistoryCreateMobileLink')}"/>
+                            <p:commandButton id="createButtonMobile" ajax="false" action="#{sessionHistoryController.prepareCreateMobileReturnCreate}" icon="fa fa-bars white Fs14"  value="#{configMapController.getKey('ListSessionHistoryCreateMobileLink')}"/>
 
                         </div>
                     </div>
@@ -205,6 +206,7 @@
                 </div>
             </h:form>
             <ui:include src="CreateSessionInfo.xhtml"/>
+            <ui:include src="/admin/statsTaken/Create.xhtml"/>
         </div>
     </ui:define>
 </ui:composition>

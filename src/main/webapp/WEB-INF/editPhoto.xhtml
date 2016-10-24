@@ -1,0 +1,51 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition   xmlns="http://www.w3.org/1999/xhtml"
+                  xmlns:ui="http://java.sun.com/jsf/facelets"
+                  xmlns:h="http://java.sun.com/jsf/html"
+                  xmlns:f="http://java.sun.com/jsf/core"
+                  xmlns:p="http://primefaces.org/ui" 
+                  xmlns:pe="http://primefaces.org/ui/extensions">
+
+    <!--<p:log />--> 
+    <p:dialog id="editPhotoDialogue"  closable="true" 
+              header="#{configMapController.getKey('editPhotoDialogueTitle')}" fitViewport="true" widgetVar="editPhotoDialogueWidget" responsive="true"> 
+        <div class="Container100 Responsive100">
+            <div class="Container100 Responsive100">
+                <div class="ContainerIndent">
+
+
+                    <h:form id="editPhotoForm" > 
+ <div id="imageWrapper" style="max-width: 300px;max-height: 300px; margin:auto;  position:relative;"> 
+                        <p:graphicImage id="editedPhoto"  class="dialoguePhoto parentOfUploadPhoto" value="#{customerImagesController.editedImageAsStream}" style="max-width: 300px;max-height: 300px;"  cache="false" />
+</div>  
+                       
+
+                        <pe:imageAreaSelect id="areaSelect2" class="dialoguePhoto parentOfUploadPhoto"  for="editedPhoto" zIndex="99"  handles="true"  widgetVar="areaSelectWidget2" parentSelector="#imageWrapper" >  
+                            <p:ajax event="selectEnd" listener="#{customerImagesController.selectEndListener}" update=":growl"/>  
+                        </pe:imageAreaSelect> 
+                        <div class="Container100 Responsive100">
+                            <div class="ContainerIndent">
+                                <p:outputLabel  value="#{configMapController.getKey('CreateCustomerImagesLabel_profilephoto')}" for="editPhoto" />
+                                <p:selectBooleanCheckbox id="editPhoto"  class="parentOfUploadPhoto" disabled="#{customerImagesController.saveButtonDisabled}"  value="#{customerImagesController.profilePhoto}" style="padding: 5px" >
+                                    <p:ajax event="change" />
+                                </p:selectBooleanCheckbox> 
+                            </div>
+                        </div>
+                        <h:panelGrid columns="2" >
+                            <p:commandButton  icon="fa fa-rotate-right white Fs14"  class="parentOfUploadPhoto"   actionListener="#{customerImagesController.rotateEditedImage90degrees}" update="@(.parentOfUploadPhoto) :growl"  value="#{configMapController.getKey('CreateCustomerImagesRotateImage90Link')}"  oncomplete="PF('areaSelectWidget2').cancelSelection();PF('areaSelectWidget2').reload();"  />
+
+                            <p:commandButton  icon=" fa fa-crop white Fs14" class="parentOfUploadPhoto"  actionListener="#{customerImagesController.cropEditedImage}"  update="@(.parentOfUploadPhoto)  :growl"  value="#{configMapController.getKey('CreateCustomerImagesCropLink')}" oncomplete="PF('areaSelectWidget2').cancelSelection();" />
+
+                            <p:commandButton   icon="fa fa-check white Fs14" class="parentOfUploadPhoto"   actionListener="#{customerImagesController.updateEditedPhoto}" update="@(.parentOfUploadPhoto) :growl"   value="#{configMapController.getKey('CreateCustomerImagesSaveLink')}" />
+
+                            <p:commandButton   icon="fa fa-trash white Fs14"   ajax="true" oncomplete="PF('editPhotoDialogueWidget').hide();"  update=":growl "   value="#{configMapController.getKey('EditCustomersuploadPhoto')}" immediate="true"/>
+                        </h:panelGrid>
+                    </h:form>
+                </div>
+            </div>
+        </div>
+    </p:dialog>
+</ui:composition> 
+
+
