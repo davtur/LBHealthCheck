@@ -67,8 +67,7 @@ public class SurveyAnswersController implements Serializable {
     public SurveyAnswersController() {
     }
 
-    
-     private List<SurveyQuestions> sortQuestionsByOrderField(List<SurveyQuestions> lsq) {
+    private List<SurveyQuestions> sortQuestionsByOrderField(List<SurveyQuestions> lsq) {
         Comparator<SurveyQuestions> idComparator = new Comparator<SurveyQuestions>() {
             @Override
             public int compare(SurveyQuestions o1, SurveyQuestions o2) {
@@ -79,7 +78,6 @@ public class SurveyAnswersController implements Serializable {
         return lsq;
     }
 
-    
     public static boolean isUserInRole(String roleName) {
         boolean inRole = FacesContext.getCurrentInstance().getExternalContext().isUserInRole(roleName);
         return inRole;
@@ -422,8 +420,6 @@ public class SurveyAnswersController implements Serializable {
         }
     }
 
-
-
     private void performDestroy() {
         try {
             getFacade().remove(current);
@@ -463,7 +459,7 @@ public class SurveyAnswersController implements Serializable {
             FacesContext context = FacesContext.getCurrentInstance();
             CustomersController customersController = context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
             Collection<SurveyQuestions> lsq = selectedSurvey.getSurveyQuestionsCollection();
-            sortQuestionsByOrderField((List<SurveyQuestions>)lsq);
+            sortQuestionsByOrderField((List<SurveyQuestions>) lsq);
             for (SurveyQuestions quest : lsq) {
                 SurveyAnswers sa = ejbFacade.findSurveyAnswersByCustomerAndQuestion(customersController.getSelected(), quest);
                 if (sa != null) {
