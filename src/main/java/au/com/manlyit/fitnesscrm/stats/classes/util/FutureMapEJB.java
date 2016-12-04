@@ -10,6 +10,7 @@ import au.com.manlyit.fitnesscrm.stats.beans.CustomersFacade;
 import au.com.manlyit.fitnesscrm.stats.beans.PaymentBean;
 import au.com.manlyit.fitnesscrm.stats.beans.PaymentParametersFacade;
 import au.com.manlyit.fitnesscrm.stats.beans.PaymentsFacade;
+import au.com.manlyit.fitnesscrm.stats.beans.util.PaymentSource;
 import au.com.manlyit.fitnesscrm.stats.beans.util.PaymentStatus;
 import au.com.manlyit.fitnesscrm.stats.classes.EziDebitPaymentGateway;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
@@ -2448,6 +2449,7 @@ public class FutureMapEJB implements Serializable {
             }
             if (payment == null) {
                 payment = new Payments();
+                payment.setPaymentSource(PaymentSource.DIRECT_DEBIT.value());
                 payment.setCreateDatetime(new Date());
                 payment.setManuallyAddedPayment(false);
                 payment.setId(0);
@@ -2568,6 +2570,7 @@ public class FutureMapEJB implements Serializable {
             if (payment == null) {
                 payment = new Payments();
                 payment.setCreateDatetime(new Date());
+                payment.setPaymentSource(PaymentSource.DIRECT_DEBIT.value());
                 payment.setId(0);
                 payment.setCustomerName(cust);
             }

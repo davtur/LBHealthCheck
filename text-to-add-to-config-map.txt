@@ -2056,3 +2056,13 @@ system.default.contractorRate.pt=Default 1 hour PT
 
 ListSessionHistoryCreateStatLink=Log Client Stats
 editPhotoDialogueTitle=Edit Photo
+
+
+DashboardCreateExpenseButtonLabel=Log Expense
+DashboardShortcutsPanelLabel=Shortcuts
+DashboardTimeframePanelLabel=Timeframe
+DashboardNoSchedPaymentsPanelLabel=Customers without Any Scheduled Payments"
+
+DashboardRevenueChartTitle= Revenue, Expenses and Profit Chart 
+DashboardExpensesChartTitle= Expenses by Supplier Chart 
+DashboardSessionsChartTitle= Sessions Chart 

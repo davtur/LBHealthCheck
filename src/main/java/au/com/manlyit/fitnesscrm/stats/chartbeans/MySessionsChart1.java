@@ -747,6 +747,7 @@ public class MySessionsChart1 implements Serializable {
     public void recreateDashboardModels() {
         dashboardMonthlyRevenueModel = null;
         dashboardMonthlySessionsModel = null;
+        expensesBySupplierModel = null;
         // RequestContext requestContext = RequestContext.getCurrentInstance();
 
         // requestContext.execute("PF('sessionsDataTable').filter();");

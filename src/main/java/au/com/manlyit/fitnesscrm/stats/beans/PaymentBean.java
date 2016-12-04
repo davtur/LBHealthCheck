@@ -1,5 +1,6 @@
 package au.com.manlyit.fitnesscrm.stats.beans;
 
+import au.com.manlyit.fitnesscrm.stats.beans.util.PaymentSource;
 import au.com.manlyit.fitnesscrm.stats.beans.util.PaymentStatus;
 import au.com.manlyit.fitnesscrm.stats.classes.EziDebitPaymentGateway;
 import au.com.manlyit.fitnesscrm.stats.classes.util.AsyncJob;
@@ -433,6 +434,7 @@ public class PaymentBean implements Serializable {
             try {
                 Payments newPayment = new Payments(-1);
                 newPayment.setDebitDate(debitDate);
+                newPayment.setPaymentSource(PaymentSource.DIRECT_DEBIT.value());
                 newPayment.setCreateDatetime(new Date());
                 newPayment.setLastUpdatedDatetime(new Date());
                 newPayment.setYourSystemReference(cust.getId().toString());
@@ -984,7 +986,7 @@ public class PaymentBean implements Serializable {
                     ourSystemRef += "-CANCELLED-" + sdf.format(new Date());
                     String ourGeneralReference = cust.getLastname() + " " + cust.getFirstname();
 
-                    EziResponseOfstring editCustomerDetail = getWs().editCustomerDetails(digitalKey, "", cust.getId().toString(), ourSystemRef, ourGeneralReference, cd.getCustomerName().getValue(), cd.getCustomerFirstName().getValue(), cust.getStreetAddress(), cd.getAddressLine2().getValue(), cust.getSuburb(), cust.getPostcode(), cust.getAddrState(), cust.getEmailAddress(), cust.getTelephone(), cd.getSmsPaymentReminder().getValue(), cd.getSmsFailedNotification().getValue(), cd.getSmsExpiredCard().getValue(), authenticatedUser);
+                    EziResponseOfstring editCustomerDetail = getWs().editCustomerDetails(digitalKey, "", cust.getId().toString(), ourSystemRef, ourGeneralReference, cd.getCustomerName().getValue(), cd.getCustomerFirstName().getValue(), cust.getStreetAddress(), cd.getAddressLine2().getValue(), cust.getSuburb(), cust.getPostcode(), cust.getAddrState(), cust.getEmailAddress(), cust.getTelephone().trim(), cd.getSmsPaymentReminder().getValue(), cd.getSmsFailedNotification().getValue(), cd.getSmsExpiredCard().getValue(), authenticatedUser);
                     LOGGER.log(Level.INFO, "editCustomerDetail Response: Error - {0}, Data - {1}", new Object[]{editCustomerDetail.getErrorMessage().getValue(), editCustomerDetail.getData().getValue()});
                     if (editCustomerDetail.getError() == 0) {// any errors will be a non zero value
 
@@ -1029,7 +1031,7 @@ public class PaymentBean implements Serializable {
 //New Zealand Customers the mobile
 //phone number must be 10 digits
 //long and begin with '02'
-                String phoneNumber = cust.getTelephone();
+                String phoneNumber = cust.getTelephone().trim();
                 if (phoneNumber == null) {
                     phoneNumber = "";
                     LOGGER.log(Level.INFO, "Invalid Phone Number for Customer {0}. Setting it to empty string", cust.getUsername());

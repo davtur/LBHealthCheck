@@ -15,10 +15,10 @@ import org.apache.commons.lang.StringEscapeUtils;
 import org.primefaces.push.EventBus;
 import org.primefaces.push.EventBusFactory;
 
-public  class JsfUtil implements Serializable {
+public class JsfUtil implements Serializable {
+
     private static final long serialVersionUID = 1L;
     private static final Logger LOGGER = Logger.getLogger(JsfUtil.class.getName());
-  
 
     public static SelectItem[] getSelectItems(List<?> entities, boolean selectOne) {
         int size = selectOne ? entities.size() + 1 : entities.size();
@@ -33,7 +33,7 @@ public  class JsfUtil implements Serializable {
         }
         return items;
     }
-    
+
     public static SelectItem[] getSelectItemsBaseEntity(List<?> entities, boolean selectOne) {
         int size = selectOne ? entities.size() + 1 : entities.size();
         SelectItem[] items = new SelectItem[size];
@@ -49,7 +49,7 @@ public  class JsfUtil implements Serializable {
             }
         } catch (Exception e) {
             addErrorMessage(e, "JSFUtil.getSelectItemsBaseEntity - The Objects passed to this method don't implement the BaseEntity Class!");
-            LOGGER.log(Level.WARNING, "JSFUtil.getSelectItemsBaseEntity - The Objects passed to this method don't implement the BaseEntity Class!",e);
+            LOGGER.log(Level.WARNING, "JSFUtil.getSelectItemsBaseEntity - The Objects passed to this method don't implement the BaseEntity Class!", e);
         }
         return items;
     }
@@ -110,14 +110,22 @@ public  class JsfUtil implements Serializable {
 
     public static void addErrorMessage(String summary, String message) {
         FacesMessage facesMsg;
-        if (summary.contains(message)) {
-            facesMsg = new FacesMessage(FacesMessage.SEVERITY_ERROR, message, null);
-        } else {
+        String msg ;
+        if (summary != null) {
+            if (summary.contains(message)) {
+                facesMsg = new FacesMessage(FacesMessage.SEVERITY_ERROR, message, null);
+                msg = message;
+            } else {
+                facesMsg = new FacesMessage(FacesMessage.SEVERITY_ERROR, summary, message);
+                msg = summary + "; " + message;
+            }
+        }else{
             facesMsg = new FacesMessage(FacesMessage.SEVERITY_ERROR, summary, message);
+            msg = message;
         }
 
         FacesContext.getCurrentInstance().addMessage(null, facesMsg);
-        String msg = summary + "; " + message;
+        
         Logger.getLogger(JsfUtil.class.getName()).severe(msg);
     }
 
@@ -159,7 +167,7 @@ public  class JsfUtil implements Serializable {
      return ejbCustomerFacade.findCustomerByUsername(FacesContext.getCurrentInstance().getExternalContext().getRemoteUser()).getId();
      }*/
 
-    /*public synchronized Customers getCustomer() {
+ /*public synchronized Customers getCustomer() {
      Customers cust;
      FacesContext context = FacesContext.getCurrentInstance();
      CustomersController custController = (CustomersController) context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);

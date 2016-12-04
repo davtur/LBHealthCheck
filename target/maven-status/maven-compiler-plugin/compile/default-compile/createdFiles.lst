@@ -33,6 +33,7 @@ au/com/manlyit/fitnesscrm/stats/webservices/NewCustomer.class
 au/com/manlyit/fitnesscrm/stats/beans/SessionTimetableFacade.class
 au/com/manlyit/fitnesscrm/stats/chartbeans/BeepTestAndVO2MaxChart.class
 au/com/manlyit/fitnesscrm/stats/db/Item.class
+au/com/manlyit/fitnesscrm/stats/beans/util/PaymentSource.class
 au/com/manlyit/fitnesscrm/stats/db/StatsTaken.class
 au/com/manlyit/fitnesscrm/stats/beans/SurveyAnswersFacade.class
 au/com/manlyit/fitnesscrm/stats/classes/util/PasswordResetFilter.class

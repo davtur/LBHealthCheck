@@ -223,18 +223,22 @@ public class LoginBean implements Serializable {
     }
 
     public boolean mobileDevice() {
-        FacesContext context = FacesContext.getCurrentInstance();
-        HttpServletRequest req = (HttpServletRequest) context.getExternalContext().getRequest();
-        String userAgent = req.getHeader("user-agent");
-        String accept = req.getHeader("Accept");
-
-        if (userAgent != null && accept != null) {
-            UAgentInfo agent = new UAgentInfo(userAgent, accept);
-            if (agent.detectMobileQuick()) {
-                return true;
+        try {
+            FacesContext context = FacesContext.getCurrentInstance();
+            HttpServletRequest req = (HttpServletRequest) context.getExternalContext().getRequest();
+            String userAgent = req.getHeader("user-agent");
+            String accept = req.getHeader("Accept");
+            
+            if (userAgent != null && accept != null) {
+                UAgentInfo agent = new UAgentInfo(userAgent, accept);
+                if (agent.detectMobileQuick()) {
+                    return true;
+                }
+            } else {
+                logger.log(Level.WARNING, "Can't detect mobile device as the user agent or accept header is null!");
             }
-        } else {
-            logger.log(Level.WARNING, "Can't detect mobile device as the user agent or accept header is null!");
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "Can't detect mobile device due to an exception - returning false !",e);
         }
 
         return false;

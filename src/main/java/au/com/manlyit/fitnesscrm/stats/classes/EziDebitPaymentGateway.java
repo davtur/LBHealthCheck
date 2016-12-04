@@ -11,6 +11,7 @@ import au.com.manlyit.fitnesscrm.stats.beans.CustomersFacade;
 import au.com.manlyit.fitnesscrm.stats.beans.NotesFacade;
 import au.com.manlyit.fitnesscrm.stats.beans.PaymentBean;
 import au.com.manlyit.fitnesscrm.stats.beans.PaymentsFacade;
+import au.com.manlyit.fitnesscrm.stats.beans.util.PaymentSource;
 import au.com.manlyit.fitnesscrm.stats.beans.util.PaymentStatus;
 import au.com.manlyit.fitnesscrm.stats.classes.util.AsyncJob;
 import au.com.manlyit.fitnesscrm.stats.classes.util.DatatableSelectionHelper;
@@ -346,8 +347,12 @@ public class EziDebitPaymentGateway implements Serializable {
     }
 
     public void editCustomerDetailsInEziDebit(Customers cust) {
-        if (isTheCustomerProvisionedInThePaymentGateway()) {
-            startAsynchJob("EditCustomerDetails", paymentBean.editCustomerDetails(cust, null, getLoggedInUser(), getDigitalKey()));
+        try {
+            if (isTheCustomerProvisionedInThePaymentGateway()) {
+                startAsynchJob("EditCustomerDetails", paymentBean.editCustomerDetails(cust, null, getLoggedInUser(), getDigitalKey()));
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "editCustomerDetailsInEziDebit - an exception occurred whilst attempting to edit the customer details in teh payment gateway.",e);
         }
 
     }
@@ -1484,7 +1489,7 @@ public class EziDebitPaymentGateway implements Serializable {
         boolean stat = false;
 
         if (selectedCustomer != null) {
-           // Customers cust = customersFacade.findById(selectedCustomer.getId());
+            // Customers cust = customersFacade.findById(selectedCustomer.getId());
 
             PaymentParameters pp = selectedCustomer.getPaymentParameters();
 
@@ -3043,6 +3048,7 @@ public class EziDebitPaymentGateway implements Serializable {
     public void logSingleCashPayment(ActionEvent actionEvent) {
         try {
             Payments newPayment = new Payments(0);
+            newPayment.setPaymentSource(PaymentSource.CASH.value());
             newPayment.setDebitDate(paymentDebitDate);
             newPayment.setSettlementDate(paymentDebitDate);
             newPayment.setCreateDatetime(new Date());
@@ -3163,6 +3169,7 @@ public class EziDebitPaymentGateway implements Serializable {
                             paymentsDBListFilteredItems = null;
                             LOGGER.log(Level.INFO, "Deleted payment that was missing in payment gateway.The payment gateway can delete scheduled payemnts when a user is on hold. Payment ID:{0}", new Object[]{pay.getId()});
                             paymentsFacade.remove(pay);
+                            createCombinedAuditLogAndNote(getLoggedInUser(), pay.getCustomerName(), "PAYMENT_DELETED", "A scheduled payment missing in the gateway was deleted.", "Payment Amount:" + pay.getPaymentAmount().toPlainString() + ", Date:" + pay.getDebitDate().toString(), "DELETED");
                         } else {
                             pay.setPaymentStatus(PaymentStatus.DELETE_REQUESTED.value());
                             paymentsFacade.edit(pay);
@@ -3170,6 +3177,21 @@ public class EziDebitPaymentGateway implements Serializable {
                             startAsynchJob("DeletePayment", paymentBean.deletePayment(selectedCustomer, selectedScheduledPayment.getDebitDate(), amount.longValue(), selectedScheduledPayment, loggedInUser, getDigitalKey()));
                         }
 
+                    }
+                    if (pay.getPaymentStatus().contentEquals(PaymentStatus.SUCESSFUL.value())) {
+                        if (pay.getPaymentSource() != null) {
+                            if (pay.getPaymentSource().contentEquals(PaymentSource.CASH.value())) {
+                                pay.setBankFailedReason("DELETED");
+
+                                paymentDBList = null;
+                                paymentsDBListFilteredItems = null;
+                                LOGGER.log(Level.INFO, "Deleted CASH payment. Payment ID:{0}", new Object[]{pay.getId()});
+                                paymentsFacade.remove(pay);
+
+                            }
+                            createCombinedAuditLogAndNote(getLoggedInUser(), pay.getCustomerName(), "PAYMENT_DELETED", "A scheduled payment missing in the gateway was deleted.", "Payment Amount:" + pay.getPaymentAmount().toPlainString() + ", Date:" + pay.getDebitDate().toString(), "DELETED");
+
+                        }
                     }
 
                 } else {
@@ -3191,18 +3213,18 @@ public class EziDebitPaymentGateway implements Serializable {
             eziStatus = "H";
         } else if (cs.getCustomerState().contains("CANCELLED")) {
             eziStatus = "C";
-             if(isTheCustomerProvisionedInThePaymentGateway() == true){
-            startAsynchJob("ClearSchedule", paymentBean.clearSchedule(cust, false, loggedInUser, getDigitalKey()));
-             }
+            if (isTheCustomerProvisionedInThePaymentGateway() == true) {
+                startAsynchJob("ClearSchedule", paymentBean.clearSchedule(cust, false, loggedInUser, getDigitalKey()));
+            }
         } else {
             LOGGER.log(Level.WARNING, "Customer status is not one of ACTIVE,ON HOLD or CANCELLED. changeCustomerStatus aborted.");
             return;
         }
 
         if (loggedInUser != null) {
-            if(isTheCustomerProvisionedInThePaymentGateway() == true){
-            startAsynchJob("ChangeCustomerStatus", paymentBean.changeCustomerStatus(cust, eziStatus, loggedInUser, getDigitalKey()));
-            LOGGER.log(Level.INFO, "Starting Async Job ChangeCustomerStatus.");
+            if (isTheCustomerProvisionedInThePaymentGateway() == true) {
+                startAsynchJob("ChangeCustomerStatus", paymentBean.changeCustomerStatus(cust, eziStatus, loggedInUser, getDigitalKey()));
+                LOGGER.log(Level.INFO, "Starting Async Job ChangeCustomerStatus.");
             }
         } else {
             LOGGER.log(Level.WARNING, "Logged in user is null. changeCustomerStatus aborted.");

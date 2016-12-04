@@ -1,0 +1,45 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition  xmlns="http://www.w3.org/1999/xhtml"
+                 xmlns:ui="http://java.sun.com/jsf/facelets"
+                 xmlns:h="http://java.sun.com/jsf/html"
+                 xmlns:f="http://java.sun.com/jsf/core"
+                 xmlns:p="http://primefaces.org/ui" >
+
+    <!--<p:log />--> 
+    <p:dialog id="logCashPaymentDialogue"   closable="false" fitViewport="true"  modal="true" resizable="true" appendTo="@(body)" 
+                     header="#{configMapController.getKey('LogCashPaymentHeader')}" widgetVar="dashboardLogCashPaymentDialogueWidget"> 
+        <h:form id="logCashPayment">    
+            <p:panelGrid id="logCashPaymentGrid1" columns="4">
+
+
+
+                <p:outputLabel value="#{configMapController.getKey('Trainer_Impersonate_Select_Label')}" for="c1" />
+                <p:selectOneMenu id="c1"  value="#{customersController.selected}" filter="true" converter="customersControllerConverter"  label="#{configMapController.getKey('Trainer_Impersonate_Select_Title')}" >
+                    <f:selectItems value="#{customersController.activeCustomers}"   var="cust" itemLabel="#{cust.firstname} #{cust.lastname}" itemValue="#{cust}"/>
+                    <p:ajax    event="change"/>
+                </p:selectOneMenu>
+
+                <p:outputLabel value="#{configMapController.getKey('AddPaymentLabel_debitdate')}" for="logCashDebitDate" />
+                <p:calendar id="logCashDebitDate" pattern="dd MMM yyyy" value="#{ezidebit.paymentDebitDate}" title="#{configMapController.getKey('AddPaymentTitle_debitdate')}" required="true" requiredMessage="#{configMapController.getKey('AddPaymentRequiredMessage_debitdate')}" >
+                    <p:ajax />
+                </p:calendar>
+                <p:outputLabel value="#{configMapController.getKey('AddPaymentLabel_paymentAmount')}" for="logCashPayAmount" />
+                <p:inputText id="logCashPayAmount" value="#{ezidebit.paymentAmountInCents}" title="#{configMapController.getKey('AddPaymentTitle_paymentAmount')}" required="true" requiredMessage="#{configMapController.getKey('AddPaymentRequiredMessage_paymentAmount')}">
+                    <f:convertNumber  minFractionDigits="2"/>
+                </p:inputText>
+                <p:outputLabel value="#{configMapController.getKey('AddPaymentLabel_paymentRef')}" for="logCashPayRef" />
+                <p:inputText id="logCashPayRef" value="#{ezidebit.cashPaymentReceiptReference}" title="#{configMapController.getKey('AddPaymentLabel_paymentRef')}" />
+
+
+
+            </p:panelGrid>
+            <p:panel>
+                <p:commandButton id="logCashPaymentdialogueSave"  oncomplete="PF('dashboardLogCashPaymentDialogueWidget').hide();"  actionListener="#{ezidebit.logSingleCashPayment}" value="#{configMapController.getKey('AddPaymentSaveLink')}" update=":growl  "/>                
+                <p:commandButton id="logCashPaymentdialogueDiscard" onclick="PF('dashboardLogCashPaymentDialogueWidget').hide()"  value="#{configMapController.getKey('AddPaymentDiscardLink')}" update=":growl"/>                
+            </p:panel>     
+        </h:form>
+    </p:dialog>
+</ui:composition> 
+
+

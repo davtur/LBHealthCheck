@@ -499,7 +499,7 @@ public class SurveyAnswersController implements Serializable {
     }
 
     public SelectItem[] getItemsAvailableSelectMany() {
-        file:///home/david/.netbeans/8.0/config/Templates/JSF/JSF_From_Entity_Wizard/StandardJSF/create.ftl
+       // file:///home/david/.netbeans/8.0/config/Templates/JSF/JSF_From_Entity_Wizard/StandardJSF/create.ftl
 
         return JsfUtil.getSelectItems(ejbFacade.findAll(), false);
     }
@@ -575,6 +575,7 @@ public class SurveyAnswersController implements Serializable {
     public void setSelectedSurvey(Surveys selectedSurvey) {
         surveyAnswers = null;
         this.selectedSurvey = selectedSurvey;
+        
     }
 
     /**

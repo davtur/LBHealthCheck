@@ -19,7 +19,7 @@
                     <p:outputLabel value="#{configMapController.getKey('CreateSuppliersLabel_supplierCompanyNumberType')}" for="supplierCompanyNumberType" />
                     <p:inputText id="supplierCompanyNumberType" value="#{suppliersController.selected.supplierCompanyNumberType}" title="#{configMapController.getKey('CreateSuppliersTitle_supplierCompanyNumberType')}" />
                 </p:panelGrid>
-                <p:commandButton actionListener="#{suppliersController.createDialogue}" value="#{configMapController.getKey('Save')}" update=":ExpensesCreateForm :growl" oncomplete="handleSubmit(args,'SuppliersCreateDialog');PF('suppliersControllerTable').filter()"/>
+                <p:commandButton actionListener="#{suppliersController.createDialogue}" value="#{configMapController.getKey('Save')}" update=":ExpensesCreateForm :growl" oncomplete="handleSubmit(args,'SuppliersCreateDialog');"/>
                 <p:commandButton value="#{configMapController.getKey('Cancel')}" onclick="PF('SuppliersCreateDialog').hide()"/>
             
         </h:form>

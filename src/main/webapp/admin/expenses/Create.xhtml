@@ -17,31 +17,32 @@
                         <h:panelGrid  columns="2"  cellpadding="5" >
                             <p:outputLabel value="#{configMapController.getKey('CreateExpensesLabel_expenseIncurredTimestamp')}" for="expenseIncurredTimestamp" />
                             <p:calendar id="expenseIncurredTimestamp" pattern="MM/dd/yyyy HH:mm:ss"  value="#{expensesController.selected.expenseIncurredTimestamp}"  title="#{configMapController.getKey('CreateExpensesTitle_expenseIncurredTimestamp')}" required="true" requiredMessage="#{configMapController.getKey('CreateExpensesRequiredMessage_expenseIncurredTimestamp')}">
-                                <p:ajax event="dateSelect" listener="#{expensesController.handleDateSelect}" update=":ExpensesCreateForm" />
+                                <p:ajax event="dateSelect" listener="#{expensesController.handleDateSelect}"  />
                             </p:calendar>
-                            <p:outputLabel value="#{configMapController.getKey('CreateExpensesLabel_invoiceNumber')}" for="invoiceNumber" />
-                            <p:inputText id="invoiceNumber" value="#{expensesController.selected.invoiceNumber}" title="#{configMapController.getKey('CreateExpensesTitle_invoiceNumber')}" />
-                            <p:outputLabel value="#{configMapController.getKey('CreateExpensesLabel_receiptNumber')}" for="receiptNumber" />
-                            <p:inputText id="receiptNumber" value="#{expensesController.selected.receiptNumber}" title="#{configMapController.getKey('CreateExpensesTitle_receiptNumber')}" />
                             <p:outputLabel value="#{configMapController.getKey('CreateExpensesLabel_expenseAmount')}" for="expenseAmount" />
                             <p:inputText id="expenseAmount" value="#{expensesController.selected.expenseAmount}" valueChangeListener="#{expensesController.expenseAmountChangeListener}" title="#{configMapController.getKey('CreateExpensesTitle_expenseAmount')}" required="true" requiredMessage="#{configMapController.getKey('CreateExpensesRequiredMessage_expenseAmount')}">
                                 <f:convertNumber  minFractionDigits="2"/>
-                                <p:ajax update=":ExpensesCreateForm:businessUseAmount :ExpensesCreateForm:percentForBusinessUse :ExpensesCreateForm:expenseAmountGst :ExpensesCreateForm:businessUseAmountGst" event="keyup"/>
+                                <p:ajax update=" businessUseAmount  percentForBusinessUse  expenseAmountGst  businessUseAmountGst" event="keyup"/>
                             </p:inputText>
                             <p:outputLabel value="#{configMapController.getKey('CreateExpensesLabel_businessUseAmount')}" for="businessUseAmount" />
                             <p:inputText id="businessUseAmount" value="#{expensesController.selected.businessUseAmount}" valueChangeListener="#{expensesController.businessUseAmountChangeListener}" title="#{configMapController.getKey('CreateExpensesTitle_businessUseAmount')}" >
                                 <f:convertNumber  minFractionDigits="2"/>
-                                <p:ajax update=":ExpensesCreateForm:percentForBusinessUse   :ExpensesCreateForm:businessUseAmountGst" event="keyup"/>
+                                <p:ajax update=" percentForBusinessUse    businessUseAmountGst" event="keyup"/>
                             </p:inputText>
                             <p:outputLabel value="#{configMapController.getKey('CreateExpensesLabel_percentForBusinessUse')}" for="percentForBusinessUse" />
                             <p:inputText id="percentForBusinessUse" value="#{expensesController.selected.percentForBusinessUse}"  valueChangeListener="#{expensesController.percentForBusinessUseChangeListener}" title="#{configMapController.getKey('CreateExpensesTitle_percentForBusinessUse')}" >
                                 <f:convertNumber type="percent"  minFractionDigits="2"  />
                                 <f:validateDoubleRange minimum="0.01" maximum="1.00" />
-                                <p:ajax update=":ExpensesCreateForm:businessUseAmount  :ExpensesCreateForm:percentForBusinessUse :ExpensesCreateForm:businessUseAmountGst" event="mouseout"/>
+                                <p:ajax update=" businessUseAmount   percentForBusinessUse  businessUseAmountGst" event="mouseout"/>
                             </p:inputText>
+                            <p:outputLabel value="#{configMapController.getKey('CreateExpensesLabel_invoiceNumber')}" for="invoiceNumber" />
+                            <p:inputText id="invoiceNumber" value="#{expensesController.selected.invoiceNumber}" title="#{configMapController.getKey('CreateExpensesTitle_invoiceNumber')}" />
+                            <p:outputLabel value="#{configMapController.getKey('CreateExpensesLabel_receiptNumber')}" for="receiptNumber" />
+                            <p:inputText id="receiptNumber" value="#{expensesController.selected.receiptNumber}" title="#{configMapController.getKey('CreateExpensesTitle_receiptNumber')}" />
+
                             <p:outputLabel  value="#{configMapController.getKey('CreateExpensesLabel_gstIncluded')}" for="gstIncluded" />
                             <p:selectBooleanCheckbox id="gstIncluded"     value="#{expensesController.gstIncluded}" >
-                                <p:ajax update=":ExpensesCreateForm:expenseAmountGst   :ExpensesCreateForm:businessUseAmountGst" event="change" />
+                                <p:ajax update=" expenseAmountGst    businessUseAmountGst" event="change" />
                             </p:selectBooleanCheckbox> 
                             <p:outputLabel value="#{configMapController.getKey('CreateExpensesLabel_expenseAmountGst')}" for="expenseAmountGst" />
                             <p:inputText id="expenseAmountGst" disabled="#{expensesController.gstIncluded}" value="#{expensesController.selected.expenseAmountGst}" title="#{configMapController.getKey('CreateExpensesTitle_expenseAmountGst')}" required="true" requiredMessage="#{configMapController.getKey('CreateExpensesRequiredMessage_expenseAmountGst')}">
@@ -53,7 +54,7 @@
                                 <f:convertNumber  minFractionDigits="2"/>
                             </p:inputText>
                             <h:panelGrid  columns="2"  cellpadding="5" >
-                                <p:commandButton icon="fa fa-save white Fs14"  actionListener="#{expensesController.createDialogue}" value="#{configMapController.getKey('Save')}" update=":ExpensesListForm:datalist :growl" oncomplete="handleSubmit(args,'ExpensesCreateDialogWidget');PF('expensesControllerTable').filter()"/>
+                                <p:commandButton icon="fa fa-save white Fs14"  actionListener="#{expensesController.createDialogue}" value="#{configMapController.getKey('Save')}" update="@(.ui-datatable) :growl" oncomplete="handleSubmit(args,'ExpensesCreateDialogWidget');"/>
                                 <p:commandButton icon="fa fa-trash white Fs14" value="#{configMapController.getKey('Cancel')}" onclick="PF('ExpensesCreateDialogWidget').hide()"/>
                             </h:panelGrid>
 
@@ -71,20 +72,20 @@
                             <h:panelGrid  columns="2"  >
                                 <p:selectOneMenu id="supplierId" styleClass="selectOneWidth"  valueChangeListener="#{expensesController.selectOneMenuValueChangeListener}" converter="suppliersControllerConverter"  value="#{expensesController.selected.supplierId}"  label="#{configMapController.getKey('CreateExpensesTitle_supplierId')}" required="true" requiredMessage="#{configMapController.getKey('CreateExpensesRequiredMessage_supplierId')}">
                                     <f:selectItems value="#{suppliersController.itemsAvailable}" var="supplier" itemLabel="#{supplier.supplierName}" itemValue="#{supplier}"/>
-                                    <!-- <p:ajax   update=":ExpensesCreateForm"  />-->
+                                    <!-- <p:ajax   update=" "  />-->
                                 </p:selectOneMenu>
-                                <p:commandButton  styleClass="selectOneButton"  rendered="#{suppliersController.isUserInRole('ADMIN')}" id="createButtonSupplier" icon="fa fa-plus white Fs14"   value="#{configMapController.getKey('CreateNew_Supplier')}" actionListener="#{suppliersController.prepareCreateDialogue}" update=":SuppliersCreateForm :ExpensesCreateForm:supplierId" oncomplete="PF('SuppliersCreateDialog').show()"/>
+                                <p:commandButton  styleClass="selectOneButton"  rendered="#{suppliersController.isUserInRole('ADMIN')}" id="createButtonSupplier" icon="fa fa-plus white Fs14"   value="#{configMapController.getKey('CreateNew_Supplier')}" actionListener="#{suppliersController.prepareCreateDialogue}" update=":SuppliersCreateForm supplierId" oncomplete="PF('SuppliersCreateDialog').show()"/>
                             </h:panelGrid>
                             <p:outputLabel value="#{configMapController.getKey('CreateExpensesLabel_expenseTypeId')}" for="expenseTypeId" />
                             <h:panelGrid  columns="2"  >
                                 <p:selectOneMenu id="expenseTypeId" styleClass="selectOneWidth"  valueChangeListener="#{expensesController.selectOneMenuValueChangeListener}" converter="expenseTypesControllerConverter" filter="true" value="#{expensesController.selected.expenseTypeId}"  label="#{configMapController.getKey('CreateExpensesTitle_expenseTypeId')}" required="true" requiredMessage="#{configMapController.getKey('CreateExpensesRequiredMessage_expenseTypeId')}">
                                     <f:selectItems value="#{expenseTypesController.itemsAvailable}" var="expenseType" itemLabel="#{expenseType.expenseTypeName}" itemValue="#{expenseType}"/>
-                                    <!--<p:ajax   update=":ExpensesCreateForm"  />-->
+                                    <!--<p:ajax   update=" "  />-->
                                 </p:selectOneMenu>
-                                <p:commandButton   styleClass="selectOneButton"  rendered="#{expenseTypesController.isUserInRole('ADMIN')}" id="createButtonExpenseType" icon="fa fa-plus white Fs14"   value="#{configMapController.getKey('CreateNew_ExpenseType')}" actionListener="#{expenseTypesController.createDialogue}" update=":ExpenseTypesCreateForm :ExpensesCreateForm:expenseTypeId" oncomplete="PF('ExpenseTypesCreateDialog').show()"/>
+                                <p:commandButton   styleClass="selectOneButton"  rendered="#{expenseTypesController.isUserInRole('ADMIN')}" id="createButtonExpenseType" icon="fa fa-plus white Fs14"   value="#{configMapController.getKey('CreateNew_ExpenseType')}" actionListener="#{expenseTypesController.createDialogue}" update=":ExpenseTypesCreateForm  expenseTypeId" oncomplete="PF('ExpenseTypesCreateDialog').show()"/>
                             </h:panelGrid>
                             <p:outputLabel value="#{configMapController.getKey('CreateExpensesLabel_paymentMethodId')}" for="paymentMethodId" />
-                            <p:selectOneMenu id="paymentMethodId" styleClass="selectOneWidth"  valueChangeListener="#{expensesController.selectOneMenuValueChangeListener}" converter="paymentMethodsControllerConverter"  value="#{expensesController.selected.paymentMethodId}"  label="#{configMapController.getKey('CreateExpensesTitle_paymentMethodId')}" required="true" requiredMessage="#{configMapController.getKey('CreateExpensesRequiredMessage_paymentMethodId')}">
+                            <p:selectOneMenu id="paymentMethodId" styleClass="selectOneWidth"  valueChangeListener="#{expensesController.selectOneMenuValueChangeListener}" converter="paymentMethodsControllerConverter"  filter="true"  value="#{expensesController.selected.paymentMethodId}"  label="#{configMapController.getKey('CreateExpensesTitle_paymentMethodId')}" required="true" requiredMessage="#{configMapController.getKey('CreateExpensesRequiredMessage_paymentMethodId')}">
                                 <f:selectItems value="#{paymentMethodsController.itemsAvailable}" var="paymentMethod" itemLabel="#{paymentMethod.paymentMethodName}" itemValue="#{paymentMethod}"/>
 
                             </p:selectOneMenu>

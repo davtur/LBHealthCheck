@@ -482,22 +482,26 @@ public class CustomerImagesController implements Serializable {
     private byte[] convertBufferedImageToByteArray(BufferedImage img, String fileType) {
         byte[] ba = null;
         String type = "---";
-        for (String writerName : ImageIO.getWriterFormatNames()) {
-            if (fileType.toLowerCase().contains(writerName.toLowerCase())) {
-                type = writerName;
-                logger.log(Level.INFO, "Using IMage IO writer name : {0}", type);
+        try {
+            for (String writerName : ImageIO.getWriterFormatNames()) {
+                if (fileType.toLowerCase().contains(writerName.toLowerCase())) {
+                    type = writerName;
+                    logger.log(Level.INFO, "Using IMage IO writer name : {0}", type);
+                }
             }
-        }
-        if (type.contains("---")) {
-            type = "jpeg";
-            logger.log(Level.INFO, "Using DEFAULT Image IO writer name : {0}, attempted type: {1}", new Object[]{type, fileType});
-        }
-        try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
-            ImageIO.write(img, type, os);
-            ba = os.toByteArray();
-        } catch (Exception ex) {
-            Logger.getLogger(CustomerImagesController.class.getName()).log(Level.SEVERE, null, ex);
-            JsfUtil.addErrorMessage(ex, "Update image error!!");
+            if (type.contains("---")) {
+                type = "jpeg";
+                logger.log(Level.INFO, "Using DEFAULT Image IO writer name : {0}, attempted type: {1}", new Object[]{type, fileType});
+            }
+            try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
+                ImageIO.write(img, type, os);
+                ba = os.toByteArray();
+            } catch (Exception ex) {
+                Logger.getLogger(CustomerImagesController.class.getName()).log(Level.SEVERE, null, ex);
+                JsfUtil.addErrorMessage(ex, "Update image error!!");
+            }
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "convertBufferedImageToByteArray method failed",e);
         }
         return ba;
     }
@@ -1191,7 +1195,7 @@ public class CustomerImagesController implements Serializable {
 
                 imageId = context.getExternalContext().getRequestParameterMap().get("imageId");
 
-                if (imageId != null) {
+                if (imageId != null && !imageId.trim().isEmpty()) {
                     try {
                         CustomerImages custImage = ejbFacade.find(Integer.valueOf(imageId));
                         String imageType = custImage.getMimeType().toLowerCase();
@@ -1210,7 +1214,7 @@ public class CustomerImagesController implements Serializable {
                         logger.log(Level.WARNING, "getImageThumbnail: the imageId parameter could not be converted to an integer:{0}, exception: {1} ", new Object[]{imageId, e.getMessage()});
                     }
                 } else {
-                    logger.log(Level.WARNING, "getImageThumbnail: imageId is NULL");
+                    logger.log(Level.WARNING, "getImageThumbnail: imageId is NULL or an empty String id:{0}", new Object[]{imageId});
                     return null;
                 }
             }

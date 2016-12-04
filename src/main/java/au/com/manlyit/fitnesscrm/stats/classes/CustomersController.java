@@ -1139,7 +1139,7 @@ public class CustomersController implements Serializable {
             try {
                 getFacade().edit(c);
                 updateCustomersGroupMembership(c);
-
+                
                 ezi.editCustomerDetailsInEziDebit(c);
                 recreateAllAffectedPageModels();
                 JsfUtil.addSuccessMessage(configMapFacade.getConfig("ChangesSaved"));
@@ -1156,44 +1156,50 @@ public class CustomersController implements Serializable {
         //Groups[] grps = new Groups[c.getGroupsCollection().size()];
         //c.getGroupsCollection().toArray(grps);
         // have to use an iterator as we are removing components
-        Collection<Groups> customersExistingGroups = c.getGroupsCollection();
-        Iterator<Groups> i = customersExistingGroups.iterator();
-        while (i.hasNext()) {
-            // for (int i = grps.length -1; i >= 0; i--) {
-            Groups g = i.next();
-            boolean exists = false;
-            for (Groups sg : selectedGroups) {
-                if (sg.getGroupname().trim().equalsIgnoreCase(g.getGroupname().trim())) {
-                    exists = true;
+        try {
+            Collection<Groups> customersExistingGroups = c.getGroupsCollection();
+            if (customersExistingGroups != null) {
+                Iterator<Groups> i = customersExistingGroups.iterator();
+                while (i.hasNext()) {
+                    // for (int i = grps.length -1; i >= 0; i--) {
+                    Groups g = i.next();
+                    boolean exists = false;
+                    for (Groups sg : selectedGroups) {
+                        if (sg.getGroupname().trim().equalsIgnoreCase(g.getGroupname().trim())) {
+                            exists = true;
+                        }
+                    }
+                    if (exists == false) {
+                        c.getGroupsCollection().remove(g);
+                        //ejbGroupsFacade.remove(g);
+                    }
                 }
             }
-            if (exists == false) {
-                c.getGroupsCollection().remove(g);
-                //ejbGroupsFacade.remove(g);
-            }
-        }
-        customersExistingGroups = c.getGroupsCollection();
-        for (Groups g : selectedGroups) {
-            boolean exists = false;
+            customersExistingGroups = c.getGroupsCollection();
+            for (Groups g : selectedGroups) {
+                boolean exists = false;
+                if (customersExistingGroups != null) {
+                    for (Groups eg : customersExistingGroups) {
+                        if (eg.getGroupname().trim().equalsIgnoreCase(g.getGroupname().trim())) {
+                            exists = true;
+                        }
+                    }
+                }
+                if (exists == false) {
+                    Groups grp = new Groups(0, g.getGroupname());
+                    grp.setUsername(c);
+                    // ejbGroupsFacade.create(grp);
+                    c.getGroupsCollection().add(grp);
 
-            for (Groups eg : customersExistingGroups) {
-                if (eg.getGroupname().trim().equalsIgnoreCase(g.getGroupname().trim())) {
-                    exists = true;
                 }
             }
-            if (exists == false) {
-                Groups grp = new Groups(0, g.getGroupname());
-                grp.setUsername(c);
-                // ejbGroupsFacade.create(grp);
-                c.getGroupsCollection().add(grp);
 
-            }
+            // the customer must be a member of the user base group to login
+            ejbFacade.edit(c);
+            //addCustomerToUsersGroup(c);
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "updateCustomersGroupMembership method exception: {0} : {1}", new Object[]{c.getUsername(), e.getMessage()});
         }
-
-        // the customer must be a member of the user base group to login
-        ejbFacade.edit(c);
-        //addCustomerToUsersGroup(c);
-
     }
 
     private void addCustomerToUsersGroup(Customers c) {
@@ -1918,7 +1924,7 @@ public class CustomersController implements Serializable {
         Customers cust = getFacade().findCustomerByUsername(newUsername);
         if (cust != null) {
             setAddUserButtonDisabled(true);
-            JsfUtil.addErrorMessage("Error", "The username:"+ newUsername+" is already in use!");
+            JsfUtil.addErrorMessage("Error", "The username:" + newUsername + " is already in use!");
         } else {
             setAddUserButtonDisabled(false);
         }
