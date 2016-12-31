@@ -352,7 +352,7 @@ public class EziDebitPaymentGateway implements Serializable {
                 startAsynchJob("EditCustomerDetails", paymentBean.editCustomerDetails(cust, null, getLoggedInUser(), getDigitalKey()));
             }
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "editCustomerDetailsInEziDebit - an exception occurred whilst attempting to edit the customer details in teh payment gateway.",e);
+            LOGGER.log(Level.WARNING, "editCustomerDetailsInEziDebit - an exception occurred whilst attempting to edit the customer details in teh payment gateway.", e);
         }
 
     }
@@ -1731,6 +1731,9 @@ public class EziDebitPaymentGateway implements Serializable {
 
     public void createCustomerRecord(Customers cust) {
         String authenticatedUser = FacesContext.getCurrentInstance().getExternalContext().getRemoteUser();
+        if (cust.getPaymentParameters() == null) {
+            getCustomersController().createDefaultPaymentParameters(cust);
+        }
         startAsynchJob("AddCustomer", paymentBean.addCustomer(cust, PAYMENT_GATEWAY, getDigitalKey(), authenticatedUser));
         JsfUtil.addSuccessMessage("Processing Add Customer to Payment Gateway Request.", "");
 

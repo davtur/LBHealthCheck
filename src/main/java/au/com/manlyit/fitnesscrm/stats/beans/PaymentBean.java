@@ -180,8 +180,8 @@ public class PaymentBean implements Serializable {
             if (schedulePeriodType != 'M') {
                 dayOfMonth = currentDay;
             }
-             BatchOfPaymentJobs bopjAdd = new BatchOfPaymentJobs("AddPaymentBatch", new ArrayList<>());
-                futureMap.addBatchJobToList(sessionId, bopjAdd);
+            BatchOfPaymentJobs bopjAdd = new BatchOfPaymentJobs("AddPaymentBatch", new ArrayList<>());
+            futureMap.addBatchJobToList(sessionId, bopjAdd);
 
             switch (schedulePeriodType) {
                 case 'W'://weekly
@@ -280,28 +280,28 @@ public class PaymentBean implements Serializable {
                     //if (startCal.get(Calendar.WEEK_OF_MONTH) == 1 && firstWeekOfMonth == true) {
                     if (startCal.get(Calendar.DAY_OF_MONTH) >= 1 && startCal.get(Calendar.DAY_OF_MONTH) <= 7 && firstWeekOfMonth == true) {
                         if (arePaymentsWithinLimits(limitToNumberOfPayments, paymentAmountLimitInCents, cumulativeAmountInCents, amountInCents, numberOfpayments)) {
-                            bopjAdd.getJobs().add(addNewPayment(cust, newDebitDate, amountInCents, false, loggedInUser, sessionId, digitalKey, futureMap, payBean,bopjAdd.getBatchId()));
+                            bopjAdd.getJobs().add(addNewPayment(cust, newDebitDate, amountInCents, false, loggedInUser, sessionId, digitalKey, futureMap, payBean, bopjAdd.getBatchId()));
                             numberOfpayments++;
                         }
 
                     }
                     if (startCal.get(Calendar.DAY_OF_MONTH) >= 8 && startCal.get(Calendar.DAY_OF_MONTH) <= 14 && secondWeekOfMonth == true) {
                         if (arePaymentsWithinLimits(limitToNumberOfPayments, paymentAmountLimitInCents, cumulativeAmountInCents, amountInCents, numberOfpayments)) {
-                            bopjAdd.getJobs().add(addNewPayment(cust, newDebitDate, amountInCents, false, loggedInUser, sessionId, digitalKey, futureMap, payBean,bopjAdd.getBatchId()));
+                            bopjAdd.getJobs().add(addNewPayment(cust, newDebitDate, amountInCents, false, loggedInUser, sessionId, digitalKey, futureMap, payBean, bopjAdd.getBatchId()));
                             numberOfpayments++;
                         }
 
                     }
                     if (startCal.get(Calendar.DAY_OF_MONTH) >= 15 && startCal.get(Calendar.DAY_OF_MONTH) <= 21 && thirdWeekOfMonth == true) {
                         if (arePaymentsWithinLimits(limitToNumberOfPayments, paymentAmountLimitInCents, cumulativeAmountInCents, amountInCents, numberOfpayments)) {
-                            bopjAdd.getJobs().add(addNewPayment(cust, newDebitDate, amountInCents, false, loggedInUser, sessionId, digitalKey, futureMap, payBean,bopjAdd.getBatchId()));
+                            bopjAdd.getJobs().add(addNewPayment(cust, newDebitDate, amountInCents, false, loggedInUser, sessionId, digitalKey, futureMap, payBean, bopjAdd.getBatchId()));
                             numberOfpayments++;
                         }
 
                     }
                     if (startCal.get(Calendar.DAY_OF_MONTH) >= 22 && startCal.get(Calendar.DAY_OF_MONTH) <= 28 && fourthWeekOfMonth == true) {
                         if (arePaymentsWithinLimits(limitToNumberOfPayments, paymentAmountLimitInCents, cumulativeAmountInCents, amountInCents, numberOfpayments)) {
-                            bopjAdd.getJobs().add(addNewPayment(cust, newDebitDate, amountInCents, false, loggedInUser, sessionId, digitalKey, futureMap, payBean,bopjAdd.getBatchId()));
+                            bopjAdd.getJobs().add(addNewPayment(cust, newDebitDate, amountInCents, false, loggedInUser, sessionId, digitalKey, futureMap, payBean, bopjAdd.getBatchId()));
                             numberOfpayments++;
                         }
 
@@ -321,7 +321,7 @@ public class PaymentBean implements Serializable {
                     startCal.setTime(placeholder);// set it back to correct day of month as we may have changed the day of the week.
                 } else {
                     if (arePaymentsWithinLimits(limitToNumberOfPayments, paymentAmountLimitInCents, cumulativeAmountInCents, amountInCents, numberOfpayments)) {
-                        bopjAdd.getJobs().add(addNewPayment(cust, newDebitDate, amountInCents, false, loggedInUser, sessionId, digitalKey, futureMap, payBean,bopjAdd.getBatchId()));
+                        bopjAdd.getJobs().add(addNewPayment(cust, newDebitDate, amountInCents, false, loggedInUser, sessionId, digitalKey, futureMap, payBean, bopjAdd.getBatchId()));
                         numberOfpayments++;
                     }
                     startCal.add(calendarField, calendarAmount);
@@ -971,15 +971,15 @@ public class PaymentBean implements Serializable {
             CustomerDetails cd = null;
             EziResponseOfCustomerDetailsTHgMB7OL customerdetails = getWs().getCustomerDetails(digitalKey, "", cust.getId().toString());
             if (customerdetails.getError() == 0) {// any errors will be a non zero value
-                LOGGER.log(Level.INFO, "Add customer to payment gateway. The customer already exists: Name - {0}", customerdetails.getData().getValue().getCustomerName().getValue());
-
                 cd = customerdetails.getData().getValue();
+                LOGGER.log(Level.INFO, "Add customer to payment gateway. The customer already exists: Payment gateway Name - {0}, Customers username - {1} ", new Object[]{cd.getCustomerName().getValue(), cust.getUsername()});
 
             } else {
                 LOGGER.log(Level.INFO, "Add customer to payment gateway. Check if they already exist. Get Customer Details Response: Error - {0}", customerdetails.getErrorMessage().getValue());
 
             }
             if (cd != null) {
+
                 if (cd.getStatusDescription().getValue().toUpperCase().contains("CANCELLED")) {
                     String ourSystemRef = cd.getYourSystemReference().getValue();
                     SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
@@ -998,7 +998,17 @@ public class PaymentBean implements Serializable {
                         LOGGER.log(Level.WARNING, "editCustomerDetail Response: Error - {0}", new Object[]{editCustomerDetail.getErrorMessage().getValue(), editCustomerDetail.getError().toString()});
 
                     }
+
+                } else {
+                    String customeName = cd.getCustomerName().getValue();
+                    String status = cd.getStatusDescription().getValue();
+                    LOGGER.log(Level.INFO, "The customer {0} already exists in teh payment gateway - Response:  Payment Gateway Status - {1}", new Object[]{customeName, status});
+                    pgr = new PaymentGatewayResponse(true, cust, "The customer  " + customeName + " already exists in the payment system with status " + status + ".", "0", "EXISTING");
+
                 }
+                cust.getPaymentParameters().setStatusCode(cd.getStatusCode().getValue());
+                cust.getPaymentParameters().setStatusDescription(cd.getStatusDescription().getValue());
+                customersFacade.editAndFlush(cust);
 
             } else {
 
@@ -1062,6 +1072,7 @@ public class PaymentBean implements Serializable {
             }
 
         } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Add Customer - FATAL Error - ,", e);
             pgr = new PaymentGatewayResponse(false, e, "", "-1", e.getMessage());
             return new AsyncResult<>(pgr);
         }

@@ -64,6 +64,20 @@ import org.primefaces.event.data.FilterEvent;
 @SessionScoped
 public class CustomersController implements Serializable {
 
+    /**
+     * @return the multiSelectedCustomersOnHold
+     */
+    public Customers[] getMultiSelectedCustomersOnHold() {
+        return multiSelectedCustomersOnHold;
+    }
+
+    /**
+     * @param multiSelectedCustomersOnHold the multiSelectedCustomersOnHold to set
+     */
+    public void setMultiSelectedCustomersOnHold(Customers[] multiSelectedCustomersOnHold) {
+        this.multiSelectedCustomersOnHold = multiSelectedCustomersOnHold;
+    }
+
     private static final long serialVersionUID = 1L;
 
     private Customers current;
@@ -82,6 +96,8 @@ public class CustomersController implements Serializable {
     private List<Groups> newCustomerGroupsList;
     private PfSelectableDataModel<Customers> items = null;
     private PfSelectableDataModel<Customers> customersWithoutScheduledPayments = null;
+    private PfSelectableDataModel<Customers> leads = null;
+     private PfSelectableDataModel<Customers> customersOnHold = null;
     private Date testTime;
 
     private PfSelectableDataModel<Notes> notesItems = null;
@@ -129,9 +145,13 @@ public class CustomersController implements Serializable {
     private Plan customersNewPlan;
     private List<Customers> filteredItems;
     private List<Customers> filteredCustomersWithoutScheduledPayments;
+    private List<Customers> filteredLeads;
+    private List<Customers> filteredCustomersOnHold;
     private List<Notes> notesFilteredItems;
     private Customers[] multiSelected;
     private Customers[] multiSelectedCustomersWithoutScheduledPayments;
+    private Customers[] multiSelectedLeads;
+    private Customers[] multiSelectedCustomersOnHold;
     // private Groups[] selectedGroups;
     private List<Groups> selectedGroups;
     private String checkPass;
@@ -992,7 +1012,7 @@ public class CustomersController implements Serializable {
                 if (isWebserviceCall == false) {
                     addToNotesDataTableLists(nt);
                 }
-                String details = "New LEAD generated: Name: " + c.getFirstname() + ", <br/>Email:  " + c.getEmailAddress() + ", <br/>Phone:   " + c.getTelephone() + ", <br/>Username:   " + c.getUsername() + ", <br/>Group:   " + group + ", IP Address:" + ipAddress;
+                String details = "New LEAD generated: Name: " + c.getFirstname() + ", <br/>Email:  " + c.getEmailAddress() + ", <br/>Phone:   " + c.getTelephone() + ", <br/>Username:   " + c.getUsername() + ", <br/>Group:   " + group + ", IP Address:" + ipAddress + ", Message:" + message;
                 sendNotificationEmail(c, grp, "system.email.notification.template", "New LEAD from website", message);
                 createCombinedAuditLogAndNote(c, c, "New Lead", details, "Did Not Exist", "New Lead");
                 LOGGER.log(Level.INFO, "createFromLead: {0}", new Object[]{details});
@@ -1139,7 +1159,7 @@ public class CustomersController implements Serializable {
             try {
                 getFacade().edit(c);
                 updateCustomersGroupMembership(c);
-                
+
                 ezi.editCustomerDetailsInEziDebit(c);
                 recreateAllAffectedPageModels();
                 JsfUtil.addSuccessMessage(configMapFacade.getConfig("ChangesSaved"));
@@ -1650,18 +1670,20 @@ public class CustomersController implements Serializable {
         if (customersWithoutScheduledPayments == null) {
             ArrayList<CustomerState> acs = new ArrayList<>();
             acs.add(new CustomerState(0, "ACTIVE"));
-            //acs.add(new CustomerState(0, "LEAD"));
+            acs.add(new CustomerState(0, "USER"));
             List<Customers> custListNoPaymentScheduled = new ArrayList<>();
             List<Customers> custList = ejbFacade.findFilteredCustomers(false, "id", acs, showNonUsers, isRefreshFromDB());
 
             try {
                 for (Customers c : custList) {
-                    if (c.getPaymentParameters() != null) {
-                        if (c.getPaymentParameters().getNextScheduledPayment() == null) {
+                    if (isCustomerInRole(c, "LEAD") == false) {
+                        if (c.getPaymentParameters() != null) {
+                            if (c.getPaymentParameters().getNextScheduledPayment() == null) {
+                                custListNoPaymentScheduled.add(c);
+                            }
+                        } else {
                             custListNoPaymentScheduled.add(c);
                         }
-                    } else {
-                        custListNoPaymentScheduled.add(c);
                     }
                 }
 
@@ -1675,6 +1697,60 @@ public class CustomersController implements Serializable {
         }
         return customersWithoutScheduledPayments;
     }
+
+    public PfSelectableDataModel<Customers> getLeads() {
+        if (leads == null) {
+            ArrayList<CustomerState> acs = new ArrayList<>();
+            acs.add(new CustomerState(0, "ACTIVE"));
+            acs.add(new CustomerState(0, "LEAD"));
+            List<Customers> custListOnlyLeads = new ArrayList<>();
+            List<Customers> custList = ejbFacade.findFilteredCustomers(false, "id", acs, showNonUsers, isRefreshFromDB());
+
+            try {
+                for (Customers c : custList) {
+                    if (isCustomerInRole(c, "LEAD") == true) {
+                        custListOnlyLeads.add(c);
+                    }
+                }
+
+            } catch (Exception e) {
+                LOGGER.log(Level.WARNING, "get Leads: Exception", e);
+            }
+            leads = new PfSelectableDataModel<>(custListOnlyLeads);
+            //leads = new PfSelectableDataModel<>(custList);
+        }
+        if (leads == null) {
+            leads = new PfSelectableDataModel<>(new ArrayList<>());
+        }
+        return leads;
+    }
+    public PfSelectableDataModel<Customers> getCustomersOnHold() {
+        if (customersOnHold == null) {
+            ArrayList<CustomerState> acs = new ArrayList<>();
+            acs.add(new CustomerState(0, "ON HOLD"));
+            //acs.add(new CustomerState(0, "LEAD"));
+           // List<Customers> custListOnlyLeads = new ArrayList<>();
+            List<Customers> custList = ejbFacade.findFilteredCustomers(false, "id", acs, showNonUsers, isRefreshFromDB());
+
+          /*  try {
+                for (Customers c : custList) {
+                    if (isCustomerInRole(c, "LEAD") == true) {
+                        custListOnlyLeads.add(c);
+                    }
+                }
+
+            } catch (Exception e) {
+                LOGGER.log(Level.WARNING, "get Leads: Exception", e);
+            }
+            leads = new PfSelectableDataModel<>(custListOnlyLeads);*/
+            customersOnHold = new PfSelectableDataModel<>(custList);
+        }
+        if (customersOnHold == null) {
+            customersOnHold = new PfSelectableDataModel<>(new ArrayList<>());
+        }
+        return customersOnHold;
+    }
+
 
     public PfSelectableDataModel<Notes> getNotesItems() {
         if (notesItems == null) {
@@ -2664,5 +2740,56 @@ public class CustomersController implements Serializable {
                 throw new IllegalArgumentException("object " + object + " is of type " + object.getClass().getName() + "; expected type: " + CustomersController.class.getName());
             }
         }
+    }
+
+    /**
+     * @return the multiSelectedLeads
+     */
+    public Customers[] getMultiSelectedLeads() {
+        return multiSelectedLeads;
+    }
+
+    /**
+     * @param multiSelectedLeads the multiSelectedLeads to set
+     */
+    public void setMultiSelectedLeads(Customers[] multiSelectedLeads) {
+        this.setMultiSelectedLeads(multiSelectedLeads);
+    }
+
+    /**
+     * @return the filteredLeads
+     */
+    public List<Customers> getFilteredLeads() {
+        return filteredLeads;
+    }
+
+    /**
+     * @param filteredLeads the filteredLeads to set
+     */
+    public void setFilteredLeads(List<Customers> filteredLeads) {
+        this.filteredLeads = filteredLeads;
+    }
+
+   
+
+    /**
+     * @param custmersOnHold the custmersOnHold to set
+     */
+    public void setCustmersOnHold(PfSelectableDataModel<Customers> custmersOnHold) {
+        this.customersOnHold = custmersOnHold;
+    }
+
+    /**
+     * @return the filteredCustomersOnHold
+     */
+    public List<Customers> getFilteredCustomersOnHold() {
+        return filteredCustomersOnHold;
+    }
+
+    /**
+     * @param filteredCustomersOnHold the filteredCustomersOnHold to set
+     */
+    public void setFilteredCustomersOnHold(List<Customers> filteredCustomersOnHold) {
+        this.filteredCustomersOnHold = filteredCustomersOnHold;
     }
 }

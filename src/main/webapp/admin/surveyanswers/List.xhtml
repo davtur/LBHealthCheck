@@ -1,148 +1,120 @@
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <ui:composition template="/WEB-INF/template.xhtml" xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:ui="http://java.sun.com/jsf/facelets"
-      xmlns:h="http://java.sun.com/jsf/html"
-      xmlns:f="http://java.sun.com/jsf/core"
-      xmlns:p="http://primefaces.org/ui" >
-
-    
-        <ui:define name="title">
-            <h:outputText value="#{configMapController.getKey('ListSurveyanswersTitle')}"></h:outputText>
-        </ui:define>
-        <ui:define name="body">
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:p="http://primefaces.org/ui" >
 
 
+    <ui:define name="title">
+        <h:outputText value="#{configMapController.getKey('ListSurveyanswersTitle')}"></h:outputText>
+    </ui:define>
+    <ui:define name="body">
 
 
+
+        <div class="layout-portlets-box">
 
             <h:form id="SurveyanswersListForm">
-                <h:panelGroup >
-                <p:outputLabel value="#{configMapController.getKey('CreateSurveyanswersLabel_surveyId')}" for="surveyId" />
-                        <p:selectOneMenu id="surveyId" valueChangeListener="#{surveyanswersController.selectOneMenuValueChangeListener}" converter="surveysControllerConverter"  value="#{surveyanswersController.selectedSurvey}"  label="#{configMapController.getKey('CreateSurveyanswersTitle_surveyId')}">
-                            <f:selectItems value="#{surveysController.itemsAvailableSelectMany}"/>
-                            <p:ajax   update=":SurveyanswersListForm"  />
-                        </p:selectOneMenu>
-                </h:panelGroup>
+                
                 <h:outputText escape="false" value="#{configMapController.getKey('ListSurveyanswersEmpty')}" rendered="#{surveyanswersController.items.rowCount == 0}"/>
-                <h:panelGroup >
-                    <p:dataTable  
-                        id="datalist"  
-                        editable="true" 
-                        value="#{surveyanswersController.items}" 
-                        selection="#{surveyanswersController.selected}" 
-                        rowKey="#{item.id}" 
-                        filteredValue="#{surveyanswersController.filteredItems}"  
-                        widgetVar="surveyanswersControllerTable" 
-                        var="item"  
-                        paginator="true" 
-                        rows="15"  
-                        paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  
-                        rowsPerPageTemplate="5,10,15,20,25,50,100" >
-                        <f:facet name="header">
-                            <p:outputPanel>
-                                <h:outputText value="Search all fields:" />
-                                <h:inputText id="globalFilter" onkeyup="surveyanswersControllerTable.filter()" />
-                            </p:outputPanel>
-                        </f:facet>
-                        <p:ajax event="rowEdit" listener="#{surveyanswersController.onEdit}" update=":growl" oncomplete="surveyanswersControllerTable.filter()" />  
-                        <p:ajax event="rowEditCancel" listener="#{surveyanswersController.onCancel}" update=":growl"  oncomplete="surveyanswersControllerTable.filter()" />  
-                        <p:ajax event="rowSelect"   update="createButton viewButton editButton deleteButton"/>
-                        <p:ajax event="rowUnselect" update="createButton viewButton editButton deleteButton"/>
-                        <p:column selectionMode="single"/>
-                        <p:column sortBy="#{item.id}" filterBy="#{item.id}" headerText="#{configMapController.getKey('ListSurveyanswersTitle_id')}"   >
-                            <p:cellEditor> 
-                                <f:facet name="output">
-                                    <h:outputText value="#{item.id}"/>
+                <div class="Container100 Responsive100">
+                    <div class="ContainerIndent">
+                        <p:dataTable  
+                            id="datalist"  
+                            lazy="true" 
+                            sortBy="#{item.id}"
+                            sortOrder="descending"
+                            value="#{surveyanswersController.lazyModel}" 
+                            selection="#{surveyanswersController.selected}" 
+                            rowKey="#{item.id}" 
+                            filteredValue="#{surveyanswersController.filteredItems}"  
+                            widgetVar="surveyanswersControllerTable" 
+                            var="item"  
+                            rows="15"
+                            selectionMode="single"
+                            scrollable="true"
+                            scrollHeight="400"
+                            scrollRows="50"
+                            liveScroll="true" >
+
+                            <p:ajax event="rowEdit" listener="#{surveyanswersController.onEdit}" update=":growl" oncomplete="surveyanswersControllerTable.filter()" />  
+                            <p:ajax event="rowEditCancel" listener="#{surveyanswersController.onCancel}" update=":growl"  oncomplete="surveyanswersControllerTable.filter()" />  
+                            <p:ajax event="rowSelect"   update="createButton viewButton editButton deleteButton"/>
+                            <p:ajax event="rowUnselect" update="createButton viewButton editButton deleteButton"/>
+                            <!--<p:column selectionMode="single"/>-->
+
+                            <p:column sortBy="#{item.userId}" filterBy="#{item.userId}" filterMatchMode="exact"  headerText="#{configMapController.getKey('ListSurveyanswersTitle_userId')}"   >
+                                <f:facet name="filter">
+                                    <p:selectOneMenu onchange="PF('surveyanswersControllerTable').filter()" filter="true" class="selectOneWidth">
+                                        <!--<f:selectItem itemLabel="Select One" itemValue="#{null}" noSelectionOption="true" />-->
+                                        <f:selectItems value="#{customersController.itemsAvailableSelectOne}" />
+                                    </p:selectOneMenu>
                                 </f:facet>
-                                <f:facet name="input">
-                                    <p:inputText value="#{item.id}" label="#{configMapController.getKey('ListSurveyanswersTitle_id')}" />
+
+                                <h:outputText value="#{item.userId}"/>
+
+                            </p:column>
+
+
+                            <p:column  headerText="#{configMapController.getKey('ListSurveyanswersTitle_surveyId')}"   >
+                                
+                                <h:outputText value="#{item.questionId.surveyId.name}"/>
+
+                            </p:column>
+
+                            <p:column sortBy="#{item.questionId}" filterBy="#{item.questionId}" headerText="#{configMapController.getKey('ListSurveyanswersTitle_questionId')}"   >
+                                <f:facet name="filter">
+                                    <p:selectOneMenu onchange="PF('surveyanswersControllerTable').filter()" filter="true"   class="selectOneWidth">
+                                        <f:selectItem itemLabel="---" itemValue="" noSelectionOption="true" />
+                                        <f:selectItems var="question"  value="#{surveyquestionsController.itemsAvailable}" itemValue="#{question.id}" itemLabel="#{question.question}"/>
+                                    </p:selectOneMenu>
                                 </f:facet>
-                            </p:cellEditor> 
+                                <h:outputText value="#{item.questionId.question}"/>
+                            </p:column>
+
+                            <p:column sortBy="#{item.answer}" filterBy="#{item.answer}" headerText="#{configMapController.getKey('ListSurveyanswersTitle_answer')}"   >
+                                <h:outputText value="#{item.answer}"/>
+                            </p:column>
 
 
-                        </p:column>
-                        <p:column sortBy="#{item.answer}" filterBy="#{item.answer}" headerText="#{configMapController.getKey('ListSurveyanswersTitle_answer')}"   >
-                            <p:cellEditor> 
-                                <f:facet name="output">
-                                    <h:outputText value="#{item.answer}"/>
+                            <p:column sortBy="#{item.answerTypeid}" filterBy="#{item.answerTypeid}" filterMatchMode="exact" headerText="#{configMapController.getKey('ListSurveyanswersTitle_answerTypeid')}"   >
+                                <f:facet name="filter">
+                                    <p:selectOneMenu onchange="PF('surveyanswersControllerTable').filter()" filter="true"   class="selectOneWidth">
+                                        <f:selectItem itemLabel="---" itemValue="" noSelectionOption="true" />
+                                        <f:selectItems var="answer"  value="#{surveyquestiontypesController.itemsAvailable}" itemValue="#{answer.id}" itemLabel="#{answer.type}"/>
+                                    </p:selectOneMenu>
                                 </f:facet>
-                                <f:facet name="input">
-                                    <p:inputText value="#{item.answer}" label="#{configMapController.getKey('ListSurveyanswersTitle_answer')}" />
-                                </f:facet>
-                            </p:cellEditor> 
+                                <h:outputText value="#{item.answerTypeid.type}"/>
+                            </p:column>
+
+                            <p:column sortBy="#{item.id}" filterBy="#{item.id}" headerText="#{configMapController.getKey('ListSurveyanswersTitle_id')}"   >
+                                <h:outputText value="#{item.id}"/>
+                            </p:column>
+
+                  <!--  <p:column rendered="#{surveyanswersController.isUserInRole('ADMIN')}"  headerText="Edit" style="width:50px">  
+                        <p:rowEditor />  
+                    </p:column>  -->
 
 
-                        </p:column>
-                        <p:column sortBy="#{item.questionId.surveyId.name}" filterBy="#{item.questionId.surveyId.name}" headerText="#{configMapController.getKey('ListSurveyanswersTitle_surveyId')}"   >
-                            <p:cellEditor> 
-                                <f:facet name="output">
-                                    <h:outputText value="#{item.questionId.surveyId.name}"/>
-                                </f:facet>
-                                <f:facet name="input">
-                                    <p:inputText value="#{item.questionId.surveyId.name}" label="#{configMapController.getKey('ListSurveyanswersTitle_surveyId')}" />
-                                </f:facet>
-                            </p:cellEditor> 
+                            <f:facet name="footer">
+                                <p:commandButton rendered="#{surveyanswersController.isUserInRole('ADMIN')}" id="createButton" icon="ui-icon-plus"   value="#{configMapController.getKey('Create')}" actionListener="#{surveyanswersController.prepareCreate}" update=":SurveyanswersCreateForm" oncomplete="PF('SurveyanswersCreateDialog').show()"/>
+                                <p:commandButton id="viewButton"   icon="ui-icon-search" value="#{configMapController.getKey('View')}" update=":SurveyanswersViewForm" oncomplete="PF('SurveyanswersViewDialog').show()" disabled="#{empty surveyanswersController.selected}"/>
+                                <p:commandButton rendered="#{surveyanswersController.isUserInRole('ADMIN')}" id="editButton"   icon="ui-icon-pencil" value="#{configMapController.getKey('Edit')}" update=":SurveyanswersEditForm" oncomplete="PF('SurveyanswersEditDialog').show()" disabled="#{empty surveyanswersController.selected}"/>
+                                <p:commandButton rendered="#{surveyanswersController.isUserInRole('ADMIN')}" id="deleteButton" icon="ui-icon-trash"  value="#{configMapController.getKey('Delete')}" actionListener="#{surveyanswersController.destroy}" update=":growl datalist" disabled="#{empty surveyanswersController.selected}"/>
+                            </f:facet>
 
-
-                        </p:column>
-                        <p:column sortBy="#{item.questionId.question}" filterBy="#{item.questionId.question}" headerText="#{configMapController.getKey('ListSurveyanswersTitle_questionId')}"   >
-                            <p:cellEditor> 
-                                <f:facet name="output">
-                                    <h:outputText value="#{item.questionId.question}"/>
-                                </f:facet>
-                                <f:facet name="input">
-                                    <p:inputText value="#{item.questionId.question}" label="#{configMapController.getKey('ListSurveyanswersTitle_questionId')}" />
-                                </f:facet>
-                            </p:cellEditor> 
-
-
-                        </p:column>
-                        <p:column sortBy="#{item.userId}" filterBy="#{item.userId}" headerText="#{configMapController.getKey('ListSurveyanswersTitle_userId')}"   >
-                            <p:cellEditor> 
-                                <f:facet name="output">
-                                    <h:outputText value="#{item.userId}"/>
-                                </f:facet>
-                                <f:facet name="input">
-                                    <p:inputText value="#{item.userId}" label="#{configMapController.getKey('ListSurveyanswersTitle_userId')}" />
-                                </f:facet>
-                            </p:cellEditor> 
-
-
-                        </p:column>
-                        <p:column sortBy="#{item.answerTypeid}" filterBy="#{item.answerTypeid}" headerText="#{configMapController.getKey('ListSurveyanswersTitle_answerTypeid')}"   >
-                            <p:cellEditor> 
-                                <f:facet name="output">
-                                    <h:outputText value="#{item.answerTypeid}"/>
-                                </f:facet>
-                                <f:facet name="input">
-                                    <p:inputText value="#{item.answerTypeid}" label="#{configMapController.getKey('ListSurveyanswersTitle_answerTypeid')}" />
-                                </f:facet>
-                            </p:cellEditor> 
-
-
-                        </p:column>
-                        <p:column rendered="#{surveyanswersController.isUserInRole('ADMIN')}"  headerText="Edit" style="width:50px">  
-                            <p:rowEditor />  
-                        </p:column>  
-
-
-                        <f:facet name="footer">
-                            <p:commandButton rendered="#{surveyanswersController.isUserInRole('ADMIN')}" id="createButton" icon="ui-icon-plus"   value="#{configMapController.getKey('Create')}" actionListener="#{surveyanswersController.prepareCreate}" update=":SurveyanswersCreateForm" oncomplete="PF('SurveyanswersCreateDialog').show()"/>
-                            <p:commandButton id="viewButton"   icon="ui-icon-search" value="#{configMapController.getKey('View')}" update=":SurveyanswersViewForm" oncomplete="PF('SurveyanswersViewDialog').show()" disabled="#{empty surveyanswersController.selected}"/>
-                            <p:commandButton rendered="#{surveyanswersController.isUserInRole('ADMIN')}" id="editButton"   icon="ui-icon-pencil" value="#{configMapController.getKey('Edit')}" update=":SurveyanswersEditForm" oncomplete="PF('SurveyanswersEditDialog').show()" disabled="#{empty surveyanswersController.selected}"/>
-                            <p:commandButton rendered="#{surveyanswersController.isUserInRole('ADMIN')}" id="deleteButton" icon="ui-icon-trash"  value="#{configMapController.getKey('Delete')}" actionListener="#{surveyanswersController.destroy}" update=":growl,datalist" disabled="#{empty surveyanswersController.selected}"/>
-                        </f:facet>
-
-                    </p:dataTable>
-                </h:panelGroup>
+                        </p:dataTable>
+                    </div>
+                </div>
             </h:form>
+        </div>
+        <ui:include src="Create.xhtml"/>
+        <ui:include src="Edit.xhtml"/>
+        <ui:include src="View.xhtml"/>
 
-            <ui:include src="Create.xhtml"/>
-            <ui:include src="Edit.xhtml"/>
-            <ui:include src="View.xhtml"/>
-
-        </ui:define>
-    </ui:composition>
+    </ui:define>
+</ui:composition>
 
 

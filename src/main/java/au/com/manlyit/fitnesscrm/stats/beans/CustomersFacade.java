@@ -42,7 +42,7 @@ public class CustomersFacade extends AbstractFacade<Customers> {
     @PersistenceContext(unitName = "FitnessStatsPU")
     private EntityManager em;
     private static final Logger LOGGER = Logger.getLogger(CustomersFacade.class.getName());
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = true;
 
     @Override
     protected EntityManager getEntityManager() {

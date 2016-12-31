@@ -130,17 +130,17 @@ public class WordpressInterfaceWebService {
 
             if (result.contains("OK") == true) {
                 Customers c = cc.setCustomerDefaults(new Customers());
-                c.setFirstname(firstname);
-                c.setLastname(lastname);
-                c.setEmailAddress(email);
-                c.setTelephone(phoneNumber);
+                c.setFirstname(firstname.trim());
+                c.setLastname(lastname.trim());
+                c.setEmailAddress(email.trim());
+                c.setTelephone(phoneNumber.trim());
 
                 cc.createLeadFromWebservice(c, message, req);
                 cc.updateASingleCustomersPaymentInfo(c);
                 LOGGER.log(Level.INFO, "Webservice call to add New Lead completed successfully:");
             }
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "addNewLead Failed:", e);
+            LOGGER.log(Level.SEVERE, "addNewLead Failed:", e);
             return "ERROR:" + e.getMessage();
         }
 

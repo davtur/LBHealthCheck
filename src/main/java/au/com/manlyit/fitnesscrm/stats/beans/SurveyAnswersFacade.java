@@ -10,14 +10,16 @@ import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import au.com.manlyit.fitnesscrm.stats.db.SurveyAnswers;
 import au.com.manlyit.fitnesscrm.stats.db.SurveyQuestions;
 import java.util.List;
+import java.util.logging.Logger;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
+import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
@@ -32,6 +34,8 @@ public class SurveyAnswersFacade extends AbstractFacade<SurveyAnswers> {
     private EntityManager em;
     @Inject
     private ConfigMapFacade configMapFacade;
+    private static final boolean DEBUG = true;
+    private static final Logger LOGGER = Logger.getLogger(SurveyAnswersFacade.class.getName());
 
     @Override
     protected EntityManager getEntityManager() {
@@ -50,25 +54,29 @@ public class SurveyAnswersFacade extends AbstractFacade<SurveyAnswers> {
             CriteriaQuery<SurveyAnswers> cq = cb.createQuery(SurveyAnswers.class);
             Root<SurveyAnswers> rt = cq.from(SurveyAnswers.class);
             Expression<Customers> cust = rt.get("userId");
+            Join<SurveyAnswers, SurveyQuestions> jn = rt.join("questionId");// join customers.active to customer_state.id
             Expression<SurveyQuestions> question = rt.get("questionId");
             Predicate condition1 = cb.equal(cust, customer);
             Predicate condition2 = cb.equal(question, quest);
             cq.where(cb.and(condition1, condition2));
-            cq.select(rt);
+            cq.select(rt).orderBy(cb.asc(jn.get("questionOrder")));
 
-            Query q = em.createQuery(cq);
-            retList = (List<SurveyAnswers>) q.getResultList();
+            TypedQuery<SurveyAnswers> q = em.createQuery(cq);
+            retList = q.getResultList();
+            if (DEBUG) {
+                debug(q);
+            }
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
         }
-        if(retList == null){
+        if (retList == null) {
             return null;
         }
-        if(retList.isEmpty()){
+        if (retList.isEmpty()) {
             return null;
         }
-        if(retList.size() > 1){
-             JsfUtil.addErrorMessage("Duplicate Survey Answers exist for customer "+ customer.toString() + ". The number of answers returned for the question \""+ quest.getQuestion() + "\" is " + retList.size() + "."  );
+        if (retList.size() > 1) {
+            JsfUtil.addErrorMessage("Duplicate Survey Answers exist for customer " + customer.toString() + ". The number of answers returned for the question \"" + quest.getQuestion() + "\" is " + retList.size() + ".");
         }
 
         return retList.get(0);

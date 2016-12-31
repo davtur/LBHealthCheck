@@ -4,6 +4,9 @@ import au.com.manlyit.fitnesscrm.stats.db.SurveyAnswers;
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PaginationHelper;
 import au.com.manlyit.fitnesscrm.stats.beans.SurveyAnswersFacade;
+import au.com.manlyit.fitnesscrm.stats.classes.util.LazyLoadingDataModel;
+
+
 import au.com.manlyit.fitnesscrm.stats.classes.util.SurveyMap;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import au.com.manlyit.fitnesscrm.stats.db.Notes;
@@ -60,6 +63,7 @@ public class SurveyAnswersController implements Serializable {
     private PaginationHelper pagination;
     private int selectedItemIndex;
     private List<SurveyAnswers> filteredItems;
+     private LazyLoadingDataModel<SurveyAnswers> lazyModel;
     private List<SurveyAnswers> surveyAnswers;
     private SurveyAnswers[] multiSelected;
     private ArrayList<SurveyMap> usersSurveys;
@@ -444,6 +448,15 @@ public class SurveyAnswersController implements Serializable {
         }
     }
 
+    public LazyLoadingDataModel<SurveyAnswers> getLazyModel() {
+        if (lazyModel == null) {
+            lazyModel = new LazyLoadingDataModel<>(ejbFacade);
+            
+       
+        }
+        return lazyModel;
+    }
+    
     public DataModel getItems() {
         if (items == null) {
             items = new ListDataModel(ejbFacade.findAll());
@@ -459,7 +472,7 @@ public class SurveyAnswersController implements Serializable {
             FacesContext context = FacesContext.getCurrentInstance();
             CustomersController customersController = context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
             Collection<SurveyQuestions> lsq = selectedSurvey.getSurveyQuestionsCollection();
-            sortQuestionsByOrderField((List<SurveyQuestions>) lsq);
+            lsq = sortQuestionsByOrderField((List<SurveyQuestions>) lsq);
             for (SurveyQuestions quest : lsq) {
                 SurveyAnswers sa = ejbFacade.findSurveyAnswersByCustomerAndQuestion(customersController.getSelected(), quest);
                 if (sa != null) {

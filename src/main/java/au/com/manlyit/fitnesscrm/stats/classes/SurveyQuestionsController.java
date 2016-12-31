@@ -113,7 +113,7 @@ public class SurveyQuestionsController implements Serializable {
 
     public DataModel<SurveyQuestions> getItems() {
         if (items == null) {
-            items = new ListDataModel<>(new ArrayList<>(sortQuestionsByOrderField((List<SurveyQuestions>) getSelectedSurvey().getSurveyQuestionsCollection())));
+            items = new ListDataModel<>(new ArrayList<>(getSelectedSurvey().getSurveyQuestionsCollection()));
         }
         return items;
     }
@@ -353,7 +353,7 @@ public class SurveyQuestionsController implements Serializable {
         try {
 
             List<SurveyQuestions> lsq = new ArrayList<>(getSelectedSurvey().getSurveyQuestionsCollection());
-            sortQuestionsByOrderField(lsq);
+            lsq = sortQuestionsByOrderField(lsq);
             // if (lsa == null || lsa.isEmpty()) {// the survey hasn't been taken so add blank answers
             for (SurveyQuestions quest : lsq) {
                 // ArrayList<SurveyAnswers> lsa = new ArrayList<>(quest.getSurveyAnswersCollection());
@@ -446,8 +446,10 @@ public class SurveyQuestionsController implements Serializable {
     }
 
     public void destroy() {
-        getSelectedSurvey().getSurveyQuestionsCollection().remove(getSelected());
+        //getSelectedSurvey().getSurveyQuestionsCollection().remove(getSelected());
         try {
+            
+            getFacade().remove(current);
             surveysFacade.edit(getSelectedSurvey());
             current = null;
             subItems = null;
