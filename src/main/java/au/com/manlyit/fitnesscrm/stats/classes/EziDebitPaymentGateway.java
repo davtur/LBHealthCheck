@@ -1509,7 +1509,7 @@ public class EziDebitPaymentGateway implements Serializable {
                     Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.WARNING, "Unkown ezidebit status code: {0}", new Object[]{statusCode});
                 }
             } else {
-                LOGGER.log(Level.FINE, "isTheCustomerProvisionedInThePaymentGateway - PaymentParameters are null returning false by default. ");
+                LOGGER.log(Level.INFO, "isTheCustomerProvisionedInThePaymentGateway - PaymentParameters are null returning false for {0}. ", new Object[]{selectedCustomer.getUsername()});
 
             }
             //selectedCustomer = cust;
@@ -2042,6 +2042,9 @@ public class EziDebitPaymentGateway implements Serializable {
             if (key.contains("SettlementReport")) {
                 processSettlementReport(pgr);
             }
+             if (key.contains("EmailAlert")) {
+                processEmailAlert(pgr);
+            }
 
         } catch (CancellationException ex) {
             LOGGER.log(Level.WARNING, key + ":", ex);
@@ -2068,6 +2071,11 @@ public class EziDebitPaymentGateway implements Serializable {
         getCustomersController().recreateModel();
 
         LOGGER.log(Level.INFO, "Session BEAN processSettlementReport completed");
+    }
+     private void processEmailAlert(PaymentGatewayResponse pgr) {
+
+       
+        LOGGER.log(Level.INFO, "Session BEAN -- Email Alert processing completed");
     }
 
     private void processGetPayments(PaymentGatewayResponse pgr) {

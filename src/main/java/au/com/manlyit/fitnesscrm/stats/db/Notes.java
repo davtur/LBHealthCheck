@@ -29,6 +29,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import org.eclipse.persistence.annotations.Cache;
 import org.eclipse.persistence.annotations.CacheCoordinationType;
 import org.eclipse.persistence.annotations.CacheType;
+import org.eclipse.persistence.annotations.DatabaseChangeNotificationType;
 import org.eclipse.persistence.config.CacheIsolationType;
 
 /**
@@ -40,8 +41,10 @@ import org.eclipse.persistence.config.CacheIsolationType;
         size = 64000, // Use 64,000 as the initial cache size.
         //expiry = 36000000, // 10 minutes // by default it never expires which is what we want for this table
         coordinationType = CacheCoordinationType.INVALIDATE_CHANGED_OBJECTS,
+        databaseChangeNotificationType = DatabaseChangeNotificationType.INVALIDATE,
         isolation = CacheIsolationType.SHARED
 )
+
 @Entity
 @Table(name = "notes")
 @XmlRootElement

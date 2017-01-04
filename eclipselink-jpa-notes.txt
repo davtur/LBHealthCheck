@@ -1,0 +1,29 @@
+
+##
+Adding or editing a child in a many to one relationship with parent entity.:
+
+example:
+# you can add delete modify children in the arrray 
+
+
+ List<QuestionnaireMap> qmc = new ArrayList<>(cust.getQuestionnaireMapCollection());
+
+ QuestionnaireMap qmNew = new QuestionnaireMap(0, isDefaultSurvey);
+                qmNew.setCustomerId(cust);
+                qmNew.setSurveysId(s);
+                qmNew.setQuestionnaireCompleted(false);
+                qmc.add(qmNew);
+                cust.setQuestionnaireMapCollection(qmc);
+
+  cust.setQuestionnaireMapCollection(qmc);
+  ejbFacade.edit(cust);
+
+
+
+#delete duplicates from questionare table without deleting completed forms.
+
+SELECT * FROM fitnessStats.questionnaire_map;
+
+select n1.* FROM fitnessStats.questionnaire_map n1, fitnessStats.questionnaire_map n2 WHERE n1.id > n2.id AND (n1.surveys_id = n2.surveys_id AND n1.customer_id = n2.customer_id) AND n1.questionnaire_completed = 0;
+
+DELETE n1 FROM fitnessStats.questionnaire_map n1, fitnessStats.questionnaire_map n2 WHERE n1.id > n2.id AND (n1.surveys_id = n2.surveys_id AND n1.customer_id = n2.customer_id) AND n1.questionnaire_completed = 0;

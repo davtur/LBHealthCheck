@@ -99,7 +99,7 @@
                                 <h:panelGroup  >
 
                                     <h:outputText  rendered="#{customersController.customersWithoutScheduledPayments != null}" value=" Records : #{customersController.customersWithoutScheduledPayments.rowCount}"/>
-                                    <h:outputText  value="   (Filtered Records : #{customersController.filteredCustomersWithoutScheduledPayments.size()})">
+                                    <h:outputText  rendered="#{customersController.filteredCustomersWithoutScheduledPayments != null}" value="   (Filtered Records : #{customersController.filteredCustomersWithoutScheduledPayments.size()})">
 
                                     </h:outputText>
 
@@ -202,8 +202,8 @@
                                 <h:outputText value="   " />
                                 <h:panelGroup  >
 
-                                    <h:outputText  rendered="#{customersController.customersWithoutScheduledPayments != null}" value=" Records : #{customersController.customersWithoutScheduledPayments.rowCount}"/>
-                                    <h:outputText  value="   (Filtered Records : #{customersController.filteredCustomersWithoutScheduledPayments.size()})">
+                                    <h:outputText  rendered="#{customersController.leads != null}" value=" Records : #{customersController.leads.rowCount}"/>
+                                    <h:outputText  rendered="#{customersController.filteredLeads != null}" value="   (Filtered Records : #{customersController.filteredLeads.size()})">
 
                                     </h:outputText>
 
@@ -279,8 +279,8 @@
 <!-- ON HOLD -->
 
             <div class="Container100">
-                <h:outputText escape="false" value="#{configMapController.getKey('ListCustomersEmpty')}" rendered="#{customersController.leads.rowCount == 0}"/>
-                <h:panelGroup rendered="#{customersController.leads.rowCount > 0}">
+                <h:outputText escape="false" value="#{configMapController.getKey('ListCustomersEmpty')}" rendered="#{customersController.customersOnHold.rowCount == 0}"/>
+                <h:panelGroup rendered="#{customersController.customersOnHold.rowCount > 0}">
                     <p:panel id="dashboardOnHold" header="#{configMapController.getKey('DashboardCustomersOnHoldPanelLabel')}">  
                         <p:dataTable id="customersOnHoldTableList" 
 
@@ -306,8 +306,8 @@
                                 <h:outputText value="   " />
                                 <h:panelGroup  >
 
-                                    <h:outputText  rendered="#{customersController.customersWithoutScheduledPayments != null}" value=" Records : #{customersController.customersWithoutScheduledPayments.rowCount}"/>
-                                    <h:outputText  value="   (Filtered Records : #{customersController.filteredCustomersWithoutScheduledPayments.size()})">
+                                    <h:outputText  rendered="#{customersController.customersOnHold != null}" value=" Records : #{customersController.customersOnHold.rowCount}"/>
+                                    <h:outputText  rendered="#{customersController.filteredCustomersOnHold != null}" value="   (Filtered Records : #{customersController.filteredCustomersOnHold.size()})">
 
                                     </h:outputText>
 

@@ -333,19 +333,110 @@ public class CustomersFacade extends AbstractFacade<Customers> {
     public List<Customers> findAllActiveCustomersAndStaff(boolean sortAsc) {
         ArrayList<CustomerState> acs = new ArrayList<>();
         acs.add(new CustomerState(0, "ACTIVE"));
+         ArrayList<String> types = new ArrayList<>();
+        types.add("USER");
+        types.add("LEAD");
+        types.add("TRAINER");
+        types.add("ADMIN");
+        types.add("DEVELOPER");
         String sortField = "firstname";
-        return findFilteredCustomers(sortAsc, sortField, acs, true, false);
+        return findFilteredCustomers(sortAsc, sortField, acs, types, false);
     }
 
     public List<Customers> findAllActiveCustomers(boolean sortAsc) {
         ArrayList<CustomerState> acs = new ArrayList<>();
         acs.add(new CustomerState(0, "ACTIVE"));
+         ArrayList<String> types = new ArrayList<>();
+        types.add("USER");
         String sortField = "firstname";
-        return findFilteredCustomers(sortAsc, sortField, acs, false, false);
+        return findFilteredCustomers(sortAsc, sortField, acs, types, false);
     }
 
     //public List<Customers> findFilteredCustomers(boolean sortAsc, CustomerState[] selectedCustomerStates, boolean showStaff, boolean bypassCache) {
-    public List<Customers> findFilteredCustomers(boolean sortAsc, String sortField, List<CustomerState> selectedCustomerStates, boolean showStaff, boolean bypassCache) {
+    public List<Customers> findFilteredCustomers(boolean sortAsc, String sortField, List<CustomerState> selectedCustomerStates, List<String> selectedCustomerTypes, boolean bypassCache) {
+        List<Customers> retList = null;
+        if (selectedCustomerStates == null || selectedCustomerStates.isEmpty()) {
+            return new ArrayList<>();
+        }
+        try {
+            ArrayList<Predicate> predicatesList = new ArrayList<>();
+            ArrayList<Predicate> predicatesList2 = new ArrayList<>();
+            CriteriaBuilder cb = em.getCriteriaBuilder();
+
+            CriteriaQuery<Customers> cq = cb.createQuery(Customers.class);
+            Root<Customers> rt = cq.from(Customers.class);
+            cq.select(rt);
+
+            Subquery<String> subquery = cq.subquery(String.class);
+            Root<Groups> fromGroups = subquery.from(Groups.class);
+            Expression<String> subUser = fromGroups.get("username").get("username");
+            subquery.select(subUser);
+
+            Join<Customers, CustomerState> jn = rt.join("active");// join customers.active to customer_state.id
+
+            Expression<String> custState = jn.get("customerState");
+            Expression<String> groupName = fromGroups.get("groupname");
+            Expression<String> user = rt.get("username");
+
+         //   predicatesList2.add(cb.equal(groupName, "TRAINER"));
+         //   predicatesList2.add(cb.equal(groupName, "ADMIN"));
+          //  predicatesList2.add(cb.equal(groupName, "DEVELOPER"));
+
+            for (CustomerState cs : selectedCustomerStates) {
+                predicatesList.add(cb.equal(custState, cs.getCustomerState()));
+            }
+            for (String ct : selectedCustomerTypes) {
+                 predicatesList2.add(cb.equal(groupName, ct));
+            }
+            
+          //  if (showStaff == false) {
+
+          //      subquery.where(cb.or(predicatesList2.<Predicate>toArray(new Predicate[predicatesList2.size()])));
+         //       Predicate pred = cb.not(user.in(subquery));
+         //       cq.where(cb.and(cb.or(predicatesList.<Predicate>toArray(new Predicate[predicatesList.size()])), pred));
+         //   } 
+            //else {
+             //   cq.where(cb.or(predicatesList.<Predicate>toArray(new Predicate[predicatesList.size()])));
+           // }
+           // else {
+                subquery.where(cb.or(predicatesList2.<Predicate>toArray(new Predicate[predicatesList2.size()])));
+                Predicate pred = user.in(subquery);
+                cq.where(cb.and(cb.or(predicatesList.<Predicate>toArray(new Predicate[predicatesList.size()])),pred));
+          //  }
+            
+            Expression<String> express = rt.get(sortField);
+            if (sortAsc) {
+                cq.orderBy(cb.asc(express));
+            } else {
+                cq.orderBy(cb.desc(express));
+            }
+            TypedQuery<Customers> q = em.createQuery(cq);
+            if (bypassCache) {
+                q.setHint("javax.persistence.cache.retrieveMode", "BYPASS");
+            } else // q.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase);
+            if (DEBUG) {
+                debug(q);
+            }
+
+            retList = q.getResultList();
+            // for debugging
+            // Session session = getEntityManager().unwrap(JpaEntityManager.class).getActiveSession();
+            // DatabaseQuery databaseQuery = ((EJBQueryImpl) q).getDatabaseQuery();
+            // databaseQuery.prepareCall(session, new DatabaseRecord());
+            // String sqlString = databaseQuery.getSQLString();
+            //This SQL will contain ? for parameters. To get the SQL translated with the arguments you need a DatabaseRecord with the parameter values.
+            // String sqlString2 = databaseQuery.getTranslatedSQLString(session, recordWithValues);
+            // LOGGER.log(Level.INFO, "CustomersFacade.findFilteredCustomers SQL Query String: {0}  -----------------Records Found:{1},", new Object[]{sqlString, retList.size()});
+
+        } catch (Exception e) {
+            JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
+        }
+        return retList;
+    }
+
+    /*  
+    // old filtered customers method before splitting groups and state
+       public List<Customers> findFilteredCustomers(boolean sortAsc, String sortField, List<CustomerState> selectedCustomerStates, boolean showStaff, boolean bypassCache) {
         List<Customers> retList = null;
         if (selectedCustomerStates == null || selectedCustomerStates.isEmpty()) {
             return new ArrayList<>();
@@ -377,6 +468,7 @@ public class CustomersFacade extends AbstractFacade<Customers> {
             for (CustomerState cs : selectedCustomerStates) {
                 predicatesList.add(cb.equal(custState, cs.getCustomerState()));
             }
+            
             if (showStaff == false) {
 
                 subquery.where(cb.or(predicatesList2.<Predicate>toArray(new Predicate[predicatesList2.size()])));
@@ -422,7 +514,8 @@ public class CustomersFacade extends AbstractFacade<Customers> {
         return retList;
     }
 
-    /*   public List<Customers> findFilteredCustomers(boolean sortAsc, CustomerState[] selectedCustomerStates, boolean showTrainers, boolean bypassCache) {
+    
+    public List<Customers> findFilteredCustomers(boolean sortAsc, CustomerState[] selectedCustomerStates, boolean showTrainers, boolean bypassCache) {
      List<Customers> retList = null;
      if (selectedCustomerStates == null || selectedCustomerStates.length == 0) {
      return new ArrayList<>();

@@ -130,6 +130,7 @@
                     <h:outputText  rendered="#{pay.paymentStatus == 'D'}"  value="#{pay.paymentStatus} -- Dis.Insufficient Funds" style="color: red"/>
                     <h:outputText  rendered="#{pay.paymentStatus == 'F'}"  value="#{pay.paymentStatus} -- Dishonoured" style="color: red"/>
                     <h:outputText  rendered="#{pay.paymentStatus == 'X'}"  value="#{pay.paymentStatus} -- Deleted In PGW" style="color: red"/>
+                    <h:outputText  rendered="#{pay.paymentStatus == 'H'}"  value="#{pay.paymentStatus} -- On Hold In PGW" style="color: orange"/>
                     <h:outputText  rendered="#{pay.paymentStatus == 'Y'}"  value="#{pay.paymentStatus} -- Delete Requested" style="color: orange"/>
                 </p:column>
 

@@ -48,15 +48,20 @@
                 <div class="Container100 TexAlCenter" >
 
                     <div class=" BorderedBox  TexAlCenter " >
-                        <p:outputLabel value="#{configMapController.getKey('ListCustomersStatusButton')}" for="selectedStateCheckbox"/>
+                        <!--<p:outputLabel value="#{configMapController.getKey('ListCustomersStatusButton')}" for="selectedStateCheckbox"/>-->
                         <p:selectManyCheckbox id="selectedStateCheckbox"  value="#{customersController.selectedCustomerStates}" label="Show Cancelled"  layout="lineDirection" valueChangeListener="#{customersController.selectShowCancelledBooleanChangeListener}"  >
                             <f:selectItems value="#{customersController.customerStateList}" var="cs" itemLabel="#{cs.customerState}" itemValue="#{cs}" />
                             <p:ajax event="change"   update=":tv:customerslistForm1"  /> 
                         </p:selectManyCheckbox>
-                        <p:selectBooleanCheckbox id="showNonUsers"   value="#{customersController.showNonUsers}" >  
+                        <p:selectManyCheckbox id="selectedTypeCheckbox"  value="#{customersController.selectedCustomerTypes}" label="Show Cancelled"  layout="lineDirection" valueChangeListener="#{customersController.selectShowCancelledBooleanChangeListener}"  >
+                            <f:selectItems value="#{customersController.customerTypesList}" var="ctype" itemLabel="#{ctype}" itemValue="#{ctype}" />
+                            <p:ajax event="change"   update=":tv:customerslistForm1"  /> 
+                        </p:selectManyCheckbox>
+
+                       <!-- <p:selectBooleanCheckbox id="showNonUsers"   value="#{customersController.showNonUsers}" >  
                             <p:ajax update=":customerslistForm1"   />  
                         </p:selectBooleanCheckbox> 
-                        <p:outputLabel  value="TRAINERS" for="showNonUsers"/>
+                        <p:outputLabel  value="TRAINERS" for="showNonUsers"/>-->
                     </div>
 
                 </div>

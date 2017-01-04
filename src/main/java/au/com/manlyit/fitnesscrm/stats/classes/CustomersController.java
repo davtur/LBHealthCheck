@@ -16,6 +16,7 @@ import au.com.manlyit.fitnesscrm.stats.db.ContractorRates;
 import au.com.manlyit.fitnesscrm.stats.db.CustomerState;
 import au.com.manlyit.fitnesscrm.stats.db.Groups;
 import au.com.manlyit.fitnesscrm.stats.db.Notes;
+import au.com.manlyit.fitnesscrm.stats.db.Participants;
 import au.com.manlyit.fitnesscrm.stats.db.PaymentParameters;
 import au.com.manlyit.fitnesscrm.stats.db.Plan;
 import au.com.manlyit.fitnesscrm.stats.db.QuestionnaireMap;
@@ -27,6 +28,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Iterator;
@@ -72,7 +74,8 @@ public class CustomersController implements Serializable {
     }
 
     /**
-     * @param multiSelectedCustomersOnHold the multiSelectedCustomersOnHold to set
+     * @param multiSelectedCustomersOnHold the multiSelectedCustomersOnHold to
+     * set
      */
     public void setMultiSelectedCustomersOnHold(Customers[] multiSelectedCustomersOnHold) {
         this.multiSelectedCustomersOnHold = multiSelectedCustomersOnHold;
@@ -91,13 +94,15 @@ public class CustomersController implements Serializable {
     private static final String paymentGateway = "EZIDEBIT";
     //private CustomerState[] selectedCustomerStates;
     private List<CustomerState> selectedCustomerStates;
+    private List<String> selectedCustomerTypes;
     private List<CustomerState> customerStateList;
+    private List<String> customerTypesList;
     private List<Groups> customerGroupsList;
     private List<Groups> newCustomerGroupsList;
     private PfSelectableDataModel<Customers> items = null;
     private PfSelectableDataModel<Customers> customersWithoutScheduledPayments = null;
     private PfSelectableDataModel<Customers> leads = null;
-     private PfSelectableDataModel<Customers> customersOnHold = null;
+    private PfSelectableDataModel<Customers> customersOnHold = null;
     private Date testTime;
 
     private PfSelectableDataModel<Notes> notesItems = null;
@@ -341,6 +346,7 @@ public class CustomersController implements Serializable {
 
         List<Surveys> surveyList = surveysFacade.findAll();
         String defaulSurveyName = configMapFacade.getConfig("DefaultSurveyName");
+        List<QuestionnaireMap> qmc = new ArrayList<>(cust.getQuestionnaireMapCollection());
         for (Surveys s : surveyList) {
 
             boolean foundSurveyMap = false;
@@ -349,7 +355,7 @@ public class CustomersController implements Serializable {
                 isDefaultSurvey = true;
             }
 
-            Collection<QuestionnaireMap> qmc = cust.getQuestionnaireMapCollection();
+            //Collection<QuestionnaireMap> qmc = cust.getQuestionnaireMapCollection();
             if (qmc != null) {
                 if (qmc.isEmpty() == false) {
                     for (QuestionnaireMap qm : qmc) {
@@ -361,18 +367,23 @@ public class CustomersController implements Serializable {
 
             }
             if (foundSurveyMap == false) {
+                //List<QuestionnaireMap> maps = ;
+
                 QuestionnaireMap qmNew = new QuestionnaireMap(0, isDefaultSurvey);
                 qmNew.setCustomerId(cust);
                 qmNew.setSurveysId(s);
                 qmNew.setQuestionnaireCompleted(false);
-                cust.getQuestionnaireMapCollection().add(qmNew);
+                qmc.add(qmNew);
+                cust.setQuestionnaireMapCollection(qmc);
                 //questionnaireMapFacade.create(qmNew);
-                ejbFacade.editAndFlush(cust);
+                //ejbFacade.edit(cust);
 
-                LOGGER.log(Level.INFO, "A new QuestionnaireMap was created for survey {1} and Customer {0}.", new Object[]{cust.getUsername(), s.getName()});
+                LOGGER.log(Level.INFO, "A new QuestionnaireMap was created for survey  {1} and Customer {0}. Is Default {2}", new Object[]{cust.getUsername(), s.getName(), isDefaultSurvey});
             }
 
         }
+        cust.setQuestionnaireMapCollection(qmc);
+        ejbFacade.edit(cust);
 
     }
 
@@ -562,7 +573,7 @@ public class CustomersController implements Serializable {
                 @Override
                 public PfSelectableDataModel<Customers> createPageDataModel() {
 
-                    return new PfSelectableDataModel<>(ejbFacade.findFilteredCustomers(true, "firstname", selectedCustomerStates, showNonUsers, true));
+                    return new PfSelectableDataModel<>(ejbFacade.findFilteredCustomers(true, "firstname", selectedCustomerStates, selectedCustomerTypes, true));
 
                 }
 
@@ -991,17 +1002,21 @@ public class CustomersController implements Serializable {
             c.setId(0);
             Groups grp = new Groups(0, group);
             //Check if they already Exist
-            Customers custCheck = ejbFacade.findCustomerByName(c.getFirstname(), c.getLastname());
+            Customers custCheck = ejbFacade.findCustomerByName(c.getFirstname().trim(), c.getLastname().trim());
             if (custCheck != null) {
                 sendNotificationEmail(c, grp, "system.email.notification.template", "New LEAD from website, customer already exists in DB. They may be cancelled or on-hold.", message);
             } else if (group.contains("LEAD")) {
                 // new lead from contact form
 
-                c.setUsername(getUniqueUsername(c.getFirstname() + "." + c.getLastname()));
+                c.setUsername(getUniqueUsername(c.getFirstname().trim() + "." + c.getLastname().trim()));
                 getFacade().create(c);
 
                 grp.setUsername(c);
-                ejbGroupsFacade.create(grp);
+                List<Groups> gl = new ArrayList<>();
+                gl.add(grp);
+                c.setGroupsCollection(gl);
+                getFacade().edit(c);
+                //ejbGroupsFacade.create(grp);
                 if (isWebserviceCall == false) {
                     createDefaultCustomerProfilePicture(c);
                 }
@@ -1027,7 +1042,11 @@ public class CustomersController implements Serializable {
                 // this cant be done from teh webservice due to contect lookup below
                 getFacade().create(c);
                 grp.setUsername(c);
-                ejbGroupsFacade.create(grp);
+                List<Groups> gl = new ArrayList<>();
+                gl.add(grp);
+                c.setGroupsCollection(gl);
+                getFacade().edit(c);
+                //ejbGroupsFacade.create(grp);
                 createDefaultCustomerProfilePicture(c);
                 String details = "Name: " + c.getFirstname() + ", Email:" + c.getEmailAddress() + ", Phone:" + c.getTelephone() + ", Username:" + c.getUsername() + ", Group:" + group + ", IP Address:" + ipAddress + ".Customer Onboard email sent";
                 FacesContext context = FacesContext.getCurrentInstance();
@@ -1656,7 +1675,7 @@ public class CustomersController implements Serializable {
     public PfSelectableDataModel<Customers> getItems() {
         if (items == null) {
 
-            items = new PfSelectableDataModel<>(ejbFacade.findFilteredCustomers(false, "id", selectedCustomerStates, showNonUsers, isRefreshFromDB()));
+            items = new PfSelectableDataModel<>(ejbFacade.findFilteredCustomers(false, "id", selectedCustomerStates, selectedCustomerTypes, isRefreshFromDB()));
             setRefreshFromDB(false);
             // items = getPagination().createPageDataModel();
         }
@@ -1671,8 +1690,11 @@ public class CustomersController implements Serializable {
             ArrayList<CustomerState> acs = new ArrayList<>();
             acs.add(new CustomerState(0, "ACTIVE"));
             acs.add(new CustomerState(0, "USER"));
+            ArrayList<String> types = new ArrayList<>();
+            types.add("USER");
+
             List<Customers> custListNoPaymentScheduled = new ArrayList<>();
-            List<Customers> custList = ejbFacade.findFilteredCustomers(false, "id", acs, showNonUsers, isRefreshFromDB());
+            List<Customers> custList = ejbFacade.findFilteredCustomers(false, "id", acs, types, isRefreshFromDB());
 
             try {
                 for (Customers c : custList) {
@@ -1702,9 +1724,12 @@ public class CustomersController implements Serializable {
         if (leads == null) {
             ArrayList<CustomerState> acs = new ArrayList<>();
             acs.add(new CustomerState(0, "ACTIVE"));
-            acs.add(new CustomerState(0, "LEAD"));
+            ArrayList<String> types = new ArrayList<>();
+
+            types.add("LEAD");
+
             List<Customers> custListOnlyLeads = new ArrayList<>();
-            List<Customers> custList = ejbFacade.findFilteredCustomers(false, "id", acs, showNonUsers, isRefreshFromDB());
+            List<Customers> custList = ejbFacade.findFilteredCustomers(false, "id", acs, types, isRefreshFromDB());
 
             try {
                 for (Customers c : custList) {
@@ -1724,15 +1749,16 @@ public class CustomersController implements Serializable {
         }
         return leads;
     }
+
     public PfSelectableDataModel<Customers> getCustomersOnHold() {
         if (customersOnHold == null) {
             ArrayList<CustomerState> acs = new ArrayList<>();
             acs.add(new CustomerState(0, "ON HOLD"));
-            //acs.add(new CustomerState(0, "LEAD"));
-           // List<Customers> custListOnlyLeads = new ArrayList<>();
-            List<Customers> custList = ejbFacade.findFilteredCustomers(false, "id", acs, showNonUsers, isRefreshFromDB());
+            ArrayList<String> types = new ArrayList<>();
+            types.add("USER");
+            List<Customers> custList = ejbFacade.findFilteredCustomers(false, "id", acs, types, isRefreshFromDB());
 
-          /*  try {
+            /*  try {
                 for (Customers c : custList) {
                     if (isCustomerInRole(c, "LEAD") == true) {
                         custListOnlyLeads.add(c);
@@ -1750,7 +1776,6 @@ public class CustomersController implements Serializable {
         }
         return customersOnHold;
     }
-
 
     public PfSelectableDataModel<Notes> getNotesItems() {
         if (notesItems == null) {
@@ -2327,6 +2352,25 @@ public class CustomersController implements Serializable {
         return customerStateList;
     }
 
+    public List<String> getCustomerTypesList() {
+        if (customerTypesList == null) {
+
+            customerTypesList = ejbGroupsFacade.getGroups();
+            customerTypesList.remove("DEVELOPER");
+            selectedCustomerTypes = new ArrayList<>();
+            for (String cs : customerTypesList) {
+                if (cs.contains("USER")) {
+                    selectedCustomerTypes.add(cs);
+                }
+                // if (cs.getCustomerState().contains("ON HOLD")) {
+                //     selectedCustomerStates[1] = cs;
+                //  }
+
+            }
+        }
+        return Collections.unmodifiableList(customerTypesList);
+    }
+
     /**
      * @return the selectedCustomerStates
      */
@@ -2770,8 +2814,6 @@ public class CustomersController implements Serializable {
         this.filteredLeads = filteredLeads;
     }
 
-   
-
     /**
      * @param custmersOnHold the custmersOnHold to set
      */
@@ -2791,5 +2833,26 @@ public class CustomersController implements Serializable {
      */
     public void setFilteredCustomersOnHold(List<Customers> filteredCustomersOnHold) {
         this.filteredCustomersOnHold = filteredCustomersOnHold;
+    }
+
+    /**
+     * @param customerTypesList the customerTypesList to set
+     */
+    public void setCustomerTypesList(List<String> customerTypesList) {
+        this.customerTypesList = customerTypesList;
+    }
+
+    /**
+     * @return the selectedCustomerTypes
+     */
+    public List<String> getSelectedCustomerTypes() {
+        return selectedCustomerTypes;
+    }
+
+    /**
+     * @param selectedCustomerTypes the selectedCustomerTypes to set
+     */
+    public void setSelectedCustomerTypes(List<String> selectedCustomerTypes) {
+        this.selectedCustomerTypes = selectedCustomerTypes;
     }
 }

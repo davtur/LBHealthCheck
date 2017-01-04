@@ -34,6 +34,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -812,6 +813,9 @@ public class FutureMapEJB implements Serializable {
                 if (key.contains("IsSystemLocked")) {
                     processIsSystemLocked(sessionId, ft);
                 }
+                 if (key.contains("EmailAlert")) {
+                    processEmailAlert(sessionId, ft);
+                }
 
             } catch (Exception ex) {
                 LOGGER.log(Level.WARNING, "Key:" + key + ", Future Map: processCompletedAsyncJobs", ex);
@@ -1024,6 +1028,30 @@ public class FutureMapEJB implements Serializable {
             sendMessage(sessionId, "Payment Gateway", "The operation failed!.");
         }
         LOGGER.log(Level.INFO, "processIsSystemLocked completed");
+    }
+    
+     private synchronized void processEmailAlert(String sessionId, Future<?> ft) {
+        boolean result = false;
+        PaymentGatewayResponse pgr = null;
+        try {
+            // if successful it should return a Customers Object from the getData method;
+            Object resultObject = ft.get();
+            if (resultObject.getClass() == PaymentGatewayResponse.class) {
+                pgr = (PaymentGatewayResponse) resultObject;
+                result = pgr.isOperationSuccessful();
+            }
+        } catch (InterruptedException | ExecutionException ex) {
+            Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, "Processing Async Results", ex);
+        }
+        if (result == true) {
+            storeResponseForSessionBeenToRetrieve("EmailAlert", sessionId, pgr);
+            sendMessage(sessionId, "Payment Gateway Alert", "Successfully sent Alert Email to Admin users.");
+
+        } else {
+            storeResponseForSessionBeenToRetrieve("EmailAlert", sessionId, pgr);
+            sendMessage(sessionId, "Payment Gateway", "Failed to Send Alert Email!.");
+        }
+        LOGGER.log(Level.INFO, "processEmailAlert completed");
     }
 
     private synchronized void processGetPaymentExchangeVersion(String sessionId, Future<?> ft) {
@@ -1476,6 +1504,9 @@ public class FutureMapEJB implements Serializable {
                                             //String ref = p.getId().toString();
                                             if (p.getCreateDatetime().before(testDate)) {// make sure we don't delate payments that have just been added and may still be being processed by the gateway. i.e they've been put into our DB but havn't been put into the payment gateway schedule yet
                                                 p.setPaymentStatus(PaymentStatus.MISSING_IN_PGW.value());
+                                                if(cust.getPaymentParameters().getStatusDescription().toUpperCase().contains("HOLD")){
+                                                     p.setPaymentStatus(PaymentStatus.REJECTED_CUST_ON_HOLD.value());
+                                                }
                                                 paymentsFacade.edit(p);
                                             }
                                             //AsyncJob aj = new AsyncJob("DeletePayment", paymentBean.deletePaymentByRef(cust, ref, "system", getDigitalKey()));
@@ -1884,7 +1915,7 @@ public class FutureMapEJB implements Serializable {
         LOGGER.log(Level.INFO, "FutureMap - processAddPaymentResult started");
         PaymentGatewayResponse pgr = null;
         try {
-            // if successful it should return a Customers Object from the getData method;
+            // if successful it should return a Payment Object from the getData method;
             Object resultObject = ft.get();
             if (resultObject.getClass() == PaymentGatewayResponse.class) {
                 pgr = (PaymentGatewayResponse) resultObject;
@@ -1897,8 +1928,8 @@ public class FutureMapEJB implements Serializable {
                 paymentRef = pgr.getTextData();
 
                 if (paymentRef == null) {
-                    //this should always be set and will be the primary key of teh row in the payments table
-                    LOGGER.log(Level.WARNING, "processAddPaymentResult FAILED - RESULT IS NULL or Empty");
+                    //this should always be set and will be the primary key of the row in the payments table
+                    LOGGER.log(Level.SEVERE, "processAddPaymentResult FAILED - RESULT IS NULL or Empty. This should never happen");
                     return;
                 }
                 if (result == false) {
@@ -1908,7 +1939,7 @@ public class FutureMapEJB implements Serializable {
                     try {
                         id = Integer.parseInt(paymentRef);
                     } catch (NumberFormatException numberFormatException) {
-                        LOGGER.log(Level.INFO, "processAddPaymentResult FAILED - PaymentReference could not be converted to a number. It should be the primary key of teh payments table row ", paymentRef);
+                        LOGGER.log(Level.SEVERE, "processAddPaymentResult FAILED - PaymentReference could not be converted to a number. It should be the primary key of the payments table row. This is the string:", paymentRef);
                     }
                     //Payments pay = paymentsFacade.findPaymentById(id, false);
                     if (pay != null) {
@@ -1918,7 +1949,7 @@ public class FutureMapEJB implements Serializable {
                                 pay.setBankReturnCode("");
                             }
                             if (pay.getBankReturnCode().trim().isEmpty()) {
-                                // firts attempt at retry so set counter to 0
+                                // first attempt at retry so set counter to 0
                                 pay.setBankReturnCode("0");
                             } else {
                                 int retries = Integer.parseInt(pay.getBankReturnCode().trim());
@@ -1926,15 +1957,30 @@ public class FutureMapEJB implements Serializable {
                                 pay.setBankReturnCode(Integer.toString(retries));
                                 paymentsFacade.editAndFlush(pay);
                                 if (retries < 10) {
+                                    int sleeptime = 1000 * retries * retries;
+                                    try {
+                                        LOGGER.log(Level.WARNING, "processAddPaymentResult for {0} - PAYMENT GATEWAY BUSY - ATTEMPTING RETRY IN {1} Milliseconds ", new Object[]{paymentRef, sleeptime});
 
+                                        TimeUnit.MILLISECONDS.sleep(sleeptime);
+                                    } catch (InterruptedException e) {
+                                    }
                                     startAsynchJob(sessionId, "AddPayment", paymentBean.addPayment(pay.getCustomerName(), pay.getDebitDate(), pay.getPaymentAmount().movePointRight(2).longValue(), pay, "Auto Retry", getDigitalKey()));
-                                    LOGGER.log(Level.INFO, "processAddPaymentResult PAYMENT GATEWAY BUSY - ATTEMPTING RETRY - ", paymentRef);
                                 } else {
-                                    pay.setPaymentStatus(PaymentStatus.REJECTED_BY_GATEWAY.value());
-                                    paymentsFacade.editAndFlush(pay);
+                                    LOGGER.log(Level.SEVERE, "processAddPaymentResult PAYMENT GATEWAY BUSY - FAILED - SEVERAL RETRIES WERE PERFORMED - ", paymentRef);
+                                    String message = "The payment gateway rejected the payment as it was busy. Several retries were made but the gateway continued to respond with a message stating it was busy. Payment ID:" + pay.getId().toString() + " for Amount:$" + pay.getPaymentAmount().toPlainString() + " on Date:" + pay.getDebitDate().toString() + " could not be added as the payment gateway was unavailable. Several attempts to resubmit have been made and also failed!!. Customer username = " + pay.getCustomerName().getUsername();
 
+                                    sendMessage(sessionId, "Add Payment Error!", message);
+                                    String templatePlaceholder = "<!--LINK-URL-->";
+                                    String htmlText = configMapFacade.getConfig("system.admin.emailalert.template");
+
+                                    htmlText = htmlText.replace(templatePlaceholder, message);
+                                    AsyncJob aj = new AsyncJob("EmailAlert", paymentBean.sendAsynchEmailWithPGR(configMapFacade.getConfig("AdminEmailAddress"), configMapFacade.getConfig("PasswordResetCCEmailAddress"), configMapFacade.getConfig("PasswordResetFromEmailAddress"), configMapFacade.getConfig("system.ezidebit.webEddrCallback.EmailSubject"), htmlText, null, paymentBean.emailServerProperties(), false));
+                                    this.put(FUTUREMAP_INTERNALID, aj);
                                 }
                             }
+                            pay.setPaymentStatus(PaymentStatus.REJECTED_BY_GATEWAY.value());
+                            paymentsFacade.editAndFlush(pay);
+
                         } else if (errorMessage.contains("This customer already has two payments on this date.")) {
                             paymentsFacade.remove(pay);
                             String message = "Payment ID:" + pay.getId().toString() + " for Amount:$" + pay.getPaymentAmount().toPlainString() + " on Date:" + pay.getDebitDate().toString() + " could not be added as teh customer already has two existing payments on this date!!.";
@@ -1947,7 +1993,7 @@ public class FutureMapEJB implements Serializable {
                         }
 
                     } else {
-                        LOGGER.log(Level.WARNING, "processAddPaymentResult FAILED - ERROR processing could not find payment id {0}, time: {1}", new Object[]{paymentRef, new Date().toString()});
+                        LOGGER.log(Level.SEVERE, "processAddPaymentResult FAILED - ERROR processing could not find payment id {0}, time: {1}", new Object[]{paymentRef, new Date().toString()});
                     }
                 } else if (paymentRef.isEmpty() == false) {
 
@@ -2317,6 +2363,7 @@ public class FutureMapEJB implements Serializable {
                             pp.setId(0);
                             pp.setWebddrUrl(null);
                             pp.setLoggedInUser(cust);
+                            pp.setContractStartDate(new Date());
                             isNew = true;
                         }
                         Payments p1 = null;
