@@ -143,21 +143,21 @@
 
                         <p:panelGrid id="myDetailsPaymentInfo" styleClass="updatePaymentInfo" columns="3" class="updatePaymentInfo">
                             <h:outputLabel value="#{configMapController.getKey('ListCustomersTitle_activeEZI')}" />
-                            <h:outputText value="#{customersController.selected.paymentParameters.statusDescription}"/> 
+                            <h:outputText value="#{customersController.selected.paymentParametersId.statusDescription}"/> 
                             <h:outputText value=""/>
                             <h:outputLabel value="#{configMapController.getKey('ListCustomersTitle_lastSuccessfulScheduledPayment')}" />
-                            <h:outputText value="#{customersController.selected.paymentParameters.lastSuccessfulScheduledPayment.debitDate}">
+                            <h:outputText value="#{customersController.selected.paymentParametersId.lastSuccessfulScheduledPayment.debitDate}">
                                 <f:convertDateTime pattern="dd MMM yyyy" />
                             </h:outputText>
-                            <h:outputText value="#{customersController.selected.paymentParameters.lastSuccessfulScheduledPayment.paymentAmount}">
+                            <h:outputText value="#{customersController.selected.paymentParametersId.lastSuccessfulScheduledPayment.paymentAmount}">
                                 <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
                             </h:outputText>
                             <h:outputLabel value="#{configMapController.getKey('ListCustomersTitle_nextScheduledPayment')}" />
 
-                            <h:outputText value="#{customersController.selected.paymentParameters.nextScheduledPayment.debitDate}">
+                            <h:outputText value="#{customersController.selected.paymentParametersId.nextScheduledPayment.debitDate}">
                                 <f:convertDateTime pattern="dd MMM yyyy" />
                             </h:outputText>
-                            <h:outputText value="#{customersController.selected.paymentParameters.nextScheduledPayment.paymentAmount}">
+                            <h:outputText value="#{customersController.selected.paymentParametersId.nextScheduledPayment.paymentAmount}">
                                 <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
                             </h:outputText>
                         </p:panelGrid>

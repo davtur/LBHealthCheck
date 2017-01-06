@@ -138,32 +138,32 @@
             </p:dataTable>
 
         </p:panel>
-        <p:panel id="customerDetailsPanel" rendered="#{customersController.selected.paymentParameters != null }" header="CRM Customer Record">
+        <p:panel id="customerDetailsPanel" rendered="#{customersController.selected.paymentParametersId != null }" header="CRM Customer Record">
             <p:panelGrid columns="2" style="width:100%">
-                <p:outputLabel value="Customer Name:" /> <h:outputText value="CRM: #{customersController.selected.paymentParameters.customerName}, EZI: #{ezidebit.currentCustomerDetails.customerName.value}"/>
-                <p:outputLabel value="Customer Address:" /> <h:outputText value="CRM: #{customersController.selected.paymentParameters.addressLine1}, EZI: #{ezidebit.currentCustomerDetails.addressLine1.value}, #{ezidebit.currentCustomerDetails.addressSuburb.value} #{ezidebit.currentCustomerDetails.addressState.value} #{ezidebit.currentCustomerDetails.addressPostCode.value}"/>
-                <p:outputLabel value="Contract Start:" /> <h:outputText value="#{customersController.selected.paymentParameters.contractStartDate}"/>
-                <p:outputLabel value="Email Address:" /> <h:outputText value="#{customersController.selected.paymentParameters.email}"/>
-                <p:outputLabel value="Mobile Phone:" /> <h:outputText value="#{customersController.selected.paymentParameters.mobilePhoneNumber}"/>
-                <p:outputLabel value="Ezidebit ID:" /> <h:outputText value="#{customersController.selected.paymentParameters.ezidebitCustomerID}"/>
-                <p:outputLabel value="General  ID:" /> <h:outputText value="#{customersController.selected.paymentParameters.yourGeneralReference}"/>
-                <p:outputLabel value="System   ID:" /> <h:outputText value="#{customersController.selected.paymentParameters.yourSystemReference}"/>
-                <p:outputLabel value="Status:" /> <h:outputText value="#{customersController.selected.paymentParameters.statusDescription}"/>
-                <p:outputLabel value="Payment Method:" /> <h:outputText value="#{customersController.selected.paymentParameters.paymentMethod}"/>
-                <p:outputLabel value="Payment Period" /> <h:outputText value="#{customersController.selected.paymentParameters.paymentPeriod}"/>
-                <p:outputLabel value="Payment Day Of Month" /> <h:outputText value="#{customersController.selected.paymentParameters.paymentPeriodDayOfMonth}"/>
-                <p:outputLabel value="Payment Day of Week" /> <h:outputText value="#{customersController.selected.paymentParameters.paymentPeriodDayOfWeek}"/>
-                <p:outputLabel value="Successful Payments" /> <h:outputText value="#{customersController.selected.paymentParameters.totalPaymentsSuccessful}"/>
-                <p:outputLabel value="Amount Paid" /> <h:outputText value="#{customersController.selected.paymentParameters.totalPaymentsSuccessfulAmount}"><f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
+                <p:outputLabel value="Customer Name:" /> <h:outputText value="CRM: #{customersController.selected.paymentParametersId.customerName}, EZI: #{ezidebit.currentCustomerDetails.customerName.value}"/>
+                <p:outputLabel value="Customer Address:" /> <h:outputText value="CRM: #{customersController.selected.paymentParametersId.addressLine1}, EZI: #{ezidebit.currentCustomerDetails.addressLine1.value}, #{ezidebit.currentCustomerDetails.addressSuburb.value} #{ezidebit.currentCustomerDetails.addressState.value} #{ezidebit.currentCustomerDetails.addressPostCode.value}"/>
+                <p:outputLabel value="Contract Start:" /> <h:outputText value="#{customersController.selected.paymentParametersId.contractStartDate}"/>
+                <p:outputLabel value="Email Address:" /> <h:outputText value="#{customersController.selected.paymentParametersId.email}"/>
+                <p:outputLabel value="Mobile Phone:" /> <h:outputText value="#{customersController.selected.paymentParametersId.mobilePhoneNumber}"/>
+                <p:outputLabel value="Ezidebit ID:" /> <h:outputText value="#{customersController.selected.paymentParametersId.ezidebitCustomerID}"/>
+                <p:outputLabel value="General  ID:" /> <h:outputText value="#{customersController.selected.paymentParametersId.yourGeneralReference}"/>
+                <p:outputLabel value="System   ID:" /> <h:outputText value="#{customersController.selected.paymentParametersId.yourSystemReference}"/>
+                <p:outputLabel value="Status:" /> <h:outputText value="#{customersController.selected.paymentParametersId.statusDescription}"/>
+                <p:outputLabel value="Payment Method:" /> <h:outputText value="#{customersController.selected.paymentParametersId.paymentMethod}"/>
+                <p:outputLabel value="Payment Period" /> <h:outputText value="#{customersController.selected.paymentParametersId.paymentPeriod}"/>
+                <p:outputLabel value="Payment Day Of Month" /> <h:outputText value="#{customersController.selected.paymentParametersId.paymentPeriodDayOfMonth}"/>
+                <p:outputLabel value="Payment Day of Week" /> <h:outputText value="#{customersController.selected.paymentParametersId.paymentPeriodDayOfWeek}"/>
+                <p:outputLabel value="Successful Payments" /> <h:outputText value="#{customersController.selected.paymentParametersId.totalPaymentsSuccessful}"/>
+                <p:outputLabel value="Amount Paid" /> <h:outputText value="#{customersController.selected.paymentParametersId.totalPaymentsSuccessfulAmount}"><f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
                 </h:outputText>
-                <p:outputLabel value="Failed Payments" /> <h:outputText value="#{customersController.selected.paymentParameters.totalPaymentsFailed}"/>
-                <p:outputLabel value="Failed Amount" /> <h:outputText value="#{customersController.selected.paymentParameters.totalPaymentsFailedAmount}"><f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
+                <p:outputLabel value="Failed Payments" /> <h:outputText value="#{customersController.selected.paymentParametersId.totalPaymentsFailed}"/>
+                <p:outputLabel value="Failed Amount" /> <h:outputText value="#{customersController.selected.paymentParametersId.totalPaymentsFailedAmount}"><f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
                 </h:outputText>
-                <p:outputLabel value="Send Expired Card SMS" /> <h:outputText value="#{customersController.selected.paymentParameters.smsExpiredCard}"/>
-                <p:outputLabel value="Send Failed Payment SMS" /> <h:outputText value="#{customersController.selected.paymentParameters.smsFailedNotification}"/>
-                <p:outputLabel value="Send Payment Reminder SMS" /> <h:outputText value="#{customersController.selected.paymentParameters.smsPaymentReminder}"/>
-                <p:outputLabel value="Last Successful Payment" /> <h:outputText value="#{customersController.selected.paymentParameters.lastSuccessfulScheduledPayment.debitDate}"/>
-                <p:outputLabel value="Next Scheduled Payment" /> <h:outputText value="#{customersController.selected.paymentParameters.nextScheduledPayment.debitDate}"/>
+                <p:outputLabel value="Send Expired Card SMS" /> <h:outputText value="#{customersController.selected.paymentParametersId.smsExpiredCard}"/>
+                <p:outputLabel value="Send Failed Payment SMS" /> <h:outputText value="#{customersController.selected.paymentParametersId.smsFailedNotification}"/>
+                <p:outputLabel value="Send Payment Reminder SMS" /> <h:outputText value="#{customersController.selected.paymentParametersId.smsPaymentReminder}"/>
+                <p:outputLabel value="Last Successful Payment" /> <h:outputText value="#{customersController.selected.paymentParametersId.lastSuccessfulScheduledPayment.debitDate}"/>
+                <p:outputLabel value="Next Scheduled Payment" /> <h:outputText value="#{customersController.selected.paymentParametersId.nextScheduledPayment.debitDate}"/>
 
             </p:panelGrid>
         </p:panel>

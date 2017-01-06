@@ -62,3 +62,11 @@ This is teh diff command to execute on homeserver to show changes to make to vms
 
 mysqldiff   --server2=root:Surf2day@vms --server1=root:Surf2day@localhost  --changes-for=server2   fitnessStats:fitnessStats --force --difftype=sql --skip-table-options
 
+Logging on Netbeans console.
+
+edit domain/config/logging.properties
+
+#java.util.logging.ConsoleHandler.formatter=com.sun.enterprise.server.logging.UniformLogFormatter
+java.util.logging.ConsoleHandler.formatter=java.util.logging.SimpleFormatter
+java.util.logging.SimpleFormatter.format=%1$tY-%1$tm-%1$td %1$tH:%1$tM:%1$tS.%1$tL %4$-7s (%2$s) %5$s %6$s%n
+c

@@ -112,9 +112,12 @@ public class Customers implements BaseEntity, Serializable {
     @JoinColumn(name = "profile_image", referencedColumnName = "id")
     @OneToOne
     private CustomerImages profileImage;
-
-    @OneToOne(cascade = CascadeType.ALL, mappedBy = "loggedInUser")
-    private PaymentParameters paymentParameters;
+    
+    
+    @JoinColumn(name = "payment_parameters_id", referencedColumnName = "id")
+    @OneToOne(cascade = CascadeType.ALL, optional = false)
+    private PaymentParameters paymentParametersId;
+    
     @OneToMany(mappedBy = "customerName")
     private Collection<Payments> paymentsCollection;
     @Basic(optional = false)
@@ -577,13 +580,13 @@ public class Customers implements BaseEntity, Serializable {
         this.paymentsCollection = paymentsCollection;
     }
 
-    public PaymentParameters getPaymentParameters() {
+    public PaymentParameters getPaymentParametersId() {
         
-        return paymentParameters;
+        return paymentParametersId;
     }
 
-    public void setPaymentParameters(PaymentParameters paymentParameters) {
-        this.paymentParameters = paymentParameters;
+    public void setPaymentParametersId(PaymentParameters paymentParameters) {
+        this.paymentParametersId = paymentParameters;
     }
 
     public CustomerImages getProfileImage() {

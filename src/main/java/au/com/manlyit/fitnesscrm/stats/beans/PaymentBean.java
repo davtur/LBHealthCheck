@@ -76,6 +76,9 @@ public class PaymentBean implements Serializable {
     @Inject
     private PaymentsFacade paymentsFacade;
 
+    @Inject
+    private PaymentParametersFacade ejbPaymentParametersFacade;
+
     private INonPCIService getWs() {
         URL url = null;
         WebServiceException e = null;
@@ -560,7 +563,7 @@ public class PaymentBean implements Serializable {
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
-        PaymentParameters payParams = cust.getPaymentParameters();
+        PaymentParameters payParams = cust.getPaymentParametersId();
         String addresssLine2 = ""; // not used
         String humanFriendlyReference = cust.getId() + " " + cust.getLastname().toUpperCase() + " " + cust.getFirstname().toUpperCase(); // existing customers use this type of reference by default
 
@@ -575,11 +578,11 @@ public class PaymentBean implements Serializable {
 //New Zealand Customers the mobile
 //phone number must be 10 digits
 //long and begin with '02'
-        EziResponseOfstring editCustomerDetail = getWs().editCustomerDetails(digitalKey, eziDebitRef, ourSystemRef, cust.getId().toString(), humanFriendlyReference, cust.getLastname(), cust.getFirstname(), cust.getStreetAddress(), addresssLine2, cust.getSuburb(), cust.getPostcode(), cust.getAddrState(), cust.getEmailAddress(), cust.getTelephone(), payParams.getSmsPaymentReminder(), payParams.getSmsFailedNotification(), payParams.getSmsExpiredCard(), payParams.getLoggedInUser().getUsername());
+        EziResponseOfstring editCustomerDetail = getWs().editCustomerDetails(digitalKey, eziDebitRef, ourSystemRef, cust.getId().toString(), humanFriendlyReference, cust.getLastname(), cust.getFirstname(), cust.getStreetAddress(), addresssLine2, cust.getSuburb(), cust.getPostcode(), cust.getAddrState(), cust.getEmailAddress(), cust.getTelephone(), payParams.getSmsPaymentReminder(), payParams.getSmsFailedNotification(), payParams.getSmsExpiredCard(), payParams.getCustomers().getUsername());
         LOGGER.log(Level.INFO, "editCustomerDetail Response: Error - {0}, Data - {1}", new Object[]{editCustomerDetail.getErrorMessage().getValue(), editCustomerDetail.getData().getValue()});
         if (editCustomerDetail.getError() == 0) {// any errors will be a non zero value
             result = true;
-            String auditDetails = "Edit the customers details for  :" + cust.getUsername() + " Details:  " + humanFriendlyReference + " " + cust.getLastname() + " " + cust.getFirstname() + " " + cust.getStreetAddress() + " " + addresssLine2 + " " + cust.getSuburb() + " " + cust.getPostcode() + " " + cust.getAddrState() + " " + cust.getEmailAddress() + " " + cust.getTelephone() + " " + payParams.getSmsPaymentReminder() + " " + payParams.getSmsFailedNotification() + " " + payParams.getSmsExpiredCard() + " " + payParams.getLoggedInUser().getUsername();
+            String auditDetails = "Edit the customers details for  :" + cust.getUsername() + " Details:  " + humanFriendlyReference + " " + cust.getLastname() + " " + cust.getFirstname() + " " + cust.getStreetAddress() + " " + addresssLine2 + " " + cust.getSuburb() + " " + cust.getPostcode() + " " + cust.getAddrState() + " " + cust.getEmailAddress() + " " + cust.getTelephone() + " " + payParams.getSmsPaymentReminder() + " " + payParams.getSmsFailedNotification() + " " + payParams.getSmsExpiredCard() + " " + payParams.getCustomers().getUsername();
             String changedFrom = "Existing Customer Record";
             String changedTo = "Edited customer record";
 
@@ -621,7 +624,7 @@ public class PaymentBean implements Serializable {
 
             if (eziResponse.getData().getValue().compareTo("S") == 0) {
                 String auditDetails = "Cleared scheduled for  :" + cust.getUsername() + ".  Keep Manual Payments: " + keepManualPayments;
-                String changedFrom = "From Date:" + cust.getPaymentParameters().getPaymentPeriod();
+                String changedFrom = "From Date:" + cust.getPaymentParametersId().getPaymentPeriod();
                 String changedTo = "Cleared Schedule";
                 auditLogFacade.audit(customersFacade.findCustomerByUsername(loggedInUser), cust, "clearSchedule", auditDetails, changedFrom, changedTo);
 
@@ -850,8 +853,8 @@ public class PaymentBean implements Serializable {
             String eziDebitCustomerId = ""; // use our reference instead. THis must be an empty string.
             String ourSystemCustomerReference = cust.getId().toString();
             String oldStatus = "Does not exist in payment gateway.";
-            if (cust.getPaymentParameters() != null) {
-                oldStatus = cust.getPaymentParameters().getStatusDescription();
+            if (cust.getPaymentParametersId() != null) {
+                oldStatus = cust.getPaymentParametersId().getStatusDescription();
             }
             if (newStatus.compareTo("A") == 0 || newStatus.compareTo("H") == 0 || newStatus.compareTo("C") == 0) {
                 if (loggedInUser.length() > 50) {
@@ -1006,8 +1009,8 @@ public class PaymentBean implements Serializable {
                     pgr = new PaymentGatewayResponse(true, cust, "The customer  " + customeName + " already exists in the payment system with status " + status + ".", "0", "EXISTING");
 
                 }
-                cust.getPaymentParameters().setStatusCode(cd.getStatusCode().getValue());
-                cust.getPaymentParameters().setStatusDescription(cd.getStatusDescription().getValue());
+                cust.getPaymentParametersId().setStatusCode(cd.getStatusCode().getValue());
+                cust.getPaymentParametersId().setStatusDescription(cd.getStatusDescription().getValue());
                 customersFacade.editAndFlush(cust);
 
             } else {
@@ -1016,10 +1019,10 @@ public class PaymentBean implements Serializable {
 
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
-                PaymentParameters payParams = cust.getPaymentParameters();
+                PaymentParameters payParams = cust.getPaymentParametersId();
                 String addresssLine2 = ""; // not used
                 String humanFriendlyReference = cust.getId() + " " + cust.getLastname().toUpperCase() + " " + cust.getFirstname().toUpperCase(); // existing customers use this type of reference by default
-                if (payParams == null && paymentGatewayName.toUpperCase().contains(PAYMENT_GATEWAY)) {
+                /* if (payParams == null && paymentGatewayName.toUpperCase().contains(PAYMENT_GATEWAY)) {
 
                     payParams = new PaymentParameters(0, new Date(), cust.getTelephone(), "NO", "NO", "NO", PAYMENT_GATEWAY);
                     //Customers loggedInUser = customersFacade.findCustomerByUsername(FacesContext.getCurrentInstance().getExternalContext().getRemoteUser());
@@ -1027,7 +1030,7 @@ public class PaymentBean implements Serializable {
 
                     cust.setPaymentParameters(payParams);
                     customersFacade.editAndFlush(cust);
-                }
+                }*/
 
                 if (payParams == null) {
                     LOGGER.log(Level.WARNING, "Payment gateway EZIDEBIT parameters not found");
@@ -1054,12 +1057,12 @@ public class PaymentBean implements Serializable {
                     LOGGER.log(Level.WARNING, "Invalid Phone Number for Customer {0}. Setting it to empty string", cust.getUsername());
                 }
 
-                EziResponseOfNewCustomerXcXH3LiW addCustomerResponse = getWs().addCustomer(digitalKey, cust.getId().toString(), humanFriendlyReference, cust.getLastname(), cust.getFirstname(), cust.getStreetAddress(), addresssLine2, cust.getSuburb(), cust.getAddrState(), cust.getPostcode(), cust.getEmailAddress(), phoneNumber, sdf.format(payParams.getContractStartDate()), payParams.getSmsPaymentReminder(), payParams.getSmsFailedNotification(), payParams.getSmsExpiredCard(), payParams.getLoggedInUser().getUsername());
+                EziResponseOfNewCustomerXcXH3LiW addCustomerResponse = getWs().addCustomer(digitalKey, cust.getId().toString(), humanFriendlyReference, cust.getLastname(), cust.getFirstname(), cust.getStreetAddress(), addresssLine2, cust.getSuburb(), cust.getAddrState(), cust.getPostcode(), cust.getEmailAddress(), phoneNumber, sdf.format(payParams.getContractStartDate()), payParams.getSmsPaymentReminder(), payParams.getSmsFailedNotification(), payParams.getSmsExpiredCard(), cust.getUsername());
 
                 if (addCustomerResponse.getError() == 0) {// any errors will be a non zero value
 
                     paymentGatewayReference = addCustomerResponse.getData().getValue().getCustomerRef().toString();
-                    cust.getPaymentParameters().setEzidebitCustomerID(paymentGatewayReference);
+                    cust.getPaymentParametersId().setEzidebitCustomerID(paymentGatewayReference);
                     customersFacade.editAndFlush(cust);
                     pgr = new PaymentGatewayResponse(true, cust, "The new customer record was added to the payment gateway successfully.", "0", "NEW");
 
@@ -1330,6 +1333,7 @@ public class PaymentBean implements Serializable {
             if (cd != null) {
                 pgr = new PaymentGatewayResponse(true, cd, "The Customers details were retrieved from the payment gateway", "0", "");
                 LOGGER.log(Level.INFO, "Payment Bean - Get Customer Details Response: Customer  - {0}, Ezidebit Name : {1} {2}", new Object[]{cust.getUsername(), cd.getCustomerFirstName().getValue(), cd.getCustomerName().getValue()});
+                updatePaymentParameters(cust, cd);
             }
         } else {
             pgr = new PaymentGatewayResponse(false, null, "The Customers details were not retrieved from the payment gateway due to an error.", customerdetails.getError().toString(), customerdetails.getErrorMessage().getValue());
@@ -1338,6 +1342,67 @@ public class PaymentBean implements Serializable {
         }
         return new AsyncResult<>(pgr);
 
+    }
+
+    private void updatePaymentParameters(Customers cust, CustomerDetails custDetails) {
+        PaymentParameters pp = cust.getPaymentParametersId();
+
+        if (pp == null) {
+
+            LOGGER.log(Level.SEVERE, "Future Map processGetCustomerDetails. Payment Parameters Object is NULL for customer {0}. Creating default parameters.", new Object[]{cust.getUsername()});
+            return;
+        }
+        Payments p1 = null;
+        try {
+            p1 = paymentsFacade.findLastSuccessfulScheduledPayment(cust);
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Future Map processGetCustomerDetails. findLastSuccessfulScheduledPayment for customer {0}. {1}", new Object[]{cust.getUsername(), e});
+        }
+        Payments p2 = null;
+        try {
+            p2 = paymentsFacade.findNextScheduledPayment(cust);
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Future Map processGetCustomerDetails. findNextScheduledPayment for customer {0}. {1}", new Object[]{cust.getUsername(), e});
+        }
+        pp.setLastSuccessfulScheduledPayment(p1);
+        pp.setNextScheduledPayment(p2);
+        pp.setAddressLine1(custDetails.getAddressLine1().getValue());
+        pp.setAddressLine2(custDetails.getAddressLine2().getValue());
+        pp.setAddressPostCode(custDetails.getAddressPostCode().getValue());
+        pp.setAddressState(custDetails.getAddressState().getValue());
+        pp.setAddressSuburb(custDetails.getAddressSuburb().getValue());
+        pp.setContractStartDate(custDetails.getContractStartDate().getValue().toGregorianCalendar().getTime());
+        pp.setCustomerFirstName(custDetails.getCustomerFirstName().getValue());
+        pp.setCustomerName(custDetails.getCustomerName().getValue());
+        pp.setEmail(custDetails.getEmail().getValue());
+        pp.setEzidebitCustomerID(custDetails.getEzidebitCustomerID().getValue());
+
+        pp.setMobilePhoneNumber(custDetails.getMobilePhone().getValue());
+        pp.setPaymentGatewayName("EZIDEBIT");
+        pp.setPaymentMethod(custDetails.getPaymentMethod().getValue());
+        //pp.setPaymentPeriod(custDetails.getPaymentPeriod().getValue());
+        //pp.setPaymentPeriodDayOfMonth(custDetails.getPaymentPeriodDayOfMonth().getValue());
+        //pp.setPaymentPeriodDayOfWeek(custDetails.getPaymentPeriodDayOfWeek().getValue());
+
+        pp.setSmsExpiredCard(custDetails.getSmsExpiredCard().getValue());
+        pp.setSmsFailedNotification(custDetails.getSmsFailedNotification().getValue());
+        pp.setSmsPaymentReminder(custDetails.getSmsPaymentReminder().getValue());
+        pp.setStatusCode(custDetails.getStatusCode().getValue());
+        pp.setStatusDescription(custDetails.getStatusDescription().getValue());
+        pp.setTotalPaymentsFailed(custDetails.getTotalPaymentsFailed());
+        pp.setTotalPaymentsFailedAmount(new BigDecimal(custDetails.getTotalPaymentsFailed()));
+        pp.setTotalPaymentsSuccessful(custDetails.getTotalPaymentsSuccessful());
+        pp.setTotalPaymentsSuccessfulAmount(new BigDecimal(custDetails.getTotalPaymentsSuccessfulAmount()));
+        pp.setYourGeneralReference(custDetails.getYourGeneralReference().getValue());
+        pp.setYourSystemReference(custDetails.getYourSystemReference().getValue());
+
+        ejbPaymentParametersFacade.edit(pp);
+        ejbPaymentParametersFacade.pushChangesToDBImmediatleyInsteadOfAtTxCommit();
+
+        cust.setPaymentParametersId(pp);
+        //customersFacade.editAndFlush(cust);
+        customersFacade.pushChangesToDBImmediatleyInsteadOfAtTxCommit();
+        LOGGER.log(Level.INFO, "Payment Bean processGetCustomerDetails. Payment Parameters have been updated for {0}.", new Object[]{cust.getUsername()});
     }
 
     @Asynchronous
@@ -1571,7 +1636,7 @@ public class PaymentBean implements Serializable {
                 if (eziResponse.getData().getValue().compareTo("S") == 0) {
                     result = true;
                     String auditDetails = "Created scheduled for  :" + cust.getUsername() + ".  Keep Manual Payments: " + keepManualPayments + ", start:" + scheduleStartDateString + ",Period Type:" + schedulePeriodTypeString + ",Amount:" + paymentAmountInCents;
-                    String changedFrom = "From Date:" + cust.getPaymentParameters().getPaymentPeriod();
+                    String changedFrom = "From Date:" + cust.getPaymentParametersId().getPaymentPeriod();
                     String changedTo = "New Schedule";
                     auditLogFacade.audit(customersFacade.findCustomerByUsername(loggedInUser), cust, "createSchedule", auditDetails, changedFrom, changedTo);
 

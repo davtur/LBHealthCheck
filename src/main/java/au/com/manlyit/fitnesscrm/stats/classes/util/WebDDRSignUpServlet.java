@@ -122,14 +122,14 @@ public class WebDDRSignUpServlet extends HttpServlet {
                             logger.log(Level.WARNING, "Email for Call Back from Web EDDR Form FAILED. Future result false from async job");
                         }
 
-                        PaymentParameters pp = current.getPaymentParameters();
+                        PaymentParameters pp = current.getPaymentParametersId();
 
                         if (pp != null) {
                             if (pp.getWebddrUrl() != null) {
                                 // the url is not null so this is the first time the customer has clicked the link -this should only happen once so it cant be abused.
                                 pp.setWebddrUrl(null);
                                 ejbPaymentParametersFacade.edit(pp);
-                                current.setPaymentParameters(pp);
+                                current.setPaymentParametersId(pp);
                                 ejbFacade.edit(current);
                                 logger.log(Level.INFO, " Customer {0} has set up payment info. Setting Web DDR URL to NULL as it should only be used once.", new Object[]{current.getUsername()});
                                 //startAsynchJob("ConvertSchedule", paymentBean.clearSchedule(current, false, current.getUsername(), getDigitalKey()), futureMap.getFutureMapInternalSessionId());
@@ -154,7 +154,7 @@ public class WebDDRSignUpServlet extends HttpServlet {
 
                                 controller.createCombinedAuditLogAndNote(user, current, "Direct Debit Form", "The direct debit form has been completed and payments created.", "Not Registered in Payemnt Gateway", "Registered in payment gateway with scheduled payments");
                                 /* try {
-                                    controller.getSelected().getPaymentParameters().setWebddrUrl(null);
+                                    controller.getSelected().getPaymentParametersId().setWebddrUrl(null);
                                 } catch (Exception e) {
                                     logger.log(Level.WARNING, " Customer {0} . Setting Web DDR URL to NULL FAILED .: {1}", new Object[]{current.getUsername(), e.getMessage()});
                                 }*/

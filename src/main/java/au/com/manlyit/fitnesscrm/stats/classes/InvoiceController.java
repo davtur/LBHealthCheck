@@ -205,7 +205,7 @@ public class InvoiceController implements Serializable {
         InvoiceLine il = new InvoiceLine(0);
         BigDecimal paymentsTotal;
         BigDecimal bankFeesTotal;
-        PaymentParameters pp = cust.getPaymentParameters();
+        PaymentParameters pp = cust.getPaymentParametersId();
         String ppPlanPaymentDetails = "Unknown";
         if (pp != null) {
             try {
@@ -379,7 +379,7 @@ public class InvoiceController implements Serializable {
     private int checkSessionsAgainstPlanWeek(int count, Customers cust, SessionTypes sessType) {
         int billableSessions = 0;
         Plan plan = cust.getGroupPricing();
-        PaymentParameters pp = cust.getPaymentParameters();
+        PaymentParameters pp = cust.getPaymentParametersId();
         String paymentPeriod = pp.getPaymentPeriod();
         List<Plan> plans = new ArrayList<>(plan.getPlanCollection());
         int includedInPlanCount = 0;

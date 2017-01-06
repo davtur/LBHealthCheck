@@ -394,3 +394,34 @@ ADD CONSTRAINT `fk_contractor_rates_1`
   REFERENCES `fitnessStats`.`suppliers` (`id`)
   ON DELETE CASCADE
   ON UPDATE CASCADE;
+
+# 6th Jan 2017
+
+
+
+ALTER TABLE `fitnessStats`.`customers` 
+ADD COLUMN `payment_parameters_id` INT(11) NULL AFTER `emergency_contact_phone`;
+
+UPDATE  fitnessStats.customers set payment_parameters_id = fitnessStats.paymentParameters.id where customers.id = paymentParameters.loggedInUser;
+
+ALTER TABLE `fitnessStats`.`paymentParameters` 
+DROP FOREIGN KEY `fk_paymentParameters_1`;
+ALTER TABLE `fitnessStats`.`paymentParameters` 
+DROP INDEX `loggedInUser` ;
+ALTER TABLE `fitnessStats`.`paymentParameters` 
+DROP COLUMN `loggedInUser`,
+DROP INDEX `fk_paymentParameters_1_idx` ;
+
+
+
+ALTER TABLE `fitnessStats`.`customers` 
+ADD INDEX `fk_customers_pay_params_idx` (`payment_parameters_id` ASC);
+ALTER TABLE `fitnessStats`.`customers` 
+ADD CONSTRAINT `fk_customers_pay_params`
+  FOREIGN KEY (`payment_parameters_id`)
+  REFERENCES `fitnessStats`.`paymentParameters` (`id`)
+  ON DELETE CASCADE
+  ON UPDATE CASCADE;
+
+ALTER TABLE `fitnessStats`.`customers` 
+ADD UNIQUE INDEX `payment_parameters_id_UNIQUE` (`payment_parameters_id` ASC);

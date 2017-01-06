@@ -31,7 +31,7 @@ public class TestEziDebitModule {
         logger.log(Level.INFO, "Starting tests!");
         INonPCIService ws = new NonPCIService().getBasicHttpBindingINonPCIService();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        PaymentParameters payParams = cust.getPaymentParameters();
+        PaymentParameters payParams = cust.getPaymentParametersId();
 
         String addresssLine2 = "";
 

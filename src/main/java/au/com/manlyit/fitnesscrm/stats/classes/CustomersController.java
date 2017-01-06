@@ -10,6 +10,7 @@ import au.com.manlyit.fitnesscrm.stats.beans.PaymentsFacade;
 import au.com.manlyit.fitnesscrm.stats.beans.util.PaymentPeriod;
 import au.com.manlyit.fitnesscrm.stats.chartbeans.MySessionsChart1;
 import au.com.manlyit.fitnesscrm.stats.classes.util.DatatableSelectionHelper;
+import au.com.manlyit.fitnesscrm.stats.classes.util.FutureMapEJB;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PfSelectableDataModel;
 import au.com.manlyit.fitnesscrm.stats.db.ContractorRateToTaskMap;
 import au.com.manlyit.fitnesscrm.stats.db.ContractorRates;
@@ -43,6 +44,8 @@ import java.util.Random;
 import java.util.concurrent.Future;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.ejb.TransactionAttribute;
+import static javax.ejb.TransactionAttributeType.REQUIRES_NEW;
 import javax.enterprise.context.SessionScoped;
 import javax.faces.component.UIComponent;
 import javax.faces.context.ExternalContext;
@@ -138,6 +141,8 @@ public class CustomersController implements Serializable {
     private au.com.manlyit.fitnesscrm.stats.beans.AuditLogFacade ejbAuditLogFacade;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.PreferedContactFacade ejbPreferedContactFacade;
+    @Inject
+    private FutureMapEJB futureMap;
 
     @Inject
     private ConfigMapFacade configMapFacade;
@@ -259,6 +264,7 @@ public class CustomersController implements Serializable {
         if (cust != null) {
             lastSelected = current;
             current = cust;
+
             selectedGroups = ejbGroupsFacade.getCustomersGroups(cust);
             customerGroupsList = null;
 
@@ -281,7 +287,21 @@ public class CustomersController implements Serializable {
              }*/
             FacesContext context = FacesContext.getCurrentInstance();
             EziDebitPaymentGateway controller = (EziDebitPaymentGateway) context.getApplication().getELResolver().getValue(context.getELContext(), null, "ezidebit");
-            controller.setSelectedCustomer(cust);
+            //controller.setSelectedCustomer(cust);
+            controller.setCurrentCustomerDetails(null);
+            controller.clearCustomerProvisionedInPaymentGW();
+            controller.setRefreshIFrames(true);
+            futureMap.cancelFutures(controller.getSessionId());
+            controller.setWaitingForPaymentDetails(false);
+            // setAsyncOperationRunning(false);
+            if (controller.isTheCustomerProvisionedInThePaymentGateway()) {
+                controller.getCustDetailsFromEzi();
+
+                controller.getPayments(18, 2);
+            } else {
+                controller.setCustomerDetailsHaveBeenRetrieved(true);
+            }
+            controller.setProgress(0);
             //eziDebitPaymentGatewayController.setSelectedCustomer(cust);
             SuppliersController suppliersController = (SuppliersController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "suppliersController");
             Suppliers sup = null;
@@ -397,7 +417,7 @@ public class CustomersController implements Serializable {
         String changedTo = "On Board Email Sent";
 
         try {
-            String url = current.getPaymentParameters().getWebddrUrl();
+            String url = current.getPaymentParametersId().getWebddrUrl();
             int a = url.indexOf("rAmount");
             int b = url.indexOf("businessOrPerson");
             url = url.substring(a, b);
@@ -420,7 +440,7 @@ public class CustomersController implements Serializable {
         String changedTo = "Email Sent to Customer";
 
         try {
-            String url = current.getPaymentParameters().getWebddrUrl();
+            String url = current.getPaymentParametersId().getWebddrUrl();
             int a = url.indexOf("rAmount");
             int b = url.indexOf("businessOrPerson");
             url = url.substring(a, b);
@@ -442,7 +462,7 @@ public class CustomersController implements Serializable {
         String changedTo = "On Board Email Sent";
 
         try {
-            String url = current.getPaymentParameters().getWebddrUrl();
+            String url = current.getPaymentParametersId().getWebddrUrl();
             int a = url.indexOf("rAmount");
             int b = url.indexOf("businessOrPerson");
             url = url.substring(a, b);
@@ -624,42 +644,53 @@ public class CustomersController implements Serializable {
         this.filteredItems = filteredItems;
     }
 
-    protected void createDefaultPaymentParameters(Customers current) {
+    protected void createDefaultPaymentParametersFromDetached(int custId) {
+        Customers cust = ejbFacade.find(custId);
+        ejbFacade.edit(cust);
+        createDefaultPaymentParameters(cust);
+    }
 
-        if (current == null) {
+    protected void createDefaultPaymentParameters(Customers cust) {
+
+        if (cust == null) {
             LOGGER.log(Level.WARNING, "Future Map createDefaultPaymentParameters . Customer is NULL.");
             return;
         }
-        if (current.getId() == null) {
+        if (cust.getId() == null) {
             LOGGER.log(Level.WARNING, "Future Map createDefaultPaymentParameters . Customer.getId is NULL.");
             return;
         }
+        //ejbFacade.edit(cust); 
 
-        PaymentParameters pp = current.getPaymentParameters();
+        if (cust.getId() == null) {
+            LOGGER.log(Level.WARNING, "Future Map createDefaultPaymentParameters . Could not look up Customers using find.");
+            return;
+        }
+        PaymentParameters pp = cust.getPaymentParametersId();
 
         if (pp == null) {
-            pp = ejbPaymentParametersFacade.findPaymentParametersByCustomer(current);
+            pp = ejbPaymentParametersFacade.findPaymentParametersByCustomer(cust);
             if (pp == null) {
                 try {
 
-                    String phoneNumber = current.getTelephone();
+                    String phoneNumber = cust.getTelephone();
                     if (phoneNumber == null) {
                         phoneNumber = "0000000000";
-                        LOGGER.log(Level.INFO, "Invalid Phone Number for Customer {0}. Setting it to empty string", current.getUsername());
+                        LOGGER.log(Level.INFO, "Invalid Phone Number for Customer {0}. Setting it to empty string", cust.getUsername());
                     }
                     Pattern p = Pattern.compile("\\d{10}");
                     Matcher m = p.matcher(phoneNumber);
                     //ezidebit requires an australian mobile phone number that starts with 04
                     if (m.matches() == false || phoneNumber.startsWith("04") == false) {
                         phoneNumber = "0000000000";
-                        LOGGER.log(Level.INFO, "Invalid Phone Number for Customer {0}. Setting it to empty string", current.getUsername());
+                        LOGGER.log(Level.INFO, "Invalid Phone Number for Customer {0}. Setting it to empty string", cust.getUsername());
                     }
                     pp = new PaymentParameters();
                     pp.setId(0);
                     pp.setWebddrUrl(null);
-                    pp.setLoggedInUser(current);
-                    pp.setLastSuccessfulScheduledPayment(ejbPaymentsFacade.findLastSuccessfulScheduledPayment(current));
-                    pp.setNextScheduledPayment(ejbPaymentsFacade.findNextScheduledPayment(current));
+                    pp.setCustomers(cust);
+                    pp.setLastSuccessfulScheduledPayment(ejbPaymentsFacade.findLastSuccessfulScheduledPayment(cust));
+                    pp.setNextScheduledPayment(ejbPaymentsFacade.findNextScheduledPayment(cust));
                     pp.setAddressLine1("");
                     pp.setAddressLine2("");
                     pp.setAddressPostCode("");
@@ -689,30 +720,34 @@ public class CustomersController implements Serializable {
                     pp.setTotalPaymentsSuccessfulAmount(new BigDecimal(0));
                     pp.setYourGeneralReference("");
                     pp.setYourSystemReference("");
-                    ejbPaymentParametersFacade.create(pp);
-                    current.setPaymentParameters(pp);
-                    ejbFacade.editAndFlush(current);
+                    ejbPaymentParametersFacade.createAndFlushForGeneratedIdEntities(pp);
+
+                    cust.setPaymentParametersId(pp);
+                    //ejbFacade.edit(cust);
+                    //ejbFacade.addPaymentParameters(cust.getId(), pp);
+                    LOGGER.log(Level.INFO, "CC Default Payment Parameters CREATED and Flushed to DB. Customer ID {1}, Username {2},PP ID {3}, PP Status Code {0}.", new Object[]{cust.getPaymentParametersId().getStatusCode(), cust.getId(), cust.getUsername(), cust.getPaymentParametersId().getId()});
 
                 } catch (Exception e) {
                     LOGGER.log(Level.SEVERE, "createDefaultPaymentParameters Method in Customers Controller", e);
                 }
             } else {
-                current.setPaymentParameters(pp);
-                ejbFacade.editAndFlush(current);
-                LOGGER.log(Level.WARNING, "createDefaultPaymentParameters - The payment parameters existed for this customer but were not linked with this customers foreign key", current.getUsername());
+                //cust.setPaymentParametersId(pp);
+                //ejbFacade.editAndFlush(current);
+                LOGGER.log(Level.WARNING, "CC Default Payment Parameters already existed but were not referenced by this customer in JPA context. Customer ID {1}, Username {2},PP ID {3}, PP Status Code {0}.", new Object[]{cust.getPaymentParametersId().getStatusCode(), cust.getId(), cust.getUsername(), cust.getPaymentParametersId().getId()});
+                ejbFacade.addPaymentParameters(cust.getId(), pp);
             }
         } else {
-            LOGGER.log(Level.WARNING, "createDefaultPaymentParameters - The payment parameters have already been created for this customer", current.getUsername());
+            LOGGER.log(Level.WARNING, "createDefaultPaymentParameters - The payment parameters have already been created for this customer", cust.getUsername());
         }
     }
 
     protected PaymentParameters getCustomersPaymentParameters(Customers cust) {
         if (cust != null) {
-            PaymentParameters pp = cust.getPaymentParameters();
+            PaymentParameters pp = cust.getPaymentParametersId();
             if (pp == null) {
                 createDefaultPaymentParameters(cust);
             }
-            pp = cust.getPaymentParameters();
+            pp = cust.getPaymentParametersId();
             if (pp == null) {
                 LOGGER.log(Level.SEVERE, " Customer {0} has NULL Payment parameters.", new Object[]{cust.getUsername()});
             }
@@ -980,6 +1015,7 @@ public class CustomersController implements Serializable {
 
     }
 
+    @TransactionAttribute(REQUIRES_NEW)
     private void createFromUnauthenticated(String group, Customers c, String message, HttpServletRequest request, boolean isWebserviceCall) {
 
         //TODO validate email address to ensure spammers can't take down site
@@ -1009,8 +1045,9 @@ public class CustomersController implements Serializable {
                 // new lead from contact form
 
                 c.setUsername(getUniqueUsername(c.getFirstname().trim() + "." + c.getLastname().trim()));
-                getFacade().create(c);
-
+                getFacade().createAndFlushForGeneratedIdEntities(c);
+                createDefaultPaymentParametersFromDetached(c.getId());
+                //createDefaultPaymentParameters(c);
                 grp.setUsername(c);
                 List<Groups> gl = new ArrayList<>();
                 gl.add(grp);
@@ -1334,7 +1371,7 @@ public class CustomersController implements Serializable {
             FacesContext context = FacesContext.getCurrentInstance();
             EziDebitPaymentGateway ezi = context.getApplication().evaluateExpressionGet(context, "#{ezidebit}", EziDebitPaymentGateway.class);
 
-            PaymentParameters pp = current.getPaymentParameters();
+            PaymentParameters pp = current.getPaymentParametersId();
             GregorianCalendar cal = new GregorianCalendar();
 
             String newPaymentPeriod = newPlan.getPlanTimePeriod();
@@ -1461,8 +1498,8 @@ public class CustomersController implements Serializable {
         try {
             Customers selected = getSelected();
             getFacade().edit(selected);
-            if (selected.getPaymentParameters() != null) {
-                if (selected.getPaymentParameters().getWebddrUrl() != null) {
+            if (selected.getPaymentParametersId() != null) {
+                if (selected.getPaymentParametersId().getWebddrUrl() != null) {
                     // update the customers details in the direct debit form. If they update their details online before they submit the form we need to update the form
                     // otherwise the address or other fields may  be blank
                     FacesContext context = FacesContext.getCurrentInstance();
@@ -1506,7 +1543,7 @@ public class CustomersController implements Serializable {
                         //clear all scheduled payments before cancellation to clean up db
                         controller.setPaymentKeepManualPayments(false);
                         //set our db staus for this customer to cancelled...On second thought get the status from teh payment gateway to be sure.
-                        /*PaymentParameters pp = cust.getPaymentParameters();
+                        /*PaymentParameters pp = cust.getPaymentParametersId();
                          pp.setPaymentPeriod("Z");
                          pp.setStatusCode("C");
                          pp.setPaymentPeriodDayOfMonth("-");
@@ -1699,8 +1736,8 @@ public class CustomersController implements Serializable {
             try {
                 for (Customers c : custList) {
                     if (isCustomerInRole(c, "LEAD") == false) {
-                        if (c.getPaymentParameters() != null) {
-                            if (c.getPaymentParameters().getNextScheduledPayment() == null) {
+                        if (c.getPaymentParametersId() != null) {
+                            if (c.getPaymentParametersId().getNextScheduledPayment() == null) {
                                 custListNoPaymentScheduled.add(c);
                             }
                         } else {

@@ -27,3 +27,154 @@ SELECT * FROM fitnessStats.questionnaire_map;
 select n1.* FROM fitnessStats.questionnaire_map n1, fitnessStats.questionnaire_map n2 WHERE n1.id > n2.id AND (n1.surveys_id = n2.surveys_id AND n1.customer_id = n2.customer_id) AND n1.questionnaire_completed = 0;
 
 DELETE n1 FROM fitnessStats.questionnaire_map n1, fitnessStats.questionnaire_map n2 WHERE n1.id > n2.id AND (n1.surveys_id = n2.surveys_id AND n1.customer_id = n2.customer_id) AND n1.questionnaire_completed = 0;
+
+
+https://en.wikibooks.org/wiki/Java_Persistence/Persisting
+
+Detached vs Managed
+
+JPA defines two main states for an object for a given persistence context, managed and detached.
+
+A managed object is one that was read in the current persistence context (EntityManager/JTA transaction). A managed object is registered with the persistence context and the persistence context will track changes to that object and maintain its object identity. If the same object is read again, in the same persistence context, or traversed through another managed object's relationship, the same identical (==) object will be returned. Calling persist on a new object will also make it become managed. Calling merge on a detached object will return the managed copy of the object. An object should never be managed by more than one persistence context. An object will be managed by its persistence context until the persistence context is cleared through clear, or the object is forced to be detached through detach. A removed object will no longer be managed after a flush or commit. On a rollback, all managed objects will become detached. In a JTA managed EntityManager all managed objects will be detached on any JTA commit or rollback.
+
+A detached object is one that is not managed in the current persistence context. This could be an object read through a different persistence context, or an object that was cloned or serialized. A new object is also considered detached until persist is called on it. An object that was removed and flushed or committed, will become detached. An object could be considered both managed in the context of one persistence context, and detached in the context of another persistence context.
+
+A managed object should only ever reference other managed objects, and a detached object should only reference other detached objects. Avoid relating or mixing detached and managed objects, this will normally lead to issues, as your application could access two copies of the same object causing loss of changes or stale data. Incorrectly relating managed and detached objects is probably one of the most common issues users run into in JPA.
+Persist
+
+The EntityManager.persist() operation is used to insert a new object into the database. persist does not directly insert the object into the database: it just registers it as new in the persistence context (transaction). When the transaction is committed, or if the persistence context is flushed, then the object will be inserted into the database.
+
+If the object uses a generated Id, the Id will normally be assigned to the object when persist is called, so persist can also be used to have an object's Id assigned. The one exception is if IDENTITY sequencing is used, in this case the Id is only assigned on commit or flush because the database will only assign the Id on INSERT. If the object does not use a generated Id, you should normally assign its Id before calling persist.
+
+The persist operation can only be called within a transaction, an exception will be thrown outside of a transaction. The persist operation is in-place, in that the object being persisted will become part of the persistence context. The state of the object at the point of the commit of the transaction will be persisted, not its state at the point of the persist call.
+
+persist should normally only be called on new objects. It is allowed to be called on existing objects if they are part of the persistence context, this is only for the purpose of cascading persist to any possible related new objects. If persist is called on an existing object that is not part of the persistence context, then an exception may be thrown, or it may be attempted to be inserted and a database constraint error may occur, or if no constraints are defined, it may be possible to have duplicate data inserted.
+
+persist can only be called on Entity objects, not on Embeddable objects, or collections, or non-persistent objects. Embeddable objects are automatically persisted as part of their owning Entity.
+
+Calling persist is not always required. If you related a new object to an existing object that is part of the persistence context, and the relationship is cascade persist, then it will be automatically inserted when the transaction is committed, or when the persistence context is flushed.
+
+
+
+
+
+https://docs.oracle.com/cd/E19798-01/821-1841/bncih/index.html
+
+What Is a Transaction?
+
+To emulate a business transaction, a program may need to perform several steps. A financial program, for example, might transfer funds from a checking account to a savings account by using the steps listed in the following pseudocode:
+
+begin transaction
+	debit checking account
+	credit savings account
+	update history log
+commit transaction
+
+Either all or none of the three steps must complete. Otherwise, data integrity is lost. Because the steps within a transaction are a unified whole, a transaction is often defined as an indivisible unit of work.
+
+A transaction can end in two ways: with a commit or with a rollback. When a transaction commits, the data modifications made by its statements are saved. If a statement within a transaction fails, the transaction rolls back, undoing the effects of all statements in the transaction. In the pseudocode, for example, if a disk drive were to crash during the credit step, the transaction would roll back and undo the data modifications made by the debit statement. Although the transaction fails, data integrity would be intact because the accounts still balance.
+
+In the preceding pseudocode, the begin and commit statements mark the boundaries of the transaction. When designing an enterprise bean, you determine how the boundaries are set by specifying either container-managed or bean-managed transactions.
+Container-Managed Transactions
+
+In an enterprise bean with container-managed transaction demarcation, the EJB container sets the boundaries of the transactions. You can use container-managed transactions with any type of enterprise bean: session or message-driven. Container-managed transactions simplify development because the enterprise bean code does not explicitly mark the transaction’s boundaries. The code does not include statements that begin and end the transaction. By default, if no transaction demarcation is specified, enterprise beans use container-managed transaction demarcation.
+
+Typically, the container begins a transaction immediately before an enterprise bean method starts and commits the transaction just before the method exits. Each method can be associated with a single transaction. Nested or multiple transactions are not allowed within a method.
+
+Container-managed transactions do not require all methods to be associated with transactions. When developing a bean, you can set the transaction attributes to specify which of the bean’s methods are associated with transactions.
+
+Enterprise beans that use container-managed transaction demarcation must not use any transaction-management methods that interfere with the container’s transaction demarcation boundaries. Examples of such methods are the commit, setAutoCommit, and rollback methods of java.sql.Connection or the commit and rollback methods of javax.jms.Session. If you require control over the transaction demarcation, you must use application-managed transaction demarcation.
+
+Enterprise beans that use container-managed transaction demarcation also must not use the javax.transaction.UserTransaction interface.
+Transaction Attributes
+
+A transaction attribute controls the scope of a transaction. Figure 28–1 illustrates why controlling the scope is important. In the diagram, method-A begins a transaction and then invokes method-B of Bean-2. When method-B executes, does it run within the scope of the transaction started by method-A, or does it execute with a new transaction? The answer depends on the transaction attribute of method-B.
+
+
+A transaction attribute can have one of the following values:
+
+    Required
+
+    RequiresNew
+
+    Mandatory
+
+    NotSupported
+
+    Supports
+
+    Never
+
+
+
+
+Required Attribute
+
+If the client is running within a transaction and invokes the enterprise bean’s method, the method executes within the client’s transaction. If the client is not associated with a transaction, the container starts a new transaction before running the method.
+
+The Required attribute is the implicit transaction attribute for all enterprise bean methods running with container-managed transaction demarcation. You typically do not set the Required attribute unless you need to override another transaction attribute. Because transaction attributes are declarative, you can easily change them later.
+RequiresNew Attribute
+
+    If the client is running within a transaction and invokes the enterprise bean’s method, the container takes the following steps:
+
+    Suspends the client’s transaction
+
+    Starts a new transaction
+
+    Delegates the call to the method
+
+    Resumes the client’s transaction after the method completes
+
+If the client is not associated with a transaction, the container starts a new transaction before running the method.
+
+You should use the RequiresNew attribute when you want to ensure that the method always runs within a new transaction.
+Mandatory Attribute
+
+If the client is running within a transaction and invokes the enterprise bean’s method, the method executes within the client’s transaction. If the client is not associated with a transaction, the container throws a TransactionRequiredException.
+
+Use the Mandatory attribute if the enterprise bean’s method must use the transaction of the client.
+NotSupported Attribute
+
+If the client is running within a transaction and invokes the enterprise bean’s method, the container suspends the client’s transaction before invoking the method. After the method has completed, the container resumes the client’s transaction.
+
+If the client is not associated with a transaction, the container does not start a new transaction before running the method.
+
+Use the NotSupported attribute for methods that don’t need transactions. Because transactions involve overhead, this attribute may improve performance.
+Supports Attribute
+
+If the client is running within a transaction and invokes the enterprise bean’s method, the method executes within the client’s transaction. If the client is not associated with a transaction, the container does not start a new transaction before running the method.
+
+Because the transactional behavior of the method may vary, you should use the Supports attribute with caution.
+Never Attribute
+
+If the client is running within a transaction and invokes the enterprise bean’s method, the container throws a RemoteException. If the client is not associated with a transaction, the container does not start a new transaction before running the method.
+
+
+
+https://docs.oracle.com/cd/E19798-01/821-1841/bnbqz/index.html
+Container-Managed Entity Managers
+
+Java Platform, Enterprise Edition: The Java EE Tutorial
+https://docs.oracle.com/javaee/7/tutorial/partpersist.htm#BNBPY
+
+For more information about the Java Persistence API, see
+
+    Java Persistence 2.1 API specification:
+
+    http://jcp.org/en/jsr/detail?id=338
+
+    EclipseLink, the Java Persistence API implementation in GlassFish Server:
+
+    http://www.eclipse.org/eclipselink/jpa.php
+
+    EclipseLink team blog:
+
+    http://eclipselink.blogspot.com/
+
+    EclipseLink wiki documentation:
+
+    http://wiki.eclipse.org/EclipseLink
+
+
+
+

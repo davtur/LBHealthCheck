@@ -94,7 +94,7 @@
                 <f:selectItems value="#{preferedContactController.itemsAvailableAsObjects}"  var="prefContact" itemLabel="#{prefContact.preferedContactMethod}" itemValue="#{prefContact}"/>
             </p:selectOneMenu>
             <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_smsOptions')}"  />
-            <h:panelGrid columns="2" rendered="#{not empty customersController.selected.paymentParameters}" >
+            <h:panelGrid columns="2" rendered="#{not empty customersController.selected.paymentParametersId}" >
                 <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_SmsExpiredCard')}" for="checkbox1" />
                 <p:selectBooleanCheckbox id="checkbox1" value="#{customersController.paymentParametersSmsExpiredCard}"  label="Sms Expired Card" />
                 <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_SmsPaymentReminder')}" for="checkbox2" />

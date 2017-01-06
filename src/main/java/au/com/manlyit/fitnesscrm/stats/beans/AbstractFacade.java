@@ -38,7 +38,7 @@ public abstract class AbstractFacade<T> implements Serializable {
 
     private static final Logger LOGGER = Logger.getLogger(AbstractFacade.class.getName());
     private final Class<T> entityClass;
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = true;
 
     public AbstractFacade(Class<T> entityClass) {
         this.entityClass = entityClass;
@@ -46,14 +46,21 @@ public abstract class AbstractFacade<T> implements Serializable {
 
     protected abstract EntityManager getEntityManager();
 
+    public void evictFromL2cache(Object thePrimaryKey) {
+        //return getEntityManager().find(entityClass, id);
+        getEntityManager().getEntityManagerFactory().getCache().evict(entityClass, thePrimaryKey);
+    }
+
     public void create(T entity) {
-       // try {
-            
-            getEntityManager().persist(entity);
-            
-           // String message = "Entity Created: " + entity.toString();
-            //logger.log(Level.INFO, message);
-      /*  } catch (Exception e) {
+        // try {
+
+        getEntityManager().persist(entity);
+        if (DEBUG) {
+
+            String message = "Entity Created: Class=" + entityClass.getName() + ", Entity : =" + entity.toString() + ", EM Delegate=" + getEntityManager().getDelegate().toString();
+            LOGGER.log(Level.INFO, message);
+        }
+        /*catch (Exception e) {
             LOGGER.log(Level.WARNING, "<-------------------------------------------------- Abstract Facade - could not create Entity ------------------------------------------------------------------------>");
             LOGGER.log(Level.WARNING, e.getMessage(), e);
             LOGGER.log(Level.WARNING, "<---------------------------------------------------------------------------------------------------------------------------------------------------------------------->");
@@ -69,16 +76,120 @@ public abstract class AbstractFacade<T> implements Serializable {
             LOGGER.log(Level.WARNING, "<---------------------------------------------------------------------------------------------------------------------------------------------------------------------->");
 
         }*/
+
+    }
+
+    public void createAndFlushForGeneratedIdEntities(T entity) {
+
+        /*
+        
+The EntityManager.flush() operation can be used to write all changes to the database before the transaction is committed. By default JPA does not normally write changes to the database until the transaction is committed. This is normally desirable as it avoids database access, resources and locks until required. It also allows database writes to be ordered, and batched for optimal database access, and to maintain integrity constraints and avoid deadlocks. This means that when you call persist, merge, or remove the database DML INSERT, UPDATE, DELETE is not executed, until commit, or until a flush is triggered.
+
+The flush() does not execute the actual commit: the commit still happens when an explicit commit() is requested in case of resource local transactions, or when a container managed (JTA) transaction completes.
+
+Flush has several usages:
+
+    Flush changes before a query execution to enable the query to return new objects and changes made in the persistence unit.
+    Insert persisted objects to ensure their Ids are assigned and accessible to the application if using IDENTITY sequencing.
+    Write all changes to the database to allow error handling of any database errors (useful when using JTA or SessionBeans).
+    To flush and clear a batch for batch processing in a single transaction.
+    Avoid constraint errors, or reincarnate an object.
+
+        
+         */
+        try {
+
+            getEntityManager().persist(entity);
+            getEntityManager().flush();
+            if (DEBUG) {
+
+                String message = "Entity Created and Flushed: Class=" + entityClass.getName() + ", Entity: =" + entity.toString() + ", EM Delegate=" + getEntityManager().getDelegate().toString();
+                LOGGER.log(Level.INFO, message);
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "<-------------------------------------------------- Abstract Facade - could not create and flush Entity ------------------------------------------------------------------------>");
+            LOGGER.log(Level.WARNING, e.getMessage(), e);
+            LOGGER.log(Level.WARNING, "<---------------------------------------------------------------------------------------------------------------------------------------------------------------------->");
+            Throwable t = e.getCause();
+            if (t != null) {
+                LOGGER.log(Level.WARNING, t.getMessage(), t);
+            }
+            LOGGER.log(Level.WARNING, "<---------------------------------------------------------------------------------------------------------------------------------------------------------------------->");
+            t = e.getCause().getCause();
+            if (t != null) {
+                LOGGER.log(Level.WARNING, t.getMessage(), t);
+            }
+            LOGGER.log(Level.WARNING, "<---------------------------------------------------------------------------------------------------------------------------------------------------------------------->");
+
+        }
+
+    }
+
+    public void pushChangesToDBImmediatleyInsteadOfAtTxCommit() {
+
+        /*
+        
+The EntityManager.flush() operation can be used to write all changes to the database before the transaction is committed. By default JPA does not normally write changes to the database until the transaction is committed. This is normally desirable as it avoids database access, resources and locks until required. It also allows database writes to be ordered, and batched for optimal database access, and to maintain integrity constraints and avoid deadlocks. This means that when you call persist, merge, or remove the database DML INSERT, UPDATE, DELETE is not executed, until commit, or until a flush is triggered.
+
+The flush() does not execute the actual commit: the commit still happens when an explicit commit() is requested in case of resource local transactions, or when a container managed (JTA) transaction completes.
+
+Flush has several usages:
+
+    Flush changes before a query execution to enable the query to return new objects and changes made in the persistence unit.
+    Insert persisted objects to ensure their Ids are assigned and accessible to the application if using IDENTITY sequencing.
+    Write all changes to the database to allow error handling of any database errors (useful when using JTA or SessionBeans).
+    To flush and clear a batch for batch processing in a single transaction.
+    Avoid constraint errors, or reincarnate an object.
+
+        
+         */
+        try {
+
+            getEntityManager().flush();
+            if (DEBUG) {
+
+                String message = "Entitys Flushed: ";
+                LOGGER.log(Level.INFO, message);
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "<-------------------------------------------------- Abstract Facade - could not  flush Entity's ------------------------------------------------------------------------>");
+            LOGGER.log(Level.WARNING, e.getMessage(), e);
+            LOGGER.log(Level.WARNING, "<---------------------------------------------------------------------------------------------------------------------------------------------------------------------->");
+            Throwable t = e.getCause();
+            if (t != null) {
+                LOGGER.log(Level.WARNING, t.getMessage(), t);
+            }
+            LOGGER.log(Level.WARNING, "<---------------------------------------------------------------------------------------------------------------------------------------------------------------------->");
+            t = e.getCause().getCause();
+            if (t != null) {
+                LOGGER.log(Level.WARNING, t.getMessage(), t);
+            }
+            LOGGER.log(Level.WARNING, "<---------------------------------------------------------------------------------------------------------------------------------------------------------------------->");
+
+        }
+
     }
 
     public void edit(T entity) {
-        
-        getEntityManager().merge(entity);
-     
-       // String message = "Entity Merged: " + entity.toString();
-       // LOGGER.log(Level.INFO, message);
 
-    } 
+        getEntityManager().merge(entity);
+        if (DEBUG) {
+
+            String message = "Entity  Merged: Class=" + entityClass.getName() + ", Entity: =" + entity.toString() + ", EM Delegate=" + getEntityManager().getDelegate().toString();
+            LOGGER.log(Level.INFO, message);
+        }
+    }
+
+    public void refreshfromDB(T entity) {
+
+        getEntityManager().refresh(getEntityManager().merge(entity));
+        if (DEBUG) {
+
+            String message = "Entity Refreshed: Class=" + entityClass.getName() + ", Primary Key=" + entity.toString() + ", EM Delegate=" + getEntityManager().getDelegate().toString();
+            LOGGER.log(Level.INFO, message);
+        }
+    }
+
     public void debug(Query query) {
         // for debugging
         Session session = getEntityManager().unwrap(JpaEntityManager.class).getActiveSession();
@@ -90,15 +201,14 @@ public abstract class AbstractFacade<T> implements Serializable {
         String sqlString3 = databaseQuery.getEJBQLString();
         String sqlString4 = databaseQuery.getJPQLString();
         //logger.log(Level.INFO, "DEBUG ( Turn this off if not needed ) SQL Query String: {0}  ----------------- {1}", new Object[]{sqlString, sqlString2});
-         LOGGER.log(Level.INFO, "DEBUG SQL Query String: -------------> {0} ,  ( Turn this off by setting DEBUG = false in facade class if not needed )", new Object[]{sqlString2});
+        LOGGER.log(Level.INFO, "DEBUG SQL Query String: -------------> {0} ,  ( Turn this off by setting DEBUG = false in facade class if not needed )", new Object[]{sqlString2});
     }
-    
 
     public void remove(T entity) {
 
         getEntityManager().remove(getEntityManager().merge(entity));
-      //  String message = "Entity Removed: " + entity.toString();
-      //  LOGGER.log(Level.INFO, message);
+        //  String message = "Entity Removed: " + entity.toString();
+        //  LOGGER.log(Level.INFO, message);
     }
 
     public T find(Object id) {
@@ -189,8 +299,7 @@ public abstract class AbstractFacade<T> implements Serializable {
             } else {
                 LOGGER.log(Level.FINE, "Lazy Load SQL Query    Filters Null");
             }
-       }
-        
+        }
 
         return resultList;
     }
@@ -274,7 +383,7 @@ public abstract class AbstractFacade<T> implements Serializable {
         query.setMaxResults(count);
         resultList = query.getResultList();
         // for debugging
-         if (DEBUG) {
+        if (DEBUG) {
             debug(query);
             //This SQL will contain ? for parameters. To get the SQL translated with the arguments you need a DatabaseRecord with the parameter values.
             // String sqlString2 = databaseQuery.getTranslatedSQLString(session, recordWithValues);
@@ -283,7 +392,7 @@ public abstract class AbstractFacade<T> implements Serializable {
             } else {
                 LOGGER.log(Level.FINE, "Lazy Load SQL Query    Filters Null");
             }
-       }
+        }
 
         return resultList;
     }

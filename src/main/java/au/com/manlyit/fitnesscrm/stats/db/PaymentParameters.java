@@ -10,6 +10,7 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -170,9 +171,10 @@ public class PaymentParameters implements  BaseEntity, Serializable {
     @Size(min = 1, max = 45)
     @Column(name = "paymentGatewayName")
     private String paymentGatewayName;
-    @JoinColumn(name = "loggedInUser", referencedColumnName = "id")
-    @OneToOne(optional = false)
-    private Customers loggedInUser;
+    
+    @OneToOne(optional = false, mappedBy = "paymentParametersId")
+
+    private Customers customers;
     @Lob
     @Size(min = 1, max = 65535)
     @Column(name = "webddrUrl")
@@ -251,12 +253,12 @@ public class PaymentParameters implements  BaseEntity, Serializable {
         this.paymentGatewayName = paymentGatewayName;
     }
 
-    public Customers getLoggedInUser() {
-        return loggedInUser;
+    public Customers getCustomers() {
+        return customers;
     }
 
-    public void setLoggedInUser(Customers loggedInUser) {
-        this.loggedInUser = loggedInUser;
+    public void setCustomers(Customers loggedInUser) {
+        this.customers = loggedInUser;
     }
 
     @Override

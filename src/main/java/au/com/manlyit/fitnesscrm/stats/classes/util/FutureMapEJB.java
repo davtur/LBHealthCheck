@@ -52,6 +52,7 @@ import javax.ejb.Startup;
 import javax.ejb.Timer;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
+import static javax.ejb.TransactionAttributeType.REQUIRES_NEW;
 import javax.faces.application.FacesMessage;
 import javax.inject.Inject;
 import javax.xml.bind.JAXBElement;
@@ -443,11 +444,11 @@ public class FutureMapEJB implements Serializable {
     }
 
     @TransactionAttribute(TransactionAttributeType.NEVER)
-
+    @Asynchronous
     public void sendMessage(String sessionChannel, String summary, String detail) {
         //TODO
         // sessionChannel = "/test";// remove this once the channel is dynamically set by session id
-        synchronized (lock2) {
+        //synchronized (lock2) {
             if (sessionChannel.contains(FUTUREMAP_INTERNALID) == false) {// we don't want to send a message unless there is a session to send it to
                 final String broadcastChannel = CHANNEL + sessionChannel;
 
@@ -466,7 +467,7 @@ public class FutureMapEJB implements Serializable {
             } else {
                 LOGGER.log(Level.INFO, "NOT Sending Async Message as the session is internal, summary:{0}, details:{1}", new Object[]{summary, detail});
             }
-        }
+        //}
 
     }
 
@@ -642,6 +643,7 @@ public class FutureMapEJB implements Serializable {
 // run a schedules
 
     @Asynchronous
+    @TransactionAttribute(REQUIRES_NEW)
     private void processConvertSchedule(Future<PaymentGatewayResponse> ft) {
         // Update the payments table with any new information retrived by the getPayments exzidebit web service.
         // Only for one customer.
@@ -813,7 +815,7 @@ public class FutureMapEJB implements Serializable {
                 if (key.contains("IsSystemLocked")) {
                     processIsSystemLocked(sessionId, ft);
                 }
-                 if (key.contains("EmailAlert")) {
+                if (key.contains("EmailAlert")) {
                     processEmailAlert(sessionId, ft);
                 }
 
@@ -1029,8 +1031,8 @@ public class FutureMapEJB implements Serializable {
         }
         LOGGER.log(Level.INFO, "processIsSystemLocked completed");
     }
-    
-     private synchronized void processEmailAlert(String sessionId, Future<?> ft) {
+
+    private synchronized void processEmailAlert(String sessionId, Future<?> ft) {
         boolean result = false;
         PaymentGatewayResponse pgr = null;
         try {
@@ -1081,6 +1083,7 @@ public class FutureMapEJB implements Serializable {
     }
 
     @Asynchronous
+    @TransactionAttribute(REQUIRES_NEW)
     private void processReport(String sessionId, Future<?> ft) {
         // Update the payments table with any new information retrived by the getPayments exzidebit web service.
         // Only for one customer.
@@ -1239,6 +1242,7 @@ public class FutureMapEJB implements Serializable {
     }
 
     @Asynchronous
+    @TransactionAttribute(REQUIRES_NEW)
     private void processGetPayments(String sessionId, Future<PaymentGatewayResponse> ft) {
         // Update the payments table with any new information retrived by the getPayments exzidebit web service.
         // Only for one customer.
@@ -1379,6 +1383,7 @@ public class FutureMapEJB implements Serializable {
     }
 
     @Asynchronous
+    @TransactionAttribute(REQUIRES_NEW)
     private void processGetScheduledPayments(String sessionId, Future<PaymentGatewayResponse> ft) {
         // Update the payments table with any new information retrived by the getPayments exzidebit web service.
         // Only for one customer.
@@ -1504,8 +1509,12 @@ public class FutureMapEJB implements Serializable {
                                             //String ref = p.getId().toString();
                                             if (p.getCreateDatetime().before(testDate)) {// make sure we don't delate payments that have just been added and may still be being processed by the gateway. i.e they've been put into our DB but havn't been put into the payment gateway schedule yet
                                                 p.setPaymentStatus(PaymentStatus.MISSING_IN_PGW.value());
-                                                if(cust.getPaymentParameters().getStatusDescription().toUpperCase().contains("HOLD")){
-                                                     p.setPaymentStatus(PaymentStatus.REJECTED_CUST_ON_HOLD.value());
+                                                if (cust.getPaymentParametersId().getStatusDescription().toUpperCase().contains("HOLD")) {
+                                                    p.setPaymentStatus(PaymentStatus.REJECTED_CUST_ON_HOLD.value());
+                                                } else {
+                                                    String message = "This payment exists in our database but not in the payment gateway so it won't be processed.Customer " + cust.getUsername() + ", Payment ID:" + p.getId().toString() + " for Amount:$" + p.getPaymentAmount().toPlainString() + " on Date:" + p.getDebitDate().toString() + " was rejected by the payment gateway and requires your action or revenue loss may occur!!.";
+
+                                                    sendAlertEmailToAdmin(message);
                                                 }
                                                 paymentsFacade.edit(p);
                                             }
@@ -1658,7 +1667,7 @@ public class FutureMapEJB implements Serializable {
             pp = new PaymentParameters();
             pp.setId(0);
             pp.setWebddrUrl(null);
-            pp.setLoggedInUser(current);
+            pp.setCustomers(current);
             pp.setLastSuccessfulScheduledPayment(paymentsFacade.findLastSuccessfulScheduledPayment(current));
             pp.setNextScheduledPayment(paymentsFacade.findNextScheduledPayment(current));
             pp.setAddressLine1("");
@@ -1691,7 +1700,7 @@ public class FutureMapEJB implements Serializable {
             pp.setYourGeneralReference("");
             pp.setYourSystemReference("");
             paymentParametersFacade.create(pp);
-            current.setPaymentParameters(pp);
+            current.setPaymentParametersId(pp);
             customersFacade.editAndFlush(current);
 
         } catch (RuntimeException e) {
@@ -1702,6 +1711,7 @@ public class FutureMapEJB implements Serializable {
     }
 
     @Asynchronous
+    @TransactionAttribute(REQUIRES_NEW)
     private void processAddCustomer(String sessionId, Future<PaymentGatewayResponse> ft) {
         boolean result = false;
         PaymentGatewayResponse pgr = null;
@@ -1745,6 +1755,7 @@ public class FutureMapEJB implements Serializable {
     }
 
     @Asynchronous
+    @TransactionAttribute(REQUIRES_NEW)
     private void processChangeCustomerStatus(String sessionId, Future<PaymentGatewayResponse> ft) {
         boolean result = false;
         PaymentGatewayResponse pgr = null;
@@ -1784,6 +1795,7 @@ public class FutureMapEJB implements Serializable {
     }
 
     @Asynchronous
+    @TransactionAttribute(REQUIRES_NEW)
     private void processDeletePayment(String sessionId, Future<PaymentGatewayResponse> ft) {
 
         String paymentRef = null;
@@ -1908,6 +1920,7 @@ public class FutureMapEJB implements Serializable {
     }
 
     @Asynchronous
+    @TransactionAttribute(REQUIRES_NEW)
     private void processAddPaymentResult(String sessionId, Future<PaymentGatewayResponse> ft) {
         String paymentRef;
         Payments pay = null;
@@ -1970,12 +1983,8 @@ public class FutureMapEJB implements Serializable {
                                     String message = "The payment gateway rejected the payment as it was busy. Several retries were made but the gateway continued to respond with a message stating it was busy. Payment ID:" + pay.getId().toString() + " for Amount:$" + pay.getPaymentAmount().toPlainString() + " on Date:" + pay.getDebitDate().toString() + " could not be added as the payment gateway was unavailable. Several attempts to resubmit have been made and also failed!!. Customer username = " + pay.getCustomerName().getUsername();
 
                                     sendMessage(sessionId, "Add Payment Error!", message);
-                                    String templatePlaceholder = "<!--LINK-URL-->";
-                                    String htmlText = configMapFacade.getConfig("system.admin.emailalert.template");
+                                    sendAlertEmailToAdmin(message);
 
-                                    htmlText = htmlText.replace(templatePlaceholder, message);
-                                    AsyncJob aj = new AsyncJob("EmailAlert", paymentBean.sendAsynchEmailWithPGR(configMapFacade.getConfig("AdminEmailAddress"), configMapFacade.getConfig("PasswordResetCCEmailAddress"), configMapFacade.getConfig("PasswordResetFromEmailAddress"), configMapFacade.getConfig("system.ezidebit.webEddrCallback.EmailSubject"), htmlText, null, paymentBean.emailServerProperties(), false));
-                                    this.put(FUTUREMAP_INTERNALID, aj);
                                 }
                             }
                             pay.setPaymentStatus(PaymentStatus.REJECTED_BY_GATEWAY.value());
@@ -2045,6 +2054,21 @@ public class FutureMapEJB implements Serializable {
             Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, "processAddPaymentResult FAILED - Async Task Exception ", ex);
         }
         LOGGER.log(Level.INFO, "FutureMap - processAddPaymentResult completed");
+    }
+
+    private synchronized void sendAlertEmailToAdmin(String message) {
+
+        if (message == null) {
+            LOGGER.log(Level.WARNING, "Future Map sendAlertEmailToAdmin . Message is NULL.Alert Email not sent!");
+            return;
+        }
+        String templatePlaceholder = "<!--LINK-URL-->";
+        String htmlText = configMapFacade.getConfig("system.admin.emailalert.template");
+
+        htmlText = htmlText.replace(templatePlaceholder, message);
+        AsyncJob aj = new AsyncJob("EmailAlert", paymentBean.sendAsynchEmailWithPGR(configMapFacade.getConfig("AdminEmailAddress"), configMapFacade.getConfig("PasswordResetCCEmailAddress"), configMapFacade.getConfig("PasswordResetFromEmailAddress"), configMapFacade.getConfig("system.ezidebit.webEddrCallback.EmailSubject"), htmlText, null, paymentBean.emailServerProperties(), false));
+        this.put(FUTUREMAP_INTERNALID, aj);
+
     }
 
     private synchronized void startAsynchJob(String sessionId, String key, Future<PaymentGatewayResponse> future) {
@@ -2135,6 +2159,7 @@ public class FutureMapEJB implements Serializable {
     }
 
     @Asynchronous
+    @TransactionAttribute(REQUIRES_NEW)
     private void processDeletePaymentBatch(String sessionId, Future<PaymentGatewayResponse> ft) {
         boolean result = false;
         String returnedMessage = "An error occurred trying to processDeletePaymentBatch. Refer to logs for more info";
@@ -2197,6 +2222,7 @@ public class FutureMapEJB implements Serializable {
     }
 
     @Asynchronous
+    @TransactionAttribute(REQUIRES_NEW)
     private void processAddPaymentBatch(String sessionId, Future<PaymentGatewayResponse> ft) {
         boolean result = false;
         String returnedMessage = "An error occurred trying to create the customers schedule. Refer to logs for more info";
@@ -2258,6 +2284,7 @@ public class FutureMapEJB implements Serializable {
     }
 
     @Asynchronous
+    @TransactionAttribute(REQUIRES_NEW)
     private void processClearSchedule(String sessionId, Future<PaymentGatewayResponse> ft) {
         boolean result = false;
         String returnedMessage = "An error occurred trying to clear the customers schedule. Refer to logs for more info";
@@ -2307,6 +2334,7 @@ public class FutureMapEJB implements Serializable {
     }
 
     @Asynchronous
+    @TransactionAttribute(REQUIRES_NEW)
     private void processGetCustomerDetails(String sessionId, Future<PaymentGatewayResponse> ft) {
         CustomerDetails custDetails = null;
 
@@ -2349,24 +2377,22 @@ public class FutureMapEJB implements Serializable {
 
                     Customers cust = null;
                     try {
-                        cust = customersFacade.findById(custId);
+                        cust = customersFacade.find(custId);
+
                     } catch (Exception e) {
                         LOGGER.log(Level.WARNING, "customersFacade.findById(custId) {0}.", new Object[]{custId, e.getMessage()});
                     }
                     if (cust != null) {
                         LOGGER.log(Level.INFO, "Future Map processGetCustomerDetails. Processing details for customer {0}.", new Object[]{cust.getUsername()});
 
-                        PaymentParameters pp = cust.getPaymentParameters();
-                        boolean isNew = false;
-                        if (pp == null) {
-                            pp = new PaymentParameters();
-                            pp.setId(0);
-                            pp.setWebddrUrl(null);
-                            pp.setLoggedInUser(cust);
-                            pp.setContractStartDate(new Date());
-                            isNew = true;
+                        // PaymentParameters pp = paymentParametersFacade.find(cust.getPaymentParametersId().getId());
+                        if (cust.getPaymentParametersId() == null) {
+
+                            LOGGER.log(Level.SEVERE, "Future Map processGetCustomerDetails. Payment Parameters Object is NULL for customer {0}. CustomerDetails from the payment gateway cant be stored.", new Object[]{cust.getUsername()});
+                            return;
                         }
-                        Payments p1 = null;
+                        // moved this into teh payment bean
+                        /*  Payments p1 = null;
                         try {
                             p1 = paymentsFacade.findLastSuccessfulScheduledPayment(cust);
                         } catch (Exception e) {
@@ -2378,48 +2404,46 @@ public class FutureMapEJB implements Serializable {
                         } catch (Exception e) {
                             LOGGER.log(Level.WARNING, "Future Map processGetCustomerDetails. findNextScheduledPayment for customer {0}. {1}", new Object[]{cust.getUsername(), e});
                         }
-                        pp.setLastSuccessfulScheduledPayment(p1);
-                        pp.setNextScheduledPayment(p2);
-                        pp.setAddressLine1(custDetails.getAddressLine1().getValue());
-                        pp.setAddressLine2(custDetails.getAddressLine2().getValue());
-                        pp.setAddressPostCode(custDetails.getAddressPostCode().getValue());
-                        pp.setAddressState(custDetails.getAddressState().getValue());
-                        pp.setAddressSuburb(custDetails.getAddressSuburb().getValue());
-                        pp.setContractStartDate(custDetails.getContractStartDate().getValue().toGregorianCalendar().getTime());
-                        pp.setCustomerFirstName(custDetails.getCustomerFirstName().getValue());
-                        pp.setCustomerName(custDetails.getCustomerName().getValue());
-                        pp.setEmail(custDetails.getEmail().getValue());
-                        pp.setEzidebitCustomerID(custDetails.getEzidebitCustomerID().getValue());
+                      cust.getPaymentParametersId().setLastSuccessfulScheduledPayment(p1);
+                        cust.getPaymentParametersId().setNextScheduledPayment(p2);
+                        cust.getPaymentParametersId().setAddressLine1(custDetails.getAddressLine1().getValue());
+                        cust.getPaymentParametersId().setAddressLine2(custDetails.getAddressLine2().getValue());
+                        cust.getPaymentParametersId().setAddressPostCode(custDetails.getAddressPostCode().getValue());
+                        cust.getPaymentParametersId().setAddressState(custDetails.getAddressState().getValue());
+                        cust.getPaymentParametersId().setAddressSuburb(custDetails.getAddressSuburb().getValue());
+                        cust.getPaymentParametersId().setContractStartDate(custDetails.getContractStartDate().getValue().toGregorianCalendar().getTime());
+                        cust.getPaymentParametersId().setCustomerFirstName(custDetails.getCustomerFirstName().getValue());
+                        cust.getPaymentParametersId().setCustomerName(custDetails.getCustomerName().getValue());
+                        cust.getPaymentParametersId().setEmail(custDetails.getEmail().getValue());
+                        cust.getPaymentParametersId().setEzidebitCustomerID(custDetails.getEzidebitCustomerID().getValue());
 
-                        pp.setMobilePhoneNumber(custDetails.getMobilePhone().getValue());
-                        pp.setPaymentGatewayName("EZIDEBIT");
-                        pp.setPaymentMethod(custDetails.getPaymentMethod().getValue());
-                        //pp.setPaymentPeriod(custDetails.getPaymentPeriod().getValue());
-                        //pp.setPaymentPeriodDayOfMonth(custDetails.getPaymentPeriodDayOfMonth().getValue());
-                        //pp.setPaymentPeriodDayOfWeek(custDetails.getPaymentPeriodDayOfWeek().getValue());
+                        cust.getPaymentParametersId().setMobilePhoneNumber(custDetails.getMobilePhone().getValue());
+                        cust.getPaymentParametersId().setPaymentGatewayName("EZIDEBIT");
+                        cust.getPaymentParametersId().setPaymentMethod(custDetails.getPaymentMethod().getValue());
+                        //cust.getPaymentParametersId().setPaymentPeriod(custDetails.getPaymentPeriod().getValue());
+                        //cust.getPaymentParametersId().setPaymentPeriodDayOfMonth(custDetails.getPaymentPeriodDayOfMonth().getValue());
+                        //cust.getPaymentParametersId().setPaymentPeriodDayOfWeek(custDetails.getPaymentPeriodDayOfWeek().getValue());
 
-                        pp.setSmsExpiredCard(custDetails.getSmsExpiredCard().getValue());
-                        pp.setSmsFailedNotification(custDetails.getSmsFailedNotification().getValue());
-                        pp.setSmsPaymentReminder(custDetails.getSmsPaymentReminder().getValue());
-                        pp.setStatusCode(custDetails.getStatusCode().getValue());
-                        pp.setStatusDescription(custDetails.getStatusDescription().getValue());
-                        pp.setTotalPaymentsFailed(custDetails.getTotalPaymentsFailed());
-                        pp.setTotalPaymentsFailedAmount(new BigDecimal(custDetails.getTotalPaymentsFailed()));
-                        pp.setTotalPaymentsSuccessful(custDetails.getTotalPaymentsSuccessful());
-                        pp.setTotalPaymentsSuccessfulAmount(new BigDecimal(custDetails.getTotalPaymentsSuccessfulAmount()));
-                        pp.setYourGeneralReference(custDetails.getYourGeneralReference().getValue());
-                        pp.setYourSystemReference(custDetails.getYourSystemReference().getValue());
+                        cust.getPaymentParametersId().setSmsExpiredCard(custDetails.getSmsExpiredCard().getValue());
+                        cust.getPaymentParametersId().setSmsFailedNotification(custDetails.getSmsFailedNotification().getValue());
+                        cust.getPaymentParametersId().setSmsPaymentReminder(custDetails.getSmsPaymentReminder().getValue());
+                        cust.getPaymentParametersId().setStatusCode(custDetails.getStatusCode().getValue());
+                        cust.getPaymentParametersId().setStatusDescription(custDetails.getStatusDescription().getValue());
+                        cust.getPaymentParametersId().setTotalPaymentsFailed(custDetails.getTotalPaymentsFailed());
+                        cust.getPaymentParametersId().setTotalPaymentsFailedAmount(new BigDecimal(custDetails.getTotalPaymentsFailed()));
+                        cust.getPaymentParametersId().setTotalPaymentsSuccessful(custDetails.getTotalPaymentsSuccessful());
+                        cust.getPaymentParametersId().setTotalPaymentsSuccessfulAmount(new BigDecimal(custDetails.getTotalPaymentsSuccessfulAmount()));
+                        cust.getPaymentParametersId().setYourGeneralReference(custDetails.getYourGeneralReference().getValue());
+                        cust.getPaymentParametersId().setYourSystemReference(custDetails.getYourSystemReference().getValue());
+                        paymentParametersFacade.pushChangesToDBImmediatleyInsteadOfAtTxCommit();
+                        /* paymentParametersFacade.edit(pp);
+                        paymentParametersFacade.pushChangesToDBImmediatleyInsteadOfAtTxCommit();
 
-                        if (isNew) {
-                            paymentParametersFacade.create(pp);
-                            cust.setPaymentParameters(pp);
-                        } else {
-                            paymentParametersFacade.edit(pp);
-                            cust.setPaymentParameters(pp);
-                        }
-                        customersFacade.edit(cust);
+                        cust.setPaymentParametersId(pp);
+                        customersFacade.editAndFlush(cust);
+                        customersFacade.pushChangesToDBImmediatleyInsteadOfAtTxCommit();*/
                         result = true;
-
+                        LOGGER.log(Level.INFO, "Future Map processGetCustomerDetails updated payment parameters and edited customer record.ID {1}, Username {2},PP ID {4}, PP Status Code {0}, XML Status Code {3}.", new Object[]{cust.getPaymentParametersId().getStatusCode(), cust.getId(), cust.getUsername(), custDetails.getStatusCode().getValue(), cust.getPaymentParametersId().getId()});
                     } else {
                         LOGGER.log(Level.WARNING, "Future Map processGetCustomerDetails an ezidebit YourSystemReference string cannot be converted to a number or the customer ID does not exist");
                     }
@@ -2439,12 +2463,13 @@ public class FutureMapEJB implements Serializable {
         LOGGER.log(Level.INFO, "Future Map processGetCustomerDetails completed");
         storeResponseForSessionBeenToRetrieve("GetCustomerDetails", sessionId, pgr);
         sendMessage(sessionId, "Get Customer Details", returnedMessage);
+        LOGGER.log(Level.INFO, "Future Map processGetCustomerDetails. Completed - Committing transaction to update.");
     }
 
     private synchronized void updateNextScheduledPayment(Customers cust) {
         if (cust != null) {
             LOGGER.log(Level.INFO, "updateNextScheduledPayment. Processing details for customer {0}.", new Object[]{cust.getUsername()});
-            PaymentParameters pp = cust.getPaymentParameters();
+            PaymentParameters pp = cust.getPaymentParametersId();
             if (pp != null) {
                 Payments p1 = null;
                 try {
@@ -2460,9 +2485,9 @@ public class FutureMapEJB implements Serializable {
                 }
                 pp.setLastSuccessfulScheduledPayment(p1);
                 pp.setNextScheduledPayment(p2);
-                paymentParametersFacade.edit(pp);
-                cust.setPaymentParameters(pp);
-                customersFacade.edit(cust);
+                //paymentParametersFacade.edit(pp);
+                cust.setPaymentParametersId(pp);
+                customersFacade.editAndFlush(cust);
             }
 
         } else {
@@ -2901,7 +2926,7 @@ public class FutureMapEJB implements Serializable {
                     if (c.getProfileImage() == null) {
                         createDefaultProfilePic(c);
                     }
-                    if (c.getPaymentParameters() == null) {
+                    if (c.getPaymentParametersId() == null) {
                         createDefaultPaymentParameters(c);
                         LOGGER.log(Level.INFO, "Creating default payment parameters");
                     }

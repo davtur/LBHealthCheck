@@ -892,7 +892,7 @@ public class SessionTimetableController implements Serializable {
         EziDebitPaymentGateway eziDebitPaymentGateway = context.getApplication().evaluateExpressionGet(context, "#{ezidebit}", EziDebitPaymentGateway.class);
         CustomersController controller = context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
         Customers c = controller.getSelected();
-        eziDebitPaymentGateway.setSelectedCustomer(c);
+        //eziDebitPaymentGateway.setSelectedCustomer(c);
         SessionBookings sb = new SessionBookings(0);
         Date sessionPurchaseTimestamp = new Date();
         sb.setBookingTime(sessionPurchaseTimestamp);
@@ -900,7 +900,7 @@ public class SessionTimetableController implements Serializable {
         sb.setCustomerId(c);
 
         // is the customer already set up in the payment gateway ?
-        String paymentGatewayStatusDescription = c.getPaymentParameters().getStatusDescription();
+        String paymentGatewayStatusDescription = c.getPaymentParametersId().getStatusDescription();
         if (paymentGatewayStatusDescription == null || paymentGatewayStatusDescription.contains("Cancelled")) {
             try {
                 // no they are not setup so redirect to ezidebit signup form
