@@ -1278,7 +1278,7 @@ public class CustomersController implements Serializable {
         }
     }
 
-    private void addCustomerToUsersGroup(Customers c) {
+    protected void addCustomerToUsersGroup(Customers c) {
         Collection<Groups> customersExistingGroups = c.getGroupsCollection();
         boolean exists = false;
         for (Groups eg : customersExistingGroups) {
@@ -1292,10 +1292,21 @@ public class CustomersController implements Serializable {
             Groups grp = new Groups(0, "USER");
             grp.setUsername(c);
             c.getGroupsCollection().add(grp);
-            ejbFacade.edit(c);
+            //ejbFacade.edit(c);
             //ejbGroupsFacade.create(grp);
             JsfUtil.addSuccessMessage(configMapFacade.getConfig("CustomersCreatedMustBeInUserGroup"));
         }
+        //if they are a lead remove them
+        List<Groups> lg = new ArrayList<>(customersExistingGroups);
+
+        for (int i = lg.size() - 1; i >= 0; i--) {
+            Groups eg = lg.get(i);
+            if (eg.getGroupname().trim().equalsIgnoreCase("LEAD")) {
+                c.getGroupsCollection().remove(eg);
+            }
+
+        }
+
     }
 
     public void editDialogue(ActionEvent actionEvent) {

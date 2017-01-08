@@ -444,31 +444,33 @@ public class FutureMapEJB implements Serializable {
     }
 
     @TransactionAttribute(TransactionAttributeType.NEVER)
-    @Asynchronous
+
     public void sendMessage(String sessionChannel, String summary, String detail) {
+
+        LOGGER.log(Level.INFO, "Entering - SEND MESSAGE :Channel={0}, Summary={1}, detail={2}", new Object[]{sessionChannel, summary, detail});
         //TODO
         // sessionChannel = "/test";// remove this once the channel is dynamically set by session id
         //synchronized (lock2) {
-            if (sessionChannel.contains(FUTUREMAP_INTERNALID) == false) {// we don't want to send a message unless there is a session to send it to
-                final String broadcastChannel = CHANNEL + sessionChannel;
+        if (sessionChannel.contains(FUTUREMAP_INTERNALID) == false) {// we don't want to send a message unless there is a session to send it to
+            final String broadcastChannel = CHANNEL + sessionChannel;
 
-                Reply rep = (String message) -> {
-                    LOGGER.log(Level.INFO, "Message Delivered:Channel={0}, Summary={1}, message={2}", new Object[]{broadcastChannel, summary, message});
-                };
-                // eventBus.publish(channels.getChannel(getUser()), new FacesMessage(StringEscapeUtils.escapeHtml(summary), StringEscapeUtils.escapeHtml(detail)));
-                // final String summ = summary;
-                try {
-                    EventBus eventBus = EventBusFactory.getDefault().eventBus();
-                    eventBus.publish(broadcastChannel, new FacesMessage(StringEscapeUtils.escapeHtml(summary), StringEscapeUtils.escapeHtml(detail)), rep);
-                    LOGGER.log(Level.INFO, "Sending Async Message, summary:{0}, details:{1}", new Object[]{summary, detail});
-                } catch (Exception e) {
-                    LOGGER.log(Level.WARNING, "NOT Sending Async Message as there was an exception, summary:{0}, details:{1}, error:{2}", new Object[]{summary, detail, e.getMessage()});
-                }
-            } else {
-                LOGGER.log(Level.INFO, "NOT Sending Async Message as the session is internal, summary:{0}, details:{1}", new Object[]{summary, detail});
+            Reply rep = (String message) -> {
+                LOGGER.log(Level.INFO, "MESSAGE DELIVERED :Channel={0}, Summary={1}, message={2}", new Object[]{broadcastChannel, summary, message});
+            };
+            // eventBus.publish(channels.getChannel(getUser()), new FacesMessage(StringEscapeUtils.escapeHtml(summary), StringEscapeUtils.escapeHtml(detail)));
+            // final String summ = summary;
+            try {
+                EventBus eventBus = EventBusFactory.getDefault().eventBus();
+                eventBus.publish(broadcastChannel, new FacesMessage(StringEscapeUtils.escapeHtml(summary), StringEscapeUtils.escapeHtml(detail)), rep);
+                LOGGER.log(Level.INFO, "Sending Async Message, summary:{0}, details:{1}", new Object[]{summary, detail});
+            } catch (Exception e) {
+                LOGGER.log(Level.WARNING, "NOT Sending Async Message as there was an exception, summary:{0}, details:{1}, error:{2}", new Object[]{summary, detail, e.getMessage()});
             }
+        } else {
+            LOGGER.log(Level.INFO, "NOT Sending Async Message as the session is internal, summary:{0}, details:{1}", new Object[]{summary, detail});
+        }
         //}
-
+        LOGGER.log(Level.INFO, "Exiting - SEND MESSAGE  :Channel={0}, Summary={1}, detail={2}", new Object[]{sessionChannel, summary, detail});
     }
 
     //@Schedule(dayOfMonth = "*", hour = "*", minute = "*", second = "0")//debug
@@ -561,7 +563,13 @@ public class FutureMapEJB implements Serializable {
                                             }*/
                                             if (jobIds.isEmpty()) {
                                                 batchJobsForThisSession.remove(bj);
-                                                processCompletedAsyncJobs(sessionId, bj.getJobName(), ft);
+                                                //String batchJobSessionId = FUTUREMAP_INTERNALID;
+                                                String jobName = bj.getJobName();
+
+                                                LOGGER.log(Level.INFO, "checkRunningJobsAndNotifyIfComplete, Processing Batch Job Child {1} - sessionId {0}, batch ID = {2}", new Object[]{sessionId, jobName, aj.getBatchId()});
+
+                                                processCompletedAsyncJobs(sessionId, jobName, ft);
+                                                //processCompletedAsyncJobs(sessionId,jobName, ft);
 
                                             }
 
@@ -794,7 +802,8 @@ public class FutureMapEJB implements Serializable {
                     processChangeScheduledDate(sessionId, ft);
                 }
                 if (key.contains("DeletePayment")) {
-                    processDeletePayment(sessionId, ft);
+                    //processDeletePayment(sessionId, ft);
+                    LOGGER.log(Level.WARNING, "DeletePayment BYPASSED for push update testing.");
                 }
                 if (key.contains("DeletePaymentBatch")) {
                     processDeletePaymentBatch(sessionId, ft);
@@ -1404,7 +1413,9 @@ public class FutureMapEJB implements Serializable {
                 resultArrayOfScheduledPayments = (ArrayOfScheduledPayment) pgr.getData();
                 result = pgr.isOperationSuccessful();
 
-                if (resultArrayOfScheduledPayments != null && resultArrayOfScheduledPayments.getScheduledPayment() != null) {
+                // MOved to Payments Bean
+
+                /*if (resultArrayOfScheduledPayments != null && resultArrayOfScheduledPayments.getScheduledPayment() != null) {
                     List<ScheduledPayment> payList = resultArrayOfScheduledPayments.getScheduledPayment();
                     if (payList.isEmpty() == false) {
                         String customerRef = payList.get(0).getYourSystemReference().getValue();
@@ -1527,8 +1538,8 @@ public class FutureMapEJB implements Serializable {
                                 updateNextScheduledPayment(cust);
                             } else {
                                 LOGGER.log(Level.SEVERE, "Future Map processGetScheduledPayments couldn't find a customer with our system ref from payment.");
-                                /*TODO email a report at the end of the process if there are any payments swithout a customer reference
-                         as this means that a customer is in ezidebits system but not ours */
+                                //TODO email a report at the end of the process if there are any payments swithout a customer reference
+                         //as this means that a customer is in ezidebits system but not ours 
 
                             }
                         } else {
@@ -1536,8 +1547,7 @@ public class FutureMapEJB implements Serializable {
                         }
 
                     }
-                }
-
+                }*/
                 LOGGER.log(Level.INFO, "Future Map processGetScheduledPayments completed");
                 if (result == true) {
                     String message = "Scheduled Payment Information has been updated.";
@@ -1710,19 +1720,34 @@ public class FutureMapEJB implements Serializable {
         }
     }
 
+    public synchronized void processAddCustomer(String sessionId, Future<PaymentGatewayResponse> ft) {
+        try {
+            PaymentGatewayResponse pgr = null;
+            Object resultObject = ft.get();
+            if (resultObject != null) {
+                if (resultObject.getClass() == PaymentGatewayResponse.class) {
+                    pgr = (PaymentGatewayResponse) resultObject;
+                    processAddCustomerAsync(sessionId, pgr);
+                }
+            }
+        } catch (InterruptedException | ExecutionException ex) {
+            Logger.getLogger(FutureMapEJB.class.getName()).log(Level.SEVERE, "processDeletePaymentFuture Method", ex);
+        }
+    }
+
     @Asynchronous
     @TransactionAttribute(REQUIRES_NEW)
-    private void processAddCustomer(String sessionId, Future<PaymentGatewayResponse> ft) {
+    public void processAddCustomerAsync(String sessionId, PaymentGatewayResponse pgr) {
         boolean result = false;
-        PaymentGatewayResponse pgr = null;
+        //PaymentGatewayResponse pgr = null;
         Customers cust;
         try {
             // if successful it should return a Customers Object from the getData method;
-            Object resultObject = ft.get();
-            if (resultObject.getClass() == PaymentGatewayResponse.class) {
-                pgr = (PaymentGatewayResponse) resultObject;
-                result = pgr.isOperationSuccessful();
-            }
+            // Object resultObject = ft.get();
+            //  if (resultObject.getClass() == PaymentGatewayResponse.class) {
+            //     pgr = (PaymentGatewayResponse) resultObject;
+            result = pgr.isOperationSuccessful();
+            // }
 
             if (pgr != null) {
                 if (result == true) {
@@ -1749,7 +1774,7 @@ public class FutureMapEJB implements Serializable {
                 String message = "The PaymentGatewayResponse Object is NULL";
                 sendMessage(sessionId, "Add Customer Error!", message);
             }
-        } catch (InterruptedException | ExecutionException ex) {
+        } catch (Exception ex) {
             LOGGER.log(Level.WARNING, "processAddCustomer", ex);
         }
     }
@@ -1794,28 +1819,43 @@ public class FutureMapEJB implements Serializable {
         LOGGER.log(Level.INFO, "FutureMap - processChangeCustomerStatus completed");
     }
 
+    public synchronized void processDeletePayment(String sessionId, Future<PaymentGatewayResponse> ft) {
+        try {
+            PaymentGatewayResponse pgr = null;
+            Object resultObject = ft.get();
+            if (resultObject != null) {
+                if (resultObject.getClass() == PaymentGatewayResponse.class) {
+                    pgr = (PaymentGatewayResponse) resultObject;
+                    processDeletePaymentAsync(sessionId, pgr);
+                }
+            }
+        } catch (InterruptedException | ExecutionException ex) {
+            Logger.getLogger(FutureMapEJB.class.getName()).log(Level.SEVERE, "processDeletePaymentFuture Method", ex);
+        }
+    }
+
     @Asynchronous
     @TransactionAttribute(REQUIRES_NEW)
-    private void processDeletePayment(String sessionId, Future<PaymentGatewayResponse> ft) {
+    public void processDeletePaymentAsync(String sessionId, PaymentGatewayResponse pgr) {
 
         String paymentRef = null;
         boolean result = false;
         Payments pay = null;
         String message = "The delete payment operation failed!.";
         LOGGER.log(Level.INFO, "FutureMap - processAddPaymentResult started");
-        PaymentGatewayResponse pgr = null;
+        // PaymentGatewayResponse pgr = null;
         try {
             // if successful it should return a Customers Object from the getData method;
-            Object resultObject = ft.get();
-            if (resultObject != null) {
-                if (resultObject.getClass() == PaymentGatewayResponse.class) {
-                    pgr = (PaymentGatewayResponse) resultObject;
-                    result = pgr.isOperationSuccessful();
-                    //we have a response 
-                    paymentRef = pgr.getTextData();
-                    pay = (Payments) pgr.getData();
-                }
-            }
+            // Object resultObject = ft.get();
+            // if (resultObject != null) {
+            //     if (resultObject.getClass() == PaymentGatewayResponse.class) {
+            //         pgr = (PaymentGatewayResponse) resultObject;
+            result = pgr.isOperationSuccessful();
+            //we have a response 
+            paymentRef = pgr.getTextData();
+            pay = (Payments) pgr.getData();
+            //  }
+            // }
 
             if (paymentRef == null) {
                 //this should always be set and will be the primary key of teh row in the payments table
@@ -1893,7 +1933,7 @@ public class FutureMapEJB implements Serializable {
                             pay.setBankReturnCode(Integer.toString(retries));
                             paymentsFacade.editAndFlush(pay);
                             if (retries < 10) {
-                                startAsynchJob(sessionId, "AddPayment", paymentBean.deletePayment(pay.getCustomerName(), pay.getDebitDate(), pay.getPaymentAmount().movePointRight(2).longValue(), pay, "Auto Retry", getDigitalKey()));
+                                startAsynchJob(sessionId, "AddPayment", paymentBean.deletePayment(pay.getCustomerName(), pay.getDebitDate(), pay.getPaymentAmount().movePointRight(2).longValue(), pay, "Auto Retry", getDigitalKey(), sessionId));
 
                                 //retryDeletePayment(pay);
                             } else {
@@ -1913,8 +1953,8 @@ public class FutureMapEJB implements Serializable {
 
                 }
             }
-        } catch (InterruptedException | ExecutionException | EJBException ex) {
-
+        } catch (Exception ex) {
+            LOGGER.log(Level.SEVERE, "FutureMap - processDeletePayment FAILED", ex);
         }
         LOGGER.log(Level.INFO, "FutureMap - processDeletePayment completed");
     }
@@ -2086,7 +2126,7 @@ public class FutureMapEJB implements Serializable {
         cal.add(Calendar.MONTH, -(monthsAhead));
         cal.add(Calendar.MONTH, -(monthsbehind));
         startAsynchJob(sessionId, "GetPayments", paymentBean.getPayments(cust, "ALL", "ALL", "ALL", "", cal.getTime(), endDate, false, getDigitalKey()));
-        startAsynchJob(sessionId, "GetScheduledPayments", paymentBean.getScheduledPayments(cust, cal.getTime(), endDate, getDigitalKey()));
+        startAsynchJob(sessionId, "GetScheduledPayments", paymentBean.getScheduledPayments(cust, cal.getTime(), endDate, getDigitalKey(), sessionId));
 
     }
     //CreateSchedule

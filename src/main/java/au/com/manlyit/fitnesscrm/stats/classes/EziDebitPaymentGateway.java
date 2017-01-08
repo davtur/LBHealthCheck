@@ -348,7 +348,7 @@ public class EziDebitPaymentGateway implements Serializable {
         cal.add(Calendar.MONTH, -(monthsAhead));
         cal.add(Calendar.MONTH, -(monthsbehind));
         startAsynchJob("GetPayments", paymentBean.getPayments(getSelectedCustomer(), "ALL", "ALL", "ALL", "", cal.getTime(), endDate, false, getDigitalKey()));
-        startAsynchJob("GetScheduledPayments", paymentBean.getScheduledPayments(getSelectedCustomer(), cal.getTime(), endDate, getDigitalKey()));
+        startAsynchJob("GetScheduledPayments", paymentBean.getScheduledPayments(getSelectedCustomer(), cal.getTime(), endDate, getDigitalKey(),sessionId));
     }
 
     public void editCustomerDetailsInEziDebit(Customers cust) {
@@ -1744,7 +1744,9 @@ public class EziDebitPaymentGateway implements Serializable {
 
     public void createCustomerRecord() {
         createCustomerRecord(getSelectedCustomer());
-
+        FacesContext context = FacesContext.getCurrentInstance();
+        CustomersController controller = (CustomersController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "customersController");
+        controller.addCustomerToUsersGroup(getSelectedCustomer());
     }
 
     public void createCustomerRecord(Customers cust) {
@@ -2398,7 +2400,7 @@ public class EziDebitPaymentGateway implements Serializable {
         //Payments pay = paymentsFacade.findPaymentById(reference,false);
         Payments pay = (Payments) pgr.getData();
 
-        pay = paymentsFacade.find(pay.getId());
+        //pay = paymentsFacade.find(pay.getId());
         if (pay != null) {
             removeFromPaymentLists(pay);
 
@@ -2533,7 +2535,6 @@ public class EziDebitPaymentGateway implements Serializable {
         LOGGER.log(Level.INFO, "processGetPaymentExchangeVersion completed");
     }
 
-    
     private void processGetCustomerDetails(PaymentGatewayResponse pgr) {
         CustomerDetails result = null;
         Customers selectedCust = getSelectedCustomer();
@@ -3142,7 +3143,7 @@ public class EziDebitPaymentGateway implements Serializable {
                         paymentsFacade.edit(p);
                         updatePaymentLists(p);
                         if (keepManual == true) {
-                            startAsynchJob("DeletePayment", paymentBean.deletePayment(cust, null, null, p, loggedInUser, getDigitalKey()));
+                            startAsynchJob("DeletePayment", paymentBean.deletePayment(cust, null, null, p, loggedInUser, getDigitalKey(),sessionId));
                         }
                     }
                 }
@@ -3209,7 +3210,7 @@ public class EziDebitPaymentGateway implements Serializable {
                             pay.setPaymentStatus(PaymentStatus.DELETE_REQUESTED.value());
                             paymentsFacade.edit(pay);
                             updatePaymentLists(pay);
-                            startAsynchJob("DeletePayment", paymentBean.deletePayment(getSelectedCustomer(), selectedScheduledPayment.getDebitDate(), amount.longValue(), selectedScheduledPayment, loggedInUser, getDigitalKey()));
+                            startAsynchJob("DeletePayment", paymentBean.deletePayment(getSelectedCustomer(), selectedScheduledPayment.getDebitDate(), amount.longValue(), selectedScheduledPayment, loggedInUser, getDigitalKey(),sessionId));
                         }
 
                     }
