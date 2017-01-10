@@ -15,6 +15,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Inject;
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceException;
@@ -190,6 +192,17 @@ public class CustomersFacade extends AbstractFacade<Customers> {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
         }
         return retList;
+    }
+     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    public boolean addCustomerToGroup(Customers cust, Groups group){
+        // add a customer to a new group
+        Customers c = find(cust.getId());
+        group.setUsername(c);
+       
+        c.getGroupsCollection().add(group);
+        getEntityManager().flush();
+        
+        return true;
     }
     
     public Customers findCustomerByFacebookId(String fbId) {

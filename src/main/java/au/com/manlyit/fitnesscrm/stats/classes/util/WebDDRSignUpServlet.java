@@ -122,15 +122,15 @@ public class WebDDRSignUpServlet extends HttpServlet {
                             logger.log(Level.WARNING, "Email for Call Back from Web EDDR Form FAILED. Future result false from async job");
                         }
 
-                        PaymentParameters pp = current.getPaymentParametersId();
+                        //PaymentParameters pp = current.getPaymentParametersId();
 
-                        if (pp != null) {
-                            if (pp.getWebddrUrl() != null) {
+                        if (current.getPaymentParametersId() != null) {
+                            if (current.getPaymentParametersId().getWebddrUrl() != null) {
                                 // the url is not null so this is the first time the customer has clicked the link -this should only happen once so it cant be abused.
-                                pp.setWebddrUrl(null);
-                                ejbPaymentParametersFacade.edit(pp);
-                                current.setPaymentParametersId(pp);
-                                ejbFacade.edit(current);
+                                current.getPaymentParametersId().setWebddrUrl(null);
+                                //ejbPaymentParametersFacade.edit(pp);
+                                //current.setPaymentParametersId(pp);
+                                //ejbFacade.edit(current);
                                 logger.log(Level.INFO, " Customer {0} has set up payment info. Setting Web DDR URL to NULL as it should only be used once.", new Object[]{current.getUsername()});
                                 //startAsynchJob("ConvertSchedule", paymentBean.clearSchedule(current, false, current.getUsername(), getDigitalKey()), futureMap.getFutureMapInternalSessionId());
 
@@ -141,8 +141,9 @@ public class WebDDRSignUpServlet extends HttpServlet {
 
                                 //
                                 //startAsynchJob("GetPayments", paymentBean.getPayments(current, "ALL", "ALL", "ALL", "", cal.getTime(), endDate, false, getDigitalKey()), futureMap.getFutureMapInternalSessionId());
-                                startAsynchJob("ConvertSchedule", paymentBean.getScheduledPayments(current, cal.getTime(), endDate, getDigitalKey()), futureMap.getFutureMapInternalSessionId());
-                                startAsynchJob("GetCustomerDetails", paymentBean.getCustomerDetails(current, getDigitalKey()), sessionID);
+                               // startAsynchJob("GetCustomerDetails", paymentBean.getCustomerDetails(current, getDigitalKey(),sessionID), sessionID);
+                                startAsynchJob("ConvertSchedule", paymentBean.convertEzidebitScheduleToCrmSchedule(current, cal.getTime(), endDate, getDigitalKey(),futureMap.getFutureMapInternalSessionId()), futureMap.getFutureMapInternalSessionId());
+                               
                             }
 
                             try {

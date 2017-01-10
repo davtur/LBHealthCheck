@@ -17,7 +17,7 @@
         <p:outputPanel id="mainPanel" rendered="#{ezidebit.asyncOperationRunning == false and ezidebit.customerDetailsHaveBeenRetrieved == true  }" >
             <p:commandButton id="reloadPageButton" value="Reload Page" actionListener="#{ezidebit.refreshPaymentsPage}" rendered="#{ezidebit.theCustomerProvisionedInThePaymentGateway }" update=":tv:paymentsForm  :growl" />
            <!-- <p:commandButton  value="#{configMapController.getKey('sendCustomerOnBoardEmailButton')}"  actionListener="#{customersController.sendCustomerOnboardEmail}" update="@(.updateNotesDataTable) :growl"/>-->
-            <p:commandButton  value="#{configMapController.getKey('sendCustomerOnBoardEmailButton')}" onclick="PF('SendEmailToCustomerDialog').show()"  update=" :growl"/>
+            <p:commandButton  value="#{configMapController.getKey('sendCustomerOnBoardEmailButton')}" onclick="PF('SendEmailToCustomerDialog').show()"  update=":SendEmailToCustomerForm:sendEmailDisplayPanel :growl"/>
             
 
             <p:commandButton id="eddrButton" disabled="#{!ezidebit.showAddToPaymentGatewayButton}"  actionListener="#{ezidebit.updatePaymentScheduleForm}"  oncomplete="PF('createEddrLinkDialogueWidget').show();" update=":growl :tv:paymentsForm :createEddrLink @(.updateNotesDataTable) "   value="#{configMapController.getKey('WebDDRScheduleSetupButton')}" />

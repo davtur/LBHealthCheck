@@ -110,7 +110,9 @@ public class PaymentBean implements Serializable {
             if (schedulePeriodType == 'W' || schedulePeriodType == 'F' || schedulePeriodType == 'N' || schedulePeriodType == '4') {
                 if (payDayOfWeek < 1 || payDayOfWeek > 7) {
                     LOGGER.log(Level.WARNING, "createSchedule  FAILED: A value must be provided for dayOfWeek  when the SchedulePeriodType is  W,F,4,N");
-                    return new AsyncResult<>(new PaymentGatewayResponse(false, cust, "", "-1", "createSchedule  FAILED: A value must be provided for dayOfWeek  when the SchedulePeriodType is  W,F,4,N"));
+                    pgr = new PaymentGatewayResponse(false, cust, "", "-1", "createSchedule  FAILED: A value must be provided for dayOfWeek  when the SchedulePeriodType is  W,F,4,N");
+                    futureMap.processClearSchedule(sessionId, pgr);
+                    return new AsyncResult<>(pgr);
                 }
                 if (payDayOfWeek < 2 || payDayOfWeek > 6) {
                     payDayOfWeek = 2;// can't debit on weekends only weekdays
@@ -119,7 +121,9 @@ public class PaymentBean implements Serializable {
             if (schedulePeriodType == 'M') {
                 if (dayOfMonth < 1 || dayOfMonth > 31) {
                     LOGGER.log(Level.WARNING, "createSchedule FAILED: A value must be provided for dayOfMonth (1..31 )\n" + " when the\n" + "SchedulePeriodType is in\n" + "M");
-                    return new AsyncResult<>(new PaymentGatewayResponse(false, cust, "", "-1", "createSchedule FAILED: A value must be provided for dayOfMonth (1..31 )\n" + " when the\n" + "SchedulePeriodType is in\n" + "M"));
+                    pgr = new PaymentGatewayResponse(false, cust, "", "-1", "createSchedule FAILED: A value must be provided for dayOfMonth (1..31 )\n" + " when the\n" + "SchedulePeriodType is in\n" + "M");
+                    futureMap.processClearSchedule(sessionId, pgr);
+                    return new AsyncResult<>(pgr);
                 }
             }
 
@@ -138,7 +142,9 @@ public class PaymentBean implements Serializable {
             }
             if (schedulePeriodType == 'N' && check == 0) {
                 LOGGER.log(Level.WARNING, "createSchedule FAILED: A value must be provided for week Of Month  when the SchedulePeriodType is N");
-                return new AsyncResult<>(new PaymentGatewayResponse(false, cust, "", "-1", "createSchedule FAILED: A value must be provided for week Of Month  when the SchedulePeriodType is N"));
+                pgr = new PaymentGatewayResponse(false, cust, "", "-1", "createSchedule FAILED: A value must be provided for week Of Month  when the SchedulePeriodType is N");
+                futureMap.processClearSchedule(sessionId, pgr);
+                return new AsyncResult<>(pgr);
             }
 
             //delete all existing scheduled payments
@@ -146,9 +152,11 @@ public class PaymentBean implements Serializable {
             if (crmPaymentList != null) {
                 LOGGER.log(Level.INFO, "createSchedule - Found {0} existing scheduled payments for {1}", new Object[]{crmPaymentList.size(), cust.getUsername()});
 
-                // ArrayList<Integer> jobIds = new ArrayList<>();
+                ArrayList<Integer> jobIds = new ArrayList<>();
                 BatchOfPaymentJobs bopj = new BatchOfPaymentJobs("DeletePaymentBatch", new ArrayList<>());
                 futureMap.addBatchJobToList(sessionId, bopj);
+                PaymentGatewayResponse delbatchResp = new PaymentGatewayResponse(true, cust, "", "0", "createCRMPaymentSchedule DeletePaymentBatch  Completed");
+
                 for (int x = crmPaymentList.size() - 1; x > -1; x--) {
                     Payments p = crmPaymentList.get(x);
                     String ref = p.getId().toString();
@@ -165,20 +173,21 @@ public class PaymentBean implements Serializable {
                         AsyncJob aj = new AsyncJob("DeletePayment", payBean.deletePayment(cust, null, null, p, loggedInUser, digitalKey, sessionId));
                         aj.setBatchId(bopj.getBatchId());
                         futureMap.put(sessionId, aj);
-                        /*Future<PaymentGatewayResponse> deletePaymentResponseFutResp = deletePayment(cust, null, null, p, loggedInUser, digitalKey);
+                        /*Future<PaymentGatewayResponse> deletePaymentResponseFutResp = deletePayment(cust, null, null, p, loggedInUser, digitalKey, sessionId);
                         PaymentGatewayResponse deletePaymentResponse = deletePaymentResponseFutResp.get();
                         if (deletePaymentResponse.isOperationSuccessful()) {
                             Logger.getLogger(PaymentBean.class.getName()).log(Level.INFO, "Payment Deleted Successfully - ID=", new Object[]{p.getId()});
                         } else {
                             Logger.getLogger(PaymentBean.class.getName()).log(Level.SEVERE, "Payment Deletetion FAILED - ID=", new Object[]{p.getId()});
+                        }*/
+                        try {
+                            Thread.sleep(10);// the payment gateway has some concurrency throttling so we don't want to exceed our number of txns per second.
+                        } catch (InterruptedException ex) {
+                            Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, null, ex);
                         }
-                          try {
-                        Thread.sleep(100);// the payment gateway has some concurrency throttling so we don't want to exceed our number of txns per second.
-                    } catch (InterruptedException ex) {
-                        Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, null, ex);
-                    }*/
                     }
                 }
+                futureMap.processDeletePaymentBatch(sessionId, delbatchResp);
 
             }
             // startAsynchJob("ClearSchedule", paymentBean.clearSchedule(cust, false, loggedInUser, getDigitalKey()));// work around failsafe until migration complete. THere are styill scheduled payments without a payment reference from DB
@@ -298,6 +307,7 @@ public class PaymentBean implements Serializable {
                     if (startCal.get(Calendar.DAY_OF_MONTH) >= 1 && startCal.get(Calendar.DAY_OF_MONTH) <= 7 && firstWeekOfMonth == true) {
                         if (arePaymentsWithinLimits(limitToNumberOfPayments, paymentAmountLimitInCents, cumulativeAmountInCents, amountInCents, numberOfpayments)) {
                             bopjAdd.getJobs().add(addNewPayment(cust, newDebitDate, amountInCents, false, loggedInUser, sessionId, digitalKey, futureMap, payBean, bopjAdd.getBatchId()));
+                            //addNewPayment(cust, newDebitDate, amountInCents, false, loggedInUser, sessionId, digitalKey, futureMap, payBean);
                             numberOfpayments++;
                         }
 
@@ -305,6 +315,7 @@ public class PaymentBean implements Serializable {
                     if (startCal.get(Calendar.DAY_OF_MONTH) >= 8 && startCal.get(Calendar.DAY_OF_MONTH) <= 14 && secondWeekOfMonth == true) {
                         if (arePaymentsWithinLimits(limitToNumberOfPayments, paymentAmountLimitInCents, cumulativeAmountInCents, amountInCents, numberOfpayments)) {
                             bopjAdd.getJobs().add(addNewPayment(cust, newDebitDate, amountInCents, false, loggedInUser, sessionId, digitalKey, futureMap, payBean, bopjAdd.getBatchId()));
+                            // addNewPayment(cust, newDebitDate, amountInCents, false, loggedInUser, sessionId, digitalKey, futureMap, payBean);
                             numberOfpayments++;
                         }
 
@@ -312,6 +323,7 @@ public class PaymentBean implements Serializable {
                     if (startCal.get(Calendar.DAY_OF_MONTH) >= 15 && startCal.get(Calendar.DAY_OF_MONTH) <= 21 && thirdWeekOfMonth == true) {
                         if (arePaymentsWithinLimits(limitToNumberOfPayments, paymentAmountLimitInCents, cumulativeAmountInCents, amountInCents, numberOfpayments)) {
                             bopjAdd.getJobs().add(addNewPayment(cust, newDebitDate, amountInCents, false, loggedInUser, sessionId, digitalKey, futureMap, payBean, bopjAdd.getBatchId()));
+                            //addNewPayment(cust, newDebitDate, amountInCents, false, loggedInUser, sessionId, digitalKey, futureMap, payBean);
                             numberOfpayments++;
                         }
 
@@ -319,6 +331,7 @@ public class PaymentBean implements Serializable {
                     if (startCal.get(Calendar.DAY_OF_MONTH) >= 22 && startCal.get(Calendar.DAY_OF_MONTH) <= 28 && fourthWeekOfMonth == true) {
                         if (arePaymentsWithinLimits(limitToNumberOfPayments, paymentAmountLimitInCents, cumulativeAmountInCents, amountInCents, numberOfpayments)) {
                             bopjAdd.getJobs().add(addNewPayment(cust, newDebitDate, amountInCents, false, loggedInUser, sessionId, digitalKey, futureMap, payBean, bopjAdd.getBatchId()));
+                            // addNewPayment(cust, newDebitDate, amountInCents, false, loggedInUser, sessionId, digitalKey, futureMap, payBean);
                             numberOfpayments++;
                         }
 
@@ -339,6 +352,7 @@ public class PaymentBean implements Serializable {
                 } else {
                     if (arePaymentsWithinLimits(limitToNumberOfPayments, paymentAmountLimitInCents, cumulativeAmountInCents, amountInCents, numberOfpayments)) {
                         bopjAdd.getJobs().add(addNewPayment(cust, newDebitDate, amountInCents, false, loggedInUser, sessionId, digitalKey, futureMap, payBean, bopjAdd.getBatchId()));
+                        //addNewPayment(cust, newDebitDate, amountInCents, false, loggedInUser, sessionId, digitalKey, futureMap, payBean);
                         numberOfpayments++;
                     }
                     startCal.add(calendarField, calendarAmount);
@@ -363,9 +377,14 @@ public class PaymentBean implements Serializable {
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, "createSchedule FAILED: Error", e);
             pgr.setErrorMessage(e.getMessage());
+            futureMap.processClearSchedule(sessionId, pgr);
             return new AsyncResult<>(pgr);
         }
-        return new AsyncResult<>(new PaymentGatewayResponse(true, cust, "", "-1", ""));
+        PaymentGatewayResponse addbatchResp = new PaymentGatewayResponse(true, cust, "", "0", "createCRMPaymentSchedule AddPaymentBatch  Completed");
+        futureMap.processAddPaymentBatch(sessionId, addbatchResp);
+        pgr = new PaymentGatewayResponse(true, cust, "", "-1", "");
+        futureMap.processClearSchedule(sessionId, pgr);
+        return new AsyncResult<>(pgr);
 
     }
 
@@ -429,7 +448,7 @@ public class PaymentBean implements Serializable {
                 long amountInCents = pay.getPaymentAmount().movePointRight(2).longValue();// convert to cents
                 String newPaymentID = pay.getId().toString();
                 LOGGER.log(Level.INFO, "retryAddNewPayment for customer {0} with paymentID: {1}", new Object[]{cust.getUsername(), newPaymentID});
-                AsyncJob aj = new AsyncJob("AddPayment", payBean.addPayment(cust, debitDate, amountInCents, pay, user, digitalKey));
+                AsyncJob aj = new AsyncJob("AddPayment", payBean.addPayment(cust, debitDate, amountInCents, pay, user, digitalKey, sessionId));
                 futureMap.put(sessionId, aj);
             } catch (Exception e) {
                 LOGGER.log(Level.WARNING, "retryAddNewPayment failed due to exception:", e);
@@ -451,6 +470,7 @@ public class PaymentBean implements Serializable {
             try {
                 Payments newPayment = new Payments(-1);
                 newPayment.setDebitDate(debitDate);
+                newPayment.setEzidebitCustomerID(cust.getPaymentParametersId().getEzidebitCustomerID());
                 newPayment.setPaymentSource(PaymentSource.DIRECT_DEBIT.value());
                 newPayment.setCreateDatetime(new Date());
                 newPayment.setLastUpdatedDatetime(new Date());
@@ -463,7 +483,7 @@ public class PaymentBean implements Serializable {
                 newPayment.setBankFailedReason("");
                 newPayment.setBankReceiptID("");
                 newPayment.setPaymentDate(debitDate);// we can use this timestamp to reference bookings with booking date as they will be identical
-                paymentsFacade.createAndFlush(newPayment);// need to flush to ensure the id is generated as this onlyoccurs at flush time.
+                paymentsFacade.createAndFlushForGeneratedIdEntities(newPayment);// need to flush to ensure the id is generated as this onlyoccurs at flush time.
                 paymentId = newPayment.getId();
                 //int newId = newPayment.getId();
                 // if (newId != -1) {
@@ -471,7 +491,7 @@ public class PaymentBean implements Serializable {
                 //    newPayment.setPaymentReference(newPaymentID);
                 // paymentsFacade.edit(newPayment);
                 LOGGER.log(Level.INFO, "New Payment Created for customer {0} with paymentID: {1}, time: {2}", new Object[]{cust.getUsername(), newPayment.getId(), new SimpleDateFormat("dd/MM/yy HH:mm:ss.SSS").format(new Date())});
-                AsyncJob aj = new AsyncJob("AddPayment", payBean.addPayment(cust, debitDate, amountInCents, newPayment, user, digitalKey));
+                AsyncJob aj = new AsyncJob("AddPayment", payBean.addPayment(cust, debitDate, amountInCents, newPayment, user, digitalKey, sessionId));
                 aj.setBatchId(batchId);
                 futureMap.put(sessionId, aj);
                 //  } else {
@@ -492,6 +512,7 @@ public class PaymentBean implements Serializable {
 
         CustomerDetails cd = null;
         if (eziDebitId == null || digitalKey == null) {
+
             return new AsyncResult<>(cd);
         }
         if (eziDebitId.trim().isEmpty() || digitalKey.trim().isEmpty()) {
@@ -614,7 +635,7 @@ public class PaymentBean implements Serializable {
     }
 
     @Asynchronous
-    public Future<PaymentGatewayResponse> clearSchedule(Customers cust, boolean keepManualPayments, String loggedInUser, String digitalKey) {
+    public Future<PaymentGatewayResponse> clearSchedule(Customers cust, boolean keepManualPayments, String loggedInUser, String digitalKey, String sessionId) {
         // This method will remove payments that exist in the payment schedule for the given
         // customer. You can control whether all payments are deleted, or if you wish to preserve
         // any manually added payments, and delete an ongoing cyclic schedule.
@@ -643,7 +664,7 @@ public class PaymentBean implements Serializable {
                 auditLogFacade.audit(customersFacade.findCustomerByUsername(loggedInUser), cust, "clearSchedule", auditDetails, changedFrom, changedTo);
 
                 pgr = new PaymentGatewayResponse(true, cust, "The Customers Payment Schedule was cleared successfully in the payment gateway.", "0", "");
-
+                futureMap.processClearSchedule(sessionId, pgr);
                 return new AsyncResult<>(pgr);
             } else {
                 pgr = new PaymentGatewayResponse(false, null, "The Customers Payment Schedule was not cleared in the payment gateway due to an error.", eziResponse.getError().toString(), eziResponse.getErrorMessage().getValue());
@@ -687,8 +708,9 @@ public class PaymentBean implements Serializable {
         if (paymentReference.isEmpty() && (debitDate == null || cust == null || paymentAmountInCents < 0)) {
             String eMessage = "deletePayment NULL parameter of Amount < 0. cust {0}, date {1}, Amount {2}";
             LOGGER.log(Level.WARNING, eMessage, new Object[]{cust, debitDate, paymentAmountInCents});
+            pgr = new PaymentGatewayResponse(false, payment, paymentReference, "-1", eMessage);
             futureMap.processDeletePaymentAsync(sessionId, pgr);
-            return new AsyncResult<>(new PaymentGatewayResponse(false, payment, paymentReference, "-1", eMessage));
+            return new AsyncResult<>(pgr);
         }
 
         String eziDebitCustomerId = ""; // use our reference instead. THis must be an empty string.
@@ -731,8 +753,9 @@ public class PaymentBean implements Serializable {
                 errorMessage += e.getMessage();
             }
             String eMessage = "changeCustomerStatus Response: Error - " + e.getMessage();
+            pgr = new PaymentGatewayResponse(false, payment, paymentReference, "-1", eMessage);
             futureMap.processDeletePaymentAsync(sessionId, pgr);
-            return new AsyncResult<>(new PaymentGatewayResponse(false, payment, paymentReference, "-1", eMessage));
+            return new AsyncResult<>(pgr);
 
         }
         if (eziResponse != null) {
@@ -857,11 +880,13 @@ public class PaymentBean implements Serializable {
      return new AsyncResult<>(result);
      }*/
     @Asynchronous
-    public Future<PaymentGatewayResponse> changeCustomerStatus(Customers cust, String newStatus, String loggedInUser, String digitalKey) {
+    public Future<PaymentGatewayResponse> changeCustomerStatus(Customers cust, String newStatus, String loggedInUser, String digitalKey, String sessionId) {
         PaymentGatewayResponse pgr = new PaymentGatewayResponse(false, null, "", "-1", "An unhandled error occurred!");
         if (cust == null || newStatus == null || loggedInUser == null) {
             LOGGER.log(Level.WARNING, "changeCustomerStatus ABORTED because cust ==null || newStatus == null || loggedInUser == null");
-            return new AsyncResult<>(new PaymentGatewayResponse(false, null, "", "-1", "changeCustomerStatus ABORTED because cust ==null || newStatus == null || loggedInUser == null"));
+            pgr = new PaymentGatewayResponse(false, null, "", "-1", "changeCustomerStatus ABORTED because cust ==null || newStatus == null || loggedInUser == null");
+            futureMap.processChangeCustomerStatus(sessionId, pgr);
+            return new AsyncResult<>(pgr);
         }
         try {
             // note: cancelled status cannot be changed with this method. i.e. cancelled is final like deleted.
@@ -883,7 +908,9 @@ public class PaymentBean implements Serializable {
                 } catch (Exception e) {
                     LOGGER.log(Level.WARNING, "changeCustomerStatus Response: Error - {0}", e);
                     String eMessage = "changeCustomerStatus Response: Error - " + e.getMessage();
-                    return new AsyncResult<>(new PaymentGatewayResponse(false, null, "", "-1", eMessage));
+                    pgr = new PaymentGatewayResponse(false, null, "", "-1", eMessage);
+                    futureMap.processChangeCustomerStatus(sessionId, pgr);
+                    return new AsyncResult<>(pgr);
                 }
                 LOGGER.log(Level.INFO, "changeCustomerStatus Response: Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
                 if (eziResponse.getError() == 0) {// any errors will be a non zero value
@@ -916,20 +943,23 @@ public class PaymentBean implements Serializable {
             String eMessage = "changeCustomerStatus Caught Unhandled Error - " + e.getMessage();
             pgr = new PaymentGatewayResponse(false, null, "", "-1", eMessage);
         }
+        futureMap.processChangeCustomerStatus(sessionId, pgr);
         return new AsyncResult<>(pgr);
     }
 
     @Asynchronous
     public Future<PaymentGatewayResponse> getScheduledPayments(Customers cust, Date fromDate, Date toDate, String digitalKey, String sessionId) {
 
-        ArrayOfScheduledPayment result = new ArrayOfScheduledPayment();
-        PaymentGatewayResponse pgr = new PaymentGatewayResponse(false, result, "", "-1", "An unhandled error occurred!");
-        ArrayOfScheduledPayment resultArrayOfScheduledPayments = null;
+        ArrayOfScheduledPayment resultArrayOfScheduledPayments = new ArrayOfScheduledPayment();
+        PaymentGatewayResponse pgr = new PaymentGatewayResponse(false, resultArrayOfScheduledPayments, "", "-1", "An unhandled error occurred!");
+
         boolean abort = false;
 
         if (cust == null) {
             LOGGER.log(Level.WARNING, "getScheduledPayments: The customer object passed to this method is NULL.This parameter is required.Returning empty array!!");
-            return new AsyncResult<>(new PaymentGatewayResponse(false, result, "", "-1", "The customer object passed to this method is NULL.This parameter is required.Returning empty array!!"));
+            pgr = new PaymentGatewayResponse(false, resultArrayOfScheduledPayments, "", "-1", "The customer object passed to this method is NULL.This parameter is required.Returning empty array!!");
+            futureMap.processGetScheduledPayments(sessionId, pgr);
+            return new AsyncResult<>(pgr);
         }
         try {
             LOGGER.log(Level.INFO, "Running asychronous task getScheduledPayments Customer {0}, From Date {1}, to Date {2}", new Object[]{cust, fromDate, toDate});
@@ -948,15 +978,14 @@ public class PaymentBean implements Serializable {
             LOGGER.log(Level.INFO, "Payment Bean - Running async task - Getting Scheduled Payments for Customer {0}", cust.getUsername());
             EziResponseOfArrayOfScheduledPaymentTHgMB7OL eziResponse = getWs().getScheduledPayments(digitalKey, fromDateString, toDateString, eziDebitCustomerId, ourSystemCustomerReference);
             if (eziResponse.getError() == 0) {// any errors will be a non zero value
-                result = eziResponse.getData().getValue();
-                if (result != null) {
-                    LOGGER.log(Level.INFO, "Payment Bean - Get Customer Scheduled Payments Response Recieved from ezidebit for Customer  - {0}, Number of Payments : {1} ", new Object[]{cust.getUsername(), result.getScheduledPayment().size()});
-                    pgr = new PaymentGatewayResponse(true, result, "Updated Scheduled Payment Information was recieved from the payment gateway.", "-1", "");
+                resultArrayOfScheduledPayments = eziResponse.getData().getValue();
+                if (resultArrayOfScheduledPayments != null) {
+                    LOGGER.log(Level.INFO, "Payment Bean - Get Customer Scheduled Payments Response Recieved from ezidebit for Customer  - {0}, Number of Payments : {1} ", new Object[]{cust.getUsername(), resultArrayOfScheduledPayments.getScheduledPayment().size()});
+                    pgr = new PaymentGatewayResponse(true, resultArrayOfScheduledPayments, "Updated Scheduled Payment Information was recieved from the payment gateway.", "-1", "");
 
                     //process the payments
-                    resultArrayOfScheduledPayments = result;
+                    if (resultArrayOfScheduledPayments.getScheduledPayment() != null) {
 
-                    if (resultArrayOfScheduledPayments != null && resultArrayOfScheduledPayments.getScheduledPayment() != null) {
                         List<ScheduledPayment> payList = resultArrayOfScheduledPayments.getScheduledPayment();
                         if (payList.isEmpty() == false) {
                             String customerRef = payList.get(0).getYourSystemReference().getValue();
@@ -998,11 +1027,12 @@ public class PaymentBean implements Serializable {
                                         }
 
                                         if (crmPay != null) {
+                                           
                                             if (compareScheduledPaymentXMLToEntity(crmPay, pay)) {
                                                 crmPay = convertScheduledPaymentXMLToEntity(crmPay, pay, cust);
                                                 LOGGER.log(Level.INFO, "Future Map processGetScheduledPayments  - updateing scheduled payment id:", id);
                                                 paymentsFacade.edit(crmPay);
-                                            }
+                                            } 
                                         } else {
                                             crmPay = paymentsFacade.findScheduledPaymentByCust(pay, cust);
                                             if (crmPay != null) { //' payment exists
@@ -1016,7 +1046,7 @@ public class PaymentBean implements Serializable {
                                             } else { //payment doesn't exist in crm so add it
                                                 LOGGER.log(Level.WARNING, "Future Map processGetScheduledPayments - A payment exists in the PGW but not in CRM.(This can be ignored if a customer is onboarded with the online eddr form) EzidebitID={0}, CRM Ref:{1}, Amount={2}, Date={3}, Ref={4}", new Object[]{pay.getEzidebitCustomerID().getValue(), pay.getYourSystemReference().getValue(), pay.getPaymentAmount().floatValue(), pay.getPaymentDate().toGregorianCalendar().getTime(), pay.getPaymentReference().getValue()});
                                                 crmPay = convertScheduledPaymentXMLToEntity(null, pay, cust);
-                                                paymentsFacade.createAndFlush(crmPay);
+                                                paymentsFacade.createAndFlushForGeneratedIdEntities(crmPay);
                                                 crmPay.setPaymentReference(crmPay.getId().toString());
                                                 crmPay.setManuallyAddedPayment(false);
                                                 paymentsFacade.edit(crmPay);
@@ -1040,7 +1070,7 @@ public class PaymentBean implements Serializable {
                                                     Logger.getLogger(FutureMapEJB.class
                                                             .getName()).log(Level.SEVERE, "Thread Sleep interrupted", ex);
                                                 }
-                                                Future<PaymentGatewayResponse> addPaymentResponseFutResp = addPayment(cust, crmPay.getDebitDate(), amountLong, crmPay, cust.getUsername(), digitalKey);
+                                                Future<PaymentGatewayResponse> addPaymentResponseFutResp = addPayment(cust, crmPay.getDebitDate(), amountLong, crmPay, cust.getUsername(), digitalKey, sessionId);
                                                 PaymentGatewayResponse addPaymentResponse = addPaymentResponseFutResp.get();
                                                 if (addPaymentResponse.isOperationSuccessful()) {
                                                     Logger.getLogger(PaymentBean.class.getName()).log(Level.INFO, "Payment Added Successfully - ID=", new Object[]{crmPay.getId()});
@@ -1130,7 +1160,63 @@ public class PaymentBean implements Serializable {
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, "getScheduledPayments Response: Error : ", e);
         }
+        futureMap.processGetScheduledPayments(sessionId, pgr);
+        return new AsyncResult<>(pgr);
+    }
 
+    @Asynchronous
+    public Future<PaymentGatewayResponse> convertEzidebitScheduleToCrmSchedule(Customers cust, Date fromDate, Date toDate, String digitalKey, String sessionId) {
+
+        ArrayOfScheduledPayment result = new ArrayOfScheduledPayment();
+        PaymentGatewayResponse pgr = new PaymentGatewayResponse(false, result, "", "-1", "An unhandled error occurred!");
+        ArrayOfScheduledPayment resultArrayOfScheduledPayments = null;
+        boolean abort = false;
+
+        if (cust == null) {
+            LOGGER.log(Level.WARNING, "convertEzidebitScheduleToCrmSchedule: The customer object passed to this method is NULL.This parameter is required.Returning empty array!!");
+            pgr = new PaymentGatewayResponse(false, result, "", "-1", "The customer object passed to this method is NULL.This parameter is required.Returning empty array!!");
+            futureMap.processConvertSchedule(sessionId, pgr);
+            return new AsyncResult<>(pgr);
+        }
+        try {
+            LOGGER.log(Level.INFO, "Running asychronous task convertEzidebitScheduleToCrmSchedule Customer {0}, From Date {1}, to Date {2}", new Object[]{cust, fromDate, toDate});
+            String eziDebitCustomerId = ""; // use our reference instead. THis must be an empty string.
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            String fromDateString = ""; // The exact date on which the payment that you wish to move is scheduled to be deducted from your Customer's bank account or credit card.
+            if (fromDate != null) {
+                fromDateString = sdf.format(fromDate);
+            }
+            String toDateString = "";
+            if (toDate != null) {
+                toDateString = sdf.format(toDate);
+            }
+
+            String ourSystemCustomerReference = cust.getId().toString();
+            LOGGER.log(Level.INFO, "Payment Bean - Running async task - convertEzidebitScheduleToCrmSchedule for Customer {0}", cust.getUsername());
+            EziResponseOfArrayOfScheduledPaymentTHgMB7OL eziResponse = getWs().getScheduledPayments(digitalKey, fromDateString, toDateString, eziDebitCustomerId, ourSystemCustomerReference);
+            if (eziResponse.getError() == 0) {// any errors will be a non zero value
+                result = eziResponse.getData().getValue();
+                if (result != null) {
+                    LOGGER.log(Level.INFO, "Payment Bean - Get convertEzidebitScheduleToCrmSchedule fo Convert Schedule Response Recieved from ezidebit for Customer  - {0}, Number of Payments : {1} ", new Object[]{cust.getUsername(), result.getScheduledPayment().size()});
+                    pgr = new PaymentGatewayResponse(true, result, "Updated Scheduled Payment Information was recieved from the payment gateway.", "-1", "");
+
+                    LOGGER.log(Level.INFO, "Future Map convertEzidebitScheduleToCrmSchedule completed");
+
+                } else {
+                    LOGGER.log(Level.WARNING, "getScheduledPayments Response: Error - NULL Result ");
+                    pgr = new PaymentGatewayResponse(false, null, "", "-1", "Scheduled Payment information was not recieved from the payment gateway due to an error.");
+                }
+
+            } else {
+                LOGGER.log(Level.WARNING, "getScheduledPayments Response: Error - {0}, ", eziResponse.getErrorMessage().getValue());
+                pgr = new PaymentGatewayResponse(false, null, "Scheduled Payment information was not recieved from the payment gateway due to an error.", eziResponse.getError().toString(), eziResponse.getErrorMessage().getValue());
+
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "getScheduledPayments Response: Error : ", e);
+            pgr = new PaymentGatewayResponse(false, null, "Scheduled Payment information was not recieved from the payment gateway due to an error.", "-1", e.getMessage());
+        }
+        futureMap.processConvertSchedule(sessionId, pgr);
         return new AsyncResult<>(pgr);
     }
 
@@ -1260,7 +1346,7 @@ public class PaymentBean implements Serializable {
             /* if (!Objects.equals(payment.getManuallyAddedPayment(), pay.isManuallyAddedPayment())) {
                  return false;
                  }*/
-
+ 
             if (compareStringToXMLString(payment.getPaymentReference(), pay.getPaymentReference()) == false) {
                 return false;
             }
@@ -1719,7 +1805,7 @@ public class PaymentBean implements Serializable {
     }
 
     @Asynchronous
-    public Future<PaymentGatewayResponse> getPayments(Customers cust, String paymentType, String paymentMethod, String paymentSource, String paymentReference, Date fromDate, Date toDate, boolean useSettlementDate, String digitalKey) {
+    public Future<PaymentGatewayResponse> getPayments(Customers cust, String paymentType, String paymentMethod, String paymentSource, String paymentReference, Date fromDate, Date toDate, boolean useSettlementDate, String digitalKey, String sessionId) {
         //  Description
         //  	  
         //  This method allows you to retrieve payment information from across Ezidebit's various
@@ -1750,22 +1836,30 @@ public class PaymentBean implements Serializable {
 
         if (cust == null) {
             LOGGER.log(Level.WARNING, "getPayments: The customer object passed to this method is NULL.This parameter is required.Returning empty array!!");
-            return new AsyncResult<>(new PaymentGatewayResponse(false, result, "", "-1", "The customer object passed to this method is NULL.This parameter is required.Returning empty array!!"));
+            pgr = new PaymentGatewayResponse(false, result, "", "-1", "The customer object passed to this method is NULL.This parameter is required.Returning empty array!!");
+            futureMap.processGetPayments(sessionId, pgr);
+            return new AsyncResult<>(pgr);
 
         }
         try {
             LOGGER.log(Level.INFO, "Running asychronous task getPayments Customer {0}, From Date {1}, to Date {2}", new Object[]{cust, fromDate, toDate});
             if (paymentType.compareTo("ALL") != 0 && paymentType.compareTo("PENDING") != 0 && paymentType.compareTo("FAILED") != 0 && paymentType.compareTo("SUCCESSFUL") != 0) {
                 LOGGER.log(Level.WARNING, "getPayments: payment Type is required and should be either ALL,PENDING,FAILED,SUCCESSFUL.  Returning null as this parameter is required.");
-                return new AsyncResult<>(new PaymentGatewayResponse(false, result, "", "-1", "The Payment Type is required and should be either ALL,PENDING,FAILED,SUCCESSFUL."));
+                pgr = new PaymentGatewayResponse(false, result, "", "-1", "The Payment Type is required and should be either ALL,PENDING,FAILED,SUCCESSFUL.");
+                futureMap.processGetPayments(sessionId, pgr);
+                return new AsyncResult<>(pgr);
             }
             if (paymentMethod.compareTo("ALL") != 0 && paymentMethod.compareTo("CR") != 0 && paymentMethod.compareTo("DR") != 0) {
                 LOGGER.log(Level.WARNING, "getPayments: payment Method is required and should be either ALL,CR,DR.  Returning null as this parameter is required.");
-                return new AsyncResult<>(new PaymentGatewayResponse(false, result, "", "-1", "The Payment Method is required and should be either ALL,CR,DR."));
+                pgr = new PaymentGatewayResponse(false, result, "", "-1", "The Payment Method is required and should be either ALL,CR,DR.");
+                futureMap.processGetPayments(sessionId, pgr);
+                return new AsyncResult<>(pgr);
             }
             if (paymentSource.compareTo("ALL") != 0 && paymentSource.compareTo("SCHEDULED") != 0 && paymentSource.compareTo("WEB") != 0 && paymentSource.compareTo("PHONE") != 0 && paymentSource.compareTo("BPAY") != 0) {
                 LOGGER.log(Level.WARNING, "getPayments: paymentSource is required and should be either ALL,SCHEDULED,WEB,PHONE,BPAY.  Returning null as this parameter is required.");
-                return new AsyncResult<>(new PaymentGatewayResponse(false, result, "", "-1", "The PaymentSource is required and should be either ALL,SCHEDULED,WEB,PHONE,BPAY."));
+                pgr = new PaymentGatewayResponse(false, result, "", "-1", "The PaymentSource is required and should be either ALL,SCHEDULED,WEB,PHONE,BPAY.");
+                futureMap.processGetPayments(sessionId, pgr);
+                return new AsyncResult<>(pgr);
             }
             if (paymentReference == null) {
                 paymentReference = "";
@@ -1813,20 +1907,24 @@ public class PaymentBean implements Serializable {
             LOGGER.log(Level.WARNING, "getPayments Response: Error : ", e);
             pgr = new PaymentGatewayResponse(false, null, "Payment information was not recieved from the payment gateway due to an error.", "Server Fault", e.getMessage());
         }
-
+        futureMap.processGetPayments(sessionId, pgr);
         return new AsyncResult<>(pgr);
     }
 
     @Asynchronous
-    public Future<PaymentGatewayResponse> getCustomerDetails(Customers cust, String digitalKey) {
+    public Future<PaymentGatewayResponse> getCustomerDetails(Customers cust, String digitalKey, String sessionId) {
 
         PaymentGatewayResponse pgr = new PaymentGatewayResponse(false, null, "", "-1", "An unhandled error occurred!");
         CustomerDetails cd = null;
         if (cust == null || digitalKey == null) {
-            return new AsyncResult<>(new PaymentGatewayResponse(false, null, "", "-1", "The customer or digital key is NULL!"));
+            pgr = new PaymentGatewayResponse(false, null, "", "-1", "The customer or digital key is NULL!");
+            futureMap.processGetCustomerDetails(sessionId, pgr);
+            return new AsyncResult<>(pgr);
         }
         if (cust.getId() == null || digitalKey.trim().isEmpty()) {
-            return new AsyncResult<>(new PaymentGatewayResponse(false, null, "", "-1", "The customer or digital key is empty!"));
+            pgr = new PaymentGatewayResponse(false, null, "", "-1", "The customer or digital key is empty!");
+            futureMap.processGetCustomerDetails(sessionId, pgr);
+            return new AsyncResult<>(pgr);
         }
 
         LOGGER.log(Level.INFO, "Payment Bean - Running async task - Getting Customer Details {0}", cust.getUsername());
@@ -1845,10 +1943,12 @@ public class PaymentBean implements Serializable {
             LOGGER.log(Level.WARNING, "Get Customer Details Response: Error - {0}", customerdetails.getErrorMessage().getValue());
 
         }
+        futureMap.processGetCustomerDetails(sessionId, pgr);
         return new AsyncResult<>(pgr);
 
     }
 
+    @TransactionAttribute(REQUIRES_NEW)
     private void updatePaymentParameters(Customers cust, CustomerDetails custDetails) {
         PaymentParameters pp = cust.getPaymentParametersId();
 
@@ -1901,12 +2001,11 @@ public class PaymentBean implements Serializable {
         pp.setYourGeneralReference(custDetails.getYourGeneralReference().getValue());
         pp.setYourSystemReference(custDetails.getYourSystemReference().getValue());
 
-        ejbPaymentParametersFacade.edit(pp);
-        ejbPaymentParametersFacade.pushChangesToDBImmediatleyInsteadOfAtTxCommit();
-
+        //ejbPaymentParametersFacade.edit(pp);
+        //ejbPaymentParametersFacade.pushChangesToDBImmediatleyInsteadOfAtTxCommit();
         cust.setPaymentParametersId(pp);
         //customersFacade.editAndFlush(cust);
-        customersFacade.pushChangesToDBImmediatleyInsteadOfAtTxCommit();
+        //customersFacade.pushChangesToDBImmediatleyInsteadOfAtTxCommit();
         LOGGER.log(Level.INFO, "Payment Bean processGetCustomerDetails. Payment Parameters have been updated for {0}.", new Object[]{cust.getUsername()});
     }
 
@@ -1977,7 +2076,7 @@ public class PaymentBean implements Serializable {
 
     @Asynchronous
     @TransactionAttribute(TransactionAttributeType.NEVER)
-    public Future<PaymentGatewayResponse> addPayment(Customers cust, Date debitDate, Long paymentAmountInCents, Payments payment, String loggedInUser, String digitalKey) {
+    public Future<PaymentGatewayResponse> addPayment(Customers cust, Date debitDate, Long paymentAmountInCents, Payments payment, String loggedInUser, String digitalKey, String sessionId) {
         // paymentReference Max 50 chars. It can be search with with a wildcard in other methods. Use invoice number or other payment identifier
         LOGGER.log(Level.INFO, "running asychronous task addPayment Customer {0}, debitDate {1}, paymentAmountInCents {2}", new Object[]{cust, debitDate, paymentAmountInCents});
         String paymentReference = payment.getId().toString();
@@ -2016,7 +2115,9 @@ public class PaymentBean implements Serializable {
                     }
                     LOGGER.log(Level.WARNING, "addPayment Method FAILED: ", eMessage);
                 }
-                return new AsyncResult<>(new PaymentGatewayResponse(false, payment, paymentReference, "-1", eMessage));
+                pgr = new PaymentGatewayResponse(false, payment, paymentReference, "-1", eMessage);
+                futureMap.processAddPaymentResult(sessionId, pgr);
+                return new AsyncResult<>(pgr);
             }
             if (eziResponse.getError() == 0) {// any errors will be a non zero value
                 LOGGER.log(Level.INFO, "addPayment Response: Successful. Reference:{0}, Customer: {2}, Return Value: - {1}", new Object[]{paymentReference, eziResponse.getData().getValue(), cust.getUsername()});
@@ -2055,7 +2156,7 @@ public class PaymentBean implements Serializable {
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, "addPayment Response: Error:", e);
         }
-
+        futureMap.processAddPaymentResult(sessionId, pgr);
         return new AsyncResult<>(pgr);
     }
 

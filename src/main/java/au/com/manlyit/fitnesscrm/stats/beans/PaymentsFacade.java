@@ -19,6 +19,9 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
+import static javax.ejb.TransactionAttributeType.REQUIRES_NEW;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -80,15 +83,6 @@ public ABC addNewABC(ABC abc) {
 }
 
      */
-    public void createAndFlush(Payments entity) {
-
-        getEntityManager().persist(entity);
-        getEntityManager().flush();
-
-        //      String message = "Payment Entity CREATED and flushed  to database: " + entity.getId() +"" + new SimpleDateFormat("dd/MM/yy HH:mm:ss.SSS").format(new Date());
-        //     LOGGER.log(Level.INFO, message);
-    }
-
     public void editAndFlush(Payments entity) {
 
         getEntityManager().merge(entity);
@@ -119,6 +113,18 @@ public ABC addNewABC(ABC abc) {
             LOGGER.log(Level.INFO, "Could not find customers Payments.", e);
         }
         return retList;
+    }
+
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    public boolean updatePaymentToScheduledStatus(Payments pay) {
+        Payments p = find(pay.getId());
+        if (p == null) {
+            return false;
+        }
+        p.setPaymentStatus(PaymentStatus.SCHEDULED.value());
+        p.setPaymentReference(Integer.toString(p.getId()));
+        getEntityManager().merge(p);
+        return true;
     }
 
     public List<Payments> findPaymentsByCustomerAndStatus(Customers customer, String status) {
@@ -210,11 +216,11 @@ public ABC addNewABC(ABC abc) {
 
             TypedQuery<Payments> q = em.createQuery(cq);
             //q.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase);
-             if (bypassCache) {
+            if (bypassCache) {
                 q.setHint("javax.persistence.cache.retrieveMode", "BYPASS");
-            }else{
-                 //q.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase);
-             }
+            } else {
+                //q.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase);
+            }
             List<Payments> pList = q.getResultList();
             if (pList != null) {
                 if (pList.size() > 0) {

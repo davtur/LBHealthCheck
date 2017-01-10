@@ -499,7 +499,7 @@ public class MySessionsChart1 implements Serializable {
                             maxTotal = reportTotalProfit;
                         }
 
-                        logger.log(Level.INFO, "Get ALL Payments , No.Payments:{1},startdate:{2},End date:{3}", new Object[]{paymentList.size(), strt, end});
+                        logger.log(Level.FINE, "Get ALL Payments , No.Payments:{1},startdate:{2},End date:{3}", new Object[]{paymentList.size(), strt, end});
 
                     } else {
 
@@ -575,10 +575,10 @@ public class MySessionsChart1 implements Serializable {
             logger.log(Level.WARNING, "Monthly REvenue Chart Error", e);
         }
         // yAxis.setLabel(getY);
+        logger.log(Level.INFO, "create Monthly Revenue Chart Completed");
+
         return ccModel;
     }
-    
-    
 
     private BarChartModel createSupplierExpensesChart(int datePeriodInterval, Date startDate, Date endDate) {
         BarChartModel ccModel = null;
@@ -739,10 +739,7 @@ public class MySessionsChart1 implements Serializable {
         // yAxis.setLabel(getY);
         return ccModel;
     }
-    
-    
-    
-    
+
     private BarChartModel createCustomerChurnChart(int datePeriodInterval, Date startDate, Date endDate) {
         BarChartModel ccModel = null;
 
@@ -922,7 +919,7 @@ public class MySessionsChart1 implements Serializable {
         JsfUtil.addSuccessMessage("Item selected",
                 "Item Index:" + event.getItemIndex()
                 + ", Series Index: " + event.getSeriesIndex());
-       // expensesBySupplierModel.getSeries().
+        // expensesBySupplierModel.getSeries().
     }
 
     public BarChartModel getModel() {

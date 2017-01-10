@@ -5,6 +5,7 @@ import au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.beans.CustomersFacade;
+import au.com.manlyit.fitnesscrm.stats.beans.GroupsFacade;
 import au.com.manlyit.fitnesscrm.stats.beans.LoginBean;
 import au.com.manlyit.fitnesscrm.stats.beans.PaymentsFacade;
 import au.com.manlyit.fitnesscrm.stats.beans.util.PaymentPeriod;
@@ -294,8 +295,11 @@ public class CustomersController implements Serializable {
             futureMap.cancelFutures(controller.getSessionId());
             controller.setWaitingForPaymentDetails(false);
             // setAsyncOperationRunning(false);
+            // if(cust.getPaymentParametersId().getStatusCode().startsWith("D") || cust.getPaymentParametersId().getStatusCode().isEmpty()){
+            controller.getCustDetailsFromEzi();
+            // }
             if (controller.isTheCustomerProvisionedInThePaymentGateway()) {
-                controller.getCustDetailsFromEzi();
+                // controller.getCustDetailsFromEzi();
 
                 controller.getPayments(18, 2);
             } else {
@@ -712,8 +716,8 @@ public class CustomersController implements Serializable {
                     pp.setSmsExpiredCard("YES");
                     pp.setSmsFailedNotification("YES");
                     pp.setSmsPaymentReminder("NO");
-                    pp.setStatusCode("");
-                    pp.setStatusDescription("");
+                    pp.setStatusCode("D");
+                    pp.setStatusDescription("DEFAULT NOT PROVISIONED");
                     pp.setTotalPaymentsFailed(0);
                     pp.setTotalPaymentsFailedAmount(new BigDecimal(0));
                     pp.setTotalPaymentsSuccessful(0);
@@ -1279,32 +1283,35 @@ public class CustomersController implements Serializable {
     }
 
     protected void addCustomerToUsersGroup(Customers c) {
-        Collection<Groups> customersExistingGroups = c.getGroupsCollection();
-        boolean exists = false;
-        for (Groups eg : customersExistingGroups) {
-            if (eg.getGroupname().trim().equalsIgnoreCase("USER")) {
-                exists = true;
+        List<Groups> lg = new ArrayList<>(c.getGroupsCollection());
+        List<Groups> removalList = new ArrayList<>();
+        int count = 0;
+        for (Groups g : lg) {
+            if (g.getGroupname().contains("USER")) {
+                if (count > 0) {
+                    removalList.add(g);
+                }
+                count++;
             }
-
         }
-        if (exists == false) {
-            // if (ejbGroupsFacade.isCustomerInGroup(c, "USER") == false) {
+        for (Groups g : lg) {
+            if (g.getGroupname().contains("LEAD")) {
+                removalList.add(g);
+                count++;
+            }
+        }
+
+        Iterator<Groups> i = removalList.iterator();
+        while (i.hasNext()) {
+            Groups eg = i.next();
+            c.getGroupsCollection().remove(eg);
+        }
+
+        if (count == 0) {
             Groups grp = new Groups(0, "USER");
             grp.setUsername(c);
-            c.getGroupsCollection().add(grp);
-            //ejbFacade.edit(c);
-            //ejbGroupsFacade.create(grp);
-            JsfUtil.addSuccessMessage(configMapFacade.getConfig("CustomersCreatedMustBeInUserGroup"));
-        }
-        //if they are a lead remove them
-        List<Groups> lg = new ArrayList<>(customersExistingGroups);
 
-        for (int i = lg.size() - 1; i >= 0; i--) {
-            Groups eg = lg.get(i);
-            if (eg.getGroupname().trim().equalsIgnoreCase("LEAD")) {
-                c.getGroupsCollection().remove(eg);
-            }
-
+            ejbFacade.addCustomerToGroup(c, grp);
         }
 
     }

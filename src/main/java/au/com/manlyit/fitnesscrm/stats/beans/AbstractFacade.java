@@ -14,6 +14,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.ejb.TransactionAttribute;
+import static javax.ejb.TransactionAttributeType.REQUIRES_NEW;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
@@ -78,7 +80,7 @@ public abstract class AbstractFacade<T> implements Serializable {
         }*/
 
     }
-
+@TransactionAttribute(REQUIRES_NEW)
     public void createAndFlushForGeneratedIdEntities(T entity) {
 
         /*
