@@ -34,7 +34,7 @@ public class SurveyAnswersFacade extends AbstractFacade<SurveyAnswers> {
     private EntityManager em;
     @Inject
     private ConfigMapFacade configMapFacade;
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
     private static final Logger LOGGER = Logger.getLogger(SurveyAnswersFacade.class.getName());
 
     @Override

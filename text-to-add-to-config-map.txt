@@ -2069,3 +2069,4 @@ DashboardSessionsChartTitle= Sessions Chart
 
 DashboardLeadsPanelLabel=Leads
 DashboardCustomersOnHoldPanelLabel=OnHold
+DashboardCustomersBadPaymentsPanelLabel=Bad Payments

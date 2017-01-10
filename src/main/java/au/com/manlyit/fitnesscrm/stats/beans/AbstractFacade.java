@@ -40,7 +40,7 @@ public abstract class AbstractFacade<T> implements Serializable {
 
     private static final Logger LOGGER = Logger.getLogger(AbstractFacade.class.getName());
     private final Class<T> entityClass;
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
 
     public AbstractFacade(Class<T> entityClass) {
         this.entityClass = entityClass;

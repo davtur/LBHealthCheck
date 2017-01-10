@@ -2000,7 +2000,7 @@ public class EziDebitPaymentGateway implements Serializable {
         RequestContext.getCurrentInstance().execute("updatePaymentForms();");*/
 //RequestContext.getCurrentInstance().update("devForm");
         //  refreshFromDB = true;
-        boolean currentFlag = isAsyncOperationRunning();
+       /* boolean currentFlag = isAsyncOperationRunning();
         boolean updatedFlag = futureMap.isAnAsyncOperationRunning(sessionId);
         setAsyncOperationRunning(updatedFlag);
         
@@ -2010,7 +2010,7 @@ public class EziDebitPaymentGateway implements Serializable {
             }else{
                 LOGGER.log(Level.INFO, "Async Jobs have started. {0} jobs are running",k);
             }
-        }
+        }*/
               
     }
 

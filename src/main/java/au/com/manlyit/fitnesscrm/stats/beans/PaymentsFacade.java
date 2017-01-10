@@ -521,6 +521,7 @@ public ABC addNewABC(ABC abc) {
             CriteriaQuery<Payments> cq = cb.createQuery(Payments.class);
             Root<Payments> rt = cq.from(Payments.class);
             Expression<Customers> customer;
+            Expression<Date> orderByDate;
             Expression<Date> stime;
             Expression<Date> stime2;
             Expression<Date> stime3;
@@ -540,10 +541,12 @@ public ABC addNewABC(ABC abc) {
             //  }
             if (useSettlement) {
                 stime = rt.get("settlementDate");
+                orderByDate = stime;
                 predicatesList1.add(cb.between(stime, startDate, endDate));
             } else {
                 stime = rt.get("paymentDate");
                 stime2 = rt.get("debitDate");
+                orderByDate = stime2;
                 stime3 = rt.get("transactionTime");
                 predicatesList1.add(cb.between(stime, startDate, endDate));
                 predicatesList1.add(cb.between(stime2, startDate, endDate));
@@ -561,6 +564,9 @@ public ABC addNewABC(ABC abc) {
             if (showFailed) {
                 predicatesList2.add(cb.equal(status, PaymentStatus.FATAL_DISHONOUR.value()));
                 predicatesList2.add(cb.equal(status, PaymentStatus.DISHONOURED.value()));
+                 predicatesList2.add(cb.equal(status, PaymentStatus.MISSING_IN_PGW.value()));
+                 predicatesList2.add(cb.equal(status, PaymentStatus.REJECTED_BY_GATEWAY.value()));
+                 predicatesList2.add(cb.equal(status, PaymentStatus.REJECTED_CUST_ON_HOLD.value()));
             }
             if (showScheduled) {
                 predicatesList2.add(cb.and(cb.equal(status, PaymentStatus.SCHEDULED.value()), cb.equal(custState, activeState)));
@@ -578,9 +584,9 @@ public ABC addNewABC(ABC abc) {
             //cq.where(condition1);
             cq.select(rt);
             if (sortAsc) {
-                cq.orderBy(cb.asc(stime));
+                cq.orderBy(cb.asc(orderByDate));
             } else {
-                cq.orderBy(cb.desc(stime));
+                cq.orderBy(cb.desc(orderByDate));
             }
             TypedQuery<Payments> q = em.createQuery(cq);
             //q.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase);

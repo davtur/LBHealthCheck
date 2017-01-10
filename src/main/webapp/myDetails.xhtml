@@ -18,25 +18,16 @@
 
                 <div class="Container50 Responsive50">
                     <div class="ContainerIndent">
+                        
+                        <h1 class="BigTopic">#{configMapController.getKey('ListCustomersTitle_ProfilePic')}</h1>
+
+                        <p:graphicImage id="photo1" value="#{customersController.selected.profileImage.imageStream}" height="150px" cache="false" styleClass="parentOfUploadPhoto" />
+                        <div class="EmptyBox10"></div>
+                        <p:commandButton icon="fa fa-upload  white Fs14"  id="photoUploadButton" ajax="true"  onclick="PF('uploadPhotoDialogueWidget').show();" update=":growl @(.parentOfUploadPhoto) "   value="#{configMapController.getKey('EditCustomersUploadPhotoButton')}" immediate="true"/>
+
+
                         <h1 class="BigTopic">#{configMapController.getKey('ListCustomersTitle_CustomerDetailsHeader')}</h1>
-                        <h:panelGrid columns="2"  >
-
-
-                            <p:outputLabel value="#{configMapController.getKey('EditCustomersLabel_gender')}" for="gender" />
-                            <p:selectOneMenu  styleClass="selectOneWidth" id="gender" value="#{customersController.selected.gender}" title="#{configMapController.getKey('EditCustomersTitle_gender')}" required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_gender')}">
-                                <f:selectItem itemValue="F" itemLabel="Female" />
-                                <f:selectItem itemValue="M" itemLabel="Male" />
-                                <p:ajax event="change" />
-                            </p:selectOneMenu>
-                            <p:outputLabel value="#{configMapController.getKey('EditCustomersLabel_username')}" for="username" />
-                            <h:outputText id="username" value="#{customersController.selected.username}" title="#{configMapController.getKey('EditCustomersTitle_username')}" />
-
-                            <p:outputLabel value="#{configMapController.getKey('EditCustomersLabel_dob')}" for="dob" />
-                            <p:calendar id="dob" value="#{customersController.selected.dob}" pattern="dd/MM/yyyy"   title="#{configMapController.getKey('EditCustomersTitle_dob')}"  required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_dob')}">
-                                <p:ajax event="dateSelect" listener="#{customersController.dobChangeListener}" update=":growl"  />
-                            </p:calendar>
-
-
+                        <h:panelGrid columns="2"   >
                             <p:outputLabel value="#{configMapController.getKey('EditCustomersLabel_firstname')}" for="firstname" />
                             <p:inputText id="firstname"  value="#{customersController.selected.firstname}" title="#{configMapController.getKey('EditCustomersTitle_firstname')}"  required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_firstname')}"/>
 
@@ -46,16 +37,32 @@
                             <p:inputText id="emailAddress" value="#{customersController.selected.emailAddress}" title="#{configMapController.getKey('EditCustomersTitle_emailAddress')}" required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_emailAddress')}">
                                 <f:validator validatorId="au.com.manlyit.fitnesscrm.stats.classes.util.EmailValidator" />
                             </p:inputText>
+
+                            <p:outputLabel value="#{configMapController.getKey('EditCustomersLabel_telephone')}" for="telephone" />
+                            <p:inputText id="telephone" value="#{customersController.selected.telephone}" title="#{configMapController.getKey('EditCustomersTitle_telephone')}" required="false" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_telephone')}"/>
+
+                            <p:outputLabel value="#{configMapController.getKey('EditCustomersLabel_gender')}" for="gender" />
+                            <p:selectOneMenu  styleClass="selectOneWidth" id="gender" value="#{customersController.selected.gender}" title="#{configMapController.getKey('EditCustomersTitle_gender')}" required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_gender')}">
+                                <f:selectItem itemValue="F" itemLabel="Female" />
+                                <f:selectItem itemValue="M" itemLabel="Male" />
+                                <p:ajax event="change" />
+                            </p:selectOneMenu>
+
+                            <p:outputLabel value="#{configMapController.getKey('EditCustomersLabel_dob')}" for="dob" />
+                            <p:calendar id="dob" value="#{customersController.selected.dob}" pattern="dd/MM/yyyy"   title="#{configMapController.getKey('EditCustomersTitle_dob')}"  required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_dob')}">
+                                <p:ajax event="dateSelect" listener="#{customersController.dobChangeListener}" update=":growl"  />
+                            </p:calendar>
+
+
+
                             <p:outputLabel value="#{configMapController.getKey('EditCustomersLabel_streetAddress')}" for="streetAddress" />
                             <p:inputText id="streetAddress" value="#{customersController.selected.streetAddress}" title="#{configMapController.getKey('EditCustomersTitle_streetAddress')}" required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_streetAddress')}"/>
                             <p:outputLabel value="#{configMapController.getKey('EditCustomersLabel_suburb')}" for="suburb" />
                             <p:inputText id="suburb" value="#{customersController.selected.suburb}" title="#{configMapController.getKey('EditCustomersTitle_suburb')}" required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_suburb')}"/>
                             <p:outputLabel value="#{configMapController.getKey('EditCustomersLabel_postcode')}" for="postcode" />
                             <p:inputText id="postcode" value="#{customersController.selected.postcode}" title="#{configMapController.getKey('EditCustomersTitle_postcode')}" required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_postcode')}"/>
-                            <p:outputLabel value="#{configMapController.getKey('EditCustomersLabel_telephone')}" for="telephone" />
-                            <p:inputText id="telephone" value="#{customersController.selected.telephone}" title="#{configMapController.getKey('EditCustomersTitle_telephone')}" required="false" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_telephone')}"/>
-                            <p:outputLabel value="#{configMapController.getKey('EditCustomersLabel_fax')}" for="fax" />
-                            <p:inputText id="fax" value="#{customersController.selected.fax}" title="#{configMapController.getKey('EditCustomersTitle_fax')}" />
+                             <!--<p:outputLabel value="#{configMapController.getKey('EditCustomersLabel_fax')}" for="fax" />
+                            <p:inputText id="fax" value="#{customersController.selected.fax}" title="#{configMapController.getKey('EditCustomersTitle_fax')}" />-->
                             <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_emergencyContactName')}" for="emergencyContactName" />
                             <p:inputText id="emergencyContactName" value="#{customersController.newCustomer.emergencyContactName}" title="#{configMapController.getKey('CreateCustomersTitle_emergencyContactName')}"  />
                             <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_emergencyContactPhone')}" for="emergencyContactPhone" />
@@ -69,7 +76,7 @@
                                 <p:ajax  event="change" />
                             </p:selectOneMenu>
 
-                            <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_newsletter')}" title="#{configMapController.getKey('EditCustomersTitle_newsletter')}" for="newsletter1" />
+                          <!--  <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_newsletter')}" title="#{configMapController.getKey('EditCustomersTitle_newsletter')}" for="newsletter1" />
                             <p:selectOneMenu   styleClass="selectOneWidth" id="newsletter1" value="#{customersController.selected.newsletter}"  >
                                 <f:selectItem itemValue="true" itemLabel="Send Newsletter" />
                                 <f:selectItem itemValue="false" itemLabel="Dont Send" />
@@ -79,7 +86,9 @@
                             <p:selectOneMenu   styleClass="selectOneWidth" id="emailFormat1" valueChangeListener="#{customersController.selectOneMenuValueChangeListener}" converter="emailFormatControllerConverter" value="#{customersController.selected.emailFormat}" label="#{configMapController.getKey('CreateCustomersTitle_emailFormat')}" >
                                 <f:selectItems value="#{emailFormatController.itemsAvailableAsObjects}"  var="emailFormat" itemLabel="#{emailFormat.emailFormat}" itemValue="#{emailFormat}"/>
                                 <p:ajax  event="change" />
-                            </p:selectOneMenu>
+                            </p:selectOneMenu>-->
+                            <p:outputLabel value="#{configMapController.getKey('EditCustomersLabel_username')}" for="username" />
+                            <h:outputText id="username" value="#{customersController.selected.username}" title="#{configMapController.getKey('EditCustomersTitle_username')}" />
 
                             <p:outputLabel value="#{configMapController.getKey('EditCustomersLabel_password')}" for="passButton2" />
                             <!--  <p:password id="password"  value="#{customersController.checkPass}" onfocus="this.select()" feedback="true" title="#{configMapController.getKey('EditCustomersTitle_password')}" >
@@ -89,6 +98,7 @@
                             <p:password id="password2"  value="#{customersController.checkPass}" onfocus="this.select()" feedback="true" title="#{configMapController.getKey('EditCustomersTitle_password')}" />
                           
                             <p:commandButton   ajax="true" actionListener="#{customersController.updatepass}" update="password  :growl"   value="#{configMapController.getKey('EditCustomersUpdatePassword')}" immediate="true"/>-->
+
                             <p:commandButton icon="fa fa-cog  white Fs14" id="passButton2" ajax="true"  onclick="PF('updatePasswordDialogueWidget').show();" update=":growl :updatePass"   value="#{configMapController.getKey('EditCustomersUpdatePassword')}" immediate="true"/>
                         </h:panelGrid>
                         <div class="EmptyBox10"></div>
@@ -97,47 +107,12 @@
 
                     </div>
                 </div>
-                <div class="Container50 Responsive50">
+               <!-- <div class="Container50 Responsive50">
                     <div class="ContainerIndent">
 
-                        <h1 class="BigTopic">#{configMapController.getKey('ListCustomersTitle_ProfilePic')}</h1>
-
-                        <p:graphicImage id="photo1" value="#{customersController.selected.profileImage.imageStream}" height="200px" cache="false" styleClass="parentOfUploadPhoto" />
-                        <div class="EmptyBox10"></div>
-                        <p:commandButton icon="fa fa-upload  white Fs14"  id="photoUploadButton" ajax="true"  onclick="PF('uploadPhotoDialogueWidget').show();" update=":growl @(.parentOfUploadPhoto) "   value="#{configMapController.getKey('EditCustomersUploadPhotoButton')}" immediate="true"/>
-
-
                     </div>
-                </div>
-                <div class="Container50 Responsive50">
-                    <div class="ContainerIndent">
-                        <h1 class="BigTopic">#{configMapController.getKey('MyDetailsSurveyPanel_title')}</h1>
-
-
- <!--   <p:outputLabel value="#{configMapController.getKey('CreateSurveyanswersLabel_surveyId')}" for="surveyId" />
-                        <p:selectOneMenu id="surveyId" valueChangeListener="#{surveyanswersController.selectOneMenuValueChangeListener}" converter="surveysControllerConverter"  value="#{surveyanswersController.selectedSurvey}"  label="#{configMapController.getKey('CreateSurveyanswersTitle_surveyId')}">
-                            <f:selectItems value="#{surveysController.itemsAvailableSelectMany}"/>
-                            <p:ajax   update=":createCustomerForm"  />
-                        </p:selectOneMenu>-->
-                        <ui:repeat value="#{customersController.selected.questionnaireMapCollection}" var="qMap">
-                            <div class="EmptyBox10"></div>
-                                                <!--   <p:commandButton icon="fa fa-edit  white Fs14" id="viewSurveyButton" disabled="#{empty surveyanswersController.selectedSurvey}"  action="customerSurveys"    value="#{configMapController.getKey('MyDeatilsSurveys_viewSurveyLabel')}" update=":growl :createCustomerForm"  /> -->
-
-                            <h:panelGrid columns="2" cellpadding="5" >
-                                <p:commandButton icon="fa fa-edit  white Fs14"   action="customerSurveys" rendered="#{qMap.enabled}"   value="#{qMap.surveysId.name}" update=":growl :createCustomerForm"  >
-                                    <f:setPropertyActionListener value="#{qMap.surveysId}" target="#{surveyanswersController.selectedSurvey}" />
-                                </p:commandButton> 
-
-
-                                <h:outputText  rendered="#{qMap.questionnaireCompleted and qMap.enabled}" value="Completed" />   
-                                <h:outputText  rendered="#{!qMap.questionnaireCompleted and qMap.enabled}" value="Please complete this form." />   
-
-                            </h:panelGrid>
-
-                        </ui:repeat>
-                    </div>
-                </div>
-                <div class="Container50 Responsive50">
+                </div>-->
+                 <div class="Container50 Responsive50">
                     <div class="ContainerIndent">
                         <h1 class="BigTopic">#{configMapController.getKey('ListCustomersTitle_PanelHeader')}</h1>
 
@@ -165,7 +140,7 @@
                         <h:panelGrid columns="2" cellpadding="5" >
                             <p:commandButton styleClass="updatePaymentInfo" icon="fa fa-dollar  white Fs14" id="directDebitFormButton" disabled="#{!ezidebit.customerWebDDRFormEnabled}"  actionListener="#{ezidebit.redirectToPaymentGateway}"    value="#{configMapController.getKey('EnterPaymentDetailsButton')}" update=":growl :createCustomerForm"  /> 
 
-                            <div class="EmptyBox10"></div>
+                            
                             <h:outputText rendered="#{ezidebit.customerWebDDRFormEnabled}" styleClass="red FontBold animated pulse infinite" value="#{configMapController.getKey('MyDetailsCallToFillOutPaymentDetails')}"/>
                             <h:outputText  rendered="#{!ezidebit.customerWebDDRFormEnabled}" value="Completed" /> 
 
@@ -173,6 +148,34 @@
                         <div class="EmptyBox10"></div>
                         <p:commandButton styleClass="updatePaymentInfo" icon="fa fa-credit-card  white Fs14" id="editPaymentMethodButton" disabled="#{ezidebit.theCustomerProvisionedInThePaymentGateway == false or ezidebit.customerDetailsHaveBeenRetrieved == false or ezidebit.customerCancelledInPaymentGateway == true}"  oncomplete="PF('editPaymentMethodDialogueWidget').show();"    value="#{configMapController.getKey('editPaymentMethodButtonLink')}" update=":growl @(.updatePaymentInfo)"  /> 
 
+                    </div>
+                </div>
+               <div class="Container50 Responsive50">
+                    <div class="ContainerIndent">
+                        <h1 class="BigTopic">#{configMapController.getKey('MyDetailsSurveyPanel_title')}</h1>
+
+
+ <!--   <p:outputLabel value="#{configMapController.getKey('CreateSurveyanswersLabel_surveyId')}" for="surveyId" />
+                        <p:selectOneMenu id="surveyId" valueChangeListener="#{surveyanswersController.selectOneMenuValueChangeListener}" converter="surveysControllerConverter"  value="#{surveyanswersController.selectedSurvey}"  label="#{configMapController.getKey('CreateSurveyanswersTitle_surveyId')}">
+                            <f:selectItems value="#{surveysController.itemsAvailableSelectMany}"/>
+                            <p:ajax   update=":createCustomerForm"  />
+                        </p:selectOneMenu>-->
+                        <ui:repeat value="#{customersController.selected.questionnaireMapCollection}" var="qMap">
+                            <div class="EmptyBox10"></div>
+                                                <!--   <p:commandButton icon="fa fa-edit  white Fs14" id="viewSurveyButton" disabled="#{empty surveyanswersController.selectedSurvey}"  action="customerSurveys"    value="#{configMapController.getKey('MyDeatilsSurveys_viewSurveyLabel')}" update=":growl :createCustomerForm"  /> -->
+
+                            <h:panelGrid columns="2" cellpadding="5" >
+                                <p:commandButton icon="fa fa-edit  white Fs14"   action="customerSurveys" rendered="#{qMap.enabled}"   value="#{qMap.surveysId.name}" update=":growl :createCustomerForm"  >
+                                    <f:setPropertyActionListener value="#{qMap.surveysId}" target="#{surveyanswersController.selectedSurvey}" />
+                                </p:commandButton> 
+
+
+                                <h:outputText  rendered="#{qMap.questionnaireCompleted and qMap.enabled}" value="Completed" />   
+                                <h:outputText  rendered="#{!qMap.questionnaireCompleted and qMap.enabled}" value="Please complete this form." />   
+
+                            </h:panelGrid>
+
+                        </ui:repeat>
                     </div>
                 </div>
 

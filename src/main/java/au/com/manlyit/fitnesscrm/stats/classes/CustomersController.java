@@ -5,7 +5,6 @@ import au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.beans.CustomersFacade;
-import au.com.manlyit.fitnesscrm.stats.beans.GroupsFacade;
 import au.com.manlyit.fitnesscrm.stats.beans.LoginBean;
 import au.com.manlyit.fitnesscrm.stats.beans.PaymentsFacade;
 import au.com.manlyit.fitnesscrm.stats.beans.util.PaymentPeriod;
@@ -13,13 +12,11 @@ import au.com.manlyit.fitnesscrm.stats.chartbeans.MySessionsChart1;
 import au.com.manlyit.fitnesscrm.stats.classes.util.DatatableSelectionHelper;
 import au.com.manlyit.fitnesscrm.stats.classes.util.FutureMapEJB;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PfSelectableDataModel;
-import au.com.manlyit.fitnesscrm.stats.db.ContractorRateToTaskMap;
-import au.com.manlyit.fitnesscrm.stats.db.ContractorRates;
 import au.com.manlyit.fitnesscrm.stats.db.CustomerState;
 import au.com.manlyit.fitnesscrm.stats.db.Groups;
 import au.com.manlyit.fitnesscrm.stats.db.Notes;
-import au.com.manlyit.fitnesscrm.stats.db.Participants;
 import au.com.manlyit.fitnesscrm.stats.db.PaymentParameters;
+import au.com.manlyit.fitnesscrm.stats.db.Payments;
 import au.com.manlyit.fitnesscrm.stats.db.Plan;
 import au.com.manlyit.fitnesscrm.stats.db.QuestionnaireMap;
 import au.com.manlyit.fitnesscrm.stats.db.Suppliers;
@@ -71,6 +68,20 @@ import org.primefaces.event.data.FilterEvent;
 public class CustomersController implements Serializable {
 
     /**
+     * @return the multiSelectedCustomersBadPayments
+     */
+    public Payments[] getMultiSelectedCustomersBadPayments() {
+        return multiSelectedCustomersBadPayments;
+    }
+
+    /**
+     * @param multiSelectedCustomersBadPayments the multiSelectedCustomersBadPayments to set
+     */
+    public void setMultiSelectedCustomersBadPayments(Payments[] multiSelectedCustomersBadPayments) {
+        this.multiSelectedCustomersBadPayments = multiSelectedCustomersBadPayments;
+    }
+
+    /**
      * @return the multiSelectedCustomersOnHold
      */
     public Customers[] getMultiSelectedCustomersOnHold() {
@@ -107,6 +118,7 @@ public class CustomersController implements Serializable {
     private PfSelectableDataModel<Customers> customersWithoutScheduledPayments = null;
     private PfSelectableDataModel<Customers> leads = null;
     private PfSelectableDataModel<Customers> customersOnHold = null;
+    private PfSelectableDataModel<Payments> customersBadPayments = null;
     private Date testTime;
 
     private PfSelectableDataModel<Notes> notesItems = null;
@@ -158,11 +170,13 @@ public class CustomersController implements Serializable {
     private List<Customers> filteredCustomersWithoutScheduledPayments;
     private List<Customers> filteredLeads;
     private List<Customers> filteredCustomersOnHold;
+    private List<Payments> filteredCustomersBadPayments;
     private List<Notes> notesFilteredItems;
     private Customers[] multiSelected;
     private Customers[] multiSelectedCustomersWithoutScheduledPayments;
     private Customers[] multiSelectedLeads;
     private Customers[] multiSelectedCustomersOnHold;
+    private Payments[] multiSelectedCustomersBadPayments;
     // private Groups[] selectedGroups;
     private List<Groups> selectedGroups;
     private String checkPass;
@@ -1832,6 +1846,21 @@ public class CustomersController implements Serializable {
         return customersOnHold;
     }
 
+    public PfSelectableDataModel<Payments> getCustomersBadPayments() {
+        if (customersBadPayments == null) {
+            FacesContext context = FacesContext.getCurrentInstance();
+            MySessionsChart1 chart = context.getApplication().evaluateExpressionGet(context, "#{mySessionsChart1}", MySessionsChart1.class);
+
+            List<Payments> pl = ejbPaymentsFacade.findPaymentsByDateRange(false, false, true, false, false, chart.getDashboardStartDate(), chart.getDashboardEndDate(), false, null);
+
+            customersBadPayments = new PfSelectableDataModel<>(pl);
+        }
+        if (customersBadPayments == null) {
+            customersBadPayments = new PfSelectableDataModel<>(new ArrayList<>());
+        }
+        return customersBadPayments;
+    }
+
     public PfSelectableDataModel<Notes> getNotesItems() {
         if (notesItems == null) {
             setNotesItems((PfSelectableDataModel<Notes>) getNotesPagination().createPageDataModel());
@@ -2909,5 +2938,19 @@ public class CustomersController implements Serializable {
      */
     public void setSelectedCustomerTypes(List<String> selectedCustomerTypes) {
         this.selectedCustomerTypes = selectedCustomerTypes;
+    }
+
+    /**
+     * @return the filteredCustomersBadPayments
+     */
+    public List<Payments> getFilteredCustomersBadPayments() {
+        return filteredCustomersBadPayments;
+    }
+
+    /**
+     * @param filteredCustomersBadPayments the filteredCustomersBadPayments to set
+     */
+    public void setFilteredCustomersBadPayments(List<Payments> filteredCustomersBadPayments) {
+        this.filteredCustomersBadPayments = filteredCustomersBadPayments;
     }
 }

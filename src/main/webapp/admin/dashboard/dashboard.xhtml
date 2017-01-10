@@ -68,7 +68,7 @@
             </p:panel>
 
 
-<!-- CUSTOMERS WITHOUT SCHEDULED PAYMENTS -->
+            <!-- CUSTOMERS WITHOUT SCHEDULED PAYMENTS -->
 
             <div class="Container100">
                 <h:outputText escape="false" value="#{configMapController.getKey('ListCustomersEmpty')}" rendered="#{customersController.customersWithoutScheduledPayments.rowCount == 0}"/>
@@ -85,7 +85,7 @@
                                      editable="false" 
 
                                      var="item"  
-                                     scrollHeight="400"
+                                     scrollHeight="300"
                                      scrollable="true" >
                             <f:facet name="header">
                                 <p:ajax event="filter" listener="#{customersController.onTableFiltered}"   update="@this"  />  
@@ -172,7 +172,117 @@
                 </h:panelGroup>
 
             </div>
-<!-- LEADS -->
+
+            <!-- DELETED PAYMENTS in PGATEWAY -->
+
+            <div class="Container100">
+                <h:outputText escape="false" value="#{configMapController.getKey('ListCustomersEmpty')}" rendered="#{customersController.customersBadPayments.rowCount == 0}"/>
+                <h:panelGroup rendered="#{customersController.customersBadPayments.rowCount > 0}">
+                    <p:panel id="dashboardBadPayments" header="#{configMapController.getKey('DashboardCustomersBadPaymentsPanelLabel')}">  
+                        <p:dataTable id="customersBadPaymentsTableList" 
+
+
+                                     selection="#{customersController.multiSelectedCustomersBadPayments}" 
+                                     rowKey="#{item.id}" 
+                                     value="#{customersController.customersBadPayments}" 
+                                     filteredValue="#{customersController.filteredCustomersBadPayments}" 
+                                     widgetVar="customersBadPaymentsControllerTable" 
+                                     editable="false" 
+
+                                     var="pay"  
+                                     scrollHeight="300"
+                                     scrollable="true" >
+                            <f:facet name="header">
+                                <p:ajax event="filter" listener="#{customersController.onTableFiltered}"   update="@this"  />  
+
+
+                                <h:panelGroup>
+                                    <h:outputText value="Search all fields: " />
+                                    <p:inputText id="globalFilter" onkeyup="PF('customersBadPaymentsControllerTable').filter();"  />
+                                </h:panelGroup>
+                                <h:outputText value="   " />
+                                <h:panelGroup  >
+
+                                    <h:outputText  rendered="#{customersController.customersBadPayments != null}" value=" Records : #{customersController.customersBadPayments.rowCount}"/>
+                                    <h:outputText  rendered="#{customersController.filteredCustomersBadPayments != null}" value="   (Filtered Records : #{customersController.filteredCustomersBadPayments.size()})">
+
+                                    </h:outputText>
+
+                                </h:panelGroup>
+
+                            </f:facet>
+
+                            <p:column  sortBy="#{pay.debitDate}" filterBy="#{pay.debitDate}" headerText="#{configMapController.getKey('ListPaymentsTitle_debitDate')}"   >
+                                <h:outputText value="#{pay.debitDate}">
+                                    <f:convertDateTime pattern="E dd MMM yyyy" />
+                                </h:outputText>
+                            </p:column>
+                            <p:column  sortBy="#{pay.customerName.lastname}" filterBy="#{pay.customerName.lastname}" headerText="#{configMapController.getKey('ListPaymentsTitle_customerName')}"   >
+                                <h:outputText value="#{pay.customerName.firstname} #{pay.customerName.lastname}"/>
+                            </p:column>
+                            <p:column  sortBy="#{pay.customerName.active.customerState}" filterBy="#{pay.customerName.active.customerState}" headerText="#{configMapController.getKey('ListCustomerStateTitle_customerState')}"   >
+                                <h:outputText value="#{pay.customerName.active.customerState} "/>
+                            </p:column>
+                          <!--  <p:column  sortBy="#{pay.manuallyAddedPayment}" filterBy="#{pay.manuallyAddedPayment}" headerText="#{configMapController.getKey('ListPaymentsTitle_manual')}"   >
+                                <h:outputText rendered="#{pay.manuallyAddedPayment}" value="Manual"/>
+                                <h:outputText rendered="#{!pay.manuallyAddedPayment}" value="Auto"/>
+                            </p:column>-->
+
+
+
+                            <!--<p:column  sortBy="#{pay.paymentReference}" filterBy="#{pay.paymentReference}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentReference')}"   >
+                                <h:outputText value="#{pay.paymentReference}"/>
+                            </p:column>-->
+                            <p:column  sortBy="#{pay.paymentAmount}" filterBy="#{pay.paymentAmount}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentAmount')}"   >
+                                <h:outputText value="#{pay.paymentAmount}">
+                                    <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
+                                </h:outputText>
+                            </p:column>
+                            <p:column  sortBy="#{pay.transactionFeeCustomer}" filterBy="#{pay.transactionFeeCustomer}" headerText="#{configMapController.getKey('ListPaymentsTitle_transactionFeeCustomer')}"   >
+                                <h:outputText value="#{pay.transactionFeeCustomer}">
+                                    <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
+                                </h:outputText>
+                            </p:column>
+                            <p:column  sortBy="#{pay.transactionFeeClient}" filterBy="#{pay.transactionFeeClient}" headerText="#{configMapController.getKey('ListPaymentsTitle_transactionFeeClient')}"   >
+                                <h:outputText value="#{pay.transactionFeeClient}">
+                                    <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
+                                </h:outputText>
+                            </p:column>
+
+<!-- <p:column  sortBy="#{pay.settlementDate}" filterBy="#{pay.settlementDate}" headerText="#{configMapController.getKey('ListPaymentsTitle_settlementDate')}"   >
+     <h:outputText value="#{pay.settlementDate}">
+         <f:convertDateTime pattern="E dd MMM yyyy" />
+     </h:outputText>
+ </p:column>-->
+                            <p:column  sortBy="#{pay.paymentStatus}" filterBy="#{pay.paymentStatus}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentStatus')}"   >
+
+                                <h:outputText  rendered="#{pay.paymentStatus == 'W'}"  value="#{pay.paymentStatus} -- Waiting"/>
+                                <h:outputText  rendered="#{pay.paymentStatus == 'N'}"  value="#{pay.paymentStatus} -- Scheduled"/>
+                                <h:outputText  rendered="#{pay.paymentStatus == 'U'}"  value="#{pay.paymentStatus} -- Processing" style="color: orange"/>
+                                <h:outputText  rendered="#{pay.paymentStatus == 'P'}"  value="#{pay.paymentStatus} -- Pending"/>
+                                <h:outputText  rendered="#{pay.paymentStatus == 'S'}"  value="#{pay.paymentStatus} -- Successful" style="color: green"/>
+                                <h:outputText  rendered="#{pay.paymentStatus == 'D'}"  value="#{pay.paymentStatus} -- Dis.Insufficient Funds" style="color: red"/>
+                                <h:outputText  rendered="#{pay.paymentStatus == 'F'}"  value="#{pay.paymentStatus} -- Dishonoured" style="color: red"/>
+                                <h:outputText  rendered="#{pay.paymentStatus == 'X'}"  value="#{pay.paymentStatus} -- Deleted In PGW" style="color: red"/>
+                                <h:outputText  rendered="#{pay.paymentStatus == 'H'}"  value="#{pay.paymentStatus} -- On Hold In PGW" style="color: orange"/>
+                                <h:outputText  rendered="#{pay.paymentStatus == 'Y'}"  value="#{pay.paymentStatus} -- Delete Requested" style="color: orange"/>
+                                <h:outputText  rendered="#{pay.paymentStatus == 'R'}"  value="#{pay.paymentStatus} -- Rejected By PGW" style="color: red"/>
+                            </p:column>
+                            <p:column  sortBy="#{pay.id}" filterBy="#{pay.id}" headerText="#{configMapController.getKey('ListPaymentsTitle_id')}"   >
+                                <h:outputText value="#{pay.id}"/>
+                            </p:column>
+                            <p:column  sortBy="#{pay.paymentID}" filterBy="#{pay.paymentID}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentID')}"   >
+                                <h:outputText value="#{pay.paymentID}"/>
+                                <h:outputText  rendered="#{empty pay.paymentID}"  value="Scheduled" style="background-color: lightseagreen;"/>
+                            </p:column>
+                        </p:dataTable>
+                    </p:panel>
+                </h:panelGroup>
+
+            </div>
+
+
+            <!-- LEADS -->
 
             <div class="Container100">
                 <h:outputText escape="false" value="#{configMapController.getKey('ListCustomersEmpty')}" rendered="#{customersController.leads.rowCount == 0}"/>
@@ -189,7 +299,7 @@
                                      editable="false" 
 
                                      var="item"  
-                                     scrollHeight="400"
+                                     scrollHeight="300"
                                      scrollable="true" >
                             <f:facet name="header">
                                 <p:ajax event="filter" listener="#{customersController.onTableFiltered}"   update="@this"  />  
@@ -276,7 +386,7 @@
                 </h:panelGroup>
 
             </div>
-<!-- ON HOLD -->
+            <!-- ON HOLD -->
 
             <div class="Container100">
                 <h:outputText escape="false" value="#{configMapController.getKey('ListCustomersEmpty')}" rendered="#{customersController.customersOnHold.rowCount == 0}"/>
@@ -293,7 +403,7 @@
                                      editable="false" 
 
                                      var="item"  
-                                     scrollHeight="400"
+                                     scrollHeight="300"
                                      scrollable="true" >
                             <f:facet name="header">
                                 <p:ajax event="filter" listener="#{customersController.onTableFiltered}"   update="@this"  />  
