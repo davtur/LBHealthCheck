@@ -75,7 +75,8 @@ public class CustomersController implements Serializable {
     }
 
     /**
-     * @param multiSelectedCustomersBadPayments the multiSelectedCustomersBadPayments to set
+     * @param multiSelectedCustomersBadPayments the
+     * multiSelectedCustomersBadPayments to set
      */
     public void setMultiSelectedCustomersBadPayments(Payments[] multiSelectedCustomersBadPayments) {
         this.multiSelectedCustomersBadPayments = multiSelectedCustomersBadPayments;
@@ -1247,11 +1248,33 @@ public class CustomersController implements Serializable {
 
     private void updateCustomersGroupMembership(Customers c) {
         //modify customers groups
-        //Groups[] grps = new Groups[c.getGroupsCollection().size()];
-        //c.getGroupsCollection().toArray(grps);
-        // have to use an iterator as we are removing components
         try {
-            Collection<Groups> customersExistingGroups = c.getGroupsCollection();
+            List<Groups> lg = new ArrayList<>(c.getGroupsCollection());
+            ejbFacade.clearAllCustomerGroups(c);
+
+            // check if they are in the hidden developer group
+            int count = 0;
+
+            for (Groups g : lg) {
+                if (g.getGroupname().contains("DEVELOPER")) {
+                    if (count == 0) {
+                        c.getGroupsCollection().add(g);
+                        count++;
+                    }
+                }
+            }
+            // add selected groups
+            for (Groups g : selectedGroups) {
+
+                Groups grp = new Groups(0, g.getGroupname());
+                grp.setUsername(c);
+                ejbFacade.addCustomerToGroup(c, grp);
+            }
+
+            //Groups[] grps = new Groups[c.getGroupsCollection().size()];
+            //c.getGroupsCollection().toArray(grps);
+            // have to use an iterator as we are removing components
+            /*       Collection<Groups> customersExistingGroups = c.getGroupsCollection();
             if (customersExistingGroups != null) {
                 Iterator<Groups> i = customersExistingGroups.iterator();
                 while (i.hasNext()) {
@@ -1286,10 +1309,9 @@ public class CustomersController implements Serializable {
                     c.getGroupsCollection().add(grp);
 
                 }
-            }
-
+            }*/
             // the customer must be a member of the user base group to login
-            ejbFacade.edit(c);
+            // ejbFacade.edit(c);
             //addCustomerToUsersGroup(c);
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, "updateCustomersGroupMembership method exception: {0} : {1}", new Object[]{c.getUsername(), e.getMessage()});
@@ -2948,7 +2970,8 @@ public class CustomersController implements Serializable {
     }
 
     /**
-     * @param filteredCustomersBadPayments the filteredCustomersBadPayments to set
+     * @param filteredCustomersBadPayments the filteredCustomersBadPayments to
+     * set
      */
     public void setFilteredCustomersBadPayments(List<Payments> filteredCustomersBadPayments) {
         this.filteredCustomersBadPayments = filteredCustomersBadPayments;

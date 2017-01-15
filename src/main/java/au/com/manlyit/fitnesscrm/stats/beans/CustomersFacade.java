@@ -204,6 +204,14 @@ public class CustomersFacade extends AbstractFacade<Customers> {
         
         return true;
     }
+      @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    public void clearAllCustomerGroups(Customers cust){
+
+        Customers c = find(cust.getId());            
+        c.getGroupsCollection().clear();
+        getEntityManager().flush();
+        
+    }
     
     public Customers findCustomerByFacebookId(String fbId) {
         Customers cm = null;
