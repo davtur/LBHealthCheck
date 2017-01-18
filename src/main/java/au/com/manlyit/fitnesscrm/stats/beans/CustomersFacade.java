@@ -37,39 +37,39 @@ import javax.validation.ConstraintViolationException;
  */
 @Stateless
 public class CustomersFacade extends AbstractFacade<Customers> {
-    
+
     private static final long serialVersionUID = 1L;
-    
+
     @Inject
     private ConfigMapFacade configMapFacade;
     @PersistenceContext(unitName = "FitnessStatsPU")
     private EntityManager em;
     private static final Logger LOGGER = Logger.getLogger(CustomersFacade.class.getName());
     private static final boolean DEBUG = false;
-    
+
     @Override
     protected EntityManager getEntityManager() {
         return em;
     }
-    
+
     public void editAndFlush(Customers entity) {
         getEntityManager().merge(entity);
         getEntityManager().flush();
         String message = "Entity Edited: " + entity.toString();
         Logger.getLogger(getClass().getName()).log(Level.INFO, message);
-        
+
     }
-    
+
     public CustomersFacade() {
         super(Customers.class);
     }
-    
+
     public void addPaymentParameters(int custID, PaymentParameters newPayParams) {
         Customers cust = em.find(Customers.class, custID);
         cust.setPaymentParametersId(newPayParams);
         newPayParams.setCustomers(cust);
     }
-    
+
     public Customers findCustomerByUsername(String username) {
 
         // CriteriaBuilder cb = em.getCriteriaBuilder();
@@ -81,10 +81,10 @@ public class CustomersFacade extends AbstractFacade<Customers> {
             CriteriaBuilder cb = em.getCriteriaBuilder();
             CriteriaQuery<Customers> cq = cb.createQuery(Customers.class);
             Root<Customers> rt = cq.from(Customers.class);
-            
+
             Expression<String> custUsername = rt.get("username");
             cq.where(cb.equal(custUsername, username));
-            
+
             Query q = em.createQuery(cq);
             //q.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase);
             if (DEBUG) {
@@ -98,7 +98,7 @@ public class CustomersFacade extends AbstractFacade<Customers> {
         // Query q = em.createNativeQuery("SELECT * FROM customers where username = '" + username + "'", Customers.class);
         // return (Customers) q.getSingleResult();
     }
-    
+
     public Customers findCustomerByEmail(String email) {
 
         // CriteriaBuilder cb = em.getCriteriaBuilder();
@@ -110,10 +110,10 @@ public class CustomersFacade extends AbstractFacade<Customers> {
             CriteriaBuilder cb = em.getCriteriaBuilder();
             CriteriaQuery<Customers> cq = cb.createQuery(Customers.class);
             Root<Customers> rt = cq.from(Customers.class);
-            
+
             Expression<String> emailAddress = rt.get("emailAddress");
             cq.where(cb.equal(emailAddress, email));
-            
+
             Query q = em.createQuery(cq);
             //q.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase);
             if (DEBUG) {
@@ -127,7 +127,7 @@ public class CustomersFacade extends AbstractFacade<Customers> {
         // Query q = em.createNativeQuery("SELECT * FROM customers where username = '" + username + "'", Customers.class);
         // return (Customers) q.getSingleResult();
     }
-    
+
     public Customers findCustomerByName(String firstname, String lastname) {
 
         // compare as uppcase and spaces trimmed
@@ -140,7 +140,7 @@ public class CustomersFacade extends AbstractFacade<Customers> {
             CriteriaBuilder cb = em.getCriteriaBuilder();
             CriteriaQuery<Customers> cq = cb.createQuery(Customers.class);
             Root<Customers> rt = cq.from(Customers.class);
-            
+
             Expression<String> custFirstname = rt.get("firstname");
             Expression<String> custLastname = rt.get("lastname");
             Predicate condition1 = cb.equal(cb.trim(cb.upper(custFirstname)), firstname.toUpperCase().trim());
@@ -168,17 +168,17 @@ public class CustomersFacade extends AbstractFacade<Customers> {
         // Query q = em.createNativeQuery("SELECT * FROM customers where username = '" + username + "'", Customers.class);
         // return (Customers) q.getSingleResult();
     }
-    
+
     public List<Customers> findCustomersByEmail(String email) {
         List<Customers> retList = null;
         try {
             CriteriaBuilder cb = em.getCriteriaBuilder();
             CriteriaQuery<Customers> cq = cb.createQuery(Customers.class);
             Root<Customers> rt = cq.from(Customers.class);
-            
+
             Expression<String> custEmail = rt.get("emailAddress");
             cq.where(cb.equal(custEmail, email));
-            
+
             TypedQuery<Customers> q = em.createQuery(cq);
             if (DEBUG) {
                 debug(q);
@@ -186,43 +186,59 @@ public class CustomersFacade extends AbstractFacade<Customers> {
             // q.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase);
             retList = q.getResultList();
         } catch (ConstraintViolationException cve) {
-            
+
             JsfUtil.addErrorMessage(cve, configMapFacade.getConfig("PersistenceErrorOccured"));
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
         }
         return retList;
     }
-     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-    public boolean addCustomerToGroup(Customers cust, Groups group){
+
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    public boolean addCustomerToGroup(Customers cust, Groups group) {
         // add a customer to a new group
         Customers c = find(cust.getId());
         group.setUsername(c);
-       
+
         c.getGroupsCollection().add(group);
         getEntityManager().flush();
-        
+
         return true;
     }
-      @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-    public void clearAllCustomerGroups(Customers cust){
 
-        Customers c = find(cust.getId());            
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    public boolean removeCustomerFromGroup(Customers cust, Groups group) {
+        // add a customer to a new group
+        Customers c = find(cust.getId());
+        
+
+        c.getGroupsCollection().remove(group);
+        getEntityManager().flush();
+
+        return true;
+    }
+
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    public void clearAllCustomerGroups(Customers cust) {
+
+        Customers c = find(cust.getId());
         c.getGroupsCollection().clear();
         getEntityManager().flush();
-        
+
     }
-    
+
     public Customers findCustomerByFacebookId(String fbId) {
         Customers cm = null;
         try {
             CriteriaBuilder cb = em.getCriteriaBuilder();
-            CriteriaQuery<Customers> cq = cb.createQuery(Customers.class);
-            Root<Customers> rt = cq.from(Customers.class);
-            
+            CriteriaQuery<Customers> cq = cb.createQuery(Customers.class
+            );
+            Root<Customers> rt = cq.from(Customers.class
+            );
+
             Expression<String> facebookId = rt.get("facebookId");
             cq.where(cb.equal(facebookId, fbId));
-            
+
             Query q = em.createQuery(cq);
             //q.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase);
             if (DEBUG) {
@@ -241,17 +257,19 @@ public class CustomersFacade extends AbstractFacade<Customers> {
         }
         return cm;
     }
-    
+
     public Customers findByIdBypassCache(int id) {
         Customers cm = null;
         try {
             CriteriaBuilder cb = em.getCriteriaBuilder();
-            CriteriaQuery<Customers> cq = cb.createQuery(Customers.class);
-            Root<Customers> rt = cq.from(Customers.class);
-            
+            CriteriaQuery<Customers> cq = cb.createQuery(Customers.class
+            );
+            Root<Customers> rt = cq.from(Customers.class
+            );
+
             Expression<Integer> custId = rt.get("id");
             cq.where(cb.equal(custId, id));
-            
+
             Query q = em.createQuery(cq);
             q.setHint("javax.persistence.cache.retrieveMode", "BYPASS");
             if (DEBUG) {
@@ -270,7 +288,7 @@ public class CustomersFacade extends AbstractFacade<Customers> {
         }
         return cm;
     }
-    
+
     public Customers findById(int id) {
         Customers c = null;
         /*  try {
@@ -286,12 +304,14 @@ public class CustomersFacade extends AbstractFacade<Customers> {
          Expression<Integer> custId ;*/
         try {
             CriteriaBuilder cb = em.getCriteriaBuilder();
-            CriteriaQuery<Customers> cq = cb.createQuery(Customers.class);
-            Root<Customers> rt = cq.from(Customers.class);
+            CriteriaQuery<Customers> cq = cb.createQuery(Customers.class
+            );
+            Root<Customers> rt = cq.from(Customers.class
+            );
             Expression<Integer> custId;
             custId = rt.get("id");
             cq.where(cb.equal(custId, id));
-            
+
             TypedQuery<Customers> q = em.createQuery(cq);
             //q.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase);
             if (DEBUG) {
@@ -310,36 +330,39 @@ public class CustomersFacade extends AbstractFacade<Customers> {
             } else {
                 LOGGER.log(Level.WARNING, "Customers findById, Customer not found, LIST IS NULL : Customer Id = {0}", id);
             }
-            
+
         } catch (PersistenceException pe) {
             Throwable e;
             e = pe.getCause();
+
             if (e.getClass() == ConstraintViolationException.class) {
-                
+
                 ConstraintViolationException cve = (ConstraintViolationException) e;
                 LOGGER.log(Level.WARNING, "Customers findById, An ConstraintViolationException occurred for customer id :{0}, Message: {1}", new Object[]{id, cve.getConstraintViolations().toString()});
             }
-            
+
             JsfUtil.addErrorMessage(pe, configMapFacade.getConfig("PersistenceErrorOccured"));
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, "Customers findById, An exception occurred for customer id :" + id, e);
         }
         return c;
     }
-    
+
     public List<Customers> findAllActiveCustomers2(boolean sortAsc) {
         List<Customers> retList = null;
         String state = "ACTIVE";//Active
         try {
             CriteriaBuilder cb = em.getCriteriaBuilder();
-            CriteriaQuery<Customers> cq = cb.createQuery(Customers.class);
-            Root<Customers> rt = cq.from(Customers.class);
-            
+            CriteriaQuery<Customers> cq = cb.createQuery(Customers.class
+            );
+            Root<Customers> rt = cq.from(Customers.class
+            );
+
             Join<Customers, CustomerState> jn = rt.join("active");// join customers.active to customer_state.id
             Expression<String> custState = jn.get("customerState");
             cq.where(cb.equal(custState, state));
             cq.select(rt);
-            
+
             Expression<String> express = rt.get("firstname");
             if (sortAsc) {
                 cq.orderBy(cb.asc(express));
@@ -357,7 +380,7 @@ public class CustomersFacade extends AbstractFacade<Customers> {
         }
         return retList;
     }
-    
+
     public List<Customers> findAllActiveCustomersAndStaff(boolean sortAsc) {
         ArrayList<CustomerState> acs = new ArrayList<>();
         acs.add(new CustomerState(0, "ACTIVE"));
@@ -370,7 +393,7 @@ public class CustomersFacade extends AbstractFacade<Customers> {
         String sortField = "firstname";
         return findFilteredCustomers(sortAsc, sortField, acs, types, false);
     }
-    
+
     public List<Customers> findAllActiveCustomers(boolean sortAsc) {
         ArrayList<CustomerState> acs = new ArrayList<>();
         acs.add(new CustomerState(0, "ACTIVE"));
@@ -390,16 +413,20 @@ public class CustomersFacade extends AbstractFacade<Customers> {
             ArrayList<Predicate> predicatesList = new ArrayList<>();
             ArrayList<Predicate> predicatesList2 = new ArrayList<>();
             CriteriaBuilder cb = em.getCriteriaBuilder();
-            
-            CriteriaQuery<Customers> cq = cb.createQuery(Customers.class);
-            Root<Customers> rt = cq.from(Customers.class);
+
+            CriteriaQuery<Customers> cq = cb.createQuery(Customers.class
+            );
+            Root<Customers> rt = cq.from(Customers.class
+            );
             cq.select(rt);
-            
-            Subquery<String> subquery = cq.subquery(String.class);
-            Root<Groups> fromGroups = subquery.from(Groups.class);
+
+            Subquery<String> subquery = cq.subquery(String.class
+            );
+            Root<Groups> fromGroups = subquery.from(Groups.class
+            );
             Expression<String> subUser = fromGroups.get("username").get("username");
             subquery.select(subUser);
-            
+
             Join<Customers, CustomerState> jn = rt.join("active");// join customers.active to customer_state.id
 
             Expression<String> custState = jn.get("customerState");
@@ -429,7 +456,7 @@ public class CustomersFacade extends AbstractFacade<Customers> {
             Predicate pred = user.in(subquery);
             cq.where(cb.and(cb.or(predicatesList.<Predicate>toArray(new Predicate[predicatesList.size()])), pred));
             //  }
-            
+
             Expression<String> express = rt.get(sortField);
             if (sortAsc) {
                 cq.orderBy(cb.asc(express));
@@ -443,7 +470,7 @@ public class CustomersFacade extends AbstractFacade<Customers> {
             if (DEBUG) {
                 debug(q);
             }
-            
+
             retList = q.getResultList();
             // for debugging
             // Session session = getEntityManager().unwrap(JpaEntityManager.class).getActiveSession();
@@ -611,8 +638,10 @@ public class CustomersFacade extends AbstractFacade<Customers> {
         List<Customers> retList = null;
         try {
             CriteriaBuilder cb = em.getCriteriaBuilder();
-            CriteriaQuery<Customers> cq = cb.createQuery(Customers.class);
-            Root<Customers> rt = cq.from(Customers.class);
+            CriteriaQuery<Customers> cq = cb.createQuery(Customers.class
+            );
+            Root<Customers> rt = cq.from(Customers.class
+            );
             //
             //Expression<Integer> custId = rt.get("customer_id");
             //cq.where(cb.equal(custId, customerId));
@@ -634,7 +663,7 @@ public class CustomersFacade extends AbstractFacade<Customers> {
         }
         return retList;
     }
-    
+
     public List<Customers> findAllByGroup(String group, boolean sortAsc) {
         List<Customers> retList = null;
         try {
@@ -659,8 +688,10 @@ public class CustomersFacade extends AbstractFacade<Customers> {
             String sort = "DESC";
             if (sortAsc) {
                 sort = "ASC";
+
             }
-            Query q = em.createNativeQuery("SELECT c.id, c.gender, c.firstname, c.lastname, c.dob, c.email_address, c.preferred_contact, c.username, c.street_address, c.suburb, c.postcode, c.city, c.addr_state, c.country_id, c.telephone, c.fax, c.password, c.newsletter, c.group_pricing, c.email_format, c.auth, c.active, c.referredby, c.demographic FROM fitnessStats.customers c , fitnessStats.groups g  WHERE c.username = g.username and groupname = '" + group + "'  order By c.firstname " + sort + " ", Customers.class);
+            Query q = em.createNativeQuery("SELECT c.id, c.gender, c.firstname, c.lastname, c.dob, c.email_address, c.preferred_contact, c.username, c.street_address, c.suburb, c.postcode, c.city, c.addr_state, c.country_id, c.telephone, c.fax, c.password, c.newsletter, c.group_pricing, c.email_format, c.auth, c.active, c.referredby, c.demographic FROM fitnessStats.customers c , fitnessStats.groups g  WHERE c.username = g.username and groupname = '" + group + "'  order By c.firstname " + sort + " ", Customers.class
+            );
             if (DEBUG) {
                 debug(q);
             }

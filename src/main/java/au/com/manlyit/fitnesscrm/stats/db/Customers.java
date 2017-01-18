@@ -113,7 +113,7 @@ public class Customers implements BaseEntity, Serializable {
     @OneToOne
     private CustomerImages profileImage;
     
-    
+    // JoinColumn indicates this tabl;e will have the foreign key and be the owner of the relationship.THis entity should be persisted to invoke the cascade persist on its payment parameters. 
     @JoinColumn(name = "payment_parameters_id", referencedColumnName = "id")
     @OneToOne(cascade = CascadeType.ALL, optional = false)
     private PaymentParameters paymentParametersId;

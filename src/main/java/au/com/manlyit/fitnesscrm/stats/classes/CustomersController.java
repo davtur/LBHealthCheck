@@ -732,7 +732,7 @@ public class CustomersController implements Serializable {
                     pp.setSmsFailedNotification("YES");
                     pp.setSmsPaymentReminder("NO");
                     pp.setStatusCode("D");
-                    pp.setStatusDescription("DEFAULT NOT PROVISIONED");
+                    pp.setStatusDescription("INACTIVE");
                     pp.setTotalPaymentsFailed(0);
                     pp.setTotalPaymentsFailedAmount(new BigDecimal(0));
                     pp.setTotalPaymentsSuccessful(0);
@@ -957,10 +957,10 @@ public class CustomersController implements Serializable {
             c.setPassword(PasswordService.getInstance().encrypt(c.getPassword()));
 
             if (getFacade().find(c.getId()) == null) {
-                getFacade().create(c);
+                getFacade().createAndFlushForGeneratedIdEntities(c);
                 Groups grp = new Groups(0, "USER");
                 grp.setUsername(c);
-                ejbGroupsFacade.create(grp);
+                getFacade().addCustomerToGroup(c, grp);
                 createDefaultCustomerProfilePicture(c);
                 createDefaultPaymentParameters(c);
                 addQuestionnaireMapItemsToCustomer(c);
@@ -1066,12 +1066,12 @@ public class CustomersController implements Serializable {
                 c.setUsername(getUniqueUsername(c.getFirstname().trim() + "." + c.getLastname().trim()));
                 getFacade().createAndFlushForGeneratedIdEntities(c);
                 createDefaultPaymentParametersFromDetached(c.getId());
-                //createDefaultPaymentParameters(c);
+                //createDefaultPaymentParameters(c); 
                 grp.setUsername(c);
                 List<Groups> gl = new ArrayList<>();
                 gl.add(grp);
                 c.setGroupsCollection(gl);
-                getFacade().edit(c);
+                getFacade().addCustomerToGroup(c, grp);
                 //ejbGroupsFacade.create(grp);
                 if (isWebserviceCall == false) {
                     createDefaultCustomerProfilePicture(c);
@@ -1333,14 +1333,13 @@ public class CustomersController implements Serializable {
         for (Groups g : lg) {
             if (g.getGroupname().contains("LEAD")) {
                 removalList.add(g);
-                count++;
             }
         }
 
         Iterator<Groups> i = removalList.iterator();
         while (i.hasNext()) {
             Groups eg = i.next();
-            c.getGroupsCollection().remove(eg);
+            ejbFacade.removeCustomerFromGroup(c,eg);
         }
 
         if (count == 0) {

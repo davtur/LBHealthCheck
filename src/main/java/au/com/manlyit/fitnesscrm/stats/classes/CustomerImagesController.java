@@ -69,7 +69,7 @@ import org.primefaces.model.UploadedFile;
 @Named("customerImagesController")
 @SessionScoped
 public class CustomerImagesController implements Serializable {
-
+    
     private static final Logger logger = Logger.getLogger(CustomerImagesController.class.getName());
     private static final long serialVersionUID = 1L;
     private CustomerImages current;
@@ -109,10 +109,10 @@ public class CustomerImagesController implements Serializable {
     private int imageWidth = 0;
     private int x1 = 0;
     private int y1 = 0;
-
+    
     public CustomerImagesController() {
     }
-
+    
     @PostConstruct
     public void init() {
         String loggedInUser = FacesContext.getCurrentInstance().getExternalContext().getRemoteUser();
@@ -122,11 +122,11 @@ public class CustomerImagesController implements Serializable {
             RequestContext.getCurrentInstance().update("@(.parentOfUploadPhoto) ");
         }
     }
-
+    
     private int getUser() {
         return getSelectedCustomer().getId();
     }
-
+    
     protected void createDefaultProfilePic(Customers cust) {
         if (cust.getCustomerImagesCollection() != null && cust.getCustomerImagesCollection().isEmpty() == true) {
             String placeholderImage = configMapFacade.getConfig("system.default.profile.image");
@@ -170,7 +170,7 @@ public class CustomerImagesController implements Serializable {
                         } catch (IOException e) {
                             if (e.getCause().getClass() == FileNotFoundException.class) {
                                 Logger.getLogger(CustomerImagesController.class.getName()).log(Level.SEVERE, "createDefaultProfilePic, File not found!!: {0}", placeholderImage);
-
+                                
                             } else {
                                 Logger.getLogger(CustomerImagesController.class.getName()).log(Level.SEVERE, "createDefaultProfilePic, Loading image into buffer error!!", e);
                             }
@@ -188,13 +188,13 @@ public class CustomerImagesController implements Serializable {
                         ci.setCustomers(cust);
                         ci.setCustomerId(cust);
                         ci.setDatetaken(new Date());
-
+                        
                         ejbFacade.edit(ci);
                         cust.setProfileImage(ci);
                         ejbCustomersFacade.edit(cust);
                     } catch (Exception e) {
                         logger.log(Level.WARNING, "createDefaultProfilePic , Cannot add default profile pic for customer {1} due to an exception:{0}", new Object[]{e, cust.getUsername()});
-
+                        
                     }
                 }
             } else {
@@ -202,13 +202,13 @@ public class CustomerImagesController implements Serializable {
             }
         }
     }
-
+    
     private Customers getSelectedCustomer() {
         FacesContext context = FacesContext.getCurrentInstance();
         CustomersController custController = context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
         return custController.getSelected();
     }
-
+    
     public CustomerImages getSelected() {
         if (current == null) {
             setCurrent(getSelectedCustomer().getProfileImage());
@@ -216,17 +216,17 @@ public class CustomerImagesController implements Serializable {
         }
         return current;
     }
-
+    
     public void setSelected(CustomerImages selected) {
         this.current = selected;
     }
-
+    
     public void tapHoldListener(SelectEvent event) {
         FacesMessage msg = new FacesMessage("Photo Date:",
                 ((CustomerImages) event.getObject()).getFormattedDate());
         FacesContext.getCurrentInstance().addMessage(null, msg);
     }
-
+    
     public void swipeRightListener(SwipeEvent event) {
         CustomerImages car = (CustomerImages) event.getData();
         //carsSmall.remove(car);
@@ -239,7 +239,7 @@ public class CustomerImagesController implements Serializable {
          "IMage Swiped", "Right: " + car.getFormattedDate()));
          */
     }
-
+    
     public void swipeLeftListener(SwipeEvent event) {
         CustomerImages car = (CustomerImages) event.getData();
         if (offsetOfMobileImagesToDisplay > 0) {
@@ -252,13 +252,13 @@ public class CustomerImagesController implements Serializable {
          "Image  Swiped", "Left: " + car.getFormattedDate()));
          */
     }
-
+    
     private void createGallery(int customerId) {
         try {
             List<CustomerImages> imageList = getFacade().findAllByCustId(customerId, true);
-
+            
             images = new ArrayList<>();
-
+            
             for (CustomerImages ci : imageList) {
                 if (ci != null && ci.getImage() != null) {
                     images.add(ci);
@@ -269,24 +269,24 @@ public class CustomerImagesController implements Serializable {
         } catch (Exception e) {
             logger.log(Level.WARNING, "createGallery for" + customerId + " error :", e);
         }
-
+        
     }
-
+    
     public UploadedFile getUploadedFile() {
         return uploadedFile;
     }
-
+    
     public void setUploadedFile(UploadedFile file) {
         this.uploadedFile = file;
     }
-
+    
     private static BufferedImage resizeImageWithHintKeepAspect(BufferedImage originalImage, int newWidth, int newHeight) {
         int type = originalImage.getType() == 0 ? BufferedImage.TYPE_INT_ARGB : originalImage.getType();
         float w = originalImage.getWidth();
         float h = originalImage.getHeight();
         int height = newHeight;
         int width = newWidth;
-
+        
         if (newWidth == 0 && newHeight == 0) {
             return originalImage;
         }
@@ -300,7 +300,7 @@ public class CustomerImagesController implements Serializable {
             height = Math.round(aspectHeight);
             width = newWidth;
         }
-
+        
         BufferedImage resizedImage = new BufferedImage(width, height, type);
         Graphics2D g = resizedImage.createGraphics();
         g.setComposite(AlphaComposite.Src);
@@ -312,26 +312,26 @@ public class CustomerImagesController implements Serializable {
                 RenderingHints.VALUE_ANTIALIAS_ON);
         g.drawImage(originalImage, 0, 0, width, height, null);
         g.dispose();
-
+        
         return resizedImage;
     }
-
+    
     private static BufferedImage resizeImageKeepAspect(BufferedImage originalImage, int newWidth) {
         int type = originalImage.getType() == 0 ? BufferedImage.TYPE_INT_ARGB : originalImage.getType();
-
+        
         float w = originalImage.getWidth();
         float h = originalImage.getHeight();
         float newHeight = ((float) newWidth / w) * h;
         int nheight = Math.round(newHeight);
-
+        
         BufferedImage resizedImage = new BufferedImage(newWidth, nheight, type);
         Graphics2D g = resizedImage.createGraphics();
         g.drawImage(originalImage, 0, 0, newWidth, nheight, null);
         g.dispose();
-
+        
         return resizedImage;
     }
-
+    
     public void handleCustomerChange(ValueChangeEvent event) {
         String message = "Error setting customer name for photo upload";
         Object o = event.getNewValue();
@@ -346,15 +346,15 @@ public class CustomerImagesController implements Serializable {
         } else {
             JsfUtil.addErrorMessage(message);
         }
-
+        
     }
-
+    
     private void processUploadedFile(UploadedFile file) {
         BufferedImage img = null;
         String fileName = file.getFileName();
         String contentType = file.getContentType();
         String fileExtension = fileName.substring(fileName.lastIndexOf(".")).toLowerCase();
-
+        
         int imgType = -1;
         if (contentType.contains("jpeg") || contentType.contains("jpg")) {
             imgType = 2;
@@ -373,11 +373,11 @@ public class CustomerImagesController implements Serializable {
             return;
         }
         logger.log(Level.INFO, "processUploadedFile , Name of Uploaded File: {0}, contentType: {1}, file Extension:{2}", new Object[]{fileName, contentType, fileExtension});
-
+        
         uploadedImage.setImageFileName(fileName);
         uploadedImage.setMimeType(contentType);
         uploadedImage.setImageType(imgType);
-
+        
         try (InputStream is = file.getInputstream()) {
             img = ImageIO.read(is);
         } catch (IOException ex) {
@@ -413,10 +413,10 @@ public class CustomerImagesController implements Serializable {
                     printTagValue(jpegMetadata, TiffConstants.GPS_TAG_GPS_LATITUDE);
                     printTagValue(jpegMetadata, TiffConstants.GPS_TAG_GPS_LONGITUDE_REF);
                     printTagValue(jpegMetadata, TiffConstants.GPS_TAG_GPS_LONGITUDE);
-
+                    
                     TiffField field = jpegMetadata.findEXIFValue(TiffConstants.EXIF_TAG_DATE_TIME_ORIGINAL);
                     if (field == null) {
-
+                        
                         Logger.getLogger(CustomerImagesController.class.getName()).log(Level.INFO, "Photo upload date not found in EXIF data");
                     } else {
                         SimpleDateFormat sdf = new SimpleDateFormat("yyyy:MM:dd HH:mm:ss");
@@ -433,12 +433,12 @@ public class CustomerImagesController implements Serializable {
                             uploadedImage.setDatetaken(dateThePhotoWasTaken);
                         } else {
                             JsfUtil.addErrorMessage("Couldnt get the date the photo was taken from the image file!. The Date is Null!");
-
+                            
                         }
                         JsfUtil.addSuccessMessage("Modifying the photo taken date to the date extracted from the photo: " + dateString);
-
+                        
                     }
-
+                    
                 } else {
                     JsfUtil.addErrorMessage("Couldnt get the date the photo was taken from the image file! No EXIF data in the photo.");
                 }
@@ -455,9 +455,9 @@ public class CustomerImagesController implements Serializable {
         }
         imageAreaSelectEvent1 = false;
     }
-
+    
     public void selectEndListener(final ImageAreaSelectEvent e) {
-
+        
         selectionheight = e.getHeight();
         selectionwidth = e.getWidth();
         imageHeight = e.getImgHeight();
@@ -465,12 +465,12 @@ public class CustomerImagesController implements Serializable {
         x1 = e.getX1();
         y1 = e.getY1();
         imageAreaSelectEvent1 = true;
-
+        
     }
-
+    
     private BufferedImage convertByteArrayToBufferedImage(byte[] ba) {
         ByteArrayInputStream bais = new ByteArrayInputStream(ba);
-
+        
         try {
             return ImageIO.read(bais);
         } catch (IOException e) {
@@ -478,7 +478,7 @@ public class CustomerImagesController implements Serializable {
             return null;
         }
     }
-
+    
     private byte[] convertBufferedImageToByteArray(BufferedImage img, String fileType) {
         byte[] ba = null;
         String type = "---";
@@ -501,11 +501,11 @@ public class CustomerImagesController implements Serializable {
                 JsfUtil.addErrorMessage(ex, "Update image error!!");
             }
         } catch (Exception e) {
-            logger.log(Level.WARNING, "convertBufferedImageToByteArray method failed",e);
+            logger.log(Level.WARNING, "convertBufferedImageToByteArray method failed", e);
         }
         return ba;
     }
-
+    
     private void updateUploadedImage(BufferedImage img, String fileType) {
         uploadedImage.setImage(convertBufferedImageToByteArray(img, fileType));
     }
@@ -538,13 +538,13 @@ public class CustomerImagesController implements Serializable {
     public void rotateEditedImage90degrees(ActionEvent event) {
         editingImage = rotateImage(editingImage);
     }
-
+    
     public void rotateStreamedContent90degrees(ActionEvent event) {
         uploadedImage = rotateImage(uploadedImage);
     }
-
+    
     private CustomerImages rotateImage(CustomerImages ci) {
-
+        
         BufferedImage oldImage;
         //InputStream stream;
 
@@ -567,7 +567,7 @@ public class CustomerImagesController implements Serializable {
         JsfUtil.addSuccessMessage(configMapFacade.getConfig("ImageRotateSuccessful"));
         return ci;
     }
-
+    
     public void rotate90degrees(ActionEvent event) {
         BufferedImage oldImage;
         try {
@@ -580,7 +580,7 @@ public class CustomerImagesController implements Serializable {
         BufferedImage img = rotateImage(90, oldImage);
         int newWidth = 0;
         int newHeight = new_height;
-
+        
         BufferedImage scaledImg = resizeImageWithHintKeepAspect(img, newWidth, newHeight);
         String type;
         switch (current.getImageType()) {
@@ -595,22 +595,22 @@ public class CustomerImagesController implements Serializable {
                 break;
             default:
                 type = "jpeg";
-
+            
         }
         updateUploadedImage(scaledImg, type);
         JsfUtil.addSuccessMessage(configMapFacade.getConfig("IMageRotateSuccessful"));
         imageAreaSelectEvent1 = false;
     }
-
+    
     public void cropEditedImage(ActionEvent event) {
         editingImage = cropImage(editingImage, imageAreaSelectEvent1);
     }
-
+    
     public void crop() {
         uploadedImage = cropImage(uploadedImage, imageAreaSelectEvent1);
-
+        
     }
-
+    
     private CustomerImages cropImage(CustomerImages ci, boolean imageAreaSelectEvent1) {
         if (ci == null) {
             return null;
@@ -622,7 +622,7 @@ public class CustomerImagesController implements Serializable {
         BufferedImage img;
         String type;
         try (ByteArrayInputStream is = new ByteArrayInputStream(ci.getImage());) {
-
+            
             oldImage = ImageIO.read(is);
 
             // int selectionheight = imageAreaSelectEvent1.getHeight();
@@ -637,19 +637,19 @@ public class CustomerImagesController implements Serializable {
             int oldImageHeight = oldImage.getHeight();
             float heightScaleFactor = (float) imageHeight / (float) oldImageHeight;
             float widthScaleFactor = (float) imageWidth / (float) oldImageWidth;
-
+            
             Float scaledX = (float) x1 / widthScaleFactor;
             Float scaledY = (float) y1 / heightScaleFactor;
             Float scaledWidth = (float) selectionwidth / widthScaleFactor;
             Float scaledHeight = (float) selectionheight / heightScaleFactor;
-
+            
             int x = scaledX.intValue();
             int y = scaledY.intValue();
             int w = scaledWidth.intValue();
             int h = scaledHeight.intValue();
-
+            
             img = oldImage.getSubimage(x, y, w, h);
-
+            
             switch (uploadedImage.getImageType()) {
                 case 0:
                     type = "gif";
@@ -662,7 +662,7 @@ public class CustomerImagesController implements Serializable {
                     break;
                 default:
                     type = "jpeg";
-
+                
             }
         } catch (IOException ex) {
             Logger.getLogger(CustomerImagesController.class.getName()).log(Level.SEVERE, null, ex);
@@ -703,16 +703,20 @@ public class CustomerImagesController implements Serializable {
         imageAreaSelectEvent1 = false;
         return ci;
     }
-
+    
     public void handleFileUpload(FileUploadEvent event) {
 //Barefoot-image_100_by_100.jpg
 
-        uploadedFile = event.getFile();
-        processUploadedFile(uploadedFile);
+        setUploadedFile(event.getFile());
+        if (getUploadedFile() != null) {
+            processUploadedFile(getUploadedFile());
+        } else {
+            JsfUtil.addErrorMessage("The file upload failed. Please try again.");
+        }
         setSaveButtonDisabled(false);
         //RequestContext.getCurrentInstance().update("createCustomerForm");
     }
-
+    
     private BufferedImage rotateImage(int degrees, BufferedImage oldImage) {
         BufferedImage newImage = null;
         if (oldImage != null) {
@@ -726,9 +730,9 @@ public class CustomerImagesController implements Serializable {
         }
         imageAreaSelectEvent1 = false;
         return newImage;
-
+        
     }
-
+    
     private static void printTagValue(JpegImageMetadata jpegMetadata,
             TagInfo tagInfo) {
         TiffField field = jpegMetadata.findEXIFValue(tagInfo);
@@ -739,27 +743,27 @@ public class CustomerImagesController implements Serializable {
                     + field.getValueDescription());
         }
     }
-
+    
     private CustomerImagesFacade getFacade() {
         return ejbFacade;
     }
-
+    
     public static boolean isUserInRole(String roleName) {
         boolean inRole;
         inRole = FacesContext.getCurrentInstance().getExternalContext().isUserInRole(roleName);
         return inRole;
-
+        
     }
-
+    
     public PaginationHelper getPagination() {
         if (pagination == null) {
             pagination = new PaginationHelper(1000000) {
-
+                
                 @Override
                 public int getItemsCount() {
                     return getFacade().count();
                 }
-
+                
                 @Override
                 public DataModel<CustomerImages> createPageDataModel() {
                     return new ListDataModel<>(getFacade().findRange(new int[]{getPageFirstItem(), getPageFirstItem() + getPageSize()}));
@@ -768,17 +772,17 @@ public class CustomerImagesController implements Serializable {
         }
         return pagination;
     }
-
+    
     public String prepareList() {
         recreateModel();
         return "List";
     }
-
+    
     private BufferedImage rotateBufferedImage(BufferedImage oldImage, int degreesToRotate) {
         return rotateImage(degreesToRotate, oldImage);
-
+        
     }
-
+    
     public void prepareViewFromStatTakenController() {
         try {
             setCurrent((CustomerImages) getItems().getRowData());
@@ -788,7 +792,7 @@ public class CustomerImagesController implements Serializable {
             Logger.getLogger(this.getClass().getName()).warning(e.getMessage());
         }
     }
-
+    
     public void prepareCreateFromStatTakenController(CustomerImages ci) {
         try {
             setCurrent(ci);
@@ -798,7 +802,7 @@ public class CustomerImagesController implements Serializable {
             Logger.getLogger(this.getClass().getName()).warning(e.getMessage());
         }
     }
-
+    
     public void prepareEditFromStatTakenController() {
         try {
             setCurrent((CustomerImages) getItems().getRowData());
@@ -808,14 +812,14 @@ public class CustomerImagesController implements Serializable {
             Logger.getLogger(this.getClass().getName()).warning(e.getMessage());
         }
     }
-
+    
     public String prepareView() {
         //setCurrent((CustomerImages) getItems().getRowData());
         loadImage(current);
         //selectedItemIndex = pagination.getPageFirstItem() + getItems().getRowIndex();
         return "View";
     }
-
+    
     public void prepareCreateMobile() {
         clearPhoto();
         FacesContext context = FacesContext.getCurrentInstance();
@@ -827,12 +831,12 @@ public class CustomerImagesController implements Serializable {
             Logger.getLogger(SessionHistoryController.class.getName()).log(Level.SEVERE, "prepareCreateMobileReturnCreate", ex);
         }
     }
-
+    
     public String prepareCreate() {
         clearPhoto();
         return "Create";
     }
-
+    
     private void clearPhoto() {
         setCurrent(null);
         loadImage(current);
@@ -840,39 +844,39 @@ public class CustomerImagesController implements Serializable {
         setSaveButtonDisabled(true);
         setProfilePhoto(false);
     }
-
+    
     public String prepareEdit() {
         // setCurrent((CustomerImages) getItems().getRowData());
         loadImage(current);
         //selectedItemIndex = pagination.getPageFirstItem() + getItems().getRowIndex();
         return "Edit";
     }
-
+    
     public void createFromMobile() {
-        if (uploadedFile != null) {
-            processUploadedFile(uploadedFile);
+        if (getUploadedFile() != null) {
+            processUploadedFile(getUploadedFile());
             createFromUploadDialogue();
             logger.log(Level.INFO, "Photo upload successfully from mobile device.");
         } else {
             logger.log(Level.WARNING, "The uploaded photo is NULL. Photo upload from mobile device failed.");
         }
-
+        
     }
-
+    
     public void createFromUploadDialogue() {
         current = uploadedImage;
         createFromDialogue();
         uploadedImage = null;
         RequestContext.getCurrentInstance().update("@(.parentOfUploadPhoto) ");
     }
-
+    
     public void createFromDialogue() {
-
+        
         createFromListener();
         clearPhoto();
         recreateModel();
     }
-
+    
     private void createFromListener() {
         try {
             current.setId(0);// auto generated by DB , but cannot be null 
@@ -898,25 +902,25 @@ public class CustomerImagesController implements Serializable {
                 custController.setSelected(cust);
             }
             JsfUtil.addSuccessMessage(configMapFacade.getConfig("CustomerImagesCreated"));
-
+            
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
-
+            
         }
     }
-
+    
     public String create() {
         createFromListener();
-
+        
         return prepareCreate();
     }
-
+    
     public String create(Date date) {
         try {
             current.setId(0); // auto generated by DB , but cannot be null    \n
             current.setDatetaken(date);
             getFacade().create(current);
-
+            
             JsfUtil.addSuccessMessage(configMapFacade.getConfig("CustomerImagesCreated"));
             return prepareCreate();
         } catch (Exception e) {
@@ -924,38 +928,38 @@ public class CustomerImagesController implements Serializable {
             return null;
         }
     }
-
+    
     private String getImageTypeString(int imtyp) {
         String type = "image/jpeg";
-
+        
         switch (imtyp) {
             case 1:
                 return "image/png";
             case 2:
                 return "image/jpeg";
         }
-
+        
         return type;
-
+        
     }
-
+    
     private String getFileExtensionFromFilePath(String path) {
         return path.substring(path.lastIndexOf(".")).toLowerCase();
-
+        
     }
-
+    
     private void loadImage(CustomerImages ci) {
         String placeholderImage = "/resources/images/Barefoot-image_100_by_100.jpg";
         uploadedImage = loadDefaultImageIfNull(ci, placeholderImage);
-
+        
     }
-
+    
     private CustomerImages loadDefaultImage(CustomerImages ci) {
         String placeholderImage = "/resources/images/Barefoot-image_100_by_100.jpg";
         return loadDefaultImageIfNull(ci, placeholderImage);
-
+        
     }
-
+    
     private CustomerImages loadDefaultImageIfNull(CustomerImages ci, String defaultImagePath) {
         CustomerImages sc = null;
         BufferedImage img = null;
@@ -977,7 +981,7 @@ public class CustomerImagesController implements Serializable {
                         img = ImageIO.read(stream);
                         //ImageIO.write(img, imageType, os);
                         sc.setImage(convertBufferedImageToByteArray(img, fileExtension));
-
+                        
                     } catch (Exception ex) {
                         Logger.getLogger(CustomerImagesController.class.getName()).log(Level.SEVERE, "Loading uploaded image into buffer error!!", ex);
                     }
@@ -998,7 +1002,7 @@ public class CustomerImagesController implements Serializable {
         }
         return sc;
     }
-
+    
     public String update() {
         try {
             getFacade().edit(current);
@@ -1009,7 +1013,7 @@ public class CustomerImagesController implements Serializable {
             return null;
         }
     }
-
+    
     public void updateEditedPhoto() {
         try {
             getFacade().edit(getEditingImage());
@@ -1022,13 +1026,13 @@ public class CustomerImagesController implements Serializable {
                 custController.setSelected(cust);
             }
             JsfUtil.addSuccessMessage(configMapFacade.getConfig("CustomerImagesUpdated"));
-
+            
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
-
+            
         }
     }
-
+    
     public String destroy() {
         setCurrent((CustomerImages) getItems().getRowData());
         selectedItemIndex = pagination.getPageFirstItem() + getItems().getRowIndex();
@@ -1036,12 +1040,12 @@ public class CustomerImagesController implements Serializable {
         recreateModel();
         return "List";
     }
-
+    
     public void destroyListener() {
         performDestroy();
         recreateModel();
     }
-
+    
     public String destroyAndView() {
         performDestroy();
         recreateModel();
@@ -1054,7 +1058,7 @@ public class CustomerImagesController implements Serializable {
             return "List";
         }
     }
-
+    
     private void performDestroy() {
         try {
             getFacade().remove(current);
@@ -1063,7 +1067,7 @@ public class CustomerImagesController implements Serializable {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
         }
     }
-
+    
     private void updateCurrentItem() {
         int count = getFacade().count();
         if (selectedItemIndex >= count) {
@@ -1078,38 +1082,38 @@ public class CustomerImagesController implements Serializable {
             setCurrent(getFacade().findRange(new int[]{selectedItemIndex, selectedItemIndex + 1}).get(0));
         }
     }
-
+    
     public DataModel getItems() {
         if (items == null) {
             items = getPagination().createPageDataModel();
         }
         return items;
     }
-
+    
     public void recreateModel() {
         items = null;
         filteredItems = null;
         images = null;
         imageAreaSelectEvent1 = false;
-
+        
     }
-
+    
     public String next() {
         getPagination().nextPage();
         recreateModel();
         return "List";
     }
-
+    
     public String previous() {
         getPagination().previousPage();
         recreateModel();
         return "List";
     }
-
+    
     public SelectItem[] getItemsAvailableSelectMany() {
         return JsfUtil.getSelectItems(ejbFacade.findAll(), false);
     }
-
+    
     public SelectItem[] getItemsAvailableSelectOne() {
         return JsfUtil.getSelectItems(ejbFacade.findAll(), true);
     }
@@ -1149,7 +1153,7 @@ public class CustomerImagesController implements Serializable {
         }
         RequestContext.getCurrentInstance().openDialog("uploadPhotoDialogueWidget");
     }
-
+    
     public StreamedContent getImage() throws IOException {
         FacesContext context = FacesContext.getCurrentInstance();
         String imageId;
@@ -1179,7 +1183,7 @@ public class CustomerImagesController implements Serializable {
         }
         return null;
     }
-
+    
     public StreamedContent getImageThumbnail() throws IOException {
         FacesContext context = FacesContext.getCurrentInstance();
         int thumbnailWidth = 50;
@@ -1192,9 +1196,9 @@ public class CustomerImagesController implements Serializable {
                 return new DefaultStreamedContent();
             } else // So, browser is requesting the image. Return a real StreamedContent with the image bytes.
             {
-
+                
                 imageId = context.getExternalContext().getRequestParameterMap().get("imageId");
-
+                
                 if (imageId != null && !imageId.trim().isEmpty()) {
                     try {
                         CustomerImages custImage = ejbFacade.find(Integer.valueOf(imageId));
@@ -1252,7 +1256,7 @@ public class CustomerImagesController implements Serializable {
         FacesContext context = FacesContext.getCurrentInstance();
         Map<String, String[]> paramValues = context.getExternalContext().getRequestParameterValuesMap();
         String[] selectedImages = paramValues.get("editImage");
-
+        
         for (String item : selectedImages) {
             if (item != null) {
                 CustomerImages custImage = ejbFacade.find(Integer.valueOf(item));
@@ -1263,20 +1267,20 @@ public class CustomerImagesController implements Serializable {
             }
         }
         imageAreaSelectEvent1 = false;
-
+        
     }
-
+    
     public void uploadPictureListener() {
-
+        
         setUploadedImage(null);
-
+        
     }
-
+    
     public void removePicture() {
         FacesContext context = FacesContext.getCurrentInstance();
         Map<String, String[]> paramValues = context.getExternalContext().getRequestParameterValuesMap();
         String[] selectedImages = paramValues.get("selectedImage");
-
+        
         for (String item : selectedImages) {
             if (item != null) {
                 CustomerImages custImage = ejbFacade.find(Integer.valueOf(item));
@@ -1286,30 +1290,30 @@ public class CustomerImagesController implements Serializable {
                     try {
                         if (Objects.equals(custImage.getCustomerId().getProfileImage().getId(), custImage.getId())) {
                             JsfUtil.addSuccessMessage("Photo Not Removed", "Your profile photo cannot be deleted. Upload a new picture to enable deletion of this one.");
-
+                            
                         } else if (custImage.getCustomerId().getCustomerImagesCollection().size() == 1) {
                             JsfUtil.addSuccessMessage("Photo Not Removed", "The last photo cannot be removed");
-
+                            
                         } else {
-
+                            
                             ejbFacade.remove(custImage);
                             controller.removeImageFromList(custImage);
                             RequestContext.getCurrentInstance().update("@(.parentOfUploadPhoto) ");
-
+                            
                         }
                     } catch (Exception e) {
                         logger.log(Level.WARNING, "Failed To Remove Photo!", e);
-
+                        
                     }
                 }
             }
         }
         imageAreaSelectEvent1 = false;
     }
-
+    
     public StreamedContent getUploadedImageAsStream() throws IOException {
         FacesContext context = FacesContext.getCurrentInstance();
-
+        
         if (context.getRenderResponse()) {
             // So, we're rendering the HTML. Return a stub StreamedContent so that it will generate right URL.
             return new DefaultStreamedContent();
@@ -1318,10 +1322,10 @@ public class CustomerImagesController implements Serializable {
             return new DefaultStreamedContent(new ByteArrayInputStream(getUploadedImage().getImage()));
         }
     }
-
+    
     public StreamedContent getEditedImageAsStream() throws IOException {
         FacesContext context = FacesContext.getCurrentInstance();
-
+        
         if (context.getRenderResponse()) {
             // So, we're rendering the HTML. Return a stub StreamedContent so that it will generate right URL.
             return new DefaultStreamedContent();
@@ -1330,10 +1334,10 @@ public class CustomerImagesController implements Serializable {
             return new DefaultStreamedContent(new ByteArrayInputStream(getEditingImage().getImage()));
         }
     }
-
+    
     public StreamedContent getLightBoxImageAsStream() throws IOException {
         FacesContext context = FacesContext.getCurrentInstance();
-
+        
         if (context.getRenderResponse()) {
             // So, we're rendering the HTML. Return a stub StreamedContent so that it will generate right URL.
             return new DefaultStreamedContent();
@@ -1363,7 +1367,7 @@ public class CustomerImagesController implements Serializable {
         }
         return uploadedImage;
     }
-
+    
     public String getDynamicTitle() {
         String title = "";
         String id = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("imageId");
@@ -1374,7 +1378,7 @@ public class CustomerImagesController implements Serializable {
         }
         return title;
     }
-
+    
     public String getDynamicDescription() {
         String desc = "";
         String id = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("imageId");
@@ -1386,11 +1390,11 @@ public class CustomerImagesController implements Serializable {
         }
         return desc;
     }
-
+    
     public StreamedContent getDynamicImage() {
         StreamedContent sc = null;
         String id = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("imageId");
-
+        
         try {
             if (id != null && id.trim().isEmpty() == false) {
                 Integer imageId = Integer.parseInt(id);
@@ -1411,15 +1415,15 @@ public class CustomerImagesController implements Serializable {
         } catch (NumberFormatException numberFormatException) {
             logger.log(Level.WARNING, "getDynamicImage number format exception for {0}", id);
         }
-
+        
         return sc;
     }
-
+    
     public void handleDateSelect(SelectEvent event) {
         SimpleDateFormat format = new SimpleDateFormat("dd MMM yyyy");
         Date date = (Date) event.getObject();
         current.setDatetaken(date);
-
+        
         FacesContext facesContext = FacesContext.getCurrentInstance();
         facesContext.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO, "Date Selected", format.format(date)));
     }
@@ -1435,29 +1439,29 @@ public class CustomerImagesController implements Serializable {
      */
     public void setUploadedImage(CustomerImages uploadedImage) {
         this.uploadedImage = uploadedImage;
-
+        
     }
-
+    
     public void removeImageFromList(CustomerImages image) {
-
+        
         images.remove(image);
         imageListSize = images.size();
         RequestContext.getCurrentInstance().update("@(.parentOfUploadPhoto) ");
-
+        
     }
-
+    
     public List<CustomerImages> getImages() {
         if (images == null) {
             createGallery(getUser());
             if (images == null) {
                 images = new ArrayList<>();
             }
-
+            
         }
         RequestContext.getCurrentInstance().update("@(.parentOfUploadPhoto) ");
         return images;
     }
-
+    
     public List<CustomerImages> getMobileImages() {
         ArrayList<CustomerImages> mobImages = null;
         int size = 0;
@@ -1476,14 +1480,14 @@ public class CustomerImagesController implements Serializable {
                     mobImages.add(images.get(c));
                 }
                 count++;
-
+                
             }
         } catch (Exception e) {
             logger.log(Level.SEVERE, "getMobileImages", e);
         }
-
+        
         logger.log(Level.INFO, "getMobileImages - offset={0},Display={1},backing array Size ={2}, user:{3}, images:{4}", new Object[]{offsetOfMobileImagesToDisplay, numberOfMobileImagesToDisplay, size, getUser(), mobImages.size()});
-
+        
         return mobImages;
     }
 
@@ -1493,11 +1497,11 @@ public class CustomerImagesController implements Serializable {
     public void setImages(List<CustomerImages> images) {
         this.images = images;
     }
-
+    
     public String getEffect() {
         return effect;
     }
-
+    
     public void setEffect(String effect) {
         this.effect = effect;
     }
@@ -1538,11 +1542,11 @@ public class CustomerImagesController implements Serializable {
         if (selectedForDeletion != null) {
             this.selectedForDeletion = selectedForDeletion;
             current = selectedForDeletion;
-
+            
             performDestroy();
             recreateModel();
         }
-
+        
     }
 
     /**
@@ -1761,10 +1765,10 @@ public class CustomerImagesController implements Serializable {
     public void setEditingImage(CustomerImages editingImage) {
         this.editingImage = editingImage;
     }
-
+    
     @FacesConverter(value = "customerImagesControllerConverter")
     public static class CustomerImagesControllerConverter implements Converter {
-
+        
         public Object getAsObject(FacesContext facesContext, UIComponent component, String value) {
             if (value == null || value.length() == 0) {
                 return null;
@@ -1773,19 +1777,19 @@ public class CustomerImagesController implements Serializable {
                     getValue(facesContext.getELContext(), null, "customerImagesController");
             return controller.ejbFacade.find(getKey(value));
         }
-
+        
         java.lang.Integer getKey(String value) {
             java.lang.Integer key;
             key = Integer.valueOf(value);
             return key;
         }
-
+        
         String getStringKey(java.lang.Integer value) {
             StringBuffer sb = new StringBuffer();
             sb.append(value);
             return sb.toString();
         }
-
+        
         public String getAsString(FacesContext facesContext, UIComponent component, Object object) {
             if (object == null) {
                 return null;

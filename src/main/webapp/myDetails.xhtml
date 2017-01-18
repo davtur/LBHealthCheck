@@ -142,7 +142,7 @@
 
                             
                             <h:outputText rendered="#{ezidebit.customerWebDDRFormEnabled}" styleClass="red FontBold animated pulse infinite" value="#{configMapController.getKey('MyDetailsCallToFillOutPaymentDetails')}"/>
-                            <h:outputText  rendered="#{!ezidebit.customerWebDDRFormEnabled}" value="Completed" /> 
+                            <h:outputText  rendered="#{!ezidebit.customerWebDDRFormEnabled and customersController.selected.paymentParametersId.statusCode != 'D'}" value="Completed" /> 
 
                         </h:panelGrid>
                         <div class="EmptyBox10"></div>

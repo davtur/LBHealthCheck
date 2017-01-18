@@ -2152,7 +2152,7 @@ public class FutureMapEJB implements Serializable {
             return;
         }
         String templatePlaceholder = "<!--LINK-URL-->";
-        String htmlText = configMapFacade.getConfig("system.admin.emailalert.template");
+        String htmlText = configMapFacade.getConfig("system.email.admin.alert.template");
 
         htmlText = htmlText.replace(templatePlaceholder, message);
         AsyncJob aj = new AsyncJob("EmailAlert", paymentBean.sendAsynchEmailWithPGR(configMapFacade.getConfig("AdminEmailAddress"), configMapFacade.getConfig("PasswordResetCCEmailAddress"), configMapFacade.getConfig("PasswordResetFromEmailAddress"), configMapFacade.getConfig("system.ezidebit.webEddrCallback.EmailSubject"), htmlText, null, paymentBean.emailServerProperties(), false));

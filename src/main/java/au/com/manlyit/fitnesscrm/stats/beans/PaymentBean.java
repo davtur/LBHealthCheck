@@ -1228,7 +1228,7 @@ public class PaymentBean implements Serializable {
                 return;
             }
             String templatePlaceholder = "<!--LINK-URL-->";
-            String htmlText = configMapFacade.getConfig("system.admin.emailalert.template");
+            String htmlText = configMapFacade.getConfig("system.email.admin.alert.template");
 
             htmlText = htmlText.replace(templatePlaceholder, message);
             Future<PaymentGatewayResponse> fpgr = sendAsynchEmailWithPGR(configMapFacade.getConfig("AdminEmailAddress"), configMapFacade.getConfig("PasswordResetCCEmailAddress"), configMapFacade.getConfig("PasswordResetFromEmailAddress"), configMapFacade.getConfig("system.ezidebit.webEddrCallback.EmailSubject"), htmlText, null, emailServerProperties(), false);
