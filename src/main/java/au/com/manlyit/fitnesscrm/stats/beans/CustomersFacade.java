@@ -207,15 +207,15 @@ public class CustomersFacade extends AbstractFacade<Customers> {
     }
 
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-    public boolean removeCustomerFromGroup(Customers cust, Groups group) {
+    public void removeCustomerFromGroup(Customers cust, Groups group) {
         // add a customer to a new group
         Customers c = find(cust.getId());
         
 
         c.getGroupsCollection().remove(group);
-        getEntityManager().flush();
+        //getEntityManager().flush();
 
-        return true;
+        //return true;
     }
 
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
@@ -223,7 +223,7 @@ public class CustomersFacade extends AbstractFacade<Customers> {
 
         Customers c = find(cust.getId());
         c.getGroupsCollection().clear();
-        getEntityManager().flush();
+       // getEntityManager().flush();
 
     }
 

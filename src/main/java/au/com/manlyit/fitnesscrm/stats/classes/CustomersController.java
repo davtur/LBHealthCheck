@@ -1205,12 +1205,12 @@ public class CustomersController implements Serializable {
             // does not exist so create a new customer
             try {
                 c.setId(0);
-                getFacade().create(c);
+                getFacade().createAndFlushForGeneratedIdEntities(c);
                 setSelected(c);
                 updateCustomersGroupMembership(c);
                 addQuestionnaireMapItemsToCustomer(c);
                 createDefaultCustomerProfilePicture(c);
-                // createDefaultPaymentParameters(paymentGateway);
+                //createDefaultPaymentParameters(paymentGateway);
                 setSelected(c);
 
                 setNewCustomer(setCustomerDefaults(new Customers()));
@@ -1251,18 +1251,24 @@ public class CustomersController implements Serializable {
         try {
             List<Groups> lg = new ArrayList<>(c.getGroupsCollection());
             ejbFacade.clearAllCustomerGroups(c);
-
+ // remove groups
+            for (Groups g : lg) {
+                ejbGroupsFacade.remove(g);
+            }
             // check if they are in the hidden developer group
             int count = 0;
 
             for (Groups g : lg) {
                 if (g.getGroupname().contains("DEVELOPER")) {
                     if (count == 0) {
-                        c.getGroupsCollection().add(g);
+                       // c.getGroupsCollection().add(g);
+                        ejbFacade.addCustomerToGroup(c, g);
                         count++;
                     }
                 }
             }
+            
+            
             // add selected groups
             for (Groups g : selectedGroups) {
 
@@ -2902,9 +2908,9 @@ public class CustomersController implements Serializable {
      * @param multiSelectedLeads the multiSelectedLeads to set
      */
     public void setMultiSelectedLeads(Customers[] multiSelectedLeads) {
-        this.setMultiSelectedLeads(multiSelectedLeads);
+        this.multiSelectedLeads = multiSelectedLeads;
     }
-
+ 
     /**
      * @return the filteredLeads
      */

@@ -2001,7 +2001,7 @@ public class PaymentBean implements Serializable {
         pp.setYourGeneralReference(custDetails.getYourGeneralReference().getValue());
         pp.setYourSystemReference(custDetails.getYourSystemReference().getValue());
 
-        //ejbPaymentParametersFacade.edit(pp);
+        ejbPaymentParametersFacade.edit(pp);
         //ejbPaymentParametersFacade.pushChangesToDBImmediatleyInsteadOfAtTxCommit();
         cust.setPaymentParametersId(pp);
         //customersFacade.editAndFlush(cust);
