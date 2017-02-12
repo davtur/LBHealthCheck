@@ -1542,21 +1542,24 @@ public class PaymentBean implements Serializable {
     }
 
     @Asynchronous
-    public Future<PaymentGatewayResponse> addCustomer(Customers cust, String paymentGatewayName, String digitalKey, String authenticatedUser) {
+    public Future<PaymentGatewayResponse> addCustomer(Customers cust, String paymentGatewayName, String digitalKey, String authenticatedUser,String sessionId) {
         PaymentGatewayResponse pgr = new PaymentGatewayResponse(false, null, "", "-1", "An unhandled error occurred!");
         String paymentGatewayReference = "";
         try {
             if (authenticatedUser == null) {
 
                 LOGGER.log(Level.INFO, "Authenticated User is NULL - Aborting add customer to ezidebit");
+                futureMap.processAddCustomer(sessionId, pgr);
                 return new AsyncResult<>(new PaymentGatewayResponse(false, null, "", "-1", "Authenticated User is NULL"));
 
             }
 
             if (cust == null || digitalKey == null || paymentGatewayName == null) {
+                futureMap.processAddCustomer(sessionId, pgr);
                 return new AsyncResult<>(new PaymentGatewayResponse(false, null, "", "-1", "The Customer Object is NULL, the Digital key is null or the paymentGateway name is null."));
             }
             if (cust.getId() == null || digitalKey.trim().isEmpty()) {
+                futureMap.processAddCustomer(sessionId, pgr);
                 return new AsyncResult<>(new PaymentGatewayResponse(false, null, "", "-1", "The Customer id is null or the digital key is Empty"));
             }
             // check if customer already exists in the gateway
@@ -1626,6 +1629,7 @@ public class PaymentBean implements Serializable {
                 if (payParams == null) {
                     LOGGER.log(Level.WARNING, "Payment gateway EZIDEBIT parameters not found");
                     pgr = new PaymentGatewayResponse(false, null, "", "-1", "Payment gateway EZIDEBIT parameters not found!");
+                    futureMap.processAddCustomer(sessionId, pgr);
                     return new AsyncResult<>(pgr);
                 }
 
@@ -1668,6 +1672,7 @@ public class PaymentBean implements Serializable {
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, "Add Customer - FATAL Error - ,", e);
             pgr = new PaymentGatewayResponse(false, e, "", "-1", e.getMessage());
+            futureMap.processAddCustomer(sessionId, pgr);
             return new AsyncResult<>(pgr);
         }
         if (pgr.isOperationSuccessful() == true) {
@@ -1676,6 +1681,7 @@ public class PaymentBean implements Serializable {
             String changedTo = "New Customer:";
             auditLogFacade.audit(customersFacade.findCustomerByUsername(authenticatedUser), cust, "addCustomer", auditDetails, changedFrom, changedTo);
         }
+        futureMap.processAddCustomer(sessionId, pgr);
         return new AsyncResult<>(pgr);
     }
 

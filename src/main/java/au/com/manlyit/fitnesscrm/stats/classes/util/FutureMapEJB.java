@@ -821,7 +821,7 @@ public class FutureMapEJB implements Serializable {
                 }
                 if (key.contains("AddCustomer")) {
                     //processAddCustomer(sessionId, ft);
-                    LOGGER.log(Level.INFO, "AddCustomer to direct call from payment bean.");
+                    LOGGER.log(Level.INFO, "AddCustomer  has been migrated to a direct call from payment bean.");
                 }
                 if (key.contains("AddPayment")) {
                     //  processAddPaymentResult(sessionId, ft);
@@ -1779,7 +1779,7 @@ public class FutureMapEJB implements Serializable {
     }*/
     @Asynchronous
     @TransactionAttribute(REQUIRES_NEW)
-    public void processAddCustomerAsync(String sessionId, PaymentGatewayResponse pgr) {
+    public void processAddCustomer(String sessionId, PaymentGatewayResponse pgr) {
         boolean result = false;
         //PaymentGatewayResponse pgr = null;
         Customers cust;
@@ -1788,10 +1788,10 @@ public class FutureMapEJB implements Serializable {
             // Object resultObject = ft.get();
             //  if (resultObject.getClass() == PaymentGatewayResponse.class) {
             //     pgr = (PaymentGatewayResponse) resultObject;
-            result = pgr.isOperationSuccessful();
-            // }
-
             if (pgr != null) {
+                result = pgr.isOperationSuccessful();
+                // }
+
                 if (result == true) {
 
                     cust = (Customers) pgr.getData();
@@ -2254,24 +2254,23 @@ public class FutureMapEJB implements Serializable {
         String returnedMessage = "An error occurred trying to processDeletePaymentBatch. Refer to logs for more info";
         // PaymentGatewayResponse pgr = null;
 
-        Payments pay = null;
-        Customers cust = null;
+        
+        Customers cust ;
         try {
 // if successful it should return a Customers Object from the getData method;
             // if successful it should return a Customers Object from the getData method;
             // Object resultObject = ft.get();
             //  if (resultObject.getClass() == PaymentGatewayResponse.class) {
             //     pgr = (PaymentGatewayResponse) resultObject;
-            result = pgr.isOperationSuccessful();
-            pay = (Payments) pgr.getData();
-            //  }
-
-            if (pgr != null && pay != null) {
+            if (pgr != null) {
                 result = pgr.isOperationSuccessful();
-                if (result == true) {
-                    cust = pay.getCustomerName();
+                cust = (Customers) pgr.getData();
+                //  }
 
-                    if (cust != null) {
+                if (cust != null) {
+                    result = pgr.isOperationSuccessful();
+                    if (result == true) {
+
 
                         /* Integer i = 0;
                         try {
@@ -2287,8 +2286,10 @@ public class FutureMapEJB implements Serializable {
                         sendMessage(sessionId, "Delete Payment Batch", "OK");
                         getPayments(sessionId, cust, 18, 2);
                         LOGGER.log(Level.INFO, "Future Map; Requesting a check of payments from the payment gateway after processDeletePaymentBatch for {0} ", new Object[]{cust.getUsername()});
-                    }
 
+                    }
+                } else {
+                    Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, "processDeletePaymentBatch - the customer Object in the response is null");
                 }
             } else {
                 Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, "processDeletePaymentBatch - the PaymentGatewayResponse is null");
@@ -2317,24 +2318,22 @@ public class FutureMapEJB implements Serializable {
         String returnedMessage = "An error occurred trying to create the customers schedule. Refer to logs for more info";
         //PaymentGatewayResponse pgr = null;
 
-        Payments pay = null;
-        Customers cust = null;
+       
+        Customers cust ;
         try {
 // if successful it should return a Customers Object from the getData method;
             // if successful it should return a Customers Object from the getData method;
-            //Object resultObject = ft.get();
-            //if (resultObject.getClass() == PaymentGatewayResponse.class) {
-            //    pgr = (PaymentGatewayResponse) resultObject;
-            result = pgr.isOperationSuccessful();
-            pay = (Payments) pgr.getData();
-            // }
-
-            if (pgr != null && pay != null) {
+            // Object resultObject = ft.get();
+            //  if (resultObject.getClass() == PaymentGatewayResponse.class) {
+            //     pgr = (PaymentGatewayResponse) resultObject;
+            if (pgr != null) {
                 result = pgr.isOperationSuccessful();
-                if (result == true) {
-                    cust = pay.getCustomerName();
+                cust = (Customers) pgr.getData();
+                //  }
 
-                    if (cust != null) {
+                if (cust != null) {
+                    result = pgr.isOperationSuccessful();
+                    if (result == true) {
 
                         /* Integer i = 0;
                         try {
@@ -2352,6 +2351,8 @@ public class FutureMapEJB implements Serializable {
                         LOGGER.log(Level.INFO, "Future Map; Requesting a check of payments from the payment gateway after creating the schedule for {0} ", new Object[]{cust.getUsername()});
                     }
 
+                } else {
+                    Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, "processDeletePaymentBatch - the customer Object in the response is null");
                 }
             } else {
                 Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, "processCreateSchedule - the PaymentGatewayResponse is null");

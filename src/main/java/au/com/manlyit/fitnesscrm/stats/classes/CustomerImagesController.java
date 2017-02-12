@@ -895,11 +895,12 @@ public class CustomerImagesController implements Serializable {
             }
             getFacade().create(current);
             if (isProfilePhoto()) {
+               // ejbCustomersFacade.setCustomerProfileImage(getSelectedCustomer().getId(), current);
                 cust.setProfileImage(current);
                 ejbCustomersFacade.edit(cust);
-                FacesContext context = FacesContext.getCurrentInstance();
+               /* FacesContext context = FacesContext.getCurrentInstance();
                 CustomersController custController = context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
-                custController.setSelected(cust);
+                custController.setSelected(cust);*/
             }
             JsfUtil.addSuccessMessage(configMapFacade.getConfig("CustomerImagesCreated"));
             
@@ -1018,12 +1019,13 @@ public class CustomerImagesController implements Serializable {
         try {
             getFacade().edit(getEditingImage());
             if (isProfilePhoto()) {
+                //ejbCustomersFacade.setCustomerProfileImage(getSelectedCustomer().getId(), current);
                 Customers cust = getSelectedCustomer();
                 cust.setProfileImage(current);
                 ejbCustomersFacade.edit(cust);
-                FacesContext context = FacesContext.getCurrentInstance();
+                /*FacesContext context = FacesContext.getCurrentInstance();
                 CustomersController custController = context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
-                custController.setSelected(cust);
+                custController.setSelected(cust);*/
             }
             JsfUtil.addSuccessMessage(configMapFacade.getConfig("CustomerImagesUpdated"));
             

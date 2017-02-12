@@ -5,6 +5,7 @@
 package au.com.manlyit.fitnesscrm.stats.beans;
 
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
+import au.com.manlyit.fitnesscrm.stats.db.CustomerImages;
 import au.com.manlyit.fitnesscrm.stats.db.CustomerState;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import au.com.manlyit.fitnesscrm.stats.db.Groups;
@@ -70,6 +71,13 @@ public class CustomersFacade extends AbstractFacade<Customers> {
         newPayParams.setCustomers(cust);
     }
 
+    public void setCustomerProfileImage(int custID, CustomerImages profilePhoto) {
+        Customers cust = em.find(Customers.class, custID);
+        cust.setProfileImage(profilePhoto);
+        profilePhoto.setCustomers(cust);
+        getEntityManager().merge(cust);
+    }
+ 
     public Customers findCustomerByUsername(String username) {
 
         // CriteriaBuilder cb = em.getCriteriaBuilder();
@@ -210,7 +218,6 @@ public class CustomersFacade extends AbstractFacade<Customers> {
     public void removeCustomerFromGroup(Customers cust, Groups group) {
         // add a customer to a new group
         Customers c = find(cust.getId());
-        
 
         c.getGroupsCollection().remove(group);
         //getEntityManager().flush();
@@ -223,7 +230,7 @@ public class CustomersFacade extends AbstractFacade<Customers> {
 
         Customers c = find(cust.getId());
         c.getGroupsCollection().clear();
-       // getEntityManager().flush();
+        // getEntityManager().flush();
 
     }
 

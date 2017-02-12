@@ -944,7 +944,7 @@ public class EziDebitPaymentGateway implements Serializable {
             FacesContext context = FacesContext.getCurrentInstance();
             CustomersController controller = (CustomersController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "customersController");
             controller.update(null);
-            controller.setSelected(customersFacade.find(getSelectedCustomer().getId()));
+            //controller.setSelected(customersFacade.find(getSelectedCustomer().getId()));
 
             PaymentParameters pp = controller.getSelectedCustomersPaymentParameters();
             if (pp.getWebddrUrl() != null) {
@@ -1769,7 +1769,7 @@ public class EziDebitPaymentGateway implements Serializable {
         if (cust.getPaymentParametersId() == null) {
             getCustomersController().createDefaultPaymentParameters(cust);
         }
-        startAsynchJob("AddCustomer", paymentBean.addCustomer(cust, PAYMENT_GATEWAY, getDigitalKey(), authenticatedUser));
+        startAsynchJob("AddCustomer", paymentBean.addCustomer(cust, PAYMENT_GATEWAY, getDigitalKey(), authenticatedUser,sessionId));
         JsfUtil.addSuccessMessage("Processing Add Customer to Payment Gateway Request.", "");
 
     }
@@ -1783,8 +1783,13 @@ public class EziDebitPaymentGateway implements Serializable {
 
     }
 
-    /*  private void processAddCustomer(Future ft) {
-        boolean result = false;
+      private void processAddCustomer(PaymentGatewayResponse pgr) {
+           
+          
+         // updatePaymentTableComponents();
+          
+           LOGGER.log(Level.INFO, "Session BEAN processAddCustomer completed.No updates necessary as GetCustDetails was called after successful add.");
+        /*boolean result = false;
         try {
             result = (boolean) ft.get();
         } catch (InterruptedException | ExecutionException ex) {
@@ -1798,8 +1803,8 @@ public class EziDebitPaymentGateway implements Serializable {
 
         } else {
             JsfUtil.addErrorMessage("Couldn't add Customer To Payment Gateway. Check logs");
-        }
-    }*/
+        }*/
+    }
 
  /*   private boolean addBulkCustomersToPaymentGateway() {
      boolean result = false;
@@ -2039,11 +2044,11 @@ public class EziDebitPaymentGateway implements Serializable {
             if (key.contains("CreateSchedule")) {
                 processCreateSchedule(pgr);
             }
-            /*moved to FutureMap
+            
             
             if (key.contains("AddCustomer")) {
-                processAddCustomer(ft);
-            }*/
+                processAddCustomer(pgr);
+            }
             if (key.contains("EditCustomerDetails")) {
                 processEditCustomerDetails(pgr);
             }
@@ -2162,9 +2167,9 @@ public class EziDebitPaymentGateway implements Serializable {
         //RequestContext.getCurrentInstance().update("\\:tv\\:paymentsForm");
         RequestContext.getCurrentInstance().execute("updatePaymentForms();");
         
-        LOGGER.log(Level.INFO, "Session BEAN RequestContext --------------------------------------------------");
-        LOGGER.log(Level.INFO, "Session BEAN RequestContext -------- Update Payment Table Components ---------");
-        LOGGER.log(Level.INFO, "Session BEAN RequestContext --------------------------------------------------");
+        //LOGGER.log(Level.INFO, "Session BEAN RequestContext --------------------------------------------------");
+        LOGGER.log(Level.INFO, "Session BEAN RequestContext ------>> Updated Payment Table Components ( execute(\"updatePaymentForms();\") ) <<-------");
+        //LOGGER.log(Level.INFO, "Session BEAN RequestContext --------------------------------------------------");
     }
 
     private void processGetScheduledPayments(PaymentGatewayResponse pgr) {
@@ -2258,10 +2263,10 @@ public class EziDebitPaymentGateway implements Serializable {
         } else {
             LOGGER.log(Level.WARNING, "Session BEAN processAddPaymentResult - Payment could not be found in the cache or DB with reference {0}", id);
         }
-        updatePaymentTableComponents();
-        //recreatePaymentTableData();
-        //RequestContext.getCurrentInstance().update(":tv:paymentsForm");
-        LOGGER.log(Level.INFO, "Session BEAN processAddPaymentResult completed");
+        //updatePaymentTableComponents();
+        //recreatePaymentTableData();"
+        RequestContext.getCurrentInstance().update("paymentsForm:paymentsTable2");
+        LOGGER.log(Level.INFO, "Session BEAN processAddPaymentResult completed, updating paymentsForm:paymentsTable2 ");
     }
 
     private void processCreateSchedule(PaymentGatewayResponse pgr) {
@@ -3224,7 +3229,7 @@ public class EziDebitPaymentGateway implements Serializable {
                 Payments pay = paymentsFacade.findPaymentById(selectedScheduledPayment.getId(), false);
 
                 if (pay != null) {
-                    if (pay.getPaymentStatus().contentEquals(PaymentStatus.SCHEDULED.value()) || pay.getPaymentStatus().contentEquals(PaymentStatus.DELETE_REQUESTED.value()) || pay.getPaymentStatus().contentEquals(PaymentStatus.MISSING_IN_PGW.value())) {
+                    if (pay.getPaymentStatus().contentEquals(PaymentStatus.SCHEDULED.value()) || pay.getPaymentStatus().contentEquals(PaymentStatus.DELETE_REQUESTED.value()) || pay.getPaymentStatus().contentEquals(PaymentStatus.REJECTED_CUST_ON_HOLD.value())  || pay.getPaymentStatus().contentEquals(PaymentStatus.MISSING_IN_PGW.value())|| pay.getPaymentStatus().contentEquals(PaymentStatus.REJECTED_BY_GATEWAY.value())) {
 
                         if (pay.getPaymentStatus().contentEquals(PaymentStatus.MISSING_IN_PGW.value())) {
                             pay.setBankFailedReason("DELETED");
