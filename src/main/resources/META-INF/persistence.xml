@@ -2,14 +2,71 @@
 <persistence version="2.0" xmlns="http://java.sun.com/xml/ns/persistence" >
     <persistence-unit name="FitnessStatsPU" transaction-type="JTA">
         <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
-        <!--   <jta-data-source>java:/jdbc/fitness</jta-data-source>-->
-        <jta-data-source>jdbc/fitness</jta-data-source>
-       
-        <exclude-unlisted-classes>false</exclude-unlisted-classes>
+        <jta-data-source>java:/jdbc/fitness</jta-data-source>
+        <!--<jta-data-source>jdbc/fitness</jta-data-source>-->
+        <class>au.com.manlyit.fitnesscrm.stats.db.Activation</class>
+        <class>au.com.manlyit.fitnesscrm.stats.db.AuditLog</class>
+        <class>au.com.manlyit.fitnesscrm.stats.db.ConfigMap</class>
+        <class>au.com.manlyit.fitnesscrm.stats.db.ContractorRateToTaskMap</class>
+        <class>au.com.manlyit.fitnesscrm.stats.db.ContractorRates</class>
+        <class>au.com.manlyit.fitnesscrm.stats.db.Currency</class>       
+        <class>au.com.manlyit.fitnesscrm.stats.db.CustomerAuth</class>
+        <class>au.com.manlyit.fitnesscrm.stats.db.CustomerGoals</class>
+        <class>au.com.manlyit.fitnesscrm.stats.db.CustomerImages</class>
+        <class>au.com.manlyit.fitnesscrm.stats.db.CustomerState</class>
+        <class>au.com.manlyit.fitnesscrm.stats.db.Customers</class>
+        <class>au.com.manlyit.fitnesscrm.stats.db.DemographicTypes</class>
+        <class>au.com.manlyit.fitnesscrm.stats.db.EmailFormat</class>
+        <class>au.com.manlyit.fitnesscrm.stats.db.EmailQueue</class>
+        <class>au.com.manlyit.fitnesscrm.stats.db.EmailTemplates</class>
+        <class>au.com.manlyit.fitnesscrm.stats.db.ExpenseTypes</class>
+        <class>au.com.manlyit.fitnesscrm.stats.db.Expenses</class>
+        <class>au.com.manlyit.fitnesscrm.stats.db.FitnessTestCharts</class>
+        <class>au.com.manlyit.fitnesscrm.stats.db.Groups</class>
+        <class>au.com.manlyit.fitnesscrm.stats.db.Invoice</class>
+        <class>au.com.manlyit.fitnesscrm.stats.db.InvoiceImages</class>
+        <class>au.com.manlyit.fitnesscrm.stats.db.InvoiceLine</class>
+        <class>au.com.manlyit.fitnesscrm.stats.db.InvoiceLineType</class>
+        <class>au.com.manlyit.fitnesscrm.stats.db.Item</class>
+        <class>au.com.manlyit.fitnesscrm.stats.db.JobConfigMap</class>
+        <class>au.com.manlyit.fitnesscrm.stats.db.Monitoringcharts</class>
+        <class>au.com.manlyit.fitnesscrm.stats.db.Notes</class>
+        <class>au.com.manlyit.fitnesscrm.stats.db.Participants</class>
+        <class>au.com.manlyit.fitnesscrm.stats.db.PaymentMethods</class>
+        <class>au.com.manlyit.fitnesscrm.stats.db.PaymentParameters</class>
+        <class>au.com.manlyit.fitnesscrm.stats.db.Payments</class>
+        <class>au.com.manlyit.fitnesscrm.stats.db.Plan</class>
+        <class>au.com.manlyit.fitnesscrm.stats.db.PreferedContact</class>
+        <class>au.com.manlyit.fitnesscrm.stats.db.QrtzCronTriggers</class>
+        <class>au.com.manlyit.fitnesscrm.stats.db.QrtzJobDetails</class>
+        <class>au.com.manlyit.fitnesscrm.stats.db.QrtzSimpleTriggers</class>
+        <class>au.com.manlyit.fitnesscrm.stats.db.QrtzTriggers</class>
+        <class>au.com.manlyit.fitnesscrm.stats.db.QuestionnaireMap</class>
+        <class>au.com.manlyit.fitnesscrm.stats.db.Schedule</class>
+        <class>au.com.manlyit.fitnesscrm.stats.db.SessionBookings</class>
+        <class>au.com.manlyit.fitnesscrm.stats.db.SessionHistory</class>
+        <class>au.com.manlyit.fitnesscrm.stats.db.SessionRecurrance</class>
+        <class>au.com.manlyit.fitnesscrm.stats.db.SessionTimetable</class>
+        <class>au.com.manlyit.fitnesscrm.stats.db.SessionTrainers</class>
+        <class>au.com.manlyit.fitnesscrm.stats.db.SessionTypes</class>
+        <class>au.com.manlyit.fitnesscrm.stats.db.Stat</class>
+        <class>au.com.manlyit.fitnesscrm.stats.db.StatTypes</class>
+        <class>au.com.manlyit.fitnesscrm.stats.db.StatsTaken</class>
+        <class>au.com.manlyit.fitnesscrm.stats.db.Suppliers</class>
+        <class>au.com.manlyit.fitnesscrm.stats.db.SurveyAnswerSubitems</class>
+        <class>au.com.manlyit.fitnesscrm.stats.db.SurveyAnswers</class>
+        <class>au.com.manlyit.fitnesscrm.stats.db.SurveyQuestionSubitems</class>
+        <class>au.com.manlyit.fitnesscrm.stats.db.SurveyQuestionTypes</class>
+        <class>au.com.manlyit.fitnesscrm.stats.db.SurveyQuestions</class>
+        <class>au.com.manlyit.fitnesscrm.stats.db.Surveys</class>       
+        <class>au.com.manlyit.fitnesscrm.stats.db.Tasks</class>
+        <class>au.com.manlyit.fitnesscrm.stats.db.ToDoList</class>
+        <class>au.com.manlyit.fitnesscrm.stats.db.WebsiteMonitor</class>
+        <exclude-unlisted-classes>true</exclude-unlisted-classes>
         <shared-cache-mode>ALL</shared-cache-mode>
         <properties>
             <property name="eclipselink.logging.level" value="INFO"/>
-          <!--   <property name="eclipselink.cache.coordination.protocol" value="jms"/>
+            <!--   <property name="eclipselink.cache.coordination.protocol" value="jms"/>
             <property name="eclipselink.cache.coordination.jms.topic" value="jms/PaymentsTopic"/>
             <property name="eclipselink.cache.coordination.jms.factory" value="jms/PaymentsTopicConnectionFactory"/>
                <property name="eclipselink.cache.coordination.protocol" value="jms"/>
@@ -20,8 +77,8 @@
     </persistence-unit>
     <persistence-unit name="FitnessStatsPU2" transaction-type="RESOURCE_LOCAL">
         <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
-        <!--   <non-jta-data-source>java:/jdbc/fitness2</non-jta-data-source>-->
-        <non-jta-data-source>jdbc/fitness2</non-jta-data-source>
+        <non-jta-data-source>java:/jdbc/fitness2</non-jta-data-source>
+        <!--  <non-jta-data-source>jdbc/fitness2</non-jta-data-source>-->
         <class>au.com.manlyit.fitnesscrm.stats.db.Monitoringcharts</class>
         <class>au.com.manlyit.fitnesscrm.stats.db.WebsiteMonitor</class>
         <exclude-unlisted-classes>true</exclude-unlisted-classes>

@@ -56,7 +56,7 @@ public class ConfigMapFacade extends AbstractFacade<ConfigMap> {
         create(cm);
     }
 
-    public synchronized String getConfig(String key) {
+    public  String getConfig(String key) {
         String val = getValueFromKey(key);
         if (val.indexOf(ETAG) == 0) {
             // its encrypted so decrypt

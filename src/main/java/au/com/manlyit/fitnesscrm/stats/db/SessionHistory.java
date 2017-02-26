@@ -67,6 +67,7 @@ public class SessionHistory implements BaseEntity, Serializable {
     private Expenses expenseId;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "sessionHistoryId")
     private Collection<SessionBookings> sessionBookingsCollection;
+    
     @JoinColumn(name = "session_template", referencedColumnName = "id")
     @ManyToOne
     private SessionTimetable sessionTemplate;
