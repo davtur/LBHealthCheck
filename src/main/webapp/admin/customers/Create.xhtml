@@ -12,7 +12,7 @@
     <!--<p:log />--> 
     <!--  <p:confirmDialog id="confirmDialogCustomersCreate1" message="Add a new customer to the database."  closable="false"
                        header="#{configMapController.getKey('CreateCustomersTitle')}" severity="info" widgetVar="customersCreateDialogue" > -->
-    <p:dialog id="confirmDialogCustomersCreate1"  closable="false" fitViewport="true"
+    <p:dialog id="confirmDialogCustomersCreate1"  closable="true" fitViewport="true"
               header="#{configMapController.getKey('CreateCustomersTitle')}"  widgetVar="customersCreateDialogue" > 
         <h:form id="formCustomersCreate1"> 
 
@@ -129,11 +129,15 @@
             <div class="Container100 Responsive100">
                 <div class="Container50 Responsive50">
                     <div class="ContainerIndent">
+                        <div class="ContainerIndent">
+                    <p:outputLabel rendered="#{customersController.addUserButtonDisabled}" styleClass="red FontBold animated pulse infinite" value="#{configMapController.getKey('CreateCustomersLabel_customerExists')}" for="pword" />
+                    </div>
                     <!--    <p:commandButton icon="ui-icon-check fa fa-check white Fs14" id="dialogueSave" process="@this :formCustomersCreate1" oncomplete="handleCreateCustomerComplete(xhr, status, args);" disabled="#{customersController.addUserButtonDisabled}"   actionListener="#{customersController.createDialogue}"  value="#{configMapController.getKey('CreateCustomersSaveLink')}" update=":growl :tv:customerslistForm1 :tv:formCustomersEdit1 :formCustomersCreate1 :tv:paymentsForm :tv:NoteslistForm1"/>   -->             
                        <p:commandButton icon="ui-icon-check fa fa-check white Fs14" id="dialogueSave" process="@this :formCustomersCreate1"  disabled="#{customersController.addUserButtonDisabled}"   actionListener="#{customersController.createDialogue}"  value="#{configMapController.getKey('CreateCustomersSaveLink')}" update=":growl :tv:customerslistForm1 :tv:formCustomersEdit1 :formCustomersCreate1 :tv:paymentsForm :tv:NoteslistForm1"/>                
 
                         <p:commandButton icon=" fa fa-times-circle white Fs14" id="dialogueDiscard" onclick="PF('customersCreateDialogue').hide()"  actionListener="#{customersController.cancelCreateDialogue}" value="#{configMapController.getKey('CreateCustomersDiscardLink')}" update=":growl"/>                
                     </div>
+                    
                 </div>
                 <div class="Container25 Responsive">
                     <div class="ContainerIndent">

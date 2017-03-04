@@ -46,6 +46,7 @@ import org.eclipse.persistence.sessions.Session;
 public class SessionHistoryFacade extends AbstractFacade<SessionHistory> {
 
     private static final Logger logger = Logger.getLogger(SessionHistoryFacade.class.getName());
+    private static final boolean DEBUG = true;
     @Inject
     private ConfigMapFacade configMapFacade;
     @PersistenceContext(unitName = "FitnessStatsPU")
@@ -278,7 +279,7 @@ public class SessionHistoryFacade extends AbstractFacade<SessionHistory> {
         return retList;
     }
 
-    public SessionHistory findSessionBySessionTimetable(SessionHistory template,SessionTimetable st) {
+    public SessionHistory findSessionBySessionTimetable(Date  sessionTimestamp,SessionTimetable st) {
         
         
         //Customers trainer, Date startDate, Date endDate, boolean sortAsc
@@ -294,27 +295,32 @@ public class SessionHistoryFacade extends AbstractFacade<SessionHistory> {
             CriteriaQuery<SessionHistory> cq = cb.createQuery(SessionHistory.class);
             Root<SessionHistory> rt = cq.from(SessionHistory.class);
 
-            Join<SessionHistory, SessionTrainers> jn = rt.joinCollection("sessionTrainersCollection");
-            Expression<Customers> sessionTrainer = jn.get("customerId");
+            //Join<SessionHistory, SessionTrainers> jn = rt.joinCollection("sessionTrainersCollection");
+           // Expression<Customers> sessionTrainer = jn.get("customerId");
+            Expression<SessionTimetable> sessionTemplate = rt.get("sessionTemplate");
             Expression<Time> stime = rt.get("sessiondate");
-            Expression<SessionTypes> type = rt.get("sessionTypesId");
+            //Expression<SessionTypes> type = rt.get("sessionTypesId");
 
-            Predicate condition1 = cb.equal(stime, template.getSessiondate());
-            Predicate condition2 = cb.equal(type, template.getSessionTypesId());
-            Predicate condition3 = cb.equal(sessionTrainer, st.getTrainerId());
-            cq.where(cb.and(condition1, condition2, condition3));
+            Predicate condition1 = cb.equal(stime, sessionTimestamp);
+           // Predicate condition2 = cb.equal(type, template.getSessionTypesId());
+           // Predicate condition3 = cb.equal(sessionTrainer, st.getTrainerId());
+            Predicate condition4 = cb.equal(sessionTemplate, st);
+            cq.where(cb.and(condition1, condition4));
             cq.select(rt);
 
             TypedQuery<SessionHistory> q = em.createQuery(cq);
             retList = q.getResultList();
+            if(DEBUG){
+                debug(q);
+            }
             if(retList.size() == 1){
                 matchingSession = retList.get(0);
             }else{
                 if(retList.size() > 1){
                     matchingSession = retList.get(0);
-                    logger.log(Level.WARNING, "findSessionBySessionTimetable: more than 1 match found for session timetable: {0}",template.getSessiondate().toString());
+                    logger.log(Level.WARNING, "findSessionBySessionTimetable: more than 1 match found for session timetable: {0}",sessionTimestamp.toString());
                 }else{
-                    logger.log(Level.INFO, "findSessionBySessionTimetable: no sessions found for session timetable: {0}",template.getSessiondate().toString());
+                    logger.log(Level.INFO, "findSessionBySessionTimetable: no sessions found for session timetable: {0}",sessionTimestamp.toString());
                 }
             }
         } catch (Exception e) {

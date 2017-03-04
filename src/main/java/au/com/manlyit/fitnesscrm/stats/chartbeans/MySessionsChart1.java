@@ -36,6 +36,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
@@ -56,6 +57,20 @@ import org.primefaces.model.chart.PieChartModel;
 @SessionScoped
 public class MySessionsChart1 implements Serializable {
 
+    /**
+     * @return the supplierChartPopupText
+     */
+    public String getSupplierChartPopupText() {
+        return supplierChartPopupText;
+    }
+
+    /**
+     * @param supplierChartPopupText the supplierChartPopupText to set
+     */
+    public void setSupplierChartPopupText(String supplierChartPopupText) {
+        this.supplierChartPopupText = supplierChartPopupText;
+    }
+
     private static final Logger logger = Logger.getLogger(MySessionsChart1.class.getName());
     private BarChartModel model;
     private BarChartModel model2;
@@ -66,7 +81,7 @@ public class MySessionsChart1 implements Serializable {
     private List<PieChartModel> expensesBySupplierPieChartModels;
 
     private Customers selectedCustomer;
-
+    private String supplierChartPopupText = "";
     private Date startDate;
     private Date endDate;
     private int dateInterval = 1;
@@ -714,7 +729,7 @@ public class MySessionsChart1 implements Serializable {
             ccModel.setTitle("Supplier Expenses Report");
             ccModel.setLegendPosition("ne");
             ccModel.setStacked(false);
-            ccModel.setExtender("monthlyRevenueBarChartExtender");
+            ccModel.setExtender("supplierExpensesChartExtender");
 
             Axis xAxis = ccModel.getAxis(AxisType.X);
             xAxis.setLabel(xAxisLabel);
@@ -916,10 +931,26 @@ public class MySessionsChart1 implements Serializable {
     }
 
     public void supplierChartItemSelect(ItemSelectEvent event) {
-        JsfUtil.addSuccessMessage("Item selected",
-                "Item Index:" + event.getItemIndex()
-                + ", Series Index: " + event.getSeriesIndex());
-        // expensesBySupplierModel.getSeries().
+        int itemIndex = event.getItemIndex();
+        int seriesIndex = event.getSeriesIndex();
+        LineChartSeries lcs = (LineChartSeries) expensesBySupplierModel.getSeries().get(seriesIndex);
+        String seriesLabel = lcs.getLabel();
+        Map<Object, Number> lhm = lcs.getData();
+        Number[] na = new Number[lhm.values().size()];
+        Object[] oa = new Object[lhm.keySet().size()];
+        lhm.values().toArray(na);
+        lhm.keySet().toArray(oa);
+        Number val = na[itemIndex];
+        String xAxisLabel = (String) oa[itemIndex];
+
+        /*JsfUtil.addSuccessMessage("Item selected",
+                seriesLabel + "Item Index:" + event.getItemIndex()
+                + ", Series Index: " + event.getSeriesIndex() + ", Value : " + val + ", Date : " + xAxisLabel);*/
+        supplierChartPopupText = seriesLabel + ", " + xAxisLabel + ", $" + val;
+
+        JsfUtil.addSuccessMessage("Expense Details",
+                seriesLabel + ", " + xAxisLabel + ", $" + val);
+
     }
 
     public BarChartModel getModel() {

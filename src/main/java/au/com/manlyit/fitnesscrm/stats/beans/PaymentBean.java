@@ -2010,7 +2010,7 @@ public class PaymentBean implements Serializable {
         ejbPaymentParametersFacade.edit(pp);
         //ejbPaymentParametersFacade.pushChangesToDBImmediatleyInsteadOfAtTxCommit();
         cust.setPaymentParametersId(pp);
-        //customersFacade.editAndFlush(cust);
+        customersFacade.edit(cust);
         //customersFacade.pushChangesToDBImmediatleyInsteadOfAtTxCommit();
         LOGGER.log(Level.INFO, "Payment Bean processGetCustomerDetails. Payment Parameters have been updated for {0}.", new Object[]{cust.getUsername()});
     }

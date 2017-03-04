@@ -65,7 +65,7 @@
                     </p:inputText>     
 
                 </p:panelGrid>
-                <p:commandButton actionListener="#{sessionTimetableController.update}" value="#{configMapController.getKey('Save')}" update="display,:SessionTimetableListForm:datalist,:growl" oncomplete="handleSubmit(args, 'SessionTimetableEditDialog');PF('sessionTimetableControllerTable').filter()"/>
+                <p:commandButton actionListener="#{sessionTimetableController.editDialogue}" value="#{configMapController.getKey('Save')}" update="display :SessionTimetableListForm :growl" oncomplete="PF('sessionTimetableControllerTable').filter()"/>
                 <p:commandButton value="#{configMapController.getKey('Cancel')}" onclick="PF('SessionTimetableEditDialog').hide()"/>
             </h:panelGroup>
         </h:form>

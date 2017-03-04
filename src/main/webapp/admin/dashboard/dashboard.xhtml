@@ -58,11 +58,92 @@
             </p:panel>
 
             <p:panel id="supplierExpensesChart" widgetVar="dashboardExpensesBySupplierWidget" header="#{configMapController.getKey('DashboardExpensesChartTitle')}">
-                <p:chart type="bar"   styleClass="chartClass" model="#{mySessionsChart1.expensesBySupplierModel}"     >
-                    <p:ajax listener="#{mySessionsChart1.supplierChartItemSelect}" event="itemSelect" update=":growl " />
+                <p:chart type="bar" id="supplierExpenses"  styleClass="chartClassTall" model="#{mySessionsChart1.expensesBySupplierModel}"     >
+                    <p:ajax listener="#{mySessionsChart1.supplierChartItemSelect}" event="itemSelect" update=":growl "  /><!-- oncomplete="PF('dataPointPopup').show('#{component.clientId}')"-->
                 </p:chart>
             </p:panel>
 
+            <script type="text/javascript" >
+                function supplierExpensesBarChartExtender()
+                    {
+                        this.cfg.grid = {
+                            background: 'transparent',
+                            gridLineColor: '#a0a0a0',
+                            drawBorder: false
+                        };
+                        this.cfg.legend = {
+                            show: true,
+                            location: 'ne',
+                            placement: 'outsideGrid'
+                        };
+                        this.cfg.highlighter = {
+
+                            sizeAdjust: 10,
+                            tooltipLocation: 'n',
+                            tooltipAxes: 'y',
+                            tooltipFormatString: '<b><i><span style="color:red;">hello</span></i></b> %.2f',
+                            useAxesFormatters: false
+
+                        };
+                        this.cfg.yaxis = {
+                            tickOptions: {
+                                formatString: '$%d'
+                            }
+                            /* }*/
+                        };
+                        this.cfg.seriesDefaults = {
+                            pointLabels: {
+                                show: true,
+                                formatString: '$%d',
+                                location: 's',
+                                ypadding: 5
+                            }
+                        };
+                    }
+
+            </script>
+            <!--
+            
+            $(document).ready(function () {
+ 
+  $.jqplot.config.enablePlugins = true;
+ 
+  s1 = [['23-May-08',1],['24-May-08',4],['25-May-08',2],['26-May-08', 6]];
+ 
+  plot1 = $.jqplot('chart1',[s1],{
+     title: 'Highlighting, Dragging, Cursor and Trend Line',
+     axes: {
+         xaxis: {
+             renderer: $.jqplot.DateAxisRenderer,
+             tickOptions: {
+                 formatString: '%#m/%#d/%y'
+             },
+             numberTicks: 4
+         },
+         yaxis: {
+             tickOptions: {
+                 formatString: '$%.2f'
+             }
+         }
+     },
+     highlighter: {
+         sizeAdjust: 10,
+         tooltipLocation: 'n',
+         tooltipAxes: 'y',
+         tooltipFormatString: '<b><i><span style="color:red;">hello</span></i></b> %.2f',
+         useAxesFormatters: false
+     },
+     cursor: {
+         show: true
+     }
+  });
+});
+
+            -->
+            <p:overlayPanel widgetVar="dataPointPopup" showEffect="fade" hideEffect="fade" dismissable="false" showCloseIcon="true">
+                <p:outputLabel value="#{mySessionsChart1.supplierChartPopupText}"/>
+            </p:overlayPanel>
+            <p:tooltip id="toolTipSupplierExpenses" for="supplierExpenses" value="#{mySessionsChart1.supplierChartPopupText}" trackMouse="true" widgetVar="dataPointPopup"/>
             <p:panel id="customChart" widgetVar="customChartWidget" header="#{configMapController.getKey('DashboardSessionsChartTitle')}">
                 <p:chart type="bar"   styleClass="chartClass" model="#{mySessionsChart1.dashboardMonthlySessionsChartModel}"     />
             </p:panel>

@@ -936,6 +936,7 @@ public class CustomersController implements Serializable {
     public void prepareCreateAjax(ActionEvent actionEvent) {
         //setLastSelected(current);
         setNewCustomer(setCustomerDefaults(new Customers()));
+        setAddUserButtonDisabled(true);
         //selectedItemIndex = -1;
         //RequestContext.getCurrentInstance().update("formCustomersCreate1");
         //RequestContext.getCurrentInstance().openDialog("customersCreateDialogue");
@@ -986,7 +987,7 @@ public class CustomersController implements Serializable {
 
     //lastSelected
     public void cancelCreateDialogue(ActionEvent actionEvent) {
-        setSelected(lastSelected);
+        //setSelected(lastSelected);
     }
 
     private boolean validateNewSignup(String ipAddress, String emailAddress) {
@@ -1192,6 +1193,7 @@ public class CustomersController implements Serializable {
 
     public void createDialogue(ActionEvent actionEvent) {
         createFromListener();
+        RequestContext.getCurrentInstance().closeDialog("customersCreateDialogue");
     }
 
     private void createFromListener() {
@@ -1403,7 +1405,7 @@ public class CustomersController implements Serializable {
     }
 
     public void selectOneChangePlanListener(ValueChangeEvent vce) {
-        Object newValueObject = vce.getNewValue();
+     /*   Object newValueObject = vce.getNewValue();
         // Object oldValueObject = vce.getOldValue();
         Plan oldPlan = null;
         Plan newPlan = null;
@@ -1546,7 +1548,7 @@ public class CustomersController implements Serializable {
             return (double) 365;
         }
 
-        return -1;
+        return -1;*/
     }
 
     public void selectManyMenuValueChangeListener(ValueChangeEvent vce) {

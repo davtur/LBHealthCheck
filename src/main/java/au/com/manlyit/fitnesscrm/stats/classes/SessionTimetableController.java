@@ -405,7 +405,7 @@ public class SessionTimetableController implements Serializable {
                 sh.setParticipantsCollection(new ArrayList<>());
                 sh.setSessionTypesId(st.getSessionTypesId());
                 sh.setComments(st.getComments());
-                SessionHistory existing = sessionHistoryFacade.findSessionBySessionTimetable(sh, st);
+                SessionHistory existing = sessionHistoryFacade.findSessionBySessionTimetable(startCal.getTime(), st);
                 if (existing == null) {
                     sessionHistoryFacade.create(sh);
                 } else {
@@ -622,6 +622,18 @@ public class SessionTimetableController implements Serializable {
 
     }
 
+    public void setSelectedForEditing() {
+        if (getMultiSelected().length == 1) {
+
+            for (SessionTimetable st : getMultiSelected()) {
+                current = st;
+            }
+            recreateModel();
+        } else {
+            LOGGER.log(Level.WARNING, "setSelectedForEditing - there should only be one selection for editing and you should not see this unless the xhtml validation has been messed up.");
+        }
+    }
+
     public String prepareEdit() {
         //current = (SessionTimetable)getItems().getRowData();
         //selectedItemIndex = pagination.getPageFirstItem() + getItems().getRowIndex();
@@ -634,6 +646,12 @@ public class SessionTimetableController implements Serializable {
 
     public void selectManyMenuValueChangeListener(ValueChangeEvent vce) {
         Object o = vce.getNewValue();
+    }
+
+    public void editDialogue() {
+        getFacade().edit(current);
+        JsfUtil.addSuccessMessage(configMapFacade.getConfig("SessionTimetableUpdated"));
+        
     }
 
     public String update() {
