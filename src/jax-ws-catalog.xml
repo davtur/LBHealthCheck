@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <catalog xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog" prefer="system">
-    <system systemId="https://api.ezidebit.com.au/v3-3/nonpci?wsdl" uri="wsdl/api.ezidebit.com.au/v3-3/nonpci.wsdl"/>
-    <system systemId="https://api.ezidebit.com.au/v3-3/nonpci?xsd=xsd0" uri="wsdl/api.ezidebit.com.au/v3-3/nonpci.xsd_xsd0.xsd"/>
-    <system systemId="https://api.ezidebit.com.au/v3-3/nonpci?xsd=xsd1" uri="wsdl/api.ezidebit.com.au/v3-3/nonpci.xsd_xsd1.xsd"/>
-    <system systemId="https://api.ezidebit.com.au/v3-3/nonpci?xsd=xsd2" uri="wsdl/api.ezidebit.com.au/v3-3/nonpci.xsd_xsd2.xsd"/>
-    <system systemId="https://api.ezidebit.com.au/v3-3/nonpci?wsdl=wsdl0" uri="wsdl/api.ezidebit.com.au/v3-3/nonpci.wsdl_wsdl0.wsdl"/>
-    <system systemId="https://api.demo.ezidebit.com.au/v3-3/nonpci?wsdl" uri="wsdl/api.demo.ezidebit.com.au/v3-3/nonpci.wsdl"/>
-    <system systemId="https://api.demo.ezidebit.com.au/v3-3/nonpci?xsd=xsd0" uri="wsdl/api.demo.ezidebit.com.au/v3-3/nonpci.xsd_xsd0.xsd"/>
-    <system systemId="https://api.demo.ezidebit.com.au/v3-3/nonpci?xsd=xsd1" uri="wsdl/api.demo.ezidebit.com.au/v3-3/nonpci.xsd_xsd1.xsd"/>
-    <system systemId="https://api.demo.ezidebit.com.au/v3-3/nonpci?xsd=xsd2" uri="wsdl/api.demo.ezidebit.com.au/v3-3/nonpci.xsd_xsd2.xsd"/>
-    <system systemId="https://api.demo.ezidebit.com.au/v3-3/nonpci?wsdl=wsdl0" uri="wsdl/api.demo.ezidebit.com.au/v3-3/nonpci.wsdl_wsdl0.wsdl"/>
+    <system systemId="https://api.ezidebit.com.au/v3-5/nonpci?wsdl" uri="wsdl/api.ezidebit.com.au/v3-5/nonpci.wsdl"/>
+    <system systemId="https://api.ezidebit.com.au/v3-5/nonpci?xsd=xsd0" uri="wsdl/api.ezidebit.com.au/v3-5/nonpci.xsd_xsd0.xsd"/>
+    <system systemId="https://api.ezidebit.com.au/v3-5/nonpci?xsd=xsd1" uri="wsdl/api.ezidebit.com.au/v3-5/nonpci.xsd_xsd1.xsd"/>
+    <system systemId="https://api.ezidebit.com.au/v3-5/nonpci?xsd=xsd2" uri="wsdl/api.ezidebit.com.au/v3-5/nonpci.xsd_xsd2.xsd"/>
+    <system systemId="https://api.ezidebit.com.au/v3-5/nonpci?wsdl=wsdl0" uri="wsdl/api.ezidebit.com.au/v3-5/nonpci.wsdl_wsdl0.wsdl"/>
+    <system systemId="https://api.demo.ezidebit.com.au/v3-5/nonpci?wsdl" uri="wsdl/api.demo.ezidebit.com.au/v3-5/nonpci.wsdl"/>
+    <system systemId="https://api.demo.ezidebit.com.au/v3-5/nonpci?xsd=xsd0" uri="wsdl/api.demo.ezidebit.com.au/v3-5/nonpci.xsd_xsd0.xsd"/>
+    <system systemId="https://api.demo.ezidebit.com.au/v3-5/nonpci?xsd=xsd1" uri="wsdl/api.demo.ezidebit.com.au/v3-5/nonpci.xsd_xsd1.xsd"/>
+    <system systemId="https://api.demo.ezidebit.com.au/v3-5/nonpci?xsd=xsd2" uri="wsdl/api.demo.ezidebit.com.au/v3-5/nonpci.xsd_xsd2.xsd"/>
+    <system systemId="https://api.demo.ezidebit.com.au/v3-5/nonpci?wsdl=wsdl0" uri="wsdl/api.demo.ezidebit.com.au/v3-5/nonpci.wsdl_wsdl0.wsdl"/>
 </catalog>

@@ -4,7 +4,7 @@
 
     <groupId>au.com.manlyit</groupId>
     <artifactId>FitnessCRM</artifactId>
-    <version>5.1.4</version>
+    <version>5.3.0</version>
     <packaging>war</packaging>
 
     <name>FitnessCRM</name>
@@ -296,6 +296,14 @@
                                 <include>wsdl/**</include>
                             </includes>
                         </resource>
+                        <resource>
+                            <directory>src</directory>
+                            <targetPath>WEB-INF/classes/META-INF</targetPath>
+                            <includes>
+                                <include>jax-ws-catalog.xml</include>
+                                <include>wsdl/**</include>
+                            </includes>
+                        </resource>
                     </webResources>
                 </configuration>
             </plugin>
@@ -335,10 +343,13 @@
                         </goals>
                         <configuration>
                             <wsdlFiles>
-                                <wsdlFile>api.demo.ezidebit.com.au/v3-3/nonpci.wsdl</wsdlFile>
+                                <wsdlFile>api.demo.ezidebit.com.au/v3-5/nonpci.wsdl</wsdlFile>
                             </wsdlFiles>
                             <packageName>au.com.manlyit.fitnesscrm.stats.webservices</packageName>
-                            <wsdlLocation>https://api.demo.ezidebit.com.au/v3-3/nonpci</wsdlLocation>
+                            <vmArgs>
+                                <vmArg>-Djavax.xml.accessExternalSchema=all</vmArg>
+                            </vmArgs>
+                            <wsdlLocation>https://api.demo.ezidebit.com.au/v3-5/nonpci?wsdl</wsdlLocation>
                             <staleFile>${project.build.directory}/jaxws/stale/nonpci.stale</staleFile>
                         </configuration>
                         <id>wsimport-generate-nonpci</id>

@@ -234,16 +234,16 @@ public class FutureMapEJB implements Serializable {
      * @param userSessionId
      *
      *
-     * @param aj
+     * @param pgr
      *
      */
-    public void addComponentToUpdatesList(String userSessionId, PaymentGatewayResponse aj) {
+    public void addComponentToUpdatesList(String userSessionId, PaymentGatewayResponse pgr) {
         synchronized (lock1) {
             try {
-                LOGGER.log(Level.INFO, "addComponentToUpdatesList, put. sessionid {0},Component To Update {1}.", new Object[]{userSessionId, aj});
-                getComponentsToUpdate(userSessionId).add(aj);
+                LOGGER.log(Level.INFO, "addComponentToUpdatesList, put. sessionid {0},Component To Update {1}.", new Object[]{userSessionId, pgr});
+                getComponentsToUpdate(userSessionId).add(pgr);
             } catch (Exception e) {
-                LOGGER.log(Level.SEVERE, "addComponentToUpdatesList put(String userSessionId, String aj) method. Unable to add component to update list, Session:{1}, component Name:{2}, Error Message:{0}", new Object[]{e.getMessage(), userSessionId, aj});
+                LOGGER.log(Level.SEVERE, "addComponentToUpdatesList put(String userSessionId, String aj) method. Unable to add component to update list, Session:{1}, component Name:{2}, Error Message:{0}", new Object[]{e.getMessage(), userSessionId, pgr});
             }
         }
     }
@@ -2959,7 +2959,7 @@ public class FutureMapEJB implements Serializable {
         }
     }
 
-    private boolean compareScheduledPaymentXMLToEntity(Payments payment, ScheduledPayment pay) {
+  /*  private boolean compareScheduledPaymentXMLToEntity(Payments payment, ScheduledPayment pay) {
         synchronized (lock6) {
             if (payment == null || pay == null) {
                 return payment == null && pay == null;
@@ -2986,7 +2986,7 @@ public class FutureMapEJB implements Serializable {
                 }
                 /* if (!Objects.equals(payment.getManuallyAddedPayment(), pay.isManuallyAddedPayment())) {
                  return false;
-                 }*/
+                 }
 
                 if (compareStringToXMLString(payment.getPaymentReference(), pay.getPaymentReference()) == false) {
                     return false;
@@ -3005,7 +3005,7 @@ public class FutureMapEJB implements Serializable {
 
             return true;
         }
-    }
+    }*/
 
     /*  private void sanityCheckCustomersForDefaultItems() {
         LOGGER.log(Level.INFO, "Performing Sanity Checks on Customers");

@@ -188,7 +188,7 @@ public ABC addNewABC(ABC abc) {
             Expression<Date> dDate = rt.get("debitDate");
             Expression<Customers> cust = rt.get("customerName");
             Expression<String> paymentStatus = rt.get("paymentStatus");
-            cq.where(cb.and(cb.equal(cust, customer), cb.equal(paymentStatus, PaymentStatus.SCHEDULED.value())));
+            cq.where(cb.and(cb.equal(cust, customer), cb.or(cb.equal(paymentStatus, PaymentStatus.SCHEDULED.value())),cb.equal(paymentStatus, PaymentStatus.WAITING.value())));
             cq.orderBy(cb.asc(dDate));
 
             TypedQuery<Payments> q = em.createQuery(cq);
@@ -278,6 +278,7 @@ public ABC addNewABC(ABC abc) {
             predicatesList1.add(cb.equal(payRef, id));
 
             predicatesList1.add(cb.equal(paymentStatus, PaymentStatus.SCHEDULED.value()));
+             predicatesList1.add(cb.equal(paymentStatus, PaymentStatus.WAITING.value()));
             predicatesList1.add(cb.equal(paymentStatus, PaymentStatus.SENT_TO_GATEWAY.value()));
 
             cq.where(predicatesList1.<Predicate>toArray(new Predicate[predicatesList1.size()]));
@@ -336,6 +337,7 @@ public ABC addNewABC(ABC abc) {
             }
 
             predicatesList1.add(cb.equal(paymentStatus, PaymentStatus.SCHEDULED.value()));
+            predicatesList1.add(cb.equal(paymentStatus, PaymentStatus.WAITING.value()));
             predicatesList1.add(cb.equal(paymentStatus, PaymentStatus.SENT_TO_GATEWAY.value()));
 
             cq.where(predicatesList1.<Predicate>toArray(new Predicate[predicatesList1.size()]));
@@ -396,6 +398,7 @@ public ABC addNewABC(ABC abc) {
             }
 
             predicatesList1.add(cb.equal(paymentStatus, PaymentStatus.SCHEDULED.value()));
+            predicatesList1.add(cb.equal(paymentStatus, PaymentStatus.WAITING.value()));
             predicatesList1.add(cb.equal(paymentStatus, PaymentStatus.SENT_TO_GATEWAY.value()));
             cq.where(predicatesList1.<Predicate>toArray(new Predicate[predicatesList1.size()]));
 
@@ -458,6 +461,7 @@ public ABC addNewABC(ABC abc) {
             }
 
             predicatesList1.add(cb.equal(paymentStatus, PaymentStatus.SCHEDULED.value()));
+            predicatesList1.add(cb.equal(paymentStatus, PaymentStatus.WAITING.value()));
             predicatesList1.add(cb.equal(paymentStatus, PaymentStatus.SENT_TO_GATEWAY.value()));
             cq.where(predicatesList1.<Predicate>toArray(new Predicate[predicatesList1.size()]));
 
@@ -494,9 +498,9 @@ public ABC addNewABC(ABC abc) {
 
             predicatesList1.add(cb.equal(customer, cust));
             if (includeFailed) {
-                predicatesList1.add(cb.or(cb.equal(paymentStatus, PaymentStatus.MISSING_IN_PGW.value()), cb.equal(paymentStatus, PaymentStatus.REJECTED_BY_GATEWAY.value()), cb.equal(paymentStatus, PaymentStatus.SCHEDULED.value()), cb.equal(paymentStatus, PaymentStatus.SENT_TO_GATEWAY.value()), cb.equal(paymentStatus, PaymentStatus.DELETE_REQUESTED.value())));
+                predicatesList1.add(cb.or(cb.equal(paymentStatus, PaymentStatus.WAITING.value()),cb.equal(paymentStatus, PaymentStatus.MISSING_IN_PGW.value()), cb.equal(paymentStatus, PaymentStatus.REJECTED_BY_GATEWAY.value()), cb.equal(paymentStatus, PaymentStatus.SCHEDULED.value()), cb.equal(paymentStatus, PaymentStatus.SENT_TO_GATEWAY.value()), cb.equal(paymentStatus, PaymentStatus.DELETE_REQUESTED.value())));
             } else {
-                predicatesList1.add(cb.or(cb.equal(paymentStatus, PaymentStatus.SCHEDULED.value()), cb.equal(paymentStatus, PaymentStatus.SENT_TO_GATEWAY.value()), cb.equal(paymentStatus, PaymentStatus.DELETE_REQUESTED.value())));
+                predicatesList1.add(cb.or(cb.equal(paymentStatus, PaymentStatus.WAITING.value()),cb.equal(paymentStatus, PaymentStatus.SCHEDULED.value()), cb.equal(paymentStatus, PaymentStatus.SENT_TO_GATEWAY.value()), cb.equal(paymentStatus, PaymentStatus.DELETE_REQUESTED.value())));
 
             }
             cq.where(predicatesList1.<Predicate>toArray(new Predicate[predicatesList1.size()]));
@@ -559,7 +563,7 @@ public ABC addNewABC(ABC abc) {
             }
             if (showPending) {
                 predicatesList2.add(cb.equal(status, PaymentStatus.PENDING.value()));
-                predicatesList2.add(cb.equal(status, PaymentStatus.WAITING.value()));
+               
             }
             if (showFailed) {
                 predicatesList2.add(cb.equal(status, PaymentStatus.FATAL_DISHONOUR.value()));
@@ -570,6 +574,7 @@ public ABC addNewABC(ABC abc) {
             }
             if (showScheduled) {
                 predicatesList2.add(cb.and(cb.equal(status, PaymentStatus.SCHEDULED.value()), cb.equal(custState, activeState)));
+                predicatesList2.add(cb.and(cb.equal(status, PaymentStatus.WAITING.value()), cb.equal(custState, activeState)));
 
             }
             if (cust != null) { // filter by customer if provided

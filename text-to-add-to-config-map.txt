@@ -2071,3 +2071,6 @@ DashboardLeadsPanelLabel=Leads
 DashboardCustomersOnHoldPanelLabel=OnHold
 DashboardCustomersBadPaymentsPanelLabel=Bad Payments
 CreateCustomersLabel_customerExists=A customer with this username already exists in the system.Check for an existing lead, active, on-hold or canceled customer.
+
+DashboardPaymentGatewayVersion_Label= Payment Gateway Version:
+ListPaymentsTitle_scheduledAmount=Scheduled

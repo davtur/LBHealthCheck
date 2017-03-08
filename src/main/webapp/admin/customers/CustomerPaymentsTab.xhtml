@@ -95,7 +95,12 @@
                 <p:column  sortBy="#{pay.paymentReference}" filterBy="#{pay.paymentReference}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentReference')}"   >
                     <h:outputText value="#{pay.paymentReference}"/>
                 </p:column>
-                <p:column  sortBy="#{pay.paymentAmount}" filterBy="#{pay.paymentAmount}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentAmount')}"   >
+                <p:column  sortBy="#{pay.scheduledAmount}" filterBy="#{pay.scheduledAmount}"  headerText="#{configMapController.getKey('ListPaymentsTitle_scheduledAmount')}"   >
+                    <h:outputText value="#{pay.scheduledAmount}">
+                        <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
+                    </h:outputText>
+                </p:column>
+                <p:column  sortBy="#{pay.paymentAmount}" filterBy="#{pay.paymentAmount}"  headerText="#{configMapController.getKey('ListPaymentsTitle_paymentAmount')}"   >
                     <h:outputText value="#{pay.paymentAmount}">
                         <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
                     </h:outputText>
@@ -122,16 +127,16 @@
                 </p:column>
                 <p:column  sortBy="#{pay.paymentStatus}" filterBy="#{pay.paymentStatus}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentStatus')}"   >
 
-                    <h:outputText  rendered="#{pay.paymentStatus == 'W'}"  value="#{pay.paymentStatus} -- Waiting"/>
-                    <h:outputText  rendered="#{pay.paymentStatus == 'N'}"  value="#{pay.paymentStatus} -- Scheduled"/>
-                    <h:outputText  rendered="#{pay.paymentStatus == 'U'}"  value="#{pay.paymentStatus} -- Processing" style="color: orange"/>
-                    <h:outputText  rendered="#{pay.paymentStatus == 'P'}"  value="#{pay.paymentStatus} -- Pending"/>
+                    <h:outputText  rendered="#{pay.paymentStatus == 'W'}"  value="#{pay.paymentStatus} -- Waiting" style="color: blue"/>
+                    <h:outputText  rendered="#{pay.paymentStatus == 'N'}"  value="#{pay.paymentStatus} -- Scheduled " style="color: blue"/>
+                    <h:outputText  rendered="#{pay.paymentStatus == 'U'}"  value="#{pay.paymentStatus} -- Processing" style="color: yellow"/>
+                    <h:outputText  rendered="#{pay.paymentStatus == 'P'}"  value="#{pay.paymentStatus} -- Pending" style="color: orange"/>
                     <h:outputText  rendered="#{pay.paymentStatus == 'S'}"  value="#{pay.paymentStatus} -- Successful" style="color: green"/>
                     <h:outputText  rendered="#{pay.paymentStatus == 'D'}"  value="#{pay.paymentStatus} -- Dis.Insufficient Funds" style="color: red"/>
-                    <h:outputText  rendered="#{pay.paymentStatus == 'F'}"  value="#{pay.paymentStatus} -- Dishonoured" style="color: red"/>
+                    <h:outputText  rendered="#{pay.paymentStatus == 'F'}"  value="#{pay.paymentStatus} -- Fatal Dishonour" style="color: red"/>
                     <h:outputText  rendered="#{pay.paymentStatus == 'X'}"  value="#{pay.paymentStatus} -- Deleted In PGW" style="color: red"/>
                     <h:outputText  rendered="#{pay.paymentStatus == 'H'}"  value="#{pay.paymentStatus} -- On Hold In PGW" style="color: orange"/>
-                    <h:outputText  rendered="#{pay.paymentStatus == 'Y'}"  value="#{pay.paymentStatus} -- Delete Requested" style="color: orange"/>
+                    <h:outputText  rendered="#{pay.paymentStatus == 'Y'}"  value="#{pay.paymentStatus} -- Delete Requested" style="color: yellow"/>
                     <h:outputText  rendered="#{pay.paymentStatus == 'R'}"  value="#{pay.paymentStatus} -- Rejected By PGW" style="color: red"/>
                 </p:column>
 

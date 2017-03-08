@@ -478,7 +478,7 @@ public class MySessionsChart1 implements Serializable {
 
                             } else if (p.getPaymentStatus().contains(PaymentStatus.DISHONOURED.value()) || p.getPaymentStatus().contains(PaymentStatus.FATAL_DISHONOUR.value())) {
                                 reportTotalDishonoured += p.getPaymentAmount().floatValue();
-                            } else if (p.getPaymentStatus().contains(PaymentStatus.SCHEDULED.value())) {
+                            } else if (p.getPaymentStatus().contains(PaymentStatus.SCHEDULED.value())|| p.getPaymentStatus().contains(PaymentStatus.WAITING.value())) {
                                 reportTotalScheduled += p.getPaymentAmount().floatValue();
                             }
                         }

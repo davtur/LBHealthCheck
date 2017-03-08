@@ -16,6 +16,7 @@
                 <p:commandButton id="logCashPaymentButton" oncomplete="PF('dashboardLogCashPaymentDialogueWidget').show();"  icon="fa fa-plus white Fs14"   value="#{configMapController.getKey('logCashPaymentButtonLink')}"  update=":growl " /> 
 
                 <p:commandButton rendered="#{expensesController.isUserInRole('ADMIN')}" id="addExpenseButton" icon="fa fa-plus white Fs14"   value="#{configMapController.getKey('DashboardCreateExpenseButtonLabel')}" actionListener="#{expensesController.prepareCreate}" update=":growl " oncomplete="PF('ExpensesCreateDialogWidget').show()"/>
+                <p:outputLabel value="#{configMapController.getKey('DashboardPaymentGatewayVersion_Label')} #{ezidebit.paymentGatewayVersion}" for="sessionstart" />
             </p:panel>
             <p:panel id="dashboardTimeframe" header="#{configMapController.getKey('DashboardTimeframePanelLabel')}">
                 <p:panelGrid columns="4" style="width:100%"  >
@@ -337,16 +338,16 @@
  </p:column>-->
                             <p:column  sortBy="#{pay.paymentStatus}" filterBy="#{pay.paymentStatus}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentStatus')}"   >
 
-                                <h:outputText  rendered="#{pay.paymentStatus == 'W'}"  value="#{pay.paymentStatus} -- Waiting"/>
-                                <h:outputText  rendered="#{pay.paymentStatus == 'N'}"  value="#{pay.paymentStatus} -- Scheduled"/>
-                                <h:outputText  rendered="#{pay.paymentStatus == 'U'}"  value="#{pay.paymentStatus} -- Processing" style="color: orange"/>
-                                <h:outputText  rendered="#{pay.paymentStatus == 'P'}"  value="#{pay.paymentStatus} -- Pending"/>
+                                <h:outputText  rendered="#{pay.paymentStatus == 'W'}"  value="#{pay.paymentStatus} -- Waiting" style="color: blue"/>
+                                <h:outputText  rendered="#{pay.paymentStatus == 'N'}"  value="#{pay.paymentStatus} -- Scheduled " style="color: blue"/>
+                                <h:outputText  rendered="#{pay.paymentStatus == 'U'}"  value="#{pay.paymentStatus} -- Processing" style="color: yellow"/>
+                                <h:outputText  rendered="#{pay.paymentStatus == 'P'}"  value="#{pay.paymentStatus} -- Pending" style="color: orange"/>
                                 <h:outputText  rendered="#{pay.paymentStatus == 'S'}"  value="#{pay.paymentStatus} -- Successful" style="color: green"/>
                                 <h:outputText  rendered="#{pay.paymentStatus == 'D'}"  value="#{pay.paymentStatus} -- Dis.Insufficient Funds" style="color: red"/>
-                                <h:outputText  rendered="#{pay.paymentStatus == 'F'}"  value="#{pay.paymentStatus} -- Dishonoured" style="color: red"/>
+                                <h:outputText  rendered="#{pay.paymentStatus == 'F'}"  value="#{pay.paymentStatus} -- Fatal Dishonour" style="color: red"/>
                                 <h:outputText  rendered="#{pay.paymentStatus == 'X'}"  value="#{pay.paymentStatus} -- Deleted In PGW" style="color: red"/>
                                 <h:outputText  rendered="#{pay.paymentStatus == 'H'}"  value="#{pay.paymentStatus} -- On Hold In PGW" style="color: orange"/>
-                                <h:outputText  rendered="#{pay.paymentStatus == 'Y'}"  value="#{pay.paymentStatus} -- Delete Requested" style="color: orange"/>
+                                <h:outputText  rendered="#{pay.paymentStatus == 'Y'}"  value="#{pay.paymentStatus} -- Delete Requested" style="color: yellow"/>
                                 <h:outputText  rendered="#{pay.paymentStatus == 'R'}"  value="#{pay.paymentStatus} -- Rejected By PGW" style="color: red"/>
                             </p:column>
                             <p:column  sortBy="#{pay.id}" filterBy="#{pay.id}" headerText="#{configMapController.getKey('ListPaymentsTitle_id')}"   >

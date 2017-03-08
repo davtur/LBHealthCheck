@@ -732,7 +732,7 @@ public class CustomersController implements Serializable {
                     pp.setSmsFailedNotification("YES");
                     pp.setSmsPaymentReminder("NO");
                     pp.setStatusCode("D");
-                    pp.setStatusDescription("INACTIVE");
+                    pp.setStatusDescription("Inactive");
                     pp.setTotalPaymentsFailed(0);
                     pp.setTotalPaymentsFailedAmount(new BigDecimal(0));
                     pp.setTotalPaymentsSuccessful(0);
@@ -1253,7 +1253,7 @@ public class CustomersController implements Serializable {
         try {
             List<Groups> lg = new ArrayList<>(c.getGroupsCollection());
             ejbFacade.clearAllCustomerGroups(c);
- // remove groups
+            // remove groups
             for (Groups g : lg) {
                 ejbGroupsFacade.remove(g);
             }
@@ -1263,14 +1263,13 @@ public class CustomersController implements Serializable {
             for (Groups g : lg) {
                 if (g.getGroupname().contains("DEVELOPER")) {
                     if (count == 0) {
-                       // c.getGroupsCollection().add(g);
+                        // c.getGroupsCollection().add(g);
                         ejbFacade.addCustomerToGroup(c, g);
                         count++;
                     }
                 }
             }
-            
-            
+
             // add selected groups
             for (Groups g : selectedGroups) {
 
@@ -1347,7 +1346,7 @@ public class CustomersController implements Serializable {
         Iterator<Groups> i = removalList.iterator();
         while (i.hasNext()) {
             Groups eg = i.next();
-            ejbFacade.removeCustomerFromGroup(c,eg);
+            ejbFacade.removeCustomerFromGroup(c, eg);
         }
 
         if (count == 0) {
@@ -1405,7 +1404,7 @@ public class CustomersController implements Serializable {
     }
 
     public void selectOneChangePlanListener(ValueChangeEvent vce) {
-     /*   Object newValueObject = vce.getNewValue();
+        /*   Object newValueObject = vce.getNewValue();
         // Object oldValueObject = vce.getOldValue();
         Plan oldPlan = null;
         Plan newPlan = null;
@@ -1617,15 +1616,19 @@ public class CustomersController implements Serializable {
                     }
                     controller.changeCustomerStatus(cust, selectedState);
 
-                } else {
+                } else if (cust.getActive().getCustomerState().contains("CANCELLED") == false && selectedState.getCustomerState().contains("ACTIVE")) {
 
                     // add the prevbiously cancelled customer as a new customer in ezidebit
                     controller.createCustomerRecord(cust);
 
                     String message = configMapFacade.getConfig("CustomersStateChanged") + " " + selectedState.getCustomerState() + "." + configMapFacade.getConfig("CustomersStateCannotChangeCancelled");
                     JsfUtil.addSuccessMessage(message);
-                }
+                } else {
+                    controller.changeCustomerStatus(cust, selectedState);
 
+                }
+                String message = configMapFacade.getConfig("CustomersStateChanged") + " " + selectedState.getCustomerState() + "." + configMapFacade.getConfig("CustomersStateCannotChangeCancelled");
+                JsfUtil.addSuccessMessage(message);
                 cust.setActive(selectedState);
                 getFacade().edit(cust);
                 count++;
@@ -2912,7 +2915,7 @@ public class CustomersController implements Serializable {
     public void setMultiSelectedLeads(Customers[] multiSelectedLeads) {
         this.multiSelectedLeads = multiSelectedLeads;
     }
- 
+
     /**
      * @return the filteredLeads
      */

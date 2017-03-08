@@ -1027,12 +1027,12 @@ public class PaymentBean implements Serializable {
                                         }
 
                                         if (crmPay != null) {
-                                           
+
                                             if (compareScheduledPaymentXMLToEntity(crmPay, pay)) {
                                                 crmPay = convertScheduledPaymentXMLToEntity(crmPay, pay, cust);
                                                 LOGGER.log(Level.INFO, "Future Map processGetScheduledPayments  - updateing scheduled payment id:", id);
                                                 paymentsFacade.edit(crmPay);
-                                            } 
+                                            }
                                         } else {
                                             crmPay = paymentsFacade.findScheduledPaymentByCust(pay, cust);
                                             if (crmPay != null) { //' payment exists
@@ -1155,7 +1155,28 @@ public class PaymentBean implements Serializable {
             } else {
                 LOGGER.log(Level.WARNING, "getScheduledPayments Response: Error - {0}, ", eziResponse.getErrorMessage().getValue());
                 pgr = new PaymentGatewayResponse(false, null, "Scheduled Payment information was not recieved from the payment gateway due to an error.", eziResponse.getError().toString(), eziResponse.getErrorMessage().getValue());
+                if (eziResponse.getError() == 921) {// no scheduled payments found
+                    // mark any found in our database for this customer as deleted in the payment gateway
+                    // this really shouldnt happen
+                    GregorianCalendar testCal = new GregorianCalendar();
+                    testCal.add(Calendar.MINUTE, -5);
+                    Date testDate = testCal.getTime();
+                    List<Payments> crmPaymentList = paymentsFacade.findScheduledPaymentsByCustomer(cust, true);
+                    for (Payments p : crmPaymentList) {
+                        if (p.getCreateDatetime().before(testDate)) {// make sure we don't delate payments that have just been added and may still be being processed by the gateway. i.e they've been put into our DB but havn't been put into the payment gateway schedule yet
+                            p.setPaymentStatus(PaymentStatus.MISSING_IN_PGW.value());
+                            if (cust.getPaymentParametersId().getStatusDescription().toUpperCase().contains("HOLD")) {
+                                p.setPaymentStatus(PaymentStatus.REJECTED_CUST_ON_HOLD.value());
+                            } else {
+                                String message = "This payment exists in our database but not in the payment gateway so it won't be processed.Customer " + cust.getUsername() + ", Payment ID:" + p.getId().toString() + " for Amount:$" + p.getPaymentAmount().toPlainString() + " on Date:" + p.getDebitDate().toString() + " was rejected by the payment gateway and requires your action or revenue loss may occur!!.";
 
+                                sendAlertEmailToAdmin(message);
+                            }
+                            paymentsFacade.edit(p);
+                        }
+
+                    }
+                }
             }
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, "getScheduledPayments Response: Error : ", e);
@@ -1337,7 +1358,9 @@ public class PaymentBean implements Serializable {
                 return false;
             }
             if (payment.getPaymentStatus().contains(PaymentStatus.SCHEDULED.value()) == false) {
-                return false;
+                if (payment.getPaymentStatus().contains(PaymentStatus.WAITING.value()) == false) {
+                    return false;
+                }
             }
 
             if (compareBigDecimalToDouble(payment.getPaymentAmount(), pay.getPaymentAmount()) == false) {
@@ -1346,7 +1369,7 @@ public class PaymentBean implements Serializable {
             /* if (!Objects.equals(payment.getManuallyAddedPayment(), pay.isManuallyAddedPayment())) {
                  return false;
                  }*/
- 
+
             if (compareStringToXMLString(payment.getPaymentReference(), pay.getPaymentReference()) == false) {
                 return false;
             }
@@ -1542,7 +1565,7 @@ public class PaymentBean implements Serializable {
     }
 
     @Asynchronous
-    public Future<PaymentGatewayResponse> addCustomer(Customers cust, String paymentGatewayName, String digitalKey, String authenticatedUser,String sessionId) {
+    public Future<PaymentGatewayResponse> addCustomer(Customers cust, String paymentGatewayName, String digitalKey, String authenticatedUser, String sessionId) {
         PaymentGatewayResponse pgr = new PaymentGatewayResponse(false, null, "", "-1", "An unhandled error occurred!");
         String paymentGatewayReference = "";
         try {
@@ -1942,11 +1965,12 @@ public class PaymentBean implements Serializable {
             if (cd != null) {
                 pgr = new PaymentGatewayResponse(true, cd, "The Customers details were retrieved from the payment gateway", "0", "");
                 LOGGER.log(Level.INFO, "Payment Bean - Get Customer Details Response: Customer  - {0}, Ezidebit Name : {1} {2}", new Object[]{cust.getUsername(), cd.getCustomerFirstName().getValue(), cd.getCustomerName().getValue()});
-                updatePaymentParameters(cust, cd);
+                updatePaymentParameters(cust, cd, 0);
             }
         } else {
             pgr = new PaymentGatewayResponse(false, null, "The Customers details were not retrieved from the payment gateway due to an error.", customerdetails.getError().toString(), customerdetails.getErrorMessage().getValue());
             LOGGER.log(Level.WARNING, "Get Customer Details Response: Error - {0}", customerdetails.getErrorMessage().getValue());
+            updatePaymentParameters(cust, null, customerdetails.getError());
 
         }
         futureMap.processGetCustomerDetails(sessionId, pgr);
@@ -1955,7 +1979,7 @@ public class PaymentBean implements Serializable {
     }
 
     @TransactionAttribute(REQUIRES_NEW)
-    private void updatePaymentParameters(Customers cust, CustomerDetails custDetails) {
+    private void updatePaymentParameters(Customers cust, CustomerDetails custDetails, int errorCode) {
         PaymentParameters pp = cust.getPaymentParametersId();
 
         if (pp == null) {
@@ -1963,50 +1987,61 @@ public class PaymentBean implements Serializable {
             LOGGER.log(Level.SEVERE, "Future Map processGetCustomerDetails. Payment Parameters Object is NULL for customer {0}. Creating default parameters.", new Object[]{cust.getUsername()});
             return;
         }
-        Payments p1 = null;
-        try {
-            p1 = paymentsFacade.findLastSuccessfulScheduledPayment(cust);
-        } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Future Map processGetCustomerDetails. findLastSuccessfulScheduledPayment for customer {0}. {1}", new Object[]{cust.getUsername(), e});
+        if (custDetails == null) {
+            if (errorCode != 0) {
+                if (errorCode == 201) { //customer could not be found
+                    pp.setStatusCode("D");
+                    pp.setStatusDescription("Inactive");
+                }
+            } else {
+                LOGGER.log(Level.SEVERE, "Future Map processGetCustomerDetails. CustomerDetails Object is NULL but error code = 0 ( success) for customer {0}.This shouldn't ever happen.", new Object[]{cust.getUsername()});
+            }
+
+        } else {
+            Payments p1 = null;
+            try {
+                p1 = paymentsFacade.findLastSuccessfulScheduledPayment(cust);
+            } catch (Exception e) {
+                LOGGER.log(Level.WARNING, "Future Map processGetCustomerDetails. findLastSuccessfulScheduledPayment for customer {0}. {1}", new Object[]{cust.getUsername(), e});
+            }
+            Payments p2 = null;
+            try {
+                p2 = paymentsFacade.findNextScheduledPayment(cust);
+            } catch (Exception e) {
+                LOGGER.log(Level.WARNING, "Future Map processGetCustomerDetails. findNextScheduledPayment for customer {0}. {1}", new Object[]{cust.getUsername(), e});
+            }
+            pp.setLastSuccessfulScheduledPayment(p1);
+            pp.setNextScheduledPayment(p2);
+            pp.setAddressLine1(custDetails.getAddressLine1().getValue());
+            pp.setAddressLine2(custDetails.getAddressLine2().getValue());
+            pp.setAddressPostCode(custDetails.getAddressPostCode().getValue());
+            pp.setAddressState(custDetails.getAddressState().getValue());
+            pp.setAddressSuburb(custDetails.getAddressSuburb().getValue());
+            pp.setContractStartDate(custDetails.getContractStartDate().getValue().toGregorianCalendar().getTime());
+            pp.setCustomerFirstName(custDetails.getCustomerFirstName().getValue());
+            pp.setCustomerName(custDetails.getCustomerName().getValue());
+            pp.setEmail(custDetails.getEmail().getValue());
+            pp.setEzidebitCustomerID(custDetails.getEzidebitCustomerID().getValue());
+
+            pp.setMobilePhoneNumber(custDetails.getMobilePhone().getValue());
+            pp.setPaymentGatewayName("EZIDEBIT");
+            pp.setPaymentMethod(custDetails.getPaymentMethod().getValue());
+            //pp.setPaymentPeriod(custDetails.getPaymentPeriod().getValue());
+            //pp.setPaymentPeriodDayOfMonth(custDetails.getPaymentPeriodDayOfMonth().getValue());
+            //pp.setPaymentPeriodDayOfWeek(custDetails.getPaymentPeriodDayOfWeek().getValue());
+
+            pp.setSmsExpiredCard(custDetails.getSmsExpiredCard().getValue());
+            pp.setSmsFailedNotification(custDetails.getSmsFailedNotification().getValue());
+            pp.setSmsPaymentReminder(custDetails.getSmsPaymentReminder().getValue());
+            pp.setStatusCode(custDetails.getStatusCode().getValue());
+            pp.setStatusDescription(custDetails.getStatusDescription().getValue());
+            pp.setTotalPaymentsFailed(custDetails.getTotalPaymentsFailed());
+            pp.setTotalPaymentsFailedAmount(new BigDecimal(custDetails.getTotalPaymentsFailed()));
+            pp.setTotalPaymentsSuccessful(custDetails.getTotalPaymentsSuccessful());
+            pp.setTotalPaymentsSuccessfulAmount(new BigDecimal(custDetails.getTotalPaymentsSuccessfulAmount()));
+            pp.setYourGeneralReference(custDetails.getYourGeneralReference().getValue());
+            pp.setYourSystemReference(custDetails.getYourSystemReference().getValue());
         }
-        Payments p2 = null;
-        try {
-            p2 = paymentsFacade.findNextScheduledPayment(cust);
-        } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Future Map processGetCustomerDetails. findNextScheduledPayment for customer {0}. {1}", new Object[]{cust.getUsername(), e});
-        }
-        pp.setLastSuccessfulScheduledPayment(p1);
-        pp.setNextScheduledPayment(p2);
-        pp.setAddressLine1(custDetails.getAddressLine1().getValue());
-        pp.setAddressLine2(custDetails.getAddressLine2().getValue());
-        pp.setAddressPostCode(custDetails.getAddressPostCode().getValue());
-        pp.setAddressState(custDetails.getAddressState().getValue());
-        pp.setAddressSuburb(custDetails.getAddressSuburb().getValue());
-        pp.setContractStartDate(custDetails.getContractStartDate().getValue().toGregorianCalendar().getTime());
-        pp.setCustomerFirstName(custDetails.getCustomerFirstName().getValue());
-        pp.setCustomerName(custDetails.getCustomerName().getValue());
-        pp.setEmail(custDetails.getEmail().getValue());
-        pp.setEzidebitCustomerID(custDetails.getEzidebitCustomerID().getValue());
-
-        pp.setMobilePhoneNumber(custDetails.getMobilePhone().getValue());
-        pp.setPaymentGatewayName("EZIDEBIT");
-        pp.setPaymentMethod(custDetails.getPaymentMethod().getValue());
-        //pp.setPaymentPeriod(custDetails.getPaymentPeriod().getValue());
-        //pp.setPaymentPeriodDayOfMonth(custDetails.getPaymentPeriodDayOfMonth().getValue());
-        //pp.setPaymentPeriodDayOfWeek(custDetails.getPaymentPeriodDayOfWeek().getValue());
-
-        pp.setSmsExpiredCard(custDetails.getSmsExpiredCard().getValue());
-        pp.setSmsFailedNotification(custDetails.getSmsFailedNotification().getValue());
-        pp.setSmsPaymentReminder(custDetails.getSmsPaymentReminder().getValue());
-        pp.setStatusCode(custDetails.getStatusCode().getValue());
-        pp.setStatusDescription(custDetails.getStatusDescription().getValue());
-        pp.setTotalPaymentsFailed(custDetails.getTotalPaymentsFailed());
-        pp.setTotalPaymentsFailedAmount(new BigDecimal(custDetails.getTotalPaymentsFailed()));
-        pp.setTotalPaymentsSuccessful(custDetails.getTotalPaymentsSuccessful());
-        pp.setTotalPaymentsSuccessfulAmount(new BigDecimal(custDetails.getTotalPaymentsSuccessfulAmount()));
-        pp.setYourGeneralReference(custDetails.getYourGeneralReference().getValue());
-        pp.setYourSystemReference(custDetails.getYourSystemReference().getValue());
-
         ejbPaymentParametersFacade.edit(pp);
         //ejbPaymentParametersFacade.pushChangesToDBImmediatleyInsteadOfAtTxCommit();
         cust.setPaymentParametersId(pp);
