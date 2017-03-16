@@ -10,9 +10,9 @@
         <h:outputText value="#{configMapController.getKey('ReportsTitle')}"></h:outputText>
     </ui:define>
     <ui:define name="body">
-       <!-- <h:form id="remoteCommandForm">
-            <p:remoteCommand name="connectPushServer" actionListener="#{ezidebit.checkPushChannelIsOpen}" autoRun="true" />
-        </h:form>-->
+        <!-- <h:form id="remoteCommandForm">
+             <p:remoteCommand name="connectPushServer" actionListener="#{ezidebit.checkPushChannelIsOpen}" autoRun="true" />
+         </h:form>-->
         <div class="layout-portlets-box">
             <div class="Container100">
                 <div class="ContainerIndent">
@@ -42,7 +42,7 @@
                                 </p:selectOneMenu>
 
                                 <p:commandButton id="runReport"  actionListener="#{ezidebit.runReport}"  value="#{configMapController.getKey('ListReportRunReportLink')}" />
-                                
+
                             </p:panelGrid>
                             <p:panelGrid columns="4" >
                                 <p:outputLabel  value="#{configMapController.getKey('ListReportShowSuccessful')}" for="showSuccessful" />
@@ -88,155 +88,160 @@
                         </p:panelGrid>
                         <h:outputText escape="false" value="#{configMapController.getKey('ListPaymentsEmpty')}" rendered="#{ezidebit.reportPaymentsList.rowCount == 0  and (ezidebit.reportType == 0 or ezidebit.reportType == 1 )}"/>
 
-                       
 
-                            <p:dataTable  
-                                rendered="#{ezidebit.reportPaymentsList.rowCount > 0 }"
-                                id="reportDataTable"  
-                                editable="false" 
-                                value="#{ezidebit.reportPaymentsList}" 
-                                selection="#{ezidebit.selectedReportItem}" 
-                                rowKey="#{item.id}" 
-                                filteredValue="#{ezidebit.reportPaymentsListFilteredItems}"  
-                                widgetVar="paymentsControllerTable" 
-                                var="item" 
-                                selectionMode="single"
 
-                                scrollable="true"
-                                scrollHeight="500"
-                               
+                        <p:dataTable  
+                            rendered="#{ezidebit.reportPaymentsList.rowCount > 0 }"
+                            id="reportDataTable"  
+                            editable="false" 
+                            value="#{ezidebit.reportPaymentsList}" 
+                            selection="#{ezidebit.selectedReportItem}" 
+                            rowKey="#{item.id}" 
+                            filteredValue="#{ezidebit.reportPaymentsListFilteredItems}"  
+                            widgetVar="paymentsControllerTable" 
+                            var="item" 
+                            selectionMode="single"
 
-                                >
-                                <f:facet name="header">
+                            scrollable="true"
+                            scrollHeight="500"
+
+
+                            >
+                            <f:facet name="header">
+                                <p:outputPanel>
                                     <p:outputPanel>
-                                        <p:outputPanel>
-                                            <h:outputText  rendered="#{not empty ezidebit.reportPaymentsListFilteredItems}" value="#{ezidebit.reportPaymentsListFilteredItems.size} Records Found"/>
-                                            <h:outputText  rendered="#{empty ezidebit.reportPaymentsListFilteredItems}" value="#{ezidebit.reportPaymentsList.rowCount} Records Found"/>
-                                        </p:outputPanel>
-                                        <h:outputText value="Search all fields:" />
-                                        <h:inputText id="globalFilter" onkeyup="paymentsControllerTable.filter()" />
-
-                                        <p:commandButton value="Export as PDF" ajax="false" rendered="#{ezidebit.reportPaymentsList.rowCount > 0}">
-                                            <p:dataExporter type="pdf" target="reportDataTable" fileName="#{ezidebit.reportName}" preProcessor="#{ezidebit.preProcessPDF}"/>
-                                        </p:commandButton>
-                                        <p:commandButton value="Export as Excel" ajax="false" rendered="#{ezidebit.reportPaymentsList.rowCount > 0}">
-                                            <p:dataExporter type="xls" target="reportDataTable" fileName="#{ezidebit.reportName}" postProcessor="#{ezidebit.postProcessXLS}"/>
-                                        </p:commandButton>
+                                        <h:outputText  rendered="#{not empty ezidebit.reportPaymentsListFilteredItems}" value="#{ezidebit.reportPaymentsListFilteredItems.size} Records Found"/>
+                                        <h:outputText  rendered="#{empty ezidebit.reportPaymentsListFilteredItems}" value="#{ezidebit.reportPaymentsList.rowCount} Records Found"/>
                                     </p:outputPanel>
-                                </f:facet>
+                                    <h:outputText value="Search all fields:" />
+                                    <h:inputText id="globalFilter" onkeyup="paymentsControllerTable.filter()" />
+
+                                    <p:commandButton value="Export as PDF" ajax="false" rendered="#{ezidebit.reportPaymentsList.rowCount > 0}">
+                                        <p:dataExporter type="pdf" target="reportDataTable" fileName="#{ezidebit.reportName}" preProcessor="#{ezidebit.preProcessPDF}"/>
+                                    </p:commandButton>
+                                    <p:commandButton value="Export as Excel" ajax="false" rendered="#{ezidebit.reportPaymentsList.rowCount > 0}">
+                                        <p:dataExporter type="xls" target="reportDataTable" fileName="#{ezidebit.reportName}" postProcessor="#{ezidebit.postProcessXLS}"/>
+                                    </p:commandButton>
+                                </p:outputPanel>
+                            </f:facet>
 
                            <!-- <p:column sortBy="#{item.id}" filterBy="#{item.id}" headerText="#{configMapController.getKey('ListPaymentsTitle_id')}"   >
                                 <h:outputText value="#{item.id}"/>
                             </p:column>-->
-                                <p:column sortBy="#{item.customerName}" filterBy="#{item.customerName}" headerText="#{configMapController.getKey('ListPaymentsTitle_customerName')}"   >
-                                    <h:outputText value="#{item.customerName.firstname} #{item.customerName.lastname}"/>
-                                </p:column>
-                                <p:column sortBy="#{item.paymentAmount}" filterBy="#{item.paymentAmount}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentAmount')}"   >
-                                    <h:outputText value="#{item.paymentAmount}">
-                                        <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
-                                    </h:outputText>
-                                </p:column>
+                            <p:column sortBy="#{item.customerName}" filterBy="#{item.customerName}" headerText="#{configMapController.getKey('ListPaymentsTitle_customerName')}"   >
+                                <h:outputText value="#{item.customerName.firstname} #{item.customerName.lastname}"/>
+                            </p:column>
+                            <p:column sortBy="#{item.paymentAmount}" filterBy="#{item.paymentAmount}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentAmount')}"   >
+                                <h:outputText value="#{item.paymentAmount}">
+                                    <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
+                                </h:outputText>
+                            </p:column>
 
-                                <p:column sortBy="#{item.paymentStatus}" filterBy="#{item.paymentStatus}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentStatus')}"   >
-                                    <h:outputText   value="#{item.paymentStatus} --"/>
-                                    <h:outputText  rendered="#{item.paymentStatus == 'W'}"  value=" Waiting"/>
-                                    <h:outputText  rendered="#{item.paymentStatus == 'P'}"  value=" Pending"/>
-                                    <h:outputText  rendered="#{item.paymentStatus == 'S'}"  value=" Successful" style="color: green"/>
-                                    <h:outputText  rendered="#{item.paymentStatus == 'D'}"  value=" Dis.Insufficient Funds" style="color: red"/>
-                                    <h:outputText  rendered="#{item.paymentStatus == 'F'}"  value=" Dishonoured" style="color: red"/>
-                                    <h:outputText  rendered="#{item.paymentStatus == 'N'}"  value=" Scheduled" style="color: blue"/>
-                                </p:column>
-                                <p:column sortBy="#{item.settlementDate}" filterBy="#{item.settlementDate}" headerText="#{configMapController.getKey('ListPaymentsTitle_settlementDate')}"   >
-                                    <h:outputText value="#{item.settlementDate}">
-                                        <f:convertDateTime pattern="E dd MMM yyyy" />
-                                    </h:outputText>
-                                </p:column>
+                            <p:column sortBy="#{item.paymentStatus}" filterBy="#{item.paymentStatus}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentStatus')}"   >
 
-                                <p:column sortBy="#{item.debitDate}" filterBy="#{item.debitDate}" headerText="#{configMapController.getKey('ListPaymentsTitle_debitDate')}"   >
-                                    <h:outputText value="#{item.debitDate}">
-                                        <f:convertDateTime pattern="E dd MMM yyyy" />
-                                    </h:outputText>
-                                </p:column>
-                                <p:column sortBy="#{item.paymentDate}" filterBy="#{item.paymentDate}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentDate')}"   >
-                                    <h:outputText value="#{item.paymentDate}">
-                                        <f:convertDateTime pattern="E dd MMM yyyy" />
-                                    </h:outputText>
-                                </p:column>
-                                <p:column sortBy="#{item.transactionTime}" filterBy="#{item.transactionTime}" headerText="#{configMapController.getKey('ListPaymentsTitle_transactionTime')}"   >
-                                    <h:outputText value="#{item.transactionTime}">
-                                        <f:convertDateTime pattern="E dd MMM yyyy HH:mm:ss" />
-                                    </h:outputText>
-                                </p:column>
+                                <h:outputText  rendered="#{item.paymentStatus == 'N'}"  value="#{item.paymentStatus} -- Scheduled " style="color: blue"/>
+                                <h:outputText  rendered="#{item.paymentStatus == 'U'}"  value="#{item.paymentStatus} -- Processing" style="color: yellow"/>
+                                <h:outputText  rendered="#{item.paymentStatus == 'P'}"  value="#{item.paymentStatus} -- Pending" style="color: orange"/>
+                                <h:outputText  rendered="#{item.paymentStatus == 'S'}"  value="#{item.paymentStatus} -- Successful" style="color: green"/>
+                                <h:outputText  rendered="#{item.paymentStatus == 'D'}"  value="#{item.paymentStatus} -- Dis.Insufficient Funds" style="color: red"/>
+                                <h:outputText  rendered="#{item.paymentStatus == 'F'}"  value="#{item.paymentStatus} -- Fatal Dishonour" style="color: red"/>
+                                <h:outputText  rendered="#{item.paymentStatus == 'X'}"  value="#{item.paymentStatus} -- Deleted In PGW" style="color: red"/>
+                                <h:outputText  rendered="#{item.paymentStatus == 'H'}"  value="#{item.paymentStatus} -- On Hold In PGW" style="color: orange"/>
+                                <h:outputText  rendered="#{item.paymentStatus == 'Y'}"  value="#{item.paymentStatus} -- Delete Requested" style="color: yellow"/>
+                                <h:outputText  rendered="#{item.paymentStatus == 'R'}"  value="#{item.paymentStatus} -- Rejected By PGW" style="color: red"/>
 
-                                <p:column sortBy="#{item.lastUpdatedDatetime}" filterBy="#{item.lastUpdatedDatetime}" headerText="#{configMapController.getKey('ListPaymentsTitle_lastUpdatedDatetime')}"   >
-                                    <h:outputText value="#{item.lastUpdatedDatetime}">
-                                        <f:convertDateTime pattern="dd MMM yyyy HH:mm:ss" />
-                                    </h:outputText>
-                                </p:column>
-                                <p:column sortBy="#{item.bankFailedReason}" filterBy="#{item.bankFailedReason}" headerText="#{configMapController.getKey('ListPaymentsTitle_bankFailedReason')}"   >
-                                    <h:outputText value="#{item.bankFailedReason}"/>
-                                </p:column>
-                                <p:column sortBy="#{item.bankReceiptID}"   exportable="false" filterBy="#{item.bankReceiptID}" headerText="#{configMapController.getKey('ListPaymentsTitle_bankReceiptID')}"   >
-                                    <h:outputText value="#{item.bankReceiptID}"/>
-                                </p:column>
-                                <p:column sortBy="#{item.bankReturnCode}"   exportable="false" filterBy="#{item.bankReturnCode}" headerText="#{configMapController.getKey('ListPaymentsTitle_bankReturnCode')}"   >
-                                    <h:outputText value="#{item.bankReturnCode}"/>
-                                </p:column>
-                                <p:column sortBy="#{item.ezidebitCustomerID}"  exportable="false" filterBy="#{item.ezidebitCustomerID}" headerText="#{configMapController.getKey('ListPaymentsTitle_ezidebitCustomerID')}"   >
-                                    <h:outputText value="#{item.ezidebitCustomerID}"/>
-                                </p:column>
-                                <p:column sortBy="#{item.invoiceID}" filterBy="#{item.invoiceID}" headerText="#{configMapController.getKey('ListPaymentsTitle_invoiceID')}"   >
-                                    <h:outputText value="#{item.invoiceID}"/>
-                                </p:column>
-                                <p:column sortBy="#{item.manuallyAddedPayment}"  exportable="false" filterBy="#{item.manuallyAddedPayment}" headerText="#{configMapController.getKey('ListPaymentsTitle_manuallyAddedPayment')}"   >
-                                    <h:outputText value="#{item.manuallyAddedPayment}"/>
-                                </p:column>
-                                <p:column sortBy="#{item.paymentID}" filterBy="#{item.paymentID}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentID')}"   >
-                                    <h:outputText value="#{item.paymentID}"/>
-                                </p:column>
-                                <p:column sortBy="#{item.paymentMethod}" filterBy="#{item.paymentMethod}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentMethod')}"   >
-                                    <h:outputText value="#{item.paymentMethod}"/>
-                                </p:column>
-                                <p:column sortBy="#{item.paymentReference}" filterBy="#{item.paymentReference}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentReference')}"   >
-                                    <h:outputText value="#{item.paymentReference}"/>
-                                </p:column>
-                                <p:column sortBy="#{item.paymentSource}" filterBy="#{item.paymentSource}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentSource')}"   >
-                                    <h:outputText value="#{item.paymentSource}"/>
-                                </p:column>
-                                <p:column sortBy="#{item.scheduledAmount}" filterBy="#{item.scheduledAmount}" headerText="#{configMapController.getKey('ListPaymentsTitle_scheduledAmount')}"   >
-                                    <h:outputText value="#{item.scheduledAmount}">
-                                        <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
-                                    </h:outputText>
-                                </p:column>
-                                <p:column sortBy="#{item.transactionFeeClient}"   exportable="false" filterBy="#{item.transactionFeeClient}" headerText="#{configMapController.getKey('ListPaymentsTitle_transactionFeeClient')}"   >
+                            </p:column>
+                            <p:column sortBy="#{item.settlementDate}" filterBy="#{item.settlementDate}" headerText="#{configMapController.getKey('ListPaymentsTitle_settlementDate')}"   >
+                                <h:outputText value="#{item.settlementDate}">
+                                    <f:convertDateTime pattern="E dd MMM yyyy" />
+                                </h:outputText>
+                            </p:column>
 
-                                    <h:outputText value="#{item.transactionFeeClient}">
-                                        <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
-                                    </h:outputText>
-                                </p:column>
-                                <p:column sortBy="#{item.transactionFeeCustomer}"  exportable="false" filterBy="#{item.transactionFeeCustomer}" headerText="#{configMapController.getKey('ListPaymentsTitle_transactionFeeCustomer')}"   >
-                                    <h:outputText value="#{item.transactionFeeCustomer}">
-                                        <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
-                                    </h:outputText>
-                                </p:column>
-                                <p:column sortBy="#{item.yourGeneralReference}"  exportable="false" filterBy="#{item.yourGeneralReference}" headerText="#{configMapController.getKey('ListPaymentsTitle_yourGeneralReference')}"   >
-                                    <h:outputText value="#{item.yourGeneralReference}"/>
-                                </p:column>
-                                <p:column sortBy="#{item.yourSystemReference}" filterBy="#{item.yourSystemReference}" headerText="#{configMapController.getKey('ListPaymentsTitle_yourSystemReference')}"   >
-                                    <h:outputText value="#{item.yourSystemReference}"/>
-                                </p:column>
-                                <p:column sortBy="#{item.createDatetime}"  exportable="false" filterBy="#{item.createDatetime}" headerText="#{configMapController.getKey('ListPaymentsTitle_createDatetime')}"   >
-                                    <h:outputText value="#{item.createDatetime}">
-                                        <f:convertDateTime pattern="dd MMM yyyy HH:mm:ss" />
-                                    </h:outputText>
-                                </p:column>
+                            <p:column sortBy="#{item.debitDate}" filterBy="#{item.debitDate}" headerText="#{configMapController.getKey('ListPaymentsTitle_debitDate')}"   >
+                                <h:outputText value="#{item.debitDate}">
+                                    <f:convertDateTime pattern="E dd MMM yyyy" />
+                                </h:outputText>
+                            </p:column>
+                            <p:column sortBy="#{item.paymentDate}" filterBy="#{item.paymentDate}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentDate')}"   >
+                                <h:outputText value="#{item.paymentDate}">
+                                    <f:convertDateTime pattern="E dd MMM yyyy" />
+                                </h:outputText>
+                            </p:column>
+                            <p:column sortBy="#{item.transactionTime}" filterBy="#{item.transactionTime}" headerText="#{configMapController.getKey('ListPaymentsTitle_transactionTime')}"   >
+                                <h:outputText value="#{item.transactionTime}">
+                                    <f:convertDateTime pattern="E dd MMM yyyy HH:mm:ss" />
+                                </h:outputText>
+                            </p:column>
 
-                                <f:facet name="footer">
-                                    <h:outputText value=" "/>
-                                </f:facet>
-                            </p:dataTable>
+                            <p:column sortBy="#{item.lastUpdatedDatetime}" filterBy="#{item.lastUpdatedDatetime}" headerText="#{configMapController.getKey('ListPaymentsTitle_lastUpdatedDatetime')}"   >
+                                <h:outputText value="#{item.lastUpdatedDatetime}">
+                                    <f:convertDateTime pattern="dd MMM yyyy HH:mm:ss" />
+                                </h:outputText>
+                            </p:column>
+                            <p:column sortBy="#{item.bankFailedReason}" filterBy="#{item.bankFailedReason}" headerText="#{configMapController.getKey('ListPaymentsTitle_bankFailedReason')}"   >
+                                <h:outputText value="#{item.bankFailedReason}"/>
+                            </p:column>
+                            <p:column sortBy="#{item.bankReceiptID}"   exportable="false" filterBy="#{item.bankReceiptID}" headerText="#{configMapController.getKey('ListPaymentsTitle_bankReceiptID')}"   >
+                                <h:outputText value="#{item.bankReceiptID}"/>
+                            </p:column>
+                            <p:column sortBy="#{item.bankReturnCode}"   exportable="false" filterBy="#{item.bankReturnCode}" headerText="#{configMapController.getKey('ListPaymentsTitle_bankReturnCode')}"   >
+                                <h:outputText value="#{item.bankReturnCode}"/>
+                            </p:column>
+                            <p:column sortBy="#{item.ezidebitCustomerID}"  exportable="false" filterBy="#{item.ezidebitCustomerID}" headerText="#{configMapController.getKey('ListPaymentsTitle_ezidebitCustomerID')}"   >
+                                <h:outputText value="#{item.ezidebitCustomerID}"/>
+                            </p:column>
+                            <p:column sortBy="#{item.invoiceID}" filterBy="#{item.invoiceID}" headerText="#{configMapController.getKey('ListPaymentsTitle_invoiceID')}"   >
+                                <h:outputText value="#{item.invoiceID}"/>
+                            </p:column>
+                            <p:column sortBy="#{item.manuallyAddedPayment}"  exportable="false" filterBy="#{item.manuallyAddedPayment}" headerText="#{configMapController.getKey('ListPaymentsTitle_manuallyAddedPayment')}"   >
+                                <h:outputText value="#{item.manuallyAddedPayment}"/>
+                            </p:column>
+                            <p:column sortBy="#{item.paymentID}" filterBy="#{item.paymentID}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentID')}"   >
+                                <h:outputText value="#{item.paymentID}"/>
+                            </p:column>
+                            <p:column sortBy="#{item.paymentMethod}" filterBy="#{item.paymentMethod}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentMethod')}"   >
+                                <h:outputText value="#{item.paymentMethod}"/>
+                            </p:column>
+                            <p:column sortBy="#{item.paymentReference}" filterBy="#{item.paymentReference}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentReference')}"   >
+                                <h:outputText value="#{item.paymentReference}"/>
+                            </p:column>
+                            <p:column sortBy="#{item.paymentSource}" filterBy="#{item.paymentSource}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentSource')}"   >
+                                <h:outputText value="#{item.paymentSource}"/>
+                            </p:column>
+                            <p:column sortBy="#{item.scheduledAmount}" filterBy="#{item.scheduledAmount}" headerText="#{configMapController.getKey('ListPaymentsTitle_scheduledAmount')}"   >
+                                <h:outputText value="#{item.scheduledAmount}">
+                                    <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
+                                </h:outputText>
+                            </p:column>
+                            <p:column sortBy="#{item.transactionFeeClient}"   exportable="false" filterBy="#{item.transactionFeeClient}" headerText="#{configMapController.getKey('ListPaymentsTitle_transactionFeeClient')}"   >
 
-                   
+                                <h:outputText value="#{item.transactionFeeClient}">
+                                    <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
+                                </h:outputText>
+                            </p:column>
+                            <p:column sortBy="#{item.transactionFeeCustomer}"  exportable="false" filterBy="#{item.transactionFeeCustomer}" headerText="#{configMapController.getKey('ListPaymentsTitle_transactionFeeCustomer')}"   >
+                                <h:outputText value="#{item.transactionFeeCustomer}">
+                                    <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
+                                </h:outputText>
+                            </p:column>
+                            <p:column sortBy="#{item.yourGeneralReference}"  exportable="false" filterBy="#{item.yourGeneralReference}" headerText="#{configMapController.getKey('ListPaymentsTitle_yourGeneralReference')}"   >
+                                <h:outputText value="#{item.yourGeneralReference}"/>
+                            </p:column>
+                            <p:column sortBy="#{item.yourSystemReference}" filterBy="#{item.yourSystemReference}" headerText="#{configMapController.getKey('ListPaymentsTitle_yourSystemReference')}"   >
+                                <h:outputText value="#{item.yourSystemReference}"/>
+                            </p:column>
+                            <p:column sortBy="#{item.createDatetime}"  exportable="false" filterBy="#{item.createDatetime}" headerText="#{configMapController.getKey('ListPaymentsTitle_createDatetime')}"   >
+                                <h:outputText value="#{item.createDatetime}">
+                                    <f:convertDateTime pattern="dd MMM yyyy HH:mm:ss" />
+                                </h:outputText>
+                            </p:column>
+
+                            <f:facet name="footer">
+                                <h:outputText value=" "/>
+                            </f:facet>
+                        </p:dataTable>
+
+
 
 
                         <p:dataTable  
@@ -337,27 +342,32 @@
         <p:socket onMessage="handleMessage" onError="handleError" onTransportFailure="handleTransportFailure"  onClose="handleClose" channel="/payments" onReconnect="handleReconnect" autoConnect="false"  widgetVar="subscriber"/>
 
         <script type="text/javascript">
-            function handleMessage(facesmessage) {
-                console.log("Handling primfaces push socket component faces message");
-                facesmessage.severity = 'info';
-                taskCompleted();
-                PF('growlWidget').show([facesmessage]);
+            function handleMessage(facesmessage)
+                {
+                    console.log("Handling primfaces push socket component faces message");
+                    facesmessage.severity = 'info';
+                    taskCompleted();
+                    PF('growlWidget').show([facesmessage]);
 
-            }
-            function handleError() {
-                console.log("Handling primfaces push socket component faces ERROR message");
-            }
-            function handleClose() {
-                console.log("Handling primfaces push socket component faces close message");
-                PF('subscriber').connect();
-            }
-            function handleReconnect() {
-                console.log("Handling primfaces push socket component faces reconect message");
-            }
-            function handleTransportFailure() {
-                console.log("Handling primfaces push socket component faces TRANSPORT FAILURE message");
-                PF('subscriber').connect();
-            }
+                }
+            function handleError()
+                {
+                    console.log("Handling primfaces push socket component faces ERROR message");
+                }
+            function handleClose()
+                {
+                    console.log("Handling primfaces push socket component faces close message");
+                    PF('subscriber').connect();
+                }
+            function handleReconnect()
+                {
+                    console.log("Handling primfaces push socket component faces reconect message");
+                }
+            function handleTransportFailure()
+                {
+                    console.log("Handling primfaces push socket component faces TRANSPORT FAILURE message");
+                    PF('subscriber').connect();
+                }
         </script>
     </ui:define>
 </ui:composition>

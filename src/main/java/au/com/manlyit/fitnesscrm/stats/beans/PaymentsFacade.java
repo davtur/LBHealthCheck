@@ -188,7 +188,7 @@ public ABC addNewABC(ABC abc) {
             Expression<Date> dDate = rt.get("debitDate");
             Expression<Customers> cust = rt.get("customerName");
             Expression<String> paymentStatus = rt.get("paymentStatus");
-            cq.where(cb.and(cb.equal(cust, customer), cb.or(cb.equal(paymentStatus, PaymentStatus.SCHEDULED.value())),cb.equal(paymentStatus, PaymentStatus.WAITING.value())));
+            cq.where(cb.and(cb.equal(cust, customer), cb.or(cb.equal(paymentStatus, PaymentStatus.SCHEDULED.value()),cb.equal(paymentStatus, PaymentStatus.WAITING.value()),cb.equal(paymentStatus, PaymentStatus.PENDING.value()))));
             cq.orderBy(cb.asc(dDate));
 
             TypedQuery<Payments> q = em.createQuery(cq);

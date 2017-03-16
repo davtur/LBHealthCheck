@@ -493,7 +493,8 @@ public class FutureMapEJB implements Serializable {
 
     public synchronized boolean isAnAsyncOperationRunning(String sessionId) {
 
-        return !getFutureMap(sessionId).isEmpty();
+        //return !getFutureMap(sessionId).isEmpty();
+        return !getComponentsToUpdate(sessionId).isEmpty();
 
     }
 
@@ -755,13 +756,13 @@ public class FutureMapEJB implements Serializable {
                                     Logger.getLogger(FutureMapEJB.class.getName()).log(Level.SEVERE, "processConvertSchedule", ex);
                                 }*/
                                 try {
-                                    LOGGER.log(Level.WARNING, "Future Map processConvertSchedule - Adding Payment to Payment Gateway - EzidebitID={0}, CRM Ref:{1}, Amount={2}, Date={3}, Ref={4}", new Object[]{cust, newPay.getId(), newPay.getPaymentAmount().floatValue(), newPay.getDebitDate().getTime(), newPay.getPaymentReference()});
+                                    LOGGER.log(Level.WARNING, "Future Map processConvertSchedule - Adding Payment to Payment Gateway - EzidebitID={0}, CRM Ref:{1}, Amount={2}, Date={3}, Ref={4}", new Object[]{cust, newPay.getId(), newPay.getScheduledAmount().floatValue(), newPay.getDebitDate().getTime(), newPay.getPaymentReference()});
                                 } catch (Exception e) {
                                     LOGGER.log(Level.WARNING, "Future Map processConvertSchedule ");
                                 }
                                 Long amountLong = null;
                                 try {
-                                    amountLong = newPay.getPaymentAmount().movePointRight(2).longValue();
+                                    amountLong = newPay.getScheduledAmount().movePointRight(2).longValue();
                                 } catch (Exception e) {
                                     LOGGER.log(Level.WARNING, "Arithemtic error.");
                                 }
@@ -1975,7 +1976,7 @@ public class FutureMapEJB implements Serializable {
                             pay.setBankReturnCode(Integer.toString(retries));
                             paymentsFacade.editAndFlush(pay);
                             if (retries < 10) {
-                                startAsynchJob(sessionId, "AddPayment", paymentBean.deletePayment(pay.getCustomerName(), pay.getDebitDate(), pay.getPaymentAmount().movePointRight(2).longValue(), pay, "Auto Retry", getDigitalKey(), sessionId));
+                                startAsynchJob(sessionId, "AddPayment", paymentBean.deletePayment(pay.getCustomerName(), pay.getDebitDate(), pay.getScheduledAmount().movePointRight(2).longValue(), pay, "Auto Retry", getDigitalKey(), sessionId));
 
                                 //retryDeletePayment(pay);
                             } else {
@@ -2059,7 +2060,7 @@ public class FutureMapEJB implements Serializable {
                                         TimeUnit.MILLISECONDS.sleep(sleeptime);
                                     } catch (InterruptedException e) {
                                     }
-                                    startAsynchJob(sessionId, "AddPayment", paymentBean.addPayment(pay.getCustomerName(), pay.getDebitDate(), pay.getPaymentAmount().movePointRight(2).longValue(), pay, "Auto Retry", getDigitalKey(), sessionId));
+                                    startAsynchJob(sessionId, "AddPayment", paymentBean.addPayment(pay.getCustomerName(), pay.getDebitDate(), pay.getScheduledAmount().movePointRight(2).longValue(), pay, "Auto Retry", getDigitalKey(), sessionId));
                                 } else {
                                     LOGGER.log(Level.SEVERE, "processAddPaymentResult PAYMENT GATEWAY BUSY - FAILED - SEVERAL RETRIES WERE PERFORMED - ", paymentRef);
                                     String message = "The payment gateway rejected the payment as it was busy. Several retries were made but the gateway continued to respond with a message stating it was busy. Payment ID:" + pay.getId().toString() + " for Amount:$" + pay.getPaymentAmount().toPlainString() + " on Date:" + pay.getDebitDate().toString() + " could not be added as the payment gateway was unavailable. Several attempts to resubmit have been made and also failed!!. Customer username = " + pay.getCustomerName().getUsername();

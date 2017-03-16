@@ -90,7 +90,7 @@ public class TestEziDebitModule {
             List<Payment> lop = aop.getValue().getPayment();
 
             for (Payment p : lop) {
-                logger.log(Level.INFO, "Payment: {0}", p.getPaymentAmount().toString());
+                logger.log(Level.INFO, "Payment: {0}", p.getScheduledAmount().toString());
             }
         } else {
             logger.log(Level.WARNING, "Array of Payment is null");

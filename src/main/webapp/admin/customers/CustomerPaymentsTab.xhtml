@@ -28,11 +28,11 @@
 
             <h:outputText rendered="#{ezidebit.waitingForPaymentDetails}" value="WAITING FOR BANK DETAILS - "/>
             <h:outputText rendered="#{!ezidebit.theCustomerProvisionedInThePaymentGateway  }" value=" Customer Is Not Provisioned on Payment Gateway!"/>
-            <h:outputText rendered="#{!ezidebit.asyncOperationRunning}" value=" Status: Idle"/>
-            <h:outputText rendered="#{ezidebit.asyncOperationRunning}" value="Status: Busy"/>
+            <!--<h:outputText rendered="#{!ezidebit.asyncOperationRunning}" value=" Status: Idle"/>
+            <h:outputText rendered="#{ezidebit.asyncOperationRunning}" value="Status: Busy"/>-->
 
-            <h:outputText  id="testPaymentUpdate"  value="Time:#{ezidebit.testAjaxUpdateTime}">
-                <f:convertDateTime pattern="yyyy-MM-dd hh:mm:ss.SSS" />                              
+            <h:outputText  id="testPaymentUpdate"  value="Last Updated:#{ezidebit.testAjaxUpdateTime}">
+                <f:convertDateTime pattern="hh:MM:ss.SSS" />                              
             </h:outputText>
 
         </p:outputPanel>

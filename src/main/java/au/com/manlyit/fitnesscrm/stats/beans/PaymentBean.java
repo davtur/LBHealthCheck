@@ -422,7 +422,7 @@ public class PaymentBean implements Serializable {
                 Customers cust = pay.getCustomerName();
                 Date debitDate = pay.getDebitDate();
 
-                long amountInCents = pay.getPaymentAmount().movePointRight(2).longValue();// convert to cents
+                long amountInCents = pay.getScheduledAmount().movePointRight(2).longValue();// convert to cents
                 String newPaymentID = pay.getId().toString();
                 LOGGER.log(Level.INFO, "retryDeletePayment for customer {0} with paymentID: {1}", new Object[]{cust.getUsername(), newPaymentID});
                 AsyncJob aj = new AsyncJob("DeletePayment", payBean.deletePayment(cust, debitDate, amountInCents, pay, user, digitalKey, sessionId));
@@ -445,7 +445,7 @@ public class PaymentBean implements Serializable {
             try {
                 Customers cust = pay.getCustomerName();
                 Date debitDate = pay.getDebitDate();
-                long amountInCents = pay.getPaymentAmount().movePointRight(2).longValue();// convert to cents
+                long amountInCents = pay.getScheduledAmount().movePointRight(2).longValue();// convert to cents
                 String newPaymentID = pay.getId().toString();
                 LOGGER.log(Level.INFO, "retryAddNewPayment for customer {0} with paymentID: {1}", new Object[]{cust.getUsername(), newPaymentID});
                 AsyncJob aj = new AsyncJob("AddPayment", payBean.addPayment(cust, debitDate, amountInCents, pay, user, digitalKey, sessionId));
@@ -476,6 +476,7 @@ public class PaymentBean implements Serializable {
                 newPayment.setLastUpdatedDatetime(new Date());
                 newPayment.setYourSystemReference(cust.getId().toString());
                 newPayment.setPaymentAmount(new BigDecimal(amountInCents / (long) 100));
+                newPayment.setScheduledAmount(new BigDecimal(amountInCents / (long) 100));
                 newPayment.setCustomerName(cust);
                 newPayment.setPaymentStatus(PaymentStatus.SENT_TO_GATEWAY.value());
                 newPayment.setManuallyAddedPayment(manualPayment);
@@ -1302,6 +1303,7 @@ public class PaymentBean implements Serializable {
             payment.setEzidebitCustomerID(pay.getEzidebitCustomerID().getValue());
             payment.setInvoiceID("");
             payment.setPaymentAmount(new BigDecimal(pay.getPaymentAmount().toString()));
+            payment.setScheduledAmount(new BigDecimal(pay.getPaymentAmount().toString()));
             payment.setPaymentID(null);
             payment.setPaymentMethod("DR");
             if (pay.getPaymentReference().isNil() == false) {
@@ -1674,8 +1676,9 @@ public class PaymentBean implements Serializable {
                     phoneNumber = "";
                     LOGGER.log(Level.WARNING, "Invalid Phone Number for Customer {0}. Setting it to empty string", cust.getUsername());
                 }
+                Date contractStartDate = new Date();
 
-                EziResponseOfNewCustomerXcXH3LiW addCustomerResponse = getWs().addCustomer(digitalKey, cust.getId().toString(), humanFriendlyReference, cust.getLastname(), cust.getFirstname(), cust.getStreetAddress(), addresssLine2, cust.getSuburb(), cust.getAddrState(), cust.getPostcode(), cust.getEmailAddress(), phoneNumber, sdf.format(payParams.getContractStartDate()), payParams.getSmsPaymentReminder(), payParams.getSmsFailedNotification(), payParams.getSmsExpiredCard(), cust.getUsername());
+                EziResponseOfNewCustomerXcXH3LiW addCustomerResponse = getWs().addCustomer(digitalKey, cust.getId().toString(), humanFriendlyReference, cust.getLastname(), cust.getFirstname(), cust.getStreetAddress(), addresssLine2, cust.getSuburb(), cust.getAddrState(), cust.getPostcode(), cust.getEmailAddress(), phoneNumber, sdf.format(contractStartDate), payParams.getSmsPaymentReminder(), payParams.getSmsFailedNotification(), payParams.getSmsExpiredCard(), cust.getUsername());
 
                 if (addCustomerResponse.getError() == 0) {// any errors will be a non zero value
 

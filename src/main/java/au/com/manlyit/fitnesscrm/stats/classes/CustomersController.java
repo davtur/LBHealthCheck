@@ -1617,7 +1617,7 @@ public class CustomersController implements Serializable {
                     controller.changeCustomerStatus(cust, selectedState);
 
                 } else if (cust.getActive().getCustomerState().contains("CANCELLED") == false && selectedState.getCustomerState().contains("ACTIVE")) {
-
+                     controller.changeCustomerStatus(cust, selectedState);
                     // add the prevbiously cancelled customer as a new customer in ezidebit
                     controller.createCustomerRecord(cust);
 
@@ -1635,10 +1635,11 @@ public class CustomersController implements Serializable {
 
             }
             recreateModel();
-            //RequestContext.getCurrentInstance().update(":tv:customerslistForm1:customersTableList");
+            RequestContext.getCurrentInstance().update(":tv:customerslistForm1:customersTableList");
             controller.setCustomerCancellationConfirmed(false);
             String message = count + " " + configMapFacade.getConfig("CustomersStateChanged") + " " + selectedState.getCustomerState() + ".";
             JsfUtil.addSuccessMessage(message);
+            RequestContext.getCurrentInstance().update("customerslistForm1");
         }
 
     }

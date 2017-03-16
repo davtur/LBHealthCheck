@@ -474,14 +474,29 @@ public class MySessionsChart1 implements Serializable {
                     if (paymentList != null) {
                         for (Payments p : paymentList) {
                             if (p.getPaymentStatus().contains(PaymentStatus.SUCESSFUL.value()) || p.getPaymentStatus().contains(PaymentStatus.PENDING.value())) {
-                                reportTotalSuccessful += p.getPaymentAmount().floatValue();
-
+                                try {
+                                    reportTotalSuccessful += p.getScheduledAmount().floatValue();
+                                } catch (NullPointerException e) {
+                                    reportTotalSuccessful += p.getPaymentAmount().floatValue();
+                                    logger.log(Level.WARNING, "Scheduled Amount is NULL for ID {0}, Status {1}. Using PaymentAmount Instead for Chart Value", new Object[]{p.getId().toString(), p.getPaymentStatus()});
+                                }
                             } else if (p.getPaymentStatus().contains(PaymentStatus.DISHONOURED.value()) || p.getPaymentStatus().contains(PaymentStatus.FATAL_DISHONOUR.value())) {
-                                reportTotalDishonoured += p.getPaymentAmount().floatValue();
-                            } else if (p.getPaymentStatus().contains(PaymentStatus.SCHEDULED.value())|| p.getPaymentStatus().contains(PaymentStatus.WAITING.value())) {
-                                reportTotalScheduled += p.getPaymentAmount().floatValue();
+                                try {
+                                    reportTotalDishonoured += p.getScheduledAmount().floatValue();
+                                } catch (NullPointerException e) {
+                                    reportTotalDishonoured += p.getPaymentAmount().floatValue();
+                                    logger.log(Level.WARNING, "Scheduled Amount is NULL for ID {0}, Status {1}. Using PaymentAmount Instead for Chart Value", new Object[]{p.getId().toString(), p.getPaymentStatus()});
+                                }
+                            } else if (p.getPaymentStatus().contains(PaymentStatus.SCHEDULED.value()) || p.getPaymentStatus().contains(PaymentStatus.WAITING.value())) {
+                                try {
+                                    reportTotalScheduled += p.getScheduledAmount().floatValue();
+                                } catch (NullPointerException e) {
+                                    reportTotalScheduled += p.getPaymentAmount().floatValue();
+                                    logger.log(Level.WARNING, "Scheduled Amount is NULL for ID {0}, Status {1}. Using PaymentAmount Instead for Chart Value", new Object[]{p.getId().toString(), p.getPaymentStatus()});
+                                }
                             }
                         }
+                        
                         if (expenseList != null) {
                             for (Expenses e : expenseList) {
                                 reportTotalExpenses += e.getExpenseAmount().floatValue();
