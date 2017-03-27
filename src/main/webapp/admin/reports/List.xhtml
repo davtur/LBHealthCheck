@@ -114,7 +114,7 @@
                                         <h:outputText  rendered="#{empty ezidebit.reportPaymentsListFilteredItems}" value="#{ezidebit.reportPaymentsList.rowCount} Records Found"/>
                                     </p:outputPanel>
                                     <h:outputText value="Search all fields:" />
-                                    <h:inputText id="globalFilter" onkeyup="paymentsControllerTable.filter()" />
+                                    <h:inputText id="globalFilter" onkeyup="PF('paymentsControllerTable').filter()" />
 
                                     <p:commandButton value="Export as PDF" ajax="false" rendered="#{ezidebit.reportPaymentsList.rowCount > 0}">
                                         <p:dataExporter type="pdf" target="reportDataTable" fileName="#{ezidebit.reportName}" preProcessor="#{ezidebit.preProcessPDF}"/>
@@ -139,6 +139,7 @@
 
                             <p:column sortBy="#{item.paymentStatus}" filterBy="#{item.paymentStatus}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentStatus')}"   >
 
+                                <h:outputText  rendered="#{item.paymentStatus == 'W'}"  value="#{item.paymentStatus} -- Waiting" style="color: blue"/>
                                 <h:outputText  rendered="#{item.paymentStatus == 'N'}"  value="#{item.paymentStatus} -- Scheduled " style="color: blue"/>
                                 <h:outputText  rendered="#{item.paymentStatus == 'U'}"  value="#{item.paymentStatus} -- Processing" style="color: yellow"/>
                                 <h:outputText  rendered="#{item.paymentStatus == 'P'}"  value="#{item.paymentStatus} -- Pending" style="color: orange"/>

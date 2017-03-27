@@ -13,6 +13,7 @@ import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.xml.bind.JAXBElement;
@@ -95,7 +96,7 @@ public class TestEziDebitModule {
         } else {
             logger.log(Level.WARNING, "Array of Payment is null");
         }
-        sleep(1000);
+        TimeUnit.MILLISECONDS.sleep(1000);;
     }
     
 }

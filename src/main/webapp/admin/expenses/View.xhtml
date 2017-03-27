@@ -6,7 +6,7 @@
                 xmlns:p="http://primefaces.org/ui"
                 >
 
-    <p:dialog id="ExpensesViewDlg" widgetVar="ExpensesViewDialog" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('ViewExpensesTitle')}">
+    <p:dialog id="ExpensesViewDlg" widgetVar="ExpensesViewDialogWidget" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('ViewExpensesTitle')}">
         <h:form id="ExpensesViewForm">
             <h:panelGroup id="display">
                 <p:panelGrid columns="2" rendered="#{expensesController.selected != null}">
