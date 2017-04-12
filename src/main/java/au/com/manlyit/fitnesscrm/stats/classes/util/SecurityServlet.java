@@ -18,7 +18,6 @@ import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.faces.application.FacesMessage;
-import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 
@@ -28,9 +27,10 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import net.sf.json.JSONSerializer;
 
 import net.sf.json.JSONObject;
-import net.sf.json.JSONSerializer;
+
 import org.apache.commons.lang.RandomStringUtils;
 
 import org.apache.commons.lang.StringUtils;
@@ -40,6 +40,9 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.json.simple.JSONArray;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 @WebServlet("*.sec")
 public class SecurityServlet extends HttpServlet {
@@ -140,9 +143,9 @@ public class SecurityServlet extends HttpServlet {
                                 if (controller != null && eziDebitPaymentGatewayController != null && mySessionsChart1Controller != null) {
                                     controller.updateSelectedCustomer(customer);
                                     eziDebitPaymentGatewayController.setSessionId(sessionID);
-                                    logger.log(Level.INFO, "SecurityServlet - SET SESSION ID = {0} for user : {1}",new Object[]{sessionID,customer.getUsername()});
+                                    logger.log(Level.INFO, "SecurityServlet - SET SESSION ID = {0} for user : {1}", new Object[]{sessionID, customer.getUsername()});
                                     //eziDebitPaymentGatewayController.setSelectedCustomer(customer);
-                                    
+
                                 } else {
                                     logger.log(Level.WARNING, "Customer Controller injection into security servlet failed!");
                                 }
@@ -171,7 +174,7 @@ public class SecurityServlet extends HttpServlet {
                 response.sendRedirect(request.getContextPath() + "/facebookError.html");
                 return;
             }
-            redirectToLandingPage(request,response);
+            redirectToLandingPage(request, response);
             /*if (mobileDevice(request)) {
                 httpSession.setAttribute("MOBILE_DEVICE", "TRUE");
                 response.sendRedirect(request.getContextPath() + getValueFromKey("facebook.redirect.mobilelandingpage"));
@@ -181,7 +184,7 @@ public class SecurityServlet extends HttpServlet {
 
         } else {
             logger.log(Level.WARNING, "CSRF protection validation - The Session ID passed to the original request was does not match the one in the post to this servlet");
-            redirectToLandingPage(request,response);
+            redirectToLandingPage(request, response);
             /*if (mobileDevice(request)) {
                 httpSession.setAttribute("MOBILE_DEVICE", "TRUE");
                 response.sendRedirect(request.getContextPath() + getValueFromKey("facebook.redirect.mobilelandingpage"));
@@ -191,15 +194,15 @@ public class SecurityServlet extends HttpServlet {
 
         }
     }
-      private void redirectToLandingPage(HttpServletRequest request,HttpServletResponse response) {
 
-        
+    private void redirectToLandingPage(HttpServletRequest request, HttpServletResponse response) {
+
         try {
 
             HttpSession httpSession = request.getSession();
             String landingPage;
             String adminRole = getValueFromKey("facebook.redirect.adminRole");
-            if(adminRole == null || adminRole.isEmpty()){
+            if (adminRole == null || adminRole.isEmpty()) {
                 adminRole = "ADMIN"; //default
             }
             if (mobileDevice(request)) {
@@ -222,7 +225,7 @@ public class SecurityServlet extends HttpServlet {
             logger.log(Level.WARNING, "Redirect to landing page at Login Failed", e);
         }
     }
-  
+
     private boolean mobileDevice(HttpServletRequest req) {
         //FacesContext context = FacesContext.getCurrentInstance();
         //HttpServletRequest req = (HttpServletRequest) context.getExternalContext().getRequest();
@@ -253,7 +256,24 @@ public class SecurityServlet extends HttpServlet {
                 HttpGet httpget = new HttpGet(newUrl);
                 ResponseHandler<String> responseHandler = new BasicResponseHandler();
                 String responseBody = httpclient.execute(httpget, responseHandler);
-                token = StringUtils.removeEnd(StringUtils.removeStart(responseBody, "access_token="), "&expires=5180795");
+                if (responseBody.contains("access_token=")) {
+                    token = StringUtils.removeEnd(StringUtils.removeStart(responseBody, "access_token="), "&expires=5180795");
+                } else {
+                    //Gson g = new Gson();
+                    //JsonObject j = g.fromJson(responseBody, JsonObject.class);
+                   // JsonValue jv = j.get("access_token");
+                   // token = jv.toString();
+                    
+                   JSONParser parser = new JSONParser();
+                    try {
+                        Object obj = parser.parse(responseBody);
+                        //org.json.simple.JSONArray array = (org.json.simple.JSONArray) obj;
+                        org.json.simple.JSONObject obj2 = (org.json.simple.JSONObject)obj;
+                        token = (String) obj2.get("access_token");
+                    } catch (ParseException parseException) {
+                        logger.log(Level.WARNING, parseException.getMessage());
+                    }
+                }
             } catch (ClientProtocolException e) {
                 logger.log(Level.WARNING, e.getMessage());
             } catch (IOException e) {

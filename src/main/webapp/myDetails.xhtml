@@ -18,7 +18,7 @@
 
                 <div class="Container50 Responsive50">
                     <div class="ContainerIndent">
-                        
+
                         <h1 class="BigTopic">#{configMapController.getKey('ListCustomersTitle_ProfilePic')}</h1>
 
                         <p:graphicImage id="photo1" value="#{customersController.selected.profileImage.imageStream}" height="150px" cache="false" styleClass="parentOfUploadPhoto" />
@@ -87,19 +87,6 @@
                                 <f:selectItems value="#{emailFormatController.itemsAvailableAsObjects}"  var="emailFormat" itemLabel="#{emailFormat.emailFormat}" itemValue="#{emailFormat}"/>
                                 <p:ajax  event="change" />
                             </p:selectOneMenu>-->
-                            <p:outputLabel value="#{configMapController.getKey('EditCustomersLabel_username')}" for="username" />
-                            <h:outputText id="username" value="#{customersController.selected.username}" title="#{configMapController.getKey('EditCustomersTitle_username')}" />
-
-                            <p:outputLabel value="#{configMapController.getKey('EditCustomersLabel_password')}" for="passButton2" />
-                            <!--  <p:password id="password"  value="#{customersController.checkPass}" onfocus="this.select()" feedback="true" title="#{configMapController.getKey('EditCustomersTitle_password')}" >
-                                <p:ajax listener="#{customersController.checkPassChange}" event="keyup" />
-                            </p:password>
-                          TODO make this a dialogue <h:outputLabel value="#{configMapController.getKey('EditCustomersLabel_password')}" for="password2" />
-                            <p:password id="password2"  value="#{customersController.checkPass}" onfocus="this.select()" feedback="true" title="#{configMapController.getKey('EditCustomersTitle_password')}" />
-                          
-                            <p:commandButton   ajax="true" actionListener="#{customersController.updatepass}" update="password  :growl"   value="#{configMapController.getKey('EditCustomersUpdatePassword')}" immediate="true"/>-->
-
-                            <p:commandButton icon="fa fa-cog  white Fs14" id="passButton2" ajax="true"  onclick="PF('updatePasswordDialogueWidget').show();" update=":growl :updatePass"   value="#{configMapController.getKey('EditCustomersUpdatePassword')}" immediate="true"/>
                         </h:panelGrid>
                         <div class="EmptyBox10"></div>
 
@@ -107,40 +94,80 @@
 
                     </div>
                 </div>
-               <!-- <div class="Container50 Responsive50">
-                    <div class="ContainerIndent">
-
-                    </div>
-                </div>-->
-                 <div class="Container50 Responsive50">
+                <!-- <div class="Container50 Responsive50">
+                     <div class="ContainerIndent">
+ 
+                     </div>
+                 </div>-->
+                <div class="Container50 Responsive50">
                     <div class="ContainerIndent">
                         <h1 class="BigTopic">#{configMapController.getKey('ListCustomersTitle_PanelHeader')}</h1>
+                        <p:panel id="myDetailsPaymentInfo" styleClass="updatePaymentInfo" >
+                            <h:panelGrid columns="2" cellpadding="5">
+                                <h:outputLabel value="#{configMapController.getKey('ListCustomersTitle_activeEZI')}:" class="black bold"/>
+                                <h:outputText  rendered="#{customersController.selected.paymentParametersId.statusCode == 'D'}"  value="CASH/Deposit"  style="color: green"/>
+                                <h:outputText  rendered="#{customersController.selected.paymentParametersId.statusCode == 'A'}"  value="Direct Debit"  style="color: green"/>
+                                <h:outputText  rendered="#{customersController.selected.paymentParametersId.statusCode == 'N'}"  value="Direct Debit" style="color: green"/>
+                                <h:outputText  rendered="#{customersController.selected.paymentParametersId.statusCode == 'H'}"  value="Hold - Direct Debit" style="color: orange"/>
+                                <h:outputText  rendered="#{customersController.selected.paymentParametersId.statusCode == 'C'}"  value="Cancelled - Direct Debit" style="color: red"/>
+                                <h:outputText  rendered="#{customersController.selected.paymentParametersId.statusCode == 'SP'}"  value="SUSPENDED - Direct Debit" style="color: red"/>
 
-                        <p:panelGrid id="myDetailsPaymentInfo" styleClass="updatePaymentInfo" columns="3" class="updatePaymentInfo">
-                            <h:outputLabel value="#{configMapController.getKey('ListCustomersTitle_activeEZI')}" />
-                            <h:outputText value="#{customersController.selected.paymentParametersId.statusDescription}"/> 
-                            <h:outputText value=""/>
-                            <h:outputLabel value="#{configMapController.getKey('ListCustomersTitle_lastSuccessfulScheduledPayment')}" />
-                            <h:outputText value="#{customersController.selected.paymentParametersId.lastSuccessfulScheduledPayment.debitDate}">
-                                <f:convertDateTime pattern="dd MMM yyyy" />
-                            </h:outputText>
-                            <h:outputText value="#{customersController.selected.paymentParametersId.lastSuccessfulScheduledPayment.paymentAmount}">
-                                <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
-                            </h:outputText>
-                            <h:outputLabel value="#{configMapController.getKey('ListCustomersTitle_nextScheduledPayment')}" />
 
-                            <h:outputText value="#{customersController.selected.paymentParametersId.nextScheduledPayment.debitDate}">
-                                <f:convertDateTime pattern="dd MMM yyyy" />
-                            </h:outputText>
-                            <h:outputText value="#{customersController.selected.paymentParametersId.nextScheduledPayment.paymentAmount}">
-                                <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
-                            </h:outputText>
-                        </p:panelGrid>
+                                <h:outputText  rendered="#{customersController.selected.paymentParametersId.statusCode == 'C4'}"  value="Cancelled - Customer Deceased" style="color: red"/>
+                                <h:outputText  rendered="#{customersController.selected.paymentParametersId.statusCode == 'CB'}"  value="Direct Debit Authority Cancelled by Bank" style="color: red"/>
+                                <h:outputText  rendered="#{customersController.selected.paymentParametersId.statusCode == 'CC'}"  value="Direct Debit Authority Cancelled by Customer" style="color: red"/>
+                                <h:outputText  rendered="#{customersController.selected.paymentParametersId.statusCode == 'CD'}"  value="Cancelled - Duplicate DDR" style="color: red"/>
+                                <h:outputText  rendered="#{customersController.selected.paymentParametersId.statusCode == 'CP'}"  value="Cancelled - Pick up Card" style="color: red"/>
+                                <h:outputText  rendered="#{customersController.selected.paymentParametersId.statusCode == 'CS'}"  value="Cancelled by System" style="color: red"/>
+
+                                <h:outputText  rendered="#{customersController.selected.paymentParametersId.statusCode == 'H2'}"  value="Hold - Direct Debit Authority Cancelled by Customer" style="color: orange"/>
+                                <h:outputText  rendered="#{customersController.selected.paymentParametersId.statusCode == 'H3'}"  value="Hold - Bank Account Closed" style="color: orange"/>
+                                <h:outputText  rendered="#{customersController.selected.paymentParametersId.statusCode == 'H5'}"  value="Hold - Incorrect BSB or Account Number" style="color: orange"/>
+                                <h:outputText  rendered="#{customersController.selected.paymentParametersId.statusCode == 'H9'}"  value="Hold - Technically Invalid Transaction" style="color: orange"/>
+                                <h:outputText  rendered="#{customersController.selected.paymentParametersId.statusCode == 'HB'}"  value="Hold - Waiting for Bank Account Details" style="color: orange"/>
+                                <h:outputText  rendered="#{customersController.selected.paymentParametersId.statusCode == 'HC'}"  value="Hold - Waiting for Credit Card Details" style="color: orange"/>
+                                <h:outputText  rendered="#{customersController.selected.paymentParametersId.statusCode == 'HD'}"  value="Hold - Waiting for Customer Start Date" style="color: orange"/>
+                                <h:outputText  rendered="#{customersController.selected.paymentParametersId.statusCode == 'HE'}"  value="Hold - Expired Credit Card or Incorrect Expiry Date" style="color: orange"/>
+                                <h:outputText  rendered="#{customersController.selected.paymentParametersId.statusCode == 'HF'}"  value="Hold - Fraud / Dispute" style="color: orange"/>
+                                <h:outputText  rendered="#{customersController.selected.paymentParametersId.statusCode == 'HI'}"  value="Hold - Invalid Credit Card Number" style="color: orange"/>
+                                <h:outputText  rendered="#{customersController.selected.paymentParametersId.statusCode == 'HL'}"  value="Hold - Lost Credit Card" style="color: orange"/>
+                                <h:outputText  rendered="#{customersController.selected.paymentParametersId.statusCode == 'HP'}"  value="Hold - Waiting for Scheduled Payment Frequency" style="color: orange"/>
+                                <h:outputText  rendered="#{customersController.selected.paymentParametersId.statusCode == 'HQ'}"  value="Hold - Cancelled Credit Card" style="color: orange"/>
+                                <h:outputText  rendered="#{customersController.selected.paymentParametersId.statusCode == 'HS'}"  value="Hold - Waiting for Signature on DDR" style="color: orange"/>
+                                <h:outputText  rendered="#{customersController.selected.paymentParametersId.statusCode == 'HT'}"  value="Hold - Temporarily Suspended" style="color: orange"/>
+                                <h:outputText  rendered="#{customersController.selected.paymentParametersId.statusCode == 'HU'}"  value="Hold - Unsupported Card" style="color: orange"/>
+                                <h:outputText  rendered="#{customersController.selected.paymentParametersId.statusCode == 'HV'}"  value="Hold - Waiting for DDR Authority Verification" style="color: orange"/>
+                                <h:outputText  rendered="#{customersController.selected.paymentParametersId.statusCode == 'HW'}"  value="Hold - Unable to Process" style="color: orange"/>
+                                <h:outputText  rendered="#{customersController.selected.paymentParametersId.statusCode == 'HZ'}"  value="Hold - Data integrity issues for investigation" style="color: orange"/>
+
+
+                               <!-- <h:outputText value="#{customersController.selected.paymentParametersId.statusDescription}"/> -->
+                            </h:panelGrid>
+                            <h:panelGrid  columns="3" class="updatePaymentInfo" cellpadding="5">
+
+
+                                <h:outputLabel value="#{configMapController.getKey('ListCustomersTitle_lastSuccessfulScheduledPayment')}:" class="black"/>
+                                <h:outputText value="#{customersController.selected.paymentParametersId.lastSuccessfulScheduledPayment.debitDate}">
+                                    <f:convertDateTime pattern="dd MMM yyyy" />
+                                </h:outputText>
+                                <h:outputText value="#{customersController.selected.paymentParametersId.lastSuccessfulScheduledPayment.paymentAmount}">
+                                    <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
+                                </h:outputText>
+                                <h:outputLabel value="#{configMapController.getKey('ListCustomersTitle_nextScheduledPayment')}:" class="black"/>
+
+                                <h:outputText value="#{customersController.selected.paymentParametersId.nextScheduledPayment.debitDate}">
+                                    <f:convertDateTime pattern="dd MMM yyyy" />
+                                </h:outputText>
+                                <h:outputText value="#{customersController.selected.paymentParametersId.nextScheduledPayment.scheduledAmount}">
+                                    <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
+                                </h:outputText>
+                            </h:panelGrid>
+                        </p:panel>
                         <div class="EmptyBox10"></div>
                         <h:panelGrid columns="2" cellpadding="5" >
                             <p:commandButton  styleClass="updatePaymentInfo" icon="fa fa-dollar  white Fs14" id="directDebitFormButton" disabled="#{!ezidebit.customerWebDDRFormEnabled}"  actionListener="#{ezidebit.redirectToPaymentGateway}"    value="#{configMapController.getKey('EnterPaymentDetailsButton')}" update=":growl :createCustomerForm"  /> 
 
-                            
+
                             <h:outputText rendered="#{ezidebit.customerWebDDRFormEnabled}" styleClass="red FontBold animated pulse infinite" value="#{configMapController.getKey('MyDetailsCallToFillOutPaymentDetails')}"/>
                             <h:outputText  rendered="#{!ezidebit.customerWebDDRFormEnabled and customersController.selected.paymentParametersId.statusCode != 'D'}" value="Completed" /> 
 
@@ -150,7 +177,7 @@
 
                     </div>
                 </div>
-               <div class="Container50 Responsive50">
+                <div class="Container50 Responsive50">
                     <div class="ContainerIndent">
                         <h1 class="BigTopic">#{configMapController.getKey('MyDetailsSurveyPanel_title')}</h1>
 
@@ -178,7 +205,26 @@
                         </ui:repeat>
                     </div>
                 </div>
+                <div class="Container50 Responsive50">
+                    <div class="ContainerIndent">
+                        <h1 class="BigTopic">#{configMapController.getKey('MyDetailsLogin_title')}</h1>
+                        <h:panelGrid columns="2" cellpadding="5" >
+                            <p:outputLabel value="#{configMapController.getKey('EditCustomersLabel_username')}" for="username" />
+                            <h:outputText id="username" value="#{customersController.selected.username}" title="#{configMapController.getKey('EditCustomersTitle_username')}" />
 
+                            <p:outputLabel value="#{configMapController.getKey('EditCustomersLabel_password')}" for="passButton2" />
+                            <!--  <p:password id="password"  value="#{customersController.checkPass}" onfocus="this.select()" feedback="true" title="#{configMapController.getKey('EditCustomersTitle_password')}" >
+                                <p:ajax listener="#{customersController.checkPassChange}" event="keyup" />
+                            </p:password>
+                          TODO make this a dialogue <h:outputLabel value="#{configMapController.getKey('EditCustomersLabel_password')}" for="password2" />
+                            <p:password id="password2"  value="#{customersController.checkPass}" onfocus="this.select()" feedback="true" title="#{configMapController.getKey('EditCustomersTitle_password')}" />
+                          
+                            <p:commandButton   ajax="true" actionListener="#{customersController.updatepass}" update="password  :growl"   value="#{configMapController.getKey('EditCustomersUpdatePassword')}" immediate="true"/>-->
+
+                            <p:commandButton icon="fa fa-cog  white Fs14" id="passButton2" ajax="true"  onclick="PF('updatePasswordDialogueWidget').show();" update=":growl :updatePass"   value="#{configMapController.getKey('EditCustomersUpdatePassword')}" immediate="true"/>
+                        </h:panelGrid>
+                    </div>
+                </div>
             </h:form>
         </div>
         <ui:include src="/WEB-INF/myDetailsPaymentMethod.xhtml"/>

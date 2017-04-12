@@ -471,6 +471,28 @@ public class CustomersController implements Serializable {
         createCombinedAuditLogAndNote(loggedInUser, current, "sendCustomerTemplateEmail", auditDetails, changedFrom, changedTo);
     }
 
+    public void sendPasswordResetEmail() {
+        FacesContext context = FacesContext.getCurrentInstance();
+        LoginBean controller = (LoginBean) context.getApplication().getELResolver().getValue(context.getELContext(), null, "loginBean");
+        controller.doPasswordReset("system.reset.password.template", current, configMapFacade.getConfig("PasswordResetEmailSubject"));
+        String auditDetails = "Customer Password Reset Email Sent For:" + current.getFirstname() + " " + current.getLastname() + ".";
+        String changedFrom = "N/A";
+        String changedTo = "Password Reset Email Sent";
+
+        createCombinedAuditLogAndNote(loggedInUser, current, "SendPasswordReset", auditDetails, changedFrom, changedTo);
+    }
+
+    public void sendOnboardEmailListener() {
+        setSelectedEmailTemplateByName("system.email.admin.onboardcustomer.template");
+    }
+
+    public void setSelectedEmailTemplateByName(String templateName) {
+        FacesContext context = FacesContext.getCurrentInstance();
+        LoginBean controller = (LoginBean) context.getApplication().getELResolver().getValue(context.getELContext(), null, "loginBean");
+        EmailTemplatesController emailTemplatescontroller = (EmailTemplatesController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "emailTemplatesController");
+        emailTemplatescontroller.setSelected(ejbEmailTemplatesFacade.findTemplateByName(templateName));
+    }
+
     public void sendCustomerOnboardEmail() {
         FacesContext context = FacesContext.getCurrentInstance();
         LoginBean controller = (LoginBean) context.getApplication().getELResolver().getValue(context.getELContext(), null, "loginBean");
@@ -1193,7 +1215,7 @@ public class CustomersController implements Serializable {
 
     public void createDialogue(ActionEvent actionEvent) {
         createFromListener();
-        RequestContext.getCurrentInstance().closeDialog("customersCreateDialogue");
+        //RequestContext.getCurrentInstance().closeDialog("customersCreateDialogue");
     }
 
     private void createFromListener() {
@@ -1209,7 +1231,8 @@ public class CustomersController implements Serializable {
                 c.setId(0);
                 getFacade().createAndFlushForGeneratedIdEntities(c);
                 setSelected(c);
-                updateCustomersGroupMembership(c);
+                //updateCustomersGroupMembership(c);
+                addCustomerToUsersGroup(c);
                 addQuestionnaireMapItemsToCustomer(c);
                 createDefaultCustomerProfilePicture(c);
                 //createDefaultPaymentParameters(paymentGateway);
@@ -1235,7 +1258,7 @@ public class CustomersController implements Serializable {
             // exists so update only
             try {
                 getFacade().edit(c);
-                updateCustomersGroupMembership(c);
+                updateCustomersGroupMembership(c, selectedGroups);
 
                 ezi.editCustomerDetailsInEziDebit(c);
                 recreateAllAffectedPageModels();
@@ -1248,10 +1271,31 @@ public class CustomersController implements Serializable {
 
     }
 
-    private void updateCustomersGroupMembership(Customers c) {
+    private void updateCustomersGroupMembership(Customers c, List<Groups> memberOfGroups) {
         //modify customers groups
         try {
+
+            // add selected groups
+            for (Groups g : memberOfGroups) {
+                addCustomerToGroup(c, g.getGroupname());
+            }
+            // remove any groups that were not selected
             List<Groups> lg = new ArrayList<>(c.getGroupsCollection());
+            for (Groups g : lg) {
+                boolean foundInSelectedGroups = false;
+                String groupName = g.getGroupname();
+                for (Groups sg : memberOfGroups) {
+                    if (sg.getGroupname().compareToIgnoreCase(g.getGroupname()) == 0) {
+                        foundInSelectedGroups = true;
+                    }
+                }
+                if (foundInSelectedGroups == false) {
+                    removeCustomerFromGroup(c, groupName);
+                }
+
+            }
+
+            /* List<Groups> lg = new ArrayList<>(c.getGroupsCollection());
             ejbFacade.clearAllCustomerGroups(c);
             // remove groups
             for (Groups g : lg) {
@@ -1326,7 +1370,9 @@ public class CustomersController implements Serializable {
     }
 
     protected void addCustomerToUsersGroup(Customers c) {
-        List<Groups> lg = new ArrayList<>(c.getGroupsCollection());
+        addCustomerToGroup(c, "USER");
+        removeCustomerFromGroup(c, "LEAD");
+        /*List<Groups> lg = new ArrayList<>(c.getGroupsCollection());
         List<Groups> removalList = new ArrayList<>();
         int count = 0;
         for (Groups g : lg) {
@@ -1353,9 +1399,79 @@ public class CustomersController implements Serializable {
             Groups grp = new Groups(0, "USER");
             grp.setUsername(c);
 
-            ejbFacade.addCustomerToGroup(c, grp);
+            ejbGroupsFacade.createAndFlushForGeneratedIdEntities(grp);
+            ejbFacade.edit(c);
+        }*/
+        String newGroups = "User " + c.getUsername() + " is a member of groups: ";
+        for (Groups ng : c.getGroupsCollection()) {
+            newGroups += ng.getGroupname() + " ";
+        }
+        LOGGER.log(Level.INFO, "{0}", new Object[]{newGroups});
+    }
+
+    protected void addCustomerToGroup(Customers c, String groupName) {
+        List<Groups> lg = new ArrayList<>(c.getGroupsCollection());
+        List<Groups> removalList = new ArrayList<>();
+        int count = 0;
+        for (Groups g : lg) {
+            if (g.getGroupname().contains(groupName)) {
+                if (count > 0) {
+                    removalList.add(g);
+                }
+                count++;
+            }
         }
 
+        Iterator<Groups> i = removalList.iterator();
+        while (i.hasNext()) {
+            Groups eg = i.next();
+            //ejbGroupsFacade.remove(eg);
+            ejbFacade.removeCustomerFromGroup(c, eg);
+        }
+
+        if (count == 0) {
+
+            // ejbFacade.addCustomerToGroup(c, grp);
+            List<Groups> groupsArray = new ArrayList<>(c.getGroupsCollection());
+
+            Groups grp = new Groups(0, groupName);
+            grp.setUsername(c);
+            ejbGroupsFacade.createAndFlushForGeneratedIdEntities(grp);
+            groupsArray.add(grp);
+            c.setGroupsCollection(groupsArray);
+
+            ejbFacade.edit(c);
+        }
+        String newGroups = "Adding " + c.getUsername() + " to group " + groupName + ". They are a member of groups: ";
+        for (Groups ng : c.getGroupsCollection()) {
+            newGroups += ng.getGroupname() + " ";
+        }
+        LOGGER.log(Level.INFO, "{0}", new Object[]{newGroups});
+    }
+
+    protected void removeCustomerFromGroup(Customers c, String groupName) {
+        List<Groups> lg = new ArrayList<>(c.getGroupsCollection());
+        List<Groups> removalList = new ArrayList<>();
+        for (Groups g : lg) {
+            if (g.getGroupname().contains(groupName)) {
+                removalList.add(g);
+            }
+        }
+
+        Iterator<Groups> i = removalList.iterator();
+        while (i.hasNext()) {
+            Groups eg = i.next();
+            lg.remove(eg);
+            ejbGroupsFacade.remove(eg);
+        }
+        c.setGroupsCollection(lg);
+        ejbFacade.edit(c);
+
+        String newGroups = "Removing " + c.getUsername() + " from group " + groupName + ". They are a member of the following groups: ";
+        for (Groups ng : c.getGroupsCollection()) {
+            newGroups += ng.getGroupname() + " ";
+        }
+        LOGGER.log(Level.INFO, "{0}", new Object[]{newGroups});
     }
 
     public void editDialogue(ActionEvent actionEvent) {
@@ -1617,7 +1733,7 @@ public class CustomersController implements Serializable {
                     controller.changeCustomerStatus(cust, selectedState);
 
                 } else if (cust.getActive().getCustomerState().contains("CANCELLED") == false && selectedState.getCustomerState().contains("ACTIVE")) {
-                     controller.changeCustomerStatus(cust, selectedState);
+                    controller.changeCustomerStatus(cust, selectedState);
                     // add the prevbiously cancelled customer as a new customer in ezidebit
                     controller.createCustomerRecord(cust);
 

@@ -100,15 +100,15 @@
                             <h:panelGrid columns="2">
                                 <h:panelGrid columns="1">
                                     <p:outputLabel value="#{configMapController.getKey('CreateExpensesimageUpload_label')}" for="description" />
-                                    <p:fileUpload  invalidSizeMessage="The size of the picture is too big! ( > 10MB )" fileLimitMessage="You have exceeded the limit of 100 files uploaded" fileLimit="100" auto="true" fileUploadListener="#{expensesController.handleFileUpload}"  update="@(.parentOfUploadPhoto) :growl" allowTypes="/(\.|\/)(gif|jpe?g|png)$/" sizeLimit="10000000" />
+                                    <p:fileUpload  invalidSizeMessage="The size of the picture is too big! ( > 10MB )" fileLimitMessage="You have exceeded the limit of 100 files uploaded" fileLimit="100" auto="true" fileUploadListener="#{expensesController.handleFileUpload}"  update="@(.parentOfUploadExpensesPhoto) :growl" allowTypes="/(\.|\/)(gif|jpe?g|png)$/" sizeLimit="10000000" />
 
-                                    <p:commandButton id="rotateButton" icon="fa fa-rotate-right white Fs14"  class="parentOfUploadPhoto"  disabled="#{expensesController.saveButtonDisabled}"   actionListener="#{expensesController.rotateStreamedContent90degrees}" update="@(.parentOfUploadPhoto) :growl"  value="#{configMapController.getKey('CreateCustomerImagesRotateImage90Link')}" />
+                                    <p:commandButton id="rotateButton" icon="fa fa-rotate-right white Fs14"  class="parentOfUploadPhoto"  disabled="#{expensesController.saveButtonDisabled}"   actionListener="#{expensesController.rotateStreamedContent90degrees}" update="@(.parentOfUploadExpensesPhoto) :growl"  value="#{configMapController.getKey('CreateCustomerImagesRotateImage90Link')}" />
                                     <p:commandButton id="cropButton" icon=" fa fa-crop white Fs14" class="parentOfUploadPhoto" disabled="#{expensesController.saveButtonDisabled}" actionListener="#{expensesController.crop}"  update="@(.parentOfUploadPhoto)  :growl"  value="#{configMapController.getKey('CreateCustomerImagesCropLink')}"  />
 
                                 </h:panelGrid>
                                 <h:panelGrid columns="1">
-                                    <p:graphicImage id="uploadedPhoto" styleClass="expensesPhoto" class="dialoguePhoto parentOfUploadPhoto" value="#{expensesController.uploadedImageAsStream}" style="max-width: 360px" cache="false" />
-                                    <pe:imageAreaSelect id="areaSelect"  class="expensesPhoto dialoguePhoto parentOfUploadPhoto"  for="uploadedPhoto"  handles="true"  widgetVar="areaSelectWidget"  >  
+                                    <p:graphicImage id="uploadedExpensesPhoto" styleClass="expensesPhoto" class="dialoguePhoto parentOfUploadExpensesPhoto" value="#{expensesController.uploadedImageAsStream}" style="max-width: 360px" cache="false" />
+                                  <pe:imageAreaSelect id="areaSelectExpenses"  class="expensesPhoto dialoguePhoto parentOfUploadExpensesPhoto"  for="uploadedExpensesPhoto"  handles="true"  widgetVar="areaSelectExpensesWidget"  >  
                                         <p:ajax event="selectEnd" listener="#{expensesController.selectEndListener}" update=":growl"/>  
                                     </pe:imageAreaSelect> 
                                 </h:panelGrid>

@@ -15,14 +15,14 @@
                         <p:outputLabel value="#{configMapController.getKey('ViewEmailTemplatesTitle_name')}" for="selectTemplate" />
                         <p:selectOneMenu  id="selectTemplate" valueChangeListener="#{emailTemplatesController.selectOneMenuValueChangeListener}"  converter="emailTemplatesControllerConverter"  value="#{emailTemplatesController.selected}" label="#{configMapController.getKey('ViewEmailTemplatesTitle_name')}" >
                             <f:selectItems value="#{emailTemplatesController.adminEmailTemplates}"  var="template" itemLabel="#{template.name}" itemValue="#{template}"/>
-                            <p:ajax update=":SendEmailToCustomerForm:sendEmailDisplayPanel" event="change"/>
+                            <p:ajax update="@(.updateEmailTemplatePopup)" event="change"/>
                         </p:selectOneMenu>
                     </h:panelGrid>
 
                     <p:commandButton disabled="#{emailTemplatesController.selected eq null}" value="#{configMapController.getKey('sendCustomerOnBoardEmailButton')}" oncomplete="PF('SendEmailToCustomerDialog').hide()"  actionListener="#{customersController.sendEmailToCustomerFromTemplate}" update="@(.updateNotesDataTable)  :growl"/>
                     <p:commandButton value="#{configMapController.getKey('Close')}" onclick="PF('SendEmailToCustomerDialog').hide()"/>
                 </h:panelGrid>
-                <p:panel id="sendEmailDisplayPanel">
+                <p:panel id="sendEmailDisplayPanel" styleClass="updateEmailTemplatePopup">
                     <h:panelGrid columns="2" rendered="#{emailTemplatesController.selected != null}">
                         
 

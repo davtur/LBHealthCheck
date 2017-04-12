@@ -35,7 +35,7 @@
                         <div class="EmptyBox50"></div>
                         <h:graphicImage name="images/logo.png" styleClass="MarAuto MarTop20 MarBot10"/>
                         <div class="EmptyBox20"></div>
-                       <p:messages showDetail="true"/>
+                        <p:messages showDetail="true"/>
                         <p:inputText value="#{loginBean.username}"  placeholder="Username/email" styleClass="Container80 Fnone MarAuto Fs18">
                             <p:ajax event="change" update=":loginForm" />
                         </p:inputText>
@@ -51,6 +51,10 @@
                         <div class="EmptyBox10"></div>
                         <div class="Seperator"></div>
                         <div class="EmptyBox10"></div>
+                        <p:commandButton widgetVar="fbLogin" onclick="PF('fbLogin').disable()" styleClass="loginButtonFacebook" value="Login with Facebook"  actionListener="#{facebookLoginBean.facebookRedirect}" />
+
+                        <div class="EmptyBox10"></div>
+
                     </h:form>
 
                     <h:form id="loginForm">
@@ -62,25 +66,16 @@
                         <p:panel rendered="#{not empty loginBean.facebookId}" style="width:73px">
                             <img src="https://graph.facebook.com/v2.8/#{loginBean.facebookId}/picture"/>
                         </p:panel>
-                        <p:commandButton widgetVar="fbLogin" onclick="PF('fbLogin').disable()" styleClass="loginButtonFacebook" value="Facebook Connect"  actionListener="#{facebookLoginBean.facebookRedirect}" />
+                        <div class="Seperator"></div>
+                        <div class="EmptyBox10"></div>
 
 
                         <p:commandButton value="Reset Password" ajax="false" styleClass="Fs16 RedButton" action="#{loginBean.resetPassword}" update=":growl"/>
+                        <p>If you have forgotten your username or password enter your email or username above then click the password reset button.</p>
                         <div class="EmptyBox10"></div>
                         <h:outputText value="#{facebookLoginBean.userFromSession}"></h:outputText>
 
-
-
-
                         <div class="EmptyBox50"></div>
-
-
-
-
-
-
-
-
 
                     </h:form>
 
@@ -92,7 +87,7 @@
         <h:outputStylesheet name="css/font-awesome.css" library="spark-layout" />
         <h:outputStylesheet name="css/animate.css" library="spark-layout" />
         <h:outputStylesheet name="css/spark-layout.css" library="spark-layout" />
-         <h:outputStylesheet library="css" name="customisations.css"/>
+        <h:outputStylesheet library="css" name="customisations.css"/>
     </h:body>
 
 </html>

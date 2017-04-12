@@ -2074,3 +2074,6 @@ CreateCustomersLabel_customerExists=A customer with this username already exists
 
 DashboardPaymentGatewayVersion_Label= Payment Gateway Version:
 ListPaymentsTitle_scheduledAmount=Scheduled
+passwordResetButtonLabel=Password Reset
+system.admin.alert.email.subject=Administrator Alert Email from the CRM system
+MyDetailsLogin_title=Login Details

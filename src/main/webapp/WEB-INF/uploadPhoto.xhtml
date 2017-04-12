@@ -8,7 +8,7 @@
                   xmlns:pe="http://primefaces.org/ui/extensions">
 
     <!--<p:log />--> 
-    <p:dialog id="uploadPhotoDialogue"  closable="true" 
+    <p:dialog id="uploadPhotoDialogue"  closable="true" appendTo="@(body)" 
               header="#{configMapController.getKey('uploadPhotoDialogueTitle')}" fitViewport="true" widgetVar="uploadPhotoDialogueWidget" responsive="true"> 
         <div class="Container100 Responsive100">
             <div class="Container100 Responsive100">
@@ -28,11 +28,11 @@
 
 
 
-                        <p:graphicImage id="uploadedPhoto"  class="dialoguePhoto parentOfUploadPhoto" value="#{customerImagesController.uploadedImageAsStream}" style="max-width: 300px;max-height: 300px" cache="false" >
+                        <p:graphicImage id="uploadedPhoto"  class="dialoguePhoto parentOfUploadPhoto" value="#{customerImagesController.uploadedImageAsStream}" style="max-width: 300px;max-height: 300px"  />
 
-                        </p:graphicImage>
+                   
 
-                        <pe:imageAreaSelect id="areaSelect" class="dialoguePhoto parentOfUploadPhoto"  for="uploadedPhoto"  handles="true"  widgetVar="areaSelectWidget"  >  
+                        <pe:imageAreaSelect id="areaSelect" class="dialoguePhoto parentOfUploadPhoto"  for="uploadedPhoto"    widgetVar="areaSelectWidget"  >  
                             <p:ajax event="selectEnd" listener="#{customerImagesController.selectEndListener}" update=":growl"/>  
                         </pe:imageAreaSelect> 
                         <div class="Container100 Responsive100">

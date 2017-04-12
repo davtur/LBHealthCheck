@@ -120,6 +120,8 @@ public class FutureMapEJB implements Serializable {
     private PaymentParametersFacade paymentParametersFacade;
     @Inject
     private PaymentBean paymentBean;
+    @Inject
+    private au.com.manlyit.fitnesscrm.stats.beans.EmailTemplatesFacade ejbEmailTemplatesFacade;
 
     @PathParam("user")
     private String username;
@@ -2174,8 +2176,8 @@ public class FutureMapEJB implements Serializable {
             return;
         }
         String templatePlaceholder = "<!--LINK-URL-->";
-        String htmlText = configMapFacade.getConfig("system.email.admin.alert.template");
-
+        //String htmlText = configMapFacade.getConfig("system.email.admin.alert.template");
+        String htmlText = ejbEmailTemplatesFacade.findTemplateByName("system.email.admin.alert.template").getTemplate();
         htmlText = htmlText.replace(templatePlaceholder, message);
         AsyncJob aj = new AsyncJob("EmailAlert", paymentBean.sendAsynchEmailWithPGR(configMapFacade.getConfig("AdminEmailAddress"), configMapFacade.getConfig("PasswordResetCCEmailAddress"), configMapFacade.getConfig("PasswordResetFromEmailAddress"), configMapFacade.getConfig("system.ezidebit.webEddrCallback.EmailSubject"), htmlText, null, paymentBean.emailServerProperties(), false, sessionId));
         this.put(FUTUREMAP_INTERNALID, aj);
