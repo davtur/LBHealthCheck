@@ -30,41 +30,63 @@
     <h:body>
         <p:growl id="growl"/>
         <div id="layout-portlets-cover">
-            <div class="other-pages-box Container40 Responsive50 MarAuto Fnone TexAlCenter ShadowGray MarTop10"
-                 style="margin-top:5%; background-image:url(/spark/resources/spark-layout/images/loginpageillust.svg); background-repeat:no-repeat; background-position:center; background-size:cover;">
-                <div class="Container90 Fnone MarAuto TexAlCenter">
-        
 
-            
-                <h2> Pure Fitness Manly Password Reset</h2>
-            
 
-            
-                <h:panelGroup layout="block" rendered="#{activationBean.valid}">
-                    <div >
-                        <strong>
-                    <p>  You have been sent an email with a password reset link.</p>
-                    <p>  This is the email account that you provided to Pure Fitness Manly.</p>
-                    <p>  Please go to your email and click this link within 10 minutes to reset your password.</p>
-                    <p>  Note: You will be required to change your password when you are logged in.</p>
-                        </strong>
+            <div class="other-pages-box Container40 Responsive50 MarAuto Fnone TexAlCenter ShadowGray MarTop10" style="margin-top:5%;  background-repeat:no-repeat; background-position:center; background-size:cover;" >
+
+                <div class="Container100 Responsive100">
+                    <div class="ContainerIndent">
+                        <div class="Container90 Fnone MarAuto TexAlCenter">
+
+                            <div class="EmptyBox10"></div>
+
+                            <h2> Pure Fitness Manly Password Reset</h2>
+                            <div class="EmptyBox10"></div>
+                        </div>
+                        <div class="Container90 Fnone MarAuto TexAlLeft">
+
+                            <p:panel  rendered="#{activationBean.valid}" class="FontNormal">
+                                <div >
+
+                                    <p>  You have been sent an email with a password reset link.</p>
+                                    <p>  <strong>Note:</strong> You should change your password to something easy for you to remember but hard for someone else to guess.</p>
+                                    <p>  <strong>Please go to your email and click this link within 10 minutes to log you into the system so that you can reset your password.</strong></p> 
+                                </div>
+                                <div class="EmptyBox10"></div>
+                                <div>
+
+                                    <h:outputText  value="If you still experience problems or did not receive the email, please call " />
+                                    <h:outputLink value="callto:0433818067">
+                                        <h:outputText  value="0433818067"  class="blue FontBold"/>
+                                    </h:outputLink>
+                                    <h:outputText  value=" or email " />
+                                    <h:outputLink value="mailto:sarah@purefitnessmanly.com.au" >
+                                        <f:param name="subject" value="Password Reset Issue" />
+                                        <!--<f:param name="body" value="Some body" />-->
+                                        <h:outputText  value="sarah\@purefitnessmanly.com.au" class="blue FontBold"/>
+                                    </h:outputLink>
+                                    <h:outputText  value=" to have your password reset." />
+                                </div>
+                                <div class="EmptyBox10"></div>
+                            </p:panel>
+                            <p:panel   rendered="#{!activationBean.valid}">
+                                <p>The online password reset failed. Did you put the correct username in the login box before clicking the password reset button?</p> 
+                                <h:outputText  value="Please call " />
+                                <h:outputLink value="callto:0433818067">
+                                    <h:outputText  value="0433818067"  class="blue FontBold"/>
+                                </h:outputLink>
+                                <h:outputText  value=" or email " />
+                                <h:outputLink value="mailto:sarah@purefitnessmanly.com.au" >
+                                    <f:param name="subject" value="Password Reset Issue" />
+                                    <!--<f:param name="body" value="Some body" />-->
+                                    <h:outputText  value="sarah\@purefitnessmanly.com.au" class="blue FontBold"/>
+                                </h:outputLink>
+                                <h:outputText  value=" to have your password reset or try again by clicking the back button on your web browser." />
+                            </p:panel>
+                            <div class="EmptyBox20"></div>
+                        </div>
                     </div>
-                    <h1> </h1>
-                    <h1> </h1>
-                    <div>
-                    <p>  If you still experience problems or if the email is removed by an overzealous spam filter,</p>
-                    <p>  please call <strong>0433818067</strong> or email <a href="mailto:sarah@purefitnessmanly.com.au">sarah@purefitnessmanly.com.au</a> to have your password reset.</p>
-                    </div>
-                    <h1> </h1>
-                    <h1> </h1>
-                </h:panelGroup>
-                <h:panelGroup layout="block" rendered="#{!activationBean.valid}">
-                    <p>The online password reset failed. Did you put the correct username in the login box before clicking the password reset button?</p> 
-                    <p>Please call <strong>0433818067</strong> or email <a href="mailto:sarah@purefitnessmanly.com.au">sarah@purefitnessmanly.com.au</a> to have your password reset or try again by clicking the back button on your web browser.</p> 
-                    
-                </h:panelGroup>
-
-                  </div>
+                </div>
             </div>
         </div>
 

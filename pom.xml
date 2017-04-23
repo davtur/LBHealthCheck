@@ -4,7 +4,7 @@
 
     <groupId>au.com.manlyit</groupId>
     <artifactId>FitnessCRM</artifactId>
-    <version>5.4.3</version>
+    <version>5.4.4</version>
     <packaging>war</packaging>
 
     <name>FitnessCRM</name>
@@ -229,7 +229,12 @@
             <version>3.9</version>
             <type>jar</type>
         </dependency>
-        
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>6.0.6</version>
+            <type>jar</type>
+        </dependency>
         <dependency>
             <groupId>javax</groupId>
             <artifactId>javaee-web-api</artifactId>

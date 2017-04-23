@@ -3,7 +3,8 @@
       xmlns:h="http://java.sun.com/jsf/html"
       xmlns:f="http://java.sun.com/jsf/core"
       xmlns:ui="http://java.sun.com/jsf/facelets"
-      xmlns:p="http://primefaces.org/ui">
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:pe="http://primefaces.org/ui/extensions">
 
     <h:head>
         <f:facet name="first">
@@ -36,23 +37,26 @@
                         <h:graphicImage name="images/logo.png" styleClass="MarAuto MarTop20 MarBot10"/>
                         <div class="EmptyBox20"></div>
                         <p:messages showDetail="true"/>
-                        <p:inputText value="#{loginBean.username}"  placeholder="Username/email" styleClass="Container80 Fnone MarAuto Fs18">
+                        <p:inputText id="usernameText" value="#{loginBean.username}"  placeholder="Username/email" styleClass="Container80 Fnone MarAuto Fs18">
                             <p:ajax event="change" update=":loginForm" />
                         </p:inputText>
+                        <pe:tooltip for="usernameText" value="Please enter your username or your email address in this box." myPosition="bottom left" atPosition="top right"/>
                         <div class="EmptyBox10"></div>
-                        <p:password value="#{loginBean.password}"  placeholder="Password" styleClass="Container80 Fnone MarAuto Fs18" feedback="false"/>
+                        <p:password id="passText" value="#{loginBean.password}"  placeholder="Password" styleClass="Container80 Fnone MarAuto Fs18" feedback="false"/>
+                        <pe:tooltip for="passText" value="Please enter your password in this box." myPosition="top, right"/>
                         <div class="EmptyBox20"></div>
                         <!--<div class="Container85 Fnone MarAuto softgray">
                             <div class="EmptyBox5"></div>
                             <p:selectBooleanCheckbox value="accept" itemLabel="I Accept Terms And Policies"/>
                         </div>-->
                         <div class="EmptyBox30"></div>
-                        <p:commandButton value="Login" styleClass="Fs16" actionListener="#{loginBean.login}"  update=":growl"/> 
+                        <p:commandButton id="standard" value="Login" styleClass="Fs16" actionListener="#{loginBean.login}"  update=":growl"/> 
+                        <pe:tooltip for="standard" value="Click this button to login after entering your username and password above."  myPosition="bottom left" atPosition="top right"/>  
                         <div class="EmptyBox10"></div>
                         <div class="Seperator"></div>
                         <div class="EmptyBox10"></div>
-                        <p:commandButton widgetVar="fbLogin" onclick="PF('fbLogin').disable()" styleClass="loginButtonFacebook" value="Login with Facebook"  actionListener="#{facebookLoginBean.facebookRedirect}" />
-
+                        <p:commandButton id="facebook" widgetVar="fbLogin" onclick="PF('fbLogin').disable()" styleClass="loginButtonFacebook" value="Login with Facebook"  actionListener="#{facebookLoginBean.facebookRedirect}" />
+                        <pe:tooltip for="facebook" value="Click this button to login with your facebook account. Note you must use the same email address with pure fitness and facebook." myPosition="bottom left" atPosition="top right"/> 
                         <div class="EmptyBox10"></div>
 
                     </h:form>
@@ -63,15 +67,17 @@
                         <div class="social-icons">
                             <span class="facebook"><a target="_blank" href="https://www.facebook.com/PureFitnessManly"></a></span>
                         </div>
-                        <p:panel rendered="#{not empty loginBean.facebookId}" style="width:73px">
+                        <p:panel id="facebookPic" rendered="#{not empty loginBean.facebookId}" style="width:73px">
                             <img src="https://graph.facebook.com/v2.8/#{loginBean.facebookId}/picture"/>
                         </p:panel>
+                         <pe:tooltip for="facebookPic" value="This is the currently logged in facebook profile." myPosition="bottom left" atPosition="top right"/> 
                         <div class="Seperator"></div>
                         <div class="EmptyBox10"></div>
 
 
-                        <p:commandButton value="Reset Password" ajax="false" styleClass="Fs16 RedButton" action="#{loginBean.resetPassword}" update=":growl"/>
-                        <p>If you have forgotten your username or password enter your email or username above then click the password reset button.</p>
+                        <p:commandButton id="resetPass" value="Reset Password" ajax="false" styleClass="Fs16 RedButton" action="#{loginBean.resetPassword}" update=":growl"/>
+                        <pe:tooltip for="resetPass" value="If you have forgotten your username or password enter your email or username above then click the password reset button." myPosition="bottom left" atPosition="top right"/>
+                        
                         <div class="EmptyBox10"></div>
                         <h:outputText value="#{facebookLoginBean.userFromSession}"></h:outputText>
 

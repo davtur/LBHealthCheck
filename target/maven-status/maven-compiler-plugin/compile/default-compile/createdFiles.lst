@@ -24,6 +24,7 @@ au/com/manlyit/fitnesscrm/stats/db/QrtzTriggersPK.class
 au/com/manlyit/fitnesscrm/stats/classes/SurveyquestiontypesController$1.class
 au/com/manlyit/fitnesscrm/stats/classes/PaymentsController$PaymentsControllerConverter.class
 au/com/manlyit/fitnesscrm/stats/beans/SessionTrainersFacade.class
+au/com/manlyit/fitnesscrm/stats/webservices/WordpressWS.class
 au/com/manlyit/fitnesscrm/stats/classes/util/ScheduledPaymentPojo.class
 au/com/manlyit/fitnesscrm/stats/db/SurveyAnswers.class
 au/com/manlyit/fitnesscrm/stats/classes/StatTypesController$StatTypesControllerConverter.class
@@ -331,7 +332,6 @@ au/com/manlyit/fitnesscrm/stats/beans/PaymentMethodsFacade.class
 au/com/manlyit/fitnesscrm/stats/callable/CronJobCallableThreadFactory.class
 au/com/manlyit/fitnesscrm/stats/beans/PaymentsFacade.class
 au/com/manlyit/fitnesscrm/stats/classes/SessionBookingsController$SessionBookingsControllerConverter.class
-au/com/manlyit/fitnesscrm/stats/webservices/WordpressInterfaceWebService.class
 au/com/manlyit/fitnesscrm/stats/webservices/PaymentDetailPlusNextPaymentInfo.class
 au/com/manlyit/fitnesscrm/stats/classes/PreferedContactController$1.class
 au/com/manlyit/fitnesscrm/stats/classes/ScheduleController.class
