@@ -13,6 +13,29 @@
         <param-name>primefaces.PUSH_SERVER_URL</param-name>
         <param-value>https://test-services.purefitnessmanly.com.au</param-value>
     </context-param>-->
+    <!--<data-source>
+        <name>jdbc/fitness</name>
+        
+        <class-name>com.mysql.jdbc.jdbc2.optional.MysqlDataSource</class-name>
+         <url>jdbc:mysql://localhost:3306/fitnessStats</url>
+        <user>root</user>
+        <password>Surf2day</password>
+    </data-source>
+     <data-source>
+        <class-name>com.mysql.jdbc.jdbc2.optional.MysqlDataSource</class-name>
+        <name>jdbc/fitness2</name>
+        <url>jdbc:mysql://localhost:3306/fitnessStats</url>
+        <user>root</user>
+        <password>Surf2day</password>
+     </data-source>
+ <data-source>
+        <class-name>com.mysql.jdbc.jdbc2.optional.MysqlDataSource</class-name>
+        <name>jdbc/quartz</name>
+        <url>jdbc:mysql://localhost:3306/fitnessStats</url>
+        <user>root</user>
+        <password>Surf2day</password>
+    </data-source>-->
+
     <context-param>
         <param-name>primefaces.SUBMIT</param-name>
         <param-value>partial</param-value>

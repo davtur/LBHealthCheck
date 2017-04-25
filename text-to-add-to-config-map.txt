@@ -2077,3 +2077,13 @@ ListPaymentsTitle_scheduledAmount=Scheduled
 passwordResetButtonLabel=Password Reset
 system.admin.alert.email.subject=Administrator Alert Email from the CRM system
 MyDetailsLogin_title=Login Details
+
+
+Tooltip_photoUploadButton=Upload your profile picture.
+Tooltip_saveMyDetails=Click on this button to save your personal details
+Tooltip_updateMyPaymentInfo= Click on this button to update your credit card or bank account details. In the pop-up window click edit, enter your new details and click on update to save.
+Tooltip_updateMyPaymentDetails= Click on this button to fill out your direct debit form online. You will be redirected to a secure EziDebit payment gateway form. 
+Tooltip_passChangeButton= Click on this button to change your password.
+DashboardOpenCustomerDashboard=Customers Dashboard
+
+NoCroppedAreaSelected=PLease select an area of the image with your mouse before clicking on the [crop] button.

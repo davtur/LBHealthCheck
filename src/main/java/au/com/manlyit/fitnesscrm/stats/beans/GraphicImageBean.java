@@ -48,7 +48,7 @@ public class GraphicImageBean {
             //if (context.getRenderResponse()) {
             if (context.getCurrentPhaseId() == PhaseId.RENDER_RESPONSE) {
                 // So, we're rendering the HTML. Return a stub StreamedContent so that it will generate right URL.
-                LOGGER.log(Level.INFO, "getImage: we're rendering the HTML. Return a stub StreamedContent so that it will generate right URL.");
+                LOGGER.log(Level.FINE, "getImage: we're rendering the HTML. Return a stub StreamedContent so that it will generate right URL.");
                 return new DefaultStreamedContent();
             } else // So, browser is requesting the image. Return a real StreamedContent with the image bytes.
             {
@@ -56,7 +56,7 @@ public class GraphicImageBean {
                 if (imageId != null) {
                     CustomerImages custImage = ejbFacade.find(Integer.valueOf(imageId));
                     if (custImage.getCustomerId().getId().compareTo(getSelectedCustomer().getId()) == 0) {
-                        LOGGER.log(Level.INFO, "getImage - returning image:{0},size:{1}, name:{2}, Encoding:{3}, Content Type: {4} ", new Object[]{imageId, custImage.getImage().length, custImage.getImageFileName(), custImage.getImageStream().getContentEncoding(), custImage.getImageStream().getContentType()});
+                        LOGGER.log(Level.FINE, "getImage - returning image:{0},size:{1}, name:{2}, Encoding:{3}, Content Type: {4} ", new Object[]{imageId, custImage.getImage().length, custImage.getImageFileName(), custImage.getImageStream().getContentEncoding(), custImage.getImageStream().getContentType()});
                         return new DefaultStreamedContent(new ByteArrayInputStream(custImage.getImage()));
                     } else {
                         LOGGER.log(Level.WARNING, "A customer is attempting to access anothers images by directly manipulating the URL posted parameters. It might be a hacker. Returning NULL instead of the image. Logged In Customer:{0},Imageid:{1}", new Object[]{getSelectedCustomer().getUsername(), imageId});
@@ -79,13 +79,13 @@ public class GraphicImageBean {
             //if (context.getRenderResponse()) {
             if (context.getCurrentPhaseId() == PhaseId.RENDER_RESPONSE) {
                 // So, we're rendering the HTML. Return a stub StreamedContent so that it will generate right URL.
-                LOGGER.log(Level.INFO, "getImageBytes: we're rendering the HTML. Return a stub StreamedContent so that it will generate right URL.");
+                LOGGER.log(Level.FINE, "getImageBytes: we're rendering the HTML. Return a stub StreamedContent so that it will generate right URL.");
                 return new DefaultStreamedContent();
             } else // So, browser is requesting the image. Return a real StreamedContent with the image bytes.
             {
                 CustomerImages custImage = ejbFacade.find(imageId);
                 if (custImage.getCustomerId().getId().compareTo(getSelectedCustomer().getId()) == 0) {
-                    LOGGER.log(Level.INFO, "getImageBytes - returning image:{0},size:{1}, name:{2}, Encoding:{3}, Content Type: {4} ", new Object[]{imageId, custImage.getImage().length, custImage.getImageFileName(), custImage.getImageStream().getContentEncoding(), custImage.getImageStream().getContentType()});
+                    LOGGER.log(Level.FINE, "getImageBytes - returning image:{0},size:{1}, name:{2}, Encoding:{3}, Content Type: {4} ", new Object[]{imageId, custImage.getImage().length, custImage.getImageFileName(), custImage.getImageStream().getContentEncoding(), custImage.getImageStream().getContentType()});
                     return new DefaultStreamedContent(new ByteArrayInputStream(custImage.getImage()));
                 } else {
                     LOGGER.log(Level.WARNING, " getImageBytes - A customer is attempting to access anothers images by directly manipulating the URL posted parameters. It might be a hacker. Returning NULL instead of the image. Logged In Customer:{0},Imageid:{1}", new Object[]{getSelectedCustomer().getUsername(), imageId});

@@ -1762,7 +1762,7 @@ public class EziDebitPaymentGateway implements Serializable {
             getCustomersController().createDefaultPaymentParameters(cust);
         }
         startAsynchJob("AddCustomer", paymentBean.addCustomer(cust, PAYMENT_GATEWAY, getDigitalKey(), authenticatedUser, sessionId));
-        JsfUtil.addSuccessMessage("Processing Add Customer to Payment Gateway Request.", "");
+        JsfUtil.addSuccessMessage("Processing Add Customer to Payment Gateway Request.");
 
     }
 

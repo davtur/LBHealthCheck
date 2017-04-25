@@ -20,37 +20,47 @@
                         <p:fileUpload  invalidSizeMessage="The size of the picture is too big! ( > 10MB )" class="parentOfUploadPhoto"
                                        fileLimitMessage="You have exceeded the limit of 100 files uploaded" fileLimit="100" auto="true" 
                                        fileUploadListener="#{customerImagesController.handleFileUpload}"  
-                                       update="@(.parentOfUploadPhoto) :growl" 
+                                       update=" :uploadPhotoForm :growl" 
                                        allowTypes="/(\.|\/)(gif|jpe?g|png)$/"
-                                       
+
                                        sizeLimit="10000000" />
 
 
 
+                        <div id="uploadedImageWrapper" style="width:320px; height:320px; margin:auto;  position:relative;">  
+                            <p:graphicImage id="uploadedPhoto"  class="dialoguePhoto " value="#{customerImagesController.uploadedImageAsStream}" style="max-width: 300px;max-height: 300px" cache="false"  />
+                        </div> 
 
-                        <p:graphicImage id="uploadedPhoto"  class="dialoguePhoto parentOfUploadPhoto" value="#{customerImagesController.uploadedImageAsStream}" style="max-width: 300px;max-height: 300px"  />
+                       <!-- <p:graphicImage id="uploadedPhoto"  class="dialoguePhoto " value="#{customerImagesController.uploadedImageAsStream}" style="max-width: 300px;max-height: 300px" cache="false" >
 
+                        </p:graphicImage>-->
                    
-
-                        <pe:imageAreaSelect id="areaSelect" class="dialoguePhoto parentOfUploadPhoto"  for="uploadedPhoto"    widgetVar="areaSelectWidget"  >  
+                        <pe:imageAreaSelect id="areaSelect"
+                                            class="dialoguePhoto "
+                                            for="uploadedPhoto"
+                                            handles="true"
+                                            widgetVar="areaSelectWidget"
+                                            parentSelector="#uploadedImageWrapper"
+                                            
+                                            >  
                             <p:ajax event="selectEnd" listener="#{customerImagesController.selectEndListener}" update=":growl"/>  
                         </pe:imageAreaSelect> 
                         <div class="Container100 Responsive100">
                             <div class="ContainerIndent">
                                 <p:outputLabel  value="#{configMapController.getKey('CreateCustomerImagesLabel_profilephoto')}" for="profilephoto" />
-                                <p:selectBooleanCheckbox id="profilephoto"  class="parentOfUploadPhoto" disabled="#{customerImagesController.saveButtonDisabled}"  value="#{customerImagesController.profilePhoto}" style="padding: 5px" >
+                                <p:selectBooleanCheckbox id="profilephoto"   disabled="#{customerImagesController.saveButtonDisabled}"  value="#{customerImagesController.profilePhoto}" style="padding: 5px" >
                                     <p:ajax event="change" />
                                 </p:selectBooleanCheckbox> 
                             </div>
                         </div>
 
-                        <p:commandButton id="rotateButton" icon="fa fa-rotate-right white Fs14"  class="parentOfUploadPhoto"  disabled="#{customerImagesController.saveButtonDisabled}"   actionListener="#{customerImagesController.rotateStreamedContent90degrees}" update="@(.parentOfUploadPhoto) :growl"  value="#{configMapController.getKey('CreateCustomerImagesRotateImage90Link')}" />
+                        <p:commandButton id="rotateButton" icon="fa fa-rotate-right white Fs14"    disabled="#{customerImagesController.saveButtonDisabled}"   actionListener="#{customerImagesController.rotateStreamedContent90degrees}" update=" :uploadPhotoForm  :growl"  value="#{configMapController.getKey('CreateCustomerImagesRotateImage90Link')}" />
 
-                        <p:commandButton id="cropButton" icon=" fa fa-crop white Fs14" class="parentOfUploadPhoto" disabled="#{customerImagesController.saveButtonDisabled}" actionListener="#{customerImagesController.crop}"  update="@(.parentOfUploadPhoto)  :growl"  value="#{configMapController.getKey('CreateCustomerImagesCropLink')}"  />
+                        <p:commandButton id="cropButton" icon=" fa fa-crop white Fs14" disabled="#{customerImagesController.saveButtonDisabled}" actionListener="#{customerImagesController.crop}"  update=" :uploadPhotoForm  :growl"  value="#{configMapController.getKey('CreateCustomerImagesCropLink')}"  />
 
-                        <p:commandButton id="saveButton"  icon="fa fa-check white Fs14" class="parentOfUploadPhoto" disabled="#{customerImagesController.saveButtonDisabled}"  actionListener="#{customerImagesController.createFromUploadDialogue}" update="@(.parentOfUploadPhoto) :growl"   value="#{configMapController.getKey('CreateCustomerImagesSaveLink')}" />
+                        <p:commandButton id="saveButton"  icon="fa fa-check white Fs14"  disabled="#{customerImagesController.saveButtonDisabled}"  actionListener="#{customerImagesController.createFromUploadDialogue}" update="@(.parentOfUploadPhoto) :uploadPhotoForm  :growl"   value="#{configMapController.getKey('CreateCustomerImagesSaveLink')}" />
 
-                        <p:commandButton  id="closeDialogueButton" icon="fa fa-trash white Fs14"   ajax="true" oncomplete="PF('uploadPhotoDialogueWidget').hide();"  update=":growl "   value="#{configMapController.getKey('EditCustomersuploadPhoto')}" immediate="true"/>
+                       <!-- <p:commandButton  id="closeDialogueButton" icon="fa fa-trash white Fs14"   ajax="true" oncomplete="PF('uploadPhotoDialogueWidget').hide();"  update=" :uploadPhotoForm   :growl "   value="#{configMapController.getKey('EditCustomersuploadPhoto')}" immediate="true"/>-->
                     </h:form>
                 </div>
             </div>

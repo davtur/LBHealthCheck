@@ -51,25 +51,25 @@ Portions Copyright [2016] [Payara Foundation and/or its affiliates]
     <system-applications />
     <applications />
     <resources>
-<jdbc-resource pool-name="mysql_fitnessStats_rootPool" jndi-name="jdbc/fitness"></jdbc-resource>
-    <jdbc-resource pool-name="mysql_fitnessStats_rootPool2" jndi-name="jdbc/fitness2"></jdbc-resource>
-    <jdbc-resource pool-name="fitnessStats_quartzPool" object-type="system-all" jndi-name="jdbc/quartz"></jdbc-resource>
+        <jdbc-resource pool-name="mysql_fitnessStats_rootPool" jndi-name="jdbc/fitness"></jdbc-resource>
+        <jdbc-resource pool-name="mysql_fitnessStats_rootPool2" jndi-name="jdbc/fitness2"></jdbc-resource>
+        <jdbc-resource pool-name="fitnessStats_quartzPool" object-type="system-all" jndi-name="jdbc/quartz"></jdbc-resource>
 
- <jdbc-connection-pool datasource-classname="com.mysql.jdbc.jdbc2.optional.MysqlDataSource" name="mysql_fitnessStats_rootPool" wrap-jdbc-objects="false" is-connection-validation-required="true" connection-validation-method="auto-commit" res-type="javax.sql.DataSource">
-      <property name="User" value="root"></property>
-      <property name="Password" value="Surf2day"></property>
-      <property name="URL" value="jdbc:mysql://localhost:3306/fitnessStats"></property>
-    </jdbc-connection-pool>
-    <jdbc-connection-pool datasource-classname="com.mysql.jdbc.jdbc2.optional.MysqlDataSource" name="mysql_fitnessStats_rootPool2" wrap-jdbc-objects="false" is-connection-validation-required="true" connection-validation-method="auto-commit" res-type="javax.sql.DataSource">
-      <property name="User" value="root"></property>
-      <property name="Password" value="Surf2day"></property>
-      <property name="URL" value="jdbc:mysql://localhost:3306/fitnessStats"></property>
-    </jdbc-connection-pool>
-<jdbc-connection-pool datasource-classname="com.mysql.jdbc.jdbc2.optional.MysqlDataSource" name="fitnessStats_quartzPool" wrap-jdbc-objects="false" is-connection-validation-required="true" connection-validation-method="auto-commit" res-type="javax.sql.ConnectionPoolDataSource">
-      <property name="URL" value="jdbc:mysql://localhost:3306/fitnessStats"></property>
-      <property name="Password" value="Surf2day"></property>
-      <property name="User" value="root"></property>
-    </jdbc-connection-pool>
+        <jdbc-connection-pool datasource-classname="com.mysql.jdbc.jdbc2.optional.MysqlDataSource" name="mysql_fitnessStats_rootPool" wrap-jdbc-objects="false" is-connection-validation-required="true" connection-validation-method="auto-commit" res-type="javax.sql.DataSource">
+            <property name="User" value="root"></property>
+            <property name="Password" value="Surf2day"></property>
+            <property name="URL" value="jdbc:mysql://localhost:3306/fitnessStats"></property>
+        </jdbc-connection-pool>
+        <jdbc-connection-pool datasource-classname="com.mysql.jdbc.jdbc2.optional.MysqlDataSource" name="mysql_fitnessStats_rootPool2" wrap-jdbc-objects="false" is-connection-validation-required="true" connection-validation-method="auto-commit" res-type="javax.sql.DataSource">
+            <property name="User" value="root"></property>
+            <property name="Password" value="Surf2day"></property>
+            <property name="URL" value="jdbc:mysql://localhost:3306/fitnessStats"></property>
+        </jdbc-connection-pool>
+        <jdbc-connection-pool datasource-classname="com.mysql.jdbc.jdbc2.optional.MysqlDataSource" name="fitnessStats_quartzPool" wrap-jdbc-objects="false" is-connection-validation-required="true" connection-validation-method="auto-commit" res-type="javax.sql.ConnectionPoolDataSource">
+            <property name="URL" value="jdbc:mysql://localhost:3306/fitnessStats"></property>
+            <property name="Password" value="Surf2day"></property>
+            <property name="User" value="root"></property>
+        </jdbc-connection-pool>
 
         <jdbc-resource pool-name="DerbyPool" jndi-name="jdbc/__default" object-type="system-all" />
         <jdbc-connection-pool is-isolation-level-guaranteed="false" name="DerbyPool" datasource-classname="org.apache.derby.jdbc.EmbeddedDataSource" res-type="javax.sql.DataSource">
@@ -84,9 +84,9 @@ Portions Copyright [2016] [Payara Foundation and/or its affiliates]
     <servers>
         <server name="server" config-ref="server-config">
             <resource-ref ref="jdbc/__default" />
-<resource-ref ref="jdbc/fitness"></resource-ref>
-      <resource-ref ref="jdbc/fitness2"></resource-ref>
-      <resource-ref ref="jdbc/quartz"></resource-ref>
+            <resource-ref ref="jdbc/fitness"></resource-ref>
+            <resource-ref ref="jdbc/fitness2"></resource-ref>
+            <resource-ref ref="jdbc/quartz"></resource-ref>
         </server>
     </servers>
     <configs>
@@ -121,20 +121,20 @@ Portions Copyright [2016] [Payara Foundation and/or its affiliates]
                 <module-log-levels />
             </log-service>
             <security-service activate-default-principal-to-role-mapping="true" jacc="simple">
- <auth-realm classname="com.sun.enterprise.security.auth.realm.jdbc.JDBCRealm" name="ptStatsRealm">
-          <property name="jaas-context" value="jdbcRealm"></property>
-          <property name="password-column" value="password"></property>
-          <property name="datasource-jndi" value="jdbc/fitness"></property>
-          <property name="group-table" value="groups"></property>
-          <property name="user-table" value="customers"></property>
-          <property name="group-name-column" value="groupname"></property>
-          <property name="user-name-column" value="username"></property>
-          <property name="db-user" value="purefit"></property>
-          <property name="db-password" value="56Tom$rew"></property>
-          <property name="digest-algorithm" value="SHA-256"></property>
-          <property name="encoding" value="Base64"></property>
-          <property name="charset" value="UTF-8"></property>
-        </auth-realm>
+                <auth-realm classname="com.sun.enterprise.security.auth.realm.jdbc.JDBCRealm" name="ptStatsRealm">
+                    <property name="jaas-context" value="jdbcRealm"></property>
+                    <property name="password-column" value="password"></property>
+                    <property name="datasource-jndi" value="jdbc/fitness"></property>
+                    <property name="group-table" value="groups"></property>
+                    <property name="user-table" value="customers"></property>
+                    <property name="group-name-column" value="groupname"></property>
+                    <property name="user-name-column" value="username"></property>
+                    <property name="db-user" value="purefit"></property>
+                    <property name="db-password" value="56Tom$rew"></property>
+                    <property name="digest-algorithm" value="SHA-256"></property>
+                    <property name="encoding" value="Base64"></property>
+                    <property name="charset" value="UTF-8"></property>
+                </auth-realm>
                 <auth-realm classname="com.sun.enterprise.security.auth.realm.file.FileRealm" name="admin-realm">
                     <property value="${com.sun.aas.instanceRoot}/config/admin-keyfile" name="file" />
                     <property value="fileRealm" name="jaas-context" />
@@ -218,8 +218,9 @@ Portions Copyright [2016] [Payara Foundation and/or its affiliates]
                     </protocol>
                 </protocols>
                 <network-listeners>
-                    <network-listener port="8080" protocol="http-listener" transport="tcp" name="http-listener" thread-pool="http-thread-pool" enabled="true" />
-                    <network-listener port="8443" protocol="https-listener" transport="tcp" name="https-listener" thread-pool="http-thread-pool" enabled="false" />
+                   <network-listener port="8080" protocol="http-listener" transport="tcp" name="http-listener" thread-pool="http-thread-pool" enabled="true" />
+                    <!-- <network-listener port="8443" protocol="https-listener" transport="tcp" name="https-listener" thread-pool="http-thread-pool" enabled="false" />-->
+                     <network-listener protocol="http-listener" jk-enabled="true" port="8009" name="http-listener" thread-pool="http-thread-pool" transport="tcp"></network-listener>
                 </network-listeners>
                 <transports>
                     <transport byte-buffer-type="HEAP" name="tcp" acceptor-threads="-1"></transport>

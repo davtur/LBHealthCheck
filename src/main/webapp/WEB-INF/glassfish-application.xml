@@ -1,0 +1,21 @@
+
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE glassfish-application PUBLIC "-//GlassFish.org//DTD GlassFish Application Server 3.1 Java EE Application 6.0//EN" "http://glassfish.org/dtds/glassfish-application_6_0-1.dtd">
+<glassfish-application>
+    <security-service>
+        <auth-realm classname="com.sun.enterprise.security.auth.realm.jdbc.JDBCRealm" name="ptStatsRealm">
+            <property name="jaas-context" value="jdbcRealm"></property>
+            <property name="password-column" value="password"></property>
+            <property name="datasource-jndi" value="jdbc/fitness"></property>
+            <property name="group-table" value="groups"></property>
+            <property name="user-table" value="customers"></property>
+            <property name="group-name-column" value="groupname"></property>
+            <property name="user-name-column" value="username"></property>
+            <property name="db-user" value="purefit"></property>
+            <property name="db-password" value="56Tom$rew"></property>
+            <property name="digest-algorithm" value="SHA-256"></property>
+            <property name="encoding" value="Base64"></property>
+            <property name="charset" value="UTF-8"></property>
+        </auth-realm>
+    </security-service>
+</glassfish-application>

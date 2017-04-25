@@ -4,7 +4,9 @@
                  xmlns:ui="http://java.sun.com/jsf/facelets"
                  xmlns:h="http://java.sun.com/jsf/html"
                  xmlns:f="http://java.sun.com/jsf/core"
-                 xmlns:p="http://primefaces.org/ui" >
+                  xmlns:pe="http://primefaces.org/ui/extensions"
+                 xmlns:p="http://primefaces.org/ui"
+                 >
 
     <h:form id="customerslistForm1" styleClass="updatePaymentInfo" >
 
@@ -76,7 +78,7 @@
                 <div class="Container100 TexAlRight">
                     <h:panelGrid columns="2" cellpadding="5" >
                         <p:commandButton id="addNoteDialogButton1"  value="#{configMapController.getKey('ListNotesCreateLink')}" onclick="PF('NotesCreateDialogue').show()" type="button"/> 
-                        <p:commandButton id="showDialogButton"  oncomplete="PF('customersCreateDialogue').show()"   actionListener="#{customersController.prepareCreateAjax}" value="#{configMapController.getKey('ListCustomersCreateLink')}"  update=":formCustomersCreate1:dialogueGrid :formCustomersCreate1:dialogueGrid2 :growl" /> 
+                        <p:commandButton id="showDialogButton"  oncomplete="PF('customersCreateDialogue').show()"   actionListener="#{customersController.prepareCreateAjax}" value="#{configMapController.getKey('ListCustomersCreateLink')}"  update="@(.updateNameChanged) :formCustomersCreate1:dialogueGrid :formCustomersCreate1:dialogueGrid2 :growl" /> 
                     </h:panelGrid >
 
                 </div>

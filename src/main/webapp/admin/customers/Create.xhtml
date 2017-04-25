@@ -25,12 +25,12 @@
 
                             <p:outputLabel value="#{configMapController.getKey('EditCustomersLabel_firstname')}" for="firstname" />
                             <p:inputText id="firstname"  value="#{customersController.newCustomer.firstname}" title="#{configMapController.getKey('EditCustomersTitle_firstname')}" valueChangeListener="#{customersController.dialogueFirstNameListener}" required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_firstname')}">
-                                <p:ajax update=":formCustomersCreate1:username :formCustomersCreate1:dialogueSave" event="keyup"/>
+                                <p:ajax update=" @(.updateNameChanged)" event="keyup"/>
                             </p:inputText>
 
                             <p:outputLabel value="#{configMapController.getKey('EditCustomersLabel_lastname')}" for="lastname" />
                             <p:inputText id="lastname" value="#{customersController.newCustomer.lastname}" title="#{configMapController.getKey('EditCustomersTitle_lastname')}" valueChangeListener="#{customersController.dialogueLastNameListener}" required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_lastname')}">
-                                <p:ajax update=":formCustomersCreate1:username  :formCustomersCreate1:dialogueSave" event="keyup" />
+                                <p:ajax update=" @(.updateNameChanged)" event="keyup" />
                             </p:inputText>
                             <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_gender')}" title="#{configMapController.getKey('EditCustomersTitle_gender')}" for="gender" />
                             <p:selectOneMenu  styleClass="selectOneWidth" id="gender" value="#{customersController.newCustomer.gender}"   required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_gender')}">
@@ -60,7 +60,7 @@
                             <p:inputText id="emergencyContactName" value="#{customersController.newCustomer.emergencyContactName}" title="#{configMapController.getKey('CreateCustomersTitle_emergencyContactName')}" />
 
                             <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_username')}" for="username" />
-                            <p:inputText id="username" value="#{customersController.newCustomer.username}" title="#{configMapController.getKey('CreateCustomersTitle_username')}" required="true" requiredMessage="#{configMapController.getKey('CreateCustomersRequiredMessage_username')}"/>
+                            <p:inputText id="username" styleClass="updateNameChanged" value="#{customersController.newCustomer.username}" title="#{configMapController.getKey('CreateCustomersTitle_username')}" required="true" requiredMessage="#{configMapController.getKey('CreateCustomersRequiredMessage_username')}"/>
 
                         </h:panelGrid>
                     </div>
@@ -109,7 +109,7 @@
                             </p:selectOneMenu>
                             <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_emergencyContactPhone')}" for="emergencyContactPhone" />
                             <p:inputText id="emergencyContactPhone" value="#{customersController.newCustomer.emergencyContactPhone}" title="#{configMapController.getKey('CreateCustomersTitle_emergencyContactPhone')}" >
-                              <!--  <f:validator validatorId="au.com.manlyit.fitnesscrm.stats.classes.util.PhoneNumberValidator" />-->
+                                <!--  <f:validator validatorId="au.com.manlyit.fitnesscrm.stats.classes.util.PhoneNumberValidator" />-->
                             </p:inputText>
                             <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_password')}" for="pword" />
                             <p:password id="pword"  value="#{customersController.checkPass}" onfocus="this.select()" feedback="true" title="#{configMapController.getKey('EditCustomersTitle_password')}" >
@@ -129,15 +129,21 @@
             <div class="Container100 Responsive100">
                 <div class="Container50 Responsive50">
                     <div class="ContainerIndent">
-                        <div class="ContainerIndent">
-                    <p:outputLabel rendered="#{customersController.addUserButtonDisabled}" styleClass="red FontBold animated pulse infinite" value="#{configMapController.getKey('CreateCustomersLabel_customerExists')}" for="pword" />
-                    </div>
-                    <!--    <p:commandButton icon="ui-icon-check fa fa-check white Fs14" id="dialogueSave" process="@this :formCustomersCreate1" oncomplete="handleCreateCustomerComplete(xhr, status, args);" disabled="#{customersController.addUserButtonDisabled}"   actionListener="#{customersController.createDialogue}"  value="#{configMapController.getKey('CreateCustomersSaveLink')}" update=":growl :tv:customerslistForm1 :tv:formCustomersEdit1 :formCustomersCreate1 :tv:paymentsForm :tv:NoteslistForm1"/>   -->             
-                       <p:commandButton icon="ui-icon-check fa fa-check white Fs14" id="dialogueSave"  oncomplete="PF('customersCreateDialogue').hide()" disabled="#{customersController.addUserButtonDisabled}"   actionListener="#{customersController.createDialogue}"  value="#{configMapController.getKey('CreateCustomersSaveLink')}" update=":growl :tv:customerslistForm1 :tv:formCustomersEdit1 :formCustomersCreate1 :tv:paymentsForm :tv:NoteslistForm1"/>                
 
-                        <p:commandButton icon=" fa fa-times-circle white Fs14" id="dialogueDiscard" onclick="PF('customersCreateDialogue').hide()"  actionListener="#{customersController.cancelCreateDialogue}" value="#{configMapController.getKey('CreateCustomersDiscardLink')}" update=":growl"/>                
+                        <p:panel styleClass="updateNameChanged" >
+                            <div class="ContainerIndent red FontBold animated pulse infinite">
+                                <h:outputText  rendered="#{customersController.addUserButtonDisabled}" style="padding:5px"  value="#{configMapController.getKey('CreateCustomersLabel_customerExists')}" />
+
+                            </div>
+                                <!-- <h:outputText  rendered="#{customersController.addUserButtonDisabled}" style="padding:5px" styleClass="red FontBold animated pulse infinite updateNameChanged" value="#{configMapController.getKey('CreateCustomersLabel_customerExists')}" />-->
+
+                      <!--    <p:commandButton icon="ui-icon-check fa fa-check white Fs14" id="dialogueSave" process="@this :formCustomersCreate1" oncomplete="handleCreateCustomerComplete(xhr, status, args);" disabled="#{customersController.addUserButtonDisabled}"   actionListener="#{customersController.createDialogue}"  value="#{configMapController.getKey('CreateCustomersSaveLink')}" update=":growl :tv:customerslistForm1 :tv:formCustomersEdit1 :formCustomersCreate1 :tv:paymentsForm :tv:NoteslistForm1"/>   -->             
+                            <p:commandButton icon="ui-icon-check fa fa-check white Fs14"   oncomplete="PF('customersCreateDialogue').hide()" disabled="#{customersController.addUserButtonDisabled}"   actionListener="#{customersController.createDialogue}"  value="#{configMapController.getKey('CreateCustomersSaveLink')}" update=":growl :tv:customerslistForm1 :tv:formCustomersEdit1 :formCustomersCreate1 :tv:paymentsForm :tv:NoteslistForm1"/>                
+
+                            <p:commandButton icon=" fa fa-times-circle white Fs14"  onclick="PF('customersCreateDialogue').hide()"  actionListener="#{customersController.cancelCreateDialogue}" value="#{configMapController.getKey('CreateCustomersDiscardLink')}" update=":growl"/>                
+                        </p:panel>
                     </div>
-                    
+
                 </div>
                 <div class="Container25 Responsive">
                     <div class="ContainerIndent">
@@ -156,18 +162,18 @@
         </h:form>
     </p:dialog>
     <h:outputScript id="handleCompleteScript" target="body">
-         /* <![CDATA[ */
+        /* <![CDATA[ */
         function handleCreateCustomerComplete(xhr, status, args) {
         alert("Checking Validation:" + args.validationFailed );
-            if (args.validationFailed == true) {
-                
-            }else{
-            PF('customersCreateDialogue').hide();
-                alert("Validation OK");
-            }
+        if (args.validationFailed == true) {
+
+        }else{
+        PF('customersCreateDialogue').hide();
+        alert("Validation OK");
         }
-        
-          /* ]]> */
+        }
+
+        /* ]]> */
     </h:outputScript>
 </ui:composition>
 
