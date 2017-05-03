@@ -68,12 +68,12 @@ public class SurveyQuestionsController implements Serializable {
     }
 
     public SurveyQuestions getSelected() {
-        if (current == null) {
+        /*  if (current == null) {
             current = new SurveyQuestions(0, "");
             current.setSurveyQuestionSubitemsCollection(new ArrayList<>());
             current.setSurveyId(selectedSurvey);
             selectedItemIndex = -1;
-        }
+        }*/
         return current;
     }
 
@@ -210,9 +210,10 @@ public class SurveyQuestionsController implements Serializable {
     }
 
     public String prepareCreate() {
-        current = null;
-        getSelected();
-
+        current = new SurveyQuestions(0, "");
+        current.setSurveyQuestionSubitemsCollection(new ArrayList<>());
+        current.setSurveyId(selectedSurvey);
+        selectedItemIndex = -1;
         return "Create";
     }
 
@@ -448,8 +449,8 @@ public class SurveyQuestionsController implements Serializable {
     public void destroy() {
         //getSelectedSurvey().getSurveyQuestionsCollection().remove(getSelected());
         try {
-            
-            getFacade().remove(current);
+            getSelectedSurvey().getSurveyQuestionsCollection().remove(getSelected());
+            getFacade().remove(getSelected());
             surveysFacade.edit(getSelectedSurvey());
             current = null;
             subItems = null;
@@ -536,7 +537,7 @@ public class SurveyQuestionsController implements Serializable {
     }
 
     public SelectItem[] getItemsAvailableSelectMany() {
-       // file:///home/david/.netbeans/8.0/config/Templates/JSF/JSF_From_Entity_Wizard/StandardJSF/create.ftl
+        // file:///home/david/.netbeans/8.0/config/Templates/JSF/JSF_From_Entity_Wizard/StandardJSF/create.ftl
 
         return JsfUtil.getSelectItems(ejbFacade.findAll(), false);
     }

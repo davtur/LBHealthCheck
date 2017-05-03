@@ -196,7 +196,7 @@ public class CustomerImagesController implements Serializable {
                         ci.setCustomerId(cust);
                         ci.setDatetaken(new Date());
 
-                        ejbFacade.edit(ci);
+                        ejbFacade.create(ci);
                         cust.setProfileImage(ci);
                         ejbCustomersFacade.edit(cust);
                     } catch (Exception e) {

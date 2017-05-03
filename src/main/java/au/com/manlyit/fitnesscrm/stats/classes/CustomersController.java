@@ -7,11 +7,12 @@ import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.beans.CustomersFacade;
 import au.com.manlyit.fitnesscrm.stats.beans.LoginBean;
 import au.com.manlyit.fitnesscrm.stats.beans.PaymentsFacade;
-import au.com.manlyit.fitnesscrm.stats.beans.util.PaymentPeriod;
 import au.com.manlyit.fitnesscrm.stats.chartbeans.MySessionsChart1;
 import au.com.manlyit.fitnesscrm.stats.classes.util.DatatableSelectionHelper;
+import au.com.manlyit.fitnesscrm.stats.classes.util.EmailValidator;
 import au.com.manlyit.fitnesscrm.stats.classes.util.FutureMapEJB;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PfSelectableDataModel;
+import au.com.manlyit.fitnesscrm.stats.classes.util.PhoneNumberValidator;
 import au.com.manlyit.fitnesscrm.stats.db.CustomerState;
 import au.com.manlyit.fitnesscrm.stats.db.Groups;
 import au.com.manlyit.fitnesscrm.stats.db.Notes;
@@ -36,7 +37,6 @@ import java.util.logging.Logger;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.util.List;
-import java.util.Locale;
 import java.util.Properties;
 import java.util.Random;
 import java.util.concurrent.Future;
@@ -45,7 +45,9 @@ import java.util.regex.Pattern;
 import javax.ejb.TransactionAttribute;
 import static javax.ejb.TransactionAttributeType.REQUIRES_NEW;
 import javax.enterprise.context.SessionScoped;
+import javax.faces.application.FacesMessage;
 import javax.faces.component.UIComponent;
+import javax.faces.component.UIInput;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.faces.convert.Converter;
@@ -53,6 +55,7 @@ import javax.faces.convert.FacesConverter;
 import javax.faces.event.ActionEvent;
 import javax.faces.event.ValueChangeEvent;
 import javax.faces.model.SelectItem;
+import javax.faces.validator.ValidatorException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import org.primefaces.component.datatable.DataTable;
@@ -1213,9 +1216,79 @@ public class CustomersController implements Serializable {
 
     }
 
+    private boolean validateNewCustomer(Customers cust, ActionEvent actionEvent) {
+        boolean result = true;
+        RequestContext requestContext = RequestContext.getCurrentInstance();
+        FacesContext facesContext =FacesContext.getCurrentInstance();
+        String message = "";
+        // we only want to check that a valid name, email and phonenumber has been entered.
+
+        
+        //validate email address
+        EmailValidator ev = new EmailValidator();
+        UIInput input = (UIInput) actionEvent.getComponent().findComponent("emailAddress");
+        input.setValid(true);
+        try {
+            ev.validate(facesContext, input, cust.getEmailAddress());
+        } catch (ValidatorException validatorException) {
+            result = false;
+            input.setValid(result);
+            message = "Email not valid. ";
+        }
+
+        
+        //validate phone
+        PhoneNumberValidator phv = new PhoneNumberValidator();
+        UIInput input2 = (UIInput) actionEvent.getComponent().findComponent("telephone");
+        input2.setValid(true);
+        try {
+            phv.validate(facesContext, input2, cust.getTelephone());
+        } catch (ValidatorException validatorException) {
+            result = false;
+            input2.setValid(result);
+            message += "Phone Number not valid. ";
+        }
+        
+        //validate firstname
+        
+        UIInput input3 = (UIInput) actionEvent.getComponent().findComponent("firstname");
+        input3.setValid(true);
+        if(cust.getFirstname().trim().isEmpty()){
+            result = false;
+            input3.setValid(result);
+            message += "Firstname is empty. ";
+        }
+        
+        
+        //validate lastname
+        
+        UIInput input4 = (UIInput) actionEvent.getComponent().findComponent("lastname");
+        input4.setValid(true);
+        if(cust.getLastname().trim().isEmpty()){
+            result = false;
+            input4.setValid(result);
+            message += "Lastname is empty. ";
+        }
+        
+        
+
+        if (result == true) {
+            requestContext.addCallbackParam("validNewCustomer", true);
+        } else {
+            FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, "Data Entry Error", message);
+            FacesContext.getCurrentInstance().addMessage(null, msg);
+            requestContext.addCallbackParam("validNewCustomer", false);
+        }
+
+        return result;
+    }
+
     public void createDialogue(ActionEvent actionEvent) {
-        createFromListener();
-        //RequestContext.getCurrentInstance().closeDialog("customersCreateDialogue");
+
+        if (validateNewCustomer(newCustomer, actionEvent)) {
+            createFromListener();
+        }
+
     }
 
     private void createFromListener() {
