@@ -120,6 +120,7 @@ public class CustomersController implements Serializable {
     private List<Groups> newCustomerGroupsList;
     private PfSelectableDataModel<Customers> items = null;
     private PfSelectableDataModel<Customers> customersWithoutScheduledPayments = null;
+    private PfSelectableDataModel<Customers> customersOutIfSyncWithGateway = null;
     private PfSelectableDataModel<Customers> leads = null;
     private PfSelectableDataModel<Customers> customersOnHold = null;
     private PfSelectableDataModel<Payments> customersBadPayments = null;
@@ -172,15 +173,18 @@ public class CustomersController implements Serializable {
     private Plan customersNewPlan;
     private List<Customers> filteredItems;
     private List<Customers> filteredCustomersWithoutScheduledPayments;
+    private List<Customers> filteredCustomersOutIfSyncWithGateway;
     private List<Customers> filteredLeads;
     private List<Customers> filteredCustomersOnHold;
     private List<Payments> filteredCustomersBadPayments;
     private List<Notes> notesFilteredItems;
     private Customers[] multiSelected;
     private Customers[] multiSelectedCustomersWithoutScheduledPayments;
+    private Customers[] multiSelectedCustomersOutIfSyncWithGateway;
     private Customers[] multiSelectedLeads;
     private Customers[] multiSelectedCustomersOnHold;
     private Payments[] multiSelectedCustomersBadPayments;
+
     // private Groups[] selectedGroups;
     private List<Groups> selectedGroups;
     private String checkPass;
@@ -1219,11 +1223,10 @@ public class CustomersController implements Serializable {
     private boolean validateNewCustomer(Customers cust, ActionEvent actionEvent) {
         boolean result = true;
         RequestContext requestContext = RequestContext.getCurrentInstance();
-        FacesContext facesContext =FacesContext.getCurrentInstance();
+        FacesContext facesContext = FacesContext.getCurrentInstance();
         String message = "";
         // we only want to check that a valid name, email and phonenumber has been entered.
 
-        
         //validate email address
         EmailValidator ev = new EmailValidator();
         UIInput input = (UIInput) actionEvent.getComponent().findComponent("emailAddress");
@@ -1236,7 +1239,6 @@ public class CustomersController implements Serializable {
             message = "Email not valid. ";
         }
 
-        
         //validate phone
         PhoneNumberValidator phv = new PhoneNumberValidator();
         UIInput input2 = (UIInput) actionEvent.getComponent().findComponent("telephone");
@@ -1248,29 +1250,24 @@ public class CustomersController implements Serializable {
             input2.setValid(result);
             message += "Phone Number not valid. ";
         }
-        
+
         //validate firstname
-        
         UIInput input3 = (UIInput) actionEvent.getComponent().findComponent("firstname");
         input3.setValid(true);
-        if(cust.getFirstname().trim().isEmpty()){
+        if (cust.getFirstname().trim().isEmpty()) {
             result = false;
             input3.setValid(result);
             message += "Firstname is empty. ";
         }
-        
-        
+
         //validate lastname
-        
         UIInput input4 = (UIInput) actionEvent.getComponent().findComponent("lastname");
         input4.setValid(true);
-        if(cust.getLastname().trim().isEmpty()){
+        if (cust.getLastname().trim().isEmpty()) {
             result = false;
             input4.setValid(result);
             message += "Lastname is empty. ";
         }
-        
-        
 
         if (result == true) {
             requestContext.addCallbackParam("validNewCustomer", true);
@@ -3175,5 +3172,88 @@ public class CustomersController implements Serializable {
      */
     public void setFilteredCustomersBadPayments(List<Payments> filteredCustomersBadPayments) {
         this.filteredCustomersBadPayments = filteredCustomersBadPayments;
+    }
+
+    /**
+     * @return the customersOutIfSyncWithGateway
+     */
+    public PfSelectableDataModel<Customers> getCustomersOutIfSyncWithGateway() {
+        if (customersOutIfSyncWithGateway == null) {
+            List<Customers> cl = ejbFacade.findAll(true);
+            List<Customers> badStatus = new ArrayList<>();
+            for (Customers c : cl) {
+                try {
+                         if (c.getActive().getCustomerState().contains("ACTIVE")) {
+                            if (c.getPaymentParametersId().getStatusCode().contentEquals("D") || c.getPaymentParametersId().getStatusCode().contentEquals("A") || c.getPaymentParametersId().getStatusCode().contentEquals("N")) {
+                                Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.INFO, "Active Customer {0}, status {1}, payment gateway sync OK", new Object[]{c.getUsername(), c.getPaymentParametersId().getStatusCode()});
+                            } else {
+                                badStatus.add(c);
+                                Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.INFO, "Active Customer {0}, status {1}, payment gateway sync BAD STATUS", new Object[]{c.getUsername(), c.getPaymentParametersId().getStatusCode()});
+                            }
+                            
+                        } else if (c.getActive().getCustomerState().contains("ON HOLD")) {
+                            if (c.getPaymentParametersId().getStatusCode().contains("H") || c.getPaymentParametersId().getStatusCode().contentEquals("D")) {
+                                Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.INFO, "ON HOLD Customer {0}, status {1}, payment gateway sync OK", new Object[]{c.getUsername(), c.getPaymentParametersId().getStatusCode()});
+                            } else {
+                                badStatus.add(c);
+                                Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.INFO, "ON HOLD Customer {0}, status {1}, payment gateway sync BAD STATUS", new Object[]{c.getUsername(), c.getPaymentParametersId().getStatusCode()});
+                                
+                            }
+                        } else if (c.getActive().getCustomerState().contains("CANCELLED")) {
+                            if (c.getPaymentParametersId().getStatusCode().startsWith("C") || c.getPaymentParametersId().getStatusCode().contentEquals("D")) {
+                                Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.INFO, "CANCELLED Customer {0}, status {1}, payment gateway sync OK", new Object[]{c.getUsername(), c.getPaymentParametersId().getStatusCode()});
+                            } else {
+                                badStatus.add(c);
+                                Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.INFO, "CANCELLED Customer {0}, status {1}, payment gateway sync BAD STATUS", new Object[]{c.getUsername(), c.getPaymentParametersId().getStatusCode()});
+                                
+                            }
+                        }
+                    
+                } catch (Exception e) {
+                    Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.WARNING, "ERROR Customer {0}, {1} ", new Object[]{c.getUsername(),e.getMessage()});
+                }
+            }
+            customersOutIfSyncWithGateway = new PfSelectableDataModel<>(badStatus);
+
+        }
+        return customersOutIfSyncWithGateway;
+    }
+
+    /**
+     * @param customersOutIfSyncWithGateway the customersOutIfSyncWithGateway to
+     * set
+     */
+    public void setCustomersOutIfSyncWithGateway(PfSelectableDataModel<Customers> customersOutIfSyncWithGateway) {
+        this.customersOutIfSyncWithGateway = customersOutIfSyncWithGateway;
+    }
+
+    /**
+     * @return the filteredCustomersOutIfSyncWithGateway
+     */
+    public List<Customers> getFilteredCustomersOutIfSyncWithGateway() {
+        return filteredCustomersOutIfSyncWithGateway;
+    }
+
+    /**
+     * @param filteredCustomersOutIfSyncWithGateway the
+     * filteredCustomersOutIfSyncWithGateway to set
+     */
+    public void setFilteredCustomersOutIfSyncWithGateway(List<Customers> filteredCustomersOutIfSyncWithGateway) {
+        this.filteredCustomersOutIfSyncWithGateway = filteredCustomersOutIfSyncWithGateway;
+    }
+
+    /**
+     * @return the multiSelectedCustomersOutIfSyncWithGateway
+     */
+    public Customers[] getMultiSelectedCustomersOutIfSyncWithGateway() {
+        return multiSelectedCustomersOutIfSyncWithGateway;
+    }
+
+    /**
+     * @param multiSelectedCustomersOutIfSyncWithGateway the
+     * multiSelectedCustomersOutIfSyncWithGateway to set
+     */
+    public void setMultiSelectedCustomersOutIfSyncWithGateway(Customers[] multiSelectedCustomersOutIfSyncWithGateway) {
+        this.multiSelectedCustomersOutIfSyncWithGateway = multiSelectedCustomersOutIfSyncWithGateway;
     }
 }

@@ -59,6 +59,15 @@ import org.eclipse.persistence.config.CacheIsolationType;
     @NamedQuery(name = "PaymentParameters.findBySmsExpiredCard", query = "SELECT p FROM PaymentParameters p WHERE p.smsExpiredCard = :smsExpiredCard"),
     @NamedQuery(name = "PaymentParameters.findByPaymentGatewayName", query = "SELECT p FROM PaymentParameters p WHERE p.paymentGatewayName = :paymentGatewayName")})
 public class PaymentParameters implements  BaseEntity, Serializable {
+
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "lastUpdatedFromPaymentGateway")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date lastUpdatedFromPaymentGateway;
+    @Column(name = "cancellationDate")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date cancellationDate;
     @Column(name = "paymentRegularAmount")
     private BigDecimal paymentRegularAmount;
     @Column(name = "paymentRegularTotalPaymentsAmount")
@@ -514,6 +523,22 @@ public class PaymentParameters implements  BaseEntity, Serializable {
 
     public void setPaymentsRegularTotalNumberOfPayments(Integer paymentsRegularTotalNumberOfPayments) {
         this.paymentsRegularTotalNumberOfPayments = paymentsRegularTotalNumberOfPayments;
+    }
+
+    public Date getLastUpdatedFromPaymentGateway() {
+        return lastUpdatedFromPaymentGateway;
+    }
+
+    public void setLastUpdatedFromPaymentGateway(Date lastUpdatedFromPaymentGateway) {
+        this.lastUpdatedFromPaymentGateway = lastUpdatedFromPaymentGateway;
+    }
+
+    public Date getCancellationDate() {
+        return cancellationDate;
+    }
+
+    public void setCancellationDate(Date cancellationDate) {
+        this.cancellationDate = cancellationDate;
     }
 
 }

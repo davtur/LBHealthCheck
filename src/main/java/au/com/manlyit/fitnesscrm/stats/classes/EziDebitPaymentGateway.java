@@ -956,8 +956,7 @@ public class EziDebitPaymentGateway implements Serializable {
 
     }
 
-    public void refreshAllActiveCustomers() {
-        List<Customers> acl = customersFacade.findAllActiveCustomers(true);
+    public void refreshCustomersDeatilsFromPaymentGateway(List<Customers> acl) {
 
         for (Customers c : acl) {
             try {
@@ -967,7 +966,7 @@ public class EziDebitPaymentGateway implements Serializable {
                     if (sr != null && sr.trim().isEmpty() == false) {
                         startAsynchJob("GetCustomerDetails", paymentBean.getCustomerDetails(c, getDigitalKey(), sessionId));
 
-                        TimeUnit.MILLISECONDS.sleep(100);//sleeping for a long time wont affect performance (the warning is there for a short sleep of say 5ms ) but we don't want to overload the payment gateway or they may get upset.
+                        TimeUnit.MILLISECONDS.sleep(200);//sleeping for a long time wont affect performance (the warning is there for a short sleep of say 5ms ) but we don't want to overload the payment gateway or they may get upset.
                     }
                 }
             } catch (InterruptedException ex) {
@@ -996,7 +995,7 @@ public class EziDebitPaymentGateway implements Serializable {
         if (manualRefreshFromPaymentGateway) {
             manualRefreshFromPaymentGateway = false;
             Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.INFO, "Starting async Manual Refresh from Payment Gateway with starting date:", reportStartDate);
-            startAsynchJob(key, paymentBean.getAllPaymentsBySystemSinceDate(reportStartDate, reportEndDate, reportUseSettlementDate, getDigitalKey(),sessionId));
+            startAsynchJob(key, paymentBean.getAllPaymentsBySystemSinceDate(reportStartDate, reportEndDate, reportUseSettlementDate, getDigitalKey(), sessionId));
             Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.INFO, "Starting async Manual Refresh of All active customers:");
             Customers cust = customersFacade.findCustomerByUsername(FacesContext.getCurrentInstance().getExternalContext().getRemoteUser());
             String auditDetails = "User:" + cust.getUsername() + " is running the :  " + key + " report.(" + cust.getFirstname() + " " + cust.getLastname() + "). Start Date:" + reportStartDate.toString() + ", to :" + reportEndDate.toString();
@@ -1004,7 +1003,7 @@ public class EziDebitPaymentGateway implements Serializable {
             String changedFrom = "Report Running:" + key;
             ejbAuditLogFacade.audit(cust, getSelectedCustomer(), key + " Report", auditDetails, changedFrom, changedTo);
 
-            refreshAllActiveCustomers();
+            refreshCustomersDeatilsFromPaymentGateway(customersFacade.findAllActiveCustomers(true));
         }
         RequestContext.getCurrentInstance().update("reportsForm");
     }
@@ -1036,11 +1035,12 @@ public class EziDebitPaymentGateway implements Serializable {
     public void setPaymentsDBListFilteredItems(List<Payments> paymentsListFilteredItems2) {
         this.paymentsDBListFilteredItems = paymentsListFilteredItems2;
     }
-    
-    public void runReconcileCustomersReport(){
-        List<Customers> customerList = customersFacade.findAllActiveCustomers(true);
-        
-        
+
+    public void runReconcileCustomersReport() {
+        Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.INFO, "Running Reconcile Customer Status With Payment Gateway");
+        refreshCustomersDeatilsFromPaymentGateway(customersFacade.findAll(true));
+        Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.INFO, "Completed Running Reconcile Customer Status With Payment Gateway");
+
     }
 
     private void generateEndOfMonthReport() {
@@ -2441,14 +2441,14 @@ public class EziDebitPaymentGateway implements Serializable {
         LOGGER.log(Level.INFO, "processDeletePayment completed");
     }
 
-    
     //moved to FutureMap
     private void processChangeCustomerStatus(PaymentGatewayResponse pgr) {
-        CustomersController cc =getCustomersController();
-        
+        CustomersController cc = getCustomersController();
+
         cc.setSelected(cc.getSelected());
         LOGGER.log(Level.INFO, "processChangeCustomerStatus completed");
     }
+
     private void processGetPaymentStatus(PaymentGatewayResponse pgr) {
         /*boolean result = false;
         try {
@@ -3294,7 +3294,7 @@ public class EziDebitPaymentGateway implements Serializable {
                     paymentsFacade.remove(p);
                 }
             }
-            startAsynchJob("ChangeScheduledAmount", paymentBean.changeScheduledAmount(getSelectedCustomer(), paymentDebitDate, amount, paymentLimitToNumberOfPayments, applyToAllFuturePayments, paymentKeepManualPayments, loggedInUser, getDigitalKey(),sessionId));
+            startAsynchJob("ChangeScheduledAmount", paymentBean.changeScheduledAmount(getSelectedCustomer(), paymentDebitDate, amount, paymentLimitToNumberOfPayments, applyToAllFuturePayments, paymentKeepManualPayments, loggedInUser, getDigitalKey(), sessionId));
         } else {
             LOGGER.log(Level.WARNING, "Logged in user is null. Add Single Payment aborted.");
         }
@@ -3305,7 +3305,7 @@ public class EziDebitPaymentGateway implements Serializable {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddhhmmss");
         String paymentReference = getSelectedCustomer().getId().toString() + "-" + sdf.format(new Date());
         if (loggedInUser != null) {
-            startAsynchJob("ChangeScheduledDate", paymentBean.changeScheduledDate(getSelectedCustomer(), changeFromDate, paymentDebitDate, paymentReference, paymentKeepManualPayments, loggedInUser, getDigitalKey(),sessionId));
+            startAsynchJob("ChangeScheduledDate", paymentBean.changeScheduledDate(getSelectedCustomer(), changeFromDate, paymentDebitDate, paymentReference, paymentKeepManualPayments, loggedInUser, getDigitalKey(), sessionId));
         } else {
             LOGGER.log(Level.WARNING, "Logged in user is null. Add Single Payment aborted.");
         }

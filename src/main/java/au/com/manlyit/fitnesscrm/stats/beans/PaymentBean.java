@@ -1996,6 +1996,7 @@ public class PaymentBean implements Serializable {
                 if (errorCode == 201) { //customer could not be found
                     pp.setStatusCode("D");
                     pp.setStatusDescription("Inactive");
+                    pp.setLastUpdatedFromPaymentGateway(new Date());
                 }
             } else {
                 LOGGER.log(Level.SEVERE, "Future Map processGetCustomerDetails. CustomerDetails Object is NULL but error code = 0 ( success) for customer {0}.This shouldn't ever happen.", new Object[]{cust.getUsername()});
@@ -2014,6 +2015,7 @@ public class PaymentBean implements Serializable {
             } catch (Exception e) {
                 LOGGER.log(Level.WARNING, "Future Map processGetCustomerDetails. findNextScheduledPayment for customer {0}. {1}", new Object[]{cust.getUsername(), e});
             }
+            pp.setLastUpdatedFromPaymentGateway(new Date());
             pp.setLastSuccessfulScheduledPayment(p1);
             pp.setNextScheduledPayment(p2);
             pp.setAddressLine1(custDetails.getAddressLine1().getValue());

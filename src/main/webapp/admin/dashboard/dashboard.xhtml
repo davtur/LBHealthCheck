@@ -153,6 +153,111 @@
             <p:panel id="customChart" widgetVar="customChartWidget" header="#{configMapController.getKey('DashboardSessionsChartTitle')}">
                 <p:chart type="bar"   styleClass="chartClass" model="#{mySessionsChart1.dashboardMonthlySessionsChartModel}"     />
             </p:panel>
+            
+         <!-- CUSTOMERS WITH STATUS OUT Of SYNC WITH GATEWAY -->
+
+            <div class="Container100">
+                <h:outputText escape="false" value="#{configMapController.getKey('ListCustomersEmpty')}" rendered="#{customersController.customersOutIfSyncWithGateway.rowCount == 0}"/>
+                <h:panelGroup rendered="#{customersController.customersOutIfSyncWithGateway.rowCount > 0}">
+                    <p:panel id="dashboardOutIfSyncWithGateway" header="#{configMapController.getKey('DashboardOutIfSyncWithGateway')}">  
+                        <p:dataTable id="customersTableListOutIfSyncWithGateway" 
+
+
+                                     selection="#{customersController.multiSelectedCustomersOutIfSyncWithGateway}" 
+                                     rowKey="#{item.id}" 
+                                     value="#{customersController.customersOutIfSyncWithGateway}" 
+                                     filteredValue="#{customersController.filteredCustomersOutIfSyncWithGateway}" 
+                                     widgetVar="customersControllerTableOutIfSyncWithGateway" 
+                                     editable="false" 
+
+                                     var="item"  
+                                     scrollHeight="300"
+                                     scrollable="true" >
+                            <f:facet name="header">
+                                <p:ajax event="filter" listener="#{customersController.onTableFiltered}"   update="@this"  />  
+
+
+                                <h:panelGroup>
+                                    <h:outputText value="Search all fields: " />
+                                    <p:inputText id="globalFilter" onkeyup="PF('customersControllerTableOutIfSyncWithGateway').filter();"  />
+                                </h:panelGroup>
+                                <h:outputText value="   " />
+                                <h:panelGroup  >
+
+                                    <h:outputText  rendered="#{customersController.customersOutIfSyncWithGateway != null}" value=" Records : #{customersController.customersOutIfSyncWithGateway.rowCount}"/>
+                                    <h:outputText  rendered="#{customersController.filteredCustomersOutIfSyncWithGateway!= null}" value="   (Filtered Records : #{customersController.filteredCustomersOutIfSyncWithGateway.size()})">
+
+                                    </h:outputText>
+
+                                </h:panelGroup>
+
+                            </f:facet>
+                            <p:column sortBy="#{item.id}" filterBy="#{item.id}" headerText="#{configMapController.getKey('ListCustomersTitle_id')}"   >
+                                <h:outputText value="#{item.id}"/>
+                            </p:column>
+
+                            <p:column sortBy="#{item.firstname}" filterBy="#{item.firstname}" headerText="#{configMapController.getKey('ListCustomersTitle_firstname')}"   >
+                                <h:outputText value="#{item.firstname}"/>
+                            </p:column>
+                            <p:column sortBy="#{item.lastname}" filterBy="#{item.lastname}" headerText="#{configMapController.getKey('ListCustomersTitle_lastname')}"   >
+                                <h:outputText value="#{item.lastname}"/>
+                            </p:column>
+                            <p:column sortBy="#{item.active.customerState}" filterBy="#{item.active.customerState}" headerText="#{configMapController.getKey('ListCustomersTitle_activeCRM')}"   >
+                                <h:outputText value="LEAD, " rendered="#{customersController.isCustomerInRole(item,'LEAD')}" />  <h:outputText value="TRAINER, " rendered="#{customersController.isCustomerInRole(item,'TRAINER')}" /> <h:outputText value="#{item.active.customerState}"/>                                       
+                            </p:column>
+                            <p:column sortBy="#{item.paymentParametersId.statusDescription}" filterBy="#{item.paymentParametersId.statusDescription}" headerText="#{configMapController.getKey('ListCustomersTitle_activeEZI')}"   >
+                                <h:outputText value="#{item.paymentParametersId.statusDescription}"/> 
+                            </p:column>
+                            <p:column sortBy="#{item.groupPricing.planName}" filterBy="#{item.groupPricing.planName}" headerText="#{configMapController.getKey('CreateCustomersTitle_groupPricing')}"   >
+                                <h:outputText value="#{item.groupPricing.planName} - #{item.groupPricing.planPrice}"/> 
+                            </p:column>
+                            <p:column sortBy="#{item.paymentParametersId.contractStartDate}" filterBy="#{item.paymentParametersId.contractStartDate}" headerText="#{configMapController.getKey('ListCustomersTitle_contractStartDate')}"   >
+                                <h:outputText value="#{item.paymentParametersId.contractStartDate}">
+                                    <f:convertDateTime pattern="dd MMM yyyy" />
+                                </h:outputText>
+                            </p:column>
+                            <p:column sortBy="#{item.paymentParametersId.paymentPeriod}" filterBy="#{item.paymentParametersId.paymentPeriod}" headerText="#{configMapController.getKey('ListCustomersTitle_paymentPeriod')}"   >
+
+                                <h:outputText  rendered="#{item.paymentParametersId.paymentPeriod == 'F'}"  value="Fortnightly" />
+                                <h:outputText  rendered="#{item.paymentParametersId.paymentPeriod == 'M'}"  value="Monthly" />
+                                <h:outputText  rendered="#{item.paymentParametersId.paymentPeriod == '4'}"  value="4 Weekly" />
+                                <h:outputText  rendered="#{item.paymentParametersId.paymentPeriod == 'N'}"  value="Weekday in Month" />
+                                <h:outputText  rendered="#{item.paymentParametersId.paymentPeriod == 'Q'}"  value="Quarterly" />
+                                <h:outputText  rendered="#{item.paymentParametersId.paymentPeriod == 'H'}"  value="Half Yearly" />
+                                <h:outputText  rendered="#{item.paymentParametersId.paymentPeriod == 'Y'}"  value="Annually" />
+                                <h:outputText  rendered="#{item.paymentParametersId.paymentPeriod == 'W'}"  value="Weekly" />
+                                <h:outputText  rendered="#{item.paymentParametersId.paymentPeriod == 'Z'}"  value="No Schedule" />
+                                <h:outputText  rendered="#{item.paymentParametersId.paymentPeriod != 'Z' and item.paymentParametersId.paymentPeriod != 'M' and item.paymentParametersId.paymentPeriod != 'Q' and item.paymentParametersId.paymentPeriod != 'H' and item.paymentParametersId.paymentPeriod != 'Y' }"  value=" - #{item.paymentParametersId.paymentPeriodDayOfWeek}"/> 
+                                <h:outputText  rendered="#{item.paymentParametersId.paymentPeriod != 'Z' and item.paymentParametersId.paymentPeriod == 'M' }"  value=", day-#{item.paymentParametersId.paymentPeriodDayOfMonth}"/> 
+
+                            </p:column>
+                            <p:column sortBy="#{item.paymentParametersId.lastSuccessfulScheduledPayment.lastUpdatedDatetime}" filterBy="#{item.paymentParametersId.lastSuccessfulScheduledPayment.lastUpdatedDatetime}" headerText="#{configMapController.getKey('ListCustomersTitle_lastUpdated')}"   >
+                                <h:outputText  rendered="#{not empty item.paymentParametersId.lastSuccessfulScheduledPayment}"  value="#{item.paymentParametersId.lastSuccessfulScheduledPayment.lastUpdatedDatetime}">
+                                    <f:convertDateTime  pattern="yyyy-MM-dd hh:mm:ss" />
+                                </h:outputText>
+                                <h:outputText rendered="#{empty item.paymentParametersId.lastSuccessfulScheduledPayment}" value="---"/>
+                            </p:column>
+
+                            <p:column sortBy="#{item.paymentParametersId.lastSuccessfulScheduledPayment.paymentAmount}" filterBy="#{item.paymentParametersId.lastSuccessfulScheduledPayment.paymentAmount}" headerText="#{configMapController.getKey('ListCustomersTitle_totalPaymentsSuccessfulAmount')}"   >
+                                <h:outputText rendered="#{not empty item.paymentParametersId.lastSuccessfulScheduledPayment}" value="#{item.paymentParametersId.lastSuccessfulScheduledPayment.paymentAmount}">
+                                    <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
+                                </h:outputText>
+                            </p:column>
+                            <p:column  sortBy="#{item.paymentParametersId.lastSuccessfulScheduledPayment.debitDate}" filterBy="#{item.paymentParametersId.lastSuccessfulScheduledPayment.debitDate}" headerText="#{configMapController.getKey('ListCustomersTitle_lastSuccessfulScheduledPayment')}"   >
+                                <h:outputText rendered="#{not empty item.paymentParametersId.lastSuccessfulScheduledPayment}" value="#{item.paymentParametersId.lastSuccessfulScheduledPayment.debitDate}">
+                                    <f:convertDateTime pattern="E dd MMM yyyy" />
+                                </h:outputText>
+                                <h:outputText rendered="#{empty item.paymentParametersId.lastSuccessfulScheduledPayment}" value="---"/>
+                            </p:column>
+
+
+
+
+                        </p:dataTable>
+                    </p:panel>
+                </h:panelGroup>
+
+            </div>
 
 
             <!-- CUSTOMERS WITHOUT SCHEDULED PAYMENTS -->

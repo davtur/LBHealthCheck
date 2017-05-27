@@ -2089,4 +2089,5 @@ DashboardOpenCustomerDashboard=Customers Dashboard
 NoCroppedAreaSelected=PLease select an area of the image with your mouse before clicking on the [crop] button.
 
 
-ListReportRunReconcileCustomersReport=Reconcile Customers
+ListReportRunReconcileCustomersReport=Synch all Customers
+DashboardOutIfSyncWithGateway=Customers with status mismatch with Payment Gateway
