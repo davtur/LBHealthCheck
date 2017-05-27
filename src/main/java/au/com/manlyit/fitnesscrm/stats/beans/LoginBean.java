@@ -298,7 +298,7 @@ public class LoginBean implements Serializable {
         ExternalContext ec = context.getExternalContext();
         HttpServletRequest request = (HttpServletRequest) ec.getRequest();
         try {
-            String loginId = this.username.trim();
+            String loginId = this.username.toLowerCase().trim();
             if (loginId.contains("@")) {
                 //they may be using their email address to login with
                 Customers cust = ejbCustomerFacade.findCustomerByEmail(loginId);

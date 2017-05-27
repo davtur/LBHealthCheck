@@ -13,7 +13,7 @@
 
     <h:body>
         <!-- Main View  -->
-        <pm:page id="selectCustomer"  title="Customer Notes" >
+        <pm:page id="selectCustomer"  title="Customer Info" >
 
             <pm:header title="Edit Notes" swatch="b" >
 
@@ -35,12 +35,12 @@
                                 <h:outputText value="#{notes.createTimestamp}">
                                     <f:convertDateTime pattern="dd MMM yyyy  HH:mm" />
                                 </h:outputText> 
-                                <p:graphicImage value="#{customerImagesController.dynamicImage}" width="50px">
-                                    <f:param name="imageid" value="#{cust.profileImage.id}"/>
+                                <p:graphicImage value="#{customerImagesController.imageThumbnail}" width="130px">
+                                    <f:param name="imageId" value="#{cust.profileImage.id}"/>
                                 </p:graphicImage>
 
                                 <h:outputText value="#{cust.firstname} #{cust.lastname}"/>
-                                <h:outputText styleClass="ui-li-count" value="Edit"/>           
+                                <h:outputText styleClass="ui-li-count" value="View"/>           
 
                                 <f:setPropertyActionListener value="#{cust}" target="#{notesController.selectedUser}"  />
 

@@ -1036,6 +1036,12 @@ public class EziDebitPaymentGateway implements Serializable {
     public void setPaymentsDBListFilteredItems(List<Payments> paymentsListFilteredItems2) {
         this.paymentsDBListFilteredItems = paymentsListFilteredItems2;
     }
+    
+    public void runReconcileCustomersReport(){
+        List<Customers> customerList = customersFacade.findAllActiveCustomers(true);
+        
+        
+    }
 
     private void generateEndOfMonthReport() {
         Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.INFO, "Running End Of Month Report");

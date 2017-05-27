@@ -1271,7 +1271,7 @@ public class CustomerImagesController implements Serializable {
 
     public StreamedContent getImageThumbnail() throws IOException {
         FacesContext context = FacesContext.getCurrentInstance();
-        int thumbnailWidth = 50;
+        int thumbnailWidth = 130;
         String imageId;
         if (context != null) {
             //if (context.getRenderResponse()) {

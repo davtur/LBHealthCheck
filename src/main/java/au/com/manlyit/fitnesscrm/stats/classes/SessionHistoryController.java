@@ -18,7 +18,6 @@ import com.itextpdf.text.Image;
 import com.itextpdf.text.PageSize;
 import com.itextpdf.text.Paragraph;
 
-
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
@@ -430,7 +429,9 @@ public class SessionHistoryController implements Serializable {
             } else {
                 updateSessionDateTimes();
                 getFacade().edit(current);
-                expensesFacade.remove(current.getExpenseId());
+                if (current.getExpenseId() != null) {
+                    expensesFacade.remove(current.getExpenseId());
+                }
                 updateExpenses(current);
             }
             JsfUtil.addSuccessMessage(configMapFacade.getConfig("SessionHistoryCreated"));
@@ -564,7 +565,9 @@ public class SessionHistoryController implements Serializable {
             updateCurrentParticipants(participants.getTarget());
             updateCurrentTrainers(getTrainers());
             getFacade().edit(current);
-            expensesFacade.remove(current.getExpenseId());
+            if (current.getExpenseId() != null) {
+                expensesFacade.remove(current.getExpenseId());
+            }
             updateExpenses(current);
             JsfUtil.addSuccessMessage(configMapFacade.getConfig("SessionHistoryUpdated"));
             return "List";

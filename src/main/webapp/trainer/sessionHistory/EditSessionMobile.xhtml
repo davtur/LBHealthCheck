@@ -17,7 +17,7 @@
            
         <!-- Main View  -->
          <pm:page id="sessions" title="Pure Fitness Session" >
-            <pm:header  swatch="b" title="Edit Recent Sessions">
+            <pm:header  swatch="b" title="Update Training Sessions">
                 
                 <f:facet name="left">
                     <h:form id="sessionsForm2">  
@@ -30,6 +30,10 @@
                 <p:outputPanel >
                     <h:form id="sessionsForm">  
                         <p:growl  showDetail="true"/>
+                        <p:panelGrid columns="1">
+                        <p:commandButton  value="Log New Session" action="#{sessionHistoryController.prepareCreateMobileReturnCreate}" icon="plus"  ajax="false" />
+                         <h:outputText value="Please edit group sessions below instead of creating a new session for the same timeslot.(Group sessions are now created automatically from the timetable)"/>
+                        </p:panelGrid>
                         <p:dataList    value="#{sessionHistoryController.sessionHistoryItems}" var="sess">
                             <p:column>
                                 <p:commandLink action="/trainer/sessionHistory/CreateSessionMobile?faces-redirect=true" ajax="false" >

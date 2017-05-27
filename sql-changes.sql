@@ -425,3 +425,10 @@ ADD CONSTRAINT `fk_customers_pay_params`
 
 ALTER TABLE `fitnessStats`.`customers` 
 ADD UNIQUE INDEX `payment_parameters_id_UNIQUE` (`payment_parameters_id` ASC);
+
+
+
+ALTER TABLE `fitnessStats`.`paymentParameters` 
+CHANGE COLUMN `contractStartDate` `contractStartDate` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ,
+ADD COLUMN `lastUpdatedFromPaymentGateway` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP AFTER `paymentsRegularTotalNumberOfPayments`,
+ADD COLUMN `cancellationDate` DATETIME NULL AFTER `lastUpdatedFromPaymentGateway`;

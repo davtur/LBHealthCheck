@@ -4,16 +4,21 @@
 FROM payara/micro:latest
 #ENV COPY_TMP /opt/dockersrc
 #RUN mkdir -p $COPY_TMP
+
 COPY ./FitnessCRM-5.4.6.war /opt/payara/deployments/
 #COPY ./domain-fitnessCRM.xml $COPY_TMP
+COPY ./domain-fitnessCRM.xml /opt/payara/
 
+USER root
+RUN chown -R payara:payara /opt/payara/domain-fitnessCRM.xml
+RUN chmod -R 664 /opt/payara/domain-fitnessCRM.xml
+RUN chown -R payara:payara /opt/payara/deployments/FitnessCRM-5.4.6.war
+RUN chmod -R 664 /opt/payara/deployments/FitnessCRM-5.4.6.war
 
-#RUN chown -R payara:payara $COPY_TMP
-#RUN chmod -R 777 $COPY_TMP
-
+USER payara
 #RUN mv /dockersrc/* /opt/payara/deployments/ &&\  
  #   chmod  777 /opt/payara/deployments/FitnessCRM-5.4.4.war /opt/payara/deployments/domain-fitnessCRM.xml
 
-#CMD ["java","-jar","/opt/payara/payara-micro.jar","--deploymentDir","/opt/payara/deployments","--domainconfig","/opt/payara/deployments/domain-fitnessCRM.xml"]
+CMD ["java","-jar","/opt/payara/payara-micro.jar","--deploymentDir","/opt/payara/deployments","--domainconfig","/opt/payara/domain-fitnessCRM.xml"]
 
-CMD ["java","-jar","/opt/payara/payara-micro.jar","--deploymentDir","/opt/payara/deployments"]
+#CMD ["java","-jar","/opt/payara/payara-micro.jar","--deploymentDir","/opt/payara/deployments"]

@@ -2087,3 +2087,6 @@ Tooltip_passChangeButton= Click on this button to change your password.
 DashboardOpenCustomerDashboard=Customers Dashboard
 
 NoCroppedAreaSelected=PLease select an area of the image with your mouse before clicking on the [crop] button.
+
+
+ListReportRunReconcileCustomersReport=Reconcile Customers
