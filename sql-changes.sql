@@ -432,3 +432,10 @@ ALTER TABLE `fitnessStats`.`paymentParameters`
 CHANGE COLUMN `contractStartDate` `contractStartDate` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ,
 ADD COLUMN `lastUpdatedFromPaymentGateway` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP AFTER `paymentsRegularTotalNumberOfPayments`,
 ADD COLUMN `cancellationDate` DATETIME NULL AFTER `lastUpdatedFromPaymentGateway`;
+
+
+ALTER TABLE `fitnessStats`.`suppliers` 
+ADD UNIQUE INDEX `supplier_name_UNIQUE` (`supplier_name` ASC);
+
+ALTER TABLE `fitnessStats`.`expense_types` 
+ADD UNIQUE INDEX `expense_type_name_UNIQUE` (`expense_type_name` ASC);

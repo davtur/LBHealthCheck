@@ -6,10 +6,12 @@ import au.com.manlyit.fitnesscrm.stats.classes.util.PaginationHelper;
 import au.com.manlyit.fitnesscrm.stats.beans.PaymentMethodsFacade;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
-import java.util.ResourceBundle;
 import javax.enterprise.context.SessionScoped;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
@@ -281,6 +283,24 @@ public class PaymentMethodsController implements Serializable {
 
     public Collection<PaymentMethods> getItemsAvailable() {
         return ejbFacade.findAll();
+    }
+
+    public Collection<PaymentMethods> getItemsAvailableSorted() {
+
+        List<PaymentMethods> cpm = new ArrayList<>(ejbFacade.findAll());
+        Collections.sort(cpm, new Comparator<PaymentMethods>() {
+            @Override
+            public int compare(PaymentMethods o1, PaymentMethods o2) {
+                if (o1.getPaymentMethodName() != null && o2.getPaymentMethodName() != null) {
+                    return o1.getPaymentMethodName().compareToIgnoreCase(o2.getPaymentMethodName());
+                } else {
+                    return -1;
+                }
+            }
+        });
+        // Collections.sort(cpm, (PaymentMethods o1,PaymentMethods o2) -> o1.getPaymentMethodName().compareToIgnoreCase(o2.getPaymentMethodName()));
+
+        return cpm;
     }
 
     public void onEdit(RowEditEvent event) {

@@ -12,16 +12,16 @@ import au.com.manlyit.fitnesscrm.stats.db.SessionTypes;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.enterprise.context.SessionScoped;
-import javax.faces.application.FacesMessage;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 import javax.faces.convert.Converter;
@@ -33,7 +33,6 @@ import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
 import javax.inject.Inject;
 import javax.inject.Named;
-import org.primefaces.event.DragDropEvent;
 import org.primefaces.event.RowEditEvent;
 import org.primefaces.event.SelectEvent;
 import org.primefaces.event.TransferEvent;
@@ -339,7 +338,7 @@ public class SuppliersController implements Serializable {
             return null;
         }
     }
-    
+
     public void prepareCreateDialogue(ActionEvent actionEvent) {
         current = new Suppliers(0);
     }
@@ -480,6 +479,24 @@ public class SuppliersController implements Serializable {
 
     public Collection<Suppliers> getItemsAvailable() {
         return ejbFacade.findAll();
+    }
+
+    public Collection<Suppliers> getItemsAvailableSorted() {
+        List<Suppliers> cpm = new ArrayList<>(ejbFacade.findAll());
+
+        Collections.sort(cpm, new Comparator<Suppliers>() {
+            @Override
+            public int compare(Suppliers o1, Suppliers o2) {
+                if (o1.getSupplierName() != null && o2.getSupplierName() != null) {
+                    return o1.getSupplierName().compareToIgnoreCase(o2.getSupplierName());
+                } else {
+                    return -1;
+                }
+            }
+        });
+
+        // Collections.sort(cpm, (Suppliers o1, Suppliers o2) -> o1.getSupplierName().compareToIgnoreCase(o2.getSupplierName()));
+        return cpm;
     }
 
     public void onEdit(RowEditEvent event) {

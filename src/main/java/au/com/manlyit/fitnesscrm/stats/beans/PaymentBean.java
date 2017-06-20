@@ -2,6 +2,7 @@ package au.com.manlyit.fitnesscrm.stats.beans;
 
 import au.com.manlyit.fitnesscrm.stats.beans.util.PaymentSource;
 import au.com.manlyit.fitnesscrm.stats.beans.util.PaymentStatus;
+import au.com.manlyit.fitnesscrm.stats.classes.CustomersController;
 import au.com.manlyit.fitnesscrm.stats.classes.EziDebitPaymentGateway;
 import au.com.manlyit.fitnesscrm.stats.classes.util.AsyncJob;
 import au.com.manlyit.fitnesscrm.stats.classes.util.BatchOfPaymentJobs;
@@ -54,6 +55,7 @@ import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import static javax.ejb.TransactionAttributeType.REQUIRES_NEW;
+import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.xml.bind.JAXBElement;
@@ -87,6 +89,9 @@ public class PaymentBean implements Serializable {
     private PaymentParametersFacade ejbPaymentParametersFacade;
     @Inject
     private FutureMapEJB futureMap;
+    
+    @Inject
+    private EziDebitPaymentGateway eziDebit;
 
     private INonPCIService getWs() {
         URL url = null;
@@ -99,6 +104,9 @@ public class PaymentBean implements Serializable {
 
         }
         return new NonPCIService(url).getBasicHttpBindingINonPCIService();
+       
+        
+       // return futureMap.getWs();
     }
 
     @TransactionAttribute(TransactionAttributeType.NEVER)// we don't want a transaction for this method as teh call within this method will invoke their own transactions

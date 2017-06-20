@@ -4,9 +4,14 @@ import au.com.manlyit.fitnesscrm.stats.db.ExpenseTypes;
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PaginationHelper;
 import au.com.manlyit.fitnesscrm.stats.beans.ExpenseTypesFacade;
+import au.com.manlyit.fitnesscrm.stats.db.PaymentMethods;
+import au.com.manlyit.fitnesscrm.stats.db.Suppliers;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -281,6 +286,23 @@ public class ExpenseTypesController implements Serializable {
 
     public Collection<ExpenseTypes> getItemsAvailable() {
         return ejbFacade.findAll();
+    }
+
+    public Collection<ExpenseTypes> getItemsAvailableSorted() {
+        List<ExpenseTypes> cpm = new ArrayList<>(ejbFacade.findAll());
+        //Collections.sort(cpm, (ExpenseTypes o1, ExpenseTypes o2) -> o1.getExpenseTypeName().compareToIgnoreCase(o2.getExpenseTypeName()));
+        
+        Collections.sort(cpm, new Comparator<ExpenseTypes>() {
+            @Override
+            public int compare(ExpenseTypes o1, ExpenseTypes o2) {
+                if (o1.getExpenseTypeName() != null && o2.getExpenseTypeName() != null) {
+                    return o1.getExpenseTypeName().compareToIgnoreCase(o2.getExpenseTypeName());
+                } else {
+                    return -1;
+                }
+            }
+        });
+        return cpm;
     }
 
     public void onEdit(RowEditEvent event) {

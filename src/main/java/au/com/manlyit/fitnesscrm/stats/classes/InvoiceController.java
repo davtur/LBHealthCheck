@@ -291,7 +291,7 @@ public class InvoiceController implements Serializable {
             if (fee == null) {
                 fee = new BigDecimal(0);
             }
-            paymentsTotal = paymentsTotal.add(p.getScheduledAmount());
+            paymentsTotal = paymentsTotal.add(p.getPaymentAmount());
             bankFeesTotal = bankFeesTotal.add(fee);
             numberOfPayments++;
 
@@ -302,10 +302,10 @@ public class InvoiceController implements Serializable {
             productsAndServicesTotal = productsAndServicesTotal.add(bankFeesTotal);
            // productsAndServicesTotal = productsAndServicesTotal.subtract(paymentsTotal);
             // il.setPrice(paymentsTotal);
-            il.setPrice(p.getScheduledAmount());
+            il.setPrice(p.getPaymentAmount());
             paymentsTotal = paymentsTotal.negate();
             //il.setAmount(paymentsTotal);
-            il.setAmount(p.getScheduledAmount());
+            il.setAmount(p.getPaymentAmount());
 
             // add line item for bank fees
             InvoiceLine il2 = new InvoiceLine(0);

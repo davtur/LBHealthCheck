@@ -745,6 +745,7 @@ public class CustomersController implements Serializable {
                     pp.setAddressState("");
                     pp.setAddressSuburb("");
                     pp.setContractStartDate(new Date());
+                    pp.setLastUpdatedFromPaymentGateway(new Date());                   
                     pp.setCustomerFirstName("");
                     pp.setCustomerName("");
                     pp.setEmail("");
@@ -1281,6 +1282,8 @@ public class CustomersController implements Serializable {
     }
 
     public void createDialogue(ActionEvent actionEvent) {
+         newCustomer.setTelephone(newCustomer.getTelephone().trim());
+         newCustomer.setEmailAddress(newCustomer.getEmailAddress().trim());
 
         if (validateNewCustomer(newCustomer, actionEvent)) {
             createFromListener();
@@ -1291,6 +1294,7 @@ public class CustomersController implements Serializable {
     private void createFromListener() {
         FacesContext context = FacesContext.getCurrentInstance();
         Customers c = getNewCustomer();
+       
 
         EziDebitPaymentGateway ezi = context.getApplication().evaluateExpressionGet(context, "#{ezidebit}", EziDebitPaymentGateway.class);
         // SurveysController surveyCon = context.getApplication().evaluateExpressionGet(context, "#{surveysController}", SurveysController.class);
@@ -3185,26 +3189,26 @@ public class CustomersController implements Serializable {
                 try {
                          if (c.getActive().getCustomerState().contains("ACTIVE")) {
                             if (c.getPaymentParametersId().getStatusCode().contentEquals("D") || c.getPaymentParametersId().getStatusCode().contentEquals("A") || c.getPaymentParametersId().getStatusCode().contentEquals("N")) {
-                                Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.INFO, "Active Customer {0}, status {1}, payment gateway sync OK", new Object[]{c.getUsername(), c.getPaymentParametersId().getStatusCode()});
+                                Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.FINE, "Active Customer {0}, status {1}, payment gateway sync OK", new Object[]{c.getUsername(), c.getPaymentParametersId().getStatusCode()});
                             } else {
                                 badStatus.add(c);
-                                Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.INFO, "Active Customer {0}, status {1}, payment gateway sync BAD STATUS", new Object[]{c.getUsername(), c.getPaymentParametersId().getStatusCode()});
+                                Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.WARNING, "Active Customer {0}, status {1}, payment gateway sync BAD STATUS", new Object[]{c.getUsername(), c.getPaymentParametersId().getStatusCode()});
                             }
                             
                         } else if (c.getActive().getCustomerState().contains("ON HOLD")) {
                             if (c.getPaymentParametersId().getStatusCode().contains("H") || c.getPaymentParametersId().getStatusCode().contentEquals("D")) {
-                                Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.INFO, "ON HOLD Customer {0}, status {1}, payment gateway sync OK", new Object[]{c.getUsername(), c.getPaymentParametersId().getStatusCode()});
+                                Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.FINE, "ON HOLD Customer {0}, status {1}, payment gateway sync OK", new Object[]{c.getUsername(), c.getPaymentParametersId().getStatusCode()});
                             } else {
                                 badStatus.add(c);
-                                Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.INFO, "ON HOLD Customer {0}, status {1}, payment gateway sync BAD STATUS", new Object[]{c.getUsername(), c.getPaymentParametersId().getStatusCode()});
+                                Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.WARNING, "ON HOLD Customer {0}, status {1}, payment gateway sync BAD STATUS", new Object[]{c.getUsername(), c.getPaymentParametersId().getStatusCode()});
                                 
                             }
                         } else if (c.getActive().getCustomerState().contains("CANCELLED")) {
                             if (c.getPaymentParametersId().getStatusCode().startsWith("C") || c.getPaymentParametersId().getStatusCode().contentEquals("D")) {
-                                Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.INFO, "CANCELLED Customer {0}, status {1}, payment gateway sync OK", new Object[]{c.getUsername(), c.getPaymentParametersId().getStatusCode()});
+                                Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.FINE, "CANCELLED Customer {0}, status {1}, payment gateway sync OK", new Object[]{c.getUsername(), c.getPaymentParametersId().getStatusCode()});
                             } else {
                                 badStatus.add(c);
-                                Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.INFO, "CANCELLED Customer {0}, status {1}, payment gateway sync BAD STATUS", new Object[]{c.getUsername(), c.getPaymentParametersId().getStatusCode()});
+                                Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.WARNING, "CANCELLED Customer {0}, status {1}, payment gateway sync BAD STATUS", new Object[]{c.getUsername(), c.getPaymentParametersId().getStatusCode()});
                                 
                             }
                         }

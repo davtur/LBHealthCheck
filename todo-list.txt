@@ -5,3 +5,17 @@ TAsk:
 2. Add trainers to reporting and capture outgoings
     - trainer reward structure - the more clients the more they get paid for the session
     - a trainer should be able to see their on taget amount for the month
+
+3. SHOW PAYMENT COMMENST IN PAYMENTS TABLE
+
+4. remove blank spaces in names and other fields 
+
+5. remove pay rates from non-trainers admin page
+
+6. fix suppliers chart so  you can see supplier name
+
+7. fix chnage plan popup
+
+8. lazy load cust list
+
+9. dupliacte expense types

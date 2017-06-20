@@ -56,19 +56,19 @@ Portions Copyright [2016] [Payara Foundation and/or its affiliates]
         <jdbc-resource pool-name="fitnessStats_quartzPool" object-type="system-all" jndi-name="jdbc/quartz"></jdbc-resource>
 
         <jdbc-connection-pool datasource-classname="com.mysql.jdbc.jdbc2.optional.MysqlDataSource" name="mysql_fitnessStats_rootPool" wrap-jdbc-objects="false" is-connection-validation-required="true" connection-validation-method="auto-commit" res-type="javax.sql.DataSource">
-            <property name="User" value="root"></property>
-            <property name="Password" value="Surf2day"></property>
+            <property name="User" value="crmdb"></property>
+            <property name="Password" value="Surf2day11!!"></property>
             <property name="URL" value="jdbc:mysql://172.17.0.1:3306/fitnessStats"></property>
         </jdbc-connection-pool>
         <jdbc-connection-pool datasource-classname="com.mysql.jdbc.jdbc2.optional.MysqlDataSource" name="mysql_fitnessStats_rootPool2" wrap-jdbc-objects="false" is-connection-validation-required="true" connection-validation-method="auto-commit" res-type="javax.sql.DataSource">
-            <property name="User" value="root"></property>
-            <property name="Password" value="Surf2day"></property>
+            <property name="User" value="crmdb"></property>
+            <property name="Password" value="Surf2day11!!"></property>
             <property name="URL" value="jdbc:mysql://172.17.0.1:3306/fitnessStats"></property>
         </jdbc-connection-pool>
         <jdbc-connection-pool datasource-classname="com.mysql.jdbc.jdbc2.optional.MysqlDataSource" name="fitnessStats_quartzPool" wrap-jdbc-objects="false" is-connection-validation-required="true" connection-validation-method="auto-commit" res-type="javax.sql.ConnectionPoolDataSource">
             <property name="URL" value="jdbc:mysql://172.17.0.1:3306/fitnessStats"></property>
-            <property name="Password" value="Surf2day"></property>
-            <property name="User" value="root"></property>
+            <property name="Password" value="Surf2day11!!"></property>
+            <property name="User" value="crmdb"></property>
         </jdbc-connection-pool>
 
         <jdbc-resource pool-name="DerbyPool" jndi-name="jdbc/__default" object-type="system-all" />

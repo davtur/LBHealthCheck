@@ -19,10 +19,14 @@ import au.com.manlyit.fitnesscrm.stats.db.Payments;
 import au.com.manlyit.fitnesscrm.stats.webservices.ArrayOfPayment;
 import au.com.manlyit.fitnesscrm.stats.webservices.ArrayOfScheduledPayment;
 import au.com.manlyit.fitnesscrm.stats.webservices.CustomerDetails;
+import au.com.manlyit.fitnesscrm.stats.webservices.INonPCIService;
+import au.com.manlyit.fitnesscrm.stats.webservices.NonPCIService;
 import au.com.manlyit.fitnesscrm.stats.webservices.Payment;
 import au.com.manlyit.fitnesscrm.stats.webservices.ScheduledPayment;
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -57,6 +61,7 @@ import javax.faces.application.FacesMessage;
 import javax.inject.Inject;
 import javax.xml.bind.JAXBElement;
 import javax.xml.datatype.XMLGregorianCalendar;
+import javax.xml.ws.WebServiceException;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.primefaces.push.EventBus;
 import org.primefaces.push.EventBus.Reply;
@@ -122,6 +127,7 @@ public class FutureMapEJB implements Serializable {
     private PaymentBean paymentBean;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.EmailTemplatesFacade ejbEmailTemplatesFacade;
+    private INonPCIService ws;
 
     @PathParam("user")
     private String username;
@@ -164,6 +170,25 @@ public class FutureMapEJB implements Serializable {
      */
     public synchronized String getFutureMapInternalSessionId() {
         return FUTUREMAP_INTERNALID;
+    }
+
+    public INonPCIService getWs() {
+        synchronized (lock9) {
+            if (ws == null) {
+                URL url = null;
+                WebServiceException e = null;
+                try {
+                    url = new URL(configMapFacade.getConfig("payment.ezidebit.gateway.url"));
+                } catch (MalformedURLException ex) {
+
+                    LOGGER.log(Level.SEVERE, "MalformedURLException - payment.ezidebit.gateway.url", ex);
+
+                }
+                ws = new NonPCIService(url).getBasicHttpBindingINonPCIService();
+            }
+            return ws;
+        }
+
     }
 
     /**

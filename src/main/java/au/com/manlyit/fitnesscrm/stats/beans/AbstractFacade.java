@@ -39,6 +39,7 @@ import org.primefaces.model.SortOrder;
 public abstract class AbstractFacade<T> implements Serializable {
 
     private static final Logger LOGGER = Logger.getLogger(AbstractFacade.class.getName());
+    private static final long serialVersionUID = 1L;
     private final Class<T> entityClass;
     private static final boolean DEBUG = false;
 
@@ -224,6 +225,7 @@ Flush has several usages:
         //q.setHint("javax.persistence.cache.retrieveMode", "BYPASS");
         return q.getResultList();
     }
+   
 
     public List<T> findRange(int[] range) {
         javax.persistence.criteria.CriteriaQuery cq = getEntityManager().getCriteriaBuilder().createQuery();

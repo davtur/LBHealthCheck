@@ -217,6 +217,24 @@ public class EziDebitPaymentGateway implements Serializable {
     ThreadFactory tf1 = new eziDebitThreadFactory();
     private String sessionId;
 
+    private INonPCIService ws;
+
+    public INonPCIService getWs() {
+        if (ws == null) {
+            URL url = null;
+            WebServiceException e = null;
+            try {
+                url = new URL(configMapFacade.getConfig("payment.ezidebit.gateway.url"));
+            } catch (MalformedURLException ex) {
+
+                LOGGER.log(Level.SEVERE, "MalformedURLException - payment.ezidebit.gateway.url", ex);
+
+            }
+            ws = new NonPCIService(url).getBasicHttpBindingINonPCIService();
+        }
+        return ws;
+    }
+
     @PostConstruct
     private void setSessionId() {
         FacesContext facesContext = FacesContext.getCurrentInstance();
@@ -2016,79 +2034,56 @@ public class EziDebitPaymentGateway implements Serializable {
     public void checkIfAsyncJobsHaveFinishedAndUpdate(String key, PaymentGatewayResponse pgr) {
 
         try {
-            if (key.contains("GetCustomerDetails")) {
+            if (key.contentEquals("GetCustomerDetails")) {
                 processGetCustomerDetails(pgr);
-            }
-            if (key.contains("AddPayment")) {
+            } else if (key.contentEquals("AddPayment")) {
                 processAddPaymentResult(pgr);
-            }
-            if (key.contains("DeletePaymentBatch")) {
+            } else if (key.contentEquals("DeletePaymentBatch")) {
                 processDeletePaymentBatch(pgr);
-            }
-            if (key.contains("AddPaymentBatch")) {
+            } else if (key.contentEquals("AddPaymentBatch")) {
                 processAddPaymentBatch(pgr);
-            }
-
-            if (key.contains("GetPayments")) {
+            } else if (key.contentEquals("GetPayments")) {
                 processGetPayments(pgr);
-            }
-            if (key.contains("GetScheduledPayments")) {
+            } else if (key.contentEquals("GetScheduledPayments")) {
                 processGetScheduledPayments(pgr);
-            }
-            if (key.contains("CreateSchedule")) {
+            } else if (key.contentEquals("CreateSchedule")) {
                 processCreateSchedule(pgr);
-            }
-
-            if (key.contains("AddCustomer")) {
+            } else if (key.contentEquals("AddCustomer")) {
                 processAddCustomer(pgr);
-            }
-            if (key.contains("EditCustomerDetails")) {
+            } else if (key.contentEquals("EditCustomerDetails")) {
                 processEditCustomerDetails(pgr);
-            }
-            /* if (key.contains("ClearSchedule")) {
+            } /* if (key.contains("ClearSchedule")) {
                 processClearSchedule(ft);
-            }*/
-            if (key.contains("DeletePayment")) {
+            }*/ else if (key.contentEquals("DeletePayment")) {
                 processDeletePayment(pgr);
-            }
-            /* if (key.contains("ChangeCustomerStatus")) {
+            } /* else if (key.contains("ChangeCustomerStatus")) {
                 processChangeCustomerStatus(ft);
-            }*/
-            if (key.contains("GetPaymentStatus")) {
+            }*/ else if (key.contentEquals("GetPaymentStatus")) {
                 processGetPaymentStatus(pgr);
-            }
-            if (key.contains("ChangeScheduledAmount")) {
+            } else if (key.contentEquals("ChangeScheduledAmount")) {
                 processChangeScheduledAmount(pgr);
-            }
-            if (key.contains("ChangeScheduledDate")) {
+            } else if (key.contentEquals("ChangeScheduledDate")) {
                 processChangeScheduledDate(pgr);
-            }
-            if (key.contains("IsBsbValid")) {
+            } else if (key.contentEquals("IsBsbValid")) {
                 processIsBsbValid(pgr);
-            }
-            if (key.contains("IsSystemLocked")) {
+            } else if (key.contentEquals("IsSystemLocked")) {
                 processIsSystemLocked(pgr);
-            }
-            if (key.contains("GetPaymentExchangeVersion")) {
+            } else if (key.contentEquals("GetPaymentExchangeVersion")) {
                 processGetPaymentExchangeVersion(pgr);
-            }
-            if (key.contains("GetCustomerDetailsFromEziDebitId")) {
+            } else if (key.contentEquals("GetCustomerDetailsFromEziDebitId")) {
                 processGetCustomerDetailsFromEziDebitId(pgr);
-            }
-            if (key.contains("GetPaymentDetail")) {
+            } else if (key.contentEquals("GetPaymentDetail")) {
                 processGetPaymentDetail(pgr);
-            }
-            if (key.contains("GetPaymentDetailPlusNextPaymentInfo")) {
+            } else if (key.contentEquals("GetPaymentDetailPlusNextPaymentInfo")) {
                 processGetPaymentDetailPlusNextPaymentInfo(pgr);
-            }
-            if (key.contains("PaymentReport")) {
+            } else if (key.contentEquals("PaymentReport")) {
                 processPaymentReport(pgr);
-            }
-            if (key.contains("SettlementReport")) {
+            } else if (key.contentEquals("SettlementReport")) {
                 processSettlementReport(pgr);
-            }
-            if (key.contains("EmailAlert")) {
+            } else if (key.contentEquals("EmailAlert")) {
                 processEmailAlert(pgr);
+            } else {
+                LOGGER.log(Level.WARNING, "checkIfAsyncJobsHaveFinishedAndUpdate Key not matched:{0}", key);
             }
 
         } catch (CancellationException ex) {
@@ -3311,7 +3306,7 @@ public class EziDebitPaymentGateway implements Serializable {
         }
     }
 
-    private INonPCIService getWs() {
+    /* private INonPCIService getWs() {
         URL url = null;
         WebServiceException e = null;
         try {
@@ -3320,8 +3315,7 @@ public class EziDebitPaymentGateway implements Serializable {
             e = new WebServiceException(ex);
         }
         return new NonPCIService(url).getBasicHttpBindingINonPCIService();
-    }
-
+    }*/
     public String createBulk() {
         // this script doea a bulk inport from the payment gateway
         // delimiter is semi colon as ezidebit puts commas in the report

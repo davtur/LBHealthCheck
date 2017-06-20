@@ -99,6 +99,7 @@ au/com/manlyit/fitnesscrm/stats/converters/DemographicTypesConverter.class
 au/com/manlyit/fitnesscrm/stats/chartbeans/JfcTimeSeriesChart1.class
 au/com/manlyit/fitnesscrm/stats/classes/util/UserAgentSwitchViewHandlerWrapper.class
 au/com/manlyit/fitnesscrm/stats/beans/SurveyquestiontypesFacade.class
+au/com/manlyit/fitnesscrm/stats/classes/ExpenseTypesController$2.class
 au/com/manlyit/fitnesscrm/stats/webservices/ClearSchedule.class
 au/com/manlyit/fitnesscrm/stats/classes/SurveyQuestionsController$1.class
 au/com/manlyit/fitnesscrm/stats/classes/NotesController.class
@@ -299,6 +300,7 @@ au/com/manlyit/fitnesscrm/stats/classes/PreferedContactController$PreferedContac
 au/com/manlyit/fitnesscrm/stats/classes/CrmContextListener.class
 au/com/manlyit/fitnesscrm/stats/classes/util/SendHTMLEmailWithFileAttached.class
 au/com/manlyit/fitnesscrm/stats/db/QrtzTriggers.class
+au/com/manlyit/fitnesscrm/stats/classes/PaymentMethodsController$2.class
 au/com/manlyit/fitnesscrm/stats/classes/CustomerGoalsController$CustomerGoalsControllerConverter.class
 au/com/manlyit/fitnesscrm/stats/classes/QrtzCronTriggersController.class
 au/com/manlyit/fitnesscrm/stats/classes/WebsiteMonitorController$1.class
@@ -318,6 +320,7 @@ au/com/manlyit/fitnesscrm/stats/chartbeans/PlankTestChart.class
 au/com/manlyit/fitnesscrm/stats/classes/EziDebitPaymentGateway$1.class
 au/com/manlyit/fitnesscrm/stats/beans/CustomerStateFacade.class
 au/com/manlyit/fitnesscrm/stats/classes/SessionHistoryController.class
+au/com/manlyit/fitnesscrm/stats/classes/SuppliersController$2.class
 au/com/manlyit/fitnesscrm/stats/beans/TasksFacade.class
 au/com/manlyit/fitnesscrm/stats/webservices/TestFunctionResponse.class
 au/com/manlyit/fitnesscrm/stats/db/CustomerAuth.class
