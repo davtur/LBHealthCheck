@@ -3,7 +3,7 @@
     <distributable/>
     <context-param>
         <param-name>javax.faces.PROJECT_STAGE</param-name>
-        <param-value>Production</param-value>
+        <param-value>Development</param-value>
     </context-param>
     <context-param>
         <param-name>javax.faces.FACELETS_BUFFER_SIZE</param-name>
@@ -117,7 +117,7 @@
     <servlet>
         <servlet-name>Push Servlet</servlet-name>
         <servlet-class>org.primefaces.push.PushServlet</servlet-class>
-        <!--<init-param>
+      <!--  <init-param>
             <param-name>org.atmosphere.cpr.broadcasterCacheClass</param-name>
             <param-value>org.atmosphere.cache.UUIDBroadcasterCache</param-value>
         </init-param>
@@ -127,22 +127,23 @@
             <param-name>org.atmosphere.cpr.AtmosphereInterceptor</param-name>
             <param-value>org.atmosphere.client.TrackMessageSizeInterceptor</param-value>
         </init-param>-->
-        <!-- that is for long-pollin in order to cache messsages in the session   
+        <!-- that is for long-pollin in order to cache messsages in the session -->  
         
-        <init-param>
+      <!--   <init-param>
             <param-name>org.atmosphere.cpr.sessionSupport</param-name>
             <param-value>true</param-value>
         </init-param> 
-        <init-param>
-            <param-name>org.atmosphere.cpr.broadcasterCacheClass</param-name>
-            <param-value>org.atmosphere.cache.SessionBroadcasterCache</param-value>
-        </init-param>-->
-        <!-- This one I have no idea what it does. Someone in the forums   
+       
+        This one I have no idea what it does. Someone in the forums   
         suggested it -->
-        <!--  <init-param>
+        <!--<init-param>
             <param-name>org.atmosphere.disableOnStateEvent</param-name>
             <param-value>true</param-value>
         </init-param>-->
+        <init-param>
+            <param-name>org.atmosphere.cpr.asyncSupport</param-name>
+            <param-value>org.atmosphere.container.JSR356AsyncSupport</param-value>
+        </init-param>
         <async-supported>true</async-supported>
     </servlet>
     <servlet-mapping>
@@ -156,7 +157,7 @@
         <description>Context Listener</description>
         <listener-class>au.com.manlyit.fitnesscrm.stats.classes.CrmContextListener</listener-class>
     </listener>
-    <!--  <listener>
+    <!--<listener>
         <description>Atmosphere Session Support Listener</description>
         <listener-class>org.atmosphere.cpr.SessionSupport</listener-class>
     </listener>-->

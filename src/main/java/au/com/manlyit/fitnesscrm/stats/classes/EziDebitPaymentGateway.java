@@ -171,6 +171,7 @@ public class EziDebitPaymentGateway implements Serializable {
     private int paymentDayOfMonth = 0; // required when Period Type is M
     private int paymentLimitToNumberOfPayments = 0;
     private Integer[] daysInMonth;
+    private boolean pushChannelIsConnected = false;
     private boolean paymentFirstWeekOfMonth = false;
     private boolean applyToAllFuturePayments = true;
     private boolean refreshIFrames = false;
@@ -269,12 +270,30 @@ public class EziDebitPaymentGateway implements Serializable {
         return this.sessionId;
     }
 
-    public String getPushChannel() {
+    public void getPushChannelReconnect() {
+        RequestContext requestContext = RequestContext.getCurrentInstance();
+         String channel = CHANNEL + getSessionId();
+        
+        LOGGER.log(Level.INFO, "Payment Gateway BEAN - GET PUSH CHANNELL RECONNECT: {0}", new Object[]{channel});
+        requestContext.execute("PF('subscriber').connect('/" + getSessionId() + "')");
 
+       // return channel;
+    }
+
+    public boolean getPushChannel() {
+        RequestContext requestContext = RequestContext.getCurrentInstance();
         String channel = CHANNEL + getSessionId();
 
         LOGGER.log(Level.INFO, "Payment Gateway BEAN - GET PUSH CHANNELL: {0}", new Object[]{channel});
-        return channel;
+        if(pushChannelIsConnected == false){
+            LOGGER.log(Level.INFO, "Payment Gateway BEAN - CONNECTING PUSH CHANNELL: {0}", new Object[]{channel});
+            pushChannelIsConnected = true;
+            requestContext.execute("PF('subscriber').connect('/" + getSessionId() + "')");
+        }else{
+            LOGGER.log(Level.INFO, "Payment Gateway BEAN -Connected Flag is set -  PUSH CHANNELL: {0}", new Object[]{channel});
+        }
+        
+        return false;
     }
 
     /**

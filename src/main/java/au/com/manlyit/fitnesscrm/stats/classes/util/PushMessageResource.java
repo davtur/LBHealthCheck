@@ -5,6 +5,8 @@
  */
 package au.com.manlyit.fitnesscrm.stats.classes.util;
 
+import java.util.logging.Level;
+import javax.faces.application.FacesMessage;
 import org.primefaces.push.EventBus;
 import org.primefaces.push.RemoteEndpoint;
 import org.primefaces.push.annotation.OnClose;
@@ -15,43 +17,46 @@ import org.primefaces.push.annotation.PushEndpoint;
 import org.primefaces.push.annotation.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
- 
+
 import javax.inject.Inject;
 import javax.servlet.ServletContext;
- 
-@PushEndpoint("/{room}/{user}")
+import org.primefaces.push.impl.JSONEncoder;
+
+@PushEndpoint("/payments/{session}")
 @Singleton
 public class PushMessageResource {
- 
-    private final Logger logger = LoggerFactory.getLogger(PushMessageResource.class);
- 
-    @PathParam("room")
-    private String room;
- 
-    @PathParam("user")
-    private String username;
- 
+
+    private static final java.util.logging.Logger LOGGER = java.util.logging.Logger.getLogger(PushMessageResource.class.getName());
+
+    @PathParam("session")
+    private String sessionId;
+
     @Inject
     private ServletContext ctx;
- 
+
+    @OnMessage(encoders = {JSONEncoder.class})
+    public FacesMessage onMessage(FacesMessage message) {
+        return message;
+    }
+
     @OnOpen
-    public void onOpen(RemoteEndpoint r, EventBus eventBus) {
-        logger.info("OnOpen {}", r);
- 
-        eventBus.publish(room + "/*", new Message(String.format("%s has entered the room '%s'",  username, room), true));
+    public void onOpen(RemoteEndpoint rEndPoint, EventBus e) {
+        rEndPoint.address();
+       
+        LOGGER.log(Level.INFO, "Atmosphere Push Connection OPENED. Transport Type = {0}, Address = {1}, Path = {2}, URI = {3}, Status = {4}", new Object[]{rEndPoint.transport().name(), rEndPoint.address(), rEndPoint.path(), rEndPoint.uri(), rEndPoint.status(),sessionId});
     }
- 
+
     @OnClose
-    public void onClose(RemoteEndpoint r, EventBus eventBus) {
-        PushMessageUsers users= (PushMessageUsers) ctx.getAttribute("pushMessageUsers");
-        users.remove(username);
-         
-        eventBus.publish(room + "/*", new Message(String.format("%s has left the room", username), true));
+    public void onClose(RemoteEndpoint rEndPoint, EventBus e) {
+       
+        LOGGER.log(Level.INFO, "Atmosphere Push Connection CLOSED. Transport Type = {0}, Address = {1}, Path = {2}, URI = {3}, Status = {4}", new Object[]{rEndPoint.transport().name(), rEndPoint.address(), rEndPoint.path(), rEndPoint.uri(), rEndPoint.status(),sessionId});
+
     }
- 
+
+    
     @OnMessage(decoders = {MessageDecoder.class}, encoders = {MessageEncoder.class})
     public Message onMessage(Message message) {
         return message;
     }
- 
+
 }

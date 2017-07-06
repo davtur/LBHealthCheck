@@ -321,7 +321,7 @@ div.timetableDataTable .ui-datatable table tbody .ui-state-highlight > td {
     float:left;
     width: 37px;
     height: 37px;
-    background: url(/FitnessStats/resources/templates/yoo_pace/images/tools/icons_social.png) 0 0 no-repeat;
+    background: url(/FitnessStats/resources/images/FB-f-Logo__blue_50.png) 0 0 no-repeat;
 }
 
 
@@ -373,4 +373,11 @@ Width300{
 
 chartClassTall{
     height:400px;
+}
+.updatePaymentForms {
+    
+}
+
+.updatePaymentInfo {
+    
 }

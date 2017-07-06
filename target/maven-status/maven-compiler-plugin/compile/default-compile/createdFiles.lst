@@ -80,6 +80,7 @@ au/com/manlyit/fitnesscrm/stats/classes/EmailQueueController$EmailQueueControlle
 au/com/manlyit/fitnesscrm/stats/webservices/ChangeScheduledDate.class
 au/com/manlyit/fitnesscrm/stats/beans/ContractorRateToTaskMapFacade.class
 au/com/manlyit/fitnesscrm/stats/db/Participants.class
+org/primefaces/spark/component/menu/SparkMenu.class
 au/com/manlyit/fitnesscrm/stats/chartbeans/MySessionsChart1.class
 au/com/manlyit/fitnesscrm/stats/webservices/EziResponseOfNewCustomerXcXH3LiW.class
 au/com/manlyit/fitnesscrm/stats/db/SessionRecurrance.class
@@ -233,6 +234,7 @@ au/com/manlyit/fitnesscrm/stats/classes/util/BaseEntity.class
 au/com/manlyit/fitnesscrm/stats/classes/util/FutureMapEJB.class
 au/com/manlyit/fitnesscrm/stats/classes/SurveyAnswersController$SurveyAnswersControllerConverter.class
 au/com/manlyit/fitnesscrm/stats/classes/ItemController$ItemControllerConverter.class
+org/primefaces/spark/component/menu/SparkMenuRenderer.class
 au/com/manlyit/fitnesscrm/stats/classes/DemographicTypesController$demographicTypesControllerConverter.class
 au/com/manlyit/fitnesscrm/stats/db/SurveyAnswerSubitems.class
 au/com/manlyit/fitnesscrm/stats/classes/util/SecurityServlet.class

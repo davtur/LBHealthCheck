@@ -22,6 +22,7 @@
     <h:body>    
         <div id="menu-mask"></div>
         <p:growl id="growl" widgetVar="growlWidget"    showDetail="true"    />
+        
         <ui:include src="topbar.xhtml" />
 
         <ui:include src="layoutmenu.xhtml" />
@@ -50,9 +51,11 @@
             <p:remoteCommand name="taskCompleted"   actionListener="#{ezidebit.remoteCommandListener}"  />
            <!-- <p:remoteCommand name="connectPushServer" actionListener="#{ezidebit.checkPushChannelIsOpen}" autoRun="true" />-->
             <p:remoteCommand name="updatePaymentForms" update="@(.updatePaymentInfo)" />
-           
+            <p:remoteCommand name="handleReconnect" actionListener="#{ezidebit.pushChannelReconnect}" />
+            <p:outputLabel rendered="#{ezidebit.pushChannel}" value="" />
         </h:form>
-        <p:socket onMessage="handleMessage" onError="handleError" onTransportFailure="handleTransportFailure"  onClose="handleClose" channel="#{ezidebit.pushChannel}" onOpen="handleOpen" onReconnect="handleReconnect" autoConnect="true"  widgetVar="subscriber"/>
+        
+        <p:socket onMessage="handleMessage" onError="handleError" onTransportFailure="handleTransportFailure"  onClose="handleClose" channel="/payments" onOpen="handleOpen" onReconnect="handleReconnect" autoConnect="false"  widgetVar="subscriber"/>
         <script type="text/javascript">
             function handleMessage(facesmessage) {
                 console.log("Handling primfaces push socket component faces MESSAGE");
@@ -64,7 +67,8 @@
             function handleError() {
                 console.log("Handling primfaces push socket component  ERROR message");
                 alert('Error');
-                PF('subscriber').connect();
+               // PF('subscriber').connect();
+               handleReconnect();
             }
               function handleOpen() {
                 console.log("Handling primfaces push socket component  OPEN message");
@@ -72,7 +76,7 @@
             function handleClose() {
                 console.log("Handling primfaces push socket component  CLOSE message");
                 alert('Close');
-                PF('subscriber').connect();
+                //PF('subscriber').connect();
             }
            
             function handleReconnect() {
@@ -82,7 +86,7 @@
             function handleTransportFailure() {
                 console.log("Handling primfaces push socket component  TRANSPORT FAILURE message");
                 alert('handleTransportFailure');
-                PF('subscriber').connect();
+               handleReconnect();
             }
             
         </script>

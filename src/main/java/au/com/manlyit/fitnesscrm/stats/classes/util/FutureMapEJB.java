@@ -78,7 +78,7 @@ import org.primefaces.push.impl.JSONEncoder;
  *
  * @author david
  */
-@PushEndpoint("/payments/{user}")
+//@PushEndpoint("/payments/{user}")
 //@PushEndpoint("/payments/")
 @ConcurrencyManagement(BEAN)
 @Singleton
@@ -129,13 +129,13 @@ public class FutureMapEJB implements Serializable {
     private au.com.manlyit.fitnesscrm.stats.beans.EmailTemplatesFacade ejbEmailTemplatesFacade;
     private INonPCIService ws;
 
-    @PathParam("user")
-    private String username;
+   /* @PathParam("user")
+    private String username;*/
 
     public FutureMapEJB() {
     }
 
-    @OnMessage(encoders = {JSONEncoder.class})
+   /* @OnMessage(encoders = {JSONEncoder.class})
     public FacesMessage onMessage(FacesMessage message) {
         return message;
     }
@@ -152,7 +152,7 @@ public class FutureMapEJB implements Serializable {
 
         LOGGER.log(Level.INFO, "Atmosphere Push Connection CLOSED. Transport Type = {0}, Address = {1}, Path = {2}, URI = {3}, Status = {4}", new Object[]{rEndPoint.transport().name(), rEndPoint.address(), rEndPoint.path(), rEndPoint.uri(), rEndPoint.status()});
 
-    }
+    }*/
 
     /*   @PostConstruct
     private void applicationSetup() {
@@ -474,13 +474,13 @@ public class FutureMapEJB implements Serializable {
 
     public void sendMessage(String sessionChannel, String summary, String detail) {
 
-        LOGGER.log(Level.INFO, "Entering - SEND MESSAGE :Channel={0}, Summary={1}, detail={2}", new Object[]{sessionChannel, summary, detail});
+        LOGGER.log(Level.INFO, "Entering - SEND MESSAGE ");
         //TODO
         // sessionChannel = "/test";// remove this once the channel is dynamically set by session id
         //synchronized (lock2) {
         if (sessionChannel.contains(FUTUREMAP_INTERNALID) == false) {// we don't want to send a message unless there is a session to send it to
             final String broadcastChannel = CHANNEL + sessionChannel;
-
+           LOGGER.log(Level.INFO, "Entering - SEND MESSAGE :Channel={0}, Summary={1}, detail={2}", new Object[]{broadcastChannel, summary, detail});
             Reply rep = (String message) -> {
                 LOGGER.log(Level.INFO, "MESSAGE DELIVERED :Channel={0}, Summary={1}, message={2}", new Object[]{broadcastChannel, summary, message});
             };

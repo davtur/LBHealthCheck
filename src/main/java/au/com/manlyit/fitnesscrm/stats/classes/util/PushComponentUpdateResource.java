@@ -18,18 +18,18 @@ import org.slf4j.LoggerFactory;
  
 import org.primefaces.push.impl.JSONEncoder;
  
-@PushEndpoint("/{user}")
-@Singleton
+//@PushEndpoint("/{user}")
+//@Singleton
 public class PushComponentUpdateResource  implements Serializable  {
  
     private final Logger logger = LoggerFactory.getLogger(PushComponentUpdateResource.class);
  
  
-    @PathParam("user")
+    //@PathParam("user")
     private String username;
  
     
-     @OnMessage(encoders = {JSONEncoder.class})
+    // @OnMessage(encoders = {JSONEncoder.class})
     public FacesMessage onMessage(FacesMessage message) {
         return message;
     }
