@@ -110,7 +110,7 @@ public class EziDebitPaymentGateway implements Serializable {
     private static final Logger LOGGER = Logger.getLogger(EziDebitPaymentGateway.class.getName());
     //private static final String digitalKey = "78F14D92-76F1-45B0-815B-C3F0F239F624";// test
     private static final String PAYMENT_GATEWAY = "EZIDEBIT";
-    private final static String CHANNEL = "/payments/";
+   
     private static final long serialVersionUID = 1L;
     private final static int MONTHS_IN_ADVANCE_FOR_PAYMENT_SCHEDULE = 9;
     private int testAjaxCounter = 0;
@@ -214,6 +214,7 @@ public class EziDebitPaymentGateway implements Serializable {
     private float reportTotalSuccessful = 0;
     private float reportTotalDishonoured = 0;
     private float reportTotalScheduled = 0;
+    
 
     ThreadFactory tf1 = new eziDebitThreadFactory();
     private String sessionId;
@@ -270,31 +271,8 @@ public class EziDebitPaymentGateway implements Serializable {
         return this.sessionId;
     }
 
-    public void getPushChannelReconnect() {
-        RequestContext requestContext = RequestContext.getCurrentInstance();
-         String channel = CHANNEL + getSessionId();
-        
-        LOGGER.log(Level.INFO, "Payment Gateway BEAN - GET PUSH CHANNELL RECONNECT: {0}", new Object[]{channel});
-        requestContext.execute("PF('subscriber').connect('/" + getSessionId() + "')");
-
-       // return channel;
-    }
-
-    public boolean getPushChannel() {
-        RequestContext requestContext = RequestContext.getCurrentInstance();
-        String channel = CHANNEL + getSessionId();
-
-        LOGGER.log(Level.INFO, "Payment Gateway BEAN - GET PUSH CHANNELL: {0}", new Object[]{channel});
-        if(pushChannelIsConnected == false){
-            LOGGER.log(Level.INFO, "Payment Gateway BEAN - CONNECTING PUSH CHANNELL: {0}", new Object[]{channel});
-            pushChannelIsConnected = true;
-            requestContext.execute("PF('subscriber').connect('/" + getSessionId() + "')");
-        }else{
-            LOGGER.log(Level.INFO, "Payment Gateway BEAN -Connected Flag is set -  PUSH CHANNELL: {0}", new Object[]{channel});
-        }
-        
-        return false;
-    }
+   
+    
 
     /**
      * @return the autoStartPoller
@@ -2010,7 +1988,7 @@ public class EziDebitPaymentGateway implements Serializable {
                     checkIfAsyncJobsHaveFinishedAndUpdate(key, pgr);
                 }
                 futureMap.clearComponentUpdates(sessionId);
-
+ 
             } catch (Exception e) {
                 LOGGER.log(Level.SEVERE, "checkRunningJobsAndNotifyIfComplete,  {0} async jobs for sessionId {1} have finished.Exception {2}", new Object[]{Integer.toString(y), sessionId, e});
             }
@@ -2022,7 +2000,8 @@ public class EziDebitPaymentGateway implements Serializable {
         //k = futureMap.getFutureMap(sessionId).size();
         if (isRefreshIFrames() == true) {
             //RequestContext.getCurrentInstance().update("@(.updatePaymentInfo)");
-            RequestContext.getCurrentInstance().update("\\:iFrameForm");
+            //RequestContext.getCurrentInstance().update(":iFrameForm");
+            updatePaymentTableComponents();
             //RequestContext.getCurrentInstance().update("createCustomerForm");
             LOGGER.log(Level.INFO, "Asking Request Context to update IFrame forms.");
             setRefreshIFrames(false);
@@ -2045,7 +2024,8 @@ public class EziDebitPaymentGateway implements Serializable {
             } else {
                 LOGGER.log(Level.INFO, "Async Jobs have started. {0} jobs are running", k);
             }
-            RequestContext.getCurrentInstance().update("paymentsForm");
+            //RequestContext.getCurrentInstance().update(":tv:paymentsForm");
+            updatePaymentTableComponents();
         }
 
     }
@@ -3563,4 +3543,5 @@ public class EziDebitPaymentGateway implements Serializable {
         this.paymentGatewayVersion = paymentGatewayVersion;
     }
 
+   
 }

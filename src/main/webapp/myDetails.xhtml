@@ -3,13 +3,13 @@
                 xmlns:f="http://java.sun.com/jsf/core"
                 xmlns:ui="http://java.sun.com/jsf/facelets"
                 xmlns:p="http://primefaces.org/ui"
-                xmlns:pe="http://primefaces.org/ui/extensions"
+
                 template="/WEB-INF/template.xhtml">
     <ui:define name="title">
         <h:outputText value="#{configMapController.getKey('EditCustomersTitle')}"></h:outputText>
     </ui:define>
     <ui:define name="body">
-
+        <p:tooltip  />
         <div class="layout-portlets-box">
 
             <h:panelGroup id="messagePanel" layout="block">
@@ -24,8 +24,8 @@
 
                         <p:graphicImage id="photo1" value="#{customersController.selected.profileImage.imageStream}" height="150px" cache="false" styleClass="parentOfUploadPhoto" />
                         <div class="EmptyBox10"></div>
-                        <p:commandButton icon="fa fa-upload  white Fs14"  id="photoUploadButton" ajax="true"  onclick="PF('uploadPhotoDialogueWidget').show();" update=":growl @(.parentOfUploadPhoto) "   value="#{configMapController.getKey('EditCustomersUploadPhotoButton')}" immediate="true"/>
-                        <pe:tooltip for="photoUploadButton" value="#{configMapController.getKey('Tooltip_photoUploadButton')}" myPosition="bottom left" atPosition="top right"/>
+                        <p:commandButton icon="fa fa-upload  white Fs14" title="#{configMapController.getKey('Tooltip_photoUploadButton')}" id="photoUploadButton" ajax="true"  onclick="PF('uploadPhotoDialogueWidget').show();" update=":growl @(.parentOfUploadPhoto) "   value="#{configMapController.getKey('EditCustomersUploadPhotoButton')}" immediate="true"/>
+
 
                         <h1 class="BigTopic">#{configMapController.getKey('ListCustomersTitle_CustomerDetailsHeader')}</h1>
                         <h:panelGrid columns="2"   >
@@ -91,8 +91,8 @@
                         </h:panelGrid>
                         <div class="EmptyBox10"></div>
 
-                        <p:commandButton id="saveMyDetails" actionListener="#{customersController.update}" value="#{configMapController.getKey('EditCustomersSaveLink')}" icon="ui-icon-check fa fa-check white Fs14" update=":growl"/>
-                        <pe:tooltip for="saveMyDetails" value="#{configMapController.getKey('Tooltip_saveMyDetails')}" myPosition="bottom left" atPosition="top right"/>
+                        <p:commandButton id="saveMyDetails" actionListener="#{customersController.update}" title="#{configMapController.getKey('Tooltip_saveMyDetails')}" value="#{configMapController.getKey('EditCustomersSaveLink')}" icon="ui-icon-check fa fa-check white Fs14" update=":growl"/>
+
 
                     </div>
                 </div>
@@ -170,16 +170,16 @@
 
                             <h:outputText rendered="#{ezidebit.customerWebDDRFormEnabled}"  styleClass="red FontBold"   value="#{configMapController.getKey('MyDetailsCallToFillOutPaymentDetails')}"/>
 
-                            <p:commandButton  styleClass="updatePaymentInfo" icon="fa fa-dollar  white Fs14" id="directDebitFormButton" disabled="#{!ezidebit.customerWebDDRFormEnabled}"  actionListener="#{ezidebit.redirectToPaymentGateway}"    value="#{configMapController.getKey('EnterPaymentDetailsButton')}" update=":growl :createCustomerForm"  /> 
-                            <pe:tooltip for="directDebitFormButton" value="#{configMapController.getKey('Tooltip_updateMyPaymentDetails')}" myPosition="bottom left" atPosition="top right"/>
+                            <p:commandButton  styleClass="updatePaymentInfo" icon="fa fa-dollar  white Fs14" title="#{configMapController.getKey('Tooltip_updateMyPaymentDetails')}" id="directDebitFormButton" disabled="#{!ezidebit.customerWebDDRFormEnabled}"  actionListener="#{ezidebit.redirectToPaymentGateway}"    value="#{configMapController.getKey('EnterPaymentDetailsButton')}" update=":growl :createCustomerForm"  /> 
+
 
 
                             <h:outputText  rendered="#{!ezidebit.customerWebDDRFormEnabled and customersController.selected.paymentParametersId.statusCode != 'D'}" value="Completed" /> 
 
                         </h:panelGrid>
                         <div class="EmptyBox10"></div>
-                        <p:commandButton styleClass="updatePaymentInfo" icon="fa fa-credit-card  white Fs14" id="editPaymentMethodButton" disabled="#{ezidebit.theCustomerProvisionedInThePaymentGateway == false or ezidebit.customerDetailsHaveBeenRetrieved == false or ezidebit.customerCancelledInPaymentGateway == true}"  oncomplete="PF('editPaymentMethodDialogueWidget').show();"    value="#{configMapController.getKey('editPaymentMethodButtonLink')}" update=":growl @(.updatePaymentInfo)"  /> 
-                        <pe:tooltip for="editPaymentMethodButton" value="#{configMapController.getKey('Tooltip_updateMyPaymentInfo')}" myPosition="bottom left" atPosition="top right"/>
+                        <p:commandButton styleClass="updatePaymentInfo" icon="fa fa-credit-card  white Fs14" title="#{configMapController.getKey('Tooltip_updateMyPaymentInfo')}" id="editPaymentMethodButton" disabled="#{ezidebit.theCustomerProvisionedInThePaymentGateway == false or ezidebit.customerDetailsHaveBeenRetrieved == false or ezidebit.customerCancelledInPaymentGateway == true}"  oncomplete="PF('editPaymentMethodDialogueWidget').show();"    value="#{configMapController.getKey('editPaymentMethodButtonLink')}" update=":growl @(.updatePaymentInfo)"  /> 
+
 
                     </div>
                 </div>
@@ -203,7 +203,7 @@
                                 <p:commandButton icon="fa fa-edit  white Fs14"   action="customerSurveys" rendered="#{qMap.enabled}"   value="#{qMap.surveysId.name}" update=":growl :createCustomerForm"  >
                                     <f:setPropertyActionListener value="#{qMap.surveysId}" target="#{surveyanswersController.selectedSurvey}" />
                                 </p:commandButton> 
-                                
+
                                 <h:outputText  rendered="#{!qMap.questionnaireCompleted and qMap.enabled}"  styleClass="red FontBold" value="Please complete this form." />   
 
 
@@ -230,8 +230,8 @@
                           
                             <p:commandButton   ajax="true" actionListener="#{customersController.updatepass}" update="password  :growl"   value="#{configMapController.getKey('EditCustomersUpdatePassword')}" immediate="true"/>-->
 
-                            <p:commandButton icon="fa fa-cog  white Fs14" id="passButton2" ajax="true"  onclick="PF('updatePasswordDialogueWidget').show();" update=":growl :updatePass"   value="#{configMapController.getKey('EditCustomersUpdatePassword')}" immediate="true"/>
-                            <pe:tooltip for="passButton2" value="#{configMapController.getKey('Tooltip_passChangeButton')}" myPosition="bottom left" atPosition="top right"/>
+                            <p:commandButton icon="fa fa-cog  white Fs14" id="passButton2" ajax="true" title="#{configMapController.getKey('Tooltip_passChangeButton')}" onclick="PF('updatePasswordDialogueWidget').show();" update=":growl :updatePass"   value="#{configMapController.getKey('EditCustomersUpdatePassword')}" immediate="true"/>
+
 
                         </h:panelGrid>
                     </div>

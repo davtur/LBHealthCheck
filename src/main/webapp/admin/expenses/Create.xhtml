@@ -8,7 +8,7 @@
                 >
     <p:dialog id="ExpensesCreateDlg" fitViewport="true" widgetVar="ExpensesCreateDialogWidget" modal="true" resizable="true" appendTo="@(body)" header="#{configMapController.getKey('CreateExpensesTitle')}">
         <h:form id="ExpensesCreateForm">
-
+ <p:tooltip />
   <!--  <p:panelGrid columns="2" rendered="#{expensesController.selected != null}">-->
 
             <div class="Container100 Responsive100">
@@ -72,23 +72,23 @@
                             <p:outputLabel value="#{configMapController.getKey('CreateExpensesLabel_supplierId')}" for="supplierId" />
                             <h:panelGrid  columns="2"  id="supplierIdGrid">
 
-                                <p:selectOneMenu id="supplierId" styleClass="selectOneWidth"  valueChangeListener="#{expensesController.selectOneMenuValueChangeListener}" converter="suppliersControllerConverter" filter="true" value="#{expensesController.selected.supplierId}"  label="#{configMapController.getKey('CreateExpensesTitle_supplierId')}" required="true" requiredMessage="#{configMapController.getKey('CreateExpensesRequiredMessage_supplierId')}">
+                                <p:selectOneMenu id="supplierId" styleClass="selectOneWidth" title="Description: #{expensesController.selected.supplierId.description}" valueChangeListener="#{expensesController.selectOneMenuValueChangeListener}" converter="suppliersControllerConverter" filter="true" value="#{expensesController.selected.supplierId}"  label="#{configMapController.getKey('CreateExpensesTitle_supplierId')}" required="true" requiredMessage="#{configMapController.getKey('CreateExpensesRequiredMessage_supplierId')}">
                                     <f:selectItems value="#{suppliersController.itemsAvailableSorted}" var="supplier" itemLabel="#{supplier.supplierName}" itemValue="#{supplier}"/>
                                     <p:ajax   update=":ExpensesCreateForm:supplierIdGrid" event="change"  />
                                 </p:selectOneMenu>
                                 <p:commandButton  styleClass="selectOneButton"  rendered="#{suppliersController.isUserInRole('ADMIN')}" id="createButtonSupplier" icon="fa fa-plus white Fs14"   value="#{configMapController.getKey('CreateNew_Supplier')}" actionListener="#{suppliersController.prepareCreateDialogue}" update=":SuppliersCreateForm supplierId" oncomplete="PF('SuppliersCreateDialog').show()"/>
-                                <pe:tooltip for="supplierId" value="Description: #{expensesController.selected.supplierId.description}" />
+                                
 
 
                             </h:panelGrid>
                             <p:outputLabel value="#{configMapController.getKey('CreateExpensesLabel_expenseTypeId')}" for="expenseTypeId" />
                             <h:panelGrid  columns="2" id="expenseTypeIdGrid" >
-                                <p:selectOneMenu id="expenseTypeId" styleClass="selectOneWidth"  valueChangeListener="#{expensesController.selectOneMenuValueChangeListener}" converter="expenseTypesControllerConverter" filter="true" value="#{expensesController.selected.expenseTypeId}"  label="#{configMapController.getKey('CreateExpensesTitle_expenseTypeId')}" required="true" requiredMessage="#{configMapController.getKey('CreateExpensesRequiredMessage_expenseTypeId')}">
+                                <p:selectOneMenu id="expenseTypeId" styleClass="selectOneWidth" title="Description: #{expensesController.selected.expenseTypeId.description}" valueChangeListener="#{expensesController.selectOneMenuValueChangeListener}" converter="expenseTypesControllerConverter" filter="true" value="#{expensesController.selected.expenseTypeId}"  label="#{configMapController.getKey('CreateExpensesTitle_expenseTypeId')}" required="true" requiredMessage="#{configMapController.getKey('CreateExpensesRequiredMessage_expenseTypeId')}">
                                     <f:selectItems value="#{expenseTypesController.itemsAvailableSorted}" var="expenseType" itemLabel="#{expenseType.expenseTypeName}" itemValue="#{expenseType}"/>
                                     <p:ajax   update=" :ExpensesCreateForm:expenseTypeIdGrid" event="change"  />
                                 </p:selectOneMenu>
                                 <p:commandButton   styleClass="selectOneButton"  rendered="#{expenseTypesController.isUserInRole('ADMIN')}" id="createButtonExpenseType" icon="fa fa-plus white Fs14"   value="#{configMapController.getKey('CreateNew_ExpenseType')}" actionListener="#{expenseTypesController.createDialogue}" update=":ExpenseTypesCreateForm  expenseTypeId" oncomplete="PF('ExpenseTypesCreateDialog').show()"/>
-                                <pe:tooltip for="expenseTypeId" value="Description: #{expensesController.selected.expenseTypeId.description}" />
+                               
 
                             </h:panelGrid>
                             <p:outputLabel value="#{configMapController.getKey('CreateExpensesLabel_paymentMethodId')}" for="paymentMethodId" />

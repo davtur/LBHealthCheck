@@ -143,6 +143,7 @@ au/com/manlyit/fitnesscrm/stats/db/StatTypes.class
 au/com/manlyit/fitnesscrm/stats/webservices/GetPayments.class
 au/com/manlyit/fitnesscrm/stats/webservices/EziResponseOfPaymentDetailTHgMB7OL.class
 au/com/manlyit/fitnesscrm/stats/classes/util/PushComponentUpdateResource.class
+au/com/manlyit/fitnesscrm/stats/beans/PushSocketBean.class
 au/com/manlyit/fitnesscrm/stats/webservices/ChangeScheduledAmountResponse.class
 au/com/manlyit/fitnesscrm/stats/classes/StreamGraphicImage.class
 au/com/manlyit/fitnesscrm/stats/classes/SessionRecurranceController$1.class

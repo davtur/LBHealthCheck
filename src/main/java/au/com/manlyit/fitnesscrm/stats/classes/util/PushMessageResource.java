@@ -26,29 +26,33 @@ import org.primefaces.push.impl.JSONEncoder;
 @Singleton
 public class PushMessageResource {
 
+   
+
     private static final java.util.logging.Logger LOGGER = java.util.logging.Logger.getLogger(PushMessageResource.class.getName());
 
     @PathParam("session")
     private String sessionId;
+   
 
     @Inject
     private ServletContext ctx;
 
     @OnMessage(encoders = {JSONEncoder.class})
     public FacesMessage onMessage(FacesMessage message) {
+               LOGGER.log(Level.INFO, "Atmosphere Push Connection MESSAGE RECIEVED., SessionID={2}, Summary={0}, Details={1} ", new Object[]{message.getSummary(), message.getDetail(),sessionId});
         return message;
     }
 
     @OnOpen
     public void onOpen(RemoteEndpoint rEndPoint, EventBus e) {
-        rEndPoint.address();
-       
-        LOGGER.log(Level.INFO, "Atmosphere Push Connection OPENED. Transport Type = {0}, Address = {1}, Path = {2}, URI = {3}, Status = {4}", new Object[]{rEndPoint.transport().name(), rEndPoint.address(), rEndPoint.path(), rEndPoint.uri(), rEndPoint.status(),sessionId});
+        rEndPoint.address(); 
+     
+        LOGGER.log(Level.INFO, "Atmosphere Push Connection OPENED. Transport Type = {0}, Address = {1}, Path = {2}, URI = {3}, Status = {4}, sessionID={5}", new Object[]{rEndPoint.transport().name(), rEndPoint.address(), rEndPoint.path(), rEndPoint.uri(), rEndPoint.status(),sessionId});
     }
 
     @OnClose
     public void onClose(RemoteEndpoint rEndPoint, EventBus e) {
-       
+      
         LOGGER.log(Level.INFO, "Atmosphere Push Connection CLOSED. Transport Type = {0}, Address = {1}, Path = {2}, URI = {3}, Status = {4}", new Object[]{rEndPoint.transport().name(), rEndPoint.address(), rEndPoint.path(), rEndPoint.uri(), rEndPoint.status(),sessionId});
 
     }
@@ -58,5 +62,7 @@ public class PushMessageResource {
     public Message onMessage(Message message) {
         return message;
     }
+
+   
 
 }

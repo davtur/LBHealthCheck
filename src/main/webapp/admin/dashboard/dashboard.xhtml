@@ -153,8 +153,8 @@
             <p:panel id="customChart" widgetVar="customChartWidget" header="#{configMapController.getKey('DashboardSessionsChartTitle')}">
                 <p:chart type="bar"   styleClass="chartClass" model="#{mySessionsChart1.dashboardMonthlySessionsChartModel}"     />
             </p:panel>
-            
-         <!-- CUSTOMERS WITH STATUS OUT Of SYNC WITH GATEWAY -->
+
+            <!-- CUSTOMERS WITH STATUS OUT Of SYNC WITH GATEWAY -->
 
             <div class="Container100">
                 <h:outputText escape="false" value="#{configMapController.getKey('ListCustomersEmpty')}" rendered="#{customersController.customersOutIfSyncWithGateway.rowCount == 0}"/>
@@ -177,10 +177,10 @@
                                 <p:ajax event="filter" listener="#{customersController.onTableFiltered}"   update="@this"  />  
 
 
-                                <h:panelGroup>
+                                <!--<h:panelGroup>
                                     <h:outputText value="Search all fields: " />
                                     <p:inputText id="globalFilter" onkeyup="PF('customersControllerTableOutIfSyncWithGateway').filter();"  />
-                                </h:panelGroup>
+                                </h:panelGroup>-->
                                 <h:outputText value="   " />
                                 <h:panelGroup  >
 
@@ -192,6 +192,12 @@
                                 </h:panelGroup>
 
                             </f:facet>
+                          <!--  <p:ajax event="rowSelect"  listener="#{customersController.setSelecteDblClick}"   />  -->
+                            <p:column>
+                                <p:commandButton value="View" action="/admin/customers/List.xhtml?faces-redirect=true" >
+                                    <f:setPropertyActionListener value="#{item}" target="#{customersController.dashboardSyncSelected}" />
+                                </p:commandButton>
+                            </p:column>
                             <p:column sortBy="#{item.id}" filterBy="#{item.id}" headerText="#{configMapController.getKey('ListCustomersTitle_id')}"   >
                                 <h:outputText value="#{item.id}"/>
                             </p:column>
@@ -266,14 +272,14 @@
                 <h:outputText escape="false" value="#{configMapController.getKey('ListCustomersEmpty')}" rendered="#{customersController.customersWithoutScheduledPayments.rowCount == 0}"/>
                 <h:panelGroup rendered="#{customersController.customersWithoutScheduledPayments.rowCount > 0}">
                     <p:panel id="dashboardCustWithoutPay" header="#{configMapController.getKey('DashboardNoSchedPaymentsPanelLabel')}">  
-                        <p:dataTable id="customersTableList" 
+                        <p:dataTable id="customersTableListCustomersWithoutScheduledPayments" 
 
 
                                      selection="#{customersController.multiSelectedCustomersWithoutScheduledPayments}" 
                                      rowKey="#{item.id}" 
                                      value="#{customersController.customersWithoutScheduledPayments}" 
                                      filteredValue="#{customersController.filteredCustomersWithoutScheduledPayments}" 
-                                     widgetVar="customersControllerTable" 
+                                     widgetVar="customersControllerTableBadPayments" 
                                      editable="false" 
 
                                      var="item"  
@@ -285,7 +291,7 @@
 
                                 <h:panelGroup>
                                     <h:outputText value="Search all fields: " />
-                                    <p:inputText id="globalFilter" onkeyup="PF('customersControllerTable').filter();"  />
+                                    <p:inputText id="globalFilter" onkeyup="PF('customersControllerTableBadPayments').filter();"  />
                                 </h:panelGroup>
                                 <h:outputText value="   " />
                                 <h:panelGroup  >
@@ -298,6 +304,11 @@
                                 </h:panelGroup>
 
                             </f:facet>
+                            <p:column>
+                                <p:commandButton value="View" action="/admin/customers/List.xhtml?faces-redirect=true" >
+                                    <f:setPropertyActionListener value="#{item}" target="#{customersController.dashboardSyncSelected}" />
+                                </p:commandButton>
+                            </p:column>
                             <p:column sortBy="#{item.id}" filterBy="#{item.id}" headerText="#{configMapController.getKey('ListCustomersTitle_id')}"   >
                                 <h:outputText value="#{item.id}"/>
                             </p:column>
@@ -388,10 +399,10 @@
                                 <p:ajax event="filter" listener="#{customersController.onTableFiltered}"   update="@this"  />  
 
 
-                                <h:panelGroup>
-                                    <h:outputText value="Search all fields: " />
-                                    <p:inputText id="globalFilter" onkeyup="PF('customersBadPaymentsControllerTable').filter();"  />
-                                </h:panelGroup>
+                                <!-- <h:panelGroup>
+                                     <h:outputText value="Search all fields: " />
+                                     <p:inputText id="globalFilter" onkeyup="PF('customersBadPaymentsControllerTable').filter();"  />
+                                 </h:panelGroup>-->
                                 <h:outputText value="   " />
                                 <h:panelGroup  >
 
@@ -403,7 +414,11 @@
                                 </h:panelGroup>
 
                             </f:facet>
-
+                            <p:column>
+                                <p:commandButton value="View" action="/admin/customers/List.xhtml?faces-redirect=true" >
+                                    <f:setPropertyActionListener value="#{item}" target="#{customersController.dashboardSyncSelected}" />
+                                </p:commandButton>
+                            </p:column>
                             <p:column  sortBy="#{pay.debitDate}" filterBy="#{pay.debitDate}" headerText="#{configMapController.getKey('ListPaymentsTitle_debitDate')}"   >
                                 <h:outputText value="#{pay.debitDate}">
                                     <f:convertDateTime pattern="E dd MMM yyyy" />
@@ -497,10 +512,10 @@
                                 <p:ajax event="filter" listener="#{customersController.onTableFiltered}"   update="@this"  />  
 
 
-                                <h:panelGroup>
-                                    <h:outputText value="Search all fields: " />
-                                    <p:inputText id="globalFilter" onkeyup="PF('leadsControllerTable').filter();"  />
-                                </h:panelGroup>
+                                <!-- <h:panelGroup>
+                                     <h:outputText value="Search all fields: " />
+                                     <p:inputText id="globalFilter" onkeyup="PF('leadsControllerTable').filter();"  />
+                                 </h:panelGroup>-->
                                 <h:outputText value="   " />
                                 <h:panelGroup  >
 
@@ -512,6 +527,11 @@
                                 </h:panelGroup>
 
                             </f:facet>
+                            <p:column>
+                                <p:commandButton value="View" action="/admin/customers/List.xhtml?faces-redirect=true" >
+                                    <f:setPropertyActionListener value="#{item}" target="#{customersController.dashboardSyncSelected}" />
+                                </p:commandButton>
+                            </p:column>
                             <p:column sortBy="#{item.id}" filterBy="#{item.id}" headerText="#{configMapController.getKey('ListCustomersTitle_id')}"   >
                                 <h:outputText value="#{item.id}"/>
                             </p:column>
@@ -601,10 +621,10 @@
                                 <p:ajax event="filter" listener="#{customersController.onTableFiltered}"   update="@this"  />  
 
 
-                                <h:panelGroup>
-                                    <h:outputText value="Search all fields: " />
-                                    <p:inputText id="globalFilter" onkeyup="PF('customersOnHoldControllerTable').filter();"  />
-                                </h:panelGroup>
+                                <!-- <h:panelGroup>
+                                     <h:outputText value="Search all fields: " />
+                                     <p:inputText id="globalFilter" onkeyup="PF('customersOnHoldControllerTable').filter();"  />
+                                 </h:panelGroup>-->
                                 <h:outputText value="   " />
                                 <h:panelGroup  >
 
@@ -616,6 +636,11 @@
                                 </h:panelGroup>
 
                             </f:facet>
+                            <p:column>
+                                <p:commandButton value="View" action="/admin/customers/List.xhtml?faces-redirect=true" >
+                                    <f:setPropertyActionListener value="#{item}" target="#{customersController.dashboardSyncSelected}" />
+                                </p:commandButton>
+                            </p:column>
                             <p:column sortBy="#{item.id}" filterBy="#{item.id}" headerText="#{configMapController.getKey('ListCustomersTitle_id')}"   >
                                 <h:outputText value="#{item.id}"/>
                             </p:column>
