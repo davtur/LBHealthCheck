@@ -4,7 +4,7 @@
                  xmlns:ui="http://java.sun.com/jsf/facelets"
                  xmlns:h="http://java.sun.com/jsf/html"
                  xmlns:f="http://java.sun.com/jsf/core"
-                  xmlns:pe="http://primefaces.org/ui/extensions"
+                 xmlns:pe="http://primefaces.org/ui/extensions"
                  xmlns:p="http://primefaces.org/ui"
                  >
 
@@ -88,32 +88,34 @@
         </div>
         <div class="Seperator"></div>
         <div class="Container100">
-            <h:outputText escape="false" value="#{configMapController.getKey('ListCustomersEmpty')}" rendered="#{customersController.items.rowCount == 0}"/>
-            <h:panelGroup rendered="#{customersController.items.rowCount > 0}">
+            <h:outputText escape="false" value="#{configMapController.getKey('ListCustomersEmpty')}" rendered="#{customersController.lazyModel.rowCount == 0}"/>
+            <h:panelGroup rendered="#{customersController.lazyModel.rowCount > 0}">
                 <p:dataTable id="customersTableList" 
-
+                             lazy="true"
 
                              selection="#{customersController.multiSelected}" 
                              rowKey="#{item.id}" 
-                             value="#{customersController.items}" 
+                             value="#{customersController.lazyModel}" 
                              filteredValue="#{customersController.filteredItems}" 
                              widgetVar="customersControllerTable" 
                              editable="true" 
 
                              var="item"  
+                             scrollable="true"
                              scrollHeight="400"
-                             scrollable="true" >
+                             scrollRows="50"
+                             liveScroll="true" >
                     <f:facet name="header">
 
 
-                        <h:panelGroup>
+                       <!-- <h:panelGroup>
                             <h:outputText value="Search all fields:" />
                             <p:inputText id="globalFilter" onkeyup="PF('customersControllerTable').filter();" />
-                        </h:panelGroup>
+                        </h:panelGroup>-->
                         <h:outputText value="   " />
                         <h:panelGroup>
                          <!--   <h:outputText  rendered="#{ customersController.filteredItems != null}" value="#{customersController.filteredItems.size} Records Found"/>-->
-                            <h:outputText  rendered="#{customersController.items != null}" value="#{customersController.items.rowCount} Records Found"/>
+                            <h:outputText  rendered="#{customersController.lazyModel != null}" value="#{customersController.lazyModel.rowCount} Records Found"/>
 
 
                         </h:panelGroup>
@@ -122,7 +124,7 @@
                     <p:ajax event="rowSelect"  listener="#{customersController.setSelecteDblClick}" update=":growl :tv:customerslistForm1:selectedUser :tv:formCustomersEdit1 :formCustomersCreate1 :tv:paymentsForm :tv:NoteslistForm1 :confirmCancellation :confirmDialogNotesCreate1"  />  
                     <p:column selectionMode="multiple" />
                     <p:column sortBy="#{item.id}" filterBy="#{item.id}" headerText="#{configMapController.getKey('ListCustomersTitle_id')}"   >
-                        
+
                         <p:graphicImage value="#{customerImagesController.imageThumbnail}" height="30px" styleClass="parentOfUploadPhoto" >
                             <f:param name="imageId" value="#{item.profileImage.id}"/>
                         </p:graphicImage>

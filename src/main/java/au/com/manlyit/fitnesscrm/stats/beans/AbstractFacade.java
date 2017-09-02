@@ -4,6 +4,7 @@
  */
 package au.com.manlyit.fitnesscrm.stats.beans;
 
+import au.com.manlyit.fitnesscrm.stats.db.CustomerState;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import java.io.Serializable;
 import java.lang.reflect.Method;
@@ -81,7 +82,8 @@ public abstract class AbstractFacade<T> implements Serializable {
         }*/
 
     }
-@TransactionAttribute(REQUIRES_NEW)
+
+    @TransactionAttribute(REQUIRES_NEW)
     public void createAndFlushForGeneratedIdEntities(T entity) {
 
         /*
@@ -225,7 +227,6 @@ Flush has several usages:
         //q.setHint("javax.persistence.cache.retrieveMode", "BYPASS");
         return q.getResultList();
     }
-   
 
     public List<T> findRange(int[] range) {
         javax.persistence.criteria.CriteriaQuery cq = getEntityManager().getCriteriaBuilder().createQuery();
@@ -249,6 +250,63 @@ Flush has several usages:
 // This method provides a bridge
     // between the session beans and my LazyDataModel.
 // Note: all of our databse entities that are involved in the lazy loading table must implement BaseEntity and have the id column name as the primary key.( see Customers class as an example )
+
+    public long loadedTotalRowCount(int first, int count, String sortField, SortOrder sortOrder, Map<String, Object> filters) {
+        long totalRows = 0;
+        String message = "Abstract Facade: load method - Lazy Loading: " + entityClass.getSimpleName() + ",Rows=" + count + ", First=" + first + ", SortField=" + sortField + ", SortOrder=" + sortOrder.name();
+        LOGGER.log(Level.INFO, message);
+        CriteriaBuilder builder = getEntityManager().getCriteriaBuilder();
+        CriteriaQuery cq = builder.createQuery();
+        Root<T> root = cq.from(entityClass);
+        cq.select(root);
+        if (sortField != null) {
+            if (sortOrder == SortOrder.ASCENDING) {
+                cq.orderBy(builder.asc(root.get(sortField)));
+            } else if (sortOrder == SortOrder.DESCENDING) {
+                cq.orderBy(builder.desc(root.get(sortField)));
+            }
+        }
+        if (filters != null) {
+            Set<Map.Entry<String, Object>> entries = filters.entrySet();
+            ArrayList<Predicate> predicatesList = new ArrayList<>(entries.size());
+            for (Map.Entry<String, Object> filter : entries) {
+                String key = filter.getKey();
+                Expression expresskey = root.get(key);
+                Object val = filter.getValue();
+                Class type = expresskey.getJavaType();
+                try {
+                    Method getIdMethod = type.getMethod("getId");// this is implemented by the BaseEntity class so if it is a join to another table it should have this method
+                    String sVal = (String) val;
+                    int iVal = Integer.parseInt(sVal);
+                    Expression<Integer> custId = root.join(key).get("id");
+                    predicatesList.add(builder.equal(custId, iVal));
+                } catch (NoSuchMethodException ex) {
+                    predicatesList.add(builder.like(expresskey, filter.getValue() + "%"));
+                } catch (SecurityException ex) {
+                    Logger.getLogger(AbstractFacade.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            cq.where(predicatesList.<Predicate>toArray(
+                    new Predicate[predicatesList.size()]));
+        }
+        cq.select(builder.count(root));
+
+        Query query = getEntityManager().createQuery(cq);
+
+        totalRows = (Long) query.getSingleResult();
+        if (DEBUG) {
+            debug(query);
+            //This SQL will contain ? for parameters. To get the SQL translated with the arguments you need a DatabaseRecord with the parameter values.
+            // String sqlString2 = databaseQuery.getTranslatedSQLString(session, recordWithValues);
+            if (filters != null) {
+                LOGGER.log(Level.FINE, "filters: {0}  ", new Object[]{filters.entrySet()});
+            } else {
+                LOGGER.log(Level.FINE, "Lazy Load SQL Query    Filters Null");
+            }
+        }
+
+        return totalRows;
+    }
 
     public List<T> load(int first, int count, String sortField, SortOrder sortOrder, Map<String, Object> filters) {
         List<T> resultList;
@@ -307,6 +365,16 @@ Flush has several usages:
 
         return resultList;
     }
+
+    public List<T> loadCustomers(List<CustomerState> selectedCustomerStates, List<String> selectedCustomerTypes, int first, int count, String sortField, SortOrder sortOrder, Map<String, Object> filters) {
+        List<T> resultList = null;
+        //override this in CustomersFacade
+        return resultList;
+    }
+     public long loadedCustomersTotalRowCount(List<CustomerState> selectedCustomerStates, List<String> selectedCustomerTypes,int first, int count, String sortField, SortOrder sortOrder, Map<String, Object> filters) {
+           //override this in CustomersFacade
+         return 0;
+     }
 
     public int countDateRange(Date startDate, Date endDate, String dateRangeFieldName) {
         int count = -1;

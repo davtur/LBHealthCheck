@@ -55,7 +55,8 @@ public class LazyLoadingDataModel<T extends BaseEntity> extends LazyDataModel<T>
         List<T> list = null;
         if (useDateRange == false) {
             list = facade.load(first, pageSize, sortField, sortOrder, filters);
-            this.setRowCount(facade.count());
+            Long totalRows = facade.loadedTotalRowCount(first, pageSize, sortField, sortOrder, filters);
+            this.setRowCount(totalRows.intValue());
             
         } else {
             list = facade.loadDateRange(first, pageSize, sortField, sortOrder, filters, getFromDate(), getToDate(), getDateRangeEntityFieldName());
@@ -67,7 +68,7 @@ public class LazyLoadingDataModel<T extends BaseEntity> extends LazyDataModel<T>
        
         // I am using the following line for debugging:
         // throw new RuntimeException(list.toString());
-        logger.log(Level.INFO, "Lazy Load return a list of size:{0}", list.size());
+        logger.log(Level.INFO, "Lazy Load returned a list of size:{0}", list.size());
         return list;
     }
 

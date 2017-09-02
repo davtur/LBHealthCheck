@@ -10,8 +10,11 @@ import au.com.manlyit.fitnesscrm.stats.db.CustomerState;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import au.com.manlyit.fitnesscrm.stats.db.Groups;
 import au.com.manlyit.fitnesscrm.stats.db.PaymentParameters;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Inject;
@@ -31,6 +34,7 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
 import javax.validation.ConstraintViolationException;
+import org.primefaces.model.SortOrder;
 
 /**
  *
@@ -77,7 +81,7 @@ public class CustomersFacade extends AbstractFacade<Customers> {
         profilePhoto.setCustomers(cust);
         getEntityManager().merge(cust);
     }
- 
+
     public Customers findCustomerByUsername(String username) {
 
         // CriteriaBuilder cb = em.getCriteriaBuilder();
@@ -408,6 +412,181 @@ public class CustomersFacade extends AbstractFacade<Customers> {
         types.add("USER");
         String sortField = "firstname";
         return findFilteredCustomers(sortAsc, sortField, acs, types, false);
+    }
+
+    @Override
+    public List<Customers> loadCustomers(List<CustomerState> selectedCustomerStates, List<String> selectedCustomerTypes, int first, int count, String sortField, SortOrder sortOrder, Map<String, Object> filters) {
+        List<Customers> resultList;
+        String message = "Abstract Facade: load method - Lazy Loading: " + Customers.class.getSimpleName() + ",Rows=" + count + ", First=" + first + ", SortField=" + sortField + ", SortOrder=" + sortOrder.name();
+        LOGGER.log(Level.INFO, message);
+        CriteriaBuilder builder = getEntityManager().getCriteriaBuilder();
+        CriteriaQuery<Customers> cq = builder.createQuery(Customers.class);
+        Root<Customers> root = cq.from(Customers.class);
+        cq.select(root);
+        // additional filtering for customers
+        ArrayList<Predicate> predicatesList1 = new ArrayList<>();
+        ArrayList<Predicate> predicatesList2 = new ArrayList<>();
+        Subquery<String> subquery = cq.subquery(String.class);
+        Root<Groups> fromGroups = subquery.from(Groups.class);
+        Expression<String> subUser = fromGroups.get("username").get("username");
+        subquery.select(subUser);
+
+        Join<Customers, CustomerState> jn = root.join("active");// join customers.active to customer_state.id
+
+        Expression<String> custState = jn.get("customerState");
+        Expression<String> groupName = fromGroups.get("groupname");
+        Expression<String> user = root.get("username");
+
+        for (CustomerState cs : selectedCustomerStates) {
+            predicatesList1.add(builder.equal(custState, cs.getCustomerState()));
+        }
+        for (String ct : selectedCustomerTypes) {
+            predicatesList2.add(builder.equal(groupName, ct));
+        }
+        subquery.where(builder.or(predicatesList2.<Predicate>toArray(new Predicate[predicatesList2.size()])));
+        Predicate pred = user.in(subquery);
+
+        //-----------------------------------------------------------------------------
+        if (sortField != null) {
+            if (sortOrder == SortOrder.ASCENDING) {
+                cq.orderBy(builder.asc(root.get(sortField)));
+            } else if (sortOrder == SortOrder.DESCENDING) {
+                cq.orderBy(builder.desc(root.get(sortField)));
+            }
+        }
+        if (filters != null) {
+            Set<Map.Entry<String, Object>> entries = filters.entrySet();
+            ArrayList<Predicate> predicatesList = new ArrayList<>(entries.size());
+            for (Map.Entry<String, Object> filter : entries) {
+                String key = filter.getKey();
+                Expression expresskey = root.get(key);
+                Object val = filter.getValue();
+                Class type = expresskey.getJavaType();
+                try {
+                    Method getIdMethod = type.getMethod("getId");// this is implemented by the BaseEntity class so if it is a join to another table it should have this method
+                    String sVal = (String) val;
+                    int iVal = Integer.parseInt(sVal);
+                    Expression<Integer> custId = root.join(key).get("id");
+                    predicatesList.add(builder.equal(custId, iVal));
+                } catch (NoSuchMethodException ex) {
+                    predicatesList.add(builder.like(expresskey, filter.getValue() + "%"));
+                } catch (SecurityException ex) {
+                    Logger.getLogger(AbstractFacade.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            //cq.where(predicatesList.<Predicate>toArray(new Predicate[predicatesList.size()]));
+             if (predicatesList.isEmpty()) {
+                cq.where(builder.and(builder.or(predicatesList1.<Predicate>toArray(new Predicate[predicatesList1.size()])), pred));
+
+            } else {
+                cq.where(builder.and(builder.and(builder.or(predicatesList1.<Predicate>toArray(new Predicate[predicatesList1.size()])), pred), builder.or(predicatesList.<Predicate>toArray(new Predicate[predicatesList.size()]))));
+            }
+        }
+        javax.persistence.TypedQuery<Customers> query = getEntityManager().createQuery(cq);
+
+        query.setFirstResult(first);
+
+        query.setMaxResults(count);
+        resultList = query.getResultList();
+        if (DEBUG) {
+            debug(query);
+            //This SQL will contain ? for parameters. To get the SQL translated with the arguments you need a DatabaseRecord with the parameter values.
+            // String sqlString2 = databaseQuery.getTranslatedSQLString(session, recordWithValues);
+            if (filters != null) {
+                LOGGER.log(Level.FINE, "filters: {0}  ", new Object[]{filters.entrySet()});
+            } else {
+                LOGGER.log(Level.FINE, "Lazy Load SQL Query    Filters Null");
+            }
+        }
+
+        return resultList;
+    }
+
+    public long loadedCustomersTotalRowCount(List<CustomerState> selectedCustomerStates, List<String> selectedCustomerTypes, int first, int count, String sortField, SortOrder sortOrder, Map<String, Object> filters) {
+        long totalRows = 0;
+        String message = "Abstract Facade: load method - Lazy Loading: " + Customers.class.getSimpleName() + ",Rows=" + count + ", First=" + first + ", SortField=" + sortField + ", SortOrder=" + sortOrder.name();
+        LOGGER.log(Level.INFO, message);
+        CriteriaBuilder builder = getEntityManager().getCriteriaBuilder();
+        CriteriaQuery cq = builder.createQuery();
+        Root<Customers> root = cq.from(Customers.class);
+        cq.select(root);
+        // additional filtering for customers
+        ArrayList<Predicate> predicatesList1 = new ArrayList<>();
+        ArrayList<Predicate> predicatesList2 = new ArrayList<>();
+        Subquery<String> subquery = cq.subquery(String.class);
+        Root<Groups> fromGroups = subquery.from(Groups.class);
+        Expression<String> subUser = fromGroups.get("username").get("username");
+        subquery.select(subUser);
+
+        Join<Customers, CustomerState> jn = root.join("active");// join customers.active to customer_state.id
+
+        Expression<String> custState = jn.get("customerState");
+        Expression<String> groupName = fromGroups.get("groupname");
+        Expression<String> user = root.get("username");
+
+        for (CustomerState cs : selectedCustomerStates) {
+            predicatesList1.add(builder.equal(custState, cs.getCustomerState()));
+        }
+        for (String ct : selectedCustomerTypes) {
+            predicatesList2.add(builder.equal(groupName, ct));
+        }
+        subquery.where(builder.or(predicatesList2.<Predicate>toArray(new Predicate[predicatesList2.size()])));
+        Predicate pred = user.in(subquery);
+
+        //-----------------------------------------------------------------------------
+        if (sortField != null) {
+            if (sortOrder == SortOrder.ASCENDING) {
+                cq.orderBy(builder.asc(root.get(sortField)));
+            } else if (sortOrder == SortOrder.DESCENDING) {
+                cq.orderBy(builder.desc(root.get(sortField)));
+            }
+        }
+        if (filters != null) {
+            Set<Map.Entry<String, Object>> entries = filters.entrySet();
+            ArrayList<Predicate> predicatesList = new ArrayList<>(entries.size());
+            for (Map.Entry<String, Object> filter : entries) {
+                String key = filter.getKey();
+                Expression expresskey = root.get(key);
+                Object val = filter.getValue();
+                Class type = expresskey.getJavaType();
+                try {
+                    Method getIdMethod = type.getMethod("getId");// this is implemented by the BaseEntity class so if it is a join to another table it should have this method
+                    String sVal = (String) val;
+                    int iVal = Integer.parseInt(sVal);
+                    Expression<Integer> custId = root.join(key).get("id");
+                    predicatesList.add(builder.equal(custId, iVal));
+                } catch (NoSuchMethodException ex) {
+                    predicatesList.add(builder.like(expresskey, filter.getValue() + "%"));
+                } catch (SecurityException ex) {
+                    Logger.getLogger(AbstractFacade.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            //cq.where(predicatesList.<Predicate>toArray(new Predicate[predicatesList.size()]));
+            if (predicatesList.isEmpty()) {
+                cq.where(builder.and(builder.or(predicatesList1.<Predicate>toArray(new Predicate[predicatesList1.size()])), pred));
+
+            } else {
+                cq.where(builder.and(builder.and(builder.or(predicatesList1.<Predicate>toArray(new Predicate[predicatesList1.size()])), pred), builder.or(predicatesList.<Predicate>toArray(new Predicate[predicatesList.size()]))));
+            }
+        }
+        cq.select(builder.count(root));
+
+        Query query = getEntityManager().createQuery(cq);
+
+        totalRows = (Long) query.getSingleResult();
+        if (DEBUG) {
+            debug(query);
+            //This SQL will contain ? for parameters. To get the SQL translated with the arguments you need a DatabaseRecord with the parameter values.
+            // String sqlString2 = databaseQuery.getTranslatedSQLString(session, recordWithValues);
+            if (filters != null) {
+                LOGGER.log(Level.FINE, "filters: {0}  ", new Object[]{filters.entrySet()});
+            } else {
+                LOGGER.log(Level.FINE, "Lazy Load SQL Query    Filters Null");
+            }
+        }
+
+        return totalRows;
+
     }
 
     //public List<Customers> findFilteredCustomers(boolean sortAsc, CustomerState[] selectedCustomerStates, boolean showStaff, boolean bypassCache) {

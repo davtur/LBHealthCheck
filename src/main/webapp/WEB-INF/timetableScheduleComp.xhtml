@@ -21,12 +21,13 @@
                                     view="basicWeek" 
                                     draggable="false"
                                     resizable="false"
-                                    columnFormat="ddd"
+                                    columnFormat="month:'ddd',week:'dddd',day:'dddd dd-MM'"
                                     timeZone="Australia/Sydney" 
                                     widgetVar="timetable3Schedule" 
                                     styleClass="timetableSchedule"
                                     timeFormat="HH:mm" 
-                                    ignoreTimezone="false" 
+                                    clientTimeZone="local"
+                                    
                                     allDaySlot="false" 
                                     tooltip="false"
                                     maxTime="20:00:00" 
@@ -47,7 +48,7 @@
         </div>
     </h:form>
 
-    <script>
+    <script type="text/javascript">
         //<![CDATA[
         jQuery(document).ready(function () {
             renderSchedule();
@@ -55,8 +56,8 @@
 
 
         function renderSchedule() {
-            var schedule = PF('timetable3Schedule');
-            if (schedule) {
+            //var schedule = PF('timetable3Schedule');
+            if (PF('timetable3Schedule')) {
                 var height = $(window).height();
                 var width = $(window).width();
                 var aspectRatio = 1.5;
@@ -102,7 +103,7 @@
                         <div class="ContainerIndent">
                             <div class="Container20  ">
                                 <div class="ContainerIndent">
-                                    <p:graphicImage value="#{customerImagesController.dynamicImage}" width="55px">
+                                    <p:graphicImage value="#{customerImagesController.imageThumbnail}" width="55px">
                                         <f:param name="imageId" value="#{sessionTimetableController.event.data.sessionTemplate.trainerId.profileImage.id}"/>
                                     </p:graphicImage>
                                 </div>

@@ -8,6 +8,7 @@ import au.com.manlyit.fitnesscrm.stats.beans.CustomersFacade;
 import au.com.manlyit.fitnesscrm.stats.beans.LoginBean;
 import au.com.manlyit.fitnesscrm.stats.beans.PaymentsFacade;
 import au.com.manlyit.fitnesscrm.stats.chartbeans.MySessionsChart1;
+import au.com.manlyit.fitnesscrm.stats.classes.util.CustomersLazyLoadingDataModel;
 import au.com.manlyit.fitnesscrm.stats.classes.util.DatatableSelectionHelper;
 import au.com.manlyit.fitnesscrm.stats.classes.util.EmailValidator;
 import au.com.manlyit.fitnesscrm.stats.classes.util.FutureMapEJB;
@@ -204,6 +205,7 @@ public class CustomersController implements Serializable {
     private boolean showNonUsers = false;
     private boolean signupFromBookingInProgress = false;
     private boolean signupFormSubmittedOK = false;
+    private CustomersLazyLoadingDataModel<Customers> lazyModel;
     private static final Logger LOGGER = Logger.getLogger(CustomersController.class.getName());
 
     public CustomersController() {
@@ -1965,6 +1967,17 @@ public class CustomersController implements Serializable {
      }
      return items;
      }*/
+    public CustomersLazyLoadingDataModel<Customers> getLazyModel() {
+        if (lazyModel == null) {
+
+            lazyModel = new CustomersLazyLoadingDataModel<>(ejbFacade);
+        }
+        lazyModel.setSelectedCustomerStates(selectedCustomerStates);
+        lazyModel.setSelectedCustomerTypes(selectedCustomerTypes);
+
+        return lazyModel;
+    }
+
     public PfSelectableDataModel<Customers> getItems() {
         if (items == null) {
 
@@ -2097,6 +2110,7 @@ public class CustomersController implements Serializable {
 
     public void recreateModel() {
         items = null;
+        lazyModel = null;
         filteredItems = null;
         notesItems = null;
         notesFilteredItems = null;
@@ -3276,6 +3290,6 @@ public class CustomersController implements Serializable {
         this.dashboardSyncSelected = dashboardSyncSelected;
         if (dashboardSyncSelected != null) {
             setSelected(dashboardSyncSelected);
-        } 
+        }
     }
 }

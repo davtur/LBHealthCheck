@@ -89,7 +89,7 @@ public class PaymentBean implements Serializable {
     private PaymentParametersFacade ejbPaymentParametersFacade;
     @Inject
     private FutureMapEJB futureMap;
-    
+
     @Inject
     private EziDebitPaymentGateway eziDebit;
 
@@ -104,9 +104,8 @@ public class PaymentBean implements Serializable {
 
         }
         return new NonPCIService(url).getBasicHttpBindingINonPCIService();
-       
-        
-       // return futureMap.getWs();
+
+        // return futureMap.getWs();
     }
 
     @TransactionAttribute(TransactionAttributeType.NEVER)// we don't want a transaction for this method as teh call within this method will invoke their own transactions
@@ -649,7 +648,7 @@ public class PaymentBean implements Serializable {
         // This method will remove payments that exist in the payment schedule for the given
         // customer. You can control whether all payments are deleted, or if you wish to preserve
         // any manually added payments, and delete an ongoing cyclic schedule.
-        PaymentGatewayResponse pgr;
+        PaymentGatewayResponse pgr = new PaymentGatewayResponse(false, null, "The Customers Payment Schedule was not cleared in the payment gateway due to an error.", "Null", "Null");
 
         String eziDebitCustomerId = ""; // use our reference instead. THis must be an empty string.
 
@@ -665,25 +664,26 @@ public class PaymentBean implements Serializable {
         }
         EziResponseOfstring eziResponse = getWs().clearSchedule(digitalKey, eziDebitCustomerId, ourSystemCustomerReference, keepManualPaymentsString, loggedInUser);
         LOGGER.log(Level.INFO, "clearSchedule Response: Error - {0}, Data - {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue()});
+        boolean failed = true;
         if (eziResponse.getError() == 0) {// any errors will be a non zero value
 
-            if (eziResponse.getData().getValue().compareTo("S") == 0) {
-                String auditDetails = "Cleared scheduled for  :" + cust.getUsername() + ".  Keep Manual Payments: " + keepManualPayments;
-                String changedFrom = "From Date:" + cust.getPaymentParametersId().getPaymentPeriod();
-                String changedTo = "Cleared Schedule";
-                auditLogFacade.audit(customersFacade.findCustomerByUsername(loggedInUser), cust, "clearSchedule", auditDetails, changedFrom, changedTo);
+            if (eziResponse.getData().getValue() != null) {
+                if (eziResponse.getData().getValue().compareTo("S") == 0) {
+                    String auditDetails = "Cleared scheduled for  :" + cust.getUsername() + ".  Keep Manual Payments: " + keepManualPayments;
+                    String changedFrom = "From Date:" + cust.getPaymentParametersId().getPaymentPeriod();
+                    String changedTo = "Cleared Schedule";
+                    auditLogFacade.audit(customersFacade.findCustomerByUsername(loggedInUser), cust, "clearSchedule", auditDetails, changedFrom, changedTo);
 
-                pgr = new PaymentGatewayResponse(true, cust, "The Customers Payment Schedule was cleared successfully in the payment gateway.", "0", "");
-                futureMap.processClearSchedule(sessionId, pgr);
-                return new AsyncResult<>(pgr);
-            } else {
-                pgr = new PaymentGatewayResponse(false, null, "The Customers Payment Schedule was not cleared in the payment gateway due to an error.", eziResponse.getError().toString(), eziResponse.getErrorMessage().getValue());
-                LOGGER.log(Level.WARNING, "The Customers Payment Schedule was not cleared in the payment gateway due to an error. : Error - {0}, Message - {1}", new Object[]{eziResponse.getError().toString(), eziResponse.getErrorMessage().getValue()});
-
+                    pgr = new PaymentGatewayResponse(true, cust, "The Customers Payment Schedule was cleared successfully in the payment gateway.", "0", "");
+                    futureMap.processClearSchedule(sessionId, pgr);
+                    return new AsyncResult<>(pgr);
+                }
             }
-        } else {
+
+        }
+        if (failed) {
             pgr = new PaymentGatewayResponse(false, null, "The Customers Payment Schedule was not cleared in the payment gateway due to an error.", eziResponse.getError().toString(), eziResponse.getErrorMessage().getValue());
-            LOGGER.log(Level.WARNING, "Clear Customers Payment Schedule FAILED: Error - {0}, Message - {1}", new Object[]{eziResponse.getError().toString(), eziResponse.getErrorMessage().getValue()});
+            LOGGER.log(Level.WARNING, "The Customers Payment Schedule was not cleared in the payment gateway due to an error. : Error - {0}, Message - {1}", new Object[]{eziResponse.getError().toString(), eziResponse.getErrorMessage().getValue()});
 
         }
 
