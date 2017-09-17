@@ -1,19 +1,18 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
-
-<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
-  <appender name="console" class="org.apache.log4j.ConsoleAppender"> 
-    <param name="Target" value="System.out"/> 
-    <layout class="org.apache.log4j.PatternLayout"> 
-     <!-- <param name="ConversionPattern" value="%-5p %c{1} - %m%n"/> -->
-      <param name="ConversionPattern" value="%d{dd MMM yyyy HH:mm:ss,SSS} %p %F %L %t %c - %m%n"/>
-    </layout> 
-  </appender> 
-
-  <root> 
-    <priority value ="debug" /> 
-    <appender-ref ref="console" /> 
-  </root>
-  <logger name="org.atmosphere" level="DEBUG" />
-  <logger name="org.primefaces" level="DEBUG" />
-</log4j:configuration>
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+  <Appenders>
+    <RandomAccessFile name="glassfishLog4jAppender" fileName="/var/log/glassfish/fitnesscrm.log">
+        <PatternLayout>
+            <Pattern>%d{dd MMM yyyy HH:mm:ss,SSS} %p %F %L %t %c - %m%n</Pattern>
+        </PatternLayout>
+    </RandomAccessFile>
+    </Appenders>
+  <Loggers>
+    <Logger name="org.apache.log4j.xml" level="info"/>
+    <Logger name="org.atmosphere" level="DEBUG" />
+    <Logger name="org.primefaces" level="DEBUG" />
+     <Root level="debug">
+      <AppenderRef ref="STDOUT"/>
+    </Root>
+ </Loggers>
+</Configuration>

@@ -439,3 +439,20 @@ ADD UNIQUE INDEX `supplier_name_UNIQUE` (`supplier_name` ASC);
 
 ALTER TABLE `fitnessStats`.`expense_types` 
 ADD UNIQUE INDEX `expense_type_name_UNIQUE` (`expense_type_name` ASC);
+
+
+CREATE TABLE `expenses_map` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `search_string` varchar(30) NOT NULL,
+  `expense_type_id` int(11) NOT NULL,
+  `supplier_id` int(11) NOT NULL,
+  `payment_method_id` int(11) NOT NULL,
+  `description` text,
+  PRIMARY KEY (`id`),
+  KEY `fk_expenses_map_1_idx` (`payment_method_id`),
+  KEY `fk_expenses_map_2_idx` (`expense_type_id`),
+  KEY `fk_expenses_map_3_idx` (`supplier_id`),
+  CONSTRAINT `fk_expenses_map_1` FOREIGN KEY (`payment_method_id`) REFERENCES `payment_methods` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT `fk_expenses_map_2` FOREIGN KEY (`expense_type_id`) REFERENCES `expense_types` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT `fk_expenses_map_3` FOREIGN KEY (`supplier_id`) REFERENCES `suppliers` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;

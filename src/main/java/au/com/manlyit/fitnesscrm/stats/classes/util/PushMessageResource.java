@@ -15,8 +15,6 @@ import org.primefaces.push.annotation.OnOpen;
 import org.primefaces.push.annotation.PathParam;
 import org.primefaces.push.annotation.PushEndpoint;
 import org.primefaces.push.annotation.Singleton;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.servlet.ServletContext;

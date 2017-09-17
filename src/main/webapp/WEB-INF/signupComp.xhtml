@@ -9,7 +9,7 @@
 
 
     <p:dialog header="Sign Up  Wizard" widgetVar="signupDialog" modal="true" showEffect="fade" hideEffect="fade"   resizable="false">
-        <p:outputPanel id="signUpForm" styleClass="signUpFormUpdate" >
+        <h:form id="signUpForm" styleClass="signUpFormUpdate">
 
             <h1 class="BigTopic">#{configMapController.getKey('SignUpDialogueHeader')}</h1>
             <div class="Container100 Responsive100">
@@ -20,12 +20,12 @@
 
                     <p:outputLabel styleClass="signupFormLabel" value="#{configMapController.getKey('EditCustomersLabel_firstname')}" for="firstname" />
                     <p:inputText id="firstname"  value="#{customersController.newCustomer.firstname}" title="#{configMapController.getKey('EditCustomersTitle_firstname')}" valueChangeListener="#{customersController.dialogueFirstNameListener}" required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_firstname')}">
-                        <p:ajax update=":username :dialogueSave" event="keyup"/>
+                        <p:ajax update=":signUpForm:username :signUpForm:dialogueSave" event="keyup"/>
                     </p:inputText>
                     <br/>
                     <p:outputLabel styleClass="signupFormLabel"  value="#{configMapController.getKey('EditCustomersLabel_lastname')}" for="lastname" />
                     <p:inputText id="lastname" value="#{customersController.newCustomer.lastname}" title="#{configMapController.getKey('EditCustomersTitle_lastname')}" valueChangeListener="#{customersController.dialogueLastNameListener}" required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_lastname')}">
-                        <p:ajax update=":username  :dialogueSave" event="keyup" />
+                        <p:ajax update=":signUpForm:username  :signUpForm:dialogueSave" event="keyup" />
                     </p:inputText>
                     <br/>
                     <p:outputLabel styleClass="signupFormLabel"  value="#{configMapController.getKey('CreateCustomersLabel_gender')}" title="#{configMapController.getKey('EditCustomersTitle_gender')}" for="gender" />
@@ -62,7 +62,7 @@
             </div>
 
 
-        </p:outputPanel>
+        </h:form>
     </p:dialog>
 
 

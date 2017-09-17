@@ -252,34 +252,44 @@ height: 300px !important;
 
 .greenBg {
     background-color: green !important ;
+        cursor: pointer;
 }
 .blueBg {
     background-color: blue !important ;
+        cursor: pointer;
 }
 .orangeBg {
     background-color: orange !important ;
+        cursor: pointer;
 }
 .redBg {
     background-color: red !important ;
+        cursor: pointer;
 }
 /* http://www.colorschemer.com/schemes/viewscheme.php?id=8293 southbeach pastel theme for timetable */
 .pastel1 {
     background-color: #389090 !important ;
+        cursor: pointer;
 }
 .pastel2 {
     background-color: #F47E7D !important ;
+        cursor: pointer;
 }
 .pastel3 {
     background-color: #B5D045 !important ;
+        cursor: pointer;
 }
 .pastel4 {
     background-color: #FB8335 !important ;
+        cursor: pointer;
 }
 .pastel5 {
     background-color: #81C0C5 !important ;
+        cursor: pointer;
 }
 .pastel6 {
     background-color: #E0C7A8!important ;
+        cursor: pointer;
 }
 
 .signupForm {

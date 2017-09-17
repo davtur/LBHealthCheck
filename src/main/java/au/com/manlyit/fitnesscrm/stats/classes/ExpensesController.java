@@ -5,7 +5,6 @@ import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PaginationHelper;
 import au.com.manlyit.fitnesscrm.stats.beans.ExpensesFacade;
 import au.com.manlyit.fitnesscrm.stats.classes.util.LazyLoadingDataModel;
-import au.com.manlyit.fitnesscrm.stats.db.AuditLog;
 import au.com.manlyit.fitnesscrm.stats.db.ContractorRates;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import au.com.manlyit.fitnesscrm.stats.db.ExpenseTypes;
@@ -13,7 +12,6 @@ import au.com.manlyit.fitnesscrm.stats.db.InvoiceImages;
 import au.com.manlyit.fitnesscrm.stats.db.PaymentMethods;
 import au.com.manlyit.fitnesscrm.stats.db.SessionHistory;
 import au.com.manlyit.fitnesscrm.stats.db.SessionTrainers;
-import au.com.manlyit.fitnesscrm.stats.db.SessionTypes;
 import au.com.manlyit.fitnesscrm.stats.db.Suppliers;
 import java.awt.AlphaComposite;
 import java.awt.Graphics2D;
@@ -25,8 +23,12 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.math.RoundingMode;
+import java.text.ParseException;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -38,7 +40,9 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
+import javax.ejb.EJBException;
 import javax.enterprise.context.SessionScoped;
+import javax.faces.application.FacesMessage;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 import javax.faces.convert.Converter;
@@ -51,6 +55,12 @@ import javax.faces.model.SelectItem;
 import javax.imageio.ImageIO;
 import javax.inject.Inject;
 import javax.inject.Named;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.DateUtil;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.sanselan.ImageReadException;
 import org.apache.sanselan.Sanselan;
 import org.apache.sanselan.common.IImageMetadata;
@@ -98,6 +108,8 @@ public class ExpensesController implements Serializable {
     private List<Expenses> filteredItems;
     private Expenses[] multiSelected;
     private boolean gstIncluded = true;
+    private String bulkvalue = "";
+    private String duplicateValues = "";
     private boolean imageAreaSelectEvent1 = false;
     private CroppedImage croppedImage;
     private BufferedImage currentImage;
@@ -179,6 +191,267 @@ public class ExpensesController implements Serializable {
     public static boolean isUserInRole(String roleName) {
         boolean inRole = FacesContext.getCurrentInstance().getExternalContext().isUserInRole(roleName);
         return inRole;
+    }
+
+    public void handleExpensesExcelFileUpload(FileUploadEvent event) throws IllegalAccessException, NoSuchMethodException, IOException, ParseException {
+        FacesMessage msg = new FacesMessage("Succesful", event.getFile().getFileName() + " is uploaded.");
+        FacesContext.getCurrentInstance().addMessage(null, msg);
+        int createdCount = 0;
+        int updatedCount = 0;
+        int errorCount = 0;
+        int rollingCount = 0;
+        int rowNumber = 0;
+
+        UploadedFile excel;
+        excel = event.getFile();
+        InputStream fis = excel.getInputstream();
+        XSSFWorkbook wb = new XSSFWorkbook(fis);
+        XSSFSheet ws = wb.getSheet("expenses");
+
+        int rowNum = ws.getLastRowNum() + 1;
+        int colNum = ws.getRow(0).getLastCellNum();
+        
+        LOGGER.log(Level.INFO, "ROWS FOUND IN WORKSHEET = {0}", rowNum);
+        LOGGER.log(Level.INFO, "COLUMNS FOUND IN WORKSHEET = {0}", colNum);
+
+        String line;
+        int nullcellcount = 0;
+        boolean finished;
+        Expenses cid = new Expenses();
+
+        Class c = cid.getClass();
+        try {
+            Object t = c.newInstance();
+        } catch (InstantiationException | IllegalAccessException ex) {
+            LOGGER.log(Level.SEVERE, null, ex);
+        }
+
+        Method[] allMethods = c.getDeclaredMethods();
+        Object[][] headerMap;
+        headerMap = new Object[allMethods.length][3];
+        int count = 0;
+        for (Method m : allMethods) {
+            String methodName = m.getName();
+            if (methodName.indexOf("set") == 0) {
+                headerMap[count][0] = methodName;
+                Class[] ca = m.getParameterTypes();
+                headerMap[count][2] = ca[0];
+                count++;
+            }
+
+        }
+
+        for (int i = 0; i < rowNum; i++) {
+            rowNumber++;
+            rollingCount++;
+            if (rollingCount == 500) {
+                rollingCount = 0;
+                int tot = createdCount + updatedCount + errorCount;
+                LOGGER.log(Level.INFO, "500 ROWS Processed. Total = {0}", tot);
+                LOGGER.log(Level.INFO, "CREATED = {0}", createdCount);
+                LOGGER.log(Level.INFO, "EDITED  = {0}", updatedCount);
+                LOGGER.log(Level.INFO, "ERRORS = {0}", errorCount);
+
+            }
+
+            XSSFRow row = ws.getRow(i);
+
+            if (i == 0) { //header row
+                for (int j = 0; j < colNum; j++) {
+                    XSSFCell cell = row.getCell(j);
+                    if (cell != null) {
+                        String headerName = cell.getStringCellValue().trim().replace("_", "");// remove underscores from excel
+                        LOGGER.log(Level.FINE, "Header Name :  {0}  at position  {1}", new Object[]{headerName, j});
+
+                        if (headerName.compareToIgnoreCase("Date") == 0) {
+                            headerName = "Date";
+                        }
+                        if (headerName.compareToIgnoreCase("Amount") == 0) {
+                            headerName = "Amount";
+                        }
+                        if (headerName.compareToIgnoreCase("Description") == 0) {
+                            headerName = "Description";
+                        }
+                        for (int k = 0; k < count; k++) {
+                            String methodName = (String) headerMap[k][0];
+                            if (methodName.substring(3).trim().compareToIgnoreCase(headerName) == 0) { // exact match but not case sensitive
+                                headerMap[k][1] = j;
+                            }
+
+                        }
+                    }
+                }
+                for (int k = 0; k < count; k++) {
+
+                    if (headerMap[k][1] == null) {
+                        LOGGER.log(Level.WARNING, "!!! Header did not match any Table Column Names: {0}", headerMap[k][0]);
+                    } else {
+                        LOGGER.log(Level.FINE, "Header:  {0}  maps to  {1}", new Object[]{headerMap[k][0], headerMap[k][1]});
+                    }
+
+                }
+
+            } else { // data rows to add to table
+                if (nullcellcount == colNum) {
+                    finished = true;
+                    LOGGER.log(Level.FINE, "FINISHED");
+                    break;
+                }
+                line = "";
+                nullcellcount = 0;
+                cid = new Expenses();
+                for (int j = 0; j < colNum; j++) {
+                    XSSFCell cell = row.getCell(j);
+                    if (cell != null) {
+                        String mName = null;
+                        Class cellTypeAccepted = null;
+                        for (int k = 0; k < count; k++) {
+                            if (headerMap[k][1] != null) {
+                                if (j == (Integer) headerMap[k][1]) {
+                                    mName = (String) headerMap[k][0];
+                                    cellTypeAccepted = (Class) headerMap[k][2];
+                                }
+                            }
+                        }
+                        if (mName == null || cellTypeAccepted == null) {
+                            LOGGER.log(Level.FINE, "WARNING-- Header data not found for target {0}", j);
+                        } else {
+                            Method m;
+                            m = c.getMethod(mName, cellTypeAccepted);
+
+                            String val;
+                            try {
+                                switch (cell.getCellType()) {
+                                    case Cell.CELL_TYPE_STRING:
+
+                                        val = cell.getStringCellValue();
+                                        if (cellTypeAccepted == Integer.class || cellTypeAccepted == int.class) {
+                                            int num = Integer.parseInt(val);
+
+                                            m.invoke(cid, num);
+                                        } else if (cellTypeAccepted == Double.class) {
+                                            double num = Double.parseDouble(val);
+                                            m.invoke(cid, num);
+                                        } else if (cellTypeAccepted == String.class) {
+                                            m.invoke(cid, val);
+                                        } else {
+                                            LOGGER.log(Level.SEVERE, "Unknown type {0}", cellTypeAccepted);
+                                        }
+                                        //line += data[i][j].toString() + ",";
+                                        break;
+                                    case Cell.CELL_TYPE_NUMERIC:
+                                        if (DateUtil.isCellDateFormatted(cell)) {
+                                            Date date = cell.getDateCellValue();
+                                            String strDateFormat = "dd/MM/yyyy HH:mm";
+                                            SimpleDateFormat dateFormat = new SimpleDateFormat(strDateFormat);
+                                            Date dateForValidation = dateFormat.parse("01/01/1970 10:30");
+                                            if (date.after(dateForValidation) == true) {
+                                                m.invoke(cid, date);
+                                            }
+                                        } else {
+                                            if (cellTypeAccepted == Integer.class) {
+                                                Double num = cell.getNumericCellValue();
+                                                m.invoke(cid, num.intValue());
+                                            } else if (cellTypeAccepted == Double.class) {
+                                                Double num = cell.getNumericCellValue();
+                                                m.invoke(cid, num);
+                                                line += num + ",";
+                                            }
+
+                                        }
+                                        break;
+                                    case Cell.CELL_TYPE_BOOLEAN:
+
+                                        //line += data[i][j].toString() + ",";
+                                        break;
+                                    case Cell.CELL_TYPE_FORMULA:
+
+                                        // line += data[i][j].toString() + ",";
+                                        break;
+                                    default:
+                                        //LOGGER.log(Level.FINE,"Unknown Cell Type");
+
+                                        line += "-UNK,";
+                                }
+
+                            } catch (IllegalArgumentException | InvocationTargetException ex) {
+                                LOGGER.log(Level.SEVERE, "Couldn't invoke method: " + mName, ex);
+                            } catch (IllegalStateException ex) {
+                                LOGGER.log(Level.SEVERE, "Illegal State: " + mName, ex);
+                            }
+                        }
+                    } else {
+                        nullcellcount++;
+                    }
+
+                }
+                //  LOGGER.log(Level.FINE, "");
+                //  LOGGER.log(Level.FINE, line);
+                if (cid.getId() == null) {
+                    cid.setId(0);
+                }
+                /*if(cid.getLastAcceptedDateTime() == null){
+                 cid.setLastAcceptedDateTime(cid.getDateCreated());
+                 Logger.getLogger(getClass().getName()).log(Level.WARNING, "LastAcceptedDateTime is null. Setting it to create Date: ", rowNumber);
+                 }
+                 if(cid.getLastDispatchedDateTime() == null){
+                 cid.setLastDispatchedDateTime(cid.getDateCreated());
+                 Logger.getLogger(getClass().getName()).log(Level.WARNING, "LastDispatchedDateTime is null. Setting it to create Date: ", rowNumber);
+                 }
+                 if(cid.getLastResolvedDateTime()== null){
+                 cid.setLastResolvedDateTime(cid.getDateCreated());
+                 Logger.getLogger(getClass().getName()).log(Level.WARNING, "LastResolvedDateTime is null. Setting it to create Date: ", rowNumber);
+                 }*/
+                if (cid.getExpenseAmount().compareTo(BigDecimal.ZERO) == 0) {
+                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, "The Amount is zero at row number: ", rowNumber);
+                    errorCount++;
+                } else {
+
+                     Expenses exp = null;
+                    try {
+                       exp = createExpenseFromCsv(cid.getExpenseIncurredTimestamp(), cid.getExpenseAmount(), cid.getDescription());
+
+                    } catch (Exception e) {
+                        LOGGER.log(Level.SEVERE, "The expense at row number {0} failed due to an exception - {1}", new Object[]{rowNumber,e});
+
+                    }
+
+                }
+
+            }
+
+        }
+        int total = createdCount + updatedCount + errorCount;
+        LOGGER.log(Level.INFO, "FINISHED LOADING FILE INTO DB. ");
+        LOGGER.log(Level.INFO, "CREATED = {0}", createdCount);
+        LOGGER.log(Level.INFO, "EDITED  = {0}", updatedCount);
+        LOGGER.log(Level.INFO, "ERRORS = {0}", errorCount);
+        LOGGER.log(Level.INFO, "TOTAL PROCESSED = {0}", total);
+
+        recreateModel();
+    }
+
+    private Expenses createExpenseFromCsv(Date expenseDate, BigDecimal expenseAmount, String description) {
+        Expenses expense = null;
+
+        try {
+
+            expense = new Expenses();
+            expense.setId(0);
+            expense.setCreatedTimestamp(new Date());
+            expense.setUpdatedTimestamp(new Date());
+            expense.setExpenseIncurredTimestamp(expenseDate);
+            expense.setExpenseAmount(expenseAmount);
+            expense.setDescription(description);
+
+            getFacade().create(getCurrent());
+            LOGGER.log(Level.INFO, "createExpenseFromCsv - Expense object Created OK. id = {0}, Date = {1}, Amount = {2}, Description = {3}", new Object[] { expense.getId(),expenseDate,expenseAmount.toString(),description});
+            
+        } catch (Exception e) {
+           LOGGER.log(Level.SEVERE, "createExpenseFromCsv - Expense object Create FAILED. error = {0}, Date = {1}, Amount = {2}, Description = {3}",new Object[] { e,expenseDate,expenseAmount.toString(),description});
+        }
+        return expense;
+
     }
 
     public Expenses getSelected() {
@@ -1391,6 +1664,34 @@ public class ExpensesController implements Serializable {
             }
         }
 
+    }
+
+    /**
+     * @return the bulkvalue
+     */
+    public String getBulkvalue() {
+        return bulkvalue;
+    }
+
+    /**
+     * @param bulkvalue the bulkvalue to set
+     */
+    public void setBulkvalue(String bulkvalue) {
+        this.bulkvalue = bulkvalue;
+    }
+
+    /**
+     * @return the duplicateValues
+     */
+    public String getDuplicateValues() {
+        return duplicateValues;
+    }
+
+    /**
+     * @param duplicateValues the duplicateValues to set
+     */
+    public void setDuplicateValues(String duplicateValues) {
+        this.duplicateValues = duplicateValues;
     }
 
 }

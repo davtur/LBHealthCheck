@@ -7,23 +7,18 @@
 package au.com.manlyit.fitnesscrm.stats.classes.util;
 
 
+import com.itextpdf.text.log.LoggerFactory;
 import java.io.Serializable;
+import java.util.logging.Logger;
 import javax.faces.application.FacesMessage;
-import org.primefaces.push.annotation.OnMessage;
-import org.primefaces.push.annotation.PathParam;
-import org.primefaces.push.annotation.PushEndpoint;
-import org.primefaces.push.annotation.Singleton;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
- 
-import org.primefaces.push.impl.JSONEncoder;
+
  
 //@PushEndpoint("/{user}")
 //@Singleton
 public class PushComponentUpdateResource  implements Serializable  {
  
-    private final Logger logger = LoggerFactory.getLogger(PushComponentUpdateResource.class);
- 
+    
+    private static final Logger logger = Logger.getLogger(PushComponentUpdateResource.class.getName());
  
     //@PathParam("user")
     private String username;
