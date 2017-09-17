@@ -1,17 +1,15 @@
 package au.com.manlyit.fitnesscrm.stats.classes;
 
-import au.com.manlyit.fitnesscrm.stats.db.PaymentMethods;
+import au.com.manlyit.fitnesscrm.stats.db.ExpensesMap;
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PaginationHelper;
-import au.com.manlyit.fitnesscrm.stats.beans.PaymentMethodsFacade;
+import au.com.manlyit.fitnesscrm.stats.beans.ExpensesMapFacade;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.ResourceBundle;
 import javax.enterprise.context.SessionScoped;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
@@ -27,23 +25,23 @@ import javax.inject.Named;
 import org.primefaces.event.RowEditEvent;
 import org.primefaces.event.SelectEvent;
 
-@Named("paymentMethodsController")
+@Named("expensesMapController")
 @SessionScoped
-public class PaymentMethodsController implements Serializable {
+public class ExpensesMapController implements Serializable {
 
-    private PaymentMethods current;
-    private PaymentMethods selectedForDeletion;
+    private ExpensesMap current;
+    private ExpensesMap selectedForDeletion;
     private DataModel items = null;
     @Inject
-    private au.com.manlyit.fitnesscrm.stats.beans.PaymentMethodsFacade ejbFacade;
+    private au.com.manlyit.fitnesscrm.stats.beans.ExpensesMapFacade ejbFacade;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade configMapFacade;
     private PaginationHelper pagination;
     private int selectedItemIndex;
-    private List<PaymentMethods> filteredItems;
-    private PaymentMethods[] multiSelected;
+    private List<ExpensesMap> filteredItems;
+    private ExpensesMap[] multiSelected;
 
-    public PaymentMethodsController() {
+    public ExpensesMapController() {
     }
 
     public static boolean isUserInRole(String roleName) {
@@ -51,15 +49,15 @@ public class PaymentMethodsController implements Serializable {
         return inRole;
     }
 
-    public PaymentMethods getSelected() {
+    public ExpensesMap getSelected() {
         if (current == null) {
-            current = new PaymentMethods();
+            current = new ExpensesMap();
             selectedItemIndex = -1;
         }
         return current;
     }
 
-    public void setSelected(PaymentMethods selected) {
+    public void setSelected(ExpensesMap selected) {
         if (selected != null) {
             current = selected;
             selectedItemIndex = -1;
@@ -67,7 +65,7 @@ public class PaymentMethodsController implements Serializable {
 
     }
 
-    private PaymentMethodsFacade getFacade() {
+    private ExpensesMapFacade getFacade() {
         return ejbFacade;
     }
 
@@ -92,28 +90,28 @@ public class PaymentMethodsController implements Serializable {
     /**
      * @return the filteredItems
      */
-    public List<PaymentMethods> getFilteredItems() {
+    public List<ExpensesMap> getFilteredItems() {
         return filteredItems;
     }
 
     /**
      * @param filteredItems the filteredItems to set
      */
-    public void setFilteredItems(List<PaymentMethods> filteredItems) {
+    public void setFilteredItems(List<ExpensesMap> filteredItems) {
         this.filteredItems = filteredItems;
     }
 
     /**
      * @return the multiSelected
      */
-    public PaymentMethods[] getMultiSelected() {
+    public ExpensesMap[] getMultiSelected() {
         return multiSelected;
     }
 
     /**
      * @param multiSelected the multiSelected to set
      */
-    public void setMultiSelected(PaymentMethods[] multiSelected) {
+    public void setMultiSelected(ExpensesMap[] multiSelected) {
         this.multiSelected = multiSelected;
     }
 
@@ -123,13 +121,13 @@ public class PaymentMethodsController implements Serializable {
     }
 
     public String prepareView() {
-        //current = (PaymentMethods)getItems().getRowData();
+        //current = (ExpensesMap)getItems().getRowData();
         //selectedItemIndex = pagination.getPageFirstItem() + getItems().getRowIndex();
         return "View";
     }
 
     public String prepareCreate() {
-        current = new PaymentMethods();
+        current = new ExpensesMap();
         selectedItemIndex = -1;
         return "Create";
     }
@@ -140,7 +138,7 @@ public class PaymentMethodsController implements Serializable {
                 current.setId(0);
             }
             getFacade().create(current);
-            JsfUtil.addSuccessMessage(configMapFacade.getConfig("PaymentMethodsCreated"));
+            JsfUtil.addSuccessMessage(configMapFacade.getConfig("ExpensesMapCreated"));
             return prepareCreate();
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
@@ -153,7 +151,7 @@ public class PaymentMethodsController implements Serializable {
             current.setId(0);
             getFacade().create(current);
             recreateModel();
-            JsfUtil.addSuccessMessage(configMapFacade.getConfig("PaymentMethodsCreated"));
+            JsfUtil.addSuccessMessage(configMapFacade.getConfig("ExpensesMapCreated"));
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
         }
@@ -161,7 +159,7 @@ public class PaymentMethodsController implements Serializable {
     }
 
     public String prepareEdit() {
-        //current = (PaymentMethods)getItems().getRowData();
+        //current = (ExpensesMap)getItems().getRowData();
         //selectedItemIndex = pagination.getPageFirstItem() + getItems().getRowIndex();
         return "Edit";
     }
@@ -177,7 +175,7 @@ public class PaymentMethodsController implements Serializable {
     public String update() {
         try {
             getFacade().edit(current);
-            JsfUtil.addSuccessMessage(configMapFacade.getConfig("PaymentMethodsUpdated"));
+            JsfUtil.addSuccessMessage(configMapFacade.getConfig("ExpensesMapUpdated"));
             return "View";
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
@@ -204,11 +202,11 @@ public class PaymentMethodsController implements Serializable {
         }
     }
 
-    public PaymentMethods getSelectedForDeletion() {
+    public ExpensesMap getSelectedForDeletion() {
         return selectedForDeletion;
     }
 
-    public void setSelectedForDeletion(PaymentMethods selectedForDeletion) {
+    public void setSelectedForDeletion(ExpensesMap selectedForDeletion) {
         this.selectedForDeletion = selectedForDeletion;
         current = selectedForDeletion;
 
@@ -220,7 +218,7 @@ public class PaymentMethodsController implements Serializable {
     private void performDestroy() {
         try {
             getFacade().remove(current);
-            JsfUtil.addSuccessMessage(configMapFacade.getConfig("PaymentMethodsDeleted"));
+            JsfUtil.addSuccessMessage(configMapFacade.getConfig("ExpensesMapDeleted"));
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
         }
@@ -278,33 +276,15 @@ public class PaymentMethodsController implements Serializable {
     }
 
     public SelectItem[] getItemsAvailableSelectOne() {
-        return JsfUtil.getSelectItemsBaseEntity(ejbFacade.findAll(), true);
+        return JsfUtil.getSelectItems(ejbFacade.findAll(), true);
     }
 
-    public Collection<PaymentMethods> getItemsAvailable() {
+    public Collection<ExpensesMap> getItemsAvailable() {
         return ejbFacade.findAll();
     }
 
-    public Collection<PaymentMethods> getItemsAvailableSorted() {
-
-        List<PaymentMethods> cpm = new ArrayList<>(ejbFacade.findAll());
-        Collections.sort(cpm, new Comparator<PaymentMethods>() {
-            @Override
-            public int compare(PaymentMethods o1, PaymentMethods o2) {
-                if (o1.getPaymentMethodName() != null && o2.getPaymentMethodName() != null) {
-                    return o1.getPaymentMethodName().compareToIgnoreCase(o2.getPaymentMethodName());
-                } else {
-                    return -1;
-                }
-            }
-        });
-        // Collections.sort(cpm, (PaymentMethods o1,PaymentMethods o2) -> o1.getPaymentMethodName().compareToIgnoreCase(o2.getPaymentMethodName()));
-
-        return cpm;
-    }
-
     public void onEdit(RowEditEvent event) {
-        PaymentMethods cm = (PaymentMethods) event.getObject();
+        ExpensesMap cm = (ExpensesMap) event.getObject();
         getFacade().edit(cm);
         recreateModel();
         JsfUtil.addSuccessMessage("Row Edit Successful");
@@ -314,15 +294,15 @@ public class PaymentMethodsController implements Serializable {
         JsfUtil.addErrorMessage("Row Edit Cancelled");
     }
 
-    @FacesConverter(value = "paymentMethodsControllerConverter")
-    public static class PaymentMethodsControllerConverter implements Converter {
+    @FacesConverter(value = "expensesMapControllerConverter")
+    public static class ExpensesMapControllerConverter implements Converter {
 
         public Object getAsObject(FacesContext facesContext, UIComponent component, String value) {
             if (value == null || value.length() == 0) {
                 return null;
             }
-            PaymentMethodsController controller = (PaymentMethodsController) facesContext.getApplication().getELResolver().
-                    getValue(facesContext.getELContext(), null, "paymentMethodsController");
+            ExpensesMapController controller = (ExpensesMapController) facesContext.getApplication().getELResolver().
+                    getValue(facesContext.getELContext(), null, "expensesMapController");
             return controller.ejbFacade.find(getKey(value));
         }
 
@@ -343,11 +323,11 @@ public class PaymentMethodsController implements Serializable {
             if (object == null) {
                 return null;
             }
-            if (object instanceof PaymentMethods) {
-                PaymentMethods o = (PaymentMethods) object;
+            if (object instanceof ExpensesMap) {
+                ExpensesMap o = (ExpensesMap) object;
                 return getStringKey(o.getId());
             } else {
-                throw new IllegalArgumentException("object " + object + " is of type " + object.getClass().getName() + "; expected type: " + PaymentMethodsController.class.getName());
+                throw new IllegalArgumentException("object " + object + " is of type " + object.getClass().getName() + "; expected type: " + ExpensesMapController.class.getName());
             }
         }
 

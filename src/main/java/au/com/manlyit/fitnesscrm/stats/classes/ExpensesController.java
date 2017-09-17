@@ -26,11 +26,11 @@ import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.text.ParseException;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
@@ -40,7 +40,6 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
-import javax.ejb.EJBException;
 import javax.enterprise.context.SessionScoped;
 import javax.faces.application.FacesMessage;
 import javax.faces.component.UIComponent;
@@ -106,7 +105,10 @@ public class ExpensesController implements Serializable {
     private PaginationHelper pagination;
     private int selectedItemIndex;
     private List<Expenses> filteredItems;
+    private List<Expenses> expensesForImport;
+    private List<Expenses> filteredItemsForImport;
     private Expenses[] multiSelected;
+    private Expenses[] multiSelectedForImport;
     private boolean gstIncluded = true;
     private String bulkvalue = "";
     private String duplicateValues = "";
@@ -124,6 +126,7 @@ public class ExpensesController implements Serializable {
     private int x1 = 0;
     private int y1 = 0;
     private LazyLoadingDataModel<Expenses> lazyModel;
+
     private Date startDate;
     private Date endDate;
 
@@ -193,6 +196,21 @@ public class ExpensesController implements Serializable {
         return inRole;
     }
 
+    public void processBulkUpload() {
+        for (Expenses e : expensesForImport) {
+            int rowNum = e.getId();
+            try {
+                getFacade().create(e);
+                LOGGER.log(Level.INFO, "createExpenseFromCsv - Expense persist object  OK. id = {0}, Date = {1}, Amount = {2}, Description = {3}, excel row = {4}", new Object[]{e.getId(), e.getExpenseIncurredTimestamp(), e.getExpenseAmount().toString(), e.getDescription(), rowNum});
+
+            } catch (Exception ex) {
+                String rejectedRow = rowNum + "," + e.getExpenseIncurredTimestamp() + "," + e.getExpenseAmount().toString() + "," + e.getDescription() + "\r\n";
+                duplicateValues += rejectedRow;
+                LOGGER.log(Level.SEVERE, "createExpenseFromCsv - Expense object persist FAILED. error = {0}, Date = {1}, Amount = {2}, Description = {3}, excel row = {4}", new Object[]{ex.getMessage(), e.getExpenseIncurredTimestamp(), e.getExpenseAmount().toString(), e.getDescription(), rowNum});
+            }
+        }
+    }
+
     public void handleExpensesExcelFileUpload(FileUploadEvent event) throws IllegalAccessException, NoSuchMethodException, IOException, ParseException {
         FacesMessage msg = new FacesMessage("Succesful", event.getFile().getFileName() + " is uploaded.");
         FacesContext.getCurrentInstance().addMessage(null, msg);
@@ -201,16 +219,21 @@ public class ExpensesController implements Serializable {
         int errorCount = 0;
         int rollingCount = 0;
         int rowNumber = 0;
-
+        expensesForImport = new ArrayList<>();
         UploadedFile excel;
         excel = event.getFile();
         InputStream fis = excel.getInputstream();
         XSSFWorkbook wb = new XSSFWorkbook(fis);
         XSSFSheet ws = wb.getSheet("expenses");
-
+        if (ws == null) {
+            String message = "There is no worksheet in the excel spreadsheet named \"expenses\". Rename the worksheet and try again.";
+            JsfUtil.addErrorMessage(message);
+            LOGGER.log(Level.WARNING, message);
+            return;
+        }
         int rowNum = ws.getLastRowNum() + 1;
         int colNum = ws.getRow(0).getLastCellNum();
-        
+
         LOGGER.log(Level.INFO, "ROWS FOUND IN WORKSHEET = {0}", rowNum);
         LOGGER.log(Level.INFO, "COLUMNS FOUND IN WORKSHEET = {0}", colNum);
 
@@ -264,10 +287,10 @@ public class ExpensesController implements Serializable {
                         LOGGER.log(Level.FINE, "Header Name :  {0}  at position  {1}", new Object[]{headerName, j});
 
                         if (headerName.compareToIgnoreCase("Date") == 0) {
-                            headerName = "Date";
+                            headerName = "ExpenseIncurredTimestamp";
                         }
                         if (headerName.compareToIgnoreCase("Amount") == 0) {
-                            headerName = "Amount";
+                            headerName = "ExpenseAmount";
                         }
                         if (headerName.compareToIgnoreCase("Description") == 0) {
                             headerName = "Description";
@@ -284,9 +307,9 @@ public class ExpensesController implements Serializable {
                 for (int k = 0; k < count; k++) {
 
                     if (headerMap[k][1] == null) {
-                        LOGGER.log(Level.WARNING, "!!! Header did not match any Table Column Names: {0}", headerMap[k][0]);
+                        LOGGER.log(Level.FINE, "!!! Header did not match any Table Column Names: {0}", headerMap[k][0]);
                     } else {
-                        LOGGER.log(Level.FINE, "Header:  {0}  maps to  {1}", new Object[]{headerMap[k][0], headerMap[k][1]});
+                        LOGGER.log(Level.INFO, "Header:  {0}  maps to  {1}", new Object[]{headerMap[k][0], headerMap[k][1]});
                     }
 
                 }
@@ -329,6 +352,9 @@ public class ExpensesController implements Serializable {
                                             int num = Integer.parseInt(val);
 
                                             m.invoke(cid, num);
+                                        } else if (cellTypeAccepted == BigDecimal.class) {
+                                            BigDecimal num = new BigDecimal(val);
+                                            m.invoke(cid, num);
                                         } else if (cellTypeAccepted == Double.class) {
                                             double num = Double.parseDouble(val);
                                             m.invoke(cid, num);
@@ -356,6 +382,9 @@ public class ExpensesController implements Serializable {
                                                 Double num = cell.getNumericCellValue();
                                                 m.invoke(cid, num);
                                                 line += num + ",";
+                                            } else if (cellTypeAccepted == BigDecimal.class) {
+                                                BigDecimal num = new BigDecimal(cell.getNumericCellValue());
+                                                m.invoke(cid, num);
                                             }
 
                                         }
@@ -407,12 +436,12 @@ public class ExpensesController implements Serializable {
                     errorCount++;
                 } else {
 
-                     Expenses exp = null;
+                    Expenses exp = null;
                     try {
-                       exp = createExpenseFromCsv(cid.getExpenseIncurredTimestamp(), cid.getExpenseAmount(), cid.getDescription());
-
+                        expensesForImport.add(createExpenseFromCsv(cid.getExpenseIncurredTimestamp(), cid.getExpenseAmount(), cid.getDescription(), rowNumber));
+                        createdCount++;
                     } catch (Exception e) {
-                        LOGGER.log(Level.SEVERE, "The expense at row number {0} failed due to an exception - {1}", new Object[]{rowNumber,e});
+                        LOGGER.log(Level.SEVERE, "The expense at row number {0} failed due to an exception - {1}", new Object[]{rowNumber, e});
 
                     }
 
@@ -423,32 +452,79 @@ public class ExpensesController implements Serializable {
         }
         int total = createdCount + updatedCount + errorCount;
         LOGGER.log(Level.INFO, "FINISHED LOADING FILE INTO DB. ");
-        LOGGER.log(Level.INFO, "CREATED = {0}", createdCount);
-        LOGGER.log(Level.INFO, "EDITED  = {0}", updatedCount);
-        LOGGER.log(Level.INFO, "ERRORS = {0}", errorCount);
-        LOGGER.log(Level.INFO, "TOTAL PROCESSED = {0}", total);
+        LOGGER.log(Level.INFO, "CREATED = {0}", new Object[]{createdCount});
+        LOGGER.log(Level.INFO, "EDITED  = {0}", new Object[]{updatedCount});
+        LOGGER.log(Level.INFO, "ERRORS = {0}", new Object[]{errorCount});
+        LOGGER.log(Level.INFO, "TOTAL PROCESSED = {0}", new Object[]{total});
 
         recreateModel();
     }
 
-    private Expenses createExpenseFromCsv(Date expenseDate, BigDecimal expenseAmount, String description) {
+    private Expenses createExpenseFromCsv(Date expenseDate, BigDecimal expenseAmount, String description, int rowNumber) {
         Expenses expense = null;
 
         try {
 
             expense = new Expenses();
-            expense.setId(0);
+            expense.setId(rowNumber);
             expense.setCreatedTimestamp(new Date());
             expense.setUpdatedTimestamp(new Date());
             expense.setExpenseIncurredTimestamp(expenseDate);
             expense.setExpenseAmount(expenseAmount);
             expense.setDescription(description);
 
-            getFacade().create(getCurrent());
-            LOGGER.log(Level.INFO, "createExpenseFromCsv - Expense object Created OK. id = {0}, Date = {1}, Amount = {2}, Description = {3}", new Object[] { expense.getId(),expenseDate,expenseAmount.toString(),description});
-            
+            FacesContext context = FacesContext.getCurrentInstance();
+            SuppliersController suppliersController = (SuppliersController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "suppliersController");
+            ExpenseTypesController expenseTypesController = (ExpenseTypesController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "expenseTypesController");
+            PaymentMethodsController paymentMethodsController = (PaymentMethodsController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "paymentMethodsController");
+            List<Suppliers> suppliers = new ArrayList<>(suppliersController.getItemsAvailableSorted());
+            List<ExpenseTypes> expenseTypes = new ArrayList<>(expenseTypesController.getItemsAvailableSorted());
+            List<PaymentMethods> paymentMethods = new ArrayList<>(paymentMethodsController.getItemsAvailableSorted());
+
+            //TODO use expenseMap to pick the right supplier and expense type based on the description.
+            for (PaymentMethods pm : paymentMethods) {
+                if (pm != null) {
+                    expense.setPaymentMethodId(pm);
+                }
+            }
+            if (expense.getPaymentMethodId() == null) {
+                LOGGER.log(Level.WARNING, "no Payment Method Found during import from excell");
+            }
+
+            for (ExpenseTypes et : expenseTypes) {
+                if (et != null) {
+                    expense.setExpenseTypeId(et);
+                }
+            }
+            if (expense.getExpenseTypeId() == null) {
+                LOGGER.log(Level.WARNING, "no ExpenseTypes Found during import from excell");
+            }
+            for (Suppliers sup : suppliers) {
+                if (sup != null) {
+                    expense.setSupplierId(sup);
+                }
+            }
+            if (expense.getSupplierId() == null) {
+                LOGGER.log(Level.WARNING, "no Suppliers Found during import from excell");
+            }
+
+            BigDecimal multiplyPercent = new BigDecimal((getSelected().getPercentForBusinessUse()));
+            BigDecimal divideGstIncluded = new BigDecimal(11);
+            BigDecimal divideGstExcluded = new BigDecimal(10);
+            expense.setBusinessUseAmount(expenseAmount.multiply(multiplyPercent));
+            if (isGstIncluded()) {
+                expense.setExpenseAmountGst(expenseAmount.divide(divideGstIncluded, 2, RoundingMode.HALF_UP));
+                expense.setBusinessUseAmountGst(getSelected().getBusinessUseAmount().divide(divideGstIncluded, 2, RoundingMode.HALF_UP));
+            } else {
+                expense.setExpenseAmountGst(expenseAmount.divide(divideGstExcluded, 2, RoundingMode.HALF_UP));
+                expense.setBusinessUseAmountGst(getSelected().getBusinessUseAmount().divide(divideGstExcluded, 2, RoundingMode.HALF_UP));
+            }
+
+            //getFacade().create(getCurrent());
+            LOGGER.log(Level.INFO, "createExpenseFromCsv - Expense object Created OK. id = {0}, Date = {1}, Amount = {2}, Description = {3}", new Object[]{expense.getId(), expenseDate, expenseAmount.toString(), description});
+
         } catch (Exception e) {
-           LOGGER.log(Level.SEVERE, "createExpenseFromCsv - Expense object Create FAILED. error = {0}, Date = {1}, Amount = {2}, Description = {3}",new Object[] { e,expenseDate,expenseAmount.toString(),description});
+            LOGGER.log(Level.SEVERE, "createExpenseFromCsv - Expense object Create FAILED. error = {0}, Date = {1}, Amount = {2}, Description = {3}", new Object[]{e, expenseDate, expenseAmount.toString(), description});
         }
         return expense;
 
@@ -1326,6 +1402,13 @@ public class ExpensesController implements Serializable {
         recreateModel();
         JsfUtil.addSuccessMessage("Row Edit Successful");
     }
+    
+    public void onEditImport(RowEditEvent event) {
+        Expenses cm = (Expenses) event.getObject();
+       // getFacade().edit(cm);
+       // recreateModel();
+        JsfUtil.addSuccessMessage("Row Edit Successful");
+    }
 
     public void onCancel(RowEditEvent event) {
         JsfUtil.addErrorMessage("Row Edit Cancelled");
@@ -1692,6 +1775,48 @@ public class ExpensesController implements Serializable {
      */
     public void setDuplicateValues(String duplicateValues) {
         this.duplicateValues = duplicateValues;
+    }
+
+    /**
+     * @return the expensesForImport
+     */
+    public List<Expenses> getExpensesForImport() {
+        return expensesForImport;
+    }
+
+    /**
+     * @param expensesForImport the expensesForImport to set
+     */
+    public void setExpensesForImport(List<Expenses> expensesForImport) {
+        this.expensesForImport = expensesForImport;
+    }
+
+    /**
+     * @return the filteredItemsForImport
+     */
+    public List<Expenses> getFilteredItemsForImport() {
+        return filteredItemsForImport;
+    }
+
+    /**
+     * @param filteredItemsForImport the filteredItemsForImport to set
+     */
+    public void setFilteredItemsForImport(List<Expenses> filteredItemsForImport) {
+        this.filteredItemsForImport = filteredItemsForImport;
+    }
+
+    /**
+     * @return the multiSelectedForImport
+     */
+    public Expenses[] getMultiSelectedForImport() {
+        return multiSelectedForImport;
+    }
+
+    /**
+     * @param multiSelectedForImport the multiSelectedForImport to set
+     */
+    public void setMultiSelectedForImport(Expenses[] multiSelectedForImport) {
+        this.multiSelectedForImport = multiSelectedForImport;
     }
 
 }

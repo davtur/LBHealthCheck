@@ -55,6 +55,9 @@ import org.eclipse.persistence.config.CacheIsolationType;
 public class Suppliers implements Serializable,BaseEntity {
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "supplierId")
+    private Collection<ExpensesMap> expensesMapCollection;
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "supplierId")
     private Collection<ContractorRateToTaskMap> contractorRateToTaskMapCollection;
     
 
@@ -181,6 +184,15 @@ public class Suppliers implements Serializable,BaseEntity {
   
     public void setContractorRateToTaskMapCollection(Collection<ContractorRateToTaskMap> contractorRateToTaskMapCollection) {
         this.contractorRateToTaskMapCollection = contractorRateToTaskMapCollection;
+    }
+
+    @XmlTransient
+    public Collection<ExpensesMap> getExpensesMapCollection() {
+        return expensesMapCollection;
+    }
+
+    public void setExpensesMapCollection(Collection<ExpensesMap> expensesMapCollection) {
+        this.expensesMapCollection = expensesMapCollection;
     }
 
    

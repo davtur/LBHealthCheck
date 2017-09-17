@@ -1,0 +1,38 @@
+
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                >
+    <p:dialog id="ExpensesMapCreateDlg" widgetVar="ExpensesMapCreateDialog" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('CreateExpensesMapTitle')}">
+
+        <h:form id="ExpensesMapCreateForm">
+            <h:panelGroup id="display">
+                <p:panelGrid columns="2" rendered="#{expensesMapController.selected != null}">
+                    <p:outputLabel value="#{configMapController.getKey('CreateExpensesMapLabel_searchString')}" for="searchString" />
+                    <p:inputText id="searchString" value="#{expensesMapController.selected.searchString}" title="#{configMapController.getKey('CreateExpensesMapTitle_searchString')}" required="true" requiredMessage="#{configMapController.getKey('CreateExpensesMapRequiredMessage_searchString')}"/>
+                    <p:outputLabel value="#{configMapController.getKey('CreateExpensesMapLabel_supplierId')}" for="supplierId" />
+                    <p:selectOneMenu id="supplierId" styleClass="selectOneWidth updateSupplierTypes" title="Description: #{expensesMapController.selected.supplierId.description}" valueChangeListener="#{expensesMapController.selectOneMenuValueChangeListener}" converter="suppliersControllerConverter" filter="true" value="#{expensesMapController.selected.supplierId}"  label="#{configMapController.getKey('CreateExpensesMapTitle_supplierId')}" required="true" requiredMessage="#{configMapController.getKey('CreateExpensesMapRequiredMessage_supplierId')}">
+                        <f:selectItems value="#{suppliersController.itemsAvailableSorted}" var="supplier" itemLabel="#{supplier.supplierName}" itemValue="#{supplier}"/>
+                    </p:selectOneMenu>
+                    <p:outputLabel value="#{configMapController.getKey('CreateExpensesMapLabel_expenseTypeId')}" for="expenseTypeId" />
+                    <p:selectOneMenu id="expenseTypeId" styleClass="selectOneWidth updateExpenseTypes" title="Description: #{expensesMapController.selected.expenseTypeId.description}" valueChangeListener="#{expensesMapController.selectOneMenuValueChangeListener}" converter="expenseTypesControllerConverter" filter="true" value="#{expensesMapController.selected.expenseTypeId}"  label="#{configMapController.getKey('CreateExpensesMapTitle_expenseTypeId')}" required="true" requiredMessage="#{configMapController.getKey('CreateExpensesMapRequiredMessage_expenseTypeId')}">
+                        <f:selectItems value="#{expenseTypesController.itemsAvailableSorted}" var="expenseType" itemLabel="#{expenseType.expenseTypeName}" itemValue="#{expenseType}"/>
+                    </p:selectOneMenu>
+                    <p:outputLabel value="#{configMapController.getKey('CreateExpensesMapLabel_paymentMethodId')}" for="paymentMethodId" />
+                    <p:selectOneMenu id="paymentMethodId" styleClass="selectOneWidth"  valueChangeListener="#{expensesMapController.selectOneMenuValueChangeListener}" converter="paymentMethodsControllerConverter"  filter="true"  value="#{expensesMapController.selected.paymentMethodId}"  label="#{configMapController.getKey('CreateExpensesMapTitle_paymentMethodId')}" required="true" requiredMessage="#{configMapController.getKey('CreateExpensesMapRequiredMessage_paymentMethodId')}">
+                        <f:selectItems value="#{paymentMethodsController.itemsAvailableSorted}" var="paymentMethod" itemLabel="#{paymentMethod.paymentMethodName}" itemValue="#{paymentMethod}"/>
+                    </p:selectOneMenu>
+                    <p:outputLabel value="#{configMapController.getKey('CreateExpensesMapLabel_description')}" for="description" />
+                    <p:inputTextarea rows="4" cols="30" id="description"  value="#{expensesMapController.selected.description}"  title="#{configMapController.getKey('CreateExpensesMapTitle_description')}" />
+                </p:panelGrid>
+                <p:commandButton actionListener="#{expensesMapController.createDialogue}" value="#{configMapController.getKey('Save')}" update="display,:ExpensesMapListForm:datalist,:growl" oncomplete="handleSubmit(args,'ExpensesMapCreateDialog');PF('expensesMapControllerTable').filter()"/>
+                <p:commandButton value="#{configMapController.getKey('Cancel')}" onclick="PF('ExpensesMapCreateDialog').hide()"/>
+            </h:panelGroup>
+        </h:form>
+    </p:dialog>
+
+</ui:composition>    
+
+

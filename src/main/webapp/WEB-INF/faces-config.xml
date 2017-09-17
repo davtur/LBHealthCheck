@@ -41,6 +41,10 @@
             <base-name>/Bundle</base-name>
             <var>bundle</var>
         </resource-bundle>
+        <resource-bundle>
+            <base-name>/Bundle_expenseMap</base-name>
+            <var>bundle_expenseMap</var>
+        </resource-bundle>
     </application>
     
     <factory>

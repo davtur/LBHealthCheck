@@ -49,6 +49,9 @@ import org.eclipse.persistence.config.CacheIsolationType;
     @NamedQuery(name = "PaymentMethods.findByPaymentMethodName", query = "SELECT p FROM PaymentMethods p WHERE p.paymentMethodName = :paymentMethodName")})
 public class PaymentMethods implements Serializable {
 
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "paymentMethodId")
+    private Collection<ExpensesMap> expensesMapCollection;
+
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -128,6 +131,15 @@ public class PaymentMethods implements Serializable {
     @Override
     public String toString() {
         return "au.com.manlyit.fitnesscrm.stats.beans.PaymentMethods[ id=" + id + " ]";
+    }
+
+    @XmlTransient
+    public Collection<ExpensesMap> getExpensesMapCollection() {
+        return expensesMapCollection;
+    }
+
+    public void setExpensesMapCollection(Collection<ExpensesMap> expensesMapCollection) {
+        this.expensesMapCollection = expensesMapCollection;
     }
     
 }

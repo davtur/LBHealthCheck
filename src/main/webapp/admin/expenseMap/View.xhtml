@@ -1,0 +1,32 @@
+
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                >
+
+    <p:dialog id="ExpensesMapViewDlg" widgetVar="ExpensesMapViewDialog" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('ViewExpensesMapTitle')}">
+        <h:form id="ExpensesMapViewForm">
+            <h:panelGroup id="display">
+                <p:panelGrid columns="2" rendered="#{expensesMapController.selected != null}">
+                    <h:outputText value="#{configMapController.getKey('ViewExpensesMapLabel_id')}"/>
+                    <h:outputText value="#{expensesMapController.selected.id}" title="#{configMapController.getKey('ViewExpensesMapTitle_id')}"/>
+                    <h:outputText value="#{configMapController.getKey('ViewExpensesMapLabel_searchString')}"/>
+                    <h:outputText value="#{expensesMapController.selected.searchString}" title="#{configMapController.getKey('ViewExpensesMapTitle_searchString')}"/>
+                    <h:outputText value="#{configMapController.getKey('ViewExpensesMapLabel_description')}"/>
+                    <h:outputText value="#{expensesMapController.selected.description}" title="#{configMapController.getKey('ViewExpensesMapTitle_description')}"/>
+                    <h:outputText value="#{configMapController.getKey('ViewExpensesMapLabel_paymentMethodId')}"/>
+                    <h:outputText value="#{expensesMapController.selected.paymentMethodId}" title="#{configMapController.getKey('ViewExpensesMapTitle_paymentMethodId')}"/>
+                    <h:outputText value="#{configMapController.getKey('ViewExpensesMapLabel_expenseTypeId')}"/>
+                    <h:outputText value="#{expensesMapController.selected.expenseTypeId}" title="#{configMapController.getKey('ViewExpensesMapTitle_expenseTypeId')}"/>
+                    <h:outputText value="#{configMapController.getKey('ViewExpensesMapLabel_supplierId')}"/>
+                    <h:outputText value="#{expensesMapController.selected.supplierId}" title="#{configMapController.getKey('ViewExpensesMapTitle_supplierId')}"/>
+                </p:panelGrid>
+                <p:commandButton value="#{configMapController.getKey('Close')}" onclick="PF('ExpensesMapViewDialog').hide()"/>
+            </h:panelGroup>
+        </h:form>
+    </p:dialog>
+
+</ui:composition>
+

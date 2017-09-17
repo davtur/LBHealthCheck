@@ -50,6 +50,9 @@ import org.eclipse.persistence.config.CacheIsolationType;
     @NamedQuery(name = "ExpenseTypes.findByExpenseTypeName", query = "SELECT e FROM ExpenseTypes e WHERE e.expenseTypeName = :expenseTypeName")})
 public class ExpenseTypes implements Serializable,BaseEntity {
 
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "expenseTypeId")
+    private Collection<ExpensesMap> expensesMapCollection;
+
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -129,6 +132,15 @@ public class ExpenseTypes implements Serializable,BaseEntity {
     @Override
     public String toString() {
         return expenseTypeName;
+    }
+
+    @XmlTransient
+    public Collection<ExpensesMap> getExpensesMapCollection() {
+        return expensesMapCollection;
+    }
+
+    public void setExpensesMapCollection(Collection<ExpensesMap> expensesMapCollection) {
+        this.expensesMapCollection = expensesMapCollection;
     }
     
 }

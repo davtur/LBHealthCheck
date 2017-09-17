@@ -1,0 +1,149 @@
+
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/template.xhtml">
+    <ui:define name="title">
+        <h:outputText value="#{configMapController.getKey('ListExpensesMapTitle')}"></h:outputText>
+    </ui:define>
+    <ui:define name="body">
+
+        <h:form id="ExpensesMapListForm">
+            <p:panel header="Expenses Import from Microsoft Excell Spreadsheet - map Description to Supplier and Expense type" >
+                <h:outputText value="The excell spreadsheet must contain a worksheet named expenses. The worksheet must contain one header row with three columns titled Date, Amount and Description. The date, amount and description values can be obtained from exports from most banks such as CBA, ING and ANZ." /> 
+            </p:panel>
+            <h:outputText escape="false" value="#{configMapController.getKey('ListExpensesMapEmpty')}" rendered="#{expensesMapController.items.rowCount == 0}"/>
+            <h:panelGroup >
+                <p:dataTable  
+                    id="datalist"  
+                    editable="true" 
+                    value="#{expensesMapController.items}" 
+                    selection="#{expensesMapController.selected}" 
+                    rowKey="#{item.id}" 
+                    filteredValue="#{expensesMapController.filteredItems}"  
+                    widgetVar="expensesMapControllerTable" 
+                    var="item"  
+                    paginator="true" 
+                    rows="15"  
+                    paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  
+                    rowsPerPageTemplate="5,10,15,20,25,50,100" >
+                    <f:facet name="header">
+                        <p:outputPanel>
+                            <h:outputText value="Search all fields:" />
+                            <h:inputText id="globalFilter" onkeyup="PF('expensesMapControllerTable').filter()" />
+                        </p:outputPanel>
+                    </f:facet>
+                    <p:ajax event="rowEdit" listener="#{expensesMapController.onEdit}" update=":growl" oncomplete="PF('expensesMapControllerTable').filter()" />  
+                    <p:ajax event="rowEditCancel" listener="#{expensesMapController.onCancel}" update=":growl"  oncomplete="PF('expensesMapControllerTable').filter()" />  
+                    <p:ajax event="rowSelect"   update="createButton viewButton editButton deleteButton"/>
+                    <p:ajax event="rowUnselect" update="createButton viewButton editButton deleteButton"/>
+                    <p:column selectionMode="single"/>
+                    <p:column sortBy="#{item.id}" filterBy="#{item.id}" headerText="#{configMapController.getKey('ListExpensesMapTitle_id')}"   >
+                        <p:cellEditor> 
+                            <f:facet name="output">
+                                <h:outputText value="#{item.id}"/>
+                            </f:facet>
+                            <f:facet name="input">
+                                <p:inputText value="#{item.id}" label="#{configMapController.getKey('ListExpensesMapTitle_id')}" />
+                            </f:facet>
+                        </p:cellEditor> 
+                    </p:column>
+
+
+                    <p:column sortBy="#{item.searchString}" filterBy="#{item.searchString}" headerText="#{configMapController.getKey('ListExpensesMapTitle_searchString')}"   >
+                        <p:cellEditor> 
+                            <f:facet name="output">
+                                <h:outputText value="#{item.searchString}"/>
+                            </f:facet>
+                            <f:facet name="input">
+                                <p:inputText value="#{item.searchString}" label="#{configMapController.getKey('ListExpensesMapTitle_searchString')}" />
+                            </f:facet>
+                        </p:cellEditor> 
+                    </p:column>
+
+                    <p:column sortBy="#{item.supplierId}" filterBy="#{item.supplierId}" headerText="#{configMapController.getKey('ListExpensesMapTitle_supplierId')}"   >
+                        <p:cellEditor> 
+                            <f:facet name="output">
+                                <h:outputText value="#{item.supplierId.supplierName}"/>
+                            </f:facet>
+                            <f:facet name="input">
+                                <p:selectOneMenu id="supplierId" styleClass="selectOneWidth updateSupplierTypes" title="Description: #{expensesMapController.selected.supplierId.description}"  converter="suppliersControllerConverter" filter="true" value="#{item.supplierId}"  label="#{configMapController.getKey('CreateExpensesMapTitle_supplierId')}" required="true" requiredMessage="#{configMapController.getKey('CreateExpensesMapRequiredMessage_supplierId')}">
+                                    <f:selectItems value="#{suppliersController.itemsAvailableSorted}" var="supplier" itemLabel="#{supplier.supplierName}" itemValue="#{supplier}"/>
+                                </p:selectOneMenu>
+                            </f:facet>
+                        </p:cellEditor> 
+                    </p:column>
+
+
+                    <p:column sortBy="#{item.expenseTypeId}" filterBy="#{item.expenseTypeId}" headerText="#{configMapController.getKey('ListExpensesMapTitle_expenseTypeId')}"   >
+                        <p:cellEditor> 
+                            <f:facet name="output">
+                                <h:outputText value="#{item.expenseTypeId.expenseTypeName}"/>
+                            </f:facet>
+                            <f:facet name="input">
+                                <p:selectOneMenu id="expenseTypeId" styleClass="selectOneWidth updateExpenseTypes" title="Description: #{expensesMapController.selected.expenseTypeId.description}"  converter="expenseTypesControllerConverter" filter="true" value="#{item.expenseTypeId}" label="#{configMapController.getKey('CreateExpensesMapTitle_expenseTypeId')}" required="true" requiredMessage="#{configMapController.getKey('CreateExpensesMapRequiredMessage_expenseTypeId')}">
+                                    <f:selectItems value="#{expenseTypesController.itemsAvailableSorted}" var="expenseType" itemLabel="#{expenseType.expenseTypeName}" itemValue="#{expenseType}"/>
+                                </p:selectOneMenu>
+                            </f:facet>
+                        </p:cellEditor> 
+                    </p:column>
+
+
+                    <p:column sortBy="#{item.paymentMethodId}" filterBy="#{item.paymentMethodId}" headerText="#{configMapController.getKey('ListExpensesMapTitle_paymentMethodId')}"   >
+                        <p:cellEditor> 
+                            <f:facet name="output">
+                                <h:outputText value="#{item.paymentMethodId.paymentMethodName}"/>
+                            </f:facet>
+                            <f:facet name="input">
+                                <p:selectOneMenu id="paymentMethodId" styleClass="selectOneWidth"   converter="paymentMethodsControllerConverter"  filter="true"  value="#{item.paymentMethodId}" label="#{configMapController.getKey('CreateExpensesMapTitle_paymentMethodId')}" required="true" requiredMessage="#{configMapController.getKey('CreateExpensesMapRequiredMessage_paymentMethodId')}">
+                                    <f:selectItems value="#{paymentMethodsController.itemsAvailableSorted}" var="paymentMethod" itemLabel="#{paymentMethod.paymentMethodName}" itemValue="#{paymentMethod}"/>
+                                </p:selectOneMenu>
+                            </f:facet>
+                        </p:cellEditor> 
+                    </p:column>      
+
+                    <p:column sortBy="#{item.description}" filterBy="#{item.description}" headerText="#{configMapController.getKey('ListExpensesMapTitle_description')}"   >
+                        <p:cellEditor> 
+                            <f:facet name="output">
+                                <h:outputText value="#{item.description}"/>
+                            </f:facet>
+                            <f:facet name="input">
+                                <p:inputText value="#{item.description}" label="#{configMapController.getKey('ListExpensesMapTitle_description')}" />
+                            </f:facet>
+                        </p:cellEditor> 
+
+
+                    </p:column>
+
+
+                    <p:column rendered="#{expensesMapController.isUserInRole('ADMIN')}"  headerText="Edit" style="width:50px">  
+                        <p:rowEditor />  
+                    </p:column>  
+
+
+                    <f:facet name="footer">
+                        <p:commandButton rendered="#{expensesMapController.isUserInRole('ADMIN')}" id="createButton" icon="ui-icon-plus"   value="#{configMapController.getKey('Create')}" actionListener="#{expensesMapController.prepareCreate}" update=":ExpensesMapCreateForm" oncomplete="PF('ExpensesMapCreateDialog').show()"/>
+                        <p:commandButton id="viewButton"   icon="ui-icon-search" value="#{configMapController.getKey('View')}" update=":ExpensesMapViewForm" oncomplete="PF('ExpensesMapViewDialog').show()" disabled="#{empty expensesMapController.selected}"/>
+                        <p:commandButton rendered="#{expensesMapController.isUserInRole('ADMIN')}" id="editButton"   icon="ui-icon-pencil" value="#{configMapController.getKey('Edit')}" update=":ExpensesMapEditForm" oncomplete="PF('ExpensesMapEditDialog').show()" disabled="#{empty expensesMapController.selected}"/>
+                        <p:commandButton rendered="#{expensesMapController.isUserInRole('ADMIN')}" id="deleteButton" icon="ui-icon-trash"  value="#{configMapController.getKey('Delete')}" actionListener="#{expensesMapController.destroy}" update=":growl,datalist" disabled="#{empty expensesMapController.selected}"/>
+                        <p:commandButton rendered="#{expenseTypesController.isUserInRole('ADMIN')}" id="createButtonExpenseType" icon="fa fa-plus  white Fs14"   value="     #{configMapController.getKey('CreateNewMap_ExpenseType')}" actionListener="#{expenseTypesController.createDialogue}" update="  expenseTypeId" oncomplete="PF('ExpenseTypesCreateDialog').show()"/>
+                        <p:commandButton rendered="#{suppliersController.isUserInRole('ADMIN')}" id="createButtonSupplier" icon="fa fa-plus white Fs14"   value="     #{configMapController.getKey('CreateNewMap_Supplier')}" actionListener="#{suppliersController.prepareCreateDialogue}" update=" supplierId" oncomplete="PF('SuppliersCreateDialog').show()"/>
+
+                    </f:facet>
+
+                </p:dataTable>
+            </h:panelGroup>
+        </h:form>
+
+        <ui:include src="Create.xhtml"/>
+        <ui:include src="Edit.xhtml"/>
+        <ui:include src="View.xhtml"/>
+        <ui:include src="/admin/expenses/CreateExpenseType.xhtml"/>
+        <ui:include src="/admin/expenses/CreateSupplier.xhtml"/>
+
+    </ui:define>
+</ui:composition>
+
+

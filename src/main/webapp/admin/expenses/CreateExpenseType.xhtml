@@ -15,7 +15,7 @@
                     <p:outputLabel value="#{configMapController.getKey('CreateExpenseTypesLabel_description')}" for="description" />
                     <p:inputTextarea rows="4" cols="30" id="description"  value="#{expenseTypesController.selected.description}"  title="#{configMapController.getKey('CreateExpenseTypesTitle_description')}" />
                 </p:panelGrid>
-                <p:commandButton actionListener="#{expenseTypesController.createDialogue}" value="#{configMapController.getKey('Save')}" update=":ExpensesCreateForm  :growl" oncomplete="handleSubmit(args,'ExpenseTypesCreateDialog');"/>
+                <p:commandButton actionListener="#{expenseTypesController.createDialogue}" value="#{configMapController.getKey('Save')}" update="@(.updateExpenseTypes) :growl" oncomplete="handleSubmit(args,'ExpenseTypesCreateDialog');"/>
                 <p:commandButton value="#{configMapController.getKey('Cancel')}" onclick="PF('ExpenseTypesCreateDialog').hide()"/>
       
         </h:form>
