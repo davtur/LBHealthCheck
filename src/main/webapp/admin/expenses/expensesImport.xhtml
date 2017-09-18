@@ -30,7 +30,7 @@
 
                 <p:panel>
                     <h:panelGrid columns="1">
-                        <h:outputLabel value="Rejected Entries " for="duplicatevalue" />
+                        <h:outputLabel value="Duplicate Entries - a lot of duplicates may mean you have already uploaded the file or entered some manually." for="duplicatevalue" />
                         <p:inputTextarea rows="10" cols="300" id="duplicatevalue" value="#{expensesController.duplicateValues}" title="#{configMapController.getKey('CreateEzidebitImportTitle_bulkvalue')}" />
                     </h:panelGrid>
                 </p:panel>

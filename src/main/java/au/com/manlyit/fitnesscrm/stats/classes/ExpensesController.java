@@ -8,6 +8,7 @@ import au.com.manlyit.fitnesscrm.stats.classes.util.LazyLoadingDataModel;
 import au.com.manlyit.fitnesscrm.stats.db.ContractorRates;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import au.com.manlyit.fitnesscrm.stats.db.ExpenseTypes;
+import au.com.manlyit.fitnesscrm.stats.db.ExpensesMap;
 import au.com.manlyit.fitnesscrm.stats.db.InvoiceImages;
 import au.com.manlyit.fitnesscrm.stats.db.PaymentMethods;
 import au.com.manlyit.fitnesscrm.stats.db.SessionHistory;
@@ -213,6 +214,7 @@ public class ExpensesController implements Serializable {
 
     public void handleExpensesExcelFileUpload(FileUploadEvent event) throws IllegalAccessException, NoSuchMethodException, IOException, ParseException {
         FacesMessage msg = new FacesMessage("Succesful", event.getFile().getFileName() + " is uploaded.");
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
         FacesContext.getCurrentInstance().addMessage(null, msg);
         int createdCount = 0;
         int updatedCount = 0;
@@ -436,10 +438,27 @@ public class ExpensesController implements Serializable {
                     errorCount++;
                 } else {
 
-                    Expenses exp = null;
                     try {
+                        List<Expenses> duplicateList = null;
+
+                        try {
+                            duplicateList = ejbFacade.findExpensesByDateAmountAndDescription(cid.getExpenseIncurredTimestamp(), cid.getExpenseAmount(), cid.getDescription());
+
+                        } catch (Exception e) {
+                            LOGGER.log(Level.SEVERE, "Checking for duplicates for the expense at row number {0} failed due to an exception - {1}", new Object[]{rowNumber, e});
+                        }
+                        if (duplicateList != null) {
+                            if (duplicateList.isEmpty() == false) {
+
+                                LOGGER.log(Level.WARNING, "Duplicate(s) for the expense at row number {0} found! count = {1}", new Object[]{rowNumber, duplicateList.size()});
+                                String dupInfo = "DUPLICATE FOUND IN DATABASE, Rpw=" + rowNumber + ", " + sdf.format(cid.getExpenseIncurredTimestamp()) + ", " + cid.getExpenseAmount() + ", " + cid.getDescription() + "\r\n";
+                                duplicateValues += dupInfo;
+                            }
+                        }
+
                         expensesForImport.add(createExpenseFromCsv(cid.getExpenseIncurredTimestamp(), cid.getExpenseAmount(), cid.getDescription(), rowNumber));
                         createdCount++;
+
                     } catch (Exception e) {
                         LOGGER.log(Level.SEVERE, "The expense at row number {0} failed due to an exception - {1}", new Object[]{rowNumber, e});
 
@@ -477,32 +496,49 @@ public class ExpensesController implements Serializable {
             SuppliersController suppliersController = (SuppliersController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "suppliersController");
             ExpenseTypesController expenseTypesController = (ExpenseTypesController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "expenseTypesController");
             PaymentMethodsController paymentMethodsController = (PaymentMethodsController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "paymentMethodsController");
+            ExpensesMapController expensesMapController = (ExpensesMapController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "expensesMapController");
             List<Suppliers> suppliers = new ArrayList<>(suppliersController.getItemsAvailableSorted());
             List<ExpenseTypes> expenseTypes = new ArrayList<>(expenseTypesController.getItemsAvailableSorted());
             List<PaymentMethods> paymentMethods = new ArrayList<>(paymentMethodsController.getItemsAvailableSorted());
+            List<ExpensesMap> expensesMap = new ArrayList<>(expensesMapController.getItemsAvailable());
 
             //TODO use expenseMap to pick the right supplier and expense type based on the description.
-            for (PaymentMethods pm : paymentMethods) {
-                if (pm != null) {
-                    expense.setPaymentMethodId(pm);
+            boolean foundMap = false;
+            for (ExpensesMap em : expensesMap) {
+
+                if (description.contains(em.getSearchString()) == true) {
+                    foundMap = true;
+                    expense.setPaymentMethodId(em.getPaymentMethodId());
+                    expense.setSupplierId(em.getSupplierId());
+                    expense.setExpenseTypeId(em.getExpenseTypeId());
+                    LOGGER.log(Level.INFO, "ExpenseMap Matched. Row = {2}. Using defaults for searchString = {0}. Matched Description = {1}", new Object[]{em.getSearchString(), description, rowNumber});
+                }
+
+            }
+            if (foundMap == false) {
+                for (PaymentMethods pm : paymentMethods) {
+                    if (pm != null) {
+                        expense.setPaymentMethodId(pm);
+                    }
+                }
+
+                for (ExpenseTypes et : expenseTypes) {
+                    if (et != null) {
+                        expense.setExpenseTypeId(et);
+                    }
+                }
+
+                for (Suppliers sup : suppliers) {
+                    if (sup != null) {
+                        expense.setSupplierId(sup);
+                    }
                 }
             }
             if (expense.getPaymentMethodId() == null) {
                 LOGGER.log(Level.WARNING, "no Payment Method Found during import from excell");
             }
-
-            for (ExpenseTypes et : expenseTypes) {
-                if (et != null) {
-                    expense.setExpenseTypeId(et);
-                }
-            }
             if (expense.getExpenseTypeId() == null) {
                 LOGGER.log(Level.WARNING, "no ExpenseTypes Found during import from excell");
-            }
-            for (Suppliers sup : suppliers) {
-                if (sup != null) {
-                    expense.setSupplierId(sup);
-                }
             }
             if (expense.getSupplierId() == null) {
                 LOGGER.log(Level.WARNING, "no Suppliers Found during import from excell");
@@ -1402,11 +1438,11 @@ public class ExpensesController implements Serializable {
         recreateModel();
         JsfUtil.addSuccessMessage("Row Edit Successful");
     }
-    
+
     public void onEditImport(RowEditEvent event) {
         Expenses cm = (Expenses) event.getObject();
-       // getFacade().edit(cm);
-       // recreateModel();
+        // getFacade().edit(cm);
+        // recreateModel();
         JsfUtil.addSuccessMessage("Row Edit Successful");
     }
 

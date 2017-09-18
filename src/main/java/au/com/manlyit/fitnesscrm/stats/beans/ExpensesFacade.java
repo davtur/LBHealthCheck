@@ -8,6 +8,7 @@ package au.com.manlyit.fitnesscrm.stats.beans;
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.db.Expenses;
 import au.com.manlyit.fitnesscrm.stats.db.Suppliers;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -99,6 +100,35 @@ public class ExpensesFacade extends AbstractFacade<Expenses> {
             } else {
                 cq.orderBy(cb.desc(stime));
             }
+            TypedQuery<Expenses> q = em.createQuery(cq);
+            retList = q.getResultList();
+        } catch (Exception e) {
+            JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
+        }
+        return retList;
+    }
+
+    public List<Expenses> findExpensesByDateAmountAndDescription(Date expenseDate, BigDecimal amount, String description) {
+        List<Expenses> retList = null;
+        ArrayList<Predicate> predicatesList1 = new ArrayList<>();
+
+        try {
+            CriteriaBuilder cb = em.getCriteriaBuilder();
+            CriteriaQuery<Expenses> cq = cb.createQuery(Expenses.class);
+            Root<Expenses> rt = cq.from(Expenses.class);
+
+            Expression<String> expenseDescription = rt.get("description");
+            Expression<Date> stime = rt.get("expenseIncurredTimestamp");
+            Expression<BigDecimal> expenseAmount = rt.get("expenseAmount");
+
+            predicatesList1.add(cb.equal(expenseDescription, description));
+            predicatesList1.add(cb.equal(stime, expenseDate));
+            predicatesList1.add(cb.equal(expenseAmount, amount));
+
+            cq.where(predicatesList1.<Predicate>toArray(new Predicate[predicatesList1.size()]));
+
+            cq.select(rt);
+            
             TypedQuery<Expenses> q = em.createQuery(cq);
             retList = q.getResultList();
         } catch (Exception e) {

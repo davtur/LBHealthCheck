@@ -133,7 +133,10 @@
                                 <h:outputText value="#{item.customerName.firstname} #{item.customerName.lastname}"/>
                             </p:column>
                             <p:column sortBy="#{item.paymentAmount}" filterBy="#{item.paymentAmount}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentAmount')}"   >
-                                <h:outputText value="#{item.paymentAmount}">
+                                <h:outputText value="#{item.paymentAmount}" rendered="#{!(item.paymentStatus == 'W'|| item.paymentStatus == 'N')}">
+                                    <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
+                                </h:outputText>
+                                <h:outputText value="#{item.scheduledAmount}" rendered="#{(item.paymentStatus == 'W'|| item.paymentStatus == 'N')}">
                                     <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
                                 </h:outputText>
                             </p:column>

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui">
+
+    <h:head>
+        <f:facet name="first">
+            <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+            <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+            <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"/>
+            <meta name="apple-mobile-web-app-capable" content="yes" />
+        </f:facet>
+        <title>Pure Fitness Manly</title>
+        <h:outputScript  name="js/layout.js" library="spark-layout" />
+
+        <h:outputScript  name="custom.js" library="js" />
+        <ui:insert name="head" />
+    </h:head>
+
+    <h:body>    
+        <div id="menu-mask"></div>
+        <p:growl id="growl" widgetVar="growlWidget"    showDetail="true"    />
+
+        <ui:include src="topbar.xhtml" />
+
+        <ui:include src="layoutmenu.xhtml" />
+        <!--   <ui:include src="sessionTimeoutDialogue.xhtml" />-->
+
+        <div id="layout-portlets-cover">
+            <ui:insert name="body">
+                Template
+            </ui:insert>
+
+            <div class="layout-portlets-box TexAlCenter">
+                <span class="Fs14 gray FontRalewayRegular">Pure Fitness Manly  |   All rights reserved.</span>
+            </div>
+        </div>
+
+        <p:ajaxStatus style="width:32px;height:32px;position:fixed;right:7px;bottom:7px">
+            <f:facet name="start">
+                <p:graphicImage name="images/preloader.gif" library="spark-layout"/>
+            </f:facet>
+
+            <f:facet name="complete">
+                <h:outputText value="" />
+            </f:facet>
+        </p:ajaxStatus>
+        <h:form id="remoteCommandForm">
+
+            <p:remoteCommand name="socketOpenEvent"   actionListener="#{pushSocketBean.pushChannelOpen}"  />
+            <p:remoteCommand name="socketCloseEvent"   actionListener="#{pushSocketBean.pushChannelClose}"  />         
+            <p:remoteCommand name="updatePaymentForms" update="@(.updatePaymentInfo)" />
+            <p:remoteCommand name="handleReconnect" actionListener="#{pushSocketBean.pushChannelReconnect}" />
+            <p:outputLabel rendered="#{pushSocketBean.pushChannel}" value="" />
+        </h:form>
+
+        <p:socket onMessage="handleMessage" onError="handleError" onTransportFailure="handleTransportFailure"  onClose="handleClose" channel="/payments" onOpen="handleOpen" onReconnect="handleReconnect" autoConnect="false"  widgetVar="subscriber">
+            <p:ajax event="message" listener="#{ezidebit.remoteCommandListener}" />
+
+        </p:socket>
+        <script type="text/javascript">
+            function handleMessage(facesmessage)
+                {
+                    console.log("Handling primfaces push socket component faces MESSAGE");
+                    facesmessage.severity = 'info';
+
+                    PF('growlWidget').show([facesmessage]);
+
+                }
+            function handleError()
+                {
+                    console.log("Handling primfaces push socket component  ERROR message");
+                    alert('Error');
+                    // PF('subscriber').connect();
+                    handleReconnect();
+                }
+            function handleOpen()
+                {
+
+                    console.log("Handling primfaces push socket component  OPEN message");
+                    socketOpenEvent();
+                }
+            function handleClose()
+                {
+                    console.log("Handling primfaces push socket component  CLOSE message");
+                    socketCloseEvent();
+                    //PF('subscriber').connect();
+                }
+
+            function handleReconnect()
+                {
+                    handleReconnect();
+                    //alert('handleReconnect');
+                    console.log("Handling primfaces push socket component  RECONNECT message");
+                }
+            function handleTransportFailure()
+                {
+
+                    console.log("Handling primfaces push socket component  TRANSPORT FAILURE message");
+                    //alert('handleTransportFailure');
+                    handleReconnect();
+                }
+          /*  window.onbeforeunload = function (event)
+                {
+                    PF('subscriber').disconnect();
+                    console.log("Disconnect primfaces push socket component in page unload event");
+                };*/
+
+        </script>
+
+        <h:outputStylesheet name="css/core-layout.css" library="spark-layout" />
+        <h:outputStylesheet name="css/font-awesome.css" library="spark-layout" />
+        <h:outputStylesheet name="css/animate.css" library="spark-layout" />
+        <h:outputStylesheet name="css/spark-layout-blue.css" library="spark-layout" />
+        <h:outputStylesheet library="css" name="customisations.css"/>
+
+    </h:body>
+
+</html>
