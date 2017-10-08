@@ -440,6 +440,7 @@ public class ExpensesController implements Serializable {
 
                     try {
                         List<Expenses> duplicateList = null;
+                        cid.setExpenseAmount(cid.getExpenseAmount().abs());// excell usually has expenses as a negative number. we need the absolute value
 
                         try {
                             duplicateList = ejbFacade.findExpensesByDateAmountAndDescription(cid.getExpenseIncurredTimestamp(), cid.getExpenseAmount(), cid.getDescription());
@@ -451,7 +452,7 @@ public class ExpensesController implements Serializable {
                             if (duplicateList.isEmpty() == false) {
 
                                 LOGGER.log(Level.WARNING, "Duplicate(s) for the expense at row number {0} found! count = {1}", new Object[]{rowNumber, duplicateList.size()});
-                                String dupInfo = "DUPLICATE FOUND IN DATABASE, Rpw=" + rowNumber + ", " + sdf.format(cid.getExpenseIncurredTimestamp()) + ", " + cid.getExpenseAmount() + ", " + cid.getDescription() + "\r\n";
+                                String dupInfo = "DUPLICATE FOUND IN DATABASE, Row=" + rowNumber + ", " + sdf.format(cid.getExpenseIncurredTimestamp()) + ", " + cid.getExpenseAmount() + ", " + cid.getDescription() + "\r\n";
                                 duplicateValues += dupInfo;
                             }
                         }

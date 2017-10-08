@@ -219,6 +219,7 @@ public class StatsTakenController implements Serializable {
             Logger.getLogger(SessionHistoryController.class.getName()).log(Level.SEVERE, "prepareCreateMobileReturnCreate", ex);
         }
     }
+    
 
     public void prepareCreate() {
         current = new StatsTaken();

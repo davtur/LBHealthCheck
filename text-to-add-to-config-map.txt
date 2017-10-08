@@ -2175,11 +2175,16 @@ ListExpensesMapTitle_supplierId=SupplierId
 CreateNewMap_ExpenseType=Add Expense Type
 CreateNewMap_Supplier=Add Supplier
 
-ExpensesBulkImportTitle=Import Expenses from an Excell Spreadsheet
+ExpensesBulkImportTitle=Import Expenses from an Excel Spreadsheet
 CreateExpensesImportLabel_value=Expenses Bulk Import
 CreateExpensesImportTitle_bulkvalue=Upload File
 
 BulkImportExpensesButtonLabel=Import From Excel Spreadsheet
 
 
-
+CreateSessionHistoryLabel_trainerList=Selected Trainer(s):
+Trainer_takeAction_heading_Label=Take Action
+ListSessionHistoryCreateSessionTooltip=Log a training session. This will show up on your session history stats and client stats. Attendance numbers will be used to calculate bonus rates.
+ListSessionHistoryCreateSessionMobileTooltip=Mobile Friendly View.Log a training session. This will show up on your session history stats and client stats. Attendance numbers will be used to calculate bonus rates.
+ListSessionHistoryCreateStatsTooltip=Log customer measurements, stats and upload photos.
+ListSessionHistoryImpersonateCustomer=Tick this box to enable viewing a customers information as they would see it. Use the My Stats and My Details pages to view their info.

@@ -1499,6 +1499,8 @@ public class CustomerImagesController implements Serializable {
             }
         } catch (NumberFormatException numberFormatException) {
             logger.log(Level.WARNING, "getDynamicImage number format exception for {0}", id);
+        } catch (Exception ex) {
+            logger.log(Level.WARNING, "getDynamicImage  exception for {0}. {1}",new Object[]{ id,ex.getMessage()});
         }
 
         return sc;

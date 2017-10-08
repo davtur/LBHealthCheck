@@ -1,6 +1,7 @@
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<ui:composition template="/WEB-INF/template.xhtml" xmlns="http://www.w3.org/1999/xhtml"
+<ui:composition template="/WEB-INF/template.xhtml" 
+                xmlns="http://www.w3.org/1999/xhtml"
                 xmlns:ui="http://java.sun.com/jsf/facelets"
                 xmlns:h="http://java.sun.com/jsf/html"
                 xmlns:f="http://java.sun.com/jsf/core"
@@ -15,6 +16,22 @@
             <h:form id="listSessionHistoryForm1">
                 <div class="Container100 Responsive100">
                     <div class="ContainerIndent">
+                        <h1 class="BigTopic">#{configMapController.getKey('Trainer_takeAction_heading_Label')}</h1>
+
+
+                        <div class="Container20 Responsive">
+                            <p:commandButton id="createButtonDialogue"  action="CreateSessionInfo" icon="fa fa-plus white Fs14" value="#{configMapController.getKey('ListSessionHistoryCreateLink')}"/>
+                            <p:tooltip id="createButtonDialogueTip"  for="createButtonDialogue" value="#{configMapController.getKey('ListSessionHistoryCreateSessionTooltip')}" />
+                        </div>
+                        <div class="Container20 Responsive">
+                            <p:commandButton  id="createStatButton" icon="fa fa-plus white Fs14"   value="#{configMapController.getKey('ListSessionHistoryCreateStatLink')}" actionListener="#{statsTakenController.prepareCreate}" update=":StatsTakenCreateForm" oncomplete="PF('StatsTakenCreateDialog').show()"/>
+                            <p:tooltip for="createStatButton" value="#{configMapController.getKey('ListSessionHistoryCreateStatsTooltip')}" />
+                        </div>
+                        <div class="Container20 Responsive">
+                            <p:commandButton id="createButtonMobile" ajax="false" action="#{sessionHistoryController.prepareCreateMobileReturnCreate}" icon="fa fa-bars white Fs14"  value="#{configMapController.getKey('ListSessionHistoryCreateMobileLink')}"/>
+<p:tooltip for="createButtonMobile" value="#{configMapController.getKey('ListSessionHistoryCreateSessionMobileTooltip')}" />
+                        </div>
+                        <div class="EmptyBox30"></div>
                         <h1 class="BigTopic">#{configMapController.getKey('Trainer_Impersonate_heading_Label')}</h1>
 
 
@@ -26,7 +43,7 @@
                                     <f:selectItems value="#{customersController.activeCustomers}"   var="cust" itemLabel="#{cust.firstname} #{cust.lastname}" itemValue="#{cust}"/>
                                     <p:ajax   update=":listSessionHistoryForm1:text1" event="change"/>
                                 </p:selectOneMenu>
-                           </h:panelGrid>
+                            </h:panelGrid>
                         </div>
                         <div class="Container20 Responsive">
                             <h:panelGrid columns="2" cellpadding="5" >
@@ -34,17 +51,19 @@
                                 <p:selectBooleanCheckbox id="enableImp"   value="#{customersController.impersonationOn}" valueChangeListener="#{customersController.impersonationToggled}" >  
                                     <p:ajax update=":listSessionHistoryForm1:c1 :listSessionHistoryForm1:text1 :listSessionHistoryForm1:sessionChart"   event="change"/>  
                                 </p:selectBooleanCheckbox> 
+                                <p:tooltip   for="enableImp" value="#{configMapController.getKey('ListSessionHistoryImpersonateCustomer')}" />
                             </h:panelGrid>
                         </div>
                         <div class="Container20 Responsive">
                             <h:panelGrid columns="2" cellpadding="5" >
                                 <p:outputLabel value="#{configMapController.getKey('Trainer_Impersonate_message_Label')}" for="text1" />
                                 <h:outputText id="text1"   value="#{customersController.selected.firstname} #{customersController.selected.lastname}" />   
-                                   
+
                             </h:panelGrid>
                         </div>
                     </div>
                 </div>
+                <div class="EmptyBox30"></div>
                 <div class="Container100 Responsive100">
                     <div class="ContainerIndent">
                         <h1 class="BigTopic">#{configMapController.getKey('ListSessionHistoryTitle')}</h1>
@@ -83,15 +102,7 @@
                                     <p:ajax   update="sessionChart sessionsDataTablePanel"  />
                                 </p:selectOneMenu>
                             </h:panelGrid> </div>
-                        <div class="Container20 Responsive">
-                            <p:commandButton id="createButtonDialogue"  onclick="PF('createSessionDialogueWidget').show()" icon="fa fa-plus white Fs14" type="button" value="#{configMapController.getKey('ListSessionHistoryCreateLink')}"/>
-                            <p:commandButton rendered="#{statsTakenController.isUserInRole('ADMIN')}" id="createStatButton" icon="fa fa-plus white Fs14"   value="#{configMapController.getKey('ListSessionHistoryCreateStatLink')}" actionListener="#{statsTakenController.prepareCreate}" update=":StatsTakenCreateForm" oncomplete="PF('StatsTakenCreateDialog').show()"/>
 
-                        </div>
-                        <div class="Container20 Responsive">
-                            <p:commandButton id="createButtonMobile" ajax="false" action="#{sessionHistoryController.prepareCreateMobileReturnCreate}" icon="fa fa-bars white Fs14"  value="#{configMapController.getKey('ListSessionHistoryCreateMobileLink')}"/>
-
-                        </div>
                     </div>
                 </div>
                 <div class="Container100 Responsive100">
@@ -205,7 +216,7 @@
                     </div>
                 </div>
             </h:form>
-            <ui:include src="CreateSessionInfo.xhtml"/>
+            <!--   <ui:include src="CreateSessionInfo.xhtml"/>-->
             <ui:include src="/admin/statsTaken/Create.xhtml"/>
         </div>
     </ui:define>

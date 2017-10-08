@@ -474,3 +474,11 @@ CREATE TABLE `expenses_map` (
   CONSTRAINT `fk_expenses_map_2` FOREIGN KEY (`expense_type_id`) REFERENCES `expense_types` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `fk_expenses_map_3` FOREIGN KEY (`supplier_id`) REFERENCES `suppliers` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
+
+
+
+ALTER TABLE `fitnessStats`.`payments` 
+ADD INDEX `index4` (`paymentStatus` ASC, `customer_Name` ASC);
+
+ALTER TABLE `fitnessStats`.`customer_images` 
+ADD INDEX `index3` (`datetaken` ASC);

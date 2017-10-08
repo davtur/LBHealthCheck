@@ -415,6 +415,12 @@ public class SessionHistoryController implements Serializable {
         }
     }
 
+    public String createStat(){
+        
+        createDialogue();
+        return "List";
+    }
+    
     public void createDialogue() {
         try {
             updateCurrentParticipants(participants.getTarget());
@@ -474,10 +480,10 @@ public class SessionHistoryController implements Serializable {
             getFacade().create(current);
             updateExpenses(current);
             JsfUtil.addSuccessMessage(configMapFacade.getConfig("SessionHistoryCreated"));
-            return prepareCreate();
+            return "List";
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
-            return null;
+            return "List";
         }
     }
 

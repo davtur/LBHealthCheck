@@ -8,7 +8,9 @@ and open the template in the editor.
     Author     : david
 */
 body{
-    background-image: url("/FitnessStats/javax.faces.resource/images/background-wood-and-weights.jpg") !important;
+    /*background-image: url("/FitnessStats/javax.faces.resource/images/background-wood-and-weights.jpg") !important;*/
+    background-image:none !important;
+    background-color: white;
 }
 
 /*div.ui-carousel-viewport .myStatsCarousel div.ui-carousel-viewport .myStatsCarousel{

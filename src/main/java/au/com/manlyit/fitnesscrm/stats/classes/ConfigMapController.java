@@ -5,9 +5,11 @@ import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PaginationHelper;
 import au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade;
 import au.com.manlyit.fitnesscrm.stats.classes.util.LazyLoadingDataModel;
+import au.com.manlyit.fitnesscrm.stats.classes.util.StringEncrypter;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import java.util.StringTokenizer;
@@ -38,6 +40,7 @@ public class ConfigMapController implements Serializable {
 
     private ConfigMap current;
     private ConfigMap selectedForDeletion;
+    private HashMap<String, String> configMapCache;
     private DataModel<ConfigMap> items = null;
     private String password1 = "";
     private String password2 = "";
@@ -54,6 +57,8 @@ public class ConfigMapController implements Serializable {
     private List<ConfigMap> filteredItems;
     private ConfigMap[] multiSelected;
     private static final Logger LOGGER = Logger.getLogger(ConfigMapController.class.getName());
+    private static final String ETAG = "{!-ENCRYPT-!}";
+    private final StringEncrypter encrypter = new StringEncrypter("(H6%efRdswWw2@8j&6yvFdsP)");
 
     public ConfigMapController() {
     }
@@ -80,18 +85,37 @@ public class ConfigMapController implements Serializable {
         }
 
     }
-   
-   
+
     public LazyDataModel<ConfigMap> getLazyModel() {
-        if(lazyModel == null){
+        if (lazyModel == null) {
             lazyModel = new LazyLoadingDataModel<>(ejbFacade);
         }
         return lazyModel;
     }
-    public String getKey(String key) {
-        return ejbFacade.getConfig(key);
-    }
 
+    public String getKey(String key) {
+
+        if (configMapCache == null) {
+            configMapCache = new HashMap<>();
+            ArrayList<ConfigMap> al = new ArrayList<>(ejbFacade.findAll());
+            for (ConfigMap cm : al) {
+                configMapCache.put(cm.getConfigkey(), cm.getConfigvalue());
+            }
+
+        }
+        String val = configMapCache.get(key);
+        if (val != null) {
+            if (val.indexOf(ETAG) == 0) {
+                // its encrypted so decrypt
+                val = val.substring(ETAG.length());
+                String decVal = encrypter.decrypt(val);
+                return decVal;
+            }
+        }
+
+        return val;
+        // return ejbFacade.getConfig(key);
+    }
 
     private ConfigMapFacade getFacade() {
         return ejbFacade;
@@ -138,23 +162,19 @@ public class ConfigMapController implements Serializable {
         recreateModel();
         JsfUtil.addSuccessMessage(configMapFacade.getConfig("ConfigMapCreated"));
 
-
-
     }
 
     public void createPasswordDialogue(ActionEvent actionEvent) {
 
-        
         current.setId(0);
-       if(getPassword1().compareTo(getPassword2()) == 0){
-        current.setConfigvalue(password1);
-        getFacade().createEncrypted(current);
-        recreateModel();
-        JsfUtil.addSuccessMessage(configMapFacade.getConfig("ConfigMapCreated"));
-       }else{
-          JsfUtil.addSuccessMessage(configMapFacade.getConfig("The Passwords Dont Match!")); 
-       }
-
+        if (getPassword1().compareTo(getPassword2()) == 0) {
+            current.setConfigvalue(password1);
+            getFacade().createEncrypted(current);
+            recreateModel();
+            JsfUtil.addSuccessMessage(configMapFacade.getConfig("ConfigMapCreated"));
+        } else {
+            JsfUtil.addSuccessMessage(configMapFacade.getConfig("The Passwords Dont Match!"));
+        }
 
     }
 
@@ -182,7 +202,7 @@ public class ConfigMapController implements Serializable {
         try {
             StringTokenizer st = new StringTokenizer(bulkvalue, "\r\n");
             String duplicateLines = "";
- 
+
             while (st.hasMoreTokens()) {
                 String line = st.nextToken();
                 int d = line.indexOf("=");
@@ -193,17 +213,17 @@ public class ConfigMapController implements Serializable {
                     String k = line.substring(0, d).trim();
                     String v = line.substring(d + 1);
                     //ConfigMap cm1 = new ConfigMap(0, k, v);
-                     ConfigMap cm1 = getFacade().getConfigMapFromKey(k);
+                    ConfigMap cm1 = getFacade().getConfigMapFromKey(k);
                     try {
                         String existingValue = cm1.getConfigvalue();
-                        if(existingValue.indexOf("??? ConfigMap key not found") == 0) {
+                        if (existingValue.indexOf("??? ConfigMap key not found") == 0) {
                             cm1.setConfigvalue(v);
                             getFacade().edit(cm1);
-                        }else{
+                        } else {
                             count--;
                             duplicateLines += line + "\r\n";
                         }
-                        
+
                     } catch (EJBException ejbe) {
                         Exception e1 = ejbe.getCausedByException();
                         Exception e = (Exception) e1.getCause();
@@ -214,7 +234,7 @@ public class ConfigMapController implements Serializable {
                         } else {
                             LOGGER.log(Level.SEVERE, "Bulk Config Insert Failed:" + line + "\r\n", e);
                         }
-                    }catch (Exception e) {
+                    } catch (Exception e) {
                         LOGGER.log(Level.SEVERE, "Bulk Config Insert Failed:" + line + "\r\n", e);
                     }
 
@@ -224,9 +244,9 @@ public class ConfigMapController implements Serializable {
             }
             setDuplicateValues(duplicateLines);
 
-
             LOGGER.log(Level.INFO, "Bulk Insert to config map completed. Updated or created count={0}", count);
             JsfUtil.addSuccessMessage(count + ", " + configMapFacade.getConfig("ConfigMapCreated"));
+            recreateModel();
             return prepareCreate();
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
@@ -330,6 +350,7 @@ public class ConfigMapController implements Serializable {
     private void recreateModel() {
         items = null;
         filteredItems = null;
+        configMapCache = null;
     }
 
     public String next() {
@@ -351,8 +372,8 @@ public class ConfigMapController implements Serializable {
     public SelectItem[] getItemsAvailableSelectOne() {
         return JsfUtil.getSelectItems(ejbFacade.findAll(), true);
     }
-    
-     public List<ConfigMap> getItemsAvailableSelectObjects() {
+
+    public List<ConfigMap> getItemsAvailableSelectObjects() {
         return ejbFacade.findAll();
     }
 
@@ -465,7 +486,7 @@ public class ConfigMapController implements Serializable {
         this.password = password;
     }
 
-    @FacesConverter(value="configMapControllerConverter")
+    @FacesConverter(value = "configMapControllerConverter")
     public static class ConfigMapControllerConverter implements Converter {
 
         public Object getAsObject(FacesContext facesContext, UIComponent component, String value) {
