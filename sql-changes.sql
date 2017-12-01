@@ -482,3 +482,22 @@ ADD INDEX `index4` (`paymentStatus` ASC, `customer_Name` ASC);
 
 ALTER TABLE `fitnessStats`.`customer_images` 
 ADD INDEX `index3` (`datetaken` ASC);
+
+
+ALTER TABLE `fitnessStats`.`notes` 
+ADD INDEX `index4` (`user_id` ASC);
+
+ALTER TABLE `fitnessStats`.`payments` 
+ADD INDEX `index5` (`paymentDate` ASC);
+
+
+CREATE TABLE `fitnessStats`.`leads` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `firstname` VARCHAR(127) NULL,
+  `lastname` VARCHAR(127) NULL,
+  `email` VARCHAR(255) NULL,
+  `mobile` VARCHAR(45) NULL,
+  `created` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `message` TEXT NULL,
+  `notes` VARCHAR(255) NULL,
+  PRIMARY KEY (`id`));

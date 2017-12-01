@@ -123,8 +123,8 @@
         </init-param>
         <init-param>
    <param-name>org.atmosphere.cpr.asyncSupport</param-name>
-   <param-value>org.atmosphere.container.GlassFishServ30WebSocketSupport</param-value>
-</init-param>
+  <param-value>org.atmosphere.container.GlassFishServ30WebSocketSupport</param-value>
+</init-param> <!---->
        <!--   Tell Atmosphere to use TrackMessageSizeInterceptor - in order to   
         avoid glued messages -->
         <init-param>
