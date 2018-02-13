@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="info" name="FitnessCrm" packages="">
+  <Appenders>
+    <RandomAccessFile name="glassfishLog4j2Appender" fileName="/var/log/glassfish/fitnesscrm.log">
+        <PatternLayout>
+            <Pattern>%d{dd MMM yyyy HH:mm:ss,SSS} %p %F %L %t %c - %m%n</Pattern>
+        </PatternLayout>
+    </RandomAccessFile>
+    </Appenders>
+  <Loggers>
+    <Logger name="org.apache.log4j.xml" level="info"/>
+    <Logger name="org.atmosphere" level="INFO" />
+    <Logger name="org.primefaces" level="INFO" />
+     <Root level="info">
+      <AppenderRef ref="glassfishLog4j2Appender"/>
+    </Root>
+ </Loggers>
+</Configuration>

@@ -28,6 +28,5 @@ Any value defined here will override the pom.xml file value but is only applicab
         <org-netbeans-modules-javascript2-requirejs.enabled>false</org-netbeans-modules-javascript2-requirejs.enabled>
         <netbeans.hint.jdkPlatform>JDK_1.8</netbeans.hint.jdkPlatform>
         <org-netbeans-modules-maven-jaxws._5f_C_5f_nonpci_5f_1>https://api.ezidebit.com.au/v3-5/nonpci?wsdl</org-netbeans-modules-maven-jaxws._5f_C_5f_nonpci_5f_1>
-        <org-netbeans-modules-maven-jaxws.test_2e_client_2e_project>/home/david/NetBeansProjects/WebServicesTest/WebServicesTest</org-netbeans-modules-maven-jaxws.test_2e_client_2e_project>
     </properties>
 </project-shared-configuration>

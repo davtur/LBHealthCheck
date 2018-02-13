@@ -1,4 +1,15 @@
 
+Docker notes
+
+docker login --username davtur --password zgpq9ChPJf
+
+docker tag my-image username/my-repo
+
+docker push username/my-repo
+
+or right click image in netbeans and push
+
+
 Updating components in Primefaces
 
 You probably already know that PrimeFaces is using jQuery under the covers. PrimeFaces Selectors are based on jQuery. Anything which you specify in @(...) will be used as jQuery selector on the current HTML DOM tree. For any found HTML element, which has an ID, exactly this ID will ultimately be used in the update.
@@ -80,8 +91,8 @@ mvn install:install-file -Dfile=/home/david/NetBeansProjects/libraries/Primeface
 # install a new build from primefaces elite download 
 mvn install:install-file -Dfile=/home/david/NetBeansProjects/libraries/primefaces-5.2.22/primefaces-5.2.22.jar -DgroupId=org.primefaces -DartifactId=primefaces -Dversion=5.2.22 -Dpackaging=jar -DgeneratePom=true
 
-
-
+mvn install:install-file -Dfile=/home/david/NetBeansProjects/libraries/primefaces-6.1.9/primefaces-6.1.9.jar -DgroupId=org.primefaces -DartifactId=primefaces -Dversion=6.1.9 -Dpackaging=jar -DgeneratePom=true
+mvn install:install-file -Dfile=/home/david/NetBeansProjects/libraries/primefaces-6.1.11/primefaces-6.1.11.jar -DgroupId=org.primefaces -DartifactId=primefaces -Dversion=6.1.11 -Dpackaging=jar -DgeneratePom=true
 
 mvn install:install-file
 -Dfile=<path-to-file>

@@ -1,5 +1,0 @@
-#
-#**/*.*
-#**/.*
-*!/target/FitnessCRM*.war
-*!domain-fitnessCRM.xml

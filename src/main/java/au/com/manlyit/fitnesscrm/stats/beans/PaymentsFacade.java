@@ -570,7 +570,7 @@ public ABC addNewABC(ABC abc) {
                 predicatesList2.add(cb.equal(status, PaymentStatus.DISHONOURED.value()));
                  predicatesList2.add(cb.equal(status, PaymentStatus.MISSING_IN_PGW.value()));
                  predicatesList2.add(cb.equal(status, PaymentStatus.REJECTED_BY_GATEWAY.value()));
-                 predicatesList2.add(cb.equal(status, PaymentStatus.REJECTED_CUST_ON_HOLD.value()));
+                // predicatesList2.add(cb.equal(status, PaymentStatus.REJECTED_CUST_ON_HOLD.value()));
             }
             if (showScheduled) {
                 predicatesList2.add(cb.and(cb.equal(status, PaymentStatus.SCHEDULED.value()), cb.equal(custState, activeState)));
