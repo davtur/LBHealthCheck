@@ -55,6 +55,13 @@ public class ConfigMapFacade extends AbstractFacade<ConfigMap> {
         cm.setConfigvalue(taggedVal);
         create(cm);
     }
+    
+    public void editEncrypted(ConfigMap cm) {
+        String valueToEncrypt = cm.getConfigvalue();
+        String taggedVal = ETAG + encrypter.encrypt(valueToEncrypt);
+        cm.setConfigvalue(taggedVal);
+        edit(cm);
+    }
 
     public  String getConfig(String key) {
         String val = getValueFromKey(key);

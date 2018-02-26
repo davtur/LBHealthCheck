@@ -1,4 +1,4 @@
-curl -v -H "Content-Type: application/json" -X POST "https://test-services.purefitnessmanly.com.au/FitnessStats/api/customers" -d  '{"newLead":{"id": "0", "name": "David Turner", "emailAddress":"david@manlyit.com.au","phoneNumber":"0412422700","message":"Just a Test","authToken":"Green21Blue22"}}'
+
 
 
 

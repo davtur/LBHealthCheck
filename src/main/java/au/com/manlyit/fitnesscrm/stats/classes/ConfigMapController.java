@@ -39,6 +39,7 @@ public class ConfigMapController implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private ConfigMap current;
+    private ConfigMap encryptedConfigMap;
     private ConfigMap selectedForDeletion;
     private HashMap<String, String> configMapCache;
     private DataModel<ConfigMap> items = null;
@@ -91,6 +92,11 @@ public class ConfigMapController implements Serializable {
             lazyModel = new LazyLoadingDataModel<>(ejbFacade);
         }
         return lazyModel;
+    }
+    public String getSelectedKeyValue(){
+        
+        
+        return getKey(getSelected().getConfigkey());
     }
 
     public String getKey(String key) {
@@ -163,7 +169,16 @@ public class ConfigMapController implements Serializable {
         JsfUtil.addSuccessMessage(configMapFacade.getConfig("ConfigMapCreated"));
 
     }
+ public void saveEncryptedValue(ActionEvent actionEvent) {
 
+    
+       
+            getFacade().editEncrypted(encryptedConfigMap);
+        
+            JsfUtil.addSuccessMessage(configMapFacade.getConfig("ConfigMapCreated"));
+       
+
+    }
     public void createPasswordDialogue(ActionEvent actionEvent) {
 
         current.setId(0);
@@ -521,5 +536,19 @@ public class ConfigMapController implements Serializable {
                 throw new IllegalArgumentException("object " + object + " is of type " + object.getClass().getName() + "; expected type: " + ConfigMapController.class.getName());
             }
         }
+    }
+
+    /**
+     * @return the encryptedConfigMap
+     */
+    public ConfigMap getEncryptedConfigMap() {
+        return encryptedConfigMap;
+    }
+
+    /**
+     * @param encryptedConfigMap the encryptedConfigMap to set
+     */
+    public void setEncryptedConfigMap(ConfigMap encryptedConfigMap) {
+        this.encryptedConfigMap = encryptedConfigMap;
     }
 }

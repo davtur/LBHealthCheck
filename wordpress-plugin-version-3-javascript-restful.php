@@ -9,19 +9,14 @@ Author: David Turner
 Author URI: http://www.purefitnessmanly.com.au
 */
 
-//add_action( 'wpcf7_before_send_mail', 'create_new_lead_in_crm', 10, 1 ); 
-//add_action( 'wpcf7_mail_sent', 'create_new_lead_in_crm_function' );
-//
 add_action( 'wp_footer', 'mycustom_wp_footer' );
- 
-//add_action( 'wpcf7_before_send_mail', 'mycustom_wp_footer'); 
-
 
 function mycustom_wp_footer() {
 ?>
 <script type="text/javascript">
 document.addEventListener( 'wpcf7mailsent', function( event ) {
-    ga( 'send', 'event', 'Contact Form', 'submit' );
+    	ga( 'send', 'event', 'Contact Form', 'submit' );
+	goog_report_conversion ('http://www.purefitnessmanly.com.au/contact-us/');fbq('track', 'Lead');
 	//alert("Fired plugin");
 	console.log(event);
 	var inputs = event.detail.inputs;
@@ -51,7 +46,8 @@ document.addEventListener( 'wpcf7mailsent', function( event ) {
         jQuery.ajax({
 			type: "POST",
 			contentType: "application/json",
-    		url: "https://test-services.purefitnessmanly.com.au/FitnessStats/api/customers",
+    		url: "https://services.purefitnessmanly.com.au/FitnessStats/api/customers",
+			// dataType is what to expect in the response from the server. Leave it out and it makes an educated guess
 	 		//dataType:'json',
 			data: JSON.stringify(newLead),
   			xhrFields: {
@@ -81,40 +77,7 @@ document.addEventListener( 'wpcf7mailsent', function( event ) {
 	}	
 	
 }, false );
-
-
 </script>
 <?php
 }
-
-function create_new_lead_in_crm( $contact_form ) {
-	$title = $contact_form->title();
-        $submission = WPCF7_Submission::get_instance();
-
-	if ( $submission ) {
-		$posted_data = $submission->get_posted_data();
-
-
-	    if ( 'Contact Form' == $title ) {
-
-		$name = $posted_data['lead-name'];
-		$email = $posted_data['lead-email'];
-		$phone = $posted_data['lead-phone'];// if you have a field with name "phone"
-		$message = $posted_data['lead-message']; 
-		$splitName = explode(" ", $name,2);
-
-		$url = "https://services.purefitnessmanly.com.au/FitnessStats/WordpressInterfaceWebService?wsdl";
-                $client = new SoapClient($url);
-               // $fcs = $client->__getFunctions();
-                $res = $client->addNewLead(array('firstname'=> $splitName[0], 'lastname' => $splitName[1], 'email' => $email, 'mobile' => $phone, 'message' => $message));
-
-
-	     }
-        }else{
-          echo "ERROR - Submitted form is empty ";
-        }
-}
-
-
-
 ?>

@@ -28,6 +28,23 @@
                 </p:confirmDialog> 
               
             </h:form>
+            <h:form id="listForm5">
+                 <p:confirmDialog id="confirmDialog5" message="Add a Key/ Value Pair to the configuration table"  
+                                 header="Edit Encrypted Key/Value pair" severity="info" widgetVar="confirmation"> 
+                    <h:panelGrid columns="2">
+                        <h:outputLabel value="#{configMapController.getKey('EditConfigMapLabel_configkey')}" for="configkey" />
+                        <p:inputText id="configkey" value="#{configMapController.selected.configkey}" title="#{configMapController.getKey('EditConfigMapTitle_configkey')}" required="true" requiredMessage="#{configMapController.getKey('EditConfigMapRequiredMessage_configkey')}"/>
+                        <h:outputLabel value="#{configMapController.getKey('EditConfigMapLabel_configvalue')}" for="configvalue" />
+                        <p:inputTextarea  rows="4" cols="30" id="configvalue" value="#{configMapController.encryptedConfigMap.configvalue}" title="#{configMapController.getKey('EditConfigMapTitle_configvalue')}" required="true" requiredMessage="#{configMapController.getKey('EditConfigMapRequiredMessage_configvalue')}"/>
+                        <p:commandButton   id="confirm" value="Create" update=":growl" oncomplete="PF('confirmation').hide();PF('configMapControllerTable').filter()"   
+                                           actionListener="#{configMapController.saveEncryptedValue}" /> 
+
+                    </h:panelGrid>
+
+
+                </p:confirmDialog> 
+              
+            </h:form>
             <h:form id="listForm3">
                 <p:confirmDialog id="confirmDialog2" message="Add a Key/ Password Pair to the configuration table"  
                                  header="Create Key / Password" severity="info" widgetVar="confirmation2"> 
