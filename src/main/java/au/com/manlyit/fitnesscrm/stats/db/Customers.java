@@ -442,6 +442,15 @@ public class Customers implements BaseEntity, Serializable {
     public Collection<Groups> getGroupsCollection() {
         return groupsCollection;
     }
+    public String getGroupsCollectionAsString(){
+        String response = "";
+        for(Groups g : getGroupsCollection()){
+            response += g.getGroupname() + " ";
+        }
+        
+        return response;
+        
+    }
 
     public void setGroupsCollection(Collection<Groups> groupsCollection) {
         this.groupsCollection = groupsCollection;
