@@ -2,7 +2,6 @@ package au.com.manlyit.fitnesscrm.stats.beans;
 
 import au.com.manlyit.fitnesscrm.stats.beans.util.PaymentSource;
 import au.com.manlyit.fitnesscrm.stats.beans.util.PaymentStatus;
-import au.com.manlyit.fitnesscrm.stats.classes.CustomersController;
 import au.com.manlyit.fitnesscrm.stats.classes.EziDebitPaymentGateway;
 import au.com.manlyit.fitnesscrm.stats.classes.util.AsyncJob;
 import au.com.manlyit.fitnesscrm.stats.classes.util.BatchOfPaymentJobs;
@@ -36,9 +35,12 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -55,7 +57,6 @@ import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import static javax.ejb.TransactionAttributeType.REQUIRES_NEW;
-import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.xml.bind.JAXBElement;
@@ -72,6 +73,8 @@ public class PaymentBean implements Serializable {
 
     private static final Logger LOGGER = Logger.getLogger(PaymentBean.class.getName());
     private static final String PAYMENT_GATEWAY = "EZIDEBIT";
+    private static final int PAYMENT_SCHEDULE_MONTHS_AHEAD = 11;
+
     private static final long serialVersionUID = 1L;
 
     @Inject
@@ -110,7 +113,7 @@ public class PaymentBean implements Serializable {
 
     @TransactionAttribute(TransactionAttributeType.NEVER)// we don't want a transaction for this method as teh call within this method will invoke their own transactions
     @Asynchronous
-    public Future<PaymentGatewayResponse> createCRMPaymentSchedule(Customers cust, Date scheduleStartDate, Date scheduleEndDate, char schedulePeriodType, int payDayOfWeek, int dayOfMonth, long amountInCents, int limitToNumberOfPayments, long paymentAmountLimitInCents, boolean keepManualPayments, boolean firstWeekOfMonth, boolean secondWeekOfMonth, boolean thirdWeekOfMonth, boolean fourthWeekOfMonth, String loggedInUser, String sessionId, String digitalKey, FutureMapEJB futureMap, PaymentBean payBean) {
+    public Future<PaymentGatewayResponse> createCRMPaymentSchedule(Customers cust, Date scheduleStartDate, Date scheduleEndDate, char schedulePeriodType, int payDayOfWeek, int dayOfMonth, long amountInCents, int limitToNumberOfPayments, long paymentAmountLimitInCents, boolean keepManualPayments, boolean firstWeekOfMonth, boolean secondWeekOfMonth, boolean thirdWeekOfMonth, boolean fourthWeekOfMonth, String loggedInUser, String sessionId, String digitalKey, FutureMapEJB futureMap, PaymentBean payBean, boolean isScheduleUpdate) {
 
         PaymentGatewayResponse pgr = new PaymentGatewayResponse(false, cust, "", "-1", "An unhandled error occurred!");
 
@@ -164,39 +167,39 @@ public class PaymentBean implements Serializable {
                 BatchOfPaymentJobs bopj = new BatchOfPaymentJobs("DeletePaymentBatch", new ArrayList<>());
                 futureMap.addBatchJobToList(sessionId, bopj);
                 PaymentGatewayResponse delbatchResp = new PaymentGatewayResponse(true, cust, "", "0", "createCRMPaymentSchedule DeletePaymentBatch  Completed");
+                if (isScheduleUpdate == false) {
+                    for (int x = crmPaymentList.size() - 1; x > -1; x--) {
+                        Payments p = crmPaymentList.get(x);
+                        String ref = p.getId().toString();
+                        boolean isManual = p.getManuallyAddedPayment();
+                        if (keepManualPayments == true && isManual) {
+                            LOGGER.log(Level.INFO, "createSchedule - keeping manual payment: Cust={0}, Ref={1}, Manaul Payment = {2}", new Object[]{cust.getUsername(), ref, isManual});
+                        } else {
+                            LOGGER.log(Level.INFO, "createSchedule - Deleting payment: Cust={0}, Ref={1}, Manaul Payment = {2}", new Object[]{cust.getUsername(), ref, isManual});
+                            //paymentsFacade.remove(p); will be deleted once processed
+                            p.setPaymentStatus(PaymentStatus.DELETE_REQUESTED.value());
+                            paymentsFacade.editAndFlush(p);
 
-                for (int x = crmPaymentList.size() - 1; x > -1; x--) {
-                    Payments p = crmPaymentList.get(x);
-                    String ref = p.getId().toString();
-                    boolean isManual = p.getManuallyAddedPayment();
-                    if (keepManualPayments == true && isManual) {
-                        LOGGER.log(Level.INFO, "createSchedule - keeping manual payment: Cust={0}, Ref={1}, Manaul Payment = {2}", new Object[]{cust.getUsername(), ref, isManual});
-                    } else {
-                        LOGGER.log(Level.INFO, "createSchedule - Deleting payment: Cust={0}, Ref={1}, Manaul Payment = {2}", new Object[]{cust.getUsername(), ref, isManual});
-                        //paymentsFacade.remove(p); will be deleted once processed
-                        p.setPaymentStatus(PaymentStatus.DELETE_REQUESTED.value());
-                        paymentsFacade.editAndFlush(p);
-
-                        bopj.getJobs().add(p.getId());
-                        AsyncJob aj = new AsyncJob("DeletePayment", payBean.deletePayment(cust, null, null, p, loggedInUser, digitalKey, sessionId));
-                        aj.setBatchId(bopj.getBatchId());
-                        futureMap.put(sessionId, aj);
-                        /*Future<PaymentGatewayResponse> deletePaymentResponseFutResp = deletePayment(cust, null, null, p, loggedInUser, digitalKey, sessionId);
+                            bopj.getJobs().add(p.getId());
+                            AsyncJob aj = new AsyncJob("DeletePayment", payBean.deletePayment(cust, null, null, p, loggedInUser, digitalKey, sessionId));
+                            aj.setBatchId(bopj.getBatchId());
+                            futureMap.put(sessionId, aj);
+                            /*Future<PaymentGatewayResponse> deletePaymentResponseFutResp = deletePayment(cust, null, null, p, loggedInUser, digitalKey, sessionId);
                         PaymentGatewayResponse deletePaymentResponse = deletePaymentResponseFutResp.get();
                         if (deletePaymentResponse.isOperationSuccessful()) {
                             Logger.getLogger(PaymentBean.class.getName()).log(Level.INFO, "Payment Deleted Successfully - ID=", new Object[]{p.getId()});
                         } else {
                             Logger.getLogger(PaymentBean.class.getName()).log(Level.SEVERE, "Payment Deletetion FAILED - ID=", new Object[]{p.getId()});
                         }*/
-                        try {
-                            TimeUnit.MILLISECONDS.sleep(50);// the payment gateway has some concurrency throttling so we don't want to exceed our number of txns per second.
-                        } catch (InterruptedException ex) {
-                            Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, null, ex);
+                            try {
+                                TimeUnit.MILLISECONDS.sleep(50);// the payment gateway has some concurrency throttling so we don't want to exceed our number of txns per second.
+                            } catch (InterruptedException ex) {
+                                Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, null, ex);
+                            }
                         }
                     }
+                    futureMap.processDeletePaymentBatch(sessionId, delbatchResp);
                 }
-                futureMap.processDeletePaymentBatch(sessionId, delbatchResp);
-
             }
             // startAsynchJob("ClearSchedule", paymentBean.clearSchedule(cust, false, loggedInUser, getDigitalKey()));// work around failsafe until migration complete. THere are styill scheduled payments without a payment reference from DB
             // try {
@@ -313,7 +316,7 @@ public class PaymentBean implements Serializable {
                     //TODO fix this 
                     //if (startCal.get(Calendar.WEEK_OF_MONTH) == 1 && firstWeekOfMonth == true) {
                     if (startCal.get(Calendar.DAY_OF_MONTH) >= 1 && startCal.get(Calendar.DAY_OF_MONTH) <= 7 && firstWeekOfMonth == true) {
-                        if (arePaymentsWithinLimits(limitToNumberOfPayments, paymentAmountLimitInCents, cumulativeAmountInCents, amountInCents, numberOfpayments)) {
+                        if (arePaymentsWithinLimits(limitToNumberOfPayments, paymentAmountLimitInCents, cumulativeAmountInCents, amountInCents, numberOfpayments, newDebitDate)) {
                             bopjAdd.getJobs().add(addNewPayment(cust, newDebitDate, amountInCents, false, loggedInUser, sessionId, digitalKey, futureMap, payBean, bopjAdd.getBatchId()));
                             //addNewPayment(cust, newDebitDate, amountInCents, false, loggedInUser, sessionId, digitalKey, futureMap, payBean);
                             numberOfpayments++;
@@ -321,15 +324,17 @@ public class PaymentBean implements Serializable {
 
                     }
                     if (startCal.get(Calendar.DAY_OF_MONTH) >= 8 && startCal.get(Calendar.DAY_OF_MONTH) <= 14 && secondWeekOfMonth == true) {
-                        if (arePaymentsWithinLimits(limitToNumberOfPayments, paymentAmountLimitInCents, cumulativeAmountInCents, amountInCents, numberOfpayments)) {
+                        if (arePaymentsWithinLimits(limitToNumberOfPayments, paymentAmountLimitInCents, cumulativeAmountInCents, amountInCents, numberOfpayments, newDebitDate)) {
+
                             bopjAdd.getJobs().add(addNewPayment(cust, newDebitDate, amountInCents, false, loggedInUser, sessionId, digitalKey, futureMap, payBean, bopjAdd.getBatchId()));
+
                             // addNewPayment(cust, newDebitDate, amountInCents, false, loggedInUser, sessionId, digitalKey, futureMap, payBean);
                             numberOfpayments++;
                         }
 
                     }
                     if (startCal.get(Calendar.DAY_OF_MONTH) >= 15 && startCal.get(Calendar.DAY_OF_MONTH) <= 21 && thirdWeekOfMonth == true) {
-                        if (arePaymentsWithinLimits(limitToNumberOfPayments, paymentAmountLimitInCents, cumulativeAmountInCents, amountInCents, numberOfpayments)) {
+                        if (arePaymentsWithinLimits(limitToNumberOfPayments, paymentAmountLimitInCents, cumulativeAmountInCents, amountInCents, numberOfpayments, newDebitDate)) {
                             bopjAdd.getJobs().add(addNewPayment(cust, newDebitDate, amountInCents, false, loggedInUser, sessionId, digitalKey, futureMap, payBean, bopjAdd.getBatchId()));
                             //addNewPayment(cust, newDebitDate, amountInCents, false, loggedInUser, sessionId, digitalKey, futureMap, payBean);
                             numberOfpayments++;
@@ -337,7 +342,7 @@ public class PaymentBean implements Serializable {
 
                     }
                     if (startCal.get(Calendar.DAY_OF_MONTH) >= 22 && startCal.get(Calendar.DAY_OF_MONTH) <= 28 && fourthWeekOfMonth == true) {
-                        if (arePaymentsWithinLimits(limitToNumberOfPayments, paymentAmountLimitInCents, cumulativeAmountInCents, amountInCents, numberOfpayments)) {
+                        if (arePaymentsWithinLimits(limitToNumberOfPayments, paymentAmountLimitInCents, cumulativeAmountInCents, amountInCents, numberOfpayments, newDebitDate)) {
                             bopjAdd.getJobs().add(addNewPayment(cust, newDebitDate, amountInCents, false, loggedInUser, sessionId, digitalKey, futureMap, payBean, bopjAdd.getBatchId()));
                             // addNewPayment(cust, newDebitDate, amountInCents, false, loggedInUser, sessionId, digitalKey, futureMap, payBean);
                             numberOfpayments++;
@@ -358,7 +363,7 @@ public class PaymentBean implements Serializable {
                     newDebitDate = startCal.getTime();
                     startCal.setTime(placeholder);// set it back to correct day of month as we may have changed the day of the week.
                 } else {
-                    if (arePaymentsWithinLimits(limitToNumberOfPayments, paymentAmountLimitInCents, cumulativeAmountInCents, amountInCents, numberOfpayments)) {
+                    if (arePaymentsWithinLimits(limitToNumberOfPayments, paymentAmountLimitInCents, cumulativeAmountInCents, amountInCents, numberOfpayments, newDebitDate)) {
                         bopjAdd.getJobs().add(addNewPayment(cust, newDebitDate, amountInCents, false, loggedInUser, sessionId, digitalKey, futureMap, payBean, bopjAdd.getBatchId()));
                         //addNewPayment(cust, newDebitDate, amountInCents, false, loggedInUser, sessionId, digitalKey, futureMap, payBean);
                         numberOfpayments++;
@@ -396,25 +401,31 @@ public class PaymentBean implements Serializable {
 
     }
 
-    private boolean arePaymentsWithinLimits(int limitToNumberOfPayments, long paymentAmountLimitInCents, long cumulativeAmountInCents, long amountInCents, int numberOfpayments) {
+    private boolean arePaymentsWithinLimits(int limitToNumberOfPayments, long paymentAmountLimitInCents, long cumulativeAmountInCents, long amountInCents, int numberOfpayments, Date newDebitDate) {
+        GregorianCalendar earliestDatePaymentGatewayWillAccept = new GregorianCalendar();
+        earliestDatePaymentGatewayWillAccept.add(Calendar.DAY_OF_MONTH, -29);
+        if (earliestDatePaymentGatewayWillAccept.before(newDebitDate) == false) {
+            return false;
+        }
+
         if (limitToNumberOfPayments > 0 || paymentAmountLimitInCents > 0) {
             cumulativeAmountInCents += amountInCents;
             if (limitToNumberOfPayments > 0 && paymentAmountLimitInCents > 0) {
-                if (limitToNumberOfPayments > numberOfpayments && paymentAmountLimitInCents > cumulativeAmountInCents) {
-                    return true;
+                if (limitToNumberOfPayments < numberOfpayments || paymentAmountLimitInCents < cumulativeAmountInCents) {
+                    return false;
                 }
             }
             if (limitToNumberOfPayments > 0 && paymentAmountLimitInCents == 0) {
-                if (limitToNumberOfPayments > numberOfpayments) {
-                    return true;
+                if (limitToNumberOfPayments < numberOfpayments) {
+                    return false;
                 }
             }
             if (limitToNumberOfPayments == 0 && paymentAmountLimitInCents > 0) {
-                if (paymentAmountLimitInCents > cumulativeAmountInCents) {
-                    return true;
+                if (paymentAmountLimitInCents < cumulativeAmountInCents) {
+                    return false;
                 }
             }
-            return false;
+            return true;
 
         } else {
             return true;
@@ -1990,8 +2001,189 @@ public class PaymentBean implements Serializable {
 
     }
 
+    @Asynchronous
+    public Future<PaymentGatewayResponse> updateCustomerPaymentSchedule(Customers cust, String digitalKey, String sessionId) {
+
+        PaymentGatewayResponse pgr = new PaymentGatewayResponse(false, null, "", "-1", "An unhandled error occurred!");
+        CustomerDetails cd = null;
+        if (cust == null || digitalKey == null) {
+            pgr = new PaymentGatewayResponse(false, null, "", "-1", "The customer or digital key is NULL!");
+            //futureMap.processUpdateCustomerSchedule(sessionId, pgr);
+            return new AsyncResult<>(pgr);
+        }
+        if (cust.getId() == null || digitalKey.trim().isEmpty()) {
+            pgr = new PaymentGatewayResponse(false, null, "", "-1", "The customer or digital key is empty!");
+            //futureMap.processUpdateCustomerSchedule(sessionId, pgr);
+            return new AsyncResult<>(pgr);
+        }
+
+        LOGGER.log(Level.INFO, "Payment Bean - Running async task - Getting Customer Details {0}", cust.getUsername());
+
+        EziResponseOfCustomerDetailsTHgMB7OL customerdetails = null;
+        try {
+            customerdetails = getWs().getCustomerDetails(digitalKey, "", cust.getId().toString());
+        } catch (Exception e) {
+            LOGGER.log(Level.INFO, "Payment Bean - Running async task - Getting Customer Details {0}.Error {1}", new Object[]{cust.getUsername(), e.getMessage()});
+        }
+        if (customerdetails != null) {
+            if (customerdetails.getError() == 0) {// any errors will be a non zero value
+
+                cd = customerdetails.getData().getValue();
+                if (cd != null) {
+                    pgr = new PaymentGatewayResponse(true, cd, "The Customers details were retrieved from the payment gateway", "0", "");
+                    LOGGER.log(Level.INFO, "Payment Bean - Get Customer Details Response: Customer  - {0}, Ezidebit Name : {1} {2}", new Object[]{cust.getUsername(), cd.getCustomerFirstName().getValue(), cd.getCustomerName().getValue()});
+                    updatePaymentParameters(cust, cd, 0);
+
+                    // updte schedule
+                    GregorianCalendar paymentsStopDate = new GregorianCalendar();
+                    GregorianCalendar paymentsStartDate = new GregorianCalendar();
+                    paymentsStopDate.add(Calendar.MONTH, PAYMENT_SCHEDULE_MONTHS_AHEAD);
+                    // get scheduled payments in teh next 11 months 
+                    Future<PaymentGatewayResponse> csp = getScheduledPayments(cust, paymentsStartDate.getTime(), paymentsStopDate.getTime(), digitalKey, sessionId);
+                    PaymentGatewayResponse pgr2;
+                    try {
+                        pgr2 = csp.get();
+                    } catch (InterruptedException | ExecutionException ex) {
+                        Logger.getLogger(PaymentBean.class.getName()).log(Level.SEVERE, "updateCustomerPaymentSchedule", ex);
+                        pgr = new PaymentGatewayResponse(false, null, "", "-1", "The customer or digital key is empty!");
+                        futureMap.processUpdateCustomerSchedule(sessionId, pgr);
+                        return new AsyncResult<>(pgr);
+                    }
+
+                    if (pgr2.isOperationSuccessful()) {
+
+                        PaymentParameters pp = cust.getPaymentParametersId();
+                        Collection<Payments> pl = cust.getPaymentsCollection();
+                        Optional<Payments> op = pl.stream().max(Comparator.comparing(Payments::getDebitDate, Comparator.nullsLast(Comparator.reverseOrder())));
+                        Payments lastSchedPayment = op.get();
+                        long paymentAmount = 0;
+                        long totalPaymentAmount = pp.getPaymentRegularTotalPaymentsAmount().longValue();
+                        String paymentDayOfWeek = pp.getPaymentPeriodDayOfWeek();
+                        char payPeriod = pp.getPaymentPeriod().trim().charAt(0);
+                        boolean firstWeekOfMonth = false;
+                        boolean secondWeekOfMonth = false;
+                        boolean thirdWeekOfMonth = false;
+                        boolean fourthWeekOfMonth = false;
+                        int dow = Calendar.MONDAY;
+
+                        if (lastSchedPayment != null) {
+                            Date payDate = lastSchedPayment.getDebitDate();
+                            if (payDate == null) {
+                                payDate = lastSchedPayment.getPaymentDate();
+                            }
+                            if (payDate != null) {
+                                paymentsStartDate.setTime(payDate);
+                                paymentAmount = lastSchedPayment.getPaymentAmount().longValue();
+
+                                if (payPeriod == 'M') {
+                                    paymentsStartDate.add(Calendar.MONTH, 1);
+                                }
+                                if (payPeriod == 'W') {
+                                    paymentsStartDate.add(Calendar.WEEK_OF_YEAR, 1);
+                                }
+                                if (payPeriod == '4') {
+                                    paymentsStartDate.add(Calendar.WEEK_OF_YEAR, 4);
+                                }
+                                if (payPeriod == 'F') {
+                                    paymentsStartDate.add(Calendar.WEEK_OF_YEAR, 2);
+                                }
+                                if (payPeriod == 'Q') {
+                                    paymentsStartDate.add(Calendar.MONTH, 3);
+                                }
+                                if (payPeriod == 'H') {
+                                    paymentsStartDate.add(Calendar.MONTH, 6);
+                                }
+                                if (payPeriod == 'Y') {
+                                    paymentsStartDate.add(Calendar.MONTH, 12);
+                                }
+                                if (payPeriod == 'N') {
+                                    int weekOfMonth = paymentsStartDate.get(Calendar.WEEK_OF_MONTH);
+                                    int dayOfWeek = paymentsStartDate.get(Calendar.DAY_OF_WEEK);
+
+                                    paymentsStartDate.add(Calendar.MONTH, 1);
+                                    paymentsStartDate.set(Calendar.WEEK_OF_MONTH, weekOfMonth);
+                                    paymentsStartDate.set(Calendar.DAY_OF_WEEK, dayOfWeek);
+
+                                    if (weekOfMonth == 1) {
+                                        firstWeekOfMonth = true;
+                                    }
+                                    if (weekOfMonth == 2) {
+                                        secondWeekOfMonth = true;
+                                    }
+                                    if (weekOfMonth == 3) {
+                                        thirdWeekOfMonth = true;
+                                    }
+                                    if (weekOfMonth == 4) {
+                                        fourthWeekOfMonth = true;
+                                    }
+
+                                }
+
+                                if (paymentDayOfWeek.contains("TUE")) {
+                                    dow = Calendar.TUESDAY;
+                                }
+                                if (paymentDayOfWeek.contains("WED")) {
+                                    dow = Calendar.WEDNESDAY;
+                                }
+                                if (paymentDayOfWeek.contains("THU")) {
+                                    dow = Calendar.THURSDAY;
+                                }
+                                if (paymentDayOfWeek.contains("FRI")) {
+                                    dow = Calendar.FRIDAY;
+                                }
+                                Future<PaymentGatewayResponse> pgr3 = null;
+                                LOGGER.log(Level.INFO, "Payment Bean - Update Schedule: Customer  - {0}, Start {1}, Finish {2}, period {3}, day of week {4}, day of month {5}, Amount-cents {6}, num pay {7}, tot pay amount {8}, 1st wom {9},2nd wom {10},3rd wom {11},4th wom {12},", new Object[]{cust.getUsername(), paymentsStartDate.getTime(), paymentsStopDate.getTime(), payPeriod, dow,
+                                    Integer.parseInt(pp.getPaymentPeriodDayOfMonth()), paymentAmount, pp.getPaymentsRegularTotalNumberOfPayments(), totalPaymentAmount, firstWeekOfMonth, secondWeekOfMonth, thirdWeekOfMonth, fourthWeekOfMonth});
+                                if (paymentAmount > 200 && paymentAmount < 1000000) {
+                                    pgr3 = createCRMPaymentSchedule(cust, paymentsStartDate.getTime(), paymentsStopDate.getTime(), payPeriod, dow,
+                                            Integer.parseInt(pp.getPaymentPeriodDayOfMonth()), paymentAmount, pp.getPaymentsRegularTotalNumberOfPayments(), totalPaymentAmount, true, firstWeekOfMonth, secondWeekOfMonth, thirdWeekOfMonth, fourthWeekOfMonth, "System - update payment schedule", sessionId, digitalKey, futureMap, this, true);
+                                    try {
+                                        pgr = pgr3.get();
+                                    } catch (InterruptedException | ExecutionException ex) {
+                                        Logger.getLogger(PaymentBean.class.getName()).log(Level.SEVERE, "updateCustomerPaymentSchedule", ex);
+                                        pgr = new PaymentGatewayResponse(false, null, "", "-1", "The customer or digital key is empty!");
+                                        //futureMap.processUpdateCustomerSchedule(sessionId, pgr);
+                                        return new AsyncResult<>(pgr);
+                                    }
+                                } else {
+                                    LOGGER.log(Level.SEVERE, "Payment Bean - Update Schedule Failed:Payment Amount outside < $2 or greater than $10000 Customer  - {0}, Start {1}, Finish {2}, period {3}, day of week {4}, day of month {5}, Amount-cents {6}, num pay {7}, tot pay amount {8}, 1st wom {9},2nd wom {10},3rd wom {11},4th wom {12},", new Object[]{cust.getUsername(), paymentsStartDate.getTime(), paymentsStopDate.getTime(), payPeriod, dow, Integer.parseInt(pp.getPaymentPeriodDayOfMonth()), paymentAmount, pp.getPaymentsRegularTotalNumberOfPayments(), totalPaymentAmount, firstWeekOfMonth, secondWeekOfMonth, thirdWeekOfMonth, fourthWeekOfMonth});
+                                }
+                            } else {
+
+                                LOGGER.log(Level.SEVERE, "Payment Bean - Update Schedule Failed:The last scheduled payment Date and debit date were NULL  - {0}, Start {1}, Finish {2}, period {3}, day of week {4}, day of month {5}, Amount-cents {6}, num pay {7}, tot pay amount {8}, 1st wom {9},2nd wom {10},3rd wom {11},4th wom {12},", new Object[]{cust.getUsername(), paymentsStartDate.getTime(), paymentsStopDate.getTime(), payPeriod, dow, Integer.parseInt(pp.getPaymentPeriodDayOfMonth()), paymentAmount, pp.getPaymentsRegularTotalNumberOfPayments(), totalPaymentAmount, firstWeekOfMonth, secondWeekOfMonth, thirdWeekOfMonth, fourthWeekOfMonth});
+
+                            }
+                        } else {
+
+                            LOGGER.log(Level.SEVERE, "Payment Bean - Update Schedule Failed:The last scheduled payment was NULL  - {0}, Start {1}, Finish {2}, period {3}, day of week {4}, day of month {5}, Amount-cents {6}, num pay {7}, tot pay amount {8}, 1st wom {9},2nd wom {10},3rd wom {11},4th wom {12},", new Object[]{cust.getUsername(), paymentsStartDate.getTime(), paymentsStopDate.getTime(), payPeriod, dow, Integer.parseInt(pp.getPaymentPeriodDayOfMonth()), paymentAmount, pp.getPaymentsRegularTotalNumberOfPayments(), totalPaymentAmount, firstWeekOfMonth, secondWeekOfMonth, thirdWeekOfMonth, fourthWeekOfMonth});
+
+                        }
+                    }
+                    //find the last scheduled payment from array
+
+                }
+
+            } else {
+                pgr = new PaymentGatewayResponse(false, null, "The Customers details were not retrieved from the payment gateway due to an error.", customerdetails.getError().toString(), customerdetails.getErrorMessage().getValue());
+                LOGGER.log(Level.WARNING, "Get Customer Details Response: Error - {0}", customerdetails.getErrorMessage().getValue());
+                updatePaymentParameters(cust, null, customerdetails.getError());
+
+            }
+        } else {
+            pgr = new PaymentGatewayResponse(false, null, "The Customers details were not retrieved from the payment gateway due to an error.", "NULL Pointer", "-1");
+            LOGGER.log(Level.WARNING, "Get Customer Details Response: Error - NULL");
+            updatePaymentParameters(cust, null, -1);
+
+        }
+        futureMap.processUpdateCustomerSchedule(sessionId, pgr);
+        return new AsyncResult<>(pgr);
+
+    }
+
     @TransactionAttribute(REQUIRES_NEW)
-    private void updatePaymentParameters(Customers cust, CustomerDetails custDetails, int errorCode) {
+    private void updatePaymentParameters(Customers cust, CustomerDetails custDetails,
+            int errorCode
+    ) {
         PaymentParameters pp = cust.getPaymentParametersId();
 
         if (pp == null) {
@@ -2065,7 +2257,10 @@ public class PaymentBean implements Serializable {
     }
 
     @Asynchronous
-    public Future<PaymentGatewayResponse> getAllPaymentsBySystemSinceDate(Date fromDate, Date endDate, boolean useSettlementDate, String digitalKey, String sessionId) {
+    public Future<PaymentGatewayResponse> getAllPaymentsBySystemSinceDate(Date fromDate, Date endDate,
+            boolean useSettlementDate, String digitalKey,
+            String sessionId
+    ) {
         //  Description
         //  	  
         //  This method allows you to retrieve payment information from across Ezidebit's various
@@ -2137,7 +2332,11 @@ public class PaymentBean implements Serializable {
 
     @Asynchronous
     @TransactionAttribute(TransactionAttributeType.NEVER)
-    public Future<PaymentGatewayResponse> addPayment(Customers cust, Date debitDate, Long paymentAmountInCents, Payments payment, String loggedInUser, String digitalKey, String sessionId) {
+    public Future<PaymentGatewayResponse> addPayment(Customers cust, Date debitDate,
+            Long paymentAmountInCents, Payments payment,
+            String loggedInUser, String digitalKey,
+            String sessionId
+    ) {
         // paymentReference Max 50 chars. It can be search with with a wildcard in other methods. Use invoice number or other payment identifier
         LOGGER.log(Level.INFO, "running asychronous task addPayment Customer {0}, debitDate {1}, paymentAmountInCents {2}", new Object[]{cust, debitDate, paymentAmountInCents});
         String paymentReference = payment.getId().toString();
@@ -2323,7 +2522,10 @@ public class PaymentBean implements Serializable {
         return new AsyncResult<>(result);
     }*/
     @Asynchronous
-    public Future<PaymentGatewayResponse> changeScheduledAmount(Customers cust, Date changeFromDate, Long newPaymentAmountInCents, int changeFromPaymentNumber, boolean applyToAllFuturePayments, boolean keepManualPayments, String loggedInUser, String digitalKey, String sessionId) {
+    public Future<PaymentGatewayResponse> changeScheduledAmount(Customers cust, Date changeFromDate,
+            Long newPaymentAmountInCents, int changeFromPaymentNumber, boolean applyToAllFuturePayments, boolean keepManualPayments, String loggedInUser,
+            String digitalKey, String sessionId
+    ) {
         // Only scheduled payments with a status of 'W' can have their scheduled debit amounts changed;
         // This method will only change the debit amounts of scheduled payments - the debit dates will still remain the same.
         PaymentGatewayResponse pgr = new PaymentGatewayResponse(false, cust, "", "-1", "An unhandled error occurred!");
@@ -2372,7 +2574,11 @@ public class PaymentBean implements Serializable {
     }
 
     @Asynchronous
-    public Future<PaymentGatewayResponse> changeScheduledDate(Customers cust, Date changeFromDate, Date changeToDate, String paymentReference, boolean keepManualPayments, String loggedInUser, String digitalKey, String sessionId) {
+    public Future<PaymentGatewayResponse> changeScheduledDate(Customers cust, Date changeFromDate,
+            Date changeToDate, String paymentReference,
+            boolean keepManualPayments, String loggedInUser,
+            String digitalKey, String sessionId
+    ) {
         // PaymentReference - If you used a specific PaymentReference when adding a payment using the AddPayment Method, then you can use that value here to exactly identify that payment within the Customer's schedule.
         // NB - You must provide a value for either ChangeFromDate or PaymentReference to identify the payment.
         PaymentGatewayResponse pgr = new PaymentGatewayResponse(false, null, "", "-1", "An unhandled error occurred!");
@@ -2424,7 +2630,9 @@ public class PaymentBean implements Serializable {
     }
 
     @Asynchronous
-    public Future<PaymentGatewayResponse> isBsbValid(String bsb, String digitalKey, String sessionId) {
+    public Future<PaymentGatewayResponse> isBsbValid(String bsb, String digitalKey,
+            String sessionId
+    ) {
         PaymentGatewayResponse pgr = new PaymentGatewayResponse(false, null, "", "-1", "An unhandled error occurred!");
         //  Description
         //  check that the BSB is valid
@@ -2448,7 +2656,8 @@ public class PaymentBean implements Serializable {
     }
 
     @Asynchronous
-    public Future<PaymentGatewayResponse> isSystemLocked(String digitalKey, String sessionId) {
+    public Future<PaymentGatewayResponse> isSystemLocked(String digitalKey, String sessionId
+    ) {
         PaymentGatewayResponse pgr = new PaymentGatewayResponse(false, null, "", "-1", "An unhandled error occurred!");
         //  Description
         //  check that the BSB is valid
@@ -2473,7 +2682,8 @@ public class PaymentBean implements Serializable {
     }
 
     @Asynchronous
-    public Future<PaymentGatewayResponse> getPaymentExchangeVersion(String sessionId) {
+    public Future<PaymentGatewayResponse> getPaymentExchangeVersion(String sessionId
+    ) {
         PaymentGatewayResponse pgr = new PaymentGatewayResponse(false, null, "", "-1", "An unhandled error occurred!");
         //  Description
         //  
@@ -2497,7 +2707,11 @@ public class PaymentBean implements Serializable {
     }
 
     @Asynchronous
-    public Future<PaymentGatewayResponse> sendAsynchEmailWithPGR(String to, String ccAddress, String from, String emailSubject, String message, String theAttachedfileName, Properties serverProperties, boolean debug, String sessionId) {
+    public Future<PaymentGatewayResponse> sendAsynchEmailWithPGR(String to, String ccAddress,
+            String from, String emailSubject,
+            String message, String theAttachedfileName,
+            Properties serverProperties, boolean debug, String sessionId
+    ) {
         SendHTMLEmailWithFileAttached emailAgent = new SendHTMLEmailWithFileAttached();
         PaymentGatewayResponse pgr = new PaymentGatewayResponse(false, null, "", "-1", "An unhandled error occurred!");
         try {
@@ -2514,7 +2728,11 @@ public class PaymentBean implements Serializable {
     }
 
     @Asynchronous
-    public Future<Boolean> sendAsynchEmail(String to, String ccAddress, String from, String emailSubject, String message, String theAttachedfileName, Properties serverProperties, boolean debug) {
+    public Future<Boolean> sendAsynchEmail(String to, String ccAddress,
+            String from, String emailSubject,
+            String message, String theAttachedfileName,
+            Properties serverProperties, boolean debug
+    ) {
         SendHTMLEmailWithFileAttached emailAgent = new SendHTMLEmailWithFileAttached();
         try {
             emailAgent.send(to, ccAddress, from, emailSubject, message, theAttachedfileName, serverProperties, debug);

@@ -110,6 +110,7 @@ public class FutureMapEJB implements Serializable {
     private final Object futureMapArrayLock = new Object();
     private final AtomicBoolean settlementReportLock = new AtomicBoolean(false);
     private final AtomicBoolean paymentReportLock = new AtomicBoolean(false);
+    private final AtomicBoolean updateScheduleLock = new AtomicBoolean(false);
     private final AtomicBoolean asychCheckProcessing = new AtomicBoolean(false);
     private List<Payment> paymentsByCustomersMissingFromCRM;
     @Inject
@@ -129,13 +130,12 @@ public class FutureMapEJB implements Serializable {
     private au.com.manlyit.fitnesscrm.stats.beans.EmailTemplatesFacade ejbEmailTemplatesFacade;
     private INonPCIService ws;
 
-   /* @PathParam("user")
+    /* @PathParam("user")
     private String username;*/
-
     public FutureMapEJB() {
     }
 
-   /* @OnMessage(encoders = {JSONEncoder.class})
+    /* @OnMessage(encoders = {JSONEncoder.class})
     public FacesMessage onMessage(FacesMessage message) {
         return message;
     }
@@ -154,7 +154,7 @@ public class FutureMapEJB implements Serializable {
 
     }*/
 
-    /*   @PostConstruct
+ /*   @PostConstruct
     private void applicationSetup() {
         LOGGER.log(Level.INFO, "Application Setup Running");
         try {
@@ -339,7 +339,7 @@ public class FutureMapEJB implements Serializable {
     public synchronized boolean runPaymentReport(Date fromDate, String sessionId) throws InterruptedException {
         // use this if to get the lates payment information
         if (paymentReportLock.get() == true) {
-            LOGGER.log(Level.INFO, "The Settlement Report Already Running.");
+            LOGGER.log(Level.INFO, "The Payment Report Already Running.");
             return false;
         } else {
             LOGGER.log(Level.INFO, "Future Map, runPaymentReport. from date {0}.", fromDate);
@@ -347,21 +347,55 @@ public class FutureMapEJB implements Serializable {
             AsyncJob aj = new AsyncJob("PaymentReport", paymentBean.getAllPaymentsBySystemSinceDate(fromDate, toDate, false, getDigitalKey(), sessionId));
             this.put(FUTUREMAP_INTERNALID, aj);
             refreshAllCustomersDetailsFromGateway();
+            updateCustomerPaymentSchedules();
+
             paymentReportLock.set(true);
         }
         return true;
     }
 
-    private synchronized void refreshAllCustomersDetailsFromGateway() {
+    public synchronized boolean runUpdateSchedules() throws InterruptedException {
+        // use this if to get the lates payment information
+        if (updateScheduleLock.get() == true) {
+            LOGGER.log(Level.INFO, "The Payment Report Already Running.");
+            return false;
+        } else {
+            updateScheduleLock.set(true);
+            updateCustomerPaymentSchedules();
+            updateScheduleLock.set(false);
+        }
+        return true;
+    }
+
+    private synchronized void updateCustomerPaymentSchedules() {
         List<Customers> acl = customersFacade.findAllActiveCustomers(true);
-        AsyncJob aj2;
+        LOGGER.log(Level.INFO, "###### Updating {0} Customer Payment Schedules #####", acl.size());
+
         for (Customers c : acl) {
             try {
-                aj2 = new AsyncJob("GetCustomerDetails", paymentBean.getCustomerDetails(c, getDigitalKey(), FUTUREMAP_INTERNALID));
-                this.put(FUTUREMAP_INTERNALID, aj2);
+                if (c.getPaymentParametersId().getStatusCode() != null) {
+                    if (c.getPaymentParametersId().getStatusCode().trim().compareTo("A") == 0) {
+                        this.put(FUTUREMAP_INTERNALID, new AsyncJob("GetCustomerDetails", paymentBean.updateCustomerPaymentSchedule(c, getDigitalKey(), FUTUREMAP_INTERNALID)));
+                        TimeUnit.MILLISECONDS.sleep(50);//sleeping for a long time wont affect performance (the warning is there for a short sleep of say 5ms ) but we don't want to overload the payment gateway or they may get upset.
+                    }
+                }
+            } catch (Exception ex) {
+                Logger.getLogger(FutureMapEJB.class.getName()).log(Level.SEVERE, "updateCustomerPaymentSchedules", ex.getMessage());
+            }
+        }
+    }
+
+    private synchronized void refreshAllCustomersDetailsFromGateway() {
+        List<Customers> acl = customersFacade.findAllActiveCustomers(true);
+
+        for (Customers c : acl) {
+            try {
+                this.put(FUTUREMAP_INTERNALID, new AsyncJob("GetCustomerDetails", paymentBean.getCustomerDetails(c, getDigitalKey(), FUTUREMAP_INTERNALID)));
                 TimeUnit.MILLISECONDS.sleep(50);//sleeping for a long time wont affect performance (the warning is there for a short sleep of say 5ms ) but we don't want to overload the payment gateway or they may get upset.
+
             } catch (InterruptedException ex) {
-                Logger.getLogger(FutureMapEJB.class.getName()).log(Level.SEVERE, "refreshAllCustomersDetailsFromGateway - Thread Sleep InterruptedException", ex.getMessage());
+                Logger.getLogger(FutureMapEJB.class
+                        .getName()).log(Level.SEVERE, "refreshAllCustomersDetailsFromGateway - Thread Sleep InterruptedException", ex.getMessage());
             }
         }
     }
@@ -480,7 +514,7 @@ public class FutureMapEJB implements Serializable {
         //synchronized (lock2) {
         if (sessionChannel.contains(FUTUREMAP_INTERNALID) == false) {// we don't want to send a message unless there is a session to send it to
             final String broadcastChannel = CHANNEL + sessionChannel;
-           LOGGER.log(Level.INFO, "Entering - SEND MESSAGE :Channel={0}, Summary={1}, detail={2}", new Object[]{broadcastChannel, summary, detail});
+            LOGGER.log(Level.INFO, "Entering - SEND MESSAGE :Channel={0}, Summary={1}, detail={2}", new Object[]{broadcastChannel, summary, detail});
             Reply rep = (String message) -> {
                 LOGGER.log(Level.INFO, "MESSAGE DELIVERED :Channel={0}, Summary={1}, message={2}", new Object[]{broadcastChannel, summary, message});
             };
@@ -500,6 +534,27 @@ public class FutureMapEJB implements Serializable {
         LOGGER.log(Level.INFO, "Exiting - SEND MESSAGE  :Channel={0}, Summary={1}, detail={2}", new Object[]{sessionChannel, summary, detail});
     }
 
+    @Schedule(dayOfMonth = "*", hour = "*", minute = "*/10", second = "0")//debug
+    //@Schedule(dayOfMonth = "*", hour = "6", minute = "0", second = "0")
+    public void updateScheduledPayments(Timer t) {
+        try {
+            // run every day at 5am seconds
+            GregorianCalendar cal = new GregorianCalendar();
+            cal.add(Calendar.DAY_OF_YEAR, -7);
+            LOGGER.log(Level.INFO, "Running  update Scheduled Payments from date:{0}", cal.getTime());
+            boolean result = runUpdateSchedules();
+            LOGGER.log(Level.INFO, "The update Scheduled Payments has completed. Result:{0}", result);
+
+        } catch (InterruptedException ex) {
+            Logger.getLogger(FutureMapEJB.class
+                    .getName()).log(Level.WARNING, "update Scheduled Payments was interrupted", ex);
+
+        } catch (Exception ex) {
+            Logger.getLogger(FutureMapEJB.class
+                    .getName()).log(Level.SEVERE, "update Scheduled Payments - UNHANDLED EXCEPTION In EJB TIMER", ex);
+        }
+    }
+
     //@Schedule(dayOfMonth = "*", hour = "*", minute = "*", second = "0")//debug
     @Schedule(dayOfMonth = "*", hour = "6", minute = "0", second = "0")
     public void retrievePaymentsReportFromPaymentGateway(Timer t) {
@@ -511,10 +566,14 @@ public class FutureMapEJB implements Serializable {
 
             boolean result = runPaymentReport(cal.getTime(), getFutureMapInternalSessionId());
             LOGGER.log(Level.INFO, "The daily payment report has completed. Result:{0}", result);
+
         } catch (InterruptedException ex) {
-            Logger.getLogger(FutureMapEJB.class.getName()).log(Level.WARNING, "Run Payment Report was interrupted", ex);
+            Logger.getLogger(FutureMapEJB.class
+                    .getName()).log(Level.WARNING, "Run Payment Report was interrupted", ex);
+
         } catch (Exception ex) {
-            Logger.getLogger(FutureMapEJB.class.getName()).log(Level.SEVERE, "retrievePaymentsReportFromPaymentGateway - UNHANDLED EXCEPTION In EJB TIMER", ex);
+            Logger.getLogger(FutureMapEJB.class
+                    .getName()).log(Level.SEVERE, "retrievePaymentsReportFromPaymentGateway - UNHANDLED EXCEPTION In EJB TIMER", ex);
         }
     }
 
@@ -694,12 +753,14 @@ public class FutureMapEJB implements Serializable {
             //      PaymentGatewayResponse pgr = (PaymentGatewayResponse) resultObject;
             if (pgr.isOperationSuccessful()) {
                 resultArraySchedPayments = (ArrayOfScheduledPayment) pgr.getData();
+
             }
             // }
             // }
 
         } catch (Exception ex) {
-            Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, "Future Map processConvertSchedule:", ex);
+            Logger.getLogger(EziDebitPaymentGateway.class
+                    .getName()).log(Level.SEVERE, "Future Map processConvertSchedule:", ex);
         }
 
         if (resultArraySchedPayments != null && resultArraySchedPayments.getScheduledPayment() != null) {
@@ -741,13 +802,19 @@ public class FutureMapEJB implements Serializable {
                             Future<PaymentGatewayResponse> clearScheduleResponse = paymentBean.clearSchedule(cust, false, cust.getUsername(), getDigitalKey(), sessionId);
                             try {
                                 PaymentGatewayResponse clearSchedule = clearScheduleResponse.get();
+
                                 if (clearSchedule.isOperationSuccessful()) {
-                                    Logger.getLogger(PaymentBean.class.getName()).log(Level.INFO, "Payment Schedule Cleared Successfully - Cust ID={0}, Username {1}", new Object[]{cust.getId(), cust.getUsername()});
+                                    Logger.getLogger(PaymentBean.class
+                                            .getName()).log(Level.INFO, "Payment Schedule Cleared Successfully - Cust ID={0}, Username {1}", new Object[]{cust.getId(), cust.getUsername()});
+
                                 } else {
-                                    Logger.getLogger(PaymentBean.class.getName()).log(Level.SEVERE, "Payment Schedule Clear FAILED - Cust ID={0}, Username {1}", new Object[]{cust.getId(), cust.getUsername()});
+                                    Logger.getLogger(PaymentBean.class
+                                            .getName()).log(Level.SEVERE, "Payment Schedule Clear FAILED - Cust ID={0}, Username {1}", new Object[]{cust.getId(), cust.getUsername()});
+
                                 }
                             } catch (InterruptedException | ExecutionException ex) {
-                                Logger.getLogger(FutureMapEJB.class.getName()).log(Level.SEVERE, "processConvertSchedule", ex);
+                                Logger.getLogger(FutureMapEJB.class
+                                        .getName()).log(Level.SEVERE, "processConvertSchedule", ex);
                             }
 
                             ArrayList<Payments> newPayments = new ArrayList<>();
@@ -759,8 +826,10 @@ public class FutureMapEJB implements Serializable {
                                 paymentsFacade.createAndFlushForGeneratedIdEntities(crmPay);
                                 try {
                                     TimeUnit.MILLISECONDS.sleep(200);
+
                                 } catch (InterruptedException ex) {
-                                    Logger.getLogger(FutureMapEJB.class.getName()).log(Level.SEVERE, "Thread Sleep interrupted", ex);
+                                    Logger.getLogger(FutureMapEJB.class
+                                            .getName()).log(Level.SEVERE, "Thread Sleep interrupted", ex);
                                 }
                                 crmPay.setPaymentReference(crmPay.getId().toString());
                                 crmPay.setManuallyAddedPayment(false);
@@ -1004,8 +1073,10 @@ public class FutureMapEJB implements Serializable {
                 result = pgr.isOperationSuccessful();
                 // }
                 // }
+
             } catch (Exception ex) {
-                Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, "Processing Async Results", ex);
+                Logger.getLogger(EziDebitPaymentGateway.class
+                        .getName()).log(Level.SEVERE, "Processing Async Results", ex);
             }
         }
         if (result == true) {
@@ -1031,8 +1102,10 @@ public class FutureMapEJB implements Serializable {
                 result = pgr.isOperationSuccessful();
                 cust = (Customers) pgr.getData();
                 // }
+
             } catch (Exception ex) {
-                Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, "Processing Async Results", ex);
+                Logger.getLogger(EziDebitPaymentGateway.class
+                        .getName()).log(Level.SEVERE, "Processing Async Results", ex);
             }
         }
         if (result == true) {
@@ -1044,6 +1117,7 @@ public class FutureMapEJB implements Serializable {
             sendMessage(sessionId, "Payment Gateway", "The operation failed!.");
         }
         //recreatePaymentTableData();
+        updateScheduleLock.set(false);
         LOGGER.log(Level.INFO, "processChangeScheduledAmount completed");
     }
 
@@ -1060,8 +1134,10 @@ public class FutureMapEJB implements Serializable {
                 result = pgr.isOperationSuccessful();
                 cust = (Customers) pgr.getData();
                 // }
+
             } catch (Exception ex) {
-                Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, "Processing Async Results", ex);
+                Logger.getLogger(EziDebitPaymentGateway.class
+                        .getName()).log(Level.SEVERE, "Processing Async Results", ex);
             }
         }
         if (result == true) {
@@ -1087,7 +1163,8 @@ public class FutureMapEJB implements Serializable {
 
                 // }
             } catch (Exception ex) {
-                Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, "Processing Async Results", ex);
+                Logger.getLogger(EziDebitPaymentGateway.class
+                        .getName()).log(Level.SEVERE, "Processing Async Results", ex);
             }
         }
         if (result == true) {
@@ -1114,7 +1191,8 @@ public class FutureMapEJB implements Serializable {
 
                 // }
             } catch (Exception ex) {
-                Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, "Processing Async Results", ex);
+                Logger.getLogger(EziDebitPaymentGateway.class
+                        .getName()).log(Level.SEVERE, "Processing Async Results", ex);
             }
         }
         if (result == true) {
@@ -1141,7 +1219,8 @@ public class FutureMapEJB implements Serializable {
 
                 // }
             } catch (Exception ex) {
-                Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, "Processing Async Results", ex);
+                Logger.getLogger(EziDebitPaymentGateway.class
+                        .getName()).log(Level.SEVERE, "Processing Async Results", ex);
             }
         }
         if (result == true) {
@@ -1168,8 +1247,10 @@ public class FutureMapEJB implements Serializable {
                 result = pgr.isOperationSuccessful();
                 versionInfo = pgr.getTextData();
                 //}
+
             } catch (Exception ex) {
-                Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, "Processing Async Results", ex);
+                Logger.getLogger(EziDebitPaymentGateway.class
+                        .getName()).log(Level.SEVERE, "Processing Async Results", ex);
             }
         }
         if (versionInfo != null && versionInfo.trim().isEmpty() == false) {
@@ -1473,10 +1554,12 @@ public class FutureMapEJB implements Serializable {
                 }
             } else {
                 String message = "The Payment Gateway Response was empty!";
-                Logger.getLogger(EziDebitPaymentGateway.class
-                        .getName()).log(Level.SEVERE, message);
+                Logger
+                        .getLogger(EziDebitPaymentGateway.class
+                                .getName()).log(Level.SEVERE, message);
 
                 sendMessage(sessionId, "Get Payments Error", message);
+
             }
         } catch (Exception ex) {
             Logger.getLogger(EziDebitPaymentGateway.class
@@ -1653,10 +1736,12 @@ public class FutureMapEJB implements Serializable {
                 }
             } else {
                 String message = "The Payment Gateway Response was empty!";
-                Logger.getLogger(EziDebitPaymentGateway.class
-                        .getName()).log(Level.SEVERE, message);
+                Logger
+                        .getLogger(EziDebitPaymentGateway.class
+                                .getName()).log(Level.SEVERE, message);
 
                 sendMessage(sessionId, "Get Scheduled Payments Error", message);
+
             }
         } catch (Exception ex) {
             Logger.getLogger(EziDebitPaymentGateway.class
@@ -1884,16 +1969,19 @@ public class FutureMapEJB implements Serializable {
             //pgr = (PaymentGatewayResponse) resultObject;
             result = pgr.isOperationSuccessful();
             Object o = pgr.getData();
+
             if (o != null) {
                 if (o.getClass() == Customers.class) {
                     cust = (Customers) o;
+
                 }
 
             }
             // }
             // }
         } catch (Exception ex) {
-            Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, "Processing Async Results", ex);
+            Logger.getLogger(EziDebitPaymentGateway.class
+                    .getName()).log(Level.SEVERE, "Processing Async Results", ex);
         }
         if (result == true) {
             String message = pgr.getTextData();
@@ -1914,14 +2002,17 @@ public class FutureMapEJB implements Serializable {
         try {
             PaymentGatewayResponse pgr = null;
             Object resultObject = ft.get();
+
             if (resultObject != null) {
                 if (resultObject.getClass() == PaymentGatewayResponse.class) {
                     pgr = (PaymentGatewayResponse) resultObject;
                     processDeletePaymentAsync(sessionId, pgr);
+
                 }
             }
         } catch (InterruptedException | ExecutionException ex) {
-            Logger.getLogger(FutureMapEJB.class.getName()).log(Level.SEVERE, "processDeletePaymentFuture Method", ex);
+            Logger.getLogger(FutureMapEJB.class
+                    .getName()).log(Level.SEVERE, "processDeletePaymentFuture Method", ex);
         }
     }
 
@@ -2181,15 +2272,19 @@ public class FutureMapEJB implements Serializable {
                     String message = "The Payment (ref:" + paymentRef + ") was submitted successfully.";
                     storeResponseForSessionBeenToRetrieve("AddPayment", sessionId, pgr);
                     sendMessage(sessionId, "Add Payment", message);
+
                 } else {
-                    Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, "Add Payment Failed! The payment Reference is empty! This should not happen as its taken from the primary key of the row in teh payments table. ");
+                    Logger.getLogger(EziDebitPaymentGateway.class
+                            .getName()).log(Level.SEVERE, "Add Payment Failed! The payment Reference is empty! This should not happen as its taken from the primary key of the row in teh payments table. ");
                 }
             } else {
                 String message = "The information returned by the payment gateway was empty! (pgr = NULL)";
                 sendMessage(sessionId, "Add Payment Error!", message);
+
             }
         } catch (Exception ex) {
-            Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, "processAddPaymentResult FAILED - Async Task Exception ", ex);
+            Logger.getLogger(EziDebitPaymentGateway.class
+                    .getName()).log(Level.SEVERE, "processAddPaymentResult FAILED - Async Task Exception ", ex);
         }
         LOGGER.log(Level.INFO, "FutureMap - processAddPaymentResult completed");
     }
@@ -2257,6 +2352,7 @@ public class FutureMapEJB implements Serializable {
                 result = pgr.isOperationSuccessful();
                 if (result == true) {
                     Object custObject = pgr.getData();
+
                     if (custObject != null && custObject.getClass() == Customers.class) {
                         cust = (Customers) custObject;
                     }
@@ -2275,11 +2371,13 @@ public class FutureMapEJB implements Serializable {
                         // update the payment schedule and double check that the clear schedule actually worked 
                         getPayments(sessionId, cust, 18, 2);
                         LOGGER.log(Level.INFO, "Future Map; Requesting a check of payments from the payment gateway after creating the schedule for {0} ", new Object[]{cust.getUsername()});
+
                     }
 
                 }
             } else {
-                Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, "processCreateSchedule - the PaymentGatewayResponse is null");
+                Logger.getLogger(EziDebitPaymentGateway.class
+                        .getName()).log(Level.SEVERE, "processCreateSchedule - the PaymentGatewayResponse is null");
             }
             LOGGER.log(Level.INFO, "Future Map processCreateSchedule completed");
 
@@ -2289,9 +2387,11 @@ public class FutureMapEJB implements Serializable {
                 returnedMessage = "Error Code:" + pgr.getErrorCode() + " : " + pgr.getErrorMessage();
             } else {
                 returnedMessage = "Error - the response from the payment gateway was empty";
+
             }
         } catch (Exception ex) {
-            Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, "processCreateSchedule - retrieving PaymentGatewayResponse", ex);
+            Logger.getLogger(EziDebitPaymentGateway.class
+                    .getName()).log(Level.SEVERE, "processCreateSchedule - retrieving PaymentGatewayResponse", ex);
         }
         sendMessage(sessionId, "Create Payment Schedule", returnedMessage);
     }
@@ -2337,10 +2437,13 @@ public class FutureMapEJB implements Serializable {
 
                     }
                 } else {
-                    Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, "processDeletePaymentBatch - the customer Object in the response is null");
+                    Logger.getLogger(EziDebitPaymentGateway.class
+                            .getName()).log(Level.SEVERE, "processDeletePaymentBatch - the customer Object in the response is null");
+
                 }
             } else {
-                Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, "processDeletePaymentBatch - the PaymentGatewayResponse is null");
+                Logger.getLogger(EziDebitPaymentGateway.class
+                        .getName()).log(Level.SEVERE, "processDeletePaymentBatch - the PaymentGatewayResponse is null");
             }
             LOGGER.log(Level.INFO, "Future Map processDeletePaymentBatch completed");
 
@@ -2350,9 +2453,11 @@ public class FutureMapEJB implements Serializable {
                 returnedMessage = "Error Code:" + pgr.getErrorCode() + " : " + pgr.getErrorMessage();
             } else {
                 returnedMessage = "Error - the response from the payment gateway was empty";
+
             }
         } catch (Exception ex) {
-            Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, "processDeletePaymentBatch - calling getPayments", ex);
+            Logger.getLogger(EziDebitPaymentGateway.class
+                    .getName()).log(Level.SEVERE, "processDeletePaymentBatch - calling getPayments", ex);
         }
 
         LOGGER.log(Level.INFO, "Future Map --- BATCH ---> processDeletePaymentBatch completed");
@@ -2396,13 +2501,17 @@ public class FutureMapEJB implements Serializable {
                         sendMessage(sessionId, "Add Payment Batch", "OK");
                         getPayments(sessionId, cust, 18, 2);
                         LOGGER.log(Level.INFO, "Future Map; Requesting a check of payments from the payment gateway after creating the schedule for {0} ", new Object[]{cust.getUsername()});
+
                     }
 
                 } else {
-                    Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, "processDeletePaymentBatch - the customer Object in the response is null");
+                    Logger.getLogger(EziDebitPaymentGateway.class
+                            .getName()).log(Level.SEVERE, "processDeletePaymentBatch - the customer Object in the response is null");
+
                 }
             } else {
-                Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, "processCreateSchedule - the PaymentGatewayResponse is null");
+                Logger.getLogger(EziDebitPaymentGateway.class
+                        .getName()).log(Level.SEVERE, "processCreateSchedule - the PaymentGatewayResponse is null");
             }
             LOGGER.log(Level.INFO, "Future Map processCreateSchedule completed");
 
@@ -2412,9 +2521,11 @@ public class FutureMapEJB implements Serializable {
                 returnedMessage = "Error Code:" + pgr.getErrorCode() + " : " + pgr.getErrorMessage();
             } else {
                 returnedMessage = "Error - the response from the payment gateway was empty";
+
             }
         } catch (Exception ex) {
-            Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, "processAddPaymentBatch - calling getPayments", ex);
+            Logger.getLogger(EziDebitPaymentGateway.class
+                    .getName()).log(Level.SEVERE, "processAddPaymentBatch - calling getPayments", ex);
         }
         LOGGER.log(Level.INFO, "Future Map --- BATCH ---> processAddPaymentBatch completed");
 
@@ -2438,6 +2549,7 @@ public class FutureMapEJB implements Serializable {
                 result = pgr.isOperationSuccessful();
                 if (result == true) {
                     Object custObject = pgr.getData();
+
                     if (custObject != null && custObject.getClass() == Customers.class) {
                         cust = (Customers) custObject;
                     }
@@ -2451,9 +2563,11 @@ public class FutureMapEJB implements Serializable {
                     }
                     // update the payment schedule and double check that the clear schedule actually worked 
                     getPayments(sessionId, cust, 18, 2);
+
                 }
             } else {
-                Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, "processClearSchedule - the PaymentGatewayResponse is null");
+                Logger.getLogger(EziDebitPaymentGateway.class
+                        .getName()).log(Level.SEVERE, "processClearSchedule - the PaymentGatewayResponse is null");
             }
             LOGGER.log(Level.INFO, "Future Map processClearSchedule completed");
 
@@ -2463,9 +2577,11 @@ public class FutureMapEJB implements Serializable {
                 returnedMessage = "Error Code:" + pgr.getErrorCode() + " : " + pgr.getErrorMessage();
             } else {
                 returnedMessage = "Error - the response from the payment gateway was empty";
+
             }
         } catch (Exception ex) {
-            Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, "processClearSchedule - retrieving PaymentGatewayResponse", ex);
+            Logger.getLogger(EziDebitPaymentGateway.class
+                    .getName()).log(Level.SEVERE, "processClearSchedule - retrieving PaymentGatewayResponse", ex);
         }
         sendMessage(sessionId, "Clear Payment Schedule", returnedMessage);
     }
@@ -2490,6 +2606,7 @@ public class FutureMapEJB implements Serializable {
                 result = pgr.isOperationSuccessful();
                 if (result == true) {
                     Object custObject = pgr.getData();
+
                     if (custObject != null && custObject.getClass() == CustomerDetails.class) {
                         custDetails = (CustomerDetails) custObject;
                     }
@@ -2601,6 +2718,80 @@ public class FutureMapEJB implements Serializable {
         storeResponseForSessionBeenToRetrieve("GetCustomerDetails", sessionId, pgr);
         sendMessage(sessionId, "Get Customer Details", returnedMessage);
         LOGGER.log(Level.INFO, "Future Map processGetCustomerDetails. Completed - Committing transaction to update.");
+    }
+
+    @Asynchronous
+    @TransactionAttribute(REQUIRES_NEW)
+    public void processUpdateCustomerSchedule(String sessionId, PaymentGatewayResponse pgr) {
+        CustomerDetails custDetails = null;
+
+        boolean result = false;
+        String returnedMessage = "An error occurred trying to processUpdateCustomerSchedule. Refer to logs for more info";
+        try {
+
+            if (pgr != null) {
+                result = pgr.isOperationSuccessful();
+                if (result == true) {
+                    Object custObject = pgr.getData();
+
+                    if (custObject != null && custObject.getClass() == CustomerDetails.class) {
+                        custDetails = (CustomerDetails) custObject;
+                    }
+                }
+            }
+
+            if (custDetails != null) {
+                // do something with resultPaymentArray
+                String customerRef = custDetails.getYourSystemReference().getValue();
+                int k = customerRef.indexOf('-');
+                if (k > 0) {
+                    customerRef = customerRef.substring(0, k);
+                }
+                if (customerRef.trim().isEmpty() == false) {
+                    int custId = 0;
+                    try {
+                        custId = Integer.parseInt(customerRef.trim());
+                    } catch (NumberFormatException numberFormatException) {
+                        LOGGER.log(Level.WARNING, "Future Map processUpdateCustomerSchedule an ezidebit YourSystemReference string cannot be converted to a number: {0}", custId);
+
+                    }
+
+                    Customers cust = null;
+                    try {
+                        cust = customersFacade.find(custId);
+
+                    } catch (Exception e) {
+                        LOGGER.log(Level.WARNING, "customersFacade.findById(custId) {0}.", new Object[]{custId, e.getMessage()});
+                    }
+                    if (cust != null) {
+                        LOGGER.log(Level.INFO, "Future Map processUpdateCustomerSchedule. Processing details for customer {0}.", new Object[]{cust.getUsername()});
+
+                        // PaymentParameters pp = paymentParametersFacade.find(cust.getPaymentParametersId().getId());
+                        if (cust.getPaymentParametersId() == null) {
+
+                            LOGGER.log(Level.SEVERE, "Future Map processUpdateCustomerSchedule. Payment Parameters Object is NULL for customer {0}. CustomerDetails from the payment gateway cant be stored.", new Object[]{cust.getUsername()});
+                            return;
+                        }
+                        result = true;
+                        LOGGER.log(Level.INFO, "Future Map processUpdateCustomerSchedule updated payment parameters, added any new scheduled payments and edited customer record.ID {1}, Username {2},PP ID {4}, PP Status Code {0}, XML Status Code {3}.", new Object[]{cust.getPaymentParametersId().getStatusCode(), cust.getId(), cust.getUsername(), custDetails.getStatusCode().getValue(), cust.getPaymentParametersId().getId()});
+                    } else {
+                        LOGGER.log(Level.WARNING, "Future Map processUpdateCustomerSchedule an ezidebit YourSystemReference string cannot be converted to a number or the customer ID does not exist");
+                    }
+                }
+            }
+            if (result == true) {
+                returnedMessage = "The customer scheduled payments have been updated.";
+            } else if (pgr != null) {
+                returnedMessage = "Error Code:" + pgr.getErrorCode() + " : " + pgr.getErrorMessage();
+            } else {
+                returnedMessage = "Error - the response from the payment gateway was empty";
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Future Map processUpdateCustomerSchedule FAILED", e);
+        }
+
+        LOGGER.log(Level.INFO, "Future Map processUpdateCustomerSchedule completed");
+
     }
 
     private synchronized void updateNextScheduledPayment(Customers cust) {
