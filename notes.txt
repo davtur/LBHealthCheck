@@ -88,11 +88,18 @@ mvn install:install-file -Dfile=/home/david/NetBeansProjects/libraries/Primeface
 mvn install:install-file -Dfile=/home/david/NetBeansProjects/libraries/Primefaces-purchased-themes/spark-layout-2.1.2/spark-layout-2.1.2.jar -DgroupId=org.primefaces.themes -DartifactId=spark -Dversion=2.1.2 -Dpackaging=jar -DgeneratePom=true
 
 
+mvn install:install-file -Dfile=/home/david/NetBeansProjects/libraries/Primefaces-purchased-themes/spark-layout-2.1.2/spark-layout-2.1.2.jar -DgroupId=org.primefaces.themes -DartifactId=spark -Dversion=2.1.2 -Dpackaging=jar -DgeneratePom=true
+
+mvn install:install-file -Dfile=/home/david/NetBeansProjects/libraries/Primefaces-purchased-themes/california-1.0.1/california-theme-1.0.1.jar -DgroupId=org.primefaces.themes -DartifactId=spark -Dversion=1.0.1 -Dpackaging=jar -DgeneratePom=true
+
+
 # install a new build from primefaces elite download 
 mvn install:install-file -Dfile=/home/david/NetBeansProjects/libraries/primefaces-5.2.22/primefaces-5.2.22.jar -DgroupId=org.primefaces -DartifactId=primefaces -Dversion=5.2.22 -Dpackaging=jar -DgeneratePom=true
 
 mvn install:install-file -Dfile=/home/david/NetBeansProjects/libraries/primefaces-6.1.9/primefaces-6.1.9.jar -DgroupId=org.primefaces -DartifactId=primefaces -Dversion=6.1.9 -Dpackaging=jar -DgeneratePom=true
 mvn install:install-file -Dfile=/home/david/NetBeansProjects/libraries/primefaces-6.1.11/primefaces-6.1.11.jar -DgroupId=org.primefaces -DartifactId=primefaces -Dversion=6.1.11 -Dpackaging=jar -DgeneratePom=true
+mvn install:install-file -Dfile=/home/david/NetBeansProjects/libraries/primefaces-6.2.3/primefaces-6.2.3.jar -DgroupId=org.primefaces -DartifactId=primefaces -Dversion=6.2.3 -Dpackaging=jar -DgeneratePom=true
+
 
 mvn install:install-file
 -Dfile=<path-to-file>
