@@ -403,8 +403,10 @@ public class PaymentBean implements Serializable {
 
     private boolean arePaymentsWithinLimits(int limitToNumberOfPayments, long paymentAmountLimitInCents, long cumulativeAmountInCents, long amountInCents, int numberOfpayments, Date newDebitDate) {
         GregorianCalendar earliestDatePaymentGatewayWillAccept = new GregorianCalendar();
+        GregorianCalendar debitDate = new GregorianCalendar();
+        debitDate.setTime(newDebitDate);
         earliestDatePaymentGatewayWillAccept.add(Calendar.DAY_OF_MONTH, -29);
-        if (earliestDatePaymentGatewayWillAccept.before(newDebitDate) == false) {
+        if (earliestDatePaymentGatewayWillAccept.before(debitDate) == false) {
             return false;
         }
 
@@ -2004,180 +2006,190 @@ public class PaymentBean implements Serializable {
     @Asynchronous
     public Future<PaymentGatewayResponse> updateCustomerPaymentSchedule(Customers cust, String digitalKey, String sessionId) {
 
-        PaymentGatewayResponse pgr = new PaymentGatewayResponse(false, null, "", "-1", "An unhandled error occurred!");
-        CustomerDetails cd = null;
-        if (cust == null || digitalKey == null) {
-            pgr = new PaymentGatewayResponse(false, null, "", "-1", "The customer or digital key is NULL!");
-            //futureMap.processUpdateCustomerSchedule(sessionId, pgr);
-            return new AsyncResult<>(pgr);
-        }
-        if (cust.getId() == null || digitalKey.trim().isEmpty()) {
-            pgr = new PaymentGatewayResponse(false, null, "", "-1", "The customer or digital key is empty!");
-            //futureMap.processUpdateCustomerSchedule(sessionId, pgr);
-            return new AsyncResult<>(pgr);
-        }
-
-        LOGGER.log(Level.INFO, "Payment Bean - Running async task - Getting Customer Details {0}", cust.getUsername());
-
-        EziResponseOfCustomerDetailsTHgMB7OL customerdetails = null;
         try {
-            customerdetails = getWs().getCustomerDetails(digitalKey, "", cust.getId().toString());
-        } catch (Exception e) {
-            LOGGER.log(Level.INFO, "Payment Bean - Running async task - Getting Customer Details {0}.Error {1}", new Object[]{cust.getUsername(), e.getMessage()});
-        }
-        if (customerdetails != null) {
-            if (customerdetails.getError() == 0) {// any errors will be a non zero value
+            PaymentGatewayResponse pgr = new PaymentGatewayResponse(false, null, "", "-1", "An unhandled error occurred!");
+            CustomerDetails cd = null;
+            if (cust == null || digitalKey == null) {
+                pgr = new PaymentGatewayResponse(false, null, "", "-1", "The customer or digital key is NULL!");
+                //futureMap.processUpdateCustomerSchedule(sessionId, pgr);
+                return new AsyncResult<>(pgr);
+            }
+            if (cust.getId() == null || digitalKey.trim().isEmpty()) {
+                pgr = new PaymentGatewayResponse(false, null, "", "-1", "The customer or digital key is empty!");
+                //futureMap.processUpdateCustomerSchedule(sessionId, pgr);
+                return new AsyncResult<>(pgr);
+            }
 
-                cd = customerdetails.getData().getValue();
-                if (cd != null) {
-                    pgr = new PaymentGatewayResponse(true, cd, "The Customers details were retrieved from the payment gateway", "0", "");
-                    LOGGER.log(Level.INFO, "Payment Bean - Get Customer Details Response: Customer  - {0}, Ezidebit Name : {1} {2}", new Object[]{cust.getUsername(), cd.getCustomerFirstName().getValue(), cd.getCustomerName().getValue()});
-                    updatePaymentParameters(cust, cd, 0);
+            LOGGER.log(Level.INFO, "Payment Bean - Running async task - Getting Customer Details {0}", cust.getUsername());
 
-                    // updte schedule
-                    GregorianCalendar paymentsStopDate = new GregorianCalendar();
-                    GregorianCalendar paymentsStartDate = new GregorianCalendar();
-                    paymentsStopDate.add(Calendar.MONTH, PAYMENT_SCHEDULE_MONTHS_AHEAD);
-                    // get scheduled payments in teh next 11 months 
-                    Future<PaymentGatewayResponse> csp = getScheduledPayments(cust, paymentsStartDate.getTime(), paymentsStopDate.getTime(), digitalKey, sessionId);
-                    PaymentGatewayResponse pgr2;
-                    try {
-                        pgr2 = csp.get();
-                    } catch (InterruptedException | ExecutionException ex) {
-                        Logger.getLogger(PaymentBean.class.getName()).log(Level.SEVERE, "updateCustomerPaymentSchedule", ex);
-                        pgr = new PaymentGatewayResponse(false, null, "", "-1", "The customer or digital key is empty!");
-                        futureMap.processUpdateCustomerSchedule(sessionId, pgr);
-                        return new AsyncResult<>(pgr);
-                    }
+            EziResponseOfCustomerDetailsTHgMB7OL customerdetails = null;
+            try {
+                customerdetails = getWs().getCustomerDetails(digitalKey, "", cust.getId().toString());
+            } catch (Exception e) {
+                LOGGER.log(Level.INFO, "Payment Bean - Running async task - Getting Customer Details {0}.Error {1}", new Object[]{cust.getUsername(), e.getMessage()});
+            }
+            if (customerdetails != null) {
+                if (customerdetails.getError() == 0) {// any errors will be a non zero value
 
-                    if (pgr2.isOperationSuccessful()) {
+                    cd = customerdetails.getData().getValue();
+                    if (cd != null) {
+                        pgr = new PaymentGatewayResponse(true, cd, "The Customers details were retrieved from the payment gateway", "0", "");
+                        LOGGER.log(Level.INFO, "Payment Bean - Get Customer Details Response: Customer  - {0}, Ezidebit Name : {1} {2}", new Object[]{cust.getUsername(), cd.getCustomerFirstName().getValue(), cd.getCustomerName().getValue()});
+                        updatePaymentParameters(cust, cd, 0);
 
-                        PaymentParameters pp = cust.getPaymentParametersId();
-                        Collection<Payments> pl = cust.getPaymentsCollection();
-                        Optional<Payments> op = pl.stream().max(Comparator.comparing(Payments::getDebitDate, Comparator.nullsLast(Comparator.reverseOrder())));
-                        Payments lastSchedPayment = op.get();
-                        long paymentAmount = 0;
-                        long totalPaymentAmount = pp.getPaymentRegularTotalPaymentsAmount().longValue();
-                        String paymentDayOfWeek = pp.getPaymentPeriodDayOfWeek();
-                        char payPeriod = pp.getPaymentPeriod().trim().charAt(0);
-                        boolean firstWeekOfMonth = false;
-                        boolean secondWeekOfMonth = false;
-                        boolean thirdWeekOfMonth = false;
-                        boolean fourthWeekOfMonth = false;
-                        int dow = Calendar.MONDAY;
+                        // updte schedule
+                        GregorianCalendar paymentsStopDate = new GregorianCalendar();
+                        GregorianCalendar paymentsStartDate = new GregorianCalendar();
+                        paymentsStopDate.add(Calendar.MONTH, PAYMENT_SCHEDULE_MONTHS_AHEAD);
+                        // get scheduled payments in teh next 11 months 
+                        Future<PaymentGatewayResponse> csp = getScheduledPayments(cust, paymentsStartDate.getTime(), paymentsStopDate.getTime(), digitalKey, sessionId);
+                        PaymentGatewayResponse pgr2;
+                        try {
+                            pgr2 = csp.get();
+                        } catch (InterruptedException | ExecutionException ex) {
+                            Logger.getLogger(PaymentBean.class.getName()).log(Level.SEVERE, "updateCustomerPaymentSchedule", ex);
+                            pgr = new PaymentGatewayResponse(false, null, "", "-1", ex.getMessage());
+                            futureMap.processUpdateCustomerSchedule(sessionId, pgr);
+                            return new AsyncResult<>(pgr);
+                        }
 
-                        if (lastSchedPayment != null) {
-                            Date payDate = lastSchedPayment.getDebitDate();
-                            if (payDate == null) {
-                                payDate = lastSchedPayment.getPaymentDate();
-                            }
-                            if (payDate != null) {
-                                paymentsStartDate.setTime(payDate);
-                                paymentAmount = lastSchedPayment.getPaymentAmount().longValue();
+                        if (pgr2.isOperationSuccessful()) {
 
-                                if (payPeriod == 'M') {
-                                    paymentsStartDate.add(Calendar.MONTH, 1);
-                                }
-                                if (payPeriod == 'W') {
-                                    paymentsStartDate.add(Calendar.WEEK_OF_YEAR, 1);
-                                }
-                                if (payPeriod == '4') {
-                                    paymentsStartDate.add(Calendar.WEEK_OF_YEAR, 4);
-                                }
-                                if (payPeriod == 'F') {
-                                    paymentsStartDate.add(Calendar.WEEK_OF_YEAR, 2);
-                                }
-                                if (payPeriod == 'Q') {
-                                    paymentsStartDate.add(Calendar.MONTH, 3);
-                                }
-                                if (payPeriod == 'H') {
-                                    paymentsStartDate.add(Calendar.MONTH, 6);
-                                }
-                                if (payPeriod == 'Y') {
-                                    paymentsStartDate.add(Calendar.MONTH, 12);
-                                }
-                                if (payPeriod == 'N') {
-                                    int weekOfMonth = paymentsStartDate.get(Calendar.WEEK_OF_MONTH);
-                                    int dayOfWeek = paymentsStartDate.get(Calendar.DAY_OF_WEEK);
+                            PaymentParameters pp = cust.getPaymentParametersId();
+                            Collection<Payments> pl = cust.getPaymentsCollection();
+                            if (pl.isEmpty() == false) {
+                                Optional<Payments> op = pl.stream().max(Comparator.comparing(Payments::getDebitDate));
+                                Payments lastSchedPayment = op.get();
+                                long paymentAmount = 0;
+                                long totalPaymentAmount = pp.getPaymentRegularTotalPaymentsAmount().longValue();
+                                String paymentDayOfWeek = pp.getPaymentPeriodDayOfWeek();
+                                char payPeriod = pp.getPaymentPeriod().trim().charAt(0);
+                                boolean firstWeekOfMonth = false;
+                                boolean secondWeekOfMonth = false;
+                                boolean thirdWeekOfMonth = false;
+                                boolean fourthWeekOfMonth = false;
+                                int dow = Calendar.MONDAY;
 
-                                    paymentsStartDate.add(Calendar.MONTH, 1);
-                                    paymentsStartDate.set(Calendar.WEEK_OF_MONTH, weekOfMonth);
-                                    paymentsStartDate.set(Calendar.DAY_OF_WEEK, dayOfWeek);
-
-                                    if (weekOfMonth == 1) {
-                                        firstWeekOfMonth = true;
+                                if (lastSchedPayment != null) {
+                                    Date payDate = lastSchedPayment.getDebitDate();
+                                    if (payDate == null) {
+                                        payDate = lastSchedPayment.getPaymentDate();
                                     }
-                                    if (weekOfMonth == 2) {
-                                        secondWeekOfMonth = true;
-                                    }
-                                    if (weekOfMonth == 3) {
-                                        thirdWeekOfMonth = true;
-                                    }
-                                    if (weekOfMonth == 4) {
-                                        fourthWeekOfMonth = true;
-                                    }
+                                    if (payDate != null) {
+                                        if (paymentsStartDate.before(paymentsStopDate)) {
+                                            paymentsStartDate.setTime(payDate);
+                                            paymentAmount = lastSchedPayment.getScheduledAmount().longValue() * 100;  // the value is submitted as cents 
 
-                                }
+                                            if (payPeriod == 'M') {
+                                                paymentsStartDate.add(Calendar.MONTH, 1);
+                                            }
+                                            if (payPeriod == 'W') {
+                                                paymentsStartDate.add(Calendar.WEEK_OF_YEAR, 1);
+                                            }
+                                            if (payPeriod == '4') {
+                                                paymentsStartDate.add(Calendar.WEEK_OF_YEAR, 4);
+                                            }
+                                            if (payPeriod == 'F') {
+                                                paymentsStartDate.add(Calendar.WEEK_OF_YEAR, 2);
+                                            }
+                                            if (payPeriod == 'Q') {
+                                                paymentsStartDate.add(Calendar.MONTH, 3);
+                                            }
+                                            if (payPeriod == 'H') {
+                                                paymentsStartDate.add(Calendar.MONTH, 6);
+                                            }
+                                            if (payPeriod == 'Y') {
+                                                paymentsStartDate.add(Calendar.MONTH, 12);
+                                            }
+                                            if (payPeriod == 'N') {
+                                                int weekOfMonth = paymentsStartDate.get(Calendar.WEEK_OF_MONTH);
+                                                int dayOfWeek = paymentsStartDate.get(Calendar.DAY_OF_WEEK);
 
-                                if (paymentDayOfWeek.contains("TUE")) {
-                                    dow = Calendar.TUESDAY;
-                                }
-                                if (paymentDayOfWeek.contains("WED")) {
-                                    dow = Calendar.WEDNESDAY;
-                                }
-                                if (paymentDayOfWeek.contains("THU")) {
-                                    dow = Calendar.THURSDAY;
-                                }
-                                if (paymentDayOfWeek.contains("FRI")) {
-                                    dow = Calendar.FRIDAY;
-                                }
-                                Future<PaymentGatewayResponse> pgr3 = null;
-                                LOGGER.log(Level.INFO, "Payment Bean - Update Schedule: Customer  - {0}, Start {1}, Finish {2}, period {3}, day of week {4}, day of month {5}, Amount-cents {6}, num pay {7}, tot pay amount {8}, 1st wom {9},2nd wom {10},3rd wom {11},4th wom {12},", new Object[]{cust.getUsername(), paymentsStartDate.getTime(), paymentsStopDate.getTime(), payPeriod, dow,
-                                    Integer.parseInt(pp.getPaymentPeriodDayOfMonth()), paymentAmount, pp.getPaymentsRegularTotalNumberOfPayments(), totalPaymentAmount, firstWeekOfMonth, secondWeekOfMonth, thirdWeekOfMonth, fourthWeekOfMonth});
-                                if (paymentAmount > 200 && paymentAmount < 1000000) {
-                                    pgr3 = createCRMPaymentSchedule(cust, paymentsStartDate.getTime(), paymentsStopDate.getTime(), payPeriod, dow,
-                                            Integer.parseInt(pp.getPaymentPeriodDayOfMonth()), paymentAmount, pp.getPaymentsRegularTotalNumberOfPayments(), totalPaymentAmount, true, firstWeekOfMonth, secondWeekOfMonth, thirdWeekOfMonth, fourthWeekOfMonth, "System - update payment schedule", sessionId, digitalKey, futureMap, this, true);
-                                    try {
-                                        pgr = pgr3.get();
-                                    } catch (InterruptedException | ExecutionException ex) {
-                                        Logger.getLogger(PaymentBean.class.getName()).log(Level.SEVERE, "updateCustomerPaymentSchedule", ex);
-                                        pgr = new PaymentGatewayResponse(false, null, "", "-1", "The customer or digital key is empty!");
-                                        //futureMap.processUpdateCustomerSchedule(sessionId, pgr);
-                                        return new AsyncResult<>(pgr);
+                                                paymentsStartDate.add(Calendar.MONTH, 1);
+                                                paymentsStartDate.set(Calendar.WEEK_OF_MONTH, weekOfMonth);
+                                                paymentsStartDate.set(Calendar.DAY_OF_WEEK, dayOfWeek);
+
+                                                if (weekOfMonth == 1) {
+                                                    firstWeekOfMonth = true;
+                                                }
+                                                if (weekOfMonth == 2) {
+                                                    secondWeekOfMonth = true;
+                                                }
+                                                if (weekOfMonth == 3) {
+                                                    thirdWeekOfMonth = true;
+                                                }
+                                                if (weekOfMonth == 4) {
+                                                    fourthWeekOfMonth = true;
+                                                }
+
+                                            }
+
+                                            if (paymentDayOfWeek.contains("TUE")) {
+                                                dow = Calendar.TUESDAY;
+                                            }
+                                            if (paymentDayOfWeek.contains("WED")) {
+                                                dow = Calendar.WEDNESDAY;
+                                            }
+                                            if (paymentDayOfWeek.contains("THU")) {
+                                                dow = Calendar.THURSDAY;
+                                            }
+                                            if (paymentDayOfWeek.contains("FRI")) {
+                                                dow = Calendar.FRIDAY;
+                                            }
+                                            Future<PaymentGatewayResponse> pgr3 = null;
+                                            LOGGER.log(Level.INFO, "Payment Bean - Update Schedule: Customer  - {0}, Start {1}, Finish {2}, period {3}, day of week {4}, day of month {5}, Amount-cents {6}, num pay {7}, tot pay amount {8}, 1st wom {9},2nd wom {10},3rd wom {11},4th wom {12},", new Object[]{cust.getUsername(), paymentsStartDate.getTime(), paymentsStopDate.getTime(), payPeriod, dow,
+                                                Integer.parseInt(pp.getPaymentPeriodDayOfMonth()), paymentAmount, pp.getPaymentsRegularTotalNumberOfPayments(), totalPaymentAmount, firstWeekOfMonth, secondWeekOfMonth, thirdWeekOfMonth, fourthWeekOfMonth});
+                                            if (paymentAmount > 200 && paymentAmount < 1000000) {
+                                                pgr3 = createCRMPaymentSchedule(cust, paymentsStartDate.getTime(), paymentsStopDate.getTime(), payPeriod, dow, Integer.parseInt(pp.getPaymentPeriodDayOfMonth()), paymentAmount, pp.getPaymentsRegularTotalNumberOfPayments(), totalPaymentAmount, true, firstWeekOfMonth, secondWeekOfMonth, thirdWeekOfMonth, fourthWeekOfMonth, "System - update payment schedule", sessionId, digitalKey, futureMap, this, true);
+                                                try {
+                                                    pgr = pgr3.get();
+                                                } catch (InterruptedException | ExecutionException ex) {
+                                                    Logger.getLogger(PaymentBean.class.getName()).log(Level.SEVERE, "updateCustomerPaymentSchedule", ex);
+                                                    pgr = new PaymentGatewayResponse(false, null, "", "-1", "The customer or digital key is empty!");
+                                                    //futureMap.processUpdateCustomerSchedule(sessionId, pgr);
+                                                    return new AsyncResult<>(pgr);
+                                                }
+                                            } else {
+                                                LOGGER.log(Level.SEVERE, "Payment Bean - Update Schedule Failed:Payment Amount outside < $2 or greater than $10000 Customer  - {0}, Start {1}, Finish {2}, period {3}, day of week {4}, day of month {5}, Amount-cents {6}, num pay {7}, tot pay amount {8}, 1st wom {9},2nd wom {10},3rd wom {11},4th wom {12},", new Object[]{cust.getUsername(), paymentsStartDate.getTime(), paymentsStopDate.getTime(), payPeriod, dow, Integer.parseInt(pp.getPaymentPeriodDayOfMonth()), paymentAmount, pp.getPaymentsRegularTotalNumberOfPayments(), totalPaymentAmount, firstWeekOfMonth, secondWeekOfMonth, thirdWeekOfMonth, fourthWeekOfMonth});
+                                            }
+                                        } else {
+
+                                            LOGGER.log(Level.SEVERE, "Payment Bean - Update Schedule Failed:The last scheduled payment Date and debit date were NULL  - {0}, Start {1}, Finish {2}, period {3}, day of week {4}, day of month {5}, Amount-cents {6}, num pay {7}, tot pay amount {8}, 1st wom {9},2nd wom {10},3rd wom {11},4th wom {12},", new Object[]{cust.getUsername(), paymentsStartDate.getTime(), paymentsStopDate.getTime(), payPeriod, dow, Integer.parseInt(pp.getPaymentPeriodDayOfMonth()), paymentAmount, pp.getPaymentsRegularTotalNumberOfPayments(), totalPaymentAmount, firstWeekOfMonth, secondWeekOfMonth, thirdWeekOfMonth, fourthWeekOfMonth});
+
+                                        }
                                     }
                                 } else {
-                                    LOGGER.log(Level.SEVERE, "Payment Bean - Update Schedule Failed:Payment Amount outside < $2 or greater than $10000 Customer  - {0}, Start {1}, Finish {2}, period {3}, day of week {4}, day of month {5}, Amount-cents {6}, num pay {7}, tot pay amount {8}, 1st wom {9},2nd wom {10},3rd wom {11},4th wom {12},", new Object[]{cust.getUsername(), paymentsStartDate.getTime(), paymentsStopDate.getTime(), payPeriod, dow, Integer.parseInt(pp.getPaymentPeriodDayOfMonth()), paymentAmount, pp.getPaymentsRegularTotalNumberOfPayments(), totalPaymentAmount, firstWeekOfMonth, secondWeekOfMonth, thirdWeekOfMonth, fourthWeekOfMonth});
+
+                                    LOGGER.log(Level.SEVERE, "Payment Bean - Update Schedule Failed:The last scheduled payment was NULL  - {0}, Start {1}, Finish {2}, period {3}, day of week {4}, day of month {5}, Amount-cents {6}, num pay {7}, tot pay amount {8}, 1st wom {9},2nd wom {10},3rd wom {11},4th wom {12},", new Object[]{cust.getUsername(), paymentsStartDate.getTime(), paymentsStopDate.getTime(), payPeriod, dow, Integer.parseInt(pp.getPaymentPeriodDayOfMonth()), paymentAmount, pp.getPaymentsRegularTotalNumberOfPayments(), totalPaymentAmount, firstWeekOfMonth, secondWeekOfMonth, thirdWeekOfMonth, fourthWeekOfMonth});
+
                                 }
                             } else {
-
-                                LOGGER.log(Level.SEVERE, "Payment Bean - Update Schedule Failed:The last scheduled payment Date and debit date were NULL  - {0}, Start {1}, Finish {2}, period {3}, day of week {4}, day of month {5}, Amount-cents {6}, num pay {7}, tot pay amount {8}, 1st wom {9},2nd wom {10},3rd wom {11},4th wom {12},", new Object[]{cust.getUsername(), paymentsStartDate.getTime(), paymentsStopDate.getTime(), payPeriod, dow, Integer.parseInt(pp.getPaymentPeriodDayOfMonth()), paymentAmount, pp.getPaymentsRegularTotalNumberOfPayments(), totalPaymentAmount, firstWeekOfMonth, secondWeekOfMonth, thirdWeekOfMonth, fourthWeekOfMonth});
-
+                                LOGGER.log(Level.INFO, "Payment Bean - Update Schedule Failed:The customer has no scheduled payments. Create a schedule for this customer manually   - {0}", new Object[]{cust.getUsername()});
                             }
-                        } else {
-
-                            LOGGER.log(Level.SEVERE, "Payment Bean - Update Schedule Failed:The last scheduled payment was NULL  - {0}, Start {1}, Finish {2}, period {3}, day of week {4}, day of month {5}, Amount-cents {6}, num pay {7}, tot pay amount {8}, 1st wom {9},2nd wom {10},3rd wom {11},4th wom {12},", new Object[]{cust.getUsername(), paymentsStartDate.getTime(), paymentsStopDate.getTime(), payPeriod, dow, Integer.parseInt(pp.getPaymentPeriodDayOfMonth()), paymentAmount, pp.getPaymentsRegularTotalNumberOfPayments(), totalPaymentAmount, firstWeekOfMonth, secondWeekOfMonth, thirdWeekOfMonth, fourthWeekOfMonth});
-
                         }
+                        //find the last scheduled payment from array
+
                     }
-                    //find the last scheduled payment from array
+
+                } else {
+                    pgr = new PaymentGatewayResponse(false, null, "The Customers details were not retrieved from the payment gateway due to an error.", customerdetails.getError().toString(), customerdetails.getErrorMessage().getValue());
+                    LOGGER.log(Level.WARNING, "Get Customer Details Response: Error - {0}", customerdetails.getErrorMessage().getValue());
+                    updatePaymentParameters(cust, null, customerdetails.getError());
 
                 }
-
             } else {
-                pgr = new PaymentGatewayResponse(false, null, "The Customers details were not retrieved from the payment gateway due to an error.", customerdetails.getError().toString(), customerdetails.getErrorMessage().getValue());
-                LOGGER.log(Level.WARNING, "Get Customer Details Response: Error - {0}", customerdetails.getErrorMessage().getValue());
-                updatePaymentParameters(cust, null, customerdetails.getError());
+                pgr = new PaymentGatewayResponse(false, null, "The Customers details were not retrieved from the payment gateway due to an error.", "NULL Pointer", "-1");
+                LOGGER.log(Level.WARNING, "Get Customer Details Response: Error - NULL");
+                updatePaymentParameters(cust, null, -1);
 
             }
-        } else {
-            pgr = new PaymentGatewayResponse(false, null, "The Customers details were not retrieved from the payment gateway due to an error.", "NULL Pointer", "-1");
-            LOGGER.log(Level.WARNING, "Get Customer Details Response: Error - NULL");
-            updatePaymentParameters(cust, null, -1);
-
+            futureMap.processUpdateCustomerSchedule(sessionId, pgr);
+            return new AsyncResult<>(pgr);
+        } catch (Exception exception) {
+            PaymentGatewayResponse pgr = new PaymentGatewayResponse(false, null, "", "-1", exception.getMessage());
+            //futureMap.processUpdateCustomerSchedule(sessionId, pgr);
+            return new AsyncResult<>(pgr);
         }
-        futureMap.processUpdateCustomerSchedule(sessionId, pgr);
-        return new AsyncResult<>(pgr);
-
     }
 
     @TransactionAttribute(REQUIRES_NEW)

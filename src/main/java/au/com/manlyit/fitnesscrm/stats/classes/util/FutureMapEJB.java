@@ -534,7 +534,7 @@ public class FutureMapEJB implements Serializable {
         LOGGER.log(Level.INFO, "Exiting - SEND MESSAGE  :Channel={0}, Summary={1}, detail={2}", new Object[]{sessionChannel, summary, detail});
     }
 
-    @Schedule(dayOfMonth = "*", hour = "*", minute = "*/10", second = "0")//debug
+    @Schedule(dayOfMonth = "*", hour = "*", minute = "*/5", second = "0")//debug
     //@Schedule(dayOfMonth = "*", hour = "6", minute = "0", second = "0")
     public void updateScheduledPayments(Timer t) {
         try {
