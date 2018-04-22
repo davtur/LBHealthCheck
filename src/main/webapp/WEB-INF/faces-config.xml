@@ -84,4 +84,18 @@
             <renderer-class>au.com.manlyit.fitnesscrm.stats.classes.util.Primefaces4BugfixFileUploadRenderer</renderer-class>
         </renderer>
     </render-kit>-->
+    
+    <name>primefaces_california</name>
+    <component>
+        <component-type>org.primefaces.component.CaliforniaMenu</component-type>
+        <component-class>org.primefaces.california.component.menu.CaliforniaMenu</component-class>
+    </component>
+    
+    <render-kit>
+        <renderer>
+            <component-family>org.primefaces.component</component-family>
+            <renderer-type>org.primefaces.component.CaliforniaMenuRenderer</renderer-type>
+            <renderer-class>org.primefaces.california.component.menu.CaliforniaMenuRenderer</renderer-class>
+        </renderer>
+    </render-kit>
 </faces-config>

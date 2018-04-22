@@ -10,15 +10,15 @@
     </ui:define>
     <ui:define name="body">
         <p:tooltip  />
-        <div class="layout-portlets-box">
 
-            <h:panelGroup id="messagePanel" layout="block">
-                <h:messages errorStyle="color: red" infoStyle="color: green" layout="table"/>
-            </h:panelGroup>
-            <h:form id="createCustomerForm"  >
 
-                <div class="Container50 Responsive50">
-                    <div class="ContainerIndent">
+        <h:panelGroup id="messagePanel" layout="block">
+            <h:messages errorStyle="color: red" infoStyle="color: green" layout="table"/>
+        </h:panelGroup>
+        <h:form id="createCustomerForm"  >
+            <div class="ui-g">
+                <div class="ui-g-12 ui-md-12 ui-lg-4">
+                    <div class="card card-w-title">
 
                         <h1 class="BigTopic">#{configMapController.getKey('ListCustomersTitle_ProfilePic')}</h1>
 
@@ -101,8 +101,8 @@
  
                      </div>
                  </div>-->
-                <div class="Container50 Responsive50">
-                    <div class="ContainerIndent">
+                <div class="ui-g-12 ui-md-12 ui-lg-4">
+                    <div class="card card-w-title">
                         <h1 class="BigTopic">#{configMapController.getKey('ListCustomersTitle_PanelHeader')}</h1>
                         <p:panel id="myDetailsPaymentInfo" styleClass="updatePaymentInfo" >
                             <h:panelGrid columns="2" cellpadding="5">
@@ -181,10 +181,9 @@
                         <p:commandButton styleClass="updatePaymentInfo" icon="fa fa-credit-card  white Fs14" title="#{configMapController.getKey('Tooltip_updateMyPaymentInfo')}" id="editPaymentMethodButton" disabled="#{ezidebit.theCustomerProvisionedInThePaymentGateway == false or ezidebit.customerDetailsHaveBeenRetrieved == false or ezidebit.customerCancelledInPaymentGateway == true}"  oncomplete="PF('editPaymentMethodDialogueWidget').show();"    value="#{configMapController.getKey('editPaymentMethodButtonLink')}" update=":growl @(.updatePaymentInfo)"  /> 
 
 
+
                     </div>
-                </div>
-                <div class="Container50 Responsive50">
-                    <div class="ContainerIndent">
+                    <div class="card card-w-title">
                         <h1 class="BigTopic">#{configMapController.getKey('MyDetailsSurveyPanel_title')}</h1>
 
 
@@ -212,10 +211,9 @@
                             </h:panelGrid>
 
                         </ui:repeat>
+
                     </div>
-                </div>
-                <div class="Container50 Responsive50">
-                    <div class="ContainerIndent">
+                    <div class="card card-w-title">
                         <h1 class="BigTopic">#{configMapController.getKey('MyDetailsLogin_title')}</h1>
                         <h:panelGrid columns="2" cellpadding="5" >
                             <p:outputLabel value="#{configMapController.getKey('EditCustomersLabel_username')}" for="username" />
@@ -234,10 +232,12 @@
 
 
                         </h:panelGrid>
+
                     </div>
                 </div>
-            </h:form>
-        </div>
+            </div>
+        </h:form>
+
         <ui:include src="/WEB-INF/myDetailsPaymentMethod.xhtml"/>
         <ui:include src="/WEB-INF/EditPaymentMethod.xhtml"/>
         <ui:include src="/WEB-INF/UpdatePassword.xhtml"/>

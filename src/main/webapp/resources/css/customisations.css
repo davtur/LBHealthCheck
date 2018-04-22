@@ -393,3 +393,18 @@ chartClassTall{
 .updatePaymentInfo {
     
 }
+
+.img-circular{
+     width: 50%;
+ border-radius: 50%;
+ -webkit-border-radius: 50%;
+ -moz-border-radius: 50%;
+}
+.img-circular:after {
+  content: "";
+  display: block;
+  padding-bottom: 100%;
+}
+.listtab-profile{
+    width:50px;
+}

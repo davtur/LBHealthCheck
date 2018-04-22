@@ -1,53 +1,144 @@
-<ui:composition 
+<ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:f="http://java.sun.com/jsf/core" xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:p="http://primefaces.org/ui" xmlns:po="http://primefaces.org/california">
 
-    xmlns="http://www.w3.org/1999/xhtml"
-    xmlns:f="http://java.sun.com/jsf/core"
-    xmlns:h="http://java.sun.com/jsf/html"
-    xmlns:ui="http://java.sun.com/jsf/facelets"
-    xmlns:p="http://primefaces.org/ui">
+    <div class="layout-topbar">
+        <h:link outcome="/admin/dashboard/dashboard" styleClass="logo">
+            <p:graphicImage name="images/logo.png"  />
+        </h:link>
 
+        <a id="menu-button" href="#">
+            <i class="fa fa-align-left" />
+        </a>
 
-    <div id="layout-topbar" class="ShadowGray">
-        <div id="layout-topbar-indent">
-            <h:form>
-                <a id="logo" href="http://www.purefitnessmanly.com.au">	
-                    <img alt="Logo for Pure Fitness Manly Bootcamps and Personal Training" styleClass="Fleft" library="spark-layout" class="Fleft" src="/FitnessStats/resources/images/logo.png"/>
-                </a>
-               
-                <a href="#" id="mobile-menu-button" class="BordRad3 white ShowOnMobile"><i class="fa fa-bars"></i> Menu</a>
-                <a href="#" id="mobile-menu-button-gray" class="BordRad3 white ShowOnMobile"><i class="fa fa-caret-down"></i> Top Menu</a>
+       <!-- <a id="layout-megamenu-button" href="#">
+            <i class="fa fa-angle-down"></i>
+            <span class="mega-menu-title">Mega Menu</span>
+        </a> -->
 
-                <ul id="layout-topbar-menu">
-                    <li>
+        <ui:fragment rendered="#{guestPreferences.profileMode == 'topbar'}">
+            <a id="topbar-menu-button" href="#">
+                <p:graphicImage name="images/avatar.png" library="california-layout" />
+                <span>Pauline Harrell</span>
+            </a>
 
-                        <h:commandLink action="#{customersController.logout}" styleClass="Animated05"><i class="fa fa-sign-out"></i> Logout</h:commandLink>
+            <ul id="topbar-usermenu" class="usermenu usermenu-overlay">
+                <li>
+                    <a href="#">
+                        <i class="fa fa-fw fa-user"></i>
+                        <span class="topbar-item-name">Profile</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#">
+                        <i class="fa fa-fw fa-cog"></i>
+                        <span class="topbar-item-name">Settings</span>
+                        <i class="layout-menuitem-toggler fa fa-fw fa-angle-down"></i>
+                    </a>
+                    <ul>
+                        <li role="menuitem">
+                            <a href="#">
+                                <i class="fa fa-fw fa-paint-brush"></i>
+                                <span>Change</span>
+                            </a>
+                        </li>
+                        <li role="menuitem">
+                            <a href="#">
+                                <i class="fa fa-fw fa-star-o"></i>
+                                <span>Favorites</span>
+                            </a>
+                        </li>
+                        <li role="menuitem">
+                            <a href="#">
+                                <i class="fa fa-fw fa-lock"></i>
+                                <span>Lock Screen</span>
+                            </a>
+                        </li>
+                        <li role="menuitem">
+                            <a href="#">
+                                <i class="fa fa-fw fa-picture-o"></i>
+                                <span>Wallpaper</span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#">
+                        <i class="fa fa-fw fa-envelope-o"></i>
+                        <span class="topbar-item-name">Messages</span>
+                        <i class="layout-menuitem-toggler fa fa-fw fa-angle-down"></i>
+                    </a>
+                    <ul>
+                        <li role="menuitem">
+                            <a href="#" class="topbar-message">
+                                <p:graphicImage name="images/avatar1.png" library="california-layout" width="25"/>
+                                <span>Give me a call</span>
+                            </a>
+                        </li>
+                        <li role="menuitem">
+                            <a href="#" class="topbar-message">
+                                <p:graphicImage name="images/avatar2.png" library="california-layout" width="25"/>
+                                <span>Reports attached</span>
+                            </a>
+                        </li>
+                        <li role="menuitem">
+                            <a href="#" class="topbar-message">
+                                <p:graphicImage name="images/avatar3.png" library="california-layout" width="25"/>
+                                <span>About your invoice</span>
+                            </a>
+                        </li>
+                        <li role="menuitem">
+                            <a href="#" class="topbar-message">
+                                <p:graphicImage name="images/avatar2.png" library="california-layout" width="25"/>
+                                <span>Meeting today</span>
+                            </a>
+                        </li>
+                        <li role="menuitem">
+                            <a href="#" class="topbar-message">
+                                <p:graphicImage name="images/avatar4.png" library="california-layout" width="25"/>
+                                <span>Out of office</span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#">
+                        <i class="fa fa-fw fa-bell-o"></i>
+                        <span class="topbar-item-name">Notifications</span>
+                        <i class="layout-menuitem-toggler fa fa-fw fa-angle-down"></i>
+                    </a>
+                    <ul>
+                        <li role="menuitem">
+                            <a href="#">
+                                <i class="fa fa-fw fa-tasks"></i>
+                                <span>Pending tasks</span>
+                            </a>
+                        </li>
+                        <li role="menuitem">
+                            <a href="#">
+                                <i class="fa fa-fw fa-calendar-check-o"></i>
+                                <span>Meeting today</span>
+                            </a>
+                        </li>
+                        <li role="menuitem">
+                            <a href="#">
+                                <i class="fa fa-fw fa-download"></i>
+                                <span>Download</span>
+                            </a>
+                        </li>
+                        <li role="menuitem">
+                            <a href="#">
+                                <i class="fa fa-fw fa-plane"></i>
+                                <span>Book flight</span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </ui:fragment>
 
-                    </li>
-                    <li class="fa fa-ellipsis-v menu-separator"></li>
-
-                    <li>
-                        <a class="Animated05 CursPointer"><i class="fa fa-flag-checkered"></i> Language <i class="fa fa-chevron-down Fs14 Fright ShowOnMobile"></i></a>
-                        <ul style="width:150px; margin-left:-30px;" class="Animated03 submenu">
-                            <li><a href="#" class="Animated05"><i class="fa fa-flag red"></i> English</a></li>
-
-                        </ul>
-                    </li>
-
-                    <li class="fa fa-ellipsis-v menu-separator"></li> 
-                    <li>
-                        <a class="Animated05 CursPointer"><i class="fa fa-user"></i> #{customersController.selected.firstname} #{customersController.selected.lastname}, Welcome <i class="fa fa-chevron-down Fs14 Fright ShowOnMobile"></i></a>
-                        <ul style="width:175px; margin-left:-10px;" class="Animated03 submenu">
-                            <li><a class="Animated05"><i class="fa fa-user Fs30 Fleft"></i> <span class="Fright Fs20 TexAlRight">#{customersController.selected.firstname} #{customersController.selected.lastname}<span class="fa fa-clock-o Fs10 DispBlock"> Last login <h:outputText value="#{customersController.selected.lastLoginTime}">
-                                                <f:convertDateTime pattern="d MMMMM yyyy h:mm a" />
-                                            </h:outputText></span></span></a></li>
-                            <li> <h:commandLink action="/myDetails.xhtml" styleClass="Animated05" ><i class="fa fa-user"></i> My Profile</h:commandLink></li>
-                            <li> <h:commandLink action="/index.xhtml" styleClass="Animated05"><i class="fa fa-dashboard"></i> My Statistics</h:commandLink></li>
-                            <li> <h:commandLink action="/mySessions.xhtml" styleClass="Animated05"><i class="fa fa-heart"></i> My Sessions</h:commandLink></li>
-                        </ul>
-                    </li>
-                </ul>
-            </h:form>
-        </div>
+        <a id="right-sidebar-button" href="#">
+            <i class="fa fa-ellipsis-v" />
+        </a>
     </div>
 
 </ui:composition>

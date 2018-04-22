@@ -12,35 +12,43 @@
             <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"/>
             <meta name="apple-mobile-web-app-capable" content="yes" />
         </f:facet>
-        <title>Pure Fitness Manly</title>
-        <h:outputScript  name="js/layout.js" library="spark-layout" />
-
+        <title><ui:insert name="title">Pure Fitness Manly</ui:insert></title>
+        <h:outputScript name="js/nanoscroller.js" library="california-layout" />
+        <h:outputScript name="js/layout.js" library="california-layout" />
         <h:outputScript  name="custom.js" library="js" />
         <ui:insert name="head" />
     </h:head>
 
-    <h:body>    
-        <div id="menu-mask"></div>
-        <p:growl id="growl" widgetVar="growlWidget"    showDetail="true"    />
+    <h:body styleClass="main-body"> 
 
-        <ui:include src="topbar.xhtml" />
+        <div class="layout-wrapper">
+            <p:growl id="growl" widgetVar="growlWidget"    showDetail="true"    />
+            <ui:include src="./megamenu.xhtml" />
+            <ui:include src="./topbar.xhtml" />
+            <ui:include src="./sidebar.xhtml" />
+            <ui:include src="./right-sidebar.xhtml" />
+            <div class="layout-main">
+                <div class="route-bar">
+                    <div class="route-bar-breadcrumb">
+                        <i class="fa fa-home"></i> <span>/ </span>
+                        <ui:insert name="viewname" />
+                    </div>
 
-        <ui:include src="layoutmenu.xhtml" />
-        <!--   <ui:include src="sessionTimeoutDialogue.xhtml" />-->
+                    <ui:include src="./route-bar-menu.xhtml" />
+                </div>
 
-        <div id="layout-portlets-cover">
-            <ui:insert name="body">
-                Template
-            </ui:insert>
+                <div class="layout-main-content">
+                    <ui:insert name="body"/>
+                </div>
 
-            <div class="layout-portlets-box TexAlCenter">
-                <span class="Fs14 gray FontRalewayRegular">Pure Fitness Manly  |   All rights reserved.</span>
+                <ui:include src="./footer.xhtml" />
             </div>
         </div>
 
+
         <p:ajaxStatus style="width:32px;height:32px;position:fixed;right:7px;bottom:7px">
             <f:facet name="start">
-                <p:graphicImage name="images/preloader.gif" library="spark-layout"/>
+                <i class="fa fa-circle-o-notch fa-spin ajax-loader" aria-hidden="true"></i>
             </f:facet>
 
             <f:facet name="complete">
@@ -102,18 +110,16 @@
                     //alert('handleTransportFailure');
                     handleReconnect();
                 }
-          /*  window.onbeforeunload = function (event)
-                {
-                    PF('subscriber').disconnect();
-                    console.log("Disconnect primfaces push socket component in page unload event");
-                };*/
+            /*  window.onbeforeunload = function (event)
+             {
+             PF('subscriber').disconnect();
+             console.log("Disconnect primfaces push socket component in page unload event");
+             };*/
 
         </script>
 
-        <h:outputStylesheet name="css/core-layout.css" library="spark-layout" />
-        <h:outputStylesheet name="css/font-awesome.css" library="spark-layout" />
-        <h:outputStylesheet name="css/animate.css" library="spark-layout" />
-        <h:outputStylesheet name="css/spark-layout-blue.css" library="spark-layout" />
+        <h:outputStylesheet name="css/nanoscroller.css" library="california-layout" />
+        <h:outputStylesheet name="css/layout-blue.css" library="california-layout" />
         <h:outputStylesheet library="css" name="customisations.css"/>
 
     </h:body>
