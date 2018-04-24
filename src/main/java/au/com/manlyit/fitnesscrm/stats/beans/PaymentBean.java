@@ -2076,66 +2076,67 @@ public class PaymentBean implements Serializable {
                                         payDate = lastSchedPayment.getPaymentDate();
                                     }
                                     if (payDate != null) {
+
+                                        paymentsStartDate.setTime(payDate);
+                                        paymentAmount = lastSchedPayment.getScheduledAmount().longValue() * 100;  // the value is submitted as cents 
+
+                                        if (payPeriod == 'M') {
+                                            paymentsStartDate.add(Calendar.MONTH, 1);
+                                        }
+                                        if (payPeriod == 'W') {
+                                            paymentsStartDate.add(Calendar.WEEK_OF_YEAR, 1);
+                                        }
+                                        if (payPeriod == '4') {
+                                            paymentsStartDate.add(Calendar.WEEK_OF_YEAR, 4);
+                                        }
+                                        if (payPeriod == 'F') {
+                                            paymentsStartDate.add(Calendar.WEEK_OF_YEAR, 2);
+                                        }
+                                        if (payPeriod == 'Q') {
+                                            paymentsStartDate.add(Calendar.MONTH, 3);
+                                        }
+                                        if (payPeriod == 'H') {
+                                            paymentsStartDate.add(Calendar.MONTH, 6);
+                                        }
+                                        if (payPeriod == 'Y') {
+                                            paymentsStartDate.add(Calendar.MONTH, 12);
+                                        }
+                                        if (payPeriod == 'N') {
+                                            int weekOfMonth = paymentsStartDate.get(Calendar.WEEK_OF_MONTH);
+                                            int dayOfWeek = paymentsStartDate.get(Calendar.DAY_OF_WEEK);
+
+                                            paymentsStartDate.add(Calendar.MONTH, 1);
+                                            paymentsStartDate.set(Calendar.WEEK_OF_MONTH, weekOfMonth);
+                                            paymentsStartDate.set(Calendar.DAY_OF_WEEK, dayOfWeek);
+
+                                            if (weekOfMonth == 1) {
+                                                firstWeekOfMonth = true;
+                                            }
+                                            if (weekOfMonth == 2) {
+                                                secondWeekOfMonth = true;
+                                            }
+                                            if (weekOfMonth == 3) {
+                                                thirdWeekOfMonth = true;
+                                            }
+                                            if (weekOfMonth == 4) {
+                                                fourthWeekOfMonth = true;
+                                            }
+
+                                        }
+
+                                        if (paymentDayOfWeek.contains("TUE")) {
+                                            dow = Calendar.TUESDAY;
+                                        }
+                                        if (paymentDayOfWeek.contains("WED")) {
+                                            dow = Calendar.WEDNESDAY;
+                                        }
+                                        if (paymentDayOfWeek.contains("THU")) {
+                                            dow = Calendar.THURSDAY;
+                                        }
+                                        if (paymentDayOfWeek.contains("FRI")) {
+                                            dow = Calendar.FRIDAY;
+                                        } 
                                         if (paymentsStartDate.before(paymentsStopDate)) {
-                                            paymentsStartDate.setTime(payDate);
-                                            paymentAmount = lastSchedPayment.getScheduledAmount().longValue() * 100;  // the value is submitted as cents 
-
-                                            if (payPeriod == 'M') {
-                                                paymentsStartDate.add(Calendar.MONTH, 1);
-                                            }
-                                            if (payPeriod == 'W') {
-                                                paymentsStartDate.add(Calendar.WEEK_OF_YEAR, 1);
-                                            }
-                                            if (payPeriod == '4') {
-                                                paymentsStartDate.add(Calendar.WEEK_OF_YEAR, 4);
-                                            }
-                                            if (payPeriod == 'F') {
-                                                paymentsStartDate.add(Calendar.WEEK_OF_YEAR, 2);
-                                            }
-                                            if (payPeriod == 'Q') {
-                                                paymentsStartDate.add(Calendar.MONTH, 3);
-                                            }
-                                            if (payPeriod == 'H') {
-                                                paymentsStartDate.add(Calendar.MONTH, 6);
-                                            }
-                                            if (payPeriod == 'Y') {
-                                                paymentsStartDate.add(Calendar.MONTH, 12);
-                                            }
-                                            if (payPeriod == 'N') {
-                                                int weekOfMonth = paymentsStartDate.get(Calendar.WEEK_OF_MONTH);
-                                                int dayOfWeek = paymentsStartDate.get(Calendar.DAY_OF_WEEK);
-
-                                                paymentsStartDate.add(Calendar.MONTH, 1);
-                                                paymentsStartDate.set(Calendar.WEEK_OF_MONTH, weekOfMonth);
-                                                paymentsStartDate.set(Calendar.DAY_OF_WEEK, dayOfWeek);
-
-                                                if (weekOfMonth == 1) {
-                                                    firstWeekOfMonth = true;
-                                                }
-                                                if (weekOfMonth == 2) {
-                                                    secondWeekOfMonth = true;
-                                                }
-                                                if (weekOfMonth == 3) {
-                                                    thirdWeekOfMonth = true;
-                                                }
-                                                if (weekOfMonth == 4) {
-                                                    fourthWeekOfMonth = true;
-                                                }
-
-                                            }
-
-                                            if (paymentDayOfWeek.contains("TUE")) {
-                                                dow = Calendar.TUESDAY;
-                                            }
-                                            if (paymentDayOfWeek.contains("WED")) {
-                                                dow = Calendar.WEDNESDAY;
-                                            }
-                                            if (paymentDayOfWeek.contains("THU")) {
-                                                dow = Calendar.THURSDAY;
-                                            }
-                                            if (paymentDayOfWeek.contains("FRI")) {
-                                                dow = Calendar.FRIDAY;
-                                            }
                                             Future<PaymentGatewayResponse> pgr3 = null;
                                             LOGGER.log(Level.INFO, "Payment Bean - Update Schedule: Customer  - {0}, Start {1}, Finish {2}, period {3}, day of week {4}, day of month {5}, Amount-cents {6}, num pay {7}, tot pay amount {8}, 1st wom {9},2nd wom {10},3rd wom {11},4th wom {12},", new Object[]{cust.getUsername(), paymentsStartDate.getTime(), paymentsStopDate.getTime(), payPeriod, dow,
                                                 Integer.parseInt(pp.getPaymentPeriodDayOfMonth()), paymentAmount, pp.getPaymentsRegularTotalNumberOfPayments(), totalPaymentAmount, firstWeekOfMonth, secondWeekOfMonth, thirdWeekOfMonth, fourthWeekOfMonth});

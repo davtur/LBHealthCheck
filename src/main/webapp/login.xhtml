@@ -1,111 +1,85 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:h="http://java.sun.com/jsf/html"
-      xmlns:f="http://java.sun.com/jsf/core"
-      xmlns:ui="http://java.sun.com/jsf/facelets"
-      xmlns:p="http://primefaces.org/ui"
-      >
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui">
 
     <h:head>
         <f:facet name="first">
             <meta http-equiv="X-UA-Compatible" content="IE=edge" />
             <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-            <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"/>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
             <meta name="apple-mobile-web-app-capable" content="yes" />
         </f:facet>
         <title>Pure Fitness Manly</title>
-        <h:outputScript name="js/layout.js" library="california-layout" />
 
-        <h:outputText value="&lt;!--[if gte IE 9]&gt;" escape="false" />
-        <style type="text/css">
-            /* styles for IE 9 */
-        </style>
-        <h:outputText value="&lt;![endif]--&gt;" escape="false" />
         <f:metadata>
             <f:viewAction action="#{loginBean.checkAlreadyLoggedin}"  immediate="true" />
         </f:metadata>
         <ui:insert name="head" />
     </h:head>
 
-    <h:body>
+
+    <h:body styleClass="login-body">
+
         <p:tooltip />
         <p:growl id="growl" showDetail="true"/>
-        <div id="layout-portlets-cover">
-            <div class="other-pages-box Container40 Responsive50 MarAuto Fnone TexAlCenter ShadowGray MarTop10" style="margin-top:5%;  background-repeat:no-repeat; background-position:center; background-size:cover;" >
-                <div class="Container100 Fnone MarAuto TexAlCenter">
-                    <h:form id="mainLoginForm">
-                        <div class="EmptyBox50"></div>
-                        <h:graphicImage name="images/logo.png" styleClass="MarAuto MarTop20 MarBot10"/>
-                        <div class="EmptyBox20"></div>
-                        <p:messages showDetail="true"/>
-                        <p:inputText id="usernameText" value="#{loginBean.username}"  placeholder="Username/email" styleClass="Container80 Fnone MarAuto Fs18" title="Please enter your username or your email address in this box." >
-                            <p:ajax event="change" update=":loginForm" />
-                        </p:inputText>
 
-                        <div class="EmptyBox10"></div>
-                        <p:password id="passText" value="#{loginBean.password}"  placeholder="Password" styleClass="Container80 Fnone MarAuto Fs18" feedback="false" title="Please enter your password in this box."/>
-
-                        <div class="EmptyBox20"></div>
-                        <!--<div class="Container85 Fnone MarAuto softgray">
-                            <div class="EmptyBox5"></div>
-                            <p:selectBooleanCheckbox value="accept" itemLabel="I Accept Terms And Policies"/>
-                        </div>-->
-                        <div class="EmptyBox30"></div>
-                        <p:commandButton id="standard" value="Login" styleClass="Fs16" actionListener="#{loginBean.login}"  update=":growl" title="Click this button to login after entering your username and password above."/> 
-
-                        <div class="EmptyBox10"></div>
-                        <div class="Seperator"></div>
-                        <div class="EmptyBox10"></div>
-                        <div class="ContainerIndent">
-
-
-                            <div class="Container40 Responsive TexAlRight ">
-                                <p:graphicImage name="FB-f-Logo__blue_50.png" library="images"/>
-                            </div>
-
-                            <div class="Container25 Responsive">
-                                <p:commandButton id="facebook" widgetVar="fbLogin" onclick="PF('fbLogin').disable()" styleClass="loginButtonFacebook" value="Login with Facebook" actionListener="#{facebookLoginBean.facebookRedirect}" title="Click this button to login with your facebook account. Note you must use the same email address with pure fitness and facebook."/>
-                            </div> 
-                            <div class="Container20 Responsive TexAlLeft">
-                                <p:panel id="facebookPic" rendered="#{not empty loginBean.facebookId}" style="width:60px" >
-                                    <img src="https://graph.facebook.com/v2.8/#{loginBean.facebookId}/picture"/>
-                                </p:panel>
-                                <p:tooltip for="facebookPic" value="This is the currently logged in facebook profile." position="bottom left" /> 
-                            </div>
-
+        <div class="login-topbar">
+            <h:link outcome="/index" styleClass="logo">
+                <p:graphicImage name="images/logo.png"  />
+            </h:link>
+        </div> 
+        <h:form id="mainLoginForm">
+            <div class="login-panel ui-fluid">
+                <div class="ui-g">
+                    <div class="ui-g-12 login-icon-container">
+                        <p:graphicImage styleClass="login-icon" name="images/icon-login.png" library="california-layout" />
+                    </div>
+                    <div class="ui-g-12 ui-lg-12 ui-md-12 logo-container">
+                        <span class="login-summary">Pure Fitness Manly</span>
+                        <div class="login-detail">
+                            <span>Welcome, please use the form to sign-in.</span>
                         </div>
-                        <div class="EmptyBox10"></div>
-
-                    </h:form>
-
-                    <h:form id="loginForm">
-
-
-                        <!-- <div class="social-icons">
-                             <span class="facebook"><a target="_blank" href="https://www.facebook.com/PureFitnessManly"></a></span>
-                         </div>-->
-
-                        <div class="Seperator"></div>
-                        <div class="EmptyBox10"></div>
-
-
-                        <p:commandButton id="resetPass" value="Reset Password" ajax="false" styleClass="Fs16 RedButton" action="#{loginBean.resetPassword}" update=":growl" title="If you have forgotten your username or password enter your email or username above then click the password reset button."/>
-
-
-                        <div class="EmptyBox10"></div>
-                        <h:outputText value="#{facebookLoginBean.userFromSession}"></h:outputText>
-
-                        <div class="EmptyBox50"></div>
-
-                    </h:form>
-
+                    </div>
+                    <div class="ui-g-12 ui-lg-12 ui-md-12">
+                        <p:inputText id="usernameText" value="#{loginBean.username}"  placeholder="Username/email"  title="Please enter your username or your email address in this box." >
+                            <p:ajax event="change" update=":loginForm" />
+                        </p:inputText>   
+                    </div>
+                    <div class="ui-g-12 ui-lg-12 ui-md-12">
+                        <p:password id="passText" value="#{loginBean.password}"  placeholder="Password" feedback="false" title="Please enter your password in this box."/>
+                    </div>
+                    <div class="ui-g-12 ui-lg-12 ui-md-12 chkbox-container">
+                        <p:selectBooleanCheckbox id="remember-me" />
+                        <p:outputLabel for="remember-me" value="Remember Me" />
+                        <p:commandLink id="resetPass" value="Reset Password" ajax="false"  action="#{loginBean.resetPassword}" update=":growl" title="If you have forgotten your username or password enter your email or username above then click the password reset button."/>
+                    </div>
+                    <div class="ui-g-12">
+                        <div class="ui-g-4 ui-lg-4 ui-md-4 button-container">
+                            <p:commandButton id="standard" value="Sign in" styleClass="Fs16" actionListener="#{loginBean.login}"  update=":growl" title="Click this button to login after entering your username and password above."/> 
+                        </div>
+                        <div class="ui-g-4 ui-lg-4 ui-md-4 button-container">
+                            
+                            <img src="https://graph.facebook.com/v2.8/#{loginBean.facebookId}/picture" hidden="#{empty loginBean.facebookId}" class="img-circular" title="This is the currently logged in facebook profile."/>
+                        
+                        </div>
+                        <div class="ui-g-4 ui-lg-4 ui-md-4 button-container">
+                            <p:commandButton id="facebook" icon="fa fa-facebook-f" widgetVar="fbLogin" onclick="PF('fbLogin').disable()" styleClass="loginButtonFacebook" value="Sign in with Facebook" actionListener="#{facebookLoginBean.facebookRedirect}" title="Click this button to login with your facebook account. Note you must use the same email address with pure fitness and facebook."/>
+                        </div>
+                    </div>
+                  
+                    <div class="ui-g-12 ui-lg-12 ui-md-12">
+                        <p:messages showDetail="true"/>
+                    </div>
                 </div>
-            </div>
-        </div>
-
-         <h:outputStylesheet name="css/nanoscroller.css" library="california-layout" />
-        <h:outputStylesheet name="css/layout-blue.css" library="california-layout" />
+            </div> 
+        </h:form>
+        <h:form id="loginForm">
+            <h:outputText value="#{facebookLoginBean.userFromSession}"></h:outputText>
+        </h:form>
+        <h:outputStylesheet name="css/layout-#{guestPreferences.theme}.css" library="california-layout" />
         <h:outputStylesheet library="css" name="customisations.css"/>
     </h:body>
-
 </html>

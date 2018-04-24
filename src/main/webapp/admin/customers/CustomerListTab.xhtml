@@ -1,9 +1,9 @@
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <ui:composition  xmlns="http://www.w3.org/1999/xhtml"
-                 xmlns:ui="http://java.sun.com/jsf/facelets"
-                 xmlns:h="http://java.sun.com/jsf/html"
-                 xmlns:f="http://java.sun.com/jsf/core"
+                 xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                 xmlns:h="http://xmlns.jcp.org/jsf/html"
+                 xmlns:f="http://xmlns.jcp.org/jsf/core"
                  xmlns:pe="http://primefaces.org/ui/extensions"
                  xmlns:p="http://primefaces.org/ui"
                  >
@@ -15,16 +15,16 @@
             <div class="ui-g-12">
                 <div class="card ">
                     <div  class="user-profile">
-                        <h:outputText id="selectedUser" >
+                        <h:panelGrid id="selectedUser"  columns="2" cellpadding="5"  >
 
                             <p:graphicImage  value="#{customersController.selected.profileImage.imageStream}" cache="false" styleClass="img-circular listtab-profile" style="width: 50"/>
                             <div class="team-box">
-                                <span class="team-member">#{customersController.selected.firstname} #{customersController.selected.lastname}"</span>
+                                <span class="team-member">#{customersController.selected.firstname} #{customersController.selected.lastname}</span>
                                 <span class="team-member-role" hidden="#{!customersController.isCustomerInRole(item,'TRAINER')}" >Trainer</span>
                                 <span class="team-member-role"  >#{customersController.selected.active.customerState}</span>
                             </div>                     
 
-                        </h:outputText>
+                        </h:panelGrid>
                     </div>
                 </div>
 
@@ -32,7 +32,7 @@
 
             <div class="card ">
 
-                <h:panelGrid columns="2" cellpadding="5" class=" BorderedBox  TexAlRight PadWithBorder5">
+                <h:panelGrid columns="2" cellpadding="5" >
                     <p:selectOneMenu id="active" valueChangeListener="#{customersController.selectOneMenuValueChangeListener}" converter="customerStateControllerConverter"  value="#{customersController.selectedState}" label="#{configMapController.getKey('CreateCustomersTitle_active')}" >
                         <f:selectItems value="#{customerStateController.itemsAvailableAsObjects}"  var="custState" itemLabel="#{custState.customerState}" itemValue="#{custState}"/>                           
                     </p:selectOneMenu>

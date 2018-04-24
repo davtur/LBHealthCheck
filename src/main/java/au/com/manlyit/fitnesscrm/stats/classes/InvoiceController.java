@@ -473,7 +473,7 @@ public class InvoiceController implements Serializable {
         HSSFCellStyle cellStyle = wb.createCellStyle();
         DataFormat df = wb.createDataFormat();
         cellStyle.setFillForegroundColor(HSSFColor.BLUE.index);
-        cellStyle.setFillPattern(HSSFCellStyle.SOLID_FOREGROUND);
+        cellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
         for (int i = 1; i < row.getPhysicalNumberOfCells(); i++) {
             row.getCell(i).setCellStyle(cellStyle);
         }
@@ -514,11 +514,11 @@ public class InvoiceController implements Serializable {
         style.setFillForegroundColor(IndexedColors.BLACK.getIndex());
         //style.setFillPattern(CellStyle.SOLID_FOREGROUND);
         style.setFillBackgroundColor(IndexedColors.AQUA.getIndex());
-        style.setFillPattern(CellStyle.BIG_SPOTS);
+        style.setFillPattern(FillPatternType.BIG_SPOTS);
         style2.setFillForegroundColor(IndexedColors.BLACK.getIndex());
         //style2.setFillPattern(CellStyle.SOLID_FOREGROUND);
         style2.setFillBackgroundColor(IndexedColors.LIGHT_TURQUOISE.getIndex());
-        style2.setFillPattern(CellStyle.BIG_SPOTS);
+        style2.setFillPattern(FillPatternType.BRICKS);
 
         HSSFCell cell3 = row.createCell(3);
         cell3.setCellValue(new Date());
@@ -1415,10 +1415,10 @@ public class InvoiceController implements Serializable {
         //com.itextpdf.text.Font font = FontFactory.getFont(FontFactory.HELVETICA, 12, Font.NORMAL);
         Font titleFont = wb.createFont();
         titleFont.setFontHeightInPoints((short) 18);
-        titleFont.setBoldweight(Font.BOLDWEIGHT_BOLD);
+        titleFont.setBold(true);
         style = wb.createCellStyle();
-        style.setAlignment(CellStyle.ALIGN_CENTER);
-        style.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
+        style.setAlignment(HorizontalAlignment.CENTER);
+        style.setVerticalAlignment(VerticalAlignment.CENTER);
         style.setFont(titleFont);
         styles.put("title", style);
 
@@ -1426,52 +1426,52 @@ public class InvoiceController implements Serializable {
         monthFont.setFontHeightInPoints((short) 11);
         monthFont.setColor(IndexedColors.WHITE.getIndex());
         style = wb.createCellStyle();
-        style.setAlignment(CellStyle.ALIGN_CENTER);
-        style.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
+        style.setAlignment(HorizontalAlignment.CENTER);
+        style.setVerticalAlignment(VerticalAlignment.CENTER);
         style.setFillForegroundColor(IndexedColors.GREY_50_PERCENT.getIndex());
-        style.setFillPattern(CellStyle.SOLID_FOREGROUND);
+        style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
         style.setFont(monthFont);
         style.setWrapText(true);
         styles.put("header", style);
 
         style = wb.createCellStyle();
-        style.setAlignment(CellStyle.ALIGN_CENTER);
+        style.setAlignment(HorizontalAlignment.CENTER);
         style.setWrapText(true);
-        style.setBorderRight(CellStyle.BORDER_THIN);
+        style.setBorderRight(BorderStyle.THIN);
         style.setRightBorderColor(IndexedColors.BLACK.getIndex());
-        style.setBorderLeft(CellStyle.BORDER_THIN);
+        style.setBorderLeft(BorderStyle.THIN);
         style.setLeftBorderColor(IndexedColors.BLACK.getIndex());
-        style.setBorderTop(CellStyle.BORDER_THIN);
+        style.setBorderTop(BorderStyle.THIN);
         style.setTopBorderColor(IndexedColors.BLACK.getIndex());
-        style.setBorderBottom(CellStyle.BORDER_THIN);
+        style.setBorderBottom(BorderStyle.THIN);
         style.setBottomBorderColor(IndexedColors.BLACK.getIndex());
         styles.put("cell", style);
 
         style = wb.createCellStyle();
-        style.setAlignment(CellStyle.ALIGN_RIGHT);
-        style.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
+        style.setAlignment(HorizontalAlignment.RIGHT);
+        style.setVerticalAlignment(VerticalAlignment.CENTER);
         style.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
-        style.setFillPattern(CellStyle.SOLID_FOREGROUND);
+        style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
         style.setDataFormat(wb.createDataFormat().getFormat("$##,##0.00"));
         styles.put("formula", style);
 
         style = wb.createCellStyle();
-        style.setAlignment(CellStyle.ALIGN_RIGHT);
-        style.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
+        style.setAlignment(HorizontalAlignment.RIGHT);
+        style.setVerticalAlignment(VerticalAlignment.CENTER);
         style.setFillForegroundColor(IndexedColors.GREY_40_PERCENT.getIndex());
-        style.setFillPattern(CellStyle.SOLID_FOREGROUND);
+        style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
         style.setDataFormat(wb.createDataFormat().getFormat("$##,##0.00"));
         styles.put("formula_2", style);
 
         Font totalFont = wb.createFont();
         totalFont.setFontHeightInPoints((short) 11);
         totalFont.setColor(IndexedColors.YELLOW.getIndex());
-        totalFont.setBoldweight(Font.BOLDWEIGHT_BOLD);
+        totalFont.setBold(true);
         style = wb.createCellStyle();
-        style.setAlignment(CellStyle.ALIGN_RIGHT);
-        style.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
+        style.setAlignment(HorizontalAlignment.RIGHT);
+        style.setVerticalAlignment(VerticalAlignment.CENTER);
         style.setFillForegroundColor(IndexedColors.GREY_50_PERCENT.getIndex());
-        style.setFillPattern(CellStyle.SOLID_FOREGROUND);
+        style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
 
         style.setDataFormat(wb.createDataFormat().getFormat("$##,##0.00"));
         style.setFont(totalFont);

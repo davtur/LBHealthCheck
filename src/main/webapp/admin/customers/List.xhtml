@@ -1,9 +1,9 @@
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <ui:composition template="/WEB-INF/template.xhtml" xmlns="http://www.w3.org/1999/xhtml" 
-                xmlns:ui="http://java.sun.com/jsf/facelets" 
-                xmlns:h="http://java.sun.com/jsf/html" 
-                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets" 
+                xmlns:h="http://xmlns.jcp.org/jsf/html" 
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
                 xmlns:pe="http://primefaces.org/ui/extensions"
                 xmlns:p="http://primefaces.org/ui" >
 
@@ -12,27 +12,6 @@
         <h:outputText   value="#{configMapController.getKey('ListCustomersTitle')}"></h:outputText>
     </ui:define>
     <ui:define name="body">
-        <div class="layout-portlets-box">
-            <!--  <h:form id="devForm">
-                  <p:outputPanel id="devPanel" rendered="#{customersController.isUserInRole('DEVELOPER')}" styleClass=" DispBlock Fright" >
-  
-                      <p:panel id="devEffectPanel" styleClass="updatePaymentInfo">
-                          <h:outputText id="devTimeUpdate"  value="Last Payment Update:       #{customersController.testTime} "       styleClass="Fs10">
-                              <f:convertDateTime pattern="yyyy-MM-dd hh:mm:ss"  />
-  
-                          </h:outputText>
-                          <p:effect type="highlight" event="load" delay="0" speed="300"> 
-                              <f:param name="mode" value="'show'" />
-                          </p:effect>
-                      </p:panel>
-                      <p:commandButton id="devButton1"     actionListener="#{customersController.dev1}" value="Test1"  update="@(.updatePaymentInfo) :growl" /> 
-                      <p:commandButton id="devButton2"     actionListener="#{customersController.dev2}" value="Test2"  update=" :growl" /> 
-                      <p:commandButton id="devButton3"     actionListener="#{customersController.dev3}" value="Test3"  update=" :growl" /> 
-  
-  
-                  </p:outputPanel>
-              </h:form>-->
-
             <p:tabView id="tv" cache="false" prependId="false" class="layout-portlets-box"> 
                 <p:ajax  event="tabChange"  listener="#{ezidebit.onTabChange}"  />  
 
@@ -54,45 +33,6 @@
 
             </p:tabView>  
 
-
-            <!--      <h:form id="remoteCommandForm">
-                      <p:remoteCommand name="connectPushServer" actionListener="#{ezidebit.checkPushChannelIsOpen}" autoRun="true" />
-                  </h:form>
-                  <p:socket onMessage="handleMessage" onError="handleError" onTransportFailure="handleTransportFailure"  onClose="handleClose" channel="/payments" onOpen="" onReconnect="handleReconnect" autoConnect="false"  widgetVar="subscriber"/>
-                  <script type="text/javascript">
-                      function handleMessage(facesmessage) {
-                          console.log("Handling primfaces push socket component faces MESSAGE");
-                          facesmessage.severity = 'info';
-                          taskCompleted();
-                          PF('growlWidget').show([facesmessage]);
-      
-                      }
-                      function handleError() {
-                          console.log("Handling primfaces push socket component faces ERROR message");
-                      }
-                      function handleClose() {
-                          console.log("Handling primfaces push socket component faces CLOSE message");
-                          PF('subscriber').connect();
-                      }
-                      function handleClose() {
-                          console.log("Handling primfaces push socket component faces OPEN message");
-      
-                      }
-                      function handleReconnect() {
-                          console.log("Handling primfaces push socket component faces RECONNECT message");
-                      }
-                      function handleTransportFailure() {
-                          console.log("Handling primfaces push socket component faces TRANSPORT FAILURE message");
-                          PF('subscriber').connect();
-                      }
-                      function changeiFrameCss() {
-                          alert('bugger1');
-                          $('#ezidebitIframeView').find('#wrapper').css('height', '380px');
-                          alert('bugger2');
-                          $('#ezidebitIframeView').find('#content').css('background-color', 'red');
-                          alert('bugger3');
-                      }
-                  </script>-->
             <ui:include src="Create.xhtml"/>
             <ui:include src="CreateSchedule.xhtml"/>
             <ui:include src="ClearSchedule.xhtml"/>
@@ -108,34 +48,8 @@
             <ui:include src="/WEB-INF/uploadPhoto.xhtml"/>
 
 
-        </div>
+       
     </ui:define>
 </ui:composition>
 
 
-<!--
-
-           <script type="text/javascript">
-                //   <![CDATA[
-              $(document).ready(function() {
-                    // this is needed to modify request parameters 
-                    // as PrimeFaces does not transfer the attributes correctly 
-                    // and does not expose all the parameters as tag attributes 
-                  PF('subscriber').cfg.request.trackMessageLength = true;
-                    //PF('subscriber').connect(); 
-                });
-                function handleMessage(facesmessage) {
-                    facesmessage.severity = 'info';
-                    taskCompleted();
-                    PF('growlWidget').show([facesmessage]);
-                    // this is needed for long-polling, bug in atmosphere...
-                    if (PF('subscriber').connection.response.status === 200) {
-                        PF('subscriber').connection.response.request.requestCount-;
-                    }
-                }
-                // ]]>
-            </script>
-
-
-
--->

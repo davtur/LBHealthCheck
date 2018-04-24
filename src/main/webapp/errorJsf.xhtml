@@ -1,9 +1,9 @@
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <ui:composition template="/WEB-INF/template.xhtml" xmlns="http://www.w3.org/1999/xhtml"
-                xmlns:ui="http://java.sun.com/jsf/facelets"
-                xmlns:h="http://java.sun.com/jsf/html"
-                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
                 xmlns:p="http://primefaces.org/ui" >
  
 
@@ -13,7 +13,7 @@
 
         <ui:define name="body">
             <h:panelGroup layout="block" >
-                <p>Click <a href="https://services.purefitnessmanly.com.au" >here</a> to return to Pure Fitness Manly or please call <strong>0433818067</strong> or email us <a href="mailto:sarah@purefitnessmanly.com.au">sarah@purefitnessmanly.com.au</a> if you continue to experience problems.</p> 
+                <p>Click <a href="https://services.purefitnessmanly.com.au" >here</a> to return to Pure Fitness Manly or please email <a href="mailto:enquiries@purefitnessmanly.com.au">enquiries@purefitnessmanly.com.au</a> if you continue to experience problems.</p> 
             </h:panelGroup>
             <h:panelGroup layout="block">
                 <h:outputText value="Message:#{pfExceptionHandler.message}" />

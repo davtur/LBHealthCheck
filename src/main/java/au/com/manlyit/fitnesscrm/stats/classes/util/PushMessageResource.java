@@ -28,7 +28,7 @@ public class PushMessageResource {
 
     private static final java.util.logging.Logger LOGGER = java.util.logging.Logger.getLogger(PushMessageResource.class.getName());
 
-    @PathParam("session")
+  /*  @PathParam("session")
     private String sessionId;
    
 
@@ -45,13 +45,13 @@ public class PushMessageResource {
     public void onOpen(RemoteEndpoint rEndPoint, EventBus e) {
         rEndPoint.address(); 
      
-        LOGGER.log(Level.INFO, "Atmosphere Push Connection OPENED. Transport Type = {0}, Address = {1}, Path = {2}, URI = {3}, Status = {4}, sessionID={5}", new Object[]{rEndPoint.transport().name(), rEndPoint.address(), rEndPoint.path(), rEndPoint.uri(), rEndPoint.status(),sessionId});
+ //       LOGGER.log(Level.INFO, "Atmosphere Push Connection OPENED. Transport Type = {0}, Address = {1}, Path = {2}, URI = {3}, Status = {4}, sessionID={5}", new Object[]{rEndPoint.transport().name(), rEndPoint.address(), rEndPoint.path(), rEndPoint.uri(), rEndPoint.status(),sessionId});
     }
 
     @OnClose
     public void onClose(RemoteEndpoint rEndPoint, EventBus e) {
       
-        LOGGER.log(Level.INFO, "Atmosphere Push Connection CLOSED. Transport Type = {0}, Address = {1}, Path = {2}, URI = {3}, Status = {4}", new Object[]{rEndPoint.transport().name(), rEndPoint.address(), rEndPoint.path(), rEndPoint.uri(), rEndPoint.status(),sessionId});
+//        LOGGER.log(Level.INFO, "Atmosphere Push Connection CLOSED. Transport Type = {0}, Address = {1}, Path = {2}, URI = {3}, Status = {4}", new Object[]{rEndPoint.transport().name(), rEndPoint.address(), rEndPoint.path(), rEndPoint.uri(), rEndPoint.status(),sessionId});
 
     }
 
@@ -59,7 +59,7 @@ public class PushMessageResource {
     @OnMessage(decoders = {MessageDecoder.class}, encoders = {MessageEncoder.class})
     public Message onMessage(Message message) {
         return message;
-    }
+    }*/
 
    
 

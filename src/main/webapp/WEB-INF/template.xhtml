@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:h="http://java.sun.com/jsf/html"
-      xmlns:f="http://java.sun.com/jsf/core"
-      xmlns:ui="http://java.sun.com/jsf/facelets"
+           xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
       xmlns:p="http://primefaces.org/ui">
 
     <h:head>
@@ -23,10 +23,10 @@
 
         <div class="layout-wrapper">
             <p:growl id="growl" widgetVar="growlWidget"    showDetail="true"    />
-            <ui:include src="./megamenu.xhtml" />
+            <!--<ui:include src="./megamenu.xhtml" />-->
             <ui:include src="./topbar.xhtml" />
-            <ui:include src="./sidebar.xhtml" />
-            <ui:include src="./right-sidebar.xhtml" />
+           <ui:include src="./sidebar.xhtml" />
+          <!--  <ui:include src="./right-sidebar.xhtml" />-->
             <div class="layout-main">
                 <div class="route-bar">
                     <div class="route-bar-breadcrumb">
@@ -68,7 +68,12 @@
             <p:ajax event="message" listener="#{ezidebit.remoteCommandListener}" />
 
         </p:socket>
+        <f:websocket channel="/payments" onmessage="socketListener" />
         <script type="text/javascript">
+            function socketListener(message, channel, event) {
+                var text = message + ","+channel+","+ event;
+                alert(text);
+            }
             function handleMessage(facesmessage)
                 {
                     console.log("Handling primfaces push socket component faces MESSAGE");

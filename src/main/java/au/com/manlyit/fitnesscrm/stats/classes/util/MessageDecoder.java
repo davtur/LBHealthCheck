@@ -10,7 +10,7 @@ import org.primefaces.push.Decoder;
 /**
  * A Simple {@link org.primefaces.push.Decoder} that decode a String into a {@link Message} object.
  */
-public class MessageDecoder implements Decoder<String,Message> {
+/*public class MessageDecoder implements Decoder<String,Message> {
  
     //@Override
     @Override
@@ -23,4 +23,4 @@ public class MessageDecoder implements Decoder<String,Message> {
             return new Message(s);
         }
     }
-}
+}*/

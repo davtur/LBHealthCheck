@@ -58,6 +58,7 @@ import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.DataFormat;
+import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.primefaces.event.SelectEvent;
@@ -1035,7 +1036,7 @@ public class SessionHistoryController implements Serializable {
         HSSFCellStyle cellStyle = wb.createCellStyle();
         DataFormat df = wb.createDataFormat();
         cellStyle.setFillForegroundColor(HSSFColor.BLUE.index);
-        cellStyle.setFillPattern(HSSFCellStyle.SOLID_FOREGROUND);
+        cellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
         for (int i = 1; i < row.getPhysicalNumberOfCells(); i++) {
             row.getCell(i).setCellStyle(cellStyle);
         }
@@ -1067,11 +1068,11 @@ public class SessionHistoryController implements Serializable {
         style.setFillForegroundColor(IndexedColors.BLACK.getIndex());
         //style.setFillPattern(CellStyle.SOLID_FOREGROUND);
         style.setFillBackgroundColor(IndexedColors.AQUA.getIndex());
-        style.setFillPattern(CellStyle.BIG_SPOTS);
+        style.setFillPattern(FillPatternType.BIG_SPOTS);
         style2.setFillForegroundColor(IndexedColors.BLACK.getIndex());
         //style2.setFillPattern(CellStyle.SOLID_FOREGROUND);
         style2.setFillBackgroundColor(IndexedColors.LIGHT_TURQUOISE.getIndex());
-        style2.setFillPattern(CellStyle.BIG_SPOTS);
+        style2.setFillPattern(FillPatternType.BIG_SPOTS);
 
         HSSFCell cell3 = row.createCell(3);
         cell3.setCellValue(new Date());

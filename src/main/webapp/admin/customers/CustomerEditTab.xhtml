@@ -1,17 +1,18 @@
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <ui:composition  xmlns="http://www.w3.org/1999/xhtml"
-                 xmlns:ui="http://java.sun.com/jsf/facelets"
-                 xmlns:h="http://java.sun.com/jsf/html"
-                 xmlns:f="http://java.sun.com/jsf/core"
+                 xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                 xmlns:h="http://xmlns.jcp.org/jsf/html"
+                 xmlns:f="http://xmlns.jcp.org/jsf/core"
                   xmlns:pe="http://primefaces.org/ui/extensions"
                  xmlns:p="http://primefaces.org/ui" >
 
     <h:form id="formCustomersEdit1" >    
         <!-- <p:log />-->
 
-        <div class="Container50 Responsive50">
-            <div class="ContainerIndent">
+       <div class="ui-g">
+                <div class="ui-g-12 ui-md-12 ui-lg-4">
+                    <div class="card card-w-title">
                 <h:panelGrid  columns="2">
                     <p:outputLabel value="#{configMapController.getKey('EditCustomersLabel_firstname')}" for="firstname1" />
                     <p:inputText id="firstname1"  value="#{customersController.selected.firstname}" title="#{configMapController.getKey('EditCustomersTitle_firstname')}" valueChangeListener="#{customersController.firstNameListener}" required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_firstname')}">
@@ -104,8 +105,8 @@
         </div>
 
 
-        <div class="Container50 Responsive50">
-            <div class="ContainerIndent">
+       <div class="ui-g-12 ui-md-12 ui-lg-4">
+                    <div class="card card-w-title">
                 <h:panelGrid  columns="2">
                     <p:outputLabel value="#{configMapController.getKey('ListCustomersTitle_ProfilePic')}" />
                     <h:panelGrid  columns="2">
@@ -162,7 +163,7 @@
                 </h:panelGrid>
             </div>
         </div>
-
+  </div>
         <!-- <p:outputLabel  value="Groups:    " for="selectedGroupsCheckbox2"/>
          <h:selectManyCheckbox id="selectedGroupsCheckbox2" value="#{customersController.selectedGroups}"    converter="customerGroupsConverter">
              <f:selectItems value="#{customersController.customerGroupsList}" var="custGroup" itemLabel="#{custGroup.groupname}" itemValue="#{custGroup}" />

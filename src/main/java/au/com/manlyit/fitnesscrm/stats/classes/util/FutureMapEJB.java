@@ -520,8 +520,9 @@ public class FutureMapEJB implements Serializable {
             };
             // eventBus.publish(channels.getChannel(getUser()), new FacesMessage(StringEscapeUtils.escapeHtml(summary), StringEscapeUtils.escapeHtml(detail)));
             // final String summ = summary;
+            EventBus eventBus = null;
             try {
-                EventBus eventBus = EventBusFactory.getDefault().eventBus();
+                 eventBus = EventBusFactory.getDefault().eventBus();
                 eventBus.publish(broadcastChannel, new FacesMessage(StringEscapeUtils.escapeHtml(summary), StringEscapeUtils.escapeHtml(detail)), rep);
                 LOGGER.log(Level.INFO, "Sending Async Message, summary:{0}, details:{1}", new Object[]{summary, detail});
             } catch (Exception e) {
