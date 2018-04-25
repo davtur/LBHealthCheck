@@ -3,7 +3,7 @@
   <persistence-unit name="FitnessStatsPU" transaction-type="JTA">
     <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
     <jta-data-source>java:/jdbc/fitness</jta-data-source>
-    <!--<jta-data-source>jdbc/fitness</jta-data-source>
+    <!--<jta-data-source>jdbc/fitness</jta-data-source>-->
     
      
     <class>au.com.manlyit.fitnesscrm.stats.db.Activation</class>
@@ -64,7 +64,7 @@
     <class>au.com.manlyit.fitnesscrm.stats.db.Surveys</class>
     <class>au.com.manlyit.fitnesscrm.stats.db.Tasks</class>
     <class>au.com.manlyit.fitnesscrm.stats.db.ToDoList</class>
-    <class>au.com.manlyit.fitnesscrm.stats.db.WebsiteMonitor</class>-->
+    <class>au.com.manlyit.fitnesscrm.stats.db.WebsiteMonitor</class>
     <exclude-unlisted-classes>false</exclude-unlisted-classes>
     <shared-cache-mode>ALL</shared-cache-mode>
     <properties>
