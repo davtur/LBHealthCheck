@@ -7,7 +7,7 @@ package au.com.manlyit.fitnesscrm.stats.classes.util;
 
 import org.primefaces.json.JSONObject;
 import org.primefaces.push.Encoder;
- 
+  
 /**
  * A Simple {@link org.primefaces.push.Encoder} that decode a {@link Message} into a simple JSON object.
  */
