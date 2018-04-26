@@ -88,7 +88,7 @@
                               <p:selectManyMenu id="scroll" value="#{sessionHistoryController.attendingCustomers}" converter="customersControllerConverter" style="width:250px;height:600px" var="customer" showCheckbox="true">
                             <p:pickList id="picker"  value="#{sessionHistoryController.participants}" 
                                         var="cust"
-                                        iconOnly="true" effect="bounce"
+                                        iconOnly="true" effect="bounce"-->
                                                                                 <!--itemLabel="#{cust.firstname} #{cust.lastname}"-->
                                        <!--  itemValue="#{cust}" converter="customersControllerConverter" >
                                         <p:column style="width:25%">
@@ -126,5 +126,5 @@
             </h:form>
         </ui:define>
     </ui:composition>
-
+  </ui:composition>
 

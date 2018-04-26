@@ -1,3 +1,5 @@
+package au.com.manlyit.fitnesscrm.stats.beans.util;
+
 import java.io.Serializable;
 import java.util.Calendar;
 import java.util.logging.Level;

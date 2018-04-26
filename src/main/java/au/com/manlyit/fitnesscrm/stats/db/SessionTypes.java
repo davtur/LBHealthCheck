@@ -61,7 +61,7 @@ public class SessionTypes implements  BaseEntity, Serializable {
     private int sessionDurationMinutes;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "sessionTypesId")
     private Collection<SessionTimetable> sessionTimetableCollection;
-    @OneToOne(mappedBy = "sessionType")
+    //@OneToOne(mappedBy = "sessionType")
     private Plan plan;
     @OneToMany(mappedBy = "sessionType")
     private Collection<Plan> planCollection;

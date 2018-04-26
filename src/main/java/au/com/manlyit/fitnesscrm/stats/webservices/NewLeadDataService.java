@@ -17,7 +17,7 @@ import javax.ws.rs.NotAuthorizedException;
 public class NewLeadDataService {
 
     private List<NewLead> customerList = new ArrayList<>();
-    private static final Logger LOGGER = Logger.getLogger(WordpressInterfaceWebService.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(NewLeadDataService.class.getName());
     private static final String AUTHTOKEN = "Green21Blue22";
     //@Resource
     // WebServiceContext context;
