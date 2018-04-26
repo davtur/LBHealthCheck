@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package au.com.manlyit.fitnesscrm.stats.webservices;
+/*package au.com.manlyit.fitnesscrm.stats.webservices;
 
 import au.com.manlyit.fitnesscrm.stats.classes.CustomersController;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
@@ -25,14 +25,14 @@ import javax.xml.ws.handler.MessageContext;
  *
  * @author david
  */
-@WebService(serviceName = "WordpressInterfaceWebService")
+/*@WebService(serviceName = "WordpressInterfaceWebService")
 public class WordpressInterfaceWebService {
 
     private static final Logger LOGGER = Logger.getLogger(WordpressInterfaceWebService.class.getName());
     @Resource
     WebServiceContext context;
     @Inject
-    CustomersController cc;
+    CustomersController cc;*/
 
 
     /* use this to test the web service - create an executable file with the below content and run from command line
@@ -55,7 +55,7 @@ public class WordpressInterfaceWebService {
      * @param message
      * @return
      */
-    @WebMethod(operationName = "addNewLead")
+ /*   @WebMethod(operationName = "addNewLead")
     public String addNewLead(@WebParam(name = "firstname") String firstname, @WebParam(name = "lastname") String lastname, @WebParam(name = "email") String email, @WebParam(name = "mobile") String mobile, @WebParam(name = "message") String message) {
         //TODO write your implementation code here:
         String result = "OK";
@@ -146,4 +146,4 @@ public class WordpressInterfaceWebService {
 
         return result;
     }
-}
+}*/
