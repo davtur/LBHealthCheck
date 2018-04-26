@@ -5,8 +5,6 @@
 	xsi:schemaLocation="http://www.jboss.com/xml/ns/javaee http://www.jboss.org/j2ee/schema/jboss-web_12_0.xsd">
 
 	<context-root>/FitnessStats</context-root>
-	<security-domain>secureDomain</security-domain>
-	<server-instance>default-server</server-instance> <!-- does mapping to server -->
-	<virtual-host>default-host</virtual-host>  <!-- does mapping to host inside server -->
+	
 
 </jboss-web>
