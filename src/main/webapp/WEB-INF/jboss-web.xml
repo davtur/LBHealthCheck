@@ -5,6 +5,6 @@
 	xsi:schemaLocation="http://www.jboss.com/xml/ns/javaee http://www.jboss.org/j2ee/schema/jboss-web_12_0.xsd">
 
 	<context-root>/FitnessStats</context-root>
-	
+	<security-domain>secureDomain</security-domain>
 
 </jboss-web>

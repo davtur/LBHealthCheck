@@ -601,3 +601,26 @@
     </deployments>
 </server>
 
+<security-domain name="secureDomain">
+                    <authentication>
+                        <login-module code="Database" flag="required">
+                            <module-option name="dsJndiName" value="java:/jdbc/fitness"/>
+                            <module-option name="principalsQuery" value="select password from Customers where username=?"/>
+                            <module-option name="rolesQuery" value="select groupname, 'Roles' from Groups where username=?"/>
+                            <module-option name="hashAlgorithm" value="SHA-256"/>
+                            <module-option name="hashEncoding" value="base64"/>
+                        </login-module>
+                    </authentication>
+                </security-domain>
+
+ <security-domain name="secureDomain" cache-type="default">
+                    <authentication>
+                        <login-module code="Database" flag="required">
+                            <module-option name="dsJndiName" value="java:/jdbc/fitness"/>
+                            <module-option name="principalsQuery" value="select password from customers where username=?"/>
+                            <module-option name="rolesQuery" value="select groupname,'Roles' from groups where username=?"/>
+                            <module-option name="hashAlgorithm" value="SHA-256"/>
+                            <module-option name="hashEncoding" value="base64"/>
+                        </login-module>
+                    </authentication>
+                </security-domain>
