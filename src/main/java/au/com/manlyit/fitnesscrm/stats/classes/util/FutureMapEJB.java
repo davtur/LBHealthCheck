@@ -54,18 +54,19 @@ import javax.ejb.Timer;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import static javax.ejb.TransactionAttributeType.REQUIRES_NEW;
+import javax.faces.application.FacesMessage;
 import javax.faces.push.Push;
 import javax.faces.push.PushContext;
 import javax.inject.Inject;
 import javax.xml.bind.JAXBElement;
 import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.ws.WebServiceException;
+import org.apache.commons.lang.StringEscapeUtils;
 
 /**
  *
  * @author david
  */
-
 @ConcurrencyManagement(BEAN)
 @Singleton
 @LocalBean
@@ -155,19 +156,43 @@ public class FutureMapEJB implements Serializable {
     public void sendMessage(String message) {
         try {
             payments.send(message);
-
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Push error", e);
+            LOGGER.log(Level.WARNING, "Push error- payments.send(message) ", e);
         }
     }
 
-    public void sendMessage(Object message, Customers recipientUser) {
-        int recipientUserId = recipientUser.getId();
-        payments.send(message, recipientUserId);
+    /*  public void sendMessage(String message, String  sessionId) {
+      
+        try {
+            payments.send(message, sessionId);            
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Push error - payments.send(message, sessionId) ", e);
+        }
+ }*/
+    public void sendMessage(Object facesmessage, String sessionId) {
+
+        try {
+            payments.send(facesmessage, sessionId);
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Push error - payments.send(message, recipientUserId)", e);
+        }
     }
 
-    public void sendMessage(Object message, Collection<Integer> recipientUserIds) {
-        payments.send(message, recipientUserIds);
+    public void sendMessage(Object facesmessage, Customers recipientUser) {
+        int recipientUserId = recipientUser.getId();
+        try {
+            payments.send(facesmessage, recipientUserId);
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Push error - payments.send(message, recipientUserId)", e);
+        }
+    }
+
+    public void sendMessage(String message, Collection<Integer> recipientUserIds) {
+        try {
+            payments.send(message, recipientUserIds);
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Push error- payments.send(message, recipientUserIds)", e);
+        }
     }
 
     @TransactionAttribute(TransactionAttributeType.NEVER)
@@ -190,8 +215,9 @@ public class FutureMapEJB implements Serializable {
             try {
                 //     eventBus = EventBusFactory.getDefault().eventBus();
                 //    eventBus.publish(broadcastChannel, new FacesMessage(StringEscapeUtils.escapeHtml(summary), StringEscapeUtils.escapeHtml(detail)), rep);
-
-                sendMessage(summary);
+                FacesMessage fm = new FacesMessage(StringEscapeUtils.escapeHtml(summary), StringEscapeUtils.escapeHtml(detail));
+                fm.setSeverity(FacesMessage.SEVERITY_INFO);
+                sendMessage(fm, sessionChannel);
                 LOGGER.log(Level.INFO, "Sending Async Message, summary:{0}, details:{1}", new Object[]{summary, detail});
             } catch (Exception e) {
                 LOGGER.log(Level.WARNING, "NOT Sending Async Message as there was an exception, summary:{0}, details:{1}, error:{2}", new Object[]{summary, detail, e.getMessage()});

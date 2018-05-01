@@ -379,19 +379,19 @@ div.timetableDataTable .ui-datatable table tbody .ui-state-highlight > td {
 
 }
 
-Width300{
+.Width300{
     width: 300px;
 }
 
-chartClassTall{
+.chartClassTall{
     height:400px;
 }
 .updatePaymentForms {
-    
+   white-space: normal; 
 }
 
 .updatePaymentInfo {
-    
+    white-space: normal;
 }
 
 .img-circular{

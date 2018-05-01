@@ -22,17 +22,18 @@
             function handleOpen(event)
                 {
                     console.log(event);
-                    alert('Websocket Opened!')
+                    console.log('Websocket Opened!')
                 }
             function handleMessage(message, channelName, event)
                 {
                     console.log("Recieved PUSH MESSAGE");
                     console.log(message, channelName, event);
                    
-                    facesmessage.severity = 'info';
+                    
 
-                    PF('growlWidget').show([facesmessage]);
-                    alert('Message Recieved!')
+                    PF('growlWidget').show([message]);
+                    notifyListener();
+                    //alert('Message Recieved!')
                 }
             function handleClose(code, channel, event)
                 {
@@ -46,7 +47,7 @@
                         } else
                         {
                             // Abnormal close reason (as result of an error)
-                            alert('Error during the reconnect!')
+                            console.log('Error during the websocket reconnect!')
                         }
                 }
         </script>
@@ -60,7 +61,7 @@
             <!--<ui:include src="./megamenu.xhtml" />-->
             <ui:include src="./topbar.xhtml" />
             <ui:include src="./sidebar.xhtml" />
-            <!--  <ui:include src="./right-sidebar.xhtml" />-->
+            <ui:include src="./right-sidebar.xhtml" />
             <div class="layout-main">
                 <div class="route-bar">
                     <div class="route-bar-breadcrumb">
@@ -91,20 +92,23 @@
         </p:ajaxStatus>
         <h:form id="remoteCommandForm">
 
-            <p:remoteCommand name="socketOpenEvent"   actionListener="#{pushSocketBean.pushChannelOpen}"  />
-            <p:remoteCommand name="socketCloseEvent"   actionListener="#{pushSocketBean.pushChannelClose}"  />         
+           <!-- <p:remoteCommand name="socketOpenEvent"   actionListener="#{pushSocketBean.pushChannelOpen}"  />
+            <p:remoteCommand name="socketCloseEvent"   actionListener="#{pushSocketBean.pushChannelClose}"  />   -->      
             <p:remoteCommand name="updatePaymentForms" update="@(.updatePaymentInfo)" />
-            <p:remoteCommand name="handleReconnect" actionListener="#{pushSocketBean.pushChannelReconnect}" />
-            <p:outputLabel rendered="#{pushSocketBean.pushChannel}" value="" />
+         <!--   <p:remoteCommand name="handleReconnect" actionListener="#{pushSocketBean.pushChannelReconnect}" />
+            <p:outputLabel rendered="#{pushSocketBean.pushChannel}" value="" />-->
+            
+            
+             <p:remoteCommand name="notifyListener" actionListener="#{ezidebit.remoteCommandListener}" />
         </h:form>
 
         <!-- <p:socket onMessage="handleMessage" onError="handleError" onTransportFailure="handleTransportFailure"  onClose="handleClose" channel="/payments" onOpen="handleOpen" onReconnect="handleReconnect" autoConnect="false"  widgetVar="subscriber">
              <p:ajax event="message" listener="#{ezidebit.remoteCommandListener}" />
  
          </p:socket>-->
-        <f:websocket user="#{ezidebit.sessionId}" channel="payments" onopen="handleOpen" onmessage="handleMessage" onclose="handleClose" >
-             <f:ajax event="message" listener="#{ezidebit.remoteCommandListener}" />
-        </f:websocket>
+        <f:websocket user="#{ezidebit.sessionId}" channel="payments" onopen="handleOpen" onmessage="handleMessage" onclose="handleClose" />
+       <!--      <f:ajax event="payments" listener="#{ezidebit.remoteCommandListener}" />
+        </f:websocket>-->
 
         
         <h:outputStylesheet name="css/nanoscroller.css" library="california-layout" />
