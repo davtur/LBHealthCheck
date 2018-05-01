@@ -223,6 +223,12 @@
             <description/>
             <url-pattern>/index.xhtml</url-pattern>
         </web-resource-collection>
+       <web-resource-collection>
+            <web-resource-name>PushMessages</web-resource-name>
+            <description/>
+            <url-pattern>/javax.faces.push/*</url-pattern>
+        </web-resource-collection>
+        
         <auth-constraint>
             <description/>
             <role-name>USER</role-name>

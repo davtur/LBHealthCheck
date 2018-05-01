@@ -16,10 +16,10 @@
 package au.com.manlyit.fitnesscrm.stats.beans.util;
 
 import java.io.Serializable;
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.SessionScoped;
+import javax.enterprise.context.SessionScoped;
+import javax.inject.Named;
 
-@ManagedBean
+@Named
 @SessionScoped
 public class GuestPreferences implements Serializable {
 

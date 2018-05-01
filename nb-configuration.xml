@@ -27,5 +27,7 @@ Any value defined here will override the pom.xml file value but is only applicab
         <org-netbeans-modules-maven-jaxws.rest_2e_config_2e_type>ide</org-netbeans-modules-maven-jaxws.rest_2e_config_2e_type>
         <org-netbeans-modules-javascript2-requirejs.enabled>false</org-netbeans-modules-javascript2-requirejs.enabled>
         <org-netbeans-modules-maven-jaxws._5f_C_5f_nonpci_5f_1>https://api.ezidebit.com.au/v3-5/nonpci?wsdl</org-netbeans-modules-maven-jaxws._5f_C_5f_nonpci_5f_1>
+        <org-netbeans-modules-maven-jaxws._5f_C_5f_nonpci>https://api.demo.ezidebit.com.au/v3-5/nonpci?wsdl</org-netbeans-modules-maven-jaxws._5f_C_5f_nonpci>
+        <org-netbeans-modules-maven-jaxws._5f_C_5f_nonpci_2e_singlewsdl>https://api.demo.ezidebit.com.au/v3-5/nonpci?singleWsdl</org-netbeans-modules-maven-jaxws._5f_C_5f_nonpci_2e_singlewsdl>
     </properties>
 </project-shared-configuration>

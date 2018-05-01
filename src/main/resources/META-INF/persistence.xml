@@ -2,10 +2,9 @@
 <persistence xmlns="http://java.sun.com/xml/ns/persistence" version="2.0">
   <persistence-unit name="FitnessStatsPU" transaction-type="JTA">
     <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
-    <jta-data-source>java:/jdbc/fitness</jta-data-source>
-    <!--<jta-data-source>jdbc/fitness</jta-data-source>
     
-     
+    <jta-data-source>java:/jdbc/fitness</jta-data-source>
+   <!--  <jta-data-source>jdbc/fitness</jta-data-source>
     <class>au.com.manlyit.fitnesscrm.stats.db.Activation</class>
     <class>au.com.manlyit.fitnesscrm.stats.db.AuditLog</class>
     <class>au.com.manlyit.fitnesscrm.stats.db.ConfigMap</class>
@@ -78,18 +77,18 @@
             <property name="eclipselink.cache.coordination.jms.host" value="192.168.1.102:5445/" />-->
     </properties>
   </persistence-unit>
-  
   <persistence-unit name="FitnessStatsPU2" transaction-type="RESOURCE_LOCAL">
     <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
-     <non-jta-data-source>java:/jdbc/fitness2</non-jta-data-source>
-   <!--  <non-jta-data-source>jdbc/fitness2</non-jta-data-source>-->
+   <!-- <non-jta-data-source>jdbc/fitness2</non-jta-data-source>  -->
+<non-jta-data-source>java:/jdbc/fitness2</non-jta-data-source>   
+    
     <class>au.com.manlyit.fitnesscrm.stats.db.Monitoringcharts</class>
     <class>au.com.manlyit.fitnesscrm.stats.db.WebsiteMonitor</class>
     <exclude-unlisted-classes>true</exclude-unlisted-classes>
     <shared-cache-mode>ALL</shared-cache-mode>
     <properties>
-      <!--  <property name="eclipselink.logging.level" value="INFO"/>
-      <property name="eclipselink.cache.coordination.protocol" value="jms"/>
+      <property name="eclipselink.logging.level" value="INFO"/>
+      <!--  <property name="eclipselink.cache.coordination.protocol" value="jms"/>
       <property name="eclipselink.cache.coordination.jms.topic" value="jms/PaymentsTopic"/>
       <property name="eclipselink.cache.coordination.jms.factory" value="jms/PaymentsTopicConnectionFactory"/>
          <property name="eclipselink.cache.coordination.protocol" value="jms"/>

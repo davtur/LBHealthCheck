@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
-           xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      
       xmlns:f="http://xmlns.jcp.org/jsf/core"
       xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
       xmlns:p="http://primefaces.org/ui">
@@ -17,6 +18,39 @@
         <h:outputScript name="js/layout.js" library="california-layout" />
         <h:outputScript  name="custom.js" library="js" />
         <ui:insert name="head" />
+        <script type="text/javascript">
+            function handleOpen(event)
+                {
+                    console.log(event);
+                    alert('Websocket Opened!')
+                }
+            function handleMessage(message, channelName, event)
+                {
+                    console.log("Recieved PUSH MESSAGE");
+                    console.log(message, channelName, event);
+                   
+                    facesmessage.severity = 'info';
+
+                    PF('growlWidget').show([facesmessage]);
+                    alert('Message Recieved!')
+                }
+            function handleClose(code, channel, event)
+                {
+                    console.log('Handle close: ' + code, channel, event);
+                    if (code == -1)
+                        {
+                            console.log('Websockets not supported by client')
+                        } else if (code == 1000)
+                        { // Normal close (as result of expired session or view)
+                            console.log('Normal close, will try to reconnect');
+                        } else
+                        {
+                            // Abnormal close reason (as result of an error)
+                            alert('Error during the reconnect!')
+                        }
+                }
+        </script>
+
     </h:head>
 
     <h:body styleClass="main-body"> 
@@ -25,8 +59,8 @@
             <p:growl id="growl" widgetVar="growlWidget"    showDetail="true"    />
             <!--<ui:include src="./megamenu.xhtml" />-->
             <ui:include src="./topbar.xhtml" />
-           <ui:include src="./sidebar.xhtml" />
-          <!--  <ui:include src="./right-sidebar.xhtml" />-->
+            <ui:include src="./sidebar.xhtml" />
+            <!--  <ui:include src="./right-sidebar.xhtml" />-->
             <div class="layout-main">
                 <div class="route-bar">
                     <div class="route-bar-breadcrumb">
@@ -64,65 +98,15 @@
             <p:outputLabel rendered="#{pushSocketBean.pushChannel}" value="" />
         </h:form>
 
-        <p:socket onMessage="handleMessage" onError="handleError" onTransportFailure="handleTransportFailure"  onClose="handleClose" channel="/payments" onOpen="handleOpen" onReconnect="handleReconnect" autoConnect="false"  widgetVar="subscriber">
-            <p:ajax event="message" listener="#{ezidebit.remoteCommandListener}" />
+        <!-- <p:socket onMessage="handleMessage" onError="handleError" onTransportFailure="handleTransportFailure"  onClose="handleClose" channel="/payments" onOpen="handleOpen" onReconnect="handleReconnect" autoConnect="false"  widgetVar="subscriber">
+             <p:ajax event="message" listener="#{ezidebit.remoteCommandListener}" />
+ 
+         </p:socket>-->
+        <f:websocket user="#{ezidebit.sessionId}" channel="payments" onopen="handleOpen" onmessage="handleMessage" onclose="handleClose" >
+             <f:ajax event="message" listener="#{ezidebit.remoteCommandListener}" />
+        </f:websocket>
 
-        </p:socket>
-        <f:websocket channel="/payments" onmessage="socketListener" />
-        <script type="text/javascript">
-            function socketListener(message, channel, event) {
-                var text = message + ","+channel+","+ event;
-                alert(text);
-            }
-            function handleMessage(facesmessage)
-                {
-                    console.log("Handling primfaces push socket component faces MESSAGE");
-                    facesmessage.severity = 'info';
-
-                    PF('growlWidget').show([facesmessage]);
-
-                }
-            function handleError()
-                {
-                    console.log("Handling primfaces push socket component  ERROR message");
-                    alert('Error');
-                    // PF('subscriber').connect();
-                    handleReconnect();
-                }
-            function handleOpen()
-                {
-
-                    console.log("Handling primfaces push socket component  OPEN message");
-                    socketOpenEvent();
-                }
-            function handleClose()
-                {
-                    console.log("Handling primfaces push socket component  CLOSE message");
-                    socketCloseEvent();
-                    //PF('subscriber').connect();
-                }
-
-            function handleReconnect()
-                {
-                    handleReconnect();
-                    //alert('handleReconnect');
-                    console.log("Handling primfaces push socket component  RECONNECT message");
-                }
-            function handleTransportFailure()
-                {
-
-                    console.log("Handling primfaces push socket component  TRANSPORT FAILURE message");
-                    //alert('handleTransportFailure');
-                    handleReconnect();
-                }
-            /*  window.onbeforeunload = function (event)
-             {
-             PF('subscriber').disconnect();
-             console.log("Disconnect primfaces push socket component in page unload event");
-             };*/
-
-        </script>
-
+        
         <h:outputStylesheet name="css/nanoscroller.css" library="california-layout" />
         <h:outputStylesheet name="css/layout-blue.css" library="california-layout" />
         <h:outputStylesheet library="css" name="customisations.css"/>

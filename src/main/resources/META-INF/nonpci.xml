@@ -17,14 +17,14 @@
     xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"
     xmlns:wsx="http://schemas.xmlsoap.org/ws/2004/09/mex" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
     <wsdl:import
-        location="https://api.demo.ezidebit.com.au/v3-3/nonpci?wsdl=wsdl0" namespace="http://tempuri.org/"/>
+        location="https://api.demo.ezidebit.com.au/v3-5/nonpci?wsdl=wsdl0" namespace="http://tempuri.org/"/>
     <wsdl:types>
         <xsd:schema targetNamespace="https://px.ezidebit.com.au/Imports">
-            <xsd:import namespace="https://px.ezidebit.com.au/" schemaLocation="https://api.demo.ezidebit.com.au/v3-3/nonpci?xsd=xsd0"/>
+            <xsd:import namespace="https://px.ezidebit.com.au/" schemaLocation="https://api.demo.ezidebit.com.au/v3-5/nonpci?xsd=xsd0"/>
             <xsd:import
-                namespace="http://schemas.microsoft.com/2003/10/Serialization/" schemaLocation="https://api.demo.ezidebit.com.au/v3-3/nonpci?xsd=xsd1"/>
+                namespace="http://schemas.microsoft.com/2003/10/Serialization/" schemaLocation="https://api.demo.ezidebit.com.au/v3-5/nonpci?xsd=xsd1"/>
             <xsd:import
-                namespace="http://schemas.datacontract.org/2004/07/Ezidebit.PaymentExchange.V3_3.DataContracts" schemaLocation="https://api.demo.ezidebit.com.au/v3-3/nonpci?xsd=xsd2"/>
+                namespace="http://schemas.datacontract.org/2004/07/Ezidebit.PaymentExchange.V3_5.DataContracts" schemaLocation="https://api.demo.ezidebit.com.au/v3-5/nonpci?xsd=xsd2"/>
         </xsd:schema>
     </wsdl:types>
     <wsdl:message name="INonPCIService_AddCustomer_InputMessage">

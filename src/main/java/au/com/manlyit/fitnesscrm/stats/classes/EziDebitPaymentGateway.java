@@ -19,7 +19,6 @@ import au.com.manlyit.fitnesscrm.stats.classes.util.FutureMapEJB;
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PaymentGatewayResponse;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PfSelectableDataModel;
-import au.com.manlyit.fitnesscrm.stats.classes.util.PushComponentUpdateBean;
 import au.com.manlyit.fitnesscrm.stats.classes.util.ScheduledPaymentPojo;
 import au.com.manlyit.fitnesscrm.stats.db.CustomerState;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
@@ -122,8 +121,7 @@ public class EziDebitPaymentGateway implements Serializable {
     private au.com.manlyit.fitnesscrm.stats.beans.PaymentParametersFacade ejbPaymentParametersFacade;
     @Inject
     private PaymentBean paymentBean;
-    @Inject
-    private PushComponentUpdateBean pushComponentUpdateBean;
+    
     @Inject
     private ConfigMapFacade configMapFacade;
     @Inject

@@ -24,6 +24,8 @@ import javax.faces.model.SelectItem;
 @SessionScoped
 public class GroupsController implements Serializable {
 
+    private static final long serialVersionUID = 1L;
+
     private Groups current;
     private DataModel items = null;
     @Inject

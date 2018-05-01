@@ -9,6 +9,8 @@ import java.io.Serializable;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.enterprise.context.SessionScoped;
+import javax.faces.annotation.FacesConfig;
+import static javax.faces.annotation.FacesConfig.Version.JSF_2_3;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 import javax.faces.convert.Converter;
@@ -16,6 +18,7 @@ import javax.faces.convert.FacesConverter;
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
+
 
 @Named("customerGoalsController")
 @SessionScoped
