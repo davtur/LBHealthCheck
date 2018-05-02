@@ -23,12 +23,19 @@
                     console.log(event);
                     alert('Websocket Opened!')
                 }
-            function handleMessage(message, channelName, event)
+             function handleMessage(message, channelName, event)
                 {
                     console.log("Recieved PUSH MESSAGE");
                     console.log(message, channelName, event);
-                     PF('growlWidget').show([message]);
-                    alert('Message Recieved!')
+
+                    PF('growlWidget').renderMessage({"summary": "Update",
+                        "detail": message,
+                        "severity": "info"});
+                  //  alert('Message Recieved!');
+
+
+                   // notifyListener();
+                    //alert('Message Recieved!')
                 }
             function handleClose(code, channel, event)
                 {
@@ -49,7 +56,11 @@
 
     </h:head>
 
-    <h:body>    
+    <h:body>  
+        <f:websocket user="#{ezidebit.sessionId}" channel="payments" onopen="handleOpen" onmessage="handleMessage" onclose="handleClose" >
+             <f:ajax event="message" listener="#{ezidebit.remoteCommandListener}" />
+        </f:websocket>
+        
         <div id="menu-mask"></div>
         <p:growl id="growl" widgetVar="growlWidget"    showDetail="true"    />
 
@@ -90,9 +101,6 @@
              <p:ajax event="message" listener="#{ezidebit.remoteCommandListener}" />
  
          </p:socket>-->
-        <f:websocket user="#{ezidebit.sessionId}" channel="payments" onopen="handleOpen" onmessage="handleMessage" onclose="handleClose" >
-             <f:ajax event="message" listener="#{ezidebit.remoteCommandListener}" />
-        </f:websocket>
         
         <h:outputStylesheet name="css/nanoscroller.css" library="california-layout" />
         <h:outputStylesheet name="css/layout-blue.css" library="california-layout" />

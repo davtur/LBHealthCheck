@@ -7,6 +7,7 @@ package au.com.manlyit.fitnesscrm.stats.classes.util;
 
 import au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade;
 import au.com.manlyit.fitnesscrm.stats.beans.CustomersFacade;
+import au.com.manlyit.fitnesscrm.stats.beans.EmailTemplatesFacade;
 import au.com.manlyit.fitnesscrm.stats.beans.PaymentBean;
 import au.com.manlyit.fitnesscrm.stats.beans.PaymentsFacade;
 import au.com.manlyit.fitnesscrm.stats.beans.util.PaymentSource;
@@ -48,30 +49,28 @@ import javax.ejb.ConcurrencyManagement;
 import static javax.ejb.ConcurrencyManagementType.BEAN;
 import javax.ejb.LocalBean;
 import javax.ejb.Schedule;
-import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.ejb.Timer;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import static javax.ejb.TransactionAttributeType.REQUIRES_NEW;
-import javax.faces.application.FacesMessage;
+import javax.enterprise.context.ApplicationScoped;
 import javax.faces.push.Push;
 import javax.faces.push.PushContext;
 import javax.inject.Inject;
 import javax.xml.bind.JAXBElement;
 import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.ws.WebServiceException;
-import org.apache.commons.lang.StringEscapeUtils;
 
 /**
  *
  * @author david
  */
-@ConcurrencyManagement(BEAN)
-@Singleton
-@LocalBean
+//@ConcurrencyManagement(BEAN)
+//@Singleton
+//@LocalBean
 @Startup
-//@ApplicationScoped
+@ApplicationScoped
 public class FutureMapEJB implements Serializable {
 
     private static final Logger LOGGER = Logger.getLogger(FutureMapEJB.class.getName());
@@ -115,7 +114,7 @@ public class FutureMapEJB implements Serializable {
     @Inject
     private PaymentBean paymentBean;
     @Inject
-    private au.com.manlyit.fitnesscrm.stats.beans.EmailTemplatesFacade ejbEmailTemplatesFacade;
+    private EmailTemplatesFacade ejbEmailTemplatesFacade;
     private INonPCIService ws;
 
     /* @PathParam("user")
@@ -195,29 +194,17 @@ public class FutureMapEJB implements Serializable {
         }
     }
 
-    @TransactionAttribute(TransactionAttributeType.NEVER)
+   // @TransactionAttribute(TransactionAttributeType.NEVER)
 
     public void sendMessage(String sessionChannel, String summary, String detail) {
 
         LOGGER.log(Level.INFO, "Entering - SEND MESSAGE ");
-        //TODO
-        // sessionChannel = "/test";// remove this once the channel is dynamically set by session id
-        //synchronized (lock2) {
-        if (sessionChannel.contains(FUTUREMAP_INTERNALID) == false) {// we don't want to send a message unless there is a session to send it to
-            final String broadcastChannel = CHANNEL + sessionChannel;
-            LOGGER.log(Level.INFO, "Entering - SEND MESSAGE :Channel={0}, Summary={1}, detail={2}", new Object[]{broadcastChannel, summary, detail});
-            // Reply rep = (String message) -> {
-            //     LOGGER.log(Level.INFO, "MESSAGE DELIVERED :Channel={0}, Summary={1}, message={2}", new Object[]{broadcastChannel, summary, message});
-            //};
-            // eventBus.publish(channels.getChannel(getUser()), new FacesMessage(StringEscapeUtils.escapeHtml(summary), StringEscapeUtils.escapeHtml(detail)));
-            // final String summ = summary;
-            // EventBus eventBus = null;
+         if (sessionChannel.contains(FUTUREMAP_INTERNALID) == false) {// we don't want to send a message unless there is a session to send it to
+            
+            LOGGER.log(Level.INFO, "Entering - SEND MESSAGE :Channel={0}, Summary={1}, detail={2}", new Object[]{sessionChannel, summary, detail});
+          
             try {
-                //     eventBus = EventBusFactory.getDefault().eventBus();
-                //    eventBus.publish(broadcastChannel, new FacesMessage(StringEscapeUtils.escapeHtml(summary), StringEscapeUtils.escapeHtml(detail)), rep);
-                //FacesMessage fm = new FacesMessage(StringEscapeUtils.escapeHtml(summary), StringEscapeUtils.escapeHtml(detail));
-                //fm.setSeverity(FacesMessage.SEVERITY_INFO);
-                sendMessage(detail, sessionChannel);
+                 sendMessage(detail, sessionChannel);
                 LOGGER.log(Level.INFO, "Sending Async Message, summary:{0}, details:{1}", new Object[]{summary, detail});
             } catch (Exception e) {
                 LOGGER.log(Level.WARNING, "NOT Sending Async Message as there was an exception, summary:{0}, details:{1}, error:{2}", new Object[]{summary, detail, e.getMessage()});
@@ -619,7 +606,7 @@ public class FutureMapEJB implements Serializable {
     }
 
     @Schedule(hour = "*", minute = "*", second = "*")
-    @TransactionAttribute(TransactionAttributeType.NEVER)// we don't want a transaction for this method as the calls within this method will invoke their own transactions
+   // @TransactionAttribute(TransactionAttributeType.NEVER)// we don't want a transaction for this method as the calls within this method will invoke their own transactions
     public void checkRunningJobsAndNotifyIfComplete(Timer t) {  // run every 1 seconds
         long start = new Date().getTime();
 
