@@ -5,6 +5,7 @@
  */
 package au.com.manlyit.fitnesscrm.stats.db;
 
+import au.com.manlyit.fitnesscrm.stats.classes.util.BaseEntity;
 import java.io.Serializable;
 import java.util.Collection;
 import javax.persistence.Basic;
@@ -47,7 +48,7 @@ import org.eclipse.persistence.config.CacheIsolationType;
     @NamedQuery(name = "PaymentMethods.findAll", query = "SELECT p FROM PaymentMethods p"),
     @NamedQuery(name = "PaymentMethods.findById", query = "SELECT p FROM PaymentMethods p WHERE p.id = :id"),
     @NamedQuery(name = "PaymentMethods.findByPaymentMethodName", query = "SELECT p FROM PaymentMethods p WHERE p.paymentMethodName = :paymentMethodName")})
-public class PaymentMethods implements Serializable {
+public class PaymentMethods implements BaseEntity, Serializable {
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "paymentMethodId")
     private Collection<ExpensesMap> expensesMapCollection;

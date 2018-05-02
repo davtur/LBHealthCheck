@@ -169,10 +169,10 @@ public class FutureMapEJB implements Serializable {
             LOGGER.log(Level.WARNING, "Push error - payments.send(message, sessionId) ", e);
         }
  }*/
-    public void sendMessage(Object facesmessage, String sessionId) {
+    public void sendMessage(String growlMessage, String sessionId) {
 
         try {
-            payments.send(facesmessage, sessionId);
+            payments.send(growlMessage, sessionId);
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, "Push error - payments.send(message, recipientUserId)", e);
         }
@@ -215,9 +215,9 @@ public class FutureMapEJB implements Serializable {
             try {
                 //     eventBus = EventBusFactory.getDefault().eventBus();
                 //    eventBus.publish(broadcastChannel, new FacesMessage(StringEscapeUtils.escapeHtml(summary), StringEscapeUtils.escapeHtml(detail)), rep);
-                FacesMessage fm = new FacesMessage(StringEscapeUtils.escapeHtml(summary), StringEscapeUtils.escapeHtml(detail));
-                fm.setSeverity(FacesMessage.SEVERITY_INFO);
-                sendMessage(fm, sessionChannel);
+                //FacesMessage fm = new FacesMessage(StringEscapeUtils.escapeHtml(summary), StringEscapeUtils.escapeHtml(detail));
+                //fm.setSeverity(FacesMessage.SEVERITY_INFO);
+                sendMessage(detail, sessionChannel);
                 LOGGER.log(Level.INFO, "Sending Async Message, summary:{0}, details:{1}", new Object[]{summary, detail});
             } catch (Exception e) {
                 LOGGER.log(Level.WARNING, "NOT Sending Async Message as there was an exception, summary:{0}, details:{1}, error:{2}", new Object[]{summary, detail, e.getMessage()});
