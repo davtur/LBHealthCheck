@@ -1166,6 +1166,7 @@ public class PaymentBean implements Serializable {
                             }
 
                         }
+
                     }
 
                     LOGGER.log(Level.INFO, "Future Map processGetScheduledPayments completed");
@@ -1176,8 +1177,6 @@ public class PaymentBean implements Serializable {
                 }
 
             } else {
-                LOGGER.log(Level.WARNING, "getScheduledPayments Response: Error - {0}, ", eziResponse.getErrorMessage().getValue());
-                pgr = new PaymentGatewayResponse(false, null, "Scheduled Payment information was not recieved from the payment gateway due to an error.", eziResponse.getError().toString(), eziResponse.getErrorMessage().getValue());
                 if (eziResponse.getError() == 921) {// no scheduled payments found
                     // mark any found in our database for this customer as deleted in the payment gateway
                     // this really shouldnt happen
@@ -1199,6 +1198,11 @@ public class PaymentBean implements Serializable {
                         }
 
                     }
+                    LOGGER.log(Level.INFO, "getScheduledPayments Response: None Found - {0}, ", eziResponse.getErrorMessage().getValue());
+                } else {
+                    LOGGER.log(Level.WARNING, "getScheduledPayments Response: Error - {0}, ", eziResponse.getErrorMessage().getValue());
+                    pgr = new PaymentGatewayResponse(false, null, "Scheduled Payment information was not recieved from the payment gateway due to an error.", eziResponse.getError().toString(), eziResponse.getErrorMessage().getValue());
+
                 }
             }
         } catch (Exception e) {
@@ -2135,7 +2139,7 @@ public class PaymentBean implements Serializable {
                                         }
                                         if (paymentDayOfWeek.contains("FRI")) {
                                             dow = Calendar.FRIDAY;
-                                        } 
+                                        }
                                         if (paymentsStartDate.before(paymentsStopDate)) {
                                             Future<PaymentGatewayResponse> pgr3 = null;
                                             LOGGER.log(Level.INFO, "Payment Bean - Update Schedule: Customer  - {0}, Start {1}, Finish {2}, period {3}, day of week {4}, day of month {5}, Amount-cents {6}, num pay {7}, tot pay amount {8}, 1st wom {9},2nd wom {10},3rd wom {11},4th wom {12},", new Object[]{cust.getUsername(), paymentsStartDate.getTime(), paymentsStopDate.getTime(), payPeriod, dow,

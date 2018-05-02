@@ -55,7 +55,7 @@ public class ConfigMapFacade extends AbstractFacade<ConfigMap> {
         cm.setConfigvalue(taggedVal);
         create(cm);
     }
-    
+
     public void editEncrypted(ConfigMap cm) {
         String valueToEncrypt = cm.getConfigvalue();
         String taggedVal = ETAG + encrypter.encrypt(valueToEncrypt);
@@ -63,13 +63,17 @@ public class ConfigMapFacade extends AbstractFacade<ConfigMap> {
         edit(cm);
     }
 
-    public  String getConfig(String key) {
+    public String getConfig(String key) {
         String val = getValueFromKey(key);
-        if (val.indexOf(ETAG) == 0) {
-            // its encrypted so decrypt
-            val = val.substring(ETAG.length());
-            String decVal = encrypter.decrypt(val);
-            return decVal;
+        if (val != null) {
+            if (val.indexOf(ETAG) == 0) {
+                // its encrypted so decrypt
+                val = val.substring(ETAG.length());
+                String decVal = encrypter.decrypt(val);
+                return decVal;
+            }
+        } else {
+            LOGGER.log(Level.WARNING, "Could not retrieve Value fromKey - ConfigMapFacade - getConfig({0}) -- NULL value returned.", key);
         }
         return val;
     }
@@ -88,7 +92,7 @@ public class ConfigMapFacade extends AbstractFacade<ConfigMap> {
                 cq.where(cb.equal(expresskey, configkey));
                 Query q = em.createQuery(cq);
                 // this is a very intensive call as it is called manay times for each page refresh - only use the cache as its mostly read only and doesn't get updated very often.
-                 q.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase);
+                q.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase);
                 //Query q = em.createNativeQuery("SELECT * FROM configMap where key = '" + configkey + "'", ConfigMap.class);
                 ConfigMap cm = (ConfigMap) q.getSingleResult();
                 if (cm != null) {
@@ -109,13 +113,13 @@ public class ConfigMapFacade extends AbstractFacade<ConfigMap> {
                 cq.where(cb.equal(expresskey, configkey));
 
                 TypedQuery<ConfigMap> q = em.createQuery(cq);
-                List<ConfigMap> cmList =  q.getResultList();
+                List<ConfigMap> cmList = q.getResultList();
                 ConfigMap cm = cmList.get(0);
                 value = cm.getConfigvalue();
                 int numberOfDups = cmList.size();
                 LOGGER.log(Level.SEVERE, "Found {0} duplicate keys for key {1} in the ConfigMap database table. Using the first one found :(", new Object[]{numberOfDups, configkey});
             } catch (Exception e) {
-                LOGGER.log(Level.INFO, "Key={0}, Value={1}", new Object[]{ky, value});
+                LOGGER.log(Level.WARNING, "Key={0}, Value={1}", new Object[]{ky, value});
                 LOGGER.log(Level.WARNING, "Failed to get this key " + configkey + " from the ConfigMap database table due to an exception:(", e);
             }
         }
@@ -156,7 +160,7 @@ public class ConfigMapFacade extends AbstractFacade<ConfigMap> {
                 cq.where(cb.equal(expresskey, configkey));
                 TypedQuery<ConfigMap> q = em.createQuery(cq);
 
-                cm =  q.getSingleResult();
+                cm = q.getSingleResult();
             } catch (NonUniqueResultException e) {
 
                 CriteriaBuilder cb = em.getCriteriaBuilder();
@@ -166,15 +170,15 @@ public class ConfigMapFacade extends AbstractFacade<ConfigMap> {
                 cq.where(cb.equal(expresskey, configkey));
 
                 TypedQuery<ConfigMap> q = em.createQuery(cq);
-                List<ConfigMap> cmList =  q.getResultList();
+                List<ConfigMap> cmList = q.getResultList();
                 cm = cmList.get(0);
-               
+
                 int numberOfDups = cmList.size();
                 LOGGER.log(Level.SEVERE, "Found {0} duplicate keys for key {1} in the ConfigMap database table. Using the first one found :(", new Object[]{numberOfDups, configkey});
 
             } catch (Exception e) {
-                if(cm != null){
-                   value = cm.getConfigvalue();  
+                if (cm != null) {
+                    value = cm.getConfigvalue();
                 }
                 LOGGER.log(Level.INFO, "Key={0}, Value={1}", new Object[]{ky, value});
                 LOGGER.log(Level.WARNING, "Failed to get this key " + configkey + " from the ConfigMap database table due to an exception:(", e);

@@ -22,6 +22,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
+
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -44,8 +45,7 @@ import org.quartz.JobDataMap;
  * @author david
  */
 public class renderMonitoringChartsCallable1_old implements Callable<CallableTaskResults> {
-    
-   
+
     private EntityManager em;
 
     private final JobDataMap paramMap;
@@ -56,21 +56,21 @@ public class renderMonitoringChartsCallable1_old implements Callable<CallableTas
     private SimpleDateFormat sdf4 = new SimpleDateFormat("HHmm");
     private SimpleDateFormat sdf5 = new SimpleDateFormat("yyyy-MM-dd");//2010-01-01
     private Connection con = null;
-    
+
     public renderMonitoringChartsCallable1_old(JobDataMap parameters) {
         this.paramMap = parameters;
     }
-    
+
     @Override
     public CallableTaskResults call() {
         CallableTaskResults result = new CallableTaskResults();
         try {
             EntityManagerFactory emf = Persistence.createEntityManagerFactory("FitnessStatsPU");
             em = emf.createEntityManager();
-            if(em != null){
-                logger.log(Level.INFO, "Yay!!!!");  
-            }else{
-                logger.log(Level.INFO, "Boooooo!!!!");  
+            if (em != null) {
+                logger.log(Level.INFO, "Yay!!!!");
+            } else {
+                logger.log(Level.INFO, "Boooooo!!!!");
             }
             con = getAMySqlDBConnection(paramMap.getString("dbConnectURL"), paramMap.getString("dbUsername"), paramMap.getString("dbPassword"));
             createChart(0);
@@ -85,16 +85,15 @@ public class renderMonitoringChartsCallable1_old implements Callable<CallableTas
                     Logger.getLogger(getClass().getName()).log(Level.SEVERE, "Closing DB connection", ex);
                 }
             }
-            if(em != null){
+            if (em != null) {
                 em.close();
             }
-             return result;
+            return result;
         }
     }
-    
+
     public void createChart(int day) {
-        
-        
+
         GregorianCalendar latestDate = new GregorianCalendar();
         GregorianCalendar earlierDate = new GregorianCalendar();
         int hours = 24;
@@ -106,16 +105,15 @@ public class renderMonitoringChartsCallable1_old implements Callable<CallableTas
         logger.log(Level.INFO, "The day offset for the chart wasn't supplied, using day 0 by default.", numberFormatException);
         
         }*/
-       // int offsetForEarlierDate = hours * -1 * (day + 1);
+        // int offsetForEarlierDate = hours * -1 * (day + 1);
         int offsetForlatestDate = hours * -1 * day;
-        
-        
+
         //earlierDate.add(Calendar.HOUR, offsetForEarlierDate);
         //earlierDate.add(Calendar.SECOND, 1);
         if (hours > 0) {
             latestDate.add(Calendar.HOUR, offsetForlatestDate);
         }
-        
+
         latestDate.set(Calendar.HOUR, 0);
         latestDate.set(Calendar.MINUTE, 0);
         latestDate.set(Calendar.SECOND, 0);
@@ -123,7 +121,7 @@ public class renderMonitoringChartsCallable1_old implements Callable<CallableTas
         earlierDate.setTime(latestDate.getTime());
         earlierDate.add(Calendar.HOUR, hours);
         earlierDate.add(Calendar.MILLISECOND, -1);
-        
+
         String earlierDateString = sdf2.format(earlierDate.getTime());
         String latestDateString = sdf2.format(latestDate.getTime());
         String message = "Day:" + day + ",  earlierDate:" + sdf2.format(earlierDate.getTime()) + ",  latestDate:" + sdf2.format(latestDate.getTime()) + ".";
@@ -133,20 +131,18 @@ public class renderMonitoringChartsCallable1_old implements Callable<CallableTas
         try {
             successfulTestResults = (ArrayList<WebsiteMonitor>) findSuccessfulTestResultsBetweenTwoDates(1, latestDate.getTime(), earlierDate.getTime());
             failedTestResults = (ArrayList<WebsiteMonitor>) findFailedTestResultsBetweenTwoDates(1, latestDate.getTime(), earlierDate.getTime());
-            
+
         } catch (Exception e) {
-            
+
             JsfUtil.addErrorMessage(e, "WebsiteMonitor Chart Critical Error", " database.");
         }
 
         //XYSeries responseTimeSeries = new XYSeries("Successful Response Times");
         // XYSeries responseTimeSeries2 = new XYSeries("Failed Tests");
-
         //  XYSeries responseTimeSeries = new XYSeries("Successful Response Times");
         //XYSeries responseTimeSeries2 = new XYSeries("Failed Tests");
         //TimeSeries responseTimeSeries = new TimeSeries("Successful Response Times");
         //TimeSeries responseTimeSeries2 = new TimeSeries("Failed Tests");
-
         TimeSeries responseTimeSeries = populateSeries("Successful Response Times", successfulTestResults);
         TimeSeries responseTimeSeries2 = populateSeries("Failed Tests", failedTestResults);
 
@@ -154,11 +150,9 @@ public class renderMonitoringChartsCallable1_old implements Callable<CallableTas
         TimeSeriesCollection dataset = new TimeSeriesCollection();
         dataset.addSeries(responseTimeSeries2);
         dataset.addSeries(responseTimeSeries);
-        
-        
-        
+
         try {
-            
+
             String xLabel = "Time: " + earlierDateString + " to " + latestDateString;
             String titleDateLabel = "Website Response Times " + sdf3.format(latestDate.getTime());
             // create the chart...
@@ -172,21 +166,20 @@ public class renderMonitoringChartsCallable1_old implements Callable<CallableTas
                     true, // include legend
                     true, // tooltips
                     false // urls
-                    );
+            );
 
             // NOW DO SOME OPTIONAL CUSTOMISATION OF THE CHART...
             jfreechart.setBackgroundPaint(Color.white);
 
 //        final StandardLegend legend = (StandardLegend) chart.getLegend();
             //      legend.setDisplaySeriesShapes(true);
-
             // get a reference to the plot for further customisation...
             XYPlot plot = jfreechart.getXYPlot();
             plot.setBackgroundPaint(Color.lightGray);
             //    plot.setAxisOffset(new Spacer(Spacer.ABSOLUTE, 5.0, 5.0, 5.0, 5.0));
             plot.setDomainGridlinePaint(Color.white);
             plot.setRangeGridlinePaint(Color.white);
-            
+
             XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
             renderer.setSeriesLinesVisible(0, false);
             renderer.setSeriesShapesVisible(1, false);
@@ -196,20 +189,16 @@ public class renderMonitoringChartsCallable1_old implements Callable<CallableTas
             // NumberAxis rangeAxis = (NumberAxis) plot.getRangeAxis();
             // rangeAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
             // OPTIONAL CUSTOMISATION COMPLETED.
-
             // Tell the chart how we would like dates to read
             DateAxis axis = (DateAxis) plot.getDomainAxis();
             axis.setDateFormatOverride(sdf4);
 
             //File chartFile = new File("/tmp/dynamichart" + day + ".chart");
             //ChartUtilities.saveChartAsPNG(chartFile, jfreechart, 800, 500);
-
-
             // chart = new DefaultStreamedContent(new FileInputStream(chartFile), "image/png");
-
             BufferedImage bufImg = jfreechart.createBufferedImage(800, 500);
             ByteArrayOutputStream os = new ByteArrayOutputStream();
-            
+
             //JPEGImageEncoder encoder = JPEGCodec.createJPEGEncoder(os);
             //encoder.encode(bufImg);
             ImageIO.write(bufImg, "jpeg", os);
@@ -218,23 +207,19 @@ public class renderMonitoringChartsCallable1_old implements Callable<CallableTas
             saveChartToDB(os, 1, new Date());
 
             //chart = new DefaultStreamedContent(is, "image/png");
-
             //chart =  new DefaultStreamedContent(new ByteArrayInputStream(png.getRawData()), "image/png"); // or whatever your image mime type
-
         } catch (Exception e) {
-            
-            
+
             logger.log(Level.WARNING, "bundle_key", e);
         }
 
-
         //return chart;
     }
-    
+
     private TimeSeries populateSeries(String label, ArrayList<WebsiteMonitor> sqlResults) {
         TimeSeries series = null;
         try {
-            
+
             series = new TimeSeries(label);
             int size = sqlResults.size();
             for (int i = 0; i < size; i++) {
@@ -251,30 +236,36 @@ public class renderMonitoringChartsCallable1_old implements Callable<CallableTas
                         logger.log(Level.WARNING, "Couldn't add series point!!", e);
                     }
                 }
-                
+
             }
-            
+
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, "Populate Series Method, Critical Error", "Couldn't populate the series with SQL results.");
         }
-        
-        
+
         return series;
     }
-    
+
     private synchronized Connection getAMySqlDBConnection(String connectUrl, String user, String pass) {
         Connection dbCon = null;
         try {
             //String dbUrl = "jdbc:mysql://" + failFromServer + ":3306/" + db;
+
+            java.util.Properties properties = new java.util.Properties();
+            properties.setProperty("user", user);
+            properties.setProperty("password", pass);
+            properties.setProperty("useSSL", "false");
+            properties.setProperty("autoReconnect", "true");
+
             try {
                 Class.forName("com.mysql.jdbc.Driver").newInstance();
             } catch (Exception ex) {
                 java.util.logging.Logger.getLogger(getClass().getName()).log(java.util.logging.Level.WARNING, "Couldnt load the com.mysql.jdbc.Driver class\r\n {0}\r\n{1}", new Object[]{connectUrl, ex.getMessage()});
             }
             try {
-                dbCon = DriverManager.getConnection(connectUrl, user, pass);
+                dbCon = DriverManager.getConnection(connectUrl, properties);
             } catch (SQLException ex) {
-                
+
                 java.util.logging.Logger.getLogger(getClass().getName()).log(java.util.logging.Level.WARNING, "Couldnt get a connection :{0}\r\n{1}", new Object[]{connectUrl, ex.getMessage()});
             } catch (Exception ex) {
                 java.util.logging.Logger.getLogger(getClass().getName()).log(java.util.logging.Level.WARNING, "Couldnt get a connection :{0}\r\n{1}", new Object[]{connectUrl, ex.getMessage()});
@@ -286,23 +277,23 @@ public class renderMonitoringChartsCallable1_old implements Callable<CallableTas
             return dbCon;
         }
     }
-    
+
     public List<WebsiteMonitor> findSuccessfulTestResultsBetweenTwoDates(int test_id, Date top, Date bottom) {
-        
+
         String SQL = "SELECT * FROM website_monitor WHERE start_time > '" + sdf.format(bottom) + "' and start_time < '" + sdf.format(top) + "' and test_type = '" + test_id + "' and result = '0'  order by id DESC";
         return parseResults(executeDBQuery(SQL));
     }
-    
+
     public List<WebsiteMonitor> findFailedTestResultsBetweenTwoDates(int test_id, Date top, Date bottom) {
-        
+
         String SQL = "SELECT * FROM website_monitor WHERE start_time > '" + sdf.format(bottom) + "' and start_time < '" + sdf.format(top) + "' and test_type = '" + test_id + "' and result > '0'  order by id DESC";
-        
+
         return parseResults(executeDBQuery(SQL));
-        
+
     }
-    
+
     private List<WebsiteMonitor> parseResults(ResultSet rs) {
-        
+
         ArrayList<WebsiteMonitor> results = new ArrayList();
         WebsiteMonitor wm = null;
         try {
@@ -316,26 +307,26 @@ public class renderMonitoringChartsCallable1_old implements Callable<CallableTas
                 wm.setDescription(rs.getString("description"));
                 wm.setStartTime(rs.getDate("job_to_run_on_fail"));
                 wm.setResult(rs.getInt("result"));
-                results.add(wm);                
+                results.add(wm);
             }
         } catch (SQLException sQLException) {
             logger.log(Level.WARNING, "Couldn't get chart results from database", sQLException);
         }
         return results;
     }
-    
+
     private ResultSet executeDBQuery(String query) {
-        
+
         PreparedStatement prepStmt = null;
         ResultSet rs = null;
-        
+
         try {
             prepStmt = con.prepareStatement(query);
             rs = prepStmt.executeQuery();
-            
+
         } catch (SQLException e) {
             java.util.logging.Logger.getLogger(getClass().getName()).log(java.util.logging.Level.SEVERE, "Could not persist Chart results", e);
-            
+
         } catch (Exception ex) {
             String message = "The query threw an exception : " + query + "\r\n" + ex.getMessage();
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, message);
@@ -345,46 +336,45 @@ public class renderMonitoringChartsCallable1_old implements Callable<CallableTas
                     prepStmt.close();
                 }
                 prepStmt = null;
-                
-                
+
             } catch (Exception e) {
                 java.util.logging.Logger.getLogger(getClass().getName()).log(java.util.logging.Level.WARNING, "Error:Couldn't close th eprepared statement!!", e);
             }
         }
         return rs;
     }
-      private Monitoringcharts getTodaysChartIfItExists(Date chartDate) {
+
+    private Monitoringcharts getTodaysChartIfItExists(Date chartDate) {
         String queryToRun = "Select * from monitoringcharts where date >= '" + sdf5.format(chartDate) + " 00:00:00' AND date <= '" + sdf5.format(chartDate) + " 23:59:59' order by date ASC";
- 
+
         PreparedStatement prepStmt = null;
         ResultSet rs = null;
         Monitoringcharts mc = new Monitoringcharts(-1);
-         int count = 0;
+        int count = 0;
         try {
             prepStmt = con.prepareStatement(queryToRun);
             rs = prepStmt.executeQuery();
-         try {
-            while (rs.next()) {
-                mc.setId(rs.getInt("id"));
-                mc.setDate(rs.getDate("date"));
-                mc.setType(rs.getInt("type"));
-                mc.setChart(rs.getBytes("chart"));
-                count++;
+            try {
+                while (rs.next()) {
+                    mc.setId(rs.getInt("id"));
+                    mc.setDate(rs.getDate("date"));
+                    mc.setType(rs.getInt("type"));
+                    mc.setChart(rs.getBytes("chart"));
+                    count++;
+                }
+            } catch (SQLException sQLException) {
+                logger.log(Level.INFO, "Couldn't get a count", sQLException);
             }
-        } catch (SQLException sQLException) {
-            logger.log(Level.INFO, "Couldn't get a count",sQLException);
-        }
-        if(count > 1){
-            logger.log(Level.INFO, "More than 1 chart existed so using the latest for Date {0}", sdf5.format(chartDate));
-        }
-        if(count == 0){
-            logger.log(Level.INFO, "No charts found for Date {0}", sdf5.format(chartDate));
-        }
+            if (count > 1) {
+                logger.log(Level.INFO, "More than 1 chart existed so using the latest for Date {0}", sdf5.format(chartDate));
+            }
+            if (count == 0) {
+                logger.log(Level.INFO, "No charts found for Date {0}", sdf5.format(chartDate));
+            }
 
-            
         } catch (SQLException e) {
             java.util.logging.Logger.getLogger(getClass().getName()).log(java.util.logging.Level.SEVERE, "Could not persist Chart results", e);
-            
+
         } catch (Exception ex) {
             String message = "The query threw an exception : " + queryToRun + "\r\n" + ex.getMessage();
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, message);
@@ -394,32 +384,31 @@ public class renderMonitoringChartsCallable1_old implements Callable<CallableTas
                     prepStmt.close();
                 }
                 prepStmt = null;
-                
-                
+
             } catch (Exception e) {
                 java.util.logging.Logger.getLogger(getClass().getName()).log(java.util.logging.Level.WARNING, "Error:Couldn't close th eprepared statement!!", e);
             }
         }
         return mc;
     }
-    
+
     private void saveChartToDB(ByteArrayOutputStream image, int type, Date chartDate) {
         Monitoringcharts mc = getTodaysChartIfItExists(chartDate);
-        
+
         PreparedStatement prepStmt = null;
         String insertQuery = "INSERT INTO monitoringcharts (id, type, date, chart) "
                 + "VALUES ( ?,?,?,?);";
-        if(mc.getId() == -1){
+        if (mc.getId() == -1) {
             insertQuery = "UPDATE monitoringcharts set  type=?, date=?, chart=? where id=? ";
         }
-        
+
         try {
             // if we use jpa we can use this
             Monitoringcharts wsm = new Monitoringcharts();
-            if(mc.getId() != -1){
-              wsm.setId(mc.getId());  
-            }else{
-            wsm.setId(0);
+            if (mc.getId() != -1) {
+                wsm.setId(mc.getId());
+            } else {
+                wsm.setId(0);
             }
             wsm.setType(type);
             wsm.setChart(image.toByteArray());
@@ -430,11 +419,10 @@ public class renderMonitoringChartsCallable1_old implements Callable<CallableTas
             prepStmt.setDate(3, new java.sql.Date(wsm.getDate().getTime()));
             prepStmt.setBytes(4, image.toByteArray());
             prepStmt.executeUpdate();
-            
+
         } catch (SQLException e) {
             java.util.logging.Logger.getLogger(getClass().getName()).log(java.util.logging.Level.SEVERE, "Could not persist Chart results", e);
-            
-            
+
         } catch (Exception ex) {
             String message = "The query threw an exception : " + insertQuery + "\r\n" + ex.getMessage();
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, message);
@@ -444,7 +432,7 @@ public class renderMonitoringChartsCallable1_old implements Callable<CallableTas
                     prepStmt.close();
                 }
                 prepStmt = null;
-                
+
             } catch (Exception e) {
                 java.util.logging.Logger.getLogger(getClass().getName()).log(java.util.logging.Level.WARNING, "Error:Couldn't close th eprepared statement!!", e);
             } finally {
@@ -455,9 +443,9 @@ public class renderMonitoringChartsCallable1_old implements Callable<CallableTas
                         Logger.getLogger(getClass().getName()).log(Level.SEVERE, "Closing DB connection", ex);
                     }
                 }
-                
+
             }
-            
+
         }
     }
 }

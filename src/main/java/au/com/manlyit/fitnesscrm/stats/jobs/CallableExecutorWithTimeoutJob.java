@@ -288,13 +288,18 @@ public class CallableExecutorWithTimeoutJob implements Job {
         Connection con = null;
         try {
             //String dbUrl = "jdbc:mysql://" + failFromServer + ":3306/" + db;
+             java.util.Properties properties = new java.util.Properties();
+            properties.setProperty("user", user);
+            properties.setProperty("password", pass);
+            properties.setProperty("useSSL", "false");
+            properties.setProperty("autoReconnect", "true");
             try {
                 Class.forName("com.mysql.jdbc.Driver").newInstance();
             } catch (Exception ex) {
                 java.util.logging.Logger.getLogger(getClass().getName()).log(java.util.logging.Level.WARNING, "Couldnt load the com.mysql.jdbc.Driver class\r\n {0}\r\n{1}", new Object[]{connectUrl, ex.getMessage()});
             }
             try {
-                con = DriverManager.getConnection(connectUrl, user, pass);
+                con = DriverManager.getConnection(connectUrl, properties);
             } catch (SQLException ex) {
 
                 java.util.logging.Logger.getLogger(getClass().getName()).log(java.util.logging.Level.WARNING, "Couldnt get a connection :{0}\r\n{1}", new Object[]{connectUrl, ex.getMessage()});
