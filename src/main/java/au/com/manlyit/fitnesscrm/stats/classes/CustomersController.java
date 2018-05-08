@@ -386,7 +386,8 @@ public class CustomersController implements Serializable {
             }
             recreateAllAffectedPageModels();
             setCustomerTabsEnabled(true);
-            RequestContext.getCurrentInstance().execute("updatePaymentForms();");
+            //RequestContext.getCurrentInstance().execute("updatePaymentForms();");
+            futureMap.sendMessage(controller.getSessionId(), "", "UpdatePaymentForms");
 
         }
     }

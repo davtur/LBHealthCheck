@@ -2153,7 +2153,8 @@ public class EziDebitPaymentGateway implements Serializable {
         //RequestContext.getCurrentInstance().update(als);
         //RequestContext.getCurrentInstance().update("@(.updatePaymentInfo)");
         //RequestContext.getCurrentInstance().update("\\:tv\\:paymentsForm");
-        RequestContext.getCurrentInstance().execute("updatePaymentForms();");
+        futureMap.sendMessage(getSessionId(),"UpdatePaymentForms","UpdatePaymentForms");
+        //RequestContext.getCurrentInstance().execute("updatePaymentForms();");
 
         //LOGGER.log(Level.INFO, "Session BEAN RequestContext --------------------------------------------------");
         LOGGER.log(Level.INFO, "Session BEAN RequestContext ------>> Updated Payment Table Components ( execute(\"updatePaymentForms();\") ) <<-------");

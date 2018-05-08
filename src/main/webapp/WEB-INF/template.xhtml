@@ -22,21 +22,27 @@
             function handleOpen(event)
                 {
                     console.log(event);
-                    console.log('Websocket Opened!')
+                    console.log('Websocket Opened!');
                 }
             function handleMessage(message, channelName, event)
                 {
                     console.log("Recieved PUSH MESSAGE");
                     console.log(message, channelName, event);
+                    if (message === "UpdatePaymentForms")
+                        {
+                            updatePaymentForms();
+                            // alert("updated Payment Forms");
+                        } else
+                        {
+                            PF('growlWidget').renderMessage({"summary": "Update",
+                                "detail": message,
+                                "severity": "info"});
+                            //  alert('Message Recieved!');
 
-                    PF('growlWidget').renderMessage({"summary": "Update",
-                        "detail": message,
-                        "severity": "info"});
-                  //  alert('Message Recieved!');
 
-
-                   // notifyListener();
-                    //alert('Message Recieved!')
+                            notifyListener();
+                        }
+                    // alert('Message Recieved!')
                 }
             function handleClose(code, channel, event)
                 {
@@ -58,12 +64,10 @@
     </h:head>
 
     <h:body  styleClass="main-body"> 
-        <f:websocket user="#{ezidebit.sessionId}" channel="payments" onopen="handleOpen" onmessage="handleMessage" onclose="handleClose" >
-            <f:ajax event="payments" listener="#{ezidebit.remoteCommandListener}" />
-        </f:websocket>
+
         <div class="layout-wrapper">
             <p:growl id="growl" widgetVar="growlWidget"    showDetail="true"    />
-            <!-- <ui:include src="./megamenu.xhtml" />-->
+            <!-- <ui:include src="./megamenu.xhtml" /> Blah2-->
             <ui:include src="./topbar.xhtml" />
             <ui:include src="./sidebar.xhtml" />
             <!-- <ui:include src="./right-sidebar.xhtml" />-->
@@ -96,15 +100,18 @@
             </f:facet>
         </p:ajaxStatus>
         <h:form id="remoteCommandForm">
-
-           <!-- <p:remoteCommand name="socketOpenEvent"   actionListener="#{pushSocketBean.pushChannelOpen}"  />
-            <p:remoteCommand name="socketCloseEvent"   actionListener="#{pushSocketBean.pushChannelClose}"  />   -->      
+            <f:websocket user="#{ezidebit.sessionId}" channel="payments" onopen="handleOpen" onmessage="handleMessage" onclose="handleClose" >
+               <f:ajax event="message" listener="#{ezidebit.remoteCommandListener}"  />
+            </f:websocket>
+             <!--    <p:remoteCommand name="socketOpenEvent"   actionListener="#{pushSocketBean.pushChannelOpen}"  />
+                <p:remoteCommand name="socketCloseEvent"   actionListener="#{pushSocketBean.pushChannelClose}"  />   -->      
             <p:remoteCommand name="updatePaymentForms" update="@(.updatePaymentInfo)" />
+            <p:remoteCommand name="notifyListener" actionListener="#{ezidebit.remoteCommandListener}" />
          <!--   <p:remoteCommand name="handleReconnect" actionListener="#{pushSocketBean.pushChannelReconnect}" />
             <p:outputLabel rendered="#{pushSocketBean.pushChannel}" value="" />
 
 
-            <p:remoteCommand name="notifyListener" actionListener="#{ezidebit.remoteCommandListener}" />-->
+            -->
         </h:form>
 
         <!-- <p:socket onMessage="handleMessage" onError="handleError" onTransportFailure="handleTransportFailure"  onClose="handleClose" channel="/payments" onOpen="handleOpen" onReconnect="handleReconnect" autoConnect="false"  widgetVar="subscriber">
