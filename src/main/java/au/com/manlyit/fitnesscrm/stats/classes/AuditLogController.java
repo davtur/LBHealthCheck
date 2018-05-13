@@ -28,7 +28,7 @@ import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
 import javax.inject.Inject;
 import javax.inject.Named;
-import org.primefaces.context.RequestContext;
+import org.primefaces.PrimeFaces;
 import org.primefaces.event.RowEditEvent;
 import org.primefaces.event.SelectEvent;
 
@@ -177,8 +177,8 @@ public class AuditLogController implements Serializable {
         Date newDate = (Date)o;
         lazyModel.setFromDate(newDate);
        // lazyModel.setToDate(endDate);
-         RequestContext.getCurrentInstance().execute("PF('auditLogControllerTable').filter();");
-       // RequestContext requestContext = RequestContext.getCurrentInstance();
+         PrimeFaces.current().executeScript("PF('auditLogControllerTable').filter();");
+       // PrimeFaces instance = instance.current();
 
     }
     public void endDateChangedOnAuditLogTable(SelectEvent event) {
@@ -188,8 +188,8 @@ public class AuditLogController implements Serializable {
         Date newDate = (Date)o;
         //lazyModel.setFromDate(startDate);
         lazyModel.setToDate(newDate);
-         RequestContext.getCurrentInstance().execute("PF('auditLogControllerTable').filter();");
-       // RequestContext requestContext = RequestContext.getCurrentInstance();
+         PrimeFaces.current().executeScript("PF('auditLogControllerTable').filter();");
+       // PrimeFaces instance = instance.current();
 
     }
 
@@ -310,7 +310,7 @@ public class AuditLogController implements Serializable {
     }
 
     private void recreateModel() {
-        RequestContext.getCurrentInstance().execute("PF('sessionsDataTable').filter();");
+        PrimeFaces.current().executeScript("PF('sessionsDataTable').filter();");
         // items = null;
         //filteredItems = null;
     }

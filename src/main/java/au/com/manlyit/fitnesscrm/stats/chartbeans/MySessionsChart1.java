@@ -940,9 +940,9 @@ public class MySessionsChart1 implements Serializable {
         dashboardMonthlyRevenueModel = null;
         dashboardMonthlySessionsModel = null;
         expensesBySupplierModel = null;
-        // RequestContext requestContext = RequestContext.getCurrentInstance();
+        // PrimeFaces instance = PrimeFaces.current();
 
-        // requestContext.execute("PF('sessionsDataTable').filter();");
+        // PrimeFaces.execute("PF('sessionsDataTable').filter();");
     }
 
     public void supplierChartItemSelect(ItemSelectEvent event) {

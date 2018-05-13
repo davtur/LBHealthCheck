@@ -58,7 +58,7 @@ import org.apache.sanselan.formats.jpeg.JpegImageMetadata;
 import org.apache.sanselan.formats.tiff.TiffField;
 import org.apache.sanselan.formats.tiff.constants.TagInfo;
 import org.apache.sanselan.formats.tiff.constants.TiffConstants;
-import org.primefaces.context.RequestContext;
+import org.primefaces.PrimeFaces;
 import org.primefaces.event.SelectEvent;
 import org.primefaces.event.FileUploadEvent;
 import org.primefaces.extensions.event.ImageAreaSelectEvent;
@@ -124,7 +124,7 @@ public class CustomerImagesController implements Serializable {
         if (loggedInUser != null) {
             Customers cust = ejbCustomersFacade.findCustomerByUsername(loggedInUser);
             createGallery(cust.getId());
-            RequestContext.getCurrentInstance().update("@(.parentOfUploadPhoto) ");
+            PrimeFaces.current().ajax().update("@(.parentOfUploadPhoto) ");
         }
     }
 
@@ -797,7 +797,7 @@ public class CustomerImagesController implements Serializable {
             JsfUtil.addErrorMessage("The file upload failed. Please try again.");
         }
         setSaveButtonDisabled(false);
-        //RequestContext.getCurrentInstance().update("createCustomerForm");
+        //PrimeFaces.current().ajax().update("createCustomerForm");
     }
 
     private BufferedImage rotateImage(int degrees, BufferedImage oldImage) {
@@ -950,7 +950,7 @@ public class CustomerImagesController implements Serializable {
         current = uploadedImage;
         createFromDialogue();
         uploadedImage = null;
-        RequestContext.getCurrentInstance().update("@(.parentOfUploadPhoto) ");
+        PrimeFaces.current().ajax().update("@(.parentOfUploadPhoto) ");
     }
 
     public void createFromDialogue() {
@@ -1236,7 +1236,7 @@ public class CustomerImagesController implements Serializable {
         if (imageId != null) {
             setUploadedImage(ejbFacade.find(Integer.valueOf(imageId)));
         }
-        RequestContext.getCurrentInstance().openDialog("uploadPhotoDialogueWidget");
+        PrimeFaces.current().dialog().openDynamic("uploadPhotoDialogueWidget");
     }
 
     public StreamedContent getImage() throws IOException {
@@ -1347,7 +1347,7 @@ public class CustomerImagesController implements Serializable {
                 CustomerImages custImage = ejbFacade.find(Integer.valueOf(item));
                 if (custImage != null) {
                     setEditingImage(custImage);
-                    RequestContext.getCurrentInstance().execute("PF('editPhotoDialogueWidget').show();");
+                    PrimeFaces.current().executeScript("PF('editPhotoDialogueWidget').show();");
                 }
             }
         }
@@ -1383,7 +1383,7 @@ public class CustomerImagesController implements Serializable {
 
                             ejbFacade.remove(custImage);
                             controller.removeImageFromList(custImage);
-                            RequestContext.getCurrentInstance().update("@(.parentOfUploadPhoto) ");
+                            PrimeFaces.current().ajax().update("@(.parentOfUploadPhoto) ");
 
                         }
                     } catch (Exception e) {
@@ -1448,7 +1448,7 @@ public class CustomerImagesController implements Serializable {
             } catch (Exception e) {
                 JsfUtil.addErrorMessage(e, "Trying to set Barefoot-image_100_by_100.jpg as the defailt image failed!");
             }
-            //  RequestContext.getCurrentInstance().update("@(.dialoguePhoto)");
+            //  PrimeFaces.current().ajax().update("@(.dialoguePhoto)");
         }
         return uploadedImage;
     }
@@ -1485,7 +1485,7 @@ public class CustomerImagesController implements Serializable {
                 Integer imageId = Integer.parseInt(id);
                 CustomerImages ci = ejbFacade.find(imageId);
                 current = ci;
-                RequestContext.getCurrentInstance().update(":myStatsForm:photo2");
+                PrimeFaces.current().ajax().update(":myStatsForm:photo2");
                 sc = ci.getImageStream();
             } else {
                 try {
@@ -1533,7 +1533,7 @@ public class CustomerImagesController implements Serializable {
 
         images.remove(image);
         imageListSize = images.size();
-        RequestContext.getCurrentInstance().update("@(.parentOfUploadPhoto) ");
+        PrimeFaces.current().ajax().update("@(.parentOfUploadPhoto) ");
 
     }
 
@@ -1545,7 +1545,7 @@ public class CustomerImagesController implements Serializable {
             }
 
         }
-        RequestContext.getCurrentInstance().update("@(.parentOfUploadPhoto) ");
+        PrimeFaces.current().ajax().update("@(.parentOfUploadPhoto) ");
         return images;
     }
 

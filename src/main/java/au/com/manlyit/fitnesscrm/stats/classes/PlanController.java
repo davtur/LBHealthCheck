@@ -24,7 +24,7 @@ import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
 import javax.inject.Inject;
 import javax.inject.Named;
-import org.primefaces.context.RequestContext;
+import org.primefaces.PrimeFaces;
 import org.primefaces.event.RowEditEvent;
 import org.primefaces.event.SelectEvent;
 
@@ -241,14 +241,14 @@ public class PlanController implements Serializable {
 
     public void addSubItemToPlan(ActionEvent event) {
         setSubItem(true);
-        RequestContext.getCurrentInstance().update("formPlanCreate1");
-        RequestContext.getCurrentInstance().execute("PF('planCreateDialogue').show()");
+        PrimeFaces.current().ajax().update("formPlanCreate1");
+        PrimeFaces.current().executeScript("PF('planCreateDialogue').show()");
     }
 
     public void addPlan(ActionEvent event) {
         setSubItem(false);
-        RequestContext.getCurrentInstance().update("formPlanCreate1");
-        RequestContext.getCurrentInstance().execute("PF('planCreateDialogue').show()");
+        PrimeFaces.current().ajax().update("formPlanCreate1");
+        PrimeFaces.current().executeScript("PF('planCreateDialogue').show()");
 
     }
 

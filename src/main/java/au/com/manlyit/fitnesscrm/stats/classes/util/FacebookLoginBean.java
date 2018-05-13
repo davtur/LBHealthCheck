@@ -24,7 +24,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.primefaces.context.RequestContext;
+import org.primefaces.PrimeFaces;
 
 /**
  *
@@ -45,7 +45,7 @@ public class FacebookLoginBean implements Serializable {
         
         try {
             String destination = "window.location=\"" + getFacebookUrlAuth() + "\"";
-            RequestContext.getCurrentInstance().execute(destination);
+            PrimeFaces.current().executeScript(destination);
             Logger.getLogger(FacebookLoginBean.class.getName()).log(Level.INFO, "facebookRedirect to : {0}", destination);
         } catch (Exception e) {
             Logger.getLogger(FacebookLoginBean.class.getName()).log(Level.SEVERE, "facebookRedirect failed", e);

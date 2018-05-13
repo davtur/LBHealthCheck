@@ -31,7 +31,7 @@ import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
 import javax.inject.Inject;
 import javax.inject.Named;
-import org.primefaces.context.RequestContext;
+import org.primefaces.PrimeFaces;
 import org.primefaces.event.RowEditEvent;
 import org.primefaces.event.SelectEvent;
 
@@ -324,7 +324,7 @@ public class SurveyQuestionsController implements Serializable {
             subItems = new ArrayList<>(current.getSurveyQuestionSubitemsCollection());
         }
         subItem = new SurveyQuestionSubitems(0, "");
-        RequestContext.getCurrentInstance().update(":SurveyquestionsEditForm");
+        PrimeFaces.current().ajax().update(":SurveyquestionsEditForm");
     }
 
     public String prepareEdit() {

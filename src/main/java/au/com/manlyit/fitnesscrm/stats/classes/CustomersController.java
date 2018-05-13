@@ -45,6 +45,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.ejb.TransactionAttribute;
 import static javax.ejb.TransactionAttributeType.REQUIRES_NEW;
+import javax.el.ELException;
 import javax.enterprise.context.SessionScoped;
 import javax.faces.application.FacesMessage;
 import javax.faces.component.UIComponent;
@@ -61,7 +62,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import org.primefaces.component.datatable.DataTable;
 import org.primefaces.component.tabview.Tab;
-import org.primefaces.context.RequestContext;
+import org.primefaces.PrimeFaces;
 import org.primefaces.event.RowEditEvent;
 import org.primefaces.event.SelectEvent;
 import org.primefaces.event.TabChangeEvent;
@@ -287,15 +288,16 @@ public class CustomersController implements Serializable {
     }
 
     public void setSelected(Customers cust) {
-        if (cust != null) {
-            lastSelected = current;
-            current = cust;
+        try {
+            if (cust != null) {
+                lastSelected = current;
+                current = cust;
+                
+                selectedGroups = ejbGroupsFacade.getCustomersGroups(cust);
+                customerGroupsList = null;
 
-            selectedGroups = ejbGroupsFacade.getCustomersGroups(cust);
-            customerGroupsList = null;
 
-
-            /*customerGroupsList = new ArrayList<>();
+                /*customerGroupsList = new ArrayList<>();
              List<String> distinctGroups = ejbGroupsFacade.getGroups();
              if (distinctGroups != null) {
              distinctGroups.remove("DEVELOPER");
@@ -311,84 +313,87 @@ public class CustomersController implements Serializable {
              }
              } 
              }*/
-            FacesContext context = FacesContext.getCurrentInstance();
-            EziDebitPaymentGateway controller = (EziDebitPaymentGateway) context.getApplication().getELResolver().getValue(context.getELContext(), null, "ezidebit");
-            //controller.setSelectedCustomer(cust);
-            controller.setCurrentCustomerDetails(null);
-            controller.clearCustomerProvisionedInPaymentGW();
-            controller.setRefreshIFrames(true);
-            futureMap.cancelFutures(controller.getSessionId());
-            controller.setWaitingForPaymentDetails(false);
-            // setAsyncOperationRunning(false);
-            // if(cust.getPaymentParametersId().getStatusCode().startsWith("D") || cust.getPaymentParametersId().getStatusCode().isEmpty()){
-            controller.getCustDetailsFromEzi();
-            // }
-            if (controller.isTheCustomerProvisionedInThePaymentGateway()) {
-                // controller.getCustDetailsFromEzi();
+                FacesContext context = FacesContext.getCurrentInstance();
+                EziDebitPaymentGateway controller = (EziDebitPaymentGateway) context.getApplication().getELResolver().getValue(context.getELContext(), null, "ezidebit");
+                //controller.setSelectedCustomer(cust);
+                controller.setCurrentCustomerDetails(null);
+                controller.clearCustomerProvisionedInPaymentGW();
+                controller.setRefreshIFrames(true);
+                futureMap.cancelFutures(controller.getSessionId());
+                controller.setWaitingForPaymentDetails(false);
+                // setAsyncOperationRunning(false);
+                // if(cust.getPaymentParametersId().getStatusCode().startsWith("D") || cust.getPaymentParametersId().getStatusCode().isEmpty()){
+                controller.getCustDetailsFromEzi();
+                // }
+                if (controller.isTheCustomerProvisionedInThePaymentGateway()) {
+                    // controller.getCustDetailsFromEzi();
 
-                controller.getPayments(18, 2);
-            } else {
-                controller.setCustomerDetailsHaveBeenRetrieved(true);
-            }
-            controller.setProgress(0);
-            //eziDebitPaymentGatewayController.setSelectedCustomer(cust);
-            SuppliersController suppliersController = (SuppliersController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "suppliersController");
-            Suppliers sup = null;
-            if (cust.getSuppliersCollection() != null) {
-
-                if (cust.getSuppliersCollection().size() >= 1) {
-                    Iterator<Suppliers> i = cust.getSuppliersCollection().iterator();
-                    if (i.hasNext()) {
-                        sup = i.next();
+                    controller.getPayments(18, 2);
+                } else {
+                    controller.setCustomerDetailsHaveBeenRetrieved(true);
+                }
+                controller.setProgress(0);
+                //eziDebitPaymentGatewayController.setSelectedCustomer(cust);
+                SuppliersController suppliersController = (SuppliersController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "suppliersController");
+                Suppliers sup = null;
+                if (cust.getSuppliersCollection() != null) {
+                    
+                    if (cust.getSuppliersCollection().size() >= 1) {
+                        Iterator<Suppliers> i = cust.getSuppliersCollection().iterator();
+                        if (i.hasNext()) {
+                            sup = i.next();
+                        }
+                    }
+                    if (cust.getSuppliersCollection().size() > 1) {
+                        LOGGER.log(Level.WARNING, "There should only be one Supplier allocated to one customer. Username = {0}", new Object[]{cust.getUsername()});
+                    }
+                    
+                    if (sup != null) {
+                        suppliersController.setSelected(sup);
+                        
                     }
                 }
-                if (cust.getSuppliersCollection().size() > 1) {
-                    LOGGER.log(Level.WARNING, "There should only be one Supplier allocated to one customer. Username = {0}", new Object[]{cust.getUsername()});
+                
+                if (sup == null) {
+                    
+                    if (isCustomerInRole(cust, "TRAINER")) {
+                        LOGGER.log(Level.INFO, "Creating  new supplier details for contractor as it wasn't found in the DB. Contractor username:{0}", new Object[]{cust.getUsername()});
+                        sup = new Suppliers(0);
+                        sup.setSupplierName(cust.getFirstname() + "" + cust.getLastname());
+                        sup.setDescription("Internal Contractor");
+                        sup.setInternalContractorId(cust);
+                        sup.setSupplierCompanyNumber(" ");
+                        sup.setSupplierCompanyNumberType("ABN");
+                        suppliersFacade.create(sup);
+                        suppliersController.setSelected(sup);
+                    } else {
+                        suppliersController.setSelected(null);
+                        suppliersController.setSelectedContractorRate(null);
+                        suppliersController.setRateItems(null);
+                        suppliersController.setSessionTypesArray(null);
+                    }
                 }
-
-                if (sup != null) {
-                    suppliersController.setSelected(sup);
-
+                MySessionsChart1 c2 = context.getApplication().evaluateExpressionGet(context, "#{mySessionsChart1}", MySessionsChart1.class);
+                c2.setSelectedCustomer(cust);
+                //mySessionsChart1Controller.setSelectedCustomer(cust);
+                selectedItemIndex = -1;
+                checkPass = current.getPassword();
+                if (cust.getQuestionnaireMapCollection() == null) {
+                    //addQuestionnaireMapItemsToCustomer(cust);
+                    LOGGER.log(Level.SEVERE, "The customers questionaire collection is NULL. This shouldn't happen as it is created when the customer is created.", cust.getUsername());
                 }
-            }
-
-            if (sup == null) {
-
-                if (isCustomerInRole(cust, "TRAINER")) {
-                    LOGGER.log(Level.INFO, "Creating  new supplier details for contractor as it wasn't found in the DB. Contractor username:{0}", new Object[]{cust.getUsername()});
-                    sup = new Suppliers(0);
-                    sup.setSupplierName(cust.getFirstname() + "" + cust.getLastname());
-                    sup.setDescription("Internal Contractor");
-                    sup.setInternalContractorId(cust);
-                    sup.setSupplierCompanyNumber(" ");
-                    sup.setSupplierCompanyNumberType("ABN");
-                    suppliersFacade.create(sup);
-                    suppliersController.setSelected(sup);
-                } else {
-                    suppliersController.setSelected(null);
-                    suppliersController.setSelectedContractorRate(null);
-                    suppliersController.setRateItems(null);
-                    suppliersController.setSessionTypesArray(null);
+                
+                if (cust.getProfileImage() == null) {
+                    createDefaultCustomerProfilePicture(cust);
                 }
+                recreateAllAffectedPageModels();
+                setCustomerTabsEnabled(true);
+                //PrimeFaces.current().executeScript("updatePaymentForms();");
+                futureMap.sendMessage(controller.getSessionId(), "", "UpdatePaymentForms");
+                
             }
-            MySessionsChart1 c2 = context.getApplication().evaluateExpressionGet(context, "#{mySessionsChart1}", MySessionsChart1.class);
-            c2.setSelectedCustomer(cust);
-            //mySessionsChart1Controller.setSelectedCustomer(cust);
-            selectedItemIndex = -1;
-            checkPass = current.getPassword();
-            if (cust.getQuestionnaireMapCollection() == null) {
-                //addQuestionnaireMapItemsToCustomer(cust);
-                LOGGER.log(Level.SEVERE, "The customers questionaire collection is NULL. This shouldn't happen as it is created when the customer is created.", cust.getUsername());
-            }
-
-            if (cust.getProfileImage() == null) {
-                createDefaultCustomerProfilePicture(cust);
-            }
-            recreateAllAffectedPageModels();
-            setCustomerTabsEnabled(true);
-            //RequestContext.getCurrentInstance().execute("updatePaymentForms();");
-            futureMap.sendMessage(controller.getSessionId(), "", "UpdatePaymentForms");
-
+        } catch (ELException eLException) {
+            LOGGER.log(Level.SEVERE, "Setting the selected customer from the customer list tab failed.",eLException.getMessage());
         }
     }
 
@@ -544,13 +549,13 @@ public class CustomersController implements Serializable {
             notesItems = null;
 
             //als.add("growl");
-            RequestContext rc = RequestContext.getCurrentInstance();
+            PrimeFaces rc = PrimeFaces.current();
             if (rc != null) {
                 ArrayList<String> als = new ArrayList<>();
                 als.add("@(.updateNotesDataTable)");
-                rc.update(als);
+                rc.ajax().update(als);
             }
-            //  RequestContext.getCurrentInstance().update("@(.updateNotesDataTable)");
+            //  PrimeFaces.current().ajax().update("@(.updateNotesDataTable)");
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, "Customers Controller, createCombinedAuditLogAndNote: ", e);
         }
@@ -972,8 +977,8 @@ public class CustomersController implements Serializable {
         setNewCustomer(setCustomerDefaults(new Customers()));
         setAddUserButtonDisabled(true);
         //selectedItemIndex = -1;
-        //RequestContext.getCurrentInstance().update("formCustomersCreate1");
-        //RequestContext.getCurrentInstance().openDialog("customersCreateDialogue");
+        //PrimeFaces.current().ajax().update("formCustomersCreate1");
+        //PrimeFaces.current().openDialog("customersCreateDialogue");
     }
 
     private void createDefaultCustomerProfilePicture(Customers c) {
@@ -1123,7 +1128,7 @@ public class CustomersController implements Serializable {
                 createCombinedAuditLogAndNote(c, c, "New Lead", details, "Did Not Exist", "New Lead");
                 LOGGER.log(Level.INFO, "createFromLead: {0}", new Object[]{details});
                 if (isWebserviceCall == false) {
-                    RequestContext.getCurrentInstance().execute("PF('signupDialog').hide();");
+                    PrimeFaces.current().executeScript("PF('signupDialog').hide();");
                     JsfUtil.addSuccessMessage("Info", configMapFacade.getConfig("LeadSignupSuccessfull"));
                     setLeadFormSubmitted(true);
                 }
@@ -1147,7 +1152,7 @@ public class CustomersController implements Serializable {
                 controller.doPasswordReset("system.email.admin.onboardcustomer.template", c, configMapFacade.getConfig("sendCustomerOnBoardEmailEmailSubject"));
                 createCombinedAuditLogAndNote(c, c, "New Sign Up", details, "Did Not Exist", "New Lead");
                 LOGGER.log(Level.INFO, "createFromSignup: {0}", new Object[]{details});
-                RequestContext.getCurrentInstance().execute("PF('signupDialog').hide();");
+                PrimeFaces.current().executeScript("PF('signupDialog').hide();");
                 JsfUtil.addSuccessMessage("Info", configMapFacade.getConfig("SignUpSuccessfulFailed"));
                 setSignupFormSubmittedOK(true);
                 PaymentParameters pp = getCustomersPaymentParameters(c);
@@ -1227,7 +1232,7 @@ public class CustomersController implements Serializable {
 
     private boolean validateNewCustomer(Customers cust, ActionEvent actionEvent) {
         boolean result = true;
-        RequestContext requestContext = RequestContext.getCurrentInstance();
+        PrimeFaces instance = PrimeFaces.current();
         FacesContext facesContext = FacesContext.getCurrentInstance();
         String message = "";
         // we only want to check that a valid name, email and phonenumber has been entered.
@@ -1275,11 +1280,11 @@ public class CustomersController implements Serializable {
         }
 
         if (result == true) {
-            requestContext.addCallbackParam("validNewCustomer", true);
+            instance.ajax().addCallbackParam("validNewCustomer", true);
         } else {
             FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, "Data Entry Error", message);
             FacesContext.getCurrentInstance().addMessage(null, msg);
-            requestContext.addCallbackParam("validNewCustomer", false);
+            instance.ajax().addCallbackParam("validNewCustomer", false);
         }
 
         return result;
@@ -1691,8 +1696,8 @@ public class CustomersController implements Serializable {
             }
 
             //show dialogue
-            RequestContext.getCurrentInstance().execute("PF('changePlanDialogueWidget').show();");
-            RequestContext.getCurrentInstance().update("changePlanDialogue");
+            PrimeFaces.current().executeScript("PF('changePlanDialogueWidget').show();");
+            PrimeFaces.current().ajax().update("changePlanDialogue");
         }
     }
 
@@ -1774,11 +1779,11 @@ public class CustomersController implements Serializable {
     }
 
     public void dev2(ActionEvent actionEvent) {
-        RequestContext.getCurrentInstance().execute("updatePaymentForms();");
+        PrimeFaces.current().executeScript("updatePaymentForms();");
     }
 
     public void dev3(ActionEvent actionEvent) {
-        RequestContext.getCurrentInstance().update("devForm:devEffectPanel");
+        PrimeFaces.current().ajax().update("devForm:devEffectPanel");
     }
 
     public void changeCustomersState(ActionEvent actionEvent) {
@@ -1786,8 +1791,8 @@ public class CustomersController implements Serializable {
         FacesContext context = FacesContext.getCurrentInstance();
         EziDebitPaymentGateway controller = (EziDebitPaymentGateway) context.getApplication().getELResolver().getValue(context.getELContext(), null, "ezidebit");
         if (selectedState.getCustomerState().contains("CANCELLED") == true && controller.isCustomerCancellationConfirmed() == false) {
-            RequestContext.getCurrentInstance().update("confirmCancellation");
-            RequestContext.getCurrentInstance().execute("PF('confirmCancellationDialogueWidget').show()");
+            PrimeFaces.current().ajax().update("confirmCancellation");
+            PrimeFaces.current().executeScript("PF('confirmCancellationDialogueWidget').show()");
         } else {
             for (Customers cust : multiSelected) {
                 String currentStatusInPaymentGateway = cust.getPaymentParametersId().getStatusCode();
@@ -1829,11 +1834,11 @@ public class CustomersController implements Serializable {
 
             }
             recreateModel();
-            RequestContext.getCurrentInstance().update(":tv:customerslistForm1:customersTableList");
+            PrimeFaces.current().ajax().update(":tv:customerslistForm1:customersTableList");
             controller.setCustomerCancellationConfirmed(false);
             String message = count + " " + configMapFacade.getConfig("CustomersStateChanged") + " " + selectedState.getCustomerState() + ".";
             JsfUtil.addSuccessMessage(message);
-            RequestContext.getCurrentInstance().update("customerslistForm1");
+            PrimeFaces.current().ajax().update("customerslistForm1");
         }
 
     }
@@ -1895,7 +1900,7 @@ public class CustomersController implements Serializable {
 
         // redirect to the login / home page
         /* try {
-         //ec.redirect(ec.getRequestContextPath());
+         //ec.redirect(ec.getPrimeFacesPath());
 
          ec.redirect(configMapFacade.getConfig("WebsiteURL"));
          } catch (IOException e) {
@@ -2129,16 +2134,16 @@ public class CustomersController implements Serializable {
         }
     }
 
-    public void testRequestContext() {
+    public void testPrimeFaces() {
         JsfUtil.addSuccessMessage("Testing Request Context Callback");
         ArrayList<String> als = new ArrayList<>();
         als.add(":tv:customerslistForm1");
         als.add(":growl");
         als.add("@(.updateNotesDataTable)");
 
-        RequestContext.getCurrentInstance().update(als);
-        //RequestContext.getCurrentInstance().update("customerslistForm1");
-        //RequestContext.getCurrentInstance().update("@(.updateNotesDataTable)");
+        PrimeFaces.current().ajax().update(als);
+        //PrimeFaces.current().ajax().update("customerslistForm1");
+        //PrimeFaces.current().ajax().update("@(.updateNotesDataTable)");
 
     }
 

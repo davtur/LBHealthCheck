@@ -39,7 +39,7 @@ import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
 import javax.servlet.http.HttpServletRequest;
-import org.primefaces.context.RequestContext;
+import org.primefaces.PrimeFaces;
 import org.primefaces.event.RowEditEvent;
 import org.primefaces.event.SelectEvent;
 
@@ -145,8 +145,8 @@ public class StatsTakenController implements Serializable {
         Date newDate = (Date) o;
         lazyModel.setFromDate(newDate);
         // lazyModel.setToDate(endDate);
-        RequestContext.getCurrentInstance().execute("PF('statsTakenControllerTable').filter();");
-        // RequestContext requestContext = RequestContext.getCurrentInstance();
+        PrimeFaces.current().executeScript("PF('statsTakenControllerTable').filter();");
+        // PrimeFaces instance = PrimeFaces.current();
 
     }
 
@@ -157,8 +157,8 @@ public class StatsTakenController implements Serializable {
         Date newDate = (Date) o;
         //lazyModel.setFromDate(startDate);
         lazyModel.setToDate(newDate);
-        RequestContext.getCurrentInstance().execute("PF('statsTakenControllerTable').filter();");
-        // RequestContext requestContext = RequestContext.getCurrentInstance();
+        PrimeFaces.current().executeScript("PF('statsTakenControllerTable').filter();");
+        // PrimeFaces instance = PrimeFaces.current();
 
     }
       public LazyLoadingDataModel<StatsTaken> getLazyModel() {

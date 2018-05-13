@@ -68,7 +68,7 @@ import org.apache.sanselan.formats.jpeg.JpegImageMetadata;
 import org.apache.sanselan.formats.tiff.TiffField;
 import org.apache.sanselan.formats.tiff.constants.TagInfo;
 import org.apache.sanselan.formats.tiff.constants.TiffConstants;
-import org.primefaces.context.RequestContext;
+import org.primefaces.PrimeFaces;
 import org.primefaces.event.FileUploadEvent;
 import org.primefaces.event.RowEditEvent;
 import org.primefaces.event.SelectEvent;
@@ -594,8 +594,8 @@ public class ExpensesController implements Serializable {
         Date newDate = (Date) o;
         lazyModel.setFromDate(newDate);
         // lazyModel.setToDate(endDate);
-        RequestContext.getCurrentInstance().execute("PF('expensesControllerTable').filter();");
-        // RequestContext requestContext = RequestContext.getCurrentInstance();
+        PrimeFaces.current().executeScript("PF('expensesControllerTable').filter();");
+        // PrimeFaces instance = PrimeFaces.current();
 
     }
 
@@ -606,8 +606,8 @@ public class ExpensesController implements Serializable {
         Date newDate = (Date) o;
         //lazyModel.setFromDate(startDate);
         lazyModel.setToDate(newDate);
-        RequestContext.getCurrentInstance().execute("PF('expensesControllerTable').filter();");
-        // RequestContext requestContext = RequestContext.getCurrentInstance();
+        PrimeFaces.current().executeScript("PF('expensesControllerTable').filter();");
+        // PrimeFaces instance = PrimeFaces.current();
 
     }
 
@@ -1611,7 +1611,7 @@ public class ExpensesController implements Serializable {
         current.setInvoiceImages(processUploadedFile(event.getFile()));
         setSaveButtonDisabled(false);
 
-        //RequestContext.getCurrentInstance().update("createCustomerForm");
+        //PrimeFaces.current().ajax().update("createCustomerForm");
     }
 
     /**

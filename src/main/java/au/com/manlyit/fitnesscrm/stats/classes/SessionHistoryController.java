@@ -718,9 +718,9 @@ public class SessionHistoryController implements Serializable {
     public void recreateTrainerSessionsTableModel() {
         customerItems = null;
         filteredItems = null;
-        // RequestContext requestContext = RequestContext.getCurrentInstance();
+        // PrimeFaces instance = PrimeFaces.current();
 
-        // requestContext.execute("PF('sessionsDataTable').filter();");
+        // instance.execute("PF('sessionsDataTable').filter();");
     }
 
     public void recreateModel() {
@@ -1035,7 +1035,7 @@ public class SessionHistoryController implements Serializable {
         cell.setCellValue(trainer);
         HSSFCellStyle cellStyle = wb.createCellStyle();
         DataFormat df = wb.createDataFormat();
-        cellStyle.setFillForegroundColor(HSSFColor.BLUE.index);
+        cellStyle.setFillForegroundColor(IndexedColors.BLUE.getIndex());
         cellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
         for (int i = 1; i < row.getPhysicalNumberOfCells(); i++) {
             row.getCell(i).setCellStyle(cellStyle);

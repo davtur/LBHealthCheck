@@ -76,7 +76,7 @@ import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
-import org.primefaces.context.RequestContext;
+import org.primefaces.PrimeFaces;
 import org.primefaces.event.SelectEvent;
 import org.primefaces.event.RowEditEvent;
 
@@ -158,7 +158,7 @@ public class InvoiceController implements Serializable {
 
     public void invoiceParametersChanged() {
         JsfUtil.addSuccessMessage("Invoice Updated", "Successfully Updated Invoice Parameters");
-        RequestContext.getCurrentInstance().update(":growl");
+        PrimeFaces.current().ajax().update(":growl");
     }
 
     public void editEmailAddress() {
@@ -193,7 +193,7 @@ public class InvoiceController implements Serializable {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
         }
 
-        //RequestContext.getCurrentInstance().update("InvoicelistForm1");
+        //PrimeFaces.current().ajax().update("InvoicelistForm1");
     }
 
     public Invoice generateInvoiceForCustomer(Customers cust, boolean useSettlementDate, boolean showSuccessful, boolean showFailed, boolean showPending, boolean showScheduled, Date startDate, Date endDate) {
@@ -472,7 +472,7 @@ public class InvoiceController implements Serializable {
         cell.setCellValue(reportTitle);
         HSSFCellStyle cellStyle = wb.createCellStyle();
         DataFormat df = wb.createDataFormat();
-        cellStyle.setFillForegroundColor(HSSFColor.BLUE.index);
+        cellStyle.setFillForegroundColor(IndexedColors.BLUE.getIndex());
         cellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
         for (int i = 1; i < row.getPhysicalNumberOfCells(); i++) {
             row.getCell(i).setCellStyle(cellStyle);
@@ -645,7 +645,7 @@ public class InvoiceController implements Serializable {
         if (invoiceFilteredItems != null) {
             invoiceFilteredItems.add(inv);
         }
-        // RequestContext.getCurrentInstance().execute("PF('invoiceControllerTable').filter();");
+        // PrimeFaces.current().executeScript("PF('invoiceControllerTable').filter();");
 
     }
 
@@ -1094,8 +1094,8 @@ public class InvoiceController implements Serializable {
      if (htmlInvoiceSource == null) {
      htmlInvoiceSource = generateHtmlInvoice(lastGeneratedInvoice);
      }
-     //RequestContext.getCurrentInstance().update(":previewHtmlInvoiceDialogue");
-     RequestContext.getCurrentInstance().execute("PF('previewHtmlInvoiceDialogueWidget').show()");
+     //PrimeFaces.current().ajax().update(":previewHtmlInvoiceDialogue");
+     PrimeFaces.current().executeScript("PF('previewHtmlInvoiceDialogueWidget').show()");
      }*/
     private String generateHtmlInvoice(Invoice inv) {
 

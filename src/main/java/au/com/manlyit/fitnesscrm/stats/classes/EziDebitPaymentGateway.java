@@ -93,8 +93,10 @@ import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.primefaces.PrimeFaces;
+
 import org.primefaces.component.tabview.Tab;
-import org.primefaces.context.RequestContext;
+
 import org.primefaces.event.SelectEvent;
 import org.primefaces.event.TabChangeEvent;
 
@@ -844,7 +846,7 @@ public class EziDebitPaymentGateway implements Serializable {
         cell.setCellValue(reportTitle);
         HSSFCellStyle cellStyle = wb.createCellStyle();
         DataFormat df = wb.createDataFormat();
-        cellStyle.setFillForegroundColor(HSSFColor.BLUE.index);
+        cellStyle.setFillForegroundColor(IndexedColors.BLUE.getIndex());
         cellStyle.setFillPattern(FillPatternType.BIG_SPOTS);
         for (int i = 1; i < row.getPhysicalNumberOfCells(); i++) {
             row.getCell(i).setCellStyle(cellStyle);
@@ -1019,7 +1021,8 @@ public class EziDebitPaymentGateway implements Serializable {
 
             refreshCustomersDeatilsFromPaymentGateway(customersFacade.findAllActiveCustomers(true));
         }
-        RequestContext.getCurrentInstance().update("reportsForm");
+        PrimeFaces instance = PrimeFaces.current();
+        instance.ajax().update("reportsForm");
     }
 
     /**
@@ -1110,7 +1113,8 @@ public class EziDebitPaymentGateway implements Serializable {
             reportPaymentsList = new PfSelectableDataModel<>(new ArrayList<Payments>());
         }
         Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.INFO, "Report Completed");
-        RequestContext.getCurrentInstance().update("reportsForm");
+        PrimeFaces instance = PrimeFaces.current();
+        instance.ajax().update("reportsForm");
 
     }
 
@@ -1727,7 +1731,7 @@ public class EziDebitPaymentGateway implements Serializable {
         Tab tb = event.getTab();
         // String compId =   event.getTab().getClientId();
         //logger.log(Level.INFO, "Request Context update of {0} actioned",compId);
-        //RequestContext.getCurrentInstance().update(compId);
+        //PrimeFaces.current().ajax().update(compId);
 
         String tabName = "unknown";
         if (tb != null) {
@@ -1788,8 +1792,8 @@ public class EziDebitPaymentGateway implements Serializable {
 
     public void testAjax(ActionEvent event) {
         testAjaxCounter++;
-        RequestContext context = RequestContext.getCurrentInstance();
-        context.update("tabView");
+        PrimeFaces context = PrimeFaces.current();
+        context.ajax().update("tabView");
 
         JsfUtil.addSuccessMessage("Testing Ajax");
 
@@ -1908,10 +1912,10 @@ public class EziDebitPaymentGateway implements Serializable {
     public void loginToPushServer() {
 
         // Connect to the push channel based on sessionId
-        RequestContext requestContext = RequestContext.getCurrentInstance();
+        PrimeFaces instance = PrimeFaces.current();
 
-        // requestContext.execute("PF('subscriber').connect('/" + sessionId + "')");
-        //  LOGGER.log(Level.INFO, "Adding connect request to primefaces requestcontext. PF(\'subscriber\').connect(\'/{0}\')", sessionId);
+        // instance.execute("PF('subscriber').connect('/" + sessionId + "')");
+        //  LOGGER.log(Level.INFO, "Adding connect request to PrimeFaces instance. PF(\'subscriber\').connect(\'/{0}\')", sessionId);
     }
 
     @PreDestroy
@@ -1967,7 +1971,7 @@ public class EziDebitPaymentGateway implements Serializable {
             //componentsToUpdate.add("paymentsTablePanel");
             //componentsToUpdate.add("scheduledPaymentsTablePanel");
             //componentsToUpdate.add("tv:paymentsForm");
-            // requestContext.execute("PF('paymentPoller').stop();");
+            // instance.execute("PF('paymentPoller').stop();");
             //pushComponentUpdateBean.sendMessage("Notification", "Payment Gateway Request Completed");
             LOGGER.log(Level.INFO, "All asych jobs have been processed. Will continue to process any component updates.");
         }
@@ -1998,24 +2002,24 @@ public class EziDebitPaymentGateway implements Serializable {
         // checkIfAsyncJobsHaveFinishedAndUpdate();
         //k = futureMap.getFutureMap(sessionId).size();
         if (isRefreshIFrames() == true) {
-            //RequestContext.getCurrentInstance().update("@(.updatePaymentInfo)");
-            //RequestContext.getCurrentInstance().update(":iFrameForm");
+            //PrimeFaces.current().ajax().update("@(.updatePaymentInfo)");
+            //PrimeFaces.current().ajax().update(":iFrameForm");
             updatePaymentTableComponents();
-            //RequestContext.getCurrentInstance().update("createCustomerForm");
+            //PrimeFaces.current().ajax().update("createCustomerForm");
             LOGGER.log(Level.INFO, "Asking Request Context to update IFrame forms.");
             setRefreshIFrames(false);
         }
         /*  ArrayList<PaymentGatewayResponse> ctu = futureMap.getComponentsToUpdate(sessionId);
         if (ctu.isEmpty() == false) {
-            RequestContext.getCurrentInstance().update(ctu);
+            PrimeFaces.current().ajax().update(ctu);
         }
-        RequestContext.getCurrentInstance().execute("updatePaymentForms();");*/
-//RequestContext.getCurrentInstance().update("devForm");
+        PrimeFaces.current().executeScript("updatePaymentForms();");*/
+//PrimeFaces.current().ajax().update("devForm");
         //  refreshFromDB = true;
         boolean currentFlag = updatedFlag;
         updatedFlag = futureMap.isAnAsyncOperationRunning(sessionId);
         // setAsyncOperationRunning(updatedFlag);
-        // RequestContext.getCurrentInstance().update("payments");
+        // PrimeFaces.current().ajax().update("payments");
 
         if (currentFlag != updatedFlag) {
             if (updatedFlag == false) {
@@ -2023,7 +2027,7 @@ public class EziDebitPaymentGateway implements Serializable {
             } else {
                 LOGGER.log(Level.INFO, "Async Jobs have started. {0} jobs are running", k);
             }
-            //RequestContext.getCurrentInstance().update(":tv:paymentsForm");
+            //PrimeFaces.current().ajax().update(":tv:paymentsForm");
             updatePaymentTableComponents();
         }
 
@@ -2126,8 +2130,8 @@ public class EziDebitPaymentGateway implements Serializable {
         recreatePaymentTableData();
         updatePaymentTableComponents();
         //@(.parentOfUploadPhoto)
-        // RequestContext.getCurrentInstance().update("customerslistForm1");
-        // RequestContext.getCurrentInstance().update("@(.updatePaymentInfo)");
+        // PrimeFaces.current().ajax().update("customerslistForm1");
+        // PrimeFaces.current().ajax().update("@(.updatePaymentInfo)");
 
         LOGGER.log(Level.INFO, "Session BEAN processGetPayments completed");
     }
@@ -2150,15 +2154,15 @@ public class EziDebitPaymentGateway implements Serializable {
         //als.add("\\:createCustomerForm\\:myDetailsPaymentInfo");
         // als.add("\\:tv\\:paymentsForm\\:testPaymentUpdate");
         // als.add("\\:tv\\:paymentsForm\\:testPaymentUpdate2");
-        //RequestContext.getCurrentInstance().update(als);
-        //RequestContext.getCurrentInstance().update("@(.updatePaymentInfo)");
-        //RequestContext.getCurrentInstance().update("\\:tv\\:paymentsForm");
+        //PrimeFaces.current().ajax().update(als);
+        //PrimeFaces.current().ajax().update("@(.updatePaymentInfo)");
+        //PrimeFaces.current().ajax().update("\\:tv\\:paymentsForm");
         futureMap.sendMessage(getSessionId(),"UpdatePaymentForms","UpdatePaymentForms");
-        //RequestContext.getCurrentInstance().execute("updatePaymentForms();");
+        //PrimeFaces.current().executeScript("updatePaymentForms();");
 
-        //LOGGER.log(Level.INFO, "Session BEAN RequestContext --------------------------------------------------");
-        LOGGER.log(Level.INFO, "Session BEAN RequestContext ------>> Updated Payment Table Components ( execute(\"updatePaymentForms();\") ) <<-------");
-        //LOGGER.log(Level.INFO, "Session BEAN RequestContext --------------------------------------------------");
+        //LOGGER.log(Level.INFO, "Session BEAN PrimeFaces --------------------------------------------------");
+        LOGGER.log(Level.INFO, "Session BEAN PrimeFaces ------>> Updated Payment Table Components ( execute(\"updatePaymentForms();\") ) <<-------");
+        //LOGGER.log(Level.INFO, "Session BEAN PrimeFaces --------------------------------------------------");
     }
 
     private void processGetScheduledPayments(PaymentGatewayResponse pgr) {
@@ -2169,7 +2173,7 @@ public class EziDebitPaymentGateway implements Serializable {
             // if successful it should return a ArrayOfPayment Object from the getData method;
 
             recreatePaymentTableData();
-            // RequestContext.getCurrentInstance().update("customerslistForm1");
+            // PrimeFaces.current().ajax().update("customerslistForm1");
             updatePaymentTableComponents();
             //refreshFromDB = true;
         } catch (Exception ex) {
@@ -2221,7 +2225,7 @@ public class EziDebitPaymentGateway implements Serializable {
         LOGGER.log(Level.INFO, "Session BEAN processAddPaymentBatch started");
         recreatePaymentTableData();
         updatePaymentTableComponents();
-        //RequestContext.getCurrentInstance().update("\\:tv\\:paymentsForm");
+        //PrimeFaces.current().ajax().update("\\:tv\\:paymentsForm");
         LOGGER.log(Level.INFO, "Session BEAN processAddPaymentBatch completed");
     }
 
@@ -2230,7 +2234,7 @@ public class EziDebitPaymentGateway implements Serializable {
         LOGGER.log(Level.INFO, "Session BEAN processDeletePaymentBatch started");
         recreatePaymentTableData();
         updatePaymentTableComponents();
-        //RequestContext.getCurrentInstance().update("\\:tv\\:paymentsForm");
+        //PrimeFaces.current().ajax().update("\\:tv\\:paymentsForm");
         LOGGER.log(Level.INFO, "Session BEAN processDeletePaymentBatch completed");
     }
 
@@ -2254,7 +2258,7 @@ public class EziDebitPaymentGateway implements Serializable {
         }
         //updatePaymentTableComponents();
         //recreatePaymentTableData();"
-        RequestContext.getCurrentInstance().update("paymentsForm:paymentsTablePanel2");
+        PrimeFaces.current().ajax().update("paymentsForm:paymentsTablePanel2");
         LOGGER.log(Level.INFO, "Session BEAN processAddPaymentResult completed, updating paymentsForm:paymentsTable2 ");
     }
 
@@ -2430,7 +2434,7 @@ public class EziDebitPaymentGateway implements Serializable {
             LOGGER.log(Level.WARNING, "Process deletePayment - Payment that was deleted could not be found in the our DB key={0}", new Object[]{reference});
         }
         //updatePaymentTableComponents();
-        RequestContext.getCurrentInstance().update("paymentsForm");
+        PrimeFaces.current().ajax().update("paymentsForm");
 
         LOGGER.log(Level.INFO, "processDeletePayment completed");
     }
@@ -2613,7 +2617,7 @@ public class EziDebitPaymentGateway implements Serializable {
             }
 
         }
-        //RequestContext.getCurrentInstance().update("customerslistForm1");
+        //PrimeFaces.current().ajax().update("customerslistForm1");
 
         //refreshFromDB = true;
         //getCustomersController().setRefreshFromDB(true);
@@ -2682,7 +2686,7 @@ public class EziDebitPaymentGateway implements Serializable {
 
     private void stopPoller() {
         Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.INFO, "Stopping poller on customers page");
-        RequestContext.getCurrentInstance().addCallbackParam("stopPolling", true);
+        PrimeFaces.current().ajax().addCallbackParam("stopPolling", true);
     }
 
     public void recreateModels() {

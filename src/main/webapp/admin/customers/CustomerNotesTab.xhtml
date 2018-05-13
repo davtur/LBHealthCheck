@@ -35,7 +35,7 @@
                                 <p:outputPanel>
                                     <p:commandButton rendered="#{notesController.isUserInRole('ADMIN')}"  oncomplete="PF('notesControllerTable').filter()" update=":growl"  value="#{configMapController.getKey('ListNotesDestroyLink')}" actionListener="#{customersController.deleteNote}"/>
                                     <p:commandButton id="showDialogButton2"  value="#{configMapController.getKey('ListNotesCreateLink')}" onclick="PF('NotesCreateDialogue').show()" type="button"/> 
-                                   <!-- <p:commandButton   value="TEST" update="@(.updateNotesDataTable)" actionListener="#{customersController.testRequestContext}" /> -->
+                                   <!-- <p:commandButton   value="TEST" update="@(.updateNotesDataTable)" actionListener="#{customersController.testPrimeFaces}" /> -->
                                 </p:outputPanel>
                             </f:facet>
                             <p:ajax event="rowEdit" listener="#{customersController.onNotesEdit}" update=":growl" oncomplete="PF('notesControllerTable').filter()" />  

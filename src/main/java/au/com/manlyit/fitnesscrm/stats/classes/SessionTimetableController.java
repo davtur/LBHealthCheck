@@ -40,7 +40,7 @@ import javax.faces.model.SelectItem;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.servlet.http.HttpServletRequest;
-import org.primefaces.context.RequestContext;
+import org.primefaces.PrimeFaces;
 import org.primefaces.event.RowEditEvent;
 import org.primefaces.event.ScheduleEntryMoveEvent;
 import org.primefaces.event.ScheduleEntryResizeEvent;
@@ -299,7 +299,7 @@ public class SessionTimetableController implements Serializable {
             o = selectEvent.getObject();
             if (o.getClass() == TimetableScheduleEvent.class) {
                 setEvent((TimetableScheduleEvent) selectEvent.getObject());
-                RequestContext.getCurrentInstance().execute("PF('eventDialog').show()");
+                PrimeFaces.current().executeScript("PF('eventDialog').show()");
             }
         }
     }
@@ -351,7 +351,7 @@ public class SessionTimetableController implements Serializable {
                 TimetableScheduleEvent sEvent = new TimetableScheduleEvent("New Event", start, end);
                 sEvent.setReminderDate(remind);
                 setEvent(sEvent);
-                //RequestContext.getCurrentInstance().execute("PF('eventDialog').show()");
+                //PrimeFaces.current().executeScript("PF('eventDialog').show()");
 
                 //Add facesmessage
             } else {
@@ -889,13 +889,13 @@ public class SessionTimetableController implements Serializable {
 
         if (context.getExternalContext().getRemoteUser() != null) {
             // autheticated user
-            RequestContext.getCurrentInstance().execute("PF('bookingDialog').show();");
+            PrimeFaces.current().executeScript("PF('bookingDialog').show();");
 
             controller.setSignupFromBookingInProgress(false);
         } else {
             //unauthenticated 
-            RequestContext.getCurrentInstance().execute("PF('signupDialog').show();");
-            //RequestContext.getCurrentInstance().update("signupDialog");
+            PrimeFaces.current().executeScript("PF('signupDialog').show();");
+            //PrimeFaces.current().ajax().update("signupDialog");
             //CustomersController controller = (CustomersController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "customersController");
 
             controller.setSignupFromBookingInProgress(true);
