@@ -180,7 +180,9 @@
             <pm:content>
                 <h:form id="updatePass">   
                     <h:panelGrid  >
-                        <p:messages id="messages" showDetail="true" autoUpdate="true"  />
+                        <p:messages id="messages" showDetail="true">
+                        <p:autoUpdate />
+                    </p:messages>
                         <h:panelGrid columns="1" id="matchGrid" cellpadding="5">                   
                             <h:outputLabel for="pwd1" value="Enter New Password" />
                             <h:inputSecret id="pwd1" value="#{customersController.checkPass}" label="Password 1"  required="true" redisplay="true" >

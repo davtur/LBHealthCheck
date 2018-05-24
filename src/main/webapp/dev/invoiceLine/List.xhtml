@@ -35,7 +35,7 @@
                         <p:outputLabel value="#{configMapController.getKey('CreateInvoiceLineLabel_isPercentage')}" for="isPercentage" />
                         <p:inputText id="isPercentage" value="#{invoiceLineController.selected.isPercentage}" title="#{configMapController.getKey('CreateInvoiceLineTitle_isPercentage')}" required="true" requiredMessage="#{configMapController.getKey('CreateInvoiceLineRequiredMessage_isPercentage')}"/>
                         <p:outputLabel value="#{configMapController.getKey('CreateInvoiceLineLabel_itemId')}" for="itemId" />
-                        <p:selectOneMenu id="itemId" valueChangeListener="#{invoiceLineController.selectOneMenuValueChangeListener}" value="#{invoiceLineController.selected.Id}" label="#{configMapController.getKey('CreateInvoiceLineTitle_itemId')}" >
+                        <p:selectOneMenu id="itemId" valueChangeListener="#{invoiceLineController.selectOneMenuValueChangeListener}" value="#{invoiceLineController.selected.id}" label="#{configMapController.getKey('CreateInvoiceLineTitle_itemId')}" >
                             <f:selectItems value="#{itemController.itemsAvailableSelectOne}"/>
                             <p:ajax   update=":formInvoiceLineCreate1"  />
                         </p:selectOneMenu>

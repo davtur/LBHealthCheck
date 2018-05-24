@@ -1,0 +1,7 @@
+
+
+
+
+
+curl -i -X POST -H 'Content-Type: application/json' -d '{"id": "0", "name": "David Turner", "emailAddress":"david@manlyit.com.au","phoneNumber":"0412422700","message":"Just a Test","authToken":"Green21Blue22"}' https://test-services.purefitnessmanly.com.au/FitnessStats/api/customers
+  

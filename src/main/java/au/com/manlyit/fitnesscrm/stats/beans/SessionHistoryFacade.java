@@ -46,7 +46,7 @@ import org.eclipse.persistence.sessions.Session;
 public class SessionHistoryFacade extends AbstractFacade<SessionHistory> {
 
     private static final Logger logger = Logger.getLogger(SessionHistoryFacade.class.getName());
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
     @Inject
     private ConfigMapFacade configMapFacade;
     @PersistenceContext(unitName = "FitnessStatsPU")
