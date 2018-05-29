@@ -323,7 +323,7 @@ public class CustomersController implements Serializable {
                 controller.setWaitingForPaymentDetails(false);
                 // setAsyncOperationRunning(false);
                 // if(cust.getPaymentParametersId().getStatusCode().startsWith("D") || cust.getPaymentParametersId().getStatusCode().isEmpty()){
-                controller.getCustDetailsFromEzi();
+                //controller.getCustDetailsFromEzi();
                 // }
                 if (controller.isTheCustomerProvisionedInThePaymentGateway()) {
                     // controller.getCustDetailsFromEzi();
@@ -390,7 +390,7 @@ public class CustomersController implements Serializable {
                 setCustomerTabsEnabled(true);
                 //PrimeFaces.current().executeScript("updatePaymentForms();");
                 futureMap.sendMessage(controller.getSessionId(), "", "UpdatePaymentForms");
-                
+                LOGGER.log(Level.INFO, "Setting the selected customer from the customer list tab COMPLETED.");
             }
         } catch (ELException eLException) {
             LOGGER.log(Level.SEVERE, "Setting the selected customer from the customer list tab failed.",eLException.getMessage());

@@ -1863,6 +1863,61 @@ public class PaymentBean implements Serializable {
     }
 
     @Asynchronous
+    public Future<PaymentGatewayResponse> getAllCustPaymentsAndDetails(Customers cust, String paymentType, String paymentMethod, String paymentSource, String paymentReference, Date fromDate, Date toDate, boolean useSettlementDate, String digitalKey, String sessionId) {
+        String result = "Error";
+        PaymentGatewayResponse pgr = new PaymentGatewayResponse(false, result, "", "-1", "An unhandled error occurred!");
+
+        String batchSessionId = "Batch-Dont-Update";
+
+        Future<PaymentGatewayResponse> gpResponse = getPayments(cust, paymentType, paymentMethod, paymentSource, paymentReference, fromDate, toDate, useSettlementDate, digitalKey, batchSessionId);
+        Future<PaymentGatewayResponse> gspResponse = getScheduledPayments(cust, fromDate, toDate, digitalKey, batchSessionId);
+        Future<PaymentGatewayResponse> gcdResponse = getCustomerDetails(cust, digitalKey, batchSessionId);
+        PaymentGatewayResponse pgr1 = null;
+        PaymentGatewayResponse pgr2 = null;
+        PaymentGatewayResponse pgr3 = null;
+
+        try {
+            pgr1 = gpResponse.get();
+            pgr2 = gspResponse.get();
+            pgr3 = gcdResponse.get();
+            result = "";
+            if (pgr1.isOperationSuccessful()){
+                result = "Get Payments - OK, ";
+            }else{
+                result = "Get Payments - FAIL, ";
+            }
+            if (pgr2.isOperationSuccessful()){
+                result += "Get Scheduled - OK, ";
+            }else{
+                result += "Get Scheduled - FAIL, ";
+            }
+            if (pgr3.isOperationSuccessful()){
+                result += "Get Details - OK ";
+            }else{
+                result += "Get Details - FAIL ";
+            }
+
+        } catch (InterruptedException | ExecutionException e) {
+            LOGGER.log(Level.WARNING, "getAllCustPaymentsAndDetails Response: Error : ", e);
+            pgr = new PaymentGatewayResponse(false, null, "Customer details and Payment information was not recieved from the payment gateway due to an error.", "Server Fault", e.getMessage());
+            futureMap.processGetAllCustPaymentsAndDetails(sessionId, pgr);
+            return new AsyncResult<>(pgr);
+        }
+        if (pgr1.isOperationSuccessful() && pgr2.isOperationSuccessful() && pgr3.isOperationSuccessful()) {
+            LOGGER.log(Level.INFO, "getAllCustPaymentsAndDetails: Details, Payments and Scheduled payments recieved OK");
+            pgr = new PaymentGatewayResponse(true, result, "", "0", "Updated Customer Details and Payment Information was recieved from the payment gateway.");
+
+        } else {
+            LOGGER.log(Level.INFO, "getAllCustPaymentsAndDetails: The customer object passed to this method is NULL.This parameter is required.Returning empty array!!");
+            pgr = new PaymentGatewayResponse(false, result, "", "-1", "The customer object passed to this method is NULL.This parameter is required.Returning empty array!!");
+
+        }
+        futureMap.processGetAllCustPaymentsAndDetails(sessionId, pgr);
+        return new AsyncResult<>(pgr);
+
+    }
+
+    @Asynchronous
     public Future<PaymentGatewayResponse> getPayments(Customers cust, String paymentType, String paymentMethod, String paymentSource, String paymentReference, Date fromDate, Date toDate, boolean useSettlementDate, String digitalKey, String sessionId) {
         //  Description
         //  	  

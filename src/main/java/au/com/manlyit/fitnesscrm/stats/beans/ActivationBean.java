@@ -22,7 +22,7 @@ import javax.annotation.PostConstruct;
 import javax.el.ELException;
 import javax.inject.Inject;
 import javax.enterprise.context.RequestScoped;
-import javax.faces.bean.ManagedProperty;
+import javax.faces.annotation.ManagedProperty;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.servlet.ServletException;

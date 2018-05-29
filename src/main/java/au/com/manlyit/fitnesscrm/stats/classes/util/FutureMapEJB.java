@@ -194,17 +194,18 @@ public class FutureMapEJB implements Serializable {
         }
     }
 
-   // @TransactionAttribute(TransactionAttributeType.NEVER)
-
+    // @TransactionAttribute(TransactionAttributeType.NEVER)
     public void sendMessage(String sessionChannel, String summary, String detail) {
-
+        if ("Batch-Dont-Update".equals(sessionChannel)) {
+            return;
+        }
         LOGGER.log(Level.INFO, "Entering - SEND MESSAGE ");
-         if (sessionChannel.contains(FUTUREMAP_INTERNALID) == false) {// we don't want to send a message unless there is a session to send it to
-            
+        if (sessionChannel.contains(FUTUREMAP_INTERNALID) == false) {// we don't want to send a message unless there is a session to send it to
+
             LOGGER.log(Level.INFO, "Entering - SEND MESSAGE :Channel={0}, Summary={1}, detail={2}", new Object[]{sessionChannel, summary, detail});
-          
+
             try {
-                 sendMessage(detail, sessionChannel);
+                sendMessage(detail, sessionChannel);
                 LOGGER.log(Level.INFO, "Sending Async Message, summary:{0}, details:{1}", new Object[]{summary, detail});
             } catch (Exception e) {
                 LOGGER.log(Level.WARNING, "NOT Sending Async Message as there was an exception, summary:{0}, details:{1}, error:{2}", new Object[]{summary, detail, e.getMessage()});
@@ -361,6 +362,9 @@ public class FutureMapEJB implements Serializable {
     }
 
     private void storeResponseForSessionBeenToRetrieve(String operationName, String sessionId, PaymentGatewayResponse pgr) {
+        if ("Batch-Dont-Update".equals(sessionId)) {
+            return;
+        }
         if (operationName != null && sessionId != null && pgr != null && operationName.trim().isEmpty() == false) {
             // no point storing it if the operation name is empty as it will have no effect in the session bean
             pgr.setOperationName(operationName);
@@ -606,7 +610,7 @@ public class FutureMapEJB implements Serializable {
     }
 
     @Schedule(hour = "*", minute = "*", second = "*")
-   // @TransactionAttribute(TransactionAttributeType.NEVER)// we don't want a transaction for this method as the calls within this method will invoke their own transactions
+    // @TransactionAttribute(TransactionAttributeType.NEVER)// we don't want a transaction for this method as the calls within this method will invoke their own transactions
     public void checkRunningJobsAndNotifyIfComplete(Timer t) {  // run every 1 seconds
         long start = new Date().getTime();
 
@@ -1458,11 +1462,11 @@ public class FutureMapEJB implements Serializable {
         boolean abort = false;
 
         try {
+
             // if successful it should return a ArrayOfPayment Object from the getData method;
             // Object resultObject = ft.get();
             // if (resultObject.getClass() == PaymentGatewayResponse.class) {
             //   pgr = (PaymentGatewayResponse) resultObject;
-
             //}
             if (pgr != null) {
                 resultPaymentArray = (ArrayOfPayment) pgr.getData();
@@ -1561,6 +1565,7 @@ public class FutureMapEJB implements Serializable {
                 }
 
                 LOGGER.log(Level.INFO, "Future Map processGetPayments completed");
+
                 if (result == true) {
                     String message = "Payment Information has been updated.";
                     // send the gateway response object back to the hashmap that can be accessed by the session bean
@@ -2741,6 +2746,43 @@ public class FutureMapEJB implements Serializable {
         LOGGER.log(Level.INFO, "Future Map processGetCustomerDetails. Completed - Committing transaction to update.");
     }
 
+    @Asynchronous
+    @TransactionAttribute(REQUIRES_NEW)
+    public void processGetAllCustPaymentsAndDetails(String sessionId, PaymentGatewayResponse pgr) {
+        CustomerDetails custDetails = null;
+
+        boolean result = false;
+        String returnedMessage = "An error occurred trying to get customer details and payments. Refer to logs for more info";
+        
+
+        try {
+       
+
+            if (pgr != null) {
+                result = pgr.isOperationSuccessful();
+                if (result == true) {
+                    Object custObject = pgr.getData();
+
+                    if (custObject != null && custObject.getClass() == String.class) {
+                        returnedMessage = (String) custObject;
+                    }
+                }
+            }
+
+
+           } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Future Map processGetAllCustPaymentsAndDetails FAILED", e);
+        }
+
+        LOGGER.log(Level.INFO, "Future Map processGetAllCustPaymentsAndDetails completed");
+      //  storeResponseForSessionBeenToRetrieve("GetCustomerDetails", sessionId, pgr);
+        sendMessage(sessionId, "Get Customer Details & Payments", returnedMessage);
+        LOGGER.log(Level.INFO, "Future Map processGetAllCustPaymentsAndDetails. Completed - Committing transaction to update.");
+    }
+
+
+    
+    
     @Asynchronous
     @TransactionAttribute(REQUIRES_NEW)
     public void processUpdateCustomerSchedule(String sessionId, PaymentGatewayResponse pgr) {

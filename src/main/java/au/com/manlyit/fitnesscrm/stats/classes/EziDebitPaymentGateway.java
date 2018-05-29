@@ -365,8 +365,9 @@ public class EziDebitPaymentGateway implements Serializable {
         Date endDate = cal.getTime();
         cal.add(Calendar.MONTH, -(monthsAhead));
         cal.add(Calendar.MONTH, -(monthsbehind));
-        startAsynchJob("GetPayments", paymentBean.getPayments(getSelectedCustomer(), "ALL", "ALL", "ALL", "", cal.getTime(), endDate, false, getDigitalKey(), sessionId));
-        startAsynchJob("GetScheduledPayments", paymentBean.getScheduledPayments(getSelectedCustomer(), cal.getTime(), endDate, getDigitalKey(), sessionId));
+        startAsynchJob("GetAllCustPaymentsAndDetails", paymentBean.getAllCustPaymentsAndDetails(getSelectedCustomer(), "ALL", "ALL", "ALL", "", cal.getTime(), endDate, false, getDigitalKey(), sessionId));
+       // startAsynchJob("GetPayments", paymentBean.getPayments(getSelectedCustomer(), "ALL", "ALL", "ALL", "", cal.getTime(), endDate, false, getDigitalKey(), sessionId));
+      //  startAsynchJob("GetScheduledPayments", paymentBean.getScheduledPayments(getSelectedCustomer(), cal.getTime(), endDate, getDigitalKey(), sessionId));
     }
 
     public void editCustomerDetailsInEziDebit(Customers cust) {

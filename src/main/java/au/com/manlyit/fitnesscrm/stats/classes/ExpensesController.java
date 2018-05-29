@@ -55,7 +55,7 @@ import javax.faces.model.SelectItem;
 import javax.imageio.ImageIO;
 import javax.inject.Inject;
 import javax.inject.Named;
-import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
@@ -346,63 +346,57 @@ public class ExpensesController implements Serializable {
 
                             String val;
                             try {
-                                switch (cell.getCellType()) {
-                                    case Cell.CELL_TYPE_STRING:
+                                if (cell.getCellTypeEnum() == CellType.STRING) {
 
-                                        val = cell.getStringCellValue();
-                                        if (cellTypeAccepted == Integer.class || cellTypeAccepted == int.class) {
-                                            int num = Integer.parseInt(val);
+                                    val = cell.getStringCellValue();
+                                    if (cellTypeAccepted == Integer.class || cellTypeAccepted == int.class) {
+                                        int num = Integer.parseInt(val);
 
-                                            m.invoke(cid, num);
-                                        } else if (cellTypeAccepted == BigDecimal.class) {
-                                            BigDecimal num = new BigDecimal(val);
-                                            m.invoke(cid, num);
+                                        m.invoke(cid, num);
+                                    } else if (cellTypeAccepted == BigDecimal.class) {
+                                        BigDecimal num = new BigDecimal(val);
+                                        m.invoke(cid, num);
+                                    } else if (cellTypeAccepted == Double.class) {
+                                        double num = Double.parseDouble(val);
+                                        m.invoke(cid, num);
+                                    } else if (cellTypeAccepted == String.class) {
+                                        m.invoke(cid, val);
+                                    } else {
+                                        LOGGER.log(Level.SEVERE, "Unknown type {0}", cellTypeAccepted);
+                                    }
+                                    //line += data[i][j].toString() + ",";
+
+                                } else if (cell.getCellTypeEnum() == CellType.NUMERIC) {
+
+                                    if (DateUtil.isCellDateFormatted(cell)) {
+                                        Date date = cell.getDateCellValue();
+                                        String strDateFormat = "dd/MM/yyyy HH:mm";
+                                        SimpleDateFormat dateFormat = new SimpleDateFormat(strDateFormat);
+                                        Date dateForValidation = dateFormat.parse("01/01/1970 10:30");
+                                        if (date.after(dateForValidation) == true) {
+                                            m.invoke(cid, date);
+                                        }
+                                    } else {
+                                        if (cellTypeAccepted == Integer.class) {
+                                            Double num = cell.getNumericCellValue();
+                                            m.invoke(cid, num.intValue());
                                         } else if (cellTypeAccepted == Double.class) {
-                                            double num = Double.parseDouble(val);
+                                            Double num = cell.getNumericCellValue();
                                             m.invoke(cid, num);
-                                        } else if (cellTypeAccepted == String.class) {
-                                            m.invoke(cid, val);
-                                        } else {
-                                            LOGGER.log(Level.SEVERE, "Unknown type {0}", cellTypeAccepted);
+                                            line += num + ",";
+                                        } else if (cellTypeAccepted == BigDecimal.class) {
+                                            BigDecimal num = new BigDecimal(cell.getNumericCellValue());
+                                            m.invoke(cid, num);
                                         }
-                                        //line += data[i][j].toString() + ",";
-                                        break;
-                                    case Cell.CELL_TYPE_NUMERIC:
-                                        if (DateUtil.isCellDateFormatted(cell)) {
-                                            Date date = cell.getDateCellValue();
-                                            String strDateFormat = "dd/MM/yyyy HH:mm";
-                                            SimpleDateFormat dateFormat = new SimpleDateFormat(strDateFormat);
-                                            Date dateForValidation = dateFormat.parse("01/01/1970 10:30");
-                                            if (date.after(dateForValidation) == true) {
-                                                m.invoke(cid, date);
-                                            }
-                                        } else {
-                                            if (cellTypeAccepted == Integer.class) {
-                                                Double num = cell.getNumericCellValue();
-                                                m.invoke(cid, num.intValue());
-                                            } else if (cellTypeAccepted == Double.class) {
-                                                Double num = cell.getNumericCellValue();
-                                                m.invoke(cid, num);
-                                                line += num + ",";
-                                            } else if (cellTypeAccepted == BigDecimal.class) {
-                                                BigDecimal num = new BigDecimal(cell.getNumericCellValue());
-                                                m.invoke(cid, num);
-                                            }
 
-                                        }
-                                        break;
-                                    case Cell.CELL_TYPE_BOOLEAN:
+                                    }
 
-                                        //line += data[i][j].toString() + ",";
-                                        break;
-                                    case Cell.CELL_TYPE_FORMULA:
+                                } else if (cell.getCellTypeEnum() == CellType.BOOLEAN) {
 
-                                        // line += data[i][j].toString() + ",";
-                                        break;
-                                    default:
-                                        //LOGGER.log(Level.FINE,"Unknown Cell Type");
+                                } else if (cell.getCellTypeEnum() == CellType.FORMULA) {
 
-                                        line += "-UNK,";
+                                } else {
+                                    line += "-UNK,";
                                 }
 
                             } catch (IllegalArgumentException | InvocationTargetException ex) {
