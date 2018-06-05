@@ -6,7 +6,7 @@
 
     <groupId>au.com.manlyit</groupId>
     <artifactId>FitnessCRM</artifactId>
-    <version>7.2.15</version>
+    <version>7.2.16</version>
     <packaging>war</packaging>
 
     <name>FitnessCRM</name>
@@ -23,6 +23,7 @@
             <artifactId>primefaces</artifactId>
             <version>6.2.4</version>
             <type>jar</type>
+            
         </dependency>
         <dependency>
             <groupId>org.primefaces.extensions</groupId>
@@ -303,12 +304,12 @@
 
     <build>
         <plugins>
-           <plugin>
+            <plugin>
                 <groupId>org.wildfly.plugins</groupId>
                 <artifactId>wildfly-maven-plugin</artifactId>
                 <version>1.2.1.Final</version>
                 <executions>
-                     <execution>
+                    <execution>
                         <id>undeploy</id>
                         <phase>clean</phase>
                         <goals>
@@ -508,6 +509,11 @@
             <id>PrimeFaces-maven-lib</id>
             <layout>default</layout>
             <name>Repository for library PrimeFaces-maven-lib</name>
+        </repository>
+        <repository>
+            <id>project.local</id>
+            <name>project</name>
+            <url>file:${project.basedir}/repo</url>
         </repository>
     </repositories>
     <pluginRepositories>

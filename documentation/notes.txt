@@ -1,9 +1,38 @@
 
+## Install local artifact in project for openshift container use ##
+
+/home/david/NetBeansProjects/FitnessCRM/repo
 
 
+The proper way to do it would be to use an EAR project, but you can create a project repository as well, which is what you're asking.
+
+1: Make a directory in the root of your project named repo.
+
+2: Install your jar(s) there using maven install-file with the -DlocalRepositoryPath=path-to-specific-local-repo set to your repo directory. E.g:
+
+mvn install:install-file -Dfile=path-to-your-artifact-jar 
+    -DgroupId=your.groupId 
+    -DartifactId=your-artifactId 
+    -Dversion=version 
+    -Dpackaging=jar
+    -DlocalRepositoryPath=path-to-specific-local-repo
 
 
+mvn install:install-file -Dfile=/home/david/NetBeansProjects/libraries/primefaces-6.2.4/primefaces-6.2.4.jar -DgroupId=org.primefaces -DartifactId=primefaces -Dversion=6.2.4 -Dpackaging=jar -DgeneratePom=true -DlocalRepositoryPath=/home/david/NetBeansProjects/FitnessCRM/repo
 
+3: Modify your pom file to use this local repo:
+
+<repositories>
+    <repository>
+        <id>project.local</id>
+        <name>project</name>
+        <url>file:${project.basedir}/repo</url>
+    </repository>
+</repositories>
+4: Make sure it builds locally. You may want to clean out your project jars from your local .m2 repository and then build your project with mvn clean verify to insure the .war file gets built properly. After that it should deploy fine to OpenShift or Heroku.
+
+
+############################################################################
 
     <servlet>
         <servlet-name>Push Servlet</servlet-name>
