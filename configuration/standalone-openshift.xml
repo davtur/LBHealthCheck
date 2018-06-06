@@ -149,7 +149,7 @@
 		    <connection-url>jdbc:mysql://${env.DATABASE_SERVICE_HOST:localhost}:${env.DATABASE_SERVICE_PORT:3306}/${env.MYSQL_DATABASE:fitnessStats}
                     </connection-url>
                     <driver-class>com.mysql.jdbc.Driver</driver-class>
-                    <driver>mysql-connector-java-5.1.45.jar_com.mysql.jdbc.Driver_5_1</driver>
+                    <driver>mysql</driver>
                     <security>
 			<user-name>${env.MYSQL_USER:root}</user-name>
                 	<password>${env.MYSQL_PASSWORD:Surf2day}</password>
@@ -164,7 +164,7 @@
                    <connection-url>jdbc:mysql://${env.DATABASE_SERVICE_HOST:localhost}:${env.DATABASE_SERVICE_PORT:3306}/${env.MYSQL_DATABASE:fitnessStats}
                     </connection-url>
                     <driver-class>com.mysql.jdbc.Driver</driver-class>
-                    <driver>mysql-connector-java-5.1.45.jar_com.mysql.jdbc.Driver_5_1</driver>
+                    <driver>mysql</driver>
                     <security>
 			<user-name>${env.MYSQL_USER:root}</user-name>
                 	<password>${env.MYSQL_PASSWORD:Surf2day}</password>
@@ -179,7 +179,7 @@
                     <connection-url>jdbc:mysql://${env.DATABASE_SERVICE_HOST:localhost}:${env.DATABASE_SERVICE_PORT:3306}/${env.MYSQL_DATABASE:fitnessStats}
                     </connection-url>
                     <driver-class>com.mysql.jdbc.Driver</driver-class>
-                    <driver>mysql-connector-java-5.1.45.jar_com.mysql.jdbc.Driver_5_1</driver>
+                    <driver>mysql</driver>
                     <security>
 			<user-name>${env.MYSQL_USER:root}</user-name>
                 	<password>${env.MYSQL_PASSWORD:Surf2day}</password>
