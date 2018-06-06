@@ -17,12 +17,47 @@ mysqldump --skip-lock-tables  -P 3306 -u root --password=Surf2day --all-database
 # database name fitnessStats
 
 
+# find the mysql pod 
+oc get pods
+
+# copy the mysql dump to the container
 
 
+oc rsync ~/mysqldump mysql-1-mdb9q:/var/lib/mysql/data
 
 
+# rshell into teh container 
+
+ oc rsh mysql-1-mdb9q
+
+# cd to dump directory
+
+cd /var/lib/mysql/data/mysqldump
+
+# connect to mysql
+
+ oc rsh mysql-1-mdb9q
+
+# restore DB
+
+source all.sql
+
+# grant priviledges
+mysql> Grant all privileges on fitnessStats to root@localhost;
+mysql> create user purefit@localhost;
+mysql> Grant all privileges on fitnessStats to purefit@localhost;
+
+# remove teh dump directory
 
 
+# add environmnet variables
+# config is in teh root directory fo the project under /configuration/standalone-openshift.xml
+
+From left menu: Applications->Deployments->(dbtest)Wildfly10 pod->environment(tab)-> add: 
+MYSQL_DATABASE=fitnesStats 
+MYSQL_DB_ENABLED=true 
+MYSQL_USER:purefit 
+MYSQL_PASSWORD:Varmints11!!
 
 
 
