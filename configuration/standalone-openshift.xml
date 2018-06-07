@@ -152,14 +152,13 @@
                         <password>sa</password>
                     </security>
                 </datasource>         
-                <datasource jta="true" jndi-name="java:/jdbc/fitness" pool-name="fitness" enabled="true" use-ccm="false">
-		    <connection-url>jdbc:mysql://${env.DATABASE_SERVICE_HOST:localhost}:${env.DATABASE_SERVICE_PORT:3306}/${env.MYSQL_DATABASE:fitnessStats}
-                    </connection-url>
+                <datasource jta="true" jndi-name="java:jboss/datasources/fitness" pool-name="fitness" enabled="true" use-java-context="true" use-ccm="false">
+		    <connection-url>${env.DB_CONNECTION_URL}</connection-url>
                     <driver-class>com.mysql.jdbc.Driver</driver-class>
                     <driver>mysql</driver>
                     <security>
-			<user-name>${env.MYSQL_USER:root}</user-name>
-                	<password>${env.MYSQL_PASSWORD:Surf2day}</password>
+			<user-name>${env.MYSQL_USER}</user-name>
+                	<password>${env.MYSQL_PASSWORD}</password>
                      </security>
                     <validation>
                         <valid-connection-checker class-name="org.jboss.jca.adapters.jdbc.extensions.mysql.MySQLValidConnectionChecker"/>

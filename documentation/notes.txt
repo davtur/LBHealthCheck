@@ -47,6 +47,9 @@ mysql> Grant all privileges on fitnessStats to root@localhost;
 mysql> create user purefit@localhost;
 mysql> Grant all privileges on fitnessStats to purefit@localhost;
 
+mysql> GRANT ALL PRIVILEGES ON fitnessStats.* TO 'purefit'@'%';
+mysql> FLUSH PRIVILEGES;
+
 # remove teh dump directory
 
 
@@ -58,6 +61,9 @@ MYSQL_DATABASE=fitnesStats
 MYSQL_DB_ENABLED=true 
 MYSQL_USER:purefit 
 MYSQL_PASSWORD:Varmints11!!
+
+
+
 
 
 
