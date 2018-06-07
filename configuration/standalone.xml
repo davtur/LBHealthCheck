@@ -152,12 +152,12 @@
                         <password>sa</password>
                     </security>
                 </datasource>         
-                <datasource jta="true" jndi-name="java:/fitness" pool-name="fitness" enabled="true" use-java-context="true" use-ccm="false">
-		    <connection-url>mysql://mysql:3306/fitnessStats</connection-url>
+                <datasource jta="true" jndi-name="java:/jdbc/fitness" pool-name="fitness" enabled="true" use-java-context="true" use-ccm="false">
+		     <connection-url>${env.DB_CONNECTION_URL}</connection-url>
                      <driver>mysql</driver>
                     <security>
-			<user-name>purefit</user-name>
-                	<password>Varmint11</password>
+			<user-name>${env.MYSQL_USER}</user-name>
+                	<password>${env.MYSQL_PASSWORD}</password>
                      </security>
                     <validation>
                         <valid-connection-checker class-name="org.jboss.jca.adapters.jdbc.extensions.mysql.MySQLValidConnectionChecker"/>
