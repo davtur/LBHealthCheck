@@ -153,9 +153,21 @@
                     </security>
                 </datasource>         
                 <datasource jta="true" jndi-name="java:jboss/datasources/fitness" pool-name="fitness" enabled="true" use-java-context="true" use-ccm="false">
-		    <connection-url>${env.DB_CONNECTION_URL}</connection-url>
-                    <driver-class>com.mysql.jdbc.Driver</driver-class>
-                    <driver>mysql</driver>
+		    <connection-url>mysql://mysql:3306/fitnessStats</connection-url>
+                     <driver>mysql</driver>
+                    <security>
+			<user-name>purefit</user-name>
+                	<password>Varmint11</password>
+                     </security>
+                    <validation>
+                        <valid-connection-checker class-name="org.jboss.jca.adapters.jdbc.extensions.mysql.MySQLValidConnectionChecker"/>
+                        <background-validation>true</background-validation>
+                        <exception-sorter class-name="org.jboss.jca.adapters.jdbc.extensions.mysql.MySQLExceptionSorter"/>
+                    </validation>
+                </datasource>
+                <datasource jta="true" jndi-name="java:/jdbc/fitness2" pool-name="fitness2" enabled="true" use-ccm="true">
+ 		    <connection-url>${env.DB_CONNECTION_URL}</connection-url>
+                     <driver>mysql</driver>
                     <security>
 			<user-name>${env.MYSQL_USER}</user-name>
                 	<password>${env.MYSQL_PASSWORD}</password>
@@ -166,31 +178,14 @@
                         <exception-sorter class-name="org.jboss.jca.adapters.jdbc.extensions.mysql.MySQLExceptionSorter"/>
                     </validation>
                 </datasource>
-                <datasource jta="true" jndi-name="java:/jdbc/fitness2" pool-name="fitness2" enabled="true" use-ccm="true">
-                   <connection-url>jdbc:mysql://${env.DATABASE_SERVICE_HOST:localhost}:${env.DATABASE_SERVICE_PORT:3306}/${env.MYSQL_DATABASE:fitnessStats}
-                    </connection-url>
-                    <driver-class>com.mysql.jdbc.Driver</driver-class>
-                    <driver>mysql</driver>
-                    <security>
-			<user-name>${env.MYSQL_USER:root}</user-name>
-                	<password>${env.MYSQL_PASSWORD:Surf2day}</password>
-                     </security>
-                    <validation>
-                        <valid-connection-checker class-name="org.jboss.jca.adapters.jdbc.extensions.mysql.MySQLValidConnectionChecker"/>
-                        <background-validation>true</background-validation>
-                        <exception-sorter class-name="org.jboss.jca.adapters.jdbc.extensions.mysql.MySQLExceptionSorter"/>
-                    </validation>
-                </datasource>
                 <datasource jta="true" jndi-name="java:/jdbc/quartz" pool-name="quartz" enabled="true" use-ccm="true">
-                    <connection-url>jdbc:mysql://${env.DATABASE_SERVICE_HOST:localhost}:${env.DATABASE_SERVICE_PORT:3306}/${env.MYSQL_DATABASE:fitnessStats}
-                    </connection-url>
-                    <driver-class>com.mysql.jdbc.Driver</driver-class>
-                    <driver>mysql</driver>
+ 		    <connection-url>${env.DB_CONNECTION_URL}</connection-url>
+                     <driver>mysql</driver>
                     <security>
-			<user-name>${env.MYSQL_USER:root}</user-name>
-                	<password>${env.MYSQL_PASSWORD:Surf2day}</password>
+			<user-name>${env.MYSQL_USER}</user-name>
+                	<password>${env.MYSQL_PASSWORD}</password>
                      </security>
-                    <validation>
+                  <validation>
                         <valid-connection-checker class-name="org.jboss.jca.adapters.jdbc.extensions.mysql.MySQLValidConnectionChecker"/>
                         <background-validation>true</background-validation>
                         <exception-sorter class-name="org.jboss.jca.adapters.jdbc.extensions.mysql.MySQLExceptionSorter"/>
