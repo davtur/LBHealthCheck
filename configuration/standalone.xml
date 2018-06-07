@@ -154,8 +154,7 @@
                 </datasource>         
                 <datasource jta="true" jndi-name="java:/jdbc/fitness" pool-name="fitness" enabled="true" use-java-context="true" use-ccm="false">
 		     <connection-url>${env.DB_CONNECTION_URL}</connection-url>
-                     <driver-class>com.mysql.jdbc.Driver</driver-class>
-                     <driver>mysql</driver>
+                      <driver>mysql</driver>
                     <security>
 			<user-name>${env.MYSQL_USER}</user-name>
                 	<password>${env.MYSQL_PASSWORD}</password>
@@ -168,8 +167,7 @@
                 </datasource>
                 <datasource jta="true" jndi-name="java:/jdbc/fitness2" pool-name="fitness2" enabled="true" use-ccm="true">
  		    <connection-url>${env.DB_CONNECTION_URL}</connection-url>
-                     <driver-class>com.mysql.jdbc.Driver</driver-class>
-                     <driver>mysql</driver>
+                      <driver>mysql</driver>
                     <security>
 			<user-name>${env.MYSQL_USER}</user-name>
                 	<password>${env.MYSQL_PASSWORD}</password>
@@ -182,7 +180,6 @@
                 </datasource>
                 <datasource jta="true" jndi-name="java:/jdbc/quartz" pool-name="quartz" enabled="true" use-ccm="true">
  		    <connection-url>${env.DB_CONNECTION_URL}</connection-url>
-                     <driver-class>com.mysql.jdbc.Driver</driver-class>
                      <driver>mysql</driver>
                     <security>
 			<user-name>${env.MYSQL_USER}</user-name>
