@@ -54,7 +54,7 @@ mysql> FLUSH PRIVILEGES;
 
 
 # add environmnet variables
-# config is in teh root directory fo the project under /configuration/standalone-openshift.xml
+# config is in the root directory fo the project under /configuration/standalone.xml
 
 From left menu: Applications->Deployments->(dbtest)Wildfly10 pod->environment(tab)-> add: 
 MYSQL_DATABASE=fitnesStats 
@@ -64,7 +64,7 @@ MYSQL_PASSWORD:Varmints11!!
 
 
 
-
+##datasources must be configured on the /configuration/standalone.xml file as it is copied to the container by source to image.
 
 
 
