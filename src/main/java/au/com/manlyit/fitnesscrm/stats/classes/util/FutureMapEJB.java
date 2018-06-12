@@ -45,10 +45,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.PreDestroy;
 import javax.ejb.Asynchronous;
-import javax.ejb.ConcurrencyManagement;
-import static javax.ejb.ConcurrencyManagementType.BEAN;
-import javax.ejb.LocalBean;
 import javax.ejb.Schedule;
+import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.ejb.Timer;
 import javax.ejb.TransactionAttribute;
@@ -67,7 +65,7 @@ import javax.xml.ws.WebServiceException;
  * @author david
  */
 //@ConcurrencyManagement(BEAN)
-//@Singleton
+@Singleton
 //@LocalBean
 @Startup
 @ApplicationScoped
