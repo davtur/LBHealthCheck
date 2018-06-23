@@ -2,21 +2,24 @@
 <Configuration status="info" name="FitnessCrm" packages="">
   <Appenders>
       <Console name="Console" target="SYSTEM_OUT">
-      <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
+          <PatternLayout>
+            <Pattern>%d{dd MMM yyyy HH:mm:ss,SSS} %p %F %L %t %c - %m%n</Pattern>
+        </PatternLayout>
+     <!-- <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>-->
     </Console>
-    <RandomAccessFile name="fitnessCRM" fileName="/var/log/glassfish/fitnessCRM.log">
+   <!-- <RandomAccessFile name="fitnessCRM" fileName="/var/log/glassfish/fitnessCRM.log">
         <PatternLayout>
             <Pattern>%d{dd MMM yyyy HH:mm:ss,SSS} %p %F %L %t %c - %m%n</Pattern>
         </PatternLayout>
-    </RandomAccessFile>
+    </RandomAccessFile>-->
     </Appenders>
   <Loggers>
     <Logger name="org.apache.log4j.xml" level="info"/>
     <Logger name="org.atmosphere" level="INFO" />
     <Logger name="org.primefaces" level="INFO" />
-     <Root level="info">
+     <!--<Root level="info">
       <AppenderRef ref="fitnessCRM"/>
-    </Root>
+    </Root>-->
      <Root level="debug">
       <AppenderRef ref="Console"/>
     </Root>
