@@ -704,7 +704,7 @@ public class PaymentBean implements Serializable {
     }
 
     @Asynchronous
-    @TransactionAttribute(REQUIRES_NEW) //see this for an explanation. we want a new transaction http://docs.oracle.com/javaee/6/tutorial/doc/bncij.html
+   // @TransactionAttribute(REQUIRES_NEW) //see this for an explanation. we want a new transaction http://docs.oracle.com/javaee/6/tutorial/doc/bncij.html
     public Future<PaymentGatewayResponse> deletePayment(Customers cust, Date debitDate, Long paymentAmountInCents, Payments payment, String loggedInUser, String digitalKey, String sessionId) {
         //  This method will delete a single payment from the Customer's payment schedule.
         //  It is important to note the following when deleting a payment:
@@ -971,7 +971,7 @@ public class PaymentBean implements Serializable {
     }
 
     @Asynchronous
-    public Future<PaymentGatewayResponse> getScheduledPayments(Customers cust, Date fromDate, Date toDate, String digitalKey, String sessionId) {
+    public Future<PaymentGatewayResponse> getScheduledPayments(Customers cust, Date fromDate, Date toDate, String digitalKey, String sessionId, boolean ignoreDatesAndGetAll) {
 
         ArrayOfScheduledPayment resultArrayOfScheduledPayments = new ArrayOfScheduledPayment();
         PaymentGatewayResponse pgr = new PaymentGatewayResponse(false, resultArrayOfScheduledPayments, "", "-1", "An unhandled error occurred!");
@@ -999,7 +999,12 @@ public class PaymentBean implements Serializable {
 
             String ourSystemCustomerReference = cust.getId().toString();
             LOGGER.log(Level.INFO, "Payment Bean - Running async task - Getting Scheduled Payments for Customer {0}", cust.getUsername());
-            EziResponseOfArrayOfScheduledPaymentTHgMB7OL eziResponse = getWs().getScheduledPayments(digitalKey, fromDateString, toDateString, eziDebitCustomerId, ourSystemCustomerReference);
+            EziResponseOfArrayOfScheduledPaymentTHgMB7OL eziResponse = null;
+            if (ignoreDatesAndGetAll) {
+                eziResponse = getWs().getScheduledPayments(digitalKey, "", "", eziDebitCustomerId, ourSystemCustomerReference);
+            } else {
+                eziResponse = getWs().getScheduledPayments(digitalKey, fromDateString, toDateString, eziDebitCustomerId, ourSystemCustomerReference);
+            }
             if (eziResponse.getError() == 0) {// any errors will be a non zero value
                 resultArrayOfScheduledPayments = eziResponse.getData().getValue();
                 if (resultArrayOfScheduledPayments != null) {
@@ -1021,11 +1026,11 @@ public class PaymentBean implements Serializable {
                                 try {
                                     custId = Integer.parseInt(customerRef.trim());
                                 } catch (NumberFormatException numberFormatException) {
-                                    LOGGER.log(Level.WARNING, "Future Map processGetScheduledPayments an ezidebit YourSystemReference string cannot be converted to a number.", numberFormatException);
+                                    LOGGER.log(Level.WARNING, "PaymentBean processGetScheduledPayments an ezidebit YourSystemReference string cannot be converted to a number.", numberFormatException);
 
                                 }
 
-                                LOGGER.log(Level.INFO, "Future Map processGetScheduledPayments. Processing {0} payments for customer {1}.", new Object[]{payList.size(), cust.getUsername()});
+                                LOGGER.log(Level.INFO, "PaymentBean processGetScheduledPayments. Processing {0} payments for customer {1}.", new Object[]{payList.size(), cust.getUsername()});
                                 for (ScheduledPayment pay : payList) {
                                     int paymentCustRef;
                                     try {
@@ -1034,7 +1039,7 @@ public class PaymentBean implements Serializable {
                                         paymentCustRef = -1;
                                     }
                                     if (custId != paymentCustRef) {
-                                        LOGGER.log(Level.WARNING, "Future Map processGetScheduledPayments . The list being processed contains multiple customers.It should only contain one for this method. Aborting.");
+                                        LOGGER.log(Level.WARNING, "PaymentBean processGetScheduledPayments . The list being processed contains multiple customers.It should only contain one for this method. Aborting.");
                                         abort = true;
                                     }
                                 }
@@ -1046,29 +1051,38 @@ public class PaymentBean implements Serializable {
                                             id = Integer.parseInt(pay.getPaymentReference().getValue());
                                             crmPay = paymentsFacade.findPaymentById(id, false);
                                         } catch (NumberFormatException numberFormatException) {
-                                            LOGGER.log(Level.INFO, "Future Map processGetScheduledPayments  - found a payment without a valid reference", id);
+                                            LOGGER.log(Level.INFO, "PaymentBean processGetScheduledPayments  - found a payment without a valid reference", id);
                                         }
 
                                         if (crmPay != null) {
-
+                                            LOGGER.log(Level.INFO, "PaymentBean processGetScheduledPayments  - Payment already exists in the CRM database id:", id);
                                             if (compareScheduledPaymentXMLToEntity(crmPay, pay)) {
                                                 crmPay = convertScheduledPaymentXMLToEntity(crmPay, pay, cust);
-                                                LOGGER.log(Level.INFO, "Future Map processGetScheduledPayments  - updateing scheduled payment id:", id);
+                                                LOGGER.log(Level.INFO, "PaymentBean processGetScheduledPayments  - updateing scheduled payment id:", id);
                                                 paymentsFacade.edit(crmPay);
+                                            } else {
+                                                crmPay = compareScheduledPaymentXMLToEntityAndUpdateAmountAndStatus(crmPay, pay);
+                                                paymentsFacade.edit(crmPay);
+                                                LOGGER.log(Level.WARNING, "PaymentBean processGetScheduledPayments  - updating scheduled payment compareScheduledPaymentXMLToEntity FAILED id: {0}", id);
                                             }
                                         } else {
                                             crmPay = paymentsFacade.findScheduledPaymentByCust(pay, cust);
                                             if (crmPay != null) { //' payment exists
                                                 if (compareScheduledPaymentXMLToEntity(crmPay, pay)) {
                                                     // they are the same so no update
-                                                    LOGGER.log(Level.FINE, "Future Map processGetScheduledPayments paymenst are the same.");
+                                                    LOGGER.log(Level.FINE, "PaymentBean processGetScheduledPayments paymenst are the same.");
                                                 } else {
                                                     crmPay = convertScheduledPaymentXMLToEntity(crmPay, pay, cust);
                                                     paymentsFacade.edit(crmPay);
                                                 }
                                             } else { //payment doesn't exist in crm so add it
-                                                LOGGER.log(Level.WARNING, "Future Map processGetScheduledPayments - A payment exists in the PGW but not in CRM.(This can be ignored if a customer is onboarded with the online eddr form) EzidebitID={0}, CRM Ref:{1}, Amount={2}, Date={3}, Ref={4}", new Object[]{pay.getEzidebitCustomerID().getValue(), pay.getYourSystemReference().getValue(), pay.getPaymentAmount().floatValue(), pay.getPaymentDate().toGregorianCalendar().getTime(), pay.getPaymentReference().getValue()});
+                                                LOGGER.log(Level.WARNING, "PaymentBean processGetScheduledPayments - A payment exists in the PGW but not in CRM.(This can be ignored if a customer is onboarded with the online eddr form) EzidebitID={0}, CRM Ref:{1}, Amount={2}, Date={3}, Ref={4}", new Object[]{pay.getEzidebitCustomerID().getValue(), pay.getYourSystemReference().getValue(), pay.getPaymentAmount().floatValue(), pay.getPaymentDate().toGregorianCalendar().getTime(), pay.getPaymentReference().getValue()});
                                                 crmPay = convertScheduledPaymentXMLToEntity(null, pay, cust);
+                                                if(crmPay.getPaymentReference() != null){
+                                                    if(Integer.parseInt(crmPay.getPaymentReference()) <1 ){
+                                                        crmPay.setPaymentReference(null);// this is a unique field and should be equal to the id field i.e the Payment gateway reference should match 
+                                                    }
+                                                }
                                                 paymentsFacade.createAndFlushForGeneratedIdEntities(crmPay);
                                                 crmPay.setPaymentReference(crmPay.getId().toString());
                                                 crmPay.setManuallyAddedPayment(false);
@@ -1146,13 +1160,13 @@ public class PaymentBean implements Serializable {
                                     try {
                                         p1 = paymentsFacade.findLastSuccessfulScheduledPayment(cust);
                                     } catch (Exception e) {
-                                        LOGGER.log(Level.WARNING, "Future Map processGetCustomerDetails. findLastSuccessfulScheduledPayment for customer {0}. {1}", new Object[]{cust.getUsername(), e});
+                                        LOGGER.log(Level.WARNING, "PaymentBean processGetCustomerDetails. findLastSuccessfulScheduledPayment for customer {0}. {1}", new Object[]{cust.getUsername(), e});
                                     }
                                     Payments p2 = null;
                                     try {
                                         p2 = paymentsFacade.findNextScheduledPayment(cust);
                                     } catch (Exception e) {
-                                        LOGGER.log(Level.WARNING, "Future Map processGetCustomerDetails. findNextScheduledPayment for customer {0}. {1}", new Object[]{cust.getUsername(), e});
+                                        LOGGER.log(Level.WARNING, "PaymentBean processGetCustomerDetails. findNextScheduledPayment for customer {0}. {1}", new Object[]{cust.getUsername(), e});
                                     }
                                     pp.setLastSuccessfulScheduledPayment(p1);
                                     pp.setNextScheduledPayment(p2);
@@ -1162,14 +1176,14 @@ public class PaymentBean implements Serializable {
                                 }
 
                             } else {
-                                LOGGER.log(Level.WARNING, "Future Map processGetScheduledPayments our system ref in payment is null.");
+                                LOGGER.log(Level.WARNING, "PaymentBean processGetScheduledPayments our system ref in payment is null.");
                             }
 
                         }
 
                     }
 
-                    LOGGER.log(Level.INFO, "Future Map processGetScheduledPayments completed");
+                    LOGGER.log(Level.INFO, "PaymentBean processGetScheduledPayments completed");
 
                 } else {
                     LOGGER.log(Level.WARNING, "getScheduledPayments Response: Error - NULL Result ");
@@ -1316,7 +1330,7 @@ public class PaymentBean implements Serializable {
             payment = new Payments();
             payment.setCreateDatetime(new Date());
             payment.setPaymentSource(PaymentSource.DIRECT_DEBIT.value());
-            payment.setId(0);
+            payment.setId(-1);
             payment.setCustomerName(cust);
         }
         try {
@@ -1377,6 +1391,7 @@ public class PaymentBean implements Serializable {
             if (payment.getCustomerName() == null) {
                 return false;
             } else if (compareStringToXMLString(payment.getCustomerName().getId().toString(), (pay.getYourSystemReference())) == false) {
+                LOGGER.log(Level.WARNING, "PaymentBean compareScheduledPaymentXMLToEntity method - customer ID did not match:Payments={0},ScheduledPayment={1}", new Object[]{payment.getCustomerName().getId().toString(), pay.getYourSystemReference()});
                 return false;
             }
             if (compareDateToXMLGregCalendar(payment.getDebitDate(), pay.getPaymentDate()) == false) {
@@ -1392,6 +1407,7 @@ public class PaymentBean implements Serializable {
             }
 
             if (compareBigDecimalToDouble(payment.getPaymentAmount(), pay.getPaymentAmount()) == false) {
+                LOGGER.log(Level.WARNING, "Future Map compareScheduledPaymentXMLToEntity method failed. Payment BigDec Amounts dont match CRM DB {0} , payment gateway {1}", new Object[]{payment.getPaymentAmount(), pay.getPaymentAmount()});
                 return false;
             }
             /* if (!Objects.equals(payment.getManuallyAddedPayment(), pay.isManuallyAddedPayment())) {
@@ -1414,6 +1430,59 @@ public class PaymentBean implements Serializable {
         }
 
         return true;
+
+    }
+
+    private Payments compareScheduledPaymentXMLToEntityAndUpdateAmountAndStatus(Payments payment, ScheduledPayment pay) {
+
+        if (payment == null || pay == null) {
+            return null;
+        }
+        try {
+
+            if (payment.getCustomerName() == null) {
+                return null;
+            } else if (compareStringToXMLString(payment.getCustomerName().getId().toString(), (pay.getYourSystemReference())) == false) {
+                LOGGER.log(Level.WARNING, "PaymentBean compareScheduledPaymentXMLToEntity method - customer ID did not match:Payments={0},ScheduledPayment={1}", new Object[]{payment.getCustomerName().getId().toString(), pay.getYourSystemReference()});
+                return null;
+            }
+            if (compareStringToXMLString(payment.getPaymentReference(), pay.getPaymentReference()) == false) {
+                return null;
+            }
+
+            if (compareStringToXMLString(payment.getYourGeneralReference(), pay.getYourGeneralReference()) == false) {
+                return null;
+            }
+            if (compareStringToXMLString(payment.getYourSystemReference(), pay.getYourSystemReference()) == false) {
+                return null;
+            }
+            if (compareStringToXMLString(payment.getEzidebitCustomerID(), pay.getEzidebitCustomerID()) == false) {
+                return null;
+            }
+            if (compareDateToXMLGregCalendar(payment.getDebitDate(), pay.getPaymentDate()) == false) {
+                payment.setDebitDate(pay.getPaymentDate().toGregorianCalendar().getTime());
+            }
+
+            if (payment.getPaymentStatus().contains(PaymentStatus.SCHEDULED.value()) == false) {
+                if (payment.getPaymentStatus().contains(PaymentStatus.WAITING.value()) == false) {
+                    payment.setPaymentStatus(PaymentStatus.SCHEDULED.value());
+                }
+            }
+
+            if (compareBigDecimalToDouble(payment.getPaymentAmount(), pay.getPaymentAmount()) == false) {
+                LOGGER.log(Level.WARNING, "Future Map compareScheduledPaymentXMLToEntity method failed. Payment BigDec Amounts dont match CRM DB {0} , payment gateway {1}", new Object[]{payment.getPaymentAmount(), pay.getPaymentAmount()});
+                payment.setPaymentAmount(new BigDecimal(pay.getPaymentAmount()));
+            }
+            /* if (!Objects.equals(payment.getManuallyAddedPayment(), pay.isManuallyAddedPayment())) {
+                 return false;
+                 }*/
+
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Future Map compareScheduledPaymentXMLToEntity method failed.:", e.getMessage());
+            return null;
+        }
+
+        return payment;
 
     }
 
@@ -1494,21 +1563,18 @@ public class PaymentBean implements Serializable {
     }
 
     private synchronized boolean compareBigDecimalToDouble(BigDecimal d, Double bd) {
-        boolean result = true;// return true if they are the same
+        boolean result = false;// return true if they are the same
         BigDecimal d2 = null;
         if (bd != null) {
             d2 = new BigDecimal(bd);
         }
 
-        if (d == null && d2 == null) {
-            return true;
-        }
-        if ((d == null && d2 != null) || (d != null && d2 == null)) {
+        if (d == null || d2 == null) {
             return false;
         }
 
-        if (d.compareTo(d2) != 0) {
-            return false;
+        if (d.compareTo(d2) == 0) {
+            return true;
         }
         return result;
     }
@@ -1870,7 +1936,7 @@ public class PaymentBean implements Serializable {
         String batchSessionId = "Batch-Dont-Update";
 
         Future<PaymentGatewayResponse> gpResponse = getPayments(cust, paymentType, paymentMethod, paymentSource, paymentReference, fromDate, toDate, useSettlementDate, digitalKey, batchSessionId);
-        Future<PaymentGatewayResponse> gspResponse = getScheduledPayments(cust, fromDate, toDate, digitalKey, batchSessionId);
+        Future<PaymentGatewayResponse> gspResponse = getScheduledPayments(cust, fromDate, toDate, digitalKey, batchSessionId, true);
         Future<PaymentGatewayResponse> gcdResponse = getCustomerDetails(cust, digitalKey, batchSessionId);
         PaymentGatewayResponse pgr1 = null;
         PaymentGatewayResponse pgr2 = null;
@@ -1881,19 +1947,19 @@ public class PaymentBean implements Serializable {
             pgr2 = gspResponse.get();
             pgr3 = gcdResponse.get();
             result = "";
-            if (pgr1.isOperationSuccessful()){
+            if (pgr1.isOperationSuccessful()) {
                 result = "Get Payments - OK, ";
-            }else{
+            } else {
                 result = "Get Payments - FAIL, ";
             }
-            if (pgr2.isOperationSuccessful()){
+            if (pgr2.isOperationSuccessful()) {
                 result += "Get Scheduled - OK, ";
-            }else{
+            } else {
                 result += "Get Scheduled - FAIL, ";
             }
-            if (pgr3.isOperationSuccessful()){
+            if (pgr3.isOperationSuccessful()) {
                 result += "Get Details - OK ";
-            }else{
+            } else {
                 result += "Get Details - FAIL ";
             }
 
@@ -2101,7 +2167,7 @@ public class PaymentBean implements Serializable {
                         GregorianCalendar paymentsStartDate = new GregorianCalendar();
                         paymentsStopDate.add(Calendar.MONTH, PAYMENT_SCHEDULE_MONTHS_AHEAD);
                         // get scheduled payments in teh next 11 months 
-                        Future<PaymentGatewayResponse> csp = getScheduledPayments(cust, paymentsStartDate.getTime(), paymentsStopDate.getTime(), digitalKey, sessionId);
+                        Future<PaymentGatewayResponse> csp = getScheduledPayments(cust, paymentsStartDate.getTime(), paymentsStopDate.getTime(), digitalKey, sessionId, true);
                         PaymentGatewayResponse pgr2;
                         try {
                             pgr2 = csp.get();
@@ -2252,7 +2318,7 @@ public class PaymentBean implements Serializable {
         }
     }
 
-    @TransactionAttribute(REQUIRES_NEW)
+    //@TransactionAttribute(REQUIRES_NEW)
     private void updatePaymentParameters(Customers cust, CustomerDetails custDetails,
             int errorCode
     ) {
@@ -2260,7 +2326,7 @@ public class PaymentBean implements Serializable {
 
         if (pp == null) {
 
-            LOGGER.log(Level.SEVERE, "Future Map processGetCustomerDetails. Payment Parameters Object is NULL for customer {0}. Creating default parameters.", new Object[]{cust.getUsername()});
+            LOGGER.log(Level.SEVERE, "PaymentBean processGetCustomerDetails. Payment Parameters Object is NULL for customer {0}. Creating default parameters.", new Object[]{cust.getUsername()});
             return;
         }
         if (custDetails == null) {
@@ -2271,7 +2337,7 @@ public class PaymentBean implements Serializable {
                     pp.setLastUpdatedFromPaymentGateway(new Date());
                 }
             } else {
-                LOGGER.log(Level.SEVERE, "Future Map processGetCustomerDetails. CustomerDetails Object is NULL but error code = 0 ( success) for customer {0}.This shouldn't ever happen.", new Object[]{cust.getUsername()});
+                LOGGER.log(Level.SEVERE, "PaymentBean processGetCustomerDetails. CustomerDetails Object is NULL but error code = 0 ( success) for customer {0}.This shouldn't ever happen.", new Object[]{cust.getUsername()});
             }
 
         } else {
@@ -2279,13 +2345,13 @@ public class PaymentBean implements Serializable {
             try {
                 p1 = paymentsFacade.findLastSuccessfulScheduledPayment(cust);
             } catch (Exception e) {
-                LOGGER.log(Level.WARNING, "Future Map processGetCustomerDetails. findLastSuccessfulScheduledPayment for customer {0}. {1}", new Object[]{cust.getUsername(), e});
+                LOGGER.log(Level.WARNING, "PaymentBean processGetCustomerDetails. findLastSuccessfulScheduledPayment for customer {0}. {1}", new Object[]{cust.getUsername(), e});
             }
             Payments p2 = null;
             try {
                 p2 = paymentsFacade.findNextScheduledPayment(cust);
             } catch (Exception e) {
-                LOGGER.log(Level.WARNING, "Future Map processGetCustomerDetails. findNextScheduledPayment for customer {0}. {1}", new Object[]{cust.getUsername(), e});
+                LOGGER.log(Level.WARNING, "PaymentBean processGetCustomerDetails. findNextScheduledPayment for customer {0}. {1}", new Object[]{cust.getUsername(), e});
             }
             pp.setLastUpdatedFromPaymentGateway(new Date());
             pp.setLastSuccessfulScheduledPayment(p1);

@@ -760,7 +760,7 @@ public class FutureMapEJB implements Serializable {
 // run a schedules
 
     @Asynchronous
-    @TransactionAttribute(REQUIRES_NEW)
+    //@TransactionAttribute(REQUIRES_NEW)
     public void processConvertSchedule(String sessionId, PaymentGatewayResponse pgr) {
         // Update the payments table with any new information retrived by the getPayments exzidebit web service.
         // Only for one customer.
@@ -1288,7 +1288,7 @@ public class FutureMapEJB implements Serializable {
     }
 
     @Asynchronous
-    @TransactionAttribute(REQUIRES_NEW)
+    //@TransactionAttribute(REQUIRES_NEW)
     private void processReport(String sessionId, PaymentGatewayResponse pgr) {
         // Update the payments table with any new information retrived by the getPayments exzidebit web service.
         // Only for one customer.
@@ -1449,7 +1449,7 @@ public class FutureMapEJB implements Serializable {
     }
 
     @Asynchronous
-    @TransactionAttribute(REQUIRES_NEW)
+    //@TransactionAttribute(REQUIRES_NEW)
     public void processGetPayments(String sessionId, PaymentGatewayResponse pgr) {
         // Update the payments table with any new information retrived by the getPayments exzidebit web service.
         // Only for one customer.
@@ -1592,7 +1592,7 @@ public class FutureMapEJB implements Serializable {
     }
 
     @Asynchronous
-    @TransactionAttribute(REQUIRES_NEW)
+    //@TransactionAttribute(REQUIRES_NEW)
     public void processGetScheduledPayments(String sessionId, PaymentGatewayResponse pgr) {
         // Update the payments table with any new information retrived by the getPayments exzidebit web service.
         // Only for one customer.
@@ -1936,7 +1936,7 @@ public class FutureMapEJB implements Serializable {
         }
     }*/
     @Asynchronous
-    @TransactionAttribute(REQUIRES_NEW)
+   // @TransactionAttribute(REQUIRES_NEW)
     public void processAddCustomer(String sessionId, PaymentGatewayResponse pgr) {
         boolean result = false;
         //PaymentGatewayResponse pgr = null;
@@ -1980,7 +1980,7 @@ public class FutureMapEJB implements Serializable {
     }
 
     @Asynchronous
-    @TransactionAttribute(REQUIRES_NEW)
+    //@TransactionAttribute(REQUIRES_NEW)
     public void processChangeCustomerStatus(String sessionId, PaymentGatewayResponse pgr) {
         boolean result = false;
         //PaymentGatewayResponse pgr = null;
@@ -2041,7 +2041,7 @@ public class FutureMapEJB implements Serializable {
     }
 
     @Asynchronous
-    @TransactionAttribute(REQUIRES_NEW)
+   // @TransactionAttribute(REQUIRES_NEW)
     public void processDeletePaymentAsync(String sessionId, PaymentGatewayResponse pgr) {
 
         String paymentRef = null;
@@ -2063,7 +2063,7 @@ public class FutureMapEJB implements Serializable {
             //  }
             // }
 
-            if (paymentRef == null) {
+            if (paymentRef == null || paymentRef.isEmpty() || paymentRef.trim().isEmpty()) {
                 //this should always be set and will be the primary key of teh row in the payments table
                 LOGGER.log(Level.WARNING, "FutureMap - processDeletePayment FAILED - paymentRef IS NULL or Empty");
                 return;
@@ -2166,7 +2166,7 @@ public class FutureMapEJB implements Serializable {
     }
 
     @Asynchronous
-    @TransactionAttribute(REQUIRES_NEW)
+    //@TransactionAttribute(REQUIRES_NEW)
     public void processAddPaymentResult(String sessionId, PaymentGatewayResponse pgr) {
         String paymentRef;
         Payments pay = null;
@@ -2343,7 +2343,7 @@ public class FutureMapEJB implements Serializable {
         cal.add(Calendar.MONTH, -(monthsAhead));
         cal.add(Calendar.MONTH, -(monthsbehind));
         startAsynchJob(sessionId, "GetPayments", paymentBean.getPayments(cust, "ALL", "ALL", "ALL", "", cal.getTime(), endDate, false, getDigitalKey(), sessionId));
-        startAsynchJob(sessionId, "GetScheduledPayments", paymentBean.getScheduledPayments(cust, cal.getTime(), endDate, getDigitalKey(), sessionId));
+        startAsynchJob(sessionId, "GetScheduledPayments", paymentBean.getScheduledPayments(cust, cal.getTime(), endDate, getDigitalKey(), sessionId,true));
 
     }
     //CreateSchedule
@@ -2421,7 +2421,7 @@ public class FutureMapEJB implements Serializable {
     }
 
     @Asynchronous
-    @TransactionAttribute(REQUIRES_NEW)
+    //@TransactionAttribute(REQUIRES_NEW)
     public void processDeletePaymentBatch(String sessionId, PaymentGatewayResponse pgr) {
         boolean result = false;
         String returnedMessage = "An error occurred trying to processDeletePaymentBatch. Refer to logs for more info";
@@ -2489,7 +2489,7 @@ public class FutureMapEJB implements Serializable {
     }
 
     @Asynchronous
-    @TransactionAttribute(REQUIRES_NEW)
+    //@TransactionAttribute(REQUIRES_NEW)
     public void processAddPaymentBatch(String sessionId, PaymentGatewayResponse pgr) {
         boolean result = false;
         String returnedMessage = "An error occurred trying to create the customers schedule. Refer to logs for more info";
@@ -2556,7 +2556,7 @@ public class FutureMapEJB implements Serializable {
     }
 
     @Asynchronous
-    @TransactionAttribute(REQUIRES_NEW)
+   // @TransactionAttribute(REQUIRES_NEW)
     public void processClearSchedule(String sessionId, PaymentGatewayResponse pgr) {
         boolean result = false;
         String returnedMessage = "An error occurred trying to clear the customers schedule. Refer to logs for more info";
@@ -2611,7 +2611,7 @@ public class FutureMapEJB implements Serializable {
     }
 
     @Asynchronous
-    @TransactionAttribute(REQUIRES_NEW)
+   // @TransactionAttribute(REQUIRES_NEW)
     public void processGetCustomerDetails(String sessionId, PaymentGatewayResponse pgr) {
         CustomerDetails custDetails = null;
 
@@ -2745,7 +2745,7 @@ public class FutureMapEJB implements Serializable {
     }
 
     @Asynchronous
-    @TransactionAttribute(REQUIRES_NEW)
+    //@TransactionAttribute(REQUIRES_NEW)
     public void processGetAllCustPaymentsAndDetails(String sessionId, PaymentGatewayResponse pgr) {
         CustomerDetails custDetails = null;
 

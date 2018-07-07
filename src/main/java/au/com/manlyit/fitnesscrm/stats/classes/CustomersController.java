@@ -1074,7 +1074,7 @@ public class CustomersController implements Serializable {
 
     }
 
-    @TransactionAttribute(REQUIRES_NEW)
+    //@TransactionAttribute(REQUIRES_NEW)
     private void createFromUnauthenticated(String group, Customers c, String message, HttpServletRequest request, boolean isWebserviceCall) {
 
         //TODO validate email address to ensure spammers can't take down site

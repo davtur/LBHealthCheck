@@ -115,7 +115,7 @@ public ABC addNewABC(ABC abc) {
         return retList;
     }
 
-    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    //@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public boolean updatePaymentToScheduledStatus(Payments pay) {
         Payments p = find(pay.getId());
         if (p == null) {
