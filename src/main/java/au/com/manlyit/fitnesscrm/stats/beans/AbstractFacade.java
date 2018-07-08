@@ -129,7 +129,7 @@ Flush has several usages:
         }
 
     }
-
+@TransactionAttribute(REQUIRES_NEW)
     public void pushChangesToDBImmediatleyInsteadOfAtTxCommit() {
 
         /*
@@ -174,7 +174,7 @@ Flush has several usages:
         }
 
     }
-
+@TransactionAttribute(REQUIRES_NEW)
     public void edit(T entity) {
 
         getEntityManager().merge(entity);
@@ -184,7 +184,7 @@ Flush has several usages:
             LOGGER.log(Level.INFO, message);
         }
     }
-
+@TransactionAttribute(REQUIRES_NEW)
     public void refreshfromDB(T entity) {
 
         getEntityManager().refresh(getEntityManager().merge(entity));
@@ -208,7 +208,7 @@ Flush has several usages:
         //logger.log(Level.INFO, "DEBUG ( Turn this off if not needed ) SQL Query String: {0}  ----------------- {1}", new Object[]{sqlString, sqlString2});
         LOGGER.log(Level.INFO, "DEBUG SQL Query String: -------------> {0} ,  ( Turn this off by setting DEBUG = false in facade class if not needed )", new Object[]{sqlString2});
     }
-
+@TransactionAttribute(REQUIRES_NEW)
     public void remove(T entity) {
 
         getEntityManager().remove(getEntityManager().merge(entity));
