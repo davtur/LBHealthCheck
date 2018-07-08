@@ -45,6 +45,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.PreDestroy;
 import javax.ejb.Asynchronous;
+import javax.ejb.ConcurrencyManagement;
+import static javax.ejb.ConcurrencyManagementType.BEAN;
 import javax.ejb.Schedule;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
@@ -64,7 +66,7 @@ import javax.xml.ws.WebServiceException;
  *
  * @author david
  */
-//@ConcurrencyManagement(BEAN)
+@ConcurrencyManagement(BEAN)
 @Singleton
 //@LocalBean
 @Startup
@@ -93,9 +95,13 @@ public class FutureMapEJB implements Serializable {
     private final Object lock8 = new Object();
     private final Object lock9 = new Object();
     private final Object futureMapArrayLock = new Object();
+    private final Object updateCustomerSchedulesLock = new Object();
+    private final Object settlementReportLockObject = new Object();
+    private final Object paymentReportLockObject = new Object();
+    private final Object updateScheduleLock = new Object();
     private final AtomicBoolean settlementReportLock = new AtomicBoolean(false);
     private final AtomicBoolean paymentReportLock = new AtomicBoolean(false);
-    private final AtomicBoolean updateScheduleLock = new AtomicBoolean(false);
+    //private final AtomicBoolean updateScheduleLock = new AtomicBoolean(false);
     private final AtomicBoolean asychCheckProcessing = new AtomicBoolean(false);
     private List<Payment> paymentsByCustomersMissingFromCRM;
 
@@ -234,7 +240,11 @@ public class FutureMapEJB implements Serializable {
                     LOGGER.log(Level.SEVERE, "MalformedURLException - payment.ezidebit.gateway.url", ex);
 
                 }
-                ws = new NonPCIService(url).getBasicHttpBindingINonPCIService();
+                try {
+                    ws = new NonPCIService(url).getBasicHttpBindingINonPCIService();
+                } catch (Exception e2) {
+                    LOGGER.log(Level.SEVERE, "Failed to initialise the Payment Gateway Web service", e2);
+                }
             }
             return ws;
         }
@@ -374,66 +384,69 @@ public class FutureMapEJB implements Serializable {
         return configMapFacade.getConfig("payment.ezidebit.widget.digitalkey");
     }
 
-    public synchronized boolean runSettlementReport(Date fromDate, String sessionId) {
+    public boolean runSettlementReport(Date fromDate, String sessionId) {
 // use this if you need to match up against what is in your bank account
-        if (settlementReportLock.get() == true) {
-            LOGGER.log(Level.INFO, "The Settlement Report Already Running.");
-            return false;
-        } else {
-            LOGGER.log(Level.INFO, "Future Map, runSettlementReport. from date {0}.", fromDate);
-            Date toDate = new Date();
-            AsyncJob aj = new AsyncJob("SettlementReport", paymentBean.getAllPaymentsBySystemSinceDate(fromDate, toDate, true, getDigitalKey(), sessionId));
-            this.put(FUTUREMAP_INTERNALID, aj);
-            settlementReportLock.set(true);
+        synchronized (settlementReportLockObject) {
+            if (settlementReportLock.get() == true) {
+                LOGGER.log(Level.INFO, "The Settlement Report Already Running.");
+                return false;
+            } else {
+                LOGGER.log(Level.INFO, "Future Map, runSettlementReport. from date {0}.", fromDate);
+                Date toDate = new Date();
+                AsyncJob aj = new AsyncJob("SettlementReport", paymentBean.getAllPaymentsBySystemSinceDate(fromDate, toDate, true, getDigitalKey(), sessionId));
+                this.put(FUTUREMAP_INTERNALID, aj);
+                settlementReportLock.set(true);
+            }
+            return true;
         }
-        return true;
     }
 
-    public synchronized boolean runPaymentReport(Date fromDate, String sessionId) throws InterruptedException {
+    public boolean runPaymentReport(Date fromDate, String sessionId) throws InterruptedException {
         // use this if to get the lates payment information
-        if (paymentReportLock.get() == true) {
-            LOGGER.log(Level.INFO, "The Payment Report Already Running.");
-            return false;
-        } else {
-            LOGGER.log(Level.INFO, "Future Map, runPaymentReport. from date {0}.", fromDate);
-            Date toDate = new Date();
-            AsyncJob aj = new AsyncJob("PaymentReport", paymentBean.getAllPaymentsBySystemSinceDate(fromDate, toDate, false, getDigitalKey(), sessionId));
-            this.put(FUTUREMAP_INTERNALID, aj);
-            refreshAllCustomersDetailsFromGateway();
-            updateCustomerPaymentSchedules();
-
-            paymentReportLock.set(true);
+        synchronized (paymentReportLockObject) {
+            if (paymentReportLock.get() == true) {
+                LOGGER.log(Level.INFO, "The Payment Report Already Running.");
+                return false;
+            } else {
+                LOGGER.log(Level.INFO, "Future Map, runPaymentReport. from date {0}.", fromDate);
+                Date toDate = new Date();
+                AsyncJob aj = new AsyncJob("PaymentReport", paymentBean.getAllPaymentsBySystemSinceDate(fromDate, toDate, false, getDigitalKey(), sessionId));
+                this.put(FUTUREMAP_INTERNALID, aj);
+                refreshAllCustomersDetailsFromGateway();
+                updateCustomerPaymentSchedules();
+                paymentReportLock.set(true);
+            }
+            return true;
         }
-        return true;
+
     }
 
-    public synchronized boolean runUpdateSchedules() throws InterruptedException {
+    public boolean runUpdateSchedules() throws InterruptedException {
         // use this if to get the lates payment information
-        if (updateScheduleLock.get() == true) {
-            LOGGER.log(Level.INFO, "The Payment Report Already Running.");
-            return false;
-        } else {
-            updateScheduleLock.set(true);
+        synchronized (updateScheduleLock) {
             updateCustomerPaymentSchedules();
-            updateScheduleLock.set(false);
+            return true;
         }
-        return true;
+
     }
 
-    private synchronized void updateCustomerPaymentSchedules() {
-        List<Customers> acl = customersFacade.findAllActiveCustomers(true);
-        LOGGER.log(Level.INFO, "###### Updating {0} Customer Payment Schedules #####", acl.size());
+    private void updateCustomerPaymentSchedules() {
 
-        for (Customers c : acl) {
-            try {
-                if (c.getPaymentParametersId().getStatusCode() != null) {
-                    if (c.getPaymentParametersId().getStatusCode().trim().compareTo("A") == 0) {
-                        this.put(FUTUREMAP_INTERNALID, new AsyncJob("GetCustomerDetails", paymentBean.updateCustomerPaymentSchedule(c, getDigitalKey(), FUTUREMAP_INTERNALID)));
-                        TimeUnit.MILLISECONDS.sleep(50);//sleeping for a long time wont affect performance (the warning is there for a short sleep of say 5ms ) but we don't want to overload the payment gateway or they may get upset.
+        synchronized (updateCustomerSchedulesLock) {
+            List<Customers> acl = customersFacade.findAllActiveCustomers(true);
+            LOGGER.log(Level.INFO, "###### Updating {0} Customer Payment Schedules #####", acl.size());
+
+            for (Customers c : acl) {
+                try {
+                    if (c.getPaymentParametersId().getStatusCode() != null) {
+                        if (c.getPaymentParametersId().getStatusCode().trim().compareTo("A") == 0) {
+                            this.put(FUTUREMAP_INTERNALID, new AsyncJob("GetCustomerDetails", paymentBean.updateCustomerPaymentSchedule(c, getDigitalKey(), FUTUREMAP_INTERNALID)));
+                            TimeUnit.MILLISECONDS.sleep(50);//sleeping for a long time wont affect performance (the warning is there for a short sleep of say 5ms ) but we don't want to overload the payment gateway or they may get upset.
+                        }
                     }
+                } catch (Exception ex) {
+                    Logger.getLogger(FutureMapEJB.class.getName()).log(Level.SEVERE, "updateCustomerPaymentSchedules", ex.getMessage());
                 }
-            } catch (Exception ex) {
-                Logger.getLogger(FutureMapEJB.class.getName()).log(Level.SEVERE, "updateCustomerPaymentSchedules", ex.getMessage());
             }
         }
     }
@@ -1140,7 +1153,7 @@ public class FutureMapEJB implements Serializable {
             sendMessage(sessionId, "Payment Gateway", "The operation failed!.");
         }
         //recreatePaymentTableData();
-        updateScheduleLock.set(false);
+        // updateScheduleLock.set(false);
         LOGGER.log(Level.INFO, "processChangeScheduledAmount completed");
     }
 
@@ -1936,7 +1949,7 @@ public class FutureMapEJB implements Serializable {
         }
     }*/
     @Asynchronous
-   // @TransactionAttribute(REQUIRES_NEW)
+    // @TransactionAttribute(REQUIRES_NEW)
     public void processAddCustomer(String sessionId, PaymentGatewayResponse pgr) {
         boolean result = false;
         //PaymentGatewayResponse pgr = null;
@@ -2041,7 +2054,7 @@ public class FutureMapEJB implements Serializable {
     }
 
     @Asynchronous
-   // @TransactionAttribute(REQUIRES_NEW)
+    // @TransactionAttribute(REQUIRES_NEW)
     public void processDeletePaymentAsync(String sessionId, PaymentGatewayResponse pgr) {
 
         String paymentRef = null;
@@ -2343,7 +2356,7 @@ public class FutureMapEJB implements Serializable {
         cal.add(Calendar.MONTH, -(monthsAhead));
         cal.add(Calendar.MONTH, -(monthsbehind));
         startAsynchJob(sessionId, "GetPayments", paymentBean.getPayments(cust, "ALL", "ALL", "ALL", "", cal.getTime(), endDate, false, getDigitalKey(), sessionId));
-        startAsynchJob(sessionId, "GetScheduledPayments", paymentBean.getScheduledPayments(cust, cal.getTime(), endDate, getDigitalKey(), sessionId,true));
+        startAsynchJob(sessionId, "GetScheduledPayments", paymentBean.getScheduledPayments(cust, cal.getTime(), endDate, getDigitalKey(), sessionId, true));
 
     }
     //CreateSchedule
@@ -2556,7 +2569,7 @@ public class FutureMapEJB implements Serializable {
     }
 
     @Asynchronous
-   // @TransactionAttribute(REQUIRES_NEW)
+    // @TransactionAttribute(REQUIRES_NEW)
     public void processClearSchedule(String sessionId, PaymentGatewayResponse pgr) {
         boolean result = false;
         String returnedMessage = "An error occurred trying to clear the customers schedule. Refer to logs for more info";
@@ -2611,7 +2624,7 @@ public class FutureMapEJB implements Serializable {
     }
 
     @Asynchronous
-   // @TransactionAttribute(REQUIRES_NEW)
+    // @TransactionAttribute(REQUIRES_NEW)
     public void processGetCustomerDetails(String sessionId, PaymentGatewayResponse pgr) {
         CustomerDetails custDetails = null;
 
@@ -2751,10 +2764,8 @@ public class FutureMapEJB implements Serializable {
 
         boolean result = false;
         String returnedMessage = "An error occurred trying to get customer details and payments. Refer to logs for more info";
-        
 
         try {
-       
 
             if (pgr != null) {
                 result = pgr.isOperationSuccessful();
@@ -2767,20 +2778,16 @@ public class FutureMapEJB implements Serializable {
                 }
             }
 
-
-           } catch (Exception e) {
+        } catch (Exception e) {
             LOGGER.log(Level.WARNING, "Future Map processGetAllCustPaymentsAndDetails FAILED", e);
         }
 
         LOGGER.log(Level.INFO, "Future Map processGetAllCustPaymentsAndDetails completed");
-      //  storeResponseForSessionBeenToRetrieve("GetCustomerDetails", sessionId, pgr);
+        //  storeResponseForSessionBeenToRetrieve("GetCustomerDetails", sessionId, pgr);
         sendMessage(sessionId, "Get Customer Details & Payments", returnedMessage);
         LOGGER.log(Level.INFO, "Future Map processGetAllCustPaymentsAndDetails. Completed - Committing transaction to update.");
     }
 
-
-    
-    
     @Asynchronous
     @TransactionAttribute(REQUIRES_NEW)
     public void processUpdateCustomerSchedule(String sessionId, PaymentGatewayResponse pgr) {
