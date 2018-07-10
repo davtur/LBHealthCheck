@@ -58,6 +58,7 @@ import javax.faces.event.ActionEvent;
 import javax.faces.event.ValueChangeEvent;
 import javax.faces.model.SelectItem;
 import javax.faces.validator.ValidatorException;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import org.primefaces.component.datatable.DataTable;
@@ -1895,8 +1896,14 @@ public class CustomersController implements Serializable {
 
         // invalidate session
         ExternalContext ec = fc.getExternalContext();
-        HttpSession session = (HttpSession) ec.getSession(false);
-        session.invalidate();
+       // HttpSession session = (HttpSession) ec.getSession(false);
+        HttpServletRequest req = (HttpServletRequest)ec.getRequest();
+        //session.invalidate();
+        try {
+            req.logout();
+        } catch (ServletException ex) {
+            Logger.getLogger(CustomersController.class.getName()).log(Level.SEVERE, "Logout failure!", ex);
+        }
 
         // redirect to the login / home page
         /* try {
@@ -2709,11 +2716,11 @@ public class CustomersController implements Serializable {
     /**
      * @param selectedCustomerStates the selectedCustomerStates to set
      */
-    public void setSelectedCustomerStates(List<String> selectedCustomerStates) {
+    public void setSelectedCustomerStates(List<CustomerState> selectedCustomerStates) {
         List<CustomerState> newCustomerStates = new ArrayList<>();
-        for (String s : selectedCustomerStates) {
+        for (CustomerState s : selectedCustomerStates) {
             for (CustomerState cs : customerStateList) {
-                if (cs.getCustomerState().contains(s)) {
+                if (cs.getCustomerState().contains(s.getCustomerState())) {
                     newCustomerStates.add(cs);
                 }
             }

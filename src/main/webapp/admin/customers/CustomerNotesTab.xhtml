@@ -39,7 +39,7 @@
                                 </p:outputPanel>
                             </f:facet>
                             <p:ajax event="rowEdit" listener="#{customersController.onNotesEdit}" update=":growl" oncomplete="PF('notesControllerTable').filter()" />  
-                            <p:ajax event="rowDblselect"  update=":growl :NoteslistForm1:customerNotesPopupDialogue" oncomplete="PF('customerNotesPopupDialogueWidget').show()" /> 
+                            <p:ajax event="rowDblselect"  update=":growl :customerNotesPopupDialogue" oncomplete="PF('customerNotesPopupDialogueWidget').show()" /> 
                             <p:ajax event="rowEditCancel" listener="#{customersController.onNotesCancel}" update=":growl" />  
                            
                             <p:column rendered="#{notesController.isUserInRole('ADMIN')}"  headerText="Edit" style="width:50px">  
@@ -78,7 +78,7 @@
                             </p:column>
 
                         </p:dataTable>
-                        <ui:include src="NotesPopup.xhtml"/>
+                       
 
                     </h:form>
 

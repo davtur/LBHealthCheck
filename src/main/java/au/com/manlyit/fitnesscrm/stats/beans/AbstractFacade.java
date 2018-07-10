@@ -174,7 +174,7 @@ Flush has several usages:
         }
 
     }
-@TransactionAttribute(REQUIRES_NEW)
+//@TransactionAttribute(REQUIRES_NEW)
     public void edit(T entity) {
 
         getEntityManager().merge(entity);
@@ -184,7 +184,7 @@ Flush has several usages:
             LOGGER.log(Level.INFO, message);
         }
     }
-@TransactionAttribute(REQUIRES_NEW)
+//@TransactionAttribute(REQUIRES_NEW)
     public void refreshfromDB(T entity) {
 
         getEntityManager().refresh(getEntityManager().merge(entity));

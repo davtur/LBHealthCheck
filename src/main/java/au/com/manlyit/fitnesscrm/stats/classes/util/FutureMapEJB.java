@@ -54,6 +54,8 @@ import javax.ejb.Timer;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import static javax.ejb.TransactionAttributeType.REQUIRES_NEW;
+import javax.ejb.TransactionManagement;
+import javax.ejb.TransactionManagementType;
 import javax.enterprise.context.ApplicationScoped;
 import javax.faces.push.Push;
 import javax.faces.push.PushContext;
@@ -67,6 +69,7 @@ import javax.xml.ws.WebServiceException;
  * @author david
  */
 @ConcurrencyManagement(BEAN)
+@TransactionManagement(TransactionManagementType.BEAN)
 @Singleton
 //@LocalBean
 @Startup
@@ -95,6 +98,7 @@ public class FutureMapEJB implements Serializable {
     private final Object lock8 = new Object();
     private final Object lock9 = new Object();
     private final Object futureMapArrayLock = new Object();
+    private final Object sendMessageObject = new Object();
     private final Object updateCustomerSchedulesLock = new Object();
     private final Object settlementReportLockObject = new Object();
     private final Object paymentReportLockObject = new Object();
@@ -200,25 +204,27 @@ public class FutureMapEJB implements Serializable {
 
     // @TransactionAttribute(TransactionAttributeType.NEVER)
     public void sendMessage(String sessionChannel, String summary, String detail) {
-        if ("Batch-Dont-Update".equals(sessionChannel)) {
-            return;
-        }
-        LOGGER.log(Level.INFO, "Entering - SEND MESSAGE ");
-        if (sessionChannel.contains(FUTUREMAP_INTERNALID) == false) {// we don't want to send a message unless there is a session to send it to
-
-            LOGGER.log(Level.INFO, "Entering - SEND MESSAGE :Channel={0}, Summary={1}, detail={2}", new Object[]{sessionChannel, summary, detail});
-
-            try {
-                sendMessage(detail, sessionChannel);
-                LOGGER.log(Level.INFO, "Sending Async Message, summary:{0}, details:{1}", new Object[]{summary, detail});
-            } catch (Exception e) {
-                LOGGER.log(Level.WARNING, "NOT Sending Async Message as there was an exception, summary:{0}, details:{1}, error:{2}", new Object[]{summary, detail, e.getMessage()});
+        synchronized (sendMessageObject) {
+            if ("Batch-Dont-Update".equals(sessionChannel)) {
+                return;
             }
-        } else {
-            LOGGER.log(Level.INFO, "NOT Sending Async Message as the session is internal, summary:{0}, details:{1}", new Object[]{summary, detail});
+            LOGGER.log(Level.INFO, "Entering - SEND MESSAGE ");
+            if (sessionChannel.contains(FUTUREMAP_INTERNALID) == false) {// we don't want to send a message unless there is a session to send it to
+
+                LOGGER.log(Level.INFO, "Entering - SEND MESSAGE :Channel={0}, Summary={1}, detail={2}", new Object[]{sessionChannel, summary, detail});
+
+                try {
+                    sendMessage(detail, sessionChannel);
+                    LOGGER.log(Level.INFO, "Sending Async Message, summary:{0}, details:{1}", new Object[]{summary, detail});
+                } catch (Exception e) {
+                    LOGGER.log(Level.WARNING, "NOT Sending Async Message as there was an exception, summary:{0}, details:{1}, error:{2}", new Object[]{summary, detail, e.getMessage()});
+                }
+            } else {
+                LOGGER.log(Level.INFO, "NOT Sending Async Message as the session is internal, summary:{0}, details:{1}", new Object[]{summary, detail});
+            }
+            //}
+            LOGGER.log(Level.INFO, "Exiting - SEND MESSAGE  :Channel={0}, Summary={1}, detail={2}", new Object[]{sessionChannel, summary, detail});
         }
-        //}
-        LOGGER.log(Level.INFO, "Exiting - SEND MESSAGE  :Channel={0}, Summary={1}, detail={2}", new Object[]{sessionChannel, summary, detail});
     }
 
     /**
@@ -570,7 +576,7 @@ public class FutureMapEJB implements Serializable {
         }
     }
 
-    @Schedule(dayOfMonth = "*", hour = "*", minute = "*/5", second = "0")//debug
+    // @Schedule(dayOfMonth = "*", hour = "*", minute = "*/5", second = "0")//debug
     //@Schedule(dayOfMonth = "*", hour = "6", minute = "0", second = "0")
     public void updateScheduledPayments(Timer t) {
         try {
@@ -1466,7 +1472,7 @@ public class FutureMapEJB implements Serializable {
     public void processGetPayments(String sessionId, PaymentGatewayResponse pgr) {
         // Update the payments table with any new information retrived by the getPayments exzidebit web service.
         // Only for one customer.
-        boolean result;
+        boolean result = true;
         //PaymentGatewayResponse pgr = null;
 
         ArrayOfPayment resultPaymentArray;
@@ -1480,7 +1486,7 @@ public class FutureMapEJB implements Serializable {
             //   pgr = (PaymentGatewayResponse) resultObject;
             //}
             if (pgr != null) {
-                resultPaymentArray = (ArrayOfPayment) pgr.getData();
+                /* resultPaymentArray = (ArrayOfPayment) pgr.getData();
                 result = pgr.isOperationSuccessful();
 
                 if (resultPaymentArray != null && resultPaymentArray.getPayment() != null) {
@@ -1567,17 +1573,17 @@ public class FutureMapEJB implements Serializable {
                                 /*TODO email a report at the end of the process if there are any payments swithout a customer reference
                          as this means that a customer is in ezidebits system but not ours */
 
-                            }
+ /*      }
                         } else {
                             LOGGER.log(Level.WARNING, "Future Map processGetPayments our system ref in payment is null.");
                         }
 
                     }
-                }
-
+                }*/
+                result = pgr.isOperationSuccessful();
                 LOGGER.log(Level.INFO, "Future Map processGetPayments completed");
 
-                if (result == true) {
+                if (result) {
                     String message = "Payment Information has been updated.";
                     // send the gateway response object back to the hashmap that can be accessed by the session bean
                     storeResponseForSessionBeenToRetrieve("GetPayments", sessionId, pgr);
@@ -2862,7 +2868,7 @@ public class FutureMapEJB implements Serializable {
 
     }
 
-    private synchronized void updateNextScheduledPayment(Customers cust) {
+    /* private synchronized void updateNextScheduledPayment(Customers cust) {
         if (cust != null) {
             LOGGER.log(Level.INFO, "updateNextScheduledPayment. Processing details for customer {0}.", new Object[]{cust.getUsername()});
             PaymentParameters pp = cust.getPaymentParametersId();
@@ -2889,8 +2895,7 @@ public class FutureMapEJB implements Serializable {
         } else {
             LOGGER.log(Level.WARNING, "Future Map updateNextScheduledPayment  customer paymnt parameters  does not exist");
         }
-    }
-
+    }*/
     private Payments convertPaymentXMLToEntity(Payments payment, Payment pay, Customers cust) {
         synchronized (lock4) {
             if (pay == null || cust == null) {
