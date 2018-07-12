@@ -110,7 +110,7 @@ public class PaymentBean implements Serializable {
         }
         return new NonPCIService(url).getBasicHttpBindingINonPCIService();*/
 
-         return futureMap.getWs();
+        return futureMap.getWs();
     }
 
     @TransactionAttribute(TransactionAttributeType.NEVER)// we don't want a transaction for this method as teh call within this method will invoke their own transactions
@@ -1083,6 +1083,22 @@ public class PaymentBean implements Serializable {
                                         }
                                     }
                                     if (found == false) {
+
+                                        int payGatewayReference = -1;
+                                        try {
+                                            payGatewayReference = Integer.parseInt(pay.getPaymentReference().getValue());
+                                        } catch (NumberFormatException numberFormatException) {
+                                            LOGGER.log(Level.SEVERE, "PaymentBean compareScheduledPaymentXMLToEntity method - The paymentGateway Reference is invalid -- no way to match this to an existing payment:payment gateway Ref={0}", new Object[]{pay.getPaymentReference().getValue()});
+                                            found = true;
+                                        }
+                                        if (payGatewayReference <= 0) {
+                                            LOGGER.log(Level.SEVERE, "PaymentBean compareScheduledPaymentXMLToEntity method - The paymentGateway Reference is invalid -- no way to match this to an existing payment:payment gateway Ref={0}", new Object[]{pay.getPaymentReference().getValue()});
+                                            found = true;
+                                        }
+                                    }
+
+                                    if (found == false) {
+
                                         Payments crmPay;
                                         //payment doesn't exist in crm so add it
                                         LOGGER.log(Level.WARNING, "PaymentBean processGetScheduledPayments - A payment exists in the PGW but not in CRM.(This can be ignored if a customer is onboarded with the online eddr form) EzidebitID={0}, CRM Ref:{1}, Amount={2}, Date={3}, Ref={4}", new Object[]{pay.getEzidebitCustomerID().getValue(), pay.getYourSystemReference().getValue(), pay.getPaymentAmount().floatValue(), pay.getPaymentDate().toGregorianCalendar().getTime(), pay.getPaymentReference().getValue()});
@@ -1264,20 +1280,9 @@ public class PaymentBean implements Serializable {
                 LOGGER.log(Level.WARNING, "Payment Bean sendAlertEmailToAdmin . Message is NULL.Alert Email not sent!");
                 return;
             }
-            String templatePlaceholder = "!--LINK--URL--!";
-            //String htmlText = configMapFacade.getConfig("system.email.admin.alert.template");
-            String htmlText = ejbEmailTemplatesFacade.findTemplateByName("system.email.admin.alert.template").getTemplate();
-            htmlText = htmlText.replace(templatePlaceholder, message);
-            Future<PaymentGatewayResponse> fpgr = sendAsynchEmailWithPGR(configMapFacade.getConfig("AdminEmailAddress"), configMapFacade.getConfig("PasswordResetCCEmailAddress"), configMapFacade.getConfig("PasswordResetFromEmailAddress"), configMapFacade.getConfig("system.admin.alert.email.subject"), htmlText, null, emailServerProperties(), false, sessionId);
-            //PaymentGatewayResponse pgr = fpgr.get();
-
-            /* if (pgr.isOperationSuccessful()) {
-                Logger.getLogger(PaymentBean.class.getName()).log(Level.INFO, "Admin Alert Email sent successfully");
-            } else {
-                Logger.getLogger(PaymentBean.class.getName()).log(Level.SEVERE, "Admin Alert Email failed to send!");
-            }*/
+            futureMap.sendAlertEmailToAdmin(message, sessionId);
         } catch (Exception ex) {
-            Logger.getLogger(PaymentBean.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(PaymentBean.class.getName()).log(Level.SEVERE, "sendAlertEmailToAdmin Failed", ex);
         }
         LOGGER.log(Level.INFO, "Payment Bean sendAlertEmailToAdmin . Completed sending Administrator Alert Email");
     }
@@ -1396,9 +1401,12 @@ public class PaymentBean implements Serializable {
                  return false;
                  }*/
 
-            if (compareStringToXMLString(payment.getId().toString(), pay.getPaymentReference()) == false) {
-                LOGGER.log(Level.INFO, "PaymentBean compareScheduledPaymentXMLToEntity failed  - compareStringToXMLString(payment.getId().toString(), pay.getPaymentReference() ,Payment CRM database id:{0}", new Object[]{payment.getId().toString(), payment.getPaymentStatus()});
-
+            int crmPaymentReference = payment.getId();
+            int payGatewayReference = -1;
+            try {
+                payGatewayReference = Integer.parseInt(pay.getPaymentReference().getValue());
+            } catch (NumberFormatException numberFormatException) {
+                LOGGER.log(Level.WARNING, "PaymentBean compareScheduledPaymentXMLToEntity method - payment ID did not match paymentGateway Reference :CRM Ref={0},payment gateway Ref={1}", new Object[]{crmPaymentReference, pay.getPaymentReference().getValue()});
                 return false;
             }
 
@@ -1434,11 +1442,18 @@ public class PaymentBean implements Serializable {
                 LOGGER.log(Level.WARNING, "PaymentBean compareScheduledPaymentXMLToEntity method - customer ID did not match:Payments={0},ScheduledPayment={1}", new Object[]{payment.getCustomerName().getId().toString(), pay.getYourSystemReference()});
                 return false;
             }
-            if (compareStringToXMLString(payment.getPaymentReference(), pay.getPaymentReference()) == false) {
+            int crmPaymentReference = payment.getId();
+            int payGatewayReference = -1;
+            try {
+                payGatewayReference = Integer.parseInt(pay.getPaymentReference().getValue());
+            } catch (NumberFormatException numberFormatException) {
+                LOGGER.log(Level.WARNING, "PaymentBean compareScheduledPaymentXMLToEntity method - payment ID did not match paymentGateway Reference :CRM Ref={0},payment gateway Ref={1}", new Object[]{crmPaymentReference, pay.getPaymentReference().getValue()});
                 return false;
             }
 
-            if (compareStringToXMLString(payment.getYourGeneralReference(), pay.getYourGeneralReference()) == false) {
+            if (crmPaymentReference != payGatewayReference) {
+                LOGGER.log(Level.WARNING, "PaymentBean compareScheduledPaymentXMLToEntity method - payment ID did not match paymentGateway Reference :CRM Ref={0},payment gateway Ref={1}", new Object[]{crmPaymentReference, payGatewayReference});
+
                 return false;
             }
             if (compareStringToXMLString(payment.getYourSystemReference(), pay.getYourSystemReference()) == false) {
@@ -2692,6 +2707,16 @@ public class PaymentBean implements Serializable {
             String loggedInUser, String digitalKey,
             String sessionId
     ) {
+        if (payment == null) {
+            PaymentGatewayResponse pgr = new PaymentGatewayResponse(false, payment, "UNKNOWN", "-1", "Payment Object is NULL");
+            futureMap.processAddPaymentResult(sessionId, pgr);
+            return new AsyncResult<>(pgr);
+        }
+         if (payment.getId() <=0) {
+            PaymentGatewayResponse pgr = new PaymentGatewayResponse(false, payment, "PAYMENT ID not commited to DB", payment.getId().toString(), "Payment ID is <=0. This is not  valid primary key. The payment cant be added to payment gateway!");
+            futureMap.processAddPaymentResult(sessionId, pgr);
+            return new AsyncResult<>(pgr);
+        }
         // paymentReference Max 50 chars. It can be search with with a wildcard in other methods. Use invoice number or other payment identifier
         LOGGER.log(Level.INFO, "running asychronous task addPayment Customer {0}, debitDate {1}, paymentAmountInCents {2}", new Object[]{cust, debitDate, paymentAmountInCents});
         String paymentReference = payment.getId().toString();

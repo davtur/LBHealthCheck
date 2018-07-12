@@ -2335,7 +2335,7 @@ public class FutureMapEJB implements Serializable {
         LOGGER.log(Level.INFO, "FutureMap - processAddPaymentResult completed");
     }
 
-    private synchronized void sendAlertEmailToAdmin(String message, String sessionId) {
+    public synchronized void sendAlertEmailToAdmin(String message, String sessionId) {
 
         if (message == null) {
             LOGGER.log(Level.WARNING, "Future Map sendAlertEmailToAdmin . Message is NULL.Alert Email not sent!");
