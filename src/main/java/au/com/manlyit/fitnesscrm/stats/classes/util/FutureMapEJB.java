@@ -130,6 +130,8 @@ public class FutureMapEJB implements Serializable {
     public FutureMapEJB() {
     }
 
+    
+
     /* @OnMessage(encoders = {JSONEncoder.class})
     public FacesMessage onMessage(FacesMessage message) {
         return message;
@@ -1248,7 +1250,8 @@ public class FutureMapEJB implements Serializable {
         LOGGER.log(Level.INFO, "processIsSystemLocked completed");
     }
 
-    public synchronized void processEmailAlert(String sessionId, PaymentGatewayResponse pgr) {
+    @Asynchronous
+    public void processEmailAlert(String sessionId, PaymentGatewayResponse pgr) {
         boolean result = false;
         //PaymentGatewayResponse pgr = null;
         if (pgr != null) {

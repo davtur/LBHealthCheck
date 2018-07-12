@@ -99,7 +99,7 @@ public class PaymentBean implements Serializable {
     private EziDebitPaymentGateway eziDebit;
 
     private INonPCIService getWs() {
-        URL url = null;
+        /*URL url = null;
         WebServiceException e = null;
         try {
             url = new URL(configMapFacade.getConfig("payment.ezidebit.gateway.url"));
@@ -108,9 +108,9 @@ public class PaymentBean implements Serializable {
             LOGGER.log(Level.SEVERE, "MalformedURLException - payment.ezidebit.gateway.url", ex);
 
         }
-        return new NonPCIService(url).getBasicHttpBindingINonPCIService();
+        return new NonPCIService(url).getBasicHttpBindingINonPCIService();*/
 
-        // return futureMap.getWs();
+         return futureMap.getWs();
     }
 
     @TransactionAttribute(TransactionAttributeType.NEVER)// we don't want a transaction for this method as teh call within this method will invoke their own transactions
@@ -979,7 +979,8 @@ public class PaymentBean implements Serializable {
         PaymentGatewayResponse pgr = new PaymentGatewayResponse(false, resultArrayOfScheduledPayments, "", "-1", "An unhandled error occurred!");
 
         boolean abort = false;
-
+        boolean sendAlertEmail = false;
+        String message = "<h3>The below payments exists in our database but not in the payment gateway so it won't be processed.This could be due to a fatal error with the customers credit card such as it being lost or stolen, a communication error when the payment was scheduled or other reason.Resubmit the payment and if it fails again check the customer credit card or bank account details.</h3><h1> </h1>";
         if (cust == null) {
             LOGGER.log(Level.WARNING, "getScheduledPayments: The customer object passed to this method is NULL.This parameter is required.Returning empty array!!");
             pgr = new PaymentGatewayResponse(false, resultArrayOfScheduledPayments, "", "-1", "The customer object passed to this method is NULL.This parameter is required.Returning empty array!!");
@@ -1058,9 +1059,9 @@ public class PaymentBean implements Serializable {
                                             if (cust.getPaymentParametersId().getStatusDescription().toUpperCase().contains("HOLD")) {
                                                 crmPay.setPaymentStatus(PaymentStatus.REJECTED_CUST_ON_HOLD.value());
                                             } else {
-                                                String message = "This payment exists in our database but not in the payment gateway so it won't be processed.Customer " + cust.getUsername() + ", Payment ID:" + crmPay.getId().toString() + " for Amount:$" + crmPay.getPaymentAmount().toPlainString() + " on Date:" + crmPay.getDebitDate().toString() + " was rejected by the payment gateway and requires your action or revenue loss may occur!!.";
+                                                message += "<p>Customer " + cust.getUsername() + ", Payment ID:" + crmPay.getId().toString() + " for Amount:$" + crmPay.getPaymentAmount().toPlainString() + " on Date:" + crmPay.getDebitDate().toString() + " was rejected by the payment gateway and requires your action or revenue loss may occur!!.\r\n</p></BR>";
 
-                                                sendAlertEmailToAdmin(message, sessionId);
+                                                sendAlertEmail = true;
                                             }
                                             paymentsFacade.edit(crmPay);
                                         }
@@ -1104,9 +1105,9 @@ public class PaymentBean implements Serializable {
                                         Future<PaymentGatewayResponse> deletePaymentResponseFutResp = deletePayment(cust, crmPay.getDebitDate(), amountLong, null, cust.getUsername(), digitalKey, sessionId);
                                         PaymentGatewayResponse deletePaymentResponse = deletePaymentResponseFutResp.get();
                                         if (deletePaymentResponse.isOperationSuccessful()) {
-                                            Logger.getLogger(PaymentBean.class.getName()).log(Level.INFO, "Payment Deleted Successfully - ID=", new Object[]{crmPay.getId()});
+                                            Logger.getLogger(PaymentBean.class.getName()).log(Level.INFO, "Payment Deleted Successfully - ID= {0}", new Object[]{crmPay.getId()});
                                         } else {
-                                            Logger.getLogger(PaymentBean.class.getName()).log(Level.SEVERE, "Payment Deletetion FAILED - ID=", new Object[]{crmPay.getId()});
+                                            Logger.getLogger(PaymentBean.class.getName()).log(Level.SEVERE, "Payment Deletetion FAILED - ID= {0}", new Object[]{crmPay.getId()});
                                         }
                                         try {
                                             TimeUnit.MILLISECONDS.sleep(250);
@@ -1118,9 +1119,9 @@ public class PaymentBean implements Serializable {
                                         Future<PaymentGatewayResponse> addPaymentResponseFutResp = addPayment(cust, crmPay.getDebitDate(), amountLong, crmPay, cust.getUsername(), digitalKey, sessionId);
                                         PaymentGatewayResponse addPaymentResponse = addPaymentResponseFutResp.get();
                                         if (addPaymentResponse.isOperationSuccessful()) {
-                                            Logger.getLogger(PaymentBean.class.getName()).log(Level.INFO, "Payment Added Successfully - ID=", new Object[]{crmPay.getId()});
+                                            Logger.getLogger(PaymentBean.class.getName()).log(Level.INFO, "Payment Added Successfully - ID= {0}", new Object[]{crmPay.getId()});
                                         } else {
-                                            Logger.getLogger(PaymentBean.class.getName()).log(Level.SEVERE, "Payment Addition FAILED - ID=", new Object[]{crmPay.getId()});
+                                            Logger.getLogger(PaymentBean.class.getName()).log(Level.SEVERE, "Payment Addition FAILED - ID= {0}", new Object[]{crmPay.getId()});
                                         }
 
                                     }
@@ -1153,7 +1154,9 @@ public class PaymentBean implements Serializable {
                         }
 
                     }
-
+                    if (sendAlertEmail) {
+                        sendAlertEmailToAdmin(message, sessionId);
+                    }
                     LOGGER.log(Level.INFO, "PaymentBean processGetScheduledPayments completed");
 
                 } else {
@@ -1175,7 +1178,7 @@ public class PaymentBean implements Serializable {
                             if (cust.getPaymentParametersId().getStatusDescription().toUpperCase().contains("HOLD")) {
                                 p.setPaymentStatus(PaymentStatus.REJECTED_CUST_ON_HOLD.value());
                             } else {
-                                String message = "This payment exists in our database but not in the payment gateway so it won't be processed.Customer " + cust.getUsername() + ", Payment ID:" + p.getId().toString() + " for Amount:$" + p.getPaymentAmount().toPlainString() + " on Date:" + p.getDebitDate().toString() + " was rejected by the payment gateway and requires your action or revenue loss may occur!!.";
+                                message = "This payment exists in our database but not in the payment gateway so it won't be processed.Customer " + cust.getUsername() + ", Payment ID:" + p.getId().toString() + " for Amount:$" + p.getPaymentAmount().toPlainString() + " on Date:" + p.getDebitDate().toString() + " was rejected by the payment gateway and requires your action or revenue loss may occur!!.";
 
                                 sendAlertEmailToAdmin(message, sessionId);
                             }
@@ -1253,9 +1256,10 @@ public class PaymentBean implements Serializable {
         return new AsyncResult<>(pgr);
     }
 
-    private  void sendAlertEmailToAdmin(String message, String sessionId) {
+    private void sendAlertEmailToAdmin(String message, String sessionId) {
 
         try {
+            LOGGER.log(Level.INFO, "Payment Bean sendAlertEmailToAdmin . Sending Administrator Alert Email");
             if (message == null) {
                 LOGGER.log(Level.WARNING, "Payment Bean sendAlertEmailToAdmin . Message is NULL.Alert Email not sent!");
                 return;
@@ -1265,18 +1269,17 @@ public class PaymentBean implements Serializable {
             String htmlText = ejbEmailTemplatesFacade.findTemplateByName("system.email.admin.alert.template").getTemplate();
             htmlText = htmlText.replace(templatePlaceholder, message);
             Future<PaymentGatewayResponse> fpgr = sendAsynchEmailWithPGR(configMapFacade.getConfig("AdminEmailAddress"), configMapFacade.getConfig("PasswordResetCCEmailAddress"), configMapFacade.getConfig("PasswordResetFromEmailAddress"), configMapFacade.getConfig("system.admin.alert.email.subject"), htmlText, null, emailServerProperties(), false, sessionId);
-            PaymentGatewayResponse pgr = fpgr.get();
+            //PaymentGatewayResponse pgr = fpgr.get();
 
-            if (pgr.isOperationSuccessful()) {
+            /* if (pgr.isOperationSuccessful()) {
                 Logger.getLogger(PaymentBean.class.getName()).log(Level.INFO, "Admin Alert Email sent successfully");
             } else {
                 Logger.getLogger(PaymentBean.class.getName()).log(Level.SEVERE, "Admin Alert Email failed to send!");
-            }
-
-        } catch (InterruptedException | ExecutionException ex) {
+            }*/
+        } catch (Exception ex) {
             Logger.getLogger(PaymentBean.class.getName()).log(Level.SEVERE, null, ex);
         }
-
+        LOGGER.log(Level.INFO, "Payment Bean sendAlertEmailToAdmin . Completed sending Administrator Alert Email");
     }
 
     private Payments convertScheduledPaymentXMLToEntity(Payments payment, ScheduledPayment pay, Customers cust) {
@@ -1473,7 +1476,7 @@ public class PaymentBean implements Serializable {
 
     }
 
-    private  boolean compareStringToXMLString(String s, JAXBElement<String> xs) {
+    private boolean compareStringToXMLString(String s, JAXBElement<String> xs) {
         boolean result = true;// return true if they are the same
         String s2 = null;
         if (s != null) {
@@ -1505,7 +1508,7 @@ public class PaymentBean implements Serializable {
         return result;
     }
 
-    private  boolean compareDateToXMLGregCalendar(Date d, XMLGregorianCalendar xgc) {
+    private boolean compareDateToXMLGregCalendar(Date d, XMLGregorianCalendar xgc) {
         boolean result = true;// return true if they are the same
         GregorianCalendar gc = null;
         if (xgc != null) {
@@ -1527,7 +1530,7 @@ public class PaymentBean implements Serializable {
         return result;
     }
 
-    private  boolean compareDateToXMLGregCal(Date d, JAXBElement<XMLGregorianCalendar> jxgc) {
+    private boolean compareDateToXMLGregCal(Date d, JAXBElement<XMLGregorianCalendar> jxgc) {
         boolean result = true;// return true if they are the same
         GregorianCalendar xgc = null;
         if (jxgc != null) {
@@ -1549,7 +1552,7 @@ public class PaymentBean implements Serializable {
         return result;
     }
 
-    private  boolean compareBigDecimalToDouble(BigDecimal d, Double bd) {
+    private boolean compareBigDecimalToDouble(BigDecimal d, Double bd) {
         boolean result = false;// return true if they are the same
         BigDecimal d2 = null;
         if (bd != null) {
@@ -2683,7 +2686,7 @@ public class PaymentBean implements Serializable {
     }
 
     @Asynchronous
-    @TransactionAttribute(TransactionAttributeType.NEVER)
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public Future<PaymentGatewayResponse> addPayment(Customers cust, Date debitDate,
             Long paymentAmountInCents, Payments payment,
             String loggedInUser, String digitalKey,
@@ -3058,6 +3061,7 @@ public class PaymentBean implements Serializable {
         return new AsyncResult<>(pgr);
     }
 
+    @TransactionAttribute(TransactionAttributeType.NEVER)
     @Asynchronous
     public Future<PaymentGatewayResponse> sendAsynchEmailWithPGR(String to, String ccAddress,
             String from, String emailSubject,
@@ -3067,8 +3071,9 @@ public class PaymentBean implements Serializable {
         SendHTMLEmailWithFileAttached emailAgent = new SendHTMLEmailWithFileAttached();
         PaymentGatewayResponse pgr = new PaymentGatewayResponse(false, null, "", "-1", "An unhandled error occurred!");
         try {
+            LOGGER.log(Level.INFO, "sending AsynchEmail TO: {0}, CC - {1}, From:{2}, Subject:{3}", new Object[]{to, ccAddress, from, emailSubject});
             emailAgent.send(to, ccAddress, from, emailSubject, message, theAttachedfileName, serverProperties, debug);
-            LOGGER.log(Level.INFO, "sendAsynchEmail TO: {0}, CC - {1}, From:{2}, Subject:{3}", new Object[]{to, ccAddress, from, emailSubject});
+            LOGGER.log(Level.INFO, "sent AsynchEmail TO: {0}, CC - {1}, From:{2}, Subject:{3}", new Object[]{to, ccAddress, from, emailSubject});
             pgr = new PaymentGatewayResponse(true, null, "OK", "0", "Email sent successfully");
         } catch (Exception e) {
             String error = "Email Send Failed :" + e.getMessage();
