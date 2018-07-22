@@ -67,7 +67,7 @@
 
             <div class="card ">
                 <h:panelGrid columns="2" cellpadding="5" >
-                    <p:commandButton id="addNoteDialogButton1"  value="#{configMapController.getKey('ListNotesCreateLink')}" onclick="PF('NotesCreateDialogue').show()" type="button"/> 
+                    <p:commandButton id="addNoteDialogButton1"  value="#{configMapController.getKey('ListNotesCreateLink')}"  actionListener="#{notesController.prepareCreateDialogue}" oncomplete="PF('notesCreateDialogue').show()"  update=" :formNotesCreate1 :growl"/> 
                     <p:commandButton id="showDialogButton"  oncomplete="PF('customersCreateDialogue').show()"   actionListener="#{customersController.prepareCreateAjax}" value="#{configMapController.getKey('ListCustomersCreateLink')}"  update="@(.updateNameChanged) :formCustomersCreate1:dialogueGrid :formCustomersCreate1:dialogueGrid2 :growl" /> 
                 </h:panelGrid >
 

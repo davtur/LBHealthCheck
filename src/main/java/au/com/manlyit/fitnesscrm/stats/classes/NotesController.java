@@ -216,6 +216,9 @@ public class NotesController implements Serializable {
             return null;
         }
     }
+      public void prepareCreateDialogue(ActionEvent actionEvent) {
+          Logger.getLogger(NotesController.class.getName()).log(Level.INFO, "prepareCreateDialogue");
+      }
 
     public void createDialogue(ActionEvent actionEvent) {
         try {

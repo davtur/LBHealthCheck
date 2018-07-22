@@ -1,4 +1,5 @@
 function handleSubmit(args, dialog) {
+    alert('CUSTOM JS');
     var jqDialog = jQuery('#' + dialog);
     if (args.validationFailed) {
         jqDialog.effect('shake', {times: 3}, 100);
@@ -8,6 +9,7 @@ function handleSubmit(args, dialog) {
 }
 
 function handleCreateRequest(xhr, status, args, dialog, listTable) {
+    alert('CUSTOM JS');
     var jqDialog = jQuery('#' + dialog);
     if (args.validationFailed) {
         jqDialog.jq.effect("shake", {times: 5}, 100);
@@ -18,6 +20,7 @@ function handleCreateRequest(xhr, status, args, dialog, listTable) {
 }
 
 function handlePollComplete(xhr, status, args, poller) {
+    alert('CUSTOM JS');
     if (args.stopPolling) {
         PF(poller).stop();
         //alert('Stopping Poller');

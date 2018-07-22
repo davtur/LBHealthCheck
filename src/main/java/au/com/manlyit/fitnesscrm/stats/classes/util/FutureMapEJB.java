@@ -929,7 +929,7 @@ public class FutureMapEJB implements Serializable {
         // }
     }
 
-    @TransactionAttribute(TransactionAttributeType.NEVER)
+   // @TransactionAttribute(TransactionAttributeType.NEVER)
     public void processCompletedAsyncJobs(String sessionId, String key, Future<PaymentGatewayResponse> ft) {
         LOGGER.log(Level.INFO, "Future Map is processing Completed Async Jobs .");
         synchronized (lock3) {
@@ -2381,7 +2381,7 @@ public class FutureMapEJB implements Serializable {
     }
 
     @Asynchronous
-    @TransactionAttribute(TransactionAttributeType.NEVER)
+   // @TransactionAttribute(TransactionAttributeType.NEVER)
     public void processCreateSchedule(String sessionId, PaymentGatewayResponse pgr) {
         boolean result = false;
         String returnedMessage = "An error occurred trying to create the customers schedule. Refer to logs for more info";
@@ -2798,7 +2798,7 @@ public class FutureMapEJB implements Serializable {
     }
 
     @Asynchronous
-    @TransactionAttribute(REQUIRES_NEW)
+  //  @TransactionAttribute(REQUIRES_NEW)
     public void processUpdateCustomerSchedule(String sessionId, PaymentGatewayResponse pgr) {
         CustomerDetails custDetails = null;
 

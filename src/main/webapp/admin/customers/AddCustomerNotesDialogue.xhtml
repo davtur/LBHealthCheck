@@ -1,31 +1,40 @@
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <ui:composition  xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
-      xmlns:h="http://xmlns.jcp.org/jsf/html"
-      xmlns:f="http://xmlns.jcp.org/jsf/core"
-      xmlns:p="http://primefaces.org/ui" >
- 
-        <!--<p:log />--> 
-        <p:dialog id="confirmDialogNotesCreate1"  
-                  header="#{configMapController.getKey('CreateNotesDialogueHeader')} #{customersController.selected.firstname} #{customersController.selected.lastname}"  fitViewport="true" widgetVar="NotesCreateDialogue"> 
-            <h:form id="formNotesCreate1">
-                             <p:panelGrid columns="2">
-                                <p:outputLabel value="#{configMapController.getKey('CreateNotesLabel_note')}" for="note" />
-                                <p:inputTextarea rows="4" cols="30" id="note" value="#{notesController.selected.note}" title="#{configMapController.getKey('CreateNotesTitle_note')}" />
+                 xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                 xmlns:h="http://xmlns.jcp.org/jsf/html"
+                 xmlns:f="http://xmlns.jcp.org/jsf/core"
+                 xmlns:p="http://primefaces.org/ui" >
 
-                                <h:outputLabel for="reminderDate" value="Reminder:" />
-                                <p:calendar id="reminderDate" disabled="#{!notesController.reminder}" value="#{notesController.reminderDate}"  pattern="dd/MM/yyyy HH:mm">  
-                                    <p:ajax event="dateSelect" listener="#{notesController.handleReminderDateSelect}" update=":growl "  />
-                                </p:calendar>
-                                <h:outputLabel for="reminder" value="Add Reminder:" />
-                                <h:selectBooleanCheckbox id="reminder" value="#{notesController.reminder}" >
-                                    <p:ajax update=":growl :formNotesCreate1:reminderDate" />
-                                </h:selectBooleanCheckbox>
-                                <p:commandButton oncomplete="PF('NotesCreateDialogue').hide();PF('notesControllerTable').filter()" actionListener="#{notesController.createDialogue}" value="#{configMapController.getKey('CreateNotesSaveLink')}" update=":growl :tv:NoteslistForm1 :formNotesCreate1"/>                
-                            </p:panelGrid>
-                     </h:form>
-        </p:dialog>
-    </ui:composition> 
-    
+    <p:dialog id="confirmDialogNotesCreate1"  header="#{configMapController.getKey('CreateNotesDialogueHeader')}"   closable="true" fitViewport="true" widgetVar="notesCreateDialogue" > 
+        <h:form id="formNotesCreate1">
+            
+            
+            <h1 class="BigTopic">#{customersController.selected.firstname} #{customersController.selected.lastname}</h1>
+            <div class="Container100 Responsive100">
+                <div class="Container50 Responsive50">
+                    <div class="ContainerIndent">
+                        <p:panelGrid columns="2">
+                            <p:outputLabel value="#{configMapController.getKey('CreateNotesLabel_note')}" for="note" />
+                            <p:inputTextarea rows="4" cols="30" id="note" value="#{notesController.selected.note}" title="#{configMapController.getKey('CreateNotesTitle_note')}" />
+
+                           
+                            <h:outputLabel for="reminder" value="Add Reminder:" />
+                            <h:selectBooleanCheckbox id="reminder" value="#{notesController.reminder}" >
+                                <p:ajax update=":growl :formNotesCreate1:reminderDate" />
+                            </h:selectBooleanCheckbox>
+                             <h:outputLabel for="reminderDate" value="Reminder:" />
+                            <p:calendar id="reminderDate" disabled="#{!notesController.reminder}" value="#{notesController.reminderDate}"  pattern="dd/MM/yyyy HH:mm">  
+                                <p:ajax event="dateSelect" listener="#{notesController.handleReminderDateSelect}" update=":growl "  />
+                            </p:calendar>
+                            
+                            <p:commandButton oncomplete="PF('notesCreateDialogue').hide();PF('notesControllerTable').filter()" actionListener="#{notesController.createDialogue}" value="#{configMapController.getKey('CreateNotesSaveLink')}" update=":growl :tv:NoteslistForm1 :formNotesCreate1"/>                
+                        </p:panelGrid>
+                    </div>
+                </div>
+            </div>
+        </h:form>
+    </p:dialog>
+</ui:composition> 
+
 

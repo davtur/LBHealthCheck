@@ -46,7 +46,7 @@ public class AuditLogFacade extends AbstractFacade<AuditLog> {
         super(AuditLog.class);
     }
 
-    public synchronized void audit(Customers changedBy, Customers cust, String type, String detail, String changedFrom, String changedTo) {
+    public  void audit(Customers changedBy, Customers cust, String type, String detail, String changedFrom, String changedTo) {
         AuditLog al = new AuditLog(0);
         try {
             al.setTimestampOfChange(new Date());
