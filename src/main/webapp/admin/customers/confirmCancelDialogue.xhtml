@@ -9,23 +9,32 @@
 
     <!--<p:log />--> 
 
-    <p:dialog id="confirmCancellationDialogue"   closable="false"
-                     header="#{configMapController.getKey('confirmCancellation_message')}" widgetVar="confirmCancellationDialogueWidget"> 
+    <p:dialog id="confirmCancellationDialogue"   closable="true"  responsive="true" header="#{configMapController.getKey('confirmCancellation_message')}" widgetVar="confirmCancellationDialogueWidget"> 
         <h:form id="confirmCancellation">  
-            <p:panelGrid id="confirmCancellatioGrid1" columns="1" layout="grid" styleClass="cancellationDialogue">
-                <h:outputText  value="#{configMapController.getKey('confirmCancellation_messageDetail')}" />
-                <p:dataList  id="dlist1"  value="#{customersController.multiSelected}" var="cust">
-                    <p:column>
-                        <h:outputText value="#{cust.firstname} #{cust.lastname}"/>
-                    </p:column>
-                </p:dataList>
-                <p:outputLabel value="#{configMapController.getKey('confirmCancellation_checkboxLabel')}" for="confirmCancellationCheckbox1" />
-                <p:selectBooleanCheckbox id="confirmCancellationCheckbox1" value="#{ezidebit.customerCancellationConfirmed}"  label="Tick to Confirm" />
-            </p:panelGrid>
-            <p:panel>
-                <p:commandButton id="confirmCancellationDialogueSave"  oncomplete="PF('confirmCancellationDialogueWidget').hide();"  actionListener="#{customersController.changeCustomersState}" value="#{configMapController.getKey('confirmCancellationSaveLink')}" update=":growl :tv:customerslistForm1:customersTableList "/>                
-                <p:commandButton id="confirmCancellationDialogueDiscard" onclick="PF('confirmCancellationDialogueWidget').hide()"  value="#{configMapController.getKey('confirmCancellationDiscardLink')}" update=":growl"/>                
-            </p:panel>   
+            <div class="ui-fluid">
+                <div class="ui-g">
+                    <div class="ui-g-12">
+                        <div class="card card-w-title">
+                            <p:panelGrid id="confirmCancellatioGrid1" columns="1" layout="grid" styleClass="cancellationDialogue">
+                                <h:outputText  value="#{configMapController.getKey('confirmCancellation_messageDetail')}" />
+                                <p:dataList  id="dlist1"  value="#{customersController.multiSelected}" var="cust">
+                                    <p:column>
+                                        <h:outputText value="#{cust.firstname} #{cust.lastname}"/>
+                                    </p:column>
+                                </p:dataList>
+                                <h:panelGrid  columns="2" >
+                                    <p:outputLabel value="#{configMapController.getKey('confirmCancellation_checkboxLabel')}" for="confirmCancellationCheckbox1" />
+                                    <p:selectBooleanCheckbox id="confirmCancellationCheckbox1" value="#{ezidebit.customerCancellationConfirmed}"  label="Tick to Confirm" />
+                                </h:panelGrid>
+                            </p:panelGrid>
+
+                            <p:commandButton id="confirmCancellationDialogueSave"  oncomplete="PF('confirmCancellationDialogueWidget').hide();"  actionListener="#{customersController.changeCustomersState}" value="#{configMapController.getKey('confirmCancellationSaveLink')}" update=":growl :tv:customerslistForm1:customersTableList "/>                
+                           <!-- <p:commandButton id="confirmCancellationDialogueDiscard" onclick="PF('confirmCancellationDialogueWidget').hide()"  value="#{configMapController.getKey('confirmCancellationDiscardLink')}" update=":growl"/>    -->            
+
+                        </div>
+                    </div>
+                </div>
+            </div>
         </h:form>
     </p:dialog>
 
