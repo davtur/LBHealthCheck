@@ -112,7 +112,7 @@ public class EziDebitPaymentGateway implements Serializable {
     private static final Logger LOGGER = Logger.getLogger(EziDebitPaymentGateway.class.getName());
     //private static final String digitalKey = "78F14D92-76F1-45B0-815B-C3F0F239F624";// test
     private static final String PAYMENT_GATEWAY = "EZIDEBIT";
-   
+
     private static final long serialVersionUID = 1L;
     private final static int MONTHS_IN_ADVANCE_FOR_PAYMENT_SCHEDULE = 9;
     private int testAjaxCounter = 0;
@@ -123,7 +123,7 @@ public class EziDebitPaymentGateway implements Serializable {
     private au.com.manlyit.fitnesscrm.stats.beans.PaymentParametersFacade ejbPaymentParametersFacade;
     @Inject
     private PaymentBean paymentBean;
-    
+
     @Inject
     private ConfigMapFacade configMapFacade;
     @Inject
@@ -215,7 +215,6 @@ public class EziDebitPaymentGateway implements Serializable {
     private float reportTotalSuccessful = 0;
     private float reportTotalDishonoured = 0;
     private float reportTotalScheduled = 0;
-    
 
     ThreadFactory tf1 = new eziDebitThreadFactory();
     private String sessionId;
@@ -271,9 +270,6 @@ public class EziDebitPaymentGateway implements Serializable {
         return sessId;*/
         return this.sessionId;
     }
-
-   
-    
 
     /**
      * @return the autoStartPoller
@@ -366,8 +362,8 @@ public class EziDebitPaymentGateway implements Serializable {
         cal.add(Calendar.MONTH, -(monthsAhead));
         cal.add(Calendar.MONTH, -(monthsbehind));
         startAsynchJob("GetAllCustPaymentsAndDetails", paymentBean.getAllCustPaymentsAndDetails(getSelectedCustomer(), "ALL", "ALL", "ALL", "", cal.getTime(), endDate, false, getDigitalKey(), sessionId));
-       // startAsynchJob("GetPayments", paymentBean.getPayments(getSelectedCustomer(), "ALL", "ALL", "ALL", "", cal.getTime(), endDate, false, getDigitalKey(), sessionId));
-      //  startAsynchJob("GetScheduledPayments", paymentBean.getScheduledPayments(getSelectedCustomer(), cal.getTime(), endDate, getDigitalKey(), sessionId));
+        // startAsynchJob("GetPayments", paymentBean.getPayments(getSelectedCustomer(), "ALL", "ALL", "ALL", "", cal.getTime(), endDate, false, getDigitalKey(), sessionId));
+        //  startAsynchJob("GetScheduledPayments", paymentBean.getScheduledPayments(getSelectedCustomer(), cal.getTime(), endDate, getDigitalKey(), sessionId));
     }
 
     public void editCustomerDetailsInEziDebit(Customers cust) {
@@ -1992,7 +1988,7 @@ public class EziDebitPaymentGateway implements Serializable {
                     checkIfAsyncJobsHaveFinishedAndUpdate(key, pgr);
                 }
                 futureMap.clearComponentUpdates(sessionId);
- 
+
             } catch (Exception e) {
                 LOGGER.log(Level.SEVERE, "checkRunningJobsAndNotifyIfComplete,  {0} async jobs for sessionId {1} have finished.Exception {2}", new Object[]{Integer.toString(y), sessionId, e});
             }
@@ -2158,7 +2154,7 @@ public class EziDebitPaymentGateway implements Serializable {
         //PrimeFaces.current().ajax().update(als);
         //PrimeFaces.current().ajax().update("@(.updatePaymentInfo)");
         //PrimeFaces.current().ajax().update("\\:tv\\:paymentsForm");
-        futureMap.sendMessage(getSessionId(),"UpdatePaymentForms","UpdatePaymentForms");
+        futureMap.sendMessage(getSessionId(), "UpdatePaymentForms", "UpdatePaymentForms");
         //PrimeFaces.current().executeScript("updatePaymentForms();");
 
         //LOGGER.log(Level.INFO, "Session BEAN PrimeFaces --------------------------------------------------");
@@ -2613,7 +2609,7 @@ public class EziDebitPaymentGateway implements Serializable {
                     }
                 }
             } else {
-                String message = "The Customer data from teh payment gateway does not match the selected customer:" + selectedCust.getId().toString() + ", payment gateway reference No:" + result.getYourSystemReference();
+                String message = "The Customer data from teh payment gateway does not match the selected customer:" + selectedCust.getId().toString() + ", payment gateway reference No:" + result.getYourSystemReference().toString();
                 LOGGER.log(Level.SEVERE, message);
             }
 
@@ -3040,7 +3036,7 @@ public class EziDebitPaymentGateway implements Serializable {
             }
             ejbPaymentParametersFacade.edit(pp);
             customersFacade.edit(c);
-            startAsynchJob("CreateSchedule", paymentBean.createCRMPaymentSchedule(c, paymentDebitDate, endCal.getTime(), spt, dow, paymentDayOfMonth, amount, paymentLimitToNumberOfPayments, amountLimit, paymentKeepManualPayments, paymentFirstWeekOfMonth, paymentSecondWeekOfMonth, paymentThirdWeekOfMonth, paymentFourthWeekOfMonth, loggedInUser, sessionId, getDigitalKey(), futureMap, paymentBean,false));
+            startAsynchJob("CreateSchedule", paymentBean.createCRMPaymentSchedule(c, paymentDebitDate, endCal.getTime(), spt, dow, paymentDayOfMonth, amount, paymentLimitToNumberOfPayments, amountLimit, paymentKeepManualPayments, paymentFirstWeekOfMonth, paymentSecondWeekOfMonth, paymentThirdWeekOfMonth, paymentFourthWeekOfMonth, loggedInUser, sessionId, getDigitalKey(), futureMap, paymentBean, false));
             /* List<Payments> crmPaymentList = paymentsFacade.findPaymentsByCustomerAndStatus(c, PaymentStatus.SCHEDULED.value());
              for (Payments p : crmPaymentList) {
              if (!(paymentKeepManualPayments && p.getManuallyAddedPayment())) {
@@ -3194,14 +3190,18 @@ public class EziDebitPaymentGateway implements Serializable {
 
     public void updateSelectedScheduledPayment(SelectEvent event) {
         Object o = event.getObject();
-        if (o.getClass() == Payments.class) {
-            Payments pay = (Payments) o;
-            selectedScheduledPayment = pay;
-            LOGGER.log(Level.INFO, "Paymenmt Table Payment Selected. Payment Id :{0}", selectedScheduledPayment.getId().toString());
-        } else {
-            LOGGER.log(Level.WARNING, "Payment Table Payment Select Failed.");
-        }
+        if (o != null) {
+            if (o.getClass() == Payments.class) {
+                Payments pay = (Payments) o;
+                selectedScheduledPayment = pay;
+                LOGGER.log(Level.INFO, "Paymenmt Table Payment Selected. Payment Id :{0}", selectedScheduledPayment.getId().toString());
+            } else {
+                LOGGER.log(Level.WARNING, "Payment Table Payment Select Failed.");
+            }
 
+        } else {
+            LOGGER.log(Level.WARNING, "Select Event Object is NULL - updateSelectedScheduledPayment.");
+        }
     }
 
     public void deleteScheduledPayment(ActionEvent actionEvent) {
@@ -3548,5 +3548,4 @@ public class EziDebitPaymentGateway implements Serializable {
         this.paymentGatewayVersion = paymentGatewayVersion;
     }
 
-   
 }

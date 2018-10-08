@@ -973,6 +973,7 @@ public class PaymentBean implements Serializable {
     }
 
     @Asynchronous
+    @TransactionAttribute(REQUIRES_NEW)
     public Future<PaymentGatewayResponse> getScheduledPayments(Customers cust, Date fromDate, Date toDate, String digitalKey, String sessionId, boolean ignoreDatesAndGetAll) {
 
         ArrayOfScheduledPayment resultArrayOfScheduledPayments = new ArrayOfScheduledPayment();
@@ -1025,7 +1026,8 @@ public class PaymentBean implements Serializable {
                                 testCal.add(Calendar.MINUTE, -5);
                                 Date testDate = testCal.getTime();
 
-                                Collection<Payments> crmPayList = cust.getPaymentsCollection();
+                                //Collection<Payments> crmPayList = cust.getPaymentsCollection();
+                                Collection<Payments> crmPayList = paymentsFacade.findPaymentsByCustomer(cust,true);
                                 for (Payments crmPay : crmPayList) {
                                     boolean found = false;
                                     for (ScheduledPayment pay : payList) {
@@ -2365,7 +2367,7 @@ public class PaymentBean implements Serializable {
 
         try {
             PaymentGatewayResponse pgr = new PaymentGatewayResponse(false, null, "", "-1", "An unhandled error occurred!");
-            CustomerDetails cd = null;
+            CustomerDetails cd;
             if (cust == null || digitalKey == null) {
                 pgr = new PaymentGatewayResponse(false, null, "", "-1", "The customer or digital key is NULL!");
                 //futureMap.processUpdateCustomerSchedule(sessionId, pgr);
@@ -2394,11 +2396,11 @@ public class PaymentBean implements Serializable {
                         LOGGER.log(Level.INFO, "Payment Bean - Get Customer Details Response: Customer  - {0}, Ezidebit Name : {1} {2}", new Object[]{cust.getUsername(), cd.getCustomerFirstName().getValue(), cd.getCustomerName().getValue()});
                         updatePaymentParameters(cust, cd, 0);
 
-                        // updte schedule
+                        // update schedule
                         GregorianCalendar paymentsStopDate = new GregorianCalendar();
                         GregorianCalendar paymentsStartDate = new GregorianCalendar();
                         paymentsStopDate.add(Calendar.MONTH, PAYMENT_SCHEDULE_MONTHS_AHEAD);
-                        // get scheduled payments in teh next 11 months 
+                        // get scheduled payments in the next 11 months 
                         Future<PaymentGatewayResponse> csp = getScheduledPayments(cust, paymentsStartDate.getTime(), paymentsStopDate.getTime(), digitalKey, sessionId, true);
                         PaymentGatewayResponse pgr2;
                         try {
@@ -2413,7 +2415,8 @@ public class PaymentBean implements Serializable {
                         if (pgr2.isOperationSuccessful()) {
 
                             PaymentParameters pp = cust.getPaymentParametersId();
-                            Collection<Payments> pl = cust.getPaymentsCollection();
+                            //Collection<Payments> pl = cust.getPaymentsCollection();// cached values were stale 
+                            Collection<Payments> pl = paymentsFacade.findPaymentsByCustomer(cust, true);
                             if (pl.isEmpty() == false) {
                                 Optional<Payments> op = pl.stream().max(Comparator.comparing(Payments::getDebitDate));
                                 Payments lastSchedPayment = op.get();
@@ -2550,7 +2553,7 @@ public class PaymentBean implements Serializable {
         }
     }
 
-    //@TransactionAttribute(REQUIRES_NEW)
+    @TransactionAttribute(REQUIRES_NEW)
     private void updatePaymentParameters(Customers cust, CustomerDetails custDetails,
             int errorCode
     ) {

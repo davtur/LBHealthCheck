@@ -438,7 +438,7 @@ public class FutureMapEJB implements Serializable {
 
     }
 
-    private void updateCustomerPaymentSchedules() {
+    public void updateCustomerPaymentSchedules() {
 
         synchronized (updateCustomerSchedulesLock) {
             List<Customers> acl = customersFacade.findAllActiveCustomers(true);
@@ -628,7 +628,7 @@ public class FutureMapEJB implements Serializable {
 
     }
 
-    @Schedule(hour = "*", minute = "*", second = "*")
+    @Schedule(hour = "*", minute = "*", second = "*",persistent=false)
     // @TransactionAttribute(TransactionAttributeType.NEVER)// we don't want a transaction for this method as the calls within this method will invoke their own transactions
     public void checkRunningJobsAndNotifyIfComplete(Timer t) {  // run every 1 seconds
         long start = new Date().getTime();
@@ -2341,7 +2341,7 @@ public class FutureMapEJB implements Serializable {
             LOGGER.log(Level.WARNING, "Future Map sendAlertEmailToAdmin . Message is NULL.Alert Email not sent!");
             return;
         }
-        String templatePlaceholder = "<!--LINK-URL-->";
+        String templatePlaceholder = "!--LINK--URL--!";
         //String htmlText = configMapFacade.getConfig("system.email.admin.alert.template");
         String htmlText = ejbEmailTemplatesFacade.findTemplateByName("system.email.admin.alert.template").getTemplate();
         htmlText = htmlText.replace(templatePlaceholder, message);

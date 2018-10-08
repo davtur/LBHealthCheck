@@ -51,6 +51,7 @@ public class PaymentsFacade extends AbstractFacade<Payments> {
 
     @PersistenceContext(unitName = "FitnessStatsPU")
     private EntityManager em;
+    
     private static final Logger LOGGER = Logger.getLogger(PaymentsFacade.class.getName());
     @Inject
     private ConfigMapFacade configMapFacade;

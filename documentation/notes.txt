@@ -1,4 +1,48 @@
 
+## Install SSL Cert in Wildfly ##
+
+
+locate the application keystore for wildfly
+
+/home/david/wildfly/wildfly-12.0.0.Final/standalone/configuration/application.keystore
+
+
+
+Importing the Certificate
+Now that you have your Certificate you can import it into you local keystore. First of all you have to import a so called Chain Certificate or Root Certificate into your keystore. After that you can proceed with importing your Certificate.
+
+Download a Chain Certificate from the Certificate Authority you obtained the Certificate from.
+Import the Chain Certificate into your keystore
+
+#for java convert the apache certs and ca cert to pkcs12 format new keystore
+# for my new cert ( export password Surf2day )
+
+openssl pkcs12 -export -in "/home/david/old-documents-sep-2016/websites/pure Fitness/certificates/home_manlyit_com_au/home_manlyit_com_au.crt" -inkey "/home/david/old-documents-sep-2016/websites/pure Fitness/certificates/home-manlyit.key"  -out "/home/david/old-documents-sep-2016/websites/pure Fitness/certificates/home-manlyit.p12" -name homemanlyit -CAfile "/home/david/old-documents-sep-2016/websites/pure Fitness/certificates/home_manlyit_com_au/home_manlyit_com_au_cacert.crt" -caname root -chain
+Enter Export Password:
+Verifying - Enter Export Password:
+
+# set wildfly to use your new keystore with the apache certs in it
+
+            <security-realm name="ApplicationRealm">
+                <server-identities>
+                    <ssl>
+                     <!--   <keystore path="application.keystore" relative-to="jboss.server.config.dir" keystore-password="password" alias="server" key-password="password" generate-self-signed-certificate-host="localhost"/>-->
+                        <keystore path="home-manlyit.p12" relative-to="jboss.server.config.dir" keystore-password="Surf2day" alias="homemanlyit" key-password="Surf2day" />
+
+                    </ssl>
+                </server-identities>
+
+
+
+keytool -import -alias root -keystore <your_keystore_filename> 	-trustcacerts -file <filename_of_the_chain_certificate>
+
+And finally import your new Certificate
+
+keytool -import -alias tomcat -keystore <your_keystore_filename> -file <your_certificate_filename>
+
+# for local linux box ( keystore password is password and key pass was Surf2day )
+keytool -import -alias homemanlyitroot -keystore "/home/david/wildfly/wildfly-12.0.0.Final/standalone/configuration/application.keystore" -trustcacerts -file "/home/david/old-documents-sep-2016/websites/pure Fitness/certificates/home_manlyit_com_au/home_manlyit_com_au.ca-bundle"
+keytool -import -alias homemanlyit     -keystore "/home/david/wildfly/wildfly-12.0.0.Final/standalone/configuration/application.keystore"               -file "/home/david/old-documents-sep-2016/websites/pure Fitness/certificates/home_manlyit_com_au/home_manlyit_com_au.crt"
 
 
 

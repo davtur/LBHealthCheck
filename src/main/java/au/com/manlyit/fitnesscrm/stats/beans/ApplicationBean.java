@@ -12,9 +12,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
+import javax.faces.event.ActionEvent;
 import javax.inject.Inject;
 import javax.inject.Named;
-
+import au.com.manlyit.fitnesscrm.stats.classes.util.FutureMapEJB;
 /**
  *
  * @author david
@@ -30,6 +31,8 @@ public class ApplicationBean implements Serializable {
     private ConfigMapFacade configMapFacade;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.CustomersFacade ejbCustomersFacade;
+    @Inject
+    private FutureMapEJB futureMap;
     private static final Logger logger = Logger.getLogger(ApplicationBean.class.getName());
     
     private ArrayList<Map<String,Date>> ips = new ArrayList<>();
@@ -46,6 +49,11 @@ public class ApplicationBean implements Serializable {
        //TODO search ip list and check if they have already tried to register in the past hour
         
         return true;
+    }
+    public void testFunction(ActionEvent event){
+        logger.log(Level.INFO, "@@@@@@@@@@@@@@@@@@@@@@@@ EXECUTING TEST FUNCTION @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+        futureMap.updateCustomerPaymentSchedules();
+        logger.log(Level.INFO, "@@@@@@@@@@@@@@@@@@@@@@@@ COMPLETED TEST FUNCTION @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
     }
     
 }

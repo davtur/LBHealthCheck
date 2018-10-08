@@ -6,7 +6,7 @@
 
     <groupId>au.com.manlyit</groupId>
     <artifactId>FitnessCRM</artifactId>
-    <version>7.2.59</version>
+    <version>7.3.0</version>
     <packaging>war</packaging>
 
     <name>FitnessCRM</name>
@@ -37,7 +37,7 @@
             <version>2.3</version>
             <scope>provided</scope>
         </dependency>
-       <!-- <dependency>
+        <!-- <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-core</artifactId>
             <version>3.5.1.redhat-003</version>
@@ -304,7 +304,7 @@
 
     <build>
         <plugins>
-           <!-- <plugin>
+            <!-- <plugin>
                 <groupId>org.wildfly.plugins</groupId>
                 <artifactId>wildfly-maven-plugin</artifactId>
                 <version>1.2.1.Final</version>
@@ -334,6 +334,29 @@
                     </execution>
                 </executions>
             </plugin> -->
+            <!--<plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>buildnumber-maven-plugin</artifactId>
+                <version>1.4</version>
+                <executions>
+                    <execution>
+                        <id>buildnumber</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>create</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <format>{0,number}</format>
+                    <items>
+                        <item>buildNumber</item>
+                    </items>                    
+                    <doCheck>false</doCheck>
+                    <doUpdate>false</doUpdate>
+                    <revisionOnScmFailure>unknownbuild</revisionOnScmFailure>   
+                </configuration>
+            </plugin> --> 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -496,7 +519,8 @@
                 </executions>
             </plugin>
         </plugins>
-
+  <!-- <finalName>${project.artifactId}-${project.version}.${buildNumber}</finalName>-->
+ 
     </build>
     <repositories>
         <repository>
