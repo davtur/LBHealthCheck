@@ -4,14 +4,29 @@
                 xmlns:ui="http://xmlns.jcp.org/jsf/facelets" 
                 xmlns:h="http://xmlns.jcp.org/jsf/html" 
                 xmlns:f="http://xmlns.jcp.org/jsf/core"
-                xmlns:pe="http://primefaces.org/ui/extensions"
                 xmlns:p="http://primefaces.org/ui" >
 
 
     <ui:define name="title">
         <h:outputText   value="#{configMapController.getKey('ListCustomersTitle')}"></h:outputText>
     </ui:define>
+
     <ui:define name="body">
+        <ui:include src="/WEB-INF/CreatePayment.xhtml"/>
+        <ui:include src="/WEB-INF/LogCashPayment.xhtml"/>
+        <ui:include src="/WEB-INF/CreateSchedule.xhtml"/>
+        <ui:include src="/WEB-INF/ClearSchedule.xhtml"/>
+        <ui:include src="/WEB-INF/UpdatePassword.xhtml"/>
+        <ui:include src="/WEB-INF/confirmCancelDialogue.xhtml"/>       
+        <ui:include src="/WEB-INF/AddCustomerNotesDialogue.xhtml"/>
+        <ui:include src="/WEB-INF/CreateEddrLink.xhtml"/>
+        <ui:include src="/WEB-INF/EditPaymentMethod2.xhtml"/>
+        <ui:include src="/WEB-INF/ChangePlanDialogue.xhtml"/>
+        <ui:include src="/WEB-INF/sendEmailToCustomerDialogue.xhtml"/>
+        <ui:include src="/WEB-INF/uploadPhoto.xhtml"/>
+        <ui:include src="/WEB-INF/NotesPopup.xhtml"/>
+        <ui:include src="Create.xhtml"/>
+        
         <p:tabView id="tv" cache="false" prependId="false" class="layout-portlets-box"> 
             <p:ajax  event="tabChange"  listener="#{ezidebit.onTabChange}"  />  
 
@@ -31,21 +46,8 @@
                 <ui:include src="CustomerNotesTab.xhtml"/>
             </p:tab>
 
-        </p:tabView>  
-        <ui:include src="CreateSchedule.xhtml"/>
-        <ui:include src="CreatePayment.xhtml"/>
-        <ui:include src="ClearSchedule.xhtml"/>
-        <ui:include src="LogCashPayment.xhtml"/>
-        <ui:include src="/WEB-INF/UpdatePassword.xhtml"/>
-        <ui:include src="confirmCancelDialogue.xhtml"/>
-        <ui:include src="Create.xhtml"/>
-        <ui:include src="AddCustomerNotesDialogue.xhtml"/>
-        <ui:include src="CreateEddrLink.xhtml"/>
-        <ui:include src="EditPaymentMethod.xhtml"/>
-        <ui:include src="ChangePlanDialogue.xhtml"/>
-        <ui:include src="/WEB-INF/sendEmailToCustomerDialogue.xhtml"/>
-        <ui:include src="/WEB-INF/uploadPhoto.xhtml"/>
-        <ui:include src="NotesPopup.xhtml"/>
+
+        </p:tabView>
     </ui:define>
 </ui:composition>
 

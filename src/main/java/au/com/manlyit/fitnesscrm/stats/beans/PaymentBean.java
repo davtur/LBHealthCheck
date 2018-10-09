@@ -1174,6 +1174,7 @@ public class PaymentBean implements Serializable {
                     }
                     if (sendAlertEmail) {
                         sendAlertEmailToAdmin(message, sessionId);
+                        LOGGER.log(Level.WARNING, "PaymentBean processGetScheduledPayments ALERT EMAIL SENT {0}", new Object[]{    message});
                     }
                     LOGGER.log(Level.INFO, "PaymentBean processGetScheduledPayments completed");
 

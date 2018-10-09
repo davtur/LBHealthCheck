@@ -8,8 +8,8 @@
 
     
         <!--<p:log />--> 
-        <p:confirmDialog id="clearScheduleDialogue" message="#{configMapController.getKey('ClearScheduleDialogueTitle')}"  
-                         header="#{configMapController.getKey('ClearScheduleTitle')}" severity="info" widgetVar="clearScheduleDialogueWidget"> 
+        <p:dialog id="clearScheduleDialogue" 
+                         header="#{configMapController.getKey('ClearScheduleTitle')}" widgetVar="clearScheduleDialogueWidget"> 
             <h:form id="clearScheduleForm">    
                 <p:panel>
                     <p:outputLabel value="#{configMapController.getKey('ClearScheduleLabel_paymentKeepManualPayments')}" for="paymentKeepManualPayments2" />
@@ -25,7 +25,7 @@
 
                 </p:panel>
             </h:form>
-        </p:confirmDialog>
+        </p:dialog>
 
 
     </ui:composition>
