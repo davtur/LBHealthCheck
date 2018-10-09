@@ -12,7 +12,7 @@
         <navigation-handler>
             org.primefaces.mobile.application.MobileNavigationHandler
         </navigation-handler>
-       <resource-handler>
+        <resource-handler>
             org.omnifaces.resourcehandler.UnmappedResourceHandler
         </resource-handler>
         <resource-bundle>
@@ -67,7 +67,7 @@
     </validator>
 
 
-   <!-- <converter>
+    <!-- <converter>
         <description>Image Converter</description>
         <converter-id>customConverter</converter-id>
         <converter-class>au.com.manlyit.fitnesscrm.stats.converters.CustomImageConverter</converter-class>
@@ -77,7 +77,12 @@
             au.com.manlyit.fitnesscrm.stats.classes.util.ViewExpiredExceptionExceptionHandlerFactory
         </exception-handler-factory>
     </factory> 
-    
+    <!-- makes websockets use ssl so that browsers dont block them from https sites -->
+    <factory>
+        <external-context-factory>
+            au.com.manlyit.fitnesscrm.stats.classes.util.CustomExternalContextSecureWebsocketWss$Factory
+        </external-context-factory>
+    </factory>  
     <!--   <render-kit>
         <renderer>
             <component-family>org.primefaces.component</component-family>

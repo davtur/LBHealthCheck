@@ -9,7 +9,7 @@
     
         <!--<p:log />--> 
         <p:dialog id="editPaymentMethodDialogue"   closable="false"  fitViewport="true"
-                         header="#{configMapController.getKey('EditPaymentMethodTitle')}" widgetVar="editPaymentMethodDialogueWidget" > 
+                         header="#{configMapController.getKey('EditPaymentMethodTitle')}" widgetVar="editPaymentMethod2DialogueWidget" > 
 
             <h:form id="iFrameForm"  styleClass="updatePaymentInfo"> 
                 <p:outputPanel id="iFramePanel" >
@@ -21,7 +21,7 @@
 
                 <p:panel>
                     <p:commandButton id="editPaymentMethoddialogueEdit"    actionListener="#{ezidebit.editPaymentMethodDialogue}" value="#{configMapController.getKey('EditPaymentMethodEditLink')}" update=":growl  @(.updatePaymentInfo)"/>                
-                    <p:commandButton id="editPaymentMethoddialogueClose" oncomplete="PF('editPaymentMethodDialogueWidget').hide()" actionListener="#{ezidebit.closeEditPaymentMethodDialogue}" value="#{configMapController.getKey('EditPaymentMethodDiscardLink')}" update=":growl @(.updatePaymentInfo)"/>                
+                    <p:commandButton id="editPaymentMethoddialogueClose" oncomplete="PF('editPaymentMethod2DialogueWidget').hide()" actionListener="#{ezidebit.closeEditPaymentMethodDialogue}" value="#{configMapController.getKey('EditPaymentMethodDiscardLink')}" update=":growl @(.updatePaymentInfo)"/>                
                 </p:panel>     
             </h:form>
         </p:dialog>

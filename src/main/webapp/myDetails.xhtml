@@ -9,9 +9,13 @@
         <h:outputText value="#{configMapController.getKey('EditCustomersTitle')}"></h:outputText>
     </ui:define>
     <ui:define name="body">
+        
+
+        <ui:include src="/WEB-INF/myDetailsPaymentMethod.xhtml"/>
+        <ui:include src="/WEB-INF/EditPaymentMethod.xhtml"/>
+        <ui:include src="/WEB-INF/UpdatePassword.xhtml"/>
+        <ui:include src="/WEB-INF/uploadPhoto.xhtml"/>
         <p:tooltip  />
-
-
         <h:panelGroup id="messagePanel" layout="block">
             <h:messages errorStyle="color: red" infoStyle="color: green" layout="table"/>
         </h:panelGroup>
@@ -238,10 +242,7 @@
             </div>
         </h:form>
 
-        <ui:include src="/WEB-INF/myDetailsPaymentMethod.xhtml"/>
-        <ui:include src="/WEB-INF/EditPaymentMethod.xhtml"/>
-        <ui:include src="/WEB-INF/UpdatePassword.xhtml"/>
-        <ui:include src="/WEB-INF/uploadPhoto.xhtml"/>
+
     </ui:define>
 </ui:composition>
 

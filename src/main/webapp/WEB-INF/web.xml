@@ -5,6 +5,9 @@
     xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd"
     version="4.0">
     <distributable/>
+   <!-- <user-data-constraint>
+    <transport-guarantee>CONFIDENTIAL</transport-guarantee>
+</user-data-constraint>-->
     <context-param>
         <param-name>javax.faces.PROJECT_STAGE</param-name>
         <param-value>Development</param-value>
@@ -223,7 +226,7 @@
             <description/>
             <url-pattern>/index.xhtml</url-pattern>
         </web-resource-collection>
-       <web-resource-collection>
+        <web-resource-collection>
             <web-resource-name>PushMessages</web-resource-name>
             <description/>
             <url-pattern>/javax.faces.push/*</url-pattern>
