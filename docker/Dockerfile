@@ -1,25 +1,16 @@
-# To change this license header, choose License Headers in Project Properties.
-# To change this template file, choose Tools | Templates
-# and open the template in the editor.
-FROM payara/micro:latest
-#ENV COPY_TMP /opt/dockersrc
-#RUN mkdir -p $COPY_TMP
+FROM jboss/wildfly:12.0.0.Final
 
-COPY ./FitnessCRM-*.war /opt/payara/deployments/
-#COPY /target/FitnessCRM-* /opt/payara/deployments/
-#COPY ./domain-fitnessCRM.xml $COPY_TMP
-COPY /domain-fitnessCRM.xml /opt/payara/
 
-USER root
-RUN chown -R payara:payara /opt/payara/domain-fitnessCRM.xml
-RUN chmod -R 664 /opt/payara/domain-fitnessCRM.xml
-RUN chown -R payara:payara /opt/payara/deployments/FitnessCRM-*.war
-RUN chmod -R 664 /opt/payara/deployments/FitnessCRM-*.war
+ADD standalone-custom.xml /opt/jboss/wildfly/standalone/configuration/
+ADD home-manlyit.p12      /opt/jboss/wildfly/standalone/configuration/
 
-USER payara
-#RUN mv /dockersrc/* /opt/payara/deployments/ &&\  
- #   chmod  777 /opt/payara/deployments/FitnessCRM-5.4.4.war /opt/payara/deployments/domain-fitnessCRM.xml
+ADD module.xml                      /opt/jboss/wildfly/modules/system/layers/base/org/eclipse/persistence/main
+ADD eclipselink-2.7.1.jar           /opt/jboss/wildfly/modules/system/layers/base/org/eclipse/persistence/main
 
-CMD ["java","-jar","/opt/payara/payara-micro.jar","--deploymentDir","/opt/payara/deployments","--domainconfig","/opt/payara/domain-fitnessCRM.xml"]
+ADD mysql-connector-java-5.1.45.jar /opt/jboss/wildfly/standalone/deployments/
 
-#CMD ["java","-jar","/opt/payara/payara-micro.jar","--deploymentDir","/opt/payara/deployments"]
+ADD FitnessCRM-*.war                /opt/jboss/wildfly/standalone/deployments/
+
+RUN /opt/jboss/wildfly/bin/add-user.sh admin Admin#70365 --silent
+EXPOSE 8080 8081 9990 9993
+CMD ["/opt/jboss/wildfly/bin/standalone.sh", "-c", "standalone-custom.xml", "-b", "0.0.0.0", "-bmanagement", "0.0.0.0"]
