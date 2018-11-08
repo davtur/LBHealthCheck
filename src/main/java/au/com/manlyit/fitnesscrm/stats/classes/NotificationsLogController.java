@@ -246,7 +246,7 @@ public class NotificationsLogController implements Serializable {
         return items;
     }
 
-    private void recreateModel() {
+    public void recreateModel() {
         items = null;
         filteredItems = null;
     }

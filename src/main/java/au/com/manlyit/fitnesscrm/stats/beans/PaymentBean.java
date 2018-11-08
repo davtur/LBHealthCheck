@@ -3,6 +3,7 @@ package au.com.manlyit.fitnesscrm.stats.beans;
 import au.com.manlyit.fitnesscrm.stats.beans.util.PaymentSource;
 import au.com.manlyit.fitnesscrm.stats.beans.util.PaymentStatus;
 import au.com.manlyit.fitnesscrm.stats.classes.EziDebitPaymentGateway;
+import au.com.manlyit.fitnesscrm.stats.classes.NotificationsLogController;
 import au.com.manlyit.fitnesscrm.stats.classes.util.AsyncJob;
 import au.com.manlyit.fitnesscrm.stats.classes.util.BatchOfPaymentJobs;
 import au.com.manlyit.fitnesscrm.stats.classes.util.FutureMapEJB;
@@ -97,6 +98,7 @@ public class PaymentBean implements Serializable {
 
     @Inject
     private EziDebitPaymentGateway eziDebit;
+    
 
     private INonPCIService getWs() {
         /*URL url = null;
@@ -1284,6 +1286,7 @@ public class PaymentBean implements Serializable {
                 return;
             }
             futureMap.sendNotificationToAdmin(message, null);
+           
         } catch (Exception ex) {
             Logger.getLogger(PaymentBean.class.getName()).log(Level.SEVERE, "sendAlertEmailToAdmin Failed", ex);
         }

@@ -123,7 +123,8 @@ public class EziDebitPaymentGateway implements Serializable {
     private au.com.manlyit.fitnesscrm.stats.beans.PaymentParametersFacade ejbPaymentParametersFacade;
     @Inject
     private PaymentBean paymentBean;
-
+@Inject
+    private NotificationsLogController notificationsLogController;
     @Inject
     private ConfigMapFacade configMapFacade;
     @Inject
@@ -2126,6 +2127,7 @@ public class EziDebitPaymentGateway implements Serializable {
 
         recreatePaymentTableData();
         updatePaymentTableComponents();
+         notificationsLogController.recreateModel();
         //@(.parentOfUploadPhoto)
         // PrimeFaces.current().ajax().update("customerslistForm1");
         // PrimeFaces.current().ajax().update("@(.updatePaymentInfo)");

@@ -5,118 +5,121 @@
     xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
     xmlns:p="http://primefaces.org/ui">
     <h:form>
-    <ul class="route-bar-menu">
-        <li class="search-item">
-            <i class="fa fa-search" />
-            <input type="text" placeholder="Search..."/>
-        </li>
-        <li>
-            <a href="javascript:void(0);" onclick="PF('notificationPanel').show('#{component.clientId}');" data-tooltip="Notifications">
-                <i class="fa fa-globe" />
-            </a>
-        </li>
-        <li>
+        <ul class="route-bar-menu">
+            <li class="search-item">
+                <i class="fa fa-search" />
+                <input type="text" placeholder="Search..."/>
+            </li>
+            <li>
+                <a href="javascript:void(0);" onclick="PF('notificationPanel').show('#{component.clientId}');" data-tooltip="Notifications">
+                    <i class="fa fa-globe" />
+                </a>
+            </li>
+            <li>
 
-            <a href="#{request.contextPath}/admin/schedule/schedule.xhtml" data-tooltip="Calendar">
-                <i class="fa fa-calendar" />
-            </a>
-        </li>
-        <li>
-            <a href="#" data-tooltip="Help">
-                <i class="fa fa-life-saver" />
-            </a>
-        </li>
-    </ul>
-    
-    <p:overlayPanel id="moviePanel" widgetVar="notificationPanel" hideEffect="fade"  dynamic="true" style="width:600px">
-        <p:dataTable  
-            id="datalist"  
-            editable="false" 
-            value="#{notificationsLogController.items}" 
-            selection="#{notificationsLogController.selected}" 
-            rowKey="#{item.id}" 
-            filteredValue="#{notificationsLogController.filteredItems}"  
-            widgetVar="notificationsLogControllerTable" 
-            var="item"  
-            paginator="true" 
-            rows="15"  
-            paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  
-            rowsPerPageTemplate="5,10,15,20,25,50,100" >
-            <f:facet name="header">
-                <p:outputPanel>
-                    <h:outputText value="Search all fields:" />
-                    <h:inputText id="globalFilter" onkeyup="PF('notificationsLogControllerTable').filter()" />
-                </p:outputPanel>
-            </f:facet>
-            <p:column sortBy="#{item.id}" filterBy="#{item.id}" headerText="#{configMapController.getKey('ListNotificationsLogTitle_id')}"   >
-                <p:cellEditor> 
-                    <f:facet name="output">
-                        <h:outputText value="#{item.id}"/>
-                    </f:facet>
-                    <f:facet name="input">
-                        <p:inputText value="#{item.id}" label="#{configMapController.getKey('ListNotificationsLogTitle_id')}" />
-                    </f:facet>
-                </p:cellEditor> 
+                <a href="#{request.contextPath}/admin/schedule/schedule.xhtml" data-tooltip="Calendar">
+                    <i class="fa fa-calendar" />
+                </a>
+            </li>
+            <li>
+                <a href="#" data-tooltip="Help">
+                    <i class="fa fa-life-saver" />
+                </a>
+            </li>
+        </ul>
 
-
-            </p:column>
-            <p:column sortBy="#{item.message}" filterBy="#{item.message}" headerText="#{configMapController.getKey('ListNotificationsLogTitle_message')}"   >
-                <p:cellEditor> 
-                    <f:facet name="output">
-                        <h:outputText value="#{item.message}"/>
-                    </f:facet>
-                    <f:facet name="input">
-                        <p:inputText value="#{item.message}" label="#{configMapController.getKey('ListNotificationsLogTitle_message')}" />
-                    </f:facet>
-                </p:cellEditor> 
+        <p:overlayPanel id="moviePanel" widgetVar="notificationPanel" hideEffect="fade" showCloseIcon="true" dynamic="true" >
+            <h1 class="BigTopic">Notifications</h1>
+            <p:dataTable  
+                id="datalist"  
+                editable="false" 
+                value="#{notificationsLogController.items}" 
+                selection="#{notificationsLogController.selected}" 
+                rowKey="#{item.id}" 
+                filteredValue="#{notificationsLogController.filteredItems}"  
+                widgetVar="notificationsLogControllerTable" 
+                var="item"  
+                paginator="true" 
+                rows="15"  
+                paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  
+                rowsPerPageTemplate="5,10,15,20,25,50,100" >
+                <f:facet name="header">
+                    <p:outputPanel>
+                        <h:outputText value="Search all fields:" />
+                        <h:inputText id="globalFilter" onkeyup="PF('notificationsLogControllerTable').filter()" />
+                    </p:outputPanel>
+                </f:facet>
+                <p:column sortBy="#{item.id}" filterBy="#{item.id}" width="50" headerText="#{configMapController.getKey('ListNotificationsLogTitle_id')}"   >
+                    <p:cellEditor> 
+                        <f:facet name="output">
+                            <h:outputText value="#{item.id}"/>
+                        </f:facet>
+                        <f:facet name="input">
+                            <p:inputText value="#{item.id}" label="#{configMapController.getKey('ListNotificationsLogTitle_id')}" />
+                        </f:facet>
+                    </p:cellEditor> 
 
 
-            </p:column>
-            <p:column sortBy="#{item.typeOfNotification}" filterBy="#{item.typeOfNotification}" headerText="#{configMapController.getKey('ListNotificationsLogTitle_typeOfNotification')}"   >
-                <p:cellEditor> 
-                    <f:facet name="output">
-                        <h:outputText value="#{item.typeOfNotification}"/>
-                    </f:facet>
-                    <f:facet name="input">
-                        <p:inputText value="#{item.typeOfNotification}" label="#{configMapController.getKey('ListNotificationsLogTitle_typeOfNotification')}" />
-                    </f:facet>
-                </p:cellEditor> 
+                </p:column>
+                <p:column sortBy="#{item.typeOfNotification}" filterBy="#{item.typeOfNotification}" width="50" headerText="#{configMapController.getKey('ListNotificationsLogTitle_typeOfNotification')}"   >
+                    <p:cellEditor> 
+                        <f:facet name="output">
+                            <h:outputText value="#{item.typeOfNotification}"/>
+                        </f:facet>
+                        <f:facet name="input">
+                            <p:inputText value="#{item.typeOfNotification}" label="#{configMapController.getKey('ListNotificationsLogTitle_typeOfNotification')}" />
+                        </f:facet>
+                    </p:cellEditor> 
 
 
-            </p:column>
-            <p:column sortBy="#{item.timestampOfNotification}" filterBy="#{item.timestampOfNotification}" headerText="#{configMapController.getKey('ListNotificationsLogTitle_timestampOfNotification')}"   >
+                </p:column>
+                <p:column sortBy="#{item.timestampOfNotification}" filterBy="#{item.timestampOfNotification}" width="80" headerText="#{configMapController.getKey('ListNotificationsLogTitle_timestampOfNotification')}"   >
 
-                <p:cellEditor> 
-                    <f:facet name="output">
-                        <h:outputText value="#{item.timestampOfNotification}">
-                            <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
-                        </h:outputText>
-                    </f:facet>
-                    <f:facet name="input">
-                        <p:calendar value="#{item.timestampOfNotification}">	
-                            <p:ajax event="dateSelect" listener= "#{notificationsLogController.handleDateSelect}" update=":growl" />
-                        </p:calendar>
-                    </f:facet>
-                </p:cellEditor> 
+                    <p:cellEditor> 
+                        <f:facet name="output">
+                            <h:outputText value="#{item.timestampOfNotification}">
+                                <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                            </h:outputText>
+                        </f:facet>
+                        <f:facet name="input">
+                            <p:calendar value="#{item.timestampOfNotification}">	
+                                <p:ajax event="dateSelect" listener= "#{notificationsLogController.handleDateSelect}" update=":growl" />
+                            </p:calendar>
+                        </f:facet>
+                    </p:cellEditor> 
 
-            </p:column>
-            <p:column  rendered="#{! empty item.customer}" sortBy="#{item.customer}" filterBy="#{item.customer}" headerText="#{configMapController.getKey('ListNotificationsLogTitle_customer')}"   >
-                <p:cellEditor> 
-                    <f:facet name="output">
-                        <h:outputText value="#{item.customer}"/>
-                    </f:facet>
-                    <f:facet name="input">
-                        <p:inputText value="#{item.customer}" label="#{configMapController.getKey('ListNotificationsLogTitle_customer')}" />
-                    </f:facet>
-                </p:cellEditor> 
-
-
-            </p:column>
+                </p:column>
+                <p:column  rendered="#{! empty item.customer}" sortBy="#{item.customer}" filterBy="#{item.customer}" headerText="#{configMapController.getKey('ListNotificationsLogTitle_customer')}"   >
+                    <p:cellEditor> 
+                        <f:facet name="output">
+                            <h:outputText value="#{item.customer}"/>
+                        </f:facet>
+                        <f:facet name="input">
+                            <p:inputText value="#{item.customer}" label="#{configMapController.getKey('ListNotificationsLogTitle_customer')}" />
+                        </f:facet>
+                    </p:cellEditor> 
 
 
+                </p:column>
 
-        </p:dataTable>
-    </p:overlayPanel>
-    <p:tooltip globalSelector=".route-bar-menu a" position="bottom" showDelay="0"/>
-</h:form>
+
+                <p:column sortBy="#{item.message}" filterBy="#{item.message}"  headerText="#{configMapController.getKey('ListNotificationsLogTitle_message')}"   >
+                    <p:cellEditor> 
+                        <f:facet name="output">
+                            <h:outputText value="#{item.message}"/>
+                        </f:facet>
+                        <f:facet name="input">
+                            <p:inputText value="#{item.message}" label="#{configMapController.getKey('ListNotificationsLogTitle_message')}" />
+                        </f:facet>
+                    </p:cellEditor> 
+
+
+                </p:column>
+
+
+
+            </p:dataTable>
+        </p:overlayPanel>
+        <p:tooltip globalSelector=".route-bar-menu a" position="bottom" showDelay="0"/>
+    </h:form>
 </ui:composition>
