@@ -2349,6 +2349,20 @@ public class FutureMapEJB implements Serializable {
         this.put(FUTUREMAP_INTERNALID, aj);
 
     }
+    public synchronized void sendNotificationToAdmin(String message, String sessionId) {
+
+        if (message == null) {
+            LOGGER.log(Level.WARNING, "Future Map sendAlertEmailToAdmin . Message is NULL.Alert Email not sent!");
+            return;
+        }
+        String templatePlaceholder = "!--LINK--URL--!";
+        //String htmlText = configMapFacade.getConfig("system.email.admin.alert.template");
+        String htmlText = ejbEmailTemplatesFacade.findTemplateByName("system.email.admin.alert.template").getTemplate();
+        htmlText = htmlText.replace(templatePlaceholder, message);
+        AsyncJob aj = new AsyncJob("EmailAlert", paymentBean.sendAsynchEmailWithPGR(configMapFacade.getConfig("AdminEmailAddress"), configMapFacade.getConfig("PasswordResetCCEmailAddress"), configMapFacade.getConfig("PasswordResetFromEmailAddress"), configMapFacade.getConfig("system.ezidebit.webEddrCallback.EmailSubject"), htmlText, null, paymentBean.emailServerProperties(), false, sessionId));
+        this.put(FUTUREMAP_INTERNALID, aj);
+
+    }
 
     private synchronized void startAsynchJob(String sessionId, String key, Future<PaymentGatewayResponse> future) {
 

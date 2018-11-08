@@ -501,3 +501,15 @@ CREATE TABLE `fitnessStats`.`leads` (
   `message` TEXT NULL,
   `notes` VARCHAR(255) NULL,
   PRIMARY KEY (`id`));
+
+
+CREATE TABLE `notifications_log` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer` int(11) DEFAULT NULL,
+  `message` text,
+  `type_of_notification` varchar(32) DEFAULT 'ALERT',
+  `timestamp_of_notification` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `notifications_log_FK_1` (`customer`),
+  CONSTRAINT `notifications_log_FK_1` FOREIGN KEY (`customer`) REFERENCES `customers` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
