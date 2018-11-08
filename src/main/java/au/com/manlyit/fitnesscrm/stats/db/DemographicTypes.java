@@ -49,12 +49,7 @@ import org.eclipse.persistence.config.CacheIsolationType;
     @NamedQuery(name = "DemographicTypes.findByName", query = "SELECT d FROM DemographicTypes d WHERE d.name = :name"),
     @NamedQuery(name = "DemographicTypes.findByDescription", query = "SELECT d FROM DemographicTypes d WHERE d.description = :description")})
 public class DemographicTypes implements  BaseEntity, Serializable {
-    private static final long serialVersionUID = 1L;
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Basic(optional = false)
-    @Column(name = "id")
-    private Integer id;
+
     @Basic(optional = false)
     @NotNull
     @Size(min = 1, max = 32)
@@ -65,6 +60,12 @@ public class DemographicTypes implements  BaseEntity, Serializable {
     @Size(min = 1, max = 96)
     @Column(name = "description")
     private String description;
+    private static final long serialVersionUID = 1L;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Basic(optional = false)
+    @Column(name = "id")
+    private Integer id;
     @OneToMany(mappedBy = "demographic")
     private Collection<Customers> customersCollection;
 
@@ -89,21 +90,6 @@ public class DemographicTypes implements  BaseEntity, Serializable {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
 
     @XmlTransient
     public Collection<Customers> getCustomersCollection() {
@@ -137,6 +123,22 @@ public class DemographicTypes implements  BaseEntity, Serializable {
     @Override
     public String toString() {
         return name;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
 }

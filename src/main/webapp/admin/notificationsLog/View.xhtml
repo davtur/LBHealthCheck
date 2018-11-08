@@ -1,0 +1,32 @@
+
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                >
+
+    <p:dialog id="NotificationsLogViewDlg" widgetVar="NotificationsLogViewDialog" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('ViewNotificationsLogTitle')}">
+        <h:form id="NotificationsLogViewForm">
+            <h:panelGroup id="display">
+                <p:panelGrid columns="2" rendered="#{notificationsLogController.selected != null}">
+                    <h:outputText value="#{configMapController.getKey('ViewNotificationsLogLabel_id')}"/>
+                    <h:outputText value="#{notificationsLogController.selected.id}" title="#{configMapController.getKey('ViewNotificationsLogTitle_id')}"/>
+                    <h:outputText value="#{configMapController.getKey('ViewNotificationsLogLabel_message')}"/>
+                    <h:outputText value="#{notificationsLogController.selected.message}" title="#{configMapController.getKey('ViewNotificationsLogTitle_message')}"/>
+                    <h:outputText value="#{configMapController.getKey('ViewNotificationsLogLabel_typeOfNotification')}"/>
+                    <h:outputText value="#{notificationsLogController.selected.typeOfNotification}" title="#{configMapController.getKey('ViewNotificationsLogTitle_typeOfNotification')}"/>
+                    <h:outputText value="#{configMapController.getKey('ViewNotificationsLogLabel_timestampOfNotification')}"/>
+                    <h:outputText value="#{notificationsLogController.selected.timestampOfNotification}" title="#{configMapController.getKey('ViewNotificationsLogTitle_timestampOfNotification')}">
+                        <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                    </h:outputText>
+                    <h:outputText value="#{configMapController.getKey('ViewNotificationsLogLabel_customer')}"/>
+                    <h:outputText value="#{notificationsLogController.selected.customer}" title="#{configMapController.getKey('ViewNotificationsLogTitle_customer')}"/>
+                </p:panelGrid>
+                <p:commandButton value="#{configMapController.getKey('Close')}" onclick="PF('NotificationsLogViewDialog').hide()"/>
+            </h:panelGroup>
+        </h:form>
+    </p:dialog>
+
+</ui:composition>
+

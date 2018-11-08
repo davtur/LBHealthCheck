@@ -49,17 +49,18 @@ import org.eclipse.persistence.config.CacheIsolationType;
     @NamedQuery(name = "CustomerState.findById", query = "SELECT c FROM CustomerState c WHERE c.id = :id"),
     @NamedQuery(name = "CustomerState.findByCustomerState", query = "SELECT c FROM CustomerState c WHERE c.customerState = :customerState")})
 public class CustomerState implements  BaseEntity, Serializable {
+
+    @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 45)
+    @Column(name = "customer_state")
+    private String customerState;
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "id")
     private Integer id;
-    @Basic(optional = false)
-    @NotNull
-    @Size(min = 1, max = 45)
-    @Column(name = "customer_state")
-    private String customerState;
     @OneToMany(mappedBy = "active")
     private Collection<Customers> customersCollection;
 
@@ -126,5 +127,7 @@ public class CustomerState implements  BaseEntity, Serializable {
     public String toString() {
         return customerState;
     }
+
+    
     
 }

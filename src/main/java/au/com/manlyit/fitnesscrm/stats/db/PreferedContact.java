@@ -49,17 +49,18 @@ import org.eclipse.persistence.config.CacheIsolationType;
     @NamedQuery(name = "PreferedContact.findById", query = "SELECT p FROM PreferedContact p WHERE p.id = :id"),
     @NamedQuery(name = "PreferedContact.findByPreferedContactMethod", query = "SELECT p FROM PreferedContact p WHERE p.preferedContactMethod = :preferedContactMethod")})
 public class PreferedContact implements  BaseEntity, Serializable {
+
+    @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 45)
+    @Column(name = "prefered_contact_method")
+    private String preferedContactMethod;
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "id")
     private Integer id;
-    @Basic(optional = false)
-    @NotNull
-    @Size(min = 1, max = 45)
-    @Column(name = "prefered_contact_method")
-    private String preferedContactMethod;
     @OneToMany(mappedBy = "preferredContact")
     private Collection<Customers> customersCollection;
 
@@ -124,5 +125,7 @@ public class PreferedContact implements  BaseEntity, Serializable {
     public String toString() {
         return preferedContactMethod;
     }
+
+   
     
 }

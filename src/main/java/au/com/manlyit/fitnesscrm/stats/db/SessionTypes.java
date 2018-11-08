@@ -53,12 +53,23 @@ import org.eclipse.persistence.config.CacheIsolationType;
     @NamedQuery(name = "SessionTypes.findByDescription", query = "SELECT s FROM SessionTypes s WHERE s.description = :description")})
 public class SessionTypes implements  BaseEntity, Serializable {
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "taskId")
-    private Collection<ContractorRateToTaskMap> contractorRateToTaskMapCollection;
+    @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 32)
+    @Column(name = "name")
+    private String name;
+    @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 96)
+    @Column(name = "description")
+    private String description;
     @Basic(optional = false)
     @NotNull
     @Column(name = "session_duration_minutes")
     private int sessionDurationMinutes;
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "taskId")
+    private Collection<ContractorRateToTaskMap> contractorRateToTaskMapCollection;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "sessionTypesId")
     private Collection<SessionTimetable> sessionTimetableCollection;
     @OneToOne(mappedBy = "sessionType")
@@ -71,16 +82,6 @@ public class SessionTypes implements  BaseEntity, Serializable {
     @Basic(optional = false)
     @Column(name = "id")
     private Integer id;
-    @Basic(optional = false)
-    @NotNull
-    @Size(min = 1, max = 32)
-    @Column(name = "name")
-    private String name;
-    @Basic(optional = false)
-    @NotNull
-    @Size(min = 1, max = 96)
-    @Column(name = "description")
-    private String description;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "sessionTypesId")
     private Collection<SessionHistory> sessionHistoryCollection;
     
@@ -105,21 +106,6 @@ public class SessionTypes implements  BaseEntity, Serializable {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
 
     @XmlTransient
     public Collection<SessionHistory> getSessionHistoryCollection() {
@@ -189,5 +175,23 @@ public class SessionTypes implements  BaseEntity, Serializable {
     public void setContractorRateToTaskMapCollection(Collection<ContractorRateToTaskMap> contractorRateToTaskMapCollection) {
         this.contractorRateToTaskMapCollection = contractorRateToTaskMapCollection;
     }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+   
 
 }

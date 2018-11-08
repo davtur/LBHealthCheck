@@ -59,15 +59,32 @@ import org.eclipse.persistence.config.CacheIsolationType;
     @NamedQuery(name = "Plan.findByPlanDiscount", query = "SELECT p FROM Plan p WHERE p.planDiscount = :planDiscount")})
 public class Plan implements BaseEntity, Serializable {
 
-    @JoinColumn(name = "session_Type", referencedColumnName = "id")
-    @ManyToOne
-    private SessionTypes sessionType;
-
+    @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 128)
+    @Column(name = "plan_name")
+    private String planName;
     // @Max(value=?)  @Min(value=?)//if you know range of your decimal fields consider using these annotations to enforce field validation
     @Basic(optional = false)
     @NotNull
     @Column(name = "plan_price")
     private BigDecimal planPrice;
+    @Lob
+    @Size(max = 65535)
+    @Column(name = "plan_description")
+    private String planDescription;
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "plan_active")
+    private short planActive;
+    @Size(max = 1)
+    @Column(name = "plan_time_period")
+    private String planTimePeriod;
+
+    @JoinColumn(name = "session_Type", referencedColumnName = "id")
+    @ManyToOne
+    private SessionTypes sessionType;
+
     @Column(name = "plan_discount")
     private BigDecimal planDiscount;
     @OneToMany(mappedBy = "parent")
@@ -81,24 +98,8 @@ public class Plan implements BaseEntity, Serializable {
     @Basic(optional = false)
     @Column(name = "id")
     private Integer id;
-    @Basic(optional = false)
-    @NotNull
-    @Size(min = 1, max = 128)
-    @Column(name = "plan_name")
-    private String planName;
-    @Lob
-    @Size(max = 65535)
-    @Column(name = "plan_description")
-    private String planDescription;
-    @Basic(optional = false)
-    @NotNull
-    @Column(name = "plan_active")
-    private short planActive;
     @OneToMany(mappedBy = "groupPricing")
     private Collection<Customers> customersCollection;
-    @Size(min = 0, max = 1)
-    @Column(name = "plan_time_period")
-    private String planTimePeriod;
 
     public Plan() {
     }
@@ -242,5 +243,7 @@ public class Plan implements BaseEntity, Serializable {
     public void setPlanTimePeriod(String planTimePeriod) {
         this.planTimePeriod = planTimePeriod;
     }
+
+   
 
 }

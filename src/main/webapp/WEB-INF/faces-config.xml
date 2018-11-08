@@ -46,6 +46,10 @@
             <base-name>/Bundle_expenseMap</base-name>
             <var>bundle_expenseMap</var>
         </resource-bundle>
+        <resource-bundle>
+            <base-name>/Bundle-Notification-log</base-name>
+            <var>bundle-Notification-log</var>
+        </resource-bundle>
     </application>
     
     <factory>

@@ -75,18 +75,7 @@ import org.eclipse.persistence.config.CacheIsolationType;
     @NamedQuery(name = "Payments.findByYourGeneralReference", query = "SELECT p FROM Payments p WHERE p.yourGeneralReference = :yourGeneralReference"),
     @NamedQuery(name = "Payments.findByYourSystemReference", query = "SELECT p FROM Payments p WHERE p.yourSystemReference = :yourSystemReference")})
 public class Payments implements  BaseEntity,Serializable {
-    @OneToOne(mappedBy = "paymentId")
-    private SessionBookings sessionBookings;
-    @OneToOne(mappedBy = "nextScheduledPayment")
-    private PaymentParameters paymentParameters;
-    @OneToOne(mappedBy = "lastSuccessfulScheduledPayment")
-    private PaymentParameters paymentParameters1;
-    private static final long serialVersionUID = 1L;
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Basic(optional = false)
-    @Column(name = "id")
-    private Integer id;
+
     @Basic(optional = false)
     @NotNull
     @Column(name = "create_datetime")
@@ -106,23 +95,12 @@ public class Payments implements  BaseEntity,Serializable {
     @Size(max = 70)
     @Column(name = "bank_Return_Code")
     private String bankReturnCode;
-    @Column(name = "debit_Date")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date debitDate;
     @Size(max = 50)
     @Column(name = "ezidebitCustomerID")
     private String ezidebitCustomerID;
     @Size(max = 50)
     @Column(name = "invoiceID")
     private String invoiceID;
-    @Column(name = "manuallyAddedPayment")
-    private Boolean manuallyAddedPayment;
-    // @Max(value=?)  @Min(value=?)//if you know range of your decimal fields consider using these annotations to enforce field validation
-    @Column(name = "paymentAmount")
-    private BigDecimal paymentAmount;
-    @Column(name = "paymentDate")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date paymentDate;
     @Size(max = 50)
     @Column(name = "paymentID")
     private String paymentID;
@@ -138,6 +116,35 @@ public class Payments implements  BaseEntity,Serializable {
     @Size(max = 50)
     @Column(name = "paymentStatus")
     private String paymentStatus;
+    @Size(max = 50)
+    @Column(name = "yourGeneralReference")
+    private String yourGeneralReference;
+    @Size(max = 50)
+    @Column(name = "yourSystemReference")
+    private String yourSystemReference;
+    @OneToOne(mappedBy = "paymentId")
+    private SessionBookings sessionBookings;
+    @OneToOne(mappedBy = "nextScheduledPayment")
+    private PaymentParameters paymentParameters;
+    @OneToOne(mappedBy = "lastSuccessfulScheduledPayment")
+    private PaymentParameters paymentParameters1;
+    private static final long serialVersionUID = 1L;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Basic(optional = false)
+    @Column(name = "id")
+    private Integer id;
+    @Column(name = "debit_Date")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date debitDate;
+    @Column(name = "manuallyAddedPayment")
+    private Boolean manuallyAddedPayment;
+    // @Max(value=?)  @Min(value=?)//if you know range of your decimal fields consider using these annotations to enforce field validation
+    @Column(name = "paymentAmount")
+    private BigDecimal paymentAmount;
+    @Column(name = "paymentDate")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date paymentDate;
     @Column(name = "scheduledAmount")
     private BigDecimal scheduledAmount;
     @Column(name = "settlementDate")
@@ -150,12 +157,6 @@ public class Payments implements  BaseEntity,Serializable {
     @Column(name = "transactionTime")
     @Temporal(TemporalType.TIMESTAMP)
     private Date transactionTime;
-    @Size(max = 50)
-    @Column(name = "yourGeneralReference")
-    private String yourGeneralReference;
-    @Size(max = 50)
-    @Column(name = "yourSystemReference")
-    private String yourSystemReference;
     @JoinColumn(name = "customer_Name", referencedColumnName = "id")
     @ManyToOne
     private Customers customerName;
@@ -229,21 +230,6 @@ public class Payments implements  BaseEntity,Serializable {
         this.debitDate = debitDate;
     }
 
-    public String getEzidebitCustomerID() {
-        return ezidebitCustomerID;
-    }
-
-    public void setEzidebitCustomerID(String ezidebitCustomerID) {
-        this.ezidebitCustomerID = ezidebitCustomerID;
-    }
-
-    public String getInvoiceID() {
-        return invoiceID;
-    }
-
-    public void setInvoiceID(String invoiceID) {
-        this.invoiceID = invoiceID;
-    }
 
     public Boolean getManuallyAddedPayment() {
         return manuallyAddedPayment;
@@ -269,45 +255,6 @@ public class Payments implements  BaseEntity,Serializable {
         this.paymentDate = paymentDate;
     }
 
-    public String getPaymentID() {
-        return paymentID;
-    }
-
-    public void setPaymentID(String paymentID) {
-        this.paymentID = paymentID;
-    }
-
-    public String getPaymentMethod() {
-        return paymentMethod;
-    }
-
-    public void setPaymentMethod(String paymentMethod) {
-        this.paymentMethod = paymentMethod;
-    }
-
-    public String getPaymentReference() {
-        return paymentReference;
-    }
-
-    public void setPaymentReference(String paymentReference) {
-        this.paymentReference = paymentReference;
-    }
-
-    public String getPaymentSource() {
-        return paymentSource;
-    }
-
-    public void setPaymentSource(String paymentSource) {
-        this.paymentSource = paymentSource;
-    }
-
-    public String getPaymentStatus() {
-        return paymentStatus;
-    }
-
-    public void setPaymentStatus(String paymentStatus) {
-        this.paymentStatus = paymentStatus;
-    }
 
     public BigDecimal getScheduledAmount() {
         return scheduledAmount;
@@ -349,21 +296,6 @@ public class Payments implements  BaseEntity,Serializable {
         this.transactionTime = transactionTime;
     }
 
-    public String getYourGeneralReference() {
-        return yourGeneralReference;
-    }
-
-    public void setYourGeneralReference(String yourGeneralReference) {
-        this.yourGeneralReference = yourGeneralReference;
-    }
-
-    public String getYourSystemReference() {
-        return yourSystemReference;
-    }
-
-    public void setYourSystemReference(String yourSystemReference) {
-        this.yourSystemReference = yourSystemReference;
-    }
 
     public Customers getCustomerName() {
         return customerName;
@@ -420,6 +352,80 @@ public class Payments implements  BaseEntity,Serializable {
 
     public void setSessionBookings(SessionBookings sessionBookings) {
         this.sessionBookings = sessionBookings;
+    }
+
+   
+
+    public String getEzidebitCustomerID() {
+        return ezidebitCustomerID;
+    }
+
+    public void setEzidebitCustomerID(String ezidebitCustomerID) {
+        this.ezidebitCustomerID = ezidebitCustomerID;
+    }
+
+    public String getInvoiceID() {
+        return invoiceID;
+    }
+
+    public void setInvoiceID(String invoiceID) {
+        this.invoiceID = invoiceID;
+    }
+
+    public String getPaymentID() {
+        return paymentID;
+    }
+
+    public void setPaymentID(String paymentID) {
+        this.paymentID = paymentID;
+    }
+
+    public String getPaymentMethod() {
+        return paymentMethod;
+    }
+
+    public void setPaymentMethod(String paymentMethod) {
+        this.paymentMethod = paymentMethod;
+    }
+
+    public String getPaymentReference() {
+        return paymentReference;
+    }
+
+    public void setPaymentReference(String paymentReference) {
+        this.paymentReference = paymentReference;
+    }
+
+    public String getPaymentSource() {
+        return paymentSource;
+    }
+
+    public void setPaymentSource(String paymentSource) {
+        this.paymentSource = paymentSource;
+    }
+
+    public String getPaymentStatus() {
+        return paymentStatus;
+    }
+
+    public void setPaymentStatus(String paymentStatus) {
+        this.paymentStatus = paymentStatus;
+    }
+
+    public String getYourGeneralReference() {
+        return yourGeneralReference;
+    }
+
+    public void setYourGeneralReference(String yourGeneralReference) {
+        this.yourGeneralReference = yourGeneralReference;
+    }
+
+    public String getYourSystemReference() {
+        return yourSystemReference;
+    }
+
+    public void setYourSystemReference(String yourSystemReference) {
+        this.yourSystemReference = yourSystemReference;
     }
     
 }

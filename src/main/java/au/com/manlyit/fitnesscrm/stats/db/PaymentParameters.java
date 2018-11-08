@@ -62,26 +62,38 @@ public class PaymentParameters implements  BaseEntity, Serializable {
 
     @Basic(optional = false)
     @NotNull
-    @Column(name = "lastUpdatedFromPaymentGateway")
+    @Column(name = "contractStartDate")
     @Temporal(TemporalType.TIMESTAMP)
-    private Date lastUpdatedFromPaymentGateway;
-    @Column(name = "cancellationDate")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date cancellationDate;
-    @Column(name = "paymentRegularAmount")
-    private BigDecimal paymentRegularAmount;
-    @Column(name = "paymentRegularTotalPaymentsAmount")
-    private BigDecimal paymentRegularTotalPaymentsAmount;
-    @Column(name = "paymentRegularDuration")
-    private Integer paymentRegularDuration;
-    @Column(name = "paymentsRegularTotalNumberOfPayments")
-    private Integer paymentsRegularTotalNumberOfPayments;
-    @JoinColumn(name = "nextScheduledPayment", referencedColumnName = "id")
-    @OneToOne
-    private Payments nextScheduledPayment;
-    @JoinColumn(name = "lastSuccessfulScheduledPayment", referencedColumnName = "id")
-    @OneToOne
-    private Payments lastSuccessfulScheduledPayment;
+    private Date contractStartDate;
+    @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 20)
+    @Column(name = "mobilePhoneNumber")
+    private String mobilePhoneNumber;
+    @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 5)
+    @Column(name = "SmsPaymentReminder")
+    private String smsPaymentReminder;
+    @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 5)
+    @Column(name = "SmsFailedNotification")
+    private String smsFailedNotification;
+    @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 5)
+    @Column(name = "SmsExpiredCard")
+    private String smsExpiredCard;
+    @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 127)
+    @Column(name = "paymentGatewayName")
+    private String paymentGatewayName;
+    @Lob
+    @Size(max = 65535)
+    @Column(name = "webddrUrl")
+    private String webddrUrl;
     @Size(max = 255)
     @Column(name = "addressLine1")
     private String addressLine1;
@@ -128,6 +140,34 @@ public class PaymentParameters implements  BaseEntity, Serializable {
     @Size(max = 255)
     @Column(name = "statusDescription")
     private String statusDescription;
+    @Size(max = 50)
+    @Column(name = "yourGeneralReference")
+    private String yourGeneralReference;
+    @Size(max = 50)
+    @Column(name = "yourSystemReference")
+    private String yourSystemReference;
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "lastUpdatedFromPaymentGateway")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date lastUpdatedFromPaymentGateway;
+    @Column(name = "cancellationDate")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date cancellationDate;
+    @Column(name = "paymentRegularAmount")
+    private BigDecimal paymentRegularAmount;
+    @Column(name = "paymentRegularTotalPaymentsAmount")
+    private BigDecimal paymentRegularTotalPaymentsAmount;
+    @Column(name = "paymentRegularDuration")
+    private Integer paymentRegularDuration;
+    @Column(name = "paymentsRegularTotalNumberOfPayments")
+    private Integer paymentsRegularTotalNumberOfPayments;
+    @JoinColumn(name = "nextScheduledPayment", referencedColumnName = "id")
+    @OneToOne
+    private Payments nextScheduledPayment;
+    @JoinColumn(name = "lastSuccessfulScheduledPayment", referencedColumnName = "id")
+    @OneToOne
+    private Payments lastSuccessfulScheduledPayment;
     @Column(name = "totalPaymentsFailed")
     private Integer totalPaymentsFailed;
     // @Max(value=?)  @Min(value=?)//if you know range of your decimal fields consider using these annotations to enforce field validation
@@ -137,12 +177,6 @@ public class PaymentParameters implements  BaseEntity, Serializable {
     private Integer totalPaymentsSuccessful;
     @Column(name = "totalPaymentsSuccessfulAmount")
     private BigDecimal totalPaymentsSuccessfulAmount;
-    @Size(max = 50)
-    @Column(name = "yourGeneralReference")
-    private String yourGeneralReference;
-    @Size(max = 50)
-    @Column(name = "yourSystemReference")
-    private String yourSystemReference;
 
     private static final long serialVersionUID = 1L;
     @Id
@@ -150,44 +184,10 @@ public class PaymentParameters implements  BaseEntity, Serializable {
     @Basic(optional = false)
     @Column(name = "id")
     private Integer id;
-    @Basic(optional = false)
-    @NotNull
-    @Column(name = "contractStartDate")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date contractStartDate;
-    @Basic(optional = false)
-    @NotNull
-    @Size(min = 1, max = 20)
-    @Column(name = "mobilePhoneNumber")
-    private String mobilePhoneNumber;
-    @Basic(optional = false)
-    @NotNull
-    @Size(min = 1, max = 5)
-    @Column(name = "SmsPaymentReminder")
-    private String smsPaymentReminder;
-    @Basic(optional = false)
-    @NotNull
-    @Size(min = 1, max = 5)
-    @Column(name = "SmsFailedNotification")
-    private String smsFailedNotification;
-    @Basic(optional = false)
-    @NotNull
-    @Size(min = 1, max = 5)
-    @Column(name = "SmsExpiredCard")
-    private String smsExpiredCard;
-    @Basic(optional = false)
-    @NotNull
-    @Size(min = 1, max = 45)
-    @Column(name = "paymentGatewayName")
-    private String paymentGatewayName;
     
     @OneToOne(optional = false, mappedBy = "paymentParametersId")
 
     private Customers customers;
-    @Lob
-    @Size(min = 1, max = 65535)
-    @Column(name = "webddrUrl")
-    private String webddrUrl;
 
     public PaymentParameters() {
     }
@@ -212,6 +212,131 @@ public class PaymentParameters implements  BaseEntity, Serializable {
 
     public void setId(Integer id) {
         this.id = id;
+    }
+
+
+    public Customers getCustomers() {
+        return customers;
+    }
+
+    public void setCustomers(Customers loggedInUser) {
+        this.customers = loggedInUser;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 0;
+        hash += (id != null ? id.hashCode() : 0);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        // TODO: Warning - this method won't work in the case the id fields are not set
+        if (!(object instanceof PaymentParameters)) {
+            return false;
+        }
+        PaymentParameters other = (PaymentParameters) object;
+        if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return "au.com.manlyit.fitnesscrm.stats.db.PaymentParameters[ id=" + id + " ]";
+    }
+
+
+    public Integer getTotalPaymentsFailed() {
+        return totalPaymentsFailed;
+    }
+
+    public void setTotalPaymentsFailed(Integer totalPaymentsFailed) {
+        this.totalPaymentsFailed = totalPaymentsFailed;
+    }
+
+    public BigDecimal getTotalPaymentsFailedAmount() {
+        return totalPaymentsFailedAmount;
+    }
+
+    public void setTotalPaymentsFailedAmount(BigDecimal totalPaymentsFailedAmount) {
+        this.totalPaymentsFailedAmount = totalPaymentsFailedAmount;
+    }
+
+    public Integer getTotalPaymentsSuccessful() {
+        return totalPaymentsSuccessful;
+    }
+
+    public void setTotalPaymentsSuccessful(Integer totalPaymentsSuccessful) {
+        this.totalPaymentsSuccessful = totalPaymentsSuccessful;
+    }
+
+    public BigDecimal getTotalPaymentsSuccessfulAmount() {
+        return totalPaymentsSuccessfulAmount;
+    }
+
+    public void setTotalPaymentsSuccessfulAmount(BigDecimal totalPaymentsSuccessfulAmount) {
+        this.totalPaymentsSuccessfulAmount = totalPaymentsSuccessfulAmount;
+    }
+
+
+    public Payments getNextScheduledPayment() {
+        return nextScheduledPayment;
+    }
+
+    public void setNextScheduledPayment(Payments nextScheduledPayment) {
+        this.nextScheduledPayment = nextScheduledPayment;
+    }
+
+    public Payments getLastSuccessfulScheduledPayment() {
+        return lastSuccessfulScheduledPayment;
+    }
+
+    public void setLastSuccessfulScheduledPayment(Payments lastSuccessfulScheduledPayment) {
+        this.lastSuccessfulScheduledPayment = lastSuccessfulScheduledPayment;
+    }
+
+    public BigDecimal getPaymentRegularAmount() {
+        return paymentRegularAmount;
+    }
+
+    public void setPaymentRegularAmount(BigDecimal paymentRegularAmount) {
+        this.paymentRegularAmount = paymentRegularAmount;
+    }
+
+    public BigDecimal getPaymentRegularTotalPaymentsAmount() {
+        return paymentRegularTotalPaymentsAmount;
+    }
+
+    public void setPaymentRegularTotalPaymentsAmount(BigDecimal paymentRegularTotalPaymentsAmount) {
+        this.paymentRegularTotalPaymentsAmount = paymentRegularTotalPaymentsAmount;
+    }
+
+    public Integer getPaymentRegularDuration() {
+        return paymentRegularDuration;
+    }
+
+    public void setPaymentRegularDuration(Integer paymentRegularDuration) {
+        this.paymentRegularDuration = paymentRegularDuration;
+    }
+
+    public Integer getPaymentsRegularTotalNumberOfPayments() {
+        return paymentsRegularTotalNumberOfPayments;
+    }
+
+    public void setPaymentsRegularTotalNumberOfPayments(Integer paymentsRegularTotalNumberOfPayments) {
+        this.paymentsRegularTotalNumberOfPayments = paymentsRegularTotalNumberOfPayments;
+    }
+
+
+    public Date getCancellationDate() {
+        return cancellationDate;
+    }
+
+    public void setCancellationDate(Date cancellationDate) {
+        this.cancellationDate = cancellationDate;
     }
 
     public Date getContractStartDate() {
@@ -262,51 +387,12 @@ public class PaymentParameters implements  BaseEntity, Serializable {
         this.paymentGatewayName = paymentGatewayName;
     }
 
-    public Customers getCustomers() {
-        return customers;
-    }
-
-    public void setCustomers(Customers loggedInUser) {
-        this.customers = loggedInUser;
-    }
-
-    @Override
-    public int hashCode() {
-        int hash = 0;
-        hash += (id != null ? id.hashCode() : 0);
-        return hash;
-    }
-
-    @Override
-    public boolean equals(Object object) {
-        // TODO: Warning - this method won't work in the case the id fields are not set
-        if (!(object instanceof PaymentParameters)) {
-            return false;
-        }
-        PaymentParameters other = (PaymentParameters) object;
-        if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
-            return false;
-        }
-        return true;
-    }
-
-    @Override
-    public String toString() {
-        return "au.com.manlyit.fitnesscrm.stats.db.PaymentParameters[ id=" + id + " ]";
-    }
-
-    /**
-     * @return the shedTitle
-     */
     public String getWebddrUrl() {
         return webddrUrl;
     }
 
-    /**
-     * @param shedTitle the shedTitle to set
-     */
-    public void setWebddrUrl(String shedTitle) {
-        this.webddrUrl = shedTitle;
+    public void setWebddrUrl(String webddrUrl) {
+        this.webddrUrl = webddrUrl;
     }
 
     public String getAddressLine1() {
@@ -429,38 +515,6 @@ public class PaymentParameters implements  BaseEntity, Serializable {
         this.statusDescription = statusDescription;
     }
 
-    public Integer getTotalPaymentsFailed() {
-        return totalPaymentsFailed;
-    }
-
-    public void setTotalPaymentsFailed(Integer totalPaymentsFailed) {
-        this.totalPaymentsFailed = totalPaymentsFailed;
-    }
-
-    public BigDecimal getTotalPaymentsFailedAmount() {
-        return totalPaymentsFailedAmount;
-    }
-
-    public void setTotalPaymentsFailedAmount(BigDecimal totalPaymentsFailedAmount) {
-        this.totalPaymentsFailedAmount = totalPaymentsFailedAmount;
-    }
-
-    public Integer getTotalPaymentsSuccessful() {
-        return totalPaymentsSuccessful;
-    }
-
-    public void setTotalPaymentsSuccessful(Integer totalPaymentsSuccessful) {
-        this.totalPaymentsSuccessful = totalPaymentsSuccessful;
-    }
-
-    public BigDecimal getTotalPaymentsSuccessfulAmount() {
-        return totalPaymentsSuccessfulAmount;
-    }
-
-    public void setTotalPaymentsSuccessfulAmount(BigDecimal totalPaymentsSuccessfulAmount) {
-        this.totalPaymentsSuccessfulAmount = totalPaymentsSuccessfulAmount;
-    }
-
     public String getYourGeneralReference() {
         return yourGeneralReference;
     }
@@ -477,68 +531,12 @@ public class PaymentParameters implements  BaseEntity, Serializable {
         this.yourSystemReference = yourSystemReference;
     }
 
-    public Payments getNextScheduledPayment() {
-        return nextScheduledPayment;
-    }
-
-    public void setNextScheduledPayment(Payments nextScheduledPayment) {
-        this.nextScheduledPayment = nextScheduledPayment;
-    }
-
-    public Payments getLastSuccessfulScheduledPayment() {
-        return lastSuccessfulScheduledPayment;
-    }
-
-    public void setLastSuccessfulScheduledPayment(Payments lastSuccessfulScheduledPayment) {
-        this.lastSuccessfulScheduledPayment = lastSuccessfulScheduledPayment;
-    }
-
-    public BigDecimal getPaymentRegularAmount() {
-        return paymentRegularAmount;
-    }
-
-    public void setPaymentRegularAmount(BigDecimal paymentRegularAmount) {
-        this.paymentRegularAmount = paymentRegularAmount;
-    }
-
-    public BigDecimal getPaymentRegularTotalPaymentsAmount() {
-        return paymentRegularTotalPaymentsAmount;
-    }
-
-    public void setPaymentRegularTotalPaymentsAmount(BigDecimal paymentRegularTotalPaymentsAmount) {
-        this.paymentRegularTotalPaymentsAmount = paymentRegularTotalPaymentsAmount;
-    }
-
-    public Integer getPaymentRegularDuration() {
-        return paymentRegularDuration;
-    }
-
-    public void setPaymentRegularDuration(Integer paymentRegularDuration) {
-        this.paymentRegularDuration = paymentRegularDuration;
-    }
-
-    public Integer getPaymentsRegularTotalNumberOfPayments() {
-        return paymentsRegularTotalNumberOfPayments;
-    }
-
-    public void setPaymentsRegularTotalNumberOfPayments(Integer paymentsRegularTotalNumberOfPayments) {
-        this.paymentsRegularTotalNumberOfPayments = paymentsRegularTotalNumberOfPayments;
-    }
-
     public Date getLastUpdatedFromPaymentGateway() {
         return lastUpdatedFromPaymentGateway;
     }
 
     public void setLastUpdatedFromPaymentGateway(Date lastUpdatedFromPaymentGateway) {
         this.lastUpdatedFromPaymentGateway = lastUpdatedFromPaymentGateway;
-    }
-
-    public Date getCancellationDate() {
-        return cancellationDate;
-    }
-
-    public void setCancellationDate(Date cancellationDate) {
-        this.cancellationDate = cancellationDate;
     }
 
 }

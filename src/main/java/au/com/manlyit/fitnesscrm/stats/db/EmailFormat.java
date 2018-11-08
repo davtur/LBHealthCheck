@@ -49,17 +49,18 @@ import org.eclipse.persistence.config.CacheIsolationType;
     @NamedQuery(name = "EmailFormat.findById", query = "SELECT e FROM EmailFormat e WHERE e.id = :id"),
     @NamedQuery(name = "EmailFormat.findByEmailFormat", query = "SELECT e FROM EmailFormat e WHERE e.emailFormat = :emailFormat")})
 public class EmailFormat implements  BaseEntity, Serializable {
+
+    @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 45)
+    @Column(name = "email_format")
+    private String emailFormat;
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "id")
     private Integer id;
-    @Basic(optional = false)
-    @NotNull
-    @Size(min = 1, max = 45)
-    @Column(name = "email_format")
-    private String emailFormat;
     @OneToMany(mappedBy = "emailFormat")
     private Collection<Customers> customersCollection;
 
@@ -124,5 +125,7 @@ public class EmailFormat implements  BaseEntity, Serializable {
     public String toString() {
         return emailFormat;
     }
+
+   
     
 }

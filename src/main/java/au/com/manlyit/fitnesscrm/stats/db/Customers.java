@@ -74,62 +74,10 @@ import org.eclipse.persistence.config.CacheIsolationType;
     @NamedQuery(name = "Customers.findByGoogleId", query = "SELECT c FROM Customers c WHERE c.googleId = :googleId")})
 public class Customers implements BaseEntity, Serializable {
 
-    @OneToMany(mappedBy = "internalContractorId")
-    private Collection<Suppliers> suppliersCollection;
-
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "customerId")
-    private Collection<QuestionnaireMap> questionnaireMapCollection;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "customerId")
-    private Collection<SessionBookings> sessionBookingsCollection;
-    @Basic(optional = false)
-    @NotNull
-    @Size(min = 1, max = 255)
-    @Column(name = "emergency_contact_name")
-    private String emergencyContactName;
-    @Basic(optional = false)
-    @NotNull
-    @Size(min = 1, max = 45)
-    @Column(name = "emergency_contact_phone")
-    private String emergencyContactPhone;
-    @Column(name = "terms_conditions_accepted")
-    private Boolean termsConditionsAccepted;
-    @Column(name = "last_login_time")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date lastLoginTime;
-    @Column(name = "login_attempts")
-    private Integer loginAttempts;
-    @Column(name = "must_reset_password")
-    private Boolean mustResetPassword;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "trainerId")
-    private Collection<SessionTimetable> sessionTimetableCollection;
-   
-    
-    
-    @OneToMany(mappedBy = "changedBy")
-    private Collection<AuditLog> auditLogCollection;
-    @OneToMany(mappedBy = "customer")
-    private Collection<AuditLog> auditLogCollection1;
-    @JoinColumn(name = "profile_image", referencedColumnName = "id")
-    @OneToOne
-    private CustomerImages profileImage;
-    
-    // JoinColumn indicates this tabl;e will have the foreign key and be the owner of the relationship.THis entity should be persisted to invoke the cascade persist on its payment parameters. 
-    @JoinColumn(name = "payment_parameters_id", referencedColumnName = "id")
-    @OneToOne(cascade = CascadeType.ALL, optional = false)
-    private PaymentParameters paymentParametersId;
-    
-    @OneToMany(mappedBy = "customerName")
-    private Collection<Payments> paymentsCollection;
     @Basic(optional = false)
     @NotNull
     @Column(name = "gender")
     private Character gender;
-    private static final long serialVersionUID = 1L;
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Basic(optional = false)
-    @Column(name = "id")
-    private Integer id;
     @Basic(optional = false)
     @NotNull
     @Size(min = 1, max = 127)
@@ -170,8 +118,6 @@ public class Customers implements BaseEntity, Serializable {
     @Size(max = 32)
     @Column(name = "addr_state")
     private String addrState;
-    @Column(name = "country_id")
-    private Integer countryId;
     @Size(max = 63)
     @Column(name = "telephone")
     private String telephone;
@@ -184,6 +130,69 @@ public class Customers implements BaseEntity, Serializable {
     @Size(min = 1, max = 255)
     @Column(name = "password")
     private String password;
+    @Size(max = 45)
+    @Column(name = "facebookId")
+    private String facebookId;
+    @Size(max = 45)
+    @Column(name = "googleId")
+    private String googleId;
+    @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 255)
+    @Column(name = "emergency_contact_name")
+    private String emergencyContactName;
+    @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 45)
+    @Column(name = "emergency_contact_phone")
+    private String emergencyContactPhone;
+    @OneToMany(mappedBy = "customer")
+    private Collection<NotificationsLog> notificationsLogCollection;
+
+    @OneToMany(mappedBy = "internalContractorId")
+    private Collection<Suppliers> suppliersCollection;
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "customerId")
+    private Collection<QuestionnaireMap> questionnaireMapCollection;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "customerId")
+    private Collection<SessionBookings> sessionBookingsCollection;
+    @Column(name = "terms_conditions_accepted")
+    private Boolean termsConditionsAccepted;
+    @Column(name = "last_login_time")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date lastLoginTime;
+    @Column(name = "login_attempts")
+    private Integer loginAttempts;
+    @Column(name = "must_reset_password")
+    private Boolean mustResetPassword;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "trainerId")
+    private Collection<SessionTimetable> sessionTimetableCollection;
+   
+    
+    
+    @OneToMany(mappedBy = "changedBy")
+    private Collection<AuditLog> auditLogCollection;
+    @OneToMany(mappedBy = "customer")
+    private Collection<AuditLog> auditLogCollection1;
+    @JoinColumn(name = "profile_image", referencedColumnName = "id")
+    @OneToOne
+    private CustomerImages profileImage;
+    
+    // JoinColumn indicates this tabl;e will have the foreign key and be the owner of the relationship.THis entity should be persisted to invoke the cascade persist on its payment parameters. 
+    @JoinColumn(name = "payment_parameters_id", referencedColumnName = "id")
+    @OneToOne(cascade = CascadeType.ALL, optional = false)
+    private PaymentParameters paymentParametersId;
+    
+    @OneToMany(mappedBy = "customerName")
+    private Collection<Payments> paymentsCollection;
+    private static final long serialVersionUID = 1L;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Basic(optional = false)
+    @Column(name = "id")
+    private Integer id;
+    @Column(name = "country_id")
+    private Integer countryId;
     @Column(name = "newsletter")
     private Boolean newsletter;
     @Column(name = "referredby")
@@ -229,12 +238,6 @@ public class Customers implements BaseEntity, Serializable {
     @OneToMany(mappedBy = "userId")
     private Collection<Notes> notesCollection;
 
-    @Size(max = 45)
-    @Column(name = "facebookId")
-    private String facebookId;
-    @Size(max = 45)
-    @Column(name = "googleId")
-    private String googleId;
     
 
     public Customers() {
@@ -265,29 +268,6 @@ public class Customers implements BaseEntity, Serializable {
         this.id = id;
     }
 
-    public String getFirstname() {
-        return firstname;
-    }
-
-    public void setFirstname(String firstname) {
-        this.firstname = firstname;
-    }
-
-    public String getLastname() {
-        return lastname;
-    }
-
-    public void setLastname(String lastname) {
-        this.lastname = lastname;
-    }
-
-    public Date getDob() {
-        return dob;
-    }
-
-    public void setDob(Date dob) {
-        this.dob = dob;
-    }
 
     public String getEmailAddress() {
         return emailAddress;
@@ -297,13 +277,6 @@ public class Customers implements BaseEntity, Serializable {
         this.emailAddress = emailAddress;
     }
 
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
 
     public String getStreetAddress() {
         return streetAddress;
@@ -313,29 +286,6 @@ public class Customers implements BaseEntity, Serializable {
         this.streetAddress = streetAddress;
     }
 
-    public String getSuburb() {
-        return suburb;
-    }
-
-    public void setSuburb(String suburb) {
-        this.suburb = suburb;
-    }
-
-    public String getPostcode() {
-        return postcode;
-    }
-
-    public void setPostcode(String postcode) {
-        this.postcode = postcode;
-    }
-
-    public String getCity() {
-        return city;
-    }
-
-    public void setCity(String city) {
-        this.city = city;
-    }
 
     public String getAddrState() {
         return addrState;
@@ -353,29 +303,6 @@ public class Customers implements BaseEntity, Serializable {
         this.countryId = countryId;
     }
 
-    public String getTelephone() {
-        return telephone;
-    }
-
-    public void setTelephone(String telephone) {
-        this.telephone = telephone;
-    }
-
-    public String getFax() {
-        return fax;
-    }
-
-    public void setFax(String fax) {
-        this.fax = fax;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
 
     public Boolean getNewsletter() {
         return newsletter;
@@ -547,21 +474,6 @@ public class Customers implements BaseEntity, Serializable {
         return firstname + " " + lastname;
     }
 
-    public String getFacebookId() {
-        return facebookId;
-    }
-
-    public void setFacebookId(String facebookId) {
-        this.facebookId = facebookId;
-    }
-
-    public String getGoogleId() {
-        return googleId;
-    }
-
-    public void setGoogleId(String googleId) {
-        this.googleId = googleId;
-    }
 
     @XmlTransient
     public Collection<SessionTrainers> getSessionTrainersCollection() {
@@ -572,13 +484,6 @@ public class Customers implements BaseEntity, Serializable {
         this.sessionTrainersCollection = sessionTrainersCollection;
     }
 
-    public Character getGender() {
-        return gender;
-    }
-
-    public void setGender(Character gender) {
-        this.gender = gender;
-    }
 
     @XmlTransient
     public Collection<Payments> getPaymentsCollection() {
@@ -718,6 +623,126 @@ public class Customers implements BaseEntity, Serializable {
 
     public void setSuppliersCollection(Collection<Suppliers> suppliersCollection) {
         this.suppliersCollection = suppliersCollection;
+    }
+
+    public Character getGender() {
+        return gender;
+    }
+
+    public void setGender(Character gender) {
+        this.gender = gender;
+    }
+
+    public String getFirstname() {
+        return firstname;
+    }
+
+    public void setFirstname(String firstname) {
+        this.firstname = firstname;
+    }
+
+    public String getLastname() {
+        return lastname;
+    }
+
+    public void setLastname(String lastname) {
+        this.lastname = lastname;
+    }
+
+    public Date getDob() {
+        return dob;
+    }
+
+    public void setDob(Date dob) {
+        this.dob = dob;
+    }
+
+  
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+   
+    public String getSuburb() {
+        return suburb;
+    }
+
+    public void setSuburb(String suburb) {
+        this.suburb = suburb;
+    }
+
+    public String getPostcode() {
+        return postcode;
+    }
+
+    public void setPostcode(String postcode) {
+        this.postcode = postcode;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+  
+
+    public String getTelephone() {
+        return telephone;
+    }
+
+    public void setTelephone(String telephone) {
+        this.telephone = telephone;
+    }
+
+    public String getFax() {
+        return fax;
+    }
+
+    public void setFax(String fax) {
+        this.fax = fax;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getFacebookId() {
+        return facebookId;
+    }
+
+    public void setFacebookId(String facebookId) {
+        this.facebookId = facebookId;
+    }
+
+    public String getGoogleId() {
+        return googleId;
+    }
+
+    public void setGoogleId(String googleId) {
+        this.googleId = googleId;
+    }
+
+   
+
+    @XmlTransient
+    public Collection<NotificationsLog> getNotificationsLogCollection() {
+        return notificationsLogCollection;
+    }
+
+    public void setNotificationsLogCollection(Collection<NotificationsLog> notificationsLogCollection) {
+        this.notificationsLogCollection = notificationsLogCollection;
     }
 
     

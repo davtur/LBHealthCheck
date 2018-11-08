@@ -1,0 +1,36 @@
+
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                >
+
+    <p:dialog id="NotificationsLogEditDlg" widgetVar="NotificationsLogEditDialog" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('EditNotificationsLogTitle')}">
+        <h:form id="NotificationsLogEditForm">
+            <h:panelGroup id="display">
+                <p:panelGrid columns="2" rendered="#{notificationsLogController.selected != null}">
+                    <h:outputLabel value="#{configMapController.getKey('EditNotificationsLogLabel_id')}" for="id" />
+                    <h:inputText id="id"  value="#{notificationsLogController.selected.id}" title="#{configMapController.getKey('EditNotificationsLogTitle_id')}" required="true" requiredMessage="#{configMapController.getKey('EditNotificationsLogRequiredMessage_id')}"/>
+                    <h:outputLabel value="#{configMapController.getKey('EditNotificationsLogLabel_message')}" for="message" />
+                    <h:inputTextarea rows="4" cols="30" id="message" value="#{notificationsLogController.selected.message}" title="#{configMapController.getKey('EditNotificationsLogTitle_message')}" />
+                    <h:outputLabel value="#{configMapController.getKey('EditNotificationsLogLabel_typeOfNotification')}" for="typeOfNotification" />
+                    <h:inputText id="typeOfNotification"  value="#{notificationsLogController.selected.typeOfNotification}" title="#{configMapController.getKey('EditNotificationsLogTitle_typeOfNotification')}" />
+                    <h:outputLabel value="#{configMapController.getKey('EditNotificationsLogLabel_timestampOfNotification')}" for="timestampOfNotification" />
+                    <h:inputText id="timestampOfNotification" value="#{notificationsLogController.selected.timestampOfNotification}" title="#{configMapController.getKey('EditNotificationsLogTitle_timestampOfNotification')}" required="true" requiredMessage="#{configMapController.getKey('EditNotificationsLogRequiredMessage_timestampOfNotification')}">
+                        <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                    </h:inputText>
+                    <h:outputLabel value="#{configMapController.getKey('EditNotificationsLogLabel_customer')}" for="customer" />
+                    <p:selectOneMenu id="customer" valueChangeListener="#{notificationsLogController.selectOneMenuValueChangeListener}" value="#{notificationsLogController.selected.customer}" label="#{configMapController.getKey('EditNotificationsLogTitle_customer')}" >
+                        <f:selectItems value="#{customersController.itemsAvailableSelectOne}"/>
+                        <p:ajax   update=":NotificationsLogEditForm"  />
+                    </p:selectOneMenu>
+                </p:panelGrid>
+                <p:commandButton actionListener="#{notificationsLogController.update}" value="#{configMapController.getKey('Save')}" update="display,:NotificationsLogListForm:datalist,:growl" oncomplete="handleSubmit(args, 'NotificationsLogEditDialog');PF('notificationsLogControllerTable').filter()"/>
+                <p:commandButton value="#{configMapController.getKey('Cancel')}" onclick="PF('NotificationsLogEditDialog').hide()"/>
+            </h:panelGroup>
+        </h:form>
+    </p:dialog>
+
+</ui:composition>
+

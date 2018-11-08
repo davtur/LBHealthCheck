@@ -1,0 +1,39 @@
+
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                >
+    <p:dialog id="NotificationsLogCreateDlg" widgetVar="NotificationsLogCreateDialog" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('CreateNotificationsLogTitle')}">
+
+        <h:form id="NotificationsLogCreateForm">
+            <h:panelGroup id="display">
+                <p:panelGrid columns="2" rendered="#{notificationsLogController.selected != null}">
+                    <p:outputLabel value="#{configMapController.getKey('CreateNotificationsLogLabel_id')}" for="id" />
+                    <p:inputText id="id" value="#{notificationsLogController.selected.id}" title="#{configMapController.getKey('CreateNotificationsLogTitle_id')}" required="true" requiredMessage="#{configMapController.getKey('CreateNotificationsLogRequiredMessage_id')}"/>
+                    <p:outputLabel value="#{configMapController.getKey('CreateNotificationsLogLabel_message')}" for="message" />
+                    <p:inputTextarea rows="4" cols="30" id="message"  value="#{notificationsLogController.selected.message}"  title="#{configMapController.getKey('CreateNotificationsLogTitle_message')}" />
+                    <p:outputLabel value="#{configMapController.getKey('CreateNotificationsLogLabel_typeOfNotification')}" for="typeOfNotification" />
+                    <p:inputText id="typeOfNotification" value="#{notificationsLogController.selected.typeOfNotification}" title="#{configMapController.getKey('CreateNotificationsLogTitle_typeOfNotification')}" />
+                    <p:outputLabel value="#{configMapController.getKey('CreateNotificationsLogLabel_timestampOfNotification')}" for="timestampOfNotification" />
+
+
+                    <p:calendar id="timestampOfNotification" pattern="MM/dd/yyyy HH:mm:ss"  value="#{notificationsLogController.selected.timestampOfNotification}"  title="#{configMapController.getKey('CreateNotificationsLogTitle_timestampOfNotification')}" required="true" requiredMessage="#{configMapController.getKey('CreateNotificationsLogRequiredMessage_timestampOfNotification')}">
+                        <p:ajax event="dateSelect" listener="#{notificationsLogController.handleDateSelect}" update=":NotificationsLogCreateForm" />
+                    </p:calendar>
+                    <p:outputLabel value="#{configMapController.getKey('CreateNotificationsLogLabel_customer')}" for="customer" />
+                    <p:selectOneMenu id="customer" valueChangeListener="#{notificationsLogController.selectOneMenuValueChangeListener}"  value="#{notificationsLogController.selected.customer}"  label="#{configMapController.getKey('CreateNotificationsLogTitle_customer')}" >
+                        <f:selectItems value="#{customersController.itemsAvailableSelectOne}"/>
+                        <p:ajax   update=":NotificationsLogCreateForm"  />
+                    </p:selectOneMenu>
+                </p:panelGrid>
+                <p:commandButton actionListener="#{notificationsLogController.createDialogue}" value="#{configMapController.getKey('Save')}" update="display,:NotificationsLogListForm:datalist,:growl" oncomplete="handleSubmit(args,'NotificationsLogCreateDialog');PF('notificationsLogControllerTable').filter()"/>
+                <p:commandButton value="#{configMapController.getKey('Cancel')}" onclick="PF('NotificationsLogCreateDialog').hide()"/>
+            </h:panelGroup>
+        </h:form>
+    </p:dialog>
+
+</ui:composition>    
+<p> Generated from template ( JSF_from_entity_wizard/StandardJSF/create.ftl  )- Dave 23rd October 2015 </p>
+
