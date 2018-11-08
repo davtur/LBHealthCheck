@@ -8,13 +8,14 @@ package au.com.manlyit.fitnesscrm.stats.classes.util;
 import au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade;
 import au.com.manlyit.fitnesscrm.stats.beans.CustomersFacade;
 import au.com.manlyit.fitnesscrm.stats.beans.EmailTemplatesFacade;
+import au.com.manlyit.fitnesscrm.stats.beans.NotificationsLogFacade;
 import au.com.manlyit.fitnesscrm.stats.beans.PaymentBean;
 import au.com.manlyit.fitnesscrm.stats.beans.PaymentsFacade;
 import au.com.manlyit.fitnesscrm.stats.beans.util.PaymentSource;
 import au.com.manlyit.fitnesscrm.stats.beans.util.PaymentStatus;
 import au.com.manlyit.fitnesscrm.stats.classes.EziDebitPaymentGateway;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
-import au.com.manlyit.fitnesscrm.stats.db.PaymentParameters;
+import au.com.manlyit.fitnesscrm.stats.db.NotificationsLog;
 import au.com.manlyit.fitnesscrm.stats.db.Payments;
 import au.com.manlyit.fitnesscrm.stats.webservices.ArrayOfPayment;
 import au.com.manlyit.fitnesscrm.stats.webservices.ArrayOfScheduledPayment;
@@ -51,9 +52,6 @@ import javax.ejb.Schedule;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.ejb.Timer;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import static javax.ejb.TransactionAttributeType.REQUIRES_NEW;
 import javax.ejb.TransactionManagement;
 import javax.ejb.TransactionManagementType;
 import javax.enterprise.context.ApplicationScoped;
@@ -115,6 +113,8 @@ public class FutureMapEJB implements Serializable {
     private ConfigMapFacade configMapFacade;
     @Inject
     private PaymentsFacade paymentsFacade;
+     @Inject
+    private NotificationsLogFacade notificationsLogFacade;
     @Inject
     @Push
     private PushContext payments;
@@ -2251,7 +2251,7 @@ public class FutureMapEJB implements Serializable {
                                     String message = "The payment gateway rejected the payment as it was busy. Several retries were made but the gateway continued to respond with a message stating it was busy. Payment ID:" + pay.getId().toString() + " for Amount:$" + pay.getPaymentAmount().toPlainString() + " on Date:" + pay.getDebitDate().toString() + " could not be added as the payment gateway was unavailable. Several attempts to resubmit have been made and also failed!!. Customer username = " + pay.getCustomerName().getUsername();
 
                                     sendMessage(sessionId, "Add Payment Error!", message);
-                                    sendAlertEmailToAdmin(message, sessionId);
+                                    sendNotificationToAdmin(message, null);
 
                                 }
                             }
@@ -2349,19 +2349,27 @@ public class FutureMapEJB implements Serializable {
         this.put(FUTUREMAP_INTERNALID, aj);
 
     }
-    public synchronized void sendNotificationToAdmin(String message, String sessionId) {
+    public synchronized void sendNotificationToAdmin(String message, Customers customer) {
 
         if (message == null) {
-            LOGGER.log(Level.WARNING, "Future Map sendAlertEmailToAdmin . Message is NULL.Alert Email not sent!");
+            LOGGER.log(Level.WARNING, "Future Map sendNotificationToAdmin . Message is NULL.Alert Email not sent!");
             return;
         }
+         LOGGER.log(Level.WARNING, "Future Map sendNotificationToAdmin . Message:{0}", message);
         String templatePlaceholder = "!--LINK--URL--!";
         //String htmlText = configMapFacade.getConfig("system.email.admin.alert.template");
         String htmlText = ejbEmailTemplatesFacade.findTemplateByName("system.email.admin.alert.template").getTemplate();
         htmlText = htmlText.replace(templatePlaceholder, message);
-        AsyncJob aj = new AsyncJob("EmailAlert", paymentBean.sendAsynchEmailWithPGR(configMapFacade.getConfig("AdminEmailAddress"), configMapFacade.getConfig("PasswordResetCCEmailAddress"), configMapFacade.getConfig("PasswordResetFromEmailAddress"), configMapFacade.getConfig("system.ezidebit.webEddrCallback.EmailSubject"), htmlText, null, paymentBean.emailServerProperties(), false, sessionId));
-        this.put(FUTUREMAP_INTERNALID, aj);
-
+        
+        NotificationsLog entity = new NotificationsLog();
+        entity.setCustomer(customer);
+        entity.setMessage(message);
+        entity.setTypeOfNotification("ALERT");
+        entity.setTimestampOfNotification(new Date());
+        
+        notificationsLogFacade.create(entity);
+        
+        
     }
 
     private synchronized void startAsynchJob(String sessionId, String key, Future<PaymentGatewayResponse> future) {

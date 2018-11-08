@@ -1283,7 +1283,7 @@ public class PaymentBean implements Serializable {
                 LOGGER.log(Level.WARNING, "Payment Bean sendAlertEmailToAdmin . Message is NULL.Alert Email not sent!");
                 return;
             }
-            futureMap.sendAlertEmailToAdmin(message, sessionId);
+            futureMap.sendNotificationToAdmin(message, null);
         } catch (Exception ex) {
             Logger.getLogger(PaymentBean.class.getName()).log(Level.SEVERE, "sendAlertEmailToAdmin Failed", ex);
         }
