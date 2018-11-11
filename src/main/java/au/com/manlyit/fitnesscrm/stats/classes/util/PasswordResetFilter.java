@@ -10,7 +10,7 @@ import au.com.manlyit.fitnesscrm.stats.classes.PasswordService;
 import au.com.manlyit.fitnesscrm.stats.db.Activation;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import java.io.IOException;
-import java.net.URLEncoder;
+import java.security.Principal;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.Locale;
@@ -90,18 +90,21 @@ public class PasswordResetFilter implements Filter {
                                     cst.setPassword(encryptedPass);
                                     ejbCustomerFacade.edit(cst);
                                     try {
-                                        req.login(user, paswd);
-                                        logger.log(Level.INFO, "The reset password link executed successfully. User {0} has been logged in.", user);
-                                        String auditDetails = "Customer Login Successful:" + cst.getUsername() + " Details:  " + cst.getLastname() + " " + cst.getFirstname() + " ";
-                                        String changedFrom = "UnAuthenticated";
-                                        String changedTo = "Authenticated User:" + cst.getUsername();
-                                        if (cst.getUsername().toLowerCase(Locale.getDefault()).equals("synthetic.tester")) {
-                                            logger.log(Level.INFO, "Synthetic Tester Logged In.");
-                                        } else {
-                                            ejbAuditLogFacade.audit(cst, cst, "Logged In", auditDetails, changedFrom, changedTo);
-                                        }
+                                        
+
+                                            req.login(user, paswd);
+                                            logger.log(Level.INFO, "The reset password link executed successfully. User {0} has been logged in.", user);
+                                            String auditDetails = "Customer Login Successful:" + cst.getUsername() + " Details:  " + cst.getLastname() + " " + cst.getFirstname() + " ";
+                                            String changedFrom = "UnAuthenticated";
+                                            String changedTo = "Authenticated User:" + cst.getUsername();
+                                            if (cst.getUsername().toLowerCase(Locale.getDefault()).equals("synthetic.tester")) {
+                                                logger.log(Level.INFO, "Synthetic Tester Logged In.");
+                                            } else {
+                                                ejbAuditLogFacade.audit(cst, cst, "Logged In", auditDetails, changedFrom, changedTo);
+                                            }
+                                        
                                     } catch (ServletException servletException) {
-                                        if (servletException.getMessage().contains("This is request has already been authenticated") == false) {
+                                        if (servletException.getMessage().contains("UT010030") == false) {//javax.servlet.ServletException: UT010030: User already logged in
                                             throw servletException;
                                         } else {
                                             logger.log(Level.INFO, "This is request has already been authenticated. User {0} is already logged in.", user);
@@ -116,16 +119,19 @@ public class PasswordResetFilter implements Filter {
 
                                         String detailsURL = req.getContextPath() + "/myDetails.xhtml";
                                         String surveysURL = req.getContextPath() + "/customerSurveys.xhtml";
+                                        //String timetableURL =  "http://www.manlybeachfemalefitness.com.au/schedule/schedule.xhtml";
+                                        String timetableURL =  configMapFacade.getConfig("login.signup.timetable.url").trim();
                                         if (cst.getTermsConditionsAccepted() == true) {
                                             res.sendRedirect(detailsURL);
                                         } else {
-                                            res.sendRedirect(surveysURL);
+                                            //res.sendRedirect(surveysURL);
+                                            res.sendRedirect(timetableURL);
                                         }
 
                                     } catch (IOException e) {
                                         logger.log(Level.SEVERE, "Redirect to MyDetails failed", e);
                                         //JsfUtil.addErrorMessage(e, "Redirect to MyDetails failed");
-
+ 
                                     }
 
                                 } else {

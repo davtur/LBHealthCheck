@@ -140,11 +140,11 @@
     <!--<listener>
         <description>Atmosphere Session Support Listener</description>
         <listener-class>org.atmosphere.cpr.SessionSupport</listener-class>
-    </listener>-->
+    </listener>
     <error-page>
         <exception-type>java.lang.Throwable</exception-type>
         <location>/errorJsf.xhtml</location>
-    </error-page>
+    </error-page>-->
     <error-page>
         <exception-type>javax.faces.application.ViewExpiredException</exception-type>
         <location>/index.xhtml</location>

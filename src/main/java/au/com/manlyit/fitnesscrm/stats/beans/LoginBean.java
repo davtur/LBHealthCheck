@@ -311,8 +311,10 @@ public class LoginBean implements Serializable {
                 request.login(loginId, this.password);
             } catch (ServletException servletException) {
                 String errorMessage = servletException.getMessage();
-                if (errorMessage.contains("already been authenticated")) {
-                    logger.log(Level.INFO, "User Aleady Authenticated - redirecting to landing page.");
+                if (errorMessage.contains("UT010030") == false) {//javax.servlet.ServletException: UT010030: User already logged in
+
+                    logger.log(Level.INFO, "This is request has already been authenticated. User {0} is already logged in  - redirecting to landing page.", loginId);
+
                 } else if (errorMessage.contains("Login failed")) {
                     logger.log(Level.INFO, "Login Failed - Bad username or Password");
                     JsfUtil.addErrorMessage("Login Failed", "Username or Password is incorrect!");

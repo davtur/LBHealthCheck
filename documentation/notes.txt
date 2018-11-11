@@ -1,4 +1,11 @@
 
+
+## solving javax.el.PropertyNotFoundException: Target Unreachable, 'null' returned null
+
+https://stackoverflow.com/questions/30128395/identifying-and-solving-javax-el-propertynotfoundexception-target-unreachable
+
+
+
 ## Install SSL Cert in Wildfly ##
 
 

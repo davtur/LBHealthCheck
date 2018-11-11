@@ -8,6 +8,8 @@ package au.com.manlyit.fitnesscrm.stats.db;
 import au.com.manlyit.fitnesscrm.stats.classes.util.BaseEntity;
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -48,36 +50,37 @@ import org.eclipse.persistence.config.CacheIsolationType;
 @Table(name = "survey_answers")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "SurveyAnswers.findAll", query = "SELECT s FROM SurveyAnswers s"),
+    @NamedQuery(name = "SurveyAnswers.findAll", query = "SELECT s FROM SurveyAnswers s")
+    ,
     @NamedQuery(name = "SurveyAnswers.findById", query = "SELECT s FROM SurveyAnswers s WHERE s.id = :id")})
-public class SurveyAnswers implements  BaseEntity, Serializable {
+public class SurveyAnswers implements BaseEntity, Serializable {
+
     private static final long serialVersionUID = 1L;
+    private static final Logger LOGGER = Logger.getLogger(SurveyAnswers.class.getName());
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "id")
     private Integer id;
-    
+
     @Basic(optional = false)
     @NotNull
     @Lob
     @Size(min = 0, max = 65535)
     @Column(name = "answer")
     private String answer;
-    
+
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "answerId")
     private Collection<SurveyAnswerSubitems> surveyAnswerSubitemsCollection;
-    
-   
-    
+
     @JoinColumn(name = "question_id", referencedColumnName = "id")
     @ManyToOne(optional = false)
     private SurveyQuestions questionId;
-    
+
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     @ManyToOne(optional = false)
     private Customers userId;
-    
+
     @JoinColumn(name = "answerType_id", referencedColumnName = "id")
     @ManyToOne(optional = false)
     private SurveyQuestionTypes answerTypeid;
@@ -103,6 +106,9 @@ public class SurveyAnswers implements  BaseEntity, Serializable {
     }
 
     public String getAnswer() {
+        if (answer == null) {
+            LOGGER.log(Level.WARNING, "answer is NULL");
+        }
         return answer;
     }
 
@@ -119,9 +125,10 @@ public class SurveyAnswers implements  BaseEntity, Serializable {
         this.surveyAnswerSubitemsCollection = surveyAnswerSubitemsCollection;
     }
 
-   
-
     public SurveyQuestions getQuestionId() {
+        if (questionId == null) {
+            LOGGER.log(Level.WARNING, "questionId is NULL");
+        }
         return questionId;
     }
 
@@ -138,6 +145,9 @@ public class SurveyAnswers implements  BaseEntity, Serializable {
     }
 
     public SurveyQuestionTypes getAnswerTypeid() {
+        if (answerTypeid == null) {
+            LOGGER.log(Level.WARNING, "answerTypeid is NULL");
+        }
         return answerTypeid;
     }
 
@@ -169,5 +179,5 @@ public class SurveyAnswers implements  BaseEntity, Serializable {
     public String toString() {
         return "au.com.manlyit.fitnesscrm.stats.db.SurveyAnswers[ id=" + id + " ]";
     }
-    
+
 }

@@ -8,6 +8,8 @@ package au.com.manlyit.fitnesscrm.stats.db;
 import au.com.manlyit.fitnesscrm.stats.classes.util.BaseEntity;
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -51,7 +53,7 @@ import org.eclipse.persistence.config.CacheIsolationType;
     @NamedQuery(name = "SurveyQuestions.findAll", query = "SELECT s FROM SurveyQuestions s"),
     @NamedQuery(name = "SurveyQuestions.findById", query = "SELECT s FROM SurveyQuestions s WHERE s.id = :id")})
 public class SurveyQuestions implements BaseEntity, Serializable {
-
+    private static final Logger LOGGER = Logger.getLogger(SurveyQuestions.class.getName());
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -104,6 +106,9 @@ public class SurveyQuestions implements BaseEntity, Serializable {
     }
 
     public String getQuestion() {
+        if(question == null){
+            LOGGER.log(Level.WARNING, "getQuestion is NULL");
+        }
         return question;
     }
 
@@ -112,6 +117,9 @@ public class SurveyQuestions implements BaseEntity, Serializable {
     }
 
     public SurveyQuestionTypes getQuestionType() {
+        if(questionType == null){
+            LOGGER.log(Level.WARNING, "questionType is NULL");
+        }
         return questionType;
     }
 
@@ -120,6 +128,9 @@ public class SurveyQuestions implements BaseEntity, Serializable {
     }
 
     public Surveys getSurveyId() {
+        if(surveyId == null){
+            LOGGER.log(Level.WARNING, "surveyId is NULL");
+        }
         return surveyId;
     }
 

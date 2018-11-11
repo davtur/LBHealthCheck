@@ -43,8 +43,6 @@ import java.util.Random;
 import java.util.concurrent.Future;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.ejb.TransactionAttribute;
-import static javax.ejb.TransactionAttributeType.REQUIRES_NEW;
 import javax.el.ELException;
 import javax.enterprise.context.SessionScoped;
 import javax.faces.application.FacesMessage;
@@ -58,6 +56,8 @@ import javax.faces.event.ActionEvent;
 import javax.faces.event.ValueChangeEvent;
 import javax.faces.model.SelectItem;
 import javax.faces.validator.ValidatorException;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -293,7 +293,7 @@ public class CustomersController implements Serializable {
             if (cust != null) {
                 lastSelected = current;
                 current = cust;
-                
+
                 selectedGroups = ejbGroupsFacade.getCustomersGroups(cust);
                 customerGroupsList = null;
 
@@ -338,7 +338,7 @@ public class CustomersController implements Serializable {
                 SuppliersController suppliersController = (SuppliersController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "suppliersController");
                 Suppliers sup = null;
                 if (cust.getSuppliersCollection() != null) {
-                    
+
                     if (cust.getSuppliersCollection().size() >= 1) {
                         Iterator<Suppliers> i = cust.getSuppliersCollection().iterator();
                         if (i.hasNext()) {
@@ -348,15 +348,15 @@ public class CustomersController implements Serializable {
                     if (cust.getSuppliersCollection().size() > 1) {
                         LOGGER.log(Level.WARNING, "There should only be one Supplier allocated to one customer. Username = {0}", new Object[]{cust.getUsername()});
                     }
-                    
+
                     if (sup != null) {
                         suppliersController.setSelected(sup);
-                        
+
                     }
                 }
-                
+
                 if (sup == null) {
-                    
+
                     if (isCustomerInRole(cust, "TRAINER")) {
                         LOGGER.log(Level.INFO, "Creating  new supplier details for contractor as it wasn't found in the DB. Contractor username:{0}", new Object[]{cust.getUsername()});
                         sup = new Suppliers(0);
@@ -383,7 +383,7 @@ public class CustomersController implements Serializable {
                     //addQuestionnaireMapItemsToCustomer(cust);
                     LOGGER.log(Level.SEVERE, "The customers questionaire collection is NULL. This shouldn't happen as it is created when the customer is created.", cust.getUsername());
                 }
-                
+
                 if (cust.getProfileImage() == null) {
                     createDefaultCustomerProfilePicture(cust);
                 }
@@ -394,7 +394,7 @@ public class CustomersController implements Serializable {
                 LOGGER.log(Level.INFO, "Setting the selected customer from the customer list tab COMPLETED.");
             }
         } catch (ELException eLException) {
-            LOGGER.log(Level.SEVERE, "Setting the selected customer from the customer list tab failed.",eLException.getMessage());
+            LOGGER.log(Level.SEVERE, "Setting the selected customer from the customer list tab failed.", eLException.getMessage());
         }
     }
 
@@ -1025,6 +1025,55 @@ public class CustomersController implements Serializable {
         }
     }
 
+    /**
+     * Validate the form of an email address.
+     *
+     * <P>
+     * Return <tt>true</tt> only if
+     * <ul>
+     * <li> <tt>aEmailAddress</tt> can successfully construct an
+     * {@link javax.mail.internet.InternetAddress}
+     * <li> when parsed with "@" as delimiter, <tt>aEmailAddress</tt> contains
+     * two tokens which satisfy
+     * {@link hirondelle.web4j.util.Util#textHasContent}.
+     * </ul>
+     *
+     * <P>
+     * The second condition arises since local email addresses, simply of the
+     * form "<tt>albert</tt>", for example, are valid for
+     * {@link javax.mail.internet.InternetAddress}, but almost always undesired.
+     *
+     * @param aEmailAddress
+     * @return
+     */
+    public static boolean isValidEmailAddress(String aEmailAddress) {
+        if (aEmailAddress == null) {
+            return false;
+        }
+        boolean result = true;
+        try {
+            InternetAddress emailAddr = new InternetAddress(aEmailAddress);
+            if (!hasNameAndDomain(aEmailAddress)) {
+                result = false;
+            }
+        } catch (AddressException ex) {
+            result = false;
+        }
+        return result;
+    }
+
+    private static boolean hasNameAndDomain(String aEmailAddress) {
+        String[] tokens = aEmailAddress.split("@");
+        if (tokens.length == 2) {
+            if (tokens[0].trim().isEmpty() == false) {
+                if (tokens[1].trim().isEmpty() == false) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     //lastSelected
     public void cancelCreateDialogue(ActionEvent actionEvent) {
         //setSelected(lastSelected);
@@ -1063,7 +1112,9 @@ public class CustomersController implements Serializable {
     public void createFromSignup(ActionEvent actionEvent) {
         FacesContext context = FacesContext.getCurrentInstance();
         if (context.isValidationFailed() == false) {
-            createFromUnauthenticated("USER", getNewCustomer(), leadComments, getHttpServletRequestFromFacesContext(), false);
+            Customers c = getNewCustomer();
+            c.setUsername(c.getEmailAddress());
+            createFromUnauthenticated("USER",c , leadComments, getHttpServletRequestFromFacesContext(), false);
         } else {
             JsfUtil.addErrorMessage("Error", configMapFacade.getConfig("SignUpValidationFailed"));
         }
@@ -1896,8 +1947,8 @@ public class CustomersController implements Serializable {
 
         // invalidate session
         ExternalContext ec = fc.getExternalContext();
-       // HttpSession session = (HttpSession) ec.getSession(false);
-        HttpServletRequest req = (HttpServletRequest)ec.getRequest();
+        // HttpSession session = (HttpSession) ec.getSession(false);
+        HttpServletRequest req = (HttpServletRequest) ec.getRequest();
         //session.invalidate();
         try {
             req.logout();
@@ -2335,6 +2386,27 @@ public class CustomersController implements Serializable {
             String newVal = (String) o;
             newVal = newVal.trim();
             updateUsername(null, newVal, current);
+
+        }
+    }
+
+    public void dialogueEmailListener(ValueChangeEvent vce) {        Object o = vce.getNewValue();
+        if (o.getClass().equals(String.class)) {
+            String newVal = (String) o;
+            newVal = newVal.trim();
+            boolean isValidEmail = isValidEmailAddress(newVal);
+
+            if (isValidEmail == true) {
+                Customers cust = getFacade().findCustomerByEmail(newVal);
+                if (cust != null) {
+                    setAddUserButtonDisabled(true);
+                    JsfUtil.addErrorMessage("Error", "The email:" + newVal + " is already in use!");
+                } else {
+                    setAddUserButtonDisabled(false);
+                }
+            } else {
+                setAddUserButtonDisabled(true);
+            }
 
         }
     }

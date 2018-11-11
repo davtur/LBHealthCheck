@@ -131,7 +131,19 @@ public class CustomersFacade extends AbstractFacade<Customers> {
             if (DEBUG) {
                 debug(q);
             }
-            cm = (Customers) q.getSingleResult();
+            
+            
+             int size = q.getResultList().size();
+            if (size == 1) {
+                cm = (Customers) q.getSingleResult();
+            } else if (size == 0) {
+                LOGGER.log(Level.WARNING, "Customers findCustomerByEmail, Email not found :  {0}", new Object[]{email, size});
+            } else if (size > 1) {
+                LOGGER.log(Level.SEVERE, "Customers findCustomerByEmail, Duplicate Email's found  {0}. The number of duplicates is {1}", new Object[]{email, size});
+                cm = (Customers) q.getResultList().get(0);
+            }
+            
+            
         } catch (Exception e) {
             LOGGER.log(Level.INFO, "Customer not found:{0}", email);
         }
