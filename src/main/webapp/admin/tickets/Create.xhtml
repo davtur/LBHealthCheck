@@ -1,0 +1,50 @@
+
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                >
+    <p:dialog id="TicketsCreateDlg" widgetVar="TicketsCreateDialog" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('CreateTicketsTitle')}">
+
+        <h:form id="TicketsCreateForm">
+            <h:panelGroup id="display">
+                <p:panelGrid columns="2" rendered="#{ticketsController.selected != null}">
+                    <p:outputLabel value="#{configMapController.getKey('CreateTicketsLabel_id')}" for="id" />
+                    <p:inputText id="id" value="#{ticketsController.selected.id}" title="#{configMapController.getKey('CreateTicketsTitle_id')}" required="true" requiredMessage="#{configMapController.getKey('CreateTicketsRequiredMessage_id')}"/>
+                    <p:outputLabel value="#{configMapController.getKey('CreateTicketsLabel_itemType')}" for="itemType" />
+                    <p:inputText id="itemType" value="#{ticketsController.selected.itemType}" title="#{configMapController.getKey('CreateTicketsTitle_itemType')}" required="true" requiredMessage="#{configMapController.getKey('CreateTicketsRequiredMessage_itemType')}"/>
+                    <p:outputLabel value="#{configMapController.getKey('CreateTicketsLabel_datePurchased')}" for="datePurchased" />
+
+
+                    <p:calendar id="datePurchased" pattern="MM/dd/yyyy HH:mm:ss"  value="#{ticketsController.selected.datePurchased}"  title="#{configMapController.getKey('CreateTicketsTitle_datePurchased')}" required="true" requiredMessage="#{configMapController.getKey('CreateTicketsRequiredMessage_datePurchased')}">
+                        <p:ajax event="dateSelect" listener="#{ticketsController.handleDateSelect}" update=":TicketsCreateForm" />
+                    </p:calendar>
+                    <p:outputLabel value="#{configMapController.getKey('CreateTicketsLabel_dateUsed')}" for="dateUsed" />
+
+
+                    <p:calendar id="dateUsed" pattern="MM/dd/yyyy HH:mm:ss"  value="#{ticketsController.selected.dateUsed}"  title="#{configMapController.getKey('CreateTicketsTitle_dateUsed')}" >
+                        <p:ajax event="dateSelect" listener="#{ticketsController.handleDateSelect}" update=":TicketsCreateForm" />
+                    </p:calendar>
+                    <p:outputLabel value="#{configMapController.getKey('CreateTicketsLabel_validFrom')}" for="validFrom" />
+
+
+                    <p:calendar id="validFrom" pattern="MM/dd/yyyy HH:mm:ss"  value="#{ticketsController.selected.validFrom}"  title="#{configMapController.getKey('CreateTicketsTitle_validFrom')}" >
+                        <p:ajax event="dateSelect" listener="#{ticketsController.handleDateSelect}" update=":TicketsCreateForm" />
+                    </p:calendar>
+                    <p:outputLabel value="#{configMapController.getKey('CreateTicketsLabel_expires')}" for="expires" />
+
+
+                    <p:calendar id="expires" pattern="MM/dd/yyyy HH:mm:ss"  value="#{ticketsController.selected.expires}"  title="#{configMapController.getKey('CreateTicketsTitle_expires')}" >
+                        <p:ajax event="dateSelect" listener="#{ticketsController.handleDateSelect}" update=":TicketsCreateForm" />
+                    </p:calendar>
+                </p:panelGrid>
+                <p:commandButton actionListener="#{ticketsController.createDialogue}" value="#{configMapController.getKey('Save')}" update="display,:TicketsListForm:datalist,:growl" oncomplete="handleSubmit(args,'TicketsCreateDialog');PF('ticketsControllerTable').filter()"/>
+                <p:commandButton value="#{configMapController.getKey('Cancel')}" onclick="PF('TicketsCreateDialog').hide()"/>
+            </h:panelGroup>
+        </h:form>
+    </p:dialog>
+
+</ui:composition>    
+<p> Generated from template ( JSF_from_entity_wizard/StandardJSF/create.ftl  )- Dave 23rd October 2015 </p>
+

@@ -5,14 +5,17 @@ import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PaginationHelper;
 import au.com.manlyit.fitnesscrm.stats.beans.SessionTimetableFacade;
 import au.com.manlyit.fitnesscrm.stats.classes.util.CrmScheduleEvent;
+import au.com.manlyit.fitnesscrm.stats.classes.util.FutureMapEJB;
 import au.com.manlyit.fitnesscrm.stats.classes.util.TimetableRows;
 import au.com.manlyit.fitnesscrm.stats.classes.util.TimetableScheduleEvent;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import au.com.manlyit.fitnesscrm.stats.db.Participants;
+import au.com.manlyit.fitnesscrm.stats.db.Plan;
 import au.com.manlyit.fitnesscrm.stats.db.Schedule;
 import au.com.manlyit.fitnesscrm.stats.db.SessionBookings;
 import au.com.manlyit.fitnesscrm.stats.db.SessionHistory;
 import au.com.manlyit.fitnesscrm.stats.db.SessionTrainers;
+import au.com.manlyit.fitnesscrm.stats.db.Tickets;
 import java.io.IOException;
 
 import java.io.Serializable;
@@ -61,6 +64,7 @@ public class SessionTimetableController implements Serializable {
     private static final long serialVersionUID = 1L;
     private static final Logger LOGGER = Logger.getLogger(SessionTimetableController.class.getName());
     private static final int DAYS_AHEAD_TO_POPULATE_TIMETABLE = 90;
+   
     private SessionTimetable current;
     private SessionTimetable selectedForDeletion;
     private SessionHistory selectedTimetableSession;
@@ -70,9 +74,12 @@ public class SessionTimetableController implements Serializable {
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.SessionBookingsFacade ejbSessionBookingsFacade;
     @Inject
+    private au.com.manlyit.fitnesscrm.stats.beans.CustomersFacade ejbCustomersFacade;
+    @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.SessionHistoryFacade sessionHistoryFacade;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade configMapFacade;
+   
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.ScheduleFacade ejbScheduleFacade;
     private PaginationHelper pagination;
@@ -651,7 +658,7 @@ public class SessionTimetableController implements Serializable {
     public void editDialogue() {
         getFacade().edit(current);
         JsfUtil.addSuccessMessage(configMapFacade.getConfig("SessionTimetableUpdated"));
-        
+
     }
 
     public String update() {
@@ -902,6 +909,7 @@ public class SessionTimetableController implements Serializable {
         }
     }
 
+    
     public void purchaseSession() {
         LOGGER.log(Level.INFO, "Purchase Session button clicked.");
         FacesContext context = FacesContext.getCurrentInstance();
@@ -918,8 +926,7 @@ public class SessionTimetableController implements Serializable {
         sb.setCustomerId(c);
 
         // is the customer already set up in the payment gateway ?
-        String paymentGatewayStatusDescription = c.getPaymentParametersId().getStatusDescription();
-        if (paymentGatewayStatusDescription == null || paymentGatewayStatusDescription.contains("Cancelled")) {
+        if (c.getPaymentParametersId() == null || c.getPaymentParametersId().getStatusDescription() == null || c.getPaymentParametersId().getStatusDescription().contains("Cancelled")) {
             try {
                 // no they are not setup so redirect to ezidebit signup form
                 sb.setStatus("PURCHASE-SIGNUP");
@@ -940,7 +947,7 @@ public class SessionTimetableController implements Serializable {
             // TODO need to check the call back from ezidebit to add the payment id to the booking
         } else {
             try {
-                if (paymentGatewayStatusDescription.contains("Active") || paymentGatewayStatusDescription.contains("New")) {
+                if (c.getPaymentParametersId().getStatusDescription().contains("Active") || c.getPaymentParametersId().getStatusDescription().contains("New")) {
                     // customer is set up just add a payment
                     LOGGER.log(Level.INFO, "purchaseSession, customer  {0}  active in payment gateway - adding payment", c.getUsername());
 
@@ -949,7 +956,7 @@ public class SessionTimetableController implements Serializable {
                     sb.setStatus("PURCHASE-ACTIVE");
                     sb.setStatusDescription("A new payment is being added for an existing customer");
 
-                } else if (paymentGatewayStatusDescription.contains("Hold")) {
+                } else if (c.getPaymentParametersId().getStatusDescription().contains("Hold")) {
                     // customer is on hold notify them to contact staff and redirect customer to instant payment page
                     // if we just take them off hold without comfirmation their regular payemts may restart
 
@@ -958,7 +965,7 @@ public class SessionTimetableController implements Serializable {
                     sb.setStatus("PURCHASE-HOLD");
                     sb.setStatusDescription("The purchase via Direct debit failed as the customer is On-Hold");
 
-                } else if (paymentGatewayStatusDescription.contains("Waiting Bank Details")) {
+                } else if (c.getPaymentParametersId().getStatusDescription().contains("Waiting Bank Details")) {
                     // the customer has not set up their payment method
                     // notify them to contact staff or redirect to instant payment page
                     LOGGER.log(Level.WARNING, "purchaseSession, Customer {0} is Waiting Bank Details", c.getUsername());
@@ -967,10 +974,10 @@ public class SessionTimetableController implements Serializable {
                     sb.setStatusDescription("The purchase via Direct debit failed as the customer has not completed their payment method - Waiting Bank Details");
                 } else {
                     // an unkown status is present log an error and redirect customer to instant payment page
-                    LOGGER.log(Level.SEVERE, "purchaseSession, Customer {0} is in an unknown status:{1}", new Object[]{c.getUsername(), paymentGatewayStatusDescription});
-                    JsfUtil.addSuccessMessage(configMapFacade.getConfig("purchaseSessionDirectDebitPaymentProcessingFailedUnknown" + paymentGatewayStatusDescription));
+                    LOGGER.log(Level.SEVERE, "purchaseSession, Customer {0} is in an unknown status:{1}", new Object[]{c.getUsername(), c.getPaymentParametersId().getStatusDescription()});
+                    JsfUtil.addSuccessMessage(configMapFacade.getConfig("purchaseSessionDirectDebitPaymentProcessingFailedUnknown" + c.getPaymentParametersId().getStatusDescription()));
                     sb.setStatus("PURCHASE-FAIL");
-                    sb.setStatusDescription("The purchase via Direct debit failed as the customer is in an unknown status: " + paymentGatewayStatusDescription);
+                    sb.setStatusDescription("The purchase via Direct debit failed as the customer is in an unknown status: " + c.getPaymentParametersId().getStatusDescription());
                 }
                 //persist sb
                 ejbSessionBookingsFacade.create(sb);

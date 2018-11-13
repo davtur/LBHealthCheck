@@ -513,3 +513,22 @@ CREATE TABLE `notifications_log` (
   KEY `notifications_log_FK_1` (`customer`),
   CONSTRAINT `notifications_log_FK_1` FOREIGN KEY (`customer`) REFERENCES `customers` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
+
+
+CREATE TABLE `tickets` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `customer` int(11) DEFAULT NULL,
+  `session_type` int(11) NOT NULL,
+  `date_purchased` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_used` datetime DEFAULT NULL,
+  `valid_from` datetime DEFAULT NULL,
+  `expires` datetime DEFAULT NULL,
+  `session_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `tickets_FK_1` (`customer`),
+  KEY `tickets_FK_2` (`session_id`),
+  KEY `fk_tickets_1_idx` (`session_type`),
+  CONSTRAINT `fk_tickets_1` FOREIGN KEY (`session_type`) REFERENCES `session_types` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT `tickets_FK_1` FOREIGN KEY (`customer`) REFERENCES `customers` (`id`),
+  CONSTRAINT `tickets_FK_2` FOREIGN KEY (`session_id`) REFERENCES `session_history` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;

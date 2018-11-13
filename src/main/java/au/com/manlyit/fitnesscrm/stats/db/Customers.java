@@ -156,6 +156,8 @@ public class Customers implements BaseEntity, Serializable {
     private Collection<QuestionnaireMap> questionnaireMapCollection;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "customerId")
     private Collection<SessionBookings> sessionBookingsCollection;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "customer")
+    private Collection<Tickets> ticketsCollection;
     @Column(name = "terms_conditions_accepted")
     private Boolean termsConditionsAccepted;
     @Column(name = "last_login_time")
@@ -743,6 +745,17 @@ public class Customers implements BaseEntity, Serializable {
 
     public void setNotificationsLogCollection(Collection<NotificationsLog> notificationsLogCollection) {
         this.notificationsLogCollection = notificationsLogCollection;
+    }
+
+    
+    @XmlTransient
+    public Collection<Tickets> getTicketsCollection() {
+        return ticketsCollection;
+    }
+
+   
+    public void setTicketsCollection(Collection<Tickets> ticketsCollection) {
+        this.ticketsCollection = ticketsCollection;
     }
 
     

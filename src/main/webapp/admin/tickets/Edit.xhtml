@@ -1,0 +1,41 @@
+
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                >
+
+    <p:dialog id="TicketsEditDlg" widgetVar="TicketsEditDialog" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('EditTicketsTitle')}">
+        <h:form id="TicketsEditForm">
+            <h:panelGroup id="display">
+                <p:panelGrid columns="2" rendered="#{ticketsController.selected != null}">
+                    <h:outputLabel value="#{configMapController.getKey('EditTicketsLabel_id')}" for="id" />
+                    <h:inputText id="id"  value="#{ticketsController.selected.id}" title="#{configMapController.getKey('EditTicketsTitle_id')}" required="true" requiredMessage="#{configMapController.getKey('EditTicketsRequiredMessage_id')}"/>
+                    <h:outputLabel value="#{configMapController.getKey('EditTicketsLabel_itemType')}" for="itemType" />
+                    <h:inputText id="itemType"  value="#{ticketsController.selected.itemType}" title="#{configMapController.getKey('EditTicketsTitle_itemType')}" required="true" requiredMessage="#{configMapController.getKey('EditTicketsRequiredMessage_itemType')}"/>
+                    <h:outputLabel value="#{configMapController.getKey('EditTicketsLabel_datePurchased')}" for="datePurchased" />
+                    <h:inputText id="datePurchased" value="#{ticketsController.selected.datePurchased}" title="#{configMapController.getKey('EditTicketsTitle_datePurchased')}" required="true" requiredMessage="#{configMapController.getKey('EditTicketsRequiredMessage_datePurchased')}">
+                        <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                    </h:inputText>
+                    <h:outputLabel value="#{configMapController.getKey('EditTicketsLabel_dateUsed')}" for="dateUsed" />
+                    <h:inputText id="dateUsed" value="#{ticketsController.selected.dateUsed}" title="#{configMapController.getKey('EditTicketsTitle_dateUsed')}" >
+                        <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                    </h:inputText>
+                    <h:outputLabel value="#{configMapController.getKey('EditTicketsLabel_validFrom')}" for="validFrom" />
+                    <h:inputText id="validFrom" value="#{ticketsController.selected.validFrom}" title="#{configMapController.getKey('EditTicketsTitle_validFrom')}" >
+                        <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                    </h:inputText>
+                    <h:outputLabel value="#{configMapController.getKey('EditTicketsLabel_expires')}" for="expires" />
+                    <h:inputText id="expires" value="#{ticketsController.selected.expires}" title="#{configMapController.getKey('EditTicketsTitle_expires')}" >
+                        <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                    </h:inputText>
+                </p:panelGrid>
+                <p:commandButton actionListener="#{ticketsController.update}" value="#{configMapController.getKey('Save')}" update="display,:TicketsListForm:datalist,:growl" oncomplete="handleSubmit(args, 'TicketsEditDialog');PF('ticketsControllerTable').filter()"/>
+                <p:commandButton value="#{configMapController.getKey('Cancel')}" onclick="PF('TicketsEditDialog').hide()"/>
+            </h:panelGroup>
+        </h:form>
+    </p:dialog>
+
+</ui:composition>
+

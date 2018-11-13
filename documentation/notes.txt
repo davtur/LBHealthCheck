@@ -1,4 +1,9 @@
 
+## loading resources
+## the file must be in src/main/resources/  i.e. if I wanted to load a file called src/main.resources/images/foo.jpg i would pass /images/foo.jpg to getResourceAsStream("/images/foo.jpg")
+                                
+##                                InputStream resourceContent = this.getClass().getResourceAsStream(placeholderImage);
+
 
 ## solving javax.el.PropertyNotFoundException: Target Unreachable, 'null' returned null
 

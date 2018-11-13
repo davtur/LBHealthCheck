@@ -6,6 +6,7 @@ import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.beans.CustomersFacade;
 import au.com.manlyit.fitnesscrm.stats.beans.LoginBean;
+import static au.com.manlyit.fitnesscrm.stats.beans.LoginBean.generateUniqueToken;
 import au.com.manlyit.fitnesscrm.stats.beans.PaymentsFacade;
 import au.com.manlyit.fitnesscrm.stats.chartbeans.MySessionsChart1;
 import au.com.manlyit.fitnesscrm.stats.classes.util.CustomersLazyLoadingDataModel;
@@ -14,6 +15,9 @@ import au.com.manlyit.fitnesscrm.stats.classes.util.EmailValidator;
 import au.com.manlyit.fitnesscrm.stats.classes.util.FutureMapEJB;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PfSelectableDataModel;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PhoneNumberValidator;
+import au.com.manlyit.fitnesscrm.stats.classes.util.StringEncrypter;
+import au.com.manlyit.fitnesscrm.stats.db.Activation;
+import au.com.manlyit.fitnesscrm.stats.db.CustomerImages;
 import au.com.manlyit.fitnesscrm.stats.db.CustomerState;
 import au.com.manlyit.fitnesscrm.stats.db.Groups;
 import au.com.manlyit.fitnesscrm.stats.db.Notes;
@@ -23,9 +27,22 @@ import au.com.manlyit.fitnesscrm.stats.db.Plan;
 import au.com.manlyit.fitnesscrm.stats.db.QuestionnaireMap;
 import au.com.manlyit.fitnesscrm.stats.db.Suppliers;
 import au.com.manlyit.fitnesscrm.stats.db.Surveys;
+import au.com.manlyit.fitnesscrm.stats.webservices.CustomerDetails;
+import java.awt.AlphaComposite;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
+import java.net.URLEncoder;
+import static java.security.AccessController.getContext;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -56,8 +73,10 @@ import javax.faces.event.ActionEvent;
 import javax.faces.event.ValueChangeEvent;
 import javax.faces.model.SelectItem;
 import javax.faces.validator.ValidatorException;
+import javax.imageio.ImageIO;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -114,6 +133,8 @@ public class CustomersController implements Serializable {
     private CustomerState selectedForImpersonation;
     private boolean impersonationOn;
     private Notes selectedNoteForDeletion;
+    private static final int NEW_HEIGHT = 500;// must match panelheight on gallery component
+    private static final int PROFILE_PIC_HEIGHT_IN_PIX = 100;
     private static final String paymentGateway = "EZIDEBIT";
     //private CustomerState[] selectedCustomerStates;
     private List<CustomerState> selectedCustomerStates;
@@ -152,6 +173,8 @@ public class CustomersController implements Serializable {
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.CustomerStateFacade ejbCustomerStateFacade;
     @Inject
+    private au.com.manlyit.fitnesscrm.stats.beans.CustomerImagesFacade customerImagesFacade;
+    @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.CustomerAuthFacade ejbCustomerAuthFacade;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.NotesFacade ejbNotesFacade;
@@ -161,6 +184,8 @@ public class CustomersController implements Serializable {
     private au.com.manlyit.fitnesscrm.stats.beans.PaymentParametersFacade ejbPaymentParametersFacade;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.AuditLogFacade ejbAuditLogFacade;
+    @Inject
+    private au.com.manlyit.fitnesscrm.stats.beans.ActivationFacade ejbActivationFacade;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.PreferedContactFacade ejbPreferedContactFacade;
     @Inject
@@ -209,6 +234,7 @@ public class CustomersController implements Serializable {
     private boolean signupFormSubmittedOK = false;
     private CustomersLazyLoadingDataModel<Customers> lazyModel;
     private static final Logger LOGGER = Logger.getLogger(CustomersController.class.getName());
+    private final StringEncrypter encrypter = new StringEncrypter("(lqKdh^Gr$2F^KJHG654)");
 
     public CustomersController() {
     }
@@ -317,7 +343,8 @@ public class CustomersController implements Serializable {
                 FacesContext context = FacesContext.getCurrentInstance();
                 EziDebitPaymentGateway controller = (EziDebitPaymentGateway) context.getApplication().getELResolver().getValue(context.getELContext(), null, "ezidebit");
                 //controller.setSelectedCustomer(cust);
-                controller.setCurrentCustomerDetails(null);
+                CustomerDetails cd1 = null;
+                controller.setCurrentCustomerDetails(cd1);
                 controller.clearCustomerProvisionedInPaymentGW();
                 controller.setRefreshIFrames(true);
                 futureMap.cancelFutures(controller.getSessionId());
@@ -550,11 +577,14 @@ public class CustomersController implements Serializable {
             notesItems = null;
 
             //als.add("growl");
-            PrimeFaces rc = PrimeFaces.current();
-            if (rc != null) {
-                ArrayList<String> als = new ArrayList<>();
-                als.add("@(.updateNotesDataTable)");
-                rc.ajax().update(als);
+            FacesContext fc = FacesContext.getCurrentInstance();// check this isnt originating from a web service call with no faces context.
+            if (fc != null) {
+                PrimeFaces rc = PrimeFaces.current();
+                if (rc != null) {
+                    ArrayList<String> als = new ArrayList<>();
+                    als.add("@(.updateNotesDataTable)");
+                    rc.ajax().update(als);
+                }
             }
             //  PrimeFaces.current().ajax().update("@(.updateNotesDataTable)");
         } catch (Exception e) {
@@ -983,10 +1013,169 @@ public class CustomersController implements Serializable {
     }
 
     private void createDefaultCustomerProfilePicture(Customers c) {
-        FacesContext context = FacesContext.getCurrentInstance();
-        CustomerImagesController custImageCon = context.getApplication().evaluateExpressionGet(context, "#{customerImagesController}", CustomerImagesController.class);
-        custImageCon.createDefaultProfilePic(c);
+        //FacesContext context = FacesContext.getCurrentInstance();
+        //CustomerImagesController custImageCon = context.getApplication().evaluateExpressionGet(context, "#{customerImagesController}", CustomerImagesController.class);
+        // custImageCon.createDefaultProfilePic(c);
+        createDefaultProfilePic(c);
 
+    }
+
+    protected void createDefaultProfilePic(Customers cust) {
+        if (cust.getCustomerImagesCollection() != null && cust.getCustomerImagesCollection().isEmpty() == true) {
+            String placeholderImage = configMapFacade.getConfig("system.default.profile.image");
+            String fileExtension = placeholderImage.substring(placeholderImage.lastIndexOf(".")).toLowerCase();
+            int imgType = -1;
+            if (fileExtension.contains("jpeg") || fileExtension.contains("jpg")) {
+                imgType = 2;
+                fileExtension = "jpeg";
+            }
+            if (fileExtension.contains("png")) {
+                imgType = 1;
+                fileExtension = "png";
+            }
+            if (fileExtension.contains("gif")) {
+                imgType = 0;
+                fileExtension = "gif";
+            }
+            if (imgType == -1) {
+                LOGGER.log(Level.WARNING, "createDefaultProfilePic , Cannot add default profile pic for customer {1} due the picture not being in jpeg, gif or png. resource:{0}", new Object[]{placeholderImage, cust.getUsername()});
+                return;
+            }
+            if (cust != null) {
+                if (cust.getProfileImage() == null) {
+                    CustomerImages ci;
+                    BufferedImage img;
+                    BufferedImage scaledImg = null;
+                    //InputStream stream;
+                    try {
+                        ci = new CustomerImages(0);
+                        ci.setMimeType("image/jpeg");
+                        ci.setImageFileName("defaultProfilePic.jpg");
+                        ci.setImageDescription("Default Avatar");
+                        img = null;
+                        //FacesContext context =  FacesContext.getCurrentInstance();
+                        //String servPath = context.getExternalContext().getRequestServletPath() + placeholderImage;
+                        //stream = FacesContext.getCurrentInstance().getExternalContext().getResourceAsStream(servPath) ;
+                        try {
+                            //img = ImageIO.read(stream);
+                            //InputStream stream = FacesContext.getCurrentInstance().getExternalContext().getResourceAsStream(placeholderImage);
+                            //img = ImageIO.read(new URL(placeholderImage));
+                            //img = ImageIO.read(stream);
+                            try {
+
+                                //InputStream resourceContent = this.getClass().getResourceAsStream("/WEB-INF/test/foo.txt");
+                                // the file must be in src/main/resources/  i.e. if I wanted to load a file called src/main.resources/images/foo.jpg i would pass /images/foo.jpg to getResourceAsStream("/images/foo.jpg")
+                                InputStream resourceContent = this.getClass().getResourceAsStream(placeholderImage);
+                                if (resourceContent == null) {
+                                    Logger.getLogger(CustomerImagesController.class.getName()).log(Level.SEVERE, "createDefaultProfilePic, Loading image into buffer error!!", placeholderImage);
+                                }
+
+                                //img = ImageIO.read(getClass().getResource(placeholderImage));
+                                img = ImageIO.read(resourceContent);
+                            } catch (IOException ex) {
+                                if (ex.getCause().getClass() == FileNotFoundException.class) {
+                                    Logger.getLogger(CustomerImagesController.class.getName()).log(Level.SEVERE, "createDefaultProfilePic, File not found!!: {0}", placeholderImage);
+
+                                } else {
+                                    Logger.getLogger(CustomerImagesController.class.getName()).log(Level.SEVERE, "createDefaultProfilePic, Loading image into buffer error!!", ex);
+                                }
+                            }
+
+                            scaledImg = resizeImageWithHintKeepAspect(img, 0, NEW_HEIGHT);// use a 0 for heigh or width to keep aspect
+                        } catch (Exception e) {
+
+                            Logger.getLogger(CustomerImagesController.class.getName()).log(Level.SEVERE, "createDefaultProfilePic, Loading image into buffer error!!", e);
+
+                        }
+                        // img = resizeImageWithHintKeepAspect(img, 0, PROFILE_PIC_HEIGHT_IN_PIX);
+                        // ByteArrayOutputStream os = new ByteArrayOutputStream();
+                        // try {
+                        //      ImageIO.write(img, fileExtension, os);
+                        //  } catch (IOException ex) {
+                        //       Logger.getLogger(CustomerImagesController.class.getName()).log(Level.SEVERE, "createDefaultProfilePic, write image  error!!", ex);
+                        //   }
+
+                        ci.setImage(convertBufferedImageToByteArray(scaledImg, fileExtension));
+                        ci.setImageType(imgType);
+                        ci.setCustomers(cust);
+                        ci.setCustomerId(cust);
+                        ci.setDatetaken(new Date());
+
+                        customerImagesFacade.create(ci);
+                        cust.setProfileImage(ci);
+                        ejbFacade.edit(cust);
+                    } catch (Exception e) {
+                        LOGGER.log(Level.WARNING, "createDefaultProfilePic , Cannot add default profile pic for customer {1} due to an exception:{0}", new Object[]{e, cust.getUsername()});
+
+                    }
+                }
+            } else {
+                LOGGER.log(Level.WARNING, "createDefaultProfilePic ERROR, Cannot add default profile pic to a null customer object");
+            }
+        }
+    }
+
+    private static BufferedImage resizeImageWithHintKeepAspect(BufferedImage originalImage, int newWidth, int newHeight) {
+        int type = originalImage.getType() == 0 ? BufferedImage.TYPE_INT_ARGB : originalImage.getType();
+        float w = originalImage.getWidth();
+        float h = originalImage.getHeight();
+        int height = newHeight;
+        int width = newWidth;
+
+        if (newWidth == 0 && newHeight == 0) {
+            return originalImage;
+        }
+        // if we want to keep aspect we can only use height or width - the one not used should be set to 0
+        if (newWidth == 0 && newHeight > 0) {
+            float aspectWidth = ((float) newHeight / h) * w;
+            width = Math.round(aspectWidth);
+        }
+        if (newWidth > 0 && newHeight == 0) {
+            float aspectHeight = ((float) newWidth / w) * h;
+            height = Math.round(aspectHeight);
+            width = newWidth;
+        }
+
+        BufferedImage resizedImage = new BufferedImage(width, height, type);
+        Graphics2D g = resizedImage.createGraphics();
+        g.setComposite(AlphaComposite.Src);
+        g.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
+                RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        g.setRenderingHint(RenderingHints.KEY_RENDERING,
+                RenderingHints.VALUE_RENDER_QUALITY);
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                RenderingHints.VALUE_ANTIALIAS_ON);
+        g.drawImage(originalImage, 0, 0, width, height, null);
+        g.dispose();
+
+        return resizedImage;
+    }
+
+    private byte[] convertBufferedImageToByteArray(BufferedImage img, String fileType) {
+        byte[] ba = null;
+        String type = "---";
+        try {
+            for (String writerName : ImageIO.getWriterFormatNames()) {
+                if (fileType.toLowerCase().contains(writerName.toLowerCase())) {
+                    type = writerName;
+                    //logger.log(Level.INFO, "Using IMage IO writer name : {0}", type);
+                }
+            }
+            if (type.contains("---")) {
+                type = "jpeg";
+                LOGGER.log(Level.INFO, "Using DEFAULT Image IO writer name : {0}, attempted type: {1}", new Object[]{type, fileType});
+            }
+            try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
+                ImageIO.write(img, type, os);
+                ba = os.toByteArray();
+            } catch (Exception ex) {
+                Logger.getLogger(CustomerImagesController.class.getName()).log(Level.SEVERE, null, ex);
+                JsfUtil.addErrorMessage(ex, "Update image error!!");
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "convertBufferedImageToByteArray method failed", e);
+        }
+        return ba;
     }
 
     public String create() {
@@ -1100,13 +1289,15 @@ public class CustomersController implements Serializable {
         FacesContext context = FacesContext.getCurrentInstance();
         if (context.isValidationFailed() == false) {
             createFromUnauthenticated("LEAD", getNewCustomer(), leadComments, getHttpServletRequestFromFacesContext(), false);
+
         } else {
             JsfUtil.addErrorMessage("Error", configMapFacade.getConfig("SignUpValidationFailed"));
         }
     }
 
     public void createLeadFromWebservice(Customers c, String message, HttpServletRequest request) {
-        createFromUnauthenticated("LEAD", c, message, request, true);
+        //createFromUnauthenticated("LEAD", c, message, request, true);
+        createFromUnauthenticated("USER", c, message, request, true);
     }
 
     public void createFromSignup(ActionEvent actionEvent) {
@@ -1114,7 +1305,7 @@ public class CustomersController implements Serializable {
         if (context.isValidationFailed() == false) {
             Customers c = getNewCustomer();
             c.setUsername(c.getEmailAddress());
-            createFromUnauthenticated("USER",c , leadComments, getHttpServletRequestFromFacesContext(), false);
+            createFromUnauthenticated("USER", c, leadComments, getHttpServletRequestFromFacesContext(), false);
         } else {
             JsfUtil.addErrorMessage("Error", configMapFacade.getConfig("SignUpValidationFailed"));
         }
@@ -1149,13 +1340,13 @@ public class CustomersController implements Serializable {
             c.setId(0);
             Groups grp = new Groups(0, group);
             //Check if they already Exist
-            Customers custCheck = ejbFacade.findCustomerByName(c.getFirstname().trim(), c.getLastname().trim());
+            Customers custCheck = ejbFacade.findCustomerByEmail(c.getEmailAddress().trim());
             if (custCheck != null) {
                 sendNotificationEmail(c, grp, "system.email.notification.template", "New LEAD from website, customer already exists in DB. They may be cancelled or on-hold.", message);
             } else if (group.contains("LEAD")) {
                 // new lead from contact form
 
-                c.setUsername(getUniqueUsername(c.getFirstname().trim() + "." + c.getLastname().trim()));
+                c.setUsername(c.getEmailAddress().trim());
                 getFacade().createAndFlushForGeneratedIdEntities(c);
                 createDefaultPaymentParametersFromDetached(c.getId());
                 //createDefaultPaymentParameters(c); 
@@ -1187,8 +1378,9 @@ public class CustomersController implements Serializable {
 
             } else {
                 // new signup
-                // this cant be done from teh webservice due to contect lookup below
-                getFacade().create(c);
+                // this cant be done from the webservice due to contect lookup below
+                c.setUsername(c.getEmailAddress().trim());
+                getFacade().createAndFlushForGeneratedIdEntities(c);
                 grp.setUsername(c);
                 List<Groups> gl = new ArrayList<>();
                 gl.add(grp);
@@ -1197,19 +1389,24 @@ public class CustomersController implements Serializable {
                 //ejbGroupsFacade.create(grp);
                 createDefaultCustomerProfilePicture(c);
                 String details = "Name: " + c.getFirstname() + ", Email:" + c.getEmailAddress() + ", Phone:" + c.getTelephone() + ", Username:" + c.getUsername() + ", Group:" + group + ", IP Address:" + ipAddress + ".Customer Onboard email sent";
-                FacesContext context = FacesContext.getCurrentInstance();
+                //FacesContext context = FacesContext.getCurrentInstance();
                 //SurveysController surveyCon = context.getApplication().evaluateExpressionGet(context, "#{surveysController}", SurveysController.class);
                 // SurveysController surveyCon = (SurveysController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "surveysController");
-                LoginBean controller = (LoginBean) context.getApplication().getELResolver().getValue(context.getELContext(), null, "loginBean");
-                controller.doPasswordReset("system.email.admin.onboardcustomer.template", c, configMapFacade.getConfig("sendCustomerOnBoardEmailEmailSubject"));
+                //LoginBean controller = (LoginBean) context.getApplication().getELResolver().getValue(context.getELContext(), null, "loginBean");
+                //controller.doPasswordReset("system.email.admin.onboardcustomer.template", c, configMapFacade.getConfig("sendCustomerOnBoardEmailEmailSubject"));
+                doPasswordResetFromWebserviceCall("system.email.admin.onboardcustomer.template", c, configMapFacade.getConfig("sendCustomerOnBoardEmailEmailSubject"));
                 createCombinedAuditLogAndNote(c, c, "New Sign Up", details, "Did Not Exist", "New Lead");
                 LOGGER.log(Level.INFO, "createFromSignup: {0}", new Object[]{details});
-                PrimeFaces.current().executeScript("PF('signupDialog').hide();");
-                JsfUtil.addSuccessMessage("Info", configMapFacade.getConfig("SignUpSuccessfulFailed"));
-                setSignupFormSubmittedOK(true);
+                if (isWebserviceCall == false) {
+                    PrimeFaces.current().executeScript("PF('signupDialog').hide();");
+                    JsfUtil.addSuccessMessage("Info", configMapFacade.getConfig("SignUpSuccessfulFailed"));
+                    setSignupFormSubmittedOK(true);
+                } else {
+                    LOGGER.log(Level.INFO, configMapFacade.getConfig("SignUpSuccessfulFailed"));
+                }
                 PaymentParameters pp = getCustomersPaymentParameters(c);
                 if (pp == null) {
-                    LOGGER.log(Level.WARNING, "createFromSignup: Failed to create payement parameters. Null returned from call to getSelectedCustomersPaymentParameters()");
+                    LOGGER.log(Level.WARNING, "createFromSignup: Failed to create payment parameters. Null returned from call to getSelectedCustomersPaymentParameters()");
 
                 }
 
@@ -1217,7 +1414,66 @@ public class CustomersController implements Serializable {
             setNewCustomer(setCustomerDefaults(new Customers()));
             addQuestionnaireMapItemsToCustomer(c);
         } else {
-            JsfUtil.addErrorMessage("Error", configMapFacade.getConfig("SignUpValidationEmailExistsFailed"));
+            if (isWebserviceCall == false) {
+                JsfUtil.addErrorMessage("Error", configMapFacade.getConfig("SignUpValidationEmailExistsFailed"));
+            } else {
+                LOGGER.log(Level.WARNING, configMapFacade.getConfig("SignUpValidationEmailExistsFailed"));
+            }
+        }
+
+    }
+
+    public void doPasswordResetFromWebserviceCall(String templateName, Customers current, String subject) {
+
+        //valid user that wants the password reset
+        //generate link and send
+        if (current != null) {
+            String uniquetoken = generateUniqueToken(10);
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmssSSS");
+            String timestamp = sdf.format(new Date());
+            String nonce = timestamp + uniquetoken;
+            Activation act = new Activation(0, nonce, new Date());
+            String nonceEncrypted = encrypter.encrypt(configMapFacade.getConfig("login.password.reset.token") + nonce);
+            String encodedNonceEncrypted;
+            String urlLink;
+            try {
+                encodedNonceEncrypted = URLEncoder.encode(nonceEncrypted, "UTF-8");
+                act.setCustomer(current);
+                ejbActivationFacade.create(act);
+                urlLink = configMapFacade.getConfig("login.password.reset.redirect.url") + encodedNonceEncrypted;
+
+                //send email
+                String templateLinkPlaceholder = configMapFacade.getConfig("login.password.reset.templateLinkPlaceholder");
+                String templateTemporaryPasswordPlaceholder = configMapFacade.getConfig("login.password.reset.templateTemporaryPasswordPlaceholder");
+                String templateUsernamePlaceholder = configMapFacade.getConfig("login.password.reset.templateUsernamePlaceholder");
+                //String htmlText = configMapFacade.getConfig(templateName);
+                String htmlText = ejbEmailTemplatesFacade.findTemplateByName(templateName).getTemplate();
+
+                htmlText = htmlText.replace(templateLinkPlaceholder, urlLink);
+                htmlText = htmlText.replace(templateUsernamePlaceholder, current.getUsername());
+                //  String tempPassword = generateUniqueToken(8);
+                //String tempPassword = RandomString.generateRandomString(new Random(), 8);
+                String tempPassword = " Please reset your password at the login page.";
+                //current.setPassword(PasswordService.getInstance().encrypt(tempPassword));
+                // ejbCustomerFacade.editAndFlush(current);
+                htmlText = htmlText.replace(templateTemporaryPasswordPlaceholder, tempPassword);
+                //String htmlText = "<table width=\"600\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\">  <tr>    <td><img src=\"cid:logoimg_cid\"/></td>  </tr>  <tr>    <td height=\"220\"> <p>Pure Fitness Manly</p>      <p>Please click the following link to reset your password:</p><p>To reset your password click <a href=\"" + urlLink + "\">here</a>.</p></td>  </tr>  <tr>    <td height=\"50\" align=\"center\" valign=\"middle\" bgcolor=\"#CCCCCC\">www.purefitnessmanly.com.au | sarah@purefitnessmanly.com.au | +61433818067</td>  </tr></table>";
+
+                //String host, String to, String ccAddress, String from, String emailSubject, String message, String theAttachedfileName, boolean debug
+                //emailAgent.send("david@manlyit.com.au", "", "info@purefitnessmanly.com.au", "Password Reset", htmlText, null, true);
+                Future<Boolean> emailSendResult = ejbPaymentBean.sendAsynchEmail(current.getEmailAddress(), configMapFacade.getConfig("PasswordResetCCEmailAddress"), configMapFacade.getConfig("PasswordResetFromEmailAddress"), subject, htmlText, null, emailServerProperties(), false);
+                //JsfUtil.addSuccessMessage("Password Reset Successful!", configMapFacade.getConfig("PasswordResetSuccessful"));
+                Logger.getLogger(LoginBean.class.getName()).log(Level.INFO, null, configMapFacade.getConfig("PasswordResetSuccessful"));
+                //FacesContext context = FacesContext.getCurrentInstance();
+                //ActivationBean controller = context.getApplication().evaluateExpressionGet(context, "#{activationBean}", ActivationBean.class);
+                //controller.setValid(true);
+            } catch (UnsupportedEncodingException ex) {
+                Logger.getLogger(LoginBean.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+        } else {
+            //JsfUtil.addErrorMessage("Error", configMapFacade.getConfig("PasswordResetErrorValidUsernameRequired"));
+            Logger.getLogger(LoginBean.class.getName()).log(Level.SEVERE, null, configMapFacade.getConfig("PasswordResetErrorValidUsernameRequired"));
         }
 
     }
@@ -2390,7 +2646,8 @@ public class CustomersController implements Serializable {
         }
     }
 
-    public void dialogueEmailListener(ValueChangeEvent vce) {        Object o = vce.getNewValue();
+    public void dialogueEmailListener(ValueChangeEvent vce) {
+        Object o = vce.getNewValue();
         if (o.getClass().equals(String.class)) {
             String newVal = (String) o;
             newVal = newVal.trim();

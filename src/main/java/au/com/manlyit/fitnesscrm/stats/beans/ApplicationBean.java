@@ -55,5 +55,10 @@ public class ApplicationBean implements Serializable {
         futureMap.updateCustomerPaymentSchedules();
         logger.log(Level.INFO, "@@@@@@@@@@@@@@@@@@@@@@@@ COMPLETED TEST FUNCTION @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
     }
+     public void testFunction2(ActionEvent event){
+        logger.log(Level.INFO, "@@@@@@@@@@@@@@@@@@@@@@@@ EXECUTING TEST TICKETS FUNCTION @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+        futureMap.issueWeeklyCustomerTicketsForPlansSessionBookings();
+        logger.log(Level.INFO, "@@@@@@@@@@@@@@@@@@@@@@@@ COMPLETED TEST TICKETS FUNCTION @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+    }
     
 }

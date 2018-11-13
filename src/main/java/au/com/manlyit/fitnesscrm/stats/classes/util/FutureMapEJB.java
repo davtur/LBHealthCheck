@@ -17,6 +17,8 @@ import au.com.manlyit.fitnesscrm.stats.classes.EziDebitPaymentGateway;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import au.com.manlyit.fitnesscrm.stats.db.NotificationsLog;
 import au.com.manlyit.fitnesscrm.stats.db.Payments;
+import au.com.manlyit.fitnesscrm.stats.db.Plan;
+import au.com.manlyit.fitnesscrm.stats.db.Tickets;
 import au.com.manlyit.fitnesscrm.stats.webservices.ArrayOfPayment;
 import au.com.manlyit.fitnesscrm.stats.webservices.ArrayOfScheduledPayment;
 import au.com.manlyit.fitnesscrm.stats.webservices.CustomerDetails;
@@ -55,6 +57,7 @@ import javax.ejb.Timer;
 import javax.ejb.TransactionManagement;
 import javax.ejb.TransactionManagementType;
 import javax.enterprise.context.ApplicationScoped;
+import javax.faces.event.ActionEvent;
 import javax.faces.push.Push;
 import javax.faces.push.PushContext;
 import javax.inject.Inject;
@@ -78,6 +81,7 @@ public class FutureMapEJB implements Serializable {
     private static final int TIMEOUT_SECONDS = 300;
     private static final int PAYMENT_SEARCH_MONTHS_AHEAD = 18;
     private static final int PAYMENT_SEARCH_MONTHS_BEHIND = 3;
+    private static final int WEEKS_AHEAD_TO_POPULATE_TICKETS = 12; // 3 months
     private static final String FUTUREMAP_INTERNALID = "FMINTID876987";
     private static final long serialVersionUID = 1L;
 
@@ -101,6 +105,8 @@ public class FutureMapEJB implements Serializable {
     private final Object settlementReportLockObject = new Object();
     private final Object paymentReportLockObject = new Object();
     private final Object updateScheduleLock = new Object();
+    private final Object issueTicketsLockObject = new Object();
+     private final Object issueOneWeeksTicketsLockObject = new Object();
     private final AtomicBoolean settlementReportLock = new AtomicBoolean(false);
     private final AtomicBoolean paymentReportLock = new AtomicBoolean(false);
     //private final AtomicBoolean updateScheduleLock = new AtomicBoolean(false);
@@ -113,12 +119,13 @@ public class FutureMapEJB implements Serializable {
     private ConfigMapFacade configMapFacade;
     @Inject
     private PaymentsFacade paymentsFacade;
-     @Inject
+    @Inject
     private NotificationsLogFacade notificationsLogFacade;
     @Inject
     @Push
     private PushContext payments;
-
+    @Inject
+    private au.com.manlyit.fitnesscrm.stats.beans.TicketsFacade ejbTicketsFacade;
     @Inject
     private PaymentBean paymentBean;
     @Inject
@@ -129,8 +136,6 @@ public class FutureMapEJB implements Serializable {
     private String username;*/
     public FutureMapEJB() {
     }
-
-    
 
     /* @OnMessage(encoders = {JSONEncoder.class})
     public FacesMessage onMessage(FacesMessage message) {
@@ -438,6 +443,98 @@ public class FutureMapEJB implements Serializable {
 
     }
 
+    //dayOfWeekToSet is a constant from the Calendar class
+    //c is the calendar instance
+    public static void SetToNextDayOfWeek(int dayOfWeekToSet, Calendar c) {
+        int currentDayOfWeek = c.get(Calendar.DAY_OF_WEEK);
+        //add 1 day to the current day until we get to the day we want
+        while (currentDayOfWeek != dayOfWeekToSet) {
+            c.add(Calendar.DAY_OF_WEEK, 1);
+            currentDayOfWeek = c.get(Calendar.DAY_OF_WEEK);
+        }
+    }
+
+    public static void SetToLastDayOfWeek(int dayOfWeekToSet, Calendar c) {
+        int currentDayOfWeek = c.get(Calendar.DAY_OF_WEEK);
+        //add 1 day to the current day until we get to the day we want
+        while (currentDayOfWeek != dayOfWeekToSet) {
+            c.add(Calendar.DAY_OF_WEEK, -1);
+            currentDayOfWeek = c.get(Calendar.DAY_OF_WEEK);
+        }
+    }
+
+    public static void SetTimeToMidnight(Calendar c) {
+        c.set(Calendar.HOUR_OF_DAY, 0);
+        c.set(Calendar.MINUTE, 0);
+        c.set(Calendar.MILLISECOND, 0);
+        c.set(Calendar.SECOND, 0);
+    }
+
+    public void issueOneWeeksTicketsForCust(Customers c, Date ticketStartDate, Date ticketStopDate) {
+
+        synchronized (issueOneWeeksTicketsLockObject) {
+            try {
+                List<Tickets> at = ejbTicketsFacade.findCustomerTicketsByDateRange(c, ticketStartDate, ticketStopDate, true);
+                int ticketsAdded = 0;
+                if (at.isEmpty()) {// if the weeks tickets are empty add the tickets based on their plan session allocated.
+
+                    // get the list of sub items on the plan. Sub items per week i.e. 2 group training session for two a week , 10 for unlimited etc.
+                    ArrayList<Plan> ap = new ArrayList<>(c.getGroupPricing().getPlanCollection());
+                    for (Plan p : ap) {
+                        Tickets t = new Tickets();
+                        t.setDatePurchased(new Date());
+                        t.setCustomer(c);
+                        t.setSessionType(p.getSessionType());
+                        t.setValidFrom(ticketStartDate);
+                        t.setExpires(ticketStopDate);
+                        ejbTicketsFacade.create(t);
+                        ticketsAdded++;
+                    }
+                }
+                LOGGER.log(Level.INFO, "Adding Tickets for Customer id {0}, existing tickets {1}, tickets added {2},startDate {3}, stopDate {4} ", new Object[]{c.getId(), at.size(), ticketsAdded, ticketStartDate.getTime(), ticketStopDate.getTime()});
+            } catch (Exception ex) {
+                Logger.getLogger(FutureMapEJB.class.getName()).log(Level.SEVERE, "issueOneWeeksTicketsForCust", ex.getMessage());
+            }
+        }
+    }
+
+    public void issueWeeklyCustomerTickets(Customers c, int weeksAheadToPolulate) {
+
+        synchronized (issueTicketsLockObject) {
+            try {
+
+                GregorianCalendar ticketStartDate = new GregorianCalendar();
+                SetToLastDayOfWeek(Calendar.SUNDAY, ticketStartDate);
+                SetTimeToMidnight(ticketStartDate);
+
+                GregorianCalendar ticketStopDate = new GregorianCalendar();
+                SetToNextDayOfWeek(Calendar.SUNDAY, ticketStopDate);
+                SetTimeToMidnight(ticketStopDate);
+                ticketStopDate.add(Calendar.MILLISECOND, -1);
+
+                for (int week = 0; week < weeksAheadToPolulate; week++) {
+                    issueOneWeeksTicketsForCust(c, ticketStartDate.getTime(), ticketStopDate.getTime());
+                    ticketStartDate.add(Calendar.WEEK_OF_YEAR, 1);
+                    ticketStopDate.add(Calendar.WEEK_OF_YEAR, 1);
+                }
+
+            } catch (Exception ex) {
+                Logger.getLogger(FutureMapEJB.class.getName()).log(Level.SEVERE, "issueWeeklyCustomerTicketsForPlansSessionBookings", ex.getMessage());
+            }
+        }
+    }
+
+    public void issueWeeklyCustomerTicketsForPlansSessionBookings() {
+
+        List<Customers> acl = customersFacade.findAllActiveCustomers(true);
+        LOGGER.log(Level.INFO, "###### Updating {0} Customer issueWeeklyCustomerTicketsForPlansSessionBookings #####", acl.size());
+
+        for (Customers c : acl) {
+            issueWeeklyCustomerTickets(c, WEEKS_AHEAD_TO_POPULATE_TICKETS);
+        }
+
+    }
+
     public void updateCustomerPaymentSchedules() {
 
         synchronized (updateCustomerSchedulesLock) {
@@ -628,7 +725,7 @@ public class FutureMapEJB implements Serializable {
 
     }
 
-    @Schedule(hour = "*", minute = "*", second = "*",persistent=false)
+    @Schedule(hour = "*", minute = "*", second = "*", persistent = false)
     // @TransactionAttribute(TransactionAttributeType.NEVER)// we don't want a transaction for this method as the calls within this method will invoke their own transactions
     public void checkRunningJobsAndNotifyIfComplete(Timer t) {  // run every 1 seconds
         long start = new Date().getTime();
@@ -929,7 +1026,7 @@ public class FutureMapEJB implements Serializable {
         // }
     }
 
-   // @TransactionAttribute(TransactionAttributeType.NEVER)
+    // @TransactionAttribute(TransactionAttributeType.NEVER)
     public void processCompletedAsyncJobs(String sessionId, String key, Future<PaymentGatewayResponse> ft) {
         LOGGER.log(Level.INFO, "Future Map is processing Completed Async Jobs .");
         synchronized (lock3) {
@@ -2349,27 +2446,27 @@ public class FutureMapEJB implements Serializable {
         this.put(FUTUREMAP_INTERNALID, aj);
 
     }
+
     public synchronized void sendNotificationToAdmin(String message, Customers customer) {
 
         if (message == null) {
             LOGGER.log(Level.WARNING, "Future Map sendNotificationToAdmin . Message is NULL.Alert Email not sent!");
             return;
         }
-         LOGGER.log(Level.WARNING, "Future Map sendNotificationToAdmin . Message:{0}", message);
+        LOGGER.log(Level.WARNING, "Future Map sendNotificationToAdmin . Message:{0}", message);
         String templatePlaceholder = "!--LINK--URL--!";
         //String htmlText = configMapFacade.getConfig("system.email.admin.alert.template");
         String htmlText = ejbEmailTemplatesFacade.findTemplateByName("system.email.admin.alert.template").getTemplate();
         htmlText = htmlText.replace(templatePlaceholder, message);
-        
+
         NotificationsLog entity = new NotificationsLog();
         entity.setCustomer(customer);
         entity.setMessage(message);
         entity.setTypeOfNotification("ALERT");
         entity.setTimestampOfNotification(new Date());
-        
+
         notificationsLogFacade.create(entity);
-        
-        
+
     }
 
     private synchronized void startAsynchJob(String sessionId, String key, Future<PaymentGatewayResponse> future) {
@@ -2403,7 +2500,7 @@ public class FutureMapEJB implements Serializable {
     }
 
     @Asynchronous
-   // @TransactionAttribute(TransactionAttributeType.NEVER)
+    // @TransactionAttribute(TransactionAttributeType.NEVER)
     public void processCreateSchedule(String sessionId, PaymentGatewayResponse pgr) {
         boolean result = false;
         String returnedMessage = "An error occurred trying to create the customers schedule. Refer to logs for more info";
@@ -2820,7 +2917,7 @@ public class FutureMapEJB implements Serializable {
     }
 
     @Asynchronous
-  //  @TransactionAttribute(REQUIRES_NEW)
+    //  @TransactionAttribute(REQUIRES_NEW)
     public void processUpdateCustomerSchedule(String sessionId, PaymentGatewayResponse pgr) {
         CustomerDetails custDetails = null;
 

@@ -50,6 +50,10 @@
             <base-name>/Bundle-Notification-log</base-name>
             <var>bundle-Notification-log</var>
         </resource-bundle>
+        <resource-bundle>
+            <base-name>/Bundle_tickets</base-name>
+            <var>bundle_tickets</var>
+        </resource-bundle>
     </application>
     
     <factory>

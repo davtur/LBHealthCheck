@@ -1,0 +1,40 @@
+
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                >
+
+    <p:dialog id="TicketsViewDlg" widgetVar="TicketsViewDialog" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('ViewTicketsTitle')}">
+        <h:form id="TicketsViewForm">
+            <h:panelGroup id="display">
+                <p:panelGrid columns="2" rendered="#{ticketsController.selected != null}">
+                    <h:outputText value="#{configMapController.getKey('ViewTicketsLabel_id')}"/>
+                    <h:outputText value="#{ticketsController.selected.id}" title="#{configMapController.getKey('ViewTicketsTitle_id')}"/>
+                    <h:outputText value="#{configMapController.getKey('ViewTicketsLabel_itemType')}"/>
+                    <h:outputText value="#{ticketsController.selected.itemType}" title="#{configMapController.getKey('ViewTicketsTitle_itemType')}"/>
+                    <h:outputText value="#{configMapController.getKey('ViewTicketsLabel_datePurchased')}"/>
+                    <h:outputText value="#{ticketsController.selected.datePurchased}" title="#{configMapController.getKey('ViewTicketsTitle_datePurchased')}">
+                        <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                    </h:outputText>
+                    <h:outputText value="#{configMapController.getKey('ViewTicketsLabel_dateUsed')}"/>
+                    <h:outputText value="#{ticketsController.selected.dateUsed}" title="#{configMapController.getKey('ViewTicketsTitle_dateUsed')}">
+                        <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                    </h:outputText>
+                    <h:outputText value="#{configMapController.getKey('ViewTicketsLabel_validFrom')}"/>
+                    <h:outputText value="#{ticketsController.selected.validFrom}" title="#{configMapController.getKey('ViewTicketsTitle_validFrom')}">
+                        <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                    </h:outputText>
+                    <h:outputText value="#{configMapController.getKey('ViewTicketsLabel_expires')}"/>
+                    <h:outputText value="#{ticketsController.selected.expires}" title="#{configMapController.getKey('ViewTicketsTitle_expires')}">
+                        <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                    </h:outputText>
+                </p:panelGrid>
+                <p:commandButton value="#{configMapController.getKey('Close')}" onclick="PF('TicketsViewDialog').hide()"/>
+            </h:panelGroup>
+        </h:form>
+    </p:dialog>
+
+</ui:composition>
+
