@@ -62,6 +62,7 @@ public class LoginBean implements Serializable {
 
     private String facebookId;
     private boolean mobileDeviceUserAgent = false;
+    private boolean dontRedirect = false;
     private String faceBookAccessToken;
     //private Future<Boolean> emailSendResult;
     @Inject
@@ -584,5 +585,19 @@ public class LoginBean implements Serializable {
      */
     public void setFaceBookAccessToken(String faceBookAccessToken) {
         this.faceBookAccessToken = faceBookAccessToken;
+    }
+
+    /**
+     * @return the dontRedirect
+     */
+    public boolean isDontRedirect() {
+        return dontRedirect;
+    }
+
+    /**
+     * @param dontRedirect the dontRedirect to set
+     */
+    public void setDontRedirect(boolean dontRedirect) {
+        this.dontRedirect = dontRedirect;
     }
 }

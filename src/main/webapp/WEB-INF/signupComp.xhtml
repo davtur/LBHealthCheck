@@ -11,63 +11,102 @@
     <p:dialog header="Sign Up  Wizard" widgetVar="signupDialog" modal="true" showEffect="fade" hideEffect="fade"   resizable="false">
         <h:form id="signUpForm" styleClass="signUpFormUpdate">
 
-            <h1 class="BigTopic">#{configMapController.getKey('SignUpDialogueHeader')}</h1>
-            <div class="Container100 Responsive100">
+            <h1 class="BigTopic">Existing Members Login</h1>
 
-                <div class="ContainerIndent  signupForm" >
-                    <p:messages showDetail="true"/>
-                    <!--<h:panelGrid id="dialogueGrid" columns="2"  cellpadding="5" >-->
+            <div class="ui-g-12 ui-lg-12 ui-md-12">
+                <p:inputText id="usernameText" value="#{loginBean.username}"  placeholder="Username/email"  title="Please enter your username or your email address in this box." >
+                    <p:ajax event="change" update=":signUpForm" />
+                </p:inputText>   
+            </div>
+            <div class="ui-g-12 ui-lg-12 ui-md-12">
+                <p:password id="passText" value="#{loginBean.password}"  placeholder="Password" feedback="false" title="Please enter your password in this box."/>
+            </div>
+            <div class="ui-g-12 ui-lg-12 ui-md-12 chkbox-container">
+                <p:selectBooleanCheckbox id="remember-me" />
+                <p:outputLabel for="remember-me" value="Remember Me" />
+                <p:commandLink id="resetPass" value="Reset Password" ajax="false"  action="#{loginBean.resetPassword}" update=":growl" title="If you have forgotten your username or password enter your email or username above then click the password reset button."/>
+            </div>
+            <div class="ui-g-12">
+                <div class="ui-g-4 ui-lg-4 ui-md-4 button-container">
+                    <p:commandButton id="standard" value="Sign in" styleClass="Fs16" actionListener="#{loginBean.login}"  update=":growl" title="Click this button to login after entering your username and password above."/> 
+                </div>
+                <div class="ui-g-4 ui-lg-4 ui-md-4 button-container">
+                    <p:commandButton id="facebook" icon="fa fa-facebook-f" widgetVar="fbLogin" onclick="PF('fbLogin').disable()" styleClass="loginButtonFacebook" value="Sign in with Facebook" actionListener="#{facebookLoginBean.timetableFacebookRedirect}" title="Click this button to login with your facebook account. Note you must use the same email address with pure fitness and facebook."/>
+                </div>
+                <div class="ui-g-4 ui-lg-4 ui-md-4 button-container">
 
-                    <p:outputLabel styleClass="signupFormLabel" value="#{configMapController.getKey('EditCustomersLabel_firstname')}" for="firstname" />
-                    <p:inputText id="firstname"  value="#{customersController.newCustomer.firstname}" title="#{configMapController.getKey('EditCustomersTitle_firstname')}" required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_firstname')}">
-                       <p:ajax update=":signUpForm:dialogueSave" event="keyup"/>
-                    </p:inputText>
-                    <br/>
-                    <p:outputLabel styleClass="signupFormLabel"  value="#{configMapController.getKey('EditCustomersLabel_lastname')}" for="lastname" />
-                    <p:inputText id="lastname" value="#{customersController.newCustomer.lastname}" title="#{configMapController.getKey('EditCustomersTitle_lastname')}"  required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_lastname')}">
-                       <p:ajax update="  :signUpForm:dialogueSave" event="keyup" />
-                    </p:inputText>
-                    <br/>
- 
-                   <!--    <p:outputLabel styleClass="signupFormLabel" value="#{configMapController.getKey('EditCustomersLabel_firstname')}" for="firstname" />
-                    <p:inputText id="firstname"  value="#{customersController.newCustomer.firstname}" title="#{configMapController.getKey('EditCustomersTitle_firstname')}" valueChangeListener="#{customersController.dialogueFirstNameListener}" required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_firstname')}">
-                        <p:ajax update=":signUpForm:username :signUpForm:dialogueSave" event="keyup"/>
-                    </p:inputText>
-                    <br/>
-                    <p:outputLabel styleClass="signupFormLabel"  value="#{configMapController.getKey('EditCustomersLabel_lastname')}" for="lastname" />
-                    <p:inputText id="lastname" value="#{customersController.newCustomer.lastname}" title="#{configMapController.getKey('EditCustomersTitle_lastname')}" valueChangeListener="#{customersController.dialogueLastNameListener}" required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_lastname')}">
-                        <p:ajax update=":signUpForm:username  :signUpForm:dialogueSave" event="keyup" />
-                    </p:inputText>
-                    <br/>
-                 <p:outputLabel styleClass="signupFormLabel"  value="#{configMapController.getKey('CreateCustomersLabel_gender')}" title="#{configMapController.getKey('EditCustomersTitle_gender')}" for="gender" />
-                    <p:selectOneMenu  styleClass="selectOneWidth" id="gender" value="#{customersController.newCustomer.gender}"   required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_gender')}">
-                        <f:selectItem itemValue="M" itemLabel="Male" />
-                        <f:selectItem itemValue="F" itemLabel="Female" />
-                    </p:selectOneMenu>
-                    <br/>
-                    <p:outputLabel styleClass="signupFormLabel"  value="#{configMapController.getKey('CreateCustomersLabel_dob')}" for="dob" />
-                    <p:calendar id="dob" pattern="dd/MM/yyyy" value="#{customersController.newCustomer.dob}" title="#{configMapController.getKey('CreateCustomersTitle_dob')}" required="true" requiredMessage="#{configMapController.getKey('CreateCustomersRequiredMessage_dob')}" />
-                    <br/>-->
-                    <p:outputLabel styleClass="signupFormLabel"  value="#{configMapController.getKey('CreateCustomersLabel_emailAddress')}" for="emailAddress" />
-                    <p:inputText id="emailAddress" value="#{customersController.newCustomer.emailAddress}" title="#{configMapController.getKey('EditCustomersTitle_emailAddress')}" valueChangeListener="#{customersController.dialogueEmailListener}" required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_emailAddress')}">
-                        <p:ajax update="  :signUpForm:dialogueSave" event="keyup" />
-                    </p:inputText>
-                    <br/>
-                   <!-- <p:outputLabel  styleClass="signupFormLabel"  value="#{configMapController.getKey('CreateCustomersLabel_username')}" for="username" />
-                    <p:inputText id="username" value="#{customersController.newCustomer.username}" title="#{configMapController.getKey('CreateCustomersTitle_username')}" required="true" requiredMessage="#{configMapController.getKey('CreateCustomersRequiredMessage_username')}"/>
-                    <br/>-->
-                    <p:outputLabel styleClass="signupFormLabel"  value="#{configMapController.getKey('CreateCustomersLabel_telephone')}" for="telephone" />
-                    <p:inputText id="telephone" value="#{customersController.newCustomer.telephone}" title="#{configMapController.getKey('CreateCustomersTitle_telephone')}" >
-                        <f:validator validatorId="au.com.manlyit.fitnesscrm.stats.classes.util.PhoneNumberValidator" />
-                    </p:inputText>
- <br/>
-                    <!--</h:panelGrid>-->
+                    <img src="https://graph.facebook.com/v2.8/#{loginBean.facebookId}/picture" hidden="#{empty loginBean.facebookId}" class="img-circular" title="This is the currently logged in facebook profile."/>
 
                 </div>
+
             </div>
-            <div class="Container100 Responsive100">
-                <div class="ContainerIndent">
+
+
+
+            <h1 class="BigTopic">#{configMapController.getKey('SignUpDialogueHeader')}</h1>
+            <div class="ui-g-12 ui-lg-12 ui-md-12">
+                <p:messages showDetail="true"/>
+                <!--<h:panelGrid id="dialogueGrid" columns="2"  cellpadding="5" >-->
+
+                    <!--<p:outputLabel styleClass="signupFormLabel" value="#{configMapController.getKey('EditCustomersLabel_firstname')}" for="firstname" />-->
+                <p:inputText id="firstname"  value="#{customersController.newCustomer.firstname}" title="#{configMapController.getKey('EditCustomersTitle_firstname')}" required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_firstname')}">
+                    <p:ajax update=":signUpForm:dialogueSave" event="keyup"/>
+                </p:inputText>
+                <p:watermark for="firstname" value="FIRSTNAME"  />
+            </div>
+            <div class="ui-g-12 ui-lg-12 ui-md-12">
+            <!--<p:outputLabel styleClass="signupFormLabel"  value="#{configMapController.getKey('EditCustomersLabel_lastname')}" for="lastname" />-->
+                <p:inputText id="lastname" value="#{customersController.newCustomer.lastname}" title="#{configMapController.getKey('EditCustomersTitle_lastname')}"  required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_lastname')}">
+                    <p:ajax update="  :signUpForm:dialogueSave" event="keyup" />
+                </p:inputText>
+                <p:watermark for="lastname" value="LASTNAME"  />
+            </div>
+            <div class="ui-g-12 ui-lg-12 ui-md-12">
+
+                  <!--    <p:outputLabel styleClass="signupFormLabel" value="#{configMapController.getKey('EditCustomersLabel_firstname')}" for="firstname" />
+                   <p:inputText id="firstname"  value="#{customersController.newCustomer.firstname}" title="#{configMapController.getKey('EditCustomersTitle_firstname')}" valueChangeListener="#{customersController.dialogueFirstNameListener}" required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_firstname')}">
+                       <p:ajax update=":signUpForm:username :signUpForm:dialogueSave" event="keyup"/>
+                   </p:inputText>
+                   <br/>
+                   <p:outputLabel styleClass="signupFormLabel"  value="#{configMapController.getKey('EditCustomersLabel_lastname')}" for="lastname" />
+                   <p:inputText id="lastname" value="#{customersController.newCustomer.lastname}" title="#{configMapController.getKey('EditCustomersTitle_lastname')}" valueChangeListener="#{customersController.dialogueLastNameListener}" required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_lastname')}">
+                       <p:ajax update=":signUpForm:username  :signUpForm:dialogueSave" event="keyup" />
+                   </p:inputText>
+                   <br/>
+                <p:outputLabel styleClass="signupFormLabel"  value="#{configMapController.getKey('CreateCustomersLabel_gender')}" title="#{configMapController.getKey('EditCustomersTitle_gender')}" for="gender" />
+                   <p:selectOneMenu  styleClass="selectOneWidth" id="gender" value="#{customersController.newCustomer.gender}"   required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_gender')}">
+                       <f:selectItem itemValue="M" itemLabel="Male" />
+                       <f:selectItem itemValue="F" itemLabel="Female" />
+                   </p:selectOneMenu>
+                   <br/>
+                   <p:outputLabel styleClass="signupFormLabel"  value="#{configMapController.getKey('CreateCustomersLabel_dob')}" for="dob" />
+                   <p:calendar id="dob" pattern="dd/MM/yyyy" value="#{customersController.newCustomer.dob}" title="#{configMapController.getKey('CreateCustomersTitle_dob')}" required="true" requiredMessage="#{configMapController.getKey('CreateCustomersRequiredMessage_dob')}" />
+                   <br/>-->
+                   <!--<p:outputLabel styleClass="signupFormLabel"  value="#{configMapController.getKey('CreateCustomersLabel_emailAddress')}" for="emailAddress" />-->
+                <p:inputText id="emailAddress" value="#{customersController.newCustomer.emailAddress}" title="#{configMapController.getKey('EditCustomersTitle_emailAddress')}" valueChangeListener="#{customersController.dialogueEmailListener}" required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_emailAddress')}">
+                    <p:ajax update="  :signUpForm:dialogueSave" event="keyup" />
+                </p:inputText>
+                <p:watermark for="emailAddress" value="Email Address"  />
+            </div>
+            <div class="ui-g-12 ui-lg-12 ui-md-12">
+           <!-- <p:outputLabel  styleClass="signupFormLabel"  value="#{configMapController.getKey('CreateCustomersLabel_username')}" for="username" />
+            <p:inputText id="username" value="#{customersController.newCustomer.username}" title="#{configMapController.getKey('CreateCustomersTitle_username')}" required="true" requiredMessage="#{configMapController.getKey('CreateCustomersRequiredMessage_username')}"/>
+            <br/>-->
+            <!--<p:outputLabel styleClass="signupFormLabel"  value="#{configMapController.getKey('CreateCustomersLabel_telephone')}" for="telephone" />-->
+                <p:inputText id="telephone" value="#{customersController.newCustomer.telephone}" title="#{configMapController.getKey('CreateCustomersTitle_telephone')}" >
+                    <f:validator validatorId="au.com.manlyit.fitnesscrm.stats.classes.util.PhoneNumberValidator" />
+                </p:inputText>
+                <p:watermark for="telephone" value="Phone Number"  />
+                <br/>
+                <!--</h:panelGrid>-->
+
+            </div>
+
+            <div class="ui-g-12">
+                <div class="ui-g-4 ui-lg-4 ui-md-4 button-container">
                     <p:commandButton icon="ui-icon-check fa fa-check white Fs14" id="dialogueSave" disabled="#{customersController.addUserButtonDisabled}"  actionListener="#{customersController.createFromSignup}"  value="#{configMapController.getKey('SendSignupVerificationEmailLink')}" update=":growl "/>                
+                </div>
+                <div class="ui-g-4 ui-lg-4 ui-md-4 button-container">
                     <p:commandButton icon=" fa fa-times-circle white Fs14" id="dialogueDiscard" onclick=" PF('signupDialog').hide()"  actionListener="#{customersController.cancelCreateDialogue}" value="#{configMapController.getKey('CancelSignupLink')}" update=":growl"/>                
                 </div>
             </div>

@@ -39,8 +39,15 @@ public class FacebookLoginBean implements Serializable {
 
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade configMapFacade;
+     @Inject
+    private au.com.manlyit.fitnesscrm.stats.beans.LoginBean loginBean;
     
     
+     public void timetableFacebookRedirect(){
+         loginBean.setDontRedirect(true);
+         facebookRedirect();
+     }
+     
     public void facebookRedirect(){
         
         try {

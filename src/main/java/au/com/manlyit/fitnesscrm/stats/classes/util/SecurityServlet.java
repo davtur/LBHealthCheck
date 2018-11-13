@@ -5,6 +5,7 @@
  */
 package au.com.manlyit.fitnesscrm.stats.classes.util;
 
+import au.com.manlyit.fitnesscrm.stats.beans.LoginBean;
 import au.com.manlyit.fitnesscrm.stats.beans.util.CustomerStatus;
 import au.com.manlyit.fitnesscrm.stats.chartbeans.MySessionsChart1;
 import au.com.manlyit.fitnesscrm.stats.classes.CustomersController;
@@ -40,7 +41,6 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.json.simple.JSONArray;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
@@ -58,6 +58,8 @@ public class SecurityServlet extends HttpServlet {
     private au.com.manlyit.fitnesscrm.stats.beans.AuditLogFacade ejbAuditLogFacade;
     @Inject
     private CustomersController controller;
+    @Inject
+    private LoginBean loginBean;
     @Inject
     private EziDebitPaymentGateway eziDebitPaymentGatewayController;
     @Inject
@@ -174,7 +176,9 @@ public class SecurityServlet extends HttpServlet {
                 response.sendRedirect(request.getContextPath() + "/facebookError.html");
                 return;
             }
-            redirectToLandingPage(request, response);
+           
+                redirectToLandingPage(request, response);
+           
             /*if (mobileDevice(request)) {
                 httpSession.setAttribute("MOBILE_DEVICE", "TRUE");
                 response.sendRedirect(request.getContextPath() + getValueFromKey("facebook.redirect.mobilelandingpage"));
@@ -205,6 +209,13 @@ public class SecurityServlet extends HttpServlet {
             if (adminRole == null || adminRole.isEmpty()) {
                 adminRole = "ADMIN"; //default
             }
+             if(loginBean.isDontRedirect() == true){
+                 landingPage = getValueFromKey("timetable.redirect.landingpage");
+                  
+                logger.log(Level.INFO, "Redirection to timetable.");
+               loginBean.setDontRedirect(false);
+            
+             }else{
             if (mobileDevice(request)) {
                 httpSession.setAttribute("MOBILE_DEVICE", "TRUE");
                 logger.log(Level.INFO, "Mobile Device user agent detected. Redirecting to the mobile landing page.");
@@ -218,6 +229,7 @@ public class SecurityServlet extends HttpServlet {
             } else {
                 landingPage = getValueFromKey("facebook.redirect.landingpage");
             }
+             }
             response.sendRedirect(request.getContextPath() + landingPage);
             logger.log(Level.INFO, "Redirecting to Landing Page:", landingPage);
         } catch (Exception e) {

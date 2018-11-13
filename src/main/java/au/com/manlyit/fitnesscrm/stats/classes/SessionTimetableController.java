@@ -4,6 +4,7 @@ import au.com.manlyit.fitnesscrm.stats.db.SessionTimetable;
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PaginationHelper;
 import au.com.manlyit.fitnesscrm.stats.beans.SessionTimetableFacade;
+import au.com.manlyit.fitnesscrm.stats.classes.util.CalendarUtil;
 import au.com.manlyit.fitnesscrm.stats.classes.util.CrmScheduleEvent;
 import au.com.manlyit.fitnesscrm.stats.classes.util.FutureMapEJB;
 import au.com.manlyit.fitnesscrm.stats.classes.util.TimetableRows;
@@ -64,13 +65,15 @@ public class SessionTimetableController implements Serializable {
     private static final long serialVersionUID = 1L;
     private static final Logger LOGGER = Logger.getLogger(SessionTimetableController.class.getName());
     private static final int DAYS_AHEAD_TO_POPULATE_TIMETABLE = 90;
-   
+
     private SessionTimetable current;
     private SessionTimetable selectedForDeletion;
     private SessionHistory selectedTimetableSession;
     private DataModel<SessionTimetable> items = null;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.SessionTimetableFacade ejbFacade;
+    @Inject
+    private au.com.manlyit.fitnesscrm.stats.beans.TicketsFacade ejbTicketsFacade;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.SessionBookingsFacade ejbSessionBookingsFacade;
     @Inject
@@ -79,7 +82,7 @@ public class SessionTimetableController implements Serializable {
     private au.com.manlyit.fitnesscrm.stats.beans.SessionHistoryFacade sessionHistoryFacade;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade configMapFacade;
-   
+
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.ScheduleFacade ejbScheduleFacade;
     private PaginationHelper pagination;
@@ -909,7 +912,30 @@ public class SessionTimetableController implements Serializable {
         }
     }
 
-    
+    public List<Tickets> doesTheCustomerHaveATicketForAGroupSession(Customers c) {
+
+        List<Tickets> result = new ArrayList<>();
+        GregorianCalendar ticketStartDate = new GregorianCalendar();
+        CalendarUtil.SetToLastDayOfWeek(Calendar.SUNDAY, ticketStartDate);
+        CalendarUtil.SetTimeToMidnight(ticketStartDate);
+
+        GregorianCalendar ticketStopDate = new GregorianCalendar();
+        CalendarUtil.SetToNextDayOfWeek(Calendar.SUNDAY, ticketStopDate);
+        CalendarUtil.SetTimeToMidnight(ticketStopDate);
+        ticketStopDate.add(Calendar.MILLISECOND, -1);
+
+        List<Tickets> at = ejbTicketsFacade.findCustomerTicketsByDateRange(c, ticketStartDate.getTime(), ticketStopDate.getTime(), true);
+        if (at != null) {
+            for (Tickets t : at) {
+                // we only want group training session tickets
+                if (t.getSessionType().getName().contains("Group Training") == true) {
+                    result.add(t);
+                }
+            }
+        }
+        return result;
+    }
+
     public void purchaseSession() {
         LOGGER.log(Level.INFO, "Purchase Session button clicked.");
         FacesContext context = FacesContext.getCurrentInstance();
@@ -925,74 +951,92 @@ public class SessionTimetableController implements Serializable {
         sb.setSessionHistoryId(bookingButtonSessionHistory);
         sb.setCustomerId(c);
 
-        // is the customer already set up in the payment gateway ?
-        if (c.getPaymentParametersId() == null || c.getPaymentParametersId().getStatusDescription() == null || c.getPaymentParametersId().getStatusDescription().contains("Cancelled")) {
-            try {
-                // no they are not setup so redirect to ezidebit signup form
-                sb.setStatus("PURCHASE-SIGNUP");
-                sb.setStatusDescription("New authenticated customer signup is being redirected to the payment gateway signup form");
-                ejbSessionBookingsFacade.create(sb);
-                // a booking is in progress for a new signup
-                // setup eddr url and payment
-                eziDebitPaymentGateway.setOneOffPaymentAmountInCents(bookingButtonSessionHistory.getSessionTemplate().getSessionCasualRate().floatValue());
-                eziDebitPaymentGateway.setOneOffPaymentDate(sessionPurchaseTimestamp);
-                eziDebitPaymentGateway.createEddrLink(null);
-                //call ezibeit controller
+        //does the customer have any tickets available for group sessions
+        List<Tickets> ct = doesTheCustomerHaveATicketForAGroupSession(c);
+        if (ct.isEmpty() == false) {
+            // customer has a ticket so book them in
+            // TODO check class sizes arent full
 
-                eziDebitPaymentGateway.redirectToPaymentGateway();
+            try {
+                ejbSessionBookingsFacade.create(sb);
+                // send booking confirmation email.
+                
             } catch (Exception e) {
-                LOGGER.log(Level.WARNING, "purchaseSession, customer  {0} New authenticated customer signup is being redirected to the payment gateway signup form", c.getUsername());
+                
+                LOGGER.log(Level.SEVERE, "Book Session Failed.Cust id {0}, bookingid {1}, exception message {2}",new Object[]{c.getId(),sb.getId(),e});
+                
             }
-            // TODO need to check the call back from ezidebit to add the payment id to the booking
-            // TODO need to check the call back from ezidebit to add the payment id to the booking
         } else {
-            try {
-                if (c.getPaymentParametersId().getStatusDescription().contains("Active") || c.getPaymentParametersId().getStatusDescription().contains("New")) {
-                    // customer is set up just add a payment
-                    LOGGER.log(Level.INFO, "purchaseSession, customer  {0}  active in payment gateway - adding payment", c.getUsername());
+            //no tickets
 
-                    eziDebitPaymentGateway.addSinglePayment(c, bookingButtonSessionHistory.getSessionTemplate().getSessionCasualRate().floatValue(), sessionPurchaseTimestamp);
-                    JsfUtil.addSuccessMessage(configMapFacade.getConfig("purchaseSessionDirectDebitPaymentProcessing"));
-                    sb.setStatus("PURCHASE-ACTIVE");
-                    sb.setStatusDescription("A new payment is being added for an existing customer");
+            // is the customer already set up in the payment gateway ?
+            if (c.getPaymentParametersId() == null || c.getPaymentParametersId().getStatusDescription() == null || c.getPaymentParametersId().getStatusDescription().contains("Cancelled")) {
+                try {
+                    // no they are not setup so redirect to ezidebit signup form
+                    sb.setStatus("PURCHASE-SIGNUP");
+                    sb.setStatusDescription("New authenticated customer signup is being redirected to the payment gateway signup form");
+                    ejbSessionBookingsFacade.create(sb);
+                    // a booking is in progress for a new signup
+                    // setup eddr url and payment
+                    eziDebitPaymentGateway.setOneOffPaymentAmountInCents(bookingButtonSessionHistory.getSessionTemplate().getSessionCasualRate().floatValue());
+                    eziDebitPaymentGateway.setOneOffPaymentDate(sessionPurchaseTimestamp);
+                    eziDebitPaymentGateway.createEddrLink(null);
+                    //call ezibeit controller
 
-                } else if (c.getPaymentParametersId().getStatusDescription().contains("Hold")) {
-                    // customer is on hold notify them to contact staff and redirect customer to instant payment page
-                    // if we just take them off hold without comfirmation their regular payemts may restart
-
-                    LOGGER.log(Level.WARNING, "purchaseSession, Customer {0} is on Hold", c.getUsername());
-                    JsfUtil.addSuccessMessage(configMapFacade.getConfig("purchaseSessionDirectDebitPaymentProcessingFailedOnHold"));
-                    sb.setStatus("PURCHASE-HOLD");
-                    sb.setStatusDescription("The purchase via Direct debit failed as the customer is On-Hold");
-
-                } else if (c.getPaymentParametersId().getStatusDescription().contains("Waiting Bank Details")) {
-                    // the customer has not set up their payment method
-                    // notify them to contact staff or redirect to instant payment page
-                    LOGGER.log(Level.WARNING, "purchaseSession, Customer {0} is Waiting Bank Details", c.getUsername());
-                    JsfUtil.addSuccessMessage(configMapFacade.getConfig("purchaseSessionDirectDebitPaymentProcessingFailedBankDetails"));
-                    sb.setStatus("PURCHASE-WBD");
-                    sb.setStatusDescription("The purchase via Direct debit failed as the customer has not completed their payment method - Waiting Bank Details");
-                } else {
-                    // an unkown status is present log an error and redirect customer to instant payment page
-                    LOGGER.log(Level.SEVERE, "purchaseSession, Customer {0} is in an unknown status:{1}", new Object[]{c.getUsername(), c.getPaymentParametersId().getStatusDescription()});
-                    JsfUtil.addSuccessMessage(configMapFacade.getConfig("purchaseSessionDirectDebitPaymentProcessingFailedUnknown" + c.getPaymentParametersId().getStatusDescription()));
-                    sb.setStatus("PURCHASE-FAIL");
-                    sb.setStatusDescription("The purchase via Direct debit failed as the customer is in an unknown status: " + c.getPaymentParametersId().getStatusDescription());
+                    eziDebitPaymentGateway.redirectToPaymentGateway();
+                } catch (Exception e) {
+                    LOGGER.log(Level.WARNING, "purchaseSession, customer  {0} New authenticated customer signup is being redirected to the payment gateway signup form", c.getUsername());
                 }
-                //persist sb
-                ejbSessionBookingsFacade.create(sb);
-            } catch (Exception e) {
-                LOGGER.log(Level.WARNING, "purchaseSession, customer  {0} existing customer setup in gateway", c.getUsername());
+                // TODO need to check the call back from ezidebit to add the payment id to the booking
+                // TODO need to check the call back from ezidebit to add the payment id to the booking
+            } else {
+                try {
+                    if (c.getPaymentParametersId().getStatusDescription().contains("Active") || c.getPaymentParametersId().getStatusDescription().contains("New")) {
+                        // customer is set up just add a payment
+                        LOGGER.log(Level.INFO, "purchaseSession, customer  {0}  active in payment gateway - adding payment", c.getUsername());
+
+                        eziDebitPaymentGateway.addSinglePayment(c, bookingButtonSessionHistory.getSessionTemplate().getSessionCasualRate().floatValue(), sessionPurchaseTimestamp);
+                        JsfUtil.addSuccessMessage(configMapFacade.getConfig("purchaseSessionDirectDebitPaymentProcessing"));
+                        sb.setStatus("PURCHASE-ACTIVE");
+                        sb.setStatusDescription("A new payment is being added for an existing customer");
+
+                    } else if (c.getPaymentParametersId().getStatusDescription().contains("Hold")) {
+                        // customer is on hold notify them to contact staff and redirect customer to instant payment page
+                        // if we just take them off hold without comfirmation their regular payemts may restart
+
+                        LOGGER.log(Level.WARNING, "purchaseSession, Customer {0} is on Hold", c.getUsername());
+                        JsfUtil.addSuccessMessage(configMapFacade.getConfig("purchaseSessionDirectDebitPaymentProcessingFailedOnHold"));
+                        sb.setStatus("PURCHASE-HOLD");
+                        sb.setStatusDescription("The purchase via Direct debit failed as the customer is On-Hold");
+
+                    } else if (c.getPaymentParametersId().getStatusDescription().contains("Waiting Bank Details")) {
+                        // the customer has not set up their payment method
+                        // notify them to contact staff or redirect to instant payment page
+                        LOGGER.log(Level.WARNING, "purchaseSession, Customer {0} is Waiting Bank Details", c.getUsername());
+                        JsfUtil.addSuccessMessage(configMapFacade.getConfig("purchaseSessionDirectDebitPaymentProcessingFailedBankDetails"));
+                        sb.setStatus("PURCHASE-WBD");
+                        sb.setStatusDescription("The purchase via Direct debit failed as the customer has not completed their payment method - Waiting Bank Details");
+                    } else {
+                        // an unkown status is present log an error and redirect customer to instant payment page
+                        LOGGER.log(Level.SEVERE, "purchaseSession, Customer {0} is in an unknown status:{1}", new Object[]{c.getUsername(), c.getPaymentParametersId().getStatusDescription()});
+                        JsfUtil.addSuccessMessage(configMapFacade.getConfig("purchaseSessionDirectDebitPaymentProcessingFailedUnknown" + c.getPaymentParametersId().getStatusDescription()));
+                        sb.setStatus("PURCHASE-FAIL");
+                        sb.setStatusDescription("The purchase via Direct debit failed as the customer is in an unknown status: " + c.getPaymentParametersId().getStatusDescription());
+                    }
+                    //persist sb
+                    ejbSessionBookingsFacade.create(sb);
+                } catch (Exception e) {
+                    LOGGER.log(Level.WARNING, "purchaseSession, customer  {0} existing customer setup in gateway", c.getUsername());
+                }
+            }
+            ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
+            HttpServletRequest request = (HttpServletRequest) ec.getRequest();
+            try {
+                ec.redirect(request.getContextPath() + "/myDetails.xhtml");
+            } catch (IOException iOException) {
+                LOGGER.log(Level.WARNING, "purchaseSession, could not redirect to /myDetails page", iOException);
             }
         }
-        ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
-        HttpServletRequest request = (HttpServletRequest) ec.getRequest();
-        try {
-            ec.redirect(request.getContextPath() + "/myDetails.xhtml");
-        } catch (IOException iOException) {
-            LOGGER.log(Level.WARNING, "purchaseSession, could not redirect to /myDetails page", iOException);
-        }
-
     }
 
     /**
