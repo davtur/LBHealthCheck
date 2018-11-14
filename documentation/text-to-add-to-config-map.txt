@@ -2191,3 +2191,6 @@ ListSessionHistoryImpersonateCustomer=Tick this box to enable viewing a customer
 
 
 login.signup.timetable.url=http://www.manlybeachfemalefitness.com.au/schedule/
+
+login.password.reset.templateSessionBookingPlaceholder=!--CLASSBOOKING--!
+template.sessionbooking.confirmation.email.subject=MBFF Class Booking Confirmation

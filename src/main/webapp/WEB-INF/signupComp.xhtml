@@ -28,7 +28,7 @@
             </div>
             <div class="ui-g-12">
                 <div class="ui-g-4 ui-lg-4 ui-md-4 button-container">
-                    <p:commandButton id="standard" value="Sign in" styleClass="Fs16" actionListener="#{loginBean.login}"  update=":growl" title="Click this button to login after entering your username and password above."/> 
+                    <p:commandButton id="standard" value="Sign in" styleClass="Fs16" actionListener="#{loginBean.loginFromTimetable}"  update=":growl" title="Click this button to login after entering your username and password above."/> 
                 </div>
                 <div class="ui-g-4 ui-lg-4 ui-md-4 button-container">
                     <p:commandButton id="facebook" icon="fa fa-facebook-f" widgetVar="fbLogin" onclick="PF('fbLogin').disable()" styleClass="loginButtonFacebook" value="Sign in with Facebook" actionListener="#{facebookLoginBean.timetableFacebookRedirect}" title="Click this button to login with your facebook account. Note you must use the same email address with pure fitness and facebook."/>

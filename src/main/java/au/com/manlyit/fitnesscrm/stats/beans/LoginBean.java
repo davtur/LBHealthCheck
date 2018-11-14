@@ -273,6 +273,13 @@ public class LoginBean implements Serializable {
             if (adminRole == null || adminRole.isEmpty()) {
                 adminRole = "ADMIN"; //default
             }
+             if(isDontRedirect() == true){
+                 landingPage = getValueFromKey("timetable.redirect.landingpage");
+                  
+                logger.log(Level.INFO, "Redirection to timetable.");
+               setDontRedirect(false);
+            
+             }else{
             if (mobileDevice(request)) {
                 httpSession.setAttribute("MOBILE_DEVICE", "TRUE");
                 logger.log(Level.INFO, "Mobile Device user agent detected. Redirecting to the mobile landing page.");
@@ -286,12 +293,17 @@ public class LoginBean implements Serializable {
             } else {
                 landingPage = getValueFromKey("facebook.redirect.landingpage");
             }
+        }
             ec.redirect(request.getContextPath() + landingPage);
             logger.log(Level.INFO, "Redirecting to Landing Page:", landingPage);
         } catch (IOException e) {
             JsfUtil.addErrorMessage(e, "Login Failed.");
             logger.log(Level.WARNING, "Login Failed", e);
         }
+    }
+    public void loginFromTimetable(){
+        setDontRedirect(true);
+        login();
     }
 
     public void login() {
@@ -312,10 +324,10 @@ public class LoginBean implements Serializable {
                 request.login(loginId, this.password);
             } catch (ServletException servletException) {
                 String errorMessage = servletException.getMessage();
-                if (errorMessage.contains("UT010030") == false) {//javax.servlet.ServletException: UT010030: User already logged in
+                if (errorMessage.contains("UT010030") == true) {//javax.servlet.ServletException: UT010030: User already logged in
 
                     logger.log(Level.INFO, "This is request has already been authenticated. User {0} is already logged in  - redirecting to landing page.", loginId);
-
+                     redirectToLandingPage();
                 } else if (errorMessage.contains("Login failed")) {
                     logger.log(Level.INFO, "Login Failed - Bad username or Password");
                     JsfUtil.addErrorMessage("Login Failed", "Username or Password is incorrect!");

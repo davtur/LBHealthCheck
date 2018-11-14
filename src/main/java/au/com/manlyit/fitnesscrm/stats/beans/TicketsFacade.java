@@ -43,7 +43,7 @@ public class TicketsFacade extends AbstractFacade<Tickets> {
     private static final Logger LOGGER = Logger.getLogger(TicketsFacade.class.getName());
     @PersistenceContext(unitName = "FitnessStatsPU")
     private EntityManager em;
-    private static boolean debug = false;
+    private static boolean debug = true;
 
     @Override
     protected EntityManager getEntityManager() {
@@ -56,7 +56,7 @@ public class TicketsFacade extends AbstractFacade<Tickets> {
 
     public List<Tickets> findCustomerTicketsByDateRange(Customers cust, Date startDate, Date endDate, boolean sortAsc) {
         List<Tickets> retList = null;
-        ArrayList<Predicate> predicatesList1 = new ArrayList<>();
+        
 
         try {
             CriteriaBuilder cb = em.getCriteriaBuilder();
@@ -72,11 +72,11 @@ public class TicketsFacade extends AbstractFacade<Tickets> {
             customer = rt.get("customer");
 
             orderByDate = validFrom;
-            predicatesList1.add(cb.greaterThanOrEqualTo(validFrom, startDate));
-            predicatesList1.add(cb.lessThanOrEqualTo(expires, endDate));
-            predicatesList1.add(cb.equal(customer, cust));
+            Predicate p1 = cb.greaterThanOrEqualTo(validFrom, startDate);
+            Predicate p2 = cb.lessThanOrEqualTo(expires, endDate);
+            Predicate p3 = cb.equal(customer, cust);
 
-            cq.where(cb.and(predicatesList1.<Predicate>toArray(new Predicate[predicatesList1.size()])));
+            cq.where(cb.and(p1,p2,p3));
 
             cq.select(rt);
             if (sortAsc) {

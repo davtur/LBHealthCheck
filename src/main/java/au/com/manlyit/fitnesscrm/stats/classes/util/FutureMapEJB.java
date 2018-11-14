@@ -465,7 +465,7 @@ public class FutureMapEJB implements Serializable {
                         ticketsAdded++;
                     }
                 }
-                LOGGER.log(Level.INFO, "Adding Tickets for Customer id {0}, existing tickets {1}, tickets added {2},startDate {3}, stopDate {4} ", new Object[]{c.getId(), at.size(), ticketsAdded, ticketStartDate.getTime(), ticketStopDate.getTime()});
+                LOGGER.log(Level.INFO, "Adding Tickets for Customer id {0}, existing tickets {1}, tickets added {2},startDate {3}, stopDate {4} ", new Object[]{c.getId(), at.size(), ticketsAdded, ticketStartDate, ticketStopDate});
             } catch (Exception ex) {
                 Logger.getLogger(FutureMapEJB.class.getName()).log(Level.SEVERE, "issueOneWeeksTicketsForCust", ex.getMessage());
             }
@@ -484,7 +484,7 @@ public class FutureMapEJB implements Serializable {
                 GregorianCalendar ticketStopDate = new GregorianCalendar();
                 CalendarUtil.SetToNextDayOfWeek(Calendar.SUNDAY, ticketStopDate);
                 CalendarUtil.SetTimeToMidnight(ticketStopDate);
-                ticketStopDate.add(Calendar.MILLISECOND, -1);
+                ticketStopDate.add(Calendar.SECOND, -1);
 
                 for (int week = 0; week < weeksAheadToPolulate; week++) {
                     issueOneWeeksTicketsForCust(c, ticketStartDate.getTime(), ticketStopDate.getTime());
@@ -2885,7 +2885,7 @@ public class FutureMapEJB implements Serializable {
         }
 
         LOGGER.log(Level.INFO, "Future Map processGetAllCustPaymentsAndDetails completed");
-        //  storeResponseForSessionBeenToRetrieve("GetCustomerDetails", sessionId, pgr);
+        storeResponseForSessionBeenToRetrieve("GetCustomerDetails", sessionId, pgr);
         sendMessage(sessionId, "Get Customer Details & Payments", returnedMessage);
         LOGGER.log(Level.INFO, "Future Map processGetAllCustPaymentsAndDetails. Completed - Committing transaction to update.");
     }

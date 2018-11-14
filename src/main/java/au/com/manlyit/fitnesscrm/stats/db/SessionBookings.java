@@ -5,6 +5,7 @@
  */
 package au.com.manlyit.fitnesscrm.stats.db;
 
+import au.com.manlyit.fitnesscrm.stats.classes.util.BaseEntity;
 import java.io.Serializable;
 import java.util.Date;
 import javax.persistence.Basic;
@@ -48,7 +49,7 @@ import org.eclipse.persistence.config.CacheIsolationType;
     @NamedQuery(name = "SessionBookings.findAll", query = "SELECT s FROM SessionBookings s"),
     @NamedQuery(name = "SessionBookings.findById", query = "SELECT s FROM SessionBookings s WHERE s.id = :id"),
     @NamedQuery(name = "SessionBookings.findByBookingTime", query = "SELECT s FROM SessionBookings s WHERE s.bookingTime = :bookingTime")})
-public class SessionBookings implements Serializable {
+public class SessionBookings implements BaseEntity, Serializable {
     @Size(max = 255)
     @Column(name = "status_description")
     private String statusDescription;
@@ -73,6 +74,9 @@ public class SessionBookings implements Serializable {
     @JoinColumn(name = "payment_id", referencedColumnName = "id")
     @OneToOne
     private Payments paymentId;
+    @JoinColumn(name = "ticket_id", referencedColumnName = "id")
+    @OneToOne
+    private Tickets ticketId;
 
     public SessionBookings() {
     }
@@ -160,6 +164,20 @@ public class SessionBookings implements Serializable {
 
     public void setStatusDescription(String statusDescription) {
         this.statusDescription = statusDescription;
+    }
+
+    /**
+     * @return the ticketId
+     */
+    public Tickets getTicketId() {
+        return ticketId;
+    }
+
+    /**
+     * @param ticketId the ticketId to set
+     */
+    public void setTicketId(Tickets ticketId) {
+        this.ticketId = ticketId;
     }
     
 }

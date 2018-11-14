@@ -469,6 +469,30 @@ public class CustomersController implements Serializable {
         ejbFacade.edit(cust);
 
     }
+    
+    
+     public void sendClassBookingConfirmationEmail() {
+        FacesContext context = FacesContext.getCurrentInstance();
+        LoginBean controller = (LoginBean) context.getApplication().getELResolver().getValue(context.getELContext(), null, "loginBean");
+        controller.doPasswordReset("system.email.admin.paymentForm.template", current, configMapFacade.getConfig("sendPaymentFormEmailSubject"));
+        JsfUtil.addSuccessMessage(configMapFacade.getConfig("sendPaymentFormEmailSuccessMessage") + " " + current.getFirstname() + " " + current.getLastname() + ".");
+        String auditDetails = "Customer Payment Form Email Sent For:" + current.getFirstname() + " " + current.getLastname() + ".";
+        String changedFrom = "N/A";
+        String changedTo = "On Board Email Sent";
+
+        try {
+            String url = current.getPaymentParametersId().getWebddrUrl();
+            int a = url.indexOf("rAmount");
+            int b = url.indexOf("businessOrPerson");
+            url = url.substring(a, b);
+            auditDetails += "\r\n" + url;
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "sendPaymentFormEmail: Couldn't get the payment details from the webDDR Url for the audit log and cutomer notes");
+        }
+        addCustomerToUsersGroup(current);
+        createCombinedAuditLogAndNote(loggedInUser, current, "sendPaymentFormEmail", auditDetails, changedFrom, changedTo);
+    }
+    
 
     public void sendPaymentFormEmail() {
         FacesContext context = FacesContext.getCurrentInstance();

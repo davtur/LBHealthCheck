@@ -1,17 +1,20 @@
 package au.com.manlyit.fitnesscrm.stats.classes;
 
+import au.com.manlyit.fitnesscrm.stats.beans.ActivationBean;
+import au.com.manlyit.fitnesscrm.stats.beans.LoginBean;
+import static au.com.manlyit.fitnesscrm.stats.beans.LoginBean.generateUniqueToken;
 import au.com.manlyit.fitnesscrm.stats.db.SessionTimetable;
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PaginationHelper;
 import au.com.manlyit.fitnesscrm.stats.beans.SessionTimetableFacade;
 import au.com.manlyit.fitnesscrm.stats.classes.util.CalendarUtil;
 import au.com.manlyit.fitnesscrm.stats.classes.util.CrmScheduleEvent;
-import au.com.manlyit.fitnesscrm.stats.classes.util.FutureMapEJB;
+import au.com.manlyit.fitnesscrm.stats.classes.util.StringEncrypter;
 import au.com.manlyit.fitnesscrm.stats.classes.util.TimetableRows;
 import au.com.manlyit.fitnesscrm.stats.classes.util.TimetableScheduleEvent;
+import au.com.manlyit.fitnesscrm.stats.db.Activation;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import au.com.manlyit.fitnesscrm.stats.db.Participants;
-import au.com.manlyit.fitnesscrm.stats.db.Plan;
 import au.com.manlyit.fitnesscrm.stats.db.Schedule;
 import au.com.manlyit.fitnesscrm.stats.db.SessionBookings;
 import au.com.manlyit.fitnesscrm.stats.db.SessionHistory;
@@ -20,6 +23,9 @@ import au.com.manlyit.fitnesscrm.stats.db.Tickets;
 import java.io.IOException;
 
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -27,6 +33,8 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Properties;
+import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.enterprise.context.SessionScoped;
@@ -79,9 +87,16 @@ public class SessionTimetableController implements Serializable {
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.CustomersFacade ejbCustomersFacade;
     @Inject
+    private au.com.manlyit.fitnesscrm.stats.beans.ActivationFacade ejbActivationFacade;
+    @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.SessionHistoryFacade sessionHistoryFacade;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade configMapFacade;
+    @Inject
+    private au.com.manlyit.fitnesscrm.stats.beans.PaymentBean ejbPaymentBean;
+    @Inject
+    private au.com.manlyit.fitnesscrm.stats.beans.EmailTemplatesFacade ejbEmailTemplatesFacade;
+private final StringEncrypter encrypter = new StringEncrypter("(lqKdh^Gr$2F^KJHG654)");
 
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.ScheduleFacade ejbScheduleFacade;
@@ -936,6 +951,81 @@ public class SessionTimetableController implements Serializable {
         return result;
     }
 
+    private void sendBookingConfirmationEmail(SessionBookings sb, Customers cust, String templateName, String subject) {
+//valid user that wants the password reset
+        //generate link and send
+         if (cust != null) {
+            String uniquetoken = generateUniqueToken(10);
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmssSSS");
+            String timestamp = sdf.format(new Date());
+            String nonce = timestamp + uniquetoken;
+            Activation act = new Activation(0, nonce, new Date());
+            String nonceEncrypted = encrypter.encrypt(configMapFacade.getConfig("login.password.reset.token") + nonce);
+            String encodedNonceEncrypted;
+            String urlLink;
+            try {
+                encodedNonceEncrypted = URLEncoder.encode(nonceEncrypted, "UTF-8");
+                act.setCustomer(cust);
+                ejbActivationFacade.create(act);
+                urlLink = configMapFacade.getConfig("login.password.reset.redirect.url") + encodedNonceEncrypted;
+
+                //send email
+                String templateLinkPlaceholder = configMapFacade.getConfig("login.password.reset.templateLinkPlaceholder");
+                String templateTemporaryPasswordPlaceholder = configMapFacade.getConfig("login.password.reset.templateTemporaryPasswordPlaceholder");
+                String templateUsernamePlaceholder = configMapFacade.getConfig("login.password.reset.templateUsernamePlaceholder");
+                String templateSessionBookingPlaceholder = configMapFacade.getConfig("login.password.reset.templateSessionBookingPlaceholder");
+                
+                
+                //String htmlText = configMapFacade.getConfig(templateName);
+                String htmlText = ejbEmailTemplatesFacade.findTemplateByName(templateName).getTemplate();
+
+                htmlText = htmlText.replace(templateLinkPlaceholder, urlLink);
+                htmlText = htmlText.replace(templateUsernamePlaceholder, cust.getUsername());
+                //  String tempPassword = generateUniqueToken(8);
+                //String tempPassword = RandomString.generateRandomString(new Random(), 8);
+                String tempPassword = " Please reset your password at the login page.";
+                //current.setPassword(PasswordService.getInstance().encrypt(tempPassword));
+                // ejbCustomerFacade.editAndFlush(current);
+                htmlText = htmlText.replace(templateTemporaryPasswordPlaceholder, tempPassword);
+                //String htmlText = "<table width=\"600\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\">  <tr>    <td><img src=\"cid:logoimg_cid\"/></td>  </tr>  <tr>    <td height=\"220\"> <p>Pure Fitness Manly</p>      <p>Please click the following link to reset your password:</p><p>To reset your password click <a href=\"" + urlLink + "\">here</a>.</p></td>  </tr>  <tr>    <td height=\"50\" align=\"center\" valign=\"middle\" bgcolor=\"#CCCCCC\">www.purefitnessmanly.com.au | sarah@purefitnessmanly.com.au | +61433818067</td>  </tr></table>";
+
+                //String host, String to, String ccAddress, String from, String emailSubject, String message, String theAttachedfileName, boolean debug
+                //emailAgent.send("david@manlyit.com.au", "", "info@purefitnessmanly.com.au", "Password Reset", htmlText, null, true);
+                Future<Boolean> emailSendResult = ejbPaymentBean.sendAsynchEmail(cust.getEmailAddress(), configMapFacade.getConfig("PasswordResetCCEmailAddress"), configMapFacade.getConfig("PasswordResetFromEmailAddress"), subject, htmlText, null, emailServerProperties(), false);
+                JsfUtil.addSuccessMessage("Password Reset Successful!", configMapFacade.getConfig("PasswordResetSuccessful"));
+                FacesContext context = FacesContext.getCurrentInstance();
+                ActivationBean controller = context.getApplication().evaluateExpressionGet(context, "#{activationBean}", ActivationBean.class);
+                controller.setValid(true);
+            } catch (UnsupportedEncodingException ex) {
+                Logger.getLogger(LoginBean.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+        } else {
+            JsfUtil.addErrorMessage("Error", configMapFacade.getConfig("PasswordResetErrorValidUsernameRequired"));
+        }
+
+    }
+
+    private Properties emailServerProperties() {
+        Properties props = new Properties();
+
+        props.put("mail.smtp.host", configMapFacade.getConfig("mail.smtp.host"));
+        props.put("mail.smtp.auth", configMapFacade.getConfig("mail.smtp.auth"));
+        props.put("mail.debug", configMapFacade.getConfig("mail.debug"));
+        props.put("mail.smtp.ssl.enable", configMapFacade.getConfig("mail.smtp.ssl.enable"));
+        props.put("mail.smtp.port", configMapFacade.getConfig("mail.smtp.port"));
+        props.put("mail.smtp.socketFactory.port", configMapFacade.getConfig("mail.smtp.socketFactory.port"));
+        props.put("mail.smtp.socketFactory.class", configMapFacade.getConfig("mail.smtp.socketFactory.class"));
+        props.put("mail.smtp.socketFactory.fallback", configMapFacade.getConfig("mail.smtp.socketFactory.fallback"));
+        props.put("mail.smtp.ssluser", configMapFacade.getConfig("mail.smtp.ssluser"));
+        props.put("mail.smtp.sslpass", configMapFacade.getConfig("mail.smtp.sslpass"));
+        props.put("mail.smtp.headerimage.url", configMapFacade.getConfig("mail.smtp.headerimage.url"));
+        props.put("mail.smtp.headerimage.cid", configMapFacade.getConfig("mail.smtp.headerimage.cid"));
+
+        return props;
+
+    }
+
     public void purchaseSession() {
         LOGGER.log(Level.INFO, "Purchase Session button clicked.");
         FacesContext context = FacesContext.getCurrentInstance();
@@ -956,19 +1046,25 @@ public class SessionTimetableController implements Serializable {
         if (ct.isEmpty() == false) {
             // customer has a ticket so book them in
             // TODO check class sizes arent full
-
+            LOGGER.log(Level.INFO, "purchaseSession, customer  {0}  active in payment gateway - has {1} tickets available - booking session", new Object[]{c.getUsername()});
             try {
-                ejbSessionBookingsFacade.create(sb);
+                
+                Tickets t = ct.get(0);
+                t.setDateUsed(new Date());
+                ejbTicketsFacade.edit(t);
+                sb.setTicketId(t);
+                sb.setStatus("TICKETED");
                 // send booking confirmation email.
-                
+                ejbSessionBookingsFacade.create(sb);
+                sendBookingConfirmationEmail(sb,c,"system.email.sessionBooking.confirmation.template",configMapFacade.getConfig("template.sessionbooking.confirmation.email.subject"));
             } catch (Exception e) {
-                
-                LOGGER.log(Level.SEVERE, "Book Session Failed.Cust id {0}, bookingid {1}, exception message {2}",new Object[]{c.getId(),sb.getId(),e});
-                
+
+                LOGGER.log(Level.SEVERE, "Book Session Failed.Cust id {0}, bookingid {1}, exception message {2}", new Object[]{c.getId(), sb.getId(), e});
+
             }
         } else {
             //no tickets
-
+            LOGGER.log(Level.INFO, "purchaseSession, customer  {0}  active in payment gateway - no tickets available - sending to my details page to update plan or payments", c.getUsername());
             // is the customer already set up in the payment gateway ?
             if (c.getPaymentParametersId() == null || c.getPaymentParametersId().getStatusDescription() == null || c.getPaymentParametersId().getStatusDescription().contains("Cancelled")) {
                 try {

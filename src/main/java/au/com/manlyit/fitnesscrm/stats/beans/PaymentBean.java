@@ -98,7 +98,6 @@ public class PaymentBean implements Serializable {
 
     @Inject
     private EziDebitPaymentGateway eziDebit;
-    
 
     private INonPCIService getWs() {
         /*URL url = null;
@@ -1011,7 +1010,12 @@ public class PaymentBean implements Serializable {
             } else {
                 eziResponse = getWs().getScheduledPayments(digitalKey, fromDateString, toDateString, eziDebitCustomerId, ourSystemCustomerReference);
             }
-            if (eziResponse.getError() == 0) {// any errors will be a non zero value
+            boolean noScheduledPaymentsFound = false;
+            if (eziResponse.getError() == 921) {// "No data matched the selection parameters." No Scheduled Payments for this customer
+                String errorMessage = eziResponse.getErrorMessage().toString();
+                noScheduledPaymentsFound = true;
+            }
+            if (eziResponse.getError() == 0 || noScheduledPaymentsFound == true) {// any errors will be a non zero value
                 resultArrayOfScheduledPayments = eziResponse.getData().getValue();
                 if (resultArrayOfScheduledPayments != null) {
                     LOGGER.log(Level.INFO, "Payment Bean - Get Customer Scheduled Payments Response Recieved from ezidebit for Customer  - {0}, Number of Payments : {1} ", new Object[]{cust.getUsername(), resultArrayOfScheduledPayments.getScheduledPayment().size()});
@@ -1029,7 +1033,7 @@ public class PaymentBean implements Serializable {
                                 Date testDate = testCal.getTime();
 
                                 //Collection<Payments> crmPayList = cust.getPaymentsCollection();
-                                Collection<Payments> crmPayList = paymentsFacade.findPaymentsByCustomer(cust,true);
+                                Collection<Payments> crmPayList = paymentsFacade.findPaymentsByCustomer(cust, true);
                                 for (Payments crmPay : crmPayList) {
                                     boolean found = false;
                                     for (ScheduledPayment pay : payList) {
@@ -1176,13 +1180,19 @@ public class PaymentBean implements Serializable {
                     }
                     if (sendAlertEmail) {
                         sendAlertEmailToAdmin(message, sessionId);
-                        LOGGER.log(Level.WARNING, "PaymentBean processGetScheduledPayments ALERT EMAIL SENT {0}", new Object[]{    message});
+                        LOGGER.log(Level.WARNING, "PaymentBean processGetScheduledPayments ALERT EMAIL SENT {0}", new Object[]{message});
                     }
                     LOGGER.log(Level.INFO, "PaymentBean processGetScheduledPayments completed");
 
                 } else {
-                    LOGGER.log(Level.WARNING, "getScheduledPayments Response: Error - NULL Result ");
-                    pgr = new PaymentGatewayResponse(false, null, "", "-1", "Scheduled Payment information was not recieved from the payment gateway due to an error.");
+                    if (noScheduledPaymentsFound == true) {
+                        LOGGER.log(Level.INFO, "Payment Bean - Get Customer Scheduled Payments Response Recieved from ezidebit for Customer  - {0}, No Scheduled Payments Found ", new Object[]{cust.getUsername()});
+                        pgr = new PaymentGatewayResponse(true, resultArrayOfScheduledPayments, "Updated Scheduled Payment Information was recieved from the payment gateway.", "-1", "");
+
+                    } else {
+                        LOGGER.log(Level.WARNING, "getScheduledPayments Response: Error - NULL Result ");
+                        pgr = new PaymentGatewayResponse(false, null, "", "-1", "Scheduled Payment information was not recieved from the payment gateway due to an error.");
+                    }
                 }
 
             } else {
@@ -1286,7 +1296,7 @@ public class PaymentBean implements Serializable {
                 return;
             }
             futureMap.sendNotificationToAdmin(message, null);
-           
+
         } catch (Exception ex) {
             Logger.getLogger(PaymentBean.class.getName()).log(Level.SEVERE, "sendAlertEmailToAdmin Failed", ex);
         }
@@ -2719,7 +2729,7 @@ public class PaymentBean implements Serializable {
             futureMap.processAddPaymentResult(sessionId, pgr);
             return new AsyncResult<>(pgr);
         }
-         if (payment.getId() <=0) {
+        if (payment.getId() <= 0) {
             PaymentGatewayResponse pgr = new PaymentGatewayResponse(false, payment, "PAYMENT ID not commited to DB", payment.getId().toString(), "Payment ID is <=0. This is not  valid primary key. The payment cant be added to payment gateway!");
             futureMap.processAddPaymentResult(sessionId, pgr);
             return new AsyncResult<>(pgr);
