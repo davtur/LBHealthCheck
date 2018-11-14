@@ -18,6 +18,7 @@ import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import au.com.manlyit.fitnesscrm.stats.db.NotificationsLog;
 import au.com.manlyit.fitnesscrm.stats.db.Payments;
 import au.com.manlyit.fitnesscrm.stats.db.Plan;
+import au.com.manlyit.fitnesscrm.stats.db.SessionTypes;
 import au.com.manlyit.fitnesscrm.stats.db.Tickets;
 import au.com.manlyit.fitnesscrm.stats.webservices.ArrayOfPayment;
 import au.com.manlyit.fitnesscrm.stats.webservices.ArrayOfScheduledPayment;
@@ -57,7 +58,6 @@ import javax.ejb.Timer;
 import javax.ejb.TransactionManagement;
 import javax.ejb.TransactionManagementType;
 import javax.enterprise.context.ApplicationScoped;
-import javax.faces.event.ActionEvent;
 import javax.faces.push.Push;
 import javax.faces.push.PushContext;
 import javax.inject.Inject;
@@ -106,7 +106,8 @@ public class FutureMapEJB implements Serializable {
     private final Object paymentReportLockObject = new Object();
     private final Object updateScheduleLock = new Object();
     private final Object issueTicketsLockObject = new Object();
-     private final Object issueOneWeeksTicketsLockObject = new Object();
+    private final Object issueOneWeeksTicketsLockObject = new Object();
+    private final Object issueBlockOfTicketsLockObject = new Object();
     private final AtomicBoolean settlementReportLock = new AtomicBoolean(false);
     private final AtomicBoolean paymentReportLock = new AtomicBoolean(false);
     //private final AtomicBoolean updateScheduleLock = new AtomicBoolean(false);
@@ -119,6 +120,8 @@ public class FutureMapEJB implements Serializable {
     private ConfigMapFacade configMapFacade;
     @Inject
     private PaymentsFacade paymentsFacade;
+    @Inject
+    private au.com.manlyit.fitnesscrm.stats.beans.SessionTypesFacade sessionTypesFacade;
     @Inject
     private NotificationsLogFacade notificationsLogFacade;
     @Inject
@@ -442,8 +445,51 @@ public class FutureMapEJB implements Serializable {
         }
 
     }
+    
+     public void issuePackOfTickets(Customers c, int validWeeks, int numberOfTickets) {
 
-   
+        GregorianCalendar ticketStartDate = new GregorianCalendar();
+        CalendarUtil.SetToLastDayOfWeek(Calendar.SUNDAY, ticketStartDate);
+        CalendarUtil.SetTimeToMidnight(ticketStartDate);
+
+        GregorianCalendar ticketStopDate = new GregorianCalendar();
+        ticketStopDate.setTimeInMillis(ticketStartDate.getTimeInMillis());
+        ticketStopDate.add(Calendar.WEEK_OF_YEAR, validWeeks );
+        
+        ticketStopDate.add(Calendar.DAY_OF_YEAR, 1);
+        ticketStopDate.add(Calendar.SECOND, -1);
+
+        issueBlockOfTickets(c, ticketStartDate.getTime(), ticketStopDate.getTime(), sessionTypesFacade.findASessionTypeByName("Group Training"), numberOfTickets);
+
+    }
+
+    
+
+    public void issueBlockOfTickets(Customers c, Date ticketStartDate, Date ticketStopDate, SessionTypes sessionType, int number) {
+
+        synchronized (issueBlockOfTicketsLockObject) {
+            try {
+
+                int ticketsAdded = 0;
+
+                for (int n = 0; n < number; n++) {
+                    Tickets t = new Tickets();
+                    t.setDatePurchased(new Date());
+                    t.setCustomer(c);
+                    t.setSessionType(sessionType);
+                    t.setValidFrom(ticketStartDate);
+                    t.setExpires(ticketStopDate);
+                    ejbTicketsFacade.create(t);
+                    ticketsAdded++;
+                }
+
+                LOGGER.log(Level.INFO, "Adding Block of Tickets for Customer id {0},  tickets added {2},startDate {3}, stopDate {4} ", new Object[]{c.getId(), ticketsAdded, ticketStartDate, ticketStopDate});
+            } catch (Exception ex) {
+                Logger.getLogger(FutureMapEJB.class.getName()).log(Level.SEVERE, "issueBlockOfTickets", ex.getMessage());
+            }
+        }
+    }
+
     public void issueOneWeeksTicketsForCust(Customers c, Date ticketStartDate, Date ticketStopDate) {
 
         synchronized (issueOneWeeksTicketsLockObject) {

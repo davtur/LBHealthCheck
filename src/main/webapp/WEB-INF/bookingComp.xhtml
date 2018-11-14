@@ -68,6 +68,15 @@
                                 </div>
 
                             </div>
+                            <div class="Seperator"></div>
+                            <div class="Container100  gray ">
+                                <div class="ContainerIndent">
+
+                                    <h:outputText  rendered="#{sessionTimetableController.sessionAlreadyBooked}" value="You have already booked this session.Please click cancel if you cant make it." />
+                                    <p:messages showDetail="true"/>
+                                </div>
+                                
+                            </div>
                             <div class="EmptyBox10"></div>
 
                             <!--      </p:panel>
@@ -75,19 +84,14 @@
                         </div>
                     </div>
 
-                    <p:messages showDetail="true"/>
-                    <h:panelGrid id="dialogueGrid" columns="2"  cellpadding="5" >
-
-                        <p:outputLabel value="Information:"  />
-
-                    </h:panelGrid>
 
                 </div>
             </div>
             <div class="Container100 Responsive100">
                 <div class="ContainerIndent">
-                    <p:commandButton icon="ui-icon-check fa fa-check white Fs14" id="dialogueSave"   actionListener="#{sessionTimetableController.purchaseSession}"  value="#{configMapController.getKey('BookingFormPurchaseSessionLink')}" update=":growl "/>                
+                    <p:commandButton icon="ui-icon-check fa fa-check white Fs14" id="dialogueSave" disabled="#{sessionTimetableController.sessionAlreadyBooked}"  actionListener="#{sessionTimetableController.purchaseSession}"  value="#{configMapController.getKey('BookingFormPurchaseSessionLink')}" update=":growl "/>                
                     <p:commandButton icon=" fa fa-times-circle white Fs14" id="dialogueDiscard" onclick=" PF('bookingDialog').hide()"  actionListener="#{customersController.cancelCreateDialogue}" value="#{configMapController.getKey('CancelSignupLink')}" update=":growl"/>                
+
                 </div>
             </div>
 

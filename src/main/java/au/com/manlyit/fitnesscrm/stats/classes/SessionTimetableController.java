@@ -37,6 +37,7 @@ import java.util.Properties;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.el.ELException;
 import javax.enterprise.context.SessionScoped;
 import javax.faces.application.FacesMessage;
 import javax.faces.component.UIComponent;
@@ -96,7 +97,7 @@ public class SessionTimetableController implements Serializable {
     private au.com.manlyit.fitnesscrm.stats.beans.PaymentBean ejbPaymentBean;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.EmailTemplatesFacade ejbEmailTemplatesFacade;
-private final StringEncrypter encrypter = new StringEncrypter("(lqKdh^Gr$2F^KJHG654)");
+    private final StringEncrypter encrypter = new StringEncrypter("(lqKdh^Gr$2F^KJHG654)");
 
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.ScheduleFacade ejbScheduleFacade;
@@ -927,7 +928,7 @@ private final StringEncrypter encrypter = new StringEncrypter("(lqKdh^Gr$2F^KJHG
         }
     }
 
-    public List<Tickets> doesTheCustomerHaveATicketForAGroupSession(Customers c) {
+    public List<Tickets> doesTheCustomerHaveATicketForAGroupSession(Customers c,Date sessionDate) {
 
         List<Tickets> result = new ArrayList<>();
         GregorianCalendar ticketStartDate = new GregorianCalendar();
@@ -939,7 +940,7 @@ private final StringEncrypter encrypter = new StringEncrypter("(lqKdh^Gr$2F^KJHG
         CalendarUtil.SetTimeToMidnight(ticketStopDate);
         ticketStopDate.add(Calendar.MILLISECOND, -1);
 
-        List<Tickets> at = ejbTicketsFacade.findCustomerTicketsByDateRange(c, ticketStartDate.getTime(), ticketStopDate.getTime(), true);
+        List<Tickets> at = ejbTicketsFacade.findCustomerTicketsValidForSessionDate(c, sessionDate, true);
         if (at != null) {
             for (Tickets t : at) {
                 // we only want group training session tickets
@@ -954,7 +955,7 @@ private final StringEncrypter encrypter = new StringEncrypter("(lqKdh^Gr$2F^KJHG
     private void sendBookingConfirmationEmail(SessionBookings sb, Customers cust, String templateName, String subject) {
 //valid user that wants the password reset
         //generate link and send
-         if (cust != null) {
+        if (cust != null) {
             String uniquetoken = generateUniqueToken(10);
             SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmssSSS");
             String timestamp = sdf.format(new Date());
@@ -974,8 +975,7 @@ private final StringEncrypter encrypter = new StringEncrypter("(lqKdh^Gr$2F^KJHG
                 String templateTemporaryPasswordPlaceholder = configMapFacade.getConfig("login.password.reset.templateTemporaryPasswordPlaceholder");
                 String templateUsernamePlaceholder = configMapFacade.getConfig("login.password.reset.templateUsernamePlaceholder");
                 String templateSessionBookingPlaceholder = configMapFacade.getConfig("login.password.reset.templateSessionBookingPlaceholder");
-                
-                
+
                 //String htmlText = configMapFacade.getConfig(templateName);
                 String htmlText = ejbEmailTemplatesFacade.findTemplateByName(templateName).getTemplate();
 
@@ -1026,6 +1026,32 @@ private final StringEncrypter encrypter = new StringEncrypter("(lqKdh^Gr$2F^KJHG
 
     }
 
+    public boolean isSessionAlreadyBooked() {
+        FacesContext context = FacesContext.getCurrentInstance();
+        try {
+            if (context != null) {
+                CustomersController controller = context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
+                Customers c = controller.getSelected();
+
+                if (c != null && bookingButtonSessionHistory != null) {
+                    SessionHistory sh = bookingButtonSessionHistory;
+                    List<SessionBookings> sbl = new ArrayList<>(sh.getSessionBookingsCollection());
+                    for (SessionBookings sb : sbl) {
+                        if (sb.getCustomerId().getId() == c.getId()) {
+                            // customer has already booked the session
+                            return true;
+                        }
+                    }
+                }
+            } else {
+                LOGGER.log(Level.WARNING, "sessionAlreadyBooked -- Faces Context is NULL");
+            }
+        } catch (ELException eLException) {
+            LOGGER.log(Level.WARNING, "sessionAlreadyBooked", eLException.getMessage());
+        }
+        return false;
+    }
+
     public void purchaseSession() {
         LOGGER.log(Level.INFO, "Purchase Session button clicked.");
         FacesContext context = FacesContext.getCurrentInstance();
@@ -1042,13 +1068,13 @@ private final StringEncrypter encrypter = new StringEncrypter("(lqKdh^Gr$2F^KJHG
         sb.setCustomerId(c);
 
         //does the customer have any tickets available for group sessions
-        List<Tickets> ct = doesTheCustomerHaveATicketForAGroupSession(c);
+        List<Tickets> ct = doesTheCustomerHaveATicketForAGroupSession(c,sb.getSessionHistoryId().getSessiondate());
         if (ct.isEmpty() == false) {
             // customer has a ticket so book them in
             // TODO check class sizes arent full
             LOGGER.log(Level.INFO, "purchaseSession, customer  {0}  active in payment gateway - has {1} tickets available - booking session", new Object[]{c.getUsername()});
             try {
-                
+
                 Tickets t = ct.get(0);
                 t.setDateUsed(new Date());
                 ejbTicketsFacade.edit(t);
@@ -1056,7 +1082,7 @@ private final StringEncrypter encrypter = new StringEncrypter("(lqKdh^Gr$2F^KJHG
                 sb.setStatus("TICKETED");
                 // send booking confirmation email.
                 ejbSessionBookingsFacade.create(sb);
-                sendBookingConfirmationEmail(sb,c,"system.email.sessionBooking.confirmation.template",configMapFacade.getConfig("template.sessionbooking.confirmation.email.subject"));
+                sendBookingConfirmationEmail(sb, c, "system.email.sessionBooking.confirmation.template", configMapFacade.getConfig("template.sessionbooking.confirmation.email.subject"));
             } catch (Exception e) {
 
                 LOGGER.log(Level.SEVERE, "Book Session Failed.Cust id {0}, bookingid {1}, exception message {2}", new Object[]{c.getId(), sb.getId(), e});

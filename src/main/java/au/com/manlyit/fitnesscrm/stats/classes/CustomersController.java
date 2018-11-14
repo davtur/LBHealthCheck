@@ -1437,6 +1437,7 @@ public class CustomersController implements Serializable {
             }
             setNewCustomer(setCustomerDefaults(new Customers()));
             addQuestionnaireMapItemsToCustomer(c);
+            futureMap. issuePackOfTickets(c,1,10);// issue free trial tickets - 10 tickets to group training sessions over 1 weeks
         } else {
             if (isWebserviceCall == false) {
                 JsfUtil.addErrorMessage("Error", configMapFacade.getConfig("SignUpValidationEmailExistsFailed"));

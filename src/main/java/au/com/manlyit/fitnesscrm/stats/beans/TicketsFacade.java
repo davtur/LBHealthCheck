@@ -104,5 +104,56 @@ public class TicketsFacade extends AbstractFacade<Tickets> {
 
         return retList;
     }
+    public List<Tickets> findCustomerTicketsValidForSessionDate(Customers cust, Date sessionDate,  boolean sortAsc) {
+        List<Tickets> retList = null;
+        
+
+        try {
+            CriteriaBuilder cb = em.getCriteriaBuilder();
+            CriteriaQuery<Tickets> cq = cb.createQuery(Tickets.class);
+            Root<Tickets> rt = cq.from(Tickets.class);
+            Expression<Customers> customer;
+            Expression<Date> orderByDate;
+            Expression<Date> validFrom;
+            Expression<Date> expires;
+
+            validFrom = rt.get("validFrom");
+            expires = rt.get("expires");
+            customer = rt.get("customer");
+
+            orderByDate = validFrom;
+            Predicate p1 = cb.lessThanOrEqualTo(validFrom, sessionDate);
+            Predicate p2 = cb.greaterThanOrEqualTo(expires, sessionDate);
+            Predicate p3 = cb.equal(customer, cust);
+
+            cq.where(cb.and(p1,p2,p3));
+
+            cq.select(rt);
+            if (sortAsc) {
+                cq.orderBy(cb.asc(orderByDate));
+            } else {
+                cq.orderBy(cb.desc(orderByDate));
+            }
+            TypedQuery<Tickets> q = em.createQuery(cq);
+            //q.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase);
+            retList = q.getResultList();
+
+            // for debugging
+            if (debug) {
+                Session session = getEntityManager().unwrap(JpaEntityManager.class).getActiveSession();
+                DatabaseQuery databaseQuery = ((EJBQueryImpl) q).getDatabaseQuery();
+                databaseQuery.prepareCall(session, new DatabaseRecord());
+                String sqlString = databaseQuery.getSQLString();
+                //This SQL will contain ? for parameters. To get the SQL translated with the arguments you need a DatabaseRecord with the parameter values.
+                // String sqlString2 = databaseQuery.getTranslatedSQLString(session, recordWithValues);
+                LOGGER.log(Level.INFO, "Get Customer Tickets by Session Date - SQL Query String: {0}  -----------------Records Found:{3}, session Date: {1}", new Object[]{sqlString, sessionDate,retList.size()});
+            }
+        } catch (QueryException e) {
+            LOGGER.log(Level.INFO, "TicketsFacade findCustomerTicketsByDateRange", e.getMessage());
+        }
+
+        return retList;
+    }
+
 
 }

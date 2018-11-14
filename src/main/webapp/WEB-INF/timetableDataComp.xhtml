@@ -87,7 +87,7 @@
 
                     </p:column>
                     <p:column>
-                        <p:commandButton   styleClass=" OrangeButton animated pulse infinite" update="@(.bookingFormUpdate)"  rendered="#{sessHist.sessionTemplate.showBookingButton}" value="#{configMapController.getKey('Timetable_BookingButtonTitle')}"  actionListener="#{sessionTimetableController.bookFromTimetable}" >
+                        <p:commandButton   styleClass=" OrangeButton animated pulse infinite" update="@(.bookingFormUpdate)" disabled="#{ empty  facesContext.externalContext.remoteUser}" rendered="#{sessHist.sessionTemplate.showBookingButton}" value="#{configMapController.getKey('Timetable_BookingButtonTitle')}"  actionListener="#{sessionTimetableController.bookFromTimetable}" >
                                              <!--<f:param name="sessionHistoryBookingId" value="#{sessHist.id}"/>-->
                             <f:setPropertyActionListener value="#{sessHist}" target="#{sessionTimetableController.bookingButtonSessionHistory}" />
                         </p:commandButton>                                                             
