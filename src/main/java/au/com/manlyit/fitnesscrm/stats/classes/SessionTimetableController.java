@@ -865,7 +865,8 @@ public class SessionTimetableController implements Serializable {
             while (date1.get(Calendar.DAY_OF_WEEK) != Calendar.MONDAY) {
                 date1.add(Calendar.DATE, -1);
             }
-            timetableStartDate = date1.getTime();
+            //timetableStartDate = date1.getTime();
+            timetableStartDate = new Date();
         }
         return timetableStartDate;
     }
