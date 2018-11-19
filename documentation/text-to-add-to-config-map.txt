@@ -2194,3 +2194,9 @@ login.signup.timetable.url=http://www.manlybeachfemalefitness.com.au/schedule/
 
 login.password.reset.templateSessionBookingPlaceholder=!--CLASSBOOKING--!
 template.sessionbooking.confirmation.email.subject=MBFF Class Booking Confirmation
+AddPaymentTitle_sessionMaxSize=The maximum number of participants in the class
+AddPaymentLabel_sessionMaxSize=Max Size
+BookingFormCancelSessionLink=Cancel Booking
+template.sessionbooking.cancellation.email.subject=MBFF Class Booking Cancelled
+BookingCancelledMessage=Your class booking has been cancelled
+BookingSuccessfulMessage=Your class has been booked

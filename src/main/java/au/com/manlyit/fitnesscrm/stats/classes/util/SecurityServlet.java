@@ -13,6 +13,8 @@ import au.com.manlyit.fitnesscrm.stats.classes.EziDebitPaymentGateway;
 import au.com.manlyit.fitnesscrm.stats.classes.PasswordService;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -176,16 +178,15 @@ public class SecurityServlet extends HttpServlet {
                 response.sendRedirect(request.getContextPath() + "/facebookError.html");
                 return;
             }
-           
-                redirectToLandingPage(request, response);
-           
+
+            redirectToLandingPage(request, response);
+
             /*if (mobileDevice(request)) {
                 httpSession.setAttribute("MOBILE_DEVICE", "TRUE");
                 response.sendRedirect(request.getContextPath() + getValueFromKey("facebook.redirect.mobilelandingpage"));
             } else {
                 response.sendRedirect(request.getContextPath() + getValueFromKey("facebook.redirect.landingpage"));
             }*/
-
         } else {
             logger.log(Level.WARNING, "CSRF protection validation - The Session ID passed to the original request was does not match the one in the post to this servlet");
             redirectToLandingPage(request, response);
@@ -209,27 +210,27 @@ public class SecurityServlet extends HttpServlet {
             if (adminRole == null || adminRole.isEmpty()) {
                 adminRole = "ADMIN"; //default
             }
-             if(loginBean.isDontRedirect() == true){
-                 landingPage = getValueFromKey("timetable.redirect.landingpage");
-                  
+            if (loginBean.isDontRedirect() == true) {
+                landingPage = getValueFromKey("timetable.redirect.landingpage");
+
                 logger.log(Level.INFO, "Redirection to timetable.");
-               loginBean.setDontRedirect(false);
-            
-             }else{
-            if (mobileDevice(request)) {
-                httpSession.setAttribute("MOBILE_DEVICE", "TRUE");
-                logger.log(Level.INFO, "Mobile Device user agent detected. Redirecting to the mobile landing page.");
-                if (request.isUserInRole(adminRole) == true) {
-                    landingPage = getValueFromKey("facebook.redirect.mobileadminlandingpage");
-                } else {
-                    landingPage = getValueFromKey("facebook.redirect.mobilelandingpage");
-                }
-            } else if (request.isUserInRole(adminRole) == true) {
-                landingPage = getValueFromKey("facebook.redirect.adminlandingpage");
+                loginBean.setDontRedirect(false);
+
             } else {
-                landingPage = getValueFromKey("facebook.redirect.landingpage");
+                if (mobileDevice(request)) {
+                    httpSession.setAttribute("MOBILE_DEVICE", "TRUE");
+                    logger.log(Level.INFO, "Mobile Device user agent detected. Redirecting to the mobile landing page.");
+                    if (request.isUserInRole(adminRole) == true) {
+                        landingPage = getValueFromKey("facebook.redirect.mobileadminlandingpage");
+                    } else {
+                        landingPage = getValueFromKey("facebook.redirect.mobilelandingpage");
+                    }
+                } else if (request.isUserInRole(adminRole) == true) {
+                    landingPage = getValueFromKey("facebook.redirect.adminlandingpage");
+                } else {
+                    landingPage = getValueFromKey("facebook.redirect.landingpage");
+                }
             }
-             }
             response.sendRedirect(request.getContextPath() + landingPage);
             logger.log(Level.INFO, "Redirecting to Landing Page:", landingPage);
         } catch (Exception e) {
@@ -260,27 +261,25 @@ public class SecurityServlet extends HttpServlet {
             String appId = getValueFromKey("facebook.app.id");//"247417342102284";
             String redirectUrl = getValueFromKey("facebook.redirect.url");//http://localhost:8080/FitnessStats/index.sec";
             String faceAppSecret = getValueFromKey("facebook.app.secret");//"33715d0844267d3ba11a24d44e90be80";
-            String newUrl = "https://graph.facebook.com/oauth/access_token?client_id="
-                    + appId + "&redirect_uri=" + redirectUrl + "&client_secret="
-                    + faceAppSecret + "&code=" + faceCode;
+            String newUrl = null;
+            try {
+                newUrl = "https://graph.facebook.com/oauth/access_token?client_id="
+                        + appId + "&redirect_uri=" + URLEncoder.encode(redirectUrl, "UTF-8") + "&client_secret="
+                        + faceAppSecret + "&code=" + faceCode;
+            } catch (UnsupportedEncodingException ex) {
+                Logger.getLogger(SecurityServlet.class.getName()).log(Level.SEVERE, "getFacebookAccessToken", ex);
+            }
             CloseableHttpClient httpclient = HttpClientBuilder.create().build();
+             JSONParser parser = new JSONParser();
             try {
                 HttpGet httpget = new HttpGet(newUrl);
                 ResponseHandler<String> responseHandler = new BasicResponseHandler();
                 String responseBody = httpclient.execute(httpget, responseHandler);
-                if (responseBody.contains("access_token=")) {
-                    token = StringUtils.removeEnd(StringUtils.removeStart(responseBody, "access_token="), "&expires=5180795");
-                } else {
-                    //Gson g = new Gson();
-                    //JsonObject j = g.fromJson(responseBody, JsonObject.class);
-                   // JsonValue jv = j.get("access_token");
-                   // token = jv.toString();
-                    
-                   JSONParser parser = new JSONParser();
+                if (responseBody != null) {
                     try {
                         Object obj = parser.parse(responseBody);
                         //org.json.simple.JSONArray array = (org.json.simple.JSONArray) obj;
-                        org.json.simple.JSONObject obj2 = (org.json.simple.JSONObject)obj;
+                        org.json.simple.JSONObject obj2 = (org.json.simple.JSONObject) obj;
                         token = (String) obj2.get("access_token");
                     } catch (ParseException parseException) {
                         logger.log(Level.WARNING, parseException.getMessage());
@@ -314,37 +313,37 @@ public class SecurityServlet extends HttpServlet {
         CloseableHttpClient httpclient = HttpClientBuilder.create().build();
         try {
             if (accessToken != null && !"".equals(accessToken)) {
-                String newUrl = "https://graph.facebook.com/me?access_token=" + accessToken;
+                String newUrl = "https://graph.facebook.com/me?fields=id,name,email,birthday&access_token=" + accessToken;
                 httpclient = HttpClientBuilder.create().build();
                 HttpGet httpget = new HttpGet(newUrl);
                 logger.log(Level.WARNING, "Get info from face --> executing request: {0}", httpget.getURI());
                 ResponseHandler<String> responseHandler = new BasicResponseHandler();
                 String responseBody = httpclient.execute(httpget, responseHandler);
-                String firstName = null;
+                String name = null;
                 String lastName = null;
+                String firstName = null;
                 String facebookId = null;
                 try {
                     JSONObject json = (JSONObject) JSONSerializer.toJSON(responseBody);
                     facebookId = json.getString("id");
 
-                    firstName = json.getString("first_name");
-                    lastName = json.getString("last_name");
-                    httpSession.setAttribute("FACEBOOK_USER", firstName + " "
-                            + lastName + ", facebookId:" + facebookId);
+                    name = json.getString("name");
+                    //lastName = json.getString("last_name");
+                    httpSession.setAttribute("FACEBOOK_USER", name + ", facebookId:" + facebookId);
 
                     email = json.getString("email");
                     //put user data in session
 
-                    if (facebookId == null || firstName == null || lastName == null || email == null) {
+                    if (facebookId == null || name == null || email == null) {
                         if (facebookId == null) {
                             logger.log(Level.WARNING, "Error getting JSON objects from facebook: Facebook ID is NULL");
                         }
-                        if (firstName == null) {
-                            logger.log(Level.WARNING, "Error getting JSON objects from facebook: firstName is NULL");
+                        if (name == null) {
+                            logger.log(Level.WARNING, "Error getting JSON objects from facebook: name is NULL");
                         }
-                        if (lastName == null) {
-                            logger.log(Level.WARNING, "Error getting JSON objects from facebook: lastName is NULL");
-                        }
+                        // if (lastName == null) {
+                        //     logger.log(Level.WARNING, "Error getting JSON objects from facebook: lastName is NULL");
+                        //  }
                         if (email == null) {
                             logger.log(Level.WARNING, "Error getting JSON objects from facebook: email is NULL");
                         }
@@ -353,8 +352,14 @@ public class SecurityServlet extends HttpServlet {
                 } catch (Exception e) {
                     logger.log(Level.WARNING, "Error getting JSON objects from facebook}", e);
                 }
-                cust.setFirstname(firstName);
-                cust.setLastname(lastName);
+                String[] names = name.split(" ");
+                if (names.length > 1) {
+                    cust.setFirstname(names[0]);
+                    cust.setLastname(names[1]);
+                } else {
+                    cust.setFirstname(name);
+                    cust.setLastname("");
+                }
                 cust.setEmailAddress(email);
                 cust.setFacebookId(facebookId);
 

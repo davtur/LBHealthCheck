@@ -8,7 +8,7 @@
                 xmlns:p="http://primefaces.org/ui" >
 
 
-    <p:dialog header="Booking  Wizard" widgetVar="bookingDialog" modal="true" showEffect="fade" hideEffect="fade"   resizable="false">
+    <p:dialog header="Booking  Wizard" widgetVar="bookingDialog" modal="false" showEffect="fade" hideEffect="fade" responsive="true"  resizable="true">
         <h:form id="bookingForm" styleClass="bookingFormUpdate">
 
             <h1 class="BigTopic">#{configMapController.getKey('BookingDialogueHeader')}</h1>
@@ -89,8 +89,9 @@
             </div>
             <div class="Container100 Responsive100">
                 <div class="ContainerIndent">
-                    <p:commandButton icon="ui-icon-check fa fa-check white Fs14" id="dialogueSave" disabled="#{sessionTimetableController.sessionAlreadyBooked}"  actionListener="#{sessionTimetableController.purchaseSession}"  value="#{configMapController.getKey('BookingFormPurchaseSessionLink')}" update=":growl "/>                
+                    <p:commandButton icon="ui-icon-check fa fa-check white Fs14" id="dialogueSave" disabled="#{sessionTimetableController.sessionAlreadyBooked}"  actionListener="#{sessionTimetableController.purchaseSession}"  value="#{configMapController.getKey('BookingFormPurchaseSessionLink')}" update="@(.bookingFormUpdate) :growl "/>                
                     <p:commandButton icon=" fa fa-times-circle white Fs14" id="dialogueDiscard" onclick=" PF('bookingDialog').hide()"  actionListener="#{customersController.cancelCreateDialogue}" value="#{configMapController.getKey('CancelSignupLink')}" update=":growl"/>                
+                    <p:commandButton icon="ui-icon-check fa fa-check white Fs14" id="dialogueCancel" disabled="#{!sessionTimetableController.sessionAlreadyBooked}"  actionListener="#{sessionTimetableController.cancelSession}"  value="#{configMapController.getKey('BookingFormCancelSessionLink')}" update="@(.bookingFormUpdate) :growl "/>                
 
                 </div>
             </div>

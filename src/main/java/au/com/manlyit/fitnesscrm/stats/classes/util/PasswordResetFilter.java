@@ -6,6 +6,7 @@
 package au.com.manlyit.fitnesscrm.stats.classes.util;
 
 import static au.com.manlyit.fitnesscrm.stats.beans.ActivationBean.generateUniqueToken;
+import au.com.manlyit.fitnesscrm.stats.classes.CustomersController;
 import au.com.manlyit.fitnesscrm.stats.classes.PasswordService;
 import au.com.manlyit.fitnesscrm.stats.db.Activation;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
@@ -17,6 +18,7 @@ import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.el.ELException;
+import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -45,6 +47,9 @@ public class PasswordResetFilter implements Filter {
     private au.com.manlyit.fitnesscrm.stats.beans.CustomersFacade ejbCustomerFacade;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.AuditLogFacade ejbAuditLogFacade;
+     @Inject
+    private CustomersController controller;
+    
     private final StringEncrypter encrypter = new StringEncrypter("(lqKdh^Gr$2F^KJHG654)");
 
     @Override
@@ -90,19 +95,18 @@ public class PasswordResetFilter implements Filter {
                                     cst.setPassword(encryptedPass);
                                     ejbCustomerFacade.edit(cst);
                                     try {
-                                        
 
-                                            req.login(user, paswd);
-                                            logger.log(Level.INFO, "The reset password link executed successfully. User {0} has been logged in.", user);
-                                            String auditDetails = "Customer Login Successful:" + cst.getUsername() + " Details:  " + cst.getLastname() + " " + cst.getFirstname() + " ";
-                                            String changedFrom = "UnAuthenticated";
-                                            String changedTo = "Authenticated User:" + cst.getUsername();
-                                            if (cst.getUsername().toLowerCase(Locale.getDefault()).equals("synthetic.tester")) {
-                                                logger.log(Level.INFO, "Synthetic Tester Logged In.");
-                                            } else {
-                                                ejbAuditLogFacade.audit(cst, cst, "Logged In", auditDetails, changedFrom, changedTo);
-                                            }
-                                        
+                                        req.login(user, paswd);
+                                        logger.log(Level.INFO, "The reset password link executed successfully. User {0} has been logged in.", user);
+                                        String auditDetails = "Customer Login Successful:" + cst.getUsername() + " Details:  " + cst.getLastname() + " " + cst.getFirstname() + " ";
+                                        String changedFrom = "UnAuthenticated";
+                                        String changedTo = "Authenticated User:" + cst.getUsername();
+                                        if (cst.getUsername().toLowerCase(Locale.getDefault()).equals("synthetic.tester")) {
+                                            logger.log(Level.INFO, "Synthetic Tester Logged In.");
+                                        } else {
+                                            ejbAuditLogFacade.audit(cst, cst, "Logged In", auditDetails, changedFrom, changedTo);
+                                        }
+                                       
                                     } catch (ServletException servletException) {
                                         if (servletException.getMessage().contains("UT010030") == false) {//javax.servlet.ServletException: UT010030: User already logged in
                                             throw servletException;
@@ -110,6 +114,10 @@ public class PasswordResetFilter implements Filter {
                                             logger.log(Level.INFO, "This is request has already been authenticated. User {0} is already logged in.", user);
                                         }
                                     }
+                                    
+                                    // FacesContext context = FacesContext.getCurrentInstance();
+                                    //    CustomersController controller = (CustomersController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "customersController");
+                                        controller.updateSelectedCustomer(cst);
                                     //Redirect to the user details page
                                     // FacesContext fc = FacesContext.getCurrentInstance();
                                     //CustomersController custController = (CustomersController) fc.getApplication().evaluateExpressionGet(fc, "#{customersController}", CustomersController.class);
@@ -120,7 +128,7 @@ public class PasswordResetFilter implements Filter {
                                         String detailsURL = req.getContextPath() + "/myDetails.xhtml";
                                         String surveysURL = req.getContextPath() + "/customerSurveys.xhtml";
                                         //String timetableURL =  "http://www.manlybeachfemalefitness.com.au/schedule/schedule.xhtml";
-                                        String timetableURL =  configMapFacade.getConfig("login.signup.timetable.url").trim();
+                                        String timetableURL = configMapFacade.getConfig("login.signup.timetable.url").trim();
                                         if (cst.getTermsConditionsAccepted() == true) {
                                             res.sendRedirect(detailsURL);
                                         } else {
@@ -131,7 +139,7 @@ public class PasswordResetFilter implements Filter {
                                     } catch (IOException e) {
                                         logger.log(Level.SEVERE, "Redirect to MyDetails failed", e);
                                         //JsfUtil.addErrorMessage(e, "Redirect to MyDetails failed");
- 
+
                                     }
 
                                 } else {

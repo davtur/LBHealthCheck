@@ -116,17 +116,19 @@ public class TicketsFacade extends AbstractFacade<Tickets> {
             Expression<Date> orderByDate;
             Expression<Date> validFrom;
             Expression<Date> expires;
+            Expression<Date> dateUsed;
 
             validFrom = rt.get("validFrom");
             expires = rt.get("expires");
             customer = rt.get("customer");
+            dateUsed = rt.get("dateUsed");
 
             orderByDate = validFrom;
             Predicate p1 = cb.lessThanOrEqualTo(validFrom, sessionDate);
             Predicate p2 = cb.greaterThanOrEqualTo(expires, sessionDate);
             Predicate p3 = cb.equal(customer, cust);
-
-            cq.where(cb.and(p1,p2,p3));
+            Predicate p4 = cb.isNull(dateUsed);
+            cq.where(cb.and(p1,p2,p3,p4));
 
             cq.select(rt);
             if (sortAsc) {

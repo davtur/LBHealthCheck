@@ -47,6 +47,7 @@
                     <h:outputText value="#{sessionTimetableController.selected.sessionMembersRate}" title="#{configMapController.getKey('ViewSessionTimetableTitle_sessionMembersRate')}"/>
                     <h:outputText value="#{configMapController.getKey('ViewSessionTimetableLabel_ssessionCasualRate')}"/>
                     <h:outputText value="#{sessionTimetableController.selected.sessionCasualRate}" title="#{configMapController.getKey('ViewSessionTimetableTitle_ssessionCasualRate')}"/>
+                    <h:outputText value="#{sessionTimetableController.selected.sessionTimetableMaxSize}" title="#{configMapController.getKey('AddPaymentLabel_sessionMaxSize')}"/>
                 </p:panelGrid>
                 <p:commandButton value="#{configMapController.getKey('Close')}" onclick="PF('SessionTimetableViewDialog').hide()"/>
             </h:panelGroup>

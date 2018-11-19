@@ -108,6 +108,9 @@ public class SessionTimetable implements BaseEntity, Serializable {
 
     @Column(name = "session_timetable_status")
     private Integer sessionTimetableStatus;
+    @Column(name = "session_timetable_max_size")
+    private Integer sessionTimetableMaxSize;
+    
     @Basic(optional = false)
     @NotNull
     @Column(name = "sessiondate")
@@ -342,6 +345,20 @@ public class SessionTimetable implements BaseEntity, Serializable {
      */
     public void setSessionStyleClasses(String sessionStyleClasses) {
         this.sessionStyleClasses = sessionStyleClasses;
+    }
+
+    /**
+     * @return the sessionTimetableMaxSize
+     */
+    public Integer getSessionTimetableMaxSize() {
+        return sessionTimetableMaxSize;
+    }
+
+    /**
+     * @param sessionTimetableMaxSize the sessionTimetableMaxSize to set
+     */
+    public void setSessionTimetableMaxSize(Integer sessionTimetableMaxSize) {
+        this.sessionTimetableMaxSize = sessionTimetableMaxSize;
     }
 
 }

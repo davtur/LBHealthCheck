@@ -42,7 +42,7 @@
                         <span class="login-summary">Manly Beach</span><br/>
                         <span class="login-summary">Female Fitness</span>
                         <div class="login-detail">
-                            <span>Welcome, please use the form to sign-in.</span>
+                            <span>Welcome, please use the form to sign-in.</span> 
                         </div>
                     </div>
                     <div class="ui-g-12 ui-lg-12 ui-md-12">
@@ -56,7 +56,7 @@
                     <div class="ui-g-12 ui-lg-12 ui-md-12 chkbox-container">
                         <p:selectBooleanCheckbox id="remember-me" />
                         <p:outputLabel for="remember-me" value="Remember Me" />
-                        <p:commandLink id="resetPass" value="Reset Password" ajax="false"  action="#{loginBean.resetPassword}" update=":growl" title="If you have forgotten your username or password enter your email or username above then click the password reset button."/>
+                        <p:commandLink id="resetPass" value="Reset Password" ajax="false"  action="#{loginBean.resetPassword}" update=":growl" title="If you have forgotten your username or password ter your email or username above then click the password reset button."/>
                     </div>
                     <div class="ui-g-12">
                         <div class="ui-g-4 ui-lg-4 ui-md-4 button-container">
@@ -64,7 +64,7 @@
                         </div>
                         <div class="ui-g-4 ui-lg-4 ui-md-4 button-container">
                             
-                            <img src="https://graph.facebook.com/v2.8/#{loginBean.facebookId}/picture" hidden="#{empty loginBean.facebookId}" class="img-circular" title="This is the currently logged in facebook profile."/>
+                            <img src="https://graph.facebook.com/#{loginBean.facebookId}/picture" hidden="#{empty loginBean.facebookId}" class="img-circular" title="This is the currently logged in facebook profile."/>
                         
                         </div>
                         <div class="ui-g-4 ui-lg-4 ui-md-4 button-container">

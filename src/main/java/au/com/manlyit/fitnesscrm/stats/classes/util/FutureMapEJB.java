@@ -446,50 +446,7 @@ public class FutureMapEJB implements Serializable {
 
     }
     
-     public void issuePackOfTickets(Customers c, int validWeeks, int numberOfTickets) {
-
-        GregorianCalendar ticketStartDate = new GregorianCalendar();
-        CalendarUtil.SetToLastDayOfWeek(Calendar.SUNDAY, ticketStartDate);
-        CalendarUtil.SetTimeToMidnight(ticketStartDate);
-
-        GregorianCalendar ticketStopDate = new GregorianCalendar();
-        ticketStopDate.setTimeInMillis(ticketStartDate.getTimeInMillis());
-        ticketStopDate.add(Calendar.WEEK_OF_YEAR, validWeeks );
-        
-        ticketStopDate.add(Calendar.DAY_OF_YEAR, 1);
-        ticketStopDate.add(Calendar.SECOND, -1);
-
-        issueBlockOfTickets(c, ticketStartDate.getTime(), ticketStopDate.getTime(), sessionTypesFacade.findASessionTypeByName("Group Training"), numberOfTickets);
-
-    }
-
     
-
-    public void issueBlockOfTickets(Customers c, Date ticketStartDate, Date ticketStopDate, SessionTypes sessionType, int number) {
-
-        synchronized (issueBlockOfTicketsLockObject) {
-            try {
-
-                int ticketsAdded = 0;
-
-                for (int n = 0; n < number; n++) {
-                    Tickets t = new Tickets();
-                    t.setDatePurchased(new Date());
-                    t.setCustomer(c);
-                    t.setSessionType(sessionType);
-                    t.setValidFrom(ticketStartDate);
-                    t.setExpires(ticketStopDate);
-                    ejbTicketsFacade.create(t);
-                    ticketsAdded++;
-                }
-
-                LOGGER.log(Level.INFO, "Adding Block of Tickets for Customer id {0},  tickets added {2},startDate {3}, stopDate {4} ", new Object[]{c.getId(), ticketsAdded, ticketStartDate, ticketStopDate});
-            } catch (Exception ex) {
-                Logger.getLogger(FutureMapEJB.class.getName()).log(Level.SEVERE, "issueBlockOfTickets", ex.getMessage());
-            }
-        }
-    }
-
     public void issueOneWeeksTicketsForCust(Customers c, Date ticketStartDate, Date ticketStopDate) {
 
         synchronized (issueOneWeeksTicketsLockObject) {
@@ -682,6 +639,7 @@ public class FutureMapEJB implements Serializable {
 
                 getFutureMap(userSessionId).clear();
             }
+            clearComponentUpdates(userSessionId);
         }
     }
 
@@ -2931,7 +2889,7 @@ public class FutureMapEJB implements Serializable {
         }
 
         LOGGER.log(Level.INFO, "Future Map processGetAllCustPaymentsAndDetails completed");
-        storeResponseForSessionBeenToRetrieve("GetCustomerDetails", sessionId, pgr);
+        storeResponseForSessionBeenToRetrieve("GetCustomerDetailsAndPayments", sessionId, pgr);
         sendMessage(sessionId, "Get Customer Details & Payments", returnedMessage);
         LOGGER.log(Level.INFO, "Future Map processGetAllCustPaymentsAndDetails. Completed - Committing transaction to update.");
     }

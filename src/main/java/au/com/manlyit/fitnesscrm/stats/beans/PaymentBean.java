@@ -1953,7 +1953,7 @@ public class PaymentBean implements Serializable {
     public Future<PaymentGatewayResponse> getAllCustPaymentsAndDetails(Customers cust, String paymentType, String paymentMethod, String paymentSource, String paymentReference, Date fromDate, Date toDate, boolean useSettlementDate, String digitalKey, String sessionId) {
         String result = "Error";
         PaymentGatewayResponse pgr = new PaymentGatewayResponse(false, result, "", "-1", "An unhandled error occurred!");
-
+        CustomerDetails cd = null;
         String batchSessionId = "Batch-Dont-Update";
         PaymentGatewayResponse pgr1 = null;
         PaymentGatewayResponse pgr2 = null;
@@ -1992,11 +1992,12 @@ public class PaymentBean implements Serializable {
         }
         if (pgr1.isOperationSuccessful() && pgr2.isOperationSuccessful() && pgr3.isOperationSuccessful()) {
             LOGGER.log(Level.INFO, "getAllCustPaymentsAndDetails: Details, Payments and Scheduled payments recieved OK");
-            pgr = new PaymentGatewayResponse(true, result, "", "0", "Updated Customer Details and Payment Information was recieved from the payment gateway.");
+            cd = (CustomerDetails)pgr3.getData();
+            pgr = new PaymentGatewayResponse(true, cd, result, "0", "Updated Customer Details and Payment Information was recieved from the payment gateway.");
 
         } else {
             LOGGER.log(Level.INFO, "getAllCustPaymentsAndDetails: The customer object passed to this method is NULL.This parameter is required.Returning empty array!!");
-            pgr = new PaymentGatewayResponse(false, result, "", "-1", "The customer object passed to this method is NULL.This parameter is required.Returning empty array!!");
+            pgr = new PaymentGatewayResponse(false, cd, result, "-1", "The customer object passed to this method is NULL.This parameter is required.Returning empty array!!");
 
         }
         futureMap.processGetAllCustPaymentsAndDetails(sessionId, pgr);

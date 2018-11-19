@@ -9,6 +9,7 @@ import au.com.manlyit.fitnesscrm.stats.beans.LoginBean;
 import static au.com.manlyit.fitnesscrm.stats.beans.LoginBean.generateUniqueToken;
 import au.com.manlyit.fitnesscrm.stats.beans.PaymentsFacade;
 import au.com.manlyit.fitnesscrm.stats.chartbeans.MySessionsChart1;
+import au.com.manlyit.fitnesscrm.stats.classes.util.CalendarUtil;
 import au.com.manlyit.fitnesscrm.stats.classes.util.CustomersLazyLoadingDataModel;
 import au.com.manlyit.fitnesscrm.stats.classes.util.DatatableSelectionHelper;
 import au.com.manlyit.fitnesscrm.stats.classes.util.EmailValidator;
@@ -25,8 +26,10 @@ import au.com.manlyit.fitnesscrm.stats.db.PaymentParameters;
 import au.com.manlyit.fitnesscrm.stats.db.Payments;
 import au.com.manlyit.fitnesscrm.stats.db.Plan;
 import au.com.manlyit.fitnesscrm.stats.db.QuestionnaireMap;
+import au.com.manlyit.fitnesscrm.stats.db.SessionTypes;
 import au.com.manlyit.fitnesscrm.stats.db.Suppliers;
 import au.com.manlyit.fitnesscrm.stats.db.Surveys;
+import au.com.manlyit.fitnesscrm.stats.db.Tickets;
 import au.com.manlyit.fitnesscrm.stats.webservices.CustomerDetails;
 import java.awt.AlphaComposite;
 import java.awt.Graphics2D;
@@ -41,7 +44,6 @@ import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
-import static java.security.AccessController.getContext;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -60,6 +62,8 @@ import java.util.Random;
 import java.util.concurrent.Future;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.ejb.TransactionAttribute;
+import static javax.ejb.TransactionAttributeType.REQUIRES_NEW;
 import javax.el.ELException;
 import javax.enterprise.context.SessionScoped;
 import javax.faces.application.FacesMessage;
@@ -76,7 +80,6 @@ import javax.faces.validator.ValidatorException;
 import javax.imageio.ImageIO;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -158,6 +161,10 @@ public class CustomersController implements Serializable {
     private au.com.manlyit.fitnesscrm.stats.beans.SuppliersFacade suppliersFacade;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.PaymentBean ejbPaymentBean;
+     @Inject
+    private au.com.manlyit.fitnesscrm.stats.beans.TicketsFacade ejbTicketsFacade;
+       @Inject
+    private au.com.manlyit.fitnesscrm.stats.beans.SessionTypesFacade ejbSessionTypesFacade;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.EmailTemplatesFacade ejbEmailTemplatesFacade;
     @Inject
@@ -188,6 +195,14 @@ public class CustomersController implements Serializable {
     private au.com.manlyit.fitnesscrm.stats.beans.ActivationFacade ejbActivationFacade;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.PreferedContactFacade ejbPreferedContactFacade;
+   //@Inject
+   // private EziDebitPaymentGateway eziDebitPaymentGatewayController;
+  //  @Inject
+ //  private MySessionsChart1 mySessionsChart1Controller;
+ //    @Inject
+ //   private SuppliersController suppliersControllerController;
+    
+    
     @Inject
     private FutureMapEJB futureMap;
 
@@ -341,28 +356,29 @@ public class CustomersController implements Serializable {
              } 
              }*/
                 FacesContext context = FacesContext.getCurrentInstance();
-                EziDebitPaymentGateway controller = (EziDebitPaymentGateway) context.getApplication().getELResolver().getValue(context.getELContext(), null, "ezidebit");
-                //controller.setSelectedCustomer(cust);
+                EziDebitPaymentGateway eziDebitPaymentGatewayController = (EziDebitPaymentGateway) context.getApplication().getELResolver().getValue(context.getELContext(), null, "ezidebit");
+//eziDebitPaymentGatewayController                
+//controller.setSelectedCustomer(cust);
                 CustomerDetails cd1 = null;
-                controller.setCurrentCustomerDetails(cd1);
-                controller.clearCustomerProvisionedInPaymentGW();
-                controller.setRefreshIFrames(true);
-                futureMap.cancelFutures(controller.getSessionId());
-                controller.setWaitingForPaymentDetails(false);
+                eziDebitPaymentGatewayController.setCurrentCustomerDetails(cd1);
+                eziDebitPaymentGatewayController.clearCustomerProvisionedInPaymentGW();
+                eziDebitPaymentGatewayController.setRefreshIFrames(true);
+                futureMap.cancelFutures(eziDebitPaymentGatewayController.getSessionId());
+                eziDebitPaymentGatewayController.setWaitingForPaymentDetails(false);
                 // setAsyncOperationRunning(false);
                 // if(cust.getPaymentParametersId().getStatusCode().startsWith("D") || cust.getPaymentParametersId().getStatusCode().isEmpty()){
                 //controller.getCustDetailsFromEzi();
                 // }
-                if (controller.isTheCustomerProvisionedInThePaymentGateway()) {
+                if (eziDebitPaymentGatewayController.isTheCustomerProvisionedInThePaymentGateway()) {
                     // controller.getCustDetailsFromEzi();
 
-                    controller.getPayments(18, 2);
+                    eziDebitPaymentGatewayController.getPayments(18, 2);
                 } else {
-                    controller.setCustomerDetailsHaveBeenRetrieved(true);
+                    eziDebitPaymentGatewayController.setCustomerDetailsHaveBeenRetrieved(true);
                 }
-                controller.setProgress(0);
+                eziDebitPaymentGatewayController.setProgress(0);
                 //eziDebitPaymentGatewayController.setSelectedCustomer(cust);
-                SuppliersController suppliersController = (SuppliersController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "suppliersController");
+                SuppliersController suppliersControllerController = (SuppliersController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "suppliersController");
                 Suppliers sup = null;
                 if (cust.getSuppliersCollection() != null) {
 
@@ -377,7 +393,7 @@ public class CustomersController implements Serializable {
                     }
 
                     if (sup != null) {
-                        suppliersController.setSelected(sup);
+                        suppliersControllerController.setSelected(sup);
 
                     }
                 }
@@ -393,16 +409,16 @@ public class CustomersController implements Serializable {
                         sup.setSupplierCompanyNumber(" ");
                         sup.setSupplierCompanyNumberType("ABN");
                         suppliersFacade.create(sup);
-                        suppliersController.setSelected(sup);
+                        suppliersControllerController.setSelected(sup);
                     } else {
-                        suppliersController.setSelected(null);
-                        suppliersController.setSelectedContractorRate(null);
-                        suppliersController.setRateItems(null);
-                        suppliersController.setSessionTypesArray(null);
+                        suppliersControllerController.setSelected(null);
+                        suppliersControllerController.setSelectedContractorRate(null);
+                        suppliersControllerController.setRateItems(null);
+                        suppliersControllerController.setSessionTypesArray(null);
                     }
                 }
-                MySessionsChart1 c2 = context.getApplication().evaluateExpressionGet(context, "#{mySessionsChart1}", MySessionsChart1.class);
-                c2.setSelectedCustomer(cust);
+                MySessionsChart1 mySessionsChart1Controller = context.getApplication().evaluateExpressionGet(context, "#{mySessionsChart1}", MySessionsChart1.class);
+                mySessionsChart1Controller.setSelectedCustomer(cust);
                 //mySessionsChart1Controller.setSelectedCustomer(cust);
                 selectedItemIndex = -1;
                 checkPass = current.getPassword();
@@ -417,7 +433,7 @@ public class CustomersController implements Serializable {
                 recreateAllAffectedPageModels();
                 setCustomerTabsEnabled(true);
                 //PrimeFaces.current().executeScript("updatePaymentForms();");
-                futureMap.sendMessage(controller.getSessionId(), "", "UpdatePaymentForms");
+                futureMap.sendMessage(eziDebitPaymentGatewayController.getSessionId(), "", "UpdatePaymentForms");
                 LOGGER.log(Level.INFO, "Setting the selected customer from the customer list tab COMPLETED.");
             }
         } catch (ELException eLException) {
@@ -803,16 +819,16 @@ public class CustomersController implements Serializable {
                     pp.setCustomers(cust);
                     pp.setLastSuccessfulScheduledPayment(ejbPaymentsFacade.findLastSuccessfulScheduledPayment(cust));
                     pp.setNextScheduledPayment(ejbPaymentsFacade.findNextScheduledPayment(cust));
-                    pp.setAddressLine1("");
+                    pp.setAddressLine1(cust.getStreetAddress());
                     pp.setAddressLine2("");
-                    pp.setAddressPostCode("");
-                    pp.setAddressState("");
-                    pp.setAddressSuburb("");
+                    pp.setAddressPostCode(cust.getPostcode());
+                    pp.setAddressState(cust.getAddrState());
+                    pp.setAddressSuburb(cust.getCity());
                     pp.setContractStartDate(new Date());
                     pp.setLastUpdatedFromPaymentGateway(new Date());
-                    pp.setCustomerFirstName("");
-                    pp.setCustomerName("");
-                    pp.setEmail("");
+                    pp.setCustomerFirstName(cust.getFirstname());
+                    pp.setCustomerName(cust.getLastname());
+                    pp.setEmail(cust.getEmailAddress());
                     pp.setEzidebitCustomerID("");
 
                     pp.setMobilePhoneNumber(phoneNumber);
@@ -832,7 +848,7 @@ public class CustomersController implements Serializable {
                     pp.setTotalPaymentsSuccessful(0);
                     pp.setTotalPaymentsSuccessfulAmount(new BigDecimal(0));
                     pp.setYourGeneralReference("");
-                    pp.setYourSystemReference("");
+                    pp.setYourSystemReference(cust.getId().toString());
                     ejbPaymentParametersFacade.createAndFlushForGeneratedIdEntities(pp);
 
                     cust.setPaymentParametersId(pp);
@@ -1341,7 +1357,7 @@ public class CustomersController implements Serializable {
 
     }
 
-    //@TransactionAttribute(REQUIRES_NEW)
+    @TransactionAttribute(REQUIRES_NEW)
     private void createFromUnauthenticated(String group, Customers c, String message, HttpServletRequest request, boolean isWebserviceCall) {
 
         //TODO validate email address to ensure spammers can't take down site
@@ -1372,6 +1388,8 @@ public class CustomersController implements Serializable {
 
                 c.setUsername(c.getEmailAddress().trim());
                 getFacade().createAndFlushForGeneratedIdEntities(c);
+                
+                
                 createDefaultPaymentParametersFromDetached(c.getId());
                 //createDefaultPaymentParameters(c); 
                 grp.setUsername(c);
@@ -1390,7 +1408,7 @@ public class CustomersController implements Serializable {
                 if (isWebserviceCall == false) {
                     addToNotesDataTableLists(nt);
                 }
-                String details = "New LEAD generated: Name: " + c.getFirstname() + ", <br/>Email:  " + c.getEmailAddress() + ", <br/>Phone:   " + c.getTelephone() + ", <br/>Username:   " + c.getUsername() + ", <br/>Group:   " + group + ", IP Address:" + ipAddress + ", Message:" + message;
+                String details = "New LEAD generated: Id:"+ c.getId() +", Name: " + c.getFirstname() + ", <br/>Email:  " + c.getEmailAddress() + ", <br/>Phone:   " + c.getTelephone() + ", <br/>Username:   " + c.getUsername() + ", <br/>Group:   " + group + ", IP Address:" + ipAddress + ", Message:" + message;
                 sendNotificationEmail(c, grp, "system.email.notification.template", "New LEAD from website", message);
                 createCombinedAuditLogAndNote(c, c, "New Lead", details, "Did Not Exist", "New Lead");
                 LOGGER.log(Level.INFO, "createFromLead: {0}", new Object[]{details});
@@ -1412,7 +1430,7 @@ public class CustomersController implements Serializable {
                 getFacade().edit(c);
                 //ejbGroupsFacade.create(grp);
                 createDefaultCustomerProfilePicture(c);
-                String details = "Name: " + c.getFirstname() + ", Email:" + c.getEmailAddress() + ", Phone:" + c.getTelephone() + ", Username:" + c.getUsername() + ", Group:" + group + ", IP Address:" + ipAddress + ".Customer Onboard email sent";
+                String details = "New Sign UP -> New user Being Added ->  Id:"+ c.getId() +", Name: " + c.getFirstname() + ", Email:" + c.getEmailAddress() + ", Phone:" + c.getTelephone() + ", Username:" + c.getUsername() + ", Group:" + group + ", IP Address:" + ipAddress + ".Customer Onboard email sent";
                 //FacesContext context = FacesContext.getCurrentInstance();
                 //SurveysController surveyCon = context.getApplication().evaluateExpressionGet(context, "#{surveysController}", SurveysController.class);
                 // SurveysController surveyCon = (SurveysController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "surveysController");
@@ -1437,7 +1455,8 @@ public class CustomersController implements Serializable {
             }
             setNewCustomer(setCustomerDefaults(new Customers()));
             addQuestionnaireMapItemsToCustomer(c);
-            futureMap. issuePackOfTickets(c,1,10);// issue free trial tickets - 10 tickets to group training sessions over 1 weeks
+            issuePackOfTickets(c,1,10);// issue free trial tickets - 10 tickets to group training sessions over 1 weeks
+        
         } else {
             if (isWebserviceCall == false) {
                 JsfUtil.addErrorMessage("Error", configMapFacade.getConfig("SignUpValidationEmailExistsFailed"));
@@ -1448,6 +1467,49 @@ public class CustomersController implements Serializable {
 
     }
 
+     public void issuePackOfTickets(Customers c, int validWeeks, int numberOfTickets) {
+
+        GregorianCalendar ticketStartDate = new GregorianCalendar();
+        CalendarUtil.SetToLastDayOfWeek(Calendar.SUNDAY, ticketStartDate);
+        CalendarUtil.SetTimeToMidnight(ticketStartDate);
+
+        GregorianCalendar ticketStopDate = new GregorianCalendar();
+        ticketStopDate.setTimeInMillis(ticketStartDate.getTimeInMillis());
+        ticketStopDate.add(Calendar.WEEK_OF_YEAR, validWeeks );
+        
+        ticketStopDate.add(Calendar.DAY_OF_YEAR, 1);
+        ticketStopDate.add(Calendar.SECOND, -1);
+
+        issueBlockOfTickets(c, ticketStartDate.getTime(), ticketStopDate.getTime(), ejbSessionTypesFacade.findASessionTypeByName("Group Training"), numberOfTickets);
+
+    }
+
+    
+
+    public void issueBlockOfTickets(Customers c, Date ticketStartDate, Date ticketStopDate, SessionTypes sessionType, int number) {
+
+      //  synchronized (issueBlockOfTicketsLockObject) {
+            try {
+
+                int ticketsAdded = 0;
+
+                for (int n = 0; n < number; n++) {
+                    Tickets t = new Tickets(0,sessionType,new Date());                   
+                    t.setCustomer(c);                  
+                    t.setValidFrom(ticketStartDate);
+                    t.setExpires(ticketStopDate);
+                    ejbTicketsFacade.create(t);
+                    ticketsAdded++;
+                }
+
+                LOGGER.log(Level.INFO, "Adding Block of Tickets for Customer id {0},  tickets added {1},startDate {2}, stopDate {3} ", new Object[]{c.getId(), ticketsAdded, ticketStartDate, ticketStopDate});
+            } catch (Exception ex) {
+                Logger.getLogger(FutureMapEJB.class.getName()).log(Level.SEVERE, "issueBlockOfTickets", ex.getMessage());
+            }
+       // }
+    }
+
+    
     public void doPasswordResetFromWebserviceCall(String templateName, Customers current, String subject) {
 
         //valid user that wants the password reset

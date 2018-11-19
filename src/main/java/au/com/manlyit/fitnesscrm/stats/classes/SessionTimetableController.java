@@ -33,6 +33,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
@@ -104,6 +105,7 @@ public class SessionTimetableController implements Serializable {
     private PaginationHelper pagination;
     private int selectedItemIndex;
     private String eventStyleClass = "";
+    private ArrayList<TimetableRows> daysOfWeek;
     private int sessionForTheWeekMaxColumns = 1;
     private List<SessionTimetable> filteredItems;
     private SessionTimetable[] multiSelected;
@@ -499,28 +501,29 @@ public class SessionTimetableController implements Serializable {
     }
 
     public List<TimetableRows> getSessionForTheWeekItems() {
-
-        ArrayList<TimetableRows> daysOfWeek = new ArrayList<>();
-        sessionForTheWeekMaxColumns = 1;
-        GregorianCalendar startCal = new GregorianCalendar();
-        startCal.setTime(getTimetableStartDate());
-        startCal.set(Calendar.HOUR_OF_DAY, 0);
-        startCal.set(Calendar.SECOND, 0);
-        startCal.set(Calendar.MINUTE, 0);
-        startCal.set(Calendar.MILLISECOND, 0);
-        GregorianCalendar endCal = new GregorianCalendar();
-        endCal.setTime(startCal.getTime());
-        endCal.add(Calendar.DAY_OF_YEAR, 1);
-
-        for (int index = 0; index < 7; index++) {
-            List<SessionHistory> sessions;
-
-            sessions = sessionHistoryFacade.loadDateRange(0, 100, "sessiondate", SortOrder.ASCENDING, null, startCal.getTime(), endCal.getTime(), "sessiondate");
-            daysOfWeek.add(new TimetableRows(startCal.getTime(), sessions));
+        if (daysOfWeek == null) {
+            daysOfWeek = new ArrayList<>();
+            sessionForTheWeekMaxColumns = 1;
+            GregorianCalendar startCal = new GregorianCalendar();
+            startCal.setTime(getTimetableStartDate());
+            startCal.set(Calendar.HOUR_OF_DAY, 0);
+            startCal.set(Calendar.SECOND, 0);
+            startCal.set(Calendar.MINUTE, 0);
+            startCal.set(Calendar.MILLISECOND, 0);
+            GregorianCalendar endCal = new GregorianCalendar();
+            endCal.setTime(startCal.getTime());
             endCal.add(Calendar.DAY_OF_YEAR, 1);
-            startCal.add(Calendar.DAY_OF_YEAR, 1);
-            if (sessions.size() > sessionForTheWeekMaxColumns) {
-                sessionForTheWeekMaxColumns = sessions.size();
+
+            for (int index = 0; index < 7; index++) {
+                List<SessionHistory> sessions;
+
+                sessions = sessionHistoryFacade.loadDateRange(0, 100, "sessiondate", SortOrder.ASCENDING, null, startCal.getTime(), endCal.getTime(), "sessiondate");
+                daysOfWeek.add(new TimetableRows(startCal.getTime(), sessions));
+                endCal.add(Calendar.DAY_OF_YEAR, 1);
+                startCal.add(Calendar.DAY_OF_YEAR, 1);
+                if (sessions.size() > sessionForTheWeekMaxColumns) {
+                    sessionForTheWeekMaxColumns = sessions.size();
+                }
             }
         }
 
@@ -802,6 +805,10 @@ public class SessionTimetableController implements Serializable {
     private void recreateModel() {
         items = null;
         filteredItems = null;
+        //timetable2
+        daysOfWeek = null;
+        //timetable3
+        eventModel = null;
     }
 
     public String next() {
@@ -928,7 +935,7 @@ public class SessionTimetableController implements Serializable {
         }
     }
 
-    public List<Tickets> doesTheCustomerHaveATicketForAGroupSession(Customers c,Date sessionDate) {
+    public List<Tickets> doesTheCustomerHaveATicketForAGroupSession(Customers c, Date sessionDate) {
 
         List<Tickets> result = new ArrayList<>();
         GregorianCalendar ticketStartDate = new GregorianCalendar();
@@ -981,6 +988,7 @@ public class SessionTimetableController implements Serializable {
 
                 htmlText = htmlText.replace(templateLinkPlaceholder, urlLink);
                 htmlText = htmlText.replace(templateUsernamePlaceholder, cust.getUsername());
+                htmlText = htmlText.replace(templateSessionBookingPlaceholder, sb.getStatusDescription());
                 //  String tempPassword = generateUniqueToken(8);
                 //String tempPassword = RandomString.generateRandomString(new Random(), 8);
                 String tempPassword = " Please reset your password at the login page.";
@@ -992,7 +1000,13 @@ public class SessionTimetableController implements Serializable {
                 //String host, String to, String ccAddress, String from, String emailSubject, String message, String theAttachedfileName, boolean debug
                 //emailAgent.send("david@manlyit.com.au", "", "info@purefitnessmanly.com.au", "Password Reset", htmlText, null, true);
                 Future<Boolean> emailSendResult = ejbPaymentBean.sendAsynchEmail(cust.getEmailAddress(), configMapFacade.getConfig("PasswordResetCCEmailAddress"), configMapFacade.getConfig("PasswordResetFromEmailAddress"), subject, htmlText, null, emailServerProperties(), false);
-                JsfUtil.addSuccessMessage("Password Reset Successful!", configMapFacade.getConfig("PasswordResetSuccessful"));
+               if(templateName.contains("cancel")){
+                   JsfUtil.addSuccessMessage("Class Booking", configMapFacade.getConfig("BookingCancelledMessage"));
+               }else{
+                 JsfUtil.addSuccessMessage("Class Booking", configMapFacade.getConfig("BookingSuccessfulMessage"));  
+               }
+                
+                
                 FacesContext context = FacesContext.getCurrentInstance();
                 ActivationBean controller = context.getApplication().evaluateExpressionGet(context, "#{activationBean}", ActivationBean.class);
                 controller.setValid(true);
@@ -1037,7 +1051,7 @@ public class SessionTimetableController implements Serializable {
                     SessionHistory sh = bookingButtonSessionHistory;
                     List<SessionBookings> sbl = new ArrayList<>(sh.getSessionBookingsCollection());
                     for (SessionBookings sb : sbl) {
-                        if (sb.getCustomerId().getId() == c.getId()) {
+                        if (Objects.equals(sb.getCustomerId().getId(), c.getId())) {
                             // customer has already booked the session
                             return true;
                         }
@@ -1045,11 +1059,45 @@ public class SessionTimetableController implements Serializable {
                 }
             } else {
                 LOGGER.log(Level.WARNING, "sessionAlreadyBooked -- Faces Context is NULL");
+
             }
         } catch (ELException eLException) {
             LOGGER.log(Level.WARNING, "sessionAlreadyBooked", eLException.getMessage());
         }
         return false;
+    }
+
+    public void cancelSession() {
+        LOGGER.log(Level.INFO, "Cancel Session button clicked.");
+        FacesContext context = FacesContext.getCurrentInstance();
+        CustomersController controller = context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
+        Customers c = controller.getSelected();
+
+        SessionHistory sh = bookingButtonSessionHistory;
+        List<SessionBookings> sbl = new ArrayList<>(sh.getSessionBookingsCollection());
+        SessionBookings sb = null;
+        for (SessionBookings sbook : sbl) {
+            if (sbook.getCustomerId().getId().equals(c.getId())) {
+                sb = sbook;
+            }
+        }
+        if (sb != null) {
+            Tickets t = sb.getTicketId();
+            if(t != null){
+                t.setDateUsed(null);
+                ejbTicketsFacade.edit(t);
+            }
+            sh.getSessionBookingsCollection().remove(sb);
+            sessionHistoryFacade.edit(sh);
+            ejbSessionBookingsFacade.remove(sb);
+            recreateModel();
+            PrimeFaces instance = PrimeFaces.current();
+            instance.executeScript("PF('bookingDialog').hide()");
+            sendBookingConfirmationEmail(sb, c, "system.email.sessionBooking.cancellation.template", configMapFacade.getConfig("template.sessionbooking.cancellation.email.subject"));
+            LOGGER.log(Level.INFO, "Cancel Session button clicked and Booking removed successfully");
+        }else{
+            LOGGER.log(Level.SEVERE, "Cancel Session button clicked but teh session Booking wasnt found!!");
+        }
     }
 
     public void purchaseSession() {
@@ -1060,15 +1108,18 @@ public class SessionTimetableController implements Serializable {
         EziDebitPaymentGateway eziDebitPaymentGateway = context.getApplication().evaluateExpressionGet(context, "#{ezidebit}", EziDebitPaymentGateway.class);
         CustomersController controller = context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
         Customers c = controller.getSelected();
+        SimpleDateFormat sdf = new SimpleDateFormat("EEEE, d MMM yyyy HH:mm");
         //eziDebitPaymentGateway.setSelectedCustomer(c);
         SessionBookings sb = new SessionBookings(0);
+        SessionHistory sh = bookingButtonSessionHistory;
         Date sessionPurchaseTimestamp = new Date();
         sb.setBookingTime(sessionPurchaseTimestamp);
-        sb.setSessionHistoryId(bookingButtonSessionHistory);
+        sb.setSessionHistoryId(sh);
         sb.setCustomerId(c);
+        //sh.getSessionBookingsCollection().size();
 
         //does the customer have any tickets available for group sessions
-        List<Tickets> ct = doesTheCustomerHaveATicketForAGroupSession(c,sb.getSessionHistoryId().getSessiondate());
+        List<Tickets> ct = doesTheCustomerHaveATicketForAGroupSession(c, sb.getSessionHistoryId().getSessiondate());
         if (ct.isEmpty() == false) {
             // customer has a ticket so book them in
             // TODO check class sizes arent full
@@ -1080,16 +1131,25 @@ public class SessionTimetableController implements Serializable {
                 ejbTicketsFacade.edit(t);
                 sb.setTicketId(t);
                 sb.setStatus("TICKETED");
+                String description = "The " + sh.getSessionTemplate().getSessionTitle() + " class for " + sdf.format(sh.getSessiondate()) + " has been booked by " + c.getFirstname() + " " + c.getLastname() + " with ticket number " + t.getId().toString() + ".";
+                sb.setStatusDescription(description);
                 // send booking confirmation email.
                 ejbSessionBookingsFacade.create(sb);
+                // have to keep entity collections in sync
+                sh.getSessionBookingsCollection().add(sb);
+                sessionHistoryFacade.edit(sh);
                 sendBookingConfirmationEmail(sb, c, "system.email.sessionBooking.confirmation.template", configMapFacade.getConfig("template.sessionbooking.confirmation.email.subject"));
+                recreateModel();
+                PrimeFaces instance = PrimeFaces.current();
+                instance.executeScript("PF('bookingDialog').hide()");
+
             } catch (Exception e) {
 
                 LOGGER.log(Level.SEVERE, "Book Session Failed.Cust id {0}, bookingid {1}, exception message {2}", new Object[]{c.getId(), sb.getId(), e});
 
             }
         } else {
-            //no tickets
+            //no tickets - free trial expired and no plan
             LOGGER.log(Level.INFO, "purchaseSession, customer  {0}  active in payment gateway - no tickets available - sending to my details page to update plan or payments", c.getUsername());
             // is the customer already set up in the payment gateway ?
             if (c.getPaymentParametersId() == null || c.getPaymentParametersId().getStatusDescription() == null || c.getPaymentParametersId().getStatusDescription().contains("Cancelled")) {
@@ -1100,7 +1160,7 @@ public class SessionTimetableController implements Serializable {
                     ejbSessionBookingsFacade.create(sb);
                     // a booking is in progress for a new signup
                     // setup eddr url and payment
-                    eziDebitPaymentGateway.setOneOffPaymentAmountInCents(bookingButtonSessionHistory.getSessionTemplate().getSessionCasualRate().floatValue());
+                    eziDebitPaymentGateway.setOneOffPaymentAmountInCents(sh.getSessionTemplate().getSessionCasualRate().floatValue());
                     eziDebitPaymentGateway.setOneOffPaymentDate(sessionPurchaseTimestamp);
                     eziDebitPaymentGateway.createEddrLink(null);
                     //call ezibeit controller
@@ -1117,7 +1177,7 @@ public class SessionTimetableController implements Serializable {
                         // customer is set up just add a payment
                         LOGGER.log(Level.INFO, "purchaseSession, customer  {0}  active in payment gateway - adding payment", c.getUsername());
 
-                        eziDebitPaymentGateway.addSinglePayment(c, bookingButtonSessionHistory.getSessionTemplate().getSessionCasualRate().floatValue(), sessionPurchaseTimestamp);
+                        eziDebitPaymentGateway.addSinglePayment(c, sh.getSessionTemplate().getSessionCasualRate().floatValue(), sessionPurchaseTimestamp);
                         JsfUtil.addSuccessMessage(configMapFacade.getConfig("purchaseSessionDirectDebitPaymentProcessing"));
                         sb.setStatus("PURCHASE-ACTIVE");
                         sb.setStatusDescription("A new payment is being added for an existing customer");

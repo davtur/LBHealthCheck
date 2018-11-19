@@ -207,7 +207,7 @@ public class LoginBean implements Serializable {
         // if (renderKitId.equalsIgnoreCase("PRIMEFACES_MOBILE")) {
 
         //facesContext = FacesContext.getCurrentInstance();
-        if (mobileDevice() == true) {
+      /*  if (mobileDevice() == true) {
             //REDIRECT TO  MOBILE PAGE
             ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
 
@@ -220,7 +220,7 @@ public class LoginBean implements Serializable {
 
             }
 
-        }
+        }*/
     }
 
     public boolean mobileDevice() {

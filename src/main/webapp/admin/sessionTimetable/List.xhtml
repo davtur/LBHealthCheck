@@ -286,7 +286,21 @@
                             </f:facet>
                         </p:cellEditor> 
                     </p:column>
-
+                    
+                    <p:column sortBy="#{item.sessionTimetableMaxSize}" filterBy="#{item.sessionTimetableMaxSize}" headerText="#{configMapController.getKey('AddPaymentLabel_sessionMaxSize')}"   >
+                        <p:cellEditor> 
+                            <f:facet name="output">
+                                <h:outputText value="#{item.sessionTimetableMaxSize}" />
+                            </f:facet>
+                            <f:facet name="input">
+                                <p:inputText value="#{item.sessionTimetableMaxSize}"  label="#{configMapController.getKey('AddPaymentLabel_sessionMaxSize')}" />
+                            </f:facet>
+                        </p:cellEditor> 
+                    </p:column>
+                    
+             
+                    
+                    
                     <p:column rendered="#{sessionTimetableController.isUserInRole('ADMIN')}"  headerText="Edit" style="width:50px">  
                         <p:rowEditor />  
                     </p:column>  

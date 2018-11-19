@@ -16,6 +16,7 @@ import javax.faces.event.ActionEvent;
 import javax.inject.Inject;
 import javax.inject.Named;
 import au.com.manlyit.fitnesscrm.stats.classes.util.FutureMapEJB;
+import javax.faces.context.FacesContext;
 /**
  *
  * @author david
@@ -43,6 +44,7 @@ public class ApplicationBean implements Serializable {
     @PostConstruct
     private void applicationSetup() {
         logger.log(Level.INFO, "ApplicationBean Created");
+        logger.log(Level.INFO, "JSF Package Version = ",FacesContext.class.getPackage().getImplementationVersion());
         //sanityCheckCustomersForDefaultItems();
     }
     public boolean validateIP(String ipAddress){

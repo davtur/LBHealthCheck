@@ -2034,8 +2034,10 @@ public class EziDebitPaymentGateway implements Serializable {
     public void checkIfAsyncJobsHaveFinishedAndUpdate(String key, PaymentGatewayResponse pgr) {
 
         try {
-            if (key.contentEquals("GetCustomerDetails")) {
+            if (key.contentEquals("GetCustomerDetails")) {//GetCustomerDetailsAndPayments
                 processGetCustomerDetails(pgr);
+            } else if (key.contentEquals("GetCustomerDetailsAndPayments")) {
+                processGetCustomerDetailsAndPayments(pgr);
             } else if (key.contentEquals("AddPayment")) {
                 processAddPaymentResult(pgr);
             } else if (key.contentEquals("DeletePaymentBatch")) {
@@ -2546,6 +2548,84 @@ public class EziDebitPaymentGateway implements Serializable {
             JsfUtil.addErrorMessage("Payment Gateway", "The operation failed!.");
         }
         LOGGER.log(Level.INFO, "processGetPaymentExchangeVersion completed");
+    }
+    
+    private void processGetCustomerDetailsAndPayments(PaymentGatewayResponse pgr){
+        CustomerDetails result = null;
+        Customers selectedCust = getSelectedCustomer();
+        String cust = selectedCust.getUsername();
+        setCustomerDetailsHaveBeenRetrieved(true);
+        LOGGER.log(Level.INFO, "Ezidebit Controller -  processing processGetCustomerDetailsAndPayments Response Recieved from ezidebit for Customer  - {0}", cust);
+
+        try {
+            result = (CustomerDetails) pgr.getData();
+        } catch (Exception ex) {
+            Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, "GetCustomerDetails", ex);
+        }
+        if (result != null) {
+            // do something with result
+            setAutoStartPoller(false);
+
+            String userId = result.getYourSystemReference().getValue();
+            if (userId.trim().matches(selectedCust.getId().toString())) {
+                // the singleton FutureMap operates under a separate cache so we need to refresh our stale cache.
+                // selectedCust = customersFacade.find(selectedCust.getId());
+                //customersFacade.refreshfromDB(selectedCust);
+                customerProvisionedInPaymentGW = null;
+                setCurrentCustomerDetails(result);
+                //updatePaymentParameters(selectedCust,result);
+                String eziStatusCode = "Unknown";
+                if (result.getStatusDescription() != null) {
+                    eziStatusCode = result.getStatusDescription().getValue().toUpperCase().trim();
+                }
+                String ourStatus = selectedCust.getActive().getCustomerState().toUpperCase().trim();
+                String message = "EZI - processGetCustomerDetailsAndPayments - Processing customer status codes. Customer: " + cust + ", ezidebit status:" + eziStatusCode + ", Crm Status:" + ourStatus + ". Pay Params StatusCode=" + selectedCust.getPaymentParametersId().getStatusCode();
+                LOGGER.log(Level.INFO, message);
+                if (ourStatus.contains(eziStatusCode) == false && (ourStatus.contains("ACTIVE") == true && eziStatusCode.contains("NEW") == true) == false) {
+                    // status codes don't match
+
+                    message = "Customer Status codes dont match. Customer: " + cust + ", ezidebit status:" + eziStatusCode + ", Crm Status:" + ourStatus + "";
+                    if (eziStatusCode.contains("WAITING BANK DETAILS")) {
+                        message = "The Customer does not have any banking details. Customer: " + cust + ", ezidebit status:" + eziStatusCode + ", Crm Status:" + ourStatus + "";
+                        LOGGER.log(Level.INFO, message);
+                        setWaitingForPaymentDetails(true);
+                        JsfUtil.addSuccessMessage("Important!", "You must enter customer banking details before payments can be set up.");
+                    } else {
+                        LOGGER.log(Level.WARNING, message);
+                        setWaitingForPaymentDetails(false);
+                        JsfUtil.addErrorMessage(message, "");
+                    }
+                    if (eziStatusCode.trim().toUpperCase().contains("CANCELLED")) {
+                        message = "The Customer is in a Cancelled status in the payment gateway";
+                        LOGGER.log(Level.INFO, message);
+                        JsfUtil.addSuccessMessage("Important!", message);
+                        setCustomerCancelledInPaymentGateway(true);
+                    } else {
+                        setCustomerCancelledInPaymentGateway(false);
+                    }
+                } else {
+                    //status codes match
+                    setWaitingForPaymentDetails(false);
+                    if (eziStatusCode.toUpperCase().contains("CANCELLED")) {
+                        setCustomerCancelledInPaymentGateway(true);
+                    } else {
+                        setCustomerCancelledInPaymentGateway(false);
+                    }
+                }
+            } else {
+                String message = "The Customer data from teh payment gateway does not match the selected customer:" + selectedCust.getId().toString() + ", payment gateway reference No:" + result.getYourSystemReference().toString();
+                LOGGER.log(Level.SEVERE, message);
+            }
+
+        }
+        //PrimeFaces.current().ajax().update("customerslistForm1");
+
+        //refreshFromDB = true;
+        //getCustomersController().setRefreshFromDB(true);
+        //getCustomersController().recreateModel();
+        // updateASingleCustomersPaymentInfo(selectedCust);
+        updatePaymentTableComponents();
+        LOGGER.log(Level.INFO, "processGetCustomerDetailsAndPayments completed");
     }
 
     private void processGetCustomerDetails(PaymentGatewayResponse pgr) {

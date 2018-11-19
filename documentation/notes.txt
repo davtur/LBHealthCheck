@@ -1,4 +1,25 @@
 
+
+
+
+ // have to keep entity collections in sync
+
+
+
+ejbSessionBookingsFacade.create(sb);
+sh.getSessionBookingsCollection().add(sb);
+sessionHistoryFacade.edit(sh);
+
+
+#### First, when you have a bidirectional relationship, JPA requires that you keep both sides of the relationship in synch with each other. This allows caching entities and other performance enhancements to be enabled by many providers. In this case, when you set the USER_ID field, you should update the User's addressCollection that is affected by the change so that your object model stays in synch with what you are committing to the database.
+####
+#### An alternative is to force a refresh manually on the User instance. This can be done with a em.refresh(user) call, or through provider specific options and query hints. This is usually the least performant option though as it requires a database hit that isn't needed.
+
+
+
+
+--------------------------------------
+
 ## loading resources
 ## the file must be in src/main/resources/  i.e. if I wanted to load a file called src/main.resources/images/foo.jpg i would pass /images/foo.jpg to getResourceAsStream("/images/foo.jpg")
                                 

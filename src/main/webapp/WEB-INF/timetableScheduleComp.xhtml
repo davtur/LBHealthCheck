@@ -127,7 +127,7 @@
                                     <f:setPropertyActionListener value="#{sessionTimetableController.event.data}" target="#{sessionTimetableController.signupButtonSessionHistory}" />
                                 </p:commandButton>
 
-                                <p:commandButton   styleClass=" OrangeButton animated pulse infinite" update="@(.bookingFormUpdate)"  rendered="#{sessionTimetableController.event.data.sessionTemplate.showBookingButton}" value="#{configMapController.getKey('Timetable_BookingButtonTitle')}"  actionListener="#{sessionTimetableController.bookFromTimetable}" >
+                                <p:commandButton   styleClass=" OrangeButton animated pulse infinite" update="@(.bookingFormUpdate)" disabled="#{empty  facesContext.externalContext.remoteUser}" rendered="#{sessionTimetableController.event.data.sessionTemplate.showBookingButton }" value="#{configMapController.getKey('Timetable_BookingButtonTitle')}"  actionListener="#{sessionTimetableController.bookFromTimetable}" >
                                     <!--<f:param name="sessionHistoryBookingId" value="#{sessionTimetableController.event.data.id}"/>-->
                                     <f:setPropertyActionListener value="#{sessionTimetableController.event.data}" target="#{sessionTimetableController.bookingButtonSessionHistory}" />
                                 </p:commandButton>

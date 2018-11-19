@@ -8,8 +8,8 @@
 
     
         <!--<p:log />--> 
-        <p:confirmDialog id="createEddrLinkDialogue" message="Set Up New Customer Using eDDR Form."  closable="false"
-                         header="#{configMapController.getKey('AddEddrLinkTitle')}" severity="info" widgetVar="createEddrLinkDialogueWidget"> 
+        <p:dialog id="createEddrLinkDialogue" responsive="true" resizable="true"  closable="true"
+                         header="#{configMapController.getKey('AddEddrLinkTitle')}"  widgetVar="createEddrLinkDialogueWidget"> 
             <h:form id="createEddrLink">  
                 <p:panel   header="#{configMapController.getKey('AddPaymentScheduleHeader')}">
                     <p:panelGrid id="addEddrLinkGrid1"  columns="4">
@@ -76,7 +76,7 @@
 
                 </p:panel>
             </h:form>
-        </p:confirmDialog>
+        </p:dialog>
 
 
     </ui:composition>

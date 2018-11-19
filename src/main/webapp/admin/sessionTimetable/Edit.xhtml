@@ -63,6 +63,10 @@
                     <p:inputText id="sessionMembersRate" value="#{sessionTimetableController.selected.sessionMembersRate}" title="#{configMapController.getKey('AddPaymentTitle_sessionMembersRate')}" required="true" requiredMessage="#{configMapController.getKey('AddPaymentRequiredMessage_sessionMembersRate')}">
                         <f:convertNumber  minFractionDigits="2"/>
                     </p:inputText>     
+              <p:outputLabel value="#{configMapController.getKey('AddPaymentLabel_sessionMaxSize')}" for="sessionMembersRate" />
+                   <p:inputText id="sessionMaxSize" value="#{sessionTimetableController.selected.sessionTimetableMaxSize}" title="#{configMapController.getKey('AddPaymentTitle_sessionMaxSize')}" required="true" requiredMessage="#{configMapController.getKey('AddPaymentTitle_sessionMaxSize')}">
+                        
+                    </p:inputText>       
 
                 </p:panelGrid>
                 <p:commandButton actionListener="#{sessionTimetableController.editDialogue}" value="#{configMapController.getKey('Save')}" update="display :SessionTimetableListForm :growl" oncomplete="PF('sessionTimetableControllerTable').filter()"/>
