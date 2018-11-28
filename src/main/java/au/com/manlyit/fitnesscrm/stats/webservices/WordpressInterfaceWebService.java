@@ -37,7 +37,7 @@ public class WordpressInterfaceWebService {
 
     /* use this to test the web service - create an executable file with the below content and run from command line
      <?php
-     $url = "https://test-services.purefitnessmanly.com.au/FitnessStats/WordpressInterfaceWebService?wsdl";
+     $url = "https://test-services.manlybeachfemalefitness.com.au/FitnessStats/WordpressInterfaceWebService?wsdl";
      $client = new SoapClient($url);
      $fcs = $client->__getFunctions();
      $res = $client->addNewLead(array('firstname'=> 'Dodgy', 'lastname' => 'Dave', 'email' => 'david@manlyit.com.au', 'mobile' => '0412422700', 'message' => 'Test From PHP'));

@@ -35,7 +35,7 @@ public class GoogleTest {
     private static final String SMTP_PORT = "465";
     private static final String emailMsgTxt = "<table width=\"600\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\">  <tr>    <td><img src=\"cid:logoimg_cid\"/></td>  </tr>  <tr>    <td height=\"220\"> <p>Thanks for Joining Site.com</p>      <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. </p>    <p>Username:<br />      Password: </p>    <p>To confirm your email click <a href=\"#\">here</a>.</p></td>  </tr>  <tr>    <td height=\"50\" align=\"center\" valign=\"middle\" bgcolor=\"#CCCCCC\">www.site.com | contact@site.com | +38200 123 456</td>  </tr></table>";
     private static final String emailSubjectTxt = "A test from gmail";
-    private static final String emailFromAddress = "noreply@purefitnessmanly.com.au";
+    private static final String emailFromAddress = "noreply@manlybeachfemalefitness.com.au";
     private static final String SSL_FACTORY = "javax.net.ssl.SSLSocketFactory";
     private static final String[] sendTo = {"david@manlyit.com.au"};
 
@@ -65,7 +65,7 @@ public class GoogleTest {
                 new javax.mail.Authenticator() {
 
                     protected PasswordAuthentication getPasswordAuthentication() {
-                        return new PasswordAuthentication("noreply@purefitnessmanly.com.au", "W*X6xh})F6)sKDwy");
+                        return new PasswordAuthentication("noreply@manlybeachfemalefitness.com.au", "W*X6xh})F6)sKDwy");
                     }
                 });
 
@@ -100,7 +100,7 @@ public class GoogleTest {
         BodyPart imgPart = new MimeBodyPart();
 
         String fileName = "resources/images/headerimg.jpg";
-        // String fileName = "http://www.purefitnessmanly.com.au/FitnessStats/resources/images/pure_fitness_manly_group_and_personal_training.jpg";
+        // String fileName = "http://www.manlybeachfemalefitness.com.au/FitnessStats/resources/images/pure_fitness_manly_group_and_personal_training.jpg";
 
         InputStream stream = null;
                // getServletContext().getResourceAsStream(fileName); //or null if you can't obtain a ServletContext

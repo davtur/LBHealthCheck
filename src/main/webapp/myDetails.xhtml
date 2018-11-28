@@ -99,6 +99,58 @@
 
 
                     </div>
+                                       <div class="card card-w-title">
+                        <h1 class="BigTopic">#{configMapController.getKey('MyDetailsLogin_title')}</h1>
+                        <h:panelGrid columns="2" cellpadding="5" >
+                            <p:outputLabel value="#{configMapController.getKey('EditCustomersLabel_username')}" for="username" />
+                            <h:outputText id="username" value="#{customersController.selected.username}" title="#{configMapController.getKey('EditCustomersTitle_username')}" />
+
+                            <p:outputLabel value="#{configMapController.getKey('EditCustomersLabel_password')}" for="passButton2" />
+                            <!--  <p:password id="password"  value="#{customersController.checkPass}" onfocus="this.select()" feedback="true" title="#{configMapController.getKey('EditCustomersTitle_password')}" >
+                                <p:ajax listener="#{customersController.checkPassChange}" event="keyup" />
+                            </p:password>
+                          TODO make this a dialogue <h:outputLabel value="#{configMapController.getKey('EditCustomersLabel_password')}" for="password2" />
+                            <p:password id="password2"  value="#{customersController.checkPass}" onfocus="this.select()" feedback="true" title="#{configMapController.getKey('EditCustomersTitle_password')}" />
+                          
+                            <p:commandButton   ajax="true" actionListener="#{customersController.updatepass}" update="password  :growl"   value="#{configMapController.getKey('EditCustomersUpdatePassword')}" immediate="true"/>-->
+
+                            <p:commandButton icon="fa fa-cog  white Fs14" id="passButton2" ajax="true" title="#{configMapController.getKey('Tooltip_passChangeButton')}" onclick="PF('updatePasswordDialogueWidget').show();" update=":growl :updatePass"   value="#{configMapController.getKey('EditCustomersUpdatePassword')}" immediate="true"/>
+
+
+                        </h:panelGrid>
+
+                    </div>
+                  <div class="card card-w-title">
+                        <h1 class="BigTopic">#{configMapController.getKey('MyDetailsSurveyPanel_title')}</h1>
+
+
+ <!--   <p:outputLabel value="#{configMapController.getKey('CreateSurveyanswersLabel_surveyId')}" for="surveyId" />
+                        <p:selectOneMenu id="surveyId" valueChangeListener="#{surveyanswersController.selectOneMenuValueChangeListener}" converter="surveysControllerConverter"  value="#{surveyanswersController.selectedSurvey}"  label="#{configMapController.getKey('CreateSurveyanswersTitle_surveyId')}">
+                            <f:selectItems value="#{surveysController.itemsAvailableSelectMany}"/>
+                            <p:ajax   update=":createCustomerForm"  />
+                        </p:selectOneMenu>-->
+                        <ui:repeat value="#{customersController.selected.questionnaireMapCollection}" var="qMap">
+                            <div class="EmptyBox10"></div>
+                                                <!--   <p:commandButton icon="fa fa-edit  white Fs14" id="viewSurveyButton" disabled="#{empty surveyanswersController.selectedSurvey}"  action="customerSurveys"    value="#{configMapController.getKey('MyDeatilsSurveys_viewSurveyLabel')}" update=":growl :createCustomerForm"  /> -->
+
+                            <h:panelGrid columns="2" cellpadding="5" >
+
+
+                                <p:commandButton icon="fa fa-edit  white Fs14"   action="customerSurveys" rendered="#{qMap.enabled}"   value="#{qMap.surveysId.name}" update=":growl :createCustomerForm"  >
+                                    <f:setPropertyActionListener value="#{qMap.surveysId}" target="#{surveyanswersController.selectedSurvey}" />
+                                </p:commandButton> 
+
+                                <h:outputText  rendered="#{!qMap.questionnaireCompleted and qMap.enabled}"  styleClass="red FontBold" value="Please complete this form." />   
+
+
+                                <h:outputText  rendered="#{qMap.questionnaireCompleted and qMap.enabled}" value="Completed" />   
+
+                            </h:panelGrid>
+
+                        </ui:repeat>
+
+                    </div>
+     
                 </div>
                 <!-- <div class="Container50 Responsive50">
                      <div class="ContainerIndent">
@@ -182,47 +234,18 @@
 
                         </h:panelGrid>
                         <div class="EmptyBox10"></div>
-                        <p:commandButton styleClass="updatePaymentInfo" icon="fa fa-credit-card  white Fs14" title="#{configMapController.getKey('Tooltip_updateMyPaymentInfo')}" id="editPaymentMethodButton" disabled="#{ezidebit.theCustomerProvisionedInThePaymentGateway == false or ezidebit.customerDetailsHaveBeenRetrieved == false or ezidebit.customerCancelledInPaymentGateway == true}"  oncomplete="PF('editPaymentMethodDialogueWidget').show();"    value="#{configMapController.getKey('editPaymentMethodButtonLink')}" update=":growl @(.updatePaymentInfo)"  /> 
+                        <p:commandButton styleClass="updatePaymentInfo" icon="fa fa-credit-card  white Fs14" title="#{configMapController.getKey('Tooltip_updateMyPaymentInfo')}" id="editPaymentMethodButton" disabled="#{ezidebit.theCustomerProvisionedInThePaymentGateway == false or ezidebit.customerDetailsHaveBeenRetrieved == false }"  oncomplete="PF('editPaymentMethodDialogueWidget').show();"    value="#{configMapController.getKey('editPaymentMethodButtonLink')}" update=":growl @(.updatePaymentInfo)"  /> 
 
 
 
                     </div>
-                    <div class="card card-w-title">
-                        <h1 class="BigTopic">#{configMapController.getKey('MyDetailsSurveyPanel_title')}</h1>
-
-
- <!--   <p:outputLabel value="#{configMapController.getKey('CreateSurveyanswersLabel_surveyId')}" for="surveyId" />
-                        <p:selectOneMenu id="surveyId" valueChangeListener="#{surveyanswersController.selectOneMenuValueChangeListener}" converter="surveysControllerConverter"  value="#{surveyanswersController.selectedSurvey}"  label="#{configMapController.getKey('CreateSurveyanswersTitle_surveyId')}">
-                            <f:selectItems value="#{surveysController.itemsAvailableSelectMany}"/>
-                            <p:ajax   update=":createCustomerForm"  />
-                        </p:selectOneMenu>-->
-                        <ui:repeat value="#{customersController.selected.questionnaireMapCollection}" var="qMap">
-                            <div class="EmptyBox10"></div>
-                                                <!--   <p:commandButton icon="fa fa-edit  white Fs14" id="viewSurveyButton" disabled="#{empty surveyanswersController.selectedSurvey}"  action="customerSurveys"    value="#{configMapController.getKey('MyDeatilsSurveys_viewSurveyLabel')}" update=":growl :createCustomerForm"  /> -->
-
-                            <h:panelGrid columns="2" cellpadding="5" >
-
-
-                                <p:commandButton icon="fa fa-edit  white Fs14"   action="customerSurveys" rendered="#{qMap.enabled}"   value="#{qMap.surveysId.name}" update=":growl :createCustomerForm"  >
-                                    <f:setPropertyActionListener value="#{qMap.surveysId}" target="#{surveyanswersController.selectedSurvey}" />
-                                </p:commandButton> 
-
-                                <h:outputText  rendered="#{!qMap.questionnaireCompleted and qMap.enabled}"  styleClass="red FontBold" value="Please complete this form." />   
-
-
-                                <h:outputText  rendered="#{qMap.questionnaireCompleted and qMap.enabled}" value="Completed" />   
-
-                            </h:panelGrid>
-
-                        </ui:repeat>
-
-                    </div>
-                    <div class="card card-w-title">
+                 <div class="card card-w-title">
                         <h1 class="BigTopic">#{configMapController.getKey('MyDetailsTicketPanel_title')}</h1>
 
                <p:dataTable  
-                    id="datalist"  
-                    editable="true" 
+                    id="datalist" 
+                    
+                    editable="false" 
                     value="#{ticketsController.items}" 
                     selection="#{ticketsController.selected}" 
                     rowKey="#{item.id}" 
@@ -230,7 +253,8 @@
                     widgetVar="ticketsControllerTable" 
                     var="item"  
                     paginator="true" 
-                    rows="15"  
+                    reflow="true" 
+                    rows="10"  
                     paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  
                     rowsPerPageTemplate="5,10,15,20,25,50,100" >
                     <f:facet name="header">
@@ -243,7 +267,7 @@
                     <p:ajax event="rowEditCancel" listener="#{ticketsController.onCancel}" update=":growl"  oncomplete="PF('ticketsControllerTable').filter()" />  
                     <p:ajax event="rowSelect"   update=" viewButton  "/>
                     <p:ajax event="rowUnselect" update=" viewButton  "/>
-                    <p:column selectionMode="single"/>
+                  <!--  <p:column selectionMode="single"/>-->
                     <p:column sortBy="#{item.id}" filterBy="#{item.id}" headerText="#{configMapController.getKey('ListTicketsTitle_id')}"   >
                         <p:cellEditor> 
                             <f:facet name="output">
@@ -256,13 +280,13 @@
 
 
                     </p:column>
-                    <p:column sortBy="#{item.itemType}" filterBy="#{item.itemType}" headerText="#{configMapController.getKey('ListTicketsTitle_itemType')}"   >
+                    <p:column sortBy="#{item.sessionType.name}" filterBy="#{item.sessionType.name}" headerText="#{configMapController.getKey('ListTicketsTitle_itemType')}"   >
                         <p:cellEditor> 
                             <f:facet name="output">
-                                <h:outputText value="#{item.itemType}"/>
+                                <h:outputText value="#{item.sessionType.name}"/>
                             </f:facet>
                             <f:facet name="input">
-                                <p:inputText value="#{item.itemType}" label="#{configMapController.getKey('ListTicketsTitle_itemType')}" />
+                                <p:inputText value="#{item.sessionType.name}" label="#{configMapController.getKey('ListTicketsTitle_itemType')}" />
                             </f:facet>
                         </p:cellEditor> 
 
@@ -332,9 +356,9 @@
                         </p:cellEditor> 
 
                     </p:column>
-                    <p:column rendered="#{ticketsController.isUserInRole('ADMIN')}"  headerText="Edit" style="width:50px">  
+                  <!--  <p:column rendered="#{ticketsController.isUserInRole('ADMIN')}"  headerText="Edit" style="width:50px">  
                         <p:rowEditor />  
-                    </p:column>  
+                    </p:column>  -->
 
 
                     <f:facet name="footer">
@@ -345,28 +369,7 @@
 
 
                     </div>
-                    <div class="card card-w-title">
-                        <h1 class="BigTopic">#{configMapController.getKey('MyDetailsLogin_title')}</h1>
-                        <h:panelGrid columns="2" cellpadding="5" >
-                            <p:outputLabel value="#{configMapController.getKey('EditCustomersLabel_username')}" for="username" />
-                            <h:outputText id="username" value="#{customersController.selected.username}" title="#{configMapController.getKey('EditCustomersTitle_username')}" />
-
-                            <p:outputLabel value="#{configMapController.getKey('EditCustomersLabel_password')}" for="passButton2" />
-                            <!--  <p:password id="password"  value="#{customersController.checkPass}" onfocus="this.select()" feedback="true" title="#{configMapController.getKey('EditCustomersTitle_password')}" >
-                                <p:ajax listener="#{customersController.checkPassChange}" event="keyup" />
-                            </p:password>
-                          TODO make this a dialogue <h:outputLabel value="#{configMapController.getKey('EditCustomersLabel_password')}" for="password2" />
-                            <p:password id="password2"  value="#{customersController.checkPass}" onfocus="this.select()" feedback="true" title="#{configMapController.getKey('EditCustomersTitle_password')}" />
-                          
-                            <p:commandButton   ajax="true" actionListener="#{customersController.updatepass}" update="password  :growl"   value="#{configMapController.getKey('EditCustomersUpdatePassword')}" immediate="true"/>-->
-
-                            <p:commandButton icon="fa fa-cog  white Fs14" id="passButton2" ajax="true" title="#{configMapController.getKey('Tooltip_passChangeButton')}" onclick="PF('updatePasswordDialogueWidget').show();" update=":growl :updatePass"   value="#{configMapController.getKey('EditCustomersUpdatePassword')}" immediate="true"/>
-
-
-                        </h:panelGrid>
-
-                    </div>
-                </div>
+                 </div>
             </div>
         </h:form>
 

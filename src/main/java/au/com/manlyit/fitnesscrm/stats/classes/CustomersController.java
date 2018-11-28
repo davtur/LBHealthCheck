@@ -162,9 +162,9 @@ public class CustomersController implements Serializable {
     private au.com.manlyit.fitnesscrm.stats.beans.SuppliersFacade suppliersFacade;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.PaymentBean ejbPaymentBean;
-     @Inject
+    @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.TicketsFacade ejbTicketsFacade;
-       @Inject
+    @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.SessionTypesFacade ejbSessionTypesFacade;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.EmailTemplatesFacade ejbEmailTemplatesFacade;
@@ -196,14 +196,13 @@ public class CustomersController implements Serializable {
     private au.com.manlyit.fitnesscrm.stats.beans.ActivationFacade ejbActivationFacade;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.PreferedContactFacade ejbPreferedContactFacade;
-   //@Inject
-   // private EziDebitPaymentGateway eziDebitPaymentGatewayController;
-  //  @Inject
- //  private MySessionsChart1 mySessionsChart1Controller;
- //    @Inject
- //   private SuppliersController suppliersControllerController;
-    
-    
+    //@Inject
+    // private EziDebitPaymentGateway eziDebitPaymentGatewayController;
+    //  @Inject
+    //  private MySessionsChart1 mySessionsChart1Controller;
+    //    @Inject
+    //   private SuppliersController suppliersControllerController;
+
     @Inject
     private FutureMapEJB futureMap;
 
@@ -486,9 +485,8 @@ public class CustomersController implements Serializable {
         ejbFacade.edit(cust);
 
     }
-    
-    
-     public void sendClassBookingConfirmationEmail() {
+
+    public void sendClassBookingConfirmationEmail() {
         FacesContext context = FacesContext.getCurrentInstance();
         LoginBean controller = (LoginBean) context.getApplication().getELResolver().getValue(context.getELContext(), null, "loginBean");
         controller.doPasswordReset("system.email.admin.paymentForm.template", current, configMapFacade.getConfig("sendPaymentFormEmailSubject"));
@@ -509,7 +507,6 @@ public class CustomersController implements Serializable {
         addCustomerToUsersGroup(current);
         createCombinedAuditLogAndNote(loggedInUser, current, "sendPaymentFormEmail", auditDetails, changedFrom, changedTo);
     }
-    
 
     public void sendPaymentFormEmail() {
         FacesContext context = FacesContext.getCurrentInstance();
@@ -1389,8 +1386,7 @@ public class CustomersController implements Serializable {
 
                 c.setUsername(c.getEmailAddress().trim());
                 getFacade().createAndFlushForGeneratedIdEntities(c);
-                
-                
+
                 createDefaultPaymentParametersFromDetached(c.getId());
                 //createDefaultPaymentParameters(c); 
                 grp.setUsername(c);
@@ -1409,7 +1405,7 @@ public class CustomersController implements Serializable {
                 if (isWebserviceCall == false) {
                     addToNotesDataTableLists(nt);
                 }
-                String details = "New LEAD generated: Id:"+ c.getId() +", Name: " + c.getFirstname() + ", <br/>Email:  " + c.getEmailAddress() + ", <br/>Phone:   " + c.getTelephone() + ", <br/>Username:   " + c.getUsername() + ", <br/>Group:   " + group + ", IP Address:" + ipAddress + ", Message:" + message;
+                String details = "New LEAD generated: Id:" + c.getId() + ", Name: " + c.getFirstname() + ", <br/>Email:  " + c.getEmailAddress() + ", <br/>Phone:   " + c.getTelephone() + ", <br/>Username:   " + c.getUsername() + ", <br/>Group:   " + group + ", IP Address:" + ipAddress + ", Message:" + message;
                 sendNotificationEmail(c, grp, "system.email.notification.template", "New LEAD from website", message);
                 createCombinedAuditLogAndNote(c, c, "New Lead", details, "Did Not Exist", "New Lead");
                 LOGGER.log(Level.INFO, "createFromLead: {0}", new Object[]{details});
@@ -1431,7 +1427,7 @@ public class CustomersController implements Serializable {
                 getFacade().edit(c);
                 //ejbGroupsFacade.create(grp);
                 createDefaultCustomerProfilePicture(c);
-                String details = "New Sign UP -> New user Being Added ->  Id:"+ c.getId() +", Name: " + c.getFirstname() + ", Email:" + c.getEmailAddress() + ", Phone:" + c.getTelephone() + ", Username:" + c.getUsername() + ", Group:" + group + ", IP Address:" + ipAddress + ".Customer Onboard email sent";
+                String details = "New Sign UP -> New user Being Added ->  Id:" + c.getId() + ", Name: " + c.getFirstname() + ", Email:" + c.getEmailAddress() + ", Phone:" + c.getTelephone() + ", Username:" + c.getUsername() + ", Group:" + group + ", IP Address:" + ipAddress + ".Customer Onboard email sent";
                 //FacesContext context = FacesContext.getCurrentInstance();
                 //SurveysController surveyCon = context.getApplication().evaluateExpressionGet(context, "#{surveysController}", SurveysController.class);
                 // SurveysController surveyCon = (SurveysController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "surveysController");
@@ -1456,8 +1452,8 @@ public class CustomersController implements Serializable {
             }
             setNewCustomer(setCustomerDefaults(new Customers()));
             addQuestionnaireMapItemsToCustomer(c);
-            issuePackOfTickets(c,1,10);// issue free trial tickets - 10 tickets to group training sessions over 1 weeks
-        
+            issuePackOfTickets(c, 1, 10);// issue free trial tickets - 10 tickets to group training sessions over 1 weeks
+
         } else {
             if (isWebserviceCall == false) {
                 JsfUtil.addErrorMessage("Error", configMapFacade.getConfig("SignUpValidationEmailExistsFailed"));
@@ -1468,7 +1464,7 @@ public class CustomersController implements Serializable {
 
     }
 
-     public void issuePackOfTickets(Customers c, int validWeeks, int numberOfTickets) {
+    public void issuePackOfTickets(Customers c, int validWeeks, int numberOfTickets) {
 
         GregorianCalendar ticketStartDate = new GregorianCalendar();
         CalendarUtil.SetToLastDayOfWeek(Calendar.SUNDAY, ticketStartDate);
@@ -1476,8 +1472,8 @@ public class CustomersController implements Serializable {
 
         GregorianCalendar ticketStopDate = new GregorianCalendar();
         ticketStopDate.setTimeInMillis(ticketStartDate.getTimeInMillis());
-        ticketStopDate.add(Calendar.WEEK_OF_YEAR, validWeeks );
-        
+        ticketStopDate.add(Calendar.WEEK_OF_YEAR, validWeeks);
+
         ticketStopDate.add(Calendar.DAY_OF_YEAR, 1);
         ticketStopDate.add(Calendar.SECOND, -1);
 
@@ -1485,32 +1481,29 @@ public class CustomersController implements Serializable {
 
     }
 
-    
-
     public void issueBlockOfTickets(Customers c, Date ticketStartDate, Date ticketStopDate, SessionTypes sessionType, int number) {
 
-      //  synchronized (issueBlockOfTicketsLockObject) {
-            try {
+        //  synchronized (issueBlockOfTicketsLockObject) {
+        try {
 
-                int ticketsAdded = 0;
+            int ticketsAdded = 0;
 
-                for (int n = 0; n < number; n++) {
-                    Tickets t = new Tickets(0,sessionType,new Date());                   
-                    t.setCustomer(c);                  
-                    t.setValidFrom(ticketStartDate);
-                    t.setExpires(ticketStopDate);
-                    ejbTicketsFacade.create(t);
-                    ticketsAdded++;
-                }
-
-                LOGGER.log(Level.INFO, "Adding Block of Tickets for Customer id {0},  tickets added {1},startDate {2}, stopDate {3} ", new Object[]{c.getId(), ticketsAdded, ticketStartDate, ticketStopDate});
-            } catch (Exception ex) {
-                Logger.getLogger(FutureMapEJB.class.getName()).log(Level.SEVERE, "issueBlockOfTickets", ex.getMessage());
+            for (int n = 0; n < number; n++) {
+                Tickets t = new Tickets(0, sessionType, new Date());
+                t.setCustomer(c);
+                t.setValidFrom(ticketStartDate);
+                t.setExpires(ticketStopDate);
+                ejbTicketsFacade.create(t);
+                ticketsAdded++;
             }
-       // }
+
+            LOGGER.log(Level.INFO, "Adding Block of Tickets for Customer id {0},  tickets added {1},startDate {2}, stopDate {3} ", new Object[]{c.getId(), ticketsAdded, ticketStartDate, ticketStopDate});
+        } catch (Exception ex) {
+            Logger.getLogger(FutureMapEJB.class.getName()).log(Level.SEVERE, "issueBlockOfTickets", ex.getMessage());
+        }
+        // }
     }
 
-    
     public void doPasswordResetFromWebserviceCall(String templateName, Customers current, String subject) {
 
         //valid user that wants the password reset
@@ -1545,10 +1538,10 @@ public class CustomersController implements Serializable {
                 //current.setPassword(PasswordService.getInstance().encrypt(tempPassword));
                 // ejbCustomerFacade.editAndFlush(current);
                 htmlText = htmlText.replace(templateTemporaryPasswordPlaceholder, tempPassword);
-                //String htmlText = "<table width=\"600\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\">  <tr>    <td><img src=\"cid:logoimg_cid\"/></td>  </tr>  <tr>    <td height=\"220\"> <p>Pure Fitness Manly</p>      <p>Please click the following link to reset your password:</p><p>To reset your password click <a href=\"" + urlLink + "\">here</a>.</p></td>  </tr>  <tr>    <td height=\"50\" align=\"center\" valign=\"middle\" bgcolor=\"#CCCCCC\">www.purefitnessmanly.com.au | sarah@purefitnessmanly.com.au | +61433818067</td>  </tr></table>";
+                //String htmlText = "<table width=\"600\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\">  <tr>    <td><img src=\"cid:logoimg_cid\"/></td>  </tr>  <tr>    <td height=\"220\"> <p>Pure Fitness Manly</p>      <p>Please click the following link to reset your password:</p><p>To reset your password click <a href=\"" + urlLink + "\">here</a>.</p></td>  </tr>  <tr>    <td height=\"50\" align=\"center\" valign=\"middle\" bgcolor=\"#CCCCCC\">www.manlybeachfemalefitness.com.au | sarah@manlybeachfemalefitness.com.au | +61433818067</td>  </tr></table>";
 
                 //String host, String to, String ccAddress, String from, String emailSubject, String message, String theAttachedfileName, boolean debug
-                //emailAgent.send("david@manlyit.com.au", "", "info@purefitnessmanly.com.au", "Password Reset", htmlText, null, true);
+                //emailAgent.send("david@manlyit.com.au", "", "info@manlybeachfemalefitness.com.au", "Password Reset", htmlText, null, true);
                 Future<Boolean> emailSendResult = ejbPaymentBean.sendAsynchEmail(current.getEmailAddress(), configMapFacade.getConfig("PasswordResetCCEmailAddress"), configMapFacade.getConfig("PasswordResetFromEmailAddress"), subject, htmlText, null, emailServerProperties(), false);
                 //JsfUtil.addSuccessMessage("Password Reset Successful!", configMapFacade.getConfig("PasswordResetSuccessful"));
                 Logger.getLogger(LoginBean.class.getName()).log(Level.INFO, null, configMapFacade.getConfig("PasswordResetSuccessful"));
@@ -2286,17 +2279,31 @@ public class CustomersController implements Serializable {
         return "/mobileMenu.xhtml?faces-redirect=true";
     }
 
+    public void logoutNoReturn() {
+        ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
+        ec.invalidateSession();
+        try {
+            ec.redirect(ec.getRequestContextPath() + "/index.xhtml");
+        } catch (IOException ex) {
+            Logger.getLogger(CustomersController.class.getName()).log(Level.SEVERE, "logoutNoReturn Failure", ex);
+        }
+    }
+
     public String logout() {
         FacesContext fc = FacesContext.getCurrentInstance();
 
         // invalidate session
         ExternalContext ec = fc.getExternalContext();
+
         // HttpSession session = (HttpSession) ec.getSession(false);
-        HttpServletRequest req = (HttpServletRequest) ec.getRequest();
+        //HttpServletRequest req = (HttpServletRequest) ec.getRequest();
         //session.invalidate();
         try {
-            req.logout();
-        } catch (ServletException ex) {
+            // logout authentication
+           // req.logout();
+            //
+            ec.invalidateSession();
+        } catch (Exception ex) {
             Logger.getLogger(CustomersController.class.getName()).log(Level.SEVERE, "Logout failure!", ex);
         }
 
@@ -3727,7 +3734,7 @@ public class CustomersController implements Serializable {
      * @return the wordpressSiteUrl
      */
     public String getWordpressSiteUrl() {
-        if(wordpressSiteUrl == null ||wordpressSiteUrl.isEmpty() ){
+        if (wordpressSiteUrl == null || wordpressSiteUrl.isEmpty()) {
             wordpressSiteUrl = configMapFacade.getConfig("system.wordpresssite.url");
         }
         return wordpressSiteUrl;

@@ -4,12 +4,17 @@ import au.com.manlyit.fitnesscrm.stats.db.NotificationsLog;
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PaginationHelper;
 import au.com.manlyit.fitnesscrm.stats.beans.NotificationsLogFacade;
+import au.com.manlyit.fitnesscrm.stats.classes.util.LazyLoadingDataModel;
+import au.com.manlyit.fitnesscrm.stats.db.AuditLog;
 
 import java.io.Serializable;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.ResourceBundle;
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.SessionScoped;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
@@ -40,8 +45,38 @@ public class NotificationsLogController implements Serializable {
     private int selectedItemIndex;
     private List<NotificationsLog> filteredItems;
     private NotificationsLog[] multiSelected;
+    private LazyLoadingDataModel<NotificationsLog> lazyModel;
+    private Date startDate;
+    private Date endDate;
 
     public NotificationsLogController() {
+    }
+
+    public LazyLoadingDataModel<NotificationsLog> getLazyModel() {
+        if (lazyModel == null) {
+            lazyModel = new LazyLoadingDataModel<>(ejbFacade);
+            lazyModel.setFromDate(getStartDate());
+            lazyModel.setToDate(getEndDate());
+            lazyModel.setDateRangeEntityFieldName("timestampOfNotification");
+            lazyModel.setUseDateRange(true);
+        }
+        return lazyModel;
+    }
+    
+    @PostConstruct
+    private void initDates() {
+        GregorianCalendar cal1 = new GregorianCalendar();
+        cal1.add(Calendar.DAY_OF_YEAR, 1);
+        setEndDate(cal1.getTime());
+        cal1.add(Calendar.DAY_OF_YEAR, -1);
+        cal1.add(Calendar.MONTH, -1);
+        setStartDate(cal1.getTime());
+        //items = new PfSelectableDataModel<>(ejbFacade.findAuditLogsByDateRange(startDate, endDate, true));
+        lazyModel = new LazyLoadingDataModel<>(ejbFacade);
+        lazyModel.setFromDate(getStartDate());
+        lazyModel.setToDate(getEndDate());
+        lazyModel.setDateRangeEntityFieldName("timestampOfNotification");
+        lazyModel.setUseDateRange(true);
     }
 
     public static boolean isUserInRole(String roleName) {
@@ -331,6 +366,34 @@ public class NotificationsLogController implements Serializable {
             }
         }
 
+    }
+
+    /**
+     * @return the startDate
+     */
+    public Date getStartDate() {
+        return startDate;
+    }
+
+    /**
+     * @param startDate the startDate to set
+     */
+    public void setStartDate(Date startDate) {
+        this.startDate = startDate;
+    }
+
+    /**
+     * @return the endDate
+     */
+    public Date getEndDate() {
+        return endDate;
+    }
+
+    /**
+     * @param endDate the endDate to set
+     */
+    public void setEndDate(Date endDate) {
+        this.endDate = endDate;
     }
 
 }

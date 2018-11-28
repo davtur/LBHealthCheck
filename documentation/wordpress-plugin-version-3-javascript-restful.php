@@ -2,11 +2,11 @@
 
 /*
 Plugin Name: Fitness CRM Lead Plugin
-Plugin URI: https://services.purefitnessmanly.com.au
+Plugin URI: https://services.manlybeachfemalefitness.com.au
 Description: A simple hook to push contact form 7 form information to a CRM webservice
 Version: 1.3
 Author: David Turner
-Author URI: http://www.purefitnessmanly.com.au
+Author URI: http://www.manlybeachfemalefitness.com.au
 */
 
 add_action( 'wp_footer', 'mycustom_wp_footer' );
@@ -16,7 +16,7 @@ function mycustom_wp_footer() {
 <script type="text/javascript">
 document.addEventListener( 'wpcf7mailsent', function( event ) {
     	ga( 'send', 'event', 'Contact Form', 'submit' );
-	goog_report_conversion ('http://www.purefitnessmanly.com.au/contact-us/');fbq('track', 'Lead');
+	goog_report_conversion ('http://www.manlybeachfemalefitness.com.au/contact-us/');fbq('track', 'Lead');
 	//alert("Fired plugin");
 	console.log(event);
 	var inputs = event.detail.inputs;
@@ -46,7 +46,7 @@ document.addEventListener( 'wpcf7mailsent', function( event ) {
         jQuery.ajax({
 			type: "POST",
 			contentType: "application/json",
-    		url: "https://services.purefitnessmanly.com.au/FitnessStats/api/customers",
+    		url: "https://services.manlybeachfemalefitness.com.au/FitnessStats/api/customers",
 			// dataType is what to expect in the response from the server. Leave it out and it makes an educated guess
 	 		//dataType:'json',
 			data: JSON.stringify(newLead),

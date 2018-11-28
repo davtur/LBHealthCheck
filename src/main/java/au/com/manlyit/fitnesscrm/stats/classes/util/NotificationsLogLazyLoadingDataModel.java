@@ -10,6 +10,7 @@ package au.com.manlyit.fitnesscrm.stats.classes.util;
  * @author dturner
  */
 import au.com.manlyit.fitnesscrm.stats.beans.AbstractFacade;
+import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -25,18 +26,19 @@ import org.primefaces.model.SortOrder;
  *
  * @param <T>
  */
-public class LazyLoadingDataModel<T extends BaseEntity> extends LazyDataModel<T> {
+public class NotificationsLogLazyLoadingDataModel<T extends BaseEntity> extends LazyDataModel<T> {
 
     private static final long serialVersionUID = 1L;
-    private static final Logger logger = Logger.getLogger(LazyLoadingDataModel.class.getName());
+    private static final Logger logger = Logger.getLogger(NotificationsLogLazyLoadingDataModel.class.getName());
     private Date fromDate;
     private Date toDate;
+    private Customers cust;
     private boolean useDateRange = false;
     private String dateRangeEntityFieldName = "";
 
     private volatile AbstractFacade<T> facade;
 
-    public LazyLoadingDataModel(AbstractFacade<T> facade) {
+    public NotificationsLogLazyLoadingDataModel(AbstractFacade<T> facade) {
         super();
         this.facade = facade;
         this.setRowCount(facade.count());
@@ -53,6 +55,9 @@ public class LazyLoadingDataModel<T extends BaseEntity> extends LazyDataModel<T>
     @Override
     public List<T> load(int first, int pageSize, String sortField, SortOrder sortOrder, Map<String, Object> filters) {
         List<T> list = null;
+        if(cust != null){
+            filters.put("customer", cust);
+        }
         if (useDateRange == false) {
             list = facade.load(first, pageSize, sortField, sortOrder, filters);
             Long totalRows = facade.loadedTotalRowCount(first, pageSize, sortField, sortOrder, filters);
@@ -144,6 +149,20 @@ public class LazyLoadingDataModel<T extends BaseEntity> extends LazyDataModel<T>
      */
     public void setDateRangeEntityFieldName(String dateRangeEntityFieldName) {
         this.dateRangeEntityFieldName = dateRangeEntityFieldName;
+    }
+
+    /**
+     * @return the cust
+     */
+    public Customers getCust() {
+        return cust;
+    }
+
+    /**
+     * @param cust the cust to set
+     */
+    public void setCust(Customers cust) {
+        this.cust = cust;
     }
 
 }

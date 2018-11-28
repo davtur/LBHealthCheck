@@ -30,19 +30,22 @@
 
         <p:overlayPanel id="moviePanel" widgetVar="notificationPanel" hideEffect="fade" showCloseIcon="true" dynamic="true" >
             <h1 class="BigTopic">Notifications</h1>
-            <p:dataTable  
-                id="datalist"  
-                editable="false" 
-                value="#{notificationsLogController.items}" 
-                selection="#{notificationsLogController.selected}" 
-                rowKey="#{item.id}" 
-                filteredValue="#{notificationsLogController.filteredItems}"  
-                widgetVar="notificationsLogControllerTable" 
-                var="item"  
-                paginator="true" 
-                rows="15"  
-                paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  
-                rowsPerPageTemplate="5,10,15,20,25,50,100" >
+            <p:dataTable  rendered="#{customersController.isUserInRole('DEVELOPER') || customersController.isUserInRole('ADMIN')}"
+                          id="datalist"  
+                          editable="false" 
+                          value="#{notificationsLogController.items}" 
+                          selection="#{notificationsLogController.lazyModel}" 
+                          rowKey="#{item.id}" 
+                          filteredValue="#{notificationsLogController.filteredItems}"  
+                          widgetVar="notificationsLogControllerTable" 
+                          var="item"  
+                          lazy="true"
+
+                          rows="15"  
+                          scrollable="true"
+                          scrollHeight="400"
+                          scrollRows="50"
+                          liveScroll="true" >
                 <f:facet name="header">
                     <p:outputPanel>
                         <h:outputText value="Search all fields:" />

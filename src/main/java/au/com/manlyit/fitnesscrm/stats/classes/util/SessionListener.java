@@ -35,8 +35,8 @@ public class SessionListener implements HttpSessionListener {
     @Override
     public void sessionDestroyed(HttpSessionEvent event) {
         HttpSession session = event.getSession();
-        logger.log(Level.INFO, "Session id: {0}", session.getId());
-        logger.log(Level.INFO, "New session: {0}", session.isNew());
+        logger.log(Level.INFO, "Session Destroyedid: {0}", session.getId());
+       
 
     }
 }

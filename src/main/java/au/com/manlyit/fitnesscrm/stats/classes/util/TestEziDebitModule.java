@@ -77,7 +77,7 @@ public class TestEziDebitModule {
         String result = ws.testFunction("JUST A TEST --------------------> ").getData().getValue();
         logger.log(Level.INFO, "Result: {0}", result);
 
-        EziResponseOfNewCustomerXcXH3LiW addCustomerResponse = ws.addCustomer(digitalKey, primaryKey, yourSystemReference, "Turner", "Sarah", "Unit 21", "5-17 High St", "Manly", "NSW", "2095", "sarah@purefitnessmanly.com.au", "0433818067", paymentDate, "NO", "YES", "YES", "LocalUser");
+        EziResponseOfNewCustomerXcXH3LiW addCustomerResponse = ws.addCustomer(digitalKey, primaryKey, yourSystemReference, "Turner", "Sarah", "Unit 21", "5-17 High St", "Manly", "NSW", "2095", "sarah@manlybeachfemalefitness.com.au", "0433818067", paymentDate, "NO", "YES", "YES", "LocalUser");
         logger.log(Level.INFO, "Add Customer Response: Error - {0}, Data - {1}", new Object[]{addCustomerResponse.getErrorMessage().getValue(), addCustomerResponse.getData().getValue()});
         EziResponseOfCustomerDetailsTHgMB7OL customerdetails = ws.getCustomerDetails(digitalKey, "", "1");
         logger.log(Level.INFO, "Get Customer Response: Error - {0}, Data - {1}", new Object[]{customerdetails.getErrorMessage().getValue(), customerdetails.getData().getValue().getCustomerName().getValue()});

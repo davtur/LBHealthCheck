@@ -138,7 +138,7 @@ public class SendHTMLEmailWithFileAttached implements Serializable {
             final String fileName = serverProperties.getProperty("mail.smtp.headerimage.url");
             final String fileNameCid = serverProperties.getProperty("mail.smtp.headerimage.cid");
             // String fileName = "/resources/images/headerimg.jpg";
-            //String fileName = "http://www.purefitnessmanly.com.au/FitnessStats/resources/images/pure_fitness_manly_group_and_personal_training.jpg";
+            //String fileName = "http://www.manlybeachfemalefitness.com.au/FitnessStats/resources/images/pure_fitness_manly_group_and_personal_training.jpg";
 
             InputStream stream ;
             // getServletContext().getResourceAsStream(fileName); //or null if you can't obtain a ServletContext

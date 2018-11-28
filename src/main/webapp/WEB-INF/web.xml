@@ -26,7 +26,7 @@
     </context-param>
    <!-- <context-param>
         <param-name>primefaces.PUSH_SERVER_URL</param-name>
-        <param-value>https://test-services.purefitnessmanly.com.au/FitnessStats</param-value>
+        <param-value>https://test-services.manlybeachfemalefitness.com.au/FitnessStats</param-value>
     </context-param>
     <data-source>
         <name>jdbc/fitness</name>

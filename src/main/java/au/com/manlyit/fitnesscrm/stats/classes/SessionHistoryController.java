@@ -1122,7 +1122,7 @@ public class SessionHistoryController implements Serializable {
         URL imageResource = servletContext.getResource(File.separator + "resources" + File.separator + "images"
                 + File.separator + "logo.png");
         pdf.open();
-        pdf.add(Image.getInstance(new URL("https://services.purefitnessmanly.com.au/FitnessStats/resources/images/logo.png")));
+        pdf.add(Image.getInstance(new URL("https://services.manlybeachfemalefitness.com.au/FitnessStats/resources/images/logo.png")));
         String trainer = "Trainer Session History for " + getSelectedCustomer().getFirstname() + " " + getSelectedCustomer().getLastname();
         pdf.addTitle(trainer);
         pdf.add(new Paragraph(trainer));

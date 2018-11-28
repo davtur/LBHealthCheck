@@ -7,6 +7,7 @@ import au.com.manlyit.fitnesscrm.stats.db.SessionTimetable;
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PaginationHelper;
 import au.com.manlyit.fitnesscrm.stats.beans.SessionTimetableFacade;
+import au.com.manlyit.fitnesscrm.stats.beans.TicketsController;
 import au.com.manlyit.fitnesscrm.stats.classes.util.CalendarUtil;
 import au.com.manlyit.fitnesscrm.stats.classes.util.CrmScheduleEvent;
 import au.com.manlyit.fitnesscrm.stats.classes.util.StringEncrypter;
@@ -933,7 +934,7 @@ public class SessionTimetableController implements Serializable {
         this.bookingButtonSessionHistory = bookingButtonSessionHistory;
         FacesContext context = FacesContext.getCurrentInstance();
         CustomersController controller = context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
-
+       
         if (context.getExternalContext().getRemoteUser() != null) {
             // autheticated user
             PrimeFaces.current().executeScript("PF('bookingDialog').show();");
@@ -1009,10 +1010,10 @@ public class SessionTimetableController implements Serializable {
                 //current.setPassword(PasswordService.getInstance().encrypt(tempPassword));
                 // ejbCustomerFacade.editAndFlush(current);
                 htmlText = htmlText.replace(templateTemporaryPasswordPlaceholder, tempPassword);
-                //String htmlText = "<table width=\"600\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\">  <tr>    <td><img src=\"cid:logoimg_cid\"/></td>  </tr>  <tr>    <td height=\"220\"> <p>Pure Fitness Manly</p>      <p>Please click the following link to reset your password:</p><p>To reset your password click <a href=\"" + urlLink + "\">here</a>.</p></td>  </tr>  <tr>    <td height=\"50\" align=\"center\" valign=\"middle\" bgcolor=\"#CCCCCC\">www.purefitnessmanly.com.au | sarah@purefitnessmanly.com.au | +61433818067</td>  </tr></table>";
+                //String htmlText = "<table width=\"600\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\">  <tr>    <td><img src=\"cid:logoimg_cid\"/></td>  </tr>  <tr>    <td height=\"220\"> <p>Pure Fitness Manly</p>      <p>Please click the following link to reset your password:</p><p>To reset your password click <a href=\"" + urlLink + "\">here</a>.</p></td>  </tr>  <tr>    <td height=\"50\" align=\"center\" valign=\"middle\" bgcolor=\"#CCCCCC\">www.manlybeachfemalefitness.com.au | sarah@manlybeachfemalefitness.com.au | +61433818067</td>  </tr></table>";
 
                 //String host, String to, String ccAddress, String from, String emailSubject, String message, String theAttachedfileName, boolean debug
-                //emailAgent.send("david@manlyit.com.au", "", "info@purefitnessmanly.com.au", "Password Reset", htmlText, null, true);
+                //emailAgent.send("david@manlyit.com.au", "", "info@manlybeachfemalefitness.com.au", "Password Reset", htmlText, null, true);
                 Future<Boolean> emailSendResult = ejbPaymentBean.sendAsynchEmail(cust.getEmailAddress(), configMapFacade.getConfig("PasswordResetCCEmailAddress"), configMapFacade.getConfig("PasswordResetFromEmailAddress"), subject, htmlText, null, emailServerProperties(), false);
                 if (templateName.contains("cancel")) {
                     JsfUtil.addSuccessMessage("Class Booking", configMapFacade.getConfig("BookingCancelledMessage"));
@@ -1120,6 +1121,7 @@ public class SessionTimetableController implements Serializable {
         //SessionTimetableController sessionTimetableController = context.getApplication().evaluateExpressionGet(context, "#{sessionTimetableController}", SessionTimetableController.class);
         EziDebitPaymentGateway eziDebitPaymentGateway = context.getApplication().evaluateExpressionGet(context, "#{ezidebit}", EziDebitPaymentGateway.class);
         CustomersController controller = context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
+         TicketsController ticketsController = context.getApplication().evaluateExpressionGet(context, "#{ticketsController}", TicketsController.class);
         Customers c = controller.getSelected();
         SimpleDateFormat sdf = new SimpleDateFormat("EEEE, d MMM yyyy HH:mm");
         //eziDebitPaymentGateway.setSelectedCustomer(c);
@@ -1153,6 +1155,7 @@ public class SessionTimetableController implements Serializable {
                 sessionHistoryFacade.edit(sh);
                 sendBookingConfirmationEmail(sb, c, "system.email.sessionBooking.confirmation.template", configMapFacade.getConfig("template.sessionbooking.confirmation.email.subject"));
                 recreateModel();
+                ticketsController.recreateModel();
                 PrimeFaces instance = PrimeFaces.current();
                 instance.executeScript("PF('bookingDialog').hide()");
 

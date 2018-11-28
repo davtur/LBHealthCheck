@@ -2,11 +2,11 @@
 
 /*
 Plugin Name: Fitness CRM Lead Plugin
-Plugin URI: https://services.purefitnessmanly.com.au
+Plugin URI: https://services.manlybeachfemalefitness.com.au
 Description: A simple hook to push contact form 7 form information to a CRM webservice
 Version: 1.3
 Author: David Turner
-Author URI: http://www.purefitnessmanly.com.au
+Author URI: http://www.manlybeachfemalefitness.com.au
 */
 
 add_action( 'wpcf7_before_send_mail', 'create_new_lead_in_crm', 10, 1 ); 
@@ -28,7 +28,7 @@ function create_new_lead_in_crm( $contact_form ) {
 		$message = $posted_data['lead-message']; 
 		$splitName = explode(" ", $name,2);
 
-		$url = "https://services.purefitnessmanly.com.au/FitnessStats/WordpressWS?wsdl";
+		$url = "https://services.manlybeachfemalefitness.com.au/FitnessStats/WordpressWS?wsdl";
                 $client = new SoapClient($url);
                // $fcs = $client->__getFunctions();
                 $res = $client->addNewLead(array('firstname'=> $splitName[0], 'lastname' => $splitName[1], 'email' => $email, 'mobile' => $phone, 'message' => $message));

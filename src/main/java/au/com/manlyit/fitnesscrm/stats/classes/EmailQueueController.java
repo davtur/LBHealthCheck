@@ -124,7 +124,7 @@ public class EmailQueueController implements Serializable {
         current = new EmailQueue();
         selectedItemIndex = -1;
         addParticipants();
-        current.setFromaddress("noreply@purefitnessmanly.com.au");
+        current.setFromaddress("noreply@manlybeachfemalefitness.com.au");
         return "Create";
     }
 
@@ -268,10 +268,10 @@ public class EmailQueueController implements Serializable {
         ejbActivationFacade.create(act);
 
         SendHTMLEmailWithFileAttached emailAgent = new SendHTMLEmailWithFileAttached();
-        String htmlText = "<table width=\"600\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\">  <tr>    <td><img src=\"cid:logoimg_cid\"/></td>  </tr>  <tr>    <td height=\"220\"> <p>Pure Fitness Manly</p>      <p>Please click the following link to reset your password:</p><p>To reset your password click <a href=\"" + urlLink + "\">here</a>.</p></td>  </tr>  <tr>    <td height=\"50\" align=\"center\" valign=\"middle\" bgcolor=\"#CCCCCC\">www.purefitnessmanly.com.au | sarah@purefitnessmanly.com.au | +61433818067</td>  </tr></table>";
+        String htmlText = "<table width=\"600\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\">  <tr>    <td><img src=\"cid:logoimg_cid\"/></td>  </tr>  <tr>    <td height=\"220\"> <p>Pure Fitness Manly</p>      <p>Please click the following link to reset your password:</p><p>To reset your password click <a href=\"" + urlLink + "\">here</a>.</p></td>  </tr>  <tr>    <td height=\"50\" align=\"center\" valign=\"middle\" bgcolor=\"#CCCCCC\">www.manlybeachfemalefitness.com.au | sarah@manlybeachfemalefitness.com.au | +61433818067</td>  </tr></table>";
 // TODO String htmlText = ejbEmailTemplatesFacade.findTemplateByName(templateName).getTemplate();
         //String host, String to, String ccAddress, String from, String emailSubject, String message, String theAttachedfileName, boolean debug
-        emailAgent.send("david@manlyit.com.au", "", "noreply@purefitnessmanly.com.au", "Password Reset", htmlText, null,emailServerProperties(), true);
+        emailAgent.send("david@manlyit.com.au", "", "noreply@manlybeachfemalefitness.com.au", "Password Reset", htmlText, null,emailServerProperties(), true);
 
     }
 

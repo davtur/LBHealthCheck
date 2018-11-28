@@ -337,7 +337,7 @@ public class TicketsController implements Serializable {
         return items;
     }
 
-    private void recreateModel() {
+    public void recreateModel() {
         items = null;
         filteredItems = null;
     }

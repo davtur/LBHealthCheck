@@ -18,7 +18,7 @@ import javax.ws.rs.core.MediaType;
 
 public class CustomerRestServiceTest extends JerseyTest {
   private static final String AUTHTOKEN = "Green21Blue22";
-    private static final String REST_URI = "https://test-services.purefitnessmanly.com.au/FitnessStats/api/customers";
+    private static final String REST_URI = "https://test-services.manlybeachfemalefitness.com.au/FitnessStats/api/customers";
     @Override
     protected Application configure() {
         return new ResourceConfig(NewLeadRestService.class);
