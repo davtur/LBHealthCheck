@@ -2,7 +2,7 @@
     xmlns="http://www.w3.org/1999/xhtml"
     xmlns:f="http://xmlns.jcp.org/jsf/core"
     xmlns:h="http://xmlns.jcp.org/jsf/html"
-    
+
     xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
     xmlns:p="http://primefaces.org/ui"
     xmlns:pc="http://primefaces.org/california">
@@ -126,7 +126,7 @@
                     id="dashboard"                              
                     action="/admin/dashboard/dashboard.xhtml" value="Dashboard"  ajax="false" icon="fa fa-tachometer"  >                        
                 </p:menuitem>
-                 <p:menuitem action="/admin/schedule/schedule.xhtml" ajax="false"
+                <p:menuitem action="/admin/schedule/schedule.xhtml" ajax="false"
                             id="schedule"   icon="fa fa-calendar-o"   
                             value="Calendar">
                 </p:menuitem>
@@ -167,11 +167,11 @@
                         id="expenses"                              
                         action="/admin/expenses/List.xhtml" ajax="false"  value="Expenses"    >                       
                     </p:menuitem>
-                     <p:menuitem
+                    <p:menuitem
                         id="expensesMap"                              
                         action="/admin/expenseMap/List.xhtml" ajax="false"  value="Expense Map"    >                       
                     </p:menuitem>
-                     <p:menuitem
+                    <p:menuitem
                         id="expensesImport"                              
                         action="/admin/expenses/expensesImport.xhtml" ajax="false"  value="Import Expenses"    >                       
                     </p:menuitem>
@@ -219,7 +219,7 @@
                         action="/admin/fitnessTestCharts/List.xhtml" ajax="false"  value="Fitness Test Charts"    >                       
                     </p:menuitem>
                 </p:submenu>
-               
+
                 <p:submenu icon="fa fa-envelope" label="Email"   id="email1" >
 
                     <p:menuitem
@@ -276,24 +276,52 @@
                 action="/index.xhtml" ajax="false" value="My Stats" icon="fa fa-heartbeat" >
             </p:menuitem>
             <p:separator  rendered="#{customersController.isUserInRole('USER')}"  />
-            <p:menuitem
-                id="myDetails"
-                action="/myDetails.xhtml" ajax="false" value="My Details" icon="fa fa-user"  >
+
+            <p:menuitem            
+                url="#{customersController.wordpressSiteUrl}" ajax="false" value="Home" icon="fa fa-user"  >
             </p:menuitem>
-            <p:separator  rendered="#{customersController.isUserInRole('USER')}"  />
-            <p:menuitem
-                id="mySessions"
-                action="/mySessions.xhtml" ajax="false" value="My Sessions" icon="fa fa-line-chart" >
+            <p:menuitem            
+                url="#{customersController.wordpressSiteUrl}#pfm-free-trial" ajax="false" value="Free Trial" icon="fa fa-user"  >
             </p:menuitem>
-            <p:separator  rendered="#{customersController.isUserInRole('USER')}"  />
-            <!--  <p:menuitem
-                 id="timeTable"
-                 action="/timetable.xhtml" ajax="false" value="Timetable"  >
-             </p:menuitem>-->
-            <p:menuitem
-                id="mobileLink"
-                action="/mobileMenu.xhtml" ajax="false" value="Mobile" icon="fa fa-mobile" >
+            <p:menuitem            
+                url="#{customersController.wordpressSiteUrl}/schedule/" ajax="false" value="Timetable" icon="fa fa-user"  >
             </p:menuitem>
+            <p:menuitem            
+                url="#{customersController.wordpressSiteUrl}/membership-options/" ajax="false" value="Membership Options" icon="fa fa-user"  >
+            </p:menuitem>
+            <p:menuitem            
+                url="#{customersController.wordpressSiteUrl}/blog/" ajax="false" value="Blog" icon="fa fa-user"  >
+            </p:menuitem>
+            <p:submenu icon="fa fa-user" label="My Account"   >
+                <p:menuitem
+                    id="myDetails"
+                    action="/myDetails.xhtml" ajax="false" value="My Details" icon="fa fa-user"  >
+                </p:menuitem>
+                <p:separator  rendered="#{customersController.isUserInRole('USER')}"  />
+                <p:menuitem
+                    id="mySessions" 
+                    action="/mySessions.xhtml" ajax="false" value="My Sessions" icon="fa fa-line-chart" >
+                </p:menuitem>
+                <p:separator  rendered="#{customersController.isUserInRole('USER')}"  />
+                <!--  <p:menuitem
+                     id="timeTable"
+                     action="/timetable.xhtml" ajax="false" value="Timetable"  >
+                 </p:menuitem>-->
+                <p:menuitem
+                    id="mobileLink"
+                    action="/mobileMenu.xhtml" ajax="false" value="Mobile" icon="fa fa-mobile" >
+                </p:menuitem>
+            </p:submenu>
+
+            <p:menuitem            
+                url="#{customersController.wordpressSiteUrl}/contact-us/" ajax="false" value="Contact Us" icon="fa fa-user"  >
+            </p:menuitem>
+            <p:menuitem            
+                url="#{customersController.wordpressSiteUrl}/about-us" ajax="false" value="About Us" icon="fa fa-user"  >
+            </p:menuitem>
+
+
+
             <p:separator  rendered="#{customersController.isUserInRole('USER')}"  />
 
             <p:menuitem  action="#{customersController.logout}"

@@ -4,12 +4,21 @@ import au.com.manlyit.fitnesscrm.stats.db.Tickets;
 import au.com.manlyit.fitnesscrm.stats.beans.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.beans.util.PaginationHelper;
 import au.com.manlyit.fitnesscrm.stats.beans.TicketsFacade;
+import au.com.manlyit.fitnesscrm.stats.classes.CustomersController;
+import au.com.manlyit.fitnesscrm.stats.classes.util.LazyLoadingDataModel;
+import au.com.manlyit.fitnesscrm.stats.classes.util.PfSelectableDataModel;
+import au.com.manlyit.fitnesscrm.stats.db.AuditLog;
 
 import java.io.Serializable;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.SessionScoped;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
@@ -29,9 +38,58 @@ import org.primefaces.event.SelectEvent;
 @SessionScoped
 public class TicketsController implements Serializable {
 
+    /**
+     * @return the lazyModel
+     */
+    public LazyLoadingDataModel<Tickets> getLazyModel() {
+        if (lazyModel == null) {
+            lazyModel = new LazyLoadingDataModel<>(ejbFacade);
+            lazyModel.setFromDate(getStartDate());
+            lazyModel.setToDate(getEndDate());
+            lazyModel.setDateRangeEntityFieldName("datePurchased");
+            lazyModel.setUseDateRange(true);
+        }
+        return lazyModel;
+    }
+
+    /**
+     * @param lazyModel the lazyModel to set
+     */
+    public void setLazyModel(LazyLoadingDataModel<Tickets> lazyModel) {
+        this.lazyModel = lazyModel;
+    }
+
+    /**
+     * @return the startDate
+     */
+    public Date getStartDate() {
+        return startDate;
+    }
+
+    /**
+     * @param startDate the startDate to set
+     */
+    public void setStartDate(Date startDate) {
+        this.startDate = startDate;
+    }
+
+    /**
+     * @return the endDate
+     */
+    public Date getEndDate() {
+        return endDate;
+    }
+
+    /**
+     * @param endDate the endDate to set
+     */
+    public void setEndDate(Date endDate) {
+        this.endDate = endDate;
+    }
+
     private Tickets current;
     private Tickets selectedForDeletion;
-    private DataModel items = null;
+    private PfSelectableDataModel<Tickets> items = null;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.TicketsFacade ejbFacade;
     @Inject
@@ -40,8 +98,32 @@ public class TicketsController implements Serializable {
     private int selectedItemIndex;
     private List<Tickets> filteredItems;
     private Tickets[] multiSelected;
+    private LazyLoadingDataModel<Tickets> lazyModel;
+    private Date startDate;
+    private Date endDate;
+    private static final Logger LOGGER = Logger.getLogger(TicketsController.class.getName());
 
     public TicketsController() {
+    }
+
+    @PostConstruct
+    private void initDates() {
+        
+        
+        
+        
+        GregorianCalendar cal1 = new GregorianCalendar();
+        cal1.add(Calendar.DAY_OF_YEAR, 1);
+        setEndDate(cal1.getTime());
+        cal1.add(Calendar.DAY_OF_YEAR, -1);
+        cal1.add(Calendar.MONTH, -1);
+        setStartDate(cal1.getTime());
+        //items = new PfSelectableDataModel<>(ejbFacade.findAuditLogsByDateRange(startDate, endDate, true));
+        setLazyModel(new LazyLoadingDataModel<>(ejbFacade));
+        getLazyModel().setFromDate(getStartDate());
+        getLazyModel().setToDate(getEndDate());
+        getLazyModel().setDateRangeEntityFieldName("datePurchased");
+        getLazyModel().setUseDateRange(true);
     }
 
     public static boolean isUserInRole(String roleName) {
@@ -239,10 +321,19 @@ public class TicketsController implements Serializable {
         }
     }
 
-    public DataModel getItems() {
+    // public DataModel getItems() {
+    public PfSelectableDataModel<Tickets> getItems() {
         if (items == null) {
-            items = getPagination().createPageDataModel();
+            //items = getPagination().createPageDataModel();
+            FacesContext context = FacesContext.getCurrentInstance();
+            CustomersController controller = context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
+
+            items = new PfSelectableDataModel<>(ejbFacade.findCustomerTicketsByDateRange(controller.getSelected(), startDate, endDate, true));
         }
+        LOGGER.log(Level.INFO, "lazy Load Items : rowcount = {0}", new Object[]{items.getRowCount()});
+        // if (items == null) {
+        //     items = getPagination().createPageDataModel();
+        // }
         return items;
     }
 

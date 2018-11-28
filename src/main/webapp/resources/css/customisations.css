@@ -352,11 +352,17 @@ div.timetableDataTable .ui-datatable table tbody .ui-state-highlight > td {
 }
 .TimetableTile{
     max-width:550px;
-    min-width:150px !important ;
+    min-width:100px !important ;
     min-height: 100% !important ;
 }
+
 #timetableDivider {
-    background-color: #33AFDE;
+    
+    background: #ff7295; /* Old browsers */
+    background: -moz-linear-gradient(240deg, #ff7295 0%, #fe875d 100%);
+    background: -webkit-linear-gradient(240deg, #ff7295 0%,#fe875d 100%);
+    background: linear-gradient(240deg, #ff7295 0%,#fe875d 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#{ff7295}', endColorstr='#{fe875d}',GradientType=1 );
 }
 .iFrameContainer {
     content:"";

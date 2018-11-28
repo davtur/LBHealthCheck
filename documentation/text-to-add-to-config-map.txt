@@ -2200,3 +2200,6 @@ BookingFormCancelSessionLink=Cancel Booking
 template.sessionbooking.cancellation.email.subject=MBFF Class Booking Cancelled
 BookingCancelledMessage=Your class booking has been cancelled
 BookingSuccessfulMessage=Your class has been booked
+system.wordpresssite.url=http://www.manlybeachfemalefitness.com.au
+
+MyDetailsTicketPanel_title=Class Tickets and Bookings

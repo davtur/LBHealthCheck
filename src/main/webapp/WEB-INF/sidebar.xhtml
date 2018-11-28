@@ -13,9 +13,15 @@
                     <div class="user-profile">
                         <a id="sidebar-profile-button" href="#">
                             <p:graphicImage  value="#{customersController.loggedInUser.profileImage.imageStream}" cache="false" styleClass="img-circular" />
-                            <span class="sidebar-profile-name">#{customersController.loggedInUser.firstname } #{customersController.selected.lastname}</span>
-                            <span class="sidebar-profile-role" hidden="#{!customersController.isUserInRole('DEVELOPER')}" >Developer</span>
-                            <span class="sidebar-profile-role" hidden="#{!(customersController.isUserInRole('ADMIN') and !customersController.isUserInRole('DEVELOPER'))}" >Administrator</span>                           
+                            <span class="sidebar-profile-name">
+                                <h:outputText rendered="#{not empty customersController.loggedInUser}" value="#{customersController.loggedInUser.firstname } #{customersController.loggedInUser.lastname}"/>
+                            </span>
+                            <span class="sidebar-profile-role" >
+                                <h:outputText  rendered="#{customersController.isUserInRole('DEVELOPER')}" value="Developer"/>
+                            </span>
+                            <span class="sidebar-profile-role"  >
+                                <h:outputText  rendered="#{(customersController.isUserInRole('ADMIN') and !customersController.isUserInRole('DEVELOPER'))}" value="Administrator"/>
+                            </span>                           
                            <!-- <span class="sidebar-profile-role" hidden="#{!customersController.isUserInRole('TRAINER')}" >Trainer</span>
                             <span class="sidebar-profile-role" hidden="#{!customersController.isUserInRole('USER')}" >User</span>-->
                         </a>
@@ -397,29 +403,60 @@
 
                         <p:separator  rendered="#{customersController.isUserInRole('TRAINER')}"  />
                       <!--  <p:submenu icon="fa fa-user"  label="User" rendered="#{customersController.isUserInRole('USER')}" id="logout1"   >-->
-                        <p:menuitem
-                            id="myStats"
-                            action="/index.xhtml" ajax="false" value="My Stats" icon="fa fa-heartbeat" >
-                        </p:menuitem>
+
                         <p:separator  rendered="#{customersController.isUserInRole('USER')}"  />
-                        <p:menuitem
-                            id="myDetails"
-                            action="/myDetails.xhtml" ajax="false" value="My Details" icon="fa fa-user"  >
+
+
+                        <p:menuitem            
+                            url="#{customersController.wordpressSiteUrl}" ajax="false" target="_blank" value="Home" icon="fa fa-user"  >
                         </p:menuitem>
-                        <p:separator  rendered="#{customersController.isUserInRole('USER')}"  />
-                        <p:menuitem
-                            id="mySessions"
-                            action="/mySessions.xhtml" ajax="false" value="My Sessions" icon="fa fa-line-chart" >
+                        <p:menuitem            
+                            url="#{customersController.wordpressSiteUrl}#pfm-free-trial" ajax="false" value="Free Trial" icon="fa fa-user"  >
                         </p:menuitem>
-                        <p:separator  rendered="#{customersController.isUserInRole('USER')}"  />
+                        <p:menuitem            
+                            action="/timetable2.xhtml" ajax="false" value="Timetable" icon="fa fa-user"  >
+                        </p:menuitem>
+                        <p:menuitem            
+                            url="#{customersController.wordpressSiteUrl}/membership-options/" ajax="false" value="Membership Options" icon="fa fa-user"  >
+                        </p:menuitem>
+                        <p:menuitem            
+                            url="#{customersController.wordpressSiteUrl}/blog/" ajax="false" value="Blog" icon="fa fa-user"  >
+                        </p:menuitem>
+                        <p:submenu icon="fa fa-user" label="My Account"   >
+                            <p:menuitem
+                                id="myStats"
+                                action="/index.xhtml" ajax="false" value="My Stats" icon="fa fa-heartbeat" >
+                            </p:menuitem>
+                            <p:separator  rendered="#{customersController.isUserInRole('USER')}"  />
+                            <p:menuitem
+                                id="myDetails"
+                                action="/myDetails.xhtml" ajax="false" value="My Details" icon="fa fa-user"  >
+                            </p:menuitem>
+                            <p:separator  rendered="#{customersController.isUserInRole('USER')}"  />
+                            <p:menuitem
+                                id="mySessions"
+                                action="/mySessions.xhtml" ajax="false" value="My Sessions" icon="fa fa-line-chart" >
+                            </p:menuitem>
+                        </p:submenu>
+
+                        <p:menuitem            
+                            url="#{customersController.wordpressSiteUrl}/contact-us/" ajax="false" value="Contact Us" icon="fa fa-user"  >
+                        </p:menuitem>
+                        <p:menuitem            
+                            url="#{customersController.wordpressSiteUrl}/about-us" ajax="false" value="About Us" icon="fa fa-user"  >
+                        </p:menuitem>
+
+
+
+
                         <!--  <p:menuitem
                              id="timeTable"
                              action="/timetable.xhtml" ajax="false" value="Timetable"  >
-                         </p:menuitem>-->
+                         </p:menuitem>
                         <p:menuitem
                             id="mobileLink"
                             action="/mobileMenu.xhtml" ajax="false" value="Mobile" icon="fa fa-mobile" >
-                        </p:menuitem>
+                        </p:menuitem>-->
                         <p:separator  rendered="#{customersController.isUserInRole('USER')}"  />
 
                         <p:menuitem  action="#{customersController.logout}"

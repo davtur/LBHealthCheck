@@ -549,6 +549,19 @@ public class SessionTimetableController implements Serializable {
         setTimetableStartDate(new Date());
     }
 
+    public void setTimetableToSelectedDate(SelectEvent selectEvent) {
+        Object o = selectEvent.getObject();
+        if (o != null) {
+            if (o.getClass() == Date.class) {
+                Date newDate = (Date) selectEvent.getObject();
+                setTimetableStartDate(newDate); 
+                recreateModel();
+                SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");               
+                JsfUtil.addSuccessMessage("Date Selected " +format.format(newDate));
+            }
+        }
+    }
+
     public String signUpFromTimetable(ActionEvent actionEvent) {
         FacesContext context = FacesContext.getCurrentInstance();
         String sessionHistoryId = context.getExternalContext().getRequestParameterMap().get("sessionHistorySignupId");
@@ -1001,13 +1014,12 @@ public class SessionTimetableController implements Serializable {
                 //String host, String to, String ccAddress, String from, String emailSubject, String message, String theAttachedfileName, boolean debug
                 //emailAgent.send("david@manlyit.com.au", "", "info@purefitnessmanly.com.au", "Password Reset", htmlText, null, true);
                 Future<Boolean> emailSendResult = ejbPaymentBean.sendAsynchEmail(cust.getEmailAddress(), configMapFacade.getConfig("PasswordResetCCEmailAddress"), configMapFacade.getConfig("PasswordResetFromEmailAddress"), subject, htmlText, null, emailServerProperties(), false);
-               if(templateName.contains("cancel")){
-                   JsfUtil.addSuccessMessage("Class Booking", configMapFacade.getConfig("BookingCancelledMessage"));
-               }else{
-                 JsfUtil.addSuccessMessage("Class Booking", configMapFacade.getConfig("BookingSuccessfulMessage"));  
-               }
-                
-                
+                if (templateName.contains("cancel")) {
+                    JsfUtil.addSuccessMessage("Class Booking", configMapFacade.getConfig("BookingCancelledMessage"));
+                } else {
+                    JsfUtil.addSuccessMessage("Class Booking", configMapFacade.getConfig("BookingSuccessfulMessage"));
+                }
+
                 FacesContext context = FacesContext.getCurrentInstance();
                 ActivationBean controller = context.getApplication().evaluateExpressionGet(context, "#{activationBean}", ActivationBean.class);
                 controller.setValid(true);
@@ -1084,7 +1096,7 @@ public class SessionTimetableController implements Serializable {
         }
         if (sb != null) {
             Tickets t = sb.getTicketId();
-            if(t != null){
+            if (t != null) {
                 t.setDateUsed(null);
                 ejbTicketsFacade.edit(t);
             }
@@ -1096,7 +1108,7 @@ public class SessionTimetableController implements Serializable {
             instance.executeScript("PF('bookingDialog').hide()");
             sendBookingConfirmationEmail(sb, c, "system.email.sessionBooking.cancellation.template", configMapFacade.getConfig("template.sessionbooking.cancellation.email.subject"));
             LOGGER.log(Level.INFO, "Cancel Session button clicked and Booking removed successfully");
-        }else{
+        } else {
             LOGGER.log(Level.SEVERE, "Cancel Session button clicked but teh session Booking wasnt found!!");
         }
     }

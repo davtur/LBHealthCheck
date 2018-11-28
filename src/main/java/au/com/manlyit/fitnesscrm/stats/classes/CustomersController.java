@@ -134,6 +134,7 @@ public class CustomersController implements Serializable {
     private Customers selectedForDeletion;
     private CustomerState selectedState;
     private CustomerState selectedForImpersonation;
+    private String wordpressSiteUrl;
     private boolean impersonationOn;
     private Notes selectedNoteForDeletion;
     private static final int NEW_HEIGHT = 500;// must match panelheight on gallery component
@@ -3720,5 +3721,22 @@ public class CustomersController implements Serializable {
         if (dashboardSyncSelected != null) {
             setSelected(dashboardSyncSelected);
         }
+    }
+
+    /**
+     * @return the wordpressSiteUrl
+     */
+    public String getWordpressSiteUrl() {
+        if(wordpressSiteUrl == null ||wordpressSiteUrl.isEmpty() ){
+            wordpressSiteUrl = configMapFacade.getConfig("system.wordpresssite.url");
+        }
+        return wordpressSiteUrl;
+    }
+
+    /**
+     * @param wordpressSiteUrl the wordpressSiteUrl to set
+     */
+    public void setWordpressSiteUrl(String wordpressSiteUrl) {
+        this.wordpressSiteUrl = wordpressSiteUrl;
     }
 }

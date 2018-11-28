@@ -5,6 +5,7 @@
  */
 package au.com.manlyit.fitnesscrm.stats.classes.util;
 
+import au.com.manlyit.fitnesscrm.stats.beans.ApplicationBean;
 import au.com.manlyit.fitnesscrm.stats.beans.LoginBean;
 import au.com.manlyit.fitnesscrm.stats.beans.util.CustomerStatus;
 import au.com.manlyit.fitnesscrm.stats.chartbeans.MySessionsChart1;
@@ -14,6 +15,7 @@ import au.com.manlyit.fitnesscrm.stats.classes.PasswordService;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.Date;
 import java.util.List;
@@ -36,7 +38,6 @@ import net.sf.json.JSONObject;
 
 import org.apache.commons.lang.RandomStringUtils;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.HttpGet;
@@ -62,6 +63,9 @@ public class SecurityServlet extends HttpServlet {
     private CustomersController controller;
     @Inject
     private LoginBean loginBean;
+
+    @Inject
+    private ApplicationBean applicationBean;
     @Inject
     private EziDebitPaymentGateway eziDebitPaymentGatewayController;
     @Inject
@@ -82,16 +86,30 @@ public class SecurityServlet extends HttpServlet {
         //logger.log(Level.INFO, "*** Called SecurityServlet");
         HttpSession httpSession = request.getSession();
         String faceCode = request.getParameter("code");
-        String state = request.getParameter("state");
+        String stateEncoded = request.getParameter("state");
+        String state = URLDecoder.decode(stateEncoded, "UTF-8");
+        String redirect = state.substring(0, 1);
+        state = state.substring(1);
+        if (redirect.compareTo("1") == 0) {
+            loginBean.setDontRedirect(true);
+        }
         //boolean mobileDevice = false;
         FacesContext context = FacesContext.getCurrentInstance();
         String accessToken = getFacebookAccessToken(faceCode);
         Customers facebookUser = getUserMailAddressFromJsonResponse(accessToken, httpSession);
         String sessionID = httpSession.getId();
-        logger.log(Level.INFO, "SecurityServlet called: SessionId={0}, State:={1},FacebookCode={2}, Token from code:{3}", new Object[]{sessionID, state, faceCode, accessToken});
-        if (state.equals(sessionID)) {
+        String facebookUsernameCRM = "NULL";
+        String facebookemailCRM = "NULL";
+        if (facebookUser != null) {
+            facebookUsernameCRM = facebookUser.getUsername();
+            facebookemailCRM = facebookUser.getEmailAddress();
+        }
+        String facebookState = applicationBean.getFacebookLoginState(state);
+        logger.log(Level.INFO, "SecurityServlet called: SessionId={0}, State:={1},FacebookCode={2}, Token from code:{3}, facebookLoginBean Stored State {4}, CRM User {5}, CRM email {6}", new Object[]{sessionID, state, faceCode, accessToken, facebookState, facebookUsernameCRM, facebookemailCRM});
+        if (facebookState != null) { // the stat exists in our map. The actual value is teh timestamp in miliiseconds of when it was used.
             String pfmEncrptedPassword = null;
             try {
+                applicationBean.removeFacebookLoginState(state);
                 //do some specific user data operation like saving to DB or login user
                 //request.login(email, "somedefaultpassword");
 
@@ -154,14 +172,19 @@ public class SecurityServlet extends HttpServlet {
                                     logger.log(Level.WARNING, "Customer Controller injection into security servlet failed!");
                                 }
                             } catch (ServletException servletException) {
-                                logger.log(Level.INFO, "Login failed!");
-                                customer.setPassword(pfmEncrptedPassword);
-                                ejbFacade.editAndFlush(customer);
-                                if (servletException.getMessage().contains("Login failed") == false) {
-                                    throw servletException;
+                                if (servletException.getMessage().contains("UT010030") == true) {//javax.servlet.ServletException: UT010030: User already logged in
+
+                                    logger.log(Level.INFO, "This is request has already been authenticated. User {0} is already logged in.", customer);
                                 } else {
-                                    context.addMessage(null, new FacesMessage("Login failed."));
-                                    return;
+                                    logger.log(Level.INFO, "Login failed!");
+                                    customer.setPassword(pfmEncrptedPassword);
+                                    ejbFacade.editAndFlush(customer);
+                                    if (servletException.getMessage().contains("Login failed") == false) {
+                                        throw servletException;
+                                    } else {
+                                        context.addMessage(null, new FacesMessage("Login failed."));
+                                        return;
+                                    }
                                 }
                             }
                         } else {
@@ -270,7 +293,7 @@ public class SecurityServlet extends HttpServlet {
                 Logger.getLogger(SecurityServlet.class.getName()).log(Level.SEVERE, "getFacebookAccessToken", ex);
             }
             CloseableHttpClient httpclient = HttpClientBuilder.create().build();
-             JSONParser parser = new JSONParser();
+            JSONParser parser = new JSONParser();
             try {
                 HttpGet httpget = new HttpGet(newUrl);
                 ResponseHandler<String> responseHandler = new BasicResponseHandler();
