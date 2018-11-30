@@ -1980,6 +1980,8 @@ public class PaymentBean implements Serializable {
             }
             if (pgr3.isOperationSuccessful()) {
                 result += "Get Details - OK ";
+                cd = (CustomerDetails) pgr3.getData();
+                updatePaymentParameters(cust, cd, 0);
             } else {
                 result += "Get Details - FAIL ";
             }
@@ -1992,7 +1994,7 @@ public class PaymentBean implements Serializable {
         }
         if (pgr1.isOperationSuccessful() && pgr2.isOperationSuccessful() && pgr3.isOperationSuccessful()) {
             LOGGER.log(Level.INFO, "getAllCustPaymentsAndDetails: Details, Payments and Scheduled payments recieved OK");
-            cd = (CustomerDetails)pgr3.getData();
+
             pgr = new PaymentGatewayResponse(true, cd, result, "0", "Updated Customer Details and Payment Information was recieved from the payment gateway.");
 
         } else {
@@ -2367,10 +2369,33 @@ public class PaymentBean implements Serializable {
                 updatePaymentParameters(cust, cd, 0);
             }
         } else {
-            pgr = new PaymentGatewayResponse(false, null, "The Customers details were not retrieved from the payment gateway due to an error.", customerdetails.getError().toString(), customerdetails.getErrorMessage().getValue());
-            LOGGER.log(Level.WARNING, "Get Customer Details Response: Error - {0}", customerdetails.getErrorMessage().getValue());
-            updatePaymentParameters(cust, null, customerdetails.getError());
+            if (customerdetails.getError() == 201) { //customer could not be found
+                // try using the Ezidebit ID
+                LOGGER.log(Level.INFO, "Payment Bean - Get Customer Details Response: Customer not found using our reference.Trying with teh Ezidebit reference - {0}, Our Ref : {1}, Cust username {2}", new Object[]{cust.getPaymentParametersId().getEzidebitCustomerID(), cust.getId(), cust.getUsername()});
 
+                String eziDebitId = cust.getPaymentParametersId().getEzidebitCustomerID();
+                customerdetails = getWs().getCustomerDetails(digitalKey, eziDebitId, "");
+                if (customerdetails.getError() == 0) {// any errors will be a non zero value
+                    cd = customerdetails.getData().getValue();
+                    if (cd != null) {
+                        pgr = new PaymentGatewayResponse(true, cd, "The Customers details were retrieved from the payment gateway", "0", "");
+                        LOGGER.log(Level.INFO, "Payment Bean - Get Customer Details Response: Customer  - {0}, Ezidebit Name : {1} {2}", new Object[]{cust.getUsername(), cd.getCustomerFirstName().getValue(), cd.getCustomerName().getValue()});
+                        updatePaymentParameters(cust, cd, 0);
+                    }
+
+                } else {
+
+                    pgr = new PaymentGatewayResponse(false, null, "The Customers details were not retrieved ( Tried both our Ref and Ezidebit Ref )from the payment gateway due to an error.", customerdetails.getError().toString(), customerdetails.getErrorMessage().getValue());
+                    LOGGER.log(Level.WARNING, "Get Customer Details Response: Error - {0}", customerdetails.getErrorMessage().getValue());
+                    updatePaymentParameters(cust, null, customerdetails.getError());
+                }
+
+            } else {
+
+                pgr = new PaymentGatewayResponse(false, null, "The Customers details were not retrieved from the payment gateway due to an error.", customerdetails.getError().toString(), customerdetails.getErrorMessage().getValue());
+                LOGGER.log(Level.WARNING, "Get Customer Details Response: Error - {0}", customerdetails.getErrorMessage().getValue());
+                updatePaymentParameters(cust, null, customerdetails.getError());
+            }
         }
         futureMap.processGetCustomerDetails(sessionId, pgr);
         return new AsyncResult<>(pgr);
@@ -2569,25 +2594,25 @@ public class PaymentBean implements Serializable {
     }
 
     @TransactionAttribute(REQUIRES_NEW)
-    private void updatePaymentParameters(Customers cust, CustomerDetails custDetails,
-            int errorCode
-    ) {
+    private void updatePaymentParameters(Customers cust, CustomerDetails custDetails, int errorCode) {
         PaymentParameters pp = cust.getPaymentParametersId();
 
         if (pp == null) {
 
-            LOGGER.log(Level.SEVERE, "PaymentBean processGetCustomerDetails. Payment Parameters Object is NULL for customer {0}. Creating default parameters.", new Object[]{cust.getUsername()});
+            LOGGER.log(Level.SEVERE, "PaymentBean updatePaymentParameters. Payment Parameters Object is NULL for customer {0}. Creating default parameters.", new Object[]{cust.getUsername()});
             return;
         }
+        pp.setLastUpdatedFromPaymentGateway(new Date());
         if (custDetails == null) {
             if (errorCode != 0) {
                 if (errorCode == 201) { //customer could not be found
                     pp.setStatusCode("D");
                     pp.setStatusDescription("Inactive");
-                    pp.setLastUpdatedFromPaymentGateway(new Date());
+                    LOGGER.log(Level.WARNING, "PaymentBean updatePaymentParameters. Ezidebit Get Customer Details returned an error: CUSTOMER NOT FOUND!!!. Customer:{0} - ID:{3}, Ezidebit ID:{1}, Payment Parameters ID:{2}", new Object[]{cust.getUsername(), pp.getEzidebitCustomerID(), pp.getId(), cust.getId()});
+
                 }
             } else {
-                LOGGER.log(Level.SEVERE, "PaymentBean processGetCustomerDetails. CustomerDetails Object is NULL but error code = 0 ( success) for customer {0}.This shouldn't ever happen.", new Object[]{cust.getUsername()});
+                LOGGER.log(Level.SEVERE, "PaymentBean updatePaymentParameters. CustomerDetails Object is NULL but error code = 0 ( success) for customer {0}.This shouldn't ever happen.", new Object[]{cust.getUsername()});
             }
 
         } else {
@@ -2595,15 +2620,15 @@ public class PaymentBean implements Serializable {
             try {
                 p1 = paymentsFacade.findLastSuccessfulScheduledPayment(cust);
             } catch (Exception e) {
-                LOGGER.log(Level.WARNING, "PaymentBean processGetCustomerDetails. findLastSuccessfulScheduledPayment for customer {0}. {1}", new Object[]{cust.getUsername(), e});
+                LOGGER.log(Level.WARNING, "PaymentBean updatePaymentParameters. findLastSuccessfulScheduledPayment for customer {0}. {1}", new Object[]{cust.getUsername(), e});
             }
             Payments p2 = null;
             try {
                 p2 = paymentsFacade.findNextScheduledPayment(cust);
             } catch (Exception e) {
-                LOGGER.log(Level.WARNING, "PaymentBean processGetCustomerDetails. findNextScheduledPayment for customer {0}. {1}", new Object[]{cust.getUsername(), e});
+                LOGGER.log(Level.WARNING, "PaymentBean updatePaymentParameters. findNextScheduledPayment for customer {0}. {1}", new Object[]{cust.getUsername(), e});
             }
-            pp.setLastUpdatedFromPaymentGateway(new Date());
+
             pp.setLastSuccessfulScheduledPayment(p1);
             pp.setNextScheduledPayment(p2);
             pp.setAddressLine1(custDetails.getAddressLine1().getValue());
@@ -2641,7 +2666,7 @@ public class PaymentBean implements Serializable {
         cust.setPaymentParametersId(pp);
         customersFacade.edit(cust);
         //customersFacade.pushChangesToDBImmediatleyInsteadOfAtTxCommit();
-        LOGGER.log(Level.INFO, "Payment Bean processGetCustomerDetails. Payment Parameters have been updated for {0}.", new Object[]{cust.getUsername()});
+        LOGGER.log(Level.INFO, "Payment Bean updatePaymentParameters. Payment Parameters have been updated for {0}.", new Object[]{cust.getUsername()});
     }
 
     @Asynchronous

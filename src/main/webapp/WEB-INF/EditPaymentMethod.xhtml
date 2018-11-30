@@ -8,7 +8,7 @@
 
     
         <!--<p:log />--> 
-        <p:dialog id="editPaymentMethodDialogue"  closable="false"  
+        <p:dialog id="editPaymentMethodDialogue"  closable="false"   appendTo="@(body)"
                   header="#{configMapController.getKey('EditPaymentMethodTitle')}" widgetVar="editPaymentMethodDialogueWidget" resizable="true"> 
 
             <h:form id="editPaymentiFrameForm" styleClass="updatePaymentInfo"> 

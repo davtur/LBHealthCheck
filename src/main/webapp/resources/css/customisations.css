@@ -21,8 +21,8 @@ height: 300px !important;
 }*/
 
 .dialoguePhoto {
-  
- 
+
+
 }
 
 .expenseImagePanel {
@@ -93,17 +93,17 @@ height: 300px !important;
         width:100% !important;
         margin:0 !important;
     }
-    
+
     #SurveyanswersListForm\:surveyList_list {
         padding:10px !important;
 
     }
-   
+
     .ui-datalist-item > table {
         width:100% !important;
     }
 
-   
+
 
     .selectOneWidth {
         min-width:100px; 
@@ -218,7 +218,7 @@ height: 300px !important;
         min-width:200px; 
         width:220px;
     }
-     .ui-datalist-item > table {
+    .ui-datalist-item > table {
         width:100% !important;
     }
 
@@ -254,44 +254,44 @@ height: 300px !important;
 
 .greenBg {
     background-color: green !important ;
-        cursor: pointer;
+    cursor: pointer;
 }
 .blueBg {
     background-color: blue !important ;
-        cursor: pointer;
+    cursor: pointer;
 }
 .orangeBg {
     background-color: orange !important ;
-        cursor: pointer;
+    cursor: pointer;
 }
 .redBg {
     background-color: red !important ;
-        cursor: pointer;
+    cursor: pointer;
 }
 /* http://www.colorschemer.com/schemes/viewscheme.php?id=8293 southbeach pastel theme for timetable */
 .pastel1 {
     background-color: #389090 !important ;
-        cursor: pointer;
+    cursor: pointer;
 }
 .pastel2 {
     background-color: #F47E7D !important ;
-        cursor: pointer;
+    cursor: pointer;
 }
 .pastel3 {
     background-color: #B5D045 !important ;
-        cursor: pointer;
+    cursor: pointer;
 }
 .pastel4 {
     background-color: #FB8335 !important ;
-        cursor: pointer;
+    cursor: pointer;
 }
 .pastel5 {
     background-color: #81C0C5 !important ;
-        cursor: pointer;
+    cursor: pointer;
 }
 .pastel6 {
     background-color: #E0C7A8!important ;
-        cursor: pointer;
+    cursor: pointer;
 }
 
 .signupForm {
@@ -357,7 +357,7 @@ div.timetableDataTable .ui-datatable table tbody .ui-state-highlight > td {
 }
 
 #timetableDivider {
-    
+
     background: #ff7295; /* Old browsers */
     background: -moz-linear-gradient(240deg, #ff7295 0%, #fe875d 100%);
     background: -webkit-linear-gradient(240deg, #ff7295 0%,#fe875d 100%);
@@ -393,7 +393,7 @@ div.timetableDataTable .ui-datatable table tbody .ui-state-highlight > td {
     height:400px;
 }
 .updatePaymentForms {
-   white-space: normal; 
+    white-space: normal; 
 }
 
 .updatePaymentInfo {
@@ -401,16 +401,85 @@ div.timetableDataTable .ui-datatable table tbody .ui-state-highlight > td {
 }
 
 .img-circular{
-     width: 50%;
- border-radius: 50%;
- -webkit-border-radius: 50%;
- -moz-border-radius: 50%;
+    width: 50%;
+    border-radius: 50%;
+    -webkit-border-radius: 50%;
+    -moz-border-radius: 50%;
 }
 .img-circular:after {
-  content: "";
-  display: block;
-  padding-bottom: 100%;
+    content: "";
+    display: block;
+    padding-bottom: 100%;
 }
 .listtab-profile{
     width:50px;
 }
+
+
+/* Font Type */
+.FontBold{ font-weight:bold;}
+.FontLight{ font-weight:lighter;}
+.FontNormal{ font-weight:normal;}
+
+/* Text Aligns */
+.TexAlCenter{ text-align:center;}
+.TexAlLeft{ text-align:left;}
+.TexAlRight{ text-align:right !important;}
+
+
+/* Empty Boxes */
+.EmptyBox5{ display:block; width:100%; height:5px; overflow:hidden;}
+.EmptyBox10{ display:block; width:100%; height:10px; overflow:hidden;}
+.EmptyBox20{ display:block; width:100%; height:20px; overflow:hidden;}
+.EmptyBox30{ display:block; width:100%; height:30px; overflow:hidden;}
+.EmptyBox40{ display:block; width:100%; height:40px; overflow:hidden;}
+.EmptyBox50{ display:block; width:100%; height:50px; overflow:hidden;}
+.EmptyBox60{ display:block; width:100%; height:60px; overflow:hidden;}
+.EmptyBox70{ display:block; width:100%; height:70px; overflow:hidden;}
+.EmptyBox80{ display:block; width:100%; height:80px; overflow:hidden;}
+.EmptyBox90{ display:block; width:100%; height:90px; overflow:hidden;}
+.EmptyBox100{ display:block; width:100%; height:100px; overflow:hidden;}
+.EmptyBox110{ display:block; width:100%; height:100px; overflow:hidden;}
+.EmptyBox120{ display:block; width:100%; height:100px; overflow:hidden;}
+.EmptyBox130{ display:block; width:100%; height:100px; overflow:hidden;}
+.EmptyBox140{ display:block; width:100%; height:100px; overflow:hidden;}
+.EmptyBox150{ display: block; width: 100%; height:150px; overflow:hidden;}
+
+
+/* hover effect for boxlink and links */
+.HoverEffect:hover{border: solid 1px #D0525D !important; color:#D0525D !important; box-sizing:border-box; -webkit-box-sizing:border-box; -moz-box-sizing:border-box;}
+
+
+/* Floating */
+.Fleft{ float:left;}
+.Fright{ float:right;}
+.Fnone{ float:none !important;}
+
+
+
+/* Display */
+.DispBlock{ display:block;}
+.DispTable{ display:table; vertical-align:middle;}
+.DispTableCell{ display:table-cell; vertical-align:middle;}
+.DispNone{ display:none;}
+.DispInlBlock{display:inline-block;}
+
+
+
+.BorderedBox{border:solid 1px #D9E3E8; background-color:#EDF3F6; box-sizing:border-box; -webkit-box-sizing:border-box; -moz-box-sizing:border-box;
+             border-radius:3px; -webkit-border-radius:3px; -moz-border-radius:3px; margin-bottom:15px;}
+.BottomBorderedBox{border-bottom:solid 1px #D9E3E8; box-sizing:border-box; -webkit-box-sizing:border-box; -moz-box-sizing:border-box;
+                   border-radius:3px; -webkit-border-radius:3px; -moz-border-radius:3px; margin-bottom:15px;}
+
+/* seperator line */
+.Seperator{border-bottom:solid 1px #C3CCD5; width:100%; overflow:hidden; height:0px; margin:15px 0px; float:left;}
+
+/* text colors */
+.red{color:#D0525D;}
+.blue{color:#33AFDE;}
+.green{color:#5fcf80;}
+.orange{color:#F7941E;}
+.white{color:#F1F6F9;}
+.softgray{color:#C3CCD5;}
+.gray{color:#778D9B;}
+.black{color:#3B3D3F;}

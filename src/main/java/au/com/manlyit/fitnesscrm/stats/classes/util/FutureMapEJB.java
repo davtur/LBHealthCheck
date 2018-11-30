@@ -15,10 +15,11 @@ import au.com.manlyit.fitnesscrm.stats.beans.util.PaymentSource;
 import au.com.manlyit.fitnesscrm.stats.beans.util.PaymentStatus;
 import au.com.manlyit.fitnesscrm.stats.classes.EziDebitPaymentGateway;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
+import au.com.manlyit.fitnesscrm.stats.db.Notes;
 import au.com.manlyit.fitnesscrm.stats.db.NotificationsLog;
+import au.com.manlyit.fitnesscrm.stats.db.PaymentParameters;
 import au.com.manlyit.fitnesscrm.stats.db.Payments;
 import au.com.manlyit.fitnesscrm.stats.db.Plan;
-import au.com.manlyit.fitnesscrm.stats.db.SessionTypes;
 import au.com.manlyit.fitnesscrm.stats.db.Tickets;
 import au.com.manlyit.fitnesscrm.stats.webservices.ArrayOfPayment;
 import au.com.manlyit.fitnesscrm.stats.webservices.ArrayOfScheduledPayment;
@@ -40,6 +41,7 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -55,6 +57,8 @@ import javax.ejb.Schedule;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.ejb.Timer;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.ejb.TransactionManagement;
 import javax.ejb.TransactionManagementType;
 import javax.enterprise.context.ApplicationScoped;
@@ -120,6 +124,10 @@ public class FutureMapEJB implements Serializable {
     private ConfigMapFacade configMapFacade;
     @Inject
     private PaymentsFacade paymentsFacade;
+    @Inject
+    private au.com.manlyit.fitnesscrm.stats.beans.AuditLogFacade ejbAuditLogFacade;
+    @Inject
+    private au.com.manlyit.fitnesscrm.stats.beans.NotesFacade ejbNotesFacade;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.SessionTypesFacade sessionTypesFacade;
     @Inject
@@ -445,8 +453,7 @@ public class FutureMapEJB implements Serializable {
         }
 
     }
-    
-    
+
     public void issueOneWeeksTicketsForCust(Customers c, Date ticketStartDate, Date ticketStopDate) {
 
         synchronized (issueOneWeeksTicketsLockObject) {
@@ -854,6 +861,170 @@ public class FutureMapEJB implements Serializable {
         }
     }
 // run a schedules
+
+    /**
+     * @param remoteUser
+     * @param sessionID
+     * @param uref
+     * @param cref
+     * @param fname
+     * @param lname
+     * @param suburb
+     * @param email
+     * @param mobile
+     * @param addr
+     * @param state
+     * @param pcode
+     * @param totalamount
+     * @param rdate
+     * @param method
+     * @param oamount
+     * @param ramount
+     * @param odate
+     * @param freq
+     * @param numpayments
+     *
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    public synchronized void processCallbackFromOnlinePaymentForm(String remoteUser, String sessionID, String uref, String cref, String fname, String lname, String email, String mobile, String addr, String suburb, String state, String pcode, String rdate, String ramount, String freq, String odate, String oamount, String numpayments, String totalamount, String method) {
+
+        //FacesContext facesContext = FacesContext.getCurrentInstance();
+        //String sessionID = httpSession.getId();
+        LOGGER.log(Level.INFO, "Session:{0}, Params:{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12},{13},{14},{15},{16},{17},{18}", new Object[]{sessionID, uref, cref, fname, lname, email, mobile, addr, suburb, state, pcode, rdate, ramount, freq, odate, oamount, numpayments, totalamount, method});
+
+        if (uref != null) {
+            uref = uref.trim();
+            if (uref.length() > 0) {
+                int customerId = 0;
+                Customers customer = null;
+                try {
+                    customerId = Integer.parseInt(uref);
+                    customer = customersFacade.findById(customerId);
+                } catch (NumberFormatException numberFormatException) {
+                }
+
+                if (customer != null) {
+
+                    String templatePlaceholder = "<!--LINK-URL-->";
+                    String htmlText = configMapFacade.getConfig("system.admin.ezidebit.webddrcallback.template");
+                    String name = customer.getFirstname() + " " + customer.getLastname();
+                    htmlText = htmlText.replace(templatePlaceholder, name);
+
+                    Future<Boolean> emailSendResult = paymentBean.sendAsynchEmail(configMapFacade.getConfig("AdminEmailAddress"), configMapFacade.getConfig("PasswordResetCCEmailAddress"), configMapFacade.getConfig("PasswordResetFromEmailAddress"), configMapFacade.getConfig("system.ezidebit.webEddrCallback.EmailSubject"), htmlText, null, emailServerProperties(), false);
+                    try {
+                        if (emailSendResult.get() == false) {
+                            LOGGER.log(Level.WARNING, "Email for Call Back from Web EDDR Form FAILED. Future result false from async job");
+                        }
+                    } catch (InterruptedException ex) {
+                        Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, "emailSendResult.get()", ex);
+                    } catch (ExecutionException ex) {
+                        Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, "emailSendResult.get()", ex);
+                    }
+
+                    PaymentParameters pp = customer.getPaymentParametersId();
+                    if (pp != null) {
+                        if (pp.getWebddrUrl() != null) {
+                            // the url is not null so this is the first time the customer has clicked the link -this should only happen once so it cant be abused.
+                            pp.setWebddrUrl(null);
+                            pp.setStatusCode("A");
+                            pp.setStatusDescription("Active");
+                            pp.setEzidebitCustomerID(cref);
+                            //ejbPaymentParametersFacade.edit(customer.getPaymentParametersId());
+                            customer.setPaymentParametersId(pp);
+                            customersFacade.editAndFlush(customer);
+                            LOGGER.log(Level.INFO, " Customer {0} has set up payment info. Setting Web DDR URL to NULL as it should only be used once.", new Object[]{customer.getUsername()});
+                            //startAsynchJob("ConvertSchedule", paymentBean.clearSchedule(customer, false, customer.getUsername(), getDigitalKey()), futureMap.getFutureMapInternalSessionId());
+
+                            GregorianCalendar cal = new GregorianCalendar();
+                            cal.add(Calendar.MONTH, 18);
+                            Date endDate = cal.getTime();
+                            cal.add(Calendar.MONTH, -24);
+
+                            //
+                            //startAsynchJob("GetPayments", paymentBean.getPayments(customer, "ALL", "ALL", "ALL", "", cal.getTime(), endDate, false, getDigitalKey()), futureMap.getFutureMapInternalSessionId());
+                            startAsynchJob(sessionID, "GetCustomerDetails", paymentBean.getCustomerDetails(customer, getDigitalKey(), sessionID));
+                            startAsynchJob(sessionID, "ConvertSchedule", paymentBean.convertEzidebitScheduleToCrmSchedule(customer, cal.getTime(), endDate, getDigitalKey(), getFutureMapInternalSessionId()));
+
+                        }
+
+                        try {
+
+                            Customers user = null;
+                            if (remoteUser != null) {
+                                user = customersFacade.findCustomerByUsername(remoteUser);
+                            }
+
+                            createCombinedAuditLogAndNote(user, customer, "Direct Debit Form", "The direct debit form has been completed and payments created.", "Not Registered in Payemnt Gateway", "Registered in payment gateway with scheduled payments");
+                            /* try {
+                                    controller.getSelected().getPaymentParametersId().setWebddrUrl(null);
+                                } catch (Exception e) {
+                                    logger.log(Level.WARNING, " Customer {0} . Setting Web DDR URL to NULL FAILED .: {1}", new Object[]{customer.getUsername(), e.getMessage()});
+                                }*/
+                        } catch (Exception e) {
+                            LOGGER.log(Level.SEVERE, "createCombinedAuditLogAndNote FAILED.", e);
+                        }
+                    }
+
+                }
+            }
+        }
+
+    }
+
+    private Properties emailServerProperties() {
+        Properties props = new Properties();
+
+        props.put("mail.smtp.host", configMapFacade.getConfig("mail.smtp.host"));
+        props.put("mail.smtp.auth", configMapFacade.getConfig("mail.smtp.auth"));
+        props.put("mail.debug", configMapFacade.getConfig("mail.debug"));
+        props.put("mail.smtp.ssl.enable", configMapFacade.getConfig("mail.smtp.ssl.enable"));
+        props.put("mail.smtp.port", configMapFacade.getConfig("mail.smtp.port"));
+        props.put("mail.smtp.socketFactory.port", configMapFacade.getConfig("mail.smtp.socketFactory.port"));
+        props.put("mail.smtp.socketFactory.class", configMapFacade.getConfig("mail.smtp.socketFactory.class"));
+        props.put("mail.smtp.socketFactory.fallback", configMapFacade.getConfig("mail.smtp.socketFactory.fallback"));
+        props.put("mail.smtp.ssluser", configMapFacade.getConfig("mail.smtp.ssluser"));
+        props.put("mail.smtp.sslpass", configMapFacade.getConfig("mail.smtp.sslpass"));
+        props.put("mail.smtp.headerimage.url", configMapFacade.getConfig("mail.smtp.headerimage.url"));
+        props.put("mail.smtp.headerimage.cid", configMapFacade.getConfig("mail.smtp.headerimage.cid"));
+        return props;
+
+    }
+
+    
+
+    public void createCombinedAuditLogAndNote(Customers adminUser, Customers customer, String title, String message, String changedFrom, String ChangedTo) {
+        try {
+            if (adminUser == null) {
+                adminUser = customer;
+                LOGGER.log(Level.WARNING, "Customers Controller, createCombinedAuditLogAndNote: The logged in user is NULL");
+            }
+            ejbAuditLogFacade.audit(adminUser, customer, title, message, changedFrom, ChangedTo);
+            Notes note = new Notes(0);
+            note.setCreateTimestamp(new Date());
+            note.setCreatedBy(adminUser);
+            note.setUserId(customer);
+            note.setNote(message);
+            ejbNotesFacade.create(note);
+            customersFacade.edit(customer);
+            //notesFilteredItems = null;
+            //notesItems = null;
+
+            //als.add("growl");
+            // FacesContext fc = FacesContext.getCurrentInstance();// check this isnt originating from a web service call with no faces context.
+            // if (fc != null) {
+            //     PrimeFaces rc = PrimeFaces.customer();
+            //      if (rc != null) {
+            //          ArrayList<String> als = new ArrayList<>();
+            //          als.add("@(.updateNotesDataTable)");
+            //          rc.ajax().update(als);
+            //      }
+            //   }
+            //  PrimeFaces.customer().ajax().update("@(.updateNotesDataTable)");
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Customers Controller, createCombinedAuditLogAndNote: ", e);
+        }
+
+    }
 
     @Asynchronous
     //@TransactionAttribute(REQUIRES_NEW)
@@ -1949,9 +2120,9 @@ public class FutureMapEJB implements Serializable {
      LOGGER.log(Level.INFO, "processGetScheduledPayments completed");
      }
      }n */
- /*  private synchronized void createDefaultPaymentParameters(Customers current) {
+ /*  private synchronized void createDefaultPaymentParameters(Customers customer) {
 
-        if (current == null) {
+        if (customer == null) {
             LOGGER.log(Level.WARNING, "Future Map createDefaultPaymentParameters . Customer is NULL.");
             return;
         }
@@ -1960,24 +2131,24 @@ public class FutureMapEJB implements Serializable {
 
         try {
 
-            String phoneNumber = current.getTelephone();
+            String phoneNumber = customer.getTelephone();
             if (phoneNumber == null) {
                 phoneNumber = "0000000000";
-                LOGGER.log(Level.INFO, "Invalid Phone Number for Customer {0}. Setting it to empty string", current.getUsername());
+                LOGGER.log(Level.INFO, "Invalid Phone Number for Customer {0}. Setting it to empty string", customer.getUsername());
             }
             Pattern p = Pattern.compile("\\d{10}");
             Matcher m = p.matcher(phoneNumber);
             //ezidebit requires an australian mobile phone number that starts with 04
             if (m.matches() == false || phoneNumber.startsWith("04") == false) {
                 phoneNumber = "0000000000";
-                LOGGER.log(Level.INFO, "Invalid Phone Number for Customer {0}. Setting it to empty string", current.getUsername());
+                LOGGER.log(Level.INFO, "Invalid Phone Number for Customer {0}. Setting it to empty string", customer.getUsername());
             }
             pp = new PaymentParameters();
             pp.setId(0);
             pp.setWebddrUrl(null);
-            pp.setCustomers(current);
-            pp.setLastSuccessfulScheduledPayment(paymentsFacade.findLastSuccessfulScheduledPayment(current));
-            pp.setNextScheduledPayment(paymentsFacade.findNextScheduledPayment(current));
+            pp.setCustomers(customer);
+            pp.setLastSuccessfulScheduledPayment(paymentsFacade.findLastSuccessfulScheduledPayment(customer));
+            pp.setNextScheduledPayment(paymentsFacade.findNextScheduledPayment(customer));
             pp.setAddressLine1("");
             pp.setAddressLine2("");
             pp.setAddressPostCode("");
@@ -2008,8 +2179,8 @@ public class FutureMapEJB implements Serializable {
             pp.setYourGeneralReference("");
             pp.setYourSystemReference("");
             paymentParametersFacade.create(pp);
-            current.setPaymentParametersId(pp);
-            customersFacade.editAndFlush(current);
+            customer.setPaymentParametersId(pp);
+            customersFacade.editAndFlush(customer);
 
         } catch (RuntimeException e) {
             throw e;
@@ -2881,6 +3052,10 @@ public class FutureMapEJB implements Serializable {
                     if (custObject != null && custObject.getClass() == String.class) {
                         returnedMessage = (String) custObject;
                     }
+                    if (custObject != null && custObject.getClass() == CustomerDetails.class) {
+                        CustomerDetails cd = (CustomerDetails) custObject;
+                        returnedMessage = "Customer Details synced with Payment gateway OK";
+                    }
                 }
             }
 
@@ -3518,4 +3693,5 @@ public class FutureMapEJB implements Serializable {
             LOGGER.log(Level.WARNING, "createDefaultProfilePic ERROR, Cannot add default profile pic to a null customer object");
         }
     }*/
+   
 }

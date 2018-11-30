@@ -20,8 +20,11 @@
                                 <h:outputText  rendered="#{customersController.isUserInRole('DEVELOPER')}" value="Developer"/>
                             </span>
                             <span class="sidebar-profile-role"  >
-                                <h:outputText  rendered="#{(customersController.isUserInRole('ADMIN') and !customersController.isUserInRole('DEVELOPER'))}" value="Administrator"/>
-                            </span>                           
+                                <h:outputText  rendered="#{customersController.isUserInRole('ADMIN')}" value="Administrator"/>
+                            </span>  
+                            <span class="sidebar-profile-role"  >
+                                <h:outputText  rendered="#{customersController.isUserInRole('TRAINER') }" value="Trainer"/>
+                            </span> 
                            <!-- <span class="sidebar-profile-role" hidden="#{!customersController.isUserInRole('TRAINER')}" >Trainer</span>
                             <span class="sidebar-profile-role" hidden="#{!customersController.isUserInRole('USER')}" >User</span>-->
                         </a>
@@ -411,16 +414,16 @@
                             url="#{customersController.wordpressSiteUrl}" ajax="false" target="_blank" value="Home" icon="fa fa-user"  >
                         </p:menuitem>
                         <p:menuitem            
-                            url="#{customersController.wordpressSiteUrl}#pfm-free-trial" ajax="false" value="Free Trial" icon="fa fa-user"  >
+                            url="#{customersController.wordpressSiteUrl}#pfm-free-trial" ajax="false"  target="_blank" value="Free Trial" icon="fa fa-user"  >
                         </p:menuitem>
                         <p:menuitem            
                             action="/timetable2.xhtml" ajax="false" value="Timetable" icon="fa fa-user"  >
                         </p:menuitem>
                         <p:menuitem            
-                            url="#{customersController.wordpressSiteUrl}/membership-options/" ajax="false" value="Membership Options" icon="fa fa-user"  >
+                            url="#{customersController.wordpressSiteUrl}/membership-options/" ajax="false" target="_blank" value="Membership Options" icon="fa fa-user"  >
                         </p:menuitem>
                         <p:menuitem            
-                            url="#{customersController.wordpressSiteUrl}/blog/" ajax="false" value="Blog" icon="fa fa-user"  >
+                            url="#{customersController.wordpressSiteUrl}/blog/" ajax="false"  target="_blank" value="Blog" icon="fa fa-user"  >
                         </p:menuitem>
                         <p:submenu icon="fa fa-user" label="My Account"   >
                             <p:menuitem
@@ -440,10 +443,10 @@
                         </p:submenu>
 
                         <p:menuitem            
-                            url="#{customersController.wordpressSiteUrl}/contact-us/" ajax="false" value="Contact Us" icon="fa fa-user"  >
+                            url="#{customersController.wordpressSiteUrl}/contact-us/" ajax="false"  target="_blank" value="Contact Us" icon="fa fa-user"  >
                         </p:menuitem>
                         <p:menuitem            
-                            url="#{customersController.wordpressSiteUrl}/about-us" ajax="false" value="About Us" icon="fa fa-user"  >
+                            url="#{customersController.wordpressSiteUrl}/about-us" ajax="false" target="_blank" value="About Us" icon="fa fa-user"  >
                         </p:menuitem>
 
 

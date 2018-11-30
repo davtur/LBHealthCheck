@@ -374,7 +374,8 @@ public class CustomersController implements Serializable {
 
                     eziDebitPaymentGatewayController.getPayments(18, 2);
                 } else {
-                    eziDebitPaymentGatewayController.setCustomerDetailsHaveBeenRetrieved(true);
+                    //eziDebitPaymentGatewayController.setCustomerDetailsHaveBeenRetrieved(true);
+                    eziDebitPaymentGatewayController.getCustDetailsFromEzi();
                 }
                 eziDebitPaymentGatewayController.setProgress(0);
                 //eziDebitPaymentGatewayController.setSelectedCustomer(cust);

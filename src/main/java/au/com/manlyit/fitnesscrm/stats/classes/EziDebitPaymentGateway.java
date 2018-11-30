@@ -71,6 +71,8 @@ import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.ejb.EJBException;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.enterprise.context.SessionScoped;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
@@ -123,8 +125,12 @@ public class EziDebitPaymentGateway implements Serializable {
     private au.com.manlyit.fitnesscrm.stats.beans.PaymentParametersFacade ejbPaymentParametersFacade;
     @Inject
     private PaymentBean paymentBean;
-@Inject
+    @Inject
     private NotificationsLogController notificationsLogController;
+    @Inject
+    private CustomersController controller;
+    @Inject
+    private EziDebitPaymentGateway ezidebitcontroller;
     @Inject
     private ConfigMapFacade configMapFacade;
     @Inject
@@ -1517,9 +1523,7 @@ public class EziDebitPaymentGateway implements Serializable {
      }
 
      }*/
-    /**
-     * @return the theCustomerProvisionedInThePaymentGateway
-     */
+   
     public boolean isTheCustomerProvisionedInThePaymentGateway() {
         boolean stat = false;
         if (customerProvisionedInPaymentGW == null) {
@@ -2129,7 +2133,7 @@ public class EziDebitPaymentGateway implements Serializable {
 
         recreatePaymentTableData();
         updatePaymentTableComponents();
-         notificationsLogController.recreateModel();
+        notificationsLogController.recreateModel();
         //@(.parentOfUploadPhoto)
         // PrimeFaces.current().ajax().update("customerslistForm1");
         // PrimeFaces.current().ajax().update("@(.updatePaymentInfo)");
@@ -2549,8 +2553,8 @@ public class EziDebitPaymentGateway implements Serializable {
         }
         LOGGER.log(Level.INFO, "processGetPaymentExchangeVersion completed");
     }
-    
-    private void processGetCustomerDetailsAndPayments(PaymentGatewayResponse pgr){
+
+    private void processGetCustomerDetailsAndPayments(PaymentGatewayResponse pgr) {
         CustomerDetails result = null;
         Customers selectedCust = getSelectedCustomer();
         String cust = selectedCust.getUsername();

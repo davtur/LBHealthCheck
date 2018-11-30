@@ -8,6 +8,7 @@ package au.com.manlyit.fitnesscrm.stats.classes.util;
 import au.com.manlyit.fitnesscrm.stats.beans.LoginBean;
 import au.com.manlyit.fitnesscrm.stats.beans.PaymentBean;
 import au.com.manlyit.fitnesscrm.stats.classes.CustomersController;
+import au.com.manlyit.fitnesscrm.stats.classes.EziDebitPaymentGateway;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import au.com.manlyit.fitnesscrm.stats.db.PaymentParameters;
 import java.io.IOException;
@@ -60,6 +61,8 @@ public class WebDDRSignUpServlet extends HttpServlet {
 
     @Inject
     private CustomersController controller;
+    @Inject
+    private EziDebitPaymentGateway ezidebitcontroller;
 
     public WebDDRSignUpServlet() {
     }
@@ -95,111 +98,20 @@ public class WebDDRSignUpServlet extends HttpServlet {
             String totalamount = request.getParameter("totalamount");
             String method = request.getParameter("method");
             //boolean mobileDevice = false;
-            FacesContext facesContext = FacesContext.getCurrentInstance();
-            String sessionID = httpSession.getId();
-            logger.log(Level.INFO, "Session:{0}, Params:{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12},{13},{14},{15},{16},{17},{18}", new Object[]{sessionID, uref, cref, fname, lname, email, mobile, addr, suburb, state, pcode, rdate, ramount, freq, odate, oamount, numpayments, totalamount, method});
 
-            if (uref != null) {
-                uref = uref.trim();
-                if (uref.length() > 0) {
-                    int customerId = 0;
-                    Customers current = null;
-                    try {
-                        customerId = Integer.parseInt(uref);
-                        current = ejbFacade.findById(customerId);
-                    } catch (NumberFormatException numberFormatException) {
-                    }
-
-                    if (current != null) {
-
-                        String templatePlaceholder = "<!--LINK-URL-->";
-                        String htmlText = configMapFacade.getConfig("system.admin.ezidebit.webddrcallback.template");
-                        String name = current.getFirstname() + " " + current.getLastname();
-                        htmlText = htmlText.replace(templatePlaceholder, name);
-
-                        Future<Boolean> emailSendResult = paymentBean.sendAsynchEmail(configMapFacade.getConfig("AdminEmailAddress"), configMapFacade.getConfig("PasswordResetCCEmailAddress"), configMapFacade.getConfig("PasswordResetFromEmailAddress"), configMapFacade.getConfig("system.ezidebit.webEddrCallback.EmailSubject"), htmlText, null, emailServerProperties(), false);
-                        if (emailSendResult.get() == false) {
-                            logger.log(Level.WARNING, "Email for Call Back from Web EDDR Form FAILED. Future result false from async job");
-                        }
-
-                        //PaymentParameters pp = current.getPaymentParametersId();
-
-                        if (current.getPaymentParametersId() != null) {
-                            if (current.getPaymentParametersId().getWebddrUrl() != null) {
-                                // the url is not null so this is the first time the customer has clicked the link -this should only happen once so it cant be abused.
-                                current.getPaymentParametersId().setWebddrUrl(null);
-                                //ejbPaymentParametersFacade.edit(pp);
-                                //current.setPaymentParametersId(pp);
-                                //ejbFacade.edit(current);
-                                logger.log(Level.INFO, " Customer {0} has set up payment info. Setting Web DDR URL to NULL as it should only be used once.", new Object[]{current.getUsername()});
-                                //startAsynchJob("ConvertSchedule", paymentBean.clearSchedule(current, false, current.getUsername(), getDigitalKey()), futureMap.getFutureMapInternalSessionId());
-
-                                GregorianCalendar cal = new GregorianCalendar();
-                                cal.add(Calendar.MONTH, 18);
-                                Date endDate = cal.getTime();
-                                cal.add(Calendar.MONTH, -24);
-
-                                //
-                                //startAsynchJob("GetPayments", paymentBean.getPayments(current, "ALL", "ALL", "ALL", "", cal.getTime(), endDate, false, getDigitalKey()), futureMap.getFutureMapInternalSessionId());
-                               // startAsynchJob("GetCustomerDetails", paymentBean.getCustomerDetails(current, getDigitalKey(),sessionID), sessionID);
-                                startAsynchJob("ConvertSchedule", paymentBean.convertEzidebitScheduleToCrmSchedule(current, cal.getTime(), endDate, getDigitalKey(),futureMap.getFutureMapInternalSessionId()), futureMap.getFutureMapInternalSessionId());
-                               
-                            }
-
-                            try {
-                                String sUser = request.getRemoteUser();
-                                Customers user = null;
-                                if (sUser != null) {
-                                    user = ejbFacade.findCustomerByUsername(sUser);
-                                }
-
-                                controller.createCombinedAuditLogAndNote(user, current, "Direct Debit Form", "The direct debit form has been completed and payments created.", "Not Registered in Payemnt Gateway", "Registered in payment gateway with scheduled payments");
-                                /* try {
-                                    controller.getSelected().getPaymentParametersId().setWebddrUrl(null);
-                                } catch (Exception e) {
-                                    logger.log(Level.WARNING, " Customer {0} . Setting Web DDR URL to NULL FAILED .: {1}", new Object[]{current.getUsername(), e.getMessage()});
-                                }*/
-                            } catch (Exception e) {
-                                logger.log(Level.SEVERE, "createCombinedAuditLogAndNote FAILED.", e);
-                            }
-                        }
-                        if (loginBean.isMobileDeviceUserAgent() == false) {
-                            response.sendRedirect(request.getContextPath() + getValueFromKey("payment.ezidebit.callback.redirect"));
-                        } else {
-                            response.sendRedirect(request.getContextPath() + getValueFromKey("payment.ezidebit.callback.mobileRedirect"));
-                        }
-
-                    }
-                }
+            futureMap.processCallbackFromOnlinePaymentForm(request.getRemoteUser(),request.getSession().getId(),uref, cref, fname, lname, email, mobile, addr, suburb, state, pcode, rdate, ramount, freq, odate, oamount, numpayments, totalamount, method);
+            if (loginBean.isMobileDeviceUserAgent() == false) {
+                response.sendRedirect(request.getContextPath() + getValueFromKey("payment.ezidebit.callback.redirect"));
+            } else {
+                response.sendRedirect(request.getContextPath() + getValueFromKey("payment.ezidebit.callback.mobileRedirect"));
             }
-        } catch (InterruptedException | ExecutionException ex) {
+
+        } catch (Exception ex) {
             Logger.getLogger(WebDDRSignUpServlet.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
-    private Properties emailServerProperties() {
-        Properties props = new Properties();
-
-        props.put("mail.smtp.host", configMapFacade.getConfig("mail.smtp.host"));
-        props.put("mail.smtp.auth", configMapFacade.getConfig("mail.smtp.auth"));
-        props.put("mail.debug", configMapFacade.getConfig("mail.debug"));
-        props.put("mail.smtp.ssl.enable", configMapFacade.getConfig("mail.smtp.ssl.enable"));
-        props.put("mail.smtp.port", configMapFacade.getConfig("mail.smtp.port"));
-        props.put("mail.smtp.socketFactory.port", configMapFacade.getConfig("mail.smtp.socketFactory.port"));
-        props.put("mail.smtp.socketFactory.class", configMapFacade.getConfig("mail.smtp.socketFactory.class"));
-        props.put("mail.smtp.socketFactory.fallback", configMapFacade.getConfig("mail.smtp.socketFactory.fallback"));
-        props.put("mail.smtp.ssluser", configMapFacade.getConfig("mail.smtp.ssluser"));
-        props.put("mail.smtp.sslpass", configMapFacade.getConfig("mail.smtp.sslpass"));
-        props.put("mail.smtp.headerimage.url", configMapFacade.getConfig("mail.smtp.headerimage.url"));
-        props.put("mail.smtp.headerimage.cid", configMapFacade.getConfig("mail.smtp.headerimage.cid"));
-        return props;
-
-    }
-
-    private String getDigitalKey() {
-        return configMapFacade.getConfig("payment.ezidebit.widget.digitalkey");
-    }
-
+    
     private void startAsynchJob(String key, Future future, String sessionId) {
 
         AsyncJob aj = new AsyncJob(key, future);

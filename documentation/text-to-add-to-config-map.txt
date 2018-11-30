@@ -2277,3 +2277,5 @@ ListTicketsTitle_datePurchased=DatePurchased
 ListTicketsTitle_dateUsed=DateUsed
 ListTicketsTitle_validFrom=ValidFrom
 ListTicketsTitle_expires=Expires
+BookingFormAdminViewLink=Admin View
+BookingFormAdminViewLink_Title=Customers Attending
