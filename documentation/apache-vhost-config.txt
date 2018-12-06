@@ -1,0 +1,162 @@
+
+root@ip-172-31-29-66:/etc/apache2/sites-available# cat manlybeachfemalefitness.conf
+
+
+
+<VirtualHost *:80>
+	ServerName services.manlybeachfemalefitness.com.au 
+	ProxyPass /invoice http://localhost:8080/invoice
+	ProxyPassReverse /invoice http://localhost:8080/invoice
+	#Redirect permanent /FitnessStats https://services.manlybeachfemalefitness.com.au/FitnessStats
+	Redirect permanent / https://services.manlybeachfemalefitness.com.au/FitnessStats/index.xhtml
+        ProxyRequests Off
+	ProxyPreserveHost On
+        DocumentRoot /var/www/public_html/manlybeachfemalefitness
+	<Proxy *>
+		Order allow,deny
+		Allow from all
+	</Proxy>
+</VirtualHost>
+<VirtualHost *:80>
+        DocumentRoot /var/www/public_html/manlybeachfemalefitness
+        ServerName www.manlybeachfemalefitness.com.au
+        ServerAdmin david@manlyit.com.au
+
+        ProxyPassMatch ^/(.*\.php(/.*)?)$ fcgi://127.0.0.1:9000/var/www/public_html/manlybeachfemalefitness/$1
+        DirectoryIndex index.php
+
+        <Directory /var/www/public_html/manlybeachfemalefitness >
+                Options Indexes FollowSymLinks MultiViews
+                AllowOverride FileInfo ALL
+                Order allow,deny
+                Allow from all
+                Require all granted
+        </Directory>
+
+        ErrorLog ${APACHE_LOG_DIR}/manlybeachfemalefitness-error.log
+
+        # Possible values include: debug, info, notice, warn, error, crit,
+        # alert, emerg.
+        LogLevel debug
+        #LogLevel info
+
+        CustomLog ${APACHE_LOG_DIR}/manlybeachfemalefitness-access.log combined
+
+        RewriteEngine on
+        RewriteCond %{SERVER_NAME} =manlybeachfemalefitness.com.au [OR]
+        RewriteCond %{SERVER_NAME} =www.manlybeachfemalefitness.com.au
+
+        RewriteRule ^ https://%{SERVER_NAME}%{REQUEST_URI} [END,NE,R=permanent]
+</VirtualHost>
+
+<VirtualHost *:443>
+        DocumentRoot /var/www/public_html/manlybeachfemalefitness
+        ServerName www.manlybeachfemalefitness.com.au
+        ServerAdmin david@manlyit.com.au
+
+        ProxyPassMatch ^/(.*\.php(/.*)?)$ fcgi://127.0.0.1:9000/var/www/public_html/manlybeachfemalefitness/$1
+        DirectoryIndex index.php
+
+        <Directory /var/www/public_html/manlybeachfemalefitness >
+                Options Indexes FollowSymLinks MultiViews
+                AllowOverride FileInfo ALL
+                Order allow,deny
+                Allow from all
+                Require all granted
+        </Directory>
+
+        ErrorLog ${APACHE_LOG_DIR}/manlybeachfemalefitness-error.log
+
+        # Possible values include: debug, info, notice, warn, error, crit,
+        # alert, emerg.
+        LogLevel debug
+        #LogLevel info
+
+        CustomLog ${APACHE_LOG_DIR}/manlybeachfemalefitness-access.log combined
+        ServerSignature On
+        SSLEngine on
+        SSLOptions  +StdEnvVars +ExportCertData
+        SSLCertificateFile /etc/apache2/ssl/www.manlybeachfemalefitness.com.au.crt
+        SSLCACertificateFile /etc/apache2/ssl/comodo-intermediate-bundle.crt
+        SSLCertificateKeyFile /etc/apache2/ssl/www.manlybeachfemalefitness.com.au.key
+        SSLCompression Off
+        # intermediate configuration, tweak to your needs
+        SSLProtocol             all -SSLv2 -SSLv3
+        SSLCipherSuite ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:ECDH+3DES:DH+3DES:RSA+AESGCM:RSA+AES:RSA+3DES:!aNULL:!MD5
+
+        SSLHonorCipherOrder     on
+
+
+</VirtualHost>
+<VirtualHost *:80>
+        ServerName manlybeachfemalefitness.com.au
+        Redirect 301 / https://www.manlybeachfemalefitness.com.au/
+</VirtualHost>
+
+
+<VirtualHost *:443>
+        ServerName services.manlybeachfemalefitness.com.au 
+	Redirect permanent / https://services.manlybeachfemalefitness.com.au/FitnessStats/index.xhtml
+        ProxyRequests Off
+        ProxyPreserveHost on
+	SSLProxyEngine on
+        # Websockets should be before other proxy lines
+        # for ws protocol proxy_wstunnel.load must be enabled in apache modules
+
+        ProxyPass /FitnessStats/javax.faces.push wss://local.manlybeachfemalefitness.com.au:8081/FitnessStats/javax.faces.push/  retry=0 
+
+        #  ProxyPass /FitnessStats ajp://localhost:8009/FitnessStats  timeout=300
+
+        ProxyPass /FitnessStats http://localhost:8080/FitnessStats  
+        # ProxyHTMLEnable On
+        # ProxyHTMLURLMap http://localhost:8080/FitnessStats /FitnessStats 
+        # ProxyPassReverse http://localhost:8080/FitnessStats /FitnessStats 
+         #  ProxyPass /invoice http://localhost:8080/invoice  timeout=300
+        #  ProxyPassReverse http://localhost:8080/invoice /invoice timeout=300
+
+  #      <Location /FitnessStats/>
+   #        ProxyPassReverse /
+   #        ProxyHTMLEnable On
+   #        ProxyHTMLURLMap  /      /FitnessStats/
+ #          RequestHeader    unset  Accept-Encoding
+   #     </Location>
+
+	<Proxy *>
+		Order deny,allow
+		Allow from all
+	</Proxy>
+        ServerSignature On
+        SSLEngine on
+        SSLOptions  +StdEnvVars +ExportCertData
+# old rapid SSL cert
+        #SSLCertificateFile /etc/apache2/ssl/purefitnessrapidssl.crt
+        #SSLCACertificateFile /etc/apache2/ssl/rapidsslintermediate.crt
+        #SSLCertificateKeyFile /etc/apache2/ssl/purefitnessrapidssl.key
+# new comodo certs valid for 3 years from 18 September 2015
+        SSLCertificateFile /etc/apache2/ssl/services.manlybeachfemalefitness.com.au.crt
+        SSLCACertificateFile /etc/apache2/ssl/comodo-intermediate-bundle.crt
+        SSLCertificateKeyFile /etc/apache2/ssl/services.manlybeachfemalefitness.com.au.key
+
+	SSLCompression Off
+        # intermediate configuration, tweak to your needs
+        SSLProtocol             all -SSLv2 -SSLv3
+#        SSLCipherSuite          ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-DSS-AES128-GCM-SHA256:kEDH+AESGCM:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA:ECDHE-ECDSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-DSS-AES128-SHA256:DHE-RSA-AES256-SHA256:DHE-DSS-AES256-SHA:DHE-RSA-AES256-SHA:ECDHE-RSA-DES-CBC3-SHA:ECDHE-ECDSA-DES-CBC3-SHA:AES128-GCM-SHA256:AES256-GCM-SHA384:AES128-SHA256:AES256-SHA256:AES128-SHA:AES256-SHA:AES:CAMELLIA:DES-CBC3-SHA:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!aECDH:!EDH-DSS-DES-CBC3-SHA:!EDH-RSA-DES-CBC3-SHA:!KRB5-DES-CBC3-SHA
+
+        #SSLCipherSuite "EECDH+ECDSA+AESGCM EECDH+aRSA+AESGCM EECDH+ECDSA+SHA384 EECDH+ECDSA+SHA256 EECDH+aRSA+SHA384 EECDH+aRSA+SHA256 EECDH+aRSA+RC4 EECDH EDH+aRSA RC4 !aNULL !eNULL !LOW !3DES !MD5 !EXP !PSK !SRP !DSS !RC4"
+        SSLCipherSuite ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:ECDH+3DES:DH+3DES:RSA+AESGCM:RSA+AES:RSA+3DES:!aNULL:!MD5
+
+        SSLHonorCipherOrder     on
+
+        # HSTS (mod_headers is required) (15768000 seconds = 6 months)
+        Header always set Strict-Transport-Security "max-age=15768000"
+
+        TraceEnable off
+        ErrorDocument 503 http://www.manlybeachfemalefitness.com.au/contact/
+        ErrorLog ${APACHE_LOG_DIR}/services-manlybeachfemalefitness-error.log
+
+        LogLevel info
+
+        CustomLog ${APACHE_LOG_DIR}/services-manlybeachfemalefitness-access.log combined
+
+</VirtualHost>
+root@ip-172-31-29-66:/etc/apache2/sites-available# 

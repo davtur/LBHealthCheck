@@ -990,8 +990,6 @@ public class FutureMapEJB implements Serializable {
 
     }
 
-    
-
     public void createCombinedAuditLogAndNote(Customers adminUser, Customers customer, String title, String message, String changedFrom, String ChangedTo) {
         try {
             if (adminUser == null) {
@@ -1617,8 +1615,12 @@ public class FutureMapEJB implements Serializable {
                                         crmPay = paymentsFacade.findPaymentById(paymentRefInt, false);
                                         if (crmPay != null) {
                                             validReference = true;
+                                        } else {
+                                            LOGGER.log(Level.SEVERE, "Future Map processReport  - paymentReference NOT FOUND in our system:{0}.", new Object[]{paymentRefInt, pay.getCustomerName().getValue(), pay.getPaymentAmount().toString(), pay.getDebitDate().getValue().toGregorianCalendar().getTime().toString()});
                                         }
                                     } catch (NumberFormatException numberFormatException) {
+                                        LOGGER.log(Level.SEVERE, "Future Map processReport  - paymentReference NOT NUMERICAL:{0} , exception Message: {1}", new Object[]{paymentRefInt, numberFormatException.getMessage()});
+
                                     }
                                 }
                             }
@@ -3037,7 +3039,6 @@ public class FutureMapEJB implements Serializable {
     @Asynchronous
     //@TransactionAttribute(REQUIRES_NEW)
     public void processGetAllCustPaymentsAndDetails(String sessionId, PaymentGatewayResponse pgr) {
-        CustomerDetails custDetails = null;
 
         boolean result = false;
         String returnedMessage = "An error occurred trying to get customer details and payments. Refer to logs for more info";
@@ -3047,14 +3048,19 @@ public class FutureMapEJB implements Serializable {
             if (pgr != null) {
                 result = pgr.isOperationSuccessful();
                 if (result == true) {
-                    Object custObject = pgr.getData();
+                    Object o = pgr.getData();
+                    if (o.getClass() == ArrayList.class) {
+                        ArrayList<Object> returnedObjects = (ArrayList<Object>) o;
+                        
+                        Object custObject = returnedObjects.get(2);// cust details
 
-                    if (custObject != null && custObject.getClass() == String.class) {
-                        returnedMessage = (String) custObject;
-                    }
-                    if (custObject != null && custObject.getClass() == CustomerDetails.class) {
-                        CustomerDetails cd = (CustomerDetails) custObject;
-                        returnedMessage = "Customer Details synced with Payment gateway OK";
+                        if (custObject != null && custObject.getClass() == String.class) {
+                            returnedMessage = (String) custObject;
+                        }
+                        if (custObject != null && custObject.getClass() == CustomerDetails.class) {
+                            CustomerDetails cd = (CustomerDetails) custObject;
+                            returnedMessage = "Customer Details synced with Payment gateway OK";
+                        }
                     }
                 }
             }
@@ -3693,5 +3699,4 @@ public class FutureMapEJB implements Serializable {
             LOGGER.log(Level.WARNING, "createDefaultProfilePic ERROR, Cannot add default profile pic to a null customer object");
         }
     }*/
-   
 }

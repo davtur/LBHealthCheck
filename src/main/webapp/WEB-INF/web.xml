@@ -5,16 +5,14 @@
     xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd"
     version="4.0">
     <distributable/>
-   <!-- <user-data-constraint>
-    <transport-guarantee>CONFIDENTIAL</transport-guarantee>
-</user-data-constraint>-->
+  
     <context-param>
         <param-name>javax.faces.PROJECT_STAGE</param-name>
         <param-value>Development</param-value>
     </context-param>
     <context-param>
         <param-name>javax.faces.FACELETS_BUFFER_SIZE</param-name>
-        <param-value>1048576</param-value>
+        <param-value>2048576</param-value>
     </context-param>
    <context-param>
         <param-name>javax.faces.ENABLE_CDI_RESOLVER_CHAIN</param-name>

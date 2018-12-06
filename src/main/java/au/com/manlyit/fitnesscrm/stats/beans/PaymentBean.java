@@ -1035,48 +1035,51 @@ public class PaymentBean implements Serializable {
                                 //Collection<Payments> crmPayList = cust.getPaymentsCollection();
                                 Collection<Payments> crmPayList = paymentsFacade.findPaymentsByCustomer(cust, true);
                                 for (Payments crmPay : crmPayList) {
-                                    boolean found = false;
-                                    for (ScheduledPayment pay : payList) {
+                                    // Schedled Payments from teh gateway are only status scheduled
+                                    if (crmPay.getPaymentStatus().contentEquals(PaymentStatus.SCHEDULED.value()) == true || crmPay.getPaymentStatus().contentEquals(PaymentStatus.WAITING.value()) == true) {
+                                        boolean found = false;
+                                        for (ScheduledPayment pay : payList) {
 
-                                        if (pay.getPaymentReference().isNil() == false) {
-                                            String ref = pay.getPaymentReference().getValue().trim();
-                                            String ids = crmPay.getId().toString().trim();
-                                            if (ids.equalsIgnoreCase(ref)) {
-                                                found = true;
-                                                int id = -1;
-                                                try {
-                                                    id = crmPay.getId();
-                                                } catch (Exception e) {
-                                                    LOGGER.log(Level.INFO, "PaymentBean processGetScheduledPayments  - found a payment without a valid reference", e);
-                                                }
-                                                LOGGER.log(Level.INFO, "PaymentBean processGetScheduledPayments  - Processing Payment CRM database id:{0}", id);
-                                                if (compareScheduledPaymentXMLToEntity(crmPay, pay)) {
-                                                    // they are the same - check status and update if necessary
-                                                    LOGGER.log(Level.INFO, "PaymentBean processGetScheduledPayments  -- sync OK -- payment id:{0}", id);
-                                                } else {
-                                                    compareScheduledPaymentXMLToEntityAndUpdateAmountAndStatus(crmPay, pay);
-                                                    LOGGER.log(Level.WARNING, "PaymentBean processGetScheduledPayments  - updating scheduled payment compareScheduledPaymentXMLToEntity FAILED id: {0}", id);
+                                            if (pay.getPaymentReference().isNil() == false) {
+                                                String ref = pay.getPaymentReference().getValue().trim();
+                                                String ids = crmPay.getId().toString().trim();
+                                                if (ids.equalsIgnoreCase(ref)) {
+                                                    found = true;
+                                                    int id = -1;
+                                                    try {
+                                                        id = crmPay.getId();
+                                                    } catch (Exception e) {
+                                                        LOGGER.log(Level.INFO, "PaymentBean processGetScheduledPayments  - found a payment without a valid reference", e);
+                                                    }
+                                                    LOGGER.log(Level.INFO, "PaymentBean processGetScheduledPayments  - Processing Payment CRM database id:{0}", id);
+                                                    if (compareScheduledPaymentXMLToEntity(crmPay, pay)) {
+                                                        // they are the same - check status and update if necessary
+                                                        LOGGER.log(Level.INFO, "PaymentBean processGetScheduledPayments  -- sync OK -- payment id:{0}", id);
+                                                    } else {
+                                                        compareScheduledPaymentXMLToEntityAndUpdateAmountAndStatus(crmPay, pay);
+                                                        LOGGER.log(Level.WARNING, "PaymentBean processGetScheduledPayments  - updating scheduled payment compareScheduledPaymentXMLToEntity FAILED id: {0}", id);
+                                                    }
                                                 }
                                             }
                                         }
-                                    }
-                                    if (found == false) {
-                                        //String ref = p.getId().toString();
-                                        if (crmPay.getCreateDatetime().before(testDate)) {// make sure we don't delate payments that have just been added and may still be being processed by the gateway. i.e they've been put into our DB but havn't been put into the payment gateway schedule yet
-                                            crmPay.setPaymentStatus(PaymentStatus.MISSING_IN_PGW.value());
-                                            if (cust.getPaymentParametersId().getStatusDescription().toUpperCase().contains("HOLD")) {
-                                                crmPay.setPaymentStatus(PaymentStatus.REJECTED_CUST_ON_HOLD.value());
-                                            } else {
-                                                message += "<p>Customer " + cust.getUsername() + ", Payment ID:" + crmPay.getId().toString() + " for Amount:$" + crmPay.getPaymentAmount().toPlainString() + " on Date:" + crmPay.getDebitDate().toString() + " was rejected by the payment gateway and requires your action or revenue loss may occur!!.\r\n</p></BR>";
+                                        if (found == false) {
+                                            //String ref = p.getId().toString();
+                                            if (crmPay.getCreateDatetime().before(testDate) ) {// make sure we don't delate payments that have just been added and may still be being processed by the gateway. i.e they've been put into our DB but havn't been put into the payment gateway schedule yet
+                                                crmPay.setPaymentStatus(PaymentStatus.MISSING_IN_PGW.value());
+                                                if (cust.getPaymentParametersId().getStatusDescription().toUpperCase().contains("HOLD")) {
+                                                    crmPay.setPaymentStatus(PaymentStatus.REJECTED_CUST_ON_HOLD.value());
+                                                } else {
+                                                    message += "<p>Customer " + cust.getUsername() + ", Payment ID:" + crmPay.getId().toString() + " for Amount:$" + crmPay.getPaymentAmount().toPlainString() + " on Date:" + crmPay.getDebitDate().toString() + " was rejected by the payment gateway and requires your action or revenue loss may occur!!.\r\n</p></BR>";
 
-                                                sendAlertEmail = true;
+                                                    sendAlertEmail = true;
+                                                }
+                                                paymentsFacade.edit(crmPay);
                                             }
-                                            paymentsFacade.edit(crmPay);
                                         }
                                     }
                                 }
-                                // remove any that 
 
+                                // remove any that 
                                 // List<Payments> crmPaymentList = paymentsFacade.findScheduledPaymentsByCustomer(cust, false);
                                 for (ScheduledPayment pay : payList) {
 
@@ -1204,7 +1207,7 @@ public class PaymentBean implements Serializable {
                     Date testDate = testCal.getTime();
                     List<Payments> crmPaymentList = paymentsFacade.findScheduledPaymentsByCustomer(cust, true);
                     for (Payments p : crmPaymentList) {
-                        if (p.getCreateDatetime().before(testDate)) {// make sure we don't delate payments that have just been added and may still be being processed by the gateway. i.e they've been put into our DB but havn't been put into the payment gateway schedule yet
+                        if (p.getCreateDatetime().before(testDate) && p.getPaymentStatus().contentEquals(PaymentStatus.SUCESSFUL.value()) == false) {// make sure we don't delate payments that have just been added and may still be being processed by the gateway. i.e they've been put into our DB but havn't been put into the payment gateway schedule yet
                             p.setPaymentStatus(PaymentStatus.MISSING_IN_PGW.value());
                             if (cust.getPaymentParametersId().getStatusDescription().toUpperCase().contains("HOLD")) {
                                 p.setPaymentStatus(PaymentStatus.REJECTED_CUST_ON_HOLD.value());
@@ -1958,6 +1961,8 @@ public class PaymentBean implements Serializable {
         PaymentGatewayResponse pgr1 = null;
         PaymentGatewayResponse pgr2 = null;
         PaymentGatewayResponse pgr3 = null;
+        ArrayList<Object> resultObjects = new ArrayList<>();
+
         try {
 
             Future<PaymentGatewayResponse> gpResponse = getPayments(cust, paymentType, paymentMethod, paymentSource, paymentReference, fromDate, toDate, useSettlementDate, digitalKey, batchSessionId);
@@ -1970,20 +1975,26 @@ public class PaymentBean implements Serializable {
             result = "";
             if (pgr1.isOperationSuccessful()) {
                 result = "Get Payments - OK, ";
+                resultObjects.add(pgr1.getData());
             } else {
                 result = "Get Payments - FAIL, ";
+                resultObjects.add("FAIL");
             }
             if (pgr2.isOperationSuccessful()) {
                 result += "Get Scheduled - OK, ";
+                resultObjects.add(pgr2.getData());
             } else {
                 result += "Get Scheduled - FAIL, ";
+                resultObjects.add("FAIL");
             }
             if (pgr3.isOperationSuccessful()) {
                 result += "Get Details - OK ";
                 cd = (CustomerDetails) pgr3.getData();
+                resultObjects.add(cd);
                 updatePaymentParameters(cust, cd, 0);
             } else {
                 result += "Get Details - FAIL ";
+                resultObjects.add("FAIL");
             }
 
         } catch (InterruptedException | ExecutionException e) {
@@ -1995,11 +2006,11 @@ public class PaymentBean implements Serializable {
         if (pgr1.isOperationSuccessful() && pgr2.isOperationSuccessful() && pgr3.isOperationSuccessful()) {
             LOGGER.log(Level.INFO, "getAllCustPaymentsAndDetails: Details, Payments and Scheduled payments recieved OK");
 
-            pgr = new PaymentGatewayResponse(true, cd, result, "0", "Updated Customer Details and Payment Information was recieved from the payment gateway.");
+            pgr = new PaymentGatewayResponse(true, resultObjects, result, "0", "Updated Customer Details and Payment Information was recieved from the payment gateway.");
 
         } else {
             LOGGER.log(Level.INFO, "getAllCustPaymentsAndDetails: The customer object passed to this method is NULL.This parameter is required.Returning empty array!!");
-            pgr = new PaymentGatewayResponse(false, cd, result, "-1", "The customer object passed to this method is NULL.This parameter is required.Returning empty array!!");
+            pgr = new PaymentGatewayResponse(false, resultObjects, result, "-1", "The customer object passed to this method is NULL.This parameter is required.Returning empty array!!");
 
         }
         futureMap.processGetAllCustPaymentsAndDetails(sessionId, pgr);
@@ -2035,6 +2046,7 @@ public class PaymentBean implements Serializable {
         //  will provide you with all payments that have been made to the client since the
         //  last time your system received payment information.
         boolean result = false;
+        List<Payment> payList = null;
         PaymentGatewayResponse pgr = new PaymentGatewayResponse(false, result, "", "-1", "An unhandled error occurred!");
 
         if (cust == null) {
@@ -2096,7 +2108,7 @@ public class PaymentBean implements Serializable {
                 resultPaymentArray = eziResponse.getData().getValue();
                 boolean abort = false;
                 if (resultPaymentArray != null && resultPaymentArray.getPayment() != null) {
-                    List<Payment> payList = resultPaymentArray.getPayment();
+                    payList = resultPaymentArray.getPayment();
                     if (payList.isEmpty() == false) {
                         //check the customer reference of teh first payment and verify they match
                         String customerRef = payList.get(0).getYourSystemReference().getValue();
@@ -2150,13 +2162,13 @@ public class PaymentBean implements Serializable {
                                             }
                                         }
                                         if (validReference) {
-                                            if (comparePaymentXMLToEntity(crmPay, pay) == false) {
+                                            if (comparePaymentXMLToEntity(crmPay, pay) == false) { // false if something has been changed
                                                 crmPay = convertPaymentXMLToEntity(crmPay, pay, cust);
                                                 LOGGER.log(Level.INFO, "Payment Bean processGetPayments  - updating payment id:{0}.", paymentRefInt);
                                                 paymentsFacade.edit(crmPay);
                                             }
-                                        } else // old payment without a primary key reference
-                                        {
+                                        } else {// old payment without a primary key reference
+
                                             if (paymentID.toUpperCase(Locale.getDefault()).contains("SCHEDULED")) {
                                                 // scheduled payment no paymentID
                                                 LOGGER.log(Level.INFO, "Payment Bean processGetPayments scheduled payment .", pay.toString());
@@ -2194,9 +2206,9 @@ public class PaymentBean implements Serializable {
                     }
                 }
 
-                if (resultPaymentArray != null) {
+                if (payList != null) {
                     LOGGER.log(Level.INFO, "Payment Bean - Get Customer Payments Response Recieved from ezidebit for Customer  - {0}, Number of Payments : {1} ", new Object[]{cust.getUsername(), resultPaymentArray.getPayment().size()});
-                    pgr = new PaymentGatewayResponse(true, result, "", "0", "Updated Payment Information was recieved from the payment gateway.");
+                    pgr = new PaymentGatewayResponse(true, payList, "", "0", "Updated Payment Information was recieved from the payment gateway.");
                 } else {
                     LOGGER.log(Level.WARNING, "getPayments Response: Error - NULL Result ");
                     pgr = new PaymentGatewayResponse(false, null, "", "0", "The payment information recieved from the payment gateway was empty");
@@ -2722,7 +2734,10 @@ public class PaymentBean implements Serializable {
                 result = eziResponse.getData().getValue();
                 if (result.getPayment() != null) {
                     pgr = new PaymentGatewayResponse(true, result, "The Customers details were retrieved from the payment gateway", "0", "");
-                    LOGGER.log(Level.INFO, "getAllPaymentsBySystemSinceDate Response: OK {0}, No of Payments in List = {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue().getPayment().size()});
+                    LOGGER.log(Level.INFO, "getAllPaymentsBySystemSinceDate Response: OK {0}, List<Payments> Size = {1}", new Object[]{eziResponse.getErrorMessage().getValue(), eziResponse.getData().getValue().getPayment().size()});
+
+                } else {
+                    LOGGER.log(Level.WARNING, "getAllPaymentsBySystemSinceDate Response: Empty - It returned an empty list {0}, ", eziResponse.getErrorMessage().getValue());
 
                 }
 

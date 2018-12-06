@@ -172,7 +172,7 @@
 
             </p:panelGrid>
         </p:panel>
-        <p:panel id="paymentsTablePanel" collapsed="true" toggleable="true" header="Completed Payments in Ezidebit" rendered="#{ezidebit.paymentsList != null and ezidebit.theCustomerProvisionedInThePaymentGateway == true}"> 
+        <p:panel id="paymentsTablePanel" collapsed="true" toggleable="true" header="All Payments - Latest response from the Payment Gateway" rendered="#{ezidebit.paymentsList != null and ezidebit.theCustomerProvisionedInThePaymentGateway == true}"> 
             <p:dataTable  id="paymentsTable"
                           value="#{ezidebit.paymentsList}" 
                           filteredValue="#{ezidebit.paymentsListFilteredItems}"  
@@ -226,13 +226,13 @@
 
         </p:panel>
 
-        <p:panel id="scheduledPaymentsTablePanel"  collapsed="true" toggleable="true"  header="Scheduled Payments in Ezidebit" rendered="#{ezidebit.scheduledPaymentsList != null and ezidebit.theCustomerProvisionedInThePaymentGateway == true}">
+        <p:panel id="scheduledPaymentsTablePanel"  collapsed="true" toggleable="true"  header="Scheduled Payments - Latest response from the Payment Gateway" rendered="#{ezidebit.scheduledPaymentsList != null and ezidebit.theCustomerProvisionedInThePaymentGateway == true}">
             <p:dataTable id="scheduledPaymentsTable"
                          selectionMode="single"
                          selection="#{ezidebit.selectedScheduledPayment}" 
                          value="#{ezidebit.scheduledPaymentsList}" 
                          filteredValue="#{ezidebit.scheduledPaymentsListFilteredItems}" 
-                         rowKey="#{payment.id}"
+                         rowKey="#{payment.paymentReference.value}"
                          widgetVar="scheduledPaymentsListControllerTable" 
                          var="payment"  
                          paginator="true" rows="15"  
@@ -255,23 +255,23 @@
                 </f:facet>
 
 
-                <p:column  >
-                    <h:outputText value="#{payment.id}"/>
-                </p:column>
 
-                <p:column sortBy="#{payment.yourGeneralReference}" filterBy="#{payment.yourGeneralReference}" headerText="#{configMapController.getKey('ListPaymentsTitle_customerName')}"   >
-                    <h:outputText value="#{payment.yourGeneralReference}"/>
+                <p:column sortBy="#{payment.yourGeneralReference.value}" filterBy="#{payment.yourGeneralReference.value}" headerText="#{configMapController.getKey('ListPaymentsTitle_customerName')}"   >
+                    <h:outputText value="#{payment.yourGeneralReference.value}"/>
                 </p:column>
-                <p:column sortBy="#{payment.paymentReference}" filterBy="#{payment.paymentReference}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentReference')}"   >                                 
-                    <h:outputText value="#{payment.paymentReference}"/>
+                <p:column sortBy="#{payment.yourSystemReference.value}" filterBy="#{payment.yourSystemReference.value}" headerText="#{configMapController.getKey('ListPaymentsTitle_customerName')}"   >
+                    <h:outputText value="#{payment.yourSystemReference.value}"/>
+                </p:column>
+                <p:column sortBy="#{payment.paymentReference.value}" filterBy="#{payment.paymentReference.value}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentReference')}"   >                                 
+                    <h:outputText value="#{payment.paymentReference.value}"/>
                 </p:column>
                 <p:column sortBy="#{payment.paymentAmount}" filterBy="#{payment.paymentAmount}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentAmount')}"   >
                     <h:outputText value="#{payment.paymentAmount}">
                         <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
                     </h:outputText>
                 </p:column>
-                <p:column sortBy="#{payment.paymentDate}" filterBy="#{payment.paymentDate}" headerText="#{configMapController.getKey('ListPaymentsTitle_debitDate')}"   >
-                    <h:outputText value="#{payment.paymentDate}" >
+                <p:column sortBy="#{payment.paymentDate.toGregorianCalendar().time}" filterBy="#{payment.paymentDate.toGregorianCalendar().time}" headerText="#{configMapController.getKey('ListPaymentsTitle_debitDate')}"   >
+                    <h:outputText value="#{payment.paymentDate.toGregorianCalendar().time}" >
                         <f:convertDateTime pattern="dd MMM yyyy" />
                     </h:outputText>
                 </p:column>

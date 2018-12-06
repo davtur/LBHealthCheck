@@ -1,4 +1,25 @@
 
+## test websocket connection
+
+david@david-h8-1210a:~$ curl -i -N -H "Connection: Upgrade" -H "Upgrade: websocket" -H "Host: test-services.manlybeachfemalefitness.com.au" -H "Origin: https://https://test-services.manlybeachfemalefitness.com.au" https://test-services.manlybeachfemalefitness.com.au/FitnessStats/
+
+curl -i -N -H "Connection: Upgrade" -H "Upgrade: websocket" -H "Host: services.manlybeachfemalefitness.com.au" -H "Origin: https://https://services.manlybeachfemalefitness.com.au" https://services.manlybeachfemalefitness.com.au/FitnessStats/
+
+
+##Import Apache SSl certs into keystore for use with wildfly or glassfish
+openssl pkcs12 -export -in "/home/david/certs/mbff-local.crt" -inkey "/home/david/certs/mbff-local.key"  -out "/home/david/certs/mbff-local.p12" -name mbfflocal -CAfile "/home/david/old-documents-sep-2016/websites/pure Fitness/certificates/home_manlyit_com_au/home_manlyit_com_au_cacert.crt" -caname root -chain
+
+## Wildfy deployments
+
+ubuntu@ip-172-31-29-66:/opt/wildfly/wildfly-12.0.0.Final/bin$ ./jboss-cli.sh 
+You are disconnected at the moment. Type 'connect' to connect to the server or 'help' for the list of supported commands.
+[disconnected /] connect
+Authenticating against security realm: ManagementRealm
+Username: admin
+Password: 
+[standalone@localhost:9990 /] 
+[standalone@localhost:9990 /] undeploy Fitness*
+[standalone@localhost:9990 /] deploy /home/ubuntu/FitnessCRM-7.5.1.war --force
 
 
 
