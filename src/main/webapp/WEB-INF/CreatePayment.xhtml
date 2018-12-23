@@ -7,7 +7,7 @@
                  xmlns:p="http://primefaces.org/ui" >
 
     <!--<p:log />--> 
-    <p:dialog id="createPaymentDialogue"  closable="true"
+    <p:dialog id="createPaymentDialogue"  closable="true"  appendTo="@(body)"
               header="#{configMapController.getKey('AddPaymentTitle')}" widgetVar="createPaymentDialogueWidget"> 
         <h:form id="createPayment">    
             <p:panelGrid id="addPaymentGrid1" columns="4">

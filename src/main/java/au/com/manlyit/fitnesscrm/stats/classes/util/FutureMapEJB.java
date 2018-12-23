@@ -2317,6 +2317,7 @@ public class FutureMapEJB implements Serializable {
         String paymentRef = null;
         boolean result = false;
         Payments pay = null;
+        Payments paymentToBeProcessed = null;
         String message = "The delete payment operation failed!.";
         LOGGER.log(Level.INFO, "FutureMap - processAddPaymentResult started");
         // PaymentGatewayResponse pgr = null;
@@ -2329,7 +2330,7 @@ public class FutureMapEJB implements Serializable {
             result = pgr.isOperationSuccessful();
             //we have a response 
             paymentRef = pgr.getTextData();
-            pay = (Payments) pgr.getData();
+            paymentToBeProcessed = (Payments) pgr.getData();
             //  }
             // }
 
@@ -2382,7 +2383,7 @@ public class FutureMapEJB implements Serializable {
                 } catch (NumberFormatException numberFormatException) {
                     LOGGER.log(Level.WARNING, "FutureMap - Process deletePayment  FAILED - PaymentReference could not be converted to a number. It should be the primary key of the payments table row ", result);
                 }
-                //Payments pay = paymentsFacade.findPaymentById(id, false);
+                pay = paymentsFacade.findPaymentById(id, false);
                 if (pay != null) {
 
                     if (errorMessage.contains("Payment selected for deletion could not be found")) {
@@ -2392,9 +2393,11 @@ public class FutureMapEJB implements Serializable {
                             paymentsFacade.remove(pay);
                             //  removeFromPaymentLists(pay);
                         } else {
-                            pay.setPaymentStatus(PaymentStatus.MISSING_IN_PGW.value());
-                            paymentsFacade.editAndFlush(pay);
-                            //  updatePaymentLists(pay);
+                            if (pay.getPaymentStatus().contentEquals(PaymentStatus.DELETE_REQUESTED.value()) == false) {
+                                pay.setPaymentStatus(PaymentStatus.MISSING_IN_PGW.value());
+                                paymentsFacade.editAndFlush(pay);
+                                //  updatePaymentLists(pay);
+                            }
                         }
                     } else if (errorMessage.contains("Your update could not be processed at this time")) {
                         if (pay.getBankReturnCode() == null) {
@@ -3051,7 +3054,7 @@ public class FutureMapEJB implements Serializable {
                     Object o = pgr.getData();
                     if (o.getClass() == ArrayList.class) {
                         ArrayList<Object> returnedObjects = (ArrayList<Object>) o;
-                        
+
                         Object custObject = returnedObjects.get(2);// cust details
 
                         if (custObject != null && custObject.getClass() == String.class) {

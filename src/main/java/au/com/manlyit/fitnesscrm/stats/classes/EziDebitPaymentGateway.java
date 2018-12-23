@@ -19,7 +19,6 @@ import au.com.manlyit.fitnesscrm.stats.classes.util.FutureMapEJB;
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PaymentGatewayResponse;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PfSelectableDataModel;
-import au.com.manlyit.fitnesscrm.stats.classes.util.ScheduledPaymentPojo;
 import au.com.manlyit.fitnesscrm.stats.db.CustomerState;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import au.com.manlyit.fitnesscrm.stats.db.Invoice;
@@ -147,7 +146,7 @@ public class EziDebitPaymentGateway implements Serializable {
     private boolean refreshFromDB = false;
     private final ThreadGroup tGroup1 = new ThreadGroup("EziDebitOps");
     private List<Payment> paymentsList;
-    
+
     private PfSelectableDataModel<Payments> paymentDBList = null;
     private PfSelectableDataModel<Payments> reportPaymentsList = null;
     private PfSelectableDataModel<Invoice> reportEndOfMonthList = null;
@@ -171,6 +170,8 @@ public class EziDebitPaymentGateway implements Serializable {
     private Date testAjaxUpdateTime = new Date();
     private float paymentAmountInCents = (float) 0;
     private float oneOffPaymentAmount = (float) 0;
+    private Double proRataChangePlanAmount = new Double(0);
+   
     private Date oneOffPaymentDate = new Date();
     private Long paymentLimitAmountInCents = new Long("0");
 
@@ -2558,7 +2559,7 @@ public class EziDebitPaymentGateway implements Serializable {
         Customers selectedCust = getSelectedCustomer();
         String cust = selectedCust.getUsername();
         setCustomerDetailsHaveBeenRetrieved(true);
-         ArrayList<Object> returnedObjects = null;
+        ArrayList<Object> returnedObjects = null;
         LOGGER.log(Level.INFO, "Ezidebit Controller -  processing processGetCustomerDetailsAndPayments Response Recieved from ezidebit for Customer  - {0}", cust);
         try {
             Object o = pgr.getData();
@@ -2627,16 +2628,14 @@ public class EziDebitPaymentGateway implements Serializable {
             }
 
         }
-        List<Payment> payListFromGateway = (List<Payment>)returnedObjects.get(0);
-        ArrayOfScheduledPayment resultArrayOfScheduledPayments = (ArrayOfScheduledPayment)returnedObjects.get(1);
+        List<Payment> payListFromGateway = (List<Payment>) returnedObjects.get(0);
+        ArrayOfScheduledPayment resultArrayOfScheduledPayments = (ArrayOfScheduledPayment) returnedObjects.get(1);
         List<ScheduledPayment> schedPayListFromGateway = resultArrayOfScheduledPayments.getScheduledPayment();
 
-        paymentsList  = payListFromGateway;
+        paymentsList = payListFromGateway;
         scheduledPaymentsList = schedPayListFromGateway;
-        
-        
-        //PrimeFaces.current().ajax().update("customerslistForm1");
 
+        //PrimeFaces.current().ajax().update("customerslistForm1");
         //refreshFromDB = true;
         //getCustomersController().setRefreshFromDB(true);
         //getCustomersController().recreateModel();
@@ -3082,11 +3081,31 @@ public class EziDebitPaymentGateway implements Serializable {
         return props;
 
     }
+    
+   public void discardChangePlan(ActionEvent actionEvent) {
+       controller.setCustomersNewPlan(controller.getSelected().getGroupPricing());
+   }
 
     public void executeChangePlan(ActionEvent actionEvent) {
         LOGGER.log(Level.INFO, "Executing Plan Change - Clear Schedule then create new schedule operations will be called..");
-        clearSchedule(actionEvent);
-        createPaymentSchedule(actionEvent);
+        try {
+            clearSchedule(actionEvent);
+            modifyProRataAlignmentPayment();
+            createPaymentSchedule(actionEvent);
+            controller.getSelected().setGroupPricing(controller.getCustomersNewPlan());
+            customersFacade.edit(controller.getSelected());
+
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Executing Plan Change - ERROR.",e);
+        }
+     
+    }
+    private void modifyProRataAlignmentPayment(){
+        int daysFromLastPaymentToNewScheduleStart = 0;
+        double amountOfLastPayment = 0;
+       //TODO add pro rate payment
+        
+        
     }
 
     public void createPaymentSchedule(ActionEvent actionEvent) {
@@ -3230,15 +3249,12 @@ public class EziDebitPaymentGateway implements Serializable {
         String loggedInUser = FacesContext.getCurrentInstance().getExternalContext().getRemoteUser();
         if (loggedInUser != null) {
             List<Payments> crmPaymentList = paymentsFacade.findScheduledPaymentsByCustomer(cust, true);
-            if (keepManual == false) {
-                startAsynchJob("ClearSchedule", paymentBean.clearSchedule(cust, false, loggedInUser, getDigitalKey(), sessionId));
-            }
             if (crmPaymentList != null) {
                 LOGGER.log(Level.INFO, "createSchedule - Found {0} existing scheduled payments for {1}", new Object[]{crmPaymentList.size(), cust.getUsername()});
                 for (int x = crmPaymentList.size() - 1; x > -1; x--) {
                     Payments p = crmPaymentList.get(x);
                     String ref = p.getId().toString();
-                    boolean isManual = true;
+                    boolean isManual = true;// all payments now manual as far as ezidebit is concerned. we just add and delete payments and dont use their scheduling
                     if (p.getManuallyAddedPayment() != null) {
                         isManual = p.getManuallyAddedPayment();
                     }
@@ -3258,6 +3274,9 @@ public class EziDebitPaymentGateway implements Serializable {
                         }
                     }
                 }
+            }
+            if (keepManual == false) {
+                startAsynchJob("ClearSchedule", paymentBean.clearSchedule(cust, false, loggedInUser, getDigitalKey(), sessionId));
             }
 
             PaymentParameters pp = cust.getPaymentParametersId();
@@ -3647,6 +3666,20 @@ public class EziDebitPaymentGateway implements Serializable {
         this.paymentGatewayVersion = paymentGatewayVersion;
     }
 
-    
+    /**
+     * @return the proRataChangePlanAmount
+     */
+    public Double getProRataChangePlanAmount() {
+        return proRataChangePlanAmount;
+    }
+
+    /**
+     * @param proRataChangePlanAmount the proRataChangePlanAmount to set
+     */
+    public void setProRataChangePlanAmount(Double proRataChangePlanAmount) {
+        this.proRataChangePlanAmount = proRataChangePlanAmount;
+    }
+
+   
 
 }

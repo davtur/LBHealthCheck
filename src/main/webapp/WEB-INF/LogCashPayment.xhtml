@@ -7,7 +7,7 @@
                  xmlns:p="http://primefaces.org/ui" >
 
    
-    <p:dialog id="logCashPaymentDialogue"  closable="true" responsive="true"
+    <p:dialog id="logCashPaymentDialogue"  closable="true" responsive="true"  appendTo="@(body)"
               header="#{configMapController.getKey('LogCashPaymentHeader')}"  widgetVar="logCashPaymentDialogueWidget"> 
         <h:form id="logCashPayment"> 
 

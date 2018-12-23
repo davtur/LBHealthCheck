@@ -4,73 +4,73 @@
                  xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
                  xmlns:h="http://xmlns.jcp.org/jsf/html"
                  xmlns:f="http://xmlns.jcp.org/jsf/core"
-                  xmlns:pe="http://primefaces.org/ui/extensions"
+                 xmlns:pe="http://primefaces.org/ui/extensions"
                  xmlns:p="http://primefaces.org/ui" >
 
     <h:form id="formCustomersEdit1" >    
         <!-- <p:log />-->
 
-       <div class="ui-g">
-                <div class="ui-g-12 ui-md-12 ui-lg-4">
-                    <div class="card card-w-title">
-                <h:panelGrid  columns="2">
-                    <p:outputLabel value="#{configMapController.getKey('EditCustomersLabel_firstname')}" for="firstname1" />
-                    <p:inputText id="firstname1"  value="#{customersController.selected.firstname}" title="#{configMapController.getKey('EditCustomersTitle_firstname')}" valueChangeListener="#{customersController.firstNameListener}" required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_firstname')}">
-                        <p:ajax update=":tv:formCustomersEdit1:username1" event="keyup"/>
-                    </p:inputText>
-                    <p:outputLabel value="#{configMapController.getKey('EditCustomersLabel_lastname')}" for="lastname1" />
-                    <p:inputText id="lastname1" value="#{customersController.selected.lastname}" title="#{configMapController.getKey('EditCustomersTitle_lastname')}" valueChangeListener="#{customersController.lastNameListener}" required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_lastname')}">
-                        <p:ajax update=":tv:formCustomersEdit1:username1" event="keyup" />
-                    </p:inputText>
-                    <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_emailAddress')}" for="emailAddress1" />
-                    <p:inputText id="emailAddress1" value="#{customersController.selected.emailAddress}" title="#{configMapController.getKey('EditCustomersTitle_emailAddress')}" required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_emailAddress')}">
-                        <f:validator validatorId="au.com.manlyit.fitnesscrm.stats.classes.util.EmailValidator" />
-                    </p:inputText>
-                    <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_streetAddress')}" for="streetAddress1" />
-                    <p:inputText id="streetAddress1" value="#{customersController.selected.streetAddress}" title="#{configMapController.getKey('CreateCustomersTitle_streetAddress')}" />
-                    <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_suburb')}" for="suburb1" />
-                    <p:inputText id="suburb1" value="#{customersController.selected.suburb}" title="#{configMapController.getKey('CreateCustomersTitle_suburb')}" />
-                    <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_postcode')}" for="postcode1" />
-                    <p:inputText id="postcode1" value="#{customersController.selected.postcode}" title="#{configMapController.getKey('CreateCustomersTitle_postcode')}" />
-                    <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_city')}" for="city1" />
-                    <p:inputText id="city1" value="#{customersController.selected.city}" title="#{configMapController.getKey('CreateCustomersTitle_city')}" />
-                    <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_addrState')}" for="addrState1" />
-                    <p:inputText id="addrState1" value="#{customersController.selected.addrState}" title="#{configMapController.getKey('CreateCustomersTitle_addrState')}" />
+        <div class="ui-g">
+            <div class="ui-g-12 ui-md-12 ui-lg-4">
+                <div class="card card-w-title">
+                    <h:panelGrid  columns="2">
+                        <p:outputLabel value="#{configMapController.getKey('EditCustomersLabel_firstname')}" for="firstname1" />
+                        <p:inputText id="firstname1"  value="#{customersController.selected.firstname}" title="#{configMapController.getKey('EditCustomersTitle_firstname')}" valueChangeListener="#{customersController.firstNameListener}" required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_firstname')}">
+                            <p:ajax update=":tv:formCustomersEdit1:username1" event="keyup"/>
+                        </p:inputText>
+                        <p:outputLabel value="#{configMapController.getKey('EditCustomersLabel_lastname')}" for="lastname1" />
+                        <p:inputText id="lastname1" value="#{customersController.selected.lastname}" title="#{configMapController.getKey('EditCustomersTitle_lastname')}" valueChangeListener="#{customersController.lastNameListener}" required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_lastname')}">
+                            <p:ajax update=":tv:formCustomersEdit1:username1" event="keyup" />
+                        </p:inputText>
+                        <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_emailAddress')}" for="emailAddress1" />
+                        <p:inputText id="emailAddress1" value="#{customersController.selected.emailAddress}" title="#{configMapController.getKey('EditCustomersTitle_emailAddress')}" required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_emailAddress')}">
+                            <f:validator validatorId="au.com.manlyit.fitnesscrm.stats.classes.util.EmailValidator" />
+                        </p:inputText>
+                        <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_streetAddress')}" for="streetAddress1" />
+                        <p:inputText id="streetAddress1" value="#{customersController.selected.streetAddress}" title="#{configMapController.getKey('CreateCustomersTitle_streetAddress')}" />
+                        <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_suburb')}" for="suburb1" />
+                        <p:inputText id="suburb1" value="#{customersController.selected.suburb}" title="#{configMapController.getKey('CreateCustomersTitle_suburb')}" />
+                        <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_postcode')}" for="postcode1" />
+                        <p:inputText id="postcode1" value="#{customersController.selected.postcode}" title="#{configMapController.getKey('CreateCustomersTitle_postcode')}" />
+                        <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_city')}" for="city1" />
+                        <p:inputText id="city1" value="#{customersController.selected.city}" title="#{configMapController.getKey('CreateCustomersTitle_city')}" />
+                        <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_addrState')}" for="addrState1" />
+                        <p:inputText id="addrState1" value="#{customersController.selected.addrState}" title="#{configMapController.getKey('CreateCustomersTitle_addrState')}" />
 
 
 
 
-                    <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_newsletter')}" title="#{configMapController.getKey('EditCustomersTitle_newsletter')}" for="newsletter1" />
-                    <p:selectOneMenu id="newsletter1" value="#{customersController.selected.newsletter}"  >
-                        <f:selectItem itemValue="Y" itemLabel="Send Newsletter" />
-                        <f:selectItem itemValue="N" itemLabel="Dont Send" />
-                    </p:selectOneMenu>
+                        <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_newsletter')}" title="#{configMapController.getKey('EditCustomersTitle_newsletter')}" for="newsletter1" />
+                        <p:selectOneMenu id="newsletter1" value="#{customersController.selected.newsletter}"  >
+                            <f:selectItem itemValue="Y" itemLabel="Send Newsletter" />
+                            <f:selectItem itemValue="N" itemLabel="Dont Send" />
+                        </p:selectOneMenu>
 
-                    <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_emailFormat')}" for="emailFormat1" />
-                    <p:selectOneMenu id="emailFormat1" valueChangeListener="#{customersController.selectOneMenuValueChangeListener}" converter="emailFormatControllerConverter" value="#{customersController.selected.emailFormat}" label="#{configMapController.getKey('CreateCustomersTitle_emailFormat')}" >
-                        <f:selectItems value="#{emailFormatController.itemsAvailableAsObjects}"  var="emailFormat" itemLabel="#{emailFormat.emailFormat}" itemValue="#{emailFormat}"/>
-                    </p:selectOneMenu>
-                    <p:outputLabel rendered="#{false}" value="#{configMapController.getKey('CreateCustomersLabel_auth')}" for="auth1" />
-                    <p:selectOneMenu rendered="#{false}" id="auth1" valueChangeListener="#{customersController.selectOneMenuValueChangeListener}" converter="customerAuthControllerConverter" value="#{customersController.selected.auth}" label="#{configMapController.getKey('CreateCustomersTitle_auth')}" >
-                        <f:selectItems value="#{customerAuthController.itemsAvailableAsObjects}"  var="custAuth" itemLabel="#{custAuth.customerAuthType}" itemValue="#{custAuth}"/>
-                    </p:selectOneMenu>
-                    <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_demographic')}" for="demographic1" />
-                    <p:selectOneMenu id="demographic1" valueChangeListener="#{customersController.selectOneMenuValueChangeListener}" converter="demographicTypesControllerConverter" value="#{customersController.selected.demographic}" label="#{configMapController.getKey('CreateCustomersTitle_demographic')}" >
-                        <f:selectItems value="#{demographicTypesController.itemsAvailableAsObjects}"  var="demo" itemLabel="#{demo.name}" itemValue="#{demo}"/>
-                    </p:selectOneMenu>
-                    <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_preferredContact')}" for="preferredContact1" />
-                    <p:selectOneMenu id="preferredContact1" valueChangeListener="#{customersController.selectOneMenuValueChangeListener}" converter="preferedContactControllerConverter" value="#{customersController.selected.preferredContact}" label="#{configMapController.getKey('CreateCustomersTitle_preferredContact')}" >
-                        <f:selectItems value="#{preferedContactController.itemsAvailableAsObjects}"  var="prefContact" itemLabel="#{prefContact.preferedContactMethod}" itemValue="#{prefContact}"/>
-                    </p:selectOneMenu>
-                    <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_smsOptions')}"  />
-                    <h:panelGrid columns="2" rendered="#{not empty customersController.selected.paymentParametersId}" >
-                        <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_SmsExpiredCard')}" for="checkbox1" />
-                        <p:selectBooleanCheckbox id="checkbox1" value="#{customersController.paymentParametersSmsExpiredCard}"  label="Sms Expired Card" />
-                        <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_SmsPaymentReminder')}" for="checkbox2" />
-                        <p:selectBooleanCheckbox id="checkbox2" value="#{customersController.paymentParametersSmsPaymentReminder}"  label="Sms Payment Reminder" />
-                        <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_SmsFailedNotification')}" for="checkbox3" />
-                        <p:selectBooleanCheckbox id="checkbox3" value="#{customersController.paymentParametersSmsFailedNotification}"  label="Sms Failed Notification" />
-                    </h:panelGrid>
+                        <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_emailFormat')}" for="emailFormat1" />
+                        <p:selectOneMenu id="emailFormat1" valueChangeListener="#{customersController.selectOneMenuValueChangeListener}" converter="emailFormatControllerConverter" value="#{customersController.selected.emailFormat}" label="#{configMapController.getKey('CreateCustomersTitle_emailFormat')}" >
+                            <f:selectItems value="#{emailFormatController.itemsAvailableAsObjects}"  var="emailFormat" itemLabel="#{emailFormat.emailFormat}" itemValue="#{emailFormat}"/>
+                        </p:selectOneMenu>
+                        <p:outputLabel rendered="#{false}" value="#{configMapController.getKey('CreateCustomersLabel_auth')}" for="auth1" />
+                        <p:selectOneMenu rendered="#{false}" id="auth1" valueChangeListener="#{customersController.selectOneMenuValueChangeListener}" converter="customerAuthControllerConverter" value="#{customersController.selected.auth}" label="#{configMapController.getKey('CreateCustomersTitle_auth')}" >
+                            <f:selectItems value="#{customerAuthController.itemsAvailableAsObjects}"  var="custAuth" itemLabel="#{custAuth.customerAuthType}" itemValue="#{custAuth}"/>
+                        </p:selectOneMenu>
+                        <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_demographic')}" for="demographic1" />
+                        <p:selectOneMenu id="demographic1" valueChangeListener="#{customersController.selectOneMenuValueChangeListener}" converter="demographicTypesControllerConverter" value="#{customersController.selected.demographic}" label="#{configMapController.getKey('CreateCustomersTitle_demographic')}" >
+                            <f:selectItems value="#{demographicTypesController.itemsAvailableAsObjects}"  var="demo" itemLabel="#{demo.name}" itemValue="#{demo}"/>
+                        </p:selectOneMenu>
+                        <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_preferredContact')}" for="preferredContact1" />
+                        <p:selectOneMenu id="preferredContact1" valueChangeListener="#{customersController.selectOneMenuValueChangeListener}" converter="preferedContactControllerConverter" value="#{customersController.selected.preferredContact}" label="#{configMapController.getKey('CreateCustomersTitle_preferredContact')}" >
+                            <f:selectItems value="#{preferedContactController.itemsAvailableAsObjects}"  var="prefContact" itemLabel="#{prefContact.preferedContactMethod}" itemValue="#{prefContact}"/>
+                        </p:selectOneMenu>
+                        <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_smsOptions')}"  />
+                        <h:panelGrid columns="2" rendered="#{not empty customersController.selected.paymentParametersId}" >
+                            <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_SmsExpiredCard')}" for="checkbox1" />
+                            <p:selectBooleanCheckbox id="checkbox1" value="#{customersController.paymentParametersSmsExpiredCard}"  label="Sms Expired Card" />
+                            <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_SmsPaymentReminder')}" for="checkbox2" />
+                            <p:selectBooleanCheckbox id="checkbox2" value="#{customersController.paymentParametersSmsPaymentReminder}"  label="Sms Payment Reminder" />
+                            <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_SmsFailedNotification')}" for="checkbox3" />
+                            <p:selectBooleanCheckbox id="checkbox3" value="#{customersController.paymentParametersSmsFailedNotification}"  label="Sms Failed Notification" />
+                        </h:panelGrid>
 
                     <!--   <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_password')}" for="passButton" />
                     <p:password id="password1"  value="#{customersController.checkPass}" onfocus="this.select()" feedback="true" redisplay="true" title="#{configMapController.getKey('EditCustomersTitle_password')}">
@@ -92,78 +92,75 @@
                     </h:panelGrid>  -->
                   <!--  <p:commandButton  id="passButton" ajax="true" actionListener="#{customersController.updatepass}" update=":growl"   value="#{configMapController.getKey('EditCustomersUpdatePassword')}" immediate="true"/>-->
 
-                    <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_emergencyContactName')}" for="emergencyContactName" />
-                    <p:inputText id="emergencyContactName" value="#{customersController.selected.emergencyContactName}" title="#{configMapController.getKey('CreateCustomersTitle_emergencyContactName')}" />
-                    <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_emergencyContactPhone')}" for="emergencyContactPhone" />
-                    <p:inputText id="emergencyContactPhone" value="#{customersController.selected.emergencyContactPhone}" title="#{configMapController.getKey('CreateCustomersTitle_emergencyContactPhone')}" >
-                    </p:inputText>    
+                        <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_emergencyContactName')}" for="emergencyContactName" />
+                        <p:inputText id="emergencyContactName" value="#{customersController.selected.emergencyContactName}" title="#{configMapController.getKey('CreateCustomersTitle_emergencyContactName')}" />
+                        <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_emergencyContactPhone')}" for="emergencyContactPhone" />
+                        <p:inputText id="emergencyContactPhone" value="#{customersController.selected.emergencyContactPhone}" title="#{configMapController.getKey('CreateCustomersTitle_emergencyContactPhone')}" >
+                        </p:inputText>    
 
-                </h:panelGrid>
-
-
-            </div>
-        </div>
-
-
-       <div class="ui-g-12 ui-md-12 ui-lg-4">
-                    <div class="card card-w-title">
-                <h:panelGrid  columns="2">
-                    <p:outputLabel value="#{configMapController.getKey('ListCustomersTitle_ProfilePic')}" />
-                    <h:panelGrid  columns="2">
-                        <p:graphicImage id="photo1" value="#{customersController.selected.profileImage.imageStream}" height="150px" cache="false" styleClass="parentOfUploadPhoto" />
-
-                        <p:commandButton icon="fa fa-upload  white Fs14"  id="photoUploadButton" ajax="true"  onclick="PF('uploadPhotoDialogueWidget').show();" update=":growl @(.parentOfUploadPhoto) "   value="#{configMapController.getKey('EditCustomersUploadPhotoButton')}" immediate="true"/>
                     </h:panelGrid>
-                    <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_gender')}" title="#{configMapController.getKey('EditCustomersTitle_gender')}" for="gender1" />
-                    <p:selectOneMenu id="gender1" value="#{customersController.selected.gender}"   required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_gender')}">
-                        <f:selectItem itemValue="M" itemLabel="Male" />
-                        <f:selectItem itemValue="F" itemLabel="Female" />
-                    </p:selectOneMenu>
-
-                    <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_dob')}" for="dob1" />
-                    <p:calendar id="dob1" pattern="dd/MM/yyyy" value="#{customersController.selected.dob}" title="#{configMapController.getKey('CreateCustomersTitle_dob')}" required="true" requiredMessage="#{configMapController.getKey('CreateCustomersRequiredMessage_dob')}">
-                    </p:calendar>
-                    <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_username')}" for="username1" />
-                    <p:inputText id="username1" value="#{customersController.selected.username}" title="#{configMapController.getKey('CreateCustomersTitle_username')}" required="true" requiredMessage="#{configMapController.getKey('CreateCustomersRequiredMessage_username')}"/>
 
 
+                </div>
+            </div>
 
-                    <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_countryId')}" for="countryId1" />
-                    <p:inputText id="countryId1" value="#{customersController.selected.countryId}" title="#{configMapController.getKey('CreateCustomersTitle_countryId')}" />
-                    <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_telephone')}" for="telephone1" />
-                    <p:inputText id="telephone1" value="#{customersController.selected.telephone}" title="#{configMapController.getKey('CreateCustomersTitle_telephone')}" required="true" >
-                        <f:validator validatorId="au.com.manlyit.fitnesscrm.stats.classes.util.PhoneNumberValidator" />
-                    </p:inputText>
-                    <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_fax')}" for="fax1" />
-                    <p:inputText id="fax1" value="#{customersController.selected.fax}" title="#{configMapController.getKey('CreateCustomersTitle_fax')}" />
 
-                    <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_referredby')}"  title="#{configMapController.getKey('EditCustomersTitle_referredby')}"  for="referredby1" />
-                    <p:selectOneMenu id="referredby1" value="#{customersController.selected.referredby}"  filter="true"  filterMatchMode="contains">
-                        <f:selectItems value="#{customersController.itemsAvailableSelectOne}"  />
-                    </p:selectOneMenu>
+            <div class="ui-g-12 ui-md-12 ui-lg-4">
+                <div class="card card-w-title">
+                    <h:panelGrid  columns="2">
+                        <p:outputLabel value="#{configMapController.getKey('ListCustomersTitle_ProfilePic')}" />
+                        <h:panelGrid  columns="2">
+                            <p:graphicImage id="photo1" value="#{customersController.selected.profileImage.imageStream}" height="150px" cache="false" styleClass="parentOfUploadPhoto" />
 
-                    <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_groupPricing')}" for="groupPricing1" />
-                    <p:selectOneMenu id="groupPricing1" valueChangeListener="#{customersController.selectOneChangePlanListener}" converter="planControllerConverter" value="#{customersController.selected.groupPricing}" label="#{configMapController.getKey('CreateCustomersTitle_groupPricing')}" >
-                        <f:selectItems value="#{planController.itemsAvailableForDisplayAsObjects}"  var="plan" itemLabel="#{plan.planName} - $#{plan.planPrice} "  itemValue="#{plan}"/>
-                        <p:ajax update="planDescription"/>
-                    </p:selectOneMenu>
-
-                    <p:outputLabel value="#{configMapController.getKey('ViewPlanLabel_planDescription')}" for="planDescription"/>
-                    <h:outputText id="planDescription" value="#{customersController.selected.groupPricing.planDescription}" title="#{configMapController.getKey('ViewPlanTitle_planDescription')}"/>
-                    <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_groups')}" for="scroll2" />
-
-                    <p:dataGrid  id="scroll2" columns="3"   value="#{customersController.customerGroupsList}" var="group" rowIndexVar="rowIndex"  >
-                        <h:panelGrid id="customerPanel2" columns="2" style="margin-bottom:10px" cellpadding="5" >
-                            <h:outputText value="#{group.groupname}" />
-                            <p:selectBooleanCheckbox id="btnAttendedSession2" value="#{customersController.checkedGroups[rowIndex]}"  >
-                                <p:ajax   event="change" listener="#{customersController.groupChangedChangeListener}"/>
-                            </p:selectBooleanCheckbox>
+                            <p:commandButton icon="fa fa-upload  white Fs14"  id="photoUploadButton" ajax="true"  onclick="PF('uploadPhotoDialogueWidget').show();" update=":growl @(.parentOfUploadPhoto) "   value="#{configMapController.getKey('EditCustomersUploadPhotoButton')}" immediate="true"/>
                         </h:panelGrid>
-                    </p:dataGrid>
-                </h:panelGrid>
+                        <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_gender')}" title="#{configMapController.getKey('EditCustomersTitle_gender')}" for="gender1" />
+                        <p:selectOneMenu id="gender1" value="#{customersController.selected.gender}"   required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_gender')}">
+                            <f:selectItem itemValue="M" itemLabel="Male" />
+                            <f:selectItem itemValue="F" itemLabel="Female" />
+                        </p:selectOneMenu>
+
+                        <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_dob')}" for="dob1" />
+                        <p:calendar id="dob1" pattern="dd/MM/yyyy" value="#{customersController.selected.dob}" title="#{configMapController.getKey('CreateCustomersTitle_dob')}" required="true" requiredMessage="#{configMapController.getKey('CreateCustomersRequiredMessage_dob')}">
+                        </p:calendar>
+                        <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_username')}" for="username1" />
+                        <p:inputText id="username1" value="#{customersController.selected.username}" title="#{configMapController.getKey('CreateCustomersTitle_username')}" required="true" requiredMessage="#{configMapController.getKey('CreateCustomersRequiredMessage_username')}"/>
+
+
+
+                        <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_countryId')}" for="countryId1" />
+                        <p:inputText id="countryId1" value="#{customersController.selected.countryId}" title="#{configMapController.getKey('CreateCustomersTitle_countryId')}" />
+                        <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_telephone')}" for="telephone1" />
+                        <p:inputText id="telephone1" value="#{customersController.selected.telephone}" title="#{configMapController.getKey('CreateCustomersTitle_telephone')}" required="true" >
+                            <f:validator validatorId="au.com.manlyit.fitnesscrm.stats.classes.util.PhoneNumberValidator" />
+                        </p:inputText>
+                        <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_fax')}" for="fax1" />
+                        <p:inputText id="fax1" value="#{customersController.selected.fax}" title="#{configMapController.getKey('CreateCustomersTitle_fax')}" />
+
+                        <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_referredby')}"  title="#{configMapController.getKey('EditCustomersTitle_referredby')}"  for="referredby1" />
+                        <p:selectOneMenu id="referredby1" value="#{customersController.selected.referredby}"  filter="true"  filterMatchMode="contains">
+                            <f:selectItems value="#{customersController.itemsAvailableSelectOne}"  />
+                        </p:selectOneMenu>
+
+                        <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_groupPricing')}"  />
+                        <h:outputText value="#{customersController.customersNewPlan.planName}" title="#{configMapController.getKey('ChangePlanNewPlanTitle')}"/>
+
+                        <p:outputLabel value="#{configMapController.getKey('ViewPlanLabel_planDescription')}" for="planDescription"/>
+                        <h:outputText id="planDescription" value="#{customersController.selected.groupPricing.planDescription}" title="#{configMapController.getKey('ViewPlanTitle_planDescription')}"/>
+                        <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_groups')}" for="scroll2" />
+
+                        <p:dataGrid  id="scroll2" columns="3"   value="#{customersController.customerGroupsList}" var="group" rowIndexVar="rowIndex"  >
+                            <h:panelGrid id="customerPanel2" columns="2" style="margin-bottom:10px" cellpadding="5" >
+                                <h:outputText value="#{group.groupname}" />
+                                <p:selectBooleanCheckbox id="btnAttendedSession2" value="#{customersController.checkedGroups[rowIndex]}"  >
+                                    <p:ajax   event="change" listener="#{customersController.groupChangedChangeListener}"/>
+                                </p:selectBooleanCheckbox>
+                            </h:panelGrid>
+                        </p:dataGrid>
+                    </h:panelGrid>
+                </div>
             </div>
         </div>
-  </div>
         <!-- <p:outputLabel  value="Groups:    " for="selectedGroupsCheckbox2"/>
          <h:selectManyCheckbox id="selectedGroupsCheckbox2" value="#{customersController.selectedGroups}"    converter="customerGroupsConverter">
              <f:selectItems value="#{customersController.customerGroupsList}" var="custGroup" itemLabel="#{custGroup.groupname}" itemValue="#{custGroup}" />
@@ -182,6 +179,7 @@
                     <p:commandButton  value="#{configMapController.getKey('sendCustomerOnBoardEmailButton')}" actionListener="#{customersController.sendOnboardEmailListener}" onclick="PF('SendEmailToCustomerDialog').show()"  update=" :growl @(.updateEmailTemplatePopup)"/>
                     <p:commandButton  id="passButton" ajax="true"  onclick="PF('updatePasswordDialogueWidget').show();" update=":growl :updatePass"   value="#{configMapController.getKey('EditCustomersUpdatePassword')}" immediate="true"/>
                     <p:commandButton value="#{configMapController.getKey('passwordResetButtonLabel')}" ajax="false" styleClass="Fs16 RedButton" action="#{customersController.sendPasswordResetEmail}" update=":growl"/>
+                    <p:commandButton  id="changePlan"   actionListener="#{customersController.changePlanDialogue}" update=":growl"   value="#{configMapController.getKey('EditCustomersChangePlanButton')}" />
 
                 </p:panel>
             </div>

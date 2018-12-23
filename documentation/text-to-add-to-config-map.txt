@@ -2279,3 +2279,7 @@ ListTicketsTitle_validFrom=ValidFrom
 ListTicketsTitle_expires=Expires
 BookingFormAdminViewLink=Admin View
 BookingFormAdminViewLink_Title=Customers Attending
+AddPaymentScheduleLabel_amountToProRata=Pro Rata Amount
+AddPaymentScheduleTitle_amountToProRata=Pro Rata Amount
+EditCustomersChangePlanButton=Change Plan
+changePlan_LastSuccessfulPayment=Last Payment Date

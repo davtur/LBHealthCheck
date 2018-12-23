@@ -9,7 +9,7 @@
 
     <!--<p:log />--> 
 
-    <p:dialog id="confirmCancellationDialogue"   closable="true"  responsive="true" header="#{configMapController.getKey('confirmCancellation_message')}" widgetVar="confirmCancellationDialogueWidget"> 
+    <p:dialog id="confirmCancellationDialogue"   closable="true"  appendTo="@(body)" responsive="true" header="#{configMapController.getKey('confirmCancellation_message')}" widgetVar="confirmCancellationDialogueWidget"> 
         <h:form id="confirmCancellation">  
             <div class="ui-fluid">
                 <div class="ui-g">

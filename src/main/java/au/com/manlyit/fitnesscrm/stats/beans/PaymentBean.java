@@ -1064,7 +1064,7 @@ public class PaymentBean implements Serializable {
                                         }
                                         if (found == false) {
                                             //String ref = p.getId().toString();
-                                            if (crmPay.getCreateDatetime().before(testDate) ) {// make sure we don't delate payments that have just been added and may still be being processed by the gateway. i.e they've been put into our DB but havn't been put into the payment gateway schedule yet
+                                            if (crmPay.getCreateDatetime().before(testDate)) {// make sure we don't delate payments that have just been added and may still be being processed by the gateway. i.e they've been put into our DB but havn't been put into the payment gateway schedule yet
                                                 crmPay.setPaymentStatus(PaymentStatus.MISSING_IN_PGW.value());
                                                 if (cust.getPaymentParametersId().getStatusDescription().toUpperCase().contains("HOLD")) {
                                                     crmPay.setPaymentStatus(PaymentStatus.REJECTED_CUST_ON_HOLD.value());
@@ -1650,6 +1650,15 @@ public class PaymentBean implements Serializable {
                 return false;
             }
             if (compareStringToXMLString(payment.getPaymentStatus(), pay.getPaymentStatus()) == false) {
+                //check if the payment status has changed and process invoice if successful or send notification if not.
+                if (pay.getPaymentStatus().isNil() == false && payment != null) {
+                    String processedPaymentStatus = pay.getPaymentStatus().getValue();
+                    String crmPaymentStatus = payment.getPaymentStatus();
+                    if (processedPaymentStatus.compareTo(crmPaymentStatus) != 0) {
+                        processPaymentStatusUpdates(payment, pay);
+                    }
+
+                }
                 return false;
             }
             if (compareBigDecimalToDouble(payment.getScheduledAmount(), pay.getScheduledAmount()) == false) {
@@ -2163,6 +2172,7 @@ public class PaymentBean implements Serializable {
                                         }
                                         if (validReference) {
                                             if (comparePaymentXMLToEntity(crmPay, pay) == false) { // false if something has been changed
+
                                                 crmPay = convertPaymentXMLToEntity(crmPay, pay, cust);
                                                 LOGGER.log(Level.INFO, "Payment Bean processGetPayments  - updating payment id:{0}.", paymentRefInt);
                                                 paymentsFacade.edit(crmPay);
@@ -2225,6 +2235,25 @@ public class PaymentBean implements Serializable {
         }
         futureMap.processGetPayments(sessionId, pgr);
         return new AsyncResult<>(pgr);
+    }
+
+    private void sendInvoice(Payments payment, Payment pay) {
+        //TODO process invoice
+    }
+
+    private void processPaymentStatusUpdates(Payments payment, Payment pay) {
+        String processedPaymentStatus = pay.getPaymentStatus().getValue();
+        String crmPaymentStatus = payment.getPaymentStatus();
+        if (processedPaymentStatus.contentEquals("S")) {
+            //TODO  process successful payment
+            sendInvoice(payment, pay);
+            LOGGER.log(Level.INFO, "PaymentStatusUpdate -- processing Invoice for successful payment id:{0},customer:{1}, Amount:{2}", new Object[]{payment.getId(), payment.getCustomerName().getUsername(), payment.getPaymentAmount().toPlainString()});
+
+        } else {
+            // process failed payment
+            LOGGER.log(Level.INFO, "PaymentStatusUpdate -- sending updates for FAILED payment id:{0},customer:{1}, Amount:{2}, status:{3}", new Object[]{payment.getId(), payment.getCustomerName().getUsername(), payment.getPaymentAmount().toPlainString(), processedPaymentStatus});
+            //TODO process failed payment updates
+        }
     }
 
     private Payments convertPaymentXMLToEntity(Payments payment, Payment pay, Customers cust) {

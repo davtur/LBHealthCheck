@@ -6,7 +6,7 @@
                  xmlns:f="http://xmlns.jcp.org/jsf/core"
                  xmlns:p="http://primefaces.org/ui" >
     <!--<p:log />--> 
-    <p:dialog id="customerNotesPopupDialogue" 
+    <p:dialog id="customerNotesPopupDialogue"   appendTo="@(body)"
               header="#{configMapController.getKey('customerNotesPopupTitle')}" widgetVar="customerNotesPopupDialogueWidget" style="max-width:400px"> 
         <p:outputPanel  style="text-align:left;">
             <h:panelGrid  columns="2"  columnClasses="label,value">
