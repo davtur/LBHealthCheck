@@ -3082,32 +3082,7 @@ public class EziDebitPaymentGateway implements Serializable {
 
     }
     
-   public void discardChangePlan(ActionEvent actionEvent) {
-       controller.setCustomersNewPlan(controller.getSelected().getGroupPricing());
-   }
-
-    public void executeChangePlan(ActionEvent actionEvent) {
-        LOGGER.log(Level.INFO, "Executing Plan Change - Clear Schedule then create new schedule operations will be called..");
-        try {
-            clearSchedule(actionEvent);
-            modifyProRataAlignmentPayment();
-            createPaymentSchedule(actionEvent);
-            controller.getSelected().setGroupPricing(controller.getCustomersNewPlan());
-            customersFacade.edit(controller.getSelected());
-
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Executing Plan Change - ERROR.",e);
-        }
-     
-    }
-    private void modifyProRataAlignmentPayment(){
-        int daysFromLastPaymentToNewScheduleStart = 0;
-        double amountOfLastPayment = 0;
-       //TODO add pro rate payment
-        
-        
-    }
-
+  
     public void createPaymentSchedule(ActionEvent actionEvent) {
 
         String loggedInUser = FacesContext.getCurrentInstance().getExternalContext().getRemoteUser();

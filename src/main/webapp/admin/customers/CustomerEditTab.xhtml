@@ -253,7 +253,7 @@
         <div class="Container100 Responsive100">
             <div class="ContainerIndent">
                 <p:fieldset  legend="Pay Rates to Session Types Editor" rendered="#{customersController.isUserInRole('ADMIN') and not empty suppliersController.selected}" >
-                    <p:selectOneMenu id="supplierId" valueChangeListener="#{suppliersController.contractorRatesChangeListener}" converter="contractorRatesControllerConverter"  value="#{suppliersController.selectedContractorRate}"  label="#{configMapController.getKey('CreateContractorRatesTitle_supplierId')}" required="true" requiredMessage="#{configMapController.getKey('CreateContractorRatesRequiredMessage_supplierId')}">
+                    <p:selectOneMenu id="supplierId" valueChangeListener="#{suppliersController.contractorRatesChangeListener}" converter="contractorRatesControllerConverter"  value="#{suppliersController.selectedContractorRate}"  label="#{configMapController.getKey('CreateContractorRatesTitle_supplierId')}"   >
                        <!-- <f:selectItems value="#{suppliersController.contractRatesByCurrentSupplier}" var="contractorRates" itemLabel="#{contractorRates.name}" itemValue="#{contractorRates}"/>-->
                         <f:selectItems value="#{contractorRatesController.itemsAvailable}" var="contractorRates" itemLabel="#{contractorRates.name}" itemValue="#{contractorRates}"/>
                         <p:ajax   update=":growl :formCustomersEdit1:contractorRatePicklist"  />
