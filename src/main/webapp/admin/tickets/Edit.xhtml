@@ -16,19 +16,19 @@
                     <h:inputText id="itemType"  value="#{ticketsController.selected.itemType}" title="#{configMapController.getKey('EditTicketsTitle_itemType')}" required="true" requiredMessage="#{configMapController.getKey('EditTicketsRequiredMessage_itemType')}"/>
                     <h:outputLabel value="#{configMapController.getKey('EditTicketsLabel_datePurchased')}" for="datePurchased" />
                     <h:inputText id="datePurchased" value="#{ticketsController.selected.datePurchased}" title="#{configMapController.getKey('EditTicketsTitle_datePurchased')}" required="true" requiredMessage="#{configMapController.getKey('EditTicketsRequiredMessage_datePurchased')}">
-                        <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                        <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
                     </h:inputText>
                     <h:outputLabel value="#{configMapController.getKey('EditTicketsLabel_dateUsed')}" for="dateUsed" />
                     <h:inputText id="dateUsed" value="#{ticketsController.selected.dateUsed}" title="#{configMapController.getKey('EditTicketsTitle_dateUsed')}" >
-                        <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                        <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
                     </h:inputText>
                     <h:outputLabel value="#{configMapController.getKey('EditTicketsLabel_validFrom')}" for="validFrom" />
                     <h:inputText id="validFrom" value="#{ticketsController.selected.validFrom}" title="#{configMapController.getKey('EditTicketsTitle_validFrom')}" >
-                        <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                        <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
                     </h:inputText>
                     <h:outputLabel value="#{configMapController.getKey('EditTicketsLabel_expires')}" for="expires" />
                     <h:inputText id="expires" value="#{ticketsController.selected.expires}" title="#{configMapController.getKey('EditTicketsTitle_expires')}" >
-                        <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                        <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
                     </h:inputText>
                 </p:panelGrid>
                 <p:commandButton actionListener="#{ticketsController.update}" value="#{configMapController.getKey('Save')}" update="display,:TicketsListForm:datalist,:growl" oncomplete="handleSubmit(args, 'TicketsEditDialog');PF('ticketsControllerTable').filter()"/>

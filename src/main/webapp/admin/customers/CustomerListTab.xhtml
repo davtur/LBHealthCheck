@@ -138,7 +138,7 @@
                     <p:column selectionMode="multiple" />
                     <p:column sortBy="#{item.id}" filterBy="#{item.id}" headerText="#{configMapController.getKey('ListCustomersTitle_id')}"   >
 
-                        <p:graphicImage value="#{customerImagesController.imageThumbnail}" height="30px" styleClass="parentOfUploadPhoto" >
+                        <p:graphicImage  rendered="#{! empty item.profileImage.id}" value="#{customerImagesController.imageThumbnail}" height="30px" styleClass="parentOfUploadPhoto" >
                             <f:param name="imageId" value="#{item.profileImage.id}"/>
                         </p:graphicImage>
                         <h:outputText value=" #{item.id}"/>

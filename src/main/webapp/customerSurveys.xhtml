@@ -60,7 +60,7 @@
                                     <p:selectBooleanCheckbox value="#{answer.surveyAnswerSubitemsCollection[0].subitemBool}" itemLabel="#{answer.surveyAnswerSubitemsCollection[0].subitemText}" valueChangeListener="#{surveyanswersController.disclaimerAnswerValueChange}" required="true" requiredMessage="#{configMapController.getKey('MyDeatilsSurveys_disclaimerRequiredMessage')}">
                                         <p:ajax update=":SurveyanswersListForm:saveSurveyButton2"/>
                                     </p:selectBooleanCheckbox>
-                                   <!-- <p:outputLabel value="#{answer.surveyAnswerSubitemsCollection[0].subitemText}" style="display:inline-block;padding-left: 5px"/> -->
+                                   <h:outputText value="#{answer.surveyAnswerSubitemsCollection[0].subitemText}" style="display:inline-block;padding-left: 5px"/> 
 
                                 </h:panelGroup>
                             </h:panelGrid>

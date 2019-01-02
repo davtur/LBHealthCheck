@@ -478,7 +478,7 @@ public class SurveyAnswersController implements Serializable {
                 if (sa != null) {
                     surveyAnswers.add(sa);
                 } else {
-                    LOGGER.log(Level.WARNING, "getSurveyList , answer for question \"{0}\" is null", quest.getQuestion());
+                    LOGGER.log(Level.WARNING, "getSurveyList , answer for question id: {1}, text: \"{0}\" is null",new Object[]{ quest.getQuestion(), quest.getId()});
                 }
             }
         }

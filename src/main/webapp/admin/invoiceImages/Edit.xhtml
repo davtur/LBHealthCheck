@@ -14,7 +14,7 @@
                     <h:inputText id="id"  value="#{invoiceImagesController.selected.id}" title="#{configMapController.getKey('EditInvoiceImagesTitle_id')}" required="true" requiredMessage="#{configMapController.getKey('EditInvoiceImagesRequiredMessage_id')}"/>
                     <h:outputLabel value="#{configMapController.getKey('EditInvoiceImagesLabel_createdTimestamp')}" for="createdTimestamp" />
                     <h:inputText id="createdTimestamp" value="#{invoiceImagesController.selected.createdTimestamp}" title="#{configMapController.getKey('EditInvoiceImagesTitle_createdTimestamp')}" required="true" requiredMessage="#{configMapController.getKey('EditInvoiceImagesRequiredMessage_createdTimestamp')}">
-                        <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                        <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
                     </h:inputText>
                     <h:outputLabel value="#{configMapController.getKey('EditInvoiceImagesLabel_expenseId')}" for="expenseId" />
                     <h:inputText id="expenseId"  value="#{invoiceImagesController.selected.expenseId}" title="#{configMapController.getKey('EditInvoiceImagesTitle_expenseId')}" required="true" requiredMessage="#{configMapController.getKey('EditInvoiceImagesRequiredMessage_expenseId')}"/>

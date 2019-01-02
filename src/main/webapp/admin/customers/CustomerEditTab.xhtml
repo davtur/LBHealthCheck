@@ -7,7 +7,7 @@
                  xmlns:pe="http://primefaces.org/ui/extensions"
                  xmlns:p="http://primefaces.org/ui" >
 
-    <h:form id="formCustomersEdit1" >    
+    <h:form id="formCustomersEdit1" styleClass="updatePaymentInfo" >    
         <!-- <p:log />-->
 
         <div class="ui-g">
@@ -143,7 +143,7 @@
                         </p:selectOneMenu>
 
                         <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_groupPricing')}"  />
-                        <h:outputText value="#{customersController.customersNewPlan.planName}" title="#{configMapController.getKey('ChangePlanNewPlanTitle')}"/>
+                        <h:outputText value="#{customersController.selected.groupPricing.planName}" title="#{configMapController.getKey('ChangePlanNewPlanTitle')}"/>
 
                         <p:outputLabel value="#{configMapController.getKey('ViewPlanLabel_planDescription')}" for="planDescription"/>
                         <h:outputText id="planDescription" value="#{customersController.selected.groupPricing.planDescription}" title="#{configMapController.getKey('ViewPlanTitle_planDescription')}"/>
@@ -180,6 +180,7 @@
                     <p:commandButton  id="passButton" ajax="true"  onclick="PF('updatePasswordDialogueWidget').show();" update=":growl :updatePass"   value="#{configMapController.getKey('EditCustomersUpdatePassword')}" immediate="true"/>
                     <p:commandButton value="#{configMapController.getKey('passwordResetButtonLabel')}" ajax="false" styleClass="Fs16 RedButton" action="#{customersController.sendPasswordResetEmail}" update=":growl"/>
                     <p:commandButton  id="changePlan"   actionListener="#{customersController.changePlanDialogue}" update=":growl"   value="#{configMapController.getKey('EditCustomersChangePlanButton')}" />
+                    <p:commandButton  id="issueTickets"   actionListener="#{customersController.issueTicketsDialogue}" update=":growl"   value="#{configMapController.getKey('EditCustomersIssueTicketsButton')}" />
 
                 </p:panel>
             </div>

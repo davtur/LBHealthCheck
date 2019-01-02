@@ -21,7 +21,7 @@
                                 <p:ajax update=" businessUseAmount  percentForBusinessUse  expenseAmountGst  businessUseAmountGst" event="keyup"/>
                             </p:inputText>
                             <p:outputLabel value="#{configMapController.getKey('CreateExpensesLabel_expenseIncurredTimestamp')}" for="expenseIncurredTimestamp" />
-                            <p:calendar id="expenseIncurredTimestamp" pattern="MM/dd/yyyy HH:mm:ss"  value="#{expensesController.selected.expenseIncurredTimestamp}"  title="#{configMapController.getKey('CreateExpensesTitle_expenseIncurredTimestamp')}" required="true" requiredMessage="#{configMapController.getKey('CreateExpensesRequiredMessage_expenseIncurredTimestamp')}">
+                            <p:calendar id="expenseIncurredTimestamp" pattern="dd/MM/yyyy HH:mm:ss"  value="#{expensesController.selected.expenseIncurredTimestamp}"  title="#{configMapController.getKey('CreateExpensesTitle_expenseIncurredTimestamp')}" required="true" requiredMessage="#{configMapController.getKey('CreateExpensesRequiredMessage_expenseIncurredTimestamp')}">
                                 <p:ajax event="dateSelect" listener="#{expensesController.handleDateSelect}"  />
                             </p:calendar>
 

@@ -13,7 +13,7 @@
                     <p:outputLabel value="#{configMapController.getKey('CreateSessionBookingsLabel_bookingTime')}" for="bookingTime" />
 
 
-                    <p:calendar id="bookingTime" pattern="MM/dd/yyyy HH:mm:ss"  value="#{sessionBookingsController.selected.bookingTime}"  title="#{configMapController.getKey('CreateSessionBookingsTitle_bookingTime')}" >
+                    <p:calendar id="bookingTime" pattern="dd/MM/yyyy HH:mm:ss"  value="#{sessionBookingsController.selected.bookingTime}"  title="#{configMapController.getKey('CreateSessionBookingsTitle_bookingTime')}" >
                         <p:ajax event="dateSelect" listener="#{sessionBookingsController.handleDateSelect}" update=":SessionBookingsCreateForm" />
                     </p:calendar>
                     <p:outputLabel value="#{configMapController.getKey('CreateSessionBookingsLabel_customerId')}" for="customerId" />

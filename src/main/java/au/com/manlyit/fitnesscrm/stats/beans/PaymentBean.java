@@ -3228,6 +3228,7 @@ public class PaymentBean implements Serializable {
         props.put("mail.smtp.sslpass", configMapFacade.getConfig("mail.smtp.sslpass"));
         props.put("mail.smtp.headerimage.url", configMapFacade.getConfig("mail.smtp.headerimage.url"));
         props.put("mail.smtp.headerimage.cid", configMapFacade.getConfig("mail.smtp.headerimage.cid"));
+        props.put("mail.smtp.starttls.enable", configMapFacade.getConfig("mail.smtp.starttls.enable"));
         return props;
 
     }

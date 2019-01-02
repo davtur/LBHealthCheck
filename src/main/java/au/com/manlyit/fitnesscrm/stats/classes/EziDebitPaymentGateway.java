@@ -171,7 +171,7 @@ public class EziDebitPaymentGateway implements Serializable {
     private float paymentAmountInCents = (float) 0;
     private float oneOffPaymentAmount = (float) 0;
     private Double proRataChangePlanAmount = new Double(0);
-   
+
     private Date oneOffPaymentDate = new Date();
     private Long paymentLimitAmountInCents = new Long("0");
 
@@ -2215,7 +2215,9 @@ public class EziDebitPaymentGateway implements Serializable {
         if (paymentDBList != null) {
             List<Payments> lp = (List<Payments>) paymentDBList.getWrappedData();
             int index = lp.indexOf(pay);
-            lp.remove(index);
+            if (index >= 0) {
+                lp.remove(index);
+            }
         }
         if (paymentsDBListFilteredItems != null) {
             int index = paymentsDBListFilteredItems.indexOf(pay);
@@ -2628,10 +2630,12 @@ public class EziDebitPaymentGateway implements Serializable {
             }
 
         }
+        List<ScheduledPayment> schedPayListFromGateway = new ArrayList<>();
         List<Payment> payListFromGateway = (List<Payment>) returnedObjects.get(0);
         ArrayOfScheduledPayment resultArrayOfScheduledPayments = (ArrayOfScheduledPayment) returnedObjects.get(1);
-        List<ScheduledPayment> schedPayListFromGateway = resultArrayOfScheduledPayments.getScheduledPayment();
-
+        if (resultArrayOfScheduledPayments != null) {
+            schedPayListFromGateway = resultArrayOfScheduledPayments.getScheduledPayment();
+        }
         paymentsList = payListFromGateway;
         scheduledPaymentsList = schedPayListFromGateway;
 
@@ -3081,8 +3085,7 @@ public class EziDebitPaymentGateway implements Serializable {
         return props;
 
     }
-    
-  
+
     public void createPaymentSchedule(ActionEvent actionEvent) {
 
         String loggedInUser = FacesContext.getCurrentInstance().getExternalContext().getRemoteUser();
@@ -3128,7 +3131,7 @@ public class EziDebitPaymentGateway implements Serializable {
                 }
             }
             ejbPaymentParametersFacade.edit(pp);
-            customersFacade.edit(c);
+            //customersFacade.edit(c);
             startAsynchJob("CreateSchedule", paymentBean.createCRMPaymentSchedule(c, paymentDebitDate, endCal.getTime(), spt, dow, paymentDayOfMonth, amount, paymentLimitToNumberOfPayments, amountLimit, paymentKeepManualPayments, paymentFirstWeekOfMonth, paymentSecondWeekOfMonth, paymentThirdWeekOfMonth, paymentFourthWeekOfMonth, loggedInUser, sessionId, getDigitalKey(), futureMap, paymentBean, false));
             /* List<Payments> crmPaymentList = paymentsFacade.findPaymentsByCustomerAndStatus(c, PaymentStatus.SCHEDULED.value());
              for (Payments p : crmPaymentList) {
@@ -3654,7 +3657,5 @@ public class EziDebitPaymentGateway implements Serializable {
     public void setProRataChangePlanAmount(Double proRataChangePlanAmount) {
         this.proRataChangePlanAmount = proRataChangePlanAmount;
     }
-
-   
 
 }

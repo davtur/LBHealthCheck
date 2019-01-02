@@ -16,19 +16,19 @@
                     <h:outputText value="#{ticketsController.selected.itemType}" title="#{configMapController.getKey('ViewTicketsTitle_itemType')}"/>
                     <h:outputText value="#{configMapController.getKey('ViewTicketsLabel_datePurchased')}"/>
                     <h:outputText value="#{ticketsController.selected.datePurchased}" title="#{configMapController.getKey('ViewTicketsTitle_datePurchased')}">
-                        <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                        <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
                     </h:outputText>
                     <h:outputText value="#{configMapController.getKey('ViewTicketsLabel_dateUsed')}"/>
                     <h:outputText value="#{ticketsController.selected.dateUsed}" title="#{configMapController.getKey('ViewTicketsTitle_dateUsed')}">
-                        <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                        <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
                     </h:outputText>
                     <h:outputText value="#{configMapController.getKey('ViewTicketsLabel_validFrom')}"/>
                     <h:outputText value="#{ticketsController.selected.validFrom}" title="#{configMapController.getKey('ViewTicketsTitle_validFrom')}">
-                        <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                        <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
                     </h:outputText>
                     <h:outputText value="#{configMapController.getKey('ViewTicketsLabel_expires')}"/>
                     <h:outputText value="#{ticketsController.selected.expires}" title="#{configMapController.getKey('ViewTicketsTitle_expires')}">
-                        <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                        <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
                     </h:outputText>
                 </p:panelGrid>
                 <p:commandButton value="#{configMapController.getKey('Close')}" onclick="PF('TicketsViewDialog').hide()"/>

@@ -1,0 +1,62 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition  xmlns="http://www.w3.org/1999/xhtml"
+                 xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                 xmlns:h="http://xmlns.jcp.org/jsf/html"
+                 xmlns:f="http://xmlns.jcp.org/jsf/core"
+                 xmlns:p="http://primefaces.org/ui" >
+
+
+
+    <p:dialog id="issueTicketsDialogue"  closable="false" responsive="true"  appendTo="@(body)" resizable="true" style="max-width: 90%"
+              header="#{configMapController.getKey('issueTicketsDialogueTitle')}"  widgetVar="issueTicketsDialogueWidget" > 
+        <h:form id="issueTicketsForm">  
+            <div class="ui-g ">
+                <div class="ui-g-12">
+                    <div class="ui-g-2 ">
+                        <p:outputLabel value="#{configMapController.getKey('CreatePlanLabel_sessionType')}"  />
+                    </div>
+                    <div class="ui-g-2 ">
+                        <p:selectOneMenu id="sessionType" valueChangeListener="#{planController.selectOneMenuValueChangeListener}" converter="sessionTypesControllerConverter" value="#{ticketsController.sessionType}"  label="#{configMapController.getKey('CreatePlanTitle_sessionType')}" >
+                            <f:selectItems value="#{sessionTypesController.itemsAvailableSelectOne}"/>
+                            <p:ajax   update=":issueTicketsForm"  />
+                        </p:selectOneMenu>
+                    </div>
+
+                    <div class="ui-g-2 ">
+                        <p:outputLabel value="#{configMapController.getKey('IssueTicketsDialogueLabel_numberOfTicketsToAdd')}" />
+                    </div>
+                    <div class="ui-g-2 ">
+                        <p:inputText  value="#{ticketsController.numberOfTicketsToAdd}" title="#{configMapController.getKey('IssueTicketsDialogueTitle_numberOfTicketsToAdd')}" >
+                            <f:convertNumber  />
+                        </p:inputText>
+                    </div>
+                    <div class="ui-g-2 ">
+                        <p:outputLabel value="#{configMapController.getKey('IssueTicketsDialogueLabel_weeksValid')}" />
+                    </div>
+                    <div class="ui-g-2 ">
+                        <p:inputText  value="#{ticketsController.weeksValid}" title="#{configMapController.getKey('IssueTicketsDialogueTitle_weeksValid')}" >
+                            <f:convertNumber  />
+                        </p:inputText>
+                    </div>
+                </div> 
+
+                <div class="ui-g-12">
+                    <div class="ui-g-2 ">
+                        <p:commandButton  onclick="PF('issueTicketsDialogueWidget').hide();"  actionListener="#{customersController.executeIssueTickets}" value="#{configMapController.getKey('IssueTicketsDialogueSaveLink')}" update=" :growl "/>                
+                    </div>
+                    <div class="ui-g-2 ">
+                        <p:commandButton  onclick="PF('issueTicketsDialogueWidget').hide()"   value="#{configMapController.getKey('IssueTicketsDialogueDiscardLink')}" update=":growl "/>                
+                    </div>
+                    <div class="ui-g-8 ">
+
+                    </div>
+                </div>
+            </div>
+        </h:form>
+    </p:dialog>
+
+
+</ui:composition>
+
+

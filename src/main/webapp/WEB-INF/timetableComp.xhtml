@@ -54,7 +54,7 @@
                         </div>
                         <div class="ui-g-12">
                             <div class="ui-g-2">
-                                <p:graphicImage value="#{customerImagesController.imageThumbnail}" width="55px">
+                                <p:graphicImage   rendered="#{! empty sessHist.sessionTemplate.trainerId.profileImage.id}"  value="#{customerImagesController.imageThumbnail}" width="55px">
                                     <f:param name="imageId" value="#{sessHist.sessionTemplate.trainerId.profileImage.id}"/>
                                 </p:graphicImage>
                             </div>

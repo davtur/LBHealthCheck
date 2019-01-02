@@ -34,7 +34,8 @@ import javax.mail.util.ByteArrayDataSource;
  */
 public class SendHTMLEmailWithFileAttached implements Serializable {
 
-    private static final Logger logger = Logger.getLogger(SendHTMLEmailWithFileAttached.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(SendHTMLEmailWithFileAttached.class.getName());
+    private static final long serialVersionUID = 1L;
 
     public SendHTMLEmailWithFileAttached() {
     }
@@ -171,7 +172,7 @@ public class SendHTMLEmailWithFileAttached implements Serializable {
                         System.out.println("Image ERROR:" + exception.getMessage());
                     }
                 } else {
-                    logger.log(Level.WARNING, "Email Header filename and/or header cid name not found: {0}", new Object[]{fileName});
+                    LOGGER.log(Level.WARNING, "Email Header filename and/or header cid name not found: {0}", new Object[]{fileName});
                 }
             // Set the message content!
             }

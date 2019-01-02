@@ -17,25 +17,25 @@
                     <p:outputLabel value="#{configMapController.getKey('CreateTicketsLabel_datePurchased')}" for="datePurchased" />
 
 
-                    <p:calendar id="datePurchased" pattern="MM/dd/yyyy HH:mm:ss"  value="#{ticketsController.selected.datePurchased}"  title="#{configMapController.getKey('CreateTicketsTitle_datePurchased')}" required="true" requiredMessage="#{configMapController.getKey('CreateTicketsRequiredMessage_datePurchased')}">
+                    <p:calendar id="datePurchased" pattern="dd/MM/yyyy HH:mm:ss"  value="#{ticketsController.selected.datePurchased}"  title="#{configMapController.getKey('CreateTicketsTitle_datePurchased')}" required="true" requiredMessage="#{configMapController.getKey('CreateTicketsRequiredMessage_datePurchased')}">
                         <p:ajax event="dateSelect" listener="#{ticketsController.handleDateSelect}" update=":TicketsCreateForm" />
                     </p:calendar>
                     <p:outputLabel value="#{configMapController.getKey('CreateTicketsLabel_dateUsed')}" for="dateUsed" />
 
 
-                    <p:calendar id="dateUsed" pattern="MM/dd/yyyy HH:mm:ss"  value="#{ticketsController.selected.dateUsed}"  title="#{configMapController.getKey('CreateTicketsTitle_dateUsed')}" >
+                    <p:calendar id="dateUsed" pattern="dd/MM/yyyy HH:mm:ss"  value="#{ticketsController.selected.dateUsed}"  title="#{configMapController.getKey('CreateTicketsTitle_dateUsed')}" >
                         <p:ajax event="dateSelect" listener="#{ticketsController.handleDateSelect}" update=":TicketsCreateForm" />
                     </p:calendar>
                     <p:outputLabel value="#{configMapController.getKey('CreateTicketsLabel_validFrom')}" for="validFrom" />
 
 
-                    <p:calendar id="validFrom" pattern="MM/dd/yyyy HH:mm:ss"  value="#{ticketsController.selected.validFrom}"  title="#{configMapController.getKey('CreateTicketsTitle_validFrom')}" >
+                    <p:calendar id="validFrom" pattern="dd/MM/yyyy HH:mm:ss"  value="#{ticketsController.selected.validFrom}"  title="#{configMapController.getKey('CreateTicketsTitle_validFrom')}" >
                         <p:ajax event="dateSelect" listener="#{ticketsController.handleDateSelect}" update=":TicketsCreateForm" />
                     </p:calendar>
                     <p:outputLabel value="#{configMapController.getKey('CreateTicketsLabel_expires')}" for="expires" />
 
 
-                    <p:calendar id="expires" pattern="MM/dd/yyyy HH:mm:ss"  value="#{ticketsController.selected.expires}"  title="#{configMapController.getKey('CreateTicketsTitle_expires')}" >
+                    <p:calendar id="expires" pattern="dd/MM/yyyy HH:mm:ss"  value="#{ticketsController.selected.expires}"  title="#{configMapController.getKey('CreateTicketsTitle_expires')}" >
                         <p:ajax event="dateSelect" listener="#{ticketsController.handleDateSelect}" update=":TicketsCreateForm" />
                     </p:calendar>
                 </p:panelGrid>

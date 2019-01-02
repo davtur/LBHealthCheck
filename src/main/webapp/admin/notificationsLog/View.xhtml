@@ -18,7 +18,7 @@
                     <h:outputText value="#{notificationsLogController.selected.typeOfNotification}" title="#{configMapController.getKey('ViewNotificationsLogTitle_typeOfNotification')}"/>
                     <h:outputText value="#{configMapController.getKey('ViewNotificationsLogLabel_timestampOfNotification')}"/>
                     <h:outputText value="#{notificationsLogController.selected.timestampOfNotification}" title="#{configMapController.getKey('ViewNotificationsLogTitle_timestampOfNotification')}">
-                        <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                        <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
                     </h:outputText>
                     <h:outputText value="#{configMapController.getKey('ViewNotificationsLogLabel_customer')}"/>
                     <h:outputText value="#{notificationsLogController.selected.customer}" title="#{configMapController.getKey('ViewNotificationsLogTitle_customer')}"/>

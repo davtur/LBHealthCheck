@@ -173,7 +173,7 @@ public class CustomerImagesController implements Serializable {
                             InputStream stream = FacesContext.getCurrentInstance().getExternalContext().getResourceAsStream(placeholderImage);
                             //img = ImageIO.read(new URL(placeholderImage));
                             img = ImageIO.read(stream);
-                              scaledImg = resizeImageWithHintKeepAspect(img, 0, NEW_HEIGHT);// use a 0 for heigh or width to keep aspect
+                            scaledImg = resizeImageWithHintKeepAspect(img, 0, NEW_HEIGHT);// use a 0 for heigh or width to keep aspect
                         } catch (IOException e) {
                             if (e.getCause().getClass() == FileNotFoundException.class) {
                                 Logger.getLogger(CustomerImagesController.class.getName()).log(Level.SEVERE, "createDefaultProfilePic, File not found!!: {0}", placeholderImage);
@@ -405,14 +405,13 @@ public class CustomerImagesController implements Serializable {
 
         //setCroppedImage(scaledImg, fileExtension);
         //jpeg
-
         //BufferedImage data = null;
         //Iterator readers = ImageIO.getImageReadersByFormatName("jpeg");
         // ImageReader reader = (ImageReader) readers.next();
         imageAreaSelectEvent1 = false;
     }
 
-   /* private void setCroppedImage(BufferedImage file, String fileType) {
+    /* private void setCroppedImage(BufferedImage file, String fileType) {
         if (file == null) {
             return;
         }
@@ -438,7 +437,6 @@ public class CustomerImagesController implements Serializable {
         Logger.getLogger(CustomerImagesController.class.getName()).log(Level.INFO, "setCroppedImage finished");
 
     }*/
-
     private Date getDateFromJpegMetadata(UploadedFile file) {
         Date photoDateFromMeta = null;
         try { // get meta data from photo
@@ -656,16 +654,15 @@ public class CustomerImagesController implements Serializable {
     }
 
     public void crop() {
-         if (imageAreaSelectEvent1 == true) {
+        if (imageAreaSelectEvent1 == true) {
             uploadedImage = cropImage(uploadedImage, imageAreaSelectEvent1);
-        }else{
-             JsfUtil.addErrorMessage("Error",configMapFacade.getConfig("NoCroppedAreaSelected"));
-         }
-        
+        } else {
+            JsfUtil.addErrorMessage("Error", configMapFacade.getConfig("NoCroppedAreaSelected"));
+        }
 
     }
 
-  /*  public void crop() {
+    /*  public void crop() {
         if (croppedImage == null) {
             return;
         }
@@ -687,7 +684,6 @@ public class CustomerImagesController implements Serializable {
 
         FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO, "Success", "Cropping finished."));
     }*/
-
     private String getRandomImageName() {
         int i = (int) (Math.random() * 100000);
 
@@ -1283,29 +1279,33 @@ public class CustomerImagesController implements Serializable {
             {
 
                 imageId = context.getExternalContext().getRequestParameterMap().get("imageId");
-
-                if (imageId != null && !imageId.trim().isEmpty()) {
-                    try {
-                        CustomerImages custImage = ejbFacade.find(Integer.valueOf(imageId));
-                        String imageType = custImage.getMimeType().toLowerCase();
-                        if (imageType.contains("jpeg") || imageType.contains("jpg")) {
-                            imageType = "jpeg";
-                        } else if (imageType.contains("gif")) {
-                            imageType = "gif";
-                        } else if (imageType.contains("png")) {
-                            imageType = "png";
-                        } else {
-                            imageType = "jpeg";
-                            logger.log(Level.WARNING, "getImageThumbnail: The Image Type could not be determined. Trying JPEG. ImageId=", imageId);
-                        }
-                        return new DefaultStreamedContent(new ByteArrayInputStream(convertBufferedImageToByteArray(resizeImageKeepAspect(convertByteArrayToBufferedImage(custImage.getImage()), thumbnailWidth), imageType)));
-                    } catch (Exception e) {
-                        logger.log(Level.WARNING, "getImageThumbnail: the imageId parameter could not be converted to an integer:{0}, exception: {1} ", new Object[]{imageId, e.getMessage()});
-                    }
-                } else {
-                    logger.log(Level.WARNING, "getImageThumbnail: imageId is NULL or an empty String id:{0}", new Object[]{imageId});
+                if (imageId == null) {
+                    logger.log(Level.WARNING, "getImageThumbnail: imageId is NULL");
                     return null;
                 }
+                if (imageId.trim().isEmpty() == true) {
+                    logger.log(Level.WARNING, "getImageThumbnail: imageId is an empty String.It may not have been set in the request. Cannot load image!!");
+                    return null;
+                }
+
+                try {
+                    CustomerImages custImage = ejbFacade.find(Integer.valueOf(imageId));
+                    String imageType = custImage.getMimeType().toLowerCase();
+                    if (imageType.contains("jpeg") || imageType.contains("jpg")) {
+                        imageType = "jpeg";
+                    } else if (imageType.contains("gif")) {
+                        imageType = "gif";
+                    } else if (imageType.contains("png")) {
+                        imageType = "png";
+                    } else {
+                        imageType = "jpeg";
+                        logger.log(Level.WARNING, "getImageThumbnail: The Image Type could not be determined. Trying JPEG. ImageId=", imageId);
+                    }
+                    return new DefaultStreamedContent(new ByteArrayInputStream(convertBufferedImageToByteArray(resizeImageKeepAspect(convertByteArrayToBufferedImage(custImage.getImage()), thumbnailWidth), imageType)));
+                } catch (Exception e) {
+                    logger.log(Level.WARNING, "getImageThumbnail: the imageId parameter could not be converted to an integer:{0}, exception: {1} ", new Object[]{imageId, e.getMessage()});
+                }
+
             }
         }
         return null;
@@ -1500,7 +1500,7 @@ public class CustomerImagesController implements Serializable {
         } catch (NumberFormatException numberFormatException) {
             logger.log(Level.WARNING, "getDynamicImage number format exception for {0}", id);
         } catch (Exception ex) {
-            logger.log(Level.WARNING, "getDynamicImage  exception for {0}. {1}",new Object[]{ id,ex.getMessage()});
+            logger.log(Level.WARNING, "getDynamicImage  exception for {0}. {1}", new Object[]{id, ex.getMessage()});
         }
 
         return sc;

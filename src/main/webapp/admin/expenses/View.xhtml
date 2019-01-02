@@ -14,15 +14,15 @@
                     <h:outputText value="#{expensesController.selected.id}" title="#{configMapController.getKey('ViewExpensesTitle_id')}"/>
                     <h:outputText value="#{configMapController.getKey('ViewExpensesLabel_createdTimestamp')}"/>
                     <h:outputText value="#{expensesController.selected.createdTimestamp}" title="#{configMapController.getKey('ViewExpensesTitle_createdTimestamp')}">
-                        <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                        <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
                     </h:outputText>
                     <h:outputText value="#{configMapController.getKey('ViewExpensesLabel_updatedTimestamp')}"/>
                     <h:outputText value="#{expensesController.selected.updatedTimestamp}" title="#{configMapController.getKey('ViewExpensesTitle_updatedTimestamp')}">
-                        <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                        <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
                     </h:outputText>
                     <h:outputText value="#{configMapController.getKey('ViewExpensesLabel_expenseIncurredTimestamp')}"/>
                     <h:outputText value="#{expensesController.selected.expenseIncurredTimestamp}" title="#{configMapController.getKey('ViewExpensesTitle_expenseIncurredTimestamp')}">
-                        <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                        <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
                     </h:outputText>
                     <h:outputText value="#{configMapController.getKey('ViewExpensesLabel_invoiceNumber')}"/>
                     <h:outputText value="#{expensesController.selected.invoiceNumber}" title="#{configMapController.getKey('ViewExpensesTitle_invoiceNumber')}"/>

@@ -43,7 +43,7 @@ public class TicketsFacade extends AbstractFacade<Tickets> {
     private static final Logger LOGGER = Logger.getLogger(TicketsFacade.class.getName());
     @PersistenceContext(unitName = "FitnessStatsPU")
     private EntityManager em;
-    private static boolean debug = true;
+    private static boolean debug = false;
 
     @Override
     protected EntityManager getEntityManager() {

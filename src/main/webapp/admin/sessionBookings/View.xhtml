@@ -14,7 +14,7 @@
                     <h:outputText value="#{sessionBookingsController.selected.id}" title="#{configMapController.getKey('ViewSessionBookingsTitle_id')}"/>
                     <h:outputText value="#{configMapController.getKey('ViewSessionBookingsLabel_bookingTime')}"/>
                     <h:outputText value="#{sessionBookingsController.selected.bookingTime}" title="#{configMapController.getKey('ViewSessionBookingsTitle_bookingTime')}">
-                        <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                        <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
                     </h:outputText>
                     <h:outputText value="#{configMapController.getKey('ViewSessionBookingsLabel_customerId')}"/>
                     <h:outputText value="#{sessionBookingsController.selected.customerId}" title="#{configMapController.getKey('ViewSessionBookingsTitle_customerId')}"/>

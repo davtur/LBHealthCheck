@@ -210,6 +210,19 @@ public class MySessionsChart1 implements Serializable {
         return startCal.getTime();
     }
 
+    public Date maxTimeField(Date d) {
+        GregorianCalendar startCal = new GregorianCalendar();
+        startCal.setTime(d);
+        startCal.set(Calendar.HOUR_OF_DAY, 0);
+        startCal.set(Calendar.SECOND, 0);
+        startCal.set(Calendar.MINUTE, 0);
+        startCal.set(Calendar.MILLISECOND, 0);
+        startCal.add(Calendar.DAY_OF_YEAR, 1);
+        startCal.add(Calendar.SECOND, -1);
+
+        return startCal.getTime();
+    }
+
     private Date getRolling12MonthRevenue() {
 
         GregorianCalendar startCal = new GregorianCalendar();
@@ -420,7 +433,8 @@ public class MySessionsChart1 implements Serializable {
             // endCal.set(Calendar.MINUTE, 59);
             //endCal.set(Calendar.MILLISECOND, 999);
             endCal.add(calendarIncrementInterval, 1);
-
+            endCal.add(Calendar.DAY_OF_YEAR, -1);
+            endCal.setTime(maxTimeField(endCal.getTime()));
             List<ChartSeries> seriesList = new ArrayList<>();
 
             List<Payments> paymentList;
@@ -453,7 +467,11 @@ public class MySessionsChart1 implements Serializable {
                         lcs.set(xAxixValue, (double) 0);
                     }
                     Date strt = startCal.getTime();
-                    Date end = endCal.getTime();
+                    //endCal.add(Calendar.DAY_OF_YEAR, -1);
+                    if(calendarIncrementInterval == Calendar.MONTH){
+                    endCal.set(Calendar.DAY_OF_MONTH, endCal.getActualMaximum(Calendar.DAY_OF_MONTH));
+                    }
+                    Date end = maxTimeField(endCal.getTime());
 
                     //sessions = ejbSessionHistoryFacade.findSessionsByDateRange(strt, end, true);
                     float reportTotalSuccessful = 0;
@@ -496,7 +514,7 @@ public class MySessionsChart1 implements Serializable {
                                 }
                             }
                         }
-                        
+
                         if (expenseList != null) {
                             for (Expenses e : expenseList) {
                                 reportTotalExpenses += e.getExpenseAmount().floatValue();
@@ -1001,7 +1019,7 @@ public class MySessionsChart1 implements Serializable {
 
     public BarChartModel getDashboardMonthlyRevenueModel() {
         if (dashboardMonthlyRevenueModel == null) {
-            dashboardMonthlyRevenueModel = createMonthlyRevenueChart(getDashboardDateInterval(), getDashboardStartDate(), getDashboardEndDate());
+            dashboardMonthlyRevenueModel = createMonthlyRevenueChart(getDashboardDateInterval(), zeroTimeField(getDashboardStartDate()), maxTimeField(getDashboardEndDate()));
         }
         return dashboardMonthlyRevenueModel;
     }

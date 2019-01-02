@@ -151,7 +151,7 @@
                             <p:outputLabel rendered="#{ezidebit.paymentSchedulePeriodType == 'W' ||ezidebit.paymentSchedulePeriodType == 'F' || ezidebit.paymentSchedulePeriodType == '4' || ezidebit.paymentSchedulePeriodType == 'N'}" value="#{configMapController.getKey('AddPaymentScheduleLabel_paymentDayOfWeek')}" for="changePlanDayOfWeek" />
                         </div>
                         <div class="ui-g-4">
-                            <p:selectOneMenu rendered="#{ezidebit.paymentSchedulePeriodType == 'W' ||ezidebit.paymentSchedulePeriodType == 'F' || ezidebit.paymentSchedulePeriodType == '4' || ezidebit.paymentSchedulePeriodType == 'N'}" id="changePlanDayOfWeek" value="#{ezidebit.paymentDayOfWeek}"  >
+                            <p:selectOneMenu  disabled="true" rendered="#{ezidebit.paymentSchedulePeriodType == 'W' ||ezidebit.paymentSchedulePeriodType == 'F' || ezidebit.paymentSchedulePeriodType == '4' || ezidebit.paymentSchedulePeriodType == 'N'}" id="changePlanDayOfWeek" value="#{ezidebit.paymentDayOfWeek}"  >
                                 <f:selectItem itemValue="MON" itemLabel="Monday" />
                                 <f:selectItem itemValue="TUE" itemLabel="Tuesday" />
                                 <f:selectItem itemValue="WED" itemLabel="Wednesday" />
@@ -164,7 +164,7 @@
                             <p:outputLabel  rendered="#{ezidebit.paymentSchedulePeriodType == 'M' }" value="#{configMapController.getKey('AddPaymentScheduleLabel_paymentDayOfMonth')}" for="changePlanDayOfMonth" />
                         </div>
                         <div class="ui-g-4">
-                            <p:selectOneMenu  rendered="#{ezidebit.paymentSchedulePeriodType == 'M' }" id="changePlanDayOfMonth" value="#{ezidebit.paymentDayOfMonth}"  >
+                            <p:selectOneMenu   disabled="true" rendered="#{ezidebit.paymentSchedulePeriodType == 'M' }" id="changePlanDayOfMonth" value="#{ezidebit.paymentDayOfMonth}"  >
                                 <f:selectItems value="#{ezidebit.daysInMonth}" var="num" itemValue="#{num}" /> 
                                 <p:ajax update="changePlanForm"   listener="#{customersController.changeNewScheduleUpdateListener}" /> 
                             </p:selectOneMenu> 

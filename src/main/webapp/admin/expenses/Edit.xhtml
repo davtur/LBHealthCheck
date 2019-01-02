@@ -14,15 +14,15 @@
                     <h:inputText id="id"  value="#{expensesController.selected.id}" title="#{configMapController.getKey('EditExpensesTitle_id')}" required="true" requiredMessage="#{configMapController.getKey('EditExpensesRequiredMessage_id')}"/>
                     <h:outputLabel value="#{configMapController.getKey('EditExpensesLabel_createdTimestamp')}" for="createdTimestamp" />
                     <h:inputText id="createdTimestamp" value="#{expensesController.selected.createdTimestamp}" title="#{configMapController.getKey('EditExpensesTitle_createdTimestamp')}" required="true" requiredMessage="#{configMapController.getKey('EditExpensesRequiredMessage_createdTimestamp')}">
-                        <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                        <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
                     </h:inputText>
                     <h:outputLabel value="#{configMapController.getKey('EditExpensesLabel_updatedTimestamp')}" for="updatedTimestamp" />
                     <h:inputText id="updatedTimestamp" value="#{expensesController.selected.updatedTimestamp}" title="#{configMapController.getKey('EditExpensesTitle_updatedTimestamp')}" required="true" requiredMessage="#{configMapController.getKey('EditExpensesRequiredMessage_updatedTimestamp')}">
-                        <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                        <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
                     </h:inputText>
                     <h:outputLabel value="#{configMapController.getKey('EditExpensesLabel_expenseIncurredTimestamp')}" for="expenseIncurredTimestamp" />
                     <h:inputText id="expenseIncurredTimestamp" value="#{expensesController.selected.expenseIncurredTimestamp}" title="#{configMapController.getKey('EditExpensesTitle_expenseIncurredTimestamp')}" required="true" requiredMessage="#{configMapController.getKey('EditExpensesRequiredMessage_expenseIncurredTimestamp')}">
-                        <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                        <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
                     </h:inputText>
                     <h:outputLabel value="#{configMapController.getKey('EditExpensesLabel_invoiceNumber')}" for="invoiceNumber" />
                     <h:inputText id="invoiceNumber"  value="#{expensesController.selected.invoiceNumber}" title="#{configMapController.getKey('EditExpensesTitle_invoiceNumber')}" />

@@ -475,7 +475,9 @@ public class FutureMapEJB implements Serializable {
                         ticketsAdded++;
                     }
                 }
-                LOGGER.log(Level.INFO, "Adding Tickets for Customer id {0}, existing tickets {1}, tickets added {2},startDate {3}, stopDate {4} ", new Object[]{c.getId(), at.size(), ticketsAdded, ticketStartDate, ticketStopDate});
+                if (ticketsAdded > 0) {
+                    LOGGER.log(Level.INFO, "Adding Tickets for Customer id {0}, existing tickets {1}, tickets added {2},startDate {3}, stopDate {4} ", new Object[]{c.getId(), at.size(), ticketsAdded, ticketStartDate, ticketStopDate});
+                }
             } catch (Exception ex) {
                 Logger.getLogger(FutureMapEJB.class.getName()).log(Level.SEVERE, "issueOneWeeksTicketsForCust", ex.getMessage());
             }
@@ -661,7 +663,7 @@ public class FutureMapEJB implements Serializable {
     }
 
     // @Schedule(dayOfMonth = "*", hour = "*", minute = "*/5", second = "0")//debug
-    //@Schedule(dayOfMonth = "*", hour = "6", minute = "0", second = "0")
+    @Schedule(dayOfMonth = "*", hour = "1", minute = "0", second = "0")
     public void updateScheduledPayments(Timer t) {
         try {
             // run every day at 5am seconds
@@ -678,6 +680,22 @@ public class FutureMapEJB implements Serializable {
         } catch (Exception ex) {
             Logger.getLogger(FutureMapEJB.class
                     .getName()).log(Level.SEVERE, "update Scheduled Payments - UNHANDLED EXCEPTION In EJB TIMER", ex);
+        }
+    }
+
+    @Schedule(dayOfMonth = "*", hour = "1", minute = "15", second = "0")
+    public void updateCustomerTickets(Timer t) {
+        try {
+            // run every day at 5am seconds
+            GregorianCalendar cal = new GregorianCalendar();
+            cal.add(Calendar.DAY_OF_YEAR, -7);
+            LOGGER.log(Level.INFO, "Running  update Customer Tickets from date:{0}", cal.getTime());
+            issueWeeklyCustomerTicketsForPlansSessionBookings();
+            LOGGER.log(Level.INFO, "The update Customer Tickets has completed.");
+
+        } catch (Exception ex) {
+            Logger.getLogger(FutureMapEJB.class
+                    .getName()).log(Level.SEVERE, "update  Customer Tickets  - UNHANDLED EXCEPTION In EJB TIMER", ex);
         }
     }
 

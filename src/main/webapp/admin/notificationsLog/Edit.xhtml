@@ -18,7 +18,7 @@
                     <h:inputText id="typeOfNotification"  value="#{notificationsLogController.selected.typeOfNotification}" title="#{configMapController.getKey('EditNotificationsLogTitle_typeOfNotification')}" />
                     <h:outputLabel value="#{configMapController.getKey('EditNotificationsLogLabel_timestampOfNotification')}" for="timestampOfNotification" />
                     <h:inputText id="timestampOfNotification" value="#{notificationsLogController.selected.timestampOfNotification}" title="#{configMapController.getKey('EditNotificationsLogTitle_timestampOfNotification')}" required="true" requiredMessage="#{configMapController.getKey('EditNotificationsLogRequiredMessage_timestampOfNotification')}">
-                        <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                        <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
                     </h:inputText>
                     <h:outputLabel value="#{configMapController.getKey('EditNotificationsLogLabel_customer')}" for="customer" />
                     <p:selectOneMenu id="customer" valueChangeListener="#{notificationsLogController.selectOneMenuValueChangeListener}" value="#{notificationsLogController.selected.customer}" label="#{configMapController.getKey('EditNotificationsLogTitle_customer')}" >

@@ -2283,3 +2283,6 @@ AddPaymentScheduleLabel_amountToProRata=Pro Rata Amount
 AddPaymentScheduleTitle_amountToProRata=Pro Rata Amount
 EditCustomersChangePlanButton=Change Plan
 changePlan_LastSuccessfulPayment=Last Payment Date
+EditCustomersIssueTicketsButton=Issue Tickets
+issueTicketsDialogueTitle=Issue Tickets
+MyDetailsPlanPanel_title=My Membership Plan

@@ -8,6 +8,7 @@ import au.com.manlyit.fitnesscrm.stats.beans.CustomersFacade;
 import au.com.manlyit.fitnesscrm.stats.beans.LoginBean;
 import static au.com.manlyit.fitnesscrm.stats.beans.LoginBean.generateUniqueToken;
 import au.com.manlyit.fitnesscrm.stats.beans.PaymentsFacade;
+import au.com.manlyit.fitnesscrm.stats.beans.TicketsController;
 import au.com.manlyit.fitnesscrm.stats.beans.util.PaymentPeriod;
 import au.com.manlyit.fitnesscrm.stats.chartbeans.MySessionsChart1;
 import au.com.manlyit.fitnesscrm.stats.classes.util.CalendarUtil;
@@ -1109,7 +1110,7 @@ public class CustomersController implements Serializable {
                                 // the file must be in src/main/resources/  i.e. if I wanted to load a file called src/main.resources/images/foo.jpg i would pass /images/foo.jpg to getResourceAsStream("/images/foo.jpg")
                                 InputStream resourceContent = this.getClass().getResourceAsStream(placeholderImage);
                                 if (resourceContent == null) {
-                                    Logger.getLogger(CustomerImagesController.class.getName()).log(Level.SEVERE, "createDefaultProfilePic, Loading image into buffer error!!", placeholderImage);
+                                    Logger.getLogger(CustomerImagesController.class.getName()).log(Level.SEVERE, "createDefaultProfilePic, Loading image {0} into buffer error from src/main/resources/ !!", new Object[]{placeholderImage});
                                 }
 
                                 //img = ImageIO.read(getClass().getResource(placeholderImage));
@@ -2169,6 +2170,26 @@ public class CustomersController implements Serializable {
         PrimeFaces.current().ajax().update("changePlanDialogue");
     }
 
+    public void executeIssueTickets(ActionEvent actionEvent) {
+        FacesContext context = FacesContext.getCurrentInstance();
+        TicketsController ticketsController = context.getApplication().evaluateExpressionGet(context, "#{ticketsController}", TicketsController.class);
+        Customers cust = null;
+        int weeksValid = -1;
+        int numberIssued = -1;
+        try {
+            cust = getSelected();
+            weeksValid = ticketsController.getWeeksValid();
+            numberIssued = ticketsController.getNumberOfTicketsToAdd();
+            issuePackOfTickets(cust, weeksValid, numberIssued);
+            LOGGER.log(Level.INFO, "executeIssueTickets: Manulally issueing tickets for {0}. Weeks tickets are valid:{1}, number issued: {2}", new Object[]{cust.getUsername(), weeksValid, numberIssued});
+            String detailedMessage = cust.getFirstname() + " " + cust.getLastname() + " was credited " + numberIssued + " tickets that are valid for " + weeksValid + " weeks.";
+            JsfUtil.addSuccessMessage("Tickets Allocated", detailedMessage);
+        } catch (Exception e) {
+            JsfUtil.addErrorMessage("Issue Tickets Failed");
+            LOGGER.log(Level.SEVERE, "executeIssueTickets: Manulally issueing tickets failed for {0}. Weeks tickets are valid:{1}, number issued: {2}", new Object[]{cust.getUsername(), weeksValid, numberIssued});
+        }
+    }
+
     public void executeChangePlan(ActionEvent actionEvent) {
         LOGGER.log(Level.INFO, "Executing Plan Change - Clear Schedule then create new schedule operations will be called..");
         try {
@@ -2184,8 +2205,6 @@ public class CustomersController implements Serializable {
             proRataAmount += ezi.getProRataChangePlanAmount();
 
             //ezi.clearSchedule(actionEvent);// Note clear schedule also clears payment parameters for PaymentPeriod PaymentPeriodDayOfMonth PaymentPeriodDayOfWeek
-
-            
             int[] fieldAndAmount = getCalendarFieldAndAmountFromPaymentPeriod(oldPayPeriod);
             GregorianCalendar nextPayBasedOnCurrentPaymentPeriod = new GregorianCalendar();
             nextPayBasedOnCurrentPaymentPeriod.setTime(scheduleStart);
@@ -2195,7 +2214,6 @@ public class CustomersController implements Serializable {
             /*ezi.setPaymentDayOfMonth(newPayDayOfMonth);
             ezi.setPaymentDayOfWeek(newPayDayOfWeek);
             ezi.setPaymentSchedulePeriodType(newPayPeriod);*/
-
             pp.setPaymentPeriod(newPayPeriod);
             pp.setPaymentPeriodDayOfMonth(Integer.toString(newPayDayOfMonth));
             pp.setPaymentPeriodDayOfWeek(newPayDayOfWeek);
@@ -2212,7 +2230,17 @@ public class CustomersController implements Serializable {
 
     }
 
+    public void issueTicketsDialogue(ActionEvent actionEvent) {
+
+        PrimeFaces.current().executeScript("PF('issueTicketsDialogueWidget').show();");
+    }
+
     public void changePlanDialogue(ActionEvent actionEvent) {
+        if (current.getPaymentParametersId().getLastSuccessfulScheduledPayment() == null) {
+            LOGGER.log(Level.WARNING, "changePlanDialogue: Last payment is NULL for {0}", new Object[]{getSelected().getUsername()});
+            JsfUtil.addErrorMessage("This customer has never has a successful payment. Create a new plan first before changing plans!");
+            return;
+        }
         FacesContext context = FacesContext.getCurrentInstance();
         EziDebitPaymentGateway ezi = context.getApplication().evaluateExpressionGet(context, "#{ezidebit}", EziDebitPaymentGateway.class);
         int[] fieldAndAmount = getCalendarFieldAndAmountFromPaymentPeriod(current.getPaymentParametersId().getPaymentPeriod().charAt(0));
@@ -2220,7 +2248,17 @@ public class CustomersController implements Serializable {
         gc.setTime(current.getPaymentParametersId().getLastSuccessfulScheduledPayment().getPaymentDate());
         gc.add(fieldAndAmount[0], fieldAndAmount[1]);
         ezi.setPaymentDebitDate(gc.getTime());
-        ezi.setPaymentSchedulePeriodType(current.getPaymentParametersId().getPaymentPeriod());
+        String custPaymentPeriod = current.getPaymentParametersId().getPaymentPeriod();
+        ezi.setPaymentSchedulePeriodType(custPaymentPeriod);
+        if (custPaymentPeriod.contains("M")) {
+            int payDayOfMonth = -1;
+            try {
+                payDayOfMonth = Integer.parseInt(current.getPaymentParametersId().getPaymentPeriodDayOfMonth());
+            } catch (NumberFormatException numberFormatException) {
+                LOGGER.log(Level.WARNING, "changePlanDialogue: Payment Period Day Of Month Invalid. customer: {0}, day of Month:{1}, error: {2}", new Object[]{getSelected().getUsername(), current.getPaymentParametersId().getPaymentPeriodDayOfMonth(), numberFormatException.getMessage()});
+            }
+
+        }
         changePlanPreview(current.getGroupPricing(), current.getGroupPricing(), gc.getTime());
         PrimeFaces.current().executeScript("PF('changePlanDialogueWidget').show();");
     }

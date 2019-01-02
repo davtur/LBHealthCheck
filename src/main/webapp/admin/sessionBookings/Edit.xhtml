@@ -14,7 +14,7 @@
                     <h:inputText id="id"  value="#{sessionBookingsController.selected.id}" title="#{configMapController.getKey('EditSessionBookingsTitle_id')}" required="true" requiredMessage="#{configMapController.getKey('EditSessionBookingsRequiredMessage_id')}"/>
                     <h:outputLabel value="#{configMapController.getKey('EditSessionBookingsLabel_bookingTime')}" for="bookingTime" />
                     <h:inputText id="bookingTime" value="#{sessionBookingsController.selected.bookingTime}" title="#{configMapController.getKey('EditSessionBookingsTitle_bookingTime')}" >
-                        <f:convertDateTime pattern="MM/dd/yyyy HH:mm:ss" />
+                        <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
                     </h:inputText>
                     <h:outputLabel value="#{configMapController.getKey('EditSessionBookingsLabel_customerId')}" for="customerId" />
                     <p:selectOneMenu id="customerId" valueChangeListener="#{sessionBookingsController.selectOneMenuValueChangeListener}" value="#{sessionBookingsController.selected.customerId}" label="#{configMapController.getKey('EditSessionBookingsTitle_customerId')}" required="true" requiredMessage="#{configMapController.getKey('EditSessionBookingsRequiredMessage_customerId')}">

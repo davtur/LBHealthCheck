@@ -19,7 +19,7 @@
                     <p:outputLabel value="#{configMapController.getKey('CreateNotificationsLogLabel_timestampOfNotification')}" for="timestampOfNotification" />
 
 
-                    <p:calendar id="timestampOfNotification" pattern="MM/dd/yyyy HH:mm:ss"  value="#{notificationsLogController.selected.timestampOfNotification}"  title="#{configMapController.getKey('CreateNotificationsLogTitle_timestampOfNotification')}" required="true" requiredMessage="#{configMapController.getKey('CreateNotificationsLogRequiredMessage_timestampOfNotification')}">
+                    <p:calendar id="timestampOfNotification" pattern="dd/MM/yyyy HH:mm:ss"  value="#{notificationsLogController.selected.timestampOfNotification}"  title="#{configMapController.getKey('CreateNotificationsLogTitle_timestampOfNotification')}" required="true" requiredMessage="#{configMapController.getKey('CreateNotificationsLogRequiredMessage_timestampOfNotification')}">
                         <p:ajax event="dateSelect" listener="#{notificationsLogController.handleDateSelect}" update=":NotificationsLogCreateForm" />
                     </p:calendar>
                     <p:outputLabel value="#{configMapController.getKey('CreateNotificationsLogLabel_customer')}" for="customer" />

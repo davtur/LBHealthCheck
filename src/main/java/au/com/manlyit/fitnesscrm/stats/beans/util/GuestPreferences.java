@@ -25,9 +25,9 @@ public class GuestPreferences implements Serializable {
 
 	private String layout = "moody";
 
-	private String theme = "blue";
+	private String theme = "orange";
 
-	private boolean darkMenu = true;
+	private boolean darkMenu = false;
 
 	private boolean gradientMenu = false;
 

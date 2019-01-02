@@ -8,6 +8,7 @@ import au.com.manlyit.fitnesscrm.stats.classes.CustomersController;
 import au.com.manlyit.fitnesscrm.stats.classes.util.LazyLoadingDataModel;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PfSelectableDataModel;
 import au.com.manlyit.fitnesscrm.stats.db.AuditLog;
+import au.com.manlyit.fitnesscrm.stats.db.SessionTypes;
 
 import java.io.Serializable;
 import java.util.Calendar;
@@ -37,6 +38,32 @@ import org.primefaces.event.SelectEvent;
 @Named("ticketsController")
 @SessionScoped
 public class TicketsController implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
+    private Tickets current;
+    private int numberOfTicketsToAdd = 0;
+    private int weeksValid = 52;
+    private SessionTypes sessionType;
+    private Tickets selectedForDeletion;
+    private PfSelectableDataModel<Tickets> items = null;
+    private int itemCount = 0;
+    @Inject
+    private au.com.manlyit.fitnesscrm.stats.beans.TicketsFacade ejbFacade;
+    @Inject
+    private au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade configMapFacade;
+    private PaginationHelper pagination;
+    private int selectedItemIndex;
+    private List<Tickets> filteredItems;
+    private Tickets[] multiSelected;
+    private LazyLoadingDataModel<Tickets> lazyModel;
+    private LazyLoadingDataModel<Tickets> thisWeeksLazyModel;
+    private Date startDate;
+    private Date endDate;
+    private static final Logger LOGGER = Logger.getLogger(TicketsController.class.getName());
+
+    public TicketsController() {
+    }
 
     /**
      * @return the lazyModel
@@ -87,31 +114,9 @@ public class TicketsController implements Serializable {
         this.endDate = endDate;
     }
 
-    private Tickets current;
-    private Tickets selectedForDeletion;
-    private PfSelectableDataModel<Tickets> items = null;
-    @Inject
-    private au.com.manlyit.fitnesscrm.stats.beans.TicketsFacade ejbFacade;
-    @Inject
-    private au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade configMapFacade;
-    private PaginationHelper pagination;
-    private int selectedItemIndex;
-    private List<Tickets> filteredItems;
-    private Tickets[] multiSelected;
-    private LazyLoadingDataModel<Tickets> lazyModel;
-    private Date startDate;
-    private Date endDate;
-    private static final Logger LOGGER = Logger.getLogger(TicketsController.class.getName());
-
-    public TicketsController() {
-    }
-
     @PostConstruct
     private void initDates() {
-        
-        
-        
-        
+
         GregorianCalendar cal1 = new GregorianCalendar();
         cal1.add(Calendar.DAY_OF_YEAR, 1);
         setEndDate(cal1.getTime());
@@ -321,14 +326,30 @@ public class TicketsController implements Serializable {
         }
     }
 
+    private void setStartandEndDatesToCurrentWeek() {
+        GregorianCalendar cal = new GregorianCalendar();
+        cal.set(Calendar.HOUR, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        cal.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
+
+        setStartDate(cal.getTime());
+        cal.add(Calendar.WEEK_OF_YEAR, 1);
+        cal.add(Calendar.DAY_OF_YEAR, 1);
+        cal.add(Calendar.SECOND, -1);
+        setEndDate(cal.getTime());
+    }
+
     // public DataModel getItems() {
     public PfSelectableDataModel<Tickets> getItems() {
         if (items == null) {
             //items = getPagination().createPageDataModel();
             FacesContext context = FacesContext.getCurrentInstance();
             CustomersController controller = context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
-
+            setStartandEndDatesToCurrentWeek();
             items = new PfSelectableDataModel<>(ejbFacade.findCustomerTicketsByDateRange(controller.getSelected(), startDate, endDate, true));
+            setItemCount(items.getRowCount());
         }
         LOGGER.log(Level.INFO, "lazy Load Items : rowcount = {0}", new Object[]{items.getRowCount()});
         // if (items == null) {
@@ -340,6 +361,8 @@ public class TicketsController implements Serializable {
     public void recreateModel() {
         items = null;
         filteredItems = null;
+        thisWeeksLazyModel = null;
+        lazyModel = null;
     }
 
     public String next() {
@@ -422,6 +445,86 @@ public class TicketsController implements Serializable {
             }
         }
 
+    }
+
+    /**
+     * @return the numberOfTicketsToAdd
+     */
+    public int getNumberOfTicketsToAdd() {
+        return numberOfTicketsToAdd;
+    }
+
+    /**
+     * @param numberOfTicketsToAdd the numberOfTicketsToAdd to set
+     */
+    public void setNumberOfTicketsToAdd(int numberOfTicketsToAdd) {
+        this.numberOfTicketsToAdd = numberOfTicketsToAdd;
+    }
+
+    /**
+     * @return the weeksValid
+     */
+    public int getWeeksValid() {
+        return weeksValid;
+    }
+
+    /**
+     * @param weeksValid the weeksValid to set
+     */
+    public void setWeeksValid(int weeksValid) {
+        this.weeksValid = weeksValid;
+    }
+
+    /**
+     * @return the sessionType
+     */
+    public SessionTypes getSessionType() {
+        return sessionType;
+    }
+
+    /**
+     * @param sessionType the sessionType to set
+     */
+    public void setSessionType(SessionTypes sessionType) {
+        this.sessionType = sessionType;
+    }
+
+    /**
+     * @return the thisWeeksLazyModel
+     */
+    public LazyLoadingDataModel<Tickets> getThisWeeksLazyModel() {
+        if (thisWeeksLazyModel == null) {
+            GregorianCalendar cal = new GregorianCalendar();
+            cal.set(Calendar.HOUR, 0);
+            cal.set(Calendar.MINUTE, 0);
+            cal.set(Calendar.SECOND, 0);
+            cal.set(Calendar.MILLISECOND, 0);
+            cal.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
+            thisWeeksLazyModel = new LazyLoadingDataModel<>(ejbFacade);
+            thisWeeksLazyModel.setFromDate(cal.getTime());
+            cal.add(Calendar.WEEK_OF_YEAR, 1);
+            cal.add(Calendar.DAY_OF_YEAR, 1);
+            cal.add(Calendar.SECOND, -1);
+            thisWeeksLazyModel.setToDate(cal.getTime());
+            thisWeeksLazyModel.setDateRangeEntityFieldName("datePurchased");
+            thisWeeksLazyModel.setUseDateRange(true);
+        }
+
+        return thisWeeksLazyModel;
+    }
+
+    /**
+     * @param thisWeeksLazyModel the thisWeeksLazyModel to set
+     */
+    public void setThisWeeksLazyModel(LazyLoadingDataModel<Tickets> thisWeeksLazyModel) {
+        this.thisWeeksLazyModel = thisWeeksLazyModel;
+    }
+
+    /**
+     * @param itemCount the itemCount to set
+     */
+    public void setItemCount(int itemCount) {
+        this.itemCount = itemCount;
     }
 
 }
