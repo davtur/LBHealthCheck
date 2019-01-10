@@ -85,6 +85,10 @@
                             <div class="ui-g-12">
                                 <div class="ui-g-3">
                                     <p:commandButton id="mapsBtn" styleClass="MarRight5" value="#{configMapController.getKey('Timetable_MapsButtonTitle')}" type="button" />
+                                    <p:overlayPanel  for="mapsBtn" hideEffect="fade" dynamic="true" styleClass="timetableGmap" >
+                                        <p:gmap styleClass="BorderedBox timetableGmap" center="#{sessHist.sessionTemplate.sessionLocationGps}" zoom="16" model="#{sessHist.sessionTemplate.simpleModel}" type="HYBRID" style="width:100%;height:400px" />
+
+                                    </p:overlayPanel>
                                 </div>
                                 <div class="ui-g-3">
                                     <p:commandButton styleClass="MarRight5 GreenButton animated pulse infinite "   update="@(.signUpFormUpdate)" oncomplete="PF('signupDialog').show()" rendered="#{sessHist.sessionTemplate.showSignupButton and  empty  facesContext.externalContext.remoteUser}" value="#{configMapController.getKey('Timetable_SignUpButtonTitle')}"  actionListener="#{customersController.signUp}"  >
@@ -102,6 +106,7 @@
                                     <p:commandButton icon="ui-icon-check fa fa-check white Fs14" id="AdminView" rendered="#{customersController.isUserInRole('ADMIN') ||customersController.isUserInRole('DEVELOPER') }"    value="#{configMapController.getKey('BookingFormAdminViewLink')}" update="@(.bookingFormUpdate) :growl "/>                
                                 </div>
 
+
                                 <p:overlayPanel id="adminOverlay" for="AdminView" hideEffect="fade" dynamic="true"  rendered="#{customersController.isUserInRole('ADMIN') ||customersController.isUserInRole('DEVELOPER') }"  style="width:200px" >
                                     <div class="ui-g">
                                         <div class="ui-g-12 Fs14 FontBold black">
@@ -118,12 +123,8 @@
                                             </div>
                                         </p:repeat>
                                     </div>
-                                </p:overlayPanel>
+                                </p:overlayPanel>  
 
-                                <p:overlayPanel  for="mapsBtn" hideEffect="fade" dynamic="false" styleClass="timetableGmap" >
-                                    <p:gmap styleClass="BorderedBox timetableGmap" center="#{sessHist.sessionTemplate.sessionLocationGps}" zoom="16" model="#{sessHist.sessionTemplate.simpleModel}" type="HYBRID" style="width:100%;height:400px" />
-
-                                </p:overlayPanel>
                             </div>
 
 

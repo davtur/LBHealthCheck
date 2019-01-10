@@ -3345,6 +3345,9 @@ public class CustomersController implements Serializable {
                 if (cs.contains("USER")) {
                     selectedCustomerTypes.add(cs);
                 }
+                if (cs.contains("LEAD")) {
+                    selectedCustomerTypes.add(cs);
+                }
                 // if (cs.getCustomerState().contains("ON HOLD")) {
                 //     selectedCustomerStates[1] = cs;
                 //  }

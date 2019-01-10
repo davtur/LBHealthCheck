@@ -224,6 +224,7 @@
             <description/>
             <url-pattern>/index.xhtml</url-pattern>
         </web-resource-collection>
+        
         <web-resource-collection>
             <web-resource-name>PushMessages</web-resource-name>
             <description/>

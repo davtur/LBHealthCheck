@@ -1565,7 +1565,12 @@ public class EziDebitPaymentGateway implements Serializable {
 
             }
         }
-        return customerProvisionedInPaymentGW.get();
+        if(customerProvisionedInPaymentGW == null){
+            return false;
+        }else{
+         return customerProvisionedInPaymentGW.get();   
+        }
+        
     }
 
     public boolean isCustomerWebDDRFormEnabled() {
