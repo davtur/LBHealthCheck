@@ -109,6 +109,14 @@
                         </div>
                         <div class="ui-g-4">
                             <p:calendar  pattern="dd MMM yyyy" value="#{ezidebit.paymentDebitDate}" title="#{configMapController.getKey('AddPaymentScheduleTitle_debitdate')}" required="true" requiredMessage="#{configMapController.getKey('AddPaymentScheduleRequiredMessage_debitdate')}" >
+                                <p:ajax event="dateSelect" listener="#{customersController.changeNewScheduleStartDate}" />
+                            </p:calendar>
+                        </div>
+                        <div class="ui-g-2 FontBold">
+                            <p:outputLabel value="#{configMapController.getKey('AddPaymentScheduleLabel_plandate')}"  />
+                        </div>
+                        <div class="ui-g-4">
+                            <p:calendar  pattern="dd MMM yyyy" value="#{customersController.newPlanStartDate}" title="#{configMapController.getKey('AddPaymentScheduleTitle_plandate')}" required="true" requiredMessage="#{configMapController.getKey('AddPaymentScheduleRequiredMessage_plandate')}" >
                                 <p:ajax event="dateSelect" listener="#{customersController.changeNewPlanStartDate}" />
                             </p:calendar>
                         </div>
@@ -164,7 +172,7 @@
                             <p:outputLabel  rendered="#{ezidebit.paymentSchedulePeriodType == 'M' }" value="#{configMapController.getKey('AddPaymentScheduleLabel_paymentDayOfMonth')}" for="changePlanDayOfMonth" />
                         </div>
                         <div class="ui-g-4">
-                            <p:selectOneMenu   disabled="true" rendered="#{ezidebit.paymentSchedulePeriodType == 'M' }" id="changePlanDayOfMonth" value="#{ezidebit.paymentDayOfMonth}"  >
+                            <p:selectOneMenu  disabled="#{!dayOfMonthDropdownDisabled}" rendered="#{ezidebit.paymentSchedulePeriodType == 'M' }" id="changePlanDayOfMonth" value="#{ezidebit.paymentDayOfMonth}"  >
                                 <f:selectItems value="#{ezidebit.daysInMonth}" var="num" itemValue="#{num}" /> 
                                 <p:ajax update="changePlanForm"   listener="#{customersController.changeNewScheduleUpdateListener}" /> 
                             </p:selectOneMenu> 

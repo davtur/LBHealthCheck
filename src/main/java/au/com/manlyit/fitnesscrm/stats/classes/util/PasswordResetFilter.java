@@ -132,8 +132,8 @@ public class PasswordResetFilter implements Filter {
                                         if (cst.getTermsConditionsAccepted() == true) {
                                             res.sendRedirect(detailsURL);
                                         } else {
-                                            //res.sendRedirect(surveysURL);
-                                            res.sendRedirect(timetableURL);
+                                            res.sendRedirect(surveysURL);
+                                            //res.sendRedirect(timetableURL);
                                         }
 
                                     } catch (IOException e) {

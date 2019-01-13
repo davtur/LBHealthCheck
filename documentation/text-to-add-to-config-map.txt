@@ -2286,3 +2286,8 @@ changePlan_LastSuccessfulPayment=Last Payment Date
 EditCustomersIssueTicketsButton=Issue Tickets
 issueTicketsDialogueTitle=Issue Tickets
 MyDetailsPlanPanel_title=My Membership Plan
+
+
+AddPaymentScheduleLabel_plandate=Plan Start Date
+AddPaymentScheduleTitle_plandate= This is the date the new plan will start.
+AddPaymentScheduleRequiredMessage_plandate= The new plan start date is required.

@@ -25,6 +25,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.el.ELException;
 import javax.enterprise.context.SessionScoped;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
@@ -466,23 +467,37 @@ public class SurveyAnswersController implements Serializable {
     }
 
     public List<SurveyAnswers> getSurveyList() {
-        if (surveyAnswers == null) {
-            surveyAnswers = new ArrayList<>();
-            prepareSurveysForSelectedCustomer();
-            FacesContext context = FacesContext.getCurrentInstance();
-            CustomersController customersController = context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
-            Collection<SurveyQuestions> lsq = selectedSurvey.getSurveyQuestionsCollection();
-            lsq = sortQuestionsByOrderField((List<SurveyQuestions>) lsq);
-            for (SurveyQuestions quest : lsq) {
-                SurveyAnswers sa = ejbFacade.findSurveyAnswersByCustomerAndQuestion(customersController.getSelected(), quest);
-                if (sa != null) {
-                    surveyAnswers.add(sa);
-                } else {
-                    LOGGER.log(Level.WARNING, "getSurveyList , answer for question id: {1}, text: \"{0}\" is null",new Object[]{ quest.getQuestion(), quest.getId()});
+        try {
+            if (surveyAnswers == null) {
+                surveyAnswers = new ArrayList<>();
+                prepareSurveysForSelectedCustomer();
+                FacesContext context = FacesContext.getCurrentInstance();
+                CustomersController customersController = context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
+                Collection<SurveyQuestions> lsq = selectedSurvey.getSurveyQuestionsCollection();
+                lsq = sortQuestionsByOrderField((List<SurveyQuestions>) lsq);
+                for (SurveyQuestions quest : lsq) {
+                    SurveyAnswers sa = ejbFacade.findSurveyAnswersByCustomerAndQuestion(customersController.getSelected(), quest);
+                    if (sa != null) {
+                        surveyAnswers.add(sa);
+                    } else {
+                        LOGGER.log(Level.WARNING, "getSurveyList , answer for question id: {1}, text: \"{0}\" is null", new Object[]{quest.getQuestion(), quest.getId()});
+                    }
                 }
             }
+            if (surveyAnswers.isEmpty() == false) {
+                // set the Save survey butoon enabled if the disclaimer checkbox is ticked
+                for (SurveyAnswers answer : surveyAnswers) {
+                    if (answer.getAnswerTypeid().getType().contentEquals("Disclaimer")) {
+                        ArrayList<SurveyAnswerSubitems> subColl = new ArrayList<>(answer.getSurveyAnswerSubitemsCollection());
+                        
+                        setSurveySaveEnabled(subColl.get(0).getSubitemBool());
+                        
+                    }
+                }
+            }
+        } catch (ELException exception) {
+            LOGGER.log(Level.WARNING, "getSurveyList , Unhandled error:", exception.getMessage());
         }
-
         return surveyAnswers;
 
     }

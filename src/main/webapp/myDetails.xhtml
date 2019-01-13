@@ -25,61 +25,62 @@
                     <div class="card card-w-title">
 
                         <h1 class="BigTopic">#{configMapController.getKey('ListCustomersTitle_ProfilePic')}</h1>
+                        <p:panel>
+                            <p:graphicImage id="photo1" value="#{customersController.selected.profileImage.imageStream}" height="150px" cache="false" styleClass="parentOfUploadPhoto" />
+                            <div class="EmptyBox10"></div>
+                            <p:commandButton icon="fa fa-upload  white Fs14" title="#{configMapController.getKey('Tooltip_photoUploadButton')}" id="photoUploadButton" ajax="true"  onclick="PF('uploadPhotoDialogueWidget').show();" update=":growl @(.parentOfUploadPhoto) "   value="#{configMapController.getKey('EditCustomersUploadPhotoButton')}" immediate="true"/>
 
-                        <p:graphicImage id="photo1" value="#{customersController.selected.profileImage.imageStream}" height="150px" cache="false" styleClass="parentOfUploadPhoto" />
-                        <div class="EmptyBox10"></div>
-                        <p:commandButton icon="fa fa-upload  white Fs14" title="#{configMapController.getKey('Tooltip_photoUploadButton')}" id="photoUploadButton" ajax="true"  onclick="PF('uploadPhotoDialogueWidget').show();" update=":growl @(.parentOfUploadPhoto) "   value="#{configMapController.getKey('EditCustomersUploadPhotoButton')}" immediate="true"/>
-
-
+                        </p:panel>
                         <h1 class="BigTopic">#{configMapController.getKey('ListCustomersTitle_CustomerDetailsHeader')}</h1>
-                        <h:panelGrid columns="2"   >
-                            <p:outputLabel value="#{configMapController.getKey('EditCustomersLabel_firstname')}" for="firstname" />
-                            <p:inputText id="firstname"  value="#{customersController.selected.firstname}" title="#{configMapController.getKey('EditCustomersTitle_firstname')}"  required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_firstname')}"/>
+                        <p:panel>
+                            <h:panelGrid columns="2"   >
+                                <p:outputLabel value="#{configMapController.getKey('EditCustomersLabel_firstname')}" for="firstname" />
+                                <p:inputText id="firstname"  value="#{customersController.selected.firstname}" title="#{configMapController.getKey('EditCustomersTitle_firstname')}"  required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_firstname')}"/>
 
-                            <p:outputLabel value="#{configMapController.getKey('EditCustomersLabel_lastname')}" for="lastname" />
-                            <p:inputText id="lastname" value="#{customersController.selected.lastname}" title="#{configMapController.getKey('EditCustomersTitle_lastname')}"  required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_lastname')}"/>
-                            <p:outputLabel value="#{configMapController.getKey('EditCustomersLabel_emailAddress')}" for="emailAddress" />
-                            <p:inputText id="emailAddress" value="#{customersController.selected.emailAddress}" title="#{configMapController.getKey('EditCustomersTitle_emailAddress')}" required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_emailAddress')}">
-                                <f:validator validatorId="au.com.manlyit.fitnesscrm.stats.classes.util.EmailValidator" />
-                            </p:inputText>
+                                <p:outputLabel value="#{configMapController.getKey('EditCustomersLabel_lastname')}" for="lastname" />
+                                <p:inputText id="lastname" value="#{customersController.selected.lastname}" title="#{configMapController.getKey('EditCustomersTitle_lastname')}"  required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_lastname')}"/>
+                                <p:outputLabel value="#{configMapController.getKey('EditCustomersLabel_emailAddress')}" for="emailAddress" />
+                                <p:inputText id="emailAddress" value="#{customersController.selected.emailAddress}" title="#{configMapController.getKey('EditCustomersTitle_emailAddress')}" required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_emailAddress')}">
+                                    <f:validator validatorId="au.com.manlyit.fitnesscrm.stats.classes.util.EmailValidator" />
+                                </p:inputText>
 
-                            <p:outputLabel value="#{configMapController.getKey('EditCustomersLabel_telephone')}" for="telephone" />
-                            <p:inputText id="telephone" value="#{customersController.selected.telephone}" title="#{configMapController.getKey('EditCustomersTitle_telephone')}" required="false" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_telephone')}"/>
+                                <p:outputLabel value="#{configMapController.getKey('EditCustomersLabel_telephone')}" for="telephone" />
+                                <p:inputText id="telephone" value="#{customersController.selected.telephone}" title="#{configMapController.getKey('EditCustomersTitle_telephone')}" required="false" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_telephone')}"/>
 
-                            <p:outputLabel value="#{configMapController.getKey('EditCustomersLabel_gender')}" for="gender" />
-                            <p:selectOneMenu  styleClass="selectOneWidth" id="gender" value="#{customersController.selected.gender}" title="#{configMapController.getKey('EditCustomersTitle_gender')}" required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_gender')}">
-                                <f:selectItem itemValue="F" itemLabel="Female" />
-                                <f:selectItem itemValue="M" itemLabel="Male" />
-                                <p:ajax event="change" />
-                            </p:selectOneMenu>
+                                <p:outputLabel value="#{configMapController.getKey('EditCustomersLabel_gender')}" for="gender" />
+                                <p:selectOneMenu  styleClass="selectOneWidth" id="gender" value="#{customersController.selected.gender}" title="#{configMapController.getKey('EditCustomersTitle_gender')}" required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_gender')}">
+                                    <f:selectItem itemValue="F" itemLabel="Female" />
+                                    <f:selectItem itemValue="M" itemLabel="Male" />
+                                    <p:ajax event="change" />
+                                </p:selectOneMenu>
 
-                            <p:outputLabel value="#{configMapController.getKey('EditCustomersLabel_dob')}" for="dob" />
-                            <p:calendar id="dob" value="#{customersController.selected.dob}" pattern="dd/MM/yyyy"   title="#{configMapController.getKey('EditCustomersTitle_dob')}"  required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_dob')}">
-                                <p:ajax event="dateSelect" listener="#{customersController.dobChangeListener}" update=":growl"  />
-                            </p:calendar>
+                                <p:outputLabel value="#{configMapController.getKey('EditCustomersLabel_dob')}" for="dob" />
+                                <p:calendar id="dob" value="#{customersController.selected.dob}" pattern="dd/MM/yyyy"   title="#{configMapController.getKey('EditCustomersTitle_dob')}"  required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_dob')}">
+                                    <p:ajax event="dateSelect" listener="#{customersController.dobChangeListener}" update=":growl"  />
+                                </p:calendar>
 
 
 
-                            <p:outputLabel value="#{configMapController.getKey('EditCustomersLabel_streetAddress')}" for="streetAddress" />
-                            <p:inputText id="streetAddress" value="#{customersController.selected.streetAddress}" title="#{configMapController.getKey('EditCustomersTitle_streetAddress')}" required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_streetAddress')}"/>
-                            <p:outputLabel value="#{configMapController.getKey('EditCustomersLabel_suburb')}" for="suburb" />
-                            <p:inputText id="suburb" value="#{customersController.selected.suburb}" title="#{configMapController.getKey('EditCustomersTitle_suburb')}" required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_suburb')}"/>
-                            <p:outputLabel value="#{configMapController.getKey('EditCustomersLabel_postcode')}" for="postcode" />
-                            <p:inputText id="postcode" value="#{customersController.selected.postcode}" title="#{configMapController.getKey('EditCustomersTitle_postcode')}" required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_postcode')}"/>
-                             <!--<p:outputLabel value="#{configMapController.getKey('EditCustomersLabel_fax')}" for="fax" />
-                            <p:inputText id="fax" value="#{customersController.selected.fax}" title="#{configMapController.getKey('EditCustomersTitle_fax')}" />-->
-                            <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_emergencyContactName')}" for="emergencyContactName" />
-                            <p:inputText id="emergencyContactName" value="#{customersController.newCustomer.emergencyContactName}" title="#{configMapController.getKey('CreateCustomersTitle_emergencyContactName')}"  />
-                            <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_emergencyContactPhone')}" for="emergencyContactPhone" />
-                            <p:inputText id="emergencyContactPhone" value="#{customersController.newCustomer.emergencyContactPhone}" title="#{configMapController.getKey('CreateCustomersTitle_emergencyContactPhone')}" >
-                                <!-- <f:validator validatorId="au.com.manlyit.fitnesscrm.stats.classes.util.PhoneNumberValidator"  />-->
-                            </p:inputText>
+                                <p:outputLabel value="#{configMapController.getKey('EditCustomersLabel_streetAddress')}" for="streetAddress" />
+                                <p:inputText id="streetAddress" value="#{customersController.selected.streetAddress}" title="#{configMapController.getKey('EditCustomersTitle_streetAddress')}" required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_streetAddress')}"/>
+                                <p:outputLabel value="#{configMapController.getKey('EditCustomersLabel_suburb')}" for="suburb" />
+                                <p:inputText id="suburb" value="#{customersController.selected.suburb}" title="#{configMapController.getKey('EditCustomersTitle_suburb')}" required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_suburb')}"/>
+                                <p:outputLabel value="#{configMapController.getKey('EditCustomersLabel_postcode')}" for="postcode" />
+                                <p:inputText id="postcode" value="#{customersController.selected.postcode}" title="#{configMapController.getKey('EditCustomersTitle_postcode')}" required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_postcode')}"/>
+                                 <!--<p:outputLabel value="#{configMapController.getKey('EditCustomersLabel_fax')}" for="fax" />
+                                <p:inputText id="fax" value="#{customersController.selected.fax}" title="#{configMapController.getKey('EditCustomersTitle_fax')}" />-->
+                                <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_emergencyContactName')}" for="emergencyContactName" />
+                                <p:inputText id="emergencyContactName" value="#{customersController.newCustomer.emergencyContactName}" title="#{configMapController.getKey('CreateCustomersTitle_emergencyContactName')}"  />
+                                <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_emergencyContactPhone')}" for="emergencyContactPhone" />
+                                <p:inputText id="emergencyContactPhone" value="#{customersController.newCustomer.emergencyContactPhone}" title="#{configMapController.getKey('CreateCustomersTitle_emergencyContactPhone')}" >
+                                    <!-- <f:validator validatorId="au.com.manlyit.fitnesscrm.stats.classes.util.PhoneNumberValidator"  />-->
+                                </p:inputText>
 
-                            <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_preferredContact')}" for="preferredContact1" />
-                            <p:selectOneMenu  styleClass="selectOneWidth" id="preferredContact1" valueChangeListener="#{customersController.selectOneMenuValueChangeListener}" converter="preferedContactControllerConverter" value="#{customersController.selected.preferredContact}" label="#{configMapController.getKey('CreateCustomersTitle_preferredContact')}" >
-                                <f:selectItems value="#{preferedContactController.itemsAvailableAsObjects}"  var="prefContact" itemLabel="#{prefContact.preferedContactMethod}" itemValue="#{prefContact}"/>
-                                <p:ajax  event="change" />
-                            </p:selectOneMenu>
+                                <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_preferredContact')}" for="preferredContact1" />
+                                <p:selectOneMenu  styleClass="selectOneWidth" id="preferredContact1" valueChangeListener="#{customersController.selectOneMenuValueChangeListener}" converter="preferedContactControllerConverter" value="#{customersController.selected.preferredContact}" label="#{configMapController.getKey('CreateCustomersTitle_preferredContact')}" >
+                                    <f:selectItems value="#{preferedContactController.itemsAvailableAsObjects}"  var="prefContact" itemLabel="#{prefContact.preferedContactMethod}" itemValue="#{prefContact}"/>
+                                    <p:ajax  event="change" />
+                                </p:selectOneMenu>
 
                           <!--  <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_newsletter')}" title="#{configMapController.getKey('EditCustomersTitle_newsletter')}" for="newsletter1" />
                             <p:selectOneMenu   styleClass="selectOneWidth" id="newsletter1" value="#{customersController.selected.newsletter}"  >
@@ -92,63 +93,63 @@
                                 <f:selectItems value="#{emailFormatController.itemsAvailableAsObjects}"  var="emailFormat" itemLabel="#{emailFormat.emailFormat}" itemValue="#{emailFormat}"/>
                                 <p:ajax  event="change" />
                             </p:selectOneMenu>-->
-                        </h:panelGrid>
-                        <div class="EmptyBox10"></div>
+                            </h:panelGrid>
+                            <div class="EmptyBox10"></div>
 
-                        <p:commandButton id="saveMyDetails" actionListener="#{customersController.update}" title="#{configMapController.getKey('Tooltip_saveMyDetails')}" value="#{configMapController.getKey('EditCustomersSaveLink')}" icon="ui-icon-check fa fa-check white Fs14" update=":growl"/>
-
+                            <p:commandButton id="saveMyDetails" actionListener="#{customersController.update}" title="#{configMapController.getKey('Tooltip_saveMyDetails')}" value="#{configMapController.getKey('EditCustomersSaveLink')}" icon="ui-icon-check fa fa-check white Fs14" update=":growl"/>
+                        </p:panel>
 
                     </div>
                     <div class="card card-w-title">
                         <h1 class="BigTopic">#{configMapController.getKey('MyDetailsLogin_title')}</h1>
-                        <h:panelGrid columns="2" cellpadding="5" >
-                            <p:outputLabel value="#{configMapController.getKey('EditCustomersLabel_username')}" for="username" />
-                            <h:outputText id="username" value="#{customersController.selected.username}" title="#{configMapController.getKey('EditCustomersTitle_username')}" />
+                        <p:panel >
+                            <h:panelGrid columns="2" cellpadding="5" >
+                                <p:outputLabel value="#{configMapController.getKey('EditCustomersLabel_username')}" for="username" />
+                                <h:outputText id="username" value="#{customersController.selected.username}" title="#{configMapController.getKey('EditCustomersTitle_username')}" />
 
-                            <p:outputLabel value="#{configMapController.getKey('EditCustomersLabel_password')}" for="passButton2" />
-                            <!--  <p:password id="password"  value="#{customersController.checkPass}" onfocus="this.select()" feedback="true" title="#{configMapController.getKey('EditCustomersTitle_password')}" >
-                                <p:ajax listener="#{customersController.checkPassChange}" event="keyup" />
-                            </p:password>
-                          TODO make this a dialogue <h:outputLabel value="#{configMapController.getKey('EditCustomersLabel_password')}" for="password2" />
-                            <p:password id="password2"  value="#{customersController.checkPass}" onfocus="this.select()" feedback="true" title="#{configMapController.getKey('EditCustomersTitle_password')}" />
-                          
-                            <p:commandButton   ajax="true" actionListener="#{customersController.updatepass}" update="password  :growl"   value="#{configMapController.getKey('EditCustomersUpdatePassword')}" immediate="true"/>-->
+                                <p:outputLabel value="#{configMapController.getKey('EditCustomersLabel_password')}" for="passButton2" />
+                                <!--  <p:password id="password"  value="#{customersController.checkPass}" onfocus="this.select()" feedback="true" title="#{configMapController.getKey('EditCustomersTitle_password')}" >
+                                    <p:ajax listener="#{customersController.checkPassChange}" event="keyup" />
+                                </p:password>
+                              TODO make this a dialogue <h:outputLabel value="#{configMapController.getKey('EditCustomersLabel_password')}" for="password2" />
+                                <p:password id="password2"  value="#{customersController.checkPass}" onfocus="this.select()" feedback="true" title="#{configMapController.getKey('EditCustomersTitle_password')}" />
+                              
+                                <p:commandButton   ajax="true" actionListener="#{customersController.updatepass}" update="password  :growl"   value="#{configMapController.getKey('EditCustomersUpdatePassword')}" immediate="true"/>-->
 
-                            <p:commandButton icon="fa fa-cog  white Fs14" id="passButton2" ajax="true" title="#{configMapController.getKey('Tooltip_passChangeButton')}" onclick="PF('updatePasswordDialogueWidget').show();" update=":growl :updatePass"   value="#{configMapController.getKey('EditCustomersUpdatePassword')}" immediate="true"/>
+                                <p:commandButton icon="fa fa-cog  white Fs14" id="passButton2" ajax="true" title="#{configMapController.getKey('Tooltip_passChangeButton')}" onclick="PF('updatePasswordDialogueWidget').show();" update=":growl :updatePass"   value="#{configMapController.getKey('EditCustomersUpdatePassword')}" immediate="true"/>
 
 
-                        </h:panelGrid>
-
+                            </h:panelGrid>
+                        </p:panel>
                     </div>
                     <div class="card card-w-title">
                         <h1 class="BigTopic">#{configMapController.getKey('MyDetailsSurveyPanel_title')}</h1>
-
-
+                        <p:panel >
  <!--   <p:outputLabel value="#{configMapController.getKey('CreateSurveyanswersLabel_surveyId')}" for="surveyId" />
                         <p:selectOneMenu id="surveyId" valueChangeListener="#{surveyanswersController.selectOneMenuValueChangeListener}" converter="surveysControllerConverter"  value="#{surveyanswersController.selectedSurvey}"  label="#{configMapController.getKey('CreateSurveyanswersTitle_surveyId')}">
                             <f:selectItems value="#{surveysController.itemsAvailableSelectMany}"/>
                             <p:ajax   update=":createCustomerForm"  />
                         </p:selectOneMenu>-->
-                        <ui:repeat value="#{customersController.selected.questionnaireMapCollection}" var="qMap">
-                            <div class="EmptyBox10"></div>
-                                                <!--   <p:commandButton icon="fa fa-edit  white Fs14" id="viewSurveyButton" disabled="#{empty surveyanswersController.selectedSurvey}"  action="customerSurveys"    value="#{configMapController.getKey('MyDeatilsSurveys_viewSurveyLabel')}" update=":growl :createCustomerForm"  /> -->
+                            <ui:repeat value="#{customersController.selected.questionnaireMapCollection}" var="qMap">
+                                <div class="EmptyBox10"></div>
+                                                    <!--   <p:commandButton icon="fa fa-edit  white Fs14" id="viewSurveyButton" disabled="#{empty surveyanswersController.selectedSurvey}"  action="customerSurveys"    value="#{configMapController.getKey('MyDeatilsSurveys_viewSurveyLabel')}" update=":growl :createCustomerForm"  /> -->
 
-                            <h:panelGrid columns="2" cellpadding="5" >
-
-
-                                <p:commandButton icon="fa fa-edit  white Fs14"   action="customerSurveys" rendered="#{qMap.enabled}"   value="#{qMap.surveysId.name}" update=":growl :createCustomerForm"  >
-                                    <f:setPropertyActionListener value="#{qMap.surveysId}" target="#{surveyanswersController.selectedSurvey}" />
-                                </p:commandButton> 
-
-                                <h:outputText  rendered="#{!qMap.questionnaireCompleted and qMap.enabled}"  styleClass="red FontBold" value="Please complete this form." />   
+                                <h:panelGrid columns="2" cellpadding="5" >
 
 
-                                <h:outputText  rendered="#{qMap.questionnaireCompleted and qMap.enabled}" value="Completed" />   
+                                    <p:commandButton icon="fa fa-edit  white Fs14"   action="customerSurveys" rendered="#{qMap.enabled}"   value="#{qMap.surveysId.name}" update=":growl :createCustomerForm"  >
+                                        <f:setPropertyActionListener value="#{qMap.surveysId}" target="#{surveyanswersController.selectedSurvey}" />
+                                    </p:commandButton> 
 
-                            </h:panelGrid>
+                                    <h:outputText  rendered="#{!qMap.questionnaireCompleted and qMap.enabled}"  styleClass="red FontBold" value="Please complete this form." />   
 
-                        </ui:repeat>
 
+                                    <h:outputText  rendered="#{qMap.questionnaireCompleted and qMap.enabled}" value="Completed" />   
+
+                                </h:panelGrid>
+
+                            </ui:repeat>
+                        </p:panel>
                     </div>
 
                 </div>
@@ -220,166 +221,174 @@
                                     <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
                                 </h:outputText>
                             </h:panelGrid>
+
+                            <div class="EmptyBox10"></div>
+                            <h:panelGrid columns="2" cellpadding="5" >
+
+                                <h:outputText rendered="#{ezidebit.customerWebDDRFormEnabled}"  styleClass="red FontBold"   value="#{configMapController.getKey('MyDetailsCallToFillOutPaymentDetails')}"/>
+
+                                <p:commandButton  styleClass="updatePaymentInfo" icon="fa fa-dollar  white Fs14" title="#{configMapController.getKey('Tooltip_updateMyPaymentDetails')}" id="directDebitFormButton" disabled="#{!ezidebit.customerWebDDRFormEnabled}"  actionListener="#{ezidebit.redirectToPaymentGateway}"    value="#{configMapController.getKey('EnterPaymentDetailsButton')}" update=":growl :createCustomerForm"  /> 
+
+
+
+                                <h:outputText  rendered="#{!ezidebit.customerWebDDRFormEnabled and customersController.selected.paymentParametersId.statusCode != 'D'}" value="Completed" /> 
+
+                            </h:panelGrid>
+                            <div class="EmptyBox10"></div>
+                            <p:commandButton styleClass="updatePaymentInfo" icon="fa fa-credit-card  white Fs14" title="#{configMapController.getKey('Tooltip_updateMyPaymentInfo')}" id="editPaymentMethodButton" disabled="#{ezidebit.theCustomerProvisionedInThePaymentGateway == false or ezidebit.customerDetailsHaveBeenRetrieved == false }"  oncomplete="PF('editPaymentMethodDialogueWidget').show();"    value="#{configMapController.getKey('editPaymentMethodButtonLink')}" update=":growl @(.updatePaymentInfo)"  /> 
+
                         </p:panel>
-                        <div class="EmptyBox10"></div>
-                        <h:panelGrid columns="2" cellpadding="5" >
-
-                            <h:outputText rendered="#{ezidebit.customerWebDDRFormEnabled}"  styleClass="red FontBold"   value="#{configMapController.getKey('MyDetailsCallToFillOutPaymentDetails')}"/>
-
-                            <p:commandButton  styleClass="updatePaymentInfo" icon="fa fa-dollar  white Fs14" title="#{configMapController.getKey('Tooltip_updateMyPaymentDetails')}" id="directDebitFormButton" disabled="#{!ezidebit.customerWebDDRFormEnabled}"  actionListener="#{ezidebit.redirectToPaymentGateway}"    value="#{configMapController.getKey('EnterPaymentDetailsButton')}" update=":growl :createCustomerForm"  /> 
-
-
-
-                            <h:outputText  rendered="#{!ezidebit.customerWebDDRFormEnabled and customersController.selected.paymentParametersId.statusCode != 'D'}" value="Completed" /> 
-
-                        </h:panelGrid>
-                        <div class="EmptyBox10"></div>
-                        <p:commandButton styleClass="updatePaymentInfo" icon="fa fa-credit-card  white Fs14" title="#{configMapController.getKey('Tooltip_updateMyPaymentInfo')}" id="editPaymentMethodButton" disabled="#{ezidebit.theCustomerProvisionedInThePaymentGateway == false or ezidebit.customerDetailsHaveBeenRetrieved == false }"  oncomplete="PF('editPaymentMethodDialogueWidget').show();"    value="#{configMapController.getKey('editPaymentMethodButtonLink')}" update=":growl @(.updatePaymentInfo)"  /> 
-
-
 
                     </div>
                     <div class="card card-w-title">
                         <h1 class="BigTopic">#{configMapController.getKey('MyDetailsPlanPanel_title')}</h1>
-                        <h:panelGrid columns="2" cellpadding="5" >
-                            <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_groupPricing')}"  />
-                            <h:outputText value="#{customersController.selected.groupPricing.planName} - $#{customersController.selected.groupPricing.planPrice}" title="#{configMapController.getKey('ChangePlanNewPlanTitle')}"/>
+                        <p:panel>
+                            <h:panelGrid columns="2" cellpadding="5" >
+                                <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_groupPricing')}"  />
+                                <h:outputText value="#{customersController.selected.groupPricing.planName} - $#{customersController.selected.groupPricing.planPrice}" title="#{configMapController.getKey('ChangePlanNewPlanTitle')}"/>
 
-                            <p:outputLabel value="#{configMapController.getKey('ViewPlanLabel_planDescription')}" for="planDescription"/>
-                            <h:outputText id="planDescription" value="#{customersController.selected.groupPricing.planDescription}" title="#{configMapController.getKey('ViewPlanTitle_planDescription')}"/>
-                        </h:panelGrid>
-                    </div>
-                    <div class="card card-w-title">
+                                <p:outputLabel value="#{configMapController.getKey('ViewPlanLabel_planDescription')}" for="planDescription"/>
+                                <h:outputText id="planDescription" value="#{customersController.selected.groupPricing.planDescription}" title="#{configMapController.getKey('ViewPlanTitle_planDescription')}"/>
+                            </h:panelGrid>
+                            <p:commandButton  styleClass="updatePaymentInfo" icon="fa fa-dollar  white Fs14" title="#{configMapController.getKey('Tooltip_updateMyPaymentDetails')}"  disabled="#{!ezidebit.customerWebDDRFormEnabled}"  actionListener="#{customersController.changePlanDialogue}"    value="#{configMapController.getKey('EditCustomersChangePlanButton')}" update=":growl "  /> 
+                            <p:commandButton   icon="fa fa-clock  white Fs14" action="/timetable2.xhtml"    value="View Timetable" update=":growl "  /> 
+
+                        </p:panel>
+                    </div>  
+
+
+
+                    <div class="card card-w-title"> 
                         <h1 class="BigTopic">#{configMapController.getKey('MyDetailsTicketPanel_title')}</h1>
-
-                        <p:dataTable  
-                            id="datalist" 
-                            lazy="false"
-                            editable="false" 
-                            value="#{ticketsController.items}" 
-                            selection="#{ticketsController.selected}" 
-                            rowKey="#{item.id}" 
-                            filteredValue="#{ticketsController.filteredItems}"  
-                            widgetVar="ticketsControllerTable" 
-                            var="item"  
-                            selectionMode="single"
-                            rows="10"
-                            scrollable="true"
-                            scrollHeight="400"
-                            scrollRows="50"
-                            liveScroll="true" >
-                            <f:facet name="header">
-                                <p:outputPanel>
-                                    <h:outputText value="Search all fields:" />
-                                    <h:inputText id="globalFilter" onkeyup="PF('ticketsControllerTable').filter()" />
-                                </p:outputPanel>
-                            </f:facet>
-                            <p:ajax event="rowEdit" listener="#{ticketsController.onEdit}" update=":growl" oncomplete="PF('ticketsControllerTable').filter()" />  
-                            <p:ajax event="rowEditCancel" listener="#{ticketsController.onCancel}" update=":growl"  oncomplete="PF('ticketsControllerTable').filter()" />  
-                            <p:ajax event="rowSelect"   update=" viewButton  "/>
-                            <p:ajax event="rowUnselect" update=" viewButton  "/>
-                            <!--  <p:column selectionMode="single"/>-->
-                            <p:column sortBy="#{item.id}" filterBy="#{item.id}" headerText="#{configMapController.getKey('ListTicketsTitle_id')}"   >
-                                <p:cellEditor> 
-                                    <f:facet name="output">
-                                        <h:outputText value="#{item.id}"/>
-                                    </f:facet>
-                                    <f:facet name="input">
-                                        <p:inputText value="#{item.id}" label="#{configMapController.getKey('ListTicketsTitle_id')}" />
-                                    </f:facet>
-                                </p:cellEditor> 
-
-
-                            </p:column>
-                            <p:column sortBy="#{item.sessionType.name}" filterBy="#{item.sessionType.name}" headerText="#{configMapController.getKey('ListTicketsTitle_itemType')}"   >
-                                <p:cellEditor> 
-                                    <f:facet name="output">
-                                        <h:outputText value="#{item.sessionType.name}"/>
-                                    </f:facet>
-                                    <f:facet name="input">
-                                        <p:inputText value="#{item.sessionType.name}" label="#{configMapController.getKey('ListTicketsTitle_itemType')}" />
-                                    </f:facet>
-                                </p:cellEditor> 
+                        <p:panel>
+                            <p:dataTable  
+                                id="datalist" 
+                                lazy="false"
+                                editable="false" 
+                                value="#{ticketsController.items}" 
+                                selection="#{ticketsController.selected}" 
+                                rowKey="#{item.id}" 
+                                filteredValue="#{ticketsController.filteredItems}"  
+                                widgetVar="ticketsControllerTable" 
+                                var="item"  
+                                selectionMode="single"
+                                rows="10"
+                                scrollable="true"
+                                scrollHeight="400"
+                                scrollRows="50"
+                                liveScroll="true" >
+                                <f:facet name="header">
+                                    <p:outputPanel>
+                                        <h:outputText value="Search all fields:" />
+                                        <h:inputText id="globalFilter" onkeyup="PF('ticketsControllerTable').filter()" />
+                                    </p:outputPanel>
+                                </f:facet>
+                                <p:ajax event="rowEdit" listener="#{ticketsController.onEdit}" update=":growl" oncomplete="PF('ticketsControllerTable').filter()" />  
+                                <p:ajax event="rowEditCancel" listener="#{ticketsController.onCancel}" update=":growl"  oncomplete="PF('ticketsControllerTable').filter()" />  
+                                <p:ajax event="rowSelect"   update=" viewButton  "/>
+                                <p:ajax event="rowUnselect" update=" viewButton  "/>
+                                <!--  <p:column selectionMode="single"/>-->
+                                <p:column sortBy="#{item.id}" filterBy="#{item.id}" headerText="#{configMapController.getKey('ListTicketsTitle_id')}"   >
+                                    <p:cellEditor> 
+                                        <f:facet name="output">
+                                            <h:outputText value="#{item.id}"/>
+                                        </f:facet>
+                                        <f:facet name="input">
+                                            <p:inputText value="#{item.id}" label="#{configMapController.getKey('ListTicketsTitle_id')}" />
+                                        </f:facet>
+                                    </p:cellEditor> 
 
 
-                            </p:column>
-                            <p:column sortBy="#{item.datePurchased}" filterBy="#{item.datePurchased}" headerText="#{configMapController.getKey('ListTicketsTitle_datePurchased')}"   >
-
-                                <p:cellEditor> 
-                                    <f:facet name="output">
-                                        <h:outputText value="#{item.datePurchased}">
-                                            <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
-                                        </h:outputText>
-                                    </f:facet>
-                                    <f:facet name="input">
-                                        <p:calendar value="#{item.datePurchased}">	
-                                            <p:ajax event="dateSelect" listener= "#{ticketsController.handleDateSelect}" update=":growl" />
-                                        </p:calendar>
-                                    </f:facet>
-                                </p:cellEditor> 
-
-                            </p:column>
-                            
-                            <p:column sortBy="#{item.validFrom}" filterBy="#{item.validFrom}" headerText="#{configMapController.getKey('ListTicketsTitle_validFrom')}"   >
-
-                                <p:cellEditor> 
-                                    <f:facet name="output">
-                                        <h:outputText value="#{item.validFrom}">
-                                            <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
-                                        </h:outputText>
-                                    </f:facet>
-                                    <f:facet name="input">
-                                        <p:calendar value="#{item.validFrom}">	
-                                            <p:ajax event="dateSelect" listener= "#{ticketsController.handleDateSelect}" update=":growl" />
-                                        </p:calendar>
-                                    </f:facet>
-                                </p:cellEditor> 
-
-                            </p:column>
-                            <p:column sortBy="#{item.expires}" filterBy="#{item.expires}" headerText="#{configMapController.getKey('ListTicketsTitle_expires')}"   >
-
-                                <p:cellEditor> 
-                                    <f:facet name="output">
-                                        <h:outputText value="#{item.expires}">
-                                            <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
-                                        </h:outputText>
-                                    </f:facet>
-                                    <f:facet name="input">
-                                        <p:calendar value="#{item.expires}">	
-                                            <p:ajax event="dateSelect" listener= "#{ticketsController.handleDateSelect}" update=":growl" />
-                                        </p:calendar>
-                                    </f:facet>
-                                </p:cellEditor> 
-
-                            </p:column>
-                            <p:column sortBy="#{item.dateUsed}" filterBy="#{item.dateUsed}" headerText="#{configMapController.getKey('ListTicketsTitle_dateUsed')}"   >
-
-                                <p:cellEditor> 
-                                    <f:facet name="output">
-                                        <h:outputText value="#{item.dateUsed}">
-                                            <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
-                                        </h:outputText>
-                                    </f:facet>
-                                    <f:facet name="input">
-                                        <p:calendar value="#{item.dateUsed}">	
-                                            <p:ajax event="dateSelect" listener= "#{ticketsController.handleDateSelect}" update=":growl" />
-                                        </p:calendar>
-                                    </f:facet>
-                                </p:cellEditor> 
-
-                            </p:column>
-                          <!--  <p:column rendered="#{ticketsController.isUserInRole('ADMIN')}"  headerText="Edit" style="width:50px">  
-                                <p:rowEditor />  
-                            </p:column>  -->
+                                </p:column>
+                                <p:column sortBy="#{item.sessionType.name}" filterBy="#{item.sessionType.name}" headerText="#{configMapController.getKey('ListTicketsTitle_itemType')}"   >
+                                    <p:cellEditor> 
+                                        <f:facet name="output">
+                                            <h:outputText value="#{item.sessionType.name}"/>
+                                        </f:facet>
+                                        <f:facet name="input">
+                                            <p:inputText value="#{item.sessionType.name}" label="#{configMapController.getKey('ListTicketsTitle_itemType')}" />
+                                        </f:facet>
+                                    </p:cellEditor> 
 
 
-                            <f:facet name="footer">
-                                <p:commandButton id="viewButton"   icon="ui-icon-search" value="#{configMapController.getKey('View')}" update=":createCustomerForm" oncomplete="PF('TicketsViewDialog').show()" disabled="#{empty ticketsController.selected}"/>
-                            </f:facet>
+                                </p:column>
+                                <p:column sortBy="#{item.datePurchased}" filterBy="#{item.datePurchased}" headerText="#{configMapController.getKey('ListTicketsTitle_datePurchased')}"   >
 
-                        </p:dataTable>
+                                    <p:cellEditor> 
+                                        <f:facet name="output">
+                                            <h:outputText value="#{item.datePurchased}">
+                                                <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
+                                            </h:outputText>
+                                        </f:facet>
+                                        <f:facet name="input">
+                                            <p:calendar value="#{item.datePurchased}">	
+                                                <p:ajax event="dateSelect" listener= "#{ticketsController.handleDateSelect}" update=":growl" />
+                                            </p:calendar>
+                                        </f:facet>
+                                    </p:cellEditor> 
+
+                                </p:column>
+
+                                <p:column sortBy="#{item.validFrom}" filterBy="#{item.validFrom}" headerText="#{configMapController.getKey('ListTicketsTitle_validFrom')}"   >
+
+                                    <p:cellEditor> 
+                                        <f:facet name="output">
+                                            <h:outputText value="#{item.validFrom}">
+                                                <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
+                                            </h:outputText>
+                                        </f:facet>
+                                        <f:facet name="input">
+                                            <p:calendar value="#{item.validFrom}">	
+                                                <p:ajax event="dateSelect" listener= "#{ticketsController.handleDateSelect}" update=":growl" />
+                                            </p:calendar>
+                                        </f:facet>
+                                    </p:cellEditor> 
+
+                                </p:column>
+                                <p:column sortBy="#{item.expires}" filterBy="#{item.expires}" headerText="#{configMapController.getKey('ListTicketsTitle_expires')}"   >
+
+                                    <p:cellEditor> 
+                                        <f:facet name="output">
+                                            <h:outputText value="#{item.expires}">
+                                                <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
+                                            </h:outputText>
+                                        </f:facet>
+                                        <f:facet name="input">
+                                            <p:calendar value="#{item.expires}">	
+                                                <p:ajax event="dateSelect" listener= "#{ticketsController.handleDateSelect}" update=":growl" />
+                                            </p:calendar>
+                                        </f:facet>
+                                    </p:cellEditor> 
+
+                                </p:column>
+                                <p:column sortBy="#{item.dateUsed}" filterBy="#{item.dateUsed}" headerText="#{configMapController.getKey('ListTicketsTitle_dateUsed')}"   >
+
+                                    <p:cellEditor> 
+                                        <f:facet name="output">
+                                            <h:outputText value="#{item.dateUsed}">
+                                                <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
+                                            </h:outputText>
+                                        </f:facet>
+                                        <f:facet name="input">
+                                            <p:calendar value="#{item.dateUsed}">	
+                                                <p:ajax event="dateSelect" listener= "#{ticketsController.handleDateSelect}" update=":growl" />
+                                            </p:calendar>
+                                        </f:facet>
+                                    </p:cellEditor> 
+
+                                </p:column>
+                              <!--  <p:column rendered="#{ticketsController.isUserInRole('ADMIN')}"  headerText="Edit" style="width:50px">  
+                                    <p:rowEditor />  
+                                </p:column>  -->
 
 
+                                <f:facet name="footer">
+                                    <p:commandButton id="viewButton"   icon="ui-icon-search" value="#{configMapController.getKey('View')}" update=":createCustomerForm" oncomplete="PF('TicketsViewDialog').show()" disabled="#{empty ticketsController.selected}"/>
+                                </f:facet>
+
+                            </p:dataTable>
+
+                        </p:panel>
                     </div>
                 </div>
             </div>

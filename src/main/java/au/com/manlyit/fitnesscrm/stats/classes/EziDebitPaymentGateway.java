@@ -3266,8 +3266,8 @@ public class EziDebitPaymentGateway implements Serializable {
             if (pp != null) {
 
                 pp.setPaymentPeriod("Z");
-                pp.setPaymentPeriodDayOfMonth("-");
-                pp.setPaymentPeriodDayOfWeek("---");
+                pp.setPaymentPeriodDayOfMonth("1");
+                pp.setPaymentPeriodDayOfWeek("MON");
                 pp.setNextScheduledPayment(null);
                 ejbPaymentParametersFacade.edit(pp);
                 customersFacade.edit(cust);
