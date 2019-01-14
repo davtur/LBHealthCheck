@@ -937,12 +937,14 @@ public class SessionTimetableController implements Serializable {
        
         if (context.getExternalContext().getRemoteUser() != null) {
             // autheticated user
+              LOGGER.log(Level.INFO, "opening  Class Booking Dialogue -- User is authenticated");
             PrimeFaces.current().executeScript("PF('bookingDialog').show();");
 
             controller.setSignupFromBookingInProgress(false);
         } else {
             //unauthenticated 
             PrimeFaces.current().executeScript("PF('signupDialog').show();");
+            LOGGER.log(Level.INFO, "opening  Sign up Dialogue -- User is unauthenticated");
             //PrimeFaces.current().ajax().update("signupDialog");
             //CustomersController controller = (CustomersController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "customersController");
 
@@ -950,6 +952,15 @@ public class SessionTimetableController implements Serializable {
         }
     }
 
+    
+    public List<Tickets> listOfCustomersValidTicketsForADate(Customers c, Date sessionDate) {
+
+       
+        List<Tickets> result = ejbTicketsFacade.findCustomerTicketsValidForSessionDate(c, sessionDate, true);
+        
+        return result;
+    }
+    
     public List<Tickets> doesTheCustomerHaveATicketForAGroupSession(Customers c, Date sessionDate) {
 
         List<Tickets> result = new ArrayList<>();
@@ -1085,6 +1096,8 @@ public class SessionTimetableController implements Serializable {
         LOGGER.log(Level.INFO, "Cancel Session button clicked.");
         FacesContext context = FacesContext.getCurrentInstance();
         CustomersController controller = context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
+        TicketsController ticketsController = context.getApplication().evaluateExpressionGet(context, "#{ticketsController}", TicketsController.class);
+        
         Customers c = controller.getSelected();
 
         SessionHistory sh = bookingButtonSessionHistory;
@@ -1105,6 +1118,7 @@ public class SessionTimetableController implements Serializable {
             sessionHistoryFacade.edit(sh);
             ejbSessionBookingsFacade.remove(sb);
             recreateModel();
+            ticketsController.recreateModel();
             PrimeFaces instance = PrimeFaces.current();
             instance.executeScript("PF('bookingDialog').hide()");
             sendBookingConfirmationEmail(sb, c, "system.email.sessionBooking.cancellation.template", configMapFacade.getConfig("template.sessionbooking.cancellation.email.subject"));

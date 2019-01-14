@@ -17,7 +17,7 @@
 
                         <p:dataList  id="surveyList" value="#{surveyanswersController.surveyList}" var="answer" type="unordered" itemType="none" styleClass="surveyInputWrapper">
 
-                            <h:panelGrid columns="1" >
+                            <h:panelGrid columns="1" styleClass="surveyInputWrapper">
                                 <h:panelGroup>
                                     <h:outputText rendered="#{!(answer.answerTypeid.type == 'Heading') and !(answer.answerTypeid.type == 'Heading2')}" value="#{answer.questionId.question}" style="font-weight: bold"/> 
                                 </h:panelGroup>

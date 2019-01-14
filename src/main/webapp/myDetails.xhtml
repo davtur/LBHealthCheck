@@ -251,7 +251,7 @@
                                 <h:outputText id="planDescription" value="#{customersController.selected.groupPricing.planDescription}" title="#{configMapController.getKey('ViewPlanTitle_planDescription')}"/>
                             </h:panelGrid>
                             <p:commandButton  styleClass="updatePaymentInfo" icon="fa fa-dollar  white Fs14" title="#{configMapController.getKey('Tooltip_updateMyPaymentDetails')}"  disabled="#{!ezidebit.customerWebDDRFormEnabled}"  actionListener="#{customersController.changePlanDialogue}"    value="#{configMapController.getKey('EditCustomersChangePlanButton')}" update=":growl "  /> 
-                            <p:commandButton   icon="fa fa-clock  white Fs14" action="/timetable2.xhtml"    value="View Timetable" update=":growl "  /> 
+                            <p:commandButton   icon="fa fa-clock  white Fs14" action="/timetable2.xhtml"   ajax="false"   value="View Timetable"   /> 
 
                         </p:panel>
                     </div>  
@@ -289,103 +289,43 @@
                                 <p:ajax event="rowUnselect" update=" viewButton  "/>
                                 <!--  <p:column selectionMode="single"/>-->
                                 <p:column sortBy="#{item.id}" filterBy="#{item.id}" headerText="#{configMapController.getKey('ListTicketsTitle_id')}"   >
-                                    <p:cellEditor> 
-                                        <f:facet name="output">
-                                            <h:outputText value="#{item.id}"/>
-                                        </f:facet>
-                                        <f:facet name="input">
-                                            <p:inputText value="#{item.id}" label="#{configMapController.getKey('ListTicketsTitle_id')}" />
-                                        </f:facet>
-                                    </p:cellEditor> 
-
-
+                                    <h:outputText value="#{item.id}"/>
                                 </p:column>
                                 <p:column sortBy="#{item.sessionType.name}" filterBy="#{item.sessionType.name}" headerText="#{configMapController.getKey('ListTicketsTitle_itemType')}"   >
-                                    <p:cellEditor> 
-                                        <f:facet name="output">
-                                            <h:outputText value="#{item.sessionType.name}"/>
-                                        </f:facet>
-                                        <f:facet name="input">
-                                            <p:inputText value="#{item.sessionType.name}" label="#{configMapController.getKey('ListTicketsTitle_itemType')}" />
-                                        </f:facet>
-                                    </p:cellEditor> 
-
-
+                                    <h:outputText value="#{item.sessionType.name}"/>
                                 </p:column>
                                 <p:column sortBy="#{item.datePurchased}" filterBy="#{item.datePurchased}" headerText="#{configMapController.getKey('ListTicketsTitle_datePurchased')}"   >
-
-                                    <p:cellEditor> 
-                                        <f:facet name="output">
-                                            <h:outputText value="#{item.datePurchased}">
-                                                <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
-                                            </h:outputText>
-                                        </f:facet>
-                                        <f:facet name="input">
-                                            <p:calendar value="#{item.datePurchased}">	
-                                                <p:ajax event="dateSelect" listener= "#{ticketsController.handleDateSelect}" update=":growl" />
-                                            </p:calendar>
-                                        </f:facet>
-                                    </p:cellEditor> 
-
-                                </p:column>
+                                    <h:outputText value="#{item.datePurchased}">
+                                        <f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+                                    </h:outputText>
+                               </p:column>
 
                                 <p:column sortBy="#{item.validFrom}" filterBy="#{item.validFrom}" headerText="#{configMapController.getKey('ListTicketsTitle_validFrom')}"   >
-
-                                    <p:cellEditor> 
-                                        <f:facet name="output">
-                                            <h:outputText value="#{item.validFrom}">
-                                                <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
-                                            </h:outputText>
-                                        </f:facet>
-                                        <f:facet name="input">
-                                            <p:calendar value="#{item.validFrom}">	
-                                                <p:ajax event="dateSelect" listener= "#{ticketsController.handleDateSelect}" update=":growl" />
-                                            </p:calendar>
-                                        </f:facet>
-                                    </p:cellEditor> 
-
-                                </p:column>
+                                    <h:outputText value="#{item.validFrom}">
+                                        <f:convertDateTime pattern="dd/MM/yyyy" />
+                                    </h:outputText>
+                               </p:column>
                                 <p:column sortBy="#{item.expires}" filterBy="#{item.expires}" headerText="#{configMapController.getKey('ListTicketsTitle_expires')}"   >
-
-                                    <p:cellEditor> 
-                                        <f:facet name="output">
-                                            <h:outputText value="#{item.expires}">
-                                                <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
-                                            </h:outputText>
-                                        </f:facet>
-                                        <f:facet name="input">
-                                            <p:calendar value="#{item.expires}">	
-                                                <p:ajax event="dateSelect" listener= "#{ticketsController.handleDateSelect}" update=":growl" />
-                                            </p:calendar>
-                                        </f:facet>
-                                    </p:cellEditor> 
-
-                                </p:column>
-                                <p:column sortBy="#{item.dateUsed}" filterBy="#{item.dateUsed}" headerText="#{configMapController.getKey('ListTicketsTitle_dateUsed')}"   >
-
-                                    <p:cellEditor> 
-                                        <f:facet name="output">
-                                            <h:outputText value="#{item.dateUsed}">
-                                                <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
-                                            </h:outputText>
-                                        </f:facet>
-                                        <f:facet name="input">
-                                            <p:calendar value="#{item.dateUsed}">	
-                                                <p:ajax event="dateSelect" listener= "#{ticketsController.handleDateSelect}" update=":growl" />
-                                            </p:calendar>
-                                        </f:facet>
-                                    </p:cellEditor> 
-
-                                </p:column>
-                              <!--  <p:column rendered="#{ticketsController.isUserInRole('ADMIN')}"  headerText="Edit" style="width:50px">  
-                                    <p:rowEditor />  
-                                </p:column>  -->
-
-
-                                <f:facet name="footer">
+                                    <h:outputText value="#{item.expires}">
+                                        <f:convertDateTime pattern="dd/MM/yyyy" />
+                                    </h:outputText>
+                               </p:column>
+                                <p:column  sortBy="#{item.dateUsed}" filterBy="#{item.dateUsed}" headerText="#{configMapController.getKey('ListTicketsTitle_classDetails')}"   >
+                                     <h:outputText rendered="#{! empty item.sessionBookings.sessionHistoryId.sessiondate}" value="#{item.sessionBookings.sessionHistoryId.sessiondate}">
+                                        <f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+                                    </h:outputText>
+                                     <h:outputText rendered="#{! empty item.sessionBookings.sessionHistoryId.sessionTemplate.sessionTitle}" value=" #{item.sessionBookings.sessionHistoryId.sessionTemplate.sessionTitle}"/>
+                               </p:column>
+                                <p:column  sortBy="#{item.dateUsed}" filterBy="#{item.dateUsed}" headerText="#{configMapController.getKey('ListTicketsTitle_dateUsed')}"   >
+                                    <h:outputText rendered="#{! empty item.dateUsed}" value="#{item.dateUsed}">
+                                        <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
+                                    </h:outputText>
+                               </p:column>
+     
+                                 
+                                 <f:facet name="footer">
                                     <p:commandButton id="viewButton"   icon="ui-icon-search" value="#{configMapController.getKey('View')}" update=":createCustomerForm" oncomplete="PF('TicketsViewDialog').show()" disabled="#{empty ticketsController.selected}"/>
                                 </f:facet>
-
                             </p:dataTable>
 
                         </p:panel>

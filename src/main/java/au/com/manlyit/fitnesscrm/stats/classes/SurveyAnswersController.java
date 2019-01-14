@@ -6,7 +6,6 @@ import au.com.manlyit.fitnesscrm.stats.classes.util.PaginationHelper;
 import au.com.manlyit.fitnesscrm.stats.beans.SurveyAnswersFacade;
 import au.com.manlyit.fitnesscrm.stats.classes.util.LazyLoadingDataModel;
 
-
 import au.com.manlyit.fitnesscrm.stats.classes.util.SurveyMap;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import au.com.manlyit.fitnesscrm.stats.db.Notes;
@@ -56,6 +55,8 @@ public class SurveyAnswersController implements Serializable {
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.SurveyAnswersFacade ejbFacade;
     @Inject
+    private au.com.manlyit.fitnesscrm.stats.beans.SurveyAnswerSubitemsFacade ejbSurveyAnswerSubitemsFacade;
+    @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade configMapFacade;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.CustomersFacade ejbCustomersFacade;
@@ -64,7 +65,7 @@ public class SurveyAnswersController implements Serializable {
     private PaginationHelper pagination;
     private int selectedItemIndex;
     private List<SurveyAnswers> filteredItems;
-     private LazyLoadingDataModel<SurveyAnswers> lazyModel;
+    private LazyLoadingDataModel<SurveyAnswers> lazyModel;
     private List<SurveyAnswers> surveyAnswers;
     private SurveyAnswers[] multiSelected;
     private ArrayList<SurveyMap> usersSurveys;
@@ -452,12 +453,11 @@ public class SurveyAnswersController implements Serializable {
     public LazyLoadingDataModel<SurveyAnswers> getLazyModel() {
         if (lazyModel == null) {
             lazyModel = new LazyLoadingDataModel<>(ejbFacade);
-            
-       
+
         }
         return lazyModel;
     }
-    
+
     public DataModel getItems() {
         if (items == null) {
             items = new ListDataModel(ejbFacade.findAll());
@@ -489,9 +489,24 @@ public class SurveyAnswersController implements Serializable {
                 for (SurveyAnswers answer : surveyAnswers) {
                     if (answer.getAnswerTypeid().getType().contentEquals("Disclaimer")) {
                         ArrayList<SurveyAnswerSubitems> subColl = new ArrayList<>(answer.getSurveyAnswerSubitemsCollection());
-                        
-                        setSurveySaveEnabled(subColl.get(0).getSubitemBool());
-                        
+                        if (subColl.isEmpty() == false) {
+                            setSurveySaveEnabled(subColl.get(0).getSubitemBool());
+                        } else {
+                            LOGGER.log(Level.WARNING, "getSurveyList , answer id {1} for question id: {0}, disclaimer boolean subitem collection is empty! You should create a sub item with text for the disclaimer checkbox ", new Object[]{answer.getQuestionId(), answer.getId()});
+                            try {
+                                SurveyAnswerSubitems subItem = new SurveyAnswerSubitems(0, "Please tick teh box to accept the terms and conditions.");
+                                subItem.setSubitemBool(false);
+                                subItem.setAnswerId(answer);
+                                ejbSurveyAnswerSubitemsFacade.createAndFlushForGeneratedIdEntities(subItem);
+                                answer.getSurveyAnswerSubitemsCollection().add(subItem);
+
+                            } catch (ELException eLException) {
+                                LOGGER.log(Level.WARNING, "getSurveyList , answer id {1} for question id: {0}, disclaimer boolean subitem collection is empty! Teh attempt to fix this by adding an new sub item failed! error:{2} ", new Object[]{answer.getQuestionId(), answer.getId(), eLException.getMessage()});
+
+                            }
+
+                        }
+
                     }
                 }
             }
@@ -527,7 +542,7 @@ public class SurveyAnswersController implements Serializable {
     }
 
     public SelectItem[] getItemsAvailableSelectMany() {
-       // file:///home/david/.netbeans/8.0/config/Templates/JSF/JSF_From_Entity_Wizard/StandardJSF/create.ftl
+        // file:///home/david/.netbeans/8.0/config/Templates/JSF/JSF_From_Entity_Wizard/StandardJSF/create.ftl
 
         return JsfUtil.getSelectItems(ejbFacade.findAll(), false);
     }
@@ -603,7 +618,7 @@ public class SurveyAnswersController implements Serializable {
     public void setSelectedSurvey(Surveys selectedSurvey) {
         surveyAnswers = null;
         this.selectedSurvey = selectedSurvey;
-        
+
     }
 
     /**

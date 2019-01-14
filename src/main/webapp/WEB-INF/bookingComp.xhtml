@@ -8,7 +8,7 @@
                 xmlns:p="http://primefaces.org/ui" >
 
 
-    <p:dialog header="#{configMapController.getKey('BookingDialogueHeader')}" widgetVar="bookingDialog" modal="false"  responsive="true"  resizable="true">
+    <p:dialog header="#{configMapController.getKey('BookingDialogueHeader')}" widgetVar="bookingDialog" modal="false"  responsive="true" appendTo="@(body)" resizable="true">
         <h:form id="bookingForm" styleClass="bookingFormUpdate ">
 
 

@@ -287,6 +287,10 @@ public class SurveyQuestionsController implements Serializable {
             //getFacade().create(current);
             //current.setSurveyQuestionSubitemsCollection(getSubItemsForCreate());
             Collection<SurveyQuestions> sqc = getSelectedSurvey().getSurveyQuestionsCollection();
+            if(checkDisclaimerHasASubitem(sqc) == false){
+               JsfUtil.addErrorMessage("The disclaimer MUST have a subitem or the survey will break. This is the text next to the checkbox. This question has not been saved!"); 
+               return;
+            }
             sqc.add(current);
             getSelectedSurvey().setSurveyQuestionsCollection(sqc);
             surveysFacade.edit(getSelectedSurvey());
@@ -297,6 +301,20 @@ public class SurveyQuestionsController implements Serializable {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
         }
 
+    }
+    private boolean checkDisclaimerHasASubitem(Collection<SurveyQuestions> sqc ){
+        boolean result = true;
+        for(SurveyQuestions sq : sqc){
+            if(sq.getQuestionType().getType().compareToIgnoreCase("Disclaimer") == 0){
+                if(sq.getSurveyQuestionSubitemsCollection().isEmpty()){
+                    return false;
+                }else{
+                    return true;
+                }
+            }
+        }
+        
+        return result;
     }
 
     public void editSurveyQuestion(ActionEvent actionEvent) {

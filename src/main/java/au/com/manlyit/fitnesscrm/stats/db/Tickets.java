@@ -7,8 +7,10 @@ package au.com.manlyit.fitnesscrm.stats.db;
 
 import au.com.manlyit.fitnesscrm.stats.classes.util.BaseEntity;
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Date;
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -18,11 +20,14 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 
 /**
  *
@@ -72,7 +77,10 @@ public class Tickets implements BaseEntity,Serializable {
     @Column(name = "expires")
     @Temporal(TemporalType.TIMESTAMP)
     private Date expires;
-
+ 
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "ticketId")
+    private SessionBookings sessionBookings;
+    
     public Tickets() {
     }
 
@@ -133,6 +141,7 @@ public class Tickets implements BaseEntity,Serializable {
     public void setExpires(Date expires) {
         this.expires = expires;
     }
+    
 
     @Override
     public int hashCode() {
@@ -171,6 +180,20 @@ public class Tickets implements BaseEntity,Serializable {
      */
     public void setCustomer(Customers customer) {
         this.customer = customer;
+    }
+
+    /**
+     * @return the sessionBookings
+     */
+    public SessionBookings getSessionBookings() {
+        return sessionBookings;
+    }
+
+    /**
+     * @param sessionBookings the sessionBookings to set
+     */
+    public void setSessionBookings(SessionBookings sessionBookings) {
+        this.sessionBookings = sessionBookings;
     }
 
     

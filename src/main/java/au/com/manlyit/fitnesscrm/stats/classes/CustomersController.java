@@ -1420,6 +1420,7 @@ public class CustomersController implements Serializable {
                 }
                 String details = "New LEAD generated: Id:" + c.getId() + ", Name: " + c.getFirstname() + ", <br/>Email:  " + c.getEmailAddress() + ", <br/>Phone:   " + c.getTelephone() + ", <br/>Username:   " + c.getUsername() + ", <br/>Group:   " + group + ", IP Address:" + ipAddress + ", Message:" + message;
                 sendNotificationEmail(c, grp, "system.email.notification.template", "New LEAD from website", message);
+                doPasswordResetFromWebserviceCall("system.email.admin.onboardcustomer.template", c, configMapFacade.getConfig("sendCustomerOnBoardEmailEmailSubject"));
                 createCombinedAuditLogAndNote(c, c, "New Lead", details, "Did Not Exist", "New Lead");
                 LOGGER.log(Level.INFO, "createFromLead: {0}", new Object[]{details});
                 if (isWebserviceCall == false) {

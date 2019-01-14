@@ -345,10 +345,13 @@ public class TicketsController implements Serializable {
     public PfSelectableDataModel<Tickets> getItems() {
         if (items == null) {
             //items = getPagination().createPageDataModel();
+            
+            
             FacesContext context = FacesContext.getCurrentInstance();
             CustomersController controller = context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
-            setStartandEndDatesToCurrentWeek();
-            items = new PfSelectableDataModel<>(ejbFacade.findCustomerTicketsByDateRange(controller.getSelected(), startDate, endDate, true));
+           // setStartandEndDatesToCurrentWeek();
+            items = new PfSelectableDataModel<>(ejbFacade.findCustomerTicketsValidAndUsedForSessionDate(controller.getSelected(), new Date(), true));
+            //items = new PfSelectableDataModel<>(ejbFacade.findCustomerTicketsByDateRange(controller.getSelected(), startDate, endDate, true));
             setItemCount(items.getRowCount());
         }
         LOGGER.log(Level.INFO, "lazy Load Items : rowcount = {0}", new Object[]{items.getRowCount()});
@@ -402,6 +405,7 @@ public class TicketsController implements Serializable {
         getFacade().edit(cm);
         recreateModel();
         JsfUtil.addSuccessMessage("Row Edit Successful");
+     
     }
 
     public void onCancel(RowEditEvent event) {
