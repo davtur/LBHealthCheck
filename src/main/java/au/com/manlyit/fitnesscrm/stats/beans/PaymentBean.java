@@ -2923,6 +2923,11 @@ public class PaymentBean implements Serializable {
             futureMap.processAddPaymentResult(sessionId, pgr);
             return new AsyncResult<>(pgr);
         }
+        if (paymentAmountInCents <= 0) {
+            PaymentGatewayResponse pgr = new PaymentGatewayResponse(false, payment, "UNKNOWN", "-1", "Payment Amount is Zero or negative");
+            futureMap.processAddPaymentResult(sessionId, pgr);
+            return new AsyncResult<>(pgr);
+        }
         if (payment.getId() <= 0) {
             PaymentGatewayResponse pgr = new PaymentGatewayResponse(false, payment, "PAYMENT ID not commited to DB", payment.getId().toString(), "Payment ID is <=0. This is not  valid primary key. The payment cant be added to payment gateway!");
             futureMap.processAddPaymentResult(sessionId, pgr);

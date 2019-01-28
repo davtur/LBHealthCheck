@@ -1,0 +1,63 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:p="http://primefaces.org/ui" >
+
+
+    <p:dialog header="Login" widgetVar="loginDialog"    responsive="true"  resizable="true">
+        <h:form id="loginCompForm" styleClass="signUpFormUpdate">
+            <div class="ui-g">
+                <div class="ui-g-12">
+                    <h1 class="BigTopic">Existing Members Login</h1>
+                </div>
+            </div>
+            <div class="ui-g">
+                <div class="ui-g-12">
+                    <img src="https://graph.facebook.com/#{loginBean.facebookId}/picture" hidden="#{empty loginBean.facebookId}" class="img-circular" title="This is the currently logged in facebook profile."/>
+                </div>
+            </div>
+            <div class="ui-g">
+                <div class="ui-g-12">
+                    <p:inputText id="usernameText" value="#{loginBean.username}"  placeholder="Username/email"  title="Please enter your username or your email address in this box." >
+                        <p:ajax event="change" update=":signUpForm" />
+                    </p:inputText>   
+                </div>
+            </div>
+            <div class="ui-g">
+                <div class="ui-g-12">
+                    <p:password id="passText" value="#{loginBean.password}"  placeholder="Password" feedback="false" title="Please enter your password in this box."/>
+                </div>
+            </div>
+            <div class="ui-g  ">
+                <div class="ui-g-12  button-container">
+                    <p:commandButton id="standard" value="Sign in" styleClass="Fs16" actionListener="#{loginBean.loginFromTimetable}"  update=":growl" title="Click this button to login after entering your username and password above."/> 
+                </div>
+            </div>
+            <div class="ui-g ">
+                <div class="ui-g-12 button-container">
+                    <p:commandButton id="facebook" icon="fa fa-facebook-f" widgetVar="fbLogin" onclick="PF('fbLogin').disable()" styleClass="loginButtonFacebook" value="Sign in with Facebook" actionListener="#{facebookLoginBean.timetableFacebookRedirect}" title="Click this button to login with your facebook account. Note you must use the same email address with pure fitness and facebook."/>
+                </div>
+            </div>
+
+
+            <div class="ui-g  ">
+                <div class="ui-g-12 chkbox-container"><p:selectBooleanCheckbox id="remember-me" />
+                    <p:outputLabel for="remember-me" value="Remember Me" />
+                </div>
+            </div>
+            <div class="ui-g  ">
+                <div class="ui-g-12"> <p:commandLink id="resetPass" value="Reset Password" ajax="false"  action="#{loginBean.resetPassword}" update=":growl" title="If you have forgotten your username or password enter your email or username above then click the password reset button."/>
+                </div>
+            </div>
+        </h:form>
+     </p:dialog>
+
+
+
+</ui:composition>
+<!--<p> Generated from template ( JSF_from_entity_wizard/StandardJSF/list.ftl  )- Dave 18th July 2015 </p>-->
+

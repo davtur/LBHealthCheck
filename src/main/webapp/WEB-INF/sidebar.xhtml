@@ -462,7 +462,7 @@
                         </p:menuitem>-->
                         <p:separator  rendered="#{customersController.isUserInRole('USER')}"  />
 
-                        <p:menuitem  action="#{customersController.logout}"
+                        <p:menuitem rendered="#{not empty customersController.loggedInUser}" action="#{customersController.logout}"
                                      id="logout"
                                      value="Logout"
                                      icon="fa fa-sign-out">

@@ -14,7 +14,13 @@
 
    <!--  <h1 class="BigTopic">#{configMapController.getKey('Timetable_Title')}</h1>-->
             <div class="ui-g-12  gray ">
+                <p:panel>
+                    <p:commandButton styleClass="MarRight5 GreenButton animated pulse infinite "   update="@(.bookingFormUpdate)" oncomplete="PF('loginDialog').show()" rendered="#{empty  facesContext.externalContext.remoteUser}" value="#{configMapController.getKey('Timetable_LoginButtonTitle')}"   /> 
+                    <h:outputText class="Fs14 FontBold black" rendered="#{not empty  facesContext.externalContext.remoteUser}" value="#{customersController.selected.firstname} #{customersController.selected.lastname} is signed in."/>
+                    <h:outputText class="Fs14 FontBold black" rendered="#{empty  facesContext.externalContext.remoteUser}" value="#{configMapController.getKey('Timetable_LoginMessageText')}"/>
 
+                </p:panel>
+                <div class="Seperator"></div>
                 <p:commandButton  styleClass="MarRight5 Fs24"  update=":SessionTimetableListForm"   value="#{configMapController.getKey('Timetable_decrementWeekButtonTitle')}"  actionListener="#{sessionTimetableController.decrementWeek}"  />
 
                 <p:commandButton styleClass="MarRight5 Fs24"    update=":SessionTimetableListForm"   value="#{configMapController.getKey('Timetable_incrementWeekButtonTitle')}"  actionListener="#{sessionTimetableController.incrementWeek}" />
@@ -22,9 +28,7 @@
                 <p:calendar value="#{sessionTimetableController.timetableStartDate}" mode="popup" pattern="d MMMMM yyyy"  showOn="both"  >
                     <p:ajax  event="dateSelect" update=":SessionTimetableListForm :growl" listener="#{sessionTimetableController.setTimetableToSelectedDate}" />
                 </p:calendar>
-                <font class="Fs14 FontRalewayBold black">
-                    <h:outputText rendered="#{not empty  facesContext.externalContext.remoteUser}" value="#{customersController.selected.firstname} #{customersController.selected.lastname} Logged In"/>
-                </font>
+
 
             </div>
         </div>
@@ -146,6 +150,7 @@
 
     <ui:include src="/WEB-INF/signupComp.xhtml"/>
     <ui:include src="/WEB-INF/bookingComp.xhtml"/>
+    <ui:include src="/WEB-INF/loginComp.xhtml"/>
 </ui:composition>
 <!--<p> Generated from template ( JSF_from_entity_wizard/StandardJSF/list.ftl  )- Dave 18th July 2015 </p>-->
 

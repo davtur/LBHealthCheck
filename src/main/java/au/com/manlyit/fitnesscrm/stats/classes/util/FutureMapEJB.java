@@ -530,8 +530,10 @@ public class FutureMapEJB implements Serializable {
             for (Customers c : acl) {
                 try {
                     if (c.getPaymentParametersId().getStatusCode() != null) {
-                        if (c.getPaymentParametersId().getStatusCode().trim().compareTo("A") == 0) {
+                        // dont update schedules with an empty payment period or payment period of z ( no schedule ).
+                        if (c.getPaymentParametersId().getStatusCode().trim().compareTo("A") == 0 && c.getPaymentParametersId().getPaymentPeriod().trim().isEmpty() == false && c.getPaymentParametersId().getPaymentPeriod().compareTo("Z") != 0) {
                             this.put(FUTUREMAP_INTERNALID, new AsyncJob("GetCustomerDetails", paymentBean.updateCustomerPaymentSchedule(c, getDigitalKey(), FUTUREMAP_INTERNALID)));
+                             LOGGER.log(Level.INFO, "###### Updating payment Schedule for username {0} #####", c.getUsername());
                             TimeUnit.MILLISECONDS.sleep(50);//sleeping for a long time wont affect performance (the warning is there for a short sleep of say 5ms ) but we don't want to overload the payment gateway or they may get upset.
                         }
                     }

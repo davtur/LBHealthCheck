@@ -2293,3 +2293,6 @@ AddPaymentScheduleTitle_plandate= This is the date the new plan will start.
 AddPaymentScheduleRequiredMessage_plandate= The new plan start date is required.
 
 ListTicketsTitle_classDetails=Class
+
+Timetable_LoginButtonTitle=Login
+Timetable_LoginMessageText=Existing members please sign in here.

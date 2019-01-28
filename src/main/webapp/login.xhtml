@@ -36,7 +36,9 @@
             <div class="login-panel ui-fluid">
                 <div class="ui-g">
                     <div class="ui-g-12 login-icon-container">
-                        <p:graphicImage styleClass="login-icon" name="images/icon-login.png" library="california-layout" />
+                        <h:link outcome="#{customersController.wordpressSiteUrl}" styleClass="logo">
+                            <p:graphicImage styleClass="login-icon" name="images/icon-login.png" library="california-layout" />
+                        </h:link>
                     </div>
                     <div class="ui-g-12 ui-lg-12 ui-md-12 logo-container">
                         <span class="login-summary">Manly Beach</span><br/>
@@ -63,15 +65,15 @@
                             <p:commandButton id="standard" value="Sign in" styleClass="Fs16" actionListener="#{loginBean.login}"  update=":growl" title="Click this button to login after entering your username and password above."/> 
                         </div>
                         <div class="ui-g-4 ui-lg-4 ui-md-4 button-container">
-                            
+
                             <img src="https://graph.facebook.com/#{loginBean.facebookId}/picture" hidden="#{empty loginBean.facebookId}" class="img-circular" title="This is the currently logged in facebook profile."/>
-                        
+
                         </div>
                         <div class="ui-g-4 ui-lg-4 ui-md-4 button-container">
                             <p:commandButton id="facebook" icon="fa fa-facebook-f" widgetVar="fbLogin" onclick="PF('fbLogin').disable()" styleClass="loginButtonFacebook" value="Sign in with Facebook" actionListener="#{facebookLoginBean.facebookRedirect}" title="Click this button to login with your facebook account. Note you must use the same email address with pure fitness and facebook."/>
                         </div>
                     </div>
-                  
+
                     <div class="ui-g-12 ui-lg-12 ui-md-12">
                         <p:messages showDetail="true"/>
                     </div>
