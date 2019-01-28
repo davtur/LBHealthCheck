@@ -63,7 +63,8 @@
 
 
 
-                <p:outputLabel value="#{configMapController.getKey('DashboardPaymentGatewayVersion_Label')} #{ezidebit.paymentGatewayVersion}" for="sessionstart" />
+                <h:outputText value="#{configMapController.getKey('DashboardPaymentGatewayVersion_Label')} #{ezidebit.paymentGatewayVersion}"  />
+               <!-- <h:outputText value="  #{configMapController.getKey('DashboardApplicationVersion_Label')} #{applicationBean.applicationVersion} "  /> -->
             </p:panel>
             <p:panel id="dashboardTimeframe" header="#{configMapController.getKey('DashboardTimeframePanelLabel')}">
                 <p:panelGrid columns="4" style="width:100%"  >

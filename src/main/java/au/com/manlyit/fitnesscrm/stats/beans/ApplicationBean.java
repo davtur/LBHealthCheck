@@ -16,10 +16,15 @@ import javax.faces.event.ActionEvent;
 import javax.inject.Inject;
 import javax.inject.Named;
 import au.com.manlyit.fitnesscrm.stats.classes.util.FutureMapEJB;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.faces.context.FacesContext;
+import org.apache.maven.model.Model;
+import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
+import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 
 /**
  *
@@ -83,6 +88,29 @@ public class ApplicationBean implements Serializable {
 
     public String removeFacebookLoginState(String key) {
         return facebookLogingStateMap.remove(key);
+    }
+    
+    public String getApplicationVersion() {
+         MavenXpp3Reader reader = new MavenXpp3Reader();
+        Model model = null;
+        String version = "Failed To retrieve version!";
+        try {
+            model = reader.read(this.getClass().getResourceAsStream("/META-INF/maven/au.com.manlyit/FitnessCRM/pom.xml"));
+        } catch (IOException ex) {
+            Logger.getLogger(ApplicationBean.class.getName()).log(Level.SEVERE, "getApplicationVersion IOException ", ex);
+        } catch (XmlPullParserException ex) {
+            Logger.getLogger(ApplicationBean.class.getName()).log(Level.SEVERE, "getApplicationVersion XmlPullParserException", ex);
+        }
+        if(model != null){
+            version = model.getVersion();
+        }
+        //System.out.println(model.getId());
+       // System.out.println(model.getGroupId());
+       // System.out.println(model.getArtifactId());
+      //  System.out.println(model.getVersion());
+        
+        
+        return version;
     }
 
     private void cleanUpOldLoginState() {
