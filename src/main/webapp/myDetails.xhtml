@@ -12,6 +12,7 @@
 
 
         <ui:include src="/WEB-INF/myDetailsPaymentMethod.xhtml"/>
+        <ui:include src="/WEB-INF/ChoosePlanDialogue.xhtml"/>
         <ui:include src="/WEB-INF/EditPaymentMethod.xhtml"/>
         <ui:include src="/WEB-INF/UpdatePassword.xhtml"/>
         <ui:include src="/WEB-INF/uploadPhoto.xhtml"/>
@@ -250,8 +251,10 @@
                                 <p:outputLabel value="#{configMapController.getKey('ViewPlanLabel_planDescription')}" for="planDescription"/>
                                 <h:outputText id="planDescription" value="#{customersController.selected.groupPricing.planDescription}" title="#{configMapController.getKey('ViewPlanTitle_planDescription')}"/>
                             </h:panelGrid>
-                            <p:commandButton  styleClass="updatePaymentInfo" icon="fa fa-dollar  white Fs14" title="#{configMapController.getKey('Tooltip_updateMyPaymentDetails')}"  disabled="#{!ezidebit.customerWebDDRFormEnabled}"  actionListener="#{customersController.changePlanDialogue}"    value="#{configMapController.getKey('EditCustomersChangePlanButton')}" update=":growl "  /> 
-                            <p:commandButton   icon="fa fa-clock  white Fs14" action="/timetable2.xhtml"   ajax="false"   value="View Timetable"   /> 
+                            <p:commandButton  styleClass="updatePaymentInfo" icon="fa fa-dollar  white Fs14" title="#{configMapController.getKey('Tooltip_CustomersChangePlanButton')}" rendered="#{!customersController.selected.groupPricing.planTimePeriod.contentEquals('Z')}" disabled="#{!ezidebit.customerWebDDRFormEnabled}"  actionListener="#{customersController.changePlanDialogue}"    value="#{configMapController.getKey('EditCustomersChangePlanButton')}" update=":growl "  /> 
+                            <p:commandButton  styleClass="updatePaymentInfo" icon="fa fa-dollar  white Fs14" title="#{configMapController.getKey('Tooltip_CustomersChoosePlanButton')}" rendered="#{customersController.selected.groupPricing.planTimePeriod.contentEquals('Z')}"    actionListener="#{customersController.choosePlanDialogue}"    value="#{configMapController.getKey('EditCustomersChoosePlanButton')}" update=":growl "  /> 
+ 
+                            <p:commandButton   icon="fa fa-clock  white Fs14" action="/timetable2.xhtml"   ajax="false"   value="Book Classes"   /> 
 
                         </p:panel>
                     </div>  

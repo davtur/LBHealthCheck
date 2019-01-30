@@ -2296,3 +2296,8 @@ ListTicketsTitle_classDetails=Class
 
 Timetable_LoginButtonTitle=Login
 Timetable_LoginMessageText=Existing members please sign in here.
+
+Tooltip_CustomersChoosePlanButton=Click this button to choose the membership plan that suits you.
+Tooltip_CustomersChangePlanButton=Click this button to change the membership plan that you are on.
+EditCustomersChoosePlanButton=Choose Plan
+choosePlanDialogueTitle=Please Select Your New Plan

@@ -20,6 +20,11 @@ height: 300px !important;
     
 }*/
 
+.choosePlanDialogue{
+    max-width: 300px;
+    
+}
+
 .dialoguePhoto {
 
 
@@ -103,7 +108,10 @@ height: 300px !important;
         width:100% !important;
     }
 
-
+.choosePlanDialogue{
+    max-width: 300px;
+    
+}
 
     .selectOneWidth {
         min-width:100px; 

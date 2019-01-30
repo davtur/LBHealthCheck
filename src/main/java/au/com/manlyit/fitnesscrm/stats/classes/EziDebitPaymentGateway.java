@@ -45,9 +45,11 @@ import com.itextpdf.text.Paragraph;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -969,7 +971,7 @@ public class EziDebitPaymentGateway implements Serializable {
             if (pp.getWebddrUrl() != null) {
 
                 ExternalContext ec = context.getExternalContext();
-                ec.redirect(pp.getWebddrUrl());
+                 ec.redirect(pp.getWebddrUrl());
             }
         } catch (IOException ex) {
             Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, null, ex);
@@ -1565,12 +1567,12 @@ public class EziDebitPaymentGateway implements Serializable {
 
             }
         }
-        if(customerProvisionedInPaymentGW == null){
+        if (customerProvisionedInPaymentGW == null) {
             return false;
-        }else{
-         return customerProvisionedInPaymentGW.get();   
+        } else {
+            return customerProvisionedInPaymentGW.get();
         }
-        
+
     }
 
     public boolean isCustomerWebDDRFormEnabled() {
@@ -2865,123 +2867,137 @@ public class EziDebitPaymentGateway implements Serializable {
     }
 
     public void createEddrLink(ActionEvent actionEvent) {
-        Customers cust = getSelectedCustomer();
-        if (cust == null || cust.getId() == null) {
-            LOGGER.log(Level.WARNING, "Create EDDR Link cannot be completed as the selected customer is null.");
-            return;
-        }
-
-        PaymentParameters pp = null;
-        Long amount = (long) (paymentAmountInCents * (float) 100);
-        Long amountLimit = paymentLimitAmountInCents * (long) 100;
-        char spt = paymentSchedulePeriodType.charAt(0);
-        GregorianCalendar debitDate = new GregorianCalendar();
-        debitDate.setTime(paymentDebitDate);
-        SimpleDateFormat sdf2 = new SimpleDateFormat("E");
-        GregorianCalendar endCal = new GregorianCalendar();
-        //endCal.setTime(paymentDebitDate);// ezi debit only supports 1 year from current date
-        endCal.add(Calendar.YEAR, 1);
-        String dom = Integer.toString(debitDate.get(Calendar.DAY_OF_MONTH));
-
-        pp = cust.getPaymentParametersId();
-        if (pp == null) {
-            getCustomersController().createDefaultPaymentParameters(cust);
+        try {
+            Customers cust = getSelectedCustomer();
+            if (cust == null || cust.getId() == null) {
+                LOGGER.log(Level.WARNING, "Create EDDR Link cannot be completed as the selected customer is null.");
+                return;
+            }
+            
+            PaymentParameters pp = null;
+            Long amount = (long) (paymentAmountInCents * (float) 100);
+            Long amountLimit = paymentLimitAmountInCents * (long) 100;
+            char spt = paymentSchedulePeriodType.charAt(0);
+            GregorianCalendar debitDate = new GregorianCalendar();
+            debitDate.setTime(paymentDebitDate);
+            SimpleDateFormat sdf2 = new SimpleDateFormat("E");
+            GregorianCalendar endCal = new GregorianCalendar();
+            //endCal.setTime(paymentDebitDate);// ezi debit only supports 1 year from current date
+            endCal.add(Calendar.YEAR, 1);
+            String dom = Integer.toString(debitDate.get(Calendar.DAY_OF_MONTH));
+            
             pp = cust.getPaymentParametersId();
-        }
-        pp.setContractStartDate(paymentDebitDate);
-        pp.setPaymentPeriod(paymentSchedulePeriodType);
-        pp.setPaymentPeriodDayOfMonth(dom);
-        pp.setPaymentPeriodDayOfWeek(sdf2.format(debitDate.getTime()).toUpperCase());
-        pp.setNextScheduledPayment(null);
-        pp.setPaymentRegularAmount(new BigDecimal(amount));
-        pp.setPaymentRegularTotalPaymentsAmount(new BigDecimal(amountLimit));
-        pp.setPaymentsRegularTotalNumberOfPayments(paymentLimitToNumberOfPayments);
-        String dur = "1";
-        if (paymentLimitToNumberOfPayments == 0 && amountLimit == 0) {
-            pp.setPaymentRegularDuration(1);//ongoing payments
-        } else {
+            if (pp == null) {
+                getCustomersController().createDefaultPaymentParameters(cust);
+                pp = cust.getPaymentParametersId();
+            }
+            pp.setContractStartDate(paymentDebitDate);
+            pp.setPaymentPeriod(paymentSchedulePeriodType);
+            pp.setPaymentPeriodDayOfMonth(dom);
+            pp.setPaymentPeriodDayOfWeek(sdf2.format(debitDate.getTime()).toUpperCase());
+            pp.setNextScheduledPayment(null);
+            pp.setPaymentRegularAmount(new BigDecimal(amount));
+            pp.setPaymentRegularTotalPaymentsAmount(new BigDecimal(amountLimit));
+            pp.setPaymentsRegularTotalNumberOfPayments(paymentLimitToNumberOfPayments);
+            String dur = "1";
+            if (paymentLimitToNumberOfPayments == 0 && amountLimit == 0) {
+                pp.setPaymentRegularDuration(1);//ongoing payments
+            } else {
+                if (paymentLimitToNumberOfPayments > 0) {
+                    pp.setPaymentRegularDuration(4);// Total Amount
+                    dur = "4";
+                }
+                if (amountLimit > 0) {
+                    pp.setPaymentRegularDuration(2);// Total payments
+                    dur = "2";
+                }
+                if (amountLimit > 0 && paymentLimitToNumberOfPayments > 0) {
+                    pp.setPaymentRegularDuration(6);// Total payments - takes precedence if both are set
+                }
+            }
+            ejbPaymentParametersFacade.edit(pp);
+            customersFacade.edit(cust);
+            String urlPaymentPeriodFormat = convertPaymentPeriod(paymentSchedulePeriodType);
+            NumberFormat nf = NumberFormat.getNumberInstance(Locale.US);
+            nf.setMaximumFractionDigits(2);
+            nf.setMinimumFractionDigits(2);
+            String amp = "&";
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+            
+            String widgetUrl = "";
+            widgetUrl += "?" + "a=" + encodeText(configMapFacade.getConfig("payment.ezidebit.webddr.hash"));
+            widgetUrl += amp + "uRefLabel=" + encodeText(configMapFacade.getConfig("payment.ezidebit.webddr.uRefLabel"));
+            widgetUrl += amp + "fName=" + encodeText(cust.getFirstname().trim());
+            widgetUrl += amp + "lName=" + encodeText(cust.getLastname().trim());
+            widgetUrl += amp + "uRef=" + cust.getId();
+            widgetUrl += amp + "email=" + encodeText(cust.getEmailAddress().trim());
+            widgetUrl += amp + "mobile=" + encodeText(cust.getTelephone().trim());
+            if (pp.getSmsPaymentReminder().contains("YES")) {
+                widgetUrl += amp + "sms=1";
+            } else {
+                widgetUrl += amp + "sms=0";
+            }
+            widgetUrl += amp + "addr=" + encodeText(cust.getStreetAddress());
+            widgetUrl += amp + "suburb=" + encodeText(cust.getSuburb());
+            widgetUrl += amp + "state=" + encodeText(cust.getAddrState());
+            widgetUrl += amp + "pCode=" + encodeText(cust.getPostcode());
+            String db = configMapFacade.getConfig("payment.ezidebit.webddr.debits");
+            if (db.contains("0") == false) {
+                widgetUrl += amp + "debits=" + db;// if its 0 leave unset to show once off and regular debits
+            }
+            if (paymentDebitDate.compareTo(oneOffPaymentDate) == 0) {
+                if (paymentAmountInCents == oneOffPaymentAmount) {
+                    // as the ezidebit form will add the payments without a reference number we need to be able to differentiate between them if they are for teh same amount on the same date.
+                    oneOffPaymentAmount += (float) 0.01;
+                }
+            }
+            if (paymentAmountInCents > 0) {
+                widgetUrl += amp + "rAmount=" + nf.format((pp.getPaymentRegularAmount().divide(new BigDecimal(100))));
+                widgetUrl += amp + "rDate=" + encodeText(sdf.format(paymentDebitDate));
+            } else {
+                widgetUrl += amp + "debits=1";
+            }
+            if (oneOffPaymentAmount > 0) {
+                widgetUrl += amp + "oAmount=" + nf.format(oneOffPaymentAmount);
+                widgetUrl += amp + "oDate=" + encodeText(sdf.format(oneOffPaymentDate));
+            } else {
+                widgetUrl += amp + "debits=2";
+            }
+            
+            widgetUrl += amp + "aFreq=" + urlPaymentPeriodFormat;
+            widgetUrl += amp + "freq=" + urlPaymentPeriodFormat;
+            widgetUrl += amp + "aDur=" + pp.getPaymentRegularDuration().toString();
+            widgetUrl += amp + "dur=" + dur;
+            widgetUrl += amp + "businessOrPerson=1";
             if (paymentLimitToNumberOfPayments > 0) {
-                pp.setPaymentRegularDuration(4);// Total Amount
-                dur = "4";
+                widgetUrl += amp + "tPay=" + Integer.toString(paymentLimitToNumberOfPayments);
             }
             if (amountLimit > 0) {
-                pp.setPaymentRegularDuration(2);// Total payments 
-                dur = "2";
+                widgetUrl += amp + "tAmount=" + nf.format((new Float(amountLimit) / (float) 100));
             }
-            if (amountLimit > 0 && paymentLimitToNumberOfPayments > 0) {
-                pp.setPaymentRegularDuration(6);// Total payments - takes precedence if both are set
+            widgetUrl += amp ;
+            widgetUrl = configMapFacade.getConfig("payment.ezidebit.webddr.baseurl") + widgetUrl + "callback=" + configMapFacade.getConfig("payment.ezidebit.webddr.callback") ;
+            pp.setWebddrUrl(widgetUrl);
+            String oldUrl = "Empty";
+            if (cust.getPaymentParametersId().getWebddrUrl() != null) {
+                oldUrl = cust.getPaymentParametersId().getWebddrUrl();
             }
+            ejbPaymentParametersFacade.edit(pp);
+            customersFacade.edit(cust);
+            LOGGER.log(Level.INFO, "eddr request url:{0}.", widgetUrl);
+            createCombinedAuditLogAndNote(getCustomers(), cust, "createEddrLink", "The Direct Debit Request form was modified.", oldUrl.replace(amp, ", "), widgetUrl.replace(amp, ", "));
+        } catch (Exception ex) {
+            Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, "createEddrLink FAILED", ex);
         }
-        ejbPaymentParametersFacade.edit(pp);
-        customersFacade.edit(cust);
-        String urlPaymentPeriodFormat = convertPaymentPeriod(paymentSchedulePeriodType);
-        NumberFormat nf = NumberFormat.getNumberInstance(Locale.US);
-        nf.setMaximumFractionDigits(2);
-        nf.setMinimumFractionDigits(2);
-        String amp = "&";
-        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-
-        String widgetUrl = configMapFacade.getConfig("payment.ezidebit.webddr.baseurl");
-        widgetUrl += "?" + "a=" + configMapFacade.getConfig("payment.ezidebit.webddr.hash");
-        widgetUrl += amp + "uRefLabel=" + configMapFacade.getConfig("payment.ezidebit.webddr.uRefLabel");
-        widgetUrl += amp + "fName=" + cust.getFirstname().trim();
-        widgetUrl += amp + "lName=" + cust.getLastname().trim();
-        widgetUrl += amp + "uRef=" + cust.getId();
-        widgetUrl += amp + "email=" + cust.getEmailAddress().trim();
-        widgetUrl += amp + "mobile=" + cust.getTelephone().trim();
-        if (pp.getSmsPaymentReminder().contains("YES")) {
-            widgetUrl += amp + "sms=1";
-        } else {
-            widgetUrl += amp + "sms=0";
+    }
+    private String encodeText(String text){
+        String ecodedText = text;
+        try {
+            ecodedText = URLEncoder.encode(text, "UTF-8");
+        } catch (UnsupportedEncodingException ex) {
+            Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, "encodeText FAILED", ex);
         }
-        widgetUrl += amp + "addr=" + cust.getStreetAddress();
-        widgetUrl += amp + "suburb=" + cust.getSuburb();
-        widgetUrl += amp + "state=" + cust.getAddrState();
-        widgetUrl += amp + "pCode=" + cust.getPostcode();
-        String db = configMapFacade.getConfig("payment.ezidebit.webddr.debits");
-        if (db.contains("0") == false) {
-            widgetUrl += amp + "debits=" + db;// if its 0 leave unset to show once off and regular debits
-        }
-        if (paymentDebitDate.compareTo(oneOffPaymentDate) == 0) {
-            if (paymentAmountInCents == oneOffPaymentAmount) {
-                // as the ezidebit form will add the payments without a reference number we need to be able to differentiate between them if they are for teh same amount on the same date.
-                oneOffPaymentAmount += (float) 0.01;
-            }
-        }
-        if (paymentAmountInCents > 0) {
-            widgetUrl += amp + "rAmount=" + nf.format((pp.getPaymentRegularAmount().divide(new BigDecimal(100))));
-            widgetUrl += amp + "rDate=" + sdf.format(paymentDebitDate);
-        } else {
-            widgetUrl += amp + "debits=1";
-        }
-        if (oneOffPaymentAmount > 0) {
-            widgetUrl += amp + "oAmount=" + nf.format(oneOffPaymentAmount);
-            widgetUrl += amp + "oDate=" + sdf.format(oneOffPaymentDate);
-        } else {
-            widgetUrl += amp + "debits=2";
-        }
-
-        widgetUrl += amp + "aFreq=" + urlPaymentPeriodFormat;
-        widgetUrl += amp + "freq=" + urlPaymentPeriodFormat;
-        widgetUrl += amp + "aDur=" + pp.getPaymentRegularDuration().toString();
-        widgetUrl += amp + "dur=" + dur;
-        widgetUrl += amp + "businessOrPerson=1";
-        if (paymentLimitToNumberOfPayments > 0) {
-            widgetUrl += amp + "tPay=" + Integer.toString(paymentLimitToNumberOfPayments);
-        }
-        if (amountLimit > 0) {
-            widgetUrl += amp + "tAmount=" + nf.format((new Float(amountLimit) / (float) 100));
-        }
-        widgetUrl += amp + "callback=" + configMapFacade.getConfig("payment.ezidebit.webddr.callback");
-        pp.setWebddrUrl(widgetUrl);
-        String oldUrl = "Empty";
-        if (cust.getPaymentParametersId().getWebddrUrl() != null) {
-            oldUrl = cust.getPaymentParametersId().getWebddrUrl();
-        }
-        ejbPaymentParametersFacade.edit(pp);
-        customersFacade.edit(cust);
-        LOGGER.log(Level.INFO, "eddr request url:{0}.", widgetUrl);
-        createCombinedAuditLogAndNote(getCustomers(), cust, "createEddrLink", "The Direct Debit Request form was modified.", oldUrl.replace(amp, ", "), widgetUrl.replace(amp, ", "));
+        return ecodedText;
     }
 
     private String convertPaymentPeriod(String period) {

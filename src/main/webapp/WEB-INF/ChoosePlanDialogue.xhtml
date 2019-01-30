@@ -1,0 +1,159 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition  xmlns="http://www.w3.org/1999/xhtml"
+                 xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                 xmlns:h="http://xmlns.jcp.org/jsf/html"
+                 xmlns:f="http://xmlns.jcp.org/jsf/core"
+                 xmlns:p="http://primefaces.org/ui" >
+
+
+
+    <p:dialog id="choosePlanDialogue"  closable="false" responsive="true"  appendTo="@(body)" resizable="true"  styleClass="choosePlanDialogue"
+              header="#{configMapController.getKey('choosePlanDialogueTitle')}"  widgetVar="choosePlanDialogueWidget" > 
+        <h:form id="choosePlanForm">  
+            <div class="ui-g ">
+                
+                <div class="ui-g-12 ">
+
+                
+                    <!-- NEW PLAN -->
+
+                   
+
+                        <div class="ui-g-12 FontBold">
+                            <p:outputLabel value="#{configMapController.getKey('ListPlanTitle_planName')}"  />
+                        </div>
+                        <div class="ui-g-12">
+                            <p:selectOneMenu id="groupPricing1" valueChangeListener="#{customersController.selectOneNewPlanListener}" converter="planControllerConverter" value="#{customersController.customersNewPlan}" label="#{configMapController.getKey('CreateCustomersTitle_groupPricing')}" >
+                                <f:selectItems value="#{planController.itemsAvailableForDisplayAsObjects}"  var="plan" itemLabel="#{plan.planName} - $#{plan.planPrice} "  itemValue="#{plan}"/>
+                                <p:ajax update="@(.updatePaymentInfo) choosePlanForm"/>
+                            </p:selectOneMenu>
+                        </div>
+                      <!--  <div class="ui-g-12 FontBold">
+                            <h:outputText value="#{configMapController.getKey('ChangePlanNewScheduleHeaderTitle')}"/>
+                        </div>-->
+                    <div class="ui-g-12 FontBold">
+                            <p:outputLabel value="#{configMapController.getKey('AddPaymentScheduleLabel_plandate')}"  />
+                        </div>
+                        <div class="ui-g-12">
+                            <p:calendar  pattern="dd MMM yyyy" value="#{customersController.newPlanStartDate}" title="#{configMapController.getKey('AddPaymentScheduleTitle_plandate')}" required="true" requiredMessage="#{configMapController.getKey('AddPaymentScheduleRequiredMessage_plandate')}" >
+                                <p:ajax event="dateSelect" listener="#{customersController.choosePlanNewPlanStartDate}" />
+                            </p:calendar>
+                        </div>
+                        
+                     <!-- 
+                     <div class="ui-g-12 FontBold">
+                            <p:outputLabel value="#{configMapController.getKey('AddPaymentScheduleLabel_debitdate')}"  />
+                        </div>
+                        <div class="ui-g-12">
+                            <p:calendar  pattern="dd MMM yyyy" value="#{ezidebit.paymentDebitDate}" title="#{configMapController.getKey('AddPaymentScheduleTitle_debitdate')}" required="true" requiredMessage="#{configMapController.getKey('AddPaymentScheduleRequiredMessage_debitdate')}" >
+                                <p:ajax event="dateSelect" listener="#{customersController.choosePlanNewScheduleStartDate}" />
+                            </p:calendar>
+                        </div>
+                        <div class="ui-g-12 FontBold">
+                            <p:outputLabel value="#{configMapController.getKey('AddPaymentScheduleLabel_paymentAmount')}"  />
+                        </div>
+                        <div class="ui-g-12">
+                            <p:inputText  value="#{ezidebit.paymentAmountInCents}" title="#{configMapController.getKey('AddPaymentScheduleTitle_paymentAmount')}" required="true" requiredMessage="#{configMapController.getKey('AddPaymentScheduleRequiredMessage_paymentAmount')}">
+                                <f:convertNumber minFractionDigits="2"/>
+                                <p:ajax update="choosePlanForm"   listener="#{customersController.choosePlanNewScheduleUpdateListener}" /> 
+                            </p:inputText>
+                        </div>
+
+
+                        <div class="ui-g-12 FontBold">
+                            <p:outputLabel value="#{configMapController.getKey('AddPaymentScheduleLabel_paymentPeriodType')}"  />
+                        </div>
+                        <div class="ui-g-12">
+                            <p:selectOneMenu id="changePlanPeriodType" value="#{ezidebit.paymentSchedulePeriodType}"  >
+                                <f:selectItem itemValue="M" itemLabel="Monthly" />
+                                <f:selectItem itemValue="W" itemLabel="Weekly" />
+                                <f:selectItem itemValue="F" itemLabel="Fortnightly" />
+                                <f:selectItem itemValue="4" itemLabel="4 Weekly" />
+                                <f:selectItem itemValue="N" itemLabel="Weekday in Month" />
+                                <f:selectItem itemValue="Q" itemLabel="Quarterly" />
+                                <f:selectItem itemValue="H" itemLabel="Half Yearly" />
+                                <f:selectItem itemValue="Y" itemLabel="Annually" />
+                                <p:ajax update="choosePlanForm"   listener="#{customersController.choosePlanNewScheduleUpdateListener}" /> 
+                            </p:selectOneMenu>
+                        </div>
+                        <div class="ui-g-12 FontBold">
+                            <p:outputLabel value="#{configMapController.getKey('AddPaymentScheduleLabel_amountToProRata')}"  />
+                        </div>
+                        <div class="ui-g-12">
+                            <p:inputText id="proRataChangePlanAmount"  value="#{ezidebit.proRataChangePlanAmount}" title="#{configMapController.getKey('AddPaymentScheduleTitle_amountToProRata')}">
+                                <f:convertNumber  type="currency" currencySymbol="$"/>
+                            </p:inputText>
+                        </div> 
+                        <div class="ui-g-12 FontBold">
+                            <p:outputLabel rendered="#{ezidebit.paymentSchedulePeriodType == 'W' ||ezidebit.paymentSchedulePeriodType == 'F' || ezidebit.paymentSchedulePeriodType == '4' || ezidebit.paymentSchedulePeriodType == 'N'}" value="#{configMapController.getKey('AddPaymentScheduleLabel_paymentDayOfWeek')}" for="changePlanDayOfWeek" />
+                        </div>
+                        <div class="ui-g-12">
+                            <p:selectOneMenu  disabled="true" rendered="#{ezidebit.paymentSchedulePeriodType == 'W' ||ezidebit.paymentSchedulePeriodType == 'F' || ezidebit.paymentSchedulePeriodType == '4' || ezidebit.paymentSchedulePeriodType == 'N'}" id="changePlanDayOfWeek" value="#{ezidebit.paymentDayOfWeek}"  >
+                                <f:selectItem itemValue="MON" itemLabel="Monday" />
+                                <f:selectItem itemValue="TUE" itemLabel="Tuesday" />
+                                <f:selectItem itemValue="WED" itemLabel="Wednesday" />
+                                <f:selectItem itemValue="THU" itemLabel="Thursday" />
+                                <f:selectItem itemValue="FRI" itemLabel="Friday" />
+                                <p:ajax update="choosePlanForm"   listener="#{customersController.choosePlanNewScheduleUpdateListener}" /> 
+                            </p:selectOneMenu>
+                        </div>
+                        <div class="ui-g-12 FontBold">
+                            <p:outputLabel  rendered="#{ezidebit.paymentSchedulePeriodType == 'M' }" value="#{configMapController.getKey('AddPaymentScheduleLabel_paymentDayOfMonth')}" for="changePlanDayOfMonth" />
+                        </div>
+                        <div class="ui-g-12">
+                            <p:selectOneMenu  disabled="#{!dayOfMonthDropdownDisabled}" rendered="#{ezidebit.paymentSchedulePeriodType == 'M' }" id="changePlanDayOfMonth" value="#{ezidebit.paymentDayOfMonth}"  >
+                                <f:selectItems value="#{ezidebit.daysInMonth}" var="num" itemValue="#{num}" /> 
+                                <p:ajax update="choosePlanForm"   listener="#{customersController.choosePlanNewScheduleUpdateListener}" /> 
+                            </p:selectOneMenu> 
+                        </div>
+
+
+                        <div class="ui-g-12 FontBold">
+                            <p:outputLabel  rendered="#{ezidebit.paymentSchedulePeriodType == 'N'}" value="#{configMapController.getKey('AddPaymentScheduleLabel_paymentFirstWeekOfMonth')}" for="changePlanFirstWeekOfMonth" />
+                        </div>
+                        <div class="ui-g-12">
+                            <p:selectBooleanCheckbox id="changePlanFirstWeekOfMonth"  rendered="#{ezidebit.paymentSchedulePeriodType == 'N'}" value="#{ezidebit.paymentFirstWeekOfMonth}">  
+                                <p:ajax update="choosePlanForm"   listener="#{customersController.choosePlanNewScheduleUpdateListener}" /> 
+                            </p:selectBooleanCheckbox> 
+                            <p:outputLabel  rendered="#{ezidebit.paymentSchedulePeriodType == 'N'}" value="#{configMapController.getKey('AddPaymentScheduleLabel_paymentSecondWeekOfMonth')}" for="changePlanSecondWeekOfMonth" />
+                            <p:selectBooleanCheckbox id="changePlanSecondWeekOfMonth"  rendered="#{ezidebit.paymentSchedulePeriodType == 'N'}" value="#{ezidebit.paymentSecondWeekOfMonth}">  
+                                <p:ajax update="choosePlanForm"   listener="#{customersController.choosePlanNewScheduleUpdateListener}" />  
+                            </p:selectBooleanCheckbox>  
+                            <p:outputLabel  rendered="#{ezidebit.paymentSchedulePeriodType == 'N'}" value="#{configMapController.getKey('AddPaymentScheduleLabel_paymentThirdWeekOfMonth')}" for="changePlanThirdWeekOfMonth" />
+                            <p:selectBooleanCheckbox id="changePlanThirdWeekOfMonth"  rendered="#{ezidebit.paymentSchedulePeriodType == 'N'}" value="#{ezidebit.paymentThirdWeekOfMonth}">  
+                                <p:ajax update="choosePlanForm"   listener="#{customersController.choosePlanNewScheduleUpdateListener}" />  
+                            </p:selectBooleanCheckbox>  
+                            <p:outputLabel rendered="#{ezidebit.paymentSchedulePeriodType == 'N'}" value="#{configMapController.getKey('AddPaymentScheduleLabel_paymentFourthWeekOfMonth')}" for="changePlanFourthWeekOfMonth" />
+                            <p:selectBooleanCheckbox  rendered="#{ezidebit.paymentSchedulePeriodType == 'N'}" id="changePlanFourthWeekOfMonth" value="#{ezidebit.paymentFourthWeekOfMonth}">  
+                                <p:ajax update="choosePlanForm"   listener="#{customersController.choosePlanNewScheduleUpdateListener}" />  
+                            </p:selectBooleanCheckbox>  
+                        </div>-->
+                        
+
+
+                </div>
+
+
+
+
+
+
+              
+
+                <div class="ui-g-12">
+                    <div class="ui-g-6 ">
+                        <p:commandButton  onclick="PF('changePlanDialogueWidget').hide();"  actionListener="#{customersController.executeSetupNewPlan}" value="#{configMapController.getKey('AddPaymentScheduleSaveLink')}" update=" :growl @(.updatePaymentInfo)"/>                
+                    </div>
+                    <div class="ui-g-6 ">
+                        <p:commandButton  onclick="PF('changePlanDialogueWidget').hide()"  actionListener="#{customersController.discardChangePlan}" value="#{configMapController.getKey('AddPaymentScheduleDiscardLink')}" update=":growl  @(.updatePaymentInfo)"/>                
+                    </div>
+                </div>
+            </div>
+        </h:form>
+    </p:dialog>
+
+
+</ui:composition>
+
+

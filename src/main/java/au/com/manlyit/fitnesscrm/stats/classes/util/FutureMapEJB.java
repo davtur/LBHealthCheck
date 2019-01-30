@@ -1174,6 +1174,7 @@ public class FutureMapEJB implements Serializable {
                             }
                             startAsynchJob(sessionId, "GetCustomerDetails", paymentBean.getCustomerDetails(cust, getDigitalKey(), sessionId));
                             getPayments(sessionId, cust, 12, 2);
+                            
                         }
                     }
                 } else {

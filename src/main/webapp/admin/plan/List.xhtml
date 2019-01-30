@@ -176,6 +176,7 @@
                                 <h:outputText  rendered="#{item.planTimePeriod == 'H'}"  value="Half Yearly" />
                                 <h:outputText  rendered="#{item.planTimePeriod == 'Y'}"  value="Annually" />
                                 <h:outputText  rendered="#{item.planTimePeriod == 'W'}"  value="Weekly" />
+                                <h:outputText  rendered="#{item.planTimePeriod == 'Z'}"  value="No Schedule" />
 
                             </f:facet>
                             <f:facet name="input">
@@ -189,7 +190,7 @@
                                     <f:selectItem itemValue="Q" itemLabel="Quarterly" />
                                     <f:selectItem itemValue="H" itemLabel="Half Yearly" />
                                     <f:selectItem itemValue="Y" itemLabel="Annually" />
-                                    
+                                    <f:selectItem itemValue="Z" itemLabel="No Schedule" />
                                 </p:selectOneMenu>
                             </f:facet>
                         </p:cellEditor> 

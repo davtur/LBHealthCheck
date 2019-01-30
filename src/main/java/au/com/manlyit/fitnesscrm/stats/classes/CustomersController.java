@@ -2169,10 +2169,10 @@ public class CustomersController implements Serializable {
         if (isThisIsANewPlan() == false) {
             double planDifference = daysBetweenPlans * planPriceDifferencePerDay;
             //if (costPerDayOfOldPLan > costPerDayOfNewPLan) {
-           //     amountUsed = amountUsed - planDifference;
-           // } else {
-                amountUsed +=  planDifference;
-           // }
+            //     amountUsed = amountUsed - planDifference;
+            // } else {
+            amountUsed += planDifference;
+            // }
         }
         //if (newPaymentScheduleStartCal.after(nextPayBasedOnCurrentPaymentPeriod)) {
         amountOfNewFirstPaymentWithProRata = newPlanPrice + amountUsed;
@@ -2263,6 +2263,124 @@ public class CustomersController implements Serializable {
         PrimeFaces.current().ajax().update("changePlanDialogue");
     }
 
+    private void newPlanPreview(Plan newPlan, Date newPlanStart) {
+        setCustomersNewPlan(newPlan);
+        //update the dialogue create schedule parameters
+
+        //start date should be next scheduled payment if not default to tomorrow
+        FacesContext context = FacesContext.getCurrentInstance();
+        EziDebitPaymentGateway ezi = context.getApplication().evaluateExpressionGet(context, "#{ezidebit}", EziDebitPaymentGateway.class);
+
+        PaymentParameters pp = current.getPaymentParametersId();
+        GregorianCalendar cal = new GregorianCalendar();
+        cal.setTime(ezi.getPaymentDebitDate());
+
+        String newPaymentPeriod = newPlan.getPlanTimePeriod();
+        double newPlanPrice = newPlan.getPlanPrice().doubleValue();
+
+        GregorianCalendar nextScheduledPay = new GregorianCalendar();
+        GregorianCalendar nextPayBasedOnCurrentPaymentPeriod = new GregorianCalendar();
+        GregorianCalendar newPaymentScheduleStartCal = new GregorianCalendar();
+        GregorianCalendar newPlanStartCal = new GregorianCalendar();
+        newPlanStartCal.setTime(getNewPlanStartDate());
+        int dayOfMonthForRegularMonthlyDebits = ezi.getPaymentDayOfMonth();
+        String dayOfWeekForRegularWeeklyDebits = ezi.getPaymentDayOfWeek();
+        newPaymentScheduleStartCal.setTime(newPlanStart);
+        double amountOfNewFirstPaymentWithProRata = 0;
+        long daysBetween = 0;
+        double costPerDayOfNewPLan = 0;
+        double amountUsed = 0;
+
+        costPerDayOfNewPLan = getCostPerDayOfPlan(newPlanPrice, newPaymentPeriod);
+
+        // new plan
+        LOGGER.log(Level.INFO, "newPlanPreview - this is a new plan that is being set up.");
+        nextPayBasedOnCurrentPaymentPeriod.setTime(newPaymentScheduleStartCal.getTime());
+
+        if (newPaymentPeriod.contentEquals("M")) { // month based periods
+            int planStartDay = newPaymentScheduleStartCal.get(Calendar.DAY_OF_MONTH);
+            nextPayBasedOnCurrentPaymentPeriod.set(Calendar.DAY_OF_MONTH, dayOfMonthForRegularMonthlyDebits);
+            if (planStartDay > dayOfMonthForRegularMonthlyDebits) {
+                nextPayBasedOnCurrentPaymentPeriod.add(Calendar.MONTH, 1);
+            }
+
+        }
+        if (newPaymentPeriod.contentEquals("Q")) { // month based periods
+            int planStartDay = newPaymentScheduleStartCal.get(Calendar.DAY_OF_MONTH);
+            nextPayBasedOnCurrentPaymentPeriod.set(Calendar.DAY_OF_MONTH, dayOfMonthForRegularMonthlyDebits);
+            if (planStartDay >= dayOfMonthForRegularMonthlyDebits) {
+                nextPayBasedOnCurrentPaymentPeriod.add(Calendar.MONTH, 3);
+            }
+
+        }
+        if (newPaymentPeriod.contentEquals("H")) { // month based periods
+            int planStartDay = newPaymentScheduleStartCal.get(Calendar.DAY_OF_MONTH);
+            nextPayBasedOnCurrentPaymentPeriod.set(Calendar.DAY_OF_MONTH, dayOfMonthForRegularMonthlyDebits);
+            if (planStartDay >= dayOfMonthForRegularMonthlyDebits) {
+                nextPayBasedOnCurrentPaymentPeriod.add(Calendar.MONTH, 6);
+            }
+
+        }
+        if (newPaymentPeriod.contentEquals("Y")) { // month based periods
+            int planStartDay = newPaymentScheduleStartCal.get(Calendar.DAY_OF_MONTH);
+            nextPayBasedOnCurrentPaymentPeriod.set(Calendar.DAY_OF_MONTH, dayOfMonthForRegularMonthlyDebits);
+            if (planStartDay >= dayOfMonthForRegularMonthlyDebits) {
+                nextPayBasedOnCurrentPaymentPeriod.add(Calendar.MONTH, 12);
+            }
+
+        }
+        if (newPaymentPeriod.contentEquals("W") || newPaymentPeriod.contentEquals("F") || newPaymentPeriod.contentEquals("N") || newPaymentPeriod.contentEquals("4")) { // week based periods
+            int planStartDayOfWeek = newPaymentScheduleStartCal.get(Calendar.DAY_OF_WEEK);
+            while (nextPayBasedOnCurrentPaymentPeriod.get(Calendar.DAY_OF_WEEK) != planStartDayOfWeek) {
+                nextPayBasedOnCurrentPaymentPeriod.add(Calendar.DATE, 1);
+            }
+        }
+        daysBetween = ChronoUnit.DAYS.between(newPaymentScheduleStartCal.toInstant(), nextPayBasedOnCurrentPaymentPeriod.toInstant());
+
+        amountUsed = daysBetween * costPerDayOfNewPLan;
+
+        amountOfNewFirstPaymentWithProRata = newPlanPrice;
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/YY");
+
+        if (amountOfNewFirstPaymentWithProRata < 0) {
+            LOGGER.log(Level.WARNING, "newPlanPreview - the new start date is greater than the paid period. If the customer is active during the gap revenue loss will occur.");
+        }
+        LOGGER.log(Level.INFO, "newPlanPreview - Next Scheduled: {0}, Next Plan Regular Payment {1}, Days Between start date  and next regular payment: {2} x cost per day of plan: {3} = pro rata amount: {4} ,  regular payments amount = {5}.",
+                new Object[]{sdf.format(nextScheduledPay.getTime()), sdf.format(nextPayBasedOnCurrentPaymentPeriod.getTime()), daysBetween, costPerDayOfNewPLan, amountUsed, amountOfNewFirstPaymentWithProRata});
+        ezi.setProRataChangePlanAmount(amountUsed);
+
+        ezi.setPaymentDebitDate(cal.getTime());
+        BigDecimal amount = newPlan.getPlanPrice();
+        ezi.setPaymentAmountInCents(amount.floatValue());
+
+        LOGGER.log(Level.INFO, "newPlanPreview: No scheduled payments: New Plan Name={0}, new payment period ={1}, newplan price = {2}", new Object[]{newPlan.getPlanName(), newPaymentPeriod, newPlanPrice});
+
+        //debits can only occur on weekdays
+        if (cal.get(Calendar.DAY_OF_WEEK) == Calendar.MONDAY
+                || cal.get(Calendar.DAY_OF_WEEK) == Calendar.TUESDAY
+                || cal.get(Calendar.DAY_OF_WEEK) == Calendar.WEDNESDAY
+                || cal.get(Calendar.DAY_OF_WEEK) == Calendar.THURSDAY
+                || cal.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY) {
+            ezi.setPaymentDayOfWeek(cal.getDisplayName(Calendar.DAY_OF_WEEK, Calendar.SHORT, Locale.ENGLISH));
+
+        } else {
+            if (cal.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) {
+                cal.add(Calendar.DAY_OF_YEAR, 2);
+            } else {
+                cal.add(Calendar.DAY_OF_YEAR, 1);
+            }
+            ezi.setPaymentDayOfWeek(cal.getDisplayName(Calendar.DAY_OF_WEEK, Calendar.SHORT, Locale.US));
+        }
+
+        ezi.setPaymentDebitDate(cal.getTime());
+        //show dialogue
+        PrimeFaces.current().executeScript("PF('choosePlanDialogueWidget').show();");
+        PrimeFaces.current().ajax().update("choosePlanDialogue");
+        LOGGER.log(Level.INFO, "newPlanPreview: Updating EDDR web URL params to send to Ezidebit for creditcard capture: paymentAmountInCents:{0},paymentSchedulePeriodType:{1}, paymentDebitDate:{2}, oneOffPaymentAmount:{3},oneOffPaymentDate:{4}",
+                 new Object[]{ezi.getPaymentAmountInCents(), ezi.getPaymentSchedulePeriodType(), ezi.getPaymentDebitDate(), ezi.getProRataChangePlanAmount(), newPlanStartDate});
+
+    }
+
     public void executeIssueTickets(ActionEvent actionEvent) {
         FacesContext context = FacesContext.getCurrentInstance();
         TicketsController ticketsController = context.getApplication().evaluateExpressionGet(context, "#{ticketsController}", TicketsController.class);
@@ -2281,6 +2399,87 @@ public class CustomersController implements Serializable {
             JsfUtil.addErrorMessage("Issue Tickets Failed");
             LOGGER.log(Level.SEVERE, "executeIssueTickets: Manulally issueing tickets failed for {0}. Weeks tickets are valid:{1}, number issued: {2}", new Object[]{cust.getUsername(), weeksValid, numberIssued});
         }
+    }
+
+    public void executeSetupNewPlan(ActionEvent actionEvent) {
+        LOGGER.log(Level.INFO, "Executing Plan Change - Clear Schedule then create new schedule operations will be called..");
+        try {
+            FacesContext context = FacesContext.getCurrentInstance();
+            EziDebitPaymentGateway ezi = context.getApplication().evaluateExpressionGet(context, "#{ezidebit}", EziDebitPaymentGateway.class);
+            PaymentParameters pp = current.getPaymentParametersId();
+            String customerStatus = pp.getStatusCode();
+            char oldPayPeriod = pp.getPaymentPeriod().charAt(0);
+            String newPayPeriod = ezi.getPaymentSchedulePeriodType();
+            String newPayDayOfWeek = ezi.getPaymentDayOfWeek();
+            int newPayDayOfMonth = ezi.getPaymentDayOfMonth();
+            Date scheduleStart = ezi.getPaymentDebitDate();
+            GregorianCalendar newScheduleStartDateCal = new GregorianCalendar();
+            GregorianCalendar nextPayBasedOnCurrentPaymentPeriod = new GregorianCalendar();
+            newScheduleStartDateCal.setTime(scheduleStart);
+            nextPayBasedOnCurrentPaymentPeriod.setTime(scheduleStart);
+            double paymentAmount = ezi.getPaymentAmountInCents();
+            double proRataAmount = ezi.getProRataChangePlanAmount();
+            Date newNextPaymentDebitDate = null;
+            int[] fieldAndAmount = getCalendarFieldAndAmountFromPaymentPeriod(oldPayPeriod);
+
+            if (customerStatus.contentEquals("A") == false) {
+                // customer is not active in the payment gateway
+                // setup the direct debit form and redirect them to it.
+
+                /* need to set the below amounts before calling the ezidebit form
+                paymentAmountInCents
+                paymentLimitAmountInCents
+                paymentSchedulePeriodType
+                paymentDebitDate
+                paymentLimitToNumberOfPayments
+                
+                oneOffPaymentDate
+                oneOffPaymentAmount
+                
+                 */
+                if (proRataAmount != 0) {
+                    ezi.setOneOffPaymentAmountInCents((float) proRataAmount);
+                    ezi.setOneOffPaymentDate(newPlanStartDate);
+
+                }
+                ezi.createEddrLink(actionEvent);
+                ezi.redirectToPaymentGateway();
+                LOGGER.log(Level.INFO, "executeSetupNewPlan: Redirecting to Ezidebit for creditcard capture: paymentAmountInCents:{0},paymentSchedulePeriodType:{1}, paymentDebitDate:{2}, oneOffPaymentAmount:{3},oneOffPaymentDate:{4}",
+                         new Object[]{ezi.getPaymentAmountInCents(), ezi.getPaymentSchedulePeriodType(), ezi.getPaymentDebitDate(), ezi.getOneOffPaymentAmountInCents(), ezi.getOneOffPaymentDate()});
+            } else {
+                //if (isThisIsANewPlan() == false) {
+                //    proRataAmount = paymentAmount + proRataAmount;
+                //  Date lastPaymentDateOnOldPlan = lastSuccessfulPayment.getDebitDate();
+                //  nextPayBasedOnCurrentPaymentPeriod.setTime(lastPaymentDateOnOldPlan);
+                //      nextPayBasedOnCurrentPaymentPeriod.add(fieldAndAmount[0], fieldAndAmount[1]);
+                //      nextPayBasedOnCurrentPaymentPeriod.add(fieldAndAmount[0], fieldAndAmount[1]);
+                //      newNextPaymentDebitDate = nextPayBasedOnCurrentPaymentPeriod.getTime();
+                //  } else {
+                newNextPaymentDebitDate = scheduleStart;
+
+                //  }
+                ezi.setPaymentDebitDate(newNextPaymentDebitDate);
+
+                /*ezi.setPaymentDayOfMonth(newPayDayOfMonth);
+            ezi.setPaymentDayOfWeek(newPayDayOfWeek);
+            ezi.setPaymentSchedulePeriodType(newPayPeriod);*/
+                ezi.createPaymentSchedule(actionEvent);
+
+                float firstPayment = new Float(proRataAmount);
+                ezi.addSinglePayment(getSelected(), firstPayment, scheduleStart);
+
+            }
+            pp.setPaymentPeriod(newPayPeriod);
+            pp.setPaymentPeriodDayOfMonth(Integer.toString(newPayDayOfMonth));
+            pp.setPaymentPeriodDayOfWeek(newPayDayOfWeek);
+            ejbPaymentParametersFacade.edit(pp);
+            getSelected().setGroupPricing(getCustomersNewPlan());
+            ejbFacade.edit(getSelected());
+
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Executing Plan Change - ERROR.", e);
+        }
+
     }
 
     public void executeChangePlan(ActionEvent actionEvent) {
@@ -2344,7 +2543,27 @@ public class CustomersController implements Serializable {
         PrimeFaces.current().executeScript("PF('issueTicketsDialogueWidget').show();");
     }
 
+    public void choosePlanDialogue(ActionEvent actionEvent) {
+        // customer was on casual or free trial with no scheduled payments setup.
+        FacesContext context = FacesContext.getCurrentInstance();
+        EziDebitPaymentGateway ezi = context.getApplication().evaluateExpressionGet(context, "#{ezidebit}", EziDebitPaymentGateway.class);
+
+        String custPaymentPeriod = current.getPaymentParametersId().getPaymentPeriod();
+        String custPlanPeriod = current.getGroupPricing().getPlanTimePeriod();
+        setDayOfMonthDropdownDisabled(isThisIsANewPlan());
+        GregorianCalendar gc = new GregorianCalendar();
+        if (gc.get(Calendar.DAY_OF_MONTH) != 1) {
+            gc.set(Calendar.DAY_OF_MONTH, 1);
+            gc.add(Calendar.MONTH, 1);
+        }
+        ezi.setPaymentDayOfMonth(gc.get(Calendar.DAY_OF_MONTH));
+        ezi.setPaymentDebitDate(gc.getTime());
+        newPlanPreview(current.getGroupPricing(), gc.getTime());
+        PrimeFaces.current().executeScript("PF('choosePlanDialogueWidget').show();");
+    }
+
     public void changePlanDialogue(ActionEvent actionEvent) {
+        // customer has an existing payment plan 
         if (current.getPaymentParametersId().getLastSuccessfulScheduledPayment() == null) {
             LOGGER.log(Level.WARNING, "changePlanDialogue: Last payment is NULL for {0}", new Object[]{getSelected().getUsername()});
             JsfUtil.addErrorMessage("Note: This customer has never had a successful payment.");
@@ -2397,12 +2616,26 @@ public class CustomersController implements Serializable {
         EziDebitPaymentGateway ezi = context.getApplication().evaluateExpressionGet(context, "#{ezidebit}", EziDebitPaymentGateway.class);
         changePlanPreview(current.getGroupPricing(), getCustomersNewPlan(), ezi.getPaymentDebitDate());
     }
+
+    public void choosePlanNewPlanStartDate(SelectEvent event) {
+        Date newStartDate = (Date) event.getObject();
+        LOGGER.log(Level.INFO, "choosePlanNewPlanStartDate: New Plan start date {0}", new Object[]{newStartDate});
+        FacesContext context = FacesContext.getCurrentInstance();
+        EziDebitPaymentGateway ezi = context.getApplication().evaluateExpressionGet(context, "#{ezidebit}", EziDebitPaymentGateway.class);
+        newPlanPreview(getCustomersNewPlan(), ezi.getPaymentDebitDate());
+    }
+
     public void changeNewScheduleStartDate(SelectEvent event) {
         Date newStartDate = (Date) event.getObject();
         LOGGER.log(Level.INFO, "changeNewScheduleStartDate: New Schedule start date {0}", new Object[]{newStartDate});
         changePlanPreview(current.getGroupPricing(), getCustomersNewPlan(), newStartDate);
     }
 
+    public void choosePlanNewScheduleStartDate(SelectEvent event) {
+        Date newStartDate = (Date) event.getObject();
+        LOGGER.log(Level.INFO, "choosePlanNewScheduleStartDate: New Schedule start date {0}", new Object[]{newStartDate});
+        newPlanPreview(getCustomersNewPlan(), newStartDate);
+    }
 
     public void changeNewScheduleUpdateListener(AjaxBehaviorEvent event) {
         Object newValueObject = event.getSource();
@@ -2411,6 +2644,15 @@ public class CustomersController implements Serializable {
         EziDebitPaymentGateway ezi = context.getApplication().evaluateExpressionGet(context, "#{ezidebit}", EziDebitPaymentGateway.class);
         LOGGER.log(Level.INFO, "changeNewScheduleUpdateListener called. Value Changed:", newValueObject.toString());
         changePlanPreview(current.getGroupPricing(), getCustomersNewPlan(), ezi.getPaymentDebitDate());
+    }
+
+    public void choosePlanNewScheduleUpdateListener(AjaxBehaviorEvent event) {
+        Object newValueObject = event.getSource();
+
+        FacesContext context = FacesContext.getCurrentInstance();
+        EziDebitPaymentGateway ezi = context.getApplication().evaluateExpressionGet(context, "#{ezidebit}", EziDebitPaymentGateway.class);
+        LOGGER.log(Level.INFO, "choosePlanNewScheduleUpdateListener called. Value Changed:", newValueObject.toString());
+        newPlanPreview(getCustomersNewPlan(), ezi.getPaymentDebitDate());
     }
 
     public void selectOneChangePlanListener(ValueChangeEvent vce) {
@@ -2438,6 +2680,34 @@ public class CustomersController implements Serializable {
             LOGGER.log(Level.INFO, "selectOneChangePlanListener: Changing Plans from:{0} to {1}.", new Object[]{oldPlan.getPlanName(), newPlan.getPlanName()});
             ezi.setPaymentSchedulePeriodType(newPlan.getPlanTimePeriod());
             changePlanPreview(oldPlan, newPlan, ezi.getPaymentDebitDate());
+        }
+    }
+
+    public void selectOneNewPlanListener(ValueChangeEvent vce) {
+        Object newValueObject = vce.getNewValue();
+        FacesContext context = FacesContext.getCurrentInstance();
+        EziDebitPaymentGateway ezi = context.getApplication().evaluateExpressionGet(context, "#{ezidebit}", EziDebitPaymentGateway.class);
+        // Object oldValueObject = vce.getOldValue();
+        Plan oldPlan = null;
+        Plan newPlan = null;
+        if (current.getGroupPricing() != null) {
+            oldPlan = current.getGroupPricing();
+        } else {
+            LOGGER.log(Level.WARNING, "selectOneNewPlanListener: The old plan is null. This shouldn't happen!!");
+            // set to default for new customers
+            oldPlan = ejbPlanFacade.findPLanByName(configMapFacade.getConfig("default.customer.plan"));
+        }
+        if (newValueObject.getClass().equals(Plan.class)) {
+            newPlan = (Plan) newValueObject;
+        }
+        if (newPlan == null) {
+            LOGGER.log(Level.WARNING, "selectOneNewPlanListener: The new plan is null. The plan cannot be changed!");
+            JsfUtil.addErrorMessage("Change Plan Failed. The new Plan is NULL");
+
+        } else {
+            LOGGER.log(Level.INFO, "selectOneNewPlanListener: Changing Plans from:{0} to {1}.", new Object[]{oldPlan.getPlanName(), newPlan.getPlanName()});
+            ezi.setPaymentSchedulePeriodType(newPlan.getPlanTimePeriod());
+            newPlanPreview(newPlan, ezi.getPaymentDebitDate());
         }
     }
 
