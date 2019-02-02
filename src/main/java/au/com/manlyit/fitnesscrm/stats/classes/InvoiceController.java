@@ -39,6 +39,7 @@ import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -68,7 +69,6 @@ import org.apache.poi.hssf.usermodel.HSSFCellStyle;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.DataFormat;
@@ -452,6 +452,15 @@ public class InvoiceController implements Serializable {
     public void postProcessPDF(Object document) throws IOException,
             BadElementException, DocumentException {
 
+    }
+    
+    public void addBlankLineItem(){
+        
+        Collection<InvoiceLine> lineItems = getSelected().getInvoiceLineCollection();
+        InvoiceLine il = new InvoiceLine();
+        il.setAmount(BigDecimal.ZERO);
+        il.setDeleted((short)0);
+        il.setInvoiceId(current);
     }
 
     public void preProcessXLS(Object document) {

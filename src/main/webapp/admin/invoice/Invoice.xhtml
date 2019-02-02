@@ -51,6 +51,9 @@
                         </p:commandButton>
                 <!--        <p:commandButton disabled="#{empty invoiceController.selected}"  id="previewHtmlInvoiceButton" actionListener="#{invoiceController.createHtmlInvoice}" value="#{configMapController.getKey('ListInvoiceExportHtmlInvoiceButton')}"  /> -->
                         <p:commandButton disabled="#{empty invoiceController.selected}" id="previewHtmlInvoiceButton"  value="#{configMapController.getKey('ListInvoiceExportHtmlInvoiceButton')}" onclick="PF('previewHtmlInvoiceDialogueWidget').show()" type="button"/>
+                 
+                    <p:commandButton disabled="#{empty invoiceController.selected}"  actionListener="#{invoiceController.createHtmlInvoice}" value="#{configMapController.getKey('ListInvoiceExportHtmlInvoiceButton')}"  />
+                    
                     </p:panelGrid>
                     <p:panelGrid columns="4" >
                         <p:outputLabel  value="#{configMapController.getKey('ListReportShowSuccessful')}" for="showSuccessful" />
