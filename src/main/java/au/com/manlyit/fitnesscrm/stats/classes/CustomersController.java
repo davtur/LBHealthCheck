@@ -2558,7 +2558,7 @@ public class CustomersController implements Serializable {
         }
         ezi.setPaymentDayOfMonth(gc.get(Calendar.DAY_OF_MONTH));
         ezi.setPaymentDebitDate(gc.getTime());
-        newPlanPreview(current.getGroupPricing(), gc.getTime());
+        newPlanPreview(current.getGroupPricing(), getNewPlanStartDate());
         PrimeFaces.current().executeScript("PF('choosePlanDialogueWidget').show();");
     }
 
@@ -2707,7 +2707,7 @@ public class CustomersController implements Serializable {
         } else {
             LOGGER.log(Level.INFO, "selectOneNewPlanListener: Changing Plans from:{0} to {1}.", new Object[]{oldPlan.getPlanName(), newPlan.getPlanName()});
             ezi.setPaymentSchedulePeriodType(newPlan.getPlanTimePeriod());
-            newPlanPreview(newPlan, ezi.getPaymentDebitDate());
+            newPlanPreview(newPlan, getNewPlanStartDate());
         }
     }
 

@@ -39,7 +39,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
@@ -65,9 +64,8 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.faces.push.Push;
 import javax.faces.push.PushContext;
 import javax.inject.Inject;
-import javax.xml.bind.JAXBElement;
-import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.ws.WebServiceException;
+import org.primefaces.PrimeFaces;
 
 /**
  *
@@ -1191,6 +1189,7 @@ public class FutureMapEJB implements Serializable {
 
         LOGGER.log(Level.INFO,
                 "processConvertSchedule completed");
+         
         // }
     }
 

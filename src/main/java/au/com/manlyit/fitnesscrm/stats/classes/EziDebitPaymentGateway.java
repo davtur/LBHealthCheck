@@ -2729,6 +2729,7 @@ public class EziDebitPaymentGateway implements Serializable {
         //getCustomersController().setRefreshFromDB(true);
         //getCustomersController().recreateModel();
         // updateASingleCustomersPaymentInfo(selectedCust);
+          PrimeFaces.current().ajax().update("@(.updatePaymentInfo)");
         updatePaymentTableComponents();
         LOGGER.log(Level.INFO, "processGetCustomerDetails completed");
     }

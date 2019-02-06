@@ -224,7 +224,7 @@
                             </h:panelGrid>
 
                             <div class="EmptyBox10"></div>
-                            <h:panelGrid columns="2" cellpadding="5" >
+                            <h:panelGrid columns="2" class="updatePaymentInfo" cellpadding="5" >
 
                                 <h:outputText rendered="#{ezidebit.customerWebDDRFormEnabled}"  styleClass="red FontBold"   value="#{configMapController.getKey('MyDetailsCallToFillOutPaymentDetails')}"/>
 
@@ -244,14 +244,14 @@
                     <div class="card card-w-title">
                         <h1 class="BigTopic">#{configMapController.getKey('MyDetailsPlanPanel_title')}</h1>
                         <p:panel>
-                            <h:panelGrid columns="2" cellpadding="5" >
+                            <h:panelGrid columns="2" class="updatePaymentInfo" cellpadding="5" >
                                 <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_groupPricing')}"  />
                                 <h:outputText value="#{customersController.selected.groupPricing.planName} - $#{customersController.selected.groupPricing.planPrice}" title="#{configMapController.getKey('ChangePlanNewPlanTitle')}"/>
 
                                 <p:outputLabel value="#{configMapController.getKey('ViewPlanLabel_planDescription')}" for="planDescription"/>
                                 <h:outputText id="planDescription" value="#{customersController.selected.groupPricing.planDescription}" title="#{configMapController.getKey('ViewPlanTitle_planDescription')}"/>
                             </h:panelGrid>
-                            <p:commandButton  styleClass="updatePaymentInfo" icon="fa fa-dollar  white Fs14" title="#{configMapController.getKey('Tooltip_CustomersChangePlanButton')}" rendered="#{!customersController.selected.groupPricing.planTimePeriod.contentEquals('Z')}" disabled="#{!ezidebit.customerWebDDRFormEnabled}"  actionListener="#{customersController.changePlanDialogue}"    value="#{configMapController.getKey('EditCustomersChangePlanButton')}" update=":growl "  /> 
+                            <p:commandButton  styleClass="updatePaymentInfo" icon="fa fa-dollar  white Fs14" title="#{configMapController.getKey('Tooltip_CustomersChangePlanButton')}" rendered="#{!customersController.selected.groupPricing.planTimePeriod.contentEquals('Z')}" disabled="true"  actionListener="#{customersController.changePlanDialogue}"    value="#{configMapController.getKey('EditCustomersChangePlanButton')}" update=":growl "  /> 
                             <p:commandButton  styleClass="updatePaymentInfo" icon="fa fa-dollar  white Fs14" title="#{configMapController.getKey('Tooltip_CustomersChoosePlanButton')}" rendered="#{customersController.selected.groupPricing.planTimePeriod.contentEquals('Z')}"    actionListener="#{customersController.choosePlanDialogue}"    value="#{configMapController.getKey('EditCustomersChoosePlanButton')}" update=":growl "  /> 
  
                             <p:commandButton   icon="fa fa-clock  white Fs14" action="/timetable2.xhtml"   ajax="false"   value="Book Classes"   /> 

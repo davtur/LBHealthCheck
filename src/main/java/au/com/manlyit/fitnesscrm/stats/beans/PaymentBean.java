@@ -65,6 +65,7 @@ import javax.inject.Named;
 import javax.xml.bind.JAXBElement;
 import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.ws.WebServiceException;
+import org.primefaces.PrimeFaces;
 
 /**
  *
@@ -2714,6 +2715,7 @@ public class PaymentBean implements Serializable {
         cust.setPaymentParametersId(pp);
         customersFacade.edit(cust);
         //customersFacade.pushChangesToDBImmediatleyInsteadOfAtTxCommit();
+      
         LOGGER.log(Level.INFO, "Payment Bean updatePaymentParameters. Payment Parameters have been updated for {0}.", new Object[]{cust.getUsername()});
     }
 
