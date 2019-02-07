@@ -114,12 +114,15 @@ public class SessionTimetableController implements Serializable {
     private MapModel simpleModel;
     private SessionHistory selectedSessionHistory;
     private SessionHistory bookingButtonSessionHistory;
+    private SessionHistory editBookingButtonSessionHistory;
     private SessionHistory signupButtonSessionHistory;
     private List<Schedule> filteredScheduleItems;
     private Schedule[] multiSelectedScheduleItems;
     private ScheduleModel eventModel;
     private TimetableScheduleEvent event;
     private Schedule selectedSchedule;
+    private Customers bookingAdminCompSelectedCust;
+    private Customers bookingAdminCompCancelSelectedCust;
 
     public SessionTimetableController() {
     }
@@ -555,10 +558,10 @@ public class SessionTimetableController implements Serializable {
         if (o != null) {
             if (o.getClass() == Date.class) {
                 Date newDate = (Date) selectEvent.getObject();
-                setTimetableStartDate(newDate); 
+                setTimetableStartDate(newDate);
                 recreateModel();
-                SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");               
-                JsfUtil.addSuccessMessage("Date Selected " +format.format(newDate));
+                SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
+                JsfUtil.addSuccessMessage("Date Selected " + format.format(newDate));
             }
         }
     }
@@ -934,10 +937,10 @@ public class SessionTimetableController implements Serializable {
         this.bookingButtonSessionHistory = bookingButtonSessionHistory;
         FacesContext context = FacesContext.getCurrentInstance();
         CustomersController controller = context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
-       
+
         if (context.getExternalContext().getRemoteUser() != null) {
             // autheticated user
-              LOGGER.log(Level.INFO, "opening  Class Booking Dialogue -- User is authenticated");
+            LOGGER.log(Level.INFO, "opening  Class Booking Dialogue -- User is authenticated");
             PrimeFaces.current().executeScript("PF('bookingDialog').show();");
 
             controller.setSignupFromBookingInProgress(false);
@@ -952,15 +955,13 @@ public class SessionTimetableController implements Serializable {
         }
     }
 
-    
     public List<Tickets> listOfCustomersValidTicketsForADate(Customers c, Date sessionDate) {
 
-       
         List<Tickets> result = ejbTicketsFacade.findCustomerTicketsValidForSessionDate(c, sessionDate, true);
-        
+
         return result;
     }
-    
+
     public List<Tickets> doesTheCustomerHaveATicketForAGroupSession(Customers c, Date sessionDate) {
 
         List<Tickets> result = new ArrayList<>();
@@ -1065,40 +1066,56 @@ public class SessionTimetableController implements Serializable {
 
     }
 
+    public boolean isSessionAlreadyBookedDataList(Customers c) {
+        return isSessionAlreadyBookedBase(c);
+       // return isSessionAlreadyBookedBase(getBookingAdminCompSelectedCust());
+
+    }
+
     public boolean isSessionAlreadyBooked() {
         FacesContext context = FacesContext.getCurrentInstance();
-        try {
-            if (context != null) {
-                CustomersController controller = context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
-                Customers c = controller.getSelected();
+        CustomersController controller = null;
+        if (context != null) {
+            controller = context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
+        } else {
+            LOGGER.log(Level.WARNING, "sessionAlreadyBooked -- Faces Context is NULL");
 
-                if (c != null && bookingButtonSessionHistory != null) {
-                    SessionHistory sh = bookingButtonSessionHistory;
-                    List<SessionBookings> sbl = new ArrayList<>(sh.getSessionBookingsCollection());
-                    for (SessionBookings sb : sbl) {
-                        if (Objects.equals(sb.getCustomerId().getId(), c.getId())) {
-                            // customer has already booked the session
-                            return true;
-                        }
+        }
+        return isSessionAlreadyBookedBase(controller.getSelected());
+    }
+
+    public boolean isSessionAlreadyBookedBase(Customers c) {
+
+        try {
+            if (c != null && bookingButtonSessionHistory != null) {
+                SessionHistory sh = bookingButtonSessionHistory;
+                List<SessionBookings> sbl = new ArrayList<>(sh.getSessionBookingsCollection());
+                for (SessionBookings sb : sbl) {
+                    if (Objects.equals(sb.getCustomerId().getId(), c.getId())) {
+                        // customer has already booked the session
+                        return true;
                     }
                 }
-            } else {
-                LOGGER.log(Level.WARNING, "sessionAlreadyBooked -- Faces Context is NULL");
-
             }
+
         } catch (ELException eLException) {
             LOGGER.log(Level.WARNING, "sessionAlreadyBooked", eLException.getMessage());
         }
         return false;
     }
 
+    
     public void cancelSession() {
-        LOGGER.log(Level.INFO, "Cancel Session button clicked.");
         FacesContext context = FacesContext.getCurrentInstance();
         CustomersController controller = context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
+        cancelSessionBase(controller.getSelected());
+    }
+
+    public void cancelSessionBase(Customers c) {
+
+        LOGGER.log(Level.INFO, "Cancel Session button clicked..Customer Name {0} {1}", new Object[]{c.getFirstname(), c.getLastname()});
+        FacesContext context = FacesContext.getCurrentInstance();
         TicketsController ticketsController = context.getApplication().evaluateExpressionGet(context, "#{ticketsController}", TicketsController.class);
-        
-        Customers c = controller.getSelected();
 
         SessionHistory sh = bookingButtonSessionHistory;
         List<SessionBookings> sbl = new ArrayList<>(sh.getSessionBookingsCollection());
@@ -1128,15 +1145,22 @@ public class SessionTimetableController implements Serializable {
         }
     }
 
+   
+
     public void purchaseSession() {
-        LOGGER.log(Level.INFO, "Purchase Session button clicked.");
+        FacesContext context = FacesContext.getCurrentInstance();
+        CustomersController controller = context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
+        purchaseSessionBase(controller.getSelected());
+    }
+
+    public void purchaseSessionBase(Customers c) {
+        LOGGER.log(Level.INFO, "Purchase Session button clicked.Customer Name {0} {1}", new Object[]{c.getFirstname(), c.getLastname()});
         FacesContext context = FacesContext.getCurrentInstance();
 
         //SessionTimetableController sessionTimetableController = context.getApplication().evaluateExpressionGet(context, "#{sessionTimetableController}", SessionTimetableController.class);
         EziDebitPaymentGateway eziDebitPaymentGateway = context.getApplication().evaluateExpressionGet(context, "#{ezidebit}", EziDebitPaymentGateway.class);
-        CustomersController controller = context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
-         TicketsController ticketsController = context.getApplication().evaluateExpressionGet(context, "#{ticketsController}", TicketsController.class);
-        Customers c = controller.getSelected();
+        TicketsController ticketsController = context.getApplication().evaluateExpressionGet(context, "#{ticketsController}", TicketsController.class);
+
         SimpleDateFormat sdf = new SimpleDateFormat("EEEE, d MMM yyyy HH:mm");
         //eziDebitPaymentGateway.setSelectedCustomer(c);
         SessionBookings sb = new SessionBookings(0);
@@ -1333,4 +1357,51 @@ public class SessionTimetableController implements Serializable {
 
     }
 
+    /**
+     * @return the bookingAdminCompSelectedCust
+     */
+    public Customers getBookingAdminCompSelectedCust() {
+        return bookingAdminCompSelectedCust;
+    }
+
+    /**
+     * @param bookingAdminCompSelectedCust the bookingAdminCompSelectedCust to
+     * set
+     */
+    public void setBookingAdminCompSelectedCust(Customers bookingAdminCompSelectedCust) {
+        this.bookingAdminCompSelectedCust = bookingAdminCompSelectedCust;
+        purchaseSessionBase(bookingAdminCompSelectedCust);
+    }
+
+    /**
+     * @return the bookingAdminCompCancelSelectedCust
+     */
+    public Customers getBookingAdminCompCancelSelectedCust() {
+        return bookingAdminCompCancelSelectedCust;
+    }
+
+    /**
+     * @param bookingAdminCompCancelSelectedCust the bookingAdminCompCancelSelectedCust to set
+     */
+    public void setBookingAdminCompCancelSelectedCust(Customers bookingAdminCompCancelSelectedCust) {
+        this.bookingAdminCompCancelSelectedCust = bookingAdminCompCancelSelectedCust;
+         cancelSessionBase(bookingAdminCompCancelSelectedCust);
+    }
+
+    /**
+     * @return the editBookingButtonSessionHistory
+     */
+    public SessionHistory getEditBookingButtonSessionHistory() {
+        return editBookingButtonSessionHistory;
+    }
+
+    /**
+     * @param editBookingButtonSessionHistory the
+     * editBookingButtonSessionHistory to set
+     */
+    public void setEditBookingButtonSessionHistory(SessionHistory editBookingButtonSessionHistory) {
+        this.editBookingButtonSessionHistory = editBookingButtonSessionHistory;
+    }
+
+    
 }

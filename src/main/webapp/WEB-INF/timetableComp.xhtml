@@ -88,7 +88,7 @@
                             </div>
                             <div class="ui-g-12">
                                 <div class="ui-g-3">
-                                    <p:commandButton id="mapsBtn" styleClass="MarRight5" value="#{configMapController.getKey('Timetable_MapsButtonTitle')}" type="button" />
+                                    <p:commandButton id="mapsBtn" styleClass="MarRight5 GreenButton" value="#{configMapController.getKey('Timetable_MapsButtonTitle')}" type="button" />
                                     <p:overlayPanel  for="mapsBtn" hideEffect="fade" dynamic="true" styleClass="timetableGmap" >
                                         <p:gmap styleClass="BorderedBox timetableGmap" center="#{sessHist.sessionTemplate.sessionLocationGps}" zoom="16" model="#{sessHist.sessionTemplate.simpleModel}" type="HYBRID" style="width:100%;height:400px" />
 
@@ -100,16 +100,20 @@
                                         <f:setPropertyActionListener value="#{sessHist}" target="#{sessionTimetableController.signupButtonSessionHistory}" />
                                     </p:commandButton>
                                 </div>
-                                <div class="ui-g-3">
+                                <div class="ui-g-2">
                                     <p:commandButton   styleClass=" OrangeButton animated pulse infinite" update="@(.bookingFormUpdate)" disabled="#{empty  facesContext.externalContext.remoteUser || (sessHist.sessionTemplate.sessionTimetableMaxSize - sessHist.sessionBookingsCollection.size() le 0)}" rendered="#{sessHist.sessionTemplate.showBookingButton}" value="#{configMapController.getKey('Timetable_BookingButtonTitle')}"  actionListener="#{sessionTimetableController.bookFromTimetable}" >
                                         <!--<f:param name="sessionHistoryBookingId" value="#{sessHist.id}"/>-->
                                         <f:setPropertyActionListener value="#{sessHist}" target="#{sessionTimetableController.bookingButtonSessionHistory}" />
                                     </p:commandButton>
                                 </div>
-                                <div class="ui-g-3">
+                                <div class="ui-g-2">
                                     <p:commandButton icon="ui-icon-check fa fa-check white Fs14" id="AdminView" rendered="#{customersController.isUserInRole('ADMIN') ||customersController.isUserInRole('DEVELOPER') }"    value="#{configMapController.getKey('BookingFormAdminViewLink')}" update="@(.bookingFormUpdate) :growl "/>                
                                 </div>
-
+                                <div class="ui-g-2">
+                                    <p:commandButton styleClass="MarRight5 GreenButton"   update="@(.bookingFormUpdate)" oncomplete="PF('bookingAdminDialog').show()"  rendered="#{customersController.isUserInRole('ADMIN') ||customersController.isUserInRole('DEVELOPER') }"  value="#{configMapController.getKey('Timetable_EditBookingButtonTitle')}"    >
+                                        <f:setPropertyActionListener value="#{sessHist}" target="#{sessionTimetableController.bookingButtonSessionHistory}" />
+                                    </p:commandButton>
+                                </div>
 
                                 <p:overlayPanel id="adminOverlay" for="AdminView" hideEffect="fade" dynamic="true"  rendered="#{customersController.isUserInRole('ADMIN') ||customersController.isUserInRole('DEVELOPER') }"  style="width:200px" >
                                     <div class="ui-g">
@@ -150,6 +154,7 @@
 
     <ui:include src="/WEB-INF/signupComp.xhtml"/>
     <ui:include src="/WEB-INF/bookingComp.xhtml"/>
+     <ui:include src="/WEB-INF/bookingAdminComp.xhtml"/>
     <ui:include src="/WEB-INF/loginComp.xhtml"/>
 </ui:composition>
 <!--<p> Generated from template ( JSF_from_entity_wizard/StandardJSF/list.ftl  )- Dave 18th July 2015 </p>-->

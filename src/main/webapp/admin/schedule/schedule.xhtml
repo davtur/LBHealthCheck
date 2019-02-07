@@ -13,7 +13,7 @@
         <ui:define name="body">
             <h:form id="scheduleForm">
 
-                <p:schedule value="#{scheduleController.eventModel}" timeZone="Australia/Sydney" widgetVar="crmSchedule" aspectRatio="2.5" timeFormat="HH:mm" ignoreTimezone="false" allDaySlot="true"  >
+                <p:schedule value="#{scheduleController.eventModel}" timeZone="Australia/Sydney" widgetVar="crmSchedule"   timeFormat="HH:mm" ignoreTimezone="false" allDaySlot="false"  >
 
                     <p:ajax event="dateSelect" listener="#{scheduleController.onDateSelect}" update=":growl :scheduleForm:eventDetails" oncomplete="PF('eventDialog').show()" />
                     <p:ajax event="eventSelect" listener="#{scheduleController.onEventSelect}" update=":growl :scheduleForm:eventDetails" oncomplete="PF('eventDialog').show()" />

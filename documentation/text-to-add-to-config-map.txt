@@ -2301,3 +2301,5 @@ Tooltip_CustomersChoosePlanButton=Click this button to choose the membership pla
 Tooltip_CustomersChangePlanButton=Click this button to change the membership plan that you are on.
 EditCustomersChoosePlanButton=Choose Plan
 choosePlanDialogueTitle=Please Select Your New Plan
+
+Timetable_EditBookingButtonTitle=Edit

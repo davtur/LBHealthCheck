@@ -146,7 +146,7 @@ public class FacebookLoginBean implements Serializable {
             returnValue = configMapFacade.getConfig("facebook.app.oauth.url")
                     + "client_id=" + appId
                     + "&redirect_uri=" + redirectUrl
-                    + "&scope=email,user_birthday&state=" + encodedState;
+                    + "&scope=email&state=" + encodedState;
         } else {
             logger.log(Level.WARNING, "getFacebookUrlAuth -  session  is NULL.");
             returnValue = configMapFacade.getConfig("facebook.redirect.landingpage");
