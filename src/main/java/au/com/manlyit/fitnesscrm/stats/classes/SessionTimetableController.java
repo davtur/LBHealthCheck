@@ -1068,7 +1068,7 @@ public class SessionTimetableController implements Serializable {
 
     public boolean isSessionAlreadyBookedDataList(Customers c) {
         return isSessionAlreadyBookedBase(c);
-       // return isSessionAlreadyBookedBase(getBookingAdminCompSelectedCust());
+        // return isSessionAlreadyBookedBase(getBookingAdminCompSelectedCust());
 
     }
 
@@ -1082,6 +1082,17 @@ public class SessionTimetableController implements Serializable {
 
         }
         return isSessionAlreadyBookedBase(controller.getSelected());
+    }
+
+    public int numberOfValidTickets(Customers c) {
+        if (c != null && bookingButtonSessionHistory != null) {
+            List<Tickets> ct = doesTheCustomerHaveATicketForAGroupSession(c, bookingButtonSessionHistory.getSessiondate());
+            if (ct != null) {
+                return ct.size();
+            }
+        }
+        return 0;
+
     }
 
     public boolean isSessionAlreadyBookedBase(Customers c) {
@@ -1104,7 +1115,6 @@ public class SessionTimetableController implements Serializable {
         return false;
     }
 
-    
     public void cancelSession() {
         FacesContext context = FacesContext.getCurrentInstance();
         CustomersController controller = context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
@@ -1145,15 +1155,13 @@ public class SessionTimetableController implements Serializable {
         }
     }
 
-   
-
     public void purchaseSession() {
         FacesContext context = FacesContext.getCurrentInstance();
         CustomersController controller = context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
-        purchaseSessionBase(controller.getSelected());
+        purchaseSessionBase(controller.getSelected(), false);
     }
 
-    public void purchaseSessionBase(Customers c) {
+    public void purchaseSessionBase(Customers c, boolean adminUser) {
         LOGGER.log(Level.INFO, "Purchase Session button clicked.Customer Name {0} {1}", new Object[]{c.getFirstname(), c.getLastname()});
         FacesContext context = FacesContext.getCurrentInstance();
 
@@ -1268,7 +1276,9 @@ public class SessionTimetableController implements Serializable {
             ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
             HttpServletRequest request = (HttpServletRequest) ec.getRequest();
             try {
-                ec.redirect(request.getContextPath() + "/myDetails.xhtml");
+                if (adminUser == false) {
+                    ec.redirect(request.getContextPath() + "/myDetails.xhtml");
+                }
             } catch (IOException iOException) {
                 LOGGER.log(Level.WARNING, "purchaseSession, could not redirect to /myDetails page", iOException);
             }
@@ -1370,7 +1380,7 @@ public class SessionTimetableController implements Serializable {
      */
     public void setBookingAdminCompSelectedCust(Customers bookingAdminCompSelectedCust) {
         this.bookingAdminCompSelectedCust = bookingAdminCompSelectedCust;
-        purchaseSessionBase(bookingAdminCompSelectedCust);
+        purchaseSessionBase(bookingAdminCompSelectedCust, true);
     }
 
     /**
@@ -1381,11 +1391,12 @@ public class SessionTimetableController implements Serializable {
     }
 
     /**
-     * @param bookingAdminCompCancelSelectedCust the bookingAdminCompCancelSelectedCust to set
+     * @param bookingAdminCompCancelSelectedCust the
+     * bookingAdminCompCancelSelectedCust to set
      */
     public void setBookingAdminCompCancelSelectedCust(Customers bookingAdminCompCancelSelectedCust) {
         this.bookingAdminCompCancelSelectedCust = bookingAdminCompCancelSelectedCust;
-         cancelSessionBase(bookingAdminCompCancelSelectedCust);
+        cancelSessionBase(bookingAdminCompCancelSelectedCust);
     }
 
     /**
@@ -1401,7 +1412,7 @@ public class SessionTimetableController implements Serializable {
      */
     public void setEditBookingButtonSessionHistory(SessionHistory editBookingButtonSessionHistory) {
         this.editBookingButtonSessionHistory = editBookingButtonSessionHistory;
+        bookingButtonSessionHistory = editBookingButtonSessionHistory;
     }
 
-    
 }

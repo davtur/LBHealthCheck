@@ -116,7 +116,7 @@ public class LoginBean implements Serializable {
 
     }
 
-    public void doPasswordReset(String templateName, Customers current, String subject) {
+    public void doPasswordReset(String templateName, Customers current, String subject, boolean resetPassword) {
 
         //valid user that wants the password reset
         //generate link and send
@@ -141,14 +141,21 @@ public class LoginBean implements Serializable {
                 String templateUsernamePlaceholder = configMapFacade.getConfig("login.password.reset.templateUsernamePlaceholder");
                 //String htmlText = configMapFacade.getConfig(templateName);
                 String htmlText = ejbEmailTemplatesFacade.findTemplateByName(templateName).getTemplate();
+                String usernameText = current.getEmailAddress();
+                if(usernameText == null || usernameText.isEmpty()){
+                    usernameText = current.getUsername();
+                }
 
                 htmlText = htmlText.replace(templateLinkPlaceholder, urlLink);
-                htmlText = htmlText.replace(templateUsernamePlaceholder, current.getUsername());
-                //  String tempPassword = generateUniqueToken(8);
-                //String tempPassword = RandomString.generateRandomString(new Random(), 8);
+                htmlText = htmlText.replace(templateUsernamePlaceholder, usernameText);
+                //String tempPassword = generateUniqueToken(8);
+
                 String tempPassword = " Please reset your password at the login page.";
-                //current.setPassword(PasswordService.getInstance().encrypt(tempPassword));
-                // ejbCustomerFacade.editAndFlush(current);
+                if (resetPassword == true) {
+                    tempPassword = RandomString.generateRandomString(new Random(), 8);
+                    current.setPassword(PasswordService.getInstance().encrypt(tempPassword));
+                }
+                ejbCustomerFacade.editAndFlush(current);
                 htmlText = htmlText.replace(templateTemporaryPasswordPlaceholder, tempPassword);
                 //String htmlText = "<table width=\"600\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\">  <tr>    <td><img src=\"cid:logoimg_cid\"/></td>  </tr>  <tr>    <td height=\"220\"> <p>Pure Fitness Manly</p>      <p>Please click the following link to reset your password:</p><p>To reset your password click <a href=\"" + urlLink + "\">here</a>.</p></td>  </tr>  <tr>    <td height=\"50\" align=\"center\" valign=\"middle\" bgcolor=\"#CCCCCC\">www.manlybeachfemalefitness.com.au | sarah@manlybeachfemalefitness.com.au | +61433818067</td>  </tr></table>";
 
@@ -187,7 +194,7 @@ public class LoginBean implements Serializable {
          }*/
         Customers current = ejbCustomerFacade.findCustomerByUsername(username);
         if (current != null) {
-            doPasswordReset("system.reset.password.template", current, configMapFacade.getConfig("PasswordResetEmailSubject"));
+            doPasswordReset("system.reset.password.template", current, configMapFacade.getConfig("PasswordResetEmailSubject"),true);
             return "activation";
         } else {
             JsfUtil.addErrorMessage("Error", configMapFacade.getConfig("PasswordResetErrorValidUsernameRequired"));
@@ -207,7 +214,7 @@ public class LoginBean implements Serializable {
         // if (renderKitId.equalsIgnoreCase("PRIMEFACES_MOBILE")) {
 
         //facesContext = FacesContext.getCurrentInstance();
-      /*  if (mobileDevice() == true) {
+        /*  if (mobileDevice() == true) {
             //REDIRECT TO  MOBILE PAGE
             ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
 
@@ -273,27 +280,27 @@ public class LoginBean implements Serializable {
             if (adminRole == null || adminRole.isEmpty()) {
                 adminRole = "ADMIN"; //default
             }
-             if(isDontRedirect() == true){
-                 landingPage = getValueFromKey("timetable.redirect.landingpage");
-                  
+            if (isDontRedirect() == true) {
+                landingPage = getValueFromKey("timetable.redirect.landingpage");
+
                 logger.log(Level.INFO, "Redirection to timetable.");
-               setDontRedirect(false);
-            
-             }else{
-            if (mobileDevice(request)) {
-                httpSession.setAttribute("MOBILE_DEVICE", "TRUE");
-                logger.log(Level.INFO, "Mobile Device user agent detected. Redirecting to the mobile landing page.");
-                if (FacesContext.getCurrentInstance().getExternalContext().isUserInRole(adminRole) == true) {
-                    landingPage = getValueFromKey("facebook.redirect.mobileadminlandingpage");
-                } else {
-                    landingPage = getValueFromKey("facebook.redirect.mobilelandingpage");
-                }
-            } else if (FacesContext.getCurrentInstance().getExternalContext().isUserInRole(adminRole) == true) {
-                landingPage = getValueFromKey("facebook.redirect.adminlandingpage");
+                setDontRedirect(false);
+
             } else {
-                landingPage = getValueFromKey("facebook.redirect.landingpage");
+                if (mobileDevice(request)) {
+                    httpSession.setAttribute("MOBILE_DEVICE", "TRUE");
+                    logger.log(Level.INFO, "Mobile Device user agent detected. Redirecting to the mobile landing page.");
+                    if (FacesContext.getCurrentInstance().getExternalContext().isUserInRole(adminRole) == true) {
+                        landingPage = getValueFromKey("facebook.redirect.mobileadminlandingpage");
+                    } else {
+                        landingPage = getValueFromKey("facebook.redirect.mobilelandingpage");
+                    }
+                } else if (FacesContext.getCurrentInstance().getExternalContext().isUserInRole(adminRole) == true) {
+                    landingPage = getValueFromKey("facebook.redirect.adminlandingpage");
+                } else {
+                    landingPage = getValueFromKey("facebook.redirect.landingpage");
+                }
             }
-        }
             ec.redirect(request.getContextPath() + landingPage);
             logger.log(Level.INFO, "Redirecting to Landing Page:", landingPage);
         } catch (IOException e) {
@@ -301,7 +308,8 @@ public class LoginBean implements Serializable {
             logger.log(Level.WARNING, "Login Failed", e);
         }
     }
-    public void loginFromTimetable(){
+
+    public void loginFromTimetable() {
         setDontRedirect(true);
         login();
     }
@@ -327,7 +335,7 @@ public class LoginBean implements Serializable {
                 if (errorMessage.contains("UT010030") == true) {//javax.servlet.ServletException: UT010030: User already logged in
 
                     logger.log(Level.INFO, "This is request has already been authenticated. User {0} is already logged in  - redirecting to landing page.", loginId);
-                     redirectToLandingPage();
+                    redirectToLandingPage();
                 } else if (errorMessage.contains("Login failed")) {
                     logger.log(Level.INFO, "Login Failed - Bad username or Password");
                     JsfUtil.addErrorMessage("Login Failed", "Username or Password is incorrect!");

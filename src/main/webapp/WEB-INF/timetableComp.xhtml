@@ -111,7 +111,7 @@
                                 </div>
                                 <div class="ui-g-2">
                                     <p:commandButton styleClass="MarRight5 GreenButton"   update="@(.bookingFormUpdate)" oncomplete="PF('bookingAdminDialog').show()"  rendered="#{customersController.isUserInRole('ADMIN') ||customersController.isUserInRole('DEVELOPER') }"  value="#{configMapController.getKey('Timetable_EditBookingButtonTitle')}"    >
-                                        <f:setPropertyActionListener value="#{sessHist}" target="#{sessionTimetableController.bookingButtonSessionHistory}" />
+                                        <f:setPropertyActionListener value="#{sessHist}" target="#{sessionTimetableController.editBookingButtonSessionHistory}" />
                                     </p:commandButton>
                                 </div>
 

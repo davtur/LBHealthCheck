@@ -502,7 +502,7 @@ public class CustomersController implements Serializable {
     public void sendClassBookingConfirmationEmail() {
         FacesContext context = FacesContext.getCurrentInstance();
         LoginBean controller = (LoginBean) context.getApplication().getELResolver().getValue(context.getELContext(), null, "loginBean");
-        controller.doPasswordReset("system.email.admin.paymentForm.template", current, configMapFacade.getConfig("sendPaymentFormEmailSubject"));
+        controller.doPasswordReset("system.email.admin.paymentForm.template", current, configMapFacade.getConfig("sendPaymentFormEmailSubject"), false);
         JsfUtil.addSuccessMessage(configMapFacade.getConfig("sendPaymentFormEmailSuccessMessage") + " " + current.getFirstname() + " " + current.getLastname() + ".");
         String auditDetails = "Customer Payment Form Email Sent For:" + current.getFirstname() + " " + current.getLastname() + ".";
         String changedFrom = "N/A";
@@ -524,7 +524,7 @@ public class CustomersController implements Serializable {
     public void sendPaymentFormEmail() {
         FacesContext context = FacesContext.getCurrentInstance();
         LoginBean controller = (LoginBean) context.getApplication().getELResolver().getValue(context.getELContext(), null, "loginBean");
-        controller.doPasswordReset("system.email.admin.paymentForm.template", current, configMapFacade.getConfig("sendPaymentFormEmailSubject"));
+        controller.doPasswordReset("system.email.admin.paymentForm.template", current, configMapFacade.getConfig("sendPaymentFormEmailSubject"), false);
         JsfUtil.addSuccessMessage(configMapFacade.getConfig("sendPaymentFormEmailSuccessMessage") + " " + current.getFirstname() + " " + current.getLastname() + ".");
         String auditDetails = "Customer Payment Form Email Sent For:" + current.getFirstname() + " " + current.getLastname() + ".";
         String changedFrom = "N/A";
@@ -547,7 +547,12 @@ public class CustomersController implements Serializable {
         FacesContext context = FacesContext.getCurrentInstance();
         LoginBean controller = (LoginBean) context.getApplication().getELResolver().getValue(context.getELContext(), null, "loginBean");
         EmailTemplatesController emailTemplatescontroller = (EmailTemplatesController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "emailTemplatesController");
-        controller.doPasswordReset(emailTemplatescontroller.getSelected().getName(), current, emailTemplatescontroller.getSelected().getSubject());
+        boolean doPasswordReset = false;
+        String templateName = emailTemplatescontroller.getSelected().getName();
+        if (templateName.contains("onboardcustomer")) {
+            doPasswordReset = true;
+        }
+        controller.doPasswordReset(templateName, current, emailTemplatescontroller.getSelected().getSubject(), doPasswordReset);
         JsfUtil.addSuccessMessage(configMapFacade.getConfig("sendEmailToCustomerFromTemplate") + " " + current.getFirstname() + " " + current.getLastname() + ".");
         String auditDetails = "Customer Email Sent For:" + current.getFirstname() + " " + current.getLastname() + ".Template Used = " + emailTemplatescontroller.getSelected().getName();
         String changedFrom = "N/A";
@@ -569,7 +574,7 @@ public class CustomersController implements Serializable {
     public void sendPasswordResetEmail() {
         FacesContext context = FacesContext.getCurrentInstance();
         LoginBean controller = (LoginBean) context.getApplication().getELResolver().getValue(context.getELContext(), null, "loginBean");
-        controller.doPasswordReset("system.reset.password.template", current, configMapFacade.getConfig("PasswordResetEmailSubject"));
+        controller.doPasswordReset("system.reset.password.template", current, configMapFacade.getConfig("PasswordResetEmailSubject"), true);
         String auditDetails = "Customer Password Reset Email Sent For:" + current.getFirstname() + " " + current.getLastname() + ".";
         String changedFrom = "N/A";
         String changedTo = "Password Reset Email Sent";
@@ -591,7 +596,7 @@ public class CustomersController implements Serializable {
     public void sendCustomerOnboardEmail() {
         FacesContext context = FacesContext.getCurrentInstance();
         LoginBean controller = (LoginBean) context.getApplication().getELResolver().getValue(context.getELContext(), null, "loginBean");
-        controller.doPasswordReset("system.email.admin.onboardcustomer.template", current, configMapFacade.getConfig("sendCustomerOnBoardEmailEmailSubject"));
+        controller.doPasswordReset("system.email.admin.onboardcustomer.template", current, configMapFacade.getConfig("sendCustomerOnBoardEmailEmailSubject"), true);
         JsfUtil.addSuccessMessage(configMapFacade.getConfig("sendCustomerOnBoardEmail") + " " + current.getFirstname() + " " + current.getLastname() + ".");
         String auditDetails = "Customer On Board Email Sent For:" + current.getFirstname() + " " + current.getLastname() + ".";
         String changedFrom = "N/A";
@@ -1420,7 +1425,7 @@ public class CustomersController implements Serializable {
                 }
                 String details = "New LEAD generated: Id:" + c.getId() + ", Name: " + c.getFirstname() + ", <br/>Email:  " + c.getEmailAddress() + ", <br/>Phone:   " + c.getTelephone() + ", <br/>Username:   " + c.getUsername() + ", <br/>Group:   " + group + ", IP Address:" + ipAddress + ", Message:" + message;
                 sendNotificationEmail(c, grp, "system.email.notification.template", "New LEAD from website", message);
-                doPasswordResetFromWebserviceCall("system.email.admin.onboardcustomer.template", c, configMapFacade.getConfig("sendCustomerOnBoardEmailEmailSubject"));
+                doPasswordResetFromWebserviceCall("system.email.admin.onboardcustomer.template", c, configMapFacade.getConfig("sendCustomerOnBoardEmailEmailSubject"), true);
                 createCombinedAuditLogAndNote(c, c, "New Lead", details, "Did Not Exist", "New Lead");
                 LOGGER.log(Level.INFO, "createFromLead: {0}", new Object[]{details});
                 if (isWebserviceCall == false) {
@@ -1447,7 +1452,7 @@ public class CustomersController implements Serializable {
                 // SurveysController surveyCon = (SurveysController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "surveysController");
                 //LoginBean controller = (LoginBean) context.getApplication().getELResolver().getValue(context.getELContext(), null, "loginBean");
                 //controller.doPasswordReset("system.email.admin.onboardcustomer.template", c, configMapFacade.getConfig("sendCustomerOnBoardEmailEmailSubject"));
-                doPasswordResetFromWebserviceCall("system.email.admin.onboardcustomer.template", c, configMapFacade.getConfig("sendCustomerOnBoardEmailEmailSubject"));
+                doPasswordResetFromWebserviceCall("system.email.admin.onboardcustomer.template", c, configMapFacade.getConfig("sendCustomerOnBoardEmailEmailSubject"), true);
                 createCombinedAuditLogAndNote(c, c, "New Sign Up", details, "Did Not Exist", "New Lead");
                 LOGGER.log(Level.INFO, "createFromSignup: {0}", new Object[]{details});
                 if (isWebserviceCall == false) {
@@ -1518,7 +1523,7 @@ public class CustomersController implements Serializable {
         // }
     }
 
-    public void doPasswordResetFromWebserviceCall(String templateName, Customers current, String subject) {
+    public void doPasswordResetFromWebserviceCall(String templateName, Customers current, String subject, boolean resetPassword) {
 
         //valid user that wants the password reset
         //generate link and send
@@ -1543,14 +1548,21 @@ public class CustomersController implements Serializable {
                 String templateUsernamePlaceholder = configMapFacade.getConfig("login.password.reset.templateUsernamePlaceholder");
                 //String htmlText = configMapFacade.getConfig(templateName);
                 String htmlText = ejbEmailTemplatesFacade.findTemplateByName(templateName).getTemplate();
+                String usernameText = current.getEmailAddress();
+                if (usernameText == null || usernameText.isEmpty()) {
+                    usernameText = current.getUsername();
+                }
 
                 htmlText = htmlText.replace(templateLinkPlaceholder, urlLink);
-                htmlText = htmlText.replace(templateUsernamePlaceholder, current.getUsername());
-                //  String tempPassword = generateUniqueToken(8);
-                //String tempPassword = RandomString.generateRandomString(new Random(), 8);
+                htmlText = htmlText.replace(templateUsernamePlaceholder, usernameText);
+                //String tempPassword = generateUniqueToken(8);
+
                 String tempPassword = " Please reset your password at the login page.";
-                //current.setPassword(PasswordService.getInstance().encrypt(tempPassword));
-                // ejbCustomerFacade.editAndFlush(current);
+                if (resetPassword == true) {
+                    tempPassword = RandomString.generateRandomString(new Random(), 8);
+                    current.setPassword(PasswordService.getInstance().encrypt(tempPassword));
+                }
+                ejbFacade.editAndFlush(current);
                 htmlText = htmlText.replace(templateTemporaryPasswordPlaceholder, tempPassword);
                 //String htmlText = "<table width=\"600\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\">  <tr>    <td><img src=\"cid:logoimg_cid\"/></td>  </tr>  <tr>    <td height=\"220\"> <p>Pure Fitness Manly</p>      <p>Please click the following link to reset your password:</p><p>To reset your password click <a href=\"" + urlLink + "\">here</a>.</p></td>  </tr>  <tr>    <td height=\"50\" align=\"center\" valign=\"middle\" bgcolor=\"#CCCCCC\">www.manlybeachfemalefitness.com.au | sarah@manlybeachfemalefitness.com.au | +61433818067</td>  </tr></table>";
 
@@ -2377,7 +2389,7 @@ public class CustomersController implements Serializable {
         PrimeFaces.current().executeScript("PF('choosePlanDialogueWidget').show();");
         PrimeFaces.current().ajax().update("choosePlanDialogue");
         LOGGER.log(Level.INFO, "newPlanPreview: Updating EDDR web URL params to send to Ezidebit for creditcard capture: paymentAmountInCents:{0},paymentSchedulePeriodType:{1}, paymentDebitDate:{2}, oneOffPaymentAmount:{3},oneOffPaymentDate:{4}",
-                 new Object[]{ezi.getPaymentAmountInCents(), ezi.getPaymentSchedulePeriodType(), ezi.getPaymentDebitDate(), ezi.getProRataChangePlanAmount(), newPlanStartDate});
+                new Object[]{ezi.getPaymentAmountInCents(), ezi.getPaymentSchedulePeriodType(), ezi.getPaymentDebitDate(), ezi.getProRataChangePlanAmount(), newPlanStartDate});
 
     }
 
@@ -2445,7 +2457,7 @@ public class CustomersController implements Serializable {
                 ezi.createEddrLink(actionEvent);
                 ezi.redirectToPaymentGateway();
                 LOGGER.log(Level.INFO, "executeSetupNewPlan: Redirecting to Ezidebit for creditcard capture: paymentAmountInCents:{0},paymentSchedulePeriodType:{1}, paymentDebitDate:{2}, oneOffPaymentAmount:{3},oneOffPaymentDate:{4}",
-                         new Object[]{ezi.getPaymentAmountInCents(), ezi.getPaymentSchedulePeriodType(), ezi.getPaymentDebitDate(), ezi.getOneOffPaymentAmountInCents(), ezi.getOneOffPaymentDate()});
+                        new Object[]{ezi.getPaymentAmountInCents(), ezi.getPaymentSchedulePeriodType(), ezi.getPaymentDebitDate(), ezi.getOneOffPaymentAmountInCents(), ezi.getOneOffPaymentDate()});
             } else {
                 //if (isThisIsANewPlan() == false) {
                 //    proRataAmount = paymentAmount + proRataAmount;
