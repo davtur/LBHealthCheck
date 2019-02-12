@@ -62,7 +62,7 @@ public class ConfigMap implements BaseEntity, Serializable {
     @Basic(optional = false)
     @NotNull
     @Lob
-    @Size(min = 1, max = 65535)
+    @Size(min = 0, max = 65535)
     @Column(name = "configvalue")
     private String configvalue;
 

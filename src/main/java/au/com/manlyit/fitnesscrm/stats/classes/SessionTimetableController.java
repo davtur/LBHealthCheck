@@ -539,6 +539,7 @@ public class SessionTimetableController implements Serializable {
         startCal.setTime(getTimetableStartDate());
         startCal.add(Calendar.DAY_OF_YEAR, 7);
         setTimetableStartDate(startCal.getTime());
+        recreateModel();
     }
 
     public void decrementWeek() {
@@ -546,11 +547,13 @@ public class SessionTimetableController implements Serializable {
         startCal.setTime(getTimetableStartDate());
         startCal.add(Calendar.DAY_OF_YEAR, -7);
         setTimetableStartDate(startCal.getTime());
+        recreateModel();
     }
 
     public void setToCurrentWeek() {
 
         setTimetableStartDate(new Date());
+        recreateModel();
     }
 
     public void setTimetableToSelectedDate(SelectEvent selectEvent) {

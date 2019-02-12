@@ -66,7 +66,7 @@
                     <p:inputText id="firstname"  value="#{customersController.newCustomer.firstname}" title="#{configMapController.getKey('EditCustomersTitle_firstname')}" required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_firstname')}">
                         <p:ajax update=":createAccountForm:dialogueSave" event="keyup"/>
                     </p:inputText>
-                    <p:watermark for="firstname" value="FIRSTNAME"  />
+                    <p:watermark for="firstname" value="Firstname"  />
                 </div>
             </div>
             <div class="ui-g  ">
@@ -74,7 +74,7 @@
                     <p:inputText id="lastname" value="#{customersController.newCustomer.lastname}" title="#{configMapController.getKey('EditCustomersTitle_lastname')}"  required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_lastname')}">
                         <p:ajax update="  :createAccountForm:dialogueSave" event="keyup" />
                     </p:inputText>
-                    <p:watermark for="lastname" value="LASTNAME"  />
+                    <p:watermark for="lastname" value="Surname"   />
                 </div>
             </div>
             <div class="ui-g  ">

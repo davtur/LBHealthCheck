@@ -21,12 +21,12 @@
 
                 </p:panel>
                 <div class="Seperator"></div>
-                <p:commandButton  styleClass="MarRight5 Fs24"  update=":SessionTimetableListForm"   value="#{configMapController.getKey('Timetable_decrementWeekButtonTitle')}"  actionListener="#{sessionTimetableController.decrementWeek}"  />
+                <p:commandButton  styleClass="MarRight5 Fs24"   update="@(.bookingFormUpdate) :growl"   value="#{configMapController.getKey('Timetable_decrementWeekButtonTitle')}"  actionListener="#{sessionTimetableController.decrementWeek}"  />
 
-                <p:commandButton styleClass="MarRight5 Fs24"    update=":SessionTimetableListForm"   value="#{configMapController.getKey('Timetable_incrementWeekButtonTitle')}"  actionListener="#{sessionTimetableController.incrementWeek}" />
-                <p:commandButton styleClass="MarRight5"  update=":SessionTimetableListForm"   value="#{configMapController.getKey('Timetable_setToCurrentWeekButtonTitle')}"  actionListener="#{sessionTimetableController.setToCurrentWeek}"  />
+                <p:commandButton styleClass="MarRight5 Fs24"    update="@(.bookingFormUpdate) :growl"   value="#{configMapController.getKey('Timetable_incrementWeekButtonTitle')}"  actionListener="#{sessionTimetableController.incrementWeek}" />
+                <p:commandButton styleClass="MarRight5"  update="@(.bookingFormUpdate) :growl"   value="#{configMapController.getKey('Timetable_setToCurrentWeekButtonTitle')}"  actionListener="#{sessionTimetableController.setToCurrentWeek}"  />
                 <p:calendar value="#{sessionTimetableController.timetableStartDate}" mode="popup" pattern="d MMMMM yyyy"  showOn="both"  >
-                    <p:ajax  event="dateSelect" update=":SessionTimetableListForm :growl" listener="#{sessionTimetableController.setTimetableToSelectedDate}" />
+                    <p:ajax  event="dateSelect" update="@(.bookingFormUpdate) :growl" listener="#{sessionTimetableController.setTimetableToSelectedDate}" />
                 </p:calendar>
 
 
@@ -106,14 +106,7 @@
                                         <f:setPropertyActionListener value="#{sessHist}" target="#{sessionTimetableController.bookingButtonSessionHistory}" />
                                     </p:commandButton>
                                 </div>
-                                <div class="ui-g-2">
-                                    <p:commandButton icon="ui-icon-check fa fa-check white Fs14" id="AdminView" rendered="#{customersController.isUserInRole('ADMIN') ||customersController.isUserInRole('DEVELOPER') }"    value="#{configMapController.getKey('BookingFormAdminViewLink')}" update="@(.bookingFormUpdate) :growl "/>                
-                                </div>
-                                <div class="ui-g-2">
-                                    <p:commandButton styleClass="MarRight5 GreenButton"   update="@(.bookingFormUpdate)" oncomplete="PF('bookingAdminDialog').show()"  rendered="#{customersController.isUserInRole('ADMIN') ||customersController.isUserInRole('DEVELOPER') }"  value="#{configMapController.getKey('Timetable_EditBookingButtonTitle')}"    >
-                                        <f:setPropertyActionListener value="#{sessHist}" target="#{sessionTimetableController.editBookingButtonSessionHistory}" />
-                                    </p:commandButton>
-                                </div>
+
 
                                 <p:overlayPanel id="adminOverlay" for="AdminView" hideEffect="fade" dynamic="true"  rendered="#{customersController.isUserInRole('ADMIN') ||customersController.isUserInRole('DEVELOPER') }"  style="width:200px" >
                                     <div class="ui-g">
@@ -134,6 +127,15 @@
                                 </p:overlayPanel>  
 
                             </div>
+                            <h:panelGrid columns="2" rendered="#{customersController.isUserInRole('ADMIN') ||customersController.isUserInRole('DEVELOPER') }" >
+
+                                <p:commandButton styleClass="MarRight5 redBg" icon="fa fa-check white Fs14" id="AdminView"    value="#{configMapController.getKey('BookingFormAdminViewLink')}" update="@(.bookingFormUpdate) :growl "/>                
+
+                                <p:commandButton styleClass="MarRight5 redBg" icon="fa fa-pencil-square-o white Fs14" id="AdminEdit"    value="#{configMapController.getKey('Timetable_EditBookingButtonTitle')}"    update="@(.bookingFormUpdate)" oncomplete="PF('bookingAdminDialog').show()"  >
+                                    <f:setPropertyActionListener value="#{sessHist}" target="#{sessionTimetableController.editBookingButtonSessionHistory}" />
+                                </p:commandButton>
+
+                            </h:panelGrid>
 
 
                             <div class="Seperator"></div>
@@ -154,7 +156,7 @@
 
     <ui:include src="/WEB-INF/signupComp.xhtml"/>
     <ui:include src="/WEB-INF/bookingComp.xhtml"/>
-     <ui:include src="/WEB-INF/bookingAdminComp.xhtml"/>
+    <ui:include src="/WEB-INF/bookingAdminComp.xhtml"/>
     <ui:include src="/WEB-INF/loginComp.xhtml"/>
 </ui:composition>
 <!--<p> Generated from template ( JSF_from_entity_wizard/StandardJSF/list.ftl  )- Dave 18th July 2015 </p>-->

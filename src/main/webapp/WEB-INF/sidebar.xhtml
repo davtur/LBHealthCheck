@@ -425,7 +425,7 @@
                         <p:menuitem            
                             url="#{customersController.wordpressSiteUrl}/blog/" ajax="false"  target="_blank" value="Blog" icon="fa fa-book"  >
                         </p:menuitem>
-                        <p:submenu icon="fa fa-user" label="My Account"   >
+                        <p:submenu icon="fa fa-user" label="My Account" rendered="#{not empty customersController.loggedInUser}"  >
                             <p:menuitem
                                 id="myStats"
                                 action="/index.xhtml" ajax="false" value="My Stats" icon="fa fa-heartbeat" >
