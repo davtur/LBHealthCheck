@@ -253,12 +253,21 @@
                             </h:panelGrid>
                             <p:commandButton  styleClass="updatePaymentInfo" icon="fa fa-dollar  white Fs14" title="#{configMapController.getKey('Tooltip_CustomersChangePlanButton')}" rendered="#{!customersController.selected.groupPricing.planTimePeriod.contentEquals('Z')}" disabled="true"  actionListener="#{customersController.changePlanDialogue}"    value="#{configMapController.getKey('EditCustomersChangePlanButton')}" update=":growl "  /> 
                             <p:commandButton  styleClass="updatePaymentInfo" icon="fa fa-dollar  white Fs14" title="#{configMapController.getKey('Tooltip_CustomersChoosePlanButton')}" rendered="#{customersController.selected.groupPricing.planTimePeriod.contentEquals('Z')}"    actionListener="#{customersController.choosePlanDialogue}"    value="#{configMapController.getKey('EditCustomersChoosePlanButton')}" update=":growl "  /> 
- 
+
                             <p:commandButton   icon="fa fa-clock  white Fs14" action="/timetable2.xhtml"   ajax="false"   value="Book Classes"   /> 
 
                         </p:panel>
                     </div>  
 
+                    <div class="card card-w-title">
+                        <h1 class="BigTopic">#{configMapController.getKey('MyDetailsPurchasePanel_title')}</h1>
+                        <p:panel>
+                            <h:panelGrid columns="1" class="updatePaymentInfo" cellpadding="5" >
+                            <p:commandButton  styleClass="updatePaymentInfo" icon="fa fa-dollar  white Fs14" title="#{configMapController.getKey('Tooltip_MyDetailsPurchaseTenPackClasses')}" disabled="#{(!customersController.selected.paymentParametersId.statusCode.contains('A')) or tenpackPurchaseButtonDisabled }"  actionListener="#{customersController.purchaseTenPackOfGroupSessions}"    value="#{configMapFacade.getConfig('purchase.tenpack.groupsessions.price')} - #{configMapController.getKey('MyDetailsPurchaseTenPackClasses_ButtonLabel')}" update="@(.updatePaymentInfo) :growl " /> 
+                            <p:commandButton  styleClass="updatePaymentInfo" icon="fa fa-dollar  white Fs14" title="#{configMapController.getKey('Tooltip_MyDetailsPurchaseTenPackPT')}"      disabled="#{(!customersController.selected.paymentParametersId.statusCode.contains('A')) or tenpackPurchaseButtonDisabled }"  actionListener="#{customersController.purchaseTenPackOfPTSessions}"       value="#{configMapFacade.getConfig('purchase.tenpack.ptsessions.price')} - #{configMapController.getKey('MyDetailsPurchaseTenPackPT_ButtonLabel')}"      update="@(.updatePaymentInfo) :growl " /> 
+                       </h:panelGrid>
+                        </p:panel>
+                    </div>  
 
 
                     <div class="card card-w-title"> 
@@ -301,32 +310,32 @@
                                     <h:outputText value="#{item.datePurchased}">
                                         <f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
                                     </h:outputText>
-                               </p:column>
+                                </p:column>
 
                                 <p:column sortBy="#{item.validFrom}" filterBy="#{item.validFrom}" headerText="#{configMapController.getKey('ListTicketsTitle_validFrom')}"   >
                                     <h:outputText value="#{item.validFrom}">
                                         <f:convertDateTime pattern="dd/MM/yyyy" />
                                     </h:outputText>
-                               </p:column>
+                                </p:column>
                                 <p:column sortBy="#{item.expires}" filterBy="#{item.expires}" headerText="#{configMapController.getKey('ListTicketsTitle_expires')}"   >
                                     <h:outputText value="#{item.expires}">
                                         <f:convertDateTime pattern="dd/MM/yyyy" />
                                     </h:outputText>
-                               </p:column>
+                                </p:column>
                                 <p:column  sortBy="#{item.dateUsed}" filterBy="#{item.dateUsed}" headerText="#{configMapController.getKey('ListTicketsTitle_classDetails')}"   >
-                                     <h:outputText rendered="#{! empty item.sessionBookings.sessionHistoryId.sessiondate}" value="#{item.sessionBookings.sessionHistoryId.sessiondate}">
+                                    <h:outputText rendered="#{! empty item.sessionBookings.sessionHistoryId.sessiondate}" value="#{item.sessionBookings.sessionHistoryId.sessiondate}">
                                         <f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
                                     </h:outputText>
-                                     <h:outputText rendered="#{! empty item.sessionBookings.sessionHistoryId.sessionTemplate.sessionTitle}" value=" #{item.sessionBookings.sessionHistoryId.sessionTemplate.sessionTitle}"/>
-                               </p:column>
+                                    <h:outputText rendered="#{! empty item.sessionBookings.sessionHistoryId.sessionTemplate.sessionTitle}" value=" #{item.sessionBookings.sessionHistoryId.sessionTemplate.sessionTitle}"/>
+                                </p:column>
                                 <p:column  sortBy="#{item.dateUsed}" filterBy="#{item.dateUsed}" headerText="#{configMapController.getKey('ListTicketsTitle_dateUsed')}"   >
                                     <h:outputText rendered="#{! empty item.dateUsed}" value="#{item.dateUsed}">
                                         <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
                                     </h:outputText>
-                               </p:column>
-     
-                                 
-                                 <f:facet name="footer">
+                                </p:column>
+
+
+                                <f:facet name="footer">
                                     <p:commandButton id="viewButton"   icon="ui-icon-search" value="#{configMapController.getKey('View')}" update=":createCustomerForm" oncomplete="PF('TicketsViewDialog').show()" disabled="#{empty ticketsController.selected}"/>
                                 </f:facet>
                             </p:dataTable>

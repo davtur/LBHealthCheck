@@ -2303,3 +2303,13 @@ EditCustomersChoosePlanButton=Choose Plan
 choosePlanDialogueTitle=Please Select Your New Plan
 
 Timetable_EditBookingButtonTitle=Edit
+
+MyDetailsPurchasePanel_title=Purchase
+Tooltip_MyDetailsPurchaseTenPackClasses=Click this button to buy a 10 pack of Group Training Classes
+MyDetailsPurchaseTenPackClasses_ButtonLabel=10 Pack of Group Classes
+MyDetailsPurchaseTenPackPT_ButtonLabel=10 Pack of Personal Training Sessions
+Tooltip_MyDetailsPurchaseTenPackPT=Click this button to buy a 10 pack of Personal Training Sessions
+purchase.tenpack.groupsessions.price=250
+purchase.tenpack.ptsessions.price=795
+purchaseTenPackOfGroupSessionsSuccsessful=A 10 pack of group training classes has been purchased successfully. Ten class tickets are being added to your account.
+purchaseTenPackOfPTSessionsSuccsessful=A 10 pack of 1 hour personal training classes has been purchased successfully. Ten PT tickets are being added to your account.

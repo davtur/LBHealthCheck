@@ -28,6 +28,7 @@ import au.com.manlyit.fitnesscrm.stats.db.PaymentParameters;
 import au.com.manlyit.fitnesscrm.stats.db.Payments;
 import au.com.manlyit.fitnesscrm.stats.db.Plan;
 import au.com.manlyit.fitnesscrm.stats.db.QuestionnaireMap;
+import au.com.manlyit.fitnesscrm.stats.db.SessionBookings;
 import au.com.manlyit.fitnesscrm.stats.db.SessionTypes;
 import au.com.manlyit.fitnesscrm.stats.db.Suppliers;
 import au.com.manlyit.fitnesscrm.stats.db.Surveys;
@@ -48,11 +49,8 @@ import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.time.DayOfWeek;
-import java.time.LocalDate;
-import java.time.ZoneId;
 import java.time.format.TextStyle;
 import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -249,6 +247,7 @@ public class CustomersController implements Serializable {
     private Customers impersonate;
     private Customers loggedInUser;
     private boolean passwordsMatch = false;
+    private boolean tenpackPurchaseButtonDisabled = false;
     private boolean impersonating = false;
     private boolean customerTabsEnabled = false;
     private boolean refreshFromDB = false;
@@ -1500,6 +1499,23 @@ public class CustomersController implements Serializable {
 
     }
 
+    public void issuePackOfPTSessionTickets(Customers c, int validWeeks, int numberOfTickets) {
+
+        GregorianCalendar ticketStartDate = new GregorianCalendar();
+        CalendarUtil.SetToLastDayOfWeek(Calendar.SUNDAY, ticketStartDate);
+        CalendarUtil.SetTimeToMidnight(ticketStartDate);
+
+        GregorianCalendar ticketStopDate = new GregorianCalendar();
+        ticketStopDate.setTimeInMillis(ticketStartDate.getTimeInMillis());
+        ticketStopDate.add(Calendar.WEEK_OF_YEAR, validWeeks);
+
+        ticketStopDate.add(Calendar.DAY_OF_YEAR, 1);
+        ticketStopDate.add(Calendar.SECOND, -1);
+
+        issueBlockOfTickets(c, ticketStartDate.getTime(), ticketStopDate.getTime(), ejbSessionTypesFacade.findASessionTypeByName("Personal Training 1 hour"), numberOfTickets);
+
+    }
+
     public void issueBlockOfTickets(Customers c, Date ticketStartDate, Date ticketStopDate, SessionTypes sessionType, int number) {
 
         //  synchronized (issueBlockOfTicketsLockObject) {
@@ -2572,6 +2588,54 @@ public class CustomersController implements Serializable {
         ezi.setPaymentDebitDate(gc.getTime());
         newPlanPreview(current.getGroupPricing(), getNewPlanStartDate());
         PrimeFaces.current().executeScript("PF('choosePlanDialogueWidget').show();");
+    }
+
+    public void purchaseTenPackOfGroupSessions(ActionEvent actionEvent) {
+        if (isTenpackPurchaseButtonDisabled() == false) {
+            setTenpackPurchaseButtonDisabled(true);
+            Customers c = getSelected();
+            float price = 0;
+            try {
+                price = Float.parseFloat(configMapFacade.getConfig("purchase.tenpack.groupsessions.price"));
+            } catch (NumberFormatException numberFormatException) {
+                LOGGER.log(Level.SEVERE, "purchaseTenPackOfGroupSessions - ERROR.Price a valid number or not set in configmap - key = purchase.tenpack.groupsessions.price", numberFormatException);
+            }
+            if (purchaseTenPack(c, price) == true) {
+                issuePackOfTickets(c, 52, 10);
+                JsfUtil.addSuccessMessage(configMapFacade.getConfig("purchaseTenPackOfGroupSessionsSuccsessful"));
+            }
+        }
+    }
+
+    public void purchaseTenPackOfPTSessions(ActionEvent actionEvent) {
+        if (isTenpackPurchaseButtonDisabled() == false) {
+            setTenpackPurchaseButtonDisabled(true);
+            Customers c = getSelected();
+            float price = 0;
+            try {
+                price = Float.parseFloat(configMapFacade.getConfig("purchase.tenpack.ptsessions.price"));
+            } catch (NumberFormatException numberFormatException) {
+                LOGGER.log(Level.SEVERE, "purchaseTenPackOfPTSessions - ERROR.Price a valid number or not set in configmap - key = purchase.tenpack.ptsessions.price", numberFormatException);
+            }
+            if (purchaseTenPack(c, price) == true) {
+                issuePackOfPTSessionTickets(c, 52, 10);
+                JsfUtil.addSuccessMessage(configMapFacade.getConfig("purchaseTenPackOfPTSessionsSuccsessful"));
+            }
+        }
+
+    }
+
+    private boolean purchaseTenPack(Customers c, float price) {
+
+        FacesContext context = FacesContext.getCurrentInstance();
+
+        SessionTimetableController sessionTimetableController = context.getApplication().evaluateExpressionGet(context, "#{sessionTimetableController}", SessionTimetableController.class);
+        SessionBookings sb = new SessionBookings();
+        sb.setBookingTime(new Date());
+        sb.setCustomerId(c);
+
+        return sessionTimetableController.purchaseProduct(c, true, sb, price, false);
+
     }
 
     public void changePlanDialogue(ActionEvent actionEvent) {
@@ -4431,5 +4495,20 @@ public class CustomersController implements Serializable {
      */
     public void setNewPlanStartDate(Date newPlanStartDate) {
         this.newPlanStartDate = newPlanStartDate;
+    }
+
+    /**
+     * @return the tenpackPurchaseButtonDisabled
+     */
+    public boolean isTenpackPurchaseButtonDisabled() {
+        return tenpackPurchaseButtonDisabled;
+    }
+
+    /**
+     * @param tenpackPurchaseButtonDisabled the tenpackPurchaseButtonDisabled to
+     * set
+     */
+    public void setTenpackPurchaseButtonDisabled(boolean tenpackPurchaseButtonDisabled) {
+        this.tenpackPurchaseButtonDisabled = tenpackPurchaseButtonDisabled;
     }
 }

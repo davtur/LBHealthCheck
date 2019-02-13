@@ -477,6 +477,7 @@ public class EziDebitPaymentGateway implements Serializable {
      */
     public List<ScheduledPayment> getScheduledPaymentsListFilteredItems() {
         return scheduledPaymentsListFilteredItems;
+        
     }
 
     /**
@@ -2272,7 +2273,7 @@ public class EziDebitPaymentGateway implements Serializable {
         }
         //updatePaymentTableComponents();
         //recreatePaymentTableData();"
-        PrimeFaces.current().ajax().update("paymentsForm:paymentsTablePanel2");
+        PrimeFaces.current().ajax().update("@(.updatePaymentInfo)");
         LOGGER.log(Level.INFO, "Session BEAN processAddPaymentResult completed, updating paymentsForm:paymentsTable2 ");
     }
 
@@ -3332,7 +3333,7 @@ public class EziDebitPaymentGateway implements Serializable {
                 if (pay != null) {
                     if (pay.getPaymentStatus().contentEquals(PaymentStatus.SCHEDULED.value()) || pay.getPaymentStatus().contentEquals(PaymentStatus.WAITING.value()) || pay.getPaymentStatus().contentEquals(PaymentStatus.DELETE_REQUESTED.value()) || pay.getPaymentStatus().contentEquals(PaymentStatus.REJECTED_CUST_ON_HOLD.value()) || pay.getPaymentStatus().contentEquals(PaymentStatus.MISSING_IN_PGW.value()) || pay.getPaymentStatus().contentEquals(PaymentStatus.REJECTED_BY_GATEWAY.value())) {
 
-                        if (pay.getPaymentStatus().contentEquals(PaymentStatus.MISSING_IN_PGW.value())) {
+                        if (pay.getPaymentStatus().contentEquals(PaymentStatus.MISSING_IN_PGW.value()) || pay.getPaymentStatus().contentEquals(PaymentStatus.SENT_TO_GATEWAY.value())) {
                             pay.setBankFailedReason("DELETED");
 
                             paymentDBList = null;
