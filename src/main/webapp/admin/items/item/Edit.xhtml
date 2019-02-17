@@ -1,0 +1,44 @@
+
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                >
+
+    <p:dialog id="ItemEditDlg" widgetVar="ItemEditDialog" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('EditItemTitle')}">
+        <h:form id="ItemEditForm">
+            <h:panelGroup id="display">
+                <p:panelGrid columns="2" rendered="#{itemController.selected != null}">
+                    <h:outputLabel value="#{configMapController.getKey('EditItemLabel_id')}" for="id" />
+                    <h:inputText id="id"  value="#{itemController.selected.id}" title="#{configMapController.getKey('EditItemTitle_id')}" required="true" requiredMessage="#{configMapController.getKey('EditItemRequiredMessage_id')}"/>
+                    <h:outputLabel value="#{configMapController.getKey('EditItemLabel_price')}" for="price" />
+                    <h:inputText id="price"  value="#{itemController.selected.price}" title="#{configMapController.getKey('EditItemTitle_price')}" />
+                    <h:outputLabel value="#{configMapController.getKey('EditItemLabel_description')}" for="description" />
+                    <h:inputText id="description"  value="#{itemController.selected.description}" title="#{configMapController.getKey('EditItemTitle_description')}" required="true" requiredMessage="#{configMapController.getKey('EditItemRequiredMessage_description')}"/>
+                    <h:outputLabel value="#{configMapController.getKey('EditItemLabel_deleted')}" for="deleted" />
+                    <h:inputText id="deleted"  value="#{itemController.selected.deleted}" title="#{configMapController.getKey('EditItemTitle_deleted')}" required="true" requiredMessage="#{configMapController.getKey('EditItemRequiredMessage_deleted')}"/>
+                    <h:outputLabel value="#{configMapController.getKey('EditItemLabel_itemName')}" for="itemName" />
+                    <h:inputText id="itemName"  value="#{itemController.selected.itemName}" title="#{configMapController.getKey('EditItemTitle_itemName')}" required="true" requiredMessage="#{configMapController.getKey('EditItemRequiredMessage_itemName')}"/>
+                    <h:outputLabel value="#{configMapController.getKey('EditItemLabel_itemPrice')}" for="itemPrice" />
+                    <h:inputText id="itemPrice"  value="#{itemController.selected.itemPrice}" title="#{configMapController.getKey('EditItemTitle_itemPrice')}" required="true" requiredMessage="#{configMapController.getKey('EditItemRequiredMessage_itemPrice')}"/>
+                    <h:outputLabel value="#{configMapController.getKey('EditItemLabel_itemDescription')}" for="itemDescription" />
+                    <h:inputTextarea rows="4" cols="30" id="itemDescription" value="#{itemController.selected.itemDescription}" title="#{configMapController.getKey('EditItemTitle_itemDescription')}" />
+                    <h:outputLabel value="#{configMapController.getKey('EditItemLabel_itemActive')}" for="itemActive" />
+                    <h:inputText id="itemActive"  value="#{itemController.selected.itemActive}" title="#{configMapController.getKey('EditItemTitle_itemActive')}" required="true" requiredMessage="#{configMapController.getKey('EditItemRequiredMessage_itemActive')}"/>
+                    <h:outputLabel value="#{configMapController.getKey('EditItemLabel_itemDiscount')}" for="itemDiscount" />
+                    <h:inputText id="itemDiscount"  value="#{itemController.selected.itemDiscount}" title="#{configMapController.getKey('EditItemTitle_itemDiscount')}" />
+                    <h:outputLabel value="#{configMapController.getKey('EditItemLabel_parent')}" for="parent" />
+                    <p:selectOneMenu id="parent" valueChangeListener="#{itemController.selectOneMenuValueChangeListener}" value="#{itemController.selected.parent}" label="#{configMapController.getKey('EditItemTitle_parent')}" >
+                        <f:selectItems value="#{itemController.itemsAvailableSelectOne}"/>
+                        <p:ajax   update=":ItemEditForm"  />
+                    </p:selectOneMenu>
+                </p:panelGrid>
+                <p:commandButton actionListener="#{itemController.update}" value="#{configMapController.getKey('Save')}" update="display,:ItemListForm:datalist,:growl" oncomplete="handleSubmit(args, 'ItemEditDialog');PF('itemControllerTable').filter()"/>
+                <p:commandButton value="#{configMapController.getKey('Cancel')}" onclick="PF('ItemEditDialog').hide()"/>
+            </h:panelGroup>
+        </h:form>
+    </p:dialog>
+
+</ui:composition>
+

@@ -1,0 +1,45 @@
+
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                >
+    <p:dialog id="ItemCreateDlg" widgetVar="ItemCreateDialog" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('CreateItemTitle')}">
+
+        <h:form id="ItemCreateForm">
+            <h:panelGroup id="display">
+                <p:panelGrid columns="2" rendered="#{itemController.selected != null}">
+                    <p:outputLabel value="#{configMapController.getKey('CreateItemLabel_id')}" for="id" />
+                    <p:inputText id="id" value="#{itemController.selected.id}" title="#{configMapController.getKey('CreateItemTitle_id')}" required="true" requiredMessage="#{configMapController.getKey('CreateItemRequiredMessage_id')}"/>
+                    <p:outputLabel value="#{configMapController.getKey('CreateItemLabel_price')}" for="price" />
+                    <p:inputText id="price" value="#{itemController.selected.price}" title="#{configMapController.getKey('CreateItemTitle_price')}" />
+                    <p:outputLabel value="#{configMapController.getKey('CreateItemLabel_description')}" for="description" />
+                    <p:inputText id="description" value="#{itemController.selected.description}" title="#{configMapController.getKey('CreateItemTitle_description')}" required="true" requiredMessage="#{configMapController.getKey('CreateItemRequiredMessage_description')}"/>
+                    <p:outputLabel value="#{configMapController.getKey('CreateItemLabel_deleted')}" for="deleted" />
+                    <p:inputText id="deleted" value="#{itemController.selected.deleted}" title="#{configMapController.getKey('CreateItemTitle_deleted')}" required="true" requiredMessage="#{configMapController.getKey('CreateItemRequiredMessage_deleted')}"/>
+                    <p:outputLabel value="#{configMapController.getKey('CreateItemLabel_itemName')}" for="itemName" />
+                    <p:inputText id="itemName" value="#{itemController.selected.itemName}" title="#{configMapController.getKey('CreateItemTitle_itemName')}" required="true" requiredMessage="#{configMapController.getKey('CreateItemRequiredMessage_itemName')}"/>
+                    <p:outputLabel value="#{configMapController.getKey('CreateItemLabel_itemPrice')}" for="itemPrice" />
+                    <p:inputText id="itemPrice" value="#{itemController.selected.itemPrice}" title="#{configMapController.getKey('CreateItemTitle_itemPrice')}" required="true" requiredMessage="#{configMapController.getKey('CreateItemRequiredMessage_itemPrice')}"/>
+                    <p:outputLabel value="#{configMapController.getKey('CreateItemLabel_itemDescription')}" for="itemDescription" />
+                    <p:inputTextarea rows="4" cols="30" id="itemDescription"  value="#{itemController.selected.itemDescription}"  title="#{configMapController.getKey('CreateItemTitle_itemDescription')}" />
+                    <p:outputLabel value="#{configMapController.getKey('CreateItemLabel_itemActive')}" for="itemActive" />
+                    <p:inputText id="itemActive" value="#{itemController.selected.itemActive}" title="#{configMapController.getKey('CreateItemTitle_itemActive')}" required="true" requiredMessage="#{configMapController.getKey('CreateItemRequiredMessage_itemActive')}"/>
+                    <p:outputLabel value="#{configMapController.getKey('CreateItemLabel_itemDiscount')}" for="itemDiscount" />
+                    <p:inputText id="itemDiscount" value="#{itemController.selected.itemDiscount}" title="#{configMapController.getKey('CreateItemTitle_itemDiscount')}" />
+                    <p:outputLabel value="#{configMapController.getKey('CreateItemLabel_parent')}" for="parent" />
+                    <p:selectOneMenu id="parent" valueChangeListener="#{itemController.selectOneMenuValueChangeListener}"  value="#{itemController.selected.parent}"  label="#{configMapController.getKey('CreateItemTitle_parent')}" >
+                        <f:selectItems value="#{itemController.itemsAvailableSelectOne}"/>
+                        <p:ajax   update=":ItemCreateForm"  />
+                    </p:selectOneMenu>
+                </p:panelGrid>
+                <p:commandButton actionListener="#{itemController.createDialogue}" value="#{configMapController.getKey('Save')}" update="display,:ItemListForm:datalist,:growl" oncomplete="handleSubmit(args,'ItemCreateDialog');PF('itemControllerTable').filter()"/>
+                <p:commandButton value="#{configMapController.getKey('Cancel')}" onclick="PF('ItemCreateDialog').hide()"/>
+            </h:panelGroup>
+        </h:form>
+    </p:dialog>
+
+</ui:composition>    
+<p> Generated from template ( JSF_from_entity_wizard/StandardJSF/create.ftl  )- Dave 23rd October 2015 </p>
+

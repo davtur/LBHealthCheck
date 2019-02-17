@@ -14,6 +14,9 @@ import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
+import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
@@ -50,6 +53,32 @@ import org.eclipse.persistence.config.CacheIsolationType;
     @NamedQuery(name = "Item.findByDescription", query = "SELECT i FROM Item i WHERE i.description = :description"),
     @NamedQuery(name = "Item.findByDeleted", query = "SELECT i FROM Item i WHERE i.deleted = :deleted")})
 public class Item implements  BaseEntity, Serializable {
+
+    @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 128)
+    @Column(name = "item_name")
+    private String itemName;
+    // @Max(value=?)  @Min(value=?)//if you know range of your decimal fields consider using these annotations to enforce field validation
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "item_price")
+    private BigDecimal itemPrice;
+    @Lob
+    @Size(max = 65535)
+    @Column(name = "item_description")
+    private String itemDescription;
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "item_active")
+    private short itemActive;
+    @Column(name = "item_discount")
+    private BigDecimal itemDiscount;
+    @OneToMany(mappedBy = "parent")
+    private Collection<Item> itemCollection;
+    @JoinColumn(name = "parent", referencedColumnName = "id")
+    @ManyToOne
+    private Item parent;
     private static final long serialVersionUID = 1L;
     @Id
     @Basic(optional = false)
@@ -148,6 +177,63 @@ public class Item implements  BaseEntity, Serializable {
     @Override
     public String toString() {
         return "au.com.manlyit.fitnesscrm.db.Item[ id=" + id + " ]";
+    }
+
+    public String getItemName() {
+        return itemName;
+    }
+
+    public void setItemName(String itemName) {
+        this.itemName = itemName;
+    }
+
+    public BigDecimal getItemPrice() {
+        return itemPrice;
+    }
+
+    public void setItemPrice(BigDecimal itemPrice) {
+        this.itemPrice = itemPrice;
+    }
+
+    public String getItemDescription() {
+        return itemDescription;
+    }
+
+    public void setItemDescription(String itemDescription) {
+        this.itemDescription = itemDescription;
+    }
+
+    public short getItemActive() {
+        return itemActive;
+    }
+
+    public void setItemActive(short itemActive) {
+        this.itemActive = itemActive;
+    }
+
+    public BigDecimal getItemDiscount() {
+        return itemDiscount;
+    }
+
+    public void setItemDiscount(BigDecimal itemDiscount) {
+        this.itemDiscount = itemDiscount;
+    }
+
+    @XmlTransient
+    public Collection<Item> getItemCollection() {
+        return itemCollection;
+    }
+
+    public void setItemCollection(Collection<Item> itemCollection) {
+        this.itemCollection = itemCollection;
+    }
+
+    public Item getParent() {
+        return parent;
+    }
+
+    public void setParent(Item parent) {
+        this.parent = parent;
     }
     
 }

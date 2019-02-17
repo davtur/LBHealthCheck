@@ -1,0 +1,40 @@
+
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                >
+
+    <p:dialog id="ItemViewDlg" widgetVar="ItemViewDialog" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('ViewItemTitle')}">
+        <h:form id="ItemViewForm">
+            <h:panelGroup id="display">
+                <p:panelGrid columns="2" rendered="#{itemController.selected != null}">
+                    <h:outputText value="#{configMapController.getKey('ViewItemLabel_id')}"/>
+                    <h:outputText value="#{itemController.selected.id}" title="#{configMapController.getKey('ViewItemTitle_id')}"/>
+                    <h:outputText value="#{configMapController.getKey('ViewItemLabel_price')}"/>
+                    <h:outputText value="#{itemController.selected.price}" title="#{configMapController.getKey('ViewItemTitle_price')}"/>
+                    <h:outputText value="#{configMapController.getKey('ViewItemLabel_description')}"/>
+                    <h:outputText value="#{itemController.selected.description}" title="#{configMapController.getKey('ViewItemTitle_description')}"/>
+                    <h:outputText value="#{configMapController.getKey('ViewItemLabel_deleted')}"/>
+                    <h:outputText value="#{itemController.selected.deleted}" title="#{configMapController.getKey('ViewItemTitle_deleted')}"/>
+                    <h:outputText value="#{configMapController.getKey('ViewItemLabel_itemName')}"/>
+                    <h:outputText value="#{itemController.selected.itemName}" title="#{configMapController.getKey('ViewItemTitle_itemName')}"/>
+                    <h:outputText value="#{configMapController.getKey('ViewItemLabel_itemPrice')}"/>
+                    <h:outputText value="#{itemController.selected.itemPrice}" title="#{configMapController.getKey('ViewItemTitle_itemPrice')}"/>
+                    <h:outputText value="#{configMapController.getKey('ViewItemLabel_itemDescription')}"/>
+                    <h:outputText value="#{itemController.selected.itemDescription}" title="#{configMapController.getKey('ViewItemTitle_itemDescription')}"/>
+                    <h:outputText value="#{configMapController.getKey('ViewItemLabel_itemActive')}"/>
+                    <h:outputText value="#{itemController.selected.itemActive}" title="#{configMapController.getKey('ViewItemTitle_itemActive')}"/>
+                    <h:outputText value="#{configMapController.getKey('ViewItemLabel_itemDiscount')}"/>
+                    <h:outputText value="#{itemController.selected.itemDiscount}" title="#{configMapController.getKey('ViewItemTitle_itemDiscount')}"/>
+                    <h:outputText value="#{configMapController.getKey('ViewItemLabel_parent')}"/>
+                    <h:outputText value="#{itemController.selected.parent}" title="#{configMapController.getKey('ViewItemTitle_parent')}"/>
+                </p:panelGrid>
+                <p:commandButton value="#{configMapController.getKey('Close')}" onclick="PF('ItemViewDialog').hide()"/>
+            </h:panelGroup>
+        </h:form>
+    </p:dialog>
+
+</ui:composition>
+

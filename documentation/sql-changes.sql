@@ -532,3 +532,29 @@ CREATE TABLE `tickets` (
   CONSTRAINT `tickets_FK_1` FOREIGN KEY (`customer`) REFERENCES `customers` (`id`),
   CONSTRAINT `tickets_FK_2` FOREIGN KEY (`session_id`) REFERENCES `session_history` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+
+CREATE TABLE `fitnessStats`.`item` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `item_name` varchar(128) NOT NULL DEFAULT 'Item Name Missing',
+  `item_price` decimal(22,2) NOT NULL DEFAULT '0.00',
+  `item_description` text,
+  `item_active` tinyint(4) NOT NULL DEFAULT '0',
+  `item_discount` decimal(22,2) DEFAULT '0.00',
+  `parent` int(11) DEFAULT NULL,
+   PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
+
+
+INSERT INTO `fitnessStats`.`item` (`id`, `item_name`, `item_price`, `item_description`, `item_active`, `item_discount`) VALUES ('0', 'Ten Pack PT Sessions', '990', 'A ten pack of PT Sessions', '1', '0.00');
+INSERT INTO `fitnessStats`.`item` (`id`, `item_name`, `item_price`, `item_description`, `item_active`, `item_discount`) VALUES ('0', 'Ten Pack Group Sessions', '250', 'A ten pack of group training classes', '1', '0.00');
+
+
+ALTER TABLE `fitnessStats`.`item` 
+ADD INDEX `fk_item_1_idx` (`parent` ASC);
+ALTER TABLE `fitnessStats`.`item` 
+ADD CONSTRAINT `fk_item_1`
+  FOREIGN KEY (`parent`)
+  REFERENCES `fitnessStats`.`item` (`id`)
+  ON DELETE CASCADE
+  ON UPDATE CASCADE;

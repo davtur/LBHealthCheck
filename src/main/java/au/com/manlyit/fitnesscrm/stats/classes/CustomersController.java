@@ -1013,6 +1013,8 @@ public class CustomersController implements Serializable {
         c4.recreateModel();
         ChartController c5 = context.getApplication().evaluateExpressionGet(context, "#{chartController}", ChartController.class);
         c5.recreateModel();
+        TicketsController ticketsController = context.getApplication().evaluateExpressionGet(context, "#{ticketsController}", TicketsController.class);
+        ticketsController.recreateModel();
         SurveyAnswersController sac = context.getApplication().evaluateExpressionGet(context, "#{surveyanswersController}", SurveyAnswersController.class);
         sac.clearSurveyAnswers();
     }
@@ -1519,6 +1521,11 @@ public class CustomersController implements Serializable {
     public void issueBlockOfTickets(Customers c, Date ticketStartDate, Date ticketStopDate, SessionTypes sessionType, int number) {
 
         //  synchronized (issueBlockOfTicketsLockObject) {
+        if(sessionType == null){
+                      LOGGER.log(Level.SEVERE, "FAILED Adding Block of Tickets for Customer id {0},  tickets added {1},startDate {2}, stopDate {3}. SESSIONTYPE is NULL ", new Object[]{c.getId(), 0, ticketStartDate, ticketStopDate});
+
+            return;
+        }
         try {
 
             int ticketsAdded = 0;
@@ -1530,6 +1537,13 @@ public class CustomersController implements Serializable {
                 t.setExpires(ticketStopDate);
                 ejbTicketsFacade.create(t);
                 ticketsAdded++;
+                FacesContext context = FacesContext.getCurrentInstance();
+                if (context != null) {
+                    TicketsController ticketsController = context.getApplication().evaluateExpressionGet(context, "#{ticketsController}", TicketsController.class);
+                    ticketsController.recreateModel();
+                    PrimeFaces.current().ajax().update("@(.updatePaymentInfo)");
+                }
+
             }
 
             LOGGER.log(Level.INFO, "Adding Block of Tickets for Customer id {0},  tickets added {1},startDate {2}, stopDate {3} ", new Object[]{c.getId(), ticketsAdded, ticketStartDate, ticketStopDate});

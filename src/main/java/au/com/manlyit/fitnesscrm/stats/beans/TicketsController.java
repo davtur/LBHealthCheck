@@ -3,20 +3,20 @@ package au.com.manlyit.fitnesscrm.stats.beans;
 import au.com.manlyit.fitnesscrm.stats.db.Tickets;
 import au.com.manlyit.fitnesscrm.stats.beans.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.beans.util.PaginationHelper;
-import au.com.manlyit.fitnesscrm.stats.beans.TicketsFacade;
 import au.com.manlyit.fitnesscrm.stats.classes.CustomersController;
 import au.com.manlyit.fitnesscrm.stats.classes.util.LazyLoadingDataModel;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PfSelectableDataModel;
-import au.com.manlyit.fitnesscrm.stats.db.AuditLog;
+import au.com.manlyit.fitnesscrm.stats.classes.util.TicketSummary;
 import au.com.manlyit.fitnesscrm.stats.db.SessionTypes;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
 import java.util.List;
-import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
@@ -55,6 +55,8 @@ public class TicketsController implements Serializable {
     private PaginationHelper pagination;
     private int selectedItemIndex;
     private List<Tickets> filteredItems;
+    private ArrayList<TicketSummary> ticketsOverview;
+    private List<Tickets> customerTicketList;
     private Tickets[] multiSelected;
     private LazyLoadingDataModel<Tickets> lazyModel;
     private LazyLoadingDataModel<Tickets> thisWeeksLazyModel;
@@ -341,16 +343,50 @@ public class TicketsController implements Serializable {
         setEndDate(cal.getTime());
     }
 
+    public ArrayList<TicketSummary> getTicketSummaryList() {
+
+        if (ticketsOverview == null) {
+
+            ticketsOverview = new ArrayList<>();
+
+            List<Tickets> tl = getCustomerTicketList();
+            for (Tickets t : tl) {
+                String key = t.getSessionType().getName();
+                boolean found = false;
+                for(TicketSummary ts:ticketsOverview){
+                    if(ts.getTicketName().contentEquals(key)){
+                        found = true;
+                        ts.incrementCount();
+                    }
+                }
+                if(found == false){
+                    ticketsOverview.add(new TicketSummary(key, 1));
+                }
+                
+            }
+        }
+        return ticketsOverview;
+
+    }
+
+    private List<Tickets> getCustomerTicketList() {
+
+        if (customerTicketList == null) {
+            FacesContext context = FacesContext.getCurrentInstance();
+            CustomersController controller = context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
+            customerTicketList = ejbFacade.findCustomerTicketsValidAndUsedForSessionDate(controller.getSelected(), new Date(), true);
+        }
+        return customerTicketList;
+    }
+
+    private void setCustomerTicketList(List<Tickets> ticketsList) {
+        customerTicketList = ticketsList;
+    }
+
     // public DataModel getItems() {
     public PfSelectableDataModel<Tickets> getItems() {
         if (items == null) {
-            //items = getPagination().createPageDataModel();
-            
-            
-            FacesContext context = FacesContext.getCurrentInstance();
-            CustomersController controller = context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
-           // setStartandEndDatesToCurrentWeek();
-            items = new PfSelectableDataModel<>(ejbFacade.findCustomerTicketsValidAndUsedForSessionDate(controller.getSelected(), new Date(), true));
+            items = new PfSelectableDataModel<>(getCustomerTicketList());
             //items = new PfSelectableDataModel<>(ejbFacade.findCustomerTicketsByDateRange(controller.getSelected(), startDate, endDate, true));
             setItemCount(items.getRowCount());
         }
@@ -365,6 +401,7 @@ public class TicketsController implements Serializable {
         items = null;
         filteredItems = null;
         thisWeeksLazyModel = null;
+        customerTicketList = null;
         lazyModel = null;
     }
 
@@ -405,7 +442,7 @@ public class TicketsController implements Serializable {
         getFacade().edit(cm);
         recreateModel();
         JsfUtil.addSuccessMessage("Row Edit Successful");
-     
+
     }
 
     public void onCancel(RowEditEvent event) {

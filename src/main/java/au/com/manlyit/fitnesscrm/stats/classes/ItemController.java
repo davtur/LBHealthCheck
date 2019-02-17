@@ -6,22 +6,24 @@ import au.com.manlyit.fitnesscrm.stats.classes.util.PaginationHelper;
 import au.com.manlyit.fitnesscrm.stats.beans.ItemFacade;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Date;
+import java.util.List;
+import java.util.ResourceBundle;
 import javax.enterprise.context.SessionScoped;
-
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 import javax.faces.convert.Converter;
 import javax.faces.convert.FacesConverter;
+import javax.faces.event.ActionEvent;
+import javax.faces.event.ValueChangeEvent;
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
-import javax.faces.event.ValueChangeEvent;
-import javax.faces.event.ActionEvent;
 import javax.inject.Inject;
 import javax.inject.Named;
-import org.primefaces.event.SelectEvent;
 import org.primefaces.event.RowEditEvent;
+import org.primefaces.event.SelectEvent;
 
 @Named("itemController")
 @SessionScoped
@@ -34,9 +36,10 @@ public class ItemController implements Serializable {
     private au.com.manlyit.fitnesscrm.stats.beans.ItemFacade ejbFacade;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade configMapFacade;
-
     private PaginationHelper pagination;
     private int selectedItemIndex;
+    private List<Item> filteredItems;
+    private Item[] multiSelected;
 
     public ItemController() {
     }
@@ -84,6 +87,34 @@ public class ItemController implements Serializable {
         return pagination;
     }
 
+    /**
+     * @return the filteredItems
+     */
+    public List<Item> getFilteredItems() {
+        return filteredItems;
+    }
+
+    /**
+     * @param filteredItems the filteredItems to set
+     */
+    public void setFilteredItems(List<Item> filteredItems) {
+        this.filteredItems = filteredItems;
+    }
+
+    /**
+     * @return the multiSelected
+     */
+    public Item[] getMultiSelected() {
+        return multiSelected;
+    }
+
+    /**
+     * @param multiSelected the multiSelected to set
+     */
+    public void setMultiSelected(Item[] multiSelected) {
+        this.multiSelected = multiSelected;
+    }
+
     public String prepareList() {
         recreateModel();
         return "List";
@@ -124,6 +155,7 @@ public class ItemController implements Serializable {
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
         }
+
     }
 
     public String prepareEdit() {
@@ -151,12 +183,10 @@ public class ItemController implements Serializable {
         }
     }
 
-    public String destroy() {
-        current = (Item) getItems().getRowData();
-        selectedItemIndex = pagination.getPageFirstItem() + getItems().getRowIndex();
+    public void destroy() {
         performDestroy();
         recreateModel();
-        return "List";
+        current = null;
     }
 
     public String destroyAndView() {
@@ -218,12 +248,20 @@ public class ItemController implements Serializable {
 
     private void recreateModel() {
         items = null;
+        filteredItems = null;
     }
 
     public String next() {
         getPagination().nextPage();
         recreateModel();
         return "List";
+    }
+
+    public void handleDateSelect(SelectEvent event) {
+
+        Date date = (Date) event.getObject();
+
+        //Add facesmessage
     }
 
     public String previous() {
@@ -233,6 +271,7 @@ public class ItemController implements Serializable {
     }
 
     public SelectItem[] getItemsAvailableSelectMany() {
+
         return JsfUtil.getSelectItems(ejbFacade.findAll(), false);
     }
 
@@ -240,11 +279,8 @@ public class ItemController implements Serializable {
         return JsfUtil.getSelectItems(ejbFacade.findAll(), true);
     }
 
-    public void handleDateSelect(SelectEvent event) {
-
-        Date date = (Date) event.getObject();
-
-        //Add facesmessage
+    public Collection<Item> getItemsAvailable() {
+        return ejbFacade.findAll();
     }
 
     public void onEdit(RowEditEvent event) {
@@ -258,10 +294,9 @@ public class ItemController implements Serializable {
         JsfUtil.addErrorMessage("Row Edit Cancelled");
     }
 
-    @FacesConverter(value="itemControllerConverter")
+    @FacesConverter(value = "itemControllerConverter")
     public static class ItemControllerConverter implements Converter {
 
-        @Override
         public Object getAsObject(FacesContext facesContext, UIComponent component, String value) {
             if (value == null || value.length() == 0) {
                 return null;
@@ -299,3 +334,4 @@ public class ItemController implements Serializable {
     }
 
 }
+//file:///home/david/.netbeans/8.0/config/Templates/JSF/JSF_From_Entity_Wizard/StandardJSF/create.ftl
