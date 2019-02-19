@@ -298,7 +298,7 @@ public class MySessionsChart1 implements Serializable {
                         sessions = ejbSessionHistoryFacade.findSessionsByDateRange(strt, end, true);
                         logger.log(Level.INFO, "Get ALL Sessions , No.Sessions:{1},startdate:{2},End date:{3}", new Object[]{sessions.size(), strt, end});
                     } else if (isTrainer == false) {
-                        sessions = ejbSessionHistoryFacade.findSessionsByParticipantAndDateRange(user, strt, end, true);
+                        sessions = ejbSessionHistoryFacade.findSessionBookingsByParticipantAndDateRange(user, strt, end, true);
                         logger.log(Level.INFO, "Get Sessions for Participant:{0}, No.Sessions:{1},startdate:{2},End date:{3}", new Object[]{user.getUsername(), sessions.size(), strt, end});
 
                     } else {

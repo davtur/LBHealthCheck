@@ -8,10 +8,10 @@ import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import au.com.manlyit.fitnesscrm.stats.db.Expenses;
 import au.com.manlyit.fitnesscrm.stats.db.Participants;
+import au.com.manlyit.fitnesscrm.stats.db.SessionBookings;
 import au.com.manlyit.fitnesscrm.stats.db.SessionHistory;
 import au.com.manlyit.fitnesscrm.stats.db.SessionTimetable;
 import au.com.manlyit.fitnesscrm.stats.db.SessionTrainers;
-import au.com.manlyit.fitnesscrm.stats.db.SessionTypes;
 import java.sql.Time;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -142,6 +142,61 @@ public class SessionHistoryFacade extends AbstractFacade<SessionHistory> {
         return retList;
     }
 
+    public List<SessionHistory> findSessionBookingsByParticipantAndDateRange(Customers participant, Date startDate, Date endDate, boolean sortAsc) {
+        List<SessionHistory> retList = null;
+
+        try {
+            CriteriaBuilder cb = em.getCriteriaBuilder();
+            CriteriaQuery<SessionHistory> cq = cb.createQuery(SessionHistory.class);
+            Root<SessionHistory> rt = cq.from(SessionHistory.class);
+
+            Join<SessionHistory, SessionBookings> jn = rt.joinCollection("sessionBookingsCollection");
+            Expression<Customers> sessionParticipant = jn.get("customerId");
+            Expression<Date> stime = rt.get("sessiondate");
+
+            Predicate condition1 = cb.lessThan(stime, endDate);
+            Predicate condition2 = cb.greaterThanOrEqualTo(stime, startDate);
+            Predicate condition3 = cb.equal(sessionParticipant, participant);
+            cq.where(cb.and(condition1, condition2, condition3));
+            cq.select(rt);
+            if (sortAsc) {
+                cq.orderBy(cb.asc(stime));
+            } else {
+                cq.orderBy(cb.desc(stime));
+            }
+            TypedQuery<SessionHistory> q = em.createQuery(cq);
+            retList = q.getResultList();
+        } catch (Exception e) {
+            JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
+        }
+
+        return retList;
+    }
+
+    public int countSessionBookingsByParticipantAndDateRange(Customers participant, Date startDate, Date endDate) {
+
+        try {
+            CriteriaBuilder cb = em.getCriteriaBuilder();
+            CriteriaQuery<Long> cq = cb.createQuery(Long.class);
+            Root<Long> rt = cq.from(Long.class);
+
+            Join<SessionHistory, Participants> jn = rt.joinCollection("participantsCollection");
+            Expression<Customers> sessionParticipant = jn.get("customerId");
+            Expression<Date> stime = rt.get("sessiondate");
+
+            Predicate condition1 = cb.between(stime, startDate, endDate);
+            Predicate condition2 = cb.equal(sessionParticipant, participant);
+            cq.where(cb.and(condition1, condition2));
+            cq.select(cb.count(rt));
+
+            Query q = em.createQuery(cq);
+            return ((Long) q.getSingleResult()).intValue();
+        } catch (Exception e) {
+            logger.log(Level.INFO, "Participant not found:" + participant.toString(), e);
+        }
+        return -1;
+    }
+
     public int countSessionsByParticipantAndDateRange(Customers participant, Date startDate, Date endDate) {
 
         try {
@@ -195,7 +250,8 @@ public class SessionHistoryFacade extends AbstractFacade<SessionHistory> {
 
         return retList;
     }
-    public List<SessionHistory> findSessionsWithoutExpenseLogged( boolean sortAsc) {
+
+    public List<SessionHistory> findSessionsWithoutExpenseLogged(boolean sortAsc) {
         List<SessionHistory> retList = null;
 
         try {
@@ -203,7 +259,6 @@ public class SessionHistoryFacade extends AbstractFacade<SessionHistory> {
             CriteriaQuery<SessionHistory> cq = cb.createQuery(SessionHistory.class);
             Root<SessionHistory> rt = cq.from(SessionHistory.class);
 
-           
             Expression<Expenses> expense = rt.get("expenseId");
             Expression<Date> stime = rt.get("sessiondate");
 
@@ -224,7 +279,6 @@ public class SessionHistoryFacade extends AbstractFacade<SessionHistory> {
 
         return retList;
     }
-
 
     public int countSessionsByParticipant(Customers participant) {
 
@@ -279,16 +333,14 @@ public class SessionHistoryFacade extends AbstractFacade<SessionHistory> {
         return retList;
     }
 
-    public SessionHistory findSessionBySessionTimetable(Date  sessionTimestamp,SessionTimetable st) {
-        
-        
+    public SessionHistory findSessionBySessionTimetable(Date sessionTimestamp, SessionTimetable st) {
+
         //Customers trainer, Date startDate, Date endDate, boolean sortAsc
         List<SessionHistory> retList = null;
         SessionHistory matchingSession = null;
-       // GregorianCalendar gc = new GregorianCalendar();
-       // gc.setTime(template.getSessiondate());
+        // GregorianCalendar gc = new GregorianCalendar();
+        // gc.setTime(template.getSessiondate());
         //SELECT * FROM fitnessStats.session_history h ,fitnessStats.session_timetable t  where t.id =2 AND  CAST(h.sessionDate as Time) = CAST(t.sessionDate as Time);
-       
 
         try {
             CriteriaBuilder cb = em.getCriteriaBuilder();
@@ -296,31 +348,31 @@ public class SessionHistoryFacade extends AbstractFacade<SessionHistory> {
             Root<SessionHistory> rt = cq.from(SessionHistory.class);
 
             //Join<SessionHistory, SessionTrainers> jn = rt.joinCollection("sessionTrainersCollection");
-           // Expression<Customers> sessionTrainer = jn.get("customerId");
+            // Expression<Customers> sessionTrainer = jn.get("customerId");
             Expression<SessionTimetable> sessionTemplate = rt.get("sessionTemplate");
             Expression<Time> stime = rt.get("sessiondate");
             //Expression<SessionTypes> type = rt.get("sessionTypesId");
 
             Predicate condition1 = cb.equal(stime, sessionTimestamp);
-           // Predicate condition2 = cb.equal(type, template.getSessionTypesId());
-           // Predicate condition3 = cb.equal(sessionTrainer, st.getTrainerId());
+            // Predicate condition2 = cb.equal(type, template.getSessionTypesId());
+            // Predicate condition3 = cb.equal(sessionTrainer, st.getTrainerId());
             Predicate condition4 = cb.equal(sessionTemplate, st);
             cq.where(cb.and(condition1, condition4));
             cq.select(rt);
 
             TypedQuery<SessionHistory> q = em.createQuery(cq);
             retList = q.getResultList();
-            if(DEBUG){
+            if (DEBUG) {
                 debug(q);
             }
-            if(retList.size() == 1){
+            if (retList.size() == 1) {
                 matchingSession = retList.get(0);
-            }else{
-                if(retList.size() > 1){
+            } else {
+                if (retList.size() > 1) {
                     matchingSession = retList.get(0);
-                    logger.log(Level.WARNING, "findSessionBySessionTimetable: more than 1 match found for session timetable: {0}",sessionTimestamp.toString());
-                }else{
-                    logger.log(Level.INFO, "findSessionBySessionTimetable: no sessions found for session timetable: {0}",sessionTimestamp.toString());
+                    logger.log(Level.WARNING, "findSessionBySessionTimetable: more than 1 match found for session timetable: {0}", sessionTimestamp.toString());
+                } else {
+                    logger.log(Level.INFO, "findSessionBySessionTimetable: no sessions found for session timetable: {0}", sessionTimestamp.toString());
                 }
             }
         } catch (Exception e) {

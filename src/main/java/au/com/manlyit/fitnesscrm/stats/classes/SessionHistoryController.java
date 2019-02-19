@@ -269,14 +269,14 @@ public class SessionHistoryController implements Serializable {
                 public int getItemsCount() {
                     FacesContext context = FacesContext.getCurrentInstance();
                     MySessionsChart1 mySessionsChart1Controller = (MySessionsChart1) context.getApplication().evaluateExpressionGet(context, "#{mySessionsChart1}", MySessionsChart1.class);
-                    return getFacade().countSessionsByParticipantAndDateRange(getSelectedCustomer(), mySessionsChart1Controller.getStartDate(), mySessionsChart1Controller.getEndDate());
+                    return getFacade().countSessionBookingsByParticipantAndDateRange(getSelectedCustomer(), mySessionsChart1Controller.getStartDate(), mySessionsChart1Controller.getEndDate());
                 }
 
                 @Override
                 public PfSelectableDataModel createPageDataModel() {
                     FacesContext context = FacesContext.getCurrentInstance();
                     MySessionsChart1 mySessionsChart1Controller = (MySessionsChart1) context.getApplication().evaluateExpressionGet(context, "#{mySessionsChart1}", MySessionsChart1.class);
-                    return new PfSelectableDataModel<>(ejbFacade.findSessionsByParticipantAndDateRange(getSelectedCustomer(), mySessionsChart1Controller.getStartDate(), mySessionsChart1Controller.getEndDate(), true));
+                    return new PfSelectableDataModel<>(ejbFacade.findSessionBookingsByParticipantAndDateRange(getSelectedCustomer(), mySessionsChart1Controller.getStartDate(), mySessionsChart1Controller.getEndDate(), true));
                 }
 
             };
@@ -705,11 +705,11 @@ public class SessionHistoryController implements Serializable {
     public PfSelectableDataModel<SessionHistory> getParticipantItems() {
         if (participantItems == null) {
             FacesContext context = FacesContext.getCurrentInstance();
-            MySessionsChart1 mySessionsChart1Controller = (MySessionsChart1) context.getApplication().evaluateExpressionGet(context, "#{mySessionsChart1}", MySessionsChart1.class);
+            MySessionsChart1 mySessionsChart1Controller = context.getApplication().evaluateExpressionGet(context, "#{mySessionsChart1}", MySessionsChart1.class);
             Customers user = getSelectedCustomer();
             Date start = mySessionsChart1Controller.getStartDate();
             Date end = mySessionsChart1Controller.getEndDate();
-            participantItems = new PfSelectableDataModel<>(ejbFacade.findSessionsByParticipantAndDateRange(user, start, end, true));
+            participantItems = new PfSelectableDataModel<>(ejbFacade.findSessionBookingsByParticipantAndDateRange(user, start, end, true));
             //participantItems = getParticipantPagination().createPageDataModel();
         }
         return participantItems;
