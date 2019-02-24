@@ -15,7 +15,6 @@ import au.com.manlyit.fitnesscrm.stats.classes.util.TimetableRows;
 import au.com.manlyit.fitnesscrm.stats.classes.util.TimetableScheduleEvent;
 import au.com.manlyit.fitnesscrm.stats.db.Activation;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
-import au.com.manlyit.fitnesscrm.stats.db.Participants;
 import au.com.manlyit.fitnesscrm.stats.db.Schedule;
 import au.com.manlyit.fitnesscrm.stats.db.SessionBookings;
 import au.com.manlyit.fitnesscrm.stats.db.SessionHistory;
@@ -32,8 +31,9 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.concurrent.Future;
@@ -410,6 +410,8 @@ public class SessionTimetableController implements Serializable {
     }
 
     private void cloneSessionsFromTimetable(SessionTimetable st, int daysIntoFuture) {
+
+        LOGGER.log(Level.INFO, "cloneSessionsFromTimetable: Id of timetable session:{0}, name os session:{1}, days to populate into teh future:{2}", new Object[]{st.getId(), st.getSessionTitle(), daysIntoFuture});
         GregorianCalendar startCal = new GregorianCalendar();
         GregorianCalendar endCal = new GregorianCalendar();
         try {
@@ -440,10 +442,15 @@ public class SessionTimetableController implements Serializable {
                 SessionHistory existing = sessionHistoryFacade.findSessionBySessionTimetable(startCal.getTime(), st);
                 if (existing == null) {
                     sessionHistoryFacade.create(sh);
+                    st.getSessionHistoryCollection().add(sh);
+                    LOGGER.log(Level.INFO, "cloneSessionsFromTimetable:No existing session found. Creating a new one.  Id of session:{0}, name of session:{1}, time of session:{2}", new Object[]{st.getId(), st.getSessionTitle(), startCal.getTime()});
+
                 } else {
                     // future session exists 
 
-                    Collection<Participants> participants;
+                    /*  Collection<Participants> participants;
+                    Collection<SessionBookings> sessionBookings;
+                    sessionBookings = existing.getSessionBookingsCollection();
                     participants = existing.getParticipantsCollection();
                     boolean hasBookingAssociatedWithIt = false;
                     if (participants != null) {
@@ -453,10 +460,29 @@ public class SessionTimetableController implements Serializable {
                             hasBookingAssociatedWithIt = true;
                         }
                     }
-                    if (hasBookingAssociatedWithIt == false) {
-                        sessionHistoryFacade.remove(existing);
-                        sessionHistoryFacade.create(sh);
-                    }
+                    if (sessionBookings != null) {
+                        if (sessionBookings.isEmpty() == false) {
+                            //TODO make sure there are no bookings against it before deleteing it.
+                            // this session has already got participants associtaed with it so dont delete it
+                            hasBookingAssociatedWithIt = true;
+                        }
+                    }*/
+                    LOGGER.log(Level.INFO, "cloneSessionsFromTimetable:Session found - editing existing.  Id of session:{0}, name of session:{1}, time of session:{2}", new Object[]{st.getId(), st.getSessionTitle(), startCal.getTime()});
+
+                    // if (hasBookingAssociatedWithIt == false) {
+                    //    existing.setParticipantsCollection(new ArrayList<>());
+                    //  } else {
+                    st.getSessionHistoryCollection().remove(existing);
+
+                    existing.setSessionTrainersCollection(ac);
+                    existing.setSessionTemplate(st);
+
+                    existing.setSessionTypesId(st.getSessionTypesId());
+                    existing.setComments(st.getComments());
+                    sessionHistoryFacade.edit(existing);
+
+                    st.getSessionHistoryCollection().add(existing);
+                    // }
 
                 }
                 startCal.add(Calendar.DAY_OF_YEAR, 7);
@@ -720,6 +746,7 @@ public class SessionTimetableController implements Serializable {
             getFacade().edit(st);
             //delete any future sessions so they don't show up in the timetable
             deleteFutureChildSessions(st);
+            daysOfWeek = null;// recreate timetabel model
         }
         //recreateModel();
     }
@@ -731,6 +758,7 @@ public class SessionTimetableController implements Serializable {
             getFacade().edit(st);
             // add three months worth of sessions
             cloneSessionsFromTimetable(st, DAYS_AHEAD_TO_POPULATE_TIMETABLE);
+            daysOfWeek = null;// recreate timetabel model
         }
         //recreateModel();
     }
@@ -789,12 +817,37 @@ public class SessionTimetableController implements Serializable {
     }
 
     private void deleteFutureChildSessions(SessionTimetable st) {
-        Collection<SessionHistory> children = st.getSessionHistoryCollection();
-        for (Iterator<SessionHistory> iterator = children.iterator(); iterator.hasNext();) {
-            SessionHistory next = iterator.next();
-            if (next.getSessiondate().compareTo(new Date()) > 0) {
-                sessionHistoryFacade.remove(next);
+        List<SessionHistory> children = new ArrayList<>(st.getSessionHistoryCollection());
+        try {
+            for (ListIterator<SessionHistory> iterator = children.listIterator(); iterator.hasNext();) {
+                SessionHistory next = iterator.next();
+                if (next.getSessiondate().compareTo(new Date()) > 0) {
+                    List<SessionBookings> sbc = new ArrayList<>(next.getSessionBookingsCollection());
+                    if (sbc != null) {
+                        if (sbc.isEmpty() == false) {
+                            // refund customers for session bookings
+                            // send cancellation email.
+
+                            try {
+                                for (ListIterator<SessionBookings> sbcIterator = sbc.listIterator(); iterator.hasNext();) {
+                                    SessionBookings sb = sbcIterator.next();
+
+                                    cancelSessionBooking(sb, sbcIterator);
+                                    LOGGER.log(Level.WARNING, "Cancelling a customers session booking from a timetable unpublish action.customer:{0}, Ticket:{1},Booking Date:{2}", new Object[]{sb.getCustomerId().getUsername(), sb.getTicketId(), sb.getBookingTime()});
+                                }
+                            } catch (NoSuchElementException e) {
+                                LOGGER.log(Level.WARNING, "deleteFutureChildSessions - sbcIterator -  NoSuchElementException", e.getMessage());
+
+                            }
+                        }
+                    }
+                    iterator.remove();
+                    sessionHistoryFacade.remove(next);
+                }
+
             }
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "deleteFutureChildSessions FAILED.  SessionTimetable:{0}, Id:{1},Session Date:{2}", new Object[]{st.getSessionTitle(), st.getId(), st.getSessiondate()});
 
         }
 
@@ -965,6 +1018,30 @@ public class SessionTimetableController implements Serializable {
         return result;
     }
 
+    public List<Tickets> doesTheCustomerHaveATicketForAPtSession(Customers c, Date sessionDate) {
+
+        List<Tickets> result = new ArrayList<>();
+        GregorianCalendar ticketStartDate = new GregorianCalendar();
+        CalendarUtil.SetToLastDayOfWeek(Calendar.SUNDAY, ticketStartDate);
+        CalendarUtil.SetTimeToMidnight(ticketStartDate);
+
+        GregorianCalendar ticketStopDate = new GregorianCalendar();
+        CalendarUtil.SetToNextDayOfWeek(Calendar.SUNDAY, ticketStopDate);
+        CalendarUtil.SetTimeToMidnight(ticketStopDate);
+        ticketStopDate.add(Calendar.MILLISECOND, -1);
+
+        List<Tickets> at = ejbTicketsFacade.findCustomerTicketsValidForSessionDate(c, sessionDate, true);
+        if (at != null) {
+            for (Tickets t : at) {
+                // we only want group training session tickets
+                if (t.getSessionType().getName().contains("Personal Training") == true) {
+                    result.add(t);
+                }
+            }
+        }
+        return result;
+    }
+
     public List<Tickets> doesTheCustomerHaveATicketForAGroupSession(Customers c, Date sessionDate) {
 
         List<Tickets> result = new ArrayList<>();
@@ -1098,6 +1175,20 @@ public class SessionTimetableController implements Serializable {
 
     }
 
+    public int numberOfValidPtTickets(Customers c) {
+        FacesContext context = FacesContext.getCurrentInstance();
+        SessionHistoryController controller = context.getApplication().evaluateExpressionGet(context, "#{sessionHistoryController}", SessionHistoryController.class);
+
+        if (c != null && controller.getSelected() != null) {
+            List<Tickets> ct = doesTheCustomerHaveATicketForAPtSession(c, controller.getSelected().getSessiondate());
+            if (ct != null) {
+                return ct.size();
+            }
+        }
+        return 0;
+
+    }
+
     public boolean isSessionAlreadyBookedBase(Customers c) {
 
         try {
@@ -1127,31 +1218,40 @@ public class SessionTimetableController implements Serializable {
     public void cancelSessionBase(Customers c) {
 
         LOGGER.log(Level.INFO, "Cancel Session button clicked..Customer Name {0} {1}", new Object[]{c.getFirstname(), c.getLastname()});
-        FacesContext context = FacesContext.getCurrentInstance();
-        TicketsController ticketsController = context.getApplication().evaluateExpressionGet(context, "#{ticketsController}", TicketsController.class);
 
         SessionHistory sh = bookingButtonSessionHistory;
         List<SessionBookings> sbl = new ArrayList<>(sh.getSessionBookingsCollection());
-        SessionBookings sb = null;
-        for (SessionBookings sbook : sbl) {
+        for (ListIterator<SessionBookings> sblIterator = sbl.listIterator(); sblIterator.hasNext();) {
+
+            SessionBookings sbook = sblIterator.next();
+
             if (sbook.getCustomerId().getId().equals(c.getId())) {
-                sb = sbook;
+                cancelSessionBooking(sbook, sblIterator);
             }
         }
+
+    }
+
+    private void cancelSessionBooking(SessionBookings sb, ListIterator<SessionBookings> sbli) {
         if (sb != null) {
             Tickets t = sb.getTicketId();
             if (t != null) {
                 t.setDateUsed(null);
                 ejbTicketsFacade.edit(t);
             }
-            sh.getSessionBookingsCollection().remove(sb);
-            sessionHistoryFacade.edit(sh);
+            SessionHistory sh = sb.getSessionHistoryId();
+            //sh.getSessionBookingsCollection().remove(sb);
+            sbli.remove();
+            //sessionHistoryFacade.edit(sh);
             ejbSessionBookingsFacade.remove(sb);
             recreateModel();
+            FacesContext context = FacesContext.getCurrentInstance();
+            TicketsController ticketsController = context.getApplication().evaluateExpressionGet(context, "#{ticketsController}", TicketsController.class);
+
             ticketsController.recreateModel();
             PrimeFaces instance = PrimeFaces.current();
             instance.executeScript("PF('bookingDialog').hide()");
-            sendBookingConfirmationEmail(sb, c, "system.email.sessionBooking.cancellation.template", configMapFacade.getConfig("template.sessionbooking.cancellation.email.subject"));
+            sendBookingConfirmationEmail(sb, sb.getCustomerId(), "system.email.sessionBooking.cancellation.template", configMapFacade.getConfig("template.sessionbooking.cancellation.email.subject"));
             LOGGER.log(Level.INFO, "Cancel Session button clicked and Booking removed successfully");
         } else {
             LOGGER.log(Level.SEVERE, "Cancel Session button clicked but teh session Booking wasnt found!!");
@@ -1215,7 +1315,7 @@ public class SessionTimetableController implements Serializable {
             }
         } else {
             //no tickets - free trial expired and no plan
-           boolean purchaseSuccessful =  purchaseProduct(c, adminUser, sb, sh.getSessionTemplate().getSessionCasualRate().floatValue(), true);
+            boolean purchaseSuccessful = purchaseProduct(c, adminUser, sb, sh.getSessionTemplate().getSessionCasualRate().floatValue(), true);
         }
     }
 

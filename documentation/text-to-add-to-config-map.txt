@@ -2313,3 +2313,5 @@ purchase.tenpack.groupsessions.price=250
 purchase.tenpack.ptsessions.price=990
 purchaseTenPackOfGroupSessionsSuccsessful=A 10 pack of group training classes has been purchased successfully. Ten class tickets are being added to your account.
 purchaseTenPackOfPTSessionsSuccsessful=A 10 pack of 1 hour personal training classes has been purchased successfully. Ten PT tickets are being added to your account.
+BookingPTFormAdminViewLink=Book PT Session
+BookingPTDialogueHeader=Book A PT Session

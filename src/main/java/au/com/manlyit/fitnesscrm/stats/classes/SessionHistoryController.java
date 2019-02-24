@@ -83,6 +83,7 @@ public class SessionHistoryController implements Serializable {
     private List<SessionHistory> participantFilteredItems;
     private Customers[] participantsArray;
     private Boolean[] checkedCustomers;
+    
     private SessionHistory[] sessionHistoryItems;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.SessionHistoryFacade ejbFacade;
@@ -403,6 +404,25 @@ public class SessionHistoryController implements Serializable {
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
             return null;
+        }
+    }
+    
+    public void createDialogueDatalist() {
+        try {
+            attendingCustomers = new ArrayList<>();
+            for (int x = 0; x < checkedCustomers.length; x++) {
+                Boolean b = checkedCustomers[x];
+                if (b != null && b == true) {
+                    Customers selectedCust = selectableActiveCustomers.get(x);
+                    attendingCustomers.add(selectedCust);
+                }
+            }
+            participants.setTarget(attendingCustomers);
+            createDialogue();
+            
+        } catch (Exception e) {
+            JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
+            
         }
     }
 
@@ -818,6 +838,14 @@ public class SessionHistoryController implements Serializable {
 
         return activeCustomers;
 
+    }
+    
+    public void selectManyValueChangeListener(ValueChangeEvent vce ){
+        logger.log(Level.INFO, "selectManyListener() selection occurred ");
+    }
+    
+    public void selectManyListener(){
+        logger.log(Level.INFO, "selectManyListener() selection occurred ");
     }
 
     /**

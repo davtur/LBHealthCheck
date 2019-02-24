@@ -350,7 +350,7 @@ public class SessionHistoryFacade extends AbstractFacade<SessionHistory> {
             //Join<SessionHistory, SessionTrainers> jn = rt.joinCollection("sessionTrainersCollection");
             // Expression<Customers> sessionTrainer = jn.get("customerId");
             Expression<SessionTimetable> sessionTemplate = rt.get("sessionTemplate");
-            Expression<Time> stime = rt.get("sessiondate");
+            Expression<Date> stime = rt.get("sessiondate");
             //Expression<SessionTypes> type = rt.get("sessionTypesId");
 
             Predicate condition1 = cb.equal(stime, sessionTimestamp);

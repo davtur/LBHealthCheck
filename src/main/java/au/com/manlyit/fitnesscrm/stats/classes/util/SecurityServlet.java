@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -94,7 +95,7 @@ public class SecurityServlet extends HttpServlet {
             loginBean.setDontRedirect(true);
         }
         //boolean mobileDevice = false;
-        FacesContext context = FacesContext.getCurrentInstance();
+        //FacesContext context = FacesContext.getCurrentInstance();
         String accessToken = getFacebookAccessToken(faceCode);
         Customers facebookUser = getUserMailAddressFromJsonResponse(accessToken, httpSession);
         String sessionID = httpSession.getId();
@@ -176,23 +177,25 @@ public class SecurityServlet extends HttpServlet {
 
                                     logger.log(Level.INFO, "This is request has already been authenticated. User {0} is already logged in.", customer);
                                 } else {
-                                    logger.log(Level.INFO, "Login failed!");
+                                    logger.log(Level.WARNING, "Login failed. Customer ({0}) was denied access - facebook login button. Message: {1}", new Object[]{customer.getUsername(), servletException.getMessage()});
                                     customer.setPassword(pfmEncrptedPassword);
                                     ejbFacade.editAndFlush(customer);
                                     if (servletException.getMessage().contains("Login failed") == false) {
                                         throw servletException;
                                     } else {
-                                        context.addMessage(null, new FacesMessage("Login failed."));
+                                        logger.log(Level.WARNING, "Login failed. Customer ({0}) was denied access - facebook login button. Message: {1}", new Object[]{customer.getUsername(), servletException.getMessage()});
+                                        //context.addMessage(null, new FacesMessage("Login failed."));
                                         return;
                                     }
                                 }
                             }
                         } else {
-                            logger.log(Level.INFO, "A cancelled customer ({0}) was denied access - facebook login button.", customer.getUsername());
-                            context.addMessage(null, new FacesMessage("Access Denied - Cancelled Status"));
+                            logger.log(Level.WARNING, "A cancelled customer ({0}) was denied access - facebook login button.", customer.getUsername());
+                            //context.addMessage(null, new FacesMessage("Access Denied - Cancelled Status"));
                         }
                     } else {
-                        context.addMessage(null, new FacesMessage("Login failed."));
+                        logger.log(Level.WARNING, "Login failed. Customer ({0}) was denied access - facebook login button.", customer.getUsername());
+                        //context.addMessage(null, new FacesMessage("Login failed."));
                     }
                 }
             } catch (ServletException e) {
@@ -343,8 +346,7 @@ public class SecurityServlet extends HttpServlet {
                 ResponseHandler<String> responseHandler = new BasicResponseHandler();
                 String responseBody = httpclient.execute(httpget, responseHandler);
                 String name = null;
-                String lastName = null;
-                String firstName = null;
+                String birthday = null;
                 String facebookId = null;
                 try {
                     JSONObject json = (JSONObject) JSONSerializer.toJSON(responseBody);
@@ -356,22 +358,23 @@ public class SecurityServlet extends HttpServlet {
 
                     email = json.getString("email");
                     //put user data in session
+                    birthday = json.getString("birthday");
 
-                    if (facebookId == null || name == null || email == null) {
+                    if (facebookId == null || name == null || email == null || birthday == null) {
                         if (facebookId == null) {
                             logger.log(Level.WARNING, "Error getting JSON objects from facebook: Facebook ID is NULL");
                         }
                         if (name == null) {
                             logger.log(Level.WARNING, "Error getting JSON objects from facebook: name is NULL");
                         }
-                        // if (lastName == null) {
-                        //     logger.log(Level.WARNING, "Error getting JSON objects from facebook: lastName is NULL");
-                        //  }
                         if (email == null) {
                             logger.log(Level.WARNING, "Error getting JSON objects from facebook: email is NULL");
                         }
+                        if (birthday == null) {
+                            logger.log(Level.WARNING, "Error getting JSON objects from facebook: birthday is NULL");
+                        }
                     }
-
+                    logger.log(Level.INFO, "facebook JSON params recieve: name={0},email={1},birthday={2},facebookId={3}, httpSession = {4}", new Object[]{name, email, birthday, facebookId, httpSession});
                 } catch (Exception e) {
                     logger.log(Level.WARNING, "Error getting JSON objects from facebook}", e);
                 }
@@ -385,7 +388,17 @@ public class SecurityServlet extends HttpServlet {
                 }
                 cust.setEmailAddress(email);
                 cust.setFacebookId(facebookId);
-
+                SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
+                try {
+                    cust.setDob(sdf.parse(birthday));
+                } catch (java.text.ParseException parseException) {
+                    logger.log(Level.WARNING, "Error getting birthday from facebook: birthday is could not be converted to a Date!!", parseException);
+                }
+                try {
+                    cust.setUsername(name.trim().replace(" ", "."));
+                } catch (Exception e) {
+                    logger.log(Level.WARNING, "Error setting Username from facebook data!!", e);
+                }
             } else {
                 logger.log(Level.WARNING, "The facebook token is null");
             }

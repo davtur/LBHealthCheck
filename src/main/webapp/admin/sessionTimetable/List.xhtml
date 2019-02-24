@@ -84,10 +84,12 @@
 
                             </f:facet>
                             <f:facet name="input">
-                                <p:selectOneMenu id="status"  value="#{item.sessionTimetableStatus}"   label="#{configMapController.getKey('CreateSessionHistoryTitle_trainer')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionHistoryRequiredMessage_trainer')}">
+                                <h:outputText value="Published" rendered="#{item.sessionTimetableStatus == 0}"/>
+                                <h:outputText value="Hidden" rendered="#{item.sessionTimetableStatus == 1}"/>
+                                <!--<p:selectOneMenu id="status"  value="#{item.sessionTimetableStatus}"   label="#{configMapController.getKey('CreateSessionHistoryTitle_trainer')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionHistoryRequiredMessage_trainer')}">
                                     <f:selectItems value="#{sessionTimetableController.timetableSessionStatusValues}" var="status" itemLabel="#{status.label} " itemValue="#{status.value}"/>
 
-                                </p:selectOneMenu>
+                                </p:selectOneMenu>-->
                             </f:facet>
                         </p:cellEditor> 
 

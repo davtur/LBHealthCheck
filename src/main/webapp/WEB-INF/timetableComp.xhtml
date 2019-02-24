@@ -16,10 +16,24 @@
             <div class="ui-g-12  gray ">
                 <p:panel>
                     <p:commandButton styleClass="MarRight5 GreenButton animated pulse infinite "   update="@(.bookingFormUpdate)" oncomplete="PF('loginDialog').show()" rendered="#{empty  facesContext.externalContext.remoteUser}" value="#{configMapController.getKey('Timetable_LoginButtonTitle')}"   /> 
-                    <h:outputText class="Fs14 FontBold black" rendered="#{not empty  facesContext.externalContext.remoteUser}" value="#{customersController.selected.firstname} #{customersController.selected.lastname} is signed in."/>
-                    <h:outputText class="Fs14 FontBold black" rendered="#{empty  facesContext.externalContext.remoteUser}" value="#{configMapController.getKey('Timetable_LoginMessageText')}"/>
+                    <h:panelGrid columns="1">
+                        <h:outputText class="Fs14 FontBold black" rendered="#{not empty  facesContext.externalContext.remoteUser}" value="Welcome #{customersController.selected.firstname}! Please book your classes below."/>
+                        <h:outputText class="Fs14 FontBold black" rendered="#{empty  facesContext.externalContext.remoteUser}" value="#{configMapController.getKey('Timetable_LoginMessageText')}"/>
 
+                        <h:outputText class="Fs14 FontBold black" rendered="#{not empty  facesContext.externalContext.remoteUser}" value="Class Tickets Available for Bookings"/>
+                        <p:dataTable value="#{ticketsController.ticketSummaryList}" var="ticketSum"  rendered="#{not empty  facesContext.externalContext.remoteUser}">
+                            <p:column headerText="Class Type">
+                                <h:outputText value="#{ticketSum.ticketName}" />
+                            </p:column>
+                            <p:column headerText="No.">
+                                <h:outputText value="#{ticketSum.numberOfTicketsAsString}" />
+                            </p:column>
+                        </p:dataTable>
+                        <p:commandButton styleClass="MarRight5 redBg" icon="fa fa-check white Fs14" oncomplete="PF('bookingPTAdminDialog').show()"  rendered="#{customersController.isUserInRole('ADMIN') ||customersController.isUserInRole('DEVELOPER') }"  value="#{configMapController.getKey('BookingPTFormAdminViewLink')}" update="@(.bookingFormUpdate) :growl "/>                
+
+                    </h:panelGrid>
                 </p:panel>
+
                 <div class="Seperator"></div>
                 <p:commandButton  styleClass="MarRight5 Fs24"   update="@(.bookingFormUpdate) :growl"   value="#{configMapController.getKey('Timetable_decrementWeekButtonTitle')}"  actionListener="#{sessionTimetableController.decrementWeek}"  />
 
@@ -157,6 +171,7 @@
     <ui:include src="/WEB-INF/signupComp.xhtml"/>
     <ui:include src="/WEB-INF/bookingComp.xhtml"/>
     <ui:include src="/WEB-INF/bookingAdminComp.xhtml"/>
+    <ui:include src="/WEB-INF/bookingPTAdminComp.xhtml"/>
     <ui:include src="/WEB-INF/loginComp.xhtml"/>
 </ui:composition>
 <!--<p> Generated from template ( JSF_from_entity_wizard/StandardJSF/list.ftl  )- Dave 18th July 2015 </p>-->

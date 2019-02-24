@@ -1,0 +1,137 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:p="http://primefaces.org/ui" >
+
+
+    <p:dialog header="#{configMapController.getKey('BookingPTDialogueHeader')}" widgetVar="bookingPTAdminDialog" modal="false"  fitViewport="true" responsive="true" appendTo="@(body)" resizable="true">
+        <h:form id="bookingPTAdminForm" styleClass="bookingPTFormUpdate ">
+
+
+            <div class="ui-g TimetableTile border-box">
+
+                <div class="ui-g-12">
+                    <p:outputLabel for="sessiondate" value="#{configMapController.getKey('CreateSessionHistoryLabel_sessiondate')}" />
+                    <p:calendar id="sessiondate" value="#{sessionHistoryController.selected.sessiondate}"  pattern="dd/MM/yyyy HH:mm"  stepMinute="5">
+
+                    </p:calendar>
+                </div>  
+                <div class="ui-g-12">
+                    <p:outputLabel for="sessionType" value="#{configMapController.getKey('CreateSessionHistoryLabel_sessionType')}" />
+                    <p:selectOneMenu id="sessionType" value="#{sessionHistoryController.selected.sessionTypesId}" label="#{configMapController.getKey('CreateSessionHistoryLabel_sessionType')}"  converter="sessionTypesControllerConverter" required="true" requiredMessage="#{configMapController.getKey('CreateSessionHistoryRequiredMessage_sessionType')}">
+                        <f:selectItems value="#{sessionTypesController.itemsAvailable}" />
+                    </p:selectOneMenu>
+                </div>
+
+                <p:spacer height="10em" />
+
+                <div class="ui-g-12">
+                    <p:outputLabel for="trainer" value="#{configMapController.getKey('CreateSessionHistoryLabel_trainer')}" />
+                    <p:selectCheckboxMenu id="trainer" filter="true" filterMatchMode="startsWith"  value="#{sessionHistoryController.trainers}" converter="customersControllerConverter" label="#{configMapController.getKey('CreateSessionHistoryLabel_trainer')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionHistoryRequiredMessage_trainer')}">
+                        <f:selectItems value="#{sessionHistoryController.activeTrainers}" var="cust" itemLabel="#{cust.firstname} #{cust.lastname}" itemValue="#{cust}"/>
+                    </p:selectCheckboxMenu>
+                </div>
+                <p:spacer height="10em" />
+                
+                <p:spacer height="10em"  />
+                <style type="text/css">
+                    .ui-datalist .ui-datalist-content {
+                        border:0 none
+                    }
+
+                    .ui-datalist ul {
+                        padding:0px 10px 0 20px;
+                        margin: 5px 0;
+                    }
+
+                    .label, .value {
+                        vertical-align: top
+                    }
+
+                    .output {
+                        font-weight: bold
+                    }
+
+                    .ui-selectmanymenu {
+                        width: 300px;
+                    }
+                </style>
+
+                <div class="ui-g-12">
+                    <p:selectManyMenu id="advanced" value="#{sessionHistoryController.attendingCustomers}" converter="customersControllerConverter"
+                                      var="c" filter="true" filterMatchMode="contains" showCheckbox="true" valueChangeListener="#{sessionHistoryController.selectManyValueChangeListener}" >
+                        <p:ajax event="change" update="@(.bookingPTFormAttendUpdate) attendance savePtSessionButton" listener="#{sessionHistoryController.selectManyListener}"/>
+                        <f:selectItems value="#{sessionHistoryController.selectableActiveCustomers}" var="cust" itemLabel="#{cust.firstname} #{cust.lastname}" itemValue="#{cust}" />
+                            
+                        
+
+                        <p:column>
+                            <p:graphicImage value="#{customerImagesController.imageThumbnail}" width="60px">
+                                <f:param name="imageId" value="#{c.profileImage.id}"/>
+                            </p:graphicImage>
+                        </p:column>
+
+                        <p:column>
+                            <h:panelGrid  columns="1" >
+                                <h:outputText value="#{c.firstname} #{c.lastname}" />
+                                <h:outputText value="Valid PT Tickets: #{sessionTimetableController.numberOfValidPtTickets(c)}" style="padding-left: 30px"/>
+                            </h:panelGrid> 
+                        </p:column>
+                        
+                    </p:selectManyMenu>
+                </div>
+
+                <div class="ui-g-12">
+                    <h:outputText styleClass="bookingPTFormAttendUpdate" id="attendance" value="#{configMapController.getKey('CreateSessionHistoryLabel_totalSelected')}#{sessionHistoryController.attendingCustomers.size()}"/>
+                </div>
+                <p:spacer height="10em" />
+<div class="ui-g-12">
+                    <p:outputLabel for="adminnotes" value="#{configMapController.getKey('CreateSessionHistoryLabel_adminNotes')}" />
+                </div>
+                <div class="ui-g-12">
+
+                    <p:inputTextarea id="adminnotes" value="#{sessionHistoryController.selected.adminNotes}"  />
+                </div>
+                <p:spacer height="10em" />
+                <div class="ui-g-12">
+                    <p:outputLabel for="comments" value="#{configMapController.getKey('CreateSessionHistoryLabel_comments')}" />
+                </div>
+                <div class="ui-g-12">
+
+                    <p:inputTextarea id="comments" value="#{sessionHistoryController.selected.comments}"  />
+                </div>
+                <p:spacer height="10em" />
+                <div class="ui-g-12">
+                    <p:commandButton  id="savePtSessionButton" oncomplete="PF('bookingPTAdminDialog').hide()"   actionListener="#{sessionHistoryController.createDialogueDatalist}" value="#{configMapController.getKey('CreateSessionMobileSaveButton')} #{sessionHistoryController.attendingCustomers.size()}" update="@(.bookingPTFormUpdate) :growl"/>
+                </div>
+
+            </div>
+
+
+
+
+            <div class="EmptyBox10">
+
+            </div>
+
+
+
+            <div class="ui-g-12">
+                <div class="ui-g-3">
+                    <p:commandButton icon=" fa fa-times-circle white Fs14" id="dialogueDiscard" onclick=" PF('bookingPTAdminDialog').hide()"  actionListener="#{customersController.cancelCreateDialogue}" value="#{configMapController.getKey('CancelSignupLink')}" update=":growl"/>                
+                </div>
+            </div>
+
+
+        </h:form>
+    </p:dialog>
+
+
+
+</ui:composition>
+<!--<p> Generated from template ( JSF_from_entity_wizard/StandardJSF/list.ftl  )- Dave 18th July 2015 </p>-->
+
