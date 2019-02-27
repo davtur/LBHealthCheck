@@ -531,7 +531,7 @@ public class FutureMapEJB implements Serializable {
                         // dont update schedules with an empty payment period or payment period of z ( no schedule ).
                         if (c.getPaymentParametersId().getStatusCode().trim().compareTo("A") == 0 && c.getPaymentParametersId().getPaymentPeriod().trim().isEmpty() == false && c.getPaymentParametersId().getPaymentPeriod().compareTo("Z") != 0) {
                             this.put(FUTUREMAP_INTERNALID, new AsyncJob("GetCustomerDetails", paymentBean.updateCustomerPaymentSchedule(c, getDigitalKey(), FUTUREMAP_INTERNALID)));
-                             LOGGER.log(Level.INFO, "###### Updating payment Schedule for username {0} #####", c.getUsername());
+                            LOGGER.log(Level.INFO, "###### Updating payment Schedule for username {0} #####", c.getUsername());
                             TimeUnit.MILLISECONDS.sleep(50);//sleeping for a long time wont affect performance (the warning is there for a short sleep of say 5ms ) but we don't want to overload the payment gateway or they may get upset.
                         }
                     }
@@ -700,25 +700,56 @@ public class FutureMapEJB implements Serializable {
     }
 
     //@Schedule(dayOfMonth = "*", hour = "*", minute = "*", second = "0")//debug
-    @Schedule(dayOfMonth = "*", hour = "6", minute = "0", second = "0")
+    @Schedule(dayOfMonth = "*", hour = "5", minute = "30", second = "0")
     public void retrievePaymentsReportFromPaymentGateway(Timer t) {
         try {
-            // run every day at 5am seconds
+            // run every day at 5:30am to update the payments database
             GregorianCalendar cal = new GregorianCalendar();
             cal.add(Calendar.DAY_OF_YEAR, -7);
-            LOGGER.log(Level.INFO, "Running the daily payment report from date:{0}", cal.getTime());
 
-            boolean result = runPaymentReport(cal.getTime(), getFutureMapInternalSessionId());
-            LOGGER.log(Level.INFO, "The daily payment report has completed. Result:{0}", result);
+            Date reportStartDate = cal.getTime();
+            Date reportEndDate = new Date();
+           
+            boolean reportUseSettlementDate = false;
 
-        } catch (InterruptedException ex) {
-            Logger.getLogger(FutureMapEJB.class
-                    .getName()).log(Level.WARNING, "Run Payment Report was interrupted", ex);
+            LOGGER.log(Level.INFO, "retrievePaymentsReportFromPaymentGateway - Running the daily payment report from date:{0}", cal.getTime());
+            Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.INFO, "retrievePaymentsReportFromPaymentGateway - Starting async scheduled Refresh from Payment Gateway with starting date:", reportStartDate);
+            startAsynchJob(getFutureMapInternalSessionId(), "PaymentReport", paymentBean.getAllPaymentsBySystemSinceDate(reportStartDate, reportEndDate, reportUseSettlementDate, getDigitalKey(), getFutureMapInternalSessionId()));
+            Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.INFO, "retrievePaymentsReportFromPaymentGateway - Starting async scheduled Refresh of All active customers:");
 
+            List<Customers> custActiveList = customersFacade.findAllActiveCustomers(true);
+            for (Customers c : custActiveList) {
+                try {
+                    PaymentParameters pp = c.getPaymentParametersId();
+                    if (pp != null) {
+                        String sr = pp.getYourSystemReference();
+                        if (sr != null && sr.trim().isEmpty() == false) {
+                            startAsynchJob(getFutureMapInternalSessionId(), "GetCustomerDetails", paymentBean.getCustomerDetails(c, getDigitalKey(), getFutureMapInternalSessionId()));
+
+                            TimeUnit.MILLISECONDS.sleep(200);//sleeping for a long time wont affect performance (the warning is there for a short sleep of say 5ms ) but we don't want to overload the payment gateway or they may get upset.
+                        }
+                    }
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         } catch (Exception ex) {
             Logger.getLogger(FutureMapEJB.class
                     .getName()).log(Level.SEVERE, "retrievePaymentsReportFromPaymentGateway - UNHANDLED EXCEPTION In EJB TIMER", ex);
         }
+    }
+
+    @Schedule(dayOfMonth = "*", hour = "5", minute = "45", second = "0")
+    public void sendManagementDailyReport(Timer t) {
+        GregorianCalendar cal = new GregorianCalendar();
+            cal.add(Calendar.DAY_OF_YEAR, -7);
+        boolean result = false;
+        try {
+            result = runPaymentReport(cal.getTime(), getFutureMapInternalSessionId());
+        } catch (InterruptedException ex) {
+            Logger.getLogger(FutureMapEJB.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        LOGGER.log(Level.INFO, "The daily payment report has completed. Result:{0}", result);
     }
 
     public synchronized boolean isAnAsyncOperationRunning(String sessionId) {
@@ -1172,7 +1203,7 @@ public class FutureMapEJB implements Serializable {
                             }
                             startAsynchJob(sessionId, "GetCustomerDetails", paymentBean.getCustomerDetails(cust, getDigitalKey(), sessionId));
                             getPayments(sessionId, cust, 12, 2);
-                            
+
                         }
                     }
                 } else {
@@ -1189,12 +1220,12 @@ public class FutureMapEJB implements Serializable {
 
         LOGGER.log(Level.INFO,
                 "processConvertSchedule completed");
-         
+
         // }
     }
 
     // @TransactionAttribute(TransactionAttributeType.NEVER)
-  /*  public void processCompletedAsyncJobs(String sessionId, String key, Future<PaymentGatewayResponse> ft) {
+    /*  public void processCompletedAsyncJobs(String sessionId, String key, Future<PaymentGatewayResponse> ft) {
         LOGGER.log(Level.INFO, "Future Map is processing Completed Async Jobs .");
         synchronized (lock3) {
 // TODO convert all methods to use PaymentGatewayResponse class
@@ -1287,7 +1318,6 @@ public class FutureMapEJB implements Serializable {
             }
         }
     }*/
-
     // run a schedules
     /*  public void processCompletedAsyncJobs2(String sessionId) {
      LOGGER.log(Level.INFO, "Future Map is processing Completed Async Jobs .");
@@ -1582,10 +1612,10 @@ public class FutureMapEJB implements Serializable {
         boolean result = false;
         paymentsByCustomersMissingFromCRM = new ArrayList<>();
         //PaymentGatewayResponse pgr = null;
-        if(pgr.isOperationSuccessful()){
+        if (pgr.isOperationSuccessful()) {
             result = true;
         }
- 
+
         if (result == true) {
             String message = "The payment report has completed.";
             storeResponseForSessionBeenToRetrieve("PaymentReport", sessionId, pgr);
@@ -3061,7 +3091,7 @@ public class FutureMapEJB implements Serializable {
             LOGGER.log(Level.WARNING, "Future Map updateNextScheduledPayment  customer paymnt parameters  does not exist");
         }
     }*/
-   /* private Payments convertPaymentXMLToEntity(Payments payment, Payment pay, Customers cust) {
+ /* private Payments convertPaymentXMLToEntity(Payments payment, Payment pay, Customers cust) {
         synchronized (lock4) {
             if (pay == null || cust == null) {
                 String p1 = "NULL";
@@ -3145,7 +3175,7 @@ public class FutureMapEJB implements Serializable {
                  payment.setManuallyAddedPayment(false);
                  }
                  }*/
-              /*  if (pay.getPaymentSource().isNil() == false) {
+ /*  if (pay.getPaymentSource().isNil() == false) {
                     payment.setPaymentSource(pay.getPaymentSource().getValue());
                 }
                 if (pay.getScheduledAmount() != null) {
@@ -3186,7 +3216,6 @@ public class FutureMapEJB implements Serializable {
             return payment;
         }
     }*/
-
     private Payments convertScheduledPaymentXMLToEntity(Payments payment, ScheduledPayment pay, Customers cust) {
         synchronized (lock5) {
             if (pay == null || cust == null) {
@@ -3260,7 +3289,7 @@ public class FutureMapEJB implements Serializable {
         }
     }
 
-  /*  private synchronized boolean compareStringToXMLString(String s, JAXBElement<String> xs) {
+    /*  private synchronized boolean compareStringToXMLString(String s, JAXBElement<String> xs) {
         boolean result = true;// return true if they are the same
         String s2 = null;
         if (s != null) {
@@ -3314,7 +3343,7 @@ public class FutureMapEJB implements Serializable {
         return result;
     }*/
 
-  /*  private synchronized boolean compareDateToXMLGregCal(Date d, JAXBElement<XMLGregorianCalendar> jxgc) {
+ /*  private synchronized boolean compareDateToXMLGregCal(Date d, JAXBElement<XMLGregorianCalendar> jxgc) {
         boolean result = true;// return true if they are the same
         GregorianCalendar xgc = null;
         if (jxgc != null) {
@@ -3336,7 +3365,7 @@ public class FutureMapEJB implements Serializable {
         return result;
     }*/
 
-  /*  private synchronized boolean compareBigDecimalToDouble(BigDecimal d, Double bd) {
+ /*  private synchronized boolean compareBigDecimalToDouble(BigDecimal d, Double bd) {
         boolean result = true;// return true if they are the same
         BigDecimal d2 = null;
         if (bd != null) {
@@ -3356,7 +3385,7 @@ public class FutureMapEJB implements Serializable {
         return result;
     }*/
 
-  /*  private boolean comparePaymentXMLToEntity(Payments payment, Payment pay) {
+ /*  private boolean comparePaymentXMLToEntity(Payments payment, Payment pay) {
         synchronized (lock6) {
             if (payment == null || pay == null) {
                 return payment == null && pay == null;
@@ -3436,7 +3465,7 @@ public class FutureMapEJB implements Serializable {
         }
     }*/
 
-    /*  private boolean compareScheduledPaymentXMLToEntity(Payments payment, ScheduledPayment pay) {
+ /*  private boolean compareScheduledPaymentXMLToEntity(Payments payment, ScheduledPayment pay) {
         synchronized (lock6) {
             if (payment == null || pay == null) {
                 return payment == null && pay == null;

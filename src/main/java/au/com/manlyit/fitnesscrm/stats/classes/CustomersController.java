@@ -1472,7 +1472,7 @@ public class CustomersController implements Serializable {
             }
             setNewCustomer(setCustomerDefaults(new Customers()));
             addQuestionnaireMapItemsToCustomer(c);
-            issuePackOfTickets(c, 1, 10);// issue free trial tickets - 10 tickets to group training sessions over 1 weeks
+            issuePackOfTickets(c, 1, 10, ejbSessionTypesFacade.findASessionTypeByName("Group Training"));// issue free trial tickets - 10 tickets to group training sessions over 1 weeks
 
         } else {
             if (isWebserviceCall == false) {
@@ -1484,7 +1484,7 @@ public class CustomersController implements Serializable {
 
     }
 
-    public void issuePackOfTickets(Customers c, int validWeeks, int numberOfTickets) {
+    public void issuePackOfTickets(Customers c, int validWeeks, int numberOfTickets, SessionTypes st) {
 
         GregorianCalendar ticketStartDate = new GregorianCalendar();
         CalendarUtil.SetToLastDayOfWeek(Calendar.SUNDAY, ticketStartDate);
@@ -1497,7 +1497,7 @@ public class CustomersController implements Serializable {
         ticketStopDate.add(Calendar.DAY_OF_YEAR, 1);
         ticketStopDate.add(Calendar.SECOND, -1);
 
-        issueBlockOfTickets(c, ticketStartDate.getTime(), ticketStopDate.getTime(), ejbSessionTypesFacade.findASessionTypeByName("Group Training"), numberOfTickets);
+        issueBlockOfTickets(c, ticketStartDate.getTime(), ticketStopDate.getTime(), st, numberOfTickets);
 
     }
 
@@ -1521,8 +1521,8 @@ public class CustomersController implements Serializable {
     public void issueBlockOfTickets(Customers c, Date ticketStartDate, Date ticketStopDate, SessionTypes sessionType, int number) {
 
         //  synchronized (issueBlockOfTicketsLockObject) {
-        if(sessionType == null){
-                      LOGGER.log(Level.SEVERE, "FAILED Adding Block of Tickets for Customer id {0},  tickets added {1},startDate {2}, stopDate {3}. SESSIONTYPE is NULL ", new Object[]{c.getId(), 0, ticketStartDate, ticketStopDate});
+        if (sessionType == null) {
+            LOGGER.log(Level.SEVERE, "FAILED Adding Block of Tickets for Customer id {0},  tickets added {1},startDate {2}, stopDate {3}. SESSIONTYPE is NULL ", new Object[]{c.getId(), 0, ticketStartDate, ticketStopDate});
 
             return;
         }
@@ -1545,6 +1545,16 @@ public class CustomersController implements Serializable {
                 }
 
             }
+            //audit the event
+            String auditDetails = "Issued Tickets for  :" + c.getUsername() + " Details: Name:" + c.getLastname() + " " + c.getFirstname() + " TicketType:" + sessionType.getName() + ", Number:" + number + ", Valid From: " + ticketStartDate.getTime() + ", Valid to: " + ticketStopDate.getTime() + ". ";
+            String changedFrom = "N/A";
+            String changedTo = "Tickets Issued";
+
+            if (loggedInUser == null) {
+                loggedInUser = c;
+                LOGGER.log(Level.WARNING, " issuePackOfTickets: The logged in user is NULL");
+            }
+            ejbAuditLogFacade.audit(loggedInUser, c, "issuePackOfTickets", auditDetails, changedFrom, changedTo);
 
             LOGGER.log(Level.INFO, "Adding Block of Tickets for Customer id {0},  tickets added {1},startDate {2}, stopDate {3} ", new Object[]{c.getId(), ticketsAdded, ticketStartDate, ticketStopDate});
         } catch (Exception ex) {
@@ -2429,14 +2439,17 @@ public class CustomersController implements Serializable {
         Customers cust = null;
         int weeksValid = -1;
         int numberIssued = -1;
+        SessionTypes st = null;
         try {
             cust = getSelected();
             weeksValid = ticketsController.getWeeksValid();
             numberIssued = ticketsController.getNumberOfTicketsToAdd();
-            issuePackOfTickets(cust, weeksValid, numberIssued);
+            st = ticketsController.getSessionType();
+            issuePackOfTickets(cust, weeksValid, numberIssued, st);
             LOGGER.log(Level.INFO, "executeIssueTickets: Manulally issueing tickets for {0}. Weeks tickets are valid:{1}, number issued: {2}", new Object[]{cust.getUsername(), weeksValid, numberIssued});
             String detailedMessage = cust.getFirstname() + " " + cust.getLastname() + " was credited " + numberIssued + " tickets that are valid for " + weeksValid + " weeks.";
             JsfUtil.addSuccessMessage("Tickets Allocated", detailedMessage);
+            ticketsController.recreateModel();
         } catch (Exception e) {
             JsfUtil.addErrorMessage("Issue Tickets Failed");
             LOGGER.log(Level.SEVERE, "executeIssueTickets: Manulally issueing tickets failed for {0}. Weeks tickets are valid:{1}, number issued: {2}", new Object[]{cust.getUsername(), weeksValid, numberIssued});
@@ -2567,11 +2580,14 @@ public class CustomersController implements Serializable {
             pp.setPaymentPeriodDayOfMonth(Integer.toString(newPayDayOfMonth));
             pp.setPaymentPeriodDayOfWeek(newPayDayOfWeek);
             ejbPaymentParametersFacade.edit(pp);
-
-            ezi.createPaymentSchedule(actionEvent);
+            if (paymentAmount > 0) {
+                ezi.createPaymentSchedule(actionEvent);
+            }
             getSelected().setGroupPricing(getCustomersNewPlan());
             float firstPayment = new Float(proRataAmount);
-            ezi.addSinglePayment(current, firstPayment, scheduleStart);
+            if (firstPayment > 0) {
+                ezi.addSinglePayment(current, firstPayment, scheduleStart);
+            }
             ejbFacade.edit(getSelected());
 
         } catch (Exception e) {
@@ -2615,7 +2631,7 @@ public class CustomersController implements Serializable {
                 LOGGER.log(Level.SEVERE, "purchaseTenPackOfGroupSessions - ERROR.Price a valid number or not set in configmap - key = purchase.tenpack.groupsessions.price", numberFormatException);
             }
             if (purchaseTenPack(c, price) == true) {
-                issuePackOfTickets(c, 52, 10);
+                issuePackOfTickets(c, 52, 10, ejbSessionTypesFacade.findASessionTypeByName("Group Training"));
                 JsfUtil.addSuccessMessage(configMapFacade.getConfig("purchaseTenPackOfGroupSessionsSuccsessful"));
             }
         }

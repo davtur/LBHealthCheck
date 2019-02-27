@@ -7,6 +7,7 @@ import au.com.manlyit.fitnesscrm.stats.classes.CustomersController;
 import au.com.manlyit.fitnesscrm.stats.classes.util.LazyLoadingDataModel;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PfSelectableDataModel;
 import au.com.manlyit.fitnesscrm.stats.classes.util.TicketSummary;
+import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import au.com.manlyit.fitnesscrm.stats.db.SessionTypes;
 
 import java.io.Serializable;
@@ -15,7 +16,6 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -52,6 +52,8 @@ public class TicketsController implements Serializable {
     private au.com.manlyit.fitnesscrm.stats.beans.TicketsFacade ejbFacade;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade configMapFacade;
+    @Inject
+    private au.com.manlyit.fitnesscrm.stats.beans.AuditLogFacade ejbAuditLogFacade;
     private PaginationHelper pagination;
     private int selectedItemIndex;
     private List<Tickets> filteredItems;
@@ -275,6 +277,23 @@ public class TicketsController implements Serializable {
     public void destroy() {
         performDestroy();
         recreateModel();
+        //audit the event
+        FacesContext context = FacesContext.getCurrentInstance();
+        CustomersController controller = context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
+        Customers c = controller.getSelected();
+        Customers loggedInUser = controller.getLoggedInUser();
+        String auditDetails = "Deleted Ticket for  :" + c.getUsername() + " Details: Name:" + c.getLastname() + " " + c.getFirstname() + " TicketType:" + current.getSessionType().getName() + ", Number:" + 1 + ", Valid From: " + current.getValidFrom() + ", Valid to: " + current.getExpires() + ". ";
+        String changedFrom = "Valid Ticket Id:" + current.getId() ;
+        if(current.getDateUsed() != null){
+            changedFrom = "Used Ticket Id:" + current.getId() +", Date used:" + current.getDateUsed();
+        }
+        String changedTo = "Ticket Removed";
+        if (loggedInUser == null) {
+            loggedInUser = c;
+            LOGGER.log(Level.WARNING, " removeTicket: The logged in user is NULL");
+        }
+        ejbAuditLogFacade.audit(loggedInUser, c, "removeTicket", auditDetails, changedFrom, changedTo);
+        // end audit block
         current = null;
     }
 
@@ -353,16 +372,16 @@ public class TicketsController implements Serializable {
             for (Tickets t : tl) {
                 String key = t.getSessionType().getName();
                 boolean found = false;
-                for(TicketSummary ts:ticketsOverview){
-                    if(ts.getTicketName().contentEquals(key)){
+                for (TicketSummary ts : ticketsOverview) {
+                    if (ts.getTicketName().contentEquals(key)) {
                         found = true;
                         ts.incrementCount();
                     }
                 }
-                if(found == false){
+                if (found == false) {
                     ticketsOverview.add(new TicketSummary(key, 1));
                 }
-                
+
             }
         }
         return ticketsOverview;
@@ -403,6 +422,7 @@ public class TicketsController implements Serializable {
         thisWeeksLazyModel = null;
         customerTicketList = null;
         lazyModel = null;
+        ticketsOverview = null;
     }
 
     public String next() {

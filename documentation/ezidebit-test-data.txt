@@ -1,3 +1,10 @@
+
+Fees / Charges
+One Time Setup Fee	$2.20	Visa/Mastercard	2.2%	Optional SMS Reminder	$0.28
+Bank Account	$1.10	Amex/Diners	4.4%	Failed Payment Fee	$11.90
+
+
+
 Appendix E
 E.1 - R EAL T IME T RANSACTION S AMPLE C REDIT C ARD N UMBERS
 The table below provides a list of dummy Credit Card Numbers that can be used in

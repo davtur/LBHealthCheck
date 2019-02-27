@@ -43,7 +43,7 @@
 
                 <div class="ui-g-12">
                     <div class="ui-g-2 ">
-                        <p:commandButton  onclick="PF('issueTicketsDialogueWidget').hide();"  actionListener="#{customersController.executeIssueTickets}" value="#{configMapController.getKey('IssueTicketsDialogueSaveLink')}" update=" :growl "/>                
+                        <p:commandButton  onclick="PF('issueTicketsDialogueWidget').hide();"  actionListener="#{customersController.executeIssueTickets}" value="#{configMapController.getKey('IssueTicketsDialogueSaveLink')}" update=" :growl @(.ticketInfo)"/>                
                     </div>
                     <div class="ui-g-2 ">
                         <p:commandButton  onclick="PF('issueTicketsDialogueWidget').hide()"   value="#{configMapController.getKey('IssueTicketsDialogueDiscardLink')}" update=":growl "/>                
