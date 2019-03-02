@@ -73,6 +73,20 @@ import org.primefaces.model.map.Marker;
 @SessionScoped
 public class SessionTimetableController implements Serializable {
 
+    /**
+     * @return the editSelected
+     */
+    public boolean isEditSelected() {
+        return editSelected;
+    }
+
+    /**
+     * @param editSelected the editSelected to set
+     */
+    public void setEditSelected(boolean editSelected) {
+        this.editSelected = editSelected;
+    }
+
     private static final long serialVersionUID = 1L;
     private static final Logger LOGGER = Logger.getLogger(SessionTimetableController.class.getName());
     private static final int DAYS_AHEAD_TO_POPULATE_TIMETABLE = 90;
@@ -105,6 +119,7 @@ public class SessionTimetableController implements Serializable {
     private au.com.manlyit.fitnesscrm.stats.beans.ScheduleFacade ejbScheduleFacade;
     private PaginationHelper pagination;
     private int selectedItemIndex;
+    private boolean editSelected = true;
     private String eventStyleClass = "";
     private ArrayList<TimetableRows> daysOfWeek;
     private int sessionForTheWeekMaxColumns = 1;
@@ -161,6 +176,10 @@ public class SessionTimetableController implements Serializable {
             selectedItemIndex = -1;
         }
         return current;
+    }
+
+    public void tileEditorToggle() {
+        setEditSelected(!isEditSelected());
     }
 
     public MapModel getSimpleModel() {
@@ -322,6 +341,14 @@ public class SessionTimetableController implements Serializable {
         if (o.getClass() == SessionTimetable.class) {
             SessionTimetable st = (SessionTimetable) o;
             LOGGER.log(Level.INFO, "SessionTimetable - Row Selected, Name={0}, Date{1}, number of selected items={2}", new Object[]{st.getSessionTitle(), st.getSessiondate(), getMultiSelected().length});
+        }
+    }
+
+    public void onDoubleClickRow(SelectEvent selectEvent) {
+        Object o = selectEvent.getObject();
+        if (o.getClass() == SessionTimetable.class) {
+            SessionTimetable st = (SessionTimetable) o;
+            LOGGER.log(Level.INFO, "SessionTimetable - Row Double Clicked, Name={0}, Date{1}, number of selected items={2}", new Object[]{st.getSessionTitle(), st.getSessiondate(), getMultiSelected().length});
         }
     }
 
@@ -726,6 +753,11 @@ public class SessionTimetableController implements Serializable {
     public void editDialogue() {
         getFacade().edit(current);
         JsfUtil.addSuccessMessage(configMapFacade.getConfig("SessionTimetableUpdated"));
+        if (current.getSessionTimetableStatus() == TimetableSessionStatus.PUBLISHED.getValue()) {
+            // its already published so push out updates
+            cloneSessionsFromTimetable(current, DAYS_AHEAD_TO_POPULATE_TIMETABLE);
+            daysOfWeek = null;// recreate timetabel model
+        }
 
     }
 

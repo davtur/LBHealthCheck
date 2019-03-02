@@ -12,7 +12,15 @@ body{
     background-image:none !important;
     background-color: white;
 }
+/*
 
+Default font size of themes might be bigger than expected, to change the font-size of PrimeFaces
+components globally, use the .ui-widget style class. An example of smaller fonts;
+
+*/
+.ui-widget, .ui-widget .ui-widget {
+font-size: 90% !important;
+}
 /*div.ui-carousel-viewport .myStatsCarousel div.ui-carousel-viewport .myStatsCarousel{
   width:100% !important;
 height: 300px !important; 

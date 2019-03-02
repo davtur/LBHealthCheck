@@ -7,46 +7,210 @@
                  xmlns:p="http://primefaces.org/ui" >
 
 
-    <p:dialog id="SessionTimetableEditDlg" widgetVar="SessionTimetableEditDialog" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('EditSessionTimetableTitle')}">
-        <h:form id="SessionTimetableEditForm">
-            <h:panelGroup id="display">
-                <p:panelGrid columns="2" rendered="#{sessionTimetableController.selected != null}">
-                    <h:outputLabel value="#{configMapController.getKey('EditSessionTimetableLabel_sessiondate')}" for="sessiondate" />
-                    <p:calendar id="sessiondate" pattern="dd/MM/yyyy HH:mm:ss"  value="#{sessionTimetableController.selected.sessiondate}"  title="#{configMapController.getKey('CreateSessionTimetableTitle_sessiondate')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionTimetableRequiredMessage_sessiondate')}">
-                        <p:ajax event="dateSelect" listener="#{sessionTimetableController.handleDateSelect}" update=":SessionTimetableCreateForm" />
-                    </p:calendar>
-                    <h:outputLabel value="#{configMapController.getKey('EditSessionTimetableLabel_comments')}" for="comments" />
-                    <p:inputTextarea rows="4" cols="30" id="comments" value="#{sessionTimetableController.selected.comments}" title="#{configMapController.getKey('EditSessionTimetableTitle_comments')}" >
-
-                    </p:inputTextarea>
-                    <p:outputLabel value="#{configMapController.getKey('CreateSessionTimetableLabel_sessionStyleClasses')}" for="styleClasses" />
-                    <p:inputText id="styleClasses" value="#{sessionTimetableController.selected.sessionStyleClasses}" label="#{configMapController.getKey('ListSessionTimetableTitle_sessionStyleClasses')}" />
+    <p:dialog id="SessionTimetableEditDlg" widgetVar="SessionTimetableEditDialog" modal="false" resizable="true" responsive="true" appendTo="@(body)" header="#{configMapController.getKey('EditSessionTimetableTitle')}">
+        <h:form id="editTimetableForm" styleClass="bookingFormUpdate ">
 
 
-                    <h:outputLabel value="#{configMapController.getKey('EditSessionTimetableLabel_adminNotes')}" for="adminNotes" />
-                    <p:inputTextarea rows="4" cols="30" id="adminNotes" value="#{sessionTimetableController.selected.adminNotes}" title="#{configMapController.getKey('EditSessionTimetableTitle_adminNotes')}" >
-
-                    </p:inputTextarea>
-                    <p:outputLabel value="#{configMapController.getKey('CreateSessionHistoryLabel_trainer')}" for="trainer" />
-
-                    <p:selectOneMenu id="trainer"  value="#{sessionTimetableController.selected.trainerId}" converter="customersControllerConverter"  label="#{configMapController.getKey('CreateSessionHistoryTitle_trainer')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionHistoryRequiredMessage_trainer')}">
-                        <f:selectItems value="#{customersController.getCustomersByGroupObject('TRAINER',true)}" var="cust" itemLabel="#{cust.firstname} #{cust.lastname}" itemValue="#{cust}"/>
-
-                    </p:selectOneMenu>
+            <div class="ui-g">
 
 
+
+                <div class="ui-g TimetableTile border-box">
+                    <div class="ui-g-12">
+                        <h2 class=" FontBold "> 
+                            <h:outputText rendered="#{sessionTimetableController.editSelected}" value="#{sessionTimetableController.selected.sessionTitle}" />
+                            <p:inputText rendered="#{!sessionTimetableController.editSelected}" value="#{sessionTimetableController.selected.sessionTitle}" >
+                                <p:ajax event="change" update="@(.bookingFormUpdate)" />
+                            </p:inputText>
+                        </h2> 
+                    </div>
+                    <div class="ui-g-12">
+                        <h:outputText rendered="#{sessionTimetableController.editSelected}" value="#{sessionTimetableController.selected.sessiondate}" styleClass=" Fs18 FontBold blue">
+                            <f:convertDateTime pattern="EEEE h:mm a" />
+                        </h:outputText>
+                        <p:calendar rendered="#{!sessionTimetableController.editSelected}" pattern="EEE h:mm a"  value="#{sessionTimetableController.selected.sessiondate}"  title="#{configMapController.getKey('CreateSessionTimetableTitle_sessiondate')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionTimetableRequiredMessage_sessiondate')}">
+                            <p:ajax event="dateSelect" listener="#{sessionTimetableController.handleDateSelect}" update="@(.bookingFormUpdate)" />
+                        </p:calendar>
+
+                    </div>
+                    <div class="ui-g-12">
+                        <div class="ui-g-2">
+                            <div class="ui-g-12">
+                                <p:graphicImage value="#{customerImagesController.imageThumbnail}" width="55px">
+                                    <f:param name="imageId" value="#{sessionTimetableController.selected.trainerId.profileImage.id}"/>
+                                </p:graphicImage>
+                                <div class="ui-g-12">
+                                    <p:selectOneMenu rendered="#{!sessionTimetableController.editSelected}" style="width: 100%" value="#{sessionTimetableController.selected.trainerId}" converter="customersControllerConverter"  label="#{configMapController.getKey('CreateSessionHistoryTitle_trainer')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionHistoryRequiredMessage_trainer')}">
+                                        <f:selectItems value="#{customersController.getCustomersByGroupObject('TRAINER',true)}" var="cust" itemLabel="#{cust.firstname} #{cust.lastname}" itemValue="#{cust}"/>
+
+                                        <p:ajax event="change" update="@(.bookingFormUpdate)" />
+
+                                    </p:selectOneMenu>
+                                </div>
+                            </div>
+                            <div class="ui-g-12">
+                                <p:commandButton id="mapsBtn" styleClass="MarRight5" value="#{configMapController.getKey('Timetable_MapsButtonTitle')}" type="button" />
+
+
+                                <p:overlayPanel  rendered="#{sessionTimetableController.editSelected}"  for="mapsBtn" hideEffect="fade" dynamic="false" styleClass="timetableGmap" >
+                                    <p:gmap styleClass="BorderedBox" center="#{sessionTimetableController.selected.sessionLocationGps}" zoom="16" model="#{sessionTimetableController.selected.simpleModel}" type="HYBRID" style="width:100%;height:400px" />
+
+                                </p:overlayPanel>
+                                <div class="ui-g-12">
+                                    <p:inputText rendered="#{!sessionTimetableController.editSelected}"  style="width: 100%" value="#{sessionTimetableController.selected.sessionLocationGps}" title="#{configMapController.getKey('EditSessionTimetableTitle_sessionLocationGps')}" required="true" requiredMessage="#{configMapController.getKey('EditSessionTimetableRequiredMessage_sessionLocationGps')}" >
+                                        <p:ajax event="change" update="@(.bookingFormUpdate)" />
+                                    </p:inputText>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="ui-g-10">
+
+
+                            <div class="ui-g-12">
+                                <span class="DispBlock " ><font class="Fs14 FontBold black">Trainer: </font> 
+                                    <h:outputText rendered="#{sessionTimetableController.editSelected}"  value="#{sessionTimetableController.selected.trainerId.firstname}"/>
+                                    <p:inputText rendered="#{!sessionTimetableController.editSelected}" style="width: 100%" value="#{sessionTimetableController.selected.trainerId.firstname}" >
+                                        <p:ajax event="change" update="@(.bookingFormUpdate)" />
+                                    </p:inputText>
+                                </span></div>
+                            <div class="ui-g-12">
+                                <span class="DispBlock " ><font class="Fs14 FontBold black">Duration: </font>
+                                    <h:outputText rendered="#{sessionTimetableController.editSelected}"   value="#{sessionTimetableController.selected.durationMinutes} #{configMapController.getKey('Timetable_MinutesLabel')}"/>
+                                    <p:inputText rendered="#{!sessionTimetableController.editSelected}"  style="width: 100%" value="#{sessionTimetableController.selected.durationMinutes}"  >
+                                        <p:ajax event="change" update="@(.bookingFormUpdate)" />
+                                    </p:inputText>
+                                </span></div>
+                            <div class="ui-g-12">
+                                <span class="DispBlock " ><font class="Fs14 FontBold black">Location: </font> 
+                                    <h:outputText rendered="#{sessionTimetableController.editSelected}"  value="#{sessionTimetableController.selected.sessionLocationLabel}"/>
+                                    <p:inputTextarea rendered="#{!sessionTimetableController.editSelected}" style="width: 100%"  value="#{sessionTimetableController.selected.sessionLocationLabel}" >
+                                        <p:ajax event="change" update="@(.bookingFormUpdate)" />
+                                    </p:inputTextarea>
+                                </span></div>
+                            <div class="ui-g-12">
+                                <span class="DispBlock " ><font class="Fs14 FontBold black">Places: </font>
+
+                                    <h:outputText rendered="#{sessionTimetableController.editSelected}"    value="#{sessionTimetableController.selected.sessionTimetableMaxSize }"/>
+                                    <p:inputText rendered="#{!sessionTimetableController.editSelected}"  style="width: 100%"  value="#{sessionTimetableController.selected.sessionTimetableMaxSize }" >
+                                        <p:ajax event="change" update="@(.bookingFormUpdate)" />
+                                    </p:inputText>
+                                </span></div>
+                            <div class="ui-g-12">
+                                <span class="DispBlock " ><font class="Fs14 FontBold black">Casual Rate: </font> 
+                                    <h:outputText rendered="#{sessionTimetableController.editSelected}"  value="#{sessionTimetableController.selected.sessionCasualRate}" >
+                                        <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
+                                    </h:outputText>
+                                    <p:inputText rendered="#{!sessionTimetableController.editSelected}" style="width: 100%" value="#{sessionTimetableController.selected.sessionCasualRate}" >
+                                        <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
+                                        <p:ajax event="change" update="@(.bookingFormUpdate)" />
+                                    </p:inputText>
+                                </span>
+                                <span class="DispBlock " ><font class="Fs14 FontBold black">Members Rate: </font> 
+                                    <h:outputText rendered="#{sessionTimetableController.editSelected}"  value="#{sessionTimetableController.selected.sessionMembersRate}"  >
+                                        <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
+
+                                    </h:outputText>
+                                    <p:inputText rendered="#{!sessionTimetableController.editSelected}" style="width: 100%" value="#{sessionTimetableController.selected.sessionMembersRate}"  >
+                                        <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
+                                        <p:ajax event="change" update="@(.bookingFormUpdate)" />
+                                    </p:inputText>
+                                </span>
+                            </div>
+                        </div>   
+                        <div class="EmptyBox10"></div>
+                    </div>
+
+                </div>
+            </div>
+            <div class="Seperator"></div>
+            <div class="ui-g-12">
+                <h:outputText rendered="#{sessionTimetableController.editSelected}"  style="max-width: 300" value="#{sessionTimetableController.selected.comments}"/>
+                <p:inputTextarea rendered="#{!sessionTimetableController.editSelected}"  style="width: 100%" value="#{sessionTimetableController.selected.comments}" >
+                    <p:ajax event="change" update="@(.bookingFormUpdate)" />
+                </p:inputTextarea>
+
+
+            </div>
+            <div class="Seperator"></div>
+            <div class="ui-g-12">
+                <p:messages showDetail="true"/>
+            </div>
+
+            <div class="Seperator"></div>
+            <div class="ui-g-12">
+                <p:commandButton value="Edit" rendered="#{sessionTimetableController.editSelected}" actionListener="#{sessionTimetableController.tileEditorToggle}" update="@(.bookingFormUpdate)" />
+                <p:commandButton value="View" rendered="#{!sessionTimetableController.editSelected}" actionListener="#{sessionTimetableController.tileEditorToggle}" update="@(.bookingFormUpdate)" />
+
+                <p:commandButton actionListener="#{sessionTimetableController.editDialogue}" value="#{configMapController.getKey('Save')}" update="@(.bookingFormUpdate) :SessionTimetableListForm :growl" oncomplete="PF('sessionTimetableControllerTable').filter()"/>
+               <!-- <p:commandButton value="#{configMapController.getKey('Cancel')}" onclick="PF('SessionTimetableEditDialog').hide()"/> -->
+            </div>
+
+            <div class="Seperator"></div>
+            <div class="ui-g-12">
+                <h:outputText  value="Hidden Parameters Not Visible on Timetable"/>
+            </div>
+
+            <div class="EmptyBox10">
+
+            </div>
+
+
+
+            <div class="ui-g-12">
+
+    <!-- <h:outputLabel value="#{configMapController.getKey('EditSessionTimetableLabel_sessiondate')}" for="sessiondate" />
+     <p:calendar id="sessiondate" pattern="dd/MM/yyyy HH:mm:ss"  value="#{sessionTimetableController.selected.sessiondate}"  title="#{configMapController.getKey('CreateSessionTimetableTitle_sessiondate')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionTimetableRequiredMessage_sessiondate')}">
+         <p:ajax event="dateSelect" listener="#{sessionTimetableController.handleDateSelect}" update=":SessionTimetableCreateForm" />
+     </p:calendar>
+     <h:outputLabel value="#{configMapController.getKey('EditSessionTimetableLabel_comments')}" for="comments" />
+     <p:inputTextarea rows="4" cols="30" id="comments" value="#{sessionTimetableController.selected.comments}" title="#{configMapController.getKey('EditSessionTimetableTitle_comments')}" >
+
+     </p:inputTextarea>-->
+                <div class="ui-g-2">
                     <h:outputLabel value="#{configMapController.getKey('EditSessionTimetableLabel_sessionTypesId')}" for="sessionTypesId" />
+                </div>
+                <div class="ui-g-10">
                     <p:selectOneMenu id="sessionTypesId" valueChangeListener="#{sessionTimetableController.selectOneMenuValueChangeListener}"  converter="sessionTypesControllerConverter" value="#{sessionTimetableController.selected.sessionTypesId}" label="#{configMapController.getKey('EditSessionTimetableTitle_sessionTypesId')}" required="true" requiredMessage="#{configMapController.getKey('EditSessionTimetableRequiredMessage_sessionTypesId')}">
                         <f:selectItems value="#{sessionTypesController.itemsAvailable}"/>
 
                     </p:selectOneMenu>
+                </div>
+                <div class="ui-g-2">
                     <h:outputLabel value="#{configMapController.getKey('EditSessionTimetableLabel_recurranceId')}" for="recurranceId" />
+                </div>
+                <div class="ui-g-10">
                     <p:selectOneMenu id="recurranceId" valueChangeListener="#{sessionTimetableController.selectOneMenuValueChangeListener}" converter="sessionRecurranceControllerConverter"  value="#{sessionTimetableController.selected.recurranceId}" label="#{configMapController.getKey('EditSessionTimetableTitle_recurranceId')}" required="true" requiredMessage="#{configMapController.getKey('EditSessionTimetableRequiredMessage_recurranceId')}">
                         <f:selectItems value="#{sessionRecurranceController.itemsAvailable}"/>
 
                     </p:selectOneMenu>
+                </div>
+                <div class="ui-g-2">
+                    <p:outputLabel value="#{configMapController.getKey('CreateSessionTimetableLabel_sessionStyleClasses')}" for="styleClasses" />
+                </div>
+                <div class="ui-g-10">
+                    <p:inputText id="styleClasses" value="#{sessionTimetableController.selected.sessionStyleClasses}" label="#{configMapController.getKey('ListSessionTimetableTitle_sessionStyleClasses')}" />
+                </div>
+                <div class="ui-g-2">
 
-                    <h:outputLabel value="#{configMapController.getKey('EditSessionTimetableLabel_durationMinutes')}" for="durationMinutes" />
+                    <h:outputLabel value="#{configMapController.getKey('EditSessionTimetableLabel_adminNotes')}" for="adminNotes" />
+                </div>
+                <div class="ui-g-10">
+                    <p:inputTextarea rows="4" cols="30" id="adminNotes" value="#{sessionTimetableController.selected.adminNotes}" title="#{configMapController.getKey('EditSessionTimetableTitle_adminNotes')}" >
+                        <p:ajax event="change" update="@(.bookingFormUpdate)" />
+                    </p:inputTextarea>
+                </div>
+
+<!-- <p:outputLabel value="#{configMapController.getKey('CreateSessionHistoryLabel_trainer')}" for="trainer" />
+
+<p:selectOneMenu id="trainer"  value="#{sessionTimetableController.selected.trainerId}" converter="customersControllerConverter"  label="#{configMapController.getKey('CreateSessionHistoryTitle_trainer')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionHistoryRequiredMessage_trainer')}">
+    <f:selectItems value="#{customersController.getCustomersByGroupObject('TRAINER',true)}" var="cust" itemLabel="#{cust.firstname} #{cust.lastname}" itemValue="#{cust}"/>
+
+</p:selectOneMenu>-->
+
+
+
+
+                  <!--  <h:outputLabel value="#{configMapController.getKey('EditSessionTimetableLabel_durationMinutes')}" for="durationMinutes" />
                     <h:inputText id="durationMinutes"  value="#{sessionTimetableController.selected.durationMinutes}" title="#{configMapController.getKey('EditSessionTimetableTitle_durationMinutes')}" required="true" requiredMessage="#{configMapController.getKey('EditSessionTimetableRequiredMessage_durationMinutes')}"/>
                     <h:outputLabel value="#{configMapController.getKey('EditSessionTimetableLabel_sessionTitle')}" for="sessionTitle" />
                     <h:inputTextarea rows="4" cols="30" id="sessionTitle" value="#{sessionTimetableController.selected.sessionTitle}" title="#{configMapController.getKey('EditSessionTimetableTitle_sessionTitle')}" required="true" requiredMessage="#{configMapController.getKey('EditSessionTimetableRequiredMessage_sessionTitle')}"/>
@@ -63,15 +227,13 @@
                     <p:inputText id="sessionMembersRate" value="#{sessionTimetableController.selected.sessionMembersRate}" title="#{configMapController.getKey('AddPaymentTitle_sessionMembersRate')}" required="true" requiredMessage="#{configMapController.getKey('AddPaymentRequiredMessage_sessionMembersRate')}">
                         <f:convertNumber  minFractionDigits="2"/>
                     </p:inputText>     
-              <p:outputLabel value="#{configMapController.getKey('AddPaymentLabel_sessionMaxSize')}" for="sessionMembersRate" />
-                   <p:inputText id="sessionMaxSize" value="#{sessionTimetableController.selected.sessionTimetableMaxSize}" title="#{configMapController.getKey('AddPaymentTitle_sessionMaxSize')}" required="true" requiredMessage="#{configMapController.getKey('AddPaymentTitle_sessionMaxSize')}">
-                        
-                    </p:inputText>       
+                    <p:outputLabel value="#{configMapController.getKey('AddPaymentLabel_sessionMaxSize')}" for="sessionMembersRate" />
+                    <p:inputText id="sessionMaxSize" value="#{sessionTimetableController.selected.sessionTimetableMaxSize}" title="#{configMapController.getKey('AddPaymentTitle_sessionMaxSize')}" required="true" requiredMessage="#{configMapController.getKey('AddPaymentTitle_sessionMaxSize')}">
 
-                </p:panelGrid>
-                <p:commandButton actionListener="#{sessionTimetableController.editDialogue}" value="#{configMapController.getKey('Save')}" update="display :SessionTimetableListForm :growl" oncomplete="PF('sessionTimetableControllerTable').filter()"/>
-                <p:commandButton value="#{configMapController.getKey('Cancel')}" onclick="PF('SessionTimetableEditDialog').hide()"/>
-            </h:panelGroup>
+                    </p:inputText>   -->    
+
+
+            </div>
         </h:form>
     </p:dialog>
 

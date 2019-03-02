@@ -698,6 +698,7 @@ public class CustomersController implements Serializable {
         c.setLastLoginTime(null);
         c.setMustResetPassword(true);
         c.setGroupPricing(ejbPlanFacade.findPLanByName(configMapFacade.getConfig("default.customer.plan")));
+        
         try {
             c.setEmailFormat(ejbEmailFormatFacade.findAll().get(Integer.parseInt(configMapFacade.getConfig("default.customer.details.emailformat"))));
             c.setAuth(ejbCustomerAuthFacade.findAll().get(Integer.parseInt(configMapFacade.getConfig("default.customer.details.auth"))));
@@ -710,11 +711,17 @@ public class CustomersController implements Serializable {
             LOGGER.log(Level.SEVERE, "Number Format Exception for customer defaults.Check config map entry for default.customer.details.xxxx and a numeric value ");
 
         }
-
-        GregorianCalendar gc = new GregorianCalendar();
+        int defaultYear = 1970;
+        
+        try {
+            defaultYear = Integer.parseInt(configMapFacade.getConfig("default.customer.details.dobyear"));
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Parse Integer from String Exception for customer defaults.Check config map entry for default.customer.details.dobyear and make sure it is a numeric value ",e);
+        }
+      GregorianCalendar gc = new GregorianCalendar();
         //gc.add(Calendar.YEAR, -18);
         gc.setTimeInMillis(0);
-        gc.set(1800, 1, 1);//set to default date  1/1/1800
+        gc.set(defaultYear, 1, 1);//set to default date  1/1/1800
 
         c.setDob(gc.getTime());
         return c;

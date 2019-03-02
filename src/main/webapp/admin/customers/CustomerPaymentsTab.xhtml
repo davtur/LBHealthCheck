@@ -49,15 +49,15 @@
                           rowKey="#{pay.id}"
                           scrollHeight="500"
                           scrollable="true" 
-
+                          reflow="true"
                           >
                 <f:facet name="header">
                     <p:outputPanel>
                         <p:outputPanel>
                            <!-- <h:outputText  rendered="#{ezidebit.paymentsDBListFilteredItems != null}" value="#{ezidebit.paymentsDBListFilteredItems.size} Records Found" />-->
                             <h:outputText  rendered="#{ezidebit.paymentDBList != null}" value="#{ezidebit.paymentDBList.rowCount} Payment Records Found for #{customersController.selected.firstname} #{customersController.selected.lastname}" />
-                       </p:outputPanel>
-                       
+                        </p:outputPanel>
+
                         <p:commandButton id="logCashPaymentButton" oncomplete="PF('logCashPaymentDialogueWidget').show();"    value="#{configMapController.getKey('logCashPaymentButtonLink')}"  update=":growl " /> 
 
                         <p:commandButton id="showAddPaymentButton" rendered="#{ezidebit.waitingForPaymentDetails == false and ezidebit.customerCancelledInPaymentGateway == false and ezidebit.theCustomerProvisionedInThePaymentGateway == true}" oncomplete="PF('createPaymentDialogueWidget').show();"    value="#{configMapController.getKey('AddPaymentButtonLink')}"  update=":growl " /> 

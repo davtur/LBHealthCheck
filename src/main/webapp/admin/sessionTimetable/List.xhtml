@@ -31,7 +31,8 @@
                     filteredValue="#{sessionTimetableController.filteredItems}"  
                     widgetVar="sessionTimetableControllerTable" 
                     var="item"  
-
+                    reflow="true"
+                    
                     paginator="true" 
                     rows="50"  
                     paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  
@@ -41,7 +42,7 @@
 
                         <p:commandButton rendered="#{sessionTimetableController.isUserInRole('ADMIN')}" id="createButton" icon="ui-icon-plus"   value="#{configMapController.getKey('Create')}" actionListener="#{sessionTimetableController.prepareCreate}" update=":SessionTimetableCreateForm" oncomplete="PF('SessionTimetableCreateDialog').show()"/>
                         <p:commandButton id="viewButton"   icon="ui-icon-search" value="#{configMapController.getKey('View')}" update=":SessionTimetableViewForm" oncomplete="PF('SessionTimetableViewDialog').show()"  actionListener="#{sessionTimetableController.setSelectedForEditing}" disabled="#{empty sessionTimetableController.multiSelected || sessionTimetableController.multiSelectedLength != 1}"/>
-                        <p:commandButton rendered="#{sessionTimetableController.isUserInRole('ADMIN')}" id="editButton"   icon="ui-icon-pencil" value="#{configMapController.getKey('Edit')}" update=":SessionTimetableEditForm" oncomplete="PF('SessionTimetableEditDialog').show()" actionListener="#{sessionTimetableController.setSelectedForEditing}" disabled="#{empty sessionTimetableController.multiSelected || sessionTimetableController.multiSelectedLength != 1}"/>
+                        <p:commandButton rendered="#{sessionTimetableController.isUserInRole('ADMIN')}" id="editButton"   icon="ui-icon-pencil" value="#{configMapController.getKey('Edit')}" update="@(.bookingFormUpdate)" oncomplete="PF('SessionTimetableEditDialog').show()" actionListener="#{sessionTimetableController.setSelectedForEditing}" disabled="#{empty sessionTimetableController.multiSelected || sessionTimetableController.multiSelectedLength != 1}"/>
                         <p:commandButton rendered="#{sessionTimetableController.isUserInRole('ADMIN')}" id="publishButton" icon="ui-icon-circle-plus"  value="#{configMapController.getKey('SessionTimetablePublish')}" actionListener="#{sessionTimetableController.publish}" update=":growl,datalist" disabled="#{empty sessionTimetableController.multiSelected || sessionTimetableController.multiSelectedLength lt 1}"/>
                         <p:commandButton rendered="#{sessionTimetableController.isUserInRole('ADMIN')}" id="unPublishButton" icon="ui-icon-circle-minus"  value="#{configMapController.getKey('SessionTimetableUnPublish')}" actionListener="#{sessionTimetableController.unPublish}" update=":growl,datalist" disabled="#{empty sessionTimetableController.multiSelected || sessionTimetableController.multiSelectedLength lt 1}"/>
                         <p:commandButton rendered="#{sessionTimetableController.isUserInRole('ADMIN')}" id="deleteButton" icon="ui-icon-trash"  value="#{configMapController.getKey('Delete')}" actionListener="#{sessionTimetableController.destroy}" update=":growl,datalist" disabled="#{empty sessionTimetableController.multiSelected || sessionTimetableController.multiSelectedLength != 1}"/>
@@ -61,20 +62,33 @@
                     <p:ajax event="rowSelectCheckbox"   update="createButton viewButton editButton deleteButton publishButton unPublishButton" listener="#{sessionTimetableController.onRowSelect}"/>
                     <p:ajax event="rowUnselectCheckbox" update="createButton viewButton editButton deleteButton publishButton unPublishButton"/>
                     <p:ajax event="toggleSelect" update="createButton viewButton editButton deleteButton publishButton unPublishButton"/>
+                    <p:ajax event="rowDblselect"   update="createButton viewButton editButton deleteButton publishButton unPublishButton @(.bookingFormUpdate)" listener="#{sessionTimetableController.onDoubleClickRow}" oncomplete="PF('SessionTimetableEditDialog').show()"/>
                     <p:column selectionMode="multiple" />
-                    <p:column sortBy="#{item.id}" filterBy="#{item.id}" headerText="#{configMapController.getKey('ListSessionTimetableTitle_id')}"   >
+
+                    <p:column rendered="#{sessionTimetableController.isUserInRole('ADMIN')}" priority="1" headerText="Edit" style="width:50px">  
+                        <p:rowEditor />  
+                    </p:column>  
+                    <p:column sortBy="#{item.showBookingButton}" filterBy="#{item.showBookingButton}" priority="1"  headerText="#{configMapController.getKey('ListSessionTimetableTitle_showBookingButton')}"   >
                         <p:cellEditor> 
                             <f:facet name="output">
-                                <h:outputText value="#{item.id}"/>
+                                <p:selectBooleanCheckbox value="#{item.showBookingButton}" disabled="true"/>
                             </f:facet>
                             <f:facet name="input">
-                                <p:inputText value="#{item.id}" label="#{configMapController.getKey('ListSessionTimetableTitle_id')}" />
+                                <p:selectBooleanCheckbox value="#{item.showBookingButton}"  label="#{configMapController.getKey('ListSessionTimetableTitle_showBookingButton')}" />
                             </f:facet>
                         </p:cellEditor> 
-
-
                     </p:column>
-                    <p:column sortBy="#{item.sessionTimetableStatus}" filterBy="#{item.sessionTimetableStatus}" headerText="#{configMapController.getKey('ListSessionTimetableTitle_Status')}"   >
+                    <p:column sortBy="#{item.showSignupButton}" filterBy="#{item.showSignupButton}" priority="1"  headerText="#{configMapController.getKey('ListSessionTimetableTitle_showSignupButton')}"   >
+                        <p:cellEditor> 
+                            <f:facet name="output">
+                                <p:selectBooleanCheckbox value="#{item.showSignupButton}" disabled="true"/>
+                            </f:facet>
+                            <f:facet name="input">
+                                <p:selectBooleanCheckbox value="#{item.showSignupButton}"  label="#{configMapController.getKey('ListSessionTimetableTitle_showBookingButton')}" />
+                            </f:facet>
+                        </p:cellEditor> 
+                    </p:column>
+                    <p:column sortBy="#{item.sessionTimetableStatus}" filterBy="#{item.sessionTimetableStatus}" priority="1"  headerText="#{configMapController.getKey('ListSessionTimetableTitle_Status')}"   >
                         <p:cellEditor> 
                             <f:facet name="output">
 
@@ -95,47 +109,33 @@
 
 
                     </p:column>
-                    <p:column sortBy="#{item.sessiondate}" filterBy="#{item.sessiondate}" headerText="#{configMapController.getKey('ListSessionTimetableTitle_sessiondate')}"   >
+                    <p:column sortBy="#{item.sessiondate}" filterBy="#{item.sessiondate}" priority="1"  headerText="#{configMapController.getKey('ListSessionTimetableTitle_sessiondate')}"   >
 
                         <p:cellEditor> 
                             <f:facet name="output">
                                 <h:outputText value="#{item.sessiondate}">
-                                    <f:convertDateTime pattern="dd/MM/yyyy,  EEE HH:mm" />
+                                    <f:convertDateTime pattern="EEE HH:mm" />
                                 </h:outputText>
                             </f:facet>
                             <f:facet name="input">
-                                <p:calendar value="#{item.sessiondate}" pattern="dd/MM/yyyy,  EEE HH:mm"  >	
+                                <p:calendar value="#{item.sessiondate}" pattern="EEE HH:mm"  >	
                                     <p:ajax event="dateSelect" listener= "#{sessionTimetableController.handleDateSelect}" update=":growl" />
                                 </p:calendar>
                             </f:facet>
                         </p:cellEditor> 
 
                     </p:column>
-                    <p:column sortBy="#{item.sessionTypesId.name}" filterBy="#{item.sessionTypesId.name}" headerText="#{configMapController.getKey('ListSessionTimetableTitle_sessionTypesId')}"   >
+                    <p:column sortBy="#{item.sessionTitle}" filterBy="#{item.sessionTitle}" priority="1"  headerText="#{configMapController.getKey('ListSessionTimetableTitle_sessionTitle')}"   >
                         <p:cellEditor> 
                             <f:facet name="output">
-                                <h:outputText value="#{item.sessionTypesId.name}"/>
+                                <h:outputText value="#{item.sessionTitle}"/>
                             </f:facet>
                             <f:facet name="input">
-                                <p:inputText value="#{item.sessionTypesId.name}" label="#{configMapController.getKey('ListSessionTimetableTitle_sessionTypesId')}" />
+                                <p:inputText value="#{item.sessionTitle}" label="#{configMapController.getKey('ListSessionTimetableTitle_sessionTitle')}" />
                             </f:facet>
                         </p:cellEditor> 
-
-
                     </p:column>
-                    <p:column sortBy="#{item.recurranceId.name}" filterBy="#{item.recurranceId.name}" headerText="#{configMapController.getKey('ListSessionTimetableTitle_recurranceId')}"   >
-                        <p:cellEditor> 
-                            <f:facet name="output">
-                                <h:outputText value="#{item.recurranceId.name}"/>
-                            </f:facet>
-                            <f:facet name="input">
-                                <p:inputText value="#{item.recurranceId.name}" label="#{configMapController.getKey('ListSessionTimetableTitle_recurranceId')}" />
-                            </f:facet>
-                        </p:cellEditor> 
-
-
-                    </p:column>
-                    <p:column sortBy="#{item.trainerId}" filterBy="#{item.trainerId}" headerText="#{configMapController.getKey('CreateSessionHistoryLabel_trainer')}"   >
+                    <p:column sortBy="#{item.trainerId}" filterBy="#{item.trainerId}" priority="2"  headerText="#{configMapController.getKey('CreateSessionHistoryLabel_trainer')}"   >
                         <p:cellEditor> 
                             <f:facet name="output">
                                 <p:graphicImage value="#{customerImagesController.dynamicImage}" width="50px">
@@ -150,10 +150,9 @@
                                 </p:selectOneMenu>
                             </f:facet>
                         </p:cellEditor> 
-
-
                     </p:column>
-                    <p:column sortBy="#{item.comments}" filterMatchMode="contains" filterBy="#{item.comments}" headerText="#{configMapController.getKey('ListSessionTimetableTitle_comments')}" style="width:450px"  >
+
+                    <p:column sortBy="#{item.comments}" filterMatchMode="contains" filterBy="#{item.comments}" priority="2" headerText="#{configMapController.getKey('ListSessionTimetableTitle_comments')}" style="width:450px"  >
                         <p:cellEditor> 
                             <f:facet name="output">
                                 <h:outputText value="#{item.comments}"/>
@@ -164,7 +163,56 @@
                         </p:cellEditor> 
                     </p:column>
 
-                    <p:column sortBy="#{item.sessionStyleClasses}" filterBy="#{item.sessionStyleClasses}" headerText="#{configMapController.getKey('ListSessionTimetableTitle_sessionStyleClasses')}"   >
+                    <p:column sortBy="#{item.sessionLocationLabel}" filterBy="#{item.sessionLocationLabel}" priority="2" headerText="#{configMapController.getKey('ListSessionTimetableTitle_sessionLocationLabel')}"   >
+                        <p:cellEditor> 
+                            <f:facet name="output">
+                                <h:outputText value="#{item.sessionLocationLabel}"/>
+                            </f:facet>
+                            <f:facet name="input">
+                                <p:inputText value="#{item.sessionLocationLabel}" label="#{configMapController.getKey('ListSessionTimetableTitle_sessionLocationLabel')}" />
+                            </f:facet>
+                        </p:cellEditor> 
+                    </p:column>    
+
+
+                    <p:column sortBy="#{item.id}" filterBy="#{item.id}" priority="5" headerText="#{configMapController.getKey('ListSessionTimetableTitle_id')}"   >
+                        <p:cellEditor> 
+                            <f:facet name="output">
+                                <h:outputText value="#{item.id}"/>
+                            </f:facet>
+                            <f:facet name="input">
+                                <p:inputText value="#{item.id}" label="#{configMapController.getKey('ListSessionTimetableTitle_id')}" />
+                            </f:facet>
+                        </p:cellEditor> 
+                    </p:column>
+
+                    <p:column sortBy="#{item.sessionTypesId.name}" filterBy="#{item.sessionTypesId.name}" priority="5" headerText="#{configMapController.getKey('ListSessionTimetableTitle_sessionTypesId')}"   >
+                        <p:cellEditor> 
+                            <f:facet name="output">
+                                <h:outputText value="#{item.sessionTypesId.name}"/>
+                            </f:facet>
+                            <f:facet name="input">
+                                <p:inputText value="#{item.sessionTypesId.name}" label="#{configMapController.getKey('ListSessionTimetableTitle_sessionTypesId')}" />
+                            </f:facet>
+                        </p:cellEditor> 
+
+
+                    </p:column>
+                    <p:column sortBy="#{item.recurranceId.name}" filterBy="#{item.recurranceId.name}" priority="5" headerText="#{configMapController.getKey('ListSessionTimetableTitle_recurranceId')}"   >
+                        <p:cellEditor> 
+                            <f:facet name="output">
+                                <h:outputText value="#{item.recurranceId.name}"/>
+                            </f:facet>
+                            <f:facet name="input">
+                                <p:inputText value="#{item.recurranceId.name}" label="#{configMapController.getKey('ListSessionTimetableTitle_recurranceId')}" />
+                            </f:facet>
+                        </p:cellEditor> 
+
+
+                    </p:column>
+
+
+                    <p:column sortBy="#{item.sessionStyleClasses}" filterBy="#{item.sessionStyleClasses}" priority="5" headerText="#{configMapController.getKey('ListSessionTimetableTitle_sessionStyleClasses')}"   >
                         <p:cellEditor> 
                             <f:facet name="output">
                                 <h:outputText value="#{item.sessionStyleClasses}"/>
@@ -176,19 +224,7 @@
                     </p:column>
 
 
-                    <p:column sortBy="#{item.adminNotes}" filterBy="#{item.adminNotes}" headerText="#{configMapController.getKey('ListSessionTimetableTitle_adminNotes')}"   >
-                        <p:cellEditor> 
-                            <f:facet name="output">
-                                <h:outputText value="#{item.adminNotes}"/>
-                            </f:facet>
-                            <f:facet name="input">
-                                <p:inputText value="#{item.adminNotes}" label="#{configMapController.getKey('ListSessionTimetableTitle_adminNotes')}" />
-                            </f:facet>
-                        </p:cellEditor> 
-
-
-                    </p:column>
-                    <p:column sortBy="#{item.durationMinutes}" filterBy="#{item.durationMinutes}" headerText="#{configMapController.getKey('ListSessionTimetableTitle_durationMinutes')}"   >
+                    <p:column sortBy="#{item.durationMinutes}" filterBy="#{item.durationMinutes}" priority="3" headerText="#{configMapController.getKey('ListSessionTimetableTitle_durationMinutes')}"   >
                         <p:cellEditor> 
                             <f:facet name="output">
                                 <h:outputText value="#{item.durationMinutes}"/>
@@ -201,7 +237,7 @@
 
                     </p:column>
 
-                    <p:column sortBy="#{item.sessionCasualRate}" filterBy="#{item.sessionCasualRate}" headerText="#{configMapController.getKey('ListSessionTimetableTitle_sessionCasualRate')}"   >
+                    <p:column sortBy="#{item.sessionCasualRate}" filterBy="#{item.sessionCasualRate}" priority="5" headerText="#{configMapController.getKey('ListSessionTimetableTitle_sessionCasualRate')}"   >
                         <p:cellEditor> 
                             <f:facet name="output">
                                 <h:outputText value="#{item.sessionCasualRate}">
@@ -216,7 +252,7 @@
                         </p:cellEditor> 
                     </p:column>
 
-                    <p:column sortBy="#{item.sessionMembersRate}" filterBy="#{item.sessionMembersRate}" headerText="#{configMapController.getKey('ListSessionTimetableTitle_sessionMembersRate')}"   >
+                    <p:column sortBy="#{item.sessionMembersRate}" filterBy="#{item.sessionMembersRate}" priority="5" headerText="#{configMapController.getKey('ListSessionTimetableTitle_sessionMembersRate')}"   >
                         <p:cellEditor> 
                             <f:facet name="output">
                                 <h:outputText value="#{item.sessionMembersRate}">
@@ -232,31 +268,8 @@
                     </p:column>
 
 
-                    <p:column sortBy="#{item.sessionTitle}" filterBy="#{item.sessionTitle}" headerText="#{configMapController.getKey('ListSessionTimetableTitle_sessionTitle')}"   >
-                        <p:cellEditor> 
-                            <f:facet name="output">
-                                <h:outputText value="#{item.sessionTitle}"/>
-                            </f:facet>
-                            <f:facet name="input">
-                                <p:inputText value="#{item.sessionTitle}" label="#{configMapController.getKey('ListSessionTimetableTitle_sessionTitle')}" />
-                            </f:facet>
-                        </p:cellEditor> 
 
-
-                    </p:column>
-                    <p:column sortBy="#{item.sessionLocationLabel}" filterBy="#{item.sessionLocationLabel}" headerText="#{configMapController.getKey('ListSessionTimetableTitle_sessionLocationLabel')}"   >
-                        <p:cellEditor> 
-                            <f:facet name="output">
-                                <h:outputText value="#{item.sessionLocationLabel}"/>
-                            </f:facet>
-                            <f:facet name="input">
-                                <p:inputText value="#{item.sessionLocationLabel}" label="#{configMapController.getKey('ListSessionTimetableTitle_sessionLocationLabel')}" />
-                            </f:facet>
-                        </p:cellEditor> 
-
-
-                    </p:column>
-                    <p:column sortBy="#{item.sessionLocationGps}" filterBy="#{item.sessionLocationGps}" headerText="#{configMapController.getKey('ListSessionTimetableTitle_sessionLocationGps')}"   >
+                    <p:column sortBy="#{item.sessionLocationGps}" filterBy="#{item.sessionLocationGps}" priority="5" headerText="#{configMapController.getKey('ListSessionTimetableTitle_sessionLocationGps')}"   >
                         <p:cellEditor> 
                             <f:facet name="output">
                                 <h:outputText value="#{item.sessionLocationGps}"/>
@@ -268,28 +281,9 @@
 
 
                     </p:column>
-                    <p:column sortBy="#{item.showBookingButton}" filterBy="#{item.showBookingButton}" headerText="#{configMapController.getKey('ListSessionTimetableTitle_showBookingButton')}"   >
-                        <p:cellEditor> 
-                            <f:facet name="output">
-                                <p:selectBooleanCheckbox value="#{item.showBookingButton}" disabled="true"/>
-                            </f:facet>
-                            <f:facet name="input">
-                                <p:selectBooleanCheckbox value="#{item.showBookingButton}"  label="#{configMapController.getKey('ListSessionTimetableTitle_showBookingButton')}" />
-                            </f:facet>
-                        </p:cellEditor> 
-                    </p:column>
-                    <p:column sortBy="#{item.showSignupButton}" filterBy="#{item.showSignupButton}" headerText="#{configMapController.getKey('ListSessionTimetableTitle_showSignupButton')}"   >
-                        <p:cellEditor> 
-                            <f:facet name="output">
-                                <p:selectBooleanCheckbox value="#{item.showSignupButton}" disabled="true"/>
-                            </f:facet>
-                            <f:facet name="input">
-                                <p:selectBooleanCheckbox value="#{item.showSignupButton}"  label="#{configMapController.getKey('ListSessionTimetableTitle_showBookingButton')}" />
-                            </f:facet>
-                        </p:cellEditor> 
-                    </p:column>
-                    
-                    <p:column sortBy="#{item.sessionTimetableMaxSize}" filterBy="#{item.sessionTimetableMaxSize}" headerText="#{configMapController.getKey('AddPaymentLabel_sessionMaxSize')}"   >
+
+
+                    <p:column sortBy="#{item.sessionTimetableMaxSize}" filterBy="#{item.sessionTimetableMaxSize}" priority="5" headerText="#{configMapController.getKey('AddPaymentLabel_sessionMaxSize')}"   >
                         <p:cellEditor> 
                             <f:facet name="output">
                                 <h:outputText value="#{item.sessionTimetableMaxSize}" />
@@ -299,13 +293,22 @@
                             </f:facet>
                         </p:cellEditor> 
                     </p:column>
-                    
-             
-                    
-                    
-                    <p:column rendered="#{sessionTimetableController.isUserInRole('ADMIN')}"  headerText="Edit" style="width:50px">  
-                        <p:rowEditor />  
-                    </p:column>  
+
+
+                    <p:column sortBy="#{item.adminNotes}" filterBy="#{item.adminNotes}" priority="6" headerText="#{configMapController.getKey('ListSessionTimetableTitle_adminNotes')}"   >
+                        <p:cellEditor> 
+                            <f:facet name="output">
+                                <h:outputText value="#{item.adminNotes}"/>
+                            </f:facet>
+                            <f:facet name="input">
+                                <p:inputText value="#{item.adminNotes}" label="#{configMapController.getKey('ListSessionTimetableTitle_adminNotes')}" />
+                            </f:facet>
+                        </p:cellEditor> 
+
+
+                    </p:column>
+
+
 
 
 
