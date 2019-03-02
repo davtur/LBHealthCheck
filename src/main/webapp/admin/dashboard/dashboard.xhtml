@@ -15,31 +15,32 @@
     <ui:define name="head">
         <script type="text/javascript">
             //<![CDATA[
-            function skinChart() {
-                this.cfg.shadow = false;
-                this.cfg.title = '';
-                this.cfg.seriesColors = ['#00acac', '#3e96e7'];
-                this.cfg.grid = {
-                    background: '#ffffff',
-                    borderColor: '#ffffff',
-                    gridLineColor: '#EEEEEE',
-                    shadow: false
-                };
-                this.cfg.axesDefaults = {
-                    rendererOptions: {
-                        textColor: '#212121'
-                    }
-                };
-                this.cfg.seriesDefaults = {
-                    shadow: false,
-                    lineWidth: 1,
-                    markerOptions: {
+            function skinChart()
+                {
+                    this.cfg.shadow = false;
+                    this.cfg.title = '';
+                    this.cfg.seriesColors = ['#00acac', '#3e96e7'];
+                    this.cfg.grid = {
+                        background: '#ffffff',
+                        borderColor: '#ffffff',
+                        gridLineColor: '#EEEEEE',
+                        shadow: false
+                    };
+                    this.cfg.axesDefaults = {
+                        rendererOptions: {
+                            textColor: '#212121'
+                        }
+                    };
+                    this.cfg.seriesDefaults = {
                         shadow: false,
-                        size: 7,
-                        style: 'circle'
+                        lineWidth: 1,
+                        markerOptions: {
+                            shadow: false,
+                            size: 7,
+                            style: 'circle'
+                        }
                     }
                 }
-            }
             //]]>
         </script>
         <style type="text/css">
@@ -49,7 +50,7 @@
         </style>
     </ui:define>
 
-    
+
     <ui:define name="body">
         <h:form id="listSessionHistoryForm1">
             <p:panel id="dashboardShortcuts" header="#{configMapController.getKey('DashboardShortcutsPanelLabel')}">
@@ -58,7 +59,7 @@
                 <p:commandButton rendered="#{expensesController.isUserInRole('ADMIN')}" id="addExpenseButton" icon="fa fa-plus white Fs14"   value="#{configMapController.getKey('DashboardCreateExpenseButtonLabel')}" actionListener="#{expensesController.prepareCreate}" update=":growl " oncomplete="PF('ExpensesCreateDialogWidget').show()"/>
 
                 <p:commandButton rendered="#{expensesController.isUserInRole('ADMIN')}" id="custDash" icon="fa fa-database white Fs14"   value="#{configMapController.getKey('DashboardOpenCustomerDashboard')}" action="/admin/customers/List.xhtml?faces-redirect=true"/>
-               <p:commandButton rendered="#{expensesController.isUserInRole('DEVELOPER')}" id="devTest" icon="fa fa-database white Fs14"   value="Test Function" actionListener="#{applicationBean.testFunction}"/>
+                <p:commandButton rendered="#{expensesController.isUserInRole('DEVELOPER')}" id="devTest" icon="fa fa-database white Fs14"   value="Test Function" actionListener="#{applicationBean.testFunction}"/>
                 <p:commandButton rendered="#{expensesController.isUserInRole('DEVELOPER')}" id="devTest2" icon="fa fa-database white Fs14"   value="Test Ticket Creation" actionListener="#{applicationBean.testFunction2}"/>
 
 
@@ -212,7 +213,7 @@
                                      filteredValue="#{customersController.filteredCustomersOutIfSyncWithGateway}" 
                                      widgetVar="customersControllerTableOutIfSyncWithGateway" 
                                      editable="false" 
-
+                                     reflow="true"
                                      var="item"  
                                      scrollHeight="300"
                                      scrollable="true" >
@@ -231,12 +232,12 @@
                                     <h:outputText  rendered="#{customersController.filteredCustomersOutIfSyncWithGateway!= null}" value="   (Filtered Records : #{customersController.filteredCustomersOutIfSyncWithGateway.size()})">
 
                                     </h:outputText>
- 
+
                                 </h:panelGroup>
 
                             </f:facet>
                           <!--  <p:ajax event="rowSelect"  listener="#{customersController.setSelecteDblClick}"   />  -->
-                                    <p:column exportable="false">
+                            <p:column exportable="false">
                                 <p:commandButton value="View" action="/admin/customers/List.xhtml?faces-redirect=true" >
                                     <f:setPropertyActionListener value="#{item}" target="#{customersController.dashboardSyncSelected}" />
                                 </p:commandButton>
@@ -244,7 +245,7 @@
                             <p:column sortBy="#{item.id}" filterBy="#{item.id}" headerText="#{configMapController.getKey('ListCustomersTitle_id')}"   >
                                 <h:outputText value="#{item.id}"/>
                             </p:column>
-                             <p:column sortBy="#{item.firstname}" filterBy="#{item.firstname}" headerText="#{configMapController.getKey('ListCustomersTitle_firstname')}"   >
+                            <p:column sortBy="#{item.firstname}" filterBy="#{item.firstname}" headerText="#{configMapController.getKey('ListCustomersTitle_firstname')}"   >
                                 <h:outputText value="#{item.firstname}"/>
                             </p:column>
                             <p:column sortBy="#{item.lastname}" filterBy="#{item.lastname}" headerText="#{configMapController.getKey('ListCustomersTitle_lastname')}"   >
@@ -344,7 +345,7 @@
                                      filteredValue="#{customersController.filteredCustomersWithoutScheduledPayments}" 
                                      widgetVar="customersControllerTableNoSchedPayments" 
                                      editable="false" 
-
+                                     reflow="true"
                                      var="item"  
                                      scrollHeight="300"
                                      scrollable="true" >
@@ -461,7 +462,7 @@
                                      filteredValue="#{customersController.filteredCustomersBadPayments}" 
                                      widgetVar="customersBadPaymentsControllerTable" 
                                      editable="false" 
-
+                                     reflow="true"
                                      var="pay"  
                                      scrollHeight="300"
                                      scrollable="true" >
@@ -574,7 +575,7 @@
                                      filteredValue="#{customersController.filteredLeads}" 
                                      widgetVar="leadsControllerTable" 
                                      editable="false" 
-
+                                     reflow="true"
                                      var="item"  
                                      scrollHeight="300"
                                      scrollable="true" >
@@ -690,7 +691,7 @@
                                      filteredValue="#{customersController.filteredCustomersOnHold}" 
                                      widgetVar="customersOnHoldControllerTable" 
                                      editable="false" 
-
+                                     reflow="true"
                                      var="item"  
                                      scrollHeight="300"
                                      scrollable="true" >
