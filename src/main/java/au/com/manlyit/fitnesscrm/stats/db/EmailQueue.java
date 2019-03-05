@@ -73,6 +73,10 @@ public class EmailQueue implements  BaseEntity, Serializable {
     @Size(max = 65535)
     @Column(name = "ccaddresses")
     private String ccaddresses;
+    @Lob
+    @Size(max = 65535)
+    @Column(name = "bccaddresses")
+    private String bccaddresses;
     @Basic(optional = false)
     @NotNull
     @Lob
@@ -213,6 +217,20 @@ public class EmailQueue implements  BaseEntity, Serializable {
     @Override
     public String toString() {
         return "au.com.manlyit.fitnesscrm.stats.db.EmailQueue[ id=" + id + " ]";
+    }
+
+    /**
+     * @return the bccaddresses
+     */
+    public String getBccaddresses() {
+        return bccaddresses;
+    }
+
+    /**
+     * @param bccaddresses the bccaddresses to set
+     */
+    public void setBccaddresses(String bccaddresses) {
+        this.bccaddresses = bccaddresses;
     }
     
 }

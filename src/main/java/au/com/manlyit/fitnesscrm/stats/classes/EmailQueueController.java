@@ -8,13 +8,19 @@ import au.com.manlyit.fitnesscrm.stats.beans.EmailQueueFacade;
 import au.com.manlyit.fitnesscrm.stats.classes.util.SendHTMLEmailWithFileAttached;
 import au.com.manlyit.fitnesscrm.stats.db.Activation;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
+import au.com.manlyit.fitnesscrm.stats.db.EmailTemplates;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import static java.util.Date.from;
 import java.util.List;
 import java.util.Properties;
 import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.inject.Inject;
 import javax.faces.application.FacesMessage;
@@ -24,6 +30,7 @@ import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 import javax.faces.convert.Converter;
 import javax.faces.convert.FacesConverter;
+import javax.faces.event.ValueChangeEvent;
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
@@ -42,14 +49,16 @@ public class EmailQueueController implements Serializable {
     private au.com.manlyit.fitnesscrm.stats.beans.CustomersFacade ejbCustomerFacade;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.ActivationFacade ejbActivationFacade;
-     @Inject
+    @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.EmailTemplatesFacade ejbEmailTemplatesFacade;
     @Inject
     private ConfigMapFacade configMapFacade;
     private PaginationHelper pagination;
     private int selectedItemIndex;
     private String templateName;
+    private EmailTemplates selectedTemplate;
     private String templateDescription;
+    private String messagePreview;
     private DualListModel<Customers> participants;
 
     public EmailQueueController() {
@@ -58,6 +67,11 @@ public class EmailQueueController implements Serializable {
     public EmailQueue getSelected() {
         if (current == null) {
             current = new EmailQueue();
+            current.setSendDate(new Date());
+            current.setFromaddress(configMapFacade.getConfig("PasswordResetFromEmailAddress"));
+            current.setCcaddresses(configMapFacade.getConfig("PasswordResetCCEmailAddress"));
+            current.setSubject(getSelectedTemplate().getSubject());
+
             selectedItemIndex = -1;
         }
         return current;
@@ -76,7 +90,7 @@ public class EmailQueueController implements Serializable {
 
     protected Properties emailServerProperties() {
         Properties props = new Properties();
-        
+
         props.put("mail.smtp.host", configMapFacade.getConfig("mail.smtp.host"));
         props.put("mail.smtp.auth", configMapFacade.getConfig("mail.smtp.auth"));
         props.put("mail.debug", configMapFacade.getConfig("mail.debug"));
@@ -136,6 +150,16 @@ public class EmailQueueController implements Serializable {
             List<Customers> targets = participants.getTarget();
             current.setToaddresses(getCSVListOfCustomerEmailAddresses(targets));
 
+            // use a template
+            /*  String templateLinkPlaceholder = configMapFacade.getConfig("login.password.reset.templateLinkPlaceholder");
+             //   String templateTemporaryPasswordPlaceholder = configMapFacade.getConfig("login.password.reset.templateTemporaryPasswordPlaceholder");
+              //  String templateUsernamePlaceholder = configMapFacade.getConfig("login.password.reset.templateUsernamePlaceholder");
+                //String htmlText = configMapFacade.getConfig(templateName);
+                String htmlText = ejbEmailTemplatesFacade.findTemplateByName(templateName).getTemplate();
+               
+
+                htmlText = htmlText.replace(templateLinkPlaceholder, current.getMessage());
+               current.setMessage(htmlText);*/
             getFacade().create(current);
 
             JsfUtil.addSuccessMessage(configMapFacade.getConfig("EmailQueueCreated"));
@@ -145,7 +169,7 @@ public class EmailQueueController implements Serializable {
             return null;
         }
     }
- 
+
     public void handleDateSelect(SelectEvent event) {
         Date date = (Date) event.getObject();
         SimpleDateFormat format = new SimpleDateFormat("dd MMM yyyy HH:mm");
@@ -186,7 +210,7 @@ public class EmailQueueController implements Serializable {
         if (selectedItemIndex >= 0) {
             return "View";
         } else {
-            // all items were removed - go back to list
+            // all items were removed - go back to listtemplateName
             recreateModel();
             return "List";
         }
@@ -228,18 +252,139 @@ public class EmailQueueController implements Serializable {
         return toAddresses;
     }
 
-    public void sendTheEmail() {
+    public void selectOneMenuValueChangeListener(ValueChangeEvent vce) {
+        Object template = vce.getNewValue();
+        if (template.getClass() == EmailTemplates.class) {
+            setSelectedTemplate((EmailTemplates) template);
+        }
+    }
 
+    /**
+     * @return the messagePreview
+     */
+    public String getMessagePreview() {
+
+        String templateLinkPlaceholder = configMapFacade.getConfig("login.password.reset.templateLinkPlaceholder");
+        //   String templateTemporaryPasswordPlaceholder = configMapFacade.getConfig("login.password.reset.templateTemporaryPasswordPlaceholder");
+        //  String templateUsernamePlaceholder = configMapFacade.getConfig("login.password.reset.templateUsernamePlaceholder");
+        //String htmlText = configMapFacade.getConfig(templateName);
+        String htmlText = "";
+        if (getSelectedTemplate() != null) {
+            htmlText = getSelectedTemplate().getTemplate();
+        }
+        if (htmlText == null) {
+            EmailTemplates selTemp = ejbEmailTemplatesFacade.findTemplateByName(getTemplateName());
+            if (selTemp != null) {
+                htmlText = selTemp.getTemplate();
+            } else {
+                return current.getMessage();
+            }
+
+        }
+
+        messagePreview = htmlText.replace(templateLinkPlaceholder, current.getMessage());
+
+        return messagePreview;
+    }
+
+    /**
+     * @param messagePreview the messagePreview to set
+     */
+    public void setMessagePreview(String messagePreview) {
+        this.messagePreview = messagePreview;
+    }
+
+    /**
+     * @return the selectedTemplate
+     */
+    public EmailTemplates getSelectedTemplate() {
+        if (selectedTemplate == null) {
+            selectedTemplate = ejbEmailTemplatesFacade.findTemplateByName(getTemplateName());
+            selectedItemIndex = -1;
+        }
+        return selectedTemplate;
+    }
+
+    /**
+     * @param selectedTemplate the selectedTemplate to set
+     */
+    public void setSelectedTemplate(EmailTemplates selectedTemplate) {
+        this.selectedTemplate = selectedTemplate;
+    }
+
+    public void sendTheBulkEmail() {
+
+        //send email
         List<Customers> targets = participants.getTarget();
 
-        current.setToaddresses(getCSVListOfCustomerEmailAddresses(targets));
+        current.setBccaddresses(getCSVListOfCustomerEmailAddresses(targets));
+        current.setToaddresses(current.getCcaddresses());
         current.setId(0);
         current.setStatus(0);
         current.setCreateDate(new Date());
-        getFacade().create(current);
+        
+        boolean valid = true;
+        String message = "";
+        String[] toAddressesArray = null;
+        if (current.getToaddresses() == null) {
+            valid = false;
+            Logger.getLogger(getClass().getName()).log(Level.WARNING, "To email addresses is NULL");
+            message = "To email addresses are empty!";
 
-        SendHTMLEmailWithFileAttached emailAgent = new SendHTMLEmailWithFileAttached();
-        emailAgent.send(current.getToaddresses(), current.getCcaddresses(), current.getFromaddress(), current.getSubject(), current.getMessage(), null,emailServerProperties(), false);
+        } else {
+            toAddressesArray = current.getToaddresses().split(",");
+            for (String s : toAddressesArray) {
+            if (validateEmailAddress(s) == false) {
+                valid = false;
+                Logger.getLogger(getClass().getName()).log(Level.WARNING, "One or more To email addresses are invalid:{0}", s);
+                message = "One or more To email addresses are invalid:" + s;
+            }
+        }
+        }
+        if (current.getFromaddress() == null) {
+            valid = false;
+            Logger.getLogger(getClass().getName()).log(Level.WARNING, "From email addresses is NULL");
+            message = "From email addresses are empty!";
+
+        }
+   
+        
+        if (current.getBccaddresses() != null) {
+            String[] bccAddressesArray = current.getBccaddresses().split(",");
+            for (String s : bccAddressesArray) {
+                if (validateEmailAddress(s) == false) {
+                    valid = false;
+                    Logger.getLogger(getClass().getName()).log(Level.WARNING, "One or more BCC email addresses are invalid:{0}", s);
+                    message = "One or more BCC email addresses are invalid:" + s;
+                }
+            }
+        }
+        if (validateEmailAddress(current.getFromaddress()) == false) {
+            valid = false;
+            Logger.getLogger(getClass().getName()).log(Level.WARNING, "From email address is invalid");
+            message = "From email address is invalid:" + current.getFromaddress();
+        }
+        if (valid) {
+            current.setMessage(getMessagePreview());
+            getFacade().create(current);
+            current = null;
+            setMessagePreview("");
+            JsfUtil.addSuccessMessage("Your email has been put in the queue and will sent as soon as the send date is reached.");
+        } else {
+            JsfUtil.addErrorMessage(message);
+        }
+
+    }
+
+    private boolean validateEmailAddress(String email) {
+
+        Pattern p = Pattern.compile(".+@.+\\.[a-z]+");
+
+        //Match the given string with the pattern
+        Matcher m = p.matcher(email);
+
+        //Check whether match is found
+        return m.matches();
 
     }
 
@@ -271,7 +416,7 @@ public class EmailQueueController implements Serializable {
         String htmlText = "<table width=\"600\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\">  <tr>    <td><img src=\"cid:logoimg_cid\"/></td>  </tr>  <tr>    <td height=\"220\"> <p>Manly Beach Female Fitness</p>      <p>Please click the following link to reset your password:</p><p>To reset your password click <a href=\"" + urlLink + "\">here</a>.</p></td>  </tr>  <tr>    <td height=\"50\" align=\"center\" valign=\"middle\" bgcolor=\"#CCCCCC\">www.manlybeachfemalefitness.com.au | sarah@manlybeachfemalefitness.com.au | +61433818067</td>  </tr></table>";
 // TODO String htmlText = ejbEmailTemplatesFacade.findTemplateByName(templateName).getTemplate();
         //String host, String to, String ccAddress, String from, String emailSubject, String message, String theAttachedfileName, boolean debug
-        emailAgent.send("david@manlyit.com.au", "", "noreply@manlybeachfemalefitness.com.au", "Password Reset", htmlText, null,emailServerProperties(), true);
+        emailAgent.send("david@manlyit.com.au", "", "", "noreply@manlybeachfemalefitness.com.au", "Password Reset", htmlText, null, emailServerProperties(), true);
 
     }
 
@@ -302,7 +447,7 @@ public class EmailQueueController implements Serializable {
     }
 
     private void addParticipants() {
-        List<Customers> sourceParticipants = ejbCustomerFacade.findAll(true);
+        List<Customers> sourceParticipants = ejbCustomerFacade.findAllActiveCustomersAndStaff(true);
         List<Customers> targetParticipants = new ArrayList<Customers>();
         participants = new DualListModel<Customers>(sourceParticipants, targetParticipants);
     }
@@ -359,6 +504,9 @@ public class EmailQueueController implements Serializable {
      * @return the templateName
      */
     public String getTemplateName() {
+        if (templateName == null) {
+            templateName = "system.email.admin.newsletter";
+        }
         return templateName;
     }
 
@@ -383,7 +531,7 @@ public class EmailQueueController implements Serializable {
         this.templateDescription = templateDescription;
     }
 
-    @FacesConverter(value="emailQueueControllerConverter")
+    @FacesConverter(value = "emailQueueControllerConverter")
     public static class EmailQueueControllerConverter implements Converter {
 
         public Object getAsObject(FacesContext facesContext, UIComponent component, String value) {
@@ -419,4 +567,5 @@ public class EmailQueueController implements Serializable {
             }
         }
     }
+
 }

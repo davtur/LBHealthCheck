@@ -104,6 +104,7 @@ public class EmailerJob implements Job {
                     String to = rs.getString("toaddresses");
                     String from = rs.getString("fromaddress");
                     String cc = rs.getString("ccaddresses");
+                    String bcc = rs.getString("bccaddresses");
                     String subject = rs.getString("subject");
                     String msg = rs.getString("message");
                     Timestamp sendDate = rs.getTimestamp("sendDate");
@@ -147,10 +148,14 @@ public class EmailerJob implements Job {
                             if (cc == null) {
                                 cc2 = "Null";
                             }
+                            String bcc2 = bcc;
+                            if (bcc == null) {
+                                bcc2 = "Null";
+                            }
                             try {
-                                String message = "Sending email to:" + to + ", from:" + from + ", cc:" + cc2 + ", subject:" + subject + ", message Length:" + msg.length() + ", sendDate:" + sendDate + ", createDate:" + createDate + ".";
+                                String message = "Sending email to:" + to + ", from:" + from + ", cc:" + cc2 + ", Bcc:" + bcc2 + ", subject:" + subject + ", message Length:" + msg.length() + ", sendDate:" + sendDate + ", createDate:" + createDate + ".";
                                 Logger.getLogger(getClass().getName()).log(Level.INFO, message);
-                                emailAgent.send(to, cc, from, subject, msg, null, props, false);
+                                emailAgent.send(to, cc, bcc,from, subject, msg, null, props, false);
                             } catch (Exception e) {
                                 String message2 = "There was a problem sending the email id: " + Integer.toString(id) + ", to: " + to + ", cc: " + cc + ", from: " + from + ", subject: " + subject + ".The exception is: " + updateQuery + "\r\n" + e.getMessage();
                                 Logger.getLogger(getClass().getName()).log(Level.SEVERE, message2);

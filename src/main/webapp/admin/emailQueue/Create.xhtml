@@ -80,7 +80,7 @@
                     </h:panelGrid>
                 </p:panel>
                 <br />
-                <p:commandButton   ajax="false"   actionListener="#{emailQueueController.sendTheEmail}" value="Send Email" />
+                <p:commandButton   ajax="false"   actionListener="#{emailQueueController.sendTheBulkEmail}" value="Send Email" />
                 <p:commandButton   ajax="false"   action="#{emailQueueController.create}" value="#{configMapController.getKey('CreateEmailQueueSaveLink')}" />
                 <br />
                 <br />

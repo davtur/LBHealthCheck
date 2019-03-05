@@ -348,8 +348,9 @@ public class SecurityServlet extends HttpServlet {
                 String name = null;
                 String birthday = null;
                 String facebookId = null;
+                JSONObject json = null;
                 try {
-                    JSONObject json = (JSONObject) JSONSerializer.toJSON(responseBody);
+                    json = (JSONObject) JSONSerializer.toJSON(responseBody);
                     facebookId = json.getString("id");
 
                     name = json.getString("name");
@@ -357,8 +358,6 @@ public class SecurityServlet extends HttpServlet {
                     httpSession.setAttribute("FACEBOOK_USER", name + ", facebookId:" + facebookId);
 
                     email = json.getString("email");
-                    //put user data in session
-                    birthday = json.getString("birthday");
 
                     if (facebookId == null || name == null || email == null || birthday == null) {
                         if (facebookId == null) {
@@ -370,9 +369,7 @@ public class SecurityServlet extends HttpServlet {
                         if (email == null) {
                             logger.log(Level.WARNING, "Error getting JSON objects from facebook: email is NULL");
                         }
-                        if (birthday == null) {
-                            logger.log(Level.WARNING, "Error getting JSON objects from facebook: birthday is NULL");
-                        }
+
                     }
                     logger.log(Level.INFO, "facebook JSON params recieve: name={0},email={1},birthday={2},facebookId={3}, httpSession = {4}", new Object[]{name, email, birthday, facebookId, httpSession});
                 } catch (Exception e) {
@@ -390,8 +387,14 @@ public class SecurityServlet extends HttpServlet {
                 cust.setFacebookId(facebookId);
                 SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
                 try {
-                    cust.setDob(sdf.parse(birthday));
-                } catch (java.text.ParseException parseException) {
+                    //put user data in session
+                    birthday = json.getString("birthday");
+                    if (birthday == null) {
+                        logger.log(Level.WARNING, "Error getting JSON objects from facebook: birthday is NULL");
+                    } else {
+                        cust.setDob(sdf.parse(birthday));
+                    }
+                } catch (Exception parseException) {
                     logger.log(Level.WARNING, "Error getting birthday from facebook: birthday is could not be converted to a Date!!", parseException);
                 }
                 try {

@@ -19,7 +19,7 @@ components globally, use the .ui-widget style class. An example of smaller fonts
 
 */
 .ui-widget, .ui-widget .ui-widget {
-font-size: 90% !important;
+    font-size: 90% !important;
 }
 /*div.ui-carousel-viewport .myStatsCarousel div.ui-carousel-viewport .myStatsCarousel{
   width:100% !important;
@@ -28,9 +28,18 @@ height: 300px !important;
     
 }*/
 
+.emailEditor{
+    width: 100%;
+    
+    
+}
+.emailEditorInput{
+  width: 100%; 
+}
+
 .choosePlanDialogue{
     max-width: 300px;
-    
+
 }
 
 .dialoguePhoto {
@@ -116,10 +125,10 @@ height: 300px !important;
         width:100% !important;
     }
 
-.choosePlanDialogue{
-    max-width: 300px;
-    
-}
+    .choosePlanDialogue{
+        max-width: 300px;
+
+    }
 
     .selectOneWidth {
         min-width:100px; 

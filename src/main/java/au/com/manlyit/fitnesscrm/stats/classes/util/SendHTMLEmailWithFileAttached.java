@@ -42,7 +42,7 @@ public class SendHTMLEmailWithFileAttached implements Serializable {
     //@Resource(name = "mail/pureFitnessMail")
     //private Session pureFitnessEmail;
 
-    public synchronized boolean send(String to, String ccAddress, String from, String emailSubject, String message, String theAttachedfileName, Properties serverProperties, boolean debug) {
+    public synchronized boolean send(String to, String ccAddress,String bccAddress, String from, String emailSubject, String message, String theAttachedfileName, Properties serverProperties, boolean debug) {
         boolean result = true;
         //boolean debug = Boolean.valueOf(args[4]).booleanValue();
         String msgText1 = message + "\n";
@@ -116,6 +116,13 @@ public class SendHTMLEmailWithFileAttached implements Serializable {
 
                 if (ccAddress.trim().length() > 0) {
                     msg.setRecipients(Message.RecipientType.CC, iterateEmailAddressesIntoArray(ccAddress));
+                }
+            }
+            if (bccAddress != null) {
+                bccAddress = bccAddress.trim();
+
+                if (bccAddress.trim().length() > 0) {
+                    msg.setRecipients(Message.RecipientType.BCC, iterateEmailAddressesIntoArray(bccAddress));
                 }
             }
 

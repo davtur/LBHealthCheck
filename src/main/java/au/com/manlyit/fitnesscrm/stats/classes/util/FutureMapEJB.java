@@ -7,6 +7,7 @@ package au.com.manlyit.fitnesscrm.stats.classes.util;
 
 import au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade;
 import au.com.manlyit.fitnesscrm.stats.beans.CustomersFacade;
+import au.com.manlyit.fitnesscrm.stats.beans.EmailQueueFacade;
 import au.com.manlyit.fitnesscrm.stats.beans.EmailTemplatesFacade;
 import au.com.manlyit.fitnesscrm.stats.beans.NotificationsLogFacade;
 import au.com.manlyit.fitnesscrm.stats.beans.PaymentBean;
@@ -15,6 +16,7 @@ import au.com.manlyit.fitnesscrm.stats.beans.util.PaymentSource;
 import au.com.manlyit.fitnesscrm.stats.beans.util.PaymentStatus;
 import au.com.manlyit.fitnesscrm.stats.classes.EziDebitPaymentGateway;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
+import au.com.manlyit.fitnesscrm.stats.db.EmailQueue;
 import au.com.manlyit.fitnesscrm.stats.db.Notes;
 import au.com.manlyit.fitnesscrm.stats.db.NotificationsLog;
 import au.com.manlyit.fitnesscrm.stats.db.PaymentParameters;
@@ -65,7 +67,6 @@ import javax.faces.push.Push;
 import javax.faces.push.PushContext;
 import javax.inject.Inject;
 import javax.xml.ws.WebServiceException;
-import org.primefaces.PrimeFaces;
 
 /**
  *
@@ -130,6 +131,9 @@ public class FutureMapEJB implements Serializable {
     private au.com.manlyit.fitnesscrm.stats.beans.SessionTypesFacade sessionTypesFacade;
     @Inject
     private NotificationsLogFacade notificationsLogFacade;
+    @Inject
+    private EmailQueueFacade emailQueueFacade;
+
     @Inject
     @Push
     private PushContext payments;
@@ -709,7 +713,7 @@ public class FutureMapEJB implements Serializable {
 
             Date reportStartDate = cal.getTime();
             Date reportEndDate = new Date();
-           
+
             boolean reportUseSettlementDate = false;
 
             LOGGER.log(Level.INFO, "retrievePaymentsReportFromPaymentGateway - Running the daily payment report from date:{0}", cal.getTime());
@@ -742,7 +746,7 @@ public class FutureMapEJB implements Serializable {
     @Schedule(dayOfMonth = "*", hour = "5", minute = "45", second = "0")
     public void sendManagementDailyReport(Timer t) {
         GregorianCalendar cal = new GregorianCalendar();
-            cal.add(Calendar.DAY_OF_YEAR, -7);
+        cal.add(Calendar.DAY_OF_YEAR, -7);
         boolean result = false;
         try {
             result = runPaymentReport(cal.getTime(), getFutureMapInternalSessionId());
@@ -759,9 +763,46 @@ public class FutureMapEJB implements Serializable {
 
     }
 
+    @Schedule(hour = "*", minute = "*/1", second = "0", persistent = false)
+    public void checkEmailQueueAndSend(Timer t) {
+        int sent = 0;
+        List<EmailQueue> eql = emailQueueFacade.findEmailsByStatus(0);// new email - status 0 equals not sent
+        if (eql != null) {
+            String message = "checkEmailQueueAndSend -- Loading " + Integer.toString(eql.size()) + " unsent scheduled emails.";
+            Logger.getLogger(getClass().getName()).log(Level.INFO, message);
+            SendHTMLEmailWithFileAttached emailAgent = new SendHTMLEmailWithFileAttached();
+
+            for (EmailQueue email : eql) {
+                if (email.getSendDate() ==null || email.getSendDate().compareTo(new Date()) < 0) {
+                    try {
+
+                        message = "checkEmailQueueAndSend -- Sending email to:" + email.getToaddresses() + ", from:" + email.getFromaddress() + ", cc:" + email.getCcaddresses() + ", Bcc:" + email.getBccaddresses() + ", subject:" + email.getSubject() + ", message Length:" + email.getMessage().length() + ", sendDate:" + email.getSendDate() + ", createDate:" + email.getCreateDate() + ".";
+                        Logger.getLogger(getClass().getName()).log(Level.INFO, message);
+                        emailAgent.send(email.getToaddresses(), email.getCcaddresses(), email.getBccaddresses(), email.getFromaddress(), email.getSubject(), email.getMessage(), null, emailServerProperties(), false);
+                        sent++;
+                        email.setStatus(1);
+                        emailQueueFacade.edit(email);
+                    } catch (Exception e) {
+                        String message2 = "checkEmailQueueAndSend -- There was a problem sending the email id: " + Integer.toString(email.getId()) + ", to: " + email.getToaddresses() + ", cc: " + email.getCcaddresses() + ", from: " + email.getFromaddress() + ", subject: " + email.getSubject() + ".The exception is: " + e.getMessage();
+                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, message2);
+
+                    }
+                }
+            }
+            message = "checkEmailQueueAndSend -- The Emailer sent " + Integer.toString(sent) + " scheduled emails.";
+            Logger.getLogger(getClass().getName()).log(Level.INFO, message);
+
+        } else {
+            LOGGER.log(Level.WARNING, "The list of emails was null");
+
+        }
+
+    }
+
     @Schedule(hour = "*", minute = "*", second = "*", persistent = false)
     // @TransactionAttribute(TransactionAttributeType.NEVER)// we don't want a transaction for this method as the calls within this method will invoke their own transactions
-    public void checkRunningJobsAndNotifyIfComplete(Timer t) {  // run every 1 seconds
+    public void checkRunningJobsAndNotifyIfComplete(Timer t
+    ) {  // run every 1 seconds
         long start = new Date().getTime();
 
         // if (asychCheckProcessing.get() == false) {
@@ -935,7 +976,17 @@ public class FutureMapEJB implements Serializable {
      *
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-    public synchronized void processCallbackFromOnlinePaymentForm(String remoteUser, String sessionID, String uref, String cref, String fname, String lname, String email, String mobile, String addr, String suburb, String state, String pcode, String rdate, String ramount, String freq, String odate, String oamount, String numpayments, String totalamount, String method) {
+    public synchronized void processCallbackFromOnlinePaymentForm(String remoteUser, String sessionID,
+            String uref, String cref,
+            String fname, String lname,
+            String email, String mobile,
+            String addr, String suburb,
+            String state, String pcode,
+            String rdate, String ramount,
+            String freq, String odate,
+            String oamount, String numpayments,
+            String totalamount, String method
+    ) {
 
         //FacesContext facesContext = FacesContext.getCurrentInstance();
         //String sessionID = httpSession.getId();
