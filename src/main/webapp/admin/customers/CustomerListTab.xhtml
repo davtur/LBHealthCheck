@@ -215,6 +215,15 @@
                     <p:column sortBy="#{item.groupPricing.planName}" filterBy="#{item.groupPricing.planName}" headerText="#{configMapController.getKey('CreateCustomersTitle_groupPricing')}"   >
                         <h:outputText value="#{item.groupPricing.planName} - #{item.groupPricing.planPrice}"/> 
                     </p:column>
+                    <p:column  headerText="Tickets"   >
+                        <ui:repeat value="#{ticketsController.getTicketSummaryList(item)}" var="ticketSum">
+
+                            <h:outputText rendered="#{!ticketSum.numberOfTicketsAsString.contentEquals('0')}" value="#{ticketSum.ticketName} = " />
+                            <h:outputText rendered="#{!ticketSum.numberOfTicketsAsString.contentEquals('0')}" value="#{ticketSum.numberOfTicketsAsString}    " />
+                            <h:outputText rendered="#{ticketSum.numberOfTicketsAsString.contentEquals('0')}" value="No Tickets" />
+
+                        </ui:repeat>
+                    </p:column>
 
                     <p:column sortBy="#{item.paymentParametersId.contractStartDate}" filterBy="#{item.paymentParametersId.contractStartDate}" headerText="#{configMapController.getKey('ListCustomersTitle_contractStartDate')}"   >
                         <h:outputText value="#{item.paymentParametersId.contractStartDate}">

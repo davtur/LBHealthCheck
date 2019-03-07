@@ -283,9 +283,9 @@ public class TicketsController implements Serializable {
         Customers c = controller.getSelected();
         Customers loggedInUser = controller.getLoggedInUser();
         String auditDetails = "Deleted Ticket for  :" + c.getUsername() + " Details: Name:" + c.getLastname() + " " + c.getFirstname() + " TicketType:" + current.getSessionType().getName() + ", Number:" + 1 + ", Valid From: " + current.getValidFrom() + ", Valid to: " + current.getExpires() + ". ";
-        String changedFrom = "Valid Ticket Id:" + current.getId() ;
-        if(current.getDateUsed() != null){
-            changedFrom = "Used Ticket Id:" + current.getId() +", Date used:" + current.getDateUsed();
+        String changedFrom = "Valid Ticket Id:" + current.getId();
+        if (current.getDateUsed() != null) {
+            changedFrom = "Used Ticket Id:" + current.getId() + ", Date used:" + current.getDateUsed();
         }
         String changedTo = "Ticket Removed";
         if (loggedInUser == null) {
@@ -362,6 +362,30 @@ public class TicketsController implements Serializable {
         setEndDate(cal.getTime());
     }
 
+    public ArrayList<TicketSummary> getTicketSummaryList(Customers cust) {
+           ArrayList<TicketSummary>  ats = new ArrayList<>();
+
+            List<Tickets> tl = getCustomerTicketList(cust);
+            for (Tickets t : tl) {
+                String key = t.getSessionType().getName();
+                boolean found = false;
+                for (TicketSummary ts : ats) {
+                    if (ts.getTicketName().contentEquals(key)) {
+                        found = true;
+                        ts.incrementCount();
+                    }
+                }
+                if (found == false) {
+                    ats.add(new TicketSummary(key, 1));
+                }
+
+            }
+            if(ats.isEmpty()){
+                ats.add(new TicketSummary("No Tickets", 0));
+            }
+            return ats;
+    }
+
     public ArrayList<TicketSummary> getTicketSummaryList() {
 
         if (ticketsOverview == null) {
@@ -386,6 +410,10 @@ public class TicketsController implements Serializable {
         }
         return ticketsOverview;
 
+    }
+
+    private List<Tickets> getCustomerTicketList(Customers c) {
+        return ejbFacade.findCustomerTicketsValidAndUsedForSessionDate(c, new Date(), true);
     }
 
     private List<Tickets> getCustomerTicketList() {
