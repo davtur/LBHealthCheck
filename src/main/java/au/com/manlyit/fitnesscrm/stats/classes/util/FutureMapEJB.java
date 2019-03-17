@@ -9,12 +9,14 @@ import au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade;
 import au.com.manlyit.fitnesscrm.stats.beans.CustomersFacade;
 import au.com.manlyit.fitnesscrm.stats.beans.EmailQueueFacade;
 import au.com.manlyit.fitnesscrm.stats.beans.EmailTemplatesFacade;
+import au.com.manlyit.fitnesscrm.stats.beans.GroupsFacade;
 import au.com.manlyit.fitnesscrm.stats.beans.NotificationsLogFacade;
 import au.com.manlyit.fitnesscrm.stats.beans.PaymentBean;
 import au.com.manlyit.fitnesscrm.stats.beans.PaymentsFacade;
 import au.com.manlyit.fitnesscrm.stats.beans.util.PaymentSource;
 import au.com.manlyit.fitnesscrm.stats.beans.util.PaymentStatus;
 import au.com.manlyit.fitnesscrm.stats.classes.EziDebitPaymentGateway;
+import au.com.manlyit.fitnesscrm.stats.db.CustomerState;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import au.com.manlyit.fitnesscrm.stats.db.EmailQueue;
 import au.com.manlyit.fitnesscrm.stats.db.Notes;
@@ -34,6 +36,7 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -124,6 +127,8 @@ public class FutureMapEJB implements Serializable {
     @Inject
     private PaymentsFacade paymentsFacade;
     @Inject
+    private GroupsFacade groupsFacade;
+    @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.AuditLogFacade ejbAuditLogFacade;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.NotesFacade ejbNotesFacade;
@@ -203,6 +208,315 @@ public class FutureMapEJB implements Serializable {
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, "Push error - payments.send(message, recipientUserId)", e);
         }
+    }
+
+    public void sendDailyReportEmail() {
+
+        LOGGER.log(Level.INFO, "Entering - sendDailyReportEmail ");
+        List<Payments> pl = null;
+        GregorianCalendar startCal = new GregorianCalendar();
+
+        startCal.set(Calendar.HOUR_OF_DAY, 0);
+        startCal.set(Calendar.SECOND, 0);
+        startCal.set(Calendar.MINUTE, 0);
+        startCal.set(Calendar.MILLISECOND, 0);
+        startCal.set(Calendar.DAY_OF_MONTH, 1);
+        Date reportStartDate = startCal.getTime();
+        startCal.set(Calendar.DAY_OF_MONTH, Calendar.getInstance().getActualMaximum(Calendar.DAY_OF_MONTH));
+        startCal.set(Calendar.HOUR_OF_DAY, 23);
+        startCal.set(Calendar.SECOND, 59);
+        startCal.set(Calendar.MINUTE, 59);
+        startCal.set(Calendar.MILLISECOND, 999);
+
+        Date reportEndDate = startCal.getTime();
+// payment report
+        float reportTotalSuccessful = 0;
+        float reportTotalDishonoured = 0;
+        float reportTotalScheduled = 0;
+
+        try {
+            pl = paymentsFacade.findPaymentsByDateRange(false, true, true, true, true, reportStartDate, reportEndDate, false, null);
+
+        } catch (Exception e) {
+            Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.WARNING, "Report Failed", e);
+            pl = new ArrayList<>();
+        }
+        // the headers must match the number of columns
+        String[] headers = {"Id", "Name", "Debited Amount", "Status", "Debited", "Settled", "Scheduled Amount", "Plan"};
+        ArrayList<ArrayList<String>> data = new ArrayList<>();
+
+        String[] payTotheaders = {"Payment Type", "Total"};
+        ArrayList<ArrayList<String>> payTotalsData = new ArrayList<>();
+
+        String[] custheaders = {"Id", "Name", "Plan", "Tickets", "Last Pay Date", "Last Pay Amount", "Next Pay date", "Next Pay Amount"};
+        ArrayList<ArrayList<String>> custData = new ArrayList<>();
+
+        String[] planSummaryheaders = {"Plan Name", "Active Customers"};
+        ArrayList<ArrayList<String>> planSummaryData = new ArrayList<>();
+
+        String[] noPayheaders = {"Id", "Name", "Plan", "Tickets", "Last Pay Date", "Last Pay Amount", "Next Pay date", "Next Pay Amount"};
+        ArrayList<ArrayList<String>> noPayData = new ArrayList<>();
+
+        String[] casualCustomersHeaders = {"Id", "Name", "Plan", "Tickets", "Last Pay Date", "Last Pay Amount", "Next Pay date", "Next Pay Amount"};
+        ArrayList<ArrayList<String>> casualCustomersData = new ArrayList<>();
+
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+        NumberFormat nf = NumberFormat.getCurrencyInstance();
+        for (Payments pay : pl) {
+            ArrayList<String> row = new ArrayList<>();
+            row.add(pay.getId().toString());
+            row.add(pay.getCustomerName().getFirstname() + " " + pay.getCustomerName().getLastname());
+            row.add(nf.format(pay.getPaymentAmount()));
+
+            if (pay.getPaymentStatus().contains(PaymentStatus.SUCESSFUL.value()) || pay.getPaymentStatus().contains(PaymentStatus.PENDING.value())) {
+                reportTotalSuccessful += pay.getScheduledAmount().floatValue();
+                if (pay.getPaymentStatus().contains(PaymentStatus.SUCESSFUL.value())) {
+                    row.add("!!InsertIntoElement!!,style=\"background-color: #be9063;\"");
+                } else {
+                    row.add("!!InsertIntoElement!!,style=\"background-color: #f49f05;\"");
+                }
+            } else if (pay.getPaymentStatus().contains(PaymentStatus.DISHONOURED.value()) || pay.getPaymentStatus().contains(PaymentStatus.FATAL_DISHONOUR.value())) {
+                reportTotalDishonoured += pay.getScheduledAmount().floatValue();
+                row.add("!!InsertIntoElement!!,style=\"background-color: #bda589;\"");
+            } else if (pay.getPaymentStatus().contains(PaymentStatus.SCHEDULED.value()) || pay.getPaymentStatus().contains(PaymentStatus.WAITING.value())) {
+                reportTotalScheduled += pay.getScheduledAmount().floatValue();
+                row.add("!!InsertIntoElement!!,style=\"background-color: #36688d;\"");
+            }
+            row.add(pay.getPaymentStatus());
+            if (pay.getDebitDate() == null) {
+                row.add("  ");
+            } else {
+                row.add(sdf.format(pay.getDebitDate()));
+            }
+            if (pay.getSettlementDate() == null) {
+                row.add("  ");
+            } else {
+                row.add(sdf.format(pay.getSettlementDate()));
+            }
+            row.add(nf.format(pay.getScheduledAmount()));
+            row.add(pay.getCustomerName().getGroupPricing().getPlanName());
+            data.add(row);
+        }
+        // payment totals
+        ArrayList<String> row = new ArrayList<>();
+        row.add("Successful Payments");
+        row.add(nf.format(reportTotalSuccessful));
+        payTotalsData.add(row);
+        row = new ArrayList<>();
+        row.add("Failed Payments");
+        row.add(nf.format(reportTotalDishonoured));
+        payTotalsData.add(row);
+        row = new ArrayList<>();
+        row.add("Scheduled Payments");
+        row.add(nf.format(reportTotalScheduled));
+        payTotalsData.add(row);
+
+        // customers report   
+        ArrayList<CustomerState> acs = new ArrayList<>();
+        acs.add(new CustomerState(0, "ACTIVE"));
+        acs.add(new CustomerState(0, "USER"));
+        ArrayList<String> types = new ArrayList<>();
+        types.add("USER");
+
+        //List<Customers> custListNoPaymentScheduled = new ArrayList<>();
+        //List<Customers> customersOnCasualPlans = new ArrayList<>();
+        ArrayList<PlanSummary> planSummaryList = new ArrayList<>();
+        List<Customers> custList = customersFacade.findFilteredCustomers(false, "id", acs, types, false);
+
+        for (Customers cust : custList) {
+            // get table row for this customer
+            ArrayList<String> custRow = getCustomerRowData(cust);
+
+            // find customers withoutpayments
+            if (groupsFacade.isCustomerInGroup(cust, "LEAD") == false) {
+                if (cust.getPaymentParametersId() != null) {
+                    if (cust.getPaymentParametersId().getNextScheduledPayment() == null) {
+                        noPayData.add(custRow);
+                        //custListNoPaymentScheduled.add(cust);
+                    }
+                } else {
+                    noPayData.add(custRow);
+                    //custListNoPaymentScheduled.add(cust);
+                }
+            }
+            // find customers on Casual Plans
+            if (cust.getGroupPricing().getPlanTimePeriod().contains("Z")) {
+                casualCustomersData.add(custRow);
+                //  customersOnCasualPlans.add(cust);
+            }
+
+            //summarize plans info
+            String key = cust.getGroupPricing().getPlanName();
+            boolean found = false;
+            for (PlanSummary planSummary : planSummaryList) {
+                if (planSummary.getPlanName().contentEquals(key)) {
+                    found = true;
+                    planSummary.incrementCount();
+                }
+            }
+            if (found == false) {
+                planSummaryList.add(new PlanSummary(key, 1));
+            }
+
+            // produce table data
+            custData.add(getCustomerRowData(cust));
+        }
+        if (planSummaryList.isEmpty()) {
+            row = new ArrayList<>();
+            row.add("no Plans");
+            row.add("0");
+            planSummaryData.add(row);
+        } else {
+            for (PlanSummary ps : planSummaryList) {
+                row = new ArrayList<>();
+                row.add(ps.getPlanName());
+                row.add(ps.getNumberOfPlansAsString());
+                planSummaryData.add(row);
+            }
+        }
+
+        String htmlToRender = renderHtmlForObject("Payment Report", headers, data);
+
+        htmlToRender += renderHtmlForObject("Payment Totals", payTotheaders, payTotalsData);
+
+        htmlToRender += renderHtmlForObject("Active Customers Report", custheaders, custData);
+
+        htmlToRender += renderHtmlForObject("Plan Summary Report", planSummaryheaders, planSummaryData);
+
+        htmlToRender += renderHtmlForObject("Active Customers with No Schedule", noPayheaders, noPayData);
+
+        htmlToRender += renderHtmlForObject("Active Casual Customers", casualCustomersHeaders, casualCustomersData);
+
+        // send report
+        sendDailyReportEmail(htmlToRender);
+        LOGGER.log(Level.INFO, " sendDailyReportEmail completed:"
+                + " {0}", htmlToRender);
+    }
+
+    private ArrayList<String> getCustomerRowData(Customers cust) {
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+        NumberFormat nf = NumberFormat.getCurrencyInstance();
+
+        ArrayList<String> row = new ArrayList<>();
+        row.add(cust.getId().toString());
+        row.add(cust.getFirstname() + " " + cust.getLastname());
+        row.add(cust.getGroupPricing().getPlanName());
+        ArrayList<TicketSummary> alts = getTicketSummaryList(cust);
+        if (alts == null || alts.isEmpty()) {
+            row.add("No tickets");
+        } else {
+            String tickets = "";
+            for (TicketSummary ts : alts) {
+                tickets += ts.getTicketName() + "=" + ts.getNumberOfTicketsAsString() + " ";
+            }
+            row.add(tickets);
+        }
+
+        if (cust.getPaymentParametersId() == null || cust.getPaymentParametersId().getLastSuccessfulScheduledPayment() == null) {
+            row.add("None");
+            row.add("---");
+        } else {
+            row.add(sdf.format(cust.getPaymentParametersId().getLastSuccessfulScheduledPayment().getDebitDate()));
+            row.add(nf.format(cust.getPaymentParametersId().getLastSuccessfulScheduledPayment().getPaymentAmount()));
+        }
+        if (cust.getPaymentParametersId() == null || cust.getPaymentParametersId().getNextScheduledPayment() == null) {
+            row.add("None");
+            row.add("---");
+        } else {
+            row.add(sdf.format(cust.getPaymentParametersId().getNextScheduledPayment().getDebitDate()));
+            row.add(nf.format(cust.getPaymentParametersId().getNextScheduledPayment().getScheduledAmount()));
+        }
+
+        return row;
+    }
+
+    private String renderHtmlForObject(String heading, String[] headers, ArrayList<ArrayList<String>> data) {
+
+        String contentStart = "<div><h2>" + heading + "</h2></div><div><h2>  </h2></div><div><table>" + System.lineSeparator() + "<thead><tr style=\"background-color: #328daa;\">";
+        for (String header : headers) {
+            contentStart += "<th>" + header + "</th>";
+        }
+        contentStart += "</tr></thead>" + "<tbody>";
+
+        String contentEnd = "</tbody></table></div>";
+        String content = contentStart;
+        boolean even = false;
+        for (ArrayList<String> row : data) {
+            if (even == true) {
+                content += "<tr style=\"background-color: #8ed3f4;\">";
+            } else {
+                content += "<tr style=\"background-color: #e4ebf2;\">";
+            }
+            // this is added in the column before you want the style injected.
+            //"!!InsertIntoElement!!,style=\"background-color: #36688d;\""
+            boolean insertStyle = false;
+            String insertThis = "";
+            for (String cell : row) {
+                if (cell.contains("!!InsertIntoElement!!")) {
+                    insertStyle = true;
+                    insertThis = cell.substring(cell.indexOf(",") +1);
+                } else {
+                    if (insertStyle == true) {
+                        insertStyle = false;
+                        content += "<td " + insertThis + " >" + cell + "</td>";
+                    } else {
+                        content += "<td>" + cell + "</td>";
+                    }
+                }
+
+            }
+            content += "</tr>";
+            even = !even;
+        }
+        content += contentEnd;
+
+        return content;
+    }
+
+    private ArrayList<TicketSummary> getTicketSummaryList(Customers cust) {
+        ArrayList<TicketSummary> ats = new ArrayList<>();
+
+        List<Tickets> tl = ejbTicketsFacade.findCustomerTicketsValidAndUsedForSessionDate(cust, new Date(), true);
+        for (Tickets t : tl) {
+            String key = t.getSessionType().getName();
+            boolean found = false;
+            for (TicketSummary ts : ats) {
+                if (ts.getTicketName().contentEquals(key)) {
+                    found = true;
+                    ts.incrementCount();
+                }
+            }
+            if (found == false) {
+                ats.add(new TicketSummary(key, 1));
+            }
+
+        }
+        if (ats.isEmpty()) {
+            ats.add(new TicketSummary("No Tickets", 0));
+        }
+        return ats;
+    }
+
+    private void sendDailyReportEmail(String content) {
+
+        //send email
+        String templateLinkPlaceholder = configMapFacade.getConfig("login.password.reset.templateLinkPlaceholder");
+        String htmlText = ejbEmailTemplatesFacade.findTemplateByName("system.email.admin.report.daily").getTemplate();
+
+        htmlText = htmlText.replace(templateLinkPlaceholder, content);
+        EmailQueue email = new EmailQueue();
+        email.setId(0);
+        email.setFromaddress(configMapFacade.getConfig("PasswordResetFromEmailAddress"));
+        email.setCcaddresses(configMapFacade.getConfig("PasswordResetCCEmailAddress"));
+        email.setToaddresses(configMapFacade.getConfig("PasswordResetCCEmailAddress"));
+        email.setSendDate(new Date());
+        email.setCreateDate(new Date());
+        email.setStatus(0);
+        email.setSubject("Daily Report");
+        email.setMessage(content);
+        email.setBccaddresses(configMapFacade.getConfig("PasswordResetCCEmailAddress"));
+
+        emailQueueFacade.create(email);
     }
 
     public void sendMessage(Object facesmessage, Customers recipientUser) {
@@ -750,6 +1064,7 @@ public class FutureMapEJB implements Serializable {
         boolean result = false;
         try {
             result = runPaymentReport(cal.getTime(), getFutureMapInternalSessionId());
+            sendDailyReportEmail();
         } catch (InterruptedException ex) {
             Logger.getLogger(FutureMapEJB.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -773,7 +1088,7 @@ public class FutureMapEJB implements Serializable {
             SendHTMLEmailWithFileAttached emailAgent = new SendHTMLEmailWithFileAttached();
 
             for (EmailQueue email : eql) {
-                if (email.getSendDate() ==null || email.getSendDate().compareTo(new Date()) < 0) {
+                if (email.getSendDate() == null || email.getSendDate().compareTo(new Date()) < 0) {
                     try {
 
                         message = "checkEmailQueueAndSend -- Sending email to:" + email.getToaddresses() + ", from:" + email.getFromaddress() + ", cc:" + email.getCcaddresses() + ", Bcc:" + email.getBccaddresses() + ", subject:" + email.getSubject() + ", message Length:" + email.getMessage().length() + ", sendDate:" + email.getSendDate() + ", createDate:" + email.getCreateDate() + ".";

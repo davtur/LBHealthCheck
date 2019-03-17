@@ -76,6 +76,12 @@ public class ApplicationBean implements Serializable {
         futureMap.issueWeeklyCustomerTicketsForPlansSessionBookings();
         logger.log(Level.INFO, "@@@@@@@@@@@@@@@@@@@@@@@@ COMPLETED TEST TICKETS FUNCTION @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
     }
+    
+     public void testReport(ActionEvent event) {
+        logger.log(Level.INFO, "@@@@@@@@@@@@@@@@@@@@@@@@ EXECUTING TEST REPORT FUNCTION @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+        futureMap.sendDailyReportEmail();
+        logger.log(Level.INFO, "@@@@@@@@@@@@@@@@@@@@@@@@ COMPLETED TEST REPORT FUNCTION @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+    }
 
     public void addFacebookLoginState(String key, String value) {
         facebookLogingStateMap.put(key, value);

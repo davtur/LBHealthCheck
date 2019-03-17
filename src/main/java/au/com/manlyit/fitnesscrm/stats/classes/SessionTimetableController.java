@@ -758,6 +758,7 @@ public class SessionTimetableController implements Serializable {
             cloneSessionsFromTimetable(current, DAYS_AHEAD_TO_POPULATE_TIMETABLE);
             daysOfWeek = null;// recreate timetabel model
         }
+        recreateModel() ;
 
     }
 
