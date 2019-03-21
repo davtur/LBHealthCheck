@@ -154,6 +154,8 @@ public class LoginBean implements Serializable {
                 if (resetPassword == true) {
                     tempPassword = RandomString.generateRandomString(new Random(), 8);
                     current.setPassword(PasswordService.getInstance().encrypt(tempPassword));
+                   
+                    logger.log(Level.INFO, "Customer: {0} {2}.Password has been reset to a random string!", new Object[]{current.getFirstname(), current.getLastname()});
                 }
                 ejbCustomerFacade.editAndFlush(current);
                 htmlText = htmlText.replace(templateTemporaryPasswordPlaceholder, tempPassword);
