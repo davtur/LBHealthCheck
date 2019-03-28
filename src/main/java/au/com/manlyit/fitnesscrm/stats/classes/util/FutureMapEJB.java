@@ -214,21 +214,40 @@ public class FutureMapEJB implements Serializable {
 
         LOGGER.log(Level.INFO, "Entering - sendDailyReportEmail ");
         List<Payments> pl = null;
+        List<Payments> pl2 = null;
+         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+         SimpleDateFormat monthNameFormat = new SimpleDateFormat("MMMMM");
+        NumberFormat nf = NumberFormat.getCurrencyInstance();
         GregorianCalendar startCal = new GregorianCalendar();
-
+        GregorianCalendar startCal2 = new GregorianCalendar();
+        String thisMonthName = monthNameFormat.format(startCal.getTime());
         startCal.set(Calendar.HOUR_OF_DAY, 0);
         startCal.set(Calendar.SECOND, 0);
         startCal.set(Calendar.MINUTE, 0);
         startCal.set(Calendar.MILLISECOND, 0);
-        startCal.set(Calendar.DAY_OF_MONTH, 1);
+        startCal.set(Calendar.DAY_OF_MONTH, 1);        
         Date reportStartDate = startCal.getTime();
-        startCal.set(Calendar.DAY_OF_MONTH, Calendar.getInstance().getActualMaximum(Calendar.DAY_OF_MONTH));
+        
+        startCal2.setTimeInMillis(startCal.getTimeInMillis());
+        startCal2.add(Calendar.MONTH, 1);
+        Date reportStartDate2 = startCal2.getTime();
+        String nextMonthName = monthNameFormat.format(startCal2.getTime());
+        
+        startCal.set(Calendar.DAY_OF_MONTH, startCal.getActualMaximum(Calendar.DAY_OF_MONTH));
         startCal.set(Calendar.HOUR_OF_DAY, 23);
         startCal.set(Calendar.SECOND, 59);
         startCal.set(Calendar.MINUTE, 59);
         startCal.set(Calendar.MILLISECOND, 999);
-
         Date reportEndDate = startCal.getTime();
+        
+        startCal2.set(Calendar.DAY_OF_MONTH, startCal2.getActualMaximum(Calendar.DAY_OF_MONTH));
+        startCal2.set(Calendar.HOUR_OF_DAY, 23);
+        startCal2.set(Calendar.SECOND, 59);
+        startCal2.set(Calendar.MINUTE, 59);
+        startCal2.set(Calendar.MILLISECOND, 999);
+        Date reportEndDate2 = startCal2.getTime();
+        
+       
 // payment report
         float reportTotalSuccessful = 0;
         float reportTotalDishonoured = 0;
@@ -236,17 +255,25 @@ public class FutureMapEJB implements Serializable {
 
         try {
             pl = paymentsFacade.findPaymentsByDateRange(false, true, true, true, true, reportStartDate, reportEndDate, false, null);
+            pl2 = paymentsFacade.findPaymentsByDateRange(false, true, true, true, true, reportStartDate2, reportEndDate2, false, null);
 
         } catch (Exception e) {
-            Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.WARNING, "Report Failed", e);
+            Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.WARNING, "Report Failed -- findPaymentsByDateRange", e);
             pl = new ArrayList<>();
+            pl2 = new ArrayList<>();
         }
         // the headers must match the number of columns
         String[] headers = {"Id", "Name", "Debited Amount", "Status", "Debited", "Settled", "Scheduled Amount", "Plan"};
         ArrayList<ArrayList<String>> data = new ArrayList<>();
 
+        String[] headers2 = {"Id", "Name", "Debited Amount", "Status", "Debited", "Settled", "Scheduled Amount", "Plan"};
+        ArrayList<ArrayList<String>> data2 = new ArrayList<>();
+
         String[] payTotheaders = {"Payment Type", "Total"};
         ArrayList<ArrayList<String>> payTotalsData = new ArrayList<>();
+
+        String[] payTotheaders2 = {"Payment Type", "Total"};
+        ArrayList<ArrayList<String>> payTotalsData2 = new ArrayList<>();
 
         String[] custheaders = {"Id", "Name", "Plan", "Tickets", "Last Pay Date", "Last Pay Amount", "Next Pay date", "Next Pay Amount"};
         ArrayList<ArrayList<String>> custData = new ArrayList<>();
@@ -260,8 +287,7 @@ public class FutureMapEJB implements Serializable {
         String[] casualCustomersHeaders = {"Id", "Name", "Plan", "Tickets", "Last Pay Date", "Last Pay Amount", "Next Pay date", "Next Pay Amount"};
         ArrayList<ArrayList<String>> casualCustomersData = new ArrayList<>();
 
-        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-        NumberFormat nf = NumberFormat.getCurrencyInstance();
+       
         for (Payments pay : pl) {
             ArrayList<String> row = new ArrayList<>();
             row.add(pay.getId().toString());
@@ -310,6 +336,60 @@ public class FutureMapEJB implements Serializable {
         row.add("Scheduled Payments");
         row.add(nf.format(reportTotalScheduled));
         payTotalsData.add(row);
+
+        // forecast for teh next month report
+        reportTotalSuccessful = 0;
+        reportTotalDishonoured = 0;
+        reportTotalScheduled = 0;
+        for (Payments pay : pl2) {
+            row = new ArrayList<>();
+            row.add(pay.getId().toString());
+            row.add(pay.getCustomerName().getFirstname() + " " + pay.getCustomerName().getLastname());
+            row.add(nf.format(pay.getPaymentAmount()));
+
+            if (pay.getPaymentStatus().contains(PaymentStatus.SUCESSFUL.value()) || pay.getPaymentStatus().contains(PaymentStatus.PENDING.value())) {
+                reportTotalSuccessful += pay.getScheduledAmount().floatValue();
+                if (pay.getPaymentStatus().contains(PaymentStatus.SUCESSFUL.value())) {
+                    row.add("!!InsertIntoElement!!,style=\"background-color: #be9063;\"");
+                } else {
+                    row.add("!!InsertIntoElement!!,style=\"background-color: #f49f05;\"");
+                }
+            } else if (pay.getPaymentStatus().contains(PaymentStatus.DISHONOURED.value()) || pay.getPaymentStatus().contains(PaymentStatus.FATAL_DISHONOUR.value())) {
+                reportTotalDishonoured += pay.getScheduledAmount().floatValue();
+                row.add("!!InsertIntoElement!!,style=\"background-color: #bda589;\"");
+            } else if (pay.getPaymentStatus().contains(PaymentStatus.SCHEDULED.value()) || pay.getPaymentStatus().contains(PaymentStatus.WAITING.value())) {
+                reportTotalScheduled += pay.getScheduledAmount().floatValue();
+                row.add("!!InsertIntoElement!!,style=\"background-color: #36688d;\"");
+            }
+            row.add(pay.getPaymentStatus());
+            if (pay.getDebitDate() == null) {
+                row.add("  ");
+            } else {
+                row.add(sdf.format(pay.getDebitDate()));
+            }
+            if (pay.getSettlementDate() == null) {
+                row.add("  ");
+            } else {
+                row.add(sdf.format(pay.getSettlementDate()));
+            }
+            row.add(nf.format(pay.getScheduledAmount()));
+            row.add(pay.getCustomerName().getGroupPricing().getPlanName());
+            data2.add(row);
+        }
+
+        // payment forecast totals
+        row = new ArrayList<>();
+        row.add("Successful Payments");
+        row.add(nf.format(reportTotalSuccessful));
+        payTotalsData2.add(row);
+        row = new ArrayList<>();
+        row.add("Failed Payments");
+        row.add(nf.format(reportTotalDishonoured));
+        payTotalsData2.add(row);
+        row = new ArrayList<>();
+        row.add("Scheduled Payments");
+        row.add(nf.format(reportTotalScheduled));
+        payTotalsData2.add(row);
 
         // customers report   
         ArrayList<CustomerState> acs = new ArrayList<>();
@@ -375,9 +455,13 @@ public class FutureMapEJB implements Serializable {
             }
         }
 
-        String htmlToRender = renderHtmlForObject("Payment Report", headers, data);
+        String htmlToRender = renderHtmlForObject(thisMonthName +" Payment Report", headers, data);
 
-        htmlToRender += renderHtmlForObject("Payment Totals", payTotheaders, payTotalsData);
+        htmlToRender += renderHtmlForObject(thisMonthName +" Payment Totals", payTotheaders, payTotalsData);
+
+        htmlToRender += renderHtmlForObject(nextMonthName +" Payment Forecast Report", headers2, data2);
+
+        htmlToRender += renderHtmlForObject(nextMonthName +" Payment Forecast Totals", payTotheaders2, payTotalsData2);
 
         htmlToRender += renderHtmlForObject("Active Customers Report", custheaders, custData);
 
@@ -386,6 +470,7 @@ public class FutureMapEJB implements Serializable {
         htmlToRender += renderHtmlForObject("Active Customers with No Schedule", noPayheaders, noPayData);
 
         htmlToRender += renderHtmlForObject("Active Casual Customers", casualCustomersHeaders, casualCustomersData);
+        htmlToRender += "<div><h2>END OF REPORT</h2></div>";
 
         // send report
         sendDailyReportEmail(htmlToRender);
@@ -454,7 +539,7 @@ public class FutureMapEJB implements Serializable {
             for (String cell : row) {
                 if (cell.contains("!!InsertIntoElement!!")) {
                     insertStyle = true;
-                    insertThis = cell.substring(cell.indexOf(",") +1);
+                    insertThis = cell.substring(cell.indexOf(",") + 1);
                 } else {
                     if (insertStyle == true) {
                         insertStyle = false;

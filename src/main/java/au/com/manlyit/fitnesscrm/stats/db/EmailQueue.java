@@ -86,7 +86,7 @@ public class EmailQueue implements  BaseEntity, Serializable {
     @Basic(optional = false)
     @NotNull
     @Lob
-    @Size(min = 1, max = 65535)
+    @Size(min = 1, max = 16777215)
     @Column(name = "message")
     private String message;
     @Basic(optional = false)
