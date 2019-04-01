@@ -3,6 +3,7 @@ package au.com.manlyit.fitnesscrm.stats.classes;
 import au.com.manlyit.fitnesscrm.stats.beans.ActivationBean;
 import au.com.manlyit.fitnesscrm.stats.beans.LoginBean;
 import static au.com.manlyit.fitnesscrm.stats.beans.LoginBean.generateUniqueToken;
+import au.com.manlyit.fitnesscrm.stats.beans.SessionRecurranceFacade;
 import au.com.manlyit.fitnesscrm.stats.db.SessionTimetable;
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PaginationHelper;
@@ -24,6 +25,7 @@ import java.io.IOException;
 
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -102,11 +104,15 @@ public class SessionTimetableController implements Serializable {
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.SessionBookingsFacade ejbSessionBookingsFacade;
     @Inject
+    private au.com.manlyit.fitnesscrm.stats.beans.SessionTypesFacade sessionTypesFacade;
+    @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.CustomersFacade ejbCustomersFacade;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.ActivationFacade ejbActivationFacade;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.SessionHistoryFacade sessionHistoryFacade;
+    @Inject
+    private au.com.manlyit.fitnesscrm.stats.beans.SessionRecurranceFacade sessionRecurranceFacade;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade configMapFacade;
     @Inject
@@ -348,6 +354,7 @@ public class SessionTimetableController implements Serializable {
         Object o = selectEvent.getObject();
         if (o.getClass() == SessionTimetable.class) {
             SessionTimetable st = (SessionTimetable) o;
+            current = st;
             LOGGER.log(Level.INFO, "SessionTimetable - Row Double Clicked, Name={0}, Date{1}, number of selected items={2}", new Object[]{st.getSessionTitle(), st.getSessiondate(), getMultiSelected().length});
         }
     }
@@ -494,23 +501,21 @@ public class SessionTimetableController implements Serializable {
                             hasBookingAssociatedWithIt = true;
                         }
                     }*/
-                    LOGGER.log(Level.INFO, "cloneSessionsFromTimetable:Session found - editing existing.  Id of session:{0}, name of session:{1}, time of session:{2}", new Object[]{st.getId(), st.getSessionTitle(), startCal.getTime()});
+                    LOGGER.log(Level.INFO, "cloneSessionsFromTimetable:Session found - skipping existing.  Id of session:{0}, name of session:{1}, time of session:{2}", new Object[]{st.getId(), st.getSessionTitle(), startCal.getTime()});
 
                     // if (hasBookingAssociatedWithIt == false) {
                     //    existing.setParticipantsCollection(new ArrayList<>());
                     //  } else {
-                    st.getSessionHistoryCollection().remove(existing);
-
-                    existing.setSessionTrainersCollection(ac);
-                    existing.setSessionTemplate(st);
-
-                    existing.setSessionTypesId(st.getSessionTypesId());
-                    existing.setComments(st.getComments());
-                    sessionHistoryFacade.edit(existing);
-
-                    st.getSessionHistoryCollection().add(existing);
+                    //st.getSessionHistoryCollection().remove(existing);
+                    //  existing = sessionHistoryFacade.find(existing.getId());
+                    //  existing.setSessionTrainersCollection(ac);
+                    //existing.setSessionTemplate(st);
+                    //  existing.setSessionTypesId(st.getSessionTypesId());
+                    //  existing.setComments(st.getComments());
+                    //  sessionHistoryFacade.edit(existing);
+//
+                    //st.getSessionHistoryCollection().add(existing);
                     // }
-
                 }
                 startCal.add(Calendar.DAY_OF_YEAR, 7);
             }
@@ -693,6 +698,29 @@ public class SessionTimetableController implements Serializable {
 
     public String prepareCreate() {
         current = new SessionTimetable();
+        current.setSessiondate(new Date());
+        //TODO add defaults in config map
+        try {
+            current.setSessionStyleClasses("pastel5");
+            current.setSessionTitle("Training Class");
+            current.setDurationMinutes(60);
+            current.setSessionLocationGps("-33.794883, 151.287572");
+            current.setSessionLocationLabel("Manly");
+            current.setShowBookingButton(true);
+            current.setShowSignupButton(true);
+            current.setSessionCasualRate(BigDecimal.ZERO);
+            current.setSessionMembersRate(BigDecimal.ZERO);
+            current.setRecurranceId(sessionRecurranceFacade.find(1));
+            current.setSessionTypesId(sessionTypesFacade.findASessionTypeByName("Group Training"));
+            current.setComments("Class Description");
+            current.setSessionTimetableMaxSize(10);
+            current.setSessionTimetableStatus(0);
+            current.setAdminNotes(" ");
+            current.setTrainerId(ejbCustomersFacade.find(3));
+            current.setId(-1);
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "SessionTimetable prepareCreate", e);
+        }
         selectedItemIndex = -1;
         return "Create";
     }
@@ -733,6 +761,7 @@ public class SessionTimetableController implements Serializable {
             recreateModel();
         } else {
             LOGGER.log(Level.WARNING, "setSelectedForEditing - there should only be one selection for editing and you should not see this unless the xhtml validation has been messed up.");
+            JsfUtil.addErrorMessage("You must select only 1 row to edit!");
         }
     }
 
@@ -750,15 +779,46 @@ public class SessionTimetableController implements Serializable {
         Object o = vce.getNewValue();
     }
 
+    public void onEdit(RowEditEvent event) {
+        SessionTimetable cm = (SessionTimetable) event.getObject();
+        editSessionTimetable(cm);
+    }
+
     public void editDialogue() {
-        getFacade().edit(current);
-        JsfUtil.addSuccessMessage(configMapFacade.getConfig("SessionTimetableUpdated"));
-        if (current.getSessionTimetableStatus() == TimetableSessionStatus.PUBLISHED.getValue()) {
-            // its already published so push out updates
-            cloneSessionsFromTimetable(current, DAYS_AHEAD_TO_POPULATE_TIMETABLE);
-            daysOfWeek = null;// recreate timetabel model
+        editSessionTimetable(current);
+    }
+
+    private void editSessionTimetable(SessionTimetable sessTime) {
+        try {
+            getFacade().edit(sessTime);
+            if (sessTime.getSessionTimetableStatus() == TimetableSessionStatus.PUBLISHED.getValue()) {
+                // its already published so push out updates
+                // the only thing that needs to be modifed is teh group type, date and comments
+                GregorianCalendar gc = new GregorianCalendar();
+                gc.setTime(sessTime.getSessiondate());
+                int dayOfWeek = gc.get(Calendar.DAY_OF_WEEK);
+                int hour = gc.get(Calendar.HOUR_OF_DAY);
+                int minute = gc.get(Calendar.MINUTE);
+
+                Collection<SessionHistory> csh = sessTime.getSessionHistoryCollection();
+
+                for (SessionHistory sessHist : csh) {
+                    gc.setTime(sessHist.getSessiondate());
+                    gc.set(Calendar.DAY_OF_WEEK, dayOfWeek);
+                    gc.set(Calendar.HOUR_OF_DAY, hour);
+                    gc.set(Calendar.MINUTE, minute);
+                    sessHist.setSessiondate(gc.getTime());
+                    sessHist.setSessionTypesId(sessTime.getSessionTypesId());
+                    sessionHistoryFacade.edit(sessHist);
+                }
+            }
+            recreateModel();
+            JsfUtil.addSuccessMessage(configMapFacade.getConfig("SessionTimetableUpdated"));
+        } catch (Exception e) {
+            JsfUtil.addErrorMessage(e, "Failed to Update the Session Timetable Record!");
+            LOGGER.log(Level.WARNING, "Failed to Update the Session Timetable id:{1} Record! Error:{0}", new Object[]{e, sessTime.getId()});
+
         }
-        recreateModel() ;
 
     }
 
@@ -948,13 +1008,6 @@ public class SessionTimetableController implements Serializable {
 
     public Collection<SessionTimetable> getItemsAvailable() {
         return ejbFacade.findAll();
-    }
-
-    public void onEdit(RowEditEvent event) {
-        SessionTimetable cm = (SessionTimetable) event.getObject();
-        getFacade().edit(cm);
-        recreateModel();
-        JsfUtil.addSuccessMessage("Row Edit Successful");
     }
 
     public void onCancel(RowEditEvent event) {

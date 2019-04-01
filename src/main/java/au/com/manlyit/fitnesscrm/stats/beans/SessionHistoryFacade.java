@@ -370,7 +370,11 @@ public class SessionHistoryFacade extends AbstractFacade<SessionHistory> {
             } else {
                 if (retList.size() > 1) {
                     matchingSession = retList.get(0);
-                    logger.log(Level.WARNING, "findSessionBySessionTimetable: more than 1 match found for session timetable: {0}", sessionTimestamp.toString());
+                    logger.log(Level.WARNING, "findSessionBySessionTimetable: {3} matches found for date: {0} and session timetable: id: {1},Title:{2}",new Object[]{ sessionTimestamp.toString(),st.getId(),st.getSessionTitle(),retList.size()});
+                    for(SessionHistory s:retList){
+                        logger.log(Level.WARNING, "duplicate Session History Object: id:{0}, Session Date:{1}.",new Object[]{s.getId(),s.getSessiondate()});
+                    
+                    }
                 } else {
                     logger.log(Level.INFO, "findSessionBySessionTimetable: no sessions found for session timetable: {0}", sessionTimestamp.toString());
                 }

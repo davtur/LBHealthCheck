@@ -29,7 +29,7 @@
                             <f:convertDateTime pattern="EEEE h:mm a" />
                         </h:outputText>
                         <p:calendar rendered="#{!sessionTimetableController.editSelected}" pattern="EEE h:mm a"  value="#{sessionTimetableController.selected.sessiondate}"  title="#{configMapController.getKey('CreateSessionTimetableTitle_sessiondate')}" required="true" requiredMessage="#{configMapController.getKey('CreateSessionTimetableRequiredMessage_sessiondate')}">
-                            <p:ajax event="dateSelect" listener="#{sessionTimetableController.handleDateSelect}" update="@(.bookingFormUpdate)" />
+                            <p:ajax event="dateSelect" listener="#{sessionTimetableController.handleDateSelect}"  />
                         </p:calendar>
 
                     </div>
@@ -141,7 +141,7 @@
                 <p:commandButton  styleClass="editButtons" value="Edit" rendered="#{sessionTimetableController.editSelected}" actionListener="#{sessionTimetableController.tileEditorToggle}" process="@(.editButtons)" update="@(.bookingFormUpdate) @(.editButtons) growl" />
                 <p:commandButton  styleClass="editButtons" value="View" rendered="#{!sessionTimetableController.editSelected}" actionListener="#{sessionTimetableController.tileEditorToggle}"  process="@(.editButtons)" update="@(.bookingFormUpdate) @(.editButtons) growl" />
 
-                <p:commandButton actionListener="#{sessionTimetableController.editDialogue}" value="#{configMapController.getKey('Save')}" update="@(.bookingFormUpdate) :SessionTimetableListForm :growl" oncomplete="PF('sessionTimetableControllerTable').filter()"/>
+                <p:commandButton actionListener="#{sessionTimetableController.editDialogue}" value="#{configMapController.getKey('Save')}" rendered="#{sessionTimetableController.editSelected}" update="@(.bookingFormUpdate) :SessionTimetableListForm :growl" oncomplete="PF('sessionTimetableControllerTable').filter()"/>
                <!-- <p:commandButton value="#{configMapController.getKey('Cancel')}" onclick="PF('SessionTimetableEditDialog').hide()"/> -->
             </div>
 

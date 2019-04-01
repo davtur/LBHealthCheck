@@ -558,3 +558,8 @@ ADD CONSTRAINT `fk_item_1`
   REFERENCES `fitnessStats`.`item` (`id`)
   ON DELETE CASCADE
   ON UPDATE CASCADE;
+
+
+ALTER TABLE `fitnessStats`.`session_types` 
+ADD COLUMN `post_paid` TINYINT(1) NOT NULL DEFAULT 0 AFTER `session_duration_minutes`,
+ADD COLUMN `pre_paid` TINYINT(1) NOT NULL DEFAULT 0 AFTER `post_paid`;
