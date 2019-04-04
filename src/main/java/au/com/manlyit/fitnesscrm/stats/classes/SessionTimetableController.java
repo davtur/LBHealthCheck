@@ -3,7 +3,7 @@ package au.com.manlyit.fitnesscrm.stats.classes;
 import au.com.manlyit.fitnesscrm.stats.beans.ActivationBean;
 import au.com.manlyit.fitnesscrm.stats.beans.LoginBean;
 import static au.com.manlyit.fitnesscrm.stats.beans.LoginBean.generateUniqueToken;
-import au.com.manlyit.fitnesscrm.stats.beans.SessionRecurranceFacade;
+import au.com.manlyit.fitnesscrm.stats.beans.PaymentsFacade;
 import au.com.manlyit.fitnesscrm.stats.db.SessionTimetable;
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PaginationHelper;
@@ -16,6 +16,7 @@ import au.com.manlyit.fitnesscrm.stats.classes.util.TimetableRows;
 import au.com.manlyit.fitnesscrm.stats.classes.util.TimetableScheduleEvent;
 import au.com.manlyit.fitnesscrm.stats.db.Activation;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
+import au.com.manlyit.fitnesscrm.stats.db.Payments;
 import au.com.manlyit.fitnesscrm.stats.db.Schedule;
 import au.com.manlyit.fitnesscrm.stats.db.SessionBookings;
 import au.com.manlyit.fitnesscrm.stats.db.SessionHistory;
@@ -105,6 +106,8 @@ public class SessionTimetableController implements Serializable {
     private au.com.manlyit.fitnesscrm.stats.beans.SessionBookingsFacade ejbSessionBookingsFacade;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.SessionTypesFacade sessionTypesFacade;
+    @Inject
+    private PaymentsFacade paymentsFacade;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.CustomersFacade ejbCustomersFacade;
     @Inject
@@ -1325,6 +1328,24 @@ public class SessionTimetableController implements Serializable {
                 t.setDateUsed(null);
                 ejbTicketsFacade.edit(t);
             }
+            Payments pay = sb.getPaymentId();
+            if (pay != null) {
+                try {
+                    FacesContext context = FacesContext.getCurrentInstance();
+                    EziDebitPaymentGateway eziDebitPaymentGateway = context.getApplication().evaluateExpressionGet(context, "#{ezidebit}", EziDebitPaymentGateway.class);
+
+                    LOGGER.log(Level.INFO, "Deleted payment for cancelled booking. Payment ID:{0}", new Object[]{pay.getId()});
+                    paymentsFacade.remove(pay);
+                    sb.setPaymentId(null);
+                    sb.getCustomerId().getPaymentsCollection().remove(pay);
+                    eziDebitPaymentGateway.createCombinedAuditLogAndNote(sb.getCustomerId(), pay.getCustomerName(), "PAYMENT_DELETED", "A scheduled payment missing in the gateway was deleted.", "Payment Amount:" + pay.getScheduledAmount().toPlainString() + ", Date:" + pay.getDebitDate().toString(), "DELETED");
+
+                } catch (ELException eLException) {
+                    LOGGER.log(Level.INFO, "Deleted payment FAILED.. Payment ID:{0} , expetion: {1}", new Object[]{pay.getId(), eLException.getMessage()});
+
+                }
+
+            }
             SessionHistory sh = sb.getSessionHistoryId();
             //sh.getSessionBookingsCollection().remove(sb);
             sbli.remove();
@@ -1347,11 +1368,11 @@ public class SessionTimetableController implements Serializable {
     public void purchaseSession() {
         FacesContext context = FacesContext.getCurrentInstance();
         CustomersController controller = context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
-        purchaseSessionBase(controller.getSelected(), false);
+        purchaseSessionBase(controller.getSelected(), false, bookingButtonSessionHistory);
     }
 
-    public void purchaseSessionBase(Customers c, boolean adminUser) {
-        LOGGER.log(Level.INFO, "Purchase Session button clicked.Customer Name {0} {1}", new Object[]{c.getFirstname(), c.getLastname()});
+    public void purchaseSessionBase(Customers c, boolean adminUser, SessionHistory sh) {
+        LOGGER.log(Level.INFO, "Purchase Session button clicked.Customer Name {0} {1}, Admin user:{4}, Session Date: {2}, Session Title {3}", new Object[]{c.getFirstname(), c.getLastname(), sh.getSessiondate(), sh.getSessionTemplate().getSessionTitle(), adminUser});
         FacesContext context = FacesContext.getCurrentInstance();
 
         //SessionTimetableController sessionTimetableController = context.getApplication().evaluateExpressionGet(context, "#{sessionTimetableController}", SessionTimetableController.class);
@@ -1359,18 +1380,18 @@ public class SessionTimetableController implements Serializable {
         TicketsController ticketsController = context.getApplication().evaluateExpressionGet(context, "#{ticketsController}", TicketsController.class);
 
         SimpleDateFormat sdf = new SimpleDateFormat("EEEE, d MMM yyyy HH:mm");
-        //eziDebitPaymentGateway.setSelectedCustomer(c);
         SessionBookings sb = new SessionBookings(0);
-        SessionHistory sh = bookingButtonSessionHistory;
         Date sessionPurchaseTimestamp = new Date();
         sb.setBookingTime(sessionPurchaseTimestamp);
         sb.setSessionHistoryId(sh);
         sb.setCustomerId(c);
-        //sh.getSessionBookingsCollection().size();
+        //eziDebitPaymentGateway.setSelectedCustomer(c);
 
+        //SessionHistory sh = bookingButtonSessionHistory;
+        //sh.getSessionBookingsCollection().size();
         //does the customer have any tickets available for group sessions
-        List<Tickets> ct = doesTheCustomerHaveATicketForAGroupSession(c, sb.getSessionHistoryId().getSessiondate());
-        if (ct.isEmpty() == false) {
+        List<Tickets> ct = doesTheCustomerHaveATicketForAGroupSession(c, sh.getSessiondate());
+        if (ct.isEmpty() == false && sh.getSessionTemplate().getSessionTypesId().getPostPaid() == true) { // check customer has tickets and that the session is included in a postpaid plan
             // customer has a ticket so book them in
             // TODO check class sizes arent full
             LOGGER.log(Level.INFO, "purchaseSession, customer  {0}  active in payment gateway - has {1} tickets available - booking session", new Object[]{c.getUsername()});
@@ -1379,6 +1400,7 @@ public class SessionTimetableController implements Serializable {
                 Tickets t = ct.get(0);
                 t.setDateUsed(new Date());
                 ejbTicketsFacade.edit(t);
+
                 sb.setTicketId(t);
                 sb.setStatus("TICKETED");
                 String description = "The " + sh.getSessionTemplate().getSessionTitle() + " class for " + sdf.format(sh.getSessiondate()) + " has been booked by " + c.getFirstname() + " " + c.getLastname() + " with ticket number " + t.getId().toString() + ".";
@@ -1445,11 +1467,22 @@ public class SessionTimetableController implements Serializable {
                     // customer is set up just add a payment
                     LOGGER.log(Level.INFO, "purchaseSession, customer  {0}  active in payment gateway - adding payment", c.getUsername());
 
-                    eziDebitPaymentGateway.addSinglePayment(c, price, sb.getBookingTime());
+                    Payments paymentId = eziDebitPaymentGateway.addSinglePayment(c, price, sb.getBookingTime());
                     JsfUtil.addSuccessMessage(configMapFacade.getConfig("purchaseSessionDirectDebitPaymentProcessing"));
+                    sb.setPaymentId(paymentId);
                     sb.setStatus("PURCHASE-ACTIVE");
                     sb.setStatusDescription("A new payment is being added for an existing customer");
                     success = true;
+                    ejbSessionBookingsFacade.create(sb);
+                    // have to keep entity collections in sync
+                    sb.getSessionHistoryId().getSessionBookingsCollection().add(sb);
+                    sessionHistoryFacade.edit(sb.getSessionHistoryId());
+                    sendBookingConfirmationEmail(sb, c, "system.email.sessionBooking.confirmation.template", configMapFacade.getConfig("template.sessionbooking.confirmation.email.subject"));
+
+                    recreateModel();
+
+                    PrimeFaces instance = PrimeFaces.current();
+                    instance.executeScript("PF('bookingDialog').hide()");
                 } else if (c.getPaymentParametersId().getStatusDescription().contains("Hold")) {
                     // customer is on hold notify them to contact staff and redirect customer to instant payment page
                     // if we just take them off hold without comfirmation their regular payemts may restart
@@ -1588,7 +1621,7 @@ public class SessionTimetableController implements Serializable {
      */
     public void setBookingAdminCompSelectedCust(Customers bookingAdminCompSelectedCust) {
         this.bookingAdminCompSelectedCust = bookingAdminCompSelectedCust;
-        purchaseSessionBase(bookingAdminCompSelectedCust, true);
+        purchaseSessionBase(bookingAdminCompSelectedCust, true, bookingButtonSessionHistory);
     }
 
     /**

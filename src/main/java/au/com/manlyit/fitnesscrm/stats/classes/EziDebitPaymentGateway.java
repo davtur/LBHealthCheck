@@ -3193,13 +3193,14 @@ public class EziDebitPaymentGateway implements Serializable {
         paymentsDBListFilteredItems = null;
 
     }*/
-    public void addSinglePayment(Customers cust, float paymentAmount, Date debitDate) {
+    public Payments addSinglePayment(Customers cust, float paymentAmount, Date debitDate) {
         String loggedInUser = FacesContext.getCurrentInstance().getExternalContext().getRemoteUser();
         Long amount = (long) (paymentAmount * (float) 100);
         // setAsyncOperationRunning(true);
-        paymentBean.addNewPayment(cust, debitDate, amount, true, loggedInUser, sessionId, getDigitalKey(), futureMap, paymentBean, 0);
+        Payments paymentId = paymentBean.addNewPayment(cust, debitDate, amount, true, loggedInUser, sessionId, getDigitalKey(), futureMap, paymentBean, 0);
         paymentDBList = null;
         paymentsDBListFilteredItems = null;
+        return paymentId;
     }
 
     public void addSinglePayment(ActionEvent actionEvent) {

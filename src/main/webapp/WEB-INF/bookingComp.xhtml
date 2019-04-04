@@ -62,11 +62,11 @@
 
                                 </span></div>
                             <div class="ui-g-12">
-                                <span class="DispBlock " ><font class="Fs14 FontBold black">Casual Rate: </font> 
-                                    <h:outputText value="#{sessHist.sessionTemplate.sessionCasualRate}" rendered="#{empty  facesContext.externalContext.remoteUser}">
+                                <span class="DispBlock " ><font class="Fs14 FontBold black"><h:outputText styleClass=" Fs18 FontBold red" rendered="#{!sessionTimetableController.bookingButtonSessionHistory.sessionTemplate.sessionTypesId.postPaid}" value="Price:" /> </font> 
+                                    <h:outputText value="#{sessHist.sessionTemplate.sessionCasualRate}" rendered="#{empty  facesContext.externalContext.remoteUser and !sessionTimetableController.bookingButtonSessionHistory.sessionTemplate.sessionTypesId.postPaid}">
                                         <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
                                     </h:outputText>
-                                    <h:outputText value="#{sessHist.sessionTemplate.sessionMembersRate}" rendered="#{not empty  facesContext.externalContext.remoteUser}" >
+                                    <h:outputText value="#{sessHist.sessionTemplate.sessionMembersRate}" rendered="#{not empty  facesContext.externalContext.remoteUser and !sessionTimetableController.bookingButtonSessionHistory.sessionTemplate.sessionTypesId.postPaid}" >
                                         <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
                                     </h:outputText>
                                 </span>
@@ -90,7 +90,11 @@
                 <p:messages showDetail="true"/>
             </div>
 
+            <div class="ui-g-12">
 
+                <h:outputText styleClass=" Fs18 FontBold red" rendered="#{!sessionTimetableController.bookingButtonSessionHistory.sessionTemplate.sessionTypesId.postPaid}" value="NOTE: This Session is not included in monthly membership. " />
+
+            </div>
             <div class="EmptyBox10">
 
             </div>

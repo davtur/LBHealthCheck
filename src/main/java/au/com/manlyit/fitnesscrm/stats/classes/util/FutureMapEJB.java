@@ -1375,7 +1375,7 @@ public class FutureMapEJB implements Serializable {
      * @param numpayments
      *
      */
-    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    //@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public synchronized void processCallbackFromOnlinePaymentForm(String remoteUser, String sessionID,
             String uref, String cref,
             String fname, String lname,

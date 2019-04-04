@@ -32,7 +32,7 @@
                     widgetVar="sessionTimetableControllerTable" 
                     var="item"  
                     reflow="true"
-                    
+
                     paginator="true" 
                     rows="50"  
                     paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  
@@ -192,7 +192,9 @@
                                 <h:outputText value="#{item.sessionTypesId.name}"/>
                             </f:facet>
                             <f:facet name="input">
-                                <p:inputText value="#{item.sessionTypesId.name}" label="#{configMapController.getKey('ListSessionTimetableTitle_sessionTypesId')}" />
+                                <p:selectOneMenu  converter="sessionTypesControllerConverter" value="#{item.sessionTypesId}"  label="#{configMapController.getKey('CreateSessionTimetableTitle_sessionTypesId')}" >
+                                    <f:selectItems value="#{sessionTypesController.itemsAvailable}"/>
+                                </p:selectOneMenu>
                             </f:facet>
                         </p:cellEditor> 
 

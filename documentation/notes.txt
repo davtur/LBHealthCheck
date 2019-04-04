@@ -1,4 +1,8 @@
 
+## wildfly SSL parameters fro ubuntu 18.04
+-Dorg.wildfly.openssl.path.ssl=/usr/lib/x86_64-linux-gnu/libssl.so.1.1 -Dorg.wildfly.openssl.path.crypto=/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+
+
 ## test websocket connection
 
 david@david-h8-1210a:~$ curl -i -N -H "Connection: Upgrade" -H "Upgrade: websocket" -H "Host: test-services.manlybeachfemalefitness.com.au" -H "Origin: https://https://test-services.manlybeachfemalefitness.com.au" https://test-services.manlybeachfemalefitness.com.au/FitnessStats/
@@ -200,6 +204,7 @@ mvn install:install-file -Dfile=/home/david/NetBeansProjects/libraries/primeface
 
 mvn install:install-file -Dfile=/home/david/NetBeansProjects/libraries/Primefaces-purchased-themes/california-1.0.1/california-theme-1.0.1.jar -DgroupId=org.primefaces.themes -DartifactId=spark -Dversion=1.0.1 -Dpackaging=jar -DgeneratePom=true -DlocalRepositoryPath=/home/david/NetBeansProjects/FitnessCRM/repo
 
+mvn install:install-file -Dfile=/home/david/NetBeansProjects/libraries/primefaces-6.2.18/primefaces-6.2.18.jar -DgroupId=org.primefaces -DartifactId=primefaces -Dversion=6.2.18 -Dpackaging=jar -DgeneratePom=true -DlocalRepositoryPath=/home/david/NetBeansProjects/FitnessCRM/repo
 
 3: Modify your pom file to use this local repo:
 

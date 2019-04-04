@@ -6,10 +6,10 @@ import au.com.manlyit.fitnesscrm.stats.classes.util.PaginationHelper;
 import au.com.manlyit.fitnesscrm.stats.beans.SessionTypesFacade;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.enterprise.context.SessionScoped;
@@ -285,6 +285,15 @@ public class SessionTypesController implements Serializable {
 
     public Collection<SessionTypes> getItemsAvailable() {
         return ejbFacade.findAllSessionTypesOrderByName(true);
+    }
+    public Collection<SessionTypes> getPtItemsAvailable() {
+        ArrayList<SessionTypes> alst = new ArrayList<>();
+        for(SessionTypes st:ejbFacade.findAllSessionTypesOrderByName(true)){
+            if(st.getName().contains("Personal Training")){
+                alst.add(st);
+            }
+        }
+        return alst;
     }
      public List<SessionTypes> getAllSessionTypes() {
         return ejbFacade.findAllSessionTypesOrderByName(true);

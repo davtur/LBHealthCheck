@@ -8,7 +8,7 @@
                 xmlns:p="http://primefaces.org/ui" >
 
 
-    <p:dialog header="#{configMapController.getKey('BookingDialogueHeader')}" widgetVar="bookingAdminDialog" modal="false"  fitViewport="true" responsive="true" appendTo="@(body)" resizable="true">
+    <p:dialog header="#{configMapController.getKey('BookingDialogueHeader')}" widgetVar="bookingAdminDialog" modal="true"  fitViewport="true" responsive="true" appendTo="@(body)" resizable="true" style="max-width:450px">
         <h:form id="bookingAdminForm" styleClass="bookingFormUpdate ">
 
 
@@ -95,39 +95,50 @@
 
             </div>
 
-
-            <p:dataList  id="scroll"   value="#{sessionHistoryController.selectableActiveCustomers}" var="cust" type="none" rowIndexVar="rowIndex"  >
-                <!-- <f:attribute name="filter" value="true" />-->
-                <p:column>
-                    <h:panelGrid id="customerPanel" columns="3" >
-                        <p:graphicImage value="#{customerImagesController.imageThumbnail}" width="130px">
-                            <f:param name="imageId" value="#{cust.profileImage.id}"/>
-                        </p:graphicImage>
-                        <h:panelGrid  columns="1" >
-                            <h:outputText value="#{cust.firstname} #{cust.lastname}" style="padding-left: 30px"/>
-                            <h:outputText value="Valid Tickets: #{sessionTimetableController.numberOfValidTickets(cust)}" style="padding-left: 30px"/>
-                        </h:panelGrid>
-                    </h:panelGrid>
-                    <div class="ui-g-12">
-                        <div class="ui-g-3">
-                            <p:commandButton styleClass="Fs14" icon="fa fa-dollar-sign white "  rendered="#{!sessionTimetableController.isSessionAlreadyBookedDataList(cust) and sessionTimetableController.numberOfValidTickets(cust) == 0}"    value="#{configMapController.getKey('BookingFormAdminPurchaseSessionLink')}" update="@(.bookingFormUpdate) :growl ">                
-                                <f:setPropertyActionListener value="#{cust}" target="#{sessionTimetableController.bookingAdminCompSelectedCust}" />
-                            </p:commandButton>
-                          <p:commandButton styleClass="Fs14" icon="fa fa-check white "  rendered="#{!sessionTimetableController.isSessionAlreadyBookedDataList(cust) and sessionTimetableController.numberOfValidTickets(cust) > 0}"    value="#{configMapController.getKey('BookingFormBookSessionLink')}" update="@(.bookingFormUpdate) :growl ">                
-                                <f:setPropertyActionListener value="#{cust}" target="#{sessionTimetableController.bookingAdminCompSelectedCust}" />
-                            </p:commandButton>
-
-                            
-                            <p:commandButton styleClass="redBg" icon=" fa fa-times-circle white Fs14"  rendered="#{sessionTimetableController.isSessionAlreadyBookedDataList(cust)}"   value="#{configMapController.getKey('BookingFormCancelSessionLink')}" update="@(.bookingFormUpdate) :growl ">                
-                                <f:setPropertyActionListener value="#{cust}" target="#{sessionTimetableController.bookingAdminCompCancelSelectedCust}" />
-                            </p:commandButton>
-                        </div>
-                    </div>
-                </p:column>
-            </p:dataList>
-
             <div class="ui-g-12">
-                <div class="ui-g-3">
+                <div class="ui-inputgroup">
+                    
+                    <p:inputText value="#{sessionHistoryController.filterValue}" placeholder="Filter By Name" styleClass=" ui-selectlistbox-filter " >
+                        <p:ajax event="keyup" update="scroll" listener="#{sessionHistoryController.filterList()}" />
+                    </p:inputText>
+                    <span class="ui-inputgroup-addon"><i class="ui-icon ui-icon-search"></i></span>
+                </div>
+            </div>
+          
+            <div class="ui-g-12">
+                <p:dataList  id="scroll"   value="#{sessionHistoryController.filteredSelectableActiveCustomers}" var="cust" type="none"  rowIndexVar="rowIndex"  >
+                    <f:attribute name="filter" value="true" />
+                    <p:column>
+                        <h:panelGrid id="customerPanel" columns="3" >
+                            <p:graphicImage value="#{customerImagesController.imageThumbnail}" width="130px">
+                                <f:param name="imageId" value="#{cust.profileImage.id}"/>
+                            </p:graphicImage>
+                            <h:panelGrid  columns="1" >
+                                <h:outputText value="#{cust.firstname} #{cust.lastname}" style="padding-left: 30px"/>
+                                <h:outputText value="Valid Tickets: #{sessionTimetableController.numberOfValidTickets(cust)}" style="padding-left: 30px"/>
+                            </h:panelGrid>
+                        </h:panelGrid>
+                        <div class="ui-g-12">
+                            <div class="ui-g-3">
+                                <p:commandButton styleClass="Fs14" icon="fa fa-dollar-sign white "  rendered="#{!sessionTimetableController.isSessionAlreadyBookedDataList(cust) and sessionTimetableController.numberOfValidTickets(cust) == 0}"    value="#{configMapController.getKey('BookingFormAdminPurchaseSessionLink')}" update="@(.bookingFormUpdate) :growl ">                
+                                    <f:setPropertyActionListener value="#{cust}" target="#{sessionTimetableController.bookingAdminCompSelectedCust}" />
+                                </p:commandButton>
+                                <p:commandButton styleClass="Fs14" icon="fa fa-check white "  rendered="#{!sessionTimetableController.isSessionAlreadyBookedDataList(cust) and sessionTimetableController.numberOfValidTickets(cust) > 0}"    value="#{configMapController.getKey('BookingFormBookSessionLink')}" update="@(.bookingFormUpdate) :growl ">                
+                                    <f:setPropertyActionListener value="#{cust}" target="#{sessionTimetableController.bookingAdminCompSelectedCust}" />
+                                </p:commandButton>
+
+
+                                <p:commandButton styleClass="redBg" icon=" fa fa-times-circle white Fs14"  rendered="#{sessionTimetableController.isSessionAlreadyBookedDataList(cust)}"   value="#{configMapController.getKey('BookingFormCancelSessionLink')}" update="@(.bookingFormUpdate) :growl ">                
+                                    <f:setPropertyActionListener value="#{cust}" target="#{sessionTimetableController.bookingAdminCompCancelSelectedCust}" />
+                                </p:commandButton>
+                            </div>
+                        </div>
+                    </p:column>
+                </p:dataList>
+            </div>
+            <div class="Seperator"></div>
+            <div class="ui-g-12">
+                <div class="ui-g-12">
                     <p:commandButton icon=" fa fa-times-circle white Fs14" id="dialogueDiscard" onclick=" PF('bookingAdminDialog').hide()"  actionListener="#{customersController.cancelCreateDialogue}" value="#{configMapController.getKey('CancelSignupLink')}" update=":growl"/>                
                 </div>
             </div>

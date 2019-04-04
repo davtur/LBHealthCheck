@@ -78,12 +78,14 @@ public class SessionHistoryController implements Serializable {
     private PfSelectableDataModel<SessionHistory> customerOrTrainerItems = null;
     private PfSelectableDataModel<SessionHistory> participantItems = null;
     private List<Customers> selectableActiveCustomers = null;
+    private List<Customers> filteredSelectableActiveCustomers = null;
+    private String filterValue = "";
     private List<SessionHistory> filteredItems;
     private List<SessionHistory> customerOrTrainerfilteredItems;
     private List<SessionHistory> participantFilteredItems;
     private Customers[] participantsArray;
     private Boolean[] checkedCustomers;
-    
+
     private SessionHistory[] sessionHistoryItems;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.SessionHistoryFacade ejbFacade;
@@ -406,7 +408,7 @@ public class SessionHistoryController implements Serializable {
             return null;
         }
     }
-    
+
     public void createDialogueDatalist() {
         try {
             attendingCustomers = new ArrayList<>();
@@ -419,10 +421,10 @@ public class SessionHistoryController implements Serializable {
             }
             participants.setTarget(attendingCustomers);
             createDialogue();
-            
+
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
-            
+
         }
     }
 
@@ -436,13 +438,14 @@ public class SessionHistoryController implements Serializable {
         }
     }
 
-    public String createStat(){
-        
+    public String createStat() {
+
         createDialogue();
         return "List";
     }
-    
+
     public void createDialogue() {
+        //TODO - remove ticket for PT sessions
         try {
             updateCurrentParticipants(participants.getTarget());
             updateCurrentTrainers(getTrainers());
@@ -839,12 +842,12 @@ public class SessionHistoryController implements Serializable {
         return activeCustomers;
 
     }
-    
-    public void selectManyValueChangeListener(ValueChangeEvent vce ){
+
+    public void selectManyValueChangeListener(ValueChangeEvent vce) {
         logger.log(Level.INFO, "selectManyListener() selection occurred ");
     }
-    
-    public void selectManyListener(){
+
+    public void selectManyListener() {
         logger.log(Level.INFO, "selectManyListener() selection occurred ");
     }
 
@@ -1177,6 +1180,18 @@ public class SessionHistoryController implements Serializable {
         this.checkedCustomers = checkedCustomers;
     }
 
+    public void filterList() {
+        List<Customers> actCust = getSelectableActiveCustomers();
+        List<Customers> filteredList = new ArrayList<>();
+        for (Customers c : actCust) {
+            String name = c.getFirstname() + " " + c.getLastname();
+            if (name.toLowerCase().contains(getFilterValue().toLowerCase())) {
+                filteredList.add(c);
+            }
+        }
+        setFilteredSelectableActiveCustomers(filteredList);
+    }
+
     /**
      * @return the selectableActiveCustomers
      */
@@ -1286,5 +1301,37 @@ public class SessionHistoryController implements Serializable {
                 throw new IllegalArgumentException("object " + object + " is of type " + object.getClass().getName() + "; expected type: " + SessionHistoryController.class.getName());
             }
         }
+    }
+
+    /**
+     * @return the filteredSelectableActiveCustomers
+     */
+    public List<Customers> getFilteredSelectableActiveCustomers() {
+        if(filteredSelectableActiveCustomers == null || filteredSelectableActiveCustomers.isEmpty()){
+           filteredSelectableActiveCustomers = getSelectableActiveCustomers();
+        }
+        return filteredSelectableActiveCustomers;
+    }
+
+    /**
+     * @param filteredSelectableActiveCustomers the
+     * filteredSelectableActiveCustomers to set
+     */
+    public void setFilteredSelectableActiveCustomers(List<Customers> filteredSelectableActiveCustomers) {
+        this.filteredSelectableActiveCustomers = filteredSelectableActiveCustomers;
+    }
+
+    /**
+     * @return the filterValue
+     */
+    public String getFilterValue() {
+        return filterValue;
+    }
+
+    /**
+     * @param filterValue the filterValue to set
+     */
+    public void setFilterValue(String filterValue) {
+        this.filterValue = filterValue;
     }
 }

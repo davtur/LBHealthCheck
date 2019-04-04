@@ -67,6 +67,12 @@ public class SessionTypes implements  BaseEntity, Serializable {
     @NotNull
     @Column(name = "session_duration_minutes")
     private int sessionDurationMinutes;
+    
+    @Column(name = "post_paid")
+    private Boolean postPaid;
+    @Column(name = "pre_paid")
+    private Boolean prePaid;
+    
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "taskId")
     private Collection<ContractorRateToTaskMap> contractorRateToTaskMapCollection;
@@ -190,6 +196,34 @@ public class SessionTypes implements  BaseEntity, Serializable {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    /**
+     * @return the prePaid
+     */
+    public Boolean getPrePaid() {
+        return prePaid;
+    }
+
+    /**
+     * @param prePaid the prePaid to set
+     */
+    public void setPrePaid(Boolean prePaid) {
+        this.prePaid = prePaid;
+    }
+
+    /**
+     * @return the postPaid
+     */
+    public Boolean getPostPaid() {
+        return postPaid;
+    }
+
+    /**
+     * @param postPaid the postPaid to set
+     */
+    public void setPostPaid(Boolean postPaid) {
+        this.postPaid = postPaid;
     }
 
    
