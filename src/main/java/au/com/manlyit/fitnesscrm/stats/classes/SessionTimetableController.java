@@ -1347,9 +1347,9 @@ public class SessionTimetableController implements Serializable {
 
             }
             SessionHistory sh = sb.getSessionHistoryId();
-            //sh.getSessionBookingsCollection().remove(sb);
+            sh.getSessionBookingsCollection().remove(sb);
             sbli.remove();
-            //sessionHistoryFacade.edit(sh);
+            sessionHistoryFacade.edit(sh);
             ejbSessionBookingsFacade.remove(sb);
             recreateModel();
             FacesContext context = FacesContext.getCurrentInstance();
