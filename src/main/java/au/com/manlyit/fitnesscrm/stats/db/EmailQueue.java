@@ -6,8 +6,10 @@ package au.com.manlyit.fitnesscrm.stats.db;
 
 import au.com.manlyit.fitnesscrm.stats.classes.util.BaseEntity;
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Date;
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -16,6 +18,8 @@ import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -51,13 +55,6 @@ import org.eclipse.persistence.config.CacheIsolationType;
     @NamedQuery(name = "EmailQueue.findBySendDate", query = "SELECT e FROM EmailQueue e WHERE e.sendDate = :sendDate"),
     @NamedQuery(name = "EmailQueue.findByCreateDate", query = "SELECT e FROM EmailQueue e WHERE e.createDate = :createDate")})
 public class EmailQueue implements  BaseEntity, Serializable {
-    private static final long serialVersionUID = 1L;
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Basic(optional = false)
-    @NotNull
-    @Column(name = "id")
-    private Integer id;
     @Basic(optional = false)
     @NotNull
     @Lob
@@ -65,42 +62,52 @@ public class EmailQueue implements  BaseEntity, Serializable {
     @Column(name = "toaddresses")
     private String toaddresses;
     @Basic(optional = false)
-    @NotNull
+    @NotNull()
     @Size(min = 1, max = 127)
     @Column(name = "fromaddress")
     private String fromaddress;
-    @Lob
+    @Lob()
     @Size(max = 65535)
     @Column(name = "ccaddresses")
     private String ccaddresses;
-    @Lob
-    @Size(max = 65535)
-    @Column(name = "bccaddresses")
-    private String bccaddresses;
     @Basic(optional = false)
     @NotNull
-    @Lob
+    @Lob()
     @Size(min = 1, max = 65535)
     @Column(name = "subject")
     private String subject;
     @Basic(optional = false)
-    @NotNull
-    @Lob
+    @NotNull()
+    @Lob()
     @Size(min = 1, max = 16777215)
     @Column(name = "message")
     private String message;
     @Basic(optional = false)
-    @NotNull
+    @NotNull()
     @Column(name = "status")
     private int status;
-    @Column(name = "sendDate")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date sendDate;
     @Basic(optional = false)
     @NotNull
     @Column(name = "createDate")
     @Temporal(TemporalType.TIMESTAMP)
     private Date createDate;
+    @Lob()
+    @Size(max = 65535)
+    @Column(name = "bccaddresses")
+    private String bccaddresses;
+   
+    private static final long serialVersionUID = 1L;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "id")
+    private Integer id;
+    @Column(name = "sendDate")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date sendDate;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "emailQueue")
+    private Collection<EmailAttachments> emailAttachmentCollection;
 
     public EmailQueue() {
     }
@@ -125,6 +132,56 @@ public class EmailQueue implements  BaseEntity, Serializable {
 
     public void setId(Integer id) {
         this.id = id;
+    }
+
+
+    public Date getSendDate() {
+        return sendDate;
+    }
+
+    public void setSendDate(Date sendDate) {
+        this.sendDate = sendDate;
+    }
+
+
+    @Override
+    public int hashCode() {
+        int hash = 0;
+        hash += (id != null ? id.hashCode() : 0);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        // TODO: Warning - this method won't work in the case the id fields are not set
+        if (!(object instanceof EmailQueue)) {
+            return false;
+        }
+        EmailQueue other = (EmailQueue) object;
+        if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return "au.com.manlyit.fitnesscrm.stats.db.EmailQueue[ id=" + id + " ]";
+    }
+
+
+    /**
+     * @return the emailAttachmentCollection
+     */
+    public Collection<EmailAttachments> getEmailAttachmentCollection() {
+        return emailAttachmentCollection;
+    }
+
+    /**
+     * @param emailAttachmentCollection the emailAttachmentCollection to set
+     */
+    public void setEmailAttachmentCollection(Collection<EmailAttachments> emailAttachmentCollection) {
+        this.emailAttachmentCollection = emailAttachmentCollection;
     }
 
     public String getToaddresses() {
@@ -160,9 +217,6 @@ public class EmailQueue implements  BaseEntity, Serializable {
     }
 
     public String getMessage() {
-        if(message == null){
-            message = "";
-        }
         return message;
     }
 
@@ -178,14 +232,6 @@ public class EmailQueue implements  BaseEntity, Serializable {
         this.status = status;
     }
 
-    public Date getSendDate() {
-        return sendDate;
-    }
-
-    public void setSendDate(Date sendDate) {
-        this.sendDate = sendDate;
-    }
-
     public Date getCreateDate() {
         return createDate;
     }
@@ -194,43 +240,13 @@ public class EmailQueue implements  BaseEntity, Serializable {
         this.createDate = createDate;
     }
 
-    @Override
-    public int hashCode() {
-        int hash = 0;
-        hash += (id != null ? id.hashCode() : 0);
-        return hash;
-    }
-
-    @Override
-    public boolean equals(Object object) {
-        // TODO: Warning - this method won't work in the case the id fields are not set
-        if (!(object instanceof EmailQueue)) {
-            return false;
-        }
-        EmailQueue other = (EmailQueue) object;
-        if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
-            return false;
-        }
-        return true;
-    }
-
-    @Override
-    public String toString() {
-        return "au.com.manlyit.fitnesscrm.stats.db.EmailQueue[ id=" + id + " ]";
-    }
-
-    /**
-     * @return the bccaddresses
-     */
     public String getBccaddresses() {
         return bccaddresses;
     }
 
-    /**
-     * @param bccaddresses the bccaddresses to set
-     */
     public void setBccaddresses(String bccaddresses) {
         this.bccaddresses = bccaddresses;
     }
-    
+
+   
 }

@@ -4,7 +4,9 @@
  */
 package au.com.manlyit.fitnesscrm.stats.classes.util;
 
+import au.com.manlyit.fitnesscrm.stats.db.EmailAttachments;
 import com.sun.mail.smtp.SMTPTransport;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -17,7 +19,6 @@ import javax.mail.Session;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 

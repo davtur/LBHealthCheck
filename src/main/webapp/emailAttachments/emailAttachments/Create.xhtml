@@ -1,0 +1,26 @@
+
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                >
+    <p:dialog id="EmailAttachmentsCreateDlg" widgetVar="EmailAttachmentsCreateDialog" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('CreateEmailAttachmentsTitle')}">
+
+        <h:form id="EmailAttachmentsCreateForm">
+            <h:panelGroup id="display">
+                <p:panelGrid columns="2" rendered="#{emailAttachmentsController.selected != null}">
+                    <p:outputLabel value="#{configMapController.getKey('CreateEmailAttachmentsLabel_id')}" for="id" />
+                    <p:inputText id="id" value="#{emailAttachmentsController.selected.id}" title="#{configMapController.getKey('CreateEmailAttachmentsTitle_id')}" required="true" requiredMessage="#{configMapController.getKey('CreateEmailAttachmentsRequiredMessage_id')}"/>
+                    <p:outputLabel value="#{configMapController.getKey('CreateEmailAttachmentsLabel_file')}" for="file" />
+                    <p:inputTextarea rows="4" cols="30" id="file"  value="#{emailAttachmentsController.selected.file}"  title="#{configMapController.getKey('CreateEmailAttachmentsTitle_file')}" required="true" requiredMessage="#{configMapController.getKey('CreateEmailAttachmentsRequiredMessage_file')}"/>
+                </p:panelGrid>
+                <p:commandButton actionListener="#{emailAttachmentsController.createDialogue}" value="#{configMapController.getKey('Save')}" update="display,:EmailAttachmentsListForm:datalist,:growl" oncomplete="handleSubmit(args,'EmailAttachmentsCreateDialog');PF('emailAttachmentsControllerTable').filter()"/>
+                <p:commandButton value="#{configMapController.getKey('Cancel')}" onclick="PF('EmailAttachmentsCreateDialog').hide()"/>
+            </h:panelGroup>
+        </h:form>
+    </p:dialog>
+
+</ui:composition>    
+<p> Generated from template ( JSF_from_entity_wizard/StandardJSF/create.ftl  )- Dave 23rd October 2015 </p>
+

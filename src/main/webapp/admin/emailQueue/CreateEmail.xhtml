@@ -10,9 +10,9 @@
     <ui:define name="title">
         <h:outputText value="#{configMapController.getKey('CreateEmailTitle')}"></h:outputText>
     </ui:define>
-    <ui:define name="body">
+    <ui:define name="body" >
 
-        <h:form id="sendEmailForm">
+        <h:form id="sendEmailForm" enctype="multipart/form-data">
             <div class="ui-g  border-box">
 
 
@@ -21,11 +21,16 @@
                     <h:outputText value="#{configMapController.getKey('CreateEmailLabel_picker')}" />
                     <p:pickList id="picker"  value="#{emailQueueController.participants}"
                                 var="cust"
-
                                 itemLabel="#{cust.firstname} #{cust.lastname}"
-                                itemValue="#{cust}" converter="customersControllerConverter">
+                                itemValue="#{cust}" 
+                                showSourceFilter="true"
+                                showTargetFilter="true"
+                                filterMatchMode="contains"
+                                responsive="true"
+                                converter="customersControllerConverter">
                         <f:facet name="sourceCaption">Customers</f:facet>
                         <f:facet name="targetCaption">Email Recipients List</f:facet>
+                        <p:ajax event="transfer" listener="#{emailQueueController.onTransfer}" update="EmailBCCAddress" />
                     </p:pickList>
 
                     <p:dialog  modal="true" showEffect="fade" hideEffect="fade" widgetVar="cityDialog">
@@ -47,7 +52,8 @@
                 <div class="ui-g-12">
                     <div class="ui-g-2">
                         <p:outputLabel value="#{configMapController.getKey('CreateEmailLabel_senddate')}" for="sd" />
-                    </div><div class="ui-g-10">
+                    </div>
+                    <div class="ui-g-10">
                         <p:calendar id="sd"  value="#{emailQueueController.selected.sendDate}"  pattern="dd/MM/yyyy HH:mm"  title="#{configMapController.getKey('CreateEmailTitle_senddate')}"  >
                             <p:ajax event="dateSelect"  listener="#{emailQueueController.handleDateSelect}" update=":growl " />
                         </p:calendar>   
@@ -55,28 +61,65 @@
                     </div>
                     <div class="ui-g-2">
                         <p:outputLabel value="#{configMapController.getKey('ViewEmailTemplatesTitle_name')}" for="selectTemplate" />
-                    </div><div class="ui-g-10"> 
+                    </div>
+                    <div class="ui-g-10"> 
                         <p:selectOneMenu  id="selectTemplate" valueChangeListener="#{emailQueueController.selectOneMenuValueChangeListener}"  converter="emailTemplatesControllerConverter"  value="#{emailQueueController.selectedTemplate}" label="#{configMapController.getKey('ViewEmailTemplatesTitle_name')}" >
                             <f:selectItems value="#{emailTemplatesController.adminEmailTemplates}"  var="template" itemLabel="#{template.name}" itemValue="#{template}"/>
                             <p:ajax update="@(.updateEmailTemplatePopup)" event="change"/>
                         </p:selectOneMenu>
-                    </div> <div class="ui-g-2">
+                    </div>
+                    <div class="ui-g-2">
                         <p:outputLabel value="#{configMapController.getKey('CreateEmailLabel_fromaddress')}" for="EmailFromAddress" />
-                    </div><div class="ui-g-10">
+                    </div>
+                    <div class="ui-g-10">
                         <h:inputText styleClass="emailEditorInput" onfocus="this.select()" id="EmailFromAddress" value="#{emailQueueController.selected.fromaddress}" title="#{configMapController.getKey('CreateEmailTitle_EmailFromAddress')}" required="true" requiredMessage="#{configMapController.getKey('CreateEmailRequiredMessage_EmailFromAddress')}">
                             <f:validator validatorId="au.com.manlyit.fitnesscrm.stats.classes.util.EmailValidator" />
                             <p:ajax event="change" />
                         </h:inputText>
-                    </div><div class="ui-g-2">
+                    </div>
+                    <div class="ui-g-2">
                         <p:outputLabel value="#{configMapController.getKey('CreateEmailLabel_ccaddress')}" for="EmailCCAddress" />
-                    </div><div class="ui-g-10">
+                    </div>
+                    <div class="ui-g-10">
                         <h:inputText styleClass="emailEditorInput" onfocus="this.select()" id="EmailCCAddress" value="#{emailQueueController.selected.ccaddresses}" title="#{configMapController.getKey('CreateEmailTitle_EmailCCAddress')}" >
                             <f:validator validatorId="au.com.manlyit.fitnesscrm.stats.classes.util.EmailValidator"  />
                             <p:ajax event="change" />
                         </h:inputText>
-                    </div><div class="ui-g-2">
+                    </div>
+                    <div class="ui-g-2">
+                        <p:outputLabel value="#{configMapController.getKey('CreateEmailLabel_bccaddress')}" for="EmailBCCAddress" />
+                    </div>
+                    <div class="ui-g-10">
+                        <p:outputPanel style="border:1px">
+                            <h:outputText styleClass="emailEditorInput"  id="EmailBCCAddress" value="#{emailQueueController.selected.bccaddresses}" title="#{configMapController.getKey('CreateEmailTitle_EmailBCCAddress')}" />
+                        </p:outputPanel>
+                    </div>
+                </div>
+                <div class="ui-g-12">
+                    
+                    <div class="ui-g-2">
+                        <p:outputLabel value="#{configMapController.getKey('CreateEmailLabel_uploadFile')}" for="fileUploader1"  />
+                    </div>
+                    <div class="ui-g-10">
+                        <p:fileUpload id="fileUploader1" fileUploadListener="#{emailQueueController.handleFileUpload}" update="growl" sizeLimit="10000000" invalidSizeMessage="Your file is too big. The file size limit is 10MB."/>
+                    </div>
+
+                    <div class="ui-g-2">
+                        <p:outputLabel value="#{configMapController.getKey('CreateEmailLabel_attachmentsList')}"  for="outPanel1" />
+                    </div>
+                    <div class="ui-g-10">
+                        <p:outputPanel id="outPanel1">
+                            <p:dataList value="#{emailQueueController.emailAttachmentsList}" var="attachment" >
+                                <h:outputText value="#{attachment.fileName}" />
+                            </p:dataList>
+                        </p:outputPanel>
+                    </div>
+
+
+                    <div class="ui-g-2">
                         <p:outputLabel value="#{configMapController.getKey('CreateEmailLabel_subject')}" for="emailSubject" />
-                    </div><div class="ui-g-10">
+                    </div>
+                    <div class="ui-g-10">
                         <h:inputText styleClass="emailEditorInput" onfocus="this.select()" id="emailSubject" value="#{emailQueueController.selected.subject}" title="#{configMapController.getKey('CreateEmailTitle_subject')}" required="true" requiredMessage="#{configMapController.getKey('CreateEmailRequiredMessage_subject')}">
                             <p:ajax event="change" />
                         </h:inputText>
@@ -84,35 +127,33 @@
 
                 </div>
                 <div class="ui-g-12">
-                    <div class="ui-g-2">
-
+                     <div class="ui-g-1">
+                        <p:commandButton value="Preview" update="display" oncomplete="PF('dlg').show()"   icon="ui-icon ui-icon-disk" /> 
+                    </div>
+                    <div class="ui-g-1">
+                        <p:commandButton type="button" value="Clear" onclick="PF('editor').clear()"  update="display"     icon="ui-icon ui-icon-close" />  
+                    </div> 
+                    <div class="ui-g-1">
                         <p:commandButton   ajax="false"   action="#{emailQueueController.sendTheBulkEmail}" value="#{configMapController.getKey('CreateEmailSaveLink')}" />
                     </div>
                     <div class="ui-g-2">
                         <p:commandButton   ajax="false"   action="#{emailQueueController.prepareList}" value="#{configMapController.getKey('CreateEmailShowAllLink')}" immediate="true"/>
                     </div>
-                    <div class="ui-g-2">
-                        <p:commandButton value="Preview" update="display" oncomplete="PF('dlg').show()"  
-                                         icon="ui-icon ui-icon-disk" /> 
-                    </div>
-                    <div class="ui-g-2">
-                        <p:commandButton type="button" value="Clear" onclick="PF('editor').clear()"  
-                                         icon="ui-icon ui-icon-close" />  
-                    </div> 
+                   
+                   
                 </div>
-
                 <div class="ui-g-12">
                     <p:outputLabel value="#{configMapController.getKey('CreateEmailLabel_editorbox')}" for="editor1" />
-                    <p:textEditor id="editor1" height="300"  styleClass="emailEditor" value="#{emailQueueController.selected.message}" widgetVar="editor" > 
-                        <p:ajax event="change" />
-                    </p:textEditor>
+                    <p:editor id="editor1" height="500"  styleClass="emailEditor"  value="#{emailQueueController.selected.message}" valueChangeListener="#{emailQueueController.editorValueChangeListener}"  widgetVar="editor"  > 
+                        <!--<p:ajax event="change" update="display" /> -->
+                    </p:editor>
                 </div>
                 <div class="ui-g-12">
 
                 </div> 
             </div>
             <p:dialog header="Content" widgetVar="dlg"  fitViewport="true" draggable="true" responsive="true" >          
-                <p:outputPanel id="display">
+                <p:outputPanel id="display" styleClass="emailPreview" >
                     <h:outputText value="#{emailQueueController.messagePreview}" escape="false" /> 
                 </p:outputPanel>
             </p:dialog>  

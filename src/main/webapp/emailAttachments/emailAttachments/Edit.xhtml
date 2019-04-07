@@ -1,0 +1,25 @@
+
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                >
+
+    <p:dialog id="EmailAttachmentsEditDlg" widgetVar="EmailAttachmentsEditDialog" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('EditEmailAttachmentsTitle')}">
+        <h:form id="EmailAttachmentsEditForm">
+            <h:panelGroup id="display">
+                <p:panelGrid columns="2" rendered="#{emailAttachmentsController.selected != null}">
+                    <h:outputLabel value="#{configMapController.getKey('EditEmailAttachmentsLabel_id')}" for="id" />
+                    <h:inputText id="id"  value="#{emailAttachmentsController.selected.id}" title="#{configMapController.getKey('EditEmailAttachmentsTitle_id')}" required="true" requiredMessage="#{configMapController.getKey('EditEmailAttachmentsRequiredMessage_id')}"/>
+                    <h:outputLabel value="#{configMapController.getKey('EditEmailAttachmentsLabel_file')}" for="file" />
+                    <h:inputTextarea rows="4" cols="30" id="file" value="#{emailAttachmentsController.selected.file}" title="#{configMapController.getKey('EditEmailAttachmentsTitle_file')}" required="true" requiredMessage="#{configMapController.getKey('EditEmailAttachmentsRequiredMessage_file')}"/>
+                </p:panelGrid>
+                <p:commandButton actionListener="#{emailAttachmentsController.update}" value="#{configMapController.getKey('Save')}" update="display,:EmailAttachmentsListForm:datalist,:growl" oncomplete="handleSubmit(args, 'EmailAttachmentsEditDialog');PF('emailAttachmentsControllerTable').filter()"/>
+                <p:commandButton value="#{configMapController.getKey('Cancel')}" onclick="PF('EmailAttachmentsEditDialog').hide()"/>
+            </h:panelGroup>
+        </h:form>
+    </p:dialog>
+
+</ui:composition>
+

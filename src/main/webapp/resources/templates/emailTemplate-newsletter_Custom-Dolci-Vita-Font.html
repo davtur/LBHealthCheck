@@ -1,0 +1,49 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!--
+
+Issue: No Font loading - console shows this error : "access to font from origin 'null' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource."
+
+In order to fix CORS issue when serving the fonts from a wordpress site, just put below into your .htaccess file.
+
+<IfModule mod_headers.c>
+  <FilesMatch "\.(ttf|ttc|otf|eot|woff|woff2|font.css|css|js)$">
+    Header set Access-Control-Allow-Origin "*"
+  </FilesMatch>
+</IfModule>
+
+As you see Access-Control-Allow-Origin "*" allows you to access all resources and webfonts from all domains.
+
+-->
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <title>MBFF Newsletter</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <style type="text/css">
+            @import url('https://www.manlybeachfemalefitness.com.au/wp-content/themes/bridge/fonts/customFonts.css');            .emailBody td h1 h2 h3 h4 h5 p {
+                font-family: 'Dolce Vita',  sans-serif ;
+                font-size: 48px;
+            }
+        </style>
+    </head>
+    <body style="margin: 0; padding: 0;">
+
+        <div class="emailBody" style="font-family: 'Dolce Vita',  sans-serif ;width:600px; background-image: linear-gradient(rgba(255,255,255,.7), rgba(255,255,255,.7)), url('https://www.manlybeachfemalefitness.com.au/wp-content/uploads/2019/04/newsletter-background-e1554548500143.jpeg');background-repeat: repeat-y no-repeat;padding: 0;margin: 0;text-transform:uppercase">
+            <table style="padding:25px;" width="600" border="0" cellspacing="0" cellpadding="5"> 
+                <tbody>
+
+                    <tr> <td align="center"><img style="width:160px;" src="https://www.manlybeachfemalefitness.com.au/wp-content/uploads/2019/04/mbff-email-logo-300px.png" alt="Manly Beach Female Fitness Logo"/><br/> </td> </tr> 
+                    <tr> <td align="center"><h1>APRIL NEWSLETTER</h1></td> </tr> 
+
+
+                    <tr> <td> !--LINK--URL--!</td> </tr> 
+
+
+
+                    <tr> <td height="50" align="center" valign="middle" bgcolor="#CCCCCC">www.manlybeachfemalefitness.com.au | tashi@purefitnessmanly.com.au | 0415 191 641</td> </tr>
+                </tbody></table>
+        </div>
+
+    </body>
+</html>

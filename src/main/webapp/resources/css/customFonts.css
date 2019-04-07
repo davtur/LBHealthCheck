@@ -17,10 +17,10 @@ and open the template in the editor.
         font-weight: normal;  
     }
     body{
-        font-family: 'Dolce-Vita', Arial, sans-serif !important;
+        font-family: 'Dolce-Vita',  sans-serif !important;
     }
     h1 h2 h3 h4 h5 p { 
-        font-family: 'Dolce-Vita', Arial, sans-serif !important;
+        font-family: 'Dolce-Vita',  sans-serif !important;
         background-color:blue;
     }
 }

@@ -1,95 +1,103 @@
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <ui:composition template="/WEB-INF/template.xhtml" xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
-      xmlns:h="http://xmlns.jcp.org/jsf/html"
-      xmlns:f="http://xmlns.jcp.org/jsf/core"
-      xmlns:p="http://primefaces.org/ui" >
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:p="http://primefaces.org/ui" >
 
-    
-        <ui:define name="title">
-            <h:outputText value="#{configMapController.getKey('ListEmailQueueTitle')}"></h:outputText>
-        </ui:define>
-        <ui:define name="body">
-            <h:form id="listForm1">
-                <h:panelGroup >
-                    <p:commandButton id="createButton" ajax="false" action="#{emailQueueController.prepareCreate}" value="#{configMapController.getKey('ListEmailQueueCreateLink')}"/>
-                </h:panelGroup>
-                <h:outputText escape="false" value="#{configMapController.getKey('ListEmailQueueEmpty')}" rendered="#{emailQueueController.items.rowCount == 0}"/>
-                <h:panelGroup rendered="#{emailQueueController.items.rowCount > 0}">
-                    <p:dataTable value="#{emailQueueController.items}" var="item"  paginator="true" rows="15"  paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  rowsPerPageTemplate="5,10,15,20,25,50,100" >
-                        <p:column sortBy="#{item.id}" >
-                            <f:facet name="header">
-                                <h:outputText value="#{configMapController.getKey('ListEmailQueueTitle_id')}"/>
-                            </f:facet>
-                            <h:outputText value="#{item.id}"/>
-                        </p:column>
-                        <p:column sortBy="#{item.toaddresses}" >
-                            <f:facet name="header">
-                                <h:outputText value="#{configMapController.getKey('ListEmailQueueTitle_toaddresses')}"/>
-                            </f:facet>
-                            <h:outputText value="#{item.toaddresses}"/>
-                        </p:column>
-                        <p:column sortBy="#{item.fromaddress}" >
-                            <f:facet name="header">
-                                <h:outputText value="#{configMapController.getKey('ListEmailQueueTitle_fromaddress')}"/>
-                            </f:facet>
-                            <h:outputText value="#{item.fromaddress}"/>
-                        </p:column>
-                        <p:column sortBy="#{item.ccaddresses}" >
-                            <f:facet name="header">
-                                <h:outputText value="#{configMapController.getKey('ListEmailQueueTitle_ccaddresses')}"/>
-                            </f:facet>
-                            <h:outputText value="#{item.ccaddresses}"/>
-                        </p:column>
-                        <p:column sortBy="#{item.subject}" >
-                            <f:facet name="header">
-                                <h:outputText value="#{configMapController.getKey('ListEmailQueueTitle_subject')}"/>
-                            </f:facet>
-                            <h:outputText value="#{item.subject}"/>
-                        </p:column>
-                        <p:column sortBy="#{item.message}" >
-                            <f:facet name="header">
-                                <h:outputText value="#{configMapController.getKey('ListEmailQueueTitle_message')}"/>
-                            </f:facet>
-                            <h:outputText value="#{item.message}"/>
-                        </p:column>
-                        <p:column sortBy="#{item.status}" >
-                            <f:facet name="header">
-                                <h:outputText value="#{configMapController.getKey('ListEmailQueueTitle_status')}"/>
-                            </f:facet>
-                            <h:outputText value="#{item.status}"/>
-                        </p:column>
-                        <p:column sortBy="#{item.sendDate}" >
-                            <f:facet name="header">
-                                <h:outputText value="#{configMapController.getKey('ListEmailQueueTitle_sendDate')}"/>
-                            </f:facet>
-                            <h:outputText value="#{item.sendDate}">
-                                <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
-                            </h:outputText>
-                        </p:column>
-                        <p:column sortBy="#{item.createDate}" >
-                            <f:facet name="header">
-                                <h:outputText value="#{configMapController.getKey('ListEmailQueueTitle_createDate')}"/>
-                            </f:facet>
-                            <h:outputText value="#{item.createDate}">
-                                <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
-                            </h:outputText>
-                        </p:column>
-                        <p:column>
-                            <f:facet name="header">
-                                <h:outputText value="&nbsp;"/>
-                            </f:facet>
-                            <p:commandButton                                                            ajax="false" action="#{emailQueueController.prepareView}" value="#{configMapController.getKey('ListEmailQueueViewLink')}"/>
-                            <h:outputText value=" "/>
-                            <p:commandButton rendered="#{emailQueueController.isUserInRole('ADMIN')}"  ajax="false" action="#{emailQueueController.prepareEdit}" value="#{configMapController.getKey('ListEmailQueueEditLink')}"/>
-                            <h:outputText value=" "/>
-                            <p:commandButton rendered="#{emailQueueController.isUserInRole('ADMIN')}"  ajax="false" action="#{emailQueueController.destroy}" value="#{configMapController.getKey('ListEmailQueueDestroyLink')}"/>
-                        </p:column>
-                    </p:dataTable>
-                </h:panelGroup>
-            </h:form>
-        </ui:define>
-    </ui:composition>
+
+    <ui:define name="title">
+        <h:outputText value="#{configMapController.getKey('ListEmailQueueTitle')}"></h:outputText>
+    </ui:define>
+    <ui:define name="body">
+        <h:form id="listForm1">
+            <h:panelGroup >
+                <p:commandButton id="createButton" ajax="false" action="#{emailQueueController.prepareCreate}" value="#{configMapController.getKey('ListEmailQueueCreateLink')}"/>
+            </h:panelGroup>
+            <h:outputText escape="false" value="#{configMapController.getKey('ListEmailQueueEmpty')}" rendered="#{emailQueueController.items.rowCount == 0}"/>
+            <h:panelGroup rendered="#{emailQueueController.items.rowCount > 0}">
+                <p:dataTable value="#{emailQueueController.items}" var="item"  paginator="true" rows="15"  paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  rowsPerPageTemplate="5,10,15,20,25,50,100" >
+                    <p:column sortBy="#{item.id}" >
+                        <f:facet name="header">
+                            <h:outputText value="#{configMapController.getKey('ListEmailQueueTitle_id')}"/>
+                        </f:facet>
+                        <h:outputText value="#{item.id}"/>
+                    </p:column>
+                    <p:column sortBy="#{item.toaddresses}" >
+                        <f:facet name="header">
+                            <h:outputText value="#{configMapController.getKey('ListEmailQueueTitle_toaddresses')}"/>
+                        </f:facet>
+                        <h:outputText value="#{item.toaddresses}"/>
+                    </p:column>
+                    <p:column sortBy="#{item.fromaddress}" >
+                        <f:facet name="header">
+                            <h:outputText value="#{configMapController.getKey('ListEmailQueueTitle_fromaddress')}"/>
+                        </f:facet>
+                        <h:outputText value="#{item.fromaddress}"/>
+                    </p:column>
+                    <p:column sortBy="#{item.ccaddresses}" >
+                        <f:facet name="header">
+                            <h:outputText value="#{configMapController.getKey('ListEmailQueueTitle_ccaddresses')}"/>
+                        </f:facet>
+                        <h:outputText value="#{item.ccaddresses}"/>
+                    </p:column>
+                    <p:column sortBy="#{item.subject}" >
+                        <f:facet name="header">
+                            <h:outputText value="#{configMapController.getKey('ListEmailQueueTitle_subject')}"/>
+                        </f:facet>
+                        <h:outputText value="#{item.subject}"/>
+                    </p:column>
+                    <!--<p:column sortBy="#{item.message}" >
+                        <f:facet name="header">
+                            <h:outputText value="#{configMapController.getKey('ListEmailQueueTitle_message')}"/>
+                        </f:facet>
+                        <p:commandButton update=":listForm1:emailDetail" oncomplete="PF('messageView').show('#{component.clientId}')"  styleClass="MarRight5" value="View Email1" type="button" >
+                            <f:setPropertyActionListener value="#{item}" target="#{emailQueueController.selected}" />
+                        </p:commandButton>
+
+                    </p:column>-->
+                    <p:column sortBy="#{item.status}" >
+                        <f:facet name="header">
+                            <h:outputText value="#{configMapController.getKey('ListEmailQueueTitle_status')}"/>
+                        </f:facet>
+                        <h:outputText value="#{item.status}"/>
+                    </p:column>
+                    <p:column sortBy="#{item.sendDate}" >
+                        <f:facet name="header">
+                            <h:outputText value="#{configMapController.getKey('ListEmailQueueTitle_sendDate')}"/>
+                        </f:facet>
+                        <h:outputText value="#{item.sendDate}">
+                            <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
+                        </h:outputText>
+                    </p:column>
+                    <p:column sortBy="#{item.createDate}" >
+                        <f:facet name="header">
+                            <h:outputText value="#{configMapController.getKey('ListEmailQueueTitle_createDate')}"/>
+                        </f:facet>
+                        <h:outputText value="#{item.createDate}">
+                            <f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
+                        </h:outputText>
+                    </p:column>
+                    <p:column>
+                        <f:facet name="header">
+                            <h:outputText value="&nbsp;"/>
+                        </f:facet>
+                        <p:commandButton                                                            ajax="false" action="#{emailQueueController.prepareView}" value="#{configMapController.getKey('ListEmailQueueViewLink')}"/>
+                        <h:outputText value=" "/>
+                        <p:commandButton rendered="#{emailQueueController.isUserInRole('ADMIN')}"  ajax="false" action="#{emailQueueController.prepareEdit}" value="#{configMapController.getKey('ListEmailQueueEditLink')}"/>
+                        <h:outputText value=" "/>
+                        <p:commandButton rendered="#{emailQueueController.isUserInRole('ADMIN')}"  ajax="false" action="#{emailQueueController.destroy}" value="#{configMapController.getKey('ListEmailQueueDestroyLink')}"/>
+                    </p:column>
+                </p:dataTable>
+               <!-- <p:overlayPanel   hideEffect="fade" dynamic="false" widgetVar="viewMessage" >
+                    <p:outputPanel id="emailDetail" style="text-align:center;">
+                    <h:outputText value="#{emailQueueController.selected.message}"/>
+                    </p:outputPanel>
+                </p:overlayPanel>-->
+            </h:panelGroup>
+        </h:form>
+    </ui:define>
+</ui:composition>
 
 

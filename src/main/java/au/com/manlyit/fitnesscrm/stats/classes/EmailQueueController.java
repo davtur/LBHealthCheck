@@ -8,12 +8,12 @@ import au.com.manlyit.fitnesscrm.stats.beans.EmailQueueFacade;
 import au.com.manlyit.fitnesscrm.stats.classes.util.SendHTMLEmailWithFileAttached;
 import au.com.manlyit.fitnesscrm.stats.db.Activation;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
+import au.com.manlyit.fitnesscrm.stats.db.EmailAttachments;
 import au.com.manlyit.fitnesscrm.stats.db.EmailTemplates;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import static java.util.Date.from;
 import java.util.List;
 import java.util.Properties;
 import java.util.Random;
@@ -34,8 +34,13 @@ import javax.faces.event.ValueChangeEvent;
 import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
+import static javax.ws.rs.client.Entity.entity;
+import org.primefaces.PrimeFaces;
+import org.primefaces.event.FileUploadEvent;
 import org.primefaces.event.SelectEvent;
+import org.primefaces.event.TransferEvent;
 import org.primefaces.model.DualListModel;
+import org.primefaces.model.UploadedFile;
 
 @Named("emailQueueController")
 @SessionScoped
@@ -52,13 +57,17 @@ public class EmailQueueController implements Serializable {
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.EmailTemplatesFacade ejbEmailTemplatesFacade;
     @Inject
+    private au.com.manlyit.fitnesscrm.stats.beans.EmailAttachmentsFacade ejbEmailAttachmentsFacade;
+    @Inject
     private ConfigMapFacade configMapFacade;
     private PaginationHelper pagination;
     private int selectedItemIndex;
     private String templateName;
     private EmailTemplates selectedTemplate;
+    private ArrayList<EmailAttachments> emailAttachmentsList;
     private String templateDescription;
     private String messagePreview;
+    private UploadedFile file;
     private DualListModel<Customers> participants;
 
     public EmailQueueController() {
@@ -70,11 +79,32 @@ public class EmailQueueController implements Serializable {
             current.setSendDate(new Date());
             current.setFromaddress(configMapFacade.getConfig("PasswordResetFromEmailAddress"));
             current.setCcaddresses(configMapFacade.getConfig("PasswordResetCCEmailAddress"));
+            current.setBccaddresses("");
             current.setSubject(getSelectedTemplate().getSubject());
+            current.setMessage("");
+            
+            
 
             selectedItemIndex = -1;
         }
         return current;
+    }
+     public void upload() {
+        if(file != null) {
+            FacesMessage message = new FacesMessage("Succesful", file.getFileName() + " is uploaded.");
+            FacesContext.getCurrentInstance().addMessage(null, message);
+        }
+    }
+     
+    public void handleFileUpload(FileUploadEvent event) {
+        EmailAttachments ea = new EmailAttachments();
+        ea.setId(0);
+        ea.setFile(event.getFile().getContents());
+        ea.setFileName(event.getFile().getFileName());
+        
+        emailAttachmentsList.add(ea);
+        FacesMessage msg = new FacesMessage("Succesful", event.getFile().getFileName() + " is uploaded.");
+        FacesContext.getCurrentInstance().addMessage(null, msg);
     }
 
     private EmailQueueFacade getFacade() {
@@ -135,11 +165,9 @@ public class EmailQueueController implements Serializable {
     }
 
     public String prepareCreate() {
-        current = new EmailQueue();
-        selectedItemIndex = -1;
-        addParticipants();
-        current.setFromaddress("noreply@manlybeachfemalefitness.com.au");
-        return "Create";
+        current = null;
+        
+        return "CreateEmail";
     }
 
     public String create() {
@@ -161,6 +189,10 @@ public class EmailQueueController implements Serializable {
                 htmlText = htmlText.replace(templateLinkPlaceholder, current.getMessage());
                current.setMessage(htmlText);*/
             getFacade().create(current);
+            for(EmailAttachments ea: emailAttachmentsList){
+                ea.setEmailQueue(current);
+                ejbEmailAttachmentsFacade.create(ea);
+            }
 
             JsfUtil.addSuccessMessage(configMapFacade.getConfig("EmailQueueCreated"));
             return prepareCreate();
@@ -258,6 +290,13 @@ public class EmailQueueController implements Serializable {
             setSelectedTemplate((EmailTemplates) template);
         }
     }
+    
+     public void editorValueChangeListener(ValueChangeEvent vce) {
+        Object template = vce.getNewValue();
+        if (template.getClass() == String.class) {
+            PrimeFaces.current().ajax().update("@(.emailPreview) ");
+        }
+    }
 
     /**
      * @return the messagePreview
@@ -277,12 +316,12 @@ public class EmailQueueController implements Serializable {
             if (selTemp != null) {
                 htmlText = selTemp.getTemplate();
             } else {
-                return current.getMessage();
+                return getSelected().getMessage();
             }
 
         }
 
-        messagePreview = htmlText.replace(templateLinkPlaceholder, current.getMessage());
+        messagePreview = htmlText.replace(templateLinkPlaceholder, getSelected().getMessage());
 
         return messagePreview;
     }
@@ -312,17 +351,45 @@ public class EmailQueueController implements Serializable {
         this.selectedTemplate = selectedTemplate;
     }
 
+    public void onTransfer(TransferEvent event) {
+        List<Customers> targets = participants.getTarget();
+
+        getSelected().setBccaddresses(getCSVListOfCustomerEmailAddresses(targets));
+        
+      /*  StringBuilder builder = new StringBuilder();
+        boolean isFirst = true;
+        for (Object item : event.getItems()) {
+            if (isFirst) {
+                builder.append(((Customers) item).getEmailAddress());
+                isFirst = false;
+            } else {
+                builder.append(",");
+                builder.append(((Customers) item).getEmailAddress());
+            }
+        }
+
+        getSelected().setBccaddresses(builder.toString());*/
+
+        
+        /*FacesMessage msg = new FacesMessage();
+        msg.setSeverity(FacesMessage.SEVERITY_INFO);
+        msg.setSummary("Items Transferred");
+        msg.setDetail(builder.toString());
+         
+        FacesContext.getCurrentInstance().addMessage(null, msg);*/
+    }
+
     public void sendTheBulkEmail() {
 
         //send email
         List<Customers> targets = participants.getTarget();
 
-        current.setBccaddresses(getCSVListOfCustomerEmailAddresses(targets));
+        //current.setBccaddresses(getCSVListOfCustomerEmailAddresses(targets));
         current.setToaddresses(current.getCcaddresses());
         current.setId(0);
         current.setStatus(0);
         current.setCreateDate(new Date());
-        
+
         boolean valid = true;
         String message = "";
         String[] toAddressesArray = null;
@@ -334,12 +401,12 @@ public class EmailQueueController implements Serializable {
         } else {
             toAddressesArray = current.getToaddresses().split(",");
             for (String s : toAddressesArray) {
-            if (validateEmailAddress(s) == false) {
-                valid = false;
-                Logger.getLogger(getClass().getName()).log(Level.WARNING, "One or more To email addresses are invalid:{0}", s);
-                message = "One or more To email addresses are invalid:" + s;
+                if (validateEmailAddress(s) == false) {
+                    valid = false;
+                    Logger.getLogger(getClass().getName()).log(Level.WARNING, "One or more To email addresses are invalid:{0}", s);
+                    message = "One or more To email addresses are invalid:" + s;
+                }
             }
-        }
         }
         if (current.getFromaddress() == null) {
             valid = false;
@@ -347,8 +414,7 @@ public class EmailQueueController implements Serializable {
             message = "From email addresses are empty!";
 
         }
-   
-        
+
         if (current.getBccaddresses() != null) {
             String[] bccAddressesArray = current.getBccaddresses().split(",");
             for (String s : bccAddressesArray) {
@@ -367,7 +433,14 @@ public class EmailQueueController implements Serializable {
         if (valid) {
             current.setMessage(getMessagePreview());
             getFacade().create(current);
+            for(EmailAttachments ea: emailAttachmentsList){
+                ea.setEmailQueue(current);
+                ejbEmailAttachmentsFacade.create(ea);
+                current.getEmailAttachmentCollection().add(ea);
+                getFacade().edit(current);
+            }
             current = null;
+            participants = null;
             setMessagePreview("");
             JsfUtil.addSuccessMessage("Your email has been put in the queue and will sent as soon as the send date is reached.");
         } else {
@@ -416,7 +489,7 @@ public class EmailQueueController implements Serializable {
         String htmlText = "<table width=\"600\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\">  <tr>    <td><img src=\"cid:logoimg_cid\"/></td>  </tr>  <tr>    <td height=\"220\"> <p>Manly Beach Female Fitness</p>      <p>Please click the following link to reset your password:</p><p>To reset your password click <a href=\"" + urlLink + "\">here</a>.</p></td>  </tr>  <tr>    <td height=\"50\" align=\"center\" valign=\"middle\" bgcolor=\"#CCCCCC\">www.manlybeachfemalefitness.com.au | sarah@manlybeachfemalefitness.com.au | +61433818067</td>  </tr></table>";
 // TODO String htmlText = ejbEmailTemplatesFacade.findTemplateByName(templateName).getTemplate();
         //String host, String to, String ccAddress, String from, String emailSubject, String message, String theAttachedfileName, boolean debug
-        emailAgent.send("david@manlyit.com.au", "", "", "noreply@manlybeachfemalefitness.com.au", "Password Reset", htmlText, null, emailServerProperties(), true);
+        emailAgent.send("david@manlyit.com.au", "", "", "noreply@manlybeachfemalefitness.com.au", "Password Reset", htmlText, null, emailServerProperties(), true,null);
 
     }
 
@@ -566,6 +639,37 @@ public class EmailQueueController implements Serializable {
                 throw new IllegalArgumentException("object " + object + " is of type " + object.getClass().getName() + "; expected type: " + EmailQueueController.class.getName());
             }
         }
+    }
+
+    /**
+     * @return the file
+     */
+    public UploadedFile getFile() {
+        return file;
+    }
+
+    /**
+     * @param file the file to set
+     */
+    public void setFile(UploadedFile file) {
+        this.file = file;
+    }
+
+    /**
+     * @return the emailAttachmentsList
+     */
+    public ArrayList<EmailAttachments> getEmailAttachmentsList() {
+        if(emailAttachmentsList == null){
+            emailAttachmentsList = new ArrayList<>();
+        }
+        return emailAttachmentsList;
+    }
+
+    /**
+     * @param emailAttachmentsList the emailAttachmentsList to set
+     */
+    public void setEmailAttachmentsList(ArrayList<EmailAttachments> emailAttachmentsList) {
+        this.emailAttachmentsList = emailAttachmentsList;
     }
 
 }

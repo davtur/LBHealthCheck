@@ -58,6 +58,10 @@
             <base-name>/Bundle_tems</base-name>
             <var>bundle_tems</var>
         </resource-bundle>
+        <resource-bundle>
+            <base-name>/Bundle</base-name>
+            <var>bundle</var>
+        </resource-bundle>
     </application>
     
     <factory>

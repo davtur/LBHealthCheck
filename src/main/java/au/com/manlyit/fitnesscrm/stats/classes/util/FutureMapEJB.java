@@ -1178,7 +1178,7 @@ public class FutureMapEJB implements Serializable {
 
                         message = "checkEmailQueueAndSend -- Sending email to:" + email.getToaddresses() + ", from:" + email.getFromaddress() + ", cc:" + email.getCcaddresses() + ", Bcc:" + email.getBccaddresses() + ", subject:" + email.getSubject() + ", message Length:" + email.getMessage().length() + ", sendDate:" + email.getSendDate() + ", createDate:" + email.getCreateDate() + ".";
                         Logger.getLogger(getClass().getName()).log(Level.INFO, message);
-                        emailAgent.send(email.getToaddresses(), email.getCcaddresses(), email.getBccaddresses(), email.getFromaddress(), email.getSubject(), email.getMessage(), null, emailServerProperties(), false);
+                        emailAgent.send(email.getToaddresses(), email.getCcaddresses(), email.getBccaddresses(), email.getFromaddress(), email.getSubject(), email.getMessage(), null, emailServerProperties(), false,email.getEmailAttachmentCollection());
                         sent++;
                         email.setStatus(1);
                         emailQueueFacade.edit(email);

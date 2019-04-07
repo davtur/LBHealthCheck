@@ -4,10 +4,17 @@
  */
 package au.com.manlyit.fitnesscrm.stats.classes.util;
 
+import au.com.manlyit.fitnesscrm.stats.db.EmailAttachments;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.Serializable;
 import java.net.URL;
+import java.nio.file.Files;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -42,7 +49,7 @@ public class SendHTMLEmailWithFileAttached implements Serializable {
     //@Resource(name = "mail/pureFitnessMail")
     //private Session pureFitnessEmail;
 
-    public synchronized boolean send(String to, String ccAddress,String bccAddress, String from, String emailSubject, String message, String theAttachedfileName, Properties serverProperties, boolean debug) {
+    public synchronized boolean send(String to, String ccAddress, String bccAddress, String from, String emailSubject, String message, String theAttachedfileName, Properties serverProperties, boolean debug, Collection<EmailAttachments> attachments) {
         boolean result = true;
         //boolean debug = Boolean.valueOf(args[4]).booleanValue();
         String msgText1 = message + "\n";
@@ -64,7 +71,7 @@ public class SendHTMLEmailWithFileAttached implements Serializable {
          }*/
 
         //Session session = Session.getInstance(props, null);
-       /* Properties props = new Properties();
+        /* Properties props = new Properties();
          props.put("mail.smtp.host", SMTP_HOST_NAME);
          props.put("mail.smtp.auth", "true");
          props.put("mail.debug", "true");
@@ -79,11 +86,11 @@ public class SendHTMLEmailWithFileAttached implements Serializable {
             session = Session.getInstance(serverProperties,
                     new javax.mail.Authenticator() {
 
-                        @Override
-                        protected PasswordAuthentication getPasswordAuthentication() {
-                            return new PasswordAuthentication(sslUser, sslPass);
-                        }
-                    });
+                @Override
+                protected PasswordAuthentication getPasswordAuthentication() {
+                    return new PasswordAuthentication(sslUser, sslPass);
+                }
+            });
         } catch (Exception e) {
             result = false;
             Logger.getLogger(SendHTMLEmailWithFileAttached.class.getName()).log(Level.SEVERE, "Couldn't get a session \r\n", e);
@@ -148,7 +155,7 @@ public class SendHTMLEmailWithFileAttached implements Serializable {
             // String fileName = "/resources/images/headerimg.jpg";
             //String fileName = "http://www.manlybeachfemalefitness.com.au/FitnessStats/resources/images/pure_fitness_manly_group_and_personal_training.jpg";
 
-            InputStream stream ;
+            InputStream stream;
             // getServletContext().getResourceAsStream(fileName); //or null if you can't obtain a ServletContext
 
             if (fileName != null && fileNameCid != null) {
@@ -181,7 +188,7 @@ public class SendHTMLEmailWithFileAttached implements Serializable {
                 } else {
                     LOGGER.log(Level.WARNING, "Email Header filename and/or header cid name not found: {0}", new Object[]{fileName});
                 }
-            // Set the message content!
+                // Set the message content!
             }
             multipart.addBodyPart(htmlPart);
 
@@ -193,6 +200,39 @@ public class SendHTMLEmailWithFileAttached implements Serializable {
                 //mimeBodyPart2.addHeaderLine(theAttachedfileName);
                 // attach the file to the message
                 multipart.addBodyPart(mimeBodyPart2);
+
+            }
+
+            msg.setContent(multipart);
+
+            // add email attachements
+            if (attachments != null) {
+                for (EmailAttachments ea : attachments) {
+                    InputStream fileStream = new ByteArrayInputStream(ea.getFile());
+                    BodyPart attachPart = new MimeBodyPart();
+                    File file = new File(ea.getFileName());
+
+                    // Initialize a pointer 
+                    // in file using OutputStream 
+                    OutputStream os = new FileOutputStream(file);
+
+                    // Starts writing the bytes in it 
+                    os.write(ea.getFile());
+
+                    os.close();
+                    String mimeType = Files.probeContentType(file.toPath());
+
+                    try {
+                        DataSource ds = new ByteArrayDataSource(fileStream, mimeType);
+                        attachPart.setDataHandler(new DataHandler(ds));
+                        attachPart.setFileName(ea.getFileName());
+                        multipart.addBodyPart(attachPart);
+                    } catch (IOException | MessagingException exception) {
+                        System.out.println("Image ERROR:" + exception.getMessage());
+                    }
+
+                    multipart.addBodyPart(attachPart);
+                }
 
             }
 
@@ -250,8 +290,6 @@ public class SendHTMLEmailWithFileAttached implements Serializable {
              } finally {
              t.close();
              }*/
-
-            
         } catch (MessagingException mex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, "Send Email Messaging Exception: \r\n" + msg.toString(), mex);
             JsfUtil.addErrorMessage(mex, mex.getMessage());

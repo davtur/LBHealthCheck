@@ -563,3 +563,19 @@ ADD CONSTRAINT `fk_item_1`
 ALTER TABLE `fitnessStats`.`session_types` 
 ADD COLUMN `post_paid` TINYINT(1) NOT NULL DEFAULT 0 AFTER `session_duration_minutes`,
 ADD COLUMN `pre_paid` TINYINT(1) NOT NULL DEFAULT 0 AFTER `post_paid`;
+
+
+CREATE TABLE `email_attachments` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+   `file` longblob NOT NULL,
+   PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=latin1;
+
+ALTER TABLE `fitnessStats`.`email_attachments` 
+ADD COLUMN `email_id` INT(11) NULL AFTER `file`;
+ALTER TABLE `fitnessStats`.`email_attachments` 
+ADD CONSTRAINT `fk_email_attachments_1`
+  FOREIGN KEY (`id`)
+  REFERENCES `fitnessStats`.`emailQueue` (`id`)
+  ON DELETE NO ACTION
+  ON UPDATE NO ACTION;

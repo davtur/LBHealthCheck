@@ -1,0 +1,24 @@
+
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                >
+
+    <p:dialog id="EmailAttachmentsViewDlg" widgetVar="EmailAttachmentsViewDialog" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('ViewEmailAttachmentsTitle')}">
+        <h:form id="EmailAttachmentsViewForm">
+            <h:panelGroup id="display">
+                <p:panelGrid columns="2" rendered="#{emailAttachmentsController.selected != null}">
+                    <h:outputText value="#{configMapController.getKey('ViewEmailAttachmentsLabel_id')}"/>
+                    <h:outputText value="#{emailAttachmentsController.selected.id}" title="#{configMapController.getKey('ViewEmailAttachmentsTitle_id')}"/>
+                    <h:outputText value="#{configMapController.getKey('ViewEmailAttachmentsLabel_file')}"/>
+                    <h:outputText value="#{emailAttachmentsController.selected.file}" title="#{configMapController.getKey('ViewEmailAttachmentsTitle_file')}"/>
+                </p:panelGrid>
+                <p:commandButton value="#{configMapController.getKey('Close')}" onclick="PF('EmailAttachmentsViewDialog').hide()"/>
+            </h:panelGroup>
+        </h:form>
+    </p:dialog>
+
+</ui:composition>
+
