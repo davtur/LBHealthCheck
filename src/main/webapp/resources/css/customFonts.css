@@ -1,0 +1,26 @@
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : 07/04/2019, 8:04:10 PM
+    Author     : david
+*/
+
+@media screen {
+    @font-face {
+        font-family: 'Dolce-Vita';  
+        font-style:normal;
+        font-weight: 400;
+        src: local('Dolce Vita') ,local('Dolce Vita'),    url('https://www.manlybeachfemalefitness.com.au/wp-content/themes/bridge/fonts/Dolce-Vita.ttf')  format('woff'),  url('https://www.manlybeachfemalefitness.com.au/wp-content/themes/bridge/fonts/Dolce-Vita.ttf') format('tff') ;  
+        font-weight: normal;  
+    }
+    body{
+        font-family: 'Dolce-Vita', Arial, sans-serif !important;
+    }
+    h1 h2 h3 h4 h5 p { 
+        font-family: 'Dolce-Vita', Arial, sans-serif !important;
+        background-color:blue;
+    }
+}
