@@ -1,4 +1,12 @@
 
+
+# how to run open project
+
+docker run  -p 8082:80  -v /persistent/db-data/dir/on/host:/var/lib/postgresql/9.4/main  -v /persistent/openproject/data/on/host:/var/db/openproject  -e SECRET_KEY_BASE=BigBadBorns1979! openproject/community:7
+
+http://localhost:8082
+
+
 ## wildfly SSL parameters fro ubuntu 18.04
 -Dorg.wildfly.openssl.path.ssl=/usr/lib/x86_64-linux-gnu/libssl.so.1.1 -Dorg.wildfly.openssl.path.crypto=/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
 

@@ -62,9 +62,14 @@ import org.primefaces.model.map.Marker;
     @NamedQuery(name = "SessionHistory.findBySessiondate", query = "SELECT s FROM SessionHistory s WHERE s.sessiondate = :sessiondate")})
 public class SessionHistory implements BaseEntity, Serializable {
 
+    @JoinColumn(name = "schedule_id", referencedColumnName = "id_schedule")
+    @OneToOne
+    private Schedule scheduleId;
+    
     @JoinColumn(name = "expense_id", referencedColumnName = "id")
     @OneToOne
     private Expenses expenseId;
+    
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "sessionHistoryId")
     private Collection<SessionBookings> sessionBookingsCollection;
     
@@ -240,6 +245,20 @@ public class SessionHistory implements BaseEntity, Serializable {
 
     public void setExpenseId(Expenses expenseId) {
         this.expenseId = expenseId;
+    }
+
+    /**
+     * @return the scheduleId
+     */
+    public Schedule getScheduleId() {
+        return scheduleId;
+    }
+
+    /**
+     * @param scheduleId the scheduleId to set
+     */
+    public void setScheduleId(Schedule scheduleId) {
+        this.scheduleId = scheduleId;
     }
     
     

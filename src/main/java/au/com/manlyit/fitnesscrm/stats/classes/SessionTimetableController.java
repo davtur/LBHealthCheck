@@ -583,6 +583,13 @@ public class SessionTimetableController implements Serializable {
                 List<SessionHistory> sessions;
 
                 sessions = sessionHistoryFacade.loadDateRange(0, 100, "sessiondate", SortOrder.ASCENDING, null, startCal.getTime(), endCal.getTime(), "sessiondate");
+                for(int x = sessions.size();x>0;x--){
+                    // remove any non group sessions that dont have a template from the timetable
+                    SessionHistory session = sessions.get(x);
+                    if(session.getSessionTemplate() == null){
+                        sessions.remove(x);
+                    }
+                }
                 daysOfWeek.add(new TimetableRows(startCal.getTime(), sessions));
                 endCal.add(Calendar.DAY_OF_YEAR, 1);
                 startCal.add(Calendar.DAY_OF_YEAR, 1);

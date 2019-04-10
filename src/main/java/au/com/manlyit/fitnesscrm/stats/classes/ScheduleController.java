@@ -142,7 +142,7 @@ public class ScheduleController implements Serializable {
         return is.readObject();
     }
 
-    public void persistEvent(CrmScheduleEvent event) {
+    public Schedule persistEvent(CrmScheduleEvent event) {
         CrmScheduleEvent ssievent = event;
         Schedule ss = new Schedule(0, ssievent.getTitle(), ssievent.getStartDate(), ssievent.getEndDate());
         ss.setShedAllday(ssievent.isAllDay());
@@ -160,6 +160,7 @@ public class ScheduleController implements Serializable {
         }
         ssievent.setDatabasePK(current.getId());
         current = null;
+        return ss;
     }
 
     private void deleteEvent(CrmScheduleEvent event) {

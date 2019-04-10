@@ -104,7 +104,7 @@ public class CustomersFacade extends AbstractFacade<Customers> {
             }
             cm = (Customers) q.getSingleResult();
         } catch (Exception e) {
-            LOGGER.log(Level.INFO, "Customer not found:{0}", username);
+            LOGGER.log(Level.INFO, "findCustomerByUsername(String username) Customer not found:{0}", username);
         }
         return cm;
         // Query q = em.createNativeQuery("SELECT * FROM customers where username = '" + username + "'", Customers.class);
@@ -145,7 +145,7 @@ public class CustomersFacade extends AbstractFacade<Customers> {
             
             
         } catch (Exception e) {
-            LOGGER.log(Level.INFO, "Customer not found:{0}", email);
+            LOGGER.log(Level.INFO, "findCustomerByEmail(String email) Customer not found:{0}", email);
         }
         return cm;
         // Query q = em.createNativeQuery("SELECT * FROM customers where username = '" + username + "'", Customers.class);
@@ -181,12 +181,12 @@ public class CustomersFacade extends AbstractFacade<Customers> {
             if (size == 1) {
                 cm = (Customers) q.getSingleResult();
             } else if (size == 0) {
-                LOGGER.log(Level.WARNING, "Customers findCustomerByName, Customer not found : Customer name  = {0} {1}", new Object[]{firstname, lastname, size});
+                LOGGER.log(Level.WARNING, "Customers findCustomerByName(String firstname, String lastname), Customer not found : Customer name  = {0} {1}", new Object[]{firstname, lastname, size});
             } else if (size > 1) {
-                LOGGER.log(Level.WARNING, "Customers findCustomerByName, Duplicate Customer id's found for Customer facebookId = {0} {1}. The number of duplicates is {1}", new Object[]{firstname, lastname, size});
+                LOGGER.log(Level.WARNING, "Customers findCustomerByName(String firstname, String lastname), Duplicate Customer id's found for Customer facebookId = {0} {1}. The number of duplicates is {1}", new Object[]{firstname, lastname, size});
             }
         } catch (Exception e) {
-            LOGGER.log(Level.INFO, "Customer not found:{0} {1} , {2}", new Object[]{firstname, lastname, e.getMessage()});
+            LOGGER.log(Level.INFO, "findCustomerByName(String firstname, String lastname) Customer not found:{0} {1} , {2}", new Object[]{firstname, lastname, e.getMessage()});
         }
         return cm;
         // Query q = em.createNativeQuery("SELECT * FROM customers where username = '" + username + "'", Customers.class);

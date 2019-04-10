@@ -54,12 +54,14 @@
     <ui:define name="body">
         <h:form id="listSessionHistoryForm1">
             <p:panel id="dashboardShortcuts" header="#{configMapController.getKey('DashboardShortcutsPanelLabel')}">
+                <p:commandButton rendered="#{expensesController.isUserInRole('ADMIN')}" id="custDash" icon="fa fa-database white Fs14"   value="#{configMapController.getKey('DashboardOpenCustomerDashboard')}" action="/admin/customers/List.xhtml?faces-redirect=true"/>
+
+
                 <p:commandButton id="logCashPaymentButton" oncomplete="PF('dashboardLogCashPaymentDialogueWidget').show();"  icon="fa fa-plus white Fs14"   value="#{configMapController.getKey('logCashPaymentButtonLink')}"  update=":growl " /> 
 
                 <p:commandButton rendered="#{expensesController.isUserInRole('ADMIN')}" id="addExpenseButton" icon="fa fa-plus white Fs14"   value="#{configMapController.getKey('DashboardCreateExpenseButtonLabel')}" actionListener="#{expensesController.prepareCreate}" update=":growl " oncomplete="PF('ExpensesCreateDialogWidget').show()"/>
 
-                <p:commandButton rendered="#{expensesController.isUserInRole('ADMIN')}" id="custDash" icon="fa fa-database white Fs14"   value="#{configMapController.getKey('DashboardOpenCustomerDashboard')}" action="/admin/customers/List.xhtml?faces-redirect=true"/>
-                <p:commandButton rendered="#{expensesController.isUserInRole('DEVELOPER')}" id="devTest" icon="fa fa-database white Fs14"   value="Test Function" actionListener="#{applicationBean.testFunction}"/>
+                <p:commandButton rendered="#{expensesController.isUserInRole('DEVELOPER')}" id="devTest" icon="fa fa-database white Fs14"   value="Test Update Payment Schedules" actionListener="#{applicationBean.testFunction}"/>
                 <p:commandButton rendered="#{expensesController.isUserInRole('DEVELOPER')}" id="devTest2" icon="fa fa-database white Fs14"   value="Test Ticket Creation" actionListener="#{applicationBean.testFunction2}"/>
                 <p:commandButton rendered="#{expensesController.isUserInRole('DEVELOPER')}" id="dailyReportTest" icon="fa fa-database white Fs14"   value="Test Email Report Creation" actionListener="#{applicationBean.testReport}"/>
 

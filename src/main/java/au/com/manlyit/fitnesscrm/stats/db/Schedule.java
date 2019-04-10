@@ -24,6 +24,7 @@ import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -64,6 +65,11 @@ import org.eclipse.persistence.config.CacheIsolationType;
 public class Schedule implements  BaseEntity, Serializable {
 
     private static final long serialVersionUID = 1L;
+    
+    @OneToOne(mappedBy = "scheduleId")
+    private SessionHistory sessionHistory;
+    
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
@@ -272,6 +278,20 @@ public class Schedule implements  BaseEntity, Serializable {
      */
     public void setSchedReminder(Boolean schedReminder) {
         this.schedReminder = schedReminder;
+    }
+
+    /**
+     * @return the sessionHistory
+     */
+    public SessionHistory getSessionHistory() {
+        return sessionHistory;
+    }
+
+    /**
+     * @param sessionHistory the sessionHistory to set
+     */
+    public void setSessionHistory(SessionHistory sessionHistory) {
+        this.sessionHistory = sessionHistory;
     }
 
 }

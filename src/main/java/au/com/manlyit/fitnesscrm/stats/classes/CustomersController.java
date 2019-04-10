@@ -2695,7 +2695,11 @@ public class CustomersController implements Serializable {
             gc.setTime(new Date());
             setThisIsANewPlan(true);
         } else {
-            gc.setTime(current.getPaymentParametersId().getLastSuccessfulScheduledPayment().getPaymentDate());
+            Date payDate = current.getPaymentParametersId().getLastSuccessfulScheduledPayment().getPaymentDate();
+            if(payDate == null){
+                payDate = current.getPaymentParametersId().getLastSuccessfulScheduledPayment().getDebitDate();
+            }
+            gc.setTime(payDate);
         }
         if (isThisIsANewPlan() == false) {
             gc.add(fieldAndAmount[0], fieldAndAmount[1]);

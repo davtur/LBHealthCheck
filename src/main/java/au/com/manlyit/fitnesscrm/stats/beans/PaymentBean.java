@@ -494,7 +494,7 @@ public class PaymentBean implements Serializable {
         if (user != null) {
 
             try {
-                
+
                 newPayment.setDebitDate(debitDate);
                 newPayment.setEzidebitCustomerID(cust.getPaymentParametersId().getEzidebitCustomerID());
                 newPayment.setPaymentSource(PaymentSource.DIRECT_DEBIT.value());
@@ -1026,9 +1026,9 @@ public class PaymentBean implements Serializable {
                     //process the payments
                     if (resultArrayOfScheduledPayments.getScheduledPayment() != null) {
 
-                        List<ScheduledPayment> payList = resultArrayOfScheduledPayments.getScheduledPayment();
-                        if (payList.isEmpty() == false) {
-                            LOGGER.log(Level.INFO, "PaymentBean processGetScheduledPayments. Processing {0} payments for customer {1}.", new Object[]{payList.size(), cust.getUsername()});
+                        List<ScheduledPayment> payListGateway = resultArrayOfScheduledPayments.getScheduledPayment();
+                        if (payListGateway.isEmpty() == false) {
+                            LOGGER.log(Level.INFO, "PaymentBean processGetScheduledPayments. Processing {0} payments for customer {1}.", new Object[]{payListGateway.size(), cust.getUsername()});
                             if (abort == false) {
                                 GregorianCalendar testCal = new GregorianCalendar();
                                 testCal.add(Calendar.MINUTE, -5);
@@ -1040,7 +1040,7 @@ public class PaymentBean implements Serializable {
                                     // Schedled Payments from teh gateway are only status scheduled
                                     if (crmPay.getPaymentStatus().contentEquals(PaymentStatus.SCHEDULED.value()) == true || crmPay.getPaymentStatus().contentEquals(PaymentStatus.WAITING.value()) == true) {
                                         boolean found = false;
-                                        for (ScheduledPayment pay : payList) {
+                                        for (ScheduledPayment pay : payListGateway) {
 
                                             if (pay.getPaymentReference().isNil() == false) {
                                                 String ref = pay.getPaymentReference().getValue().trim();
@@ -1056,12 +1056,14 @@ public class PaymentBean implements Serializable {
                                                     LOGGER.log(Level.INFO, "PaymentBean processGetScheduledPayments  - Processing Payment CRM database id:{0}", id);
                                                     if (compareScheduledPaymentXMLToEntity(crmPay, pay)) {
                                                         // they are the same - check status and update if necessary
-                                                        LOGGER.log(Level.INFO, "PaymentBean processGetScheduledPayments  -- sync OK -- payment id:{0}", id);
+                                                        LOGGER.log(Level.INFO, "PaymentBean processGetScheduledPayments compareScheduledPaymentXMLToEntity(crmPay, pay) -- sync OK -- payment id:{0}", id);
                                                     } else {
                                                         compareScheduledPaymentXMLToEntityAndUpdateAmountAndStatus(crmPay, pay);
-                                                        LOGGER.log(Level.WARNING, "PaymentBean processGetScheduledPayments  - updating scheduled payment compareScheduledPaymentXMLToEntity FAILED id: {0}", id);
+                                                        LOGGER.log(Level.INFO, "PaymentBean processGetScheduledPayments - compareScheduledPaymentXMLToEntityAndUpdateAmountAndStatus(crmPay, pay) -- update sync OK -- updating scheduled payment as compareScheduledPaymentXMLToEntity FAILED as a feild has changes in the payment. id: {0}", id);
                                                     }
                                                 }
+                                            } else {
+                                                LOGGER.log(Level.SEVERE, "PaymentBean processGetScheduledPayments  - found a payment without a valid reference", pay.toString());
                                             }
                                         }
                                         if (found == false) {
@@ -1083,7 +1085,7 @@ public class PaymentBean implements Serializable {
 
                                 // remove any that 
                                 // List<Payments> crmPaymentList = paymentsFacade.findScheduledPaymentsByCustomer(cust, false);
-                                for (ScheduledPayment pay : payList) {
+                                for (ScheduledPayment pay : payListGateway) {
 
                                     boolean found = false;
                                     for (Payments p : crmPayList) {
@@ -2243,7 +2245,7 @@ public class PaymentBean implements Serializable {
     private void sendInvoice(Payments payment, Payment pay) {
         //TODO process invoice
         LOGGER.log(Level.WARNING, "sendInvoice - Error method not completed yet. Still TODO: ");
-       
+
     }
 
     private void processPaymentStatusUpdates(Payments payment, Payment pay) {
@@ -2490,7 +2492,7 @@ public class PaymentBean implements Serializable {
                         GregorianCalendar paymentsStopDate = new GregorianCalendar();
                         GregorianCalendar paymentsStartDate = new GregorianCalendar();
                         paymentsStopDate.add(Calendar.MONTH, PAYMENT_SCHEDULE_MONTHS_AHEAD);
-                        // get scheduled payments in the next 11 months 
+                        // get scheduled payments in the next 11 months  and update our DB
                         Future<PaymentGatewayResponse> csp = getScheduledPayments(cust, paymentsStartDate.getTime(), paymentsStopDate.getTime(), digitalKey, sessionId, true);
                         PaymentGatewayResponse pgr2;
                         try {
@@ -2503,6 +2505,7 @@ public class PaymentBean implements Serializable {
                         }
 
                         if (pgr2.isOperationSuccessful()) {
+                            // the latest customer data has been retrieved from the gateway and our database updated . The findPaymentsByCustomer call below should return updated payment information.
 
                             PaymentParameters pp = cust.getPaymentParametersId();
                             //Collection<Payments> pl = cust.getPaymentsCollection();// cached values were stale 
@@ -2601,13 +2604,17 @@ public class PaymentBean implements Serializable {
                                                     return new AsyncResult<>(pgr);
                                                 }
                                             } else {
-                                                LOGGER.log(Level.SEVERE, "Payment Bean - Update Schedule Failed:Payment Amount outside < $2 or greater than $10000 Customer  - {0}, Start {1}, Finish {2}, period {3}, day of week {4}, day of month {5}, Amount-cents {6}, num pay {7}, tot pay amount {8}, 1st wom {9},2nd wom {10},3rd wom {11},4th wom {12},", new Object[]{cust.getUsername(), paymentsStartDate.getTime(), paymentsStopDate.getTime(), payPeriod, dow, Integer.parseInt(pp.getPaymentPeriodDayOfMonth()), paymentAmount, pp.getPaymentsRegularTotalNumberOfPayments(), totalPaymentAmount, firstWeekOfMonth, secondWeekOfMonth, thirdWeekOfMonth, fourthWeekOfMonth});
+                                                LOGGER.log(Level.WARNING, "Payment Bean - Update Schedule Failed:Payment Amount outside < $2 or greater than $10000 Customer  - {0}, Start {1}, Finish {2}, period {3}, day of week {4}, day of month {5}, Amount-cents {6}, num pay {7}, tot pay amount {8}, 1st wom {9},2nd wom {10},3rd wom {11},4th wom {12},", new Object[]{cust.getUsername(), paymentsStartDate.getTime(), paymentsStopDate.getTime(), payPeriod, dow, Integer.parseInt(pp.getPaymentPeriodDayOfMonth()), paymentAmount, pp.getPaymentsRegularTotalNumberOfPayments(), totalPaymentAmount, firstWeekOfMonth, secondWeekOfMonth, thirdWeekOfMonth, fourthWeekOfMonth});
                                             }
                                         } else {
 
-                                            LOGGER.log(Level.SEVERE, "Payment Bean - Update Schedule Failed:The last scheduled payment Date and debit date were NULL  - {0}, Start {1}, Finish {2}, period {3}, day of week {4}, day of month {5}, Amount-cents {6}, num pay {7}, tot pay amount {8}, 1st wom {9},2nd wom {10},3rd wom {11},4th wom {12},", new Object[]{cust.getUsername(), paymentsStartDate.getTime(), paymentsStopDate.getTime(), payPeriod, dow, Integer.parseInt(pp.getPaymentPeriodDayOfMonth()), paymentAmount, pp.getPaymentsRegularTotalNumberOfPayments(), totalPaymentAmount, firstWeekOfMonth, secondWeekOfMonth, thirdWeekOfMonth, fourthWeekOfMonth});
+                                            LOGGER.log(Level.INFO, "Payment Bean - Update Schedule Failed:The last scheduled payment Date is greater than the update window date so the schedule is already up to date - {0}, Start {1}, Finish {2}, period {3}, day of week {4}, day of month {5}, Amount-cents {6}, num pay {7}, tot pay amount {8}, 1st wom {9},2nd wom {10},3rd wom {11},4th wom {12},", new Object[]{cust.getUsername(), paymentsStartDate.getTime(), paymentsStopDate.getTime(), payPeriod, dow, Integer.parseInt(pp.getPaymentPeriodDayOfMonth()), paymentAmount, pp.getPaymentsRegularTotalNumberOfPayments(), totalPaymentAmount, firstWeekOfMonth, secondWeekOfMonth, thirdWeekOfMonth, fourthWeekOfMonth});
 
                                         }
+                                    } else {
+
+                                        LOGGER.log(Level.SEVERE, "Payment Bean - Update Schedule Failed:The last scheduled payment Date and debit date were NULL  - {0}, Start {1}, Finish {2}, period {3}, day of week {4}, day of month {5}, Amount-cents {6}, num pay {7}, tot pay amount {8}, 1st wom {9},2nd wom {10},3rd wom {11},4th wom {12},", new Object[]{cust.getUsername(), paymentsStartDate.getTime(), paymentsStopDate.getTime(), payPeriod, dow, Integer.parseInt(pp.getPaymentPeriodDayOfMonth()), paymentAmount, pp.getPaymentsRegularTotalNumberOfPayments(), totalPaymentAmount, firstWeekOfMonth, secondWeekOfMonth, thirdWeekOfMonth, fourthWeekOfMonth});
+
                                     }
                                 } else {
 
@@ -2716,7 +2723,7 @@ public class PaymentBean implements Serializable {
         cust.setPaymentParametersId(pp);
         customersFacade.edit(cust);
         //customersFacade.pushChangesToDBImmediatleyInsteadOfAtTxCommit();
-      
+
         LOGGER.log(Level.INFO, "Payment Bean updatePaymentParameters. Payment Parameters have been updated for {0}.", new Object[]{cust.getUsername()});
     }
 
@@ -3317,7 +3324,7 @@ public class PaymentBean implements Serializable {
         try {
             String bccAddress = "";
             LOGGER.log(Level.INFO, "sending AsynchEmail TO: {0}, CC - {1}, From:{2}, Subject:{3}", new Object[]{to, ccAddress, from, emailSubject});
-            emailAgent.send(to, ccAddress, bccAddress,from, emailSubject, message, theAttachedfileName, serverProperties, debug,null);
+            emailAgent.send(to, ccAddress, bccAddress, from, emailSubject, message, theAttachedfileName, serverProperties, debug, null);
             LOGGER.log(Level.INFO, "sent AsynchEmail TO: {0}, CC - {1}, From:{2}, Subject:{3}", new Object[]{to, ccAddress, from, emailSubject});
             pgr = new PaymentGatewayResponse(true, null, "OK", "0", "Email sent successfully");
         } catch (Exception e) {
@@ -3338,7 +3345,7 @@ public class PaymentBean implements Serializable {
         SendHTMLEmailWithFileAttached emailAgent = new SendHTMLEmailWithFileAttached();
         try {
             String bccAddress = "";
-            emailAgent.send(to, ccAddress,bccAddress, from, emailSubject, message, theAttachedfileName, serverProperties, debug,null);
+            emailAgent.send(to, ccAddress, bccAddress, from, emailSubject, message, theAttachedfileName, serverProperties, debug, null);
             LOGGER.log(Level.INFO, "sendAsynchEmail TO: {0}, CC - {1}, From:{2}, Subject:{3}", new Object[]{to, ccAddress, from, emailSubject});
         } catch (Exception e) {
             String error = "Email Send Failed :" + e.getMessage();

@@ -6,10 +6,12 @@ import au.com.manlyit.fitnesscrm.stats.db.SessionHistory;
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.beans.SessionHistoryFacade;
 import au.com.manlyit.fitnesscrm.stats.chartbeans.MySessionsChart1;
+import au.com.manlyit.fitnesscrm.stats.classes.util.CrmScheduleEvent;
 import au.com.manlyit.fitnesscrm.stats.classes.util.DatatableSelectionHelper;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PfSelectableDataModel;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import au.com.manlyit.fitnesscrm.stats.db.Participants;
+import au.com.manlyit.fitnesscrm.stats.db.Schedule;
 import au.com.manlyit.fitnesscrm.stats.db.SessionTrainers;
 import com.itextpdf.text.BadElementException;
 import com.itextpdf.text.Document;
@@ -54,7 +56,6 @@ import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.util.CellRangeAddress;
-import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.DataFormat;
@@ -91,6 +92,8 @@ public class SessionHistoryController implements Serializable {
     private au.com.manlyit.fitnesscrm.stats.beans.SessionHistoryFacade ejbFacade;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.GroupsFacade ejbGroupsFacade;
+     @Inject
+    private au.com.manlyit.fitnesscrm.stats.beans.ScheduleFacade ejbScheduleFacade;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.ExpensesFacade expensesFacade;
     @Inject
@@ -409,18 +412,67 @@ public class SessionHistoryController implements Serializable {
         }
     }
 
+    private void addSessionToCalendar(SessionHistory sh) {
+        if (sh.getParticipantsCollection() == null || sh.getParticipantsCollection().isEmpty()) {
+            logger.log(Level.WARNING, "Cannot add PT session to calendar as there are no clients listed in the booking.addPTSessionToCalendar getParticipantsCollection is NULL or empty");
+            JsfUtil.addErrorMessage("Cannot add PT session to calendar as there are no clients listed in the booking.");
+            return;
+        }
+        CrmScheduleEvent event = new CrmScheduleEvent();
+        event.setStartDate(sh.getSessiondate());
+        GregorianCalendar cal = new GregorianCalendar();
+        cal.setTime(sh.getSessiondate());
+        cal.add(Calendar.HOUR_OF_DAY, 1);
+        event.setEndDate(cal.getTime());
+
+        event.setReminderDate(sh.getSessiondate());
+        event.setAllDay(false);
+        event.setAddReminder(true);
+        Participants[] clients = new Participants[sh.getParticipantsCollection().size()];
+        clients = sh.getParticipantsCollection().toArray(clients);
+        String title = "";
+        if(sh.getSessionTypesId().getName().contains("Personal Training")){
+            title = "PT Reminder: " + clients[0].getCustomerId().getFirstname() + " " + clients[0].getCustomerId().getLastname();
+        }else{
+            title = sh.getSessionTypesId().getName() + " : " + sh.getSessionTrainersCollection().iterator().next().getCustomerId().getFirstname() ;
+        }
+      
+        event.setTitle(title);
+        String note = "Personal Training Booking reminder.\r\n";
+        note += "Session Type:" + sh.getSessionTypesId().getName() +"\r\n";
+        note += "Date:" + sh.getSessiondate() + "\r\n\r\n";
+        note += "Client(s):\r\n";
+        for(Participants c:clients){
+            note += "-- " + c.getCustomerId().getFirstname() + " " + c.getCustomerId().getLastname() + "\r\n";
+        }
+         note += "Trainer(s):\r\n";
+        for(SessionTrainers st:sh.getSessionTrainersCollection()){
+            note += "-- " + st.getCustomerId().getFirstname() + " " + st.getCustomerId().getLastname() + "\r\n";
+        }
+        
+        event.setStringData(note);
+        FacesContext context = FacesContext.getCurrentInstance();
+        ScheduleController scheduleController = (ScheduleController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "scheduleController");
+        Schedule ss = scheduleController.persistEvent(event);
+        scheduleController.addReminder(event);
+        sh.setScheduleId(ss);
+        getFacade().edit(sh);
+        JsfUtil.addErrorMessage("A PT booking reminder has been added to the calendar.");
+    }
+
     public void createDialogueDatalist() {
         try {
-            attendingCustomers = new ArrayList<>();
+           /* attendingCustomers = new ArrayList<>();
             for (int x = 0; x < checkedCustomers.length; x++) {
                 Boolean b = checkedCustomers[x];
                 if (b != null && b == true) {
                     Customers selectedCust = selectableActiveCustomers.get(x);
                     attendingCustomers.add(selectedCust);
                 }
-            }
+            }*/
             participants.setTarget(attendingCustomers);
             createDialogue();
+            
 
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
@@ -464,6 +516,9 @@ public class SessionHistoryController implements Serializable {
                 }
                 updateExpenses(current);
             }
+           
+                addSessionToCalendar(current);
+            
             JsfUtil.addSuccessMessage(configMapFacade.getConfig("SessionHistoryCreated"));
             try {
                 FacesContext context = FacesContext.getCurrentInstance();
@@ -642,6 +697,10 @@ public class SessionHistoryController implements Serializable {
 
     private void performDestroy() {
         try {
+            Schedule s = current.getScheduleId();
+            if(s != null){
+                ejbScheduleFacade.remove(s);
+            }
             getFacade().remove(current);
             JsfUtil.addSuccessMessage(configMapFacade.getConfig("SessionHistoryDeleted"));
         } catch (Exception e) {
@@ -1307,8 +1366,8 @@ public class SessionHistoryController implements Serializable {
      * @return the filteredSelectableActiveCustomers
      */
     public List<Customers> getFilteredSelectableActiveCustomers() {
-        if(filteredSelectableActiveCustomers == null || filteredSelectableActiveCustomers.isEmpty()){
-           filteredSelectableActiveCustomers = getSelectableActiveCustomers();
+        if (filteredSelectableActiveCustomers == null || filteredSelectableActiveCustomers.isEmpty()) {
+            filteredSelectableActiveCustomers = getSelectableActiveCustomers();
         }
         return filteredSelectableActiveCustomers;
     }
