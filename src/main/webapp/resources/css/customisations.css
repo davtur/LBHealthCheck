@@ -12,6 +12,29 @@ body{
     background-image:none !important;
     background-color: white;
 }
+
+@font-face {
+    font-family: 'Dolce Vita';  
+    font-style:normal;
+    font-weight: normal;  
+    src:  url('https://www.manlybeachfemalefitness.com.au/wp-content/themes/bridge/fonts/Dolce-Vita.woff')  format('woff'),  url('https://www.manlybeachfemalefitness.com.au/wp-content/themes/bridge/fonts/Dolce-Vita.ttf') format('tff') ;  
+}
+
+
+.dolce-font h1, .dolce-font h2, .dolce-font h3 ,.dolce-font h4 , .dolce-font h5,.dolce-font h6,.dolce-font p {
+    font-family: 'Dolce Vita', sans-serif ;
+}
+
+.login-main  {
+    
+    padding: 12% 0 0 100px !important;
+   
+}
+
+/**, body, h1, h2, h3, h4, h5, h6, p {
+    font-family: 'Dolce Vita', sans-serif !important;
+}*/
+
 /*
 
 Default font size of themes might be bigger than expected, to change the font-size of PrimeFaces
@@ -30,11 +53,11 @@ height: 300px !important;
 
 .emailEditor{
     width: 100%;
-    
-    
+
+
 }
 .emailEditorInput{
-  width: 100%; 
+    width: 100%; 
 }
 
 .choosePlanDialogue{

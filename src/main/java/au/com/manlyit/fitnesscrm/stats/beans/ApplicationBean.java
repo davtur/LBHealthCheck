@@ -45,6 +45,7 @@ public class ApplicationBean implements Serializable {
     @Inject
     private FutureMapEJB futureMap;
     private static final Logger logger = Logger.getLogger(ApplicationBean.class.getName());
+    private boolean customerEmailsEnabled = true;
 
     private ArrayList<Map<String, Date>> ips = new ArrayList<>();
     private final ConcurrentHashMap<String, String> facebookLogingStateMap = new ConcurrentHashMap<>();
@@ -137,5 +138,19 @@ public class ApplicationBean implements Serializable {
             logger.log(Level.WARNING, "cleanUpOldLoginState numberFormatException", numberFormatException.getMessage());
         }
 
+    }
+
+    /**
+     * @return the customerEmailsEnabled
+     */
+    public boolean isCustomerEmailsEnabled() {
+        return customerEmailsEnabled;
+    }
+
+    /**
+     * @param customerEmailsEnabled the customerEmailsEnabled to set
+     */
+    public void setCustomerEmailsEnabled(boolean customerEmailsEnabled) {
+        this.customerEmailsEnabled = customerEmailsEnabled;
     }
 }

@@ -1,6 +1,7 @@
 package au.com.manlyit.fitnesscrm.stats.classes;
 
 import au.com.manlyit.fitnesscrm.stats.beans.ActivationBean;
+import au.com.manlyit.fitnesscrm.stats.beans.ApplicationBean;
 import au.com.manlyit.fitnesscrm.stats.beans.LoginBean;
 import static au.com.manlyit.fitnesscrm.stats.beans.LoginBean.generateUniqueToken;
 import au.com.manlyit.fitnesscrm.stats.beans.PaymentsFacade;
@@ -567,35 +568,45 @@ public class SessionTimetableController implements Serializable {
 
     public List<TimetableRows> getSessionForTheWeekItems() {
         if (daysOfWeek == null) {
-            daysOfWeek = new ArrayList<>();
-            sessionForTheWeekMaxColumns = 1;
-            GregorianCalendar startCal = new GregorianCalendar();
-            startCal.setTime(getTimetableStartDate());
-            startCal.set(Calendar.HOUR_OF_DAY, 0);
-            startCal.set(Calendar.SECOND, 0);
-            startCal.set(Calendar.MINUTE, 0);
-            startCal.set(Calendar.MILLISECOND, 0);
-            GregorianCalendar endCal = new GregorianCalendar();
-            endCal.setTime(startCal.getTime());
-            endCal.add(Calendar.DAY_OF_YEAR, 1);
+            try {
+                daysOfWeek = new ArrayList<>();
+                sessionForTheWeekMaxColumns = 1;
+                GregorianCalendar startCal = new GregorianCalendar();
+                startCal.setTime(getTimetableStartDate());
+                startCal.set(Calendar.HOUR_OF_DAY, 0);
+                startCal.set(Calendar.SECOND, 0);
+                startCal.set(Calendar.MINUTE, 0);
+                startCal.set(Calendar.MILLISECOND, 0);
+                GregorianCalendar endCal = new GregorianCalendar();
+                endCal.setTime(startCal.getTime());
+                endCal.add(Calendar.DAY_OF_YEAR, 1);
 
-            for (int index = 0; index < 7; index++) {
-                List<SessionHistory> sessions;
+                for (int index = 0; index < 7; index++) {
+                    List<SessionHistory> sessions;
 
-                sessions = sessionHistoryFacade.loadDateRange(0, 100, "sessiondate", SortOrder.ASCENDING, null, startCal.getTime(), endCal.getTime(), "sessiondate");
-                for(int x = sessions.size();x>0;x--){
-                    // remove any non group sessions that dont have a template from the timetable
-                    SessionHistory session = sessions.get(x);
-                    if(session.getSessionTemplate() == null){
-                        sessions.remove(x);
+                    sessions = sessionHistoryFacade.loadDateRange(0, 100, "sessiondate", SortOrder.ASCENDING, null, startCal.getTime(), endCal.getTime(), "sessiondate");
+                    if (sessions != null && sessions.isEmpty() == false) {
+                        LOGGER.log(Level.INFO, "getSessionForTheWeekItems - found {0} sessions between {1} and {2}.", new Object[]{sessions.size(), startCal.getTime(), endCal.getTime()});
+                        for (int x = sessions.size(); x > 0; x--) {
+                            // remove any non group sessions that dont have a template from the timetable
+                            SessionHistory session = sessions.get(x - 1);
+                            if (session.getSessionTemplate() == null) {
+                                sessions.remove(x - 1);
+                            }
+                        }
+
+                    } else {
+                        LOGGER.log(Level.INFO, "getSessionForTheWeekItems - found no sessions between {0} and {1}. returned list of SessionHistory objects id NULL or empty", new Object[]{startCal.getTime(), endCal.getTime()});
+                    }
+                    daysOfWeek.add(new TimetableRows(startCal.getTime(), sessions));
+                    endCal.add(Calendar.DAY_OF_YEAR, 1);
+                    startCal.add(Calendar.DAY_OF_YEAR, 1);
+                    if (sessions.size() > sessionForTheWeekMaxColumns) {
+                        sessionForTheWeekMaxColumns = sessions.size();
                     }
                 }
-                daysOfWeek.add(new TimetableRows(startCal.getTime(), sessions));
-                endCal.add(Calendar.DAY_OF_YEAR, 1);
-                startCal.add(Calendar.DAY_OF_YEAR, 1);
-                if (sessions.size() > sessionForTheWeekMaxColumns) {
-                    sessionForTheWeekMaxColumns = sessions.size();
-                }
+            } catch (Exception e) {
+                LOGGER.log(Level.SEVERE, "getSessionForTheWeekItems generate the timetable failed", e);
             }
         }
 
@@ -1335,10 +1346,14 @@ public class SessionTimetableController implements Serializable {
                 t.setDateUsed(null);
                 ejbTicketsFacade.edit(t);
             }
+            FacesContext context = FacesContext.getCurrentInstance();
+            ApplicationBean applicationBean = context.getApplication().evaluateExpressionGet(context, "#{applicationBean}", ApplicationBean.class);
+            boolean emailsEnabled = applicationBean.isCustomerEmailsEnabled();
+
             Payments pay = sb.getPaymentId();
             if (pay != null) {
                 try {
-                    FacesContext context = FacesContext.getCurrentInstance();
+
                     EziDebitPaymentGateway eziDebitPaymentGateway = context.getApplication().evaluateExpressionGet(context, "#{ezidebit}", EziDebitPaymentGateway.class);
 
                     LOGGER.log(Level.INFO, "Deleted payment for cancelled booking. Payment ID:{0}", new Object[]{pay.getId()});
@@ -1359,13 +1374,15 @@ public class SessionTimetableController implements Serializable {
             sessionHistoryFacade.edit(sh);
             ejbSessionBookingsFacade.remove(sb);
             recreateModel();
-            FacesContext context = FacesContext.getCurrentInstance();
+
             TicketsController ticketsController = context.getApplication().evaluateExpressionGet(context, "#{ticketsController}", TicketsController.class);
 
             ticketsController.recreateModel();
             PrimeFaces instance = PrimeFaces.current();
             instance.executeScript("PF('bookingDialog').hide()");
-            sendBookingConfirmationEmail(sb, sb.getCustomerId(), "system.email.sessionBooking.cancellation.template", configMapFacade.getConfig("template.sessionbooking.cancellation.email.subject"));
+            if (emailsEnabled) {
+                sendBookingConfirmationEmail(sb, sb.getCustomerId(), "system.email.sessionBooking.cancellation.template", configMapFacade.getConfig("template.sessionbooking.cancellation.email.subject"));
+            }
             LOGGER.log(Level.INFO, "Cancel Session button clicked and Booking removed successfully");
         } else {
             LOGGER.log(Level.SEVERE, "Cancel Session button clicked but teh session Booking wasnt found!!");
@@ -1385,7 +1402,8 @@ public class SessionTimetableController implements Serializable {
         //SessionTimetableController sessionTimetableController = context.getApplication().evaluateExpressionGet(context, "#{sessionTimetableController}", SessionTimetableController.class);
         EziDebitPaymentGateway eziDebitPaymentGateway = context.getApplication().evaluateExpressionGet(context, "#{ezidebit}", EziDebitPaymentGateway.class);
         TicketsController ticketsController = context.getApplication().evaluateExpressionGet(context, "#{ticketsController}", TicketsController.class);
-
+        ApplicationBean applicationBean = context.getApplication().evaluateExpressionGet(context, "#{applicationBean}", ApplicationBean.class);
+        boolean emailsEnabled = applicationBean.isCustomerEmailsEnabled();
         SimpleDateFormat sdf = new SimpleDateFormat("EEEE, d MMM yyyy HH:mm");
         SessionBookings sb = new SessionBookings(0);
         Date sessionPurchaseTimestamp = new Date();
@@ -1417,7 +1435,9 @@ public class SessionTimetableController implements Serializable {
                 // have to keep entity collections in sync
                 sh.getSessionBookingsCollection().add(sb);
                 sessionHistoryFacade.edit(sh);
-                sendBookingConfirmationEmail(sb, c, "system.email.sessionBooking.confirmation.template", configMapFacade.getConfig("template.sessionbooking.confirmation.email.subject"));
+                if (emailsEnabled) {
+                    sendBookingConfirmationEmail(sb, c, "system.email.sessionBooking.confirmation.template", configMapFacade.getConfig("template.sessionbooking.confirmation.email.subject"));
+                }
                 recreateModel();
                 ticketsController.recreateModel();
                 PrimeFaces instance = PrimeFaces.current();
@@ -1442,6 +1462,8 @@ public class SessionTimetableController implements Serializable {
 
         //SessionTimetableController sessionTimetableController = context.getApplication().evaluateExpressionGet(context, "#{sessionTimetableController}", SessionTimetableController.class);
         EziDebitPaymentGateway eziDebitPaymentGateway = context.getApplication().evaluateExpressionGet(context, "#{ezidebit}", EziDebitPaymentGateway.class);
+        ApplicationBean applicationBean = context.getApplication().evaluateExpressionGet(context, "#{applicationBean}", ApplicationBean.class);
+        boolean emailsEnabled = applicationBean.isCustomerEmailsEnabled();
 
         LOGGER.log(Level.INFO, "purchaseSession, customer  {0}  active in payment gateway - no tickets available - sending to my details page to update plan or payments", c.getUsername());
         // is the customer already set up in the payment gateway ?
@@ -1484,8 +1506,9 @@ public class SessionTimetableController implements Serializable {
                     // have to keep entity collections in sync
                     sb.getSessionHistoryId().getSessionBookingsCollection().add(sb);
                     sessionHistoryFacade.edit(sb.getSessionHistoryId());
-                    sendBookingConfirmationEmail(sb, c, "system.email.sessionBooking.confirmation.template", configMapFacade.getConfig("template.sessionbooking.confirmation.email.subject"));
-
+                    if (emailsEnabled) {
+                        sendBookingConfirmationEmail(sb, c, "system.email.sessionBooking.confirmation.template", configMapFacade.getConfig("template.sessionbooking.confirmation.email.subject"));
+                    }
                     recreateModel();
 
                     PrimeFaces instance = PrimeFaces.current();

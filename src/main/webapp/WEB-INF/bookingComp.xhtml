@@ -54,11 +54,12 @@
                             <div class="ui-g-12">
                                 <span class="DispBlock " ><font class="Fs14 FontBold black">Location: </font> #{sessionTimetableController.bookingButtonSessionHistory.sessionTemplate.sessionLocationLabel}</span></div>
                             <div class="ui-g-12">
-                                <span class="DispBlock " ><font class="Fs14 FontBold black">Places: </font>
+                               
+                              <span class="DispBlock " ><font class="Fs14 FontBold black">   
+                                            <h:outputText  rendered="#{! empty sessHist.sessionBookingsCollection.size() and (sessHist.sessionTemplate.sessionTimetableMaxSize - sessHist.sessionBookingsCollection.size()) le 10}" value="Places Remaining:"/>
+                                        </font>
 
-                                    <h:outputText  rendered="#{! empty sessionTimetableController.bookingButtonSessionHistory.sessionBookingsCollection.size()}" value="#{sessionTimetableController.bookingButtonSessionHistory.sessionTemplate.sessionTimetableMaxSize - sessionTimetableController.bookingButtonSessionHistory.sessionBookingsCollection.size()}"/>
-
-                                    <h:outputText  rendered="#{empty sessionTimetableController.bookingButtonSessionHistory.sessionBookingsCollection.size()}" value="#{sessionTimetableController.bookingButtonSessionHistory.sessionTemplate.sessionTimetableMaxSize }"/>
+                                        <h:outputText  rendered="#{! empty sessHist.sessionBookingsCollection.size() and (sessHist.sessionTemplate.sessionTimetableMaxSize - sessHist.sessionBookingsCollection.size()) le 10}" value="#{sessHist.sessionTemplate.sessionTimetableMaxSize - sessHist.sessionBookingsCollection.size()}"/>
 
                                 </span></div>
                             <div class="ui-g-12">

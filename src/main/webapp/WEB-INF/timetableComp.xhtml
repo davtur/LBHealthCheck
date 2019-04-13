@@ -8,150 +8,165 @@
                 xmlns:p="http://primefaces.org/ui" >
 
 
+    <div class="ui-g ">
 
-    <h:form id="SessionTimetableListForm" styleClass="bookingFormUpdate">
-        <div class="ui-g">
+
 
    <!--  <h1 class="BigTopic">#{configMapController.getKey('Timetable_Title')}</h1>-->
-            <div class="ui-g-12  gray ">
-                <p:panel style="max-width: 500px">
-                    <p:panel rendered="#{empty  facesContext.externalContext.remoteUser}">
-                        <div class="ui-g">
+        <div class="ui-g-12  gray " >
+
+            <p:panel rendered="#{empty  facesContext.externalContext.remoteUser}" style="max-width: 500px">
+                <div class="ui-g">
+                    <div class="ui-g-12">
+                        <div class="ui-g-5">
+                            <h:form  styleClass="bookingFormUpdate">
+                                <div class="ui-g-12">
+                                    <h2 class="BigTopic">Please log in to book a class.</h2>
+                                </div>
+
+
+                               <!-- <div class="ui-g-12">
+                                    <img src="https://graph.facebook.com/#{loginBean.facebookId}/picture" hidden="#{empty loginBean.facebookId}" class="img-circular" title="This is the currently logged in facebook profile."/>
+                                </div>-->
+
+
+                                <div class="ui-g-12">
+                                    <p:inputText id="usernameText" value="#{loginBean.username}"  placeholder="Username/email"  title="Please enter your username or your email address in this box." >
+                                        <p:ajax event="change" update=":signUpForm" />
+                                    </p:inputText>   
+                                </div>
+
+
+                                <div class="ui-g-12">
+                                    <p:password id="passText" value="#{loginBean.password}"  placeholder="Password" feedback="false" title="Please enter your password in this box."/>
+                                </div>
+
+
+                                <div class="ui-g-5  button-container">
+                                    <p:commandButton id="standard" value="Sign in" styleClass="Fs16" actionListener="#{loginBean.loginFromTimetable}" update="@(.bookingFormUpdate) :growl" title="Click this button to login after entering your username and password above."/> 
+                                </div>
+                                <div class="ui-g-5"> 
+                                    <p:commandLink id="resetPass" value="Reset Password" ajax="false"  action="#{loginBean.resetPassword}" update=":growl" title="If you have forgotten your username or password enter your email or username above then click the password reset button."/>
+                                </div>
+
+
+                                <div class="ui-g-12 button-container">
+                                    <p:commandButton id="facebook" icon="fa fa-facebook-f" widgetVar="fbLogin" onclick="PF('fbLogin').disable()" styleClass="loginButtonFacebook" value="Sign in with Facebook" actionListener="#{facebookLoginBean.timetableFacebookRedirect}" title="Click this button to login with your facebook account. Note you must use the same email address with Manly Beach Female Fitness and facebook."/>
+                                </div>
+
+
+
+                                <!-- <div class="ui-g  ">
+                                     <div class="ui-g-12 chkbox-container"><p:selectBooleanCheckbox id="remember-me" />
+                                         <p:outputLabel for="remember-me" value="Remember Me" />
+                                     </div>
+                                 </div>-->
+                            </h:form>
+                        </div>
+                        <div class="ui-g-1">
                             <div class="ui-g-12">
-                                <div class="ui-g-5">
-                                    <div class="ui-g-12">
-                                        <h1 class="BigTopic">Please log in to book a class.</h1>
-                                    </div>
-
-
-                                    <div class="ui-g-12">
-                                        <img src="https://graph.facebook.com/#{loginBean.facebookId}/picture" hidden="#{empty loginBean.facebookId}" class="img-circular" title="This is the currently logged in facebook profile."/>
-                                    </div>
-
-
-                                    <div class="ui-g-12">
-                                        <p:inputText id="usernameText" value="#{loginBean.username}"  placeholder="Username/email"  title="Please enter your username or your email address in this box." >
-                                            <p:ajax event="change" update=":signUpForm" />
-                                        </p:inputText>   
-                                    </div>
-
-
-                                    <div class="ui-g-12">
-                                        <p:password id="passText" value="#{loginBean.password}"  placeholder="Password" feedback="false" title="Please enter your password in this box."/>
-                                    </div>
-
-
-                                    <div class="ui-g-5  button-container">
-                                        <p:commandButton id="standard" value="Sign in" styleClass="Fs16" actionListener="#{loginBean.loginFromTimetable}" update="@(.bookingFormUpdate) :growl" title="Click this button to login after entering your username and password above."/> 
-                                    </div>
-                                    <div class="ui-g-5"> 
-                                        <p:commandLink id="resetPass" value="Reset Password" ajax="false"  action="#{loginBean.resetPassword}" update=":growl" title="If you have forgotten your username or password enter your email or username above then click the password reset button."/>
-                                    </div>
-
-
-                                    <div class="ui-g-12 button-container">
-                                        <p:commandButton id="facebook" icon="fa fa-facebook-f" widgetVar="fbLogin" onclick="PF('fbLogin').disable()" styleClass="loginButtonFacebook" value="Sign in with Facebook" actionListener="#{facebookLoginBean.timetableFacebookRedirect}" title="Click this button to login with your facebook account. Note you must use the same email address with Manly Beach Female Fitness and facebook."/>
-                                    </div>
-
-
-
-                                    <!-- <div class="ui-g  ">
-                                         <div class="ui-g-12 chkbox-container"><p:selectBooleanCheckbox id="remember-me" />
-                                             <p:outputLabel for="remember-me" value="Remember Me" />
-                                         </div>
-                                     </div>-->
-
-                                </div>
-                                <div class="ui-g-1">
-                                    <div class="ui-g-12">
-                                        <h1 class="BigTopic"> </h1>
-                                    </div>
-                                    <div class="ui-g-12">
-                                        <h1 class="BigTopic">Or</h1>
-                                    </div>
-                                </div>
-                                <div class="ui-g-1">
-                                    
-                                </div>
-                                <div class="ui-g-5">
-
-
-                                    <div class="ui-g-12">
-                                        <h1 class="BigTopic">#{configMapController.getKey('SignUpDialogueHeader')}</h1>
-                                    </div>
-
-                                    <div class="ui-g-12">
-                                       
-                                        <p:inputText id="firstname"  value="#{customersController.newCustomer.firstname}" title="#{configMapController.getKey('EditCustomersTitle_firstname')}" required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_firstname')}">
-                                            <p:ajax update=":createAccountForm:dialogueSave" event="keyup"/>
-                                        </p:inputText>
-                                        <p:watermark for="firstname" value="Firstname"  />
-                                    </div>
-
-                                    <div class="ui-g-12">
-                                        <p:inputText id="lastname" value="#{customersController.newCustomer.lastname}" title="#{configMapController.getKey('EditCustomersTitle_lastname')}"  required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_lastname')}">
-                                            <p:ajax update="  :createAccountForm:dialogueSave" event="keyup" />
-                                        </p:inputText>
-                                        <p:watermark for="lastname" value="Surname"   />
-                                    </div>
-
-                                    <div class="ui-g-12">
-                                       <!--<p:outputLabel styleClass="signupFormLabel"  value="#{configMapController.getKey('CreateCustomersLabel_emailAddress')}" for="emailAddress" />-->
-                                        <p:inputText id="emailAddress" value="#{customersController.newCustomer.emailAddress}" title="#{configMapController.getKey('EditCustomersTitle_emailAddress')}" valueChangeListener="#{customersController.dialogueEmailListener}" required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_emailAddress')}">
-                                            <p:ajax update="  :createAccountForm:dialogueSave" event="keyup" />
-                                        </p:inputText>
-                                        <p:watermark for="emailAddress" value="Email Address"  />
-                                    </div>
-
-                                    <div class="ui-g-12">
-                                        <p:inputText id="telephone" value="#{customersController.newCustomer.telephone}" title="#{configMapController.getKey('CreateCustomersTitle_telephone')}" >
-                                            <f:validator validatorId="au.com.manlyit.fitnesscrm.stats.classes.util.PhoneNumberValidator" />
-                                        </p:inputText>
-                                        <p:watermark for="telephone" value="Phone Number"  />
-                                    </div>
-
-                                    <div class="ui-g-12 button-container">
-                                        <p:commandButton icon="ui-icon-check fa fa-check white Fs14" id="dialogueSave" disabled="#{customersController.addUserButtonDisabled}"  actionListener="#{customersController.createFromSignup}"  value="#{configMapController.getKey('SendSignupVerificationEmailLink')}" update="@(.bookingFormUpdate) :growl "/>                
-                                    </div>
-
-
-                                </div>
+                                <h1 class="BigTopic"> </h1>
+                            </div>
+                            <div class="ui-g-12">
+                                <h2 class="BigTopic">Or</h2>
                             </div>
                         </div>
-                    </p:panel>
-                  <!--  <p:commandButton styleClass="MarRight5 GreenButton animated pulse infinite "   update="@(.bookingFormUpdate)" oncomplete="PF('loginDialog').show()" rendered="#{empty  facesContext.externalContext.remoteUser}" value="#{configMapController.getKey('Timetable_LoginButtonTitle')}"   /> -->
+                        <div class="ui-g-1">
 
-                    <div class="ui-g ">
-                        <div class="ui-g-12 ">
-                            <h:outputText class="Fs14 FontBold black" rendered="#{not empty  facesContext.externalContext.remoteUser}" value="Welcome #{customersController.selected.firstname}! Please book your classes below."/>
-                           <!-- <h:outputText class="Fs14 FontBold black" rendered="#{empty  facesContext.externalContext.remoteUser}" value="#{configMapController.getKey('Timetable_LoginMessageText')}"/>-->
                         </div>
-                        <div class="ui-g-12 ">
-                            <h:outputText class="Fs14 FontBold black" rendered="#{not empty  facesContext.externalContext.remoteUser}" value="Class Tickets Available for Bookings"/>
-                        </div>
-                        <div class="ui-g-12 ">
+                        <div class="ui-g-5">
 
-                            <div class="ui-g-4 ">
-                                <p:dataTable value="#{ticketsController.ticketSummaryList}" var="ticketSum"  rendered="#{not empty  facesContext.externalContext.remoteUser}">
-                                    <p:column headerText="Class Type">
-                                        <h:outputText value="#{ticketSum.ticketName}" />
-                                    </p:column>
-                                    <p:column headerText="No.">
-                                        <h:outputText value="#{ticketSum.numberOfTicketsAsString}" />
-                                    </p:column>
-                                </p:dataTable>
-                            </div>
+                            <h:form  styleClass="bookingFormUpdate">
+                                <div class="ui-g-12">
+                                    <h2 class="BigTopic">#{configMapController.getKey('SignUpDialogueHeader')}</h2>
+                                </div>
+
+                                <div class="ui-g-12">
+
+                                    <p:inputText id="firstname"  value="#{customersController.newCustomer.firstname}" title="#{configMapController.getKey('EditCustomersTitle_firstname')}" required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_firstname')}">
+                                        <p:ajax update=":createAccountForm:dialogueSave" event="keyup"/>
+                                    </p:inputText>
+                                    <p:watermark for="firstname" value="Firstname"  />
+                                </div>
+
+                                <div class="ui-g-12">
+                                    <p:inputText id="lastname" value="#{customersController.newCustomer.lastname}" title="#{configMapController.getKey('EditCustomersTitle_lastname')}"  required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_lastname')}">
+                                        <p:ajax update="  :createAccountForm:dialogueSave" event="keyup" />
+                                    </p:inputText>
+                                    <p:watermark for="lastname" value="Surname"   />
+                                </div>
+
+                                <div class="ui-g-12">
+                                   <!--<p:outputLabel styleClass="signupFormLabel"  value="#{configMapController.getKey('CreateCustomersLabel_emailAddress')}" for="emailAddress" />-->
+                                    <p:inputText id="emailAddress" value="#{customersController.newCustomer.emailAddress}" title="#{configMapController.getKey('EditCustomersTitle_emailAddress')}" valueChangeListener="#{customersController.dialogueEmailListener}" required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_emailAddress')}">
+                                        <p:ajax update="  :createAccountForm:dialogueSave" event="keyup" />
+                                    </p:inputText>
+                                    <p:watermark for="emailAddress" value="Email Address"  />
+                                </div>
+
+                                <div class="ui-g-12">
+                                    <p:inputText id="telephone" value="#{customersController.newCustomer.telephone}" title="#{configMapController.getKey('CreateCustomersTitle_telephone')}" >
+                                        <f:validator validatorId="au.com.manlyit.fitnesscrm.stats.classes.util.PhoneNumberValidator" />
+                                    </p:inputText>
+                                    <p:watermark for="telephone" value="Phone Number"  />
+                                </div>
+
+                                <div class="ui-g-12 button-container">
+                                    <p:commandButton icon="ui-icon-check fa fa-check white Fs14" id="dialogueSave" disabled="#{customersController.addUserButtonDisabled}"  actionListener="#{customersController.createFromSignup}"  value="#{configMapController.getKey('SendSignupVerificationEmailLink')}" update="@(.bookingFormUpdate) :growl "/>                
+                                </div>
+                            </h:form>
                         </div>
-                        <div class="ui-g-12 ">
-                            <p:messages showDetail="true"/>
-                        </div>
-                        <div class="ui-g-12 ">
+                    </div>
+                </div>
+            </p:panel>
+          <!--  <p:commandButton styleClass="MarRight5 GreenButton animated pulse infinite "   update="@(.bookingFormUpdate)" oncomplete="PF('loginDialog').show()" rendered="#{empty  facesContext.externalContext.remoteUser}" value="#{configMapController.getKey('Timetable_LoginButtonTitle')}"   /> -->
+        </div>
+
+    </div>
+    <div class="ui-g ">
+        <h:form id="SessionTimetableListForm" styleClass="bookingFormUpdate">
+
+            <p:panel rendered="#{!empty  facesContext.externalContext.remoteUser}" style="max-width: 500px">
+                <div class="ui-g">
+                    <div class="ui-g-12 ">
+                        <h:outputText class="Fs14 FontBold black" rendered="#{not empty  facesContext.externalContext.remoteUser}" value="Welcome #{customersController.selected.firstname}!"/>
+                       <!-- <h:outputText class="Fs14 FontBold black" rendered="#{empty  facesContext.externalContext.remoteUser}" value="#{configMapController.getKey('Timetable_LoginMessageText')}"/>-->
+                    </div>
+                    <div class="ui-g-12 ">
+                        <h:outputText class="Fs14 FontBold black" rendered="#{not empty  facesContext.externalContext.remoteUser}" value="Tickets Available for Class Bookings"/>
+                    </div>
+                    <div class="ui-g-12 ">
+
+
+                        <p:dataTable value="#{ticketsController.ticketSummaryList}" var="ticketSum"  rendered="#{not empty  facesContext.externalContext.remoteUser}">
+                            <p:column headerText="Class Type">
+                                <h:outputText value="#{ticketSum.ticketName}" />
+                            </p:column>
+                            <p:column headerText="Valid Tickets">
+                                <h:outputText value="#{ticketSum.numberOfTicketsAsString}" />
+                            </p:column>
+                        </p:dataTable>
+
+                    </div>
+                    <div class="ui-g-12 ">
+                        <p:messages showDetail="true"/>
+                    </div>
+                    <div class="ui-g-12 ">
+                        <div class="ui-g-6 ">
                             <p:commandButton styleClass="MarRight5 redBg" icon="fa fa-check white Fs14" oncomplete="PF('bookingPTAdminDialog').show()"  rendered="#{customersController.isUserInRole('ADMIN') ||customersController.isUserInRole('DEVELOPER') }"  value="#{configMapController.getKey('BookingPTFormAdminViewLink')}" update="@(.bookingFormUpdate) :growl "/>                
+                        </div>
+                        <div class="ui-g-6 ">
+                            <h:outputText value="Customer Emails Enabled:"   rendered="#{customersController.isUserInRole('ADMIN') ||customersController.isUserInRole('DEVELOPER') }"/>
+                            <p:selectBooleanCheckbox   value="#{applicationBean.customerEmailsEnabled}"  rendered="#{customersController.isUserInRole('ADMIN') ||customersController.isUserInRole('DEVELOPER') }" >  
+                                <p:ajax update=":SessionTimetableListForm :growl"   />  
+                            </p:selectBooleanCheckbox> 
                         </div>
                     </div>
 
-                </p:panel>
+                </div>
+            </p:panel>
 
+            <div class="ui-g-12 ">
                 <div class="Seperator"></div>
                 <p:commandButton  styleClass="MarRight5 Fs24"   update="@(.bookingFormUpdate) :growl"   value="#{configMapController.getKey('Timetable_decrementWeekButtonTitle')}"  actionListener="#{sessionTimetableController.decrementWeek}"  />
 
@@ -163,128 +178,130 @@
 
 
             </div>
-        </div>
-        <div class="EmptyBox10"></div>
-        <p:repeat value="#{sessionTimetableController.sessionForTheWeekItems}"  var="dayOfWeek" >
-            <div class="ui-g  BorderedBox">
-                <div id="timetableDivider" class="ui-g-12">
-                    <h:outputText value="#{dayOfWeek.startDate}">
-                        <f:convertDateTime pattern="EEEE,  d MMMMM yyyy" />
-                    </h:outputText>
-                </div>
-            </div>
 
-
-            <div class="ui-g">
-
-                <p:repeat  value="#{dayOfWeek.sessions}" var="sessHist"  >
-
-                    <div class="ui-g TimetableTile border-box">
-                        <div class="ui-g-12">
-                            <h2 class=" FontRalewayBold ">  #{sessHist.sessionTemplate.sessionTitle} </h2> 
-                        </div>
-                        <div class="ui-g-12">
-                            <h:outputText value="#{sessHist.sessiondate}" styleClass=" Fs22 FontRalewayBold blue">
-                                <f:convertDateTime pattern="EEEE h:mm a" />
-                            </h:outputText>
-                        </div>
-                        <div class="ui-g-12">
-                            <div class="ui-g-2">
-                                <p:graphicImage   rendered="#{! empty sessHist.sessionTemplate.trainerId.profileImage.id}"  value="#{customerImagesController.imageThumbnail}" width="55px">
-                                    <f:param name="imageId" value="#{sessHist.sessionTemplate.trainerId.profileImage.id}"/>
-                                </p:graphicImage>
-                            </div>
-                            <div class="ui-g-10">
-
-
-                                <div class="ui-g-12">
-                                    <span class="DispBlock " ><font class="Fs14 FontBold black">Trainer: </font> #{sessHist.sessionTemplate.trainerId.firstname}</span></div>
-                                <div class="ui-g-12">
-                                    <span class="DispBlock " ><font class="Fs14 FontBold black">Duration: </font> #{sessHist.sessionTemplate.durationMinutes} #{configMapController.getKey('Timetable_MinutesLabel')}</span></div>
-                                <div class="ui-g-12">
-                                    <span class="DispBlock " ><font class="Fs14 FontBold black">Location: </font> #{sessHist.sessionTemplate.sessionLocationLabel}</span></div>
-                                <div class="ui-g-12">
-                                    <span class="DispBlock " ><font class="Fs14 FontBold black">Places: </font>
-
-                                        <h:outputText  rendered="#{! empty sessHist.sessionBookingsCollection.size()}" value="#{sessHist.sessionTemplate.sessionTimetableMaxSize - sessHist.sessionBookingsCollection.size()}"/>
-
-                                        <h:outputText  rendered="#{empty sessHist.sessionBookingsCollection.size()}" value="#{sessHist.sessionTemplate.sessionTimetableMaxSize }"/>
-
-                                    </span></div>
-
-                                <!--  <span class="DispBlock " ><font class="Fs14 FontRalewayBold black">Casual Rate: </font> 
-                                      <h:outputText value="#{sessHist.sessionTemplate.sessionCasualRate}">
-                                          <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
-                                      </h:outputText>
-                                  </span>-->
-                            </div>
-                            <div class="ui-g-12">
-                                <div class="ui-g-3">
-                                    <p:commandButton id="mapsBtn" styleClass="MarRight5 GreenButton" value="#{configMapController.getKey('Timetable_MapsButtonTitle')}" type="button" />
-                                    <p:overlayPanel  for="mapsBtn" hideEffect="fade" dynamic="true" styleClass="timetableGmap" >
-                                        <p:gmap styleClass="BorderedBox timetableGmap" center="#{sessHist.sessionTemplate.sessionLocationGps}" zoom="16" model="#{sessHist.sessionTemplate.simpleModel}" type="HYBRID" style="width:100%;height:400px" />
-
-                                    </p:overlayPanel>
-                                </div>
-                                <div class="ui-g-3">
-                                    <p:commandButton styleClass="MarRight5 GreenButton animated pulse infinite "   update="@(.signUpFormUpdate)" oncomplete="PF('signupDialog').show()" rendered="#{sessHist.sessionTemplate.showSignupButton and  empty  facesContext.externalContext.remoteUser}" value="#{configMapController.getKey('Timetable_SignUpButtonTitle')}"  actionListener="#{customersController.signUp}"  >
-                                      <!-- <f:param name="sessionHistorySignupId" value="#{sessHist.id}"/>-->
-                                        <f:setPropertyActionListener value="#{sessHist}" target="#{sessionTimetableController.signupButtonSessionHistory}" />
-                                    </p:commandButton>
-                                </div>
-                                <div class="ui-g-2">
-                                    <p:commandButton   styleClass=" OrangeButton animated pulse infinite" update="@(.bookingFormUpdate)" disabled="#{empty  facesContext.externalContext.remoteUser || (sessHist.sessionTemplate.sessionTimetableMaxSize - sessHist.sessionBookingsCollection.size() le 0)}" rendered="#{sessHist.sessionTemplate.showBookingButton}" value="#{configMapController.getKey('Timetable_BookingButtonTitle')}"  actionListener="#{sessionTimetableController.bookFromTimetable}" >
-                                        <!--<f:param name="sessionHistoryBookingId" value="#{sessHist.id}"/>-->
-                                        <f:setPropertyActionListener value="#{sessHist}" target="#{sessionTimetableController.bookingButtonSessionHistory}" />
-                                    </p:commandButton>
-                                </div>
-
-
-                                <p:overlayPanel id="adminOverlay" for="AdminView" hideEffect="fade" dynamic="true"  rendered="#{customersController.isUserInRole('ADMIN') ||customersController.isUserInRole('DEVELOPER') }"  style="width:200px" >
-                                    <div class="ui-g">
-                                        <div class="ui-g-12 Fs14 FontBold black">
-                                            <h:outputText value="#{configMapController.getKey('BookingFormAdminViewLink_Title')}"/>
-                                        </div>
-                                        <p:repeat  value="#{sessHist.sessionBookingsCollection}" var="sessBook"  >
-                                            <div class="ui-g-4">
-                                                <p:graphicImage value="#{customerImagesController.imageThumbnail}" width="55px">
-                                                    <f:param name="imageId" value="#{sessBook.customerId.profileImage.id}"/>
-                                                </p:graphicImage>
-                                            </div>
-                                            <div class="ui-g-8">
-                                                <h:outputText value="#{sessBook.customerId.firstname} #{sessBook.customerId.lastname}"/>
-                                            </div>
-                                        </p:repeat>
-                                    </div>
-                                </p:overlayPanel>  
-
-                            </div>
-                            <h:panelGrid columns="2" rendered="#{customersController.isUserInRole('ADMIN') ||customersController.isUserInRole('DEVELOPER') }" >
-
-                                <p:commandButton styleClass="MarRight5 redBg" icon="fa fa-check white Fs14" id="AdminView"    value="#{configMapController.getKey('BookingFormAdminViewLink')}" update="@(.bookingFormUpdate) :growl "/>                
-
-                                <p:commandButton styleClass="MarRight5 redBg" icon="fa fa-pencil-square-o white Fs14" id="AdminEdit"    value="#{configMapController.getKey('Timetable_EditBookingButtonTitle')}"    update="@(.bookingFormUpdate)" oncomplete="PF('bookingAdminDialog').show()"  >
-                                    <f:setPropertyActionListener value="#{sessHist}" target="#{sessionTimetableController.editBookingButtonSessionHistory}" />
-                                </p:commandButton>
-
-                            </h:panelGrid>
-
-
-                            <div class="Seperator"></div>
-                            <div class="ui-g-12">
-                                <h:outputText value="#{sessHist.sessionTemplate.comments}"/>
-                            </div>
-                            <div class="Seperator"></div>
-                        </div>
-
+            <div class="EmptyBox10"></div>
+            <p:repeat value="#{sessionTimetableController.sessionForTheWeekItems}"  var="dayOfWeek" >
+                <div class="ui-g  BorderedBox">
+                    <div id="timetableDivider" class="ui-g-12">
+                        <h:outputText value="#{dayOfWeek.startDate}">
+                            <f:convertDateTime pattern="EEEE,  d MMMMM yyyy" />
+                        </h:outputText>
                     </div>
-                </p:repeat >
+                </div>
 
-            </div>
 
-        </p:repeat>
-    </h:form>
+                <div class="ui-g">
 
+                    <p:repeat  value="#{dayOfWeek.sessions}" var="sessHist"  >
+
+                        <div class="ui-g TimetableTile border-box">
+                            <div class="ui-g-12">
+                                <h2 class=" FontRalewayBold ">  #{sessHist.sessionTemplate.sessionTitle} </h2> 
+                            </div>
+                            <div class="ui-g-12">
+                                <h:outputText value="#{sessHist.sessiondate}" styleClass=" Fs22 FontRalewayBold blue">
+                                    <f:convertDateTime pattern="EEEE h:mm a" />
+                                </h:outputText>
+                            </div>
+                            <div class="ui-g-12">
+                                <div class="ui-g-2">
+                                    <p:graphicImage   rendered="#{! empty sessHist.sessionTemplate.trainerId.profileImage.id}"  value="#{customerImagesController.imageThumbnail}" width="55px">
+                                        <f:param name="imageId" value="#{sessHist.sessionTemplate.trainerId.profileImage.id}"/>
+                                    </p:graphicImage>
+                                </div>
+                                <div class="ui-g-10">
+
+
+                                    <div class="ui-g-12">
+                                        <span class="DispBlock " ><font class="Fs14 FontBold black">Trainer: </font> #{sessHist.sessionTemplate.trainerId.firstname}</span></div>
+                                    <div class="ui-g-12">
+                                        <span class="DispBlock " ><font class="Fs14 FontBold black">Duration: </font> #{sessHist.sessionTemplate.durationMinutes} #{configMapController.getKey('Timetable_MinutesLabel')}</span></div>
+                                    <div class="ui-g-12">
+                                        <span class="DispBlock " ><font class="Fs14 FontBold black">Location: </font> #{sessHist.sessionTemplate.sessionLocationLabel}</span></div>
+                                    <div class="ui-g-12">
+                                        <span class="DispBlock " ><font class="Fs14 FontBold black">   
+                                                <h:outputText  rendered="#{! empty sessHist.sessionBookingsCollection.size() and (sessHist.sessionTemplate.sessionTimetableMaxSize - sessHist.sessionBookingsCollection.size()) le 10}" value="Places Remaining:"/>
+                                            </font>
+
+                                            <h:outputText  rendered="#{! empty sessHist.sessionBookingsCollection.size() and (sessHist.sessionTemplate.sessionTimetableMaxSize - sessHist.sessionBookingsCollection.size()) le 10}" value="#{sessHist.sessionTemplate.sessionTimetableMaxSize - sessHist.sessionBookingsCollection.size()}"/>
+
+                                       <!-- <h:outputText  rendered="#{empty sessHist.sessionBookingsCollection.size()}" value="#{sessHist.sessionTemplate.sessionTimetableMaxSize }"/>-->
+
+                                        </span></div>
+
+                                    <!--  <span class="DispBlock " ><font class="Fs14 FontRalewayBold black">Casual Rate: </font> 
+                                          <h:outputText value="#{sessHist.sessionTemplate.sessionCasualRate}">
+                                              <f:convertNumber type="currency" currencySymbol="$" locale="au-AU" />
+                                          </h:outputText>
+                                      </span>-->
+                                </div>
+                                <div class="ui-g-12">
+                                    <div class="ui-g-3">
+                                        <p:commandButton id="mapsBtn" styleClass="MarRight5 GreenButton" value="#{configMapController.getKey('Timetable_MapsButtonTitle')}" type="button" />
+                                        <p:overlayPanel  for="mapsBtn" hideEffect="fade" dynamic="true" styleClass="timetableGmap" >
+                                            <p:gmap styleClass="BorderedBox timetableGmap" center="#{sessHist.sessionTemplate.sessionLocationGps}" zoom="16" model="#{sessHist.sessionTemplate.simpleModel}" type="HYBRID" style="width:100%;height:400px" />
+
+                                        </p:overlayPanel>
+                                    </div>
+                                    <div class="ui-g-3">
+                                        <p:commandButton styleClass="MarRight5 GreenButton animated pulse infinite "   update="@(.signUpFormUpdate)" oncomplete="PF('signupDialog').show()" rendered="#{sessHist.sessionTemplate.showSignupButton and  empty  facesContext.externalContext.remoteUser}" value="#{configMapController.getKey('Timetable_SignUpButtonTitle')}"  actionListener="#{customersController.signUp}"  >
+                                          <!-- <f:param name="sessionHistorySignupId" value="#{sessHist.id}"/>-->
+                                            <f:setPropertyActionListener value="#{sessHist}" target="#{sessionTimetableController.signupButtonSessionHistory}" />
+                                        </p:commandButton>
+                                    </div>
+                                    <div class="ui-g-2">
+                                        <p:commandButton   styleClass=" OrangeButton animated pulse infinite" update="@(.bookingFormUpdate)" disabled="#{empty  facesContext.externalContext.remoteUser || (sessHist.sessionTemplate.sessionTimetableMaxSize - sessHist.sessionBookingsCollection.size() le 0)}" rendered="#{sessHist.sessionTemplate.showBookingButton}" value="#{configMapController.getKey('Timetable_BookingButtonTitle')}"  actionListener="#{sessionTimetableController.bookFromTimetable}" >
+                                            <!--<f:param name="sessionHistoryBookingId" value="#{sessHist.id}"/>-->
+                                            <f:setPropertyActionListener value="#{sessHist}" target="#{sessionTimetableController.bookingButtonSessionHistory}" />
+                                        </p:commandButton>
+                                    </div>
+
+
+                                    <p:overlayPanel id="adminOverlay" for="AdminView" hideEffect="fade" dynamic="true"  rendered="#{customersController.isUserInRole('ADMIN') ||customersController.isUserInRole('DEVELOPER') }"  style="width:200px" >
+                                        <div class="ui-g">
+                                            <div class="ui-g-12 Fs14 FontBold black">
+                                                <h:outputText value="#{configMapController.getKey('BookingFormAdminViewLink_Title')}"/>
+                                            </div>
+                                            <p:repeat  value="#{sessHist.sessionBookingsCollection}" var="sessBook"  >
+                                                <div class="ui-g-4">
+                                                    <p:graphicImage value="#{customerImagesController.imageThumbnail}" width="55px">
+                                                        <f:param name="imageId" value="#{sessBook.customerId.profileImage.id}"/>
+                                                    </p:graphicImage>
+                                                </div>
+                                                <div class="ui-g-8">
+                                                    <h:outputText value="#{sessBook.customerId.firstname} #{sessBook.customerId.lastname}"/>
+                                                </div>
+                                            </p:repeat>
+                                        </div>
+                                    </p:overlayPanel>  
+
+                                </div>
+                                <h:panelGrid columns="2" rendered="#{customersController.isUserInRole('ADMIN') ||customersController.isUserInRole('DEVELOPER') }" >
+
+                                    <p:commandButton styleClass="MarRight5 redBg" icon="fa fa-check white Fs14" id="AdminView"    value="#{configMapController.getKey('BookingFormAdminViewLink')}" update="@(.bookingFormUpdate) :growl "/>                
+
+                                    <p:commandButton styleClass="MarRight5 redBg" icon="fa fa-pencil-square-o white Fs14" id="AdminEdit"    value="#{configMapController.getKey('Timetable_EditBookingButtonTitle')}"    update="@(.bookingFormUpdate)" oncomplete="PF('bookingAdminDialog').show()"  >
+                                        <f:setPropertyActionListener value="#{sessHist}" target="#{sessionTimetableController.editBookingButtonSessionHistory}" />
+                                    </p:commandButton>
+
+                                </h:panelGrid>
+
+
+                                <div class="Seperator"></div>
+                                <div class="ui-g-12">
+                                    <h:outputText value="#{sessHist.sessionTemplate.comments}"/>
+                                </div>
+                                <div class="Seperator"></div>
+                            </div>
+
+                        </div>
+                    </p:repeat >
+
+                </div>
+
+            </p:repeat>
+        </h:form>
+    </div>
 
     <ui:include src="/WEB-INF/signupComp.xhtml"/>
     <ui:include src="/WEB-INF/bookingComp.xhtml"/>
