@@ -19,11 +19,13 @@ import au.com.manlyit.fitnesscrm.stats.classes.EziDebitPaymentGateway;
 import au.com.manlyit.fitnesscrm.stats.db.CustomerState;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import au.com.manlyit.fitnesscrm.stats.db.EmailQueue;
+import au.com.manlyit.fitnesscrm.stats.db.Groups;
 import au.com.manlyit.fitnesscrm.stats.db.Notes;
 import au.com.manlyit.fitnesscrm.stats.db.NotificationsLog;
 import au.com.manlyit.fitnesscrm.stats.db.PaymentParameters;
 import au.com.manlyit.fitnesscrm.stats.db.Payments;
 import au.com.manlyit.fitnesscrm.stats.db.Plan;
+import au.com.manlyit.fitnesscrm.stats.db.SessionTypes;
 import au.com.manlyit.fitnesscrm.stats.db.Tickets;
 import au.com.manlyit.fitnesscrm.stats.webservices.ArrayOfPayment;
 import au.com.manlyit.fitnesscrm.stats.webservices.ArrayOfScheduledPayment;
@@ -43,6 +45,7 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -61,8 +64,6 @@ import javax.ejb.Schedule;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.ejb.Timer;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
 import javax.ejb.TransactionManagement;
 import javax.ejb.TransactionManagementType;
 import javax.enterprise.context.ApplicationScoped;
@@ -215,8 +216,8 @@ public class FutureMapEJB implements Serializable {
         LOGGER.log(Level.INFO, "Entering - sendDailyReportEmail ");
         List<Payments> pl = null;
         List<Payments> pl2 = null;
-         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-         SimpleDateFormat monthNameFormat = new SimpleDateFormat("MMMMM");
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+        SimpleDateFormat monthNameFormat = new SimpleDateFormat("MMMMM");
         NumberFormat nf = NumberFormat.getCurrencyInstance();
         GregorianCalendar startCal = new GregorianCalendar();
         GregorianCalendar startCal2 = new GregorianCalendar();
@@ -225,29 +226,28 @@ public class FutureMapEJB implements Serializable {
         startCal.set(Calendar.SECOND, 0);
         startCal.set(Calendar.MINUTE, 0);
         startCal.set(Calendar.MILLISECOND, 0);
-        startCal.set(Calendar.DAY_OF_MONTH, 1);        
+        startCal.set(Calendar.DAY_OF_MONTH, 1);
         Date reportStartDate = startCal.getTime();
-        
+
         startCal2.setTimeInMillis(startCal.getTimeInMillis());
         startCal2.add(Calendar.MONTH, 1);
         Date reportStartDate2 = startCal2.getTime();
         String nextMonthName = monthNameFormat.format(startCal2.getTime());
-        
+
         startCal.set(Calendar.DAY_OF_MONTH, startCal.getActualMaximum(Calendar.DAY_OF_MONTH));
         startCal.set(Calendar.HOUR_OF_DAY, 23);
         startCal.set(Calendar.SECOND, 59);
         startCal.set(Calendar.MINUTE, 59);
         startCal.set(Calendar.MILLISECOND, 999);
         Date reportEndDate = startCal.getTime();
-        
+
         startCal2.set(Calendar.DAY_OF_MONTH, startCal2.getActualMaximum(Calendar.DAY_OF_MONTH));
         startCal2.set(Calendar.HOUR_OF_DAY, 23);
         startCal2.set(Calendar.SECOND, 59);
         startCal2.set(Calendar.MINUTE, 59);
         startCal2.set(Calendar.MILLISECOND, 999);
         Date reportEndDate2 = startCal2.getTime();
-        
-       
+
 // payment report
         float reportTotalSuccessful = 0;
         float reportTotalDishonoured = 0;
@@ -287,7 +287,6 @@ public class FutureMapEJB implements Serializable {
         String[] casualCustomersHeaders = {"Id", "Name", "Plan", "Tickets", "Last Pay Date", "Last Pay Amount", "Next Pay date", "Next Pay Amount"};
         ArrayList<ArrayList<String>> casualCustomersData = new ArrayList<>();
 
-       
         for (Payments pay : pl) {
             ArrayList<String> row = new ArrayList<>();
             row.add(pay.getId().toString());
@@ -455,13 +454,13 @@ public class FutureMapEJB implements Serializable {
             }
         }
 
-        String htmlToRender = renderHtmlForObject(thisMonthName +" Payment Report", headers, data);
+        String htmlToRender = renderHtmlForObject(thisMonthName + " Payment Report", headers, data);
 
-        htmlToRender += renderHtmlForObject(thisMonthName +" Payment Totals", payTotheaders, payTotalsData);
+        htmlToRender += renderHtmlForObject(thisMonthName + " Payment Totals", payTotheaders, payTotalsData);
 
-        htmlToRender += renderHtmlForObject(nextMonthName +" Payment Forecast Report", headers2, data2);
+        htmlToRender += renderHtmlForObject(nextMonthName + " Payment Forecast Report", headers2, data2);
 
-        htmlToRender += renderHtmlForObject(nextMonthName +" Payment Forecast Totals", payTotheaders2, payTotalsData2);
+        htmlToRender += renderHtmlForObject(nextMonthName + " Payment Forecast Totals", payTotheaders2, payTotalsData2);
 
         htmlToRender += renderHtmlForObject("Active Customers Report", custheaders, custData);
 
@@ -855,30 +854,76 @@ public class FutureMapEJB implements Serializable {
 
     }
 
-    public void issueOneWeeksTicketsForCust(Customers c, Date ticketStartDate, Date ticketStopDate) {
+    public void issueRcurringPlanTicketsForCust(Customers c, Date ticketStartDate, Date ticketStopDate) {
 
         synchronized (issueOneWeeksTicketsLockObject) {
             try {
                 List<Tickets> at = ejbTicketsFacade.findCustomerTicketsByDateRange(c, ticketStartDate, ticketStopDate, true);
-                int ticketsAdded = 0;
-                if (at.isEmpty()) {// if the weeks tickets are empty add the tickets based on their plan session allocated.
+                LOGGER.log(Level.INFO, "Issueing Tickets for Customer id {0} - {1} {2}, Plan {6}, existing total tickets for this date range = {3}, startDate {4}, StopDate {5}: ", new Object[]{c.getId(), c.getFirstname(), c.getLastname(), at.size(), ticketStartDate, ticketStopDate, c.getGroupPricing().getPlanName()});
 
-                    // get the list of sub items on the plan. Sub items per week i.e. 2 group training session for two a week , 10 for unlimited etc.
-                    ArrayList<Plan> ap = new ArrayList<>(c.getGroupPricing().getPlanCollection());
-                    for (Plan p : ap) {
-                        Tickets t = new Tickets();
-                        t.setDatePurchased(new Date());
-                        t.setCustomer(c);
-                        t.setSessionType(p.getSessionType());
-                        t.setValidFrom(ticketStartDate);
-                        t.setExpires(ticketStopDate);
-                        ejbTicketsFacade.create(t);
-                        ticketsAdded++;
+                // get the list of sub items on the plan. Sub items per week i.e. 2 group training session for two a week , 10 for unlimited etc.
+                ArrayList<Plan> planSubItems = new ArrayList<>(c.getGroupPricing().getPlanCollection());
+
+                // summarise tickets based on name and number
+                ArrayList<TicketSummary> ticketsOverview = new ArrayList<>();
+                int ticketsAdded = 0;
+                for (Tickets t : at) {
+                    String key = t.getSessionType().getName();
+                    boolean found = false;
+                    for (TicketSummary ts : ticketsOverview) {
+                        if (ts.getTicketName().contentEquals(key)) {
+                            found = true;
+                            ts.incrementCount();
+                        }
                     }
+                    if (found == false) {
+                        ticketsOverview.add(new TicketSummary(key, 1));
+                    }
+
                 }
+                for (TicketSummary ts : ticketsOverview) {
+                    LOGGER.log(Level.INFO, "Tickets Found for Customer id {0} : Type {1}, number {2} , startDate {4}, StopDate {5}: ", new Object[]{c.getId(), ts.getTicketName(), ts.getNumberOfTicketsAsString(), ticketStartDate, ticketStopDate});
+                }
+
+                // check if the customer needs additional tickets issued - if there are zero for the period add the required amount based on teh number of subitems in the plan
+                boolean found = false;
+                for (Plan p : planSubItems) {
+                    if (p.getSessionType() != null) {
+                        String st = p.getSessionType().getName();
+                        for (TicketSummary ts : ticketsOverview) {
+                            if (ts.getTicketName().compareTo(st) == 0) {
+                                found = true;
+                            }
+                        }
+                        if (found == false) {
+                            // add tickets
+                            Tickets t = new Tickets();
+                            t.setDatePurchased(new Date());
+                            t.setCustomer(c);
+                            t.setSessionType(p.getSessionType());
+                            t.setValidFrom(ticketStartDate);
+                            t.setExpires(ticketStopDate);
+                            ejbTicketsFacade.create(t);
+                            ticketsAdded++;
+                        }
+                    } else {
+                        LOGGER.log(Level.WARNING, "SessionType is NULL for Plan id:{0} , Plan name: {1}", new Object[]{p.getId(), p.getPlanName()});
+
+                    }
+
+                }
+
                 if (ticketsAdded > 0) {
                     LOGGER.log(Level.INFO, "Adding Tickets for Customer id {0}, existing tickets {1}, tickets added {2},startDate {3}, stopDate {4} ", new Object[]{c.getId(), at.size(), ticketsAdded, ticketStartDate, ticketStopDate});
+                } else {
+                    if (at.isEmpty()) {
+                        LOGGER.log(Level.WARNING, "No tickets found and no tickets added. Customer may be ineligible for classes. i.e free trial plan or casual. Customer id {0}, existing tickets {1}, NO TICKETS ADDED !!,startDate {3}, stopDate {4} ", new Object[]{c.getId(), at.size(), ticketsAdded, ticketStartDate, ticketStopDate});
+
+                    }
+                    LOGGER.log(Level.INFO, "No Tickets added as existing tickets available for Customer id {0} - {1} {2}, existing tickets {3}, startDate {4}, StopDate {5}: ", new Object[]{c.getId(), c.getFirstname(), c.getLastname(), at.size(), ticketStartDate, ticketStopDate});
+
                 }
+
             } catch (Exception ex) {
                 Logger.getLogger(FutureMapEJB.class.getName()).log(Level.SEVERE, "issueOneWeeksTicketsForCust", ex.getMessage());
             }
@@ -900,7 +945,7 @@ public class FutureMapEJB implements Serializable {
                 ticketStopDate.add(Calendar.SECOND, -1);
 
                 for (int week = 0; week < weeksAheadToPolulate; week++) {
-                    issueOneWeeksTicketsForCust(c, ticketStartDate.getTime(), ticketStopDate.getTime());
+                    issueRcurringPlanTicketsForCust(c, ticketStartDate.getTime(), ticketStopDate.getTime());
                     ticketStartDate.add(Calendar.WEEK_OF_YEAR, 1);
                     ticketStopDate.add(Calendar.WEEK_OF_YEAR, 1);
                 }
@@ -917,7 +962,9 @@ public class FutureMapEJB implements Serializable {
         LOGGER.log(Level.INFO, "###### Updating {0} Customer issueWeeklyCustomerTicketsForPlansSessionBookings #####", acl.size());
 
         for (Customers c : acl) {
-            issueWeeklyCustomerTickets(c, WEEKS_AHEAD_TO_POPULATE_TICKETS);
+            if (c.getGroupPricing().getPlanTimePeriod().contains("Z") == false) {// we dont want plans like casual and free trial that are not eligible - Z = no recurring time period
+                issueWeeklyCustomerTickets(c, WEEKS_AHEAD_TO_POPULATE_TICKETS);
+            }
         }
 
     }
@@ -934,7 +981,7 @@ public class FutureMapEJB implements Serializable {
                         // dont update schedules with an empty payment period or payment period of z ( no schedule ).
                         if (c.getPaymentParametersId().getStatusCode().trim().compareTo("A") == 0 && c.getPaymentParametersId().getPaymentPeriod().trim().isEmpty() == false && c.getPaymentParametersId().getPaymentPeriod().compareTo("Z") != 0) {
                             this.put(FUTUREMAP_INTERNALID, new AsyncJob("GetCustomerDetails", paymentBean.updateCustomerPaymentSchedule(c, getDigitalKey(), FUTUREMAP_INTERNALID)));
-                            LOGGER.log(Level.INFO, "###### Updating payment Schedule for customer ID - {0}, Name - {1} {2}, Status Code - {3}, Payment Period - {4} #####",new Object[]{c.getId(), c.getFirstname(),c.getLastname(),c.getPaymentParametersId().getStatusCode().trim(),c.getPaymentParametersId().getPaymentPeriod().trim()});
+                            LOGGER.log(Level.INFO, "###### Updating payment Schedule for customer ID - {0}, Name - {1} {2}, Status Code - {3}, Payment Period - {4} #####", new Object[]{c.getId(), c.getFirstname(), c.getLastname(), c.getPaymentParametersId().getStatusCode().trim(), c.getPaymentParametersId().getPaymentPeriod().trim()});
                             TimeUnit.MILLISECONDS.sleep(50);//sleeping for a long time wont affect performance (the warning is there for a short sleep of say 5ms ) but we don't want to overload the payment gateway or they may get upset.
                         }
                     }
@@ -1178,7 +1225,7 @@ public class FutureMapEJB implements Serializable {
 
                         message = "checkEmailQueueAndSend -- Sending email to:" + email.getToaddresses() + ", from:" + email.getFromaddress() + ", cc:" + email.getCcaddresses() + ", Bcc:" + email.getBccaddresses() + ", subject:" + email.getSubject() + ", message Length:" + email.getMessage().length() + ", sendDate:" + email.getSendDate() + ", createDate:" + email.getCreateDate() + ".";
                         Logger.getLogger(getClass().getName()).log(Level.INFO, message);
-                        emailAgent.send(email.getToaddresses(), email.getCcaddresses(), email.getBccaddresses(), email.getFromaddress(), email.getSubject(), email.getMessage(), null, emailServerProperties(), false,email.getEmailAttachmentCollection());
+                        emailAgent.send(email.getToaddresses(), email.getCcaddresses(), email.getBccaddresses(), email.getFromaddress(), email.getSubject(), email.getMessage(), null, emailServerProperties(), false, email.getEmailAttachmentCollection());
                         sent++;
                         email.setStatus(1);
                         emailQueueFacade.edit(email);
@@ -1455,6 +1502,8 @@ public class FutureMapEJB implements Serializable {
                             }
 
                             createCombinedAuditLogAndNote(user, customer, "Direct Debit Form", "The direct debit form has been completed and payments created.", "Not Registered in Payemnt Gateway", "Registered in payment gateway with scheduled payments");
+
+                            addCustomerToUsersGroup(customer);
                             /* try {
                                     controller.getSelected().getPaymentParametersId().setWebddrUrl(null);
                                 } catch (Exception e) {
@@ -1469,6 +1518,82 @@ public class FutureMapEJB implements Serializable {
             }
         }
 
+    }
+
+    protected void addCustomerToUsersGroup(Customers c) {
+        addCustomerToGroup(c, "USER");
+        removeCustomerFromGroup(c, "LEAD");
+
+        String newGroups = "User " + c.getUsername() + " is a member of groups: ";
+        for (Groups ng : c.getGroupsCollection()) {
+            newGroups += ng.getGroupname() + " ";
+        }
+        LOGGER.log(Level.INFO, "{0}", new Object[]{newGroups});
+    }
+
+    protected void addCustomerToGroup(Customers c, String groupName) {
+        List<Groups> lg = new ArrayList<>(c.getGroupsCollection());
+        List<Groups> removalList = new ArrayList<>();
+        int count = 0;
+        for (Groups g : lg) {
+            if (g.getGroupname().contains(groupName)) {
+                if (count > 0) {
+                    removalList.add(g);
+                }
+                count++;
+            }
+        }
+
+        Iterator<Groups> i = removalList.iterator();
+        while (i.hasNext()) {
+            Groups eg = i.next();
+            //ejbGroupsFacade.remove(eg);
+            customersFacade.removeCustomerFromGroup(c, eg);
+        }
+
+        if (count == 0) {
+
+            // ejbFacade.addCustomerToGroup(c, grp);
+            List<Groups> groupsArray = new ArrayList<>(c.getGroupsCollection());
+
+            Groups grp = new Groups(0, groupName);
+            grp.setUsername(c);
+            groupsFacade.createAndFlushForGeneratedIdEntities(grp);
+            groupsArray.add(grp);
+            c.setGroupsCollection(groupsArray);
+
+            customersFacade.edit(c);
+        }
+        String newGroups = "Adding " + c.getUsername() + " to group " + groupName + ". They are a member of groups: ";
+        for (Groups ng : c.getGroupsCollection()) {
+            newGroups += ng.getGroupname() + " ";
+        }
+        LOGGER.log(Level.INFO, "{0}", new Object[]{newGroups});
+    }
+
+    protected void removeCustomerFromGroup(Customers c, String groupName) {
+        List<Groups> lg = new ArrayList<>(c.getGroupsCollection());
+        List<Groups> removalList = new ArrayList<>();
+        for (Groups g : lg) {
+            if (g.getGroupname().contains(groupName)) {
+                removalList.add(g);
+            }
+        }
+
+        Iterator<Groups> i = removalList.iterator();
+        while (i.hasNext()) {
+            Groups eg = i.next();
+            lg.remove(eg);
+            groupsFacade.remove(eg);
+        }
+        c.setGroupsCollection(lg);
+        customersFacade.edit(c);
+
+        String newGroups = "Removing " + c.getUsername() + " from group " + groupName + ". They are a member of the following groups: ";
+        for (Groups ng : c.getGroupsCollection()) {
+            newGroups += ng.getGroupname() + " ";
+        }
+        LOGGER.log(Level.INFO, "{0}", new Object[]{newGroups});
     }
 
     private Properties emailServerProperties() {

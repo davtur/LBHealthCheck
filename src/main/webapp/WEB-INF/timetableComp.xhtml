@@ -76,7 +76,7 @@
                         </div>
                         <div class="ui-g-5">
 
-                            <h:form  styleClass="bookingFormUpdate">
+                            <h:form  styleClass="bookingFormUpdate signupForm">
                                 <div class="ui-g-12">
                                     <h2 class="BigTopic">#{configMapController.getKey('SignUpDialogueHeader')}</h2>
                                 </div>
@@ -99,7 +99,7 @@
                                 <div class="ui-g-12">
                                    <!--<p:outputLabel styleClass="signupFormLabel"  value="#{configMapController.getKey('CreateCustomersLabel_emailAddress')}" for="emailAddress" />-->
                                     <p:inputText id="emailAddress" value="#{customersController.newCustomer.emailAddress}" title="#{configMapController.getKey('EditCustomersTitle_emailAddress')}" valueChangeListener="#{customersController.dialogueEmailListener}" required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_emailAddress')}">
-                                        <p:ajax update="  :createAccountForm:dialogueSave" event="keyup" />
+                                        <p:ajax update="  dialogueSave" event="keyup" />
                                     </p:inputText>
                                     <p:watermark for="emailAddress" value="Email Address"  />
                                 </div>
@@ -112,7 +112,7 @@
                                 </div>
 
                                 <div class="ui-g-12 button-container">
-                                    <p:commandButton icon="ui-icon-check fa fa-check white Fs14" id="dialogueSave" disabled="#{customersController.addUserButtonDisabled}"  actionListener="#{customersController.createFromSignup}"  value="#{configMapController.getKey('SendSignupVerificationEmailLink')}" update="@(.bookingFormUpdate) :growl "/>                
+                                    <p:commandButton  icon="ui-icon-check fa fa-check white Fs14" id="dialogueSave" disabled="#{customersController.addUserButtonDisabled}"  actionListener="#{customersController.createFromSignup}"  value="#{configMapController.getKey('SendSignupVerificationEmailLink')}" update="@(.bookingFormUpdate) :growl "/>                
                                 </div>
                             </h:form>
                         </div>
