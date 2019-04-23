@@ -25,9 +25,9 @@
                                 </div>
 
 
-                               <!-- <div class="ui-g-12">
-                                    <img src="https://graph.facebook.com/#{loginBean.facebookId}/picture" hidden="#{empty loginBean.facebookId}" class="img-circular" title="This is the currently logged in facebook profile."/>
-                                </div>-->
+                                <!-- <div class="ui-g-12">
+                                     <img src="https://graph.facebook.com/#{loginBean.facebookId}/picture" hidden="#{empty loginBean.facebookId}" class="img-circular" title="This is the currently logged in facebook profile."/>
+                                 </div>-->
 
 
                                 <div class="ui-g-12">
@@ -196,7 +196,14 @@
 
                         <div class="ui-g TimetableTile border-box">
                             <div class="ui-g-12">
-                                <h2 class=" FontRalewayBold ">  #{sessHist.sessionTemplate.sessionTitle} </h2> 
+                                <div class="ui-g-6">
+                                    <h2 class=" FontRalewayBold ">  #{sessHist.sessionTemplate.sessionTitle} </h2>
+                                </div>
+                                <div class="ui-g-6">
+                                    <h2 class=" FontRalewayBold "> <h:outputText styleClass=" fa fa-check-circle-o Fs22  green" rendered="#{sessionTimetableController.sessionAlreadyBookedSessHist(sessHist)}" value="" />
+                                        <h:outputText styleClass="FontRalewayBold Fs22  green" rendered="#{sessionTimetableController.sessionAlreadyBookedSessHist(sessHist)}" value=" Booked" />
+                                    </h2>
+                                </div>
                             </div>
                             <div class="ui-g-12">
                                 <h:outputText value="#{sessHist.sessiondate}" styleClass=" Fs22 FontRalewayBold blue">
@@ -249,12 +256,28 @@
                                             <f:setPropertyActionListener value="#{sessHist}" target="#{sessionTimetableController.signupButtonSessionHistory}" />
                                         </p:commandButton>
                                     </div>
-                                    <div class="ui-g-2">
+                                    <!--<div class="ui-g-2">
                                         <p:commandButton   styleClass=" OrangeButton animated pulse infinite" update="@(.bookingFormUpdate)" disabled="#{empty  facesContext.externalContext.remoteUser || (sessHist.sessionTemplate.sessionTimetableMaxSize - sessHist.sessionBookingsCollection.size() le 0)}" rendered="#{sessHist.sessionTemplate.showBookingButton}" value="#{configMapController.getKey('Timetable_BookingButtonTitle')}"  actionListener="#{sessionTimetableController.bookFromTimetable}" >
-                                            <!--<f:param name="sessionHistoryBookingId" value="#{sessHist.id}"/>-->
+                                            
                                             <f:setPropertyActionListener value="#{sessHist}" target="#{sessionTimetableController.bookingButtonSessionHistory}" />
                                         </p:commandButton>
+                                    </div>-->
+                                    <div class="ui-g-3">
+                                        <p:commandButton icon="ui-icon-check fa fa-check white Fs14  animated pulse infinite"  
+                                                         disabled="#{empty  facesContext.externalContext.remoteUser || (sessHist.sessionTemplate.sessionTimetableMaxSize - sessHist.sessionBookingsCollection.size() le 0)}"
+                                                         rendered="#{!sessionTimetableController.sessionAlreadyBookedSessHist(sessHist) and sessHist.sessionTemplate.showBookingButton}"    
+                                                         value="#{configMapController.getKey('Timetable_BookingButtonTitle')}" update="@(.bookingFormUpdate) :growl ">                
+                                            <f:setPropertyActionListener value="#{sessHist}" target="#{sessionTimetableController.bookingPurchaseButtonSessionHistory}" />
+                                        </p:commandButton>
+
+                                        <p:commandButton icon="ui-icon-check fa fa-times-circle white Fs14" 
+                                                         rendered="#{sessionTimetableController.sessionAlreadyBookedSessHist(sessHist)}"   
+                                                         value="#{configMapController.getKey('BookingFormCancelSessionLink')}" update="@(.bookingFormUpdate) :growl ">                
+                                            <f:setPropertyActionListener value="#{sessHist}" target="#{sessionTimetableController.bookingCancelButtonSessionHistory}" />
+                                        </p:commandButton>
                                     </div>
+
+
 
 
                                     <p:overlayPanel id="adminOverlay" for="AdminView" hideEffect="fade" dynamic="true"  rendered="#{customersController.isUserInRole('ADMIN') ||customersController.isUserInRole('DEVELOPER') }"  style="width:200px" >

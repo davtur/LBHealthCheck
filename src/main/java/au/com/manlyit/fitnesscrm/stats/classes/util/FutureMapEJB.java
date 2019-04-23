@@ -462,13 +462,13 @@ public class FutureMapEJB implements Serializable {
 
         htmlToRender += renderHtmlForObject(nextMonthName + " Payment Forecast Totals", payTotheaders2, payTotalsData2);
 
-        htmlToRender += renderHtmlForObject("Active Customers Report", custheaders, custData);
+        htmlToRender += renderHtmlForObject("Active Customers Report (" +custData.size() + ")" , custheaders, custData);
 
         htmlToRender += renderHtmlForObject("Plan Summary Report", planSummaryheaders, planSummaryData);
 
-        htmlToRender += renderHtmlForObject("Active Customers with No Schedule", noPayheaders, noPayData);
+        htmlToRender += renderHtmlForObject("Active Customers with No Schedule (" +noPayData.size() + ")", noPayheaders, noPayData);
 
-        htmlToRender += renderHtmlForObject("Active Casual Customers", casualCustomersHeaders, casualCustomersData);
+        htmlToRender += renderHtmlForObject("Active Casual Customers (" +casualCustomersData.size() + ")", casualCustomersHeaders, casualCustomersData);
         htmlToRender += "<div><h2>END OF REPORT</h2></div>";
 
         // send report

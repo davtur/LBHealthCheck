@@ -139,6 +139,8 @@ public class SessionTimetableController implements Serializable {
     private MapModel simpleModel;
     private SessionHistory selectedSessionHistory;
     private SessionHistory bookingButtonSessionHistory;
+    private SessionHistory bookingPurchaseButtonSessionHistory;
+    private SessionHistory bookingCancelButtonSessionHistory;
     private SessionHistory editBookingButtonSessionHistory;
     private SessionHistory signupButtonSessionHistory;
     private List<Schedule> filteredScheduleItems;
@@ -1087,6 +1089,50 @@ public class SessionTimetableController implements Serializable {
     }
 
     /**
+     * @return the bookingPurchaseButtonSessionHistory
+     */
+    public SessionHistory getBookingPurchaseButtonSessionHistory() {
+        return bookingPurchaseButtonSessionHistory;
+    }
+
+    /**
+     * @param bookingPurchaseButtonSessionHistory the
+     * bookingPurchaseButtonSessionHistory to set
+     */
+    public void setBookingPurchaseButtonSessionHistory(SessionHistory bookingPurchaseButtonSessionHistory) {
+        this.bookingPurchaseButtonSessionHistory = bookingPurchaseButtonSessionHistory;
+        this.bookingButtonSessionHistory = bookingPurchaseButtonSessionHistory;
+        LOGGER.log(Level.INFO, "Book Session Button Clicked. ");
+        FacesContext context = FacesContext.getCurrentInstance();
+        CustomersController controller = context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
+        controller.setSignupFromBookingInProgress(false);
+        purchaseSession();
+    }
+
+    /**
+     * @return the bookingCancelButtonSessionHistory
+     */
+    public SessionHistory getBookingCancelButtonSessionHistory() {
+        return bookingCancelButtonSessionHistory;
+    }
+
+    /**
+     * @param bookingCancelButtonSessionHistory the
+     * bookingCancelButtonSessionHistory to set
+     */
+    public void setBookingCancelButtonSessionHistory(SessionHistory bookingCancelButtonSessionHistory) {
+        this.bookingCancelButtonSessionHistory = bookingCancelButtonSessionHistory;
+        this.bookingButtonSessionHistory = bookingCancelButtonSessionHistory;
+        LOGGER.log(Level.INFO, "Cancel Session Button Clicked. ");
+
+        FacesContext context = FacesContext.getCurrentInstance();
+        CustomersController controller = context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
+        controller.setSignupFromBookingInProgress(false);
+        cancelSession();
+
+    }
+
+    /**
      * @return the bookingButtonSessionHistory
      */
     public SessionHistory getBookingButtonSessionHistory() {
@@ -1254,9 +1300,21 @@ public class SessionTimetableController implements Serializable {
     }
 
     public boolean isSessionAlreadyBookedDataList(Customers c) {
-        return isSessionAlreadyBookedBase(c);
+        return isSessionAlreadyBookedBase(c,bookingButtonSessionHistory);
         // return isSessionAlreadyBookedBase(getBookingAdminCompSelectedCust());
 
+    }
+
+    public boolean sessionAlreadyBookedSessHist(SessionHistory sh) {
+        FacesContext context = FacesContext.getCurrentInstance();
+        CustomersController controller = null;
+        if (context != null) {
+            controller = context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
+        } else {
+            LOGGER.log(Level.WARNING, "sessionAlreadyBooked -- Faces Context is NULL");
+
+        }
+        return isSessionAlreadyBookedBase(controller.getSelected(),sh);
     }
 
     public boolean isSessionAlreadyBooked() {
@@ -1268,7 +1326,7 @@ public class SessionTimetableController implements Serializable {
             LOGGER.log(Level.WARNING, "sessionAlreadyBooked -- Faces Context is NULL");
 
         }
-        return isSessionAlreadyBookedBase(controller.getSelected());
+        return isSessionAlreadyBookedBase(controller.getSelected(),bookingButtonSessionHistory);
     }
 
     public int numberOfValidTickets(Customers c) {
@@ -1296,11 +1354,11 @@ public class SessionTimetableController implements Serializable {
 
     }
 
-    public boolean isSessionAlreadyBookedBase(Customers c) {
+    public boolean isSessionAlreadyBookedBase(Customers c,SessionHistory sh) {
 
         try {
-            if (c != null && bookingButtonSessionHistory != null) {
-                SessionHistory sh = bookingButtonSessionHistory;
+            if (c != null && sh != null) {
+                //SessionHistory sh = bookingButtonSessionHistory;
                 List<SessionBookings> sbl = new ArrayList<>(sh.getSessionBookingsCollection());
                 for (SessionBookings sb : sbl) {
                     if (Objects.equals(sb.getCustomerId().getId(), c.getId())) {

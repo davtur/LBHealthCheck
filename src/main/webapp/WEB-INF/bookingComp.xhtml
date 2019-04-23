@@ -106,11 +106,14 @@
             <div class="ui-g-12">
                 <div class="ui-g-3">
                     <p:commandButton icon="ui-icon-check fa fa-check white Fs14" id="dialogueSave" disabled="#{sessionTimetableController.sessionAlreadyBooked}"  actionListener="#{sessionTimetableController.purchaseSession}"  value="#{configMapController.getKey('BookingFormPurchaseSessionLink')}" update="@(.bookingFormUpdate) :growl "/>                
-                </div><div class="ui-g-3">
+                </div>
+                <div class="ui-g-3">
                     <p:commandButton icon=" fa fa-times-circle white Fs14" id="dialogueDiscard" onclick=" PF('bookingDialog').hide()"  actionListener="#{customersController.cancelCreateDialogue}" value="#{configMapController.getKey('CancelSignupLink')}" update=":growl"/>                
-                </div><div class="ui-g-3">
+                </div>
+                <div class="ui-g-3">
                     <p:commandButton icon="ui-icon-check fa fa-check white Fs14" id="dialogueCancel" disabled="#{!sessionTimetableController.sessionAlreadyBooked}"  actionListener="#{sessionTimetableController.cancelSession}"  value="#{configMapController.getKey('BookingFormCancelSessionLink')}" update="@(.bookingFormUpdate) :growl "/>                
-                </div><div class="ui-g-3">
+                </div>
+                <div class="ui-g-3">
                     <p:commandButton icon="ui-icon-check fa fa-check white Fs14" id="AdminView" rendered="#{customersController.isUserInRole('ADMIN') ||customersController.isUserInRole('DEVELOPER') }"    value="#{configMapController.getKey('BookingFormAdminViewLink')}" update="@(.bookingFormUpdate) :growl "/>                
                     <p:overlayPanel id="adminOverlay" for="AdminView" hideEffect="fade" dynamic="true"  rendered="#{customersController.isUserInRole('ADMIN') ||customersController.isUserInRole('DEVELOPER') }"  style="width:200px" >
                         <div class="ui-g">
