@@ -46,7 +46,7 @@
                                 <f:selectItem itemValue="Q" itemLabel="Quarterly" />
                                 <f:selectItem itemValue="H" itemLabel="Half Yearly" />
                                 <f:selectItem itemValue="Y" itemLabel="Annually" />
-                                
+
                             </p:selectOneMenu>
                             <p:outputLabel value="#{configMapController.getKey('CreatePlanLabel_planDiscount')}" for="planDiscount" />
                             <p:inputText id="planDiscount"  value="#{planController.newPlan.planDiscount}" title="#{configMapController.getKey('CreatePlanTitle_planDiscount')}" >
@@ -58,12 +58,14 @@
                             <p:selectOneMenu id="planActive" value="#{planController.newPlan.planActive}"  styleClass="selectOneWidth"  required="true" requiredMessage="#{configMapController.getKey('CreatePlanRequiredMessage_planActive')}">
                                 <f:selectItem itemValue="0" itemLabel="Active" />
                                 <f:selectItem itemValue="1" itemLabel="Hidden" />
+                                <p:ajax />
                             </p:selectOneMenu>
 
                             <p:outputLabel value="#{configMapController.getKey('CreateSessionHistoryLabel_sessionType')}" for="sessionType" />
                             <p:selectOneMenu id="sessionType"  styleClass="selectOneWidth" value="#{planController.newPlan.sessionType}" filterMatchMode="startsWith" filter="true" editable="false" converter="sessionTypesControllerConverter" label="#{configMapController.getKey('CreateSessionHistoryTitle_sessionType')}" >
                                 <f:selectItem itemValue="#{null}" itemLabel="#{configMapController.getKey('PlanNoLinkedSessionType')}" />
                                 <f:selectItems value="#{sessionTypesController.itemsAvailableSelectOne}" var="sessionType" itemLabel="#{sessionType.name}" itemValue="#{sessionType}"/>
+                                <p:ajax />
                             </p:selectOneMenu>
 
                         </h:panelGrid>
@@ -167,7 +169,7 @@
                     <p:column sortBy="#{item.planTimePeriod}" filterBy="#{item.planTimePeriod}" headerText="#{configMapController.getKey('CreatePlanPeriodTypeLabel')}"   >
                         <p:cellEditor> 
                             <f:facet name="output">
-                                
+
                                 <h:outputText  rendered="#{item.planTimePeriod == 'F'}"  value="Fortnightly" />
                                 <h:outputText  rendered="#{item.planTimePeriod == 'M'}"  value="Monthly" />
                                 <h:outputText  rendered="#{item.planTimePeriod == '4'}"  value="4 Weekly" />

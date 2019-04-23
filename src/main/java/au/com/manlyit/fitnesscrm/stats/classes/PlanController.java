@@ -161,6 +161,7 @@ public class PlanController implements Serializable {
                 newSubItem.setParent(current);
                 newSubItem.setPlanDescription(selectedSubItem.getPlanDescription());
                 newSubItem.setPlanDiscount(selectedSubItem.getPlanDiscount());
+                newSubItem.setSessionType(selectedSubItem.getSessionType());
                 //getFacade().create(newSubItem);
                 current.getPlanCollection().add(newSubItem);
                 getFacade().edit(current);

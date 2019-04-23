@@ -462,13 +462,13 @@ public class FutureMapEJB implements Serializable {
 
         htmlToRender += renderHtmlForObject(nextMonthName + " Payment Forecast Totals", payTotheaders2, payTotalsData2);
 
-        htmlToRender += renderHtmlForObject("Active Customers Report (" +custData.size() + ")" , custheaders, custData);
+        htmlToRender += renderHtmlForObject("Active Customers Report (" + custData.size() + ")", custheaders, custData);
 
         htmlToRender += renderHtmlForObject("Plan Summary Report", planSummaryheaders, planSummaryData);
 
-        htmlToRender += renderHtmlForObject("Active Customers with No Schedule (" +noPayData.size() + ")", noPayheaders, noPayData);
+        htmlToRender += renderHtmlForObject("Active Customers with No Schedule (" + noPayData.size() + ")", noPayheaders, noPayData);
 
-        htmlToRender += renderHtmlForObject("Active Casual Customers (" +casualCustomersData.size() + ")", casualCustomersHeaders, casualCustomersData);
+        htmlToRender += renderHtmlForObject("Active Casual Customers (" + casualCustomersData.size() + ")", casualCustomersHeaders, casualCustomersData);
         htmlToRender += "<div><h2>END OF REPORT</h2></div>";
 
         // send report
@@ -886,8 +886,8 @@ public class FutureMapEJB implements Serializable {
                 }
 
                 // check if the customer needs additional tickets issued - if there are zero for the period add the required amount based on teh number of subitems in the plan
-                boolean found = false;
                 for (Plan p : planSubItems) {
+                    boolean found = false;
                     if (p.getSessionType() != null) {
                         String st = p.getSessionType().getName();
                         for (TicketSummary ts : ticketsOverview) {
