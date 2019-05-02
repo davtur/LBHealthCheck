@@ -93,6 +93,10 @@ public class Customers implements BaseEntity, Serializable {
     @Column(name = "dob")
     @Temporal(TemporalType.TIMESTAMP)
     private Date dob;
+    
+    @Column(name = "create_time")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date createTime;
     @Basic(optional = false)
     @NotNull
     @Size(min = 1, max = 255)
@@ -757,6 +761,20 @@ public class Customers implements BaseEntity, Serializable {
    
     public void setTicketsCollection(Collection<Tickets> ticketsCollection) {
         this.ticketsCollection = ticketsCollection;
+    }
+
+    /**
+     * @return the createTime
+     */
+    public Date getCreateTime() {
+        return createTime;
+    }
+
+    /**
+     * @param createTime the createTime to set
+     */
+    public void setCreateTime(Date createTime) {
+        this.createTime = createTime;
     }
 
     

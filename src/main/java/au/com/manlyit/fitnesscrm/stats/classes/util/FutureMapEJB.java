@@ -287,6 +287,9 @@ public class FutureMapEJB implements Serializable {
         String[] casualCustomersHeaders = {"Id", "Name", "Plan", "Tickets", "Last Pay Date", "Last Pay Amount", "Next Pay date", "Next Pay Amount"};
         ArrayList<ArrayList<String>> casualCustomersData = new ArrayList<>();
 
+        String[] newLeadsHeaders = {"Id", "Name", "Plan", "Tickets", "Create Time", "Phone", "Email", "Message"};
+        ArrayList<ArrayList<String>> newLeadsData = new ArrayList<>();
+
         for (Payments pay : pl) {
             ArrayList<String> row = new ArrayList<>();
             row.add(pay.getId().toString());
@@ -417,6 +420,17 @@ public class FutureMapEJB implements Serializable {
                     noPayData.add(custRow);
                     //custListNoPaymentScheduled.add(cust);
                 }
+            } else {
+                // customer is a LEAD - only add new leads in the last week
+                GregorianCalendar cutOffDate = new GregorianCalendar();
+                GregorianCalendar leadCreateDate = new GregorianCalendar();
+                cutOffDate.add(Calendar.DAY_OF_YEAR, -7);
+                leadCreateDate.setTime(cust.getCreateTime());
+                if (cutOffDate.before(leadCreateDate)) {
+                    ArrayList<String> leadRow = getNewLeadRowData(cust);
+                    newLeadsData.add(leadRow);
+                }
+
             }
             // find customers on Casual Plans
             if (cust.getGroupPricing().getPlanTimePeriod().contains("Z")) {
@@ -454,7 +468,9 @@ public class FutureMapEJB implements Serializable {
             }
         }
 
-        String htmlToRender = renderHtmlForObject(thisMonthName + " Payment Report", headers, data);
+        String htmlToRender = renderHtmlForObject("New Leads - ( Last 7 Days )", newLeadsHeaders, newLeadsData);
+
+        htmlToRender += renderHtmlForObject(thisMonthName + " Payment Report", headers, data);
 
         htmlToRender += renderHtmlForObject(thisMonthName + " Payment Totals", payTotheaders, payTotalsData);
 
@@ -509,6 +525,44 @@ public class FutureMapEJB implements Serializable {
         } else {
             row.add(sdf.format(cust.getPaymentParametersId().getNextScheduledPayment().getDebitDate()));
             row.add(nf.format(cust.getPaymentParametersId().getNextScheduledPayment().getScheduledAmount()));
+        }
+
+        return row;
+    }
+
+    private ArrayList<String> getNewLeadRowData(Customers cust) {
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy hh:mm a");
+        NumberFormat nf = NumberFormat.getCurrencyInstance();
+
+        ArrayList<String> row = new ArrayList<>();
+        row.add(cust.getId().toString());
+        row.add(cust.getFirstname() + " " + cust.getLastname());
+        row.add(cust.getGroupPricing().getPlanName());
+        ArrayList<TicketSummary> alts = getTicketSummaryList(cust);
+        if (alts == null || alts.isEmpty()) {
+            row.add("No tickets");
+        } else {
+            String tickets = "";
+            for (TicketSummary ts : alts) {
+                tickets += ts.getTicketName() + "=" + ts.getNumberOfTicketsAsString() + " ";
+            }
+            row.add(tickets);
+        }
+        row.add(sdf.format(cust.getCreateTime()));
+        if (cust.getTelephone() != null) {
+            row.add(cust.getTelephone());
+        } else {
+            row.add("---");
+        }
+        if (cust.getEmailAddress() != null) {
+            row.add(cust.getEmailAddress());
+        } else {
+            row.add("---");
+        }
+        if (cust.getNotesCollection() != null && cust.getNotesCollection().iterator().hasNext()) {
+            row.add(cust.getNotesCollection().iterator().next().getNote());
+        } else {
+            row.add("---");
         }
 
         return row;

@@ -477,7 +477,7 @@ public class EziDebitPaymentGateway implements Serializable {
      */
     public List<ScheduledPayment> getScheduledPaymentsListFilteredItems() {
         return scheduledPaymentsListFilteredItems;
-        
+
     }
 
     /**
@@ -972,7 +972,7 @@ public class EziDebitPaymentGateway implements Serializable {
             if (pp.getWebddrUrl() != null) {
 
                 ExternalContext ec = context.getExternalContext();
-                 ec.redirect(pp.getWebddrUrl());
+                ec.redirect(pp.getWebddrUrl());
             }
         } catch (IOException ex) {
             Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, null, ex);
@@ -2730,7 +2730,7 @@ public class EziDebitPaymentGateway implements Serializable {
         //getCustomersController().setRefreshFromDB(true);
         //getCustomersController().recreateModel();
         // updateASingleCustomersPaymentInfo(selectedCust);
-          PrimeFaces.current().ajax().update("@(.updatePaymentInfo)");
+        PrimeFaces.current().ajax().update("@(.updatePaymentInfo)");
         updatePaymentTableComponents();
         LOGGER.log(Level.INFO, "processGetCustomerDetails completed");
     }
@@ -2875,7 +2875,7 @@ public class EziDebitPaymentGateway implements Serializable {
                 LOGGER.log(Level.WARNING, "Create EDDR Link cannot be completed as the selected customer is null.");
                 return;
             }
-            
+
             PaymentParameters pp = null;
             Long amount = (long) (paymentAmountInCents * (float) 100);
             Long amountLimit = paymentLimitAmountInCents * (long) 100;
@@ -2887,7 +2887,7 @@ public class EziDebitPaymentGateway implements Serializable {
             //endCal.setTime(paymentDebitDate);// ezi debit only supports 1 year from current date
             endCal.add(Calendar.YEAR, 1);
             String dom = Integer.toString(debitDate.get(Calendar.DAY_OF_MONTH));
-            
+
             pp = cust.getPaymentParametersId();
             if (pp == null) {
                 getCustomersController().createDefaultPaymentParameters(cust);
@@ -2925,7 +2925,7 @@ public class EziDebitPaymentGateway implements Serializable {
             nf.setMinimumFractionDigits(2);
             String amp = "&";
             SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-            
+
             String widgetUrl = "";
             widgetUrl += "?" + "a=" + encodeText(configMapFacade.getConfig("payment.ezidebit.webddr.hash"));
             widgetUrl += amp + "uRefLabel=" + encodeText(configMapFacade.getConfig("payment.ezidebit.webddr.uRefLabel"));
@@ -2939,7 +2939,11 @@ public class EziDebitPaymentGateway implements Serializable {
             } else {
                 widgetUrl += amp + "sms=0";
             }
-            widgetUrl += amp + "addr=" + encodeText(cust.getStreetAddress());
+            if (cust.getStreetAddress().trim().isEmpty()) {
+                widgetUrl += amp + "addr=TBA";
+            } else {
+                widgetUrl += amp + "addr=" + encodeText(cust.getStreetAddress());
+            }
             widgetUrl += amp + "suburb=" + encodeText(cust.getSuburb());
             widgetUrl += amp + "state=" + encodeText(cust.getAddrState());
             widgetUrl += amp + "pCode=" + encodeText(cust.getPostcode());
@@ -2965,7 +2969,7 @@ public class EziDebitPaymentGateway implements Serializable {
             } else {
                 widgetUrl += amp + "debits=2";
             }
-            
+
             widgetUrl += amp + "aFreq=" + urlPaymentPeriodFormat;
             widgetUrl += amp + "freq=" + urlPaymentPeriodFormat;
             widgetUrl += amp + "aDur=" + pp.getPaymentRegularDuration().toString();
@@ -2977,8 +2981,8 @@ public class EziDebitPaymentGateway implements Serializable {
             if (amountLimit > 0) {
                 widgetUrl += amp + "tAmount=" + nf.format((new Float(amountLimit) / (float) 100));
             }
-            widgetUrl += amp ;
-            widgetUrl = configMapFacade.getConfig("payment.ezidebit.webddr.baseurl") + widgetUrl + "callback=" + configMapFacade.getConfig("payment.ezidebit.webddr.callback") ;
+            widgetUrl += amp;
+            widgetUrl = configMapFacade.getConfig("payment.ezidebit.webddr.baseurl") + widgetUrl + "callback=" + configMapFacade.getConfig("payment.ezidebit.webddr.callback");
             pp.setWebddrUrl(widgetUrl);
             String oldUrl = "Empty";
             if (cust.getPaymentParametersId().getWebddrUrl() != null) {
@@ -2992,7 +2996,8 @@ public class EziDebitPaymentGateway implements Serializable {
             Logger.getLogger(EziDebitPaymentGateway.class.getName()).log(Level.SEVERE, "createEddrLink FAILED", ex);
         }
     }
-    private String encodeText(String text){
+
+    private String encodeText(String text) {
         String ecodedText = text;
         try {
             ecodedText = URLEncoder.encode(text, "UTF-8");
