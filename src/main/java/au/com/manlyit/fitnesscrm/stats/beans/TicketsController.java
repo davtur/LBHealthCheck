@@ -363,27 +363,27 @@ public class TicketsController implements Serializable {
     }
 
     public ArrayList<TicketSummary> getTicketSummaryList(Customers cust) {
-           ArrayList<TicketSummary>  ats = new ArrayList<>();
+        ArrayList<TicketSummary> ats = new ArrayList<>();
 
-            List<Tickets> tl = getCustomerTicketList(cust);
-            for (Tickets t : tl) {
-                String key = t.getSessionType().getName();
-                boolean found = false;
-                for (TicketSummary ts : ats) {
-                    if (ts.getTicketName().contentEquals(key)) {
-                        found = true;
-                        ts.incrementCount();
-                    }
+        List<Tickets> tl = getCustomerTicketList(cust);
+        for (Tickets t : tl) {
+            String key = t.getSessionType().getName();
+            boolean found = false;
+            for (TicketSummary ts : ats) {
+                if (ts.getTicketName().contentEquals(key)) {
+                    found = true;
+                    ts.incrementCount();
                 }
-                if (found == false) {
-                    ats.add(new TicketSummary(key, 1));
-                }
+            }
+            if (found == false) {
+                ats.add(new TicketSummary(key, 1));
+            }
 
-            }
-            if(ats.isEmpty()){
-                ats.add(new TicketSummary("No Tickets", 0));
-            }
-            return ats;
+        }
+        if (ats.isEmpty()) {
+            ats.add(new TicketSummary("No Tickets", 0));
+        }
+        return ats;
     }
 
     public ArrayList<TicketSummary> getTicketSummaryList() {
@@ -394,16 +394,18 @@ public class TicketsController implements Serializable {
 
             List<Tickets> tl = getCustomerTicketList();
             for (Tickets t : tl) {
-                String key = t.getSessionType().getName();
-                boolean found = false;
-                for (TicketSummary ts : ticketsOverview) {
-                    if (ts.getTicketName().contentEquals(key)) {
-                        found = true;
-                        ts.incrementCount();
+                if (t.getDateUsed() == null) {
+                    String key = t.getSessionType().getName();
+                    boolean found = false;
+                    for (TicketSummary ts : ticketsOverview) {
+                        if (ts.getTicketName().contentEquals(key)) {
+                            found = true;
+                            ts.incrementCount();
+                        }
                     }
-                }
-                if (found == false) {
-                    ticketsOverview.add(new TicketSummary(key, 1));
+                    if (found == false) {
+                        ticketsOverview.add(new TicketSummary(key, 1));
+                    }
                 }
 
             }

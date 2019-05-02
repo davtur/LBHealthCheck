@@ -1,5 +1,43 @@
 
 
+
+### accessing managed beans in a servlet ###
+
+In a Servlet, you can get request scoped beans by:
+
+Bean bean = (Bean) request.getAttribute("beanName");
+and session scoped beans by:
+
+Bean bean = (Bean) request.getSession().getAttribute("beanName");
+and application scoped beans by:
+
+Bean bean = (Bean) getServletContext().getAttribute("beanName");
+If you're running in a dependency injection capable framework/container and the bean is managed by CDI's @Named instead of JSF's @ManagedBean, it's even more easy:
+
+@Inject
+private Bean bean;
+Regardless of the scope, when you're actually inside the FacesContext (i.e. the current HTTP request has been served through the FacesServlet), then the normal JSF2 way is using Application#evaluateExpressionGet():
+
+FacesContext context = FacesContext.getCurrentInstance();
+Bean bean = context.getApplication().evaluateExpressionGet(context, "#{beanName}", Bean.class);
+which can be convenienced as follows:
+
+@SuppressWarnings("unchecked")
+public static <T> T findBean(String beanName) {
+    FacesContext context = FacesContext.getCurrentInstance();
+    return (T) context.getApplication().evaluateExpressionGet(context, "#{" + beanName + "}", Object.class);
+}
+and can be used as follows:
+
+Bean bean = findBean("bean");
+However, when you're already inside a @ManagedBean, then using @ManagedProperty is cleaner since it's more declarative.
+
+@ManagedProperty("#{bean}")
+private Bean bean;
+
+
+
+
 # how to run open project
 
 docker run  -p 8082:80  -v /persistent/db-data/dir/on/host:/var/lib/postgresql/9.4/main  -v /persistent/openproject/data/on/host:/var/db/openproject  -e SECRET_KEY_BASE=BigBadBorns1979! openproject/community:7

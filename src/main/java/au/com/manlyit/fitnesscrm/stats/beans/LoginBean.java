@@ -59,6 +59,7 @@ public class LoginBean implements Serializable {
     private String username;
     private String password;
     private boolean renderFacebook = false;
+    private String lastLoginAttemptMessage = "";
 
     private String facebookId;
     private boolean mobileDeviceUserAgent = false;
@@ -621,5 +622,19 @@ public class LoginBean implements Serializable {
      */
     public void setDontRedirect(boolean dontRedirect) {
         this.dontRedirect = dontRedirect;
+    }
+
+    /**
+     * @return the lastLoginAttemptMessage
+     */
+    public String getLastLoginAttemptMessage() {
+        return lastLoginAttemptMessage;
+    }
+
+    /**
+     * @param lastLoginAttemptMessage the lastLoginAttemptMessage to set
+     */
+    public void setLastLoginAttemptMessage(String lastLoginAttemptMessage) {
+        this.lastLoginAttemptMessage = lastLoginAttemptMessage;
     }
 }

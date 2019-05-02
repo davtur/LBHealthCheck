@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 
@@ -64,7 +63,8 @@ public class SecurityServlet extends HttpServlet {
     private CustomersController controller;
     @Inject
     private LoginBean loginBean;
-
+    @Inject
+    private FutureMapEJB futureMap;
     @Inject
     private ApplicationBean applicationBean;
     @Inject
@@ -90,6 +90,9 @@ public class SecurityServlet extends HttpServlet {
         String stateEncoded = request.getParameter("state");
         String state = URLDecoder.decode(stateEncoded, "UTF-8");
         String redirect = state.substring(0, 1);
+        boolean loginFailed = true;
+        String loginFailMessage = "Login Failed! ";
+
         state = state.substring(1);
         if (redirect.compareTo("1") == 0) {
             loginBean.setDontRedirect(true);
@@ -185,17 +188,22 @@ public class SecurityServlet extends HttpServlet {
                                     } else {
                                         logger.log(Level.WARNING, "Login failed. Customer ({0}) was denied access - facebook login button. Message: {1}", new Object[]{customer.getUsername(), servletException.getMessage()});
                                         //context.addMessage(null, new FacesMessage("Login failed."));
-                                        return;
+                                        loginFailMessage = "Login Failed! Facebook Identity: " + customer.getFirstname() + " " + customer.getLastname() + ", email:" + customer.getEmailAddress();
+
                                     }
                                 }
                             }
                         } else {
                             logger.log(Level.WARNING, "A cancelled customer ({0}) was denied access - facebook login button.", customer.getUsername());
                             //context.addMessage(null, new FacesMessage("Access Denied - Cancelled Status"));
+                             loginFailMessage = "Access Denied - Account Cancelled! Facebook Identity: " + customer.getFirstname() + " " + customer.getLastname() + ", email:" + customer.getEmailAddress();
+                            
                         }
                     } else {
                         logger.log(Level.WARNING, "Login failed. Customer ({0}) was denied access - facebook login button.", customer.getUsername());
                         //context.addMessage(null, new FacesMessage("Login failed."));
+                         loginFailMessage = "Access Denied! Facebook Identity: " + customer.getFirstname() + " " + customer.getLastname() + ", email:" + customer.getEmailAddress();
+                       
                     }
                 }
             } catch (ServletException e) {
@@ -204,8 +212,14 @@ public class SecurityServlet extends HttpServlet {
                 response.sendRedirect(request.getContextPath() + "/facebookError.html");
                 return;
             }
-
+            if (loginFailed) {
+                 logger.log(Level.WARNING, "Login failed message sent: {0}", loginFailMessage);
+                // FacesContext.getCurrentInstance().getExternalContext().getFlash().setKeepMessages(true);  
+                loginBean.setLastLoginAttemptMessage(loginFailMessage);
+                //futureMap.sendMessage(loginFailMessage, sessionID);
+            }
             redirectToLandingPage(request, response);
+           
 
             /*if (mobileDevice(request)) {
                 httpSession.setAttribute("MOBILE_DEVICE", "TRUE");
@@ -395,7 +409,7 @@ public class SecurityServlet extends HttpServlet {
                         cust.setDob(sdf.parse(birthday));
                     }
                 } catch (Exception parseException) {
-                    logger.log(Level.WARNING, "Error getting birthday from facebook: birthday is could not be converted to a Date!!", parseException);
+                    logger.log(Level.WARNING, "Error getting birthday from facebook: birthday could not be converted to a Date!!", parseException);
                 }
                 try {
                     cust.setUsername(name.trim().replace(" ", "."));
@@ -417,5 +431,11 @@ public class SecurityServlet extends HttpServlet {
             }
         }
         return cust;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> T findBean(String beanName) {
+        FacesContext context = FacesContext.getCurrentInstance();
+        return (T) context.getApplication().evaluateExpressionGet(context, "#{" + beanName + "}", Object.class);
     }
 }

@@ -46,37 +46,40 @@
                             <h4>Welcome, please use the form to sign in.</h4> 
                         </div>
                     </div>
-                    <div class="ui-g-12 ui-lg-12 ui-md-12">
-                        <p:inputText id="usernameText" value="#{loginBean.username}"  placeholder="Username/email"  title="Please enter your username or your email address in this box." >
-                            <p:ajax event="change" update=":loginForm" />
-                        </p:inputText>   
+                    <div class="ui-g-12" >
+                        <h:outputText  styleClass="red" value="#{loginBean.lastLoginAttemptMessage}" />
                     </div>
-                    <div class="ui-g-12 ui-lg-12 ui-md-12">
-                        <p:password id="passText" value="#{loginBean.password}"  placeholder="Password" feedback="false" title="Please enter your password in this box."/>
+                <div class="ui-g-12 ui-lg-12 ui-md-12">
+                    <p:inputText id="usernameText" value="#{loginBean.username}"  placeholder="Username/email"  title="Please enter your username or your email address in this box." >
+                        <p:ajax event="change" update=":loginForm" />
+                    </p:inputText>   
+                </div>
+                <div class="ui-g-12 ui-lg-12 ui-md-12">
+                    <p:password id="passText" value="#{loginBean.password}"  placeholder="Password" feedback="false" title="Please enter your password in this box."/>
+                </div>
+                <div class="ui-g-12 ui-lg-12 ui-md-12 chkbox-container">
+                    <p:selectBooleanCheckbox id="remember-me" />
+                    <p:outputLabel for="remember-me" value="Remember Me" />
+                    <p:commandLink id="resetPass" value="Reset Password" ajax="false"  action="#{loginBean.resetPassword}" update=":growl" title="If you have forgotten your username or password ter your email or username above then click the password reset button."/>
+                </div>
+                <div class="ui-g-12">
+                    <div class="ui-g-4 ui-lg-4 ui-md-4 button-container">
+                        <p:commandButton id="standard" value="Sign in" styleClass="Fs16" actionListener="#{loginBean.login}"  update=":growl" title="Click this button to login after entering your username and password above."/> 
                     </div>
-                    <div class="ui-g-12 ui-lg-12 ui-md-12 chkbox-container">
-                        <p:selectBooleanCheckbox id="remember-me" />
-                        <p:outputLabel for="remember-me" value="Remember Me" />
-                        <p:commandLink id="resetPass" value="Reset Password" ajax="false"  action="#{loginBean.resetPassword}" update=":growl" title="If you have forgotten your username or password ter your email or username above then click the password reset button."/>
-                    </div>
-                    <div class="ui-g-12">
-                        <div class="ui-g-4 ui-lg-4 ui-md-4 button-container">
-                            <p:commandButton id="standard" value="Sign in" styleClass="Fs16" actionListener="#{loginBean.login}"  update=":growl" title="Click this button to login after entering your username and password above."/> 
-                        </div>
-                        <div class="ui-g-4 ui-lg-4 ui-md-4 button-container">
+                    <div class="ui-g-4 ui-lg-4 ui-md-4 button-container">
 
-                            <img src="https://graph.facebook.com/#{loginBean.facebookId}/picture" hidden="#{empty loginBean.facebookId}" class="img-circular" title="This is the currently logged in facebook profile."/>
+                        <img src="https://graph.facebook.com/#{loginBean.facebookId}/picture" hidden="#{empty loginBean.facebookId}" class="img-circular" title="This is the currently logged in facebook profile."/>
 
-                        </div>
-                        <div class="ui-g-4 ui-lg-4 ui-md-4 button-container">
-                            <p:commandButton id="facebook" icon="fa fa-facebook-f" widgetVar="fbLogin" onclick="PF('fbLogin').disable()" styleClass="loginButtonFacebook" value="Sign in with Facebook" actionListener="#{facebookLoginBean.facebookRedirect}" title="Click this button to login with your facebook account. Note you must use the same email address with Manly Beach Female Fitness and facebook."/>
-                        </div>
                     </div>
-
-                    <div class="ui-g-12 ui-lg-12 ui-md-12">
-                        <p:messages showDetail="true"/>
+                    <div class="ui-g-4 ui-lg-4 ui-md-4 button-container">
+                        <p:commandButton id="facebook" icon="fa fa-facebook-f" widgetVar="fbLogin" onclick="PF('fbLogin').disable()" styleClass="loginButtonFacebook" value="Sign in with Facebook" actionListener="#{facebookLoginBean.facebookRedirect}" title="Click this button to login with your facebook account. Note you must use the same email address with Manly Beach Female Fitness and facebook."/>
                     </div>
                 </div>
+
+                <div class="ui-g-12 ui-lg-12 ui-md-12">
+                    <p:messages showDetail="true"/>
+                </div>
+            </div>
             </div> 
         </h:form>
         <h:form id="loginForm">

@@ -1300,7 +1300,7 @@ public class SessionTimetableController implements Serializable {
     }
 
     public boolean isSessionAlreadyBookedDataList(Customers c) {
-        return isSessionAlreadyBookedBase(c,bookingButtonSessionHistory);
+        return isSessionAlreadyBookedBase(c, bookingButtonSessionHistory);
         // return isSessionAlreadyBookedBase(getBookingAdminCompSelectedCust());
 
     }
@@ -1314,7 +1314,7 @@ public class SessionTimetableController implements Serializable {
             LOGGER.log(Level.WARNING, "sessionAlreadyBooked -- Faces Context is NULL");
 
         }
-        return isSessionAlreadyBookedBase(controller.getSelected(),sh);
+        return isSessionAlreadyBookedBase(controller.getSelected(), sh);
     }
 
     public boolean isSessionAlreadyBooked() {
@@ -1326,7 +1326,7 @@ public class SessionTimetableController implements Serializable {
             LOGGER.log(Level.WARNING, "sessionAlreadyBooked -- Faces Context is NULL");
 
         }
-        return isSessionAlreadyBookedBase(controller.getSelected(),bookingButtonSessionHistory);
+        return isSessionAlreadyBookedBase(controller.getSelected(), bookingButtonSessionHistory);
     }
 
     public int numberOfValidTickets(Customers c) {
@@ -1354,7 +1354,7 @@ public class SessionTimetableController implements Serializable {
 
     }
 
-    public boolean isSessionAlreadyBookedBase(Customers c,SessionHistory sh) {
+    public boolean isSessionAlreadyBookedBase(Customers c, SessionHistory sh) {
 
         try {
             if (c != null && sh != null) {
@@ -1438,6 +1438,7 @@ public class SessionTimetableController implements Serializable {
             ticketsController.recreateModel();
             PrimeFaces instance = PrimeFaces.current();
             instance.executeScript("PF('bookingDialog').hide()");
+            instance.ajax().update("@(.bookingFormUpdate)");
             if (emailsEnabled) {
                 sendBookingConfirmationEmail(sb, sb.getCustomerId(), "system.email.sessionBooking.cancellation.template", configMapFacade.getConfig("template.sessionbooking.cancellation.email.subject"));
             }
@@ -1500,6 +1501,7 @@ public class SessionTimetableController implements Serializable {
                 ticketsController.recreateModel();
                 PrimeFaces instance = PrimeFaces.current();
                 instance.executeScript("PF('bookingDialog').hide()");
+                instance.ajax().update("@(.bookingFormUpdate)");
 
             } catch (Exception e) {
 

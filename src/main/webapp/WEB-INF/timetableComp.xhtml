@@ -54,7 +54,9 @@
                                     <p:commandButton id="facebook" icon="fa fa-facebook-f" widgetVar="fbLogin" onclick="PF('fbLogin').disable()" styleClass="loginButtonFacebook" value="Sign in with Facebook" actionListener="#{facebookLoginBean.timetableFacebookRedirect}" title="Click this button to login with your facebook account. Note you must use the same email address with Manly Beach Female Fitness and facebook."/>
                                 </div>
 
-
+                                <div class="ui-g-12" >
+                                    <h:outputText  styleClass="red" value="#{loginBean.lastLoginAttemptMessage}" />
+                                </div>
 
                                 <!-- <div class="ui-g  ">
                                      <div class="ui-g-12 chkbox-container"><p:selectBooleanCheckbox id="remember-me" />
@@ -138,7 +140,7 @@
                     <div class="ui-g-12 ">
 
 
-                        <p:dataTable value="#{ticketsController.ticketSummaryList}" var="ticketSum"  rendered="#{not empty  facesContext.externalContext.remoteUser}">
+                        <p:dataTable value="#{ticketsController.ticketSummaryList}" styleClass="bookingFormUpdate"  var="ticketSum"  rendered="#{not empty  facesContext.externalContext.remoteUser}">
                             <p:column headerText="Class Type">
                                 <h:outputText value="#{ticketSum.ticketName}" />
                             </p:column>
