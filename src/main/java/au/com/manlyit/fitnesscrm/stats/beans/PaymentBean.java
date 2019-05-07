@@ -1611,7 +1611,7 @@ public class PaymentBean implements Serializable {
     private boolean comparePaymentXMLToEntity(Payments payment, Payment pay) {
 
         if (payment == null || pay == null) {
-            return payment == null && pay == null;
+            return false;
         }
         try {
 
@@ -2244,11 +2244,12 @@ public class PaymentBean implements Serializable {
 
     private void sendInvoice(Payments payment, Payment pay) {
         //TODO process invoice
-        LOGGER.log(Level.WARNING, "sendInvoice - Error method not completed yet. Still TODO: ");
+        LOGGER.log(Level.INFO, "sendInvoice - Error method not completed yet. Still TODO: ");
 
     }
 
     private void processPaymentStatusUpdates(Payments payment, Payment pay) {
+        // payment status between payment gateway and our database if different - process necessary updates.
         String processedPaymentStatus = pay.getPaymentStatus().getValue();
         String crmPaymentStatus = payment.getPaymentStatus();
         if (crmPaymentStatus.contentEquals("S")) {  // this should be W, N or P.
@@ -3324,7 +3325,7 @@ public class PaymentBean implements Serializable {
         try {
             String bccAddress = "";
             LOGGER.log(Level.INFO, "sending AsynchEmail TO: {0}, CC - {1}, From:{2}, Subject:{3}", new Object[]{to, ccAddress, from, emailSubject});
-            emailAgent.send(to, ccAddress, bccAddress, from, emailSubject, message, theAttachedfileName, serverProperties, debug, null);
+            emailAgent.send(to, ccAddress, bccAddress, from, emailSubject, message, theAttachedfileName, serverProperties, debug, null,false);
             LOGGER.log(Level.INFO, "sent AsynchEmail TO: {0}, CC - {1}, From:{2}, Subject:{3}", new Object[]{to, ccAddress, from, emailSubject});
             pgr = new PaymentGatewayResponse(true, null, "OK", "0", "Email sent successfully");
         } catch (Exception e) {
@@ -3345,7 +3346,7 @@ public class PaymentBean implements Serializable {
         SendHTMLEmailWithFileAttached emailAgent = new SendHTMLEmailWithFileAttached();
         try {
             String bccAddress = "";
-            emailAgent.send(to, ccAddress, bccAddress, from, emailSubject, message, theAttachedfileName, serverProperties, debug, null);
+            emailAgent.send(to, ccAddress, bccAddress, from, emailSubject, message, theAttachedfileName, serverProperties, debug, null,false);
             LOGGER.log(Level.INFO, "sendAsynchEmail TO: {0}, CC - {1}, From:{2}, Subject:{3}", new Object[]{to, ccAddress, from, emailSubject});
         } catch (Exception e) {
             String error = "Email Send Failed :" + e.getMessage();

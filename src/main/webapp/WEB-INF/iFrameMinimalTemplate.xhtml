@@ -19,33 +19,35 @@
         <ui:insert name="head" />
     </h:head>
 
-    <h:body>   
-        <div id="menu-mask"></div>
-        <p:growl id="growl" widgetVar="growlWidget"    showDetail="true"    />
-        
-        
-       
+    <h:body> 
+        <f:view>
+            <ui:insert name="metadata"/>
+            <div id="menu-mask"></div>
+            <p:growl id="growl" widgetVar="growlWidget"    showDetail="true"    />
+
+
+
             <ui:insert name="body">
                 Template
             </ui:insert>
 
-            
-       
 
-        <p:ajaxStatus style="width:32px;height:32px;position:fixed;right:7px;bottom:7px">
-            <f:facet name="start">
-                <p:graphicImage name="images/preloader.gif" library="california-layout"/>
-            </f:facet>
 
-            <f:facet name="complete">
-                <h:outputText value="" />
-            </f:facet>
-        </p:ajaxStatus>
 
-      <h:outputStylesheet name="css/nanoscroller.css" library="california-layout" />
-        <h:outputStylesheet name="css/layout-blue.css" library="california-layout" />
-        <h:outputStylesheet name="customisations.css" library="css"/>
-        
+            <p:ajaxStatus style="width:32px;height:32px;position:fixed;right:7px;bottom:7px">
+                <f:facet name="start">
+                    <p:graphicImage name="images/preloader.gif" library="california-layout"/>
+                </f:facet>
+
+                <f:facet name="complete">
+                    <h:outputText value="" />
+                </f:facet>
+            </p:ajaxStatus>
+
+            <h:outputStylesheet name="css/nanoscroller.css" library="california-layout" />
+            <h:outputStylesheet name="css/layout-blue.css" library="california-layout" />
+            <h:outputStylesheet name="customisations.css" library="css"/>
+        </f:view>   
     </h:body>
 
 </html>

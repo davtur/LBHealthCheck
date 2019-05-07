@@ -1,0 +1,26 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<ui:composition template="/WEB-INF/iFrameMinimalTemplate.xhtml" xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:p="http://primefaces.org/ui" >
+
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:viewParam name="eventtype" value="#{customersController.eventType}"/>
+        </f:metadata>
+    </ui:define>
+    <ui:define name="title">
+        <h:outputText value="#{configMapController.getKey('ContactFormTitle')}"></h:outputText>
+
+    </ui:define>
+    <ui:define name="body">
+        <div class="layout-portlets-box">
+            <ui:include src="/WEB-INF/registerInterestFormComp.xhtml"/>
+        </div>
+    </ui:define>
+</ui:composition>
+<!--<p> Generated from template ( JSF_from_entity_wizard/StandardJSF/list.ftl  )- Dave 18th July 2015 </p>-->
+

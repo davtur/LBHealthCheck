@@ -17,6 +17,7 @@ import au.com.manlyit.fitnesscrm.stats.db.Payments;
 import au.com.manlyit.fitnesscrm.stats.db.Plan;
 import au.com.manlyit.fitnesscrm.stats.db.SessionHistory;
 import au.com.manlyit.fitnesscrm.stats.db.SessionTypes;
+import au.com.manlyit.fitnesscrm.stats.webservices.Payment;
 import com.itextpdf.text.BadElementException;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
@@ -168,6 +169,161 @@ public class InvoiceController implements Serializable {
         } else {
             htmlInvoiceEmailEditSaveButtonText = configMapFacade.getConfig("previewHtmlInvoiceEditEmailLink");
         }
+    }
+    
+     public void generatePaymentInvoice(Payments payment) {
+        try {
+            
+            Invoice invoice  = generatePaymentInvoiceBase(payment.getCustomerName(), invoiceUseSettlementDate, invoiceShowSuccessful, invoiceShowFailed, invoiceShowPending, isInvoiceShowScheduled(), invoiceStartDate, invoiceEndDate);
+            invoice.setCreateTimestamp(new Date());
+            invoice.setCreateDatetime(invoiceStartDate);
+            invoice.setStatusId(1);
+            invoice.setDueDate(invoiceEndDate);
+            invoice.setPaymentAttempts(0);
+            invoice.setCarriedBalance(BigDecimal.ZERO);
+            invoice.setInProcessPayment((short) 0);
+            invoice.setIsReview(0);
+            invoice.setCurrencyId(currencyFacade.find(10));
+            invoice.setId(0);
+            getFacade().create(invoice);
+            invoiceLineFilteredItems = null;
+            updateTableData(current);
+            htmlInvoiceSource = generateHtmlInvoice(current);
+            htmlInvoiceEmailToAddress = current.getUserId().getEmailAddress();
+            JsfUtil.addSuccessMessage(configMapFacade.getConfig("InvoiceCreated"));
+        } catch (Exception e) {
+            JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
+        }
+
+        //PrimeFaces.current().ajax().update("InvoicelistForm1");
+    }
+         public Invoice generatePaymentInvoiceBase(Customers cust, boolean useSettlementDate, boolean showSuccessful, boolean showFailed, boolean showPending, boolean showScheduled, Date startDate, Date endDate) {
+        Invoice inv = new Invoice();
+        inv.setInvoiceLineCollection(new ArrayList<>());
+        inv.setUserId(cust);
+//add plan line item to invoice with number of billable sessions
+        InvoiceLineType ilt = invoiceLineTypeFacade.findAll().get(1);
+        InvoiceLine il = new InvoiceLine(0);
+        BigDecimal paymentsTotal;
+        BigDecimal bankFeesTotal;
+        PaymentParameters pp = cust.getPaymentParametersId();
+        String ppPlanPaymentDetails = "Unknown";
+        if (pp != null) {
+            try {
+                String period = getPaymentPeriodString(pp.getPaymentPeriod());
+                String dom = ", DOM: " + pp.getPaymentPeriodDayOfMonth() + " ";
+                String dow = ", DOW: " + pp.getPaymentPeriodDayOfWeek();
+                if (pp.getPaymentPeriodDayOfMonth().contentEquals("0")) {
+                    dom = "";
+                }
+
+                ppPlanPaymentDetails = "Period: " + period + dom + dow;
+            } catch (Exception e) {
+                ppPlanPaymentDetails = "Unknown";
+            }
+        }
+        BigDecimal productsAndServicesTotal = new BigDecimal(0);
+        il.setTypeId(ilt);
+
+        il.setQuantity(new BigDecimal(1));
+        il.setDescription("Plan: " + cust.getGroupPricing().getPlanName());
+        il.setPrice(cust.getGroupPricing().getPlanPrice());
+        il.setAmount(cust.getGroupPricing().getPlanPrice());
+        productsAndServicesTotal = productsAndServicesTotal.add(il.getAmount());
+        inv.getInvoiceLineCollection().add(il);
+        //get payments for customer
+        List<Payments> pl = paymentsFacade.findPaymentsByDateRange(useSettlementDate, showSuccessful, showFailed, showPending, showScheduled, startDate, endDate, false, cust);
+        //get sessions for customer
+        List<SessionTypes> sessionTypesList = sessionTypesFacade.findAll();
+        for (SessionTypes sessType : sessionTypesList) {
+            List<Date> weeks = getWeeksInMonth(startDate, endDate);
+            Date weekStart = startDate;
+            int billableSessionsTotal = 0;
+            for (Date weekEnd : weeks) {
+                List<SessionHistory> sessions = sessionHistoryFacade.findSessionsByParticipantAndDateRange(cust, weekStart, weekEnd, true);
+
+                //for each session type count the sessions and bill as a line item if they are not included in the plan
+                int count = 0;
+
+                for (SessionHistory sess : sessions) {
+                    String type = sess.getSessionTypesId().getName();
+                    if (type.contains(sessType.getName())) {
+                        count++;
+                        //total = total + sess.getSessionTypesId().
+                    }
+                }
+                if (count > 0) {
+                    billableSessionsTotal += checkSessionsAgainstPlanWeek(count, cust, sessType);
+                }
+                weekStart = weekEnd;
+            }
+            //add line item to invoice with number of billable sessions
+            ilt = invoiceLineTypeFacade.findAll().get(2);
+            il = new InvoiceLine(0);
+            il.setTypeId(ilt);
+            BigDecimal bdBillableSessionsTotal = new BigDecimal(billableSessionsTotal);
+            Plan sessionPlan = sessType.getPlan();
+            BigDecimal cdPrice = new BigDecimal(0);
+            if (sessionPlan != null) {
+                cdPrice = sessionPlan.getPlanPrice();
+            }
+            il.setQuantity(bdBillableSessionsTotal);
+            il.setDescription(sessType.getName());
+            il.setPrice(cdPrice);
+            il.setAmount(bdBillableSessionsTotal.multiply(cdPrice));
+            if (cdPrice.compareTo(new BigDecimal(0)) > 0 && bdBillableSessionsTotal.compareTo(new BigDecimal(0)) > 0) {
+                inv.getInvoiceLineCollection().add(il);
+                productsAndServicesTotal = productsAndServicesTotal.add(il.getAmount());
+            }
+
+        }
+        //add payments line item to invoice with number of billable sessions
+        ilt = invoiceLineTypeFacade.findAll().get(0);
+        paymentsTotal = new BigDecimal(0);
+
+        bankFeesTotal = new BigDecimal(0);
+        for (Payments p : pl) {
+            il = new InvoiceLine(0);
+            il.setTypeId(ilt);
+
+            int numberOfPayments = 0;
+
+            BigDecimal fee = p.getTransactionFeeCustomer();
+            if (fee == null) {
+                fee = new BigDecimal(0);
+            }
+            paymentsTotal = paymentsTotal.add(p.getPaymentAmount());
+            bankFeesTotal = bankFeesTotal.add(fee);
+            numberOfPayments++;
+
+            // add scheduled payment amounts 
+            //il.setQuantity(new BigDecimal(numberOfPayments));
+            il.setQuantity(new BigDecimal(1));
+            il.setDescription("Payment(s)" + " --- " + ppPlanPaymentDetails);
+            productsAndServicesTotal = productsAndServicesTotal.add(bankFeesTotal);
+           // productsAndServicesTotal = productsAndServicesTotal.subtract(paymentsTotal);
+            // il.setPrice(paymentsTotal);
+            il.setPrice(p.getPaymentAmount());
+            paymentsTotal = paymentsTotal.negate();
+            //il.setAmount(paymentsTotal);
+            il.setAmount(p.getPaymentAmount());
+
+            // add line item for bank fees
+            InvoiceLine il2 = new InvoiceLine(0);
+            il2.setTypeId(ilt);
+            //il2.setQuantity(new BigDecimal(numberOfPayments));
+            il2.setQuantity(new BigDecimal(numberOfPayments));
+            il2.setDescription("Bank Transaction Fees");
+            //il2.setPrice(bankFeesTotal);
+            // il2.setAmount(bankFeesTotal); 
+            il2.setPrice(fee);
+            il2.setAmount(fee);
+            inv.getInvoiceLineCollection().add(il2);
+            inv.getInvoiceLineCollection().add(il);
+        }
+        inv.setBalance(paymentsTotal);
+        inv.setTotal(productsAndServicesTotal);
+        return inv;
     }
 
     public void generateInvoice() {

@@ -179,7 +179,7 @@ public class CallableExecutorWithTimeoutJob implements Job {
                 cc = null;
             }
             try {
-                emailAgent.send(to, cc,bcc,from, subject, msg, null,props, false,null);
+                emailAgent.send(to, cc,bcc,from, subject, msg, null,props, false,null,false);
                 Logger.getLogger(getClass().getName()).log(Level.INFO, "Message Sent");
             } catch (Exception e) {
                 String message = "There was a problem sending the email , to: " + to + ", cc: " + cc + ", from: " + from + ", subject: " + subject + ".The exception is: \r\n" + e.getMessage();

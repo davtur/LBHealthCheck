@@ -17,7 +17,11 @@
             </h:panelGroup>
             <h:outputText escape="false" value="#{configMapController.getKey('ListEmailQueueEmpty')}" rendered="#{emailQueueController.items.rowCount == 0}"/>
             <h:panelGroup rendered="#{emailQueueController.items.rowCount > 0}">
-                <p:dataTable value="#{emailQueueController.items}" var="item"  paginator="true" rows="15"  paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  rowsPerPageTemplate="5,10,15,20,25,50,100" >
+                <p:dataTable value="#{emailQueueController.items}" var="item"  
+                             paginator="true" 
+                             rows="15"  
+                             paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"  
+                             rowsPerPageTemplate="5,10,15,20,25,50,100" >
                     <p:column sortBy="#{item.id}" >
                         <f:facet name="header">
                             <h:outputText value="#{configMapController.getKey('ListEmailQueueTitle_id')}"/>

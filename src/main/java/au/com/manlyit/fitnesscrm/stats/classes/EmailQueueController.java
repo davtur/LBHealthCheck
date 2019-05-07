@@ -82,26 +82,25 @@ public class EmailQueueController implements Serializable {
             current.setBccaddresses("");
             current.setSubject(getSelectedTemplate().getSubject());
             current.setMessage("");
-            
-            
 
             selectedItemIndex = -1;
         }
         return current;
     }
-     public void upload() {
-        if(file != null) {
+
+    public void upload() {
+        if (file != null) {
             FacesMessage message = new FacesMessage("Succesful", file.getFileName() + " is uploaded.");
             FacesContext.getCurrentInstance().addMessage(null, message);
         }
     }
-     
+
     public void handleFileUpload(FileUploadEvent event) {
         EmailAttachments ea = new EmailAttachments();
         ea.setId(0);
         ea.setFile(event.getFile().getContents());
         ea.setFileName(event.getFile().getFileName());
-        
+
         emailAttachmentsList.add(ea);
         FacesMessage msg = new FacesMessage("Succesful", event.getFile().getFileName() + " is uploaded.");
         FacesContext.getCurrentInstance().addMessage(null, msg);
@@ -166,7 +165,7 @@ public class EmailQueueController implements Serializable {
 
     public String prepareCreate() {
         current = null;
-        
+
         return "CreateEmail";
     }
 
@@ -189,7 +188,7 @@ public class EmailQueueController implements Serializable {
                 htmlText = htmlText.replace(templateLinkPlaceholder, current.getMessage());
                current.setMessage(htmlText);*/
             getFacade().create(current);
-            for(EmailAttachments ea: emailAttachmentsList){
+            for (EmailAttachments ea : emailAttachmentsList) {
                 ea.setEmailQueue(current);
                 ejbEmailAttachmentsFacade.create(ea);
             }
@@ -290,8 +289,8 @@ public class EmailQueueController implements Serializable {
             setSelectedTemplate((EmailTemplates) template);
         }
     }
-    
-     public void editorValueChangeListener(ValueChangeEvent vce) {
+
+    public void editorValueChangeListener(ValueChangeEvent vce) {
         Object template = vce.getNewValue();
         if (template.getClass() == String.class) {
             PrimeFaces.current().ajax().update("@(.emailPreview) ");
@@ -310,6 +309,13 @@ public class EmailQueueController implements Serializable {
         String htmlText = "";
         if (getSelectedTemplate() != null) {
             htmlText = getSelectedTemplate().getTemplate();
+            String beginDelimeter = "<!--BEGIN-CONTENT-->";
+            String endDelimeter = "<!--END-CONTENT-->";
+            int a = htmlText.indexOf(beginDelimeter) + beginDelimeter.length();
+            int b = htmlText.indexOf(endDelimeter);
+            if (a != -1 && b != -1) {
+                htmlText = htmlText.substring(a, b);
+            }
         }
         if (htmlText == null) {
             EmailTemplates selTemp = ejbEmailTemplatesFacade.findTemplateByName(getTemplateName());
@@ -355,8 +361,8 @@ public class EmailQueueController implements Serializable {
         List<Customers> targets = participants.getTarget();
 
         getSelected().setBccaddresses(getCSVListOfCustomerEmailAddresses(targets));
-        
-      /*  StringBuilder builder = new StringBuilder();
+
+        /*  StringBuilder builder = new StringBuilder();
         boolean isFirst = true;
         for (Object item : event.getItems()) {
             if (isFirst) {
@@ -369,9 +375,7 @@ public class EmailQueueController implements Serializable {
         }
 
         getSelected().setBccaddresses(builder.toString());*/
-
-        
-        /*FacesMessage msg = new FacesMessage();
+ /*FacesMessage msg = new FacesMessage();
         msg.setSeverity(FacesMessage.SEVERITY_INFO);
         msg.setSummary("Items Transferred");
         msg.setDetail(builder.toString());
@@ -433,7 +437,7 @@ public class EmailQueueController implements Serializable {
         if (valid) {
             current.setMessage(getMessagePreview());
             getFacade().create(current);
-            for(EmailAttachments ea: emailAttachmentsList){
+            for (EmailAttachments ea : emailAttachmentsList) {
                 ea.setEmailQueue(current);
                 ejbEmailAttachmentsFacade.create(ea);
                 current.getEmailAttachmentCollection().add(ea);
@@ -489,7 +493,7 @@ public class EmailQueueController implements Serializable {
         String htmlText = "<table width=\"600\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\">  <tr>    <td><img src=\"cid:logoimg_cid\"/></td>  </tr>  <tr>    <td height=\"220\"> <p>Manly Beach Female Fitness</p>      <p>Please click the following link to reset your password:</p><p>To reset your password click <a href=\"" + urlLink + "\">here</a>.</p></td>  </tr>  <tr>    <td height=\"50\" align=\"center\" valign=\"middle\" bgcolor=\"#CCCCCC\">www.manlybeachfemalefitness.com.au | sarah@manlybeachfemalefitness.com.au | +61433818067</td>  </tr></table>";
 // TODO String htmlText = ejbEmailTemplatesFacade.findTemplateByName(templateName).getTemplate();
         //String host, String to, String ccAddress, String from, String emailSubject, String message, String theAttachedfileName, boolean debug
-        emailAgent.send("david@manlyit.com.au", "", "", "noreply@manlybeachfemalefitness.com.au", "Password Reset", htmlText, null, emailServerProperties(), true,null);
+        emailAgent.send("david@manlyit.com.au", "", "", "noreply@manlybeachfemalefitness.com.au", "Password Reset", htmlText, null, emailServerProperties(), true, null, false);
 
     }
 
@@ -659,7 +663,7 @@ public class EmailQueueController implements Serializable {
      * @return the emailAttachmentsList
      */
     public ArrayList<EmailAttachments> getEmailAttachmentsList() {
-        if(emailAttachmentsList == null){
+        if (emailAttachmentsList == null) {
             emailAttachmentsList = new ArrayList<>();
         }
         return emailAttachmentsList;

@@ -2,6 +2,7 @@ package au.com.manlyit.fitnesscrm.stats.classes;
 
 import au.com.manlyit.fitnesscrm.stats.beans.ApplicationBean;
 import au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade;
+import au.com.manlyit.fitnesscrm.stats.beans.ContactFormsViewScopedBean;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.beans.CustomersFacade;
@@ -244,6 +245,7 @@ public class CustomersController implements Serializable {
     private Boolean[] newCustomerCheckedGroups;
     private String checkPass2;
     private String leadComments = "";
+    private String eventType;
     private Customers impersonate;
     private Customers loggedInUser;
     private boolean passwordsMatch = false;
@@ -698,7 +700,7 @@ public class CustomersController implements Serializable {
         c.setLastLoginTime(null);
         c.setMustResetPassword(true);
         c.setGroupPricing(ejbPlanFacade.findPLanByName(configMapFacade.getConfig("default.customer.plan")));
-        
+
         try {
             c.setEmailFormat(ejbEmailFormatFacade.findAll().get(Integer.parseInt(configMapFacade.getConfig("default.customer.details.emailformat"))));
             c.setAuth(ejbCustomerAuthFacade.findAll().get(Integer.parseInt(configMapFacade.getConfig("default.customer.details.auth"))));
@@ -712,13 +714,13 @@ public class CustomersController implements Serializable {
 
         }
         int defaultYear = 1970;
-        
+
         try {
             defaultYear = Integer.parseInt(configMapFacade.getConfig("default.customer.details.dobyear"));
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Parse Integer from String Exception for customer defaults.Check config map entry for default.customer.details.dobyear and make sure it is a numeric value ",e);
+            LOGGER.log(Level.WARNING, "Parse Integer from String Exception for customer defaults.Check config map entry for default.customer.details.dobyear and make sure it is a numeric value ", e);
         }
-      GregorianCalendar gc = new GregorianCalendar();
+        GregorianCalendar gc = new GregorianCalendar();
         //gc.add(Calendar.YEAR, -18);
         gc.setTimeInMillis(0);
         gc.set(defaultYear, 1, 1);//set to default date  1/1/1800
@@ -1352,7 +1354,7 @@ public class CustomersController implements Serializable {
     public void createLeadFromSignup(ActionEvent actionEvent) {
         FacesContext context = FacesContext.getCurrentInstance();
         if (context.isValidationFailed() == false) {
-            createFromUnauthenticated("LEAD", getNewCustomer(), leadComments, getHttpServletRequestFromFacesContext(), false);
+            createFromUnauthenticated("LEAD", getNewCustomer(), leadComments, getHttpServletRequestFromFacesContext(), false, false);
 
         } else {
             JsfUtil.addErrorMessage("Error", configMapFacade.getConfig("SignUpValidationFailed"));
@@ -1361,7 +1363,30 @@ public class CustomersController implements Serializable {
 
     public void createLeadFromWebservice(Customers c, String message, HttpServletRequest request) {
         //createFromUnauthenticated("LEAD", c, message, request, true);
-        createFromUnauthenticated("USER", c, message, request, true);
+        createFromUnauthenticated("USER", c, message, request, true, false);
+    }
+
+    public void createFromRegisterInterest(ActionEvent actionEvent) {
+        FacesContext context = FacesContext.getCurrentInstance();
+       // if (context.isValidationFailed() == false) {
+            // HttpServletRequest req = (HttpServletRequest) context.getExternalContext().getRequest();
+            // the eventtype param should be in the 
+            // String eventTypeToRegisterInterestForParam = req.getParameter("eventtype");
+            String eventTypeToRegisterInterestFor = getEventType();
+            if (eventTypeToRegisterInterestFor != null) {
+                if (eventTypeToRegisterInterestFor.trim().isEmpty()) {
+                    eventTypeToRegisterInterestFor = "[Error - failed to retrieve eventtype param - empty]";
+                }
+            } else {
+                eventTypeToRegisterInterestFor = "[Error - failed to retrieve eventtype param - null]";
+            }
+            String comments = "Registering Interest for " + eventTypeToRegisterInterestFor + "\r\n" + leadComments;
+            Customers c = getNewCustomer();
+            c.setUsername(c.getEmailAddress());
+            createFromUnauthenticated("LEAD", c, comments, getHttpServletRequestFromFacesContext(), false, true);
+      //  } else {
+      //      JsfUtil.addErrorMessage("Error", configMapFacade.getConfig("SignUpValidationFailed"));
+      //  }
     }
 
     public void createFromSignup(ActionEvent actionEvent) {
@@ -1369,7 +1394,7 @@ public class CustomersController implements Serializable {
         if (context.isValidationFailed() == false) {
             Customers c = getNewCustomer();
             c.setUsername(c.getEmailAddress());
-            createFromUnauthenticated("USER", c, leadComments, getHttpServletRequestFromFacesContext(), false);
+            createFromUnauthenticated("USER", c, leadComments, getHttpServletRequestFromFacesContext(), false, false);
         } else {
             JsfUtil.addErrorMessage("Error", configMapFacade.getConfig("SignUpValidationFailed"));
         }
@@ -1382,7 +1407,7 @@ public class CustomersController implements Serializable {
     }
 
     @TransactionAttribute(REQUIRES_NEW)
-    private void createFromUnauthenticated(String group, Customers c, String message, HttpServletRequest request, boolean isWebserviceCall) {
+    private void createFromUnauthenticated(String group, Customers c, String message, HttpServletRequest request, boolean isWebserviceCall, boolean registerInterestOnly) {
 
         //TODO validate email address to ensure spammers can't take down site
         //max 3 emails 
@@ -1406,7 +1431,13 @@ public class CustomersController implements Serializable {
             //Check if they already Exist
             Customers custCheck = ejbFacade.findCustomerByEmail(c.getEmailAddress().trim());
             if (custCheck != null) {
-                sendNotificationEmail(c, grp, "system.email.notification.template", "New LEAD from website, customer already exists in DB. They may be cancelled or on-hold.", message);
+                grp = custCheck.getGroupsCollection().iterator().next();
+                if (registerInterestOnly) {
+                    sendNotificationEmail(c, grp, "system.email.notification.template", "Registration of Interest for existing Customer.", message);
+                } else {
+                    sendNotificationEmail(c, grp, "system.email.notification.template", "New LEAD from website, customer already exists in DB. They may be cancelled or on-hold.", message);
+                }
+
             } else if (group.contains("LEAD")) {
                 // new lead from contact form
 
@@ -1432,14 +1463,25 @@ public class CustomersController implements Serializable {
                     addToNotesDataTableLists(nt);
                 }
                 String details = "New LEAD generated: Id:" + c.getId() + ", Name: " + c.getFirstname() + ", <br/>Email:  " + c.getEmailAddress() + ", <br/>Phone:   " + c.getTelephone() + ", <br/>Username:   " + c.getUsername() + ", <br/>Group:   " + group + ", IP Address:" + ipAddress + ", Message:" + message;
-                sendNotificationEmail(c, grp, "system.email.notification.template", "New LEAD from website", message);
-                doPasswordResetFromWebserviceCall("system.email.admin.onboardcustomer.template", c, configMapFacade.getConfig("sendCustomerOnBoardEmailEmailSubject"), true);
-                createCombinedAuditLogAndNote(c, c, "New Lead", details, "Did Not Exist", "New Lead");
-                LOGGER.log(Level.INFO, "createFromLead: {0}", new Object[]{details});
-                if (isWebserviceCall == false) {
-                    PrimeFaces.current().executeScript("PF('signupDialog').hide();");
-                    JsfUtil.addSuccessMessage("Info", configMapFacade.getConfig("LeadSignupSuccessfull"));
-                    setLeadFormSubmitted(true);
+                if (registerInterestOnly) {
+                    // registration of interest in an event
+                    sendNotificationEmail(c, grp, "system.email.notification.template", "New LEAD - Registration of Interest", message);
+                    createCombinedAuditLogAndNote(c, c, "Register Interest", details, "Did Not Exist", "New Lead");
+                    JsfUtil.addSuccessMessage("Info", configMapFacade.getConfig("RegistrationOfInterestSuccessfull"));
+                    FacesContext context = FacesContext.getCurrentInstance();
+                    ContactFormsViewScopedBean contactFormsViewScopedBean = context.getApplication().evaluateExpressionGet(context, "#{contactFormsViewScopedBean}", ContactFormsViewScopedBean.class);
+                    contactFormsViewScopedBean.setContactFormSubmitted(true);
+                } else {
+                    // new lead signup
+                    sendNotificationEmail(c, grp, "system.email.notification.template", "New LEAD from website", message);
+                    doPasswordResetFromWebserviceCall("system.email.admin.onboardcustomer.template", c, configMapFacade.getConfig("sendCustomerOnBoardEmailEmailSubject"), true);
+                    createCombinedAuditLogAndNote(c, c, "New Lead", details, "Did Not Exist", "New Lead");
+                    LOGGER.log(Level.INFO, "createFromLead: {0}", new Object[]{details});
+                    if (isWebserviceCall == false) {
+                        PrimeFaces.current().executeScript("PF('signupDialog').hide();");
+                        JsfUtil.addSuccessMessage("Info", configMapFacade.getConfig("LeadSignupSuccessfull"));
+                        setLeadFormSubmitted(true);
+                    }
                 }
 
             } else {
@@ -1477,9 +1519,12 @@ public class CustomersController implements Serializable {
                 }
 
             }
+
             setNewCustomer(setCustomerDefaults(new Customers()));
-            addQuestionnaireMapItemsToCustomer(c);
-            issuePackOfTickets(c, 1, 10, ejbSessionTypesFacade.findASessionTypeByName("Group Training"));// issue free trial tickets - 10 tickets to group training sessions over 1 weeks
+            if (registerInterestOnly == false) {
+                addQuestionnaireMapItemsToCustomer(c);
+                issuePackOfTickets(c, 1, 10, ejbSessionTypesFacade.findASessionTypeByName("Group Training"));// issue free trial tickets - 10 tickets to group training sessions over 1 weeks
+            }
 
         } else {
             if (isWebserviceCall == false) {
@@ -2696,7 +2741,7 @@ public class CustomersController implements Serializable {
             setThisIsANewPlan(true);
         } else {
             Date payDate = current.getPaymentParametersId().getLastSuccessfulScheduledPayment().getPaymentDate();
-            if(payDate == null){
+            if (payDate == null) {
                 payDate = current.getPaymentParametersId().getLastSuccessfulScheduledPayment().getDebitDate();
             }
             gc.setTime(payDate);
@@ -4551,5 +4596,19 @@ public class CustomersController implements Serializable {
      */
     public void setTenpackPurchaseButtonDisabled(boolean tenpackPurchaseButtonDisabled) {
         this.tenpackPurchaseButtonDisabled = tenpackPurchaseButtonDisabled;
+    }
+
+    /**
+     * @return the eventType
+     */
+    public String getEventType() {
+        return eventType;
+    }
+
+    /**
+     * @param eventType the eventType to set
+     */
+    public void setEventType(String eventType) {
+        this.eventType = eventType;
     }
 }

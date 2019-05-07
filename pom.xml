@@ -6,7 +6,7 @@
 
     <groupId>au.com.manlyit</groupId>
     <artifactId>FitnessCRM</artifactId>
-    <version>8.2.1</version>
+    <version>8.2.3</version>
     <packaging>war</packaging>
 
     <name>FitnessCRM</name>
@@ -425,6 +425,10 @@
                             <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
                             <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
                         </manifest>
+                        <manifestEntries>
+                            <version>${project.version}</version>
+                            <buildTime>${maven.build.timestamp}</buildTime>
+                        </manifestEntries>
                     </archive>
                     <failOnMissingWebXml>false</failOnMissingWebXml>
                     <webResources>
@@ -446,6 +450,9 @@
                         </resource>
                     </webResources>
                 </configuration>
+                <goals>
+                    <goal>manifest</goal>
+                </goals>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

@@ -16,15 +16,18 @@ import javax.faces.event.ActionEvent;
 import javax.inject.Inject;
 import javax.inject.Named;
 import au.com.manlyit.fitnesscrm.stats.classes.util.FutureMapEJB;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.Map.Entry;
+import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.jar.Attributes;
+import java.util.jar.Manifest;
 import javax.faces.context.FacesContext;
-import org.apache.maven.model.Model;
-import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
-import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
+import javax.servlet.ServletContext;
 
 /**
  *
@@ -46,6 +49,7 @@ public class ApplicationBean implements Serializable {
     private FutureMapEJB futureMap;
     private static final Logger logger = Logger.getLogger(ApplicationBean.class.getName());
     private boolean customerEmailsEnabled = true;
+    private String version;
 
     private ArrayList<Map<String, Date>> ips = new ArrayList<>();
     private final ConcurrentHashMap<String, String> facebookLogingStateMap = new ConcurrentHashMap<>();
@@ -57,6 +61,8 @@ public class ApplicationBean implements Serializable {
     private void applicationSetup() {
         logger.log(Level.INFO, "ApplicationBean Created");
         logger.log(Level.INFO, "JSF Package Version = ", FacesContext.class.getPackage().getImplementationVersion());
+        Properties manifestProps = loadManifestFile();
+        version = manifestProps.getProperty("Implementation-Version");
         //sanityCheckCustomersForDefaultItems();
     }
 
@@ -77,8 +83,8 @@ public class ApplicationBean implements Serializable {
         futureMap.issueWeeklyCustomerTicketsForPlansSessionBookings();
         logger.log(Level.INFO, "@@@@@@@@@@@@@@@@@@@@@@@@ COMPLETED TEST TICKETS FUNCTION @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
     }
-    
-     public void testReport(ActionEvent event) {
+
+    public void testReport(ActionEvent event) {
         logger.log(Level.INFO, "@@@@@@@@@@@@@@@@@@@@@@@@ EXECUTING TEST REPORT FUNCTION @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
         futureMap.sendDailyReportEmail();
         logger.log(Level.INFO, "@@@@@@@@@@@@@@@@@@@@@@@@ COMPLETED TEST REPORT FUNCTION @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
@@ -96,9 +102,9 @@ public class ApplicationBean implements Serializable {
     public String removeFacebookLoginState(String key) {
         return facebookLogingStateMap.remove(key);
     }
-    
+
     public String getApplicationVersion() {
-         MavenXpp3Reader reader = new MavenXpp3Reader();
+        /*MavenXpp3Reader reader = new MavenXpp3Reader();
         Model model = null;
         String version = "Failed To retrieve version!";
         try {
@@ -108,16 +114,68 @@ public class ApplicationBean implements Serializable {
         } catch (XmlPullParserException ex) {
             Logger.getLogger(ApplicationBean.class.getName()).log(Level.SEVERE, "getApplicationVersion XmlPullParserException", ex);
         }
-        if(model != null){
+        if (model != null) {
             version = model.getVersion();
-        }
+        }*/
         //System.out.println(model.getId());
-       // System.out.println(model.getGroupId());
-       // System.out.println(model.getArtifactId());
-      //  System.out.println(model.getVersion());
-        
-        
+        // System.out.println(model.getGroupId());
+        // System.out.println(model.getArtifactId());
+        //  System.out.println(model.getVersion());
+        //version = getClass().getPackage().getImplementationVersion();
+        try {
+            if (version == null) {
+                version = getVersionNameFromManifest();
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(ApplicationBean.class.getName()).log(Level.SEVERE, "getApplicationVersion Exception", ex);
+        }
+        Logger.getLogger(ApplicationBean.class.getName()).log(Level.INFO, "getApplicationVersion ", version);
         return version;
+    }
+
+    private Properties loadManifestFile() {
+        ServletContext servletContext = (ServletContext) FacesContext
+                .getCurrentInstance().getExternalContext().getContext();
+        Properties prop = new Properties();
+        try {
+            InputStream resourceAsStream = servletContext.getResourceAsStream("/META-INF/MANIFEST.MF");
+            if (resourceAsStream != null) {
+                prop.load(resourceAsStream);
+            }
+        } catch (IOException e) {
+            Logger.getLogger(ApplicationBean.class.getName()).log(Level.SEVERE, "loadManifestFile Exception", e);
+        }
+        return prop;
+    }
+
+    public String getVersionNameFromManifest() throws IOException {
+        String manifestFile = "/META-INF/MANIFEST.MF";
+        String attributeName1 = "Implementation-Title";
+        String attributeName2 = "Implementation-Version";
+        String applicationTitle = "FitnessCRM";
+
+        Enumeration<URL> resources = getClass().getClassLoader()
+                .getResources(manifestFile);
+        while (resources.hasMoreElements()) {
+            try {
+                Manifest manifest = new Manifest(resources.nextElement().openStream());
+                // check that this is your manifest and do what you need or get the next one
+                Attributes attributes = manifest.getMainAttributes();
+                String title = attributes.getValue(attributeName1);
+                String version = attributes.getValue(attributeName2);
+                if (title != null && version != null) {
+                    Logger.getLogger(ApplicationBean.class.getName()).log(Level.INFO, "getVersionNameFromManifest Title:{0}, Version:{1}", new Object[]{title, version});
+                    if (title.contains(applicationTitle)) {
+                        return version;
+                    }
+                }
+
+            } catch (IOException ex) {
+                Logger.getLogger(ApplicationBean.class.getName()).log(Level.SEVERE, "getApplicationVersion Exception", ex);
+            }
+        }
+
+        return "Not Found";
     }
 
     private void cleanUpOldLoginState() {
@@ -152,5 +210,19 @@ public class ApplicationBean implements Serializable {
      */
     public void setCustomerEmailsEnabled(boolean customerEmailsEnabled) {
         this.customerEmailsEnabled = customerEmailsEnabled;
+    }
+
+    /**
+     * @return the version
+     */
+    public String getVersion() {
+        return version;
+    }
+
+    /**
+     * @param version the version to set
+     */
+    public void setVersion(String version) {
+        this.version = version;
     }
 }

@@ -163,6 +163,7 @@ public class EziDebitPaymentGateway implements Serializable {
     private String reportName = "defaultreport";
     private String paymentGatewayVersion;
     private Payments selectedScheduledPayment;
+    private Payments[] multiSelectedScheduledPayment;
     private List<ScheduledPayment> scheduledPaymentsListFilteredItems;
     private CustomerDetails currentCustomerDetails;
     private Payment payment;
@@ -3685,6 +3686,20 @@ public class EziDebitPaymentGateway implements Serializable {
      */
     public void setProRataChangePlanAmount(Double proRataChangePlanAmount) {
         this.proRataChangePlanAmount = proRataChangePlanAmount;
+    }
+
+    /**
+     * @return the multiSelectedScheduledPayment
+     */
+    public Payments[] getMultiSelectedScheduledPayment() {
+        return multiSelectedScheduledPayment;
+    }
+
+    /**
+     * @param multiSelectedScheduledPayment the multiSelectedScheduledPayment to set
+     */
+    public void setMultiSelectedScheduledPayment(Payments[] multiSelectedScheduledPayment) {
+        this.multiSelectedScheduledPayment = multiSelectedScheduledPayment;
     }
 
 }

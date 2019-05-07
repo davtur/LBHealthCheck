@@ -49,7 +49,7 @@ public class SendHTMLEmailWithFileAttached implements Serializable {
     //@Resource(name = "mail/pureFitnessMail")
     //private Session pureFitnessEmail;
 
-    public synchronized boolean send(String to, String ccAddress, String bccAddress, String from, String emailSubject, String message, String theAttachedfileName, Properties serverProperties, boolean debug, Collection<EmailAttachments> attachments) {
+    public synchronized boolean send(String to, String ccAddress, String bccAddress, String from, String emailSubject, String message, String theAttachedfileName, Properties serverProperties, boolean debug, Collection<EmailAttachments> attachments, boolean sendHeaderImage) {
         boolean result = true;
         //boolean debug = Boolean.valueOf(args[4]).booleanValue();
         String msgText1 = message + "\n";
@@ -144,51 +144,53 @@ public class SendHTMLEmailWithFileAttached implements Serializable {
             // Prepare a multipart HTML
             Multipart multipart = new MimeMultipart();
             // Prepare the HTML
-            BodyPart htmlPart = new MimeBodyPart();
-            htmlPart.setContent(message, "text/html");
+            MimeBodyPart htmlPart = new MimeBodyPart();
+            htmlPart.setContent(message, "text/html; charset=utf-8");
             htmlPart.setDisposition(BodyPart.INLINE);
 
             // PREPARE THE IMAGE
-            BodyPart imgPart = new MimeBodyPart();
-            final String fileName = serverProperties.getProperty("mail.smtp.headerimage.url");
-            final String fileNameCid = serverProperties.getProperty("mail.smtp.headerimage.cid");
-            // String fileName = "/resources/images/headerimg.jpg";
-            //String fileName = "http://www.manlybeachfemalefitness.com.au/FitnessStats/resources/images/pure_fitness_manly_group_and_personal_training.jpg";
+            if (sendHeaderImage) {
+                MimeBodyPart imgPart = new MimeBodyPart();
+                final String fileName = serverProperties.getProperty("mail.smtp.headerimage.url");
+                final String fileNameCid = serverProperties.getProperty("mail.smtp.headerimage.cid");
+                // String fileName = "/resources/images/headerimg.jpg";
+                //String fileName = "http://www.manlybeachfemalefitness.com.au/FitnessStats/resources/images/pure_fitness_manly_group_and_personal_training.jpg";
 
-            InputStream stream;
-            // getServletContext().getResourceAsStream(fileName); //or null if you can't obtain a ServletContext
+                InputStream stream;
+                // getServletContext().getResourceAsStream(fileName); //or null if you can't obtain a ServletContext
 
-            if (fileName != null && fileNameCid != null) {
-                ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-                if (classLoader == null) {
-                    classLoader = this.getClass().getClassLoader();
-                }
-
-                stream = classLoader.getResourceAsStream(fileName);
-
-                if (stream == null) {
-                    //try and get the URL if the loacla file name doesn't exist
-                    try {
-                        stream = new URL(fileName).openStream();
-                    } catch (IOException iOException) {
+                if (fileName != null && fileNameCid != null) {
+                    ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+                    if (classLoader == null) {
+                        classLoader = this.getClass().getClassLoader();
                     }
-                }
-                if (stream != null) {
-                    try {
-                        DataSource ds = new ByteArrayDataSource(stream, "image/*");
 
-                        imgPart.setDataHandler(new DataHandler(ds));
-                        imgPart.setHeader("Content-ID", "<" + fileNameCid + ">");
-                        imgPart.setDisposition(MimeBodyPart.INLINE);
-                        imgPart.setFileName(fileName);
-                        multipart.addBodyPart(imgPart);
-                    } catch (IOException | MessagingException exception) {
-                        System.out.println("Image ERROR:" + exception.getMessage());
+                    stream = classLoader.getResourceAsStream(fileName);
+
+                    if (stream == null) {
+                        //try and get the URL if the loacla file name doesn't exist
+                        try {
+                            stream = new URL(fileName).openStream();
+                        } catch (IOException iOException) {
+                        }
                     }
-                } else {
-                    LOGGER.log(Level.WARNING, "Email Header filename and/or header cid name not found: {0}", new Object[]{fileName});
+                    if (stream != null) {
+                        try {
+                            DataSource ds = new ByteArrayDataSource(stream, "image/*");
+
+                            imgPart.setDataHandler(new DataHandler(ds));
+                            imgPart.setHeader("Content-ID", "<" + fileNameCid + ">");
+                            imgPart.setDisposition(MimeBodyPart.INLINE);
+                            imgPart.setFileName(fileName);
+                            multipart.addBodyPart(imgPart);
+                        } catch (IOException | MessagingException exception) {
+                            System.out.println("Image ERROR:" + exception.getMessage());
+                        }
+                    } else {
+                        LOGGER.log(Level.WARNING, "Email Header filename and/or header cid name not found: {0}", new Object[]{fileName});
+                    }
+                    // Set the message content!
                 }
-                // Set the message content!
             }
             multipart.addBodyPart(htmlPart);
 
@@ -209,7 +211,7 @@ public class SendHTMLEmailWithFileAttached implements Serializable {
             if (attachments != null) {
                 for (EmailAttachments ea : attachments) {
                     InputStream fileStream = new ByteArrayInputStream(ea.getFile());
-                    BodyPart attachPart = new MimeBodyPart();
+                    MimeBodyPart attachPart = new MimeBodyPart();
                     File file = new File(ea.getFileName());
 
                     // Initialize a pointer 

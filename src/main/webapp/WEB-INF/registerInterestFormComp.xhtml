@@ -1,0 +1,86 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:p="http://primefaces.org/ui" >
+
+
+
+    <h:form id="contactForm" styleClass="signUpFormUpdate">
+
+
+        <div class="ui-g">
+            <div class="ui-g-12">
+                <p:messages showDetail="true"/>
+               
+                <h:panelGrid  columns="2"  cellpadding="5" rendered="#{!contactFormsViewScopedBean.contactFormSubmitted}">
+
+                    <p:outputLabel value="#{configMapController.getKey('EditCustomersLabel_firstname')}" for="firstname" />
+                    <p:inputText id="firstname"  value="#{customersController.newCustomer.firstname}" title="#{configMapController.getKey('EditCustomersTitle_firstname')}"  required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_firstname')}">
+                        <p:ajax update=" :contactForm:dialogueSave" event="keyup"/>
+                    </p:inputText>
+
+                    <p:outputLabel value="#{configMapController.getKey('EditCustomersLabel_lastname')}" for="lastname" />
+                    <p:inputText id="lastname" value="#{customersController.newCustomer.lastname}" title="#{configMapController.getKey('EditCustomersTitle_lastname')}"  required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_lastname')}">
+                        <p:ajax update=" :contactForm:dialogueSave" event="keyup" />
+                    </p:inputText>
+                    <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_emailAddress')}" for="emailAddress" />
+                    <p:inputText id="emailAddress" value="#{customersController.newCustomer.emailAddress}" title="#{configMapController.getKey('EditCustomersTitle_emailAddress')}" required="true" requiredMessage="#{configMapController.getKey('EditCustomersRequiredMessage_emailAddress')}">
+                        <f:validator validatorId="au.com.manlyit.fitnesscrm.stats.classes.util.EmailValidator" />
+                        <p:ajax update=" :contactForm:dialogueSave" event="keyup"/>
+                    </p:inputText>
+                    <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_telephone')}" for="telephone" />
+                    <p:inputText id="telephone" value="#{customersController.newCustomer.telephone}" title="#{configMapController.getKey('CreateCustomersTitle_telephone')}" >
+                        <f:validator validatorId="au.com.manlyit.fitnesscrm.stats.classes.util.PhoneNumberValidator" />
+                        <p:ajax update=" :contactForm:dialogueSave" event="keyup"/>
+                    </p:inputText>
+
+                    <p:outputLabel value="#{configMapController.getKey('CreateCustomersLabel_leadComments')}" for="leadComments" />
+                    <p:inputTextarea id="leadComments" value="#{customersController.leadComments}" rows="4" title="#{configMapController.getKey('CreateCustomersTitle_leadComments')}">
+                        <p:ajax update=" :contactForm:dialogueSave" event="keyup"/>
+                    </p:inputTextarea>
+                </h:panelGrid>
+                <h:panelGrid  columns="2"  cellpadding="5" rendered="#{customersController.leadFormSubmitted}">
+                    <h:outputText value="#{configMapController.getKey('LeadContactForm_Thankyou_message')}"/>
+                    <!-- Google Code for Enquiry Conversion Page -->
+                    <script type="text/javascript">
+                        /* <![CDATA[ */
+                        window.google_trackConversion(
+                        {
+                        google_conversion_id = 1044523443;
+                        google_conversion_language = "en";
+                        google_conversion_format = "2";
+                        google_conversion_color = "ffffff";
+                        google_conversion_label = "AHRLCPWR5gMQs9OI8gM";
+                        google_conversion_value = 1.00;
+                        google_conversion_currency = "AUD";
+                        google_remarketing_only = false;
+                        }
+                        );
+                        /* ]]> */
+                    </script>
+                    <script type="text/javascript" src="https://www.googleadservices.com/pagead/conversion_async.js" charset="utf-8">
+                    </script>
+
+                </h:panelGrid>
+
+            </div>
+        </div>
+        <div class="ui-g">  
+            <div class="ui-g-12">
+                <p:commandButton icon="ui-icon-check fa fa-check white Fs14" id="dialogueSave" rendered="#{!contactFormsViewScopedBean.contactFormSubmitted}"  partialSubmit="true" actionListener="#{customersController.createFromRegisterInterest}"  value="#{configMapController.getKey('LeadContactForm_Thankyou_submitButtonText')}" update=":growl :contactForm">
+             
+                </p:commandButton>                
+            </div>
+        </div>
+
+    </h:form>
+
+
+
+</ui:composition>
+<!--<p> Generated from template ( JSF_from_entity_wizard/StandardJSF/list.ftl  )- Dave 18th July 2015 </p>-->
+
