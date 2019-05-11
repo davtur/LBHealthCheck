@@ -6,7 +6,7 @@
 
     <groupId>au.com.manlyit</groupId>
     <artifactId>FitnessCRM</artifactId>
-    <version>8.2.3</version>
+    <version>8.2.4</version>
     <packaging>war</packaging>
 
     <name>FitnessCRM</name>
@@ -46,7 +46,7 @@
         <dependency>
             <groupId>org.omnifaces</groupId>
             <artifactId>omnifaces</artifactId>
-            <version>3.2</version>
+            <version>3.3</version>
             <type>jar</type>
         </dependency>
         <dependency>

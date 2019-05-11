@@ -1033,9 +1033,10 @@ public class FutureMapEJB implements Serializable {
                 try {
                     if (c.getPaymentParametersId().getStatusCode() != null) {
                         // dont update schedules with an empty payment period or payment period of z ( no schedule ).
-                        if (c.getPaymentParametersId().getStatusCode().trim().compareTo("A") == 0 && c.getPaymentParametersId().getPaymentPeriod().trim().isEmpty() == false && c.getPaymentParametersId().getPaymentPeriod().compareTo("Z") != 0) {
+                        if (c.getPaymentParametersId().getStatusCode().trim().compareTo("A") == 0 && c.getPaymentParametersId().getPaymentPeriod().trim().isEmpty() == false && c.getPaymentParametersId().getPaymentPeriod().compareTo("Z") != 0 && c.getGroupPricing().getPlanTimePeriod().compareTo("Z") != 0) {
+                            
                             this.put(FUTUREMAP_INTERNALID, new AsyncJob("GetCustomerDetails", paymentBean.updateCustomerPaymentSchedule(c, getDigitalKey(), FUTUREMAP_INTERNALID)));
-                            LOGGER.log(Level.INFO, "###### Updating payment Schedule for customer ID - {0}, Name - {1} {2}, Status Code - {3}, Payment Period - {4} #####", new Object[]{c.getId(), c.getFirstname(), c.getLastname(), c.getPaymentParametersId().getStatusCode().trim(), c.getPaymentParametersId().getPaymentPeriod().trim()});
+                            LOGGER.log(Level.INFO, "###### Updating payment Schedule for customer ID - {0}, Name - {1} {2}, Status Code - {3}, Payment Period - {4}, Plan period - {5} #####", new Object[]{c.getId(), c.getFirstname(), c.getLastname(), c.getPaymentParametersId().getStatusCode().trim(), c.getPaymentParametersId().getPaymentPeriod().trim(),c.getGroupPricing().getPlanTimePeriod().trim()});
                             TimeUnit.MILLISECONDS.sleep(50);//sleeping for a long time wont affect performance (the warning is there for a short sleep of say 5ms ) but we don't want to overload the payment gateway or they may get upset.
                         }
                     }

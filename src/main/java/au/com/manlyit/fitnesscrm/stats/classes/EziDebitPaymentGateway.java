@@ -3331,11 +3331,19 @@ public class EziDebitPaymentGateway implements Serializable {
     }
 
     public void deleteScheduledPayment(ActionEvent actionEvent) {
-        if (selectedScheduledPayment != null) {
+        for(Payments p:multiSelectedScheduledPayment){
+        if (p != null) {
+            deleteScheduledPaymentBase(p);
+        }
+        }
+    }
+
+    private void deleteScheduledPaymentBase(Payments paymentToDelete) {
+        if (paymentToDelete != null) {
             String loggedInUser = FacesContext.getCurrentInstance().getExternalContext().getRemoteUser();
-            Double amount = selectedScheduledPayment.getScheduledAmount().floatValue() * (double) 100;
+            Double amount = paymentToDelete.getScheduledAmount().floatValue() * (double) 100;
             if (loggedInUser != null) {
-                Payments pay = paymentsFacade.findPaymentById(selectedScheduledPayment.getId(), false);
+                Payments pay = paymentsFacade.findPaymentById(paymentToDelete.getId(), false);
 
                 if (pay != null) {
                     if (pay.getPaymentStatus().contentEquals(PaymentStatus.SCHEDULED.value()) || pay.getPaymentStatus().contentEquals(PaymentStatus.WAITING.value()) || pay.getPaymentStatus().contentEquals(PaymentStatus.DELETE_REQUESTED.value()) || pay.getPaymentStatus().contentEquals(PaymentStatus.REJECTED_CUST_ON_HOLD.value()) || pay.getPaymentStatus().contentEquals(PaymentStatus.MISSING_IN_PGW.value()) || pay.getPaymentStatus().contentEquals(PaymentStatus.REJECTED_BY_GATEWAY.value())) {
@@ -3352,7 +3360,7 @@ public class EziDebitPaymentGateway implements Serializable {
                             pay.setPaymentStatus(PaymentStatus.DELETE_REQUESTED.value());
                             paymentsFacade.edit(pay);
                             updatePaymentLists(pay);
-                            startAsynchJob("DeletePayment", paymentBean.deletePayment(getSelectedCustomer(), selectedScheduledPayment.getDebitDate(), amount.longValue(), selectedScheduledPayment, loggedInUser, getDigitalKey(), sessionId));
+                            startAsynchJob("DeletePayment", paymentBean.deletePayment(getSelectedCustomer(), paymentToDelete.getDebitDate(), amount.longValue(), paymentToDelete, loggedInUser, getDigitalKey(), sessionId));
                         }
 
                     }
@@ -3696,7 +3704,8 @@ public class EziDebitPaymentGateway implements Serializable {
     }
 
     /**
-     * @param multiSelectedScheduledPayment the multiSelectedScheduledPayment to set
+     * @param multiSelectedScheduledPayment the multiSelectedScheduledPayment to
+     * set
      */
     public void setMultiSelectedScheduledPayment(Payments[] multiSelectedScheduledPayment) {
         this.multiSelectedScheduledPayment = multiSelectedScheduledPayment;
