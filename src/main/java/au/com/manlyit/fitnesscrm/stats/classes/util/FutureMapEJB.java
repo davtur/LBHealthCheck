@@ -399,18 +399,20 @@ public class FutureMapEJB implements Serializable {
         acs.add(new CustomerState(0, "USER"));
         ArrayList<String> types = new ArrayList<>();
         types.add("USER");
-
+        types.add("LEAD");
         //List<Customers> custListNoPaymentScheduled = new ArrayList<>();
         //List<Customers> customersOnCasualPlans = new ArrayList<>();
         ArrayList<PlanSummary> planSummaryList = new ArrayList<>();
         List<Customers> custList = customersFacade.findFilteredCustomers(false, "id", acs, types, false);
-
+        GregorianCalendar cutOffDate = new GregorianCalendar();
+        GregorianCalendar leadCreateDate = new GregorianCalendar();
+        cutOffDate.add(Calendar.DAY_OF_YEAR, -7);
         for (Customers cust : custList) {
             // get table row for this customer
             ArrayList<String> custRow = getCustomerRowData(cust);
 
             // find customers withoutpayments
-            if (groupsFacade.isCustomerInGroup(cust, "LEAD") == false) {
+            if (groupsFacade.isCustomerInGroup(cust, "USER") == true) {
                 if (cust.getPaymentParametersId() != null) {
                     if (cust.getPaymentParametersId().getNextScheduledPayment() == null) {
                         noPayData.add(custRow);
@@ -420,39 +422,48 @@ public class FutureMapEJB implements Serializable {
                     noPayData.add(custRow);
                     //custListNoPaymentScheduled.add(cust);
                 }
-            } else {
-                // customer is a LEAD - only add new leads in the last week
-                GregorianCalendar cutOffDate = new GregorianCalendar();
-                GregorianCalendar leadCreateDate = new GregorianCalendar();
-                cutOffDate.add(Calendar.DAY_OF_YEAR, -7);
+                // find customers on Casual Plans
+                if (cust.getGroupPricing().getPlanTimePeriod().contains("Z")) {
+                    casualCustomersData.add(custRow);
+                    //  customersOnCasualPlans.add(cust);
+                }
+                //summarize plans info
+                String key = cust.getGroupPricing().getPlanName();
+                boolean found = false;
+                for (PlanSummary planSummary : planSummaryList) {
+                    if (planSummary.getPlanName().contentEquals(key)) {
+                        found = true;
+                        planSummary.incrementCount();
+                    }
+                }
+                if (found == false) {
+                    planSummaryList.add(new PlanSummary(key, 1));
+                }
+
+                // produce table data
+                custData.add(getCustomerRowData(cust));
+
+            }
+
+            if (groupsFacade.isCustomerInGroup(cust, "LEAD") == true || groupsFacade.isCustomerInGroup(cust, "USER") == true) {
+
+                // check if the customer is a new USER or LEAD - only add if they were created in the last week
+                if (cust.getCreateTime() == null) {
+                    if (cust.getNotesCollection().iterator().hasNext()) {
+                        cust.setCreateTime(cust.getNotesCollection().iterator().next().getCreateTimestamp());
+                        LOGGER.log(Level.WARNING, "Customer {0} {1}. Create Time is null. Setting it to time of first logged notes.", new Object[]{cust.getFirstname(), cust.getLastname()});
+                    } else {
+                        cust.setCreateTime(new Date());
+                        LOGGER.log(Level.WARNING, "Customer {0} {1}. Create Time is null and no notes to use timestamp.", new Object[]{cust.getFirstname(), cust.getLastname()});
+                    }
+                    customersFacade.editAndFlush(cust);
+                }
                 leadCreateDate.setTime(cust.getCreateTime());
                 if (cutOffDate.before(leadCreateDate)) {
                     ArrayList<String> leadRow = getNewLeadRowData(cust);
                     newLeadsData.add(leadRow);
                 }
-
             }
-            // find customers on Casual Plans
-            if (cust.getGroupPricing().getPlanTimePeriod().contains("Z")) {
-                casualCustomersData.add(custRow);
-                //  customersOnCasualPlans.add(cust);
-            }
-
-            //summarize plans info
-            String key = cust.getGroupPricing().getPlanName();
-            boolean found = false;
-            for (PlanSummary planSummary : planSummaryList) {
-                if (planSummary.getPlanName().contentEquals(key)) {
-                    found = true;
-                    planSummary.incrementCount();
-                }
-            }
-            if (found == false) {
-                planSummaryList.add(new PlanSummary(key, 1));
-            }
-
-            // produce table data
-            custData.add(getCustomerRowData(cust));
         }
         if (planSummaryList.isEmpty()) {
             row = new ArrayList<>();
@@ -1034,9 +1045,9 @@ public class FutureMapEJB implements Serializable {
                     if (c.getPaymentParametersId().getStatusCode() != null) {
                         // dont update schedules with an empty payment period or payment period of z ( no schedule ).
                         if (c.getPaymentParametersId().getStatusCode().trim().compareTo("A") == 0 && c.getPaymentParametersId().getPaymentPeriod().trim().isEmpty() == false && c.getPaymentParametersId().getPaymentPeriod().compareTo("Z") != 0 && c.getGroupPricing().getPlanTimePeriod().compareTo("Z") != 0) {
-                            
+
                             this.put(FUTUREMAP_INTERNALID, new AsyncJob("GetCustomerDetails", paymentBean.updateCustomerPaymentSchedule(c, getDigitalKey(), FUTUREMAP_INTERNALID)));
-                            LOGGER.log(Level.INFO, "###### Updating payment Schedule for customer ID - {0}, Name - {1} {2}, Status Code - {3}, Payment Period - {4}, Plan period - {5} #####", new Object[]{c.getId(), c.getFirstname(), c.getLastname(), c.getPaymentParametersId().getStatusCode().trim(), c.getPaymentParametersId().getPaymentPeriod().trim(),c.getGroupPricing().getPlanTimePeriod().trim()});
+                            LOGGER.log(Level.INFO, "###### Updating payment Schedule for customer ID - {0}, Name - {1} {2}, Status Code - {3}, Payment Period - {4}, Plan period - {5} #####", new Object[]{c.getId(), c.getFirstname(), c.getLastname(), c.getPaymentParametersId().getStatusCode().trim(), c.getPaymentParametersId().getPaymentPeriod().trim(), c.getGroupPricing().getPlanTimePeriod().trim()});
                             TimeUnit.MILLISECONDS.sleep(50);//sleeping for a long time wont affect performance (the warning is there for a short sleep of say 5ms ) but we don't want to overload the payment gateway or they may get upset.
                         }
                     }
@@ -1280,7 +1291,7 @@ public class FutureMapEJB implements Serializable {
 
                         message = "checkEmailQueueAndSend -- Sending email to:" + email.getToaddresses() + ", from:" + email.getFromaddress() + ", cc:" + email.getCcaddresses() + ", Bcc:" + email.getBccaddresses() + ", subject:" + email.getSubject() + ", message Length:" + email.getMessage().length() + ", sendDate:" + email.getSendDate() + ", createDate:" + email.getCreateDate() + ".";
                         Logger.getLogger(getClass().getName()).log(Level.INFO, message);
-                        emailAgent.send(email.getToaddresses(), email.getCcaddresses(), email.getBccaddresses(), email.getFromaddress(), email.getSubject(), email.getMessage(), null, emailServerProperties(), false, email.getEmailAttachmentCollection(),false);
+                        emailAgent.send(email.getToaddresses(), email.getCcaddresses(), email.getBccaddresses(), email.getFromaddress(), email.getSubject(), email.getMessage(), null, emailServerProperties(), false, email.getEmailAttachmentCollection(), false);
                         sent++;
                         email.setStatus(1);
                         emailQueueFacade.edit(email);
