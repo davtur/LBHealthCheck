@@ -412,7 +412,7 @@ public class FutureMapEJB implements Serializable {
             ArrayList<String> custRow = getCustomerRowData(cust);
 
             // find customers withoutpayments
-            if (groupsFacade.isCustomerInGroup(cust, "USER") == true) {
+            if (groupsFacade.isCustomerInGroup(cust, "USER") == true && cust.getGroupPricing().getPlanTimePeriod().contains("Z") == false) {
                 if (cust.getPaymentParametersId() != null) {
                     if (cust.getPaymentParametersId().getNextScheduledPayment() == null) {
                         noPayData.add(custRow);
