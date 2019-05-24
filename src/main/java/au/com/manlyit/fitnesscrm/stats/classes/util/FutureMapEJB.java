@@ -269,6 +269,15 @@ public class FutureMapEJB implements Serializable {
         String[] headers2 = {"Id", "Name", "Debited Amount", "Status", "Debited", "Settled", "Scheduled Amount", "Plan"};
         ArrayList<ArrayList<String>> data2 = new ArrayList<>();
 
+        String[] groupTrainingPayments = {"Id", "Name", "Debited Amount", "Status", "Debited", "Settled", "Scheduled Amount", "Plan"};
+        ArrayList<ArrayList<String>> groupTrainingPaymentsData = new ArrayList<>();
+
+        String[] personalTrainingPayments = {"Id", "Name", "Debited Amount", "Status", "Debited", "Settled", "Scheduled Amount", "Plan"};
+        ArrayList<ArrayList<String>> personalTrainingPaymentsData = new ArrayList<>();
+
+        String[] casual10packAndProductPayments = {"Id", "Name", "Debited Amount", "Status", "Debited", "Settled", "Scheduled Amount", "Plan"};
+        ArrayList<ArrayList<String>> casual10packAndProductPaymentsData = new ArrayList<>();
+
         String[] payTotheaders = {"Payment Type", "Total"};
         ArrayList<ArrayList<String>> payTotalsData = new ArrayList<>();
 
@@ -300,6 +309,7 @@ public class FutureMapEJB implements Serializable {
                 reportTotalSuccessful += pay.getScheduledAmount().floatValue();
                 if (pay.getPaymentStatus().contains(PaymentStatus.SUCESSFUL.value())) {
                     row.add("!!InsertIntoElement!!,style=\"background-color: #be9063;\"");
+
                 } else {
                     row.add("!!InsertIntoElement!!,style=\"background-color: #f49f05;\"");
                 }
@@ -324,6 +334,24 @@ public class FutureMapEJB implements Serializable {
             row.add(nf.format(pay.getScheduledAmount()));
             row.add(pay.getCustomerName().getGroupPricing().getPlanName());
             data.add(row);
+            // TODO -- this needs to be done properly. Ech payment should have a list of products/ itmes associated with it for invoicing and reports
+            //Group Training
+            if (pay.getCustomerName().getGroupPricing().getPlanTimePeriod().contains("Z") == false) {
+                // customer is on a plan and not casual
+                if (pay.getScheduledAmount().compareTo(pay.getCustomerName().getGroupPricing().getPlanPrice()) == 0) {
+                    groupTrainingPaymentsData.add(row);
+                } else {
+
+                    // Persoanl Training
+                    personalTrainingPaymentsData.add(row);
+                }
+
+            } else {
+
+                // Other Products
+                casual10packAndProductPaymentsData.add(row);
+            }
+
         }
         // payment totals
         ArrayList<String> row = new ArrayList<>();
@@ -488,6 +516,12 @@ public class FutureMapEJB implements Serializable {
         htmlToRender += renderHtmlForObject(nextMonthName + " Payment Forecast Report", headers2, data2);
 
         htmlToRender += renderHtmlForObject(nextMonthName + " Payment Forecast Totals", payTotheaders2, payTotalsData2);
+
+        htmlToRender += renderHtmlForObject(thisMonthName + " Group Training Plan Payments", groupTrainingPayments, groupTrainingPaymentsData);
+
+        htmlToRender += renderHtmlForObject(thisMonthName + " Personal Training Payments", personalTrainingPayments, personalTrainingPaymentsData);
+
+        htmlToRender += renderHtmlForObject(thisMonthName + " 10 Pack & other Product Payments", casual10packAndProductPayments, casual10packAndProductPaymentsData);
 
         htmlToRender += renderHtmlForObject("Active Customers Report (" + custData.size() + ")", custheaders, custData);
 
