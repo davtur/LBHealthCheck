@@ -199,29 +199,105 @@ public class InvoiceController implements Serializable {
         //PrimeFaces.current().ajax().update("InvoicelistForm1");
     }
 
+    private Invoice createInvoiceForDirectDebitScheduledPayment(Payments payment) {
+
+        Item item = new Item(0);
+        Plan plan = payment.getCustomerName().getGroupPricing();
+        item.setItemName(plan.getPlanName());
+        item.setDescription(plan.getPlanDescription());
+        item.setItemPrice(payment.getScheduledAmount());
+        item.setDeleted(Short.MIN_VALUE);
+        item.setItemActive(Short.MAX_VALUE);
+        item.setItemDiscount(BigDecimal.ZERO);
+        ArrayList<Item> items = new ArrayList<>();
+        items.add(item);
+        return generateInvoiceFromItemsListBase(payment.getCustomerName(), items);
+
+    }
+
     private Invoice generateInvoiceFromItemsListBase(Customers cust, List<Item> items) {
-
-        Invoice inv = new Invoice();
-        inv.setInvoiceLineCollection(new ArrayList<>());
-        InvoiceLineType invoiceLineType = invoiceLineTypeFacade.findAll().get(2);
-        inv.setUserId(cust);
-        BigDecimal paymentsTotal = new BigDecimal(BigInteger.ZERO);
-        for (Item item : items) {
-            InvoiceLine invoiceLineItem = new InvoiceLine(0);
-            invoiceLineItem.setAmount(item.getPrice());
-            invoiceLineItem.setDeleted(Short.MIN_VALUE);
-            invoiceLineItem.setInvoiceId(inv);
-            invoiceLineItem.setDescription(item.getItemName());
-            invoiceLineItem.setItemId(item);
-            invoiceLineItem.setQuantity(BigDecimal.ONE);
-            invoiceLineItem.setTypeId(invoiceLineType);
-            invoiceLineFacade.createAndFlushForGeneratedIdEntities(invoiceLineItem);
-            inv.getInvoiceLineCollection().add(invoiceLineItem);
-            paymentsTotal.add(item.getPrice());
+        if (cust == null || items == null) {
+            String customerUsername = "Customer Username is NULL";
+            if (cust != null) {
+                customerUsername = cust.getUsername();
+            }
+            logger.log(Level.SEVERE, "generateInvoiceFromItemsListBase: NULL Value passed to method. FAILURE for Customer username: {0}", new Object[]{customerUsername});
+            return null;
         }
-        inv.setBalance(paymentsTotal);
-        inv.setTotal(paymentsTotal);
+        Invoice inv = null;
+        // generate line items from item list
+        try {
+            List<InvoiceLine> invoiceLineList = new ArrayList<>();
+            for (Item item : items) {
+                InvoiceLine invoiceLineItem = newInvoiceLineItem(BigDecimal.ONE, item.getItemName(), item.getPrice(), item);
+                invoiceLineList.add(invoiceLineItem);
+            }
+            inv = generateInvoiceWithLineItems(cust, invoiceLineList);
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "generateInvoiceFromItemsListBase: FAILURE for Customer username: {0}, Plan: {1}, Error:{2}", new Object[]{cust.getUsername(), cust.getGroupPricing().getPlanName(), e.getMessage()});
+        }
+        return inv;
+    }
 
+    public InvoiceLine newInvoiceLineItem(BigDecimal quantity, String description, BigDecimal totalPrice, Item itemReference) {
+        InvoiceLineType invoiceLineType = invoiceLineTypeFacade.findAll().get(2);
+        InvoiceLine invoiceLineItem = new InvoiceLine(0);
+        invoiceLineItem.setAmount(totalPrice);
+        invoiceLineItem.setDeleted(Short.MIN_VALUE);
+        //invoiceLineItem.setInvoiceId(inv);
+        invoiceLineItem.setDescription(description);
+        invoiceLineItem.setItemId(itemReference);
+        invoiceLineItem.setQuantity(quantity);
+        invoiceLineItem.setTypeId(invoiceLineType);
+        return invoiceLineItem;
+
+    }
+
+    public Invoice generateInvoiceWithLineItemsAndPayment(Customers cust, List<InvoiceLine> items, Payments payment) {
+        Invoice inv = null;
+        try {
+            inv = generateInvoiceWithLineItems(cust, items);
+            payment.setCrmInvoiceId(inv);
+            paymentsFacade.editAndFlush(payment);
+        } catch (Exception e) {
+            String customerUsername = "Customer Username is NULL";
+            if (cust != null) {
+                customerUsername = cust.getUsername();
+            }
+            logger.log(Level.SEVERE, "generateInvoiceWithLineItemsAndPayment: FAILURE for Customer username: {0}, Error:{1}", new Object[]{customerUsername,e.getMessage()});
+
+        }
+        return inv;
+    }
+
+    protected Invoice generateInvoiceWithLineItems(Customers cust, List<InvoiceLine> items) {
+        if (cust == null || items == null) {
+            String customerUsername = "Customer Username is NULL";
+            if (cust != null) {
+                customerUsername = cust.getUsername();
+            }
+            logger.log(Level.SEVERE, "generateInvoiceLineItems: NULL Value passed to method for customer or line items list. FAILURE for Customer username: {0}", new Object[]{customerUsername});
+            return null;
+        }
+        Invoice inv = new Invoice();
+        try {
+            inv.setInvoiceLineCollection(new ArrayList<>());
+            inv.setUserId(cust);
+            ejbFacade.createAndFlushForGeneratedIdEntities(inv);
+            BigDecimal paymentsTotal = new BigDecimal(BigInteger.ZERO);
+            for (InvoiceLine item : items) {
+                item.setInvoiceId(inv);
+                invoiceLineFacade.createAndFlushForGeneratedIdEntities(item);
+                inv.getInvoiceLineCollection().add(item);
+                paymentsTotal.add(item.getPrice());
+            }
+            inv.setBalance(paymentsTotal);
+            inv.setTotal(paymentsTotal);
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "generateInvoiceLineItems: FAILURE for Customer username: {0}, Plan: {1}, Error:{2}", new Object[]{cust.getUsername(), cust.getGroupPricing().getPlanName(), e.getMessage()});
+
+        }
+        ejbFacade.edit(inv);
         return inv;
 
     }

@@ -3,13 +3,16 @@ package au.com.manlyit.fitnesscrm.stats.beans;
 import au.com.manlyit.fitnesscrm.stats.beans.util.PaymentSource;
 import au.com.manlyit.fitnesscrm.stats.beans.util.PaymentStatus;
 import au.com.manlyit.fitnesscrm.stats.classes.EziDebitPaymentGateway;
-import au.com.manlyit.fitnesscrm.stats.classes.NotificationsLogController;
+import au.com.manlyit.fitnesscrm.stats.classes.InvoiceController;
 import au.com.manlyit.fitnesscrm.stats.classes.util.AsyncJob;
 import au.com.manlyit.fitnesscrm.stats.classes.util.BatchOfPaymentJobs;
 import au.com.manlyit.fitnesscrm.stats.classes.util.FutureMapEJB;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PaymentGatewayResponse;
 import au.com.manlyit.fitnesscrm.stats.classes.util.SendHTMLEmailWithFileAttached;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
+import au.com.manlyit.fitnesscrm.stats.db.Invoice;
+import au.com.manlyit.fitnesscrm.stats.db.InvoiceLine;
+import au.com.manlyit.fitnesscrm.stats.db.Item;
 import au.com.manlyit.fitnesscrm.stats.db.PaymentParameters;
 import au.com.manlyit.fitnesscrm.stats.db.Payments;
 import au.com.manlyit.fitnesscrm.stats.webservices.ArrayOfPayment;
@@ -23,7 +26,6 @@ import au.com.manlyit.fitnesscrm.stats.webservices.EziResponseOfPaymentDetailPlu
 import au.com.manlyit.fitnesscrm.stats.webservices.EziResponseOfPaymentDetailTHgMB7OL;
 import au.com.manlyit.fitnesscrm.stats.webservices.EziResponseOfstring;
 import au.com.manlyit.fitnesscrm.stats.webservices.INonPCIService;
-import au.com.manlyit.fitnesscrm.stats.webservices.NonPCIService;
 import au.com.manlyit.fitnesscrm.stats.webservices.Payment;
 import au.com.manlyit.fitnesscrm.stats.webservices.PaymentDetail;
 import au.com.manlyit.fitnesscrm.stats.webservices.PaymentDetailPlusNextPaymentInfo;
@@ -31,8 +33,6 @@ import au.com.manlyit.fitnesscrm.stats.webservices.ScheduledPayment;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -60,12 +60,11 @@ import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import static javax.ejb.TransactionAttributeType.REQUIRES_NEW;
+import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.xml.bind.JAXBElement;
 import javax.xml.datatype.XMLGregorianCalendar;
-import javax.xml.ws.WebServiceException;
-import org.primefaces.PrimeFaces;
 
 /**
  *
@@ -321,7 +320,7 @@ public class PaymentBean implements Serializable {
                     //if (startCal.get(Calendar.WEEK_OF_MONTH) == 1 && firstWeekOfMonth == true) {
                     if (startCal.get(Calendar.DAY_OF_MONTH) >= 1 && startCal.get(Calendar.DAY_OF_MONTH) <= 7 && firstWeekOfMonth == true) {
                         if (arePaymentsWithinLimits(limitToNumberOfPayments, paymentAmountLimitInCents, cumulativeAmountInCents, amountInCents, numberOfpayments, newDebitDate)) {
-                            bopjAdd.getJobs().add(addNewPayment(cust, newDebitDate, amountInCents, false, loggedInUser, sessionId, digitalKey, futureMap, payBean, bopjAdd.getBatchId()).getId());
+                            bopjAdd.getJobs().add(addNewPayment(cust, newDebitDate, amountInCents, false, loggedInUser, sessionId, digitalKey, futureMap, payBean, bopjAdd.getBatchId(),null).getId());
                             //addNewPayment(cust, newDebitDate, amountInCents, false, loggedInUser, sessionId, digitalKey, futureMap, payBean);
                             numberOfpayments++;
                         }
@@ -330,7 +329,7 @@ public class PaymentBean implements Serializable {
                     if (startCal.get(Calendar.DAY_OF_MONTH) >= 8 && startCal.get(Calendar.DAY_OF_MONTH) <= 14 && secondWeekOfMonth == true) {
                         if (arePaymentsWithinLimits(limitToNumberOfPayments, paymentAmountLimitInCents, cumulativeAmountInCents, amountInCents, numberOfpayments, newDebitDate)) {
 
-                            bopjAdd.getJobs().add(addNewPayment(cust, newDebitDate, amountInCents, false, loggedInUser, sessionId, digitalKey, futureMap, payBean, bopjAdd.getBatchId()).getId());
+                            bopjAdd.getJobs().add(addNewPayment(cust, newDebitDate, amountInCents, false, loggedInUser, sessionId, digitalKey, futureMap, payBean, bopjAdd.getBatchId(),null).getId());
 
                             // addNewPayment(cust, newDebitDate, amountInCents, false, loggedInUser, sessionId, digitalKey, futureMap, payBean);
                             numberOfpayments++;
@@ -339,7 +338,7 @@ public class PaymentBean implements Serializable {
                     }
                     if (startCal.get(Calendar.DAY_OF_MONTH) >= 15 && startCal.get(Calendar.DAY_OF_MONTH) <= 21 && thirdWeekOfMonth == true) {
                         if (arePaymentsWithinLimits(limitToNumberOfPayments, paymentAmountLimitInCents, cumulativeAmountInCents, amountInCents, numberOfpayments, newDebitDate)) {
-                            bopjAdd.getJobs().add(addNewPayment(cust, newDebitDate, amountInCents, false, loggedInUser, sessionId, digitalKey, futureMap, payBean, bopjAdd.getBatchId()).getId());
+                            bopjAdd.getJobs().add(addNewPayment(cust, newDebitDate, amountInCents, false, loggedInUser, sessionId, digitalKey, futureMap, payBean, bopjAdd.getBatchId(),null).getId());
                             //addNewPayment(cust, newDebitDate, amountInCents, false, loggedInUser, sessionId, digitalKey, futureMap, payBean);
                             numberOfpayments++;
                         }
@@ -347,7 +346,7 @@ public class PaymentBean implements Serializable {
                     }
                     if (startCal.get(Calendar.DAY_OF_MONTH) >= 22 && startCal.get(Calendar.DAY_OF_MONTH) <= 28 && fourthWeekOfMonth == true) {
                         if (arePaymentsWithinLimits(limitToNumberOfPayments, paymentAmountLimitInCents, cumulativeAmountInCents, amountInCents, numberOfpayments, newDebitDate)) {
-                            bopjAdd.getJobs().add(addNewPayment(cust, newDebitDate, amountInCents, false, loggedInUser, sessionId, digitalKey, futureMap, payBean, bopjAdd.getBatchId()).getId());
+                            bopjAdd.getJobs().add(addNewPayment(cust, newDebitDate, amountInCents, false, loggedInUser, sessionId, digitalKey, futureMap, payBean, bopjAdd.getBatchId(),null).getId());
                             // addNewPayment(cust, newDebitDate, amountInCents, false, loggedInUser, sessionId, digitalKey, futureMap, payBean);
                             numberOfpayments++;
                         }
@@ -368,7 +367,7 @@ public class PaymentBean implements Serializable {
                     startCal.setTime(placeholder);// set it back to correct day of month as we may have changed the day of the week.
                 } else {
                     if (arePaymentsWithinLimits(limitToNumberOfPayments, paymentAmountLimitInCents, cumulativeAmountInCents, amountInCents, numberOfpayments, newDebitDate)) {
-                        bopjAdd.getJobs().add(addNewPayment(cust, newDebitDate, amountInCents, false, loggedInUser, sessionId, digitalKey, futureMap, payBean, bopjAdd.getBatchId()).getId());
+                        bopjAdd.getJobs().add(addNewPayment(cust, newDebitDate, amountInCents, false, loggedInUser, sessionId, digitalKey, futureMap, payBean, bopjAdd.getBatchId(),null).getId());
                         //addNewPayment(cust, newDebitDate, amountInCents, false, loggedInUser, sessionId, digitalKey, futureMap, payBean);
                         numberOfpayments++;
                     }
@@ -463,7 +462,7 @@ public class PaymentBean implements Serializable {
         return true;
     }
 
-    public boolean retryAddNewPayment(Payments pay, String user, String sessionId, String digitalKey, FutureMapEJB futureMap, PaymentBean payBean) {
+    /*  public boolean retryAddNewPayment(Payments pay, String user, String sessionId, String digitalKey, FutureMapEJB futureMap, PaymentBean payBean) {
         //String user = FacesContext.getCurrentInstance().getExternalContext().getRemoteUser();
         if (user != null) {
 
@@ -484,11 +483,11 @@ public class PaymentBean implements Serializable {
             return false;
         }
         return true;
-    }
-
+    }*/
     @TransactionAttribute(TransactionAttributeType.NEVER)
-    public Payments addNewPayment(Customers cust, Date debitDate, long amountInCents, boolean manualPayment, String user, String sessionId, String digitalKey, FutureMapEJB futureMap, PaymentBean payBean, long batchId) {
+    public Payments addNewPayment(Customers cust, Date debitDate, long amountInCents, boolean manualPayment, String user, String sessionId, String digitalKey, FutureMapEJB futureMap, PaymentBean payBean, long batchId, Item item) {
         //String user = FacesContext.getCurrentInstance().getExternalContext().getRemoteUser();
+        FacesContext context = FacesContext.getCurrentInstance();
         Payments newPayment = new Payments(-1);
         int paymentId = -1;
         if (user != null) {
@@ -512,6 +511,17 @@ public class PaymentBean implements Serializable {
                 newPayment.setPaymentDate(debitDate);// we can use this timestamp to reference bookings with booking date as they will be identical
                 paymentsFacade.createAndFlushForGeneratedIdEntities(newPayment);// need to flush to ensure the id is generated as this onlyoccurs at flush time.
                 paymentId = newPayment.getId();
+
+                InvoiceController invoiceController = context.getApplication().evaluateExpressionGet(context, "#{invoiceController}", InvoiceController.class);
+                InvoiceLine il = null;
+                if (item == null) {
+                    il = invoiceController.newInvoiceLineItem(BigDecimal.ONE, cust.getGroupPricing().getPlanName(), cust.getGroupPricing().getPlanPrice(), null);
+                } else {
+                    il = invoiceController.newInvoiceLineItem(BigDecimal.ONE, item.getItemName(), item.getPrice(), item);
+                }
+                ArrayList<InvoiceLine> itemsList = new ArrayList<>();
+                itemsList.add(il);
+                Invoice invoice = invoiceController.generateInvoiceWithLineItemsAndPayment(cust, itemsList, newPayment);
                 //int newId = newPayment.getId();
                 // if (newId != -1) {
                 //    String newPaymentID = Integer.toString(newId);
@@ -3326,7 +3336,7 @@ public class PaymentBean implements Serializable {
         try {
             String bccAddress = "";
             LOGGER.log(Level.INFO, "sending AsynchEmail TO: {0}, CC - {1}, From:{2}, Subject:{3}", new Object[]{to, ccAddress, from, emailSubject});
-            emailAgent.send(to, ccAddress, bccAddress, from, emailSubject, message, theAttachedfileName, serverProperties, debug, null,false);
+            emailAgent.send(to, ccAddress, bccAddress, from, emailSubject, message, theAttachedfileName, serverProperties, debug, null, false);
             LOGGER.log(Level.INFO, "sent AsynchEmail TO: {0}, CC - {1}, From:{2}, Subject:{3}", new Object[]{to, ccAddress, from, emailSubject});
             pgr = new PaymentGatewayResponse(true, null, "OK", "0", "Email sent successfully");
         } catch (Exception e) {
@@ -3347,7 +3357,7 @@ public class PaymentBean implements Serializable {
         SendHTMLEmailWithFileAttached emailAgent = new SendHTMLEmailWithFileAttached();
         try {
             String bccAddress = "";
-            emailAgent.send(to, ccAddress, bccAddress, from, emailSubject, message, theAttachedfileName, serverProperties, debug, null,false);
+            emailAgent.send(to, ccAddress, bccAddress, from, emailSubject, message, theAttachedfileName, serverProperties, debug, null, false);
             LOGGER.log(Level.INFO, "sendAsynchEmail TO: {0}, CC - {1}, From:{2}, Subject:{3}", new Object[]{to, ccAddress, from, emailSubject});
         } catch (Exception e) {
             String error = "Email Send Failed :" + e.getMessage();

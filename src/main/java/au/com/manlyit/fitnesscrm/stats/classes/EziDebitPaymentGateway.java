@@ -22,6 +22,8 @@ import au.com.manlyit.fitnesscrm.stats.classes.util.PfSelectableDataModel;
 import au.com.manlyit.fitnesscrm.stats.db.CustomerState;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import au.com.manlyit.fitnesscrm.stats.db.Invoice;
+import au.com.manlyit.fitnesscrm.stats.db.InvoiceLine;
+import au.com.manlyit.fitnesscrm.stats.db.Item;
 import au.com.manlyit.fitnesscrm.stats.db.Notes;
 import au.com.manlyit.fitnesscrm.stats.db.PaymentParameters;
 import au.com.manlyit.fitnesscrm.stats.db.Payments;
@@ -3199,26 +3201,30 @@ public class EziDebitPaymentGateway implements Serializable {
         paymentsDBListFilteredItems = null;
 
     }*/
-    public Payments addSinglePayment(Customers cust, float paymentAmount, Date debitDate) {
-        String loggedInUser = FacesContext.getCurrentInstance().getExternalContext().getRemoteUser();
+    public Payments addSinglePayment(Customers cust, float paymentAmount, Date debitDate, Item item) {
+        FacesContext context = FacesContext.getCurrentInstance();
+        String loggedInUser = context.getExternalContext().getRemoteUser();
         Long amount = (long) (paymentAmount * (float) 100);
         // setAsyncOperationRunning(true);
-        Payments paymentId = paymentBean.addNewPayment(cust, debitDate, amount, true, loggedInUser, sessionId, getDigitalKey(), futureMap, paymentBean, 0);
+        Payments paymentId = paymentBean.addNewPayment(cust, debitDate, amount, true, loggedInUser, sessionId, getDigitalKey(), futureMap, paymentBean, 0,item);
+
+        
+
         paymentDBList = null;
         paymentsDBListFilteredItems = null;
         return paymentId;
     }
 
     public void addSinglePayment(ActionEvent actionEvent) {
-        String loggedInUser = FacesContext.getCurrentInstance().getExternalContext().getRemoteUser();
+        FacesContext context = FacesContext.getCurrentInstance();
+        ItemController itemController = context.getApplication().evaluateExpressionGet(context, "#{itemController}", ItemController.class);
         Long amount = (long) (paymentAmountInCents * (float) 100);
-        // setAsyncOperationRunning(true);
-        paymentBean.addNewPayment(getSelectedCustomer(), paymentDebitDate, amount, true, loggedInUser, sessionId, getDigitalKey(), futureMap, paymentBean, 0);
-        paymentDBList = null;
-        paymentsDBListFilteredItems = null;
+        addSinglePayment(getSelectedCustomer(), amount, paymentDebitDate,itemController.getSelected());
+
     }
 
     public void logSingleCashPayment(ActionEvent actionEvent) {
+        FacesContext context = FacesContext.getCurrentInstance();
         try {
             Payments newPayment = new Payments(0);
             newPayment.setPaymentSource(PaymentSource.CASH.value());
@@ -3243,6 +3249,12 @@ public class EziDebitPaymentGateway implements Serializable {
             newPayment.setPaymentReference(newPaymentID);
             newPayment.setPaymentID("Cash_Payment" + "_" + newPaymentID);
             paymentsFacade.edit(newPayment);
+            // add invoice todo fix description
+            InvoiceController invoiceController = context.getApplication().evaluateExpressionGet(context, "#{invoiceController}", InvoiceController.class);
+            InvoiceLine il = invoiceController.newInvoiceLineItem(BigDecimal.ONE, getSelectedCustomer().getGroupPricing().getPlanName(), getSelectedCustomer().getGroupPricing().getPlanPrice(), null);
+            ArrayList<InvoiceLine> itemsList = new ArrayList<>();
+            itemsList.add(il);
+            Invoice invoice = invoiceController.generateInvoiceWithLineItemsAndPayment(getSelectedCustomer(), itemsList, newPayment);
             LOGGER.log(Level.INFO, "Cash/Direct Deposit Payment Created for customer {0} with paymentID: {1}", new Object[]{getSelectedCustomer().getUsername(), newPaymentID});
 
         } catch (Exception e) {
@@ -3331,10 +3343,10 @@ public class EziDebitPaymentGateway implements Serializable {
     }
 
     public void deleteScheduledPayment(ActionEvent actionEvent) {
-        for(Payments p:multiSelectedScheduledPayment){
-        if (p != null) {
-            deleteScheduledPaymentBase(p);
-        }
+        for (Payments p : multiSelectedScheduledPayment) {
+            if (p != null) {
+                deleteScheduledPaymentBase(p);
+            }
         }
     }
 

@@ -161,7 +161,7 @@ public class Payments implements  BaseEntity,Serializable {
     @ManyToOne
     private Customers customerName;
     @Column(name = "crmInvoiceId")
-    private Integer crmInvoiceId;
+    private Invoice crmInvoiceId;
 
     public Payments() {
     }
@@ -434,14 +434,14 @@ public class Payments implements  BaseEntity,Serializable {
     /**
      * @return the crmInvoiceId
      */
-    public Integer getCrmInvoiceId() {
+    public Invoice getCrmInvoiceId() {
         return crmInvoiceId;
     }
 
     /**
      * @param crmInvoiceId the crmInvoiceId to set
      */
-    public void setCrmInvoiceId(Integer crmInvoiceId) {
+    public void setCrmInvoiceId(Invoice crmInvoiceId) {
         this.crmInvoiceId = crmInvoiceId;
     }
     

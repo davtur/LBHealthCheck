@@ -4,12 +4,13 @@ import au.com.manlyit.fitnesscrm.stats.db.Item;
 import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PaginationHelper;
 import au.com.manlyit.fitnesscrm.stats.beans.ItemFacade;
+import au.com.manlyit.fitnesscrm.stats.db.Plan;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import java.util.ResourceBundle;
 import javax.enterprise.context.SessionScoped;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
@@ -29,6 +30,8 @@ import org.primefaces.event.SelectEvent;
 @SessionScoped
 public class ItemController implements Serializable {
 
+   
+
     private Item current;
     private Item selectedForDeletion;
     private DataModel items = null;
@@ -36,8 +39,11 @@ public class ItemController implements Serializable {
     private au.com.manlyit.fitnesscrm.stats.beans.ItemFacade ejbFacade;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade configMapFacade;
+    @Inject
+    private au.com.manlyit.fitnesscrm.stats.beans.PlanFacade planFacade;
     private PaginationHelper pagination;
     private int selectedItemIndex;
+    private List<Item> combinedPlansAndItems;
     private List<Item> filteredItems;
     private Item[] multiSelected;
 
@@ -99,6 +105,38 @@ public class ItemController implements Serializable {
      */
     public void setFilteredItems(List<Item> filteredItems) {
         this.filteredItems = filteredItems;
+    }
+    
+     /**
+     * @return the combinedPlansAndItems
+     */
+    public List<Item> getCombinedPlansAndItems() {
+        if(combinedPlansAndItems == null){
+          List<Item> items = ejbFacade.findAllActiveItems();
+          List<Plan> plans = planFacade.findAllPlansForSelectItems();
+            for(Plan plan:plans){
+                Item i = new Item(0);
+                i.setDescription(plan.getPlanDescription());
+                i.setItemName(plan.getPlanName());
+                i.setItemPrice(plan.getPlanPrice());
+                i.setItemDiscount(BigDecimal.ZERO);
+                i.setPrice(plan.getPlanPrice());
+                i.setItemActive(Short.MAX_VALUE);
+                items.add(i);
+            }
+            
+           combinedPlansAndItems = items; 
+        }
+        
+        
+        return combinedPlansAndItems;
+    }
+
+    /**
+     * @param combinedPlansAndItems the combinedPlansAndItems to set
+     */
+    public void setCombinedPlansAndItems(List<Item> combinedPlansAndItems) {
+        this.combinedPlansAndItems = combinedPlansAndItems;
     }
 
     /**

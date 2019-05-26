@@ -20,6 +20,13 @@
                     <f:convertNumber  minFractionDigits="2"/>
                 </p:inputText>
             </p:panelGrid>
+            <div class="ui-g-4">
+                <p:selectOneMenu   converter="itemControllerConverter" value="#{itemsController.selected}" label="Payment Description" >
+                    <f:selectItems value="#{itemController.combinedPlansAndItems}"  var="item" itemLabel="#{item.itemName}"  itemValue="#{item}"/>
+                    <p:ajax />
+                </p:selectOneMenu>
+            </div>
+
             <p:panel>
                 <p:commandButton id="createPaymentdialogueSave"  oncomplete="PF('createPaymentDialogueWidget').hide();"  actionListener="#{ezidebit.addSinglePayment}" value="#{configMapController.getKey('AddPaymentSaveLink')}" update=":growl :tv:paymentsForm "/>                
                 <p:commandButton id="createPaymentdialogueDiscard" onclick="PF('createPaymentDialogueWidget').hide()"  value="#{configMapController.getKey('AddPaymentDiscardLink')}" update=":growl"/>                

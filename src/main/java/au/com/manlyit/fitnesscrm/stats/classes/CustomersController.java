@@ -2573,7 +2573,7 @@ public class CustomersController implements Serializable {
                 ezi.createPaymentSchedule(actionEvent);
 
                 float firstPayment = new Float(proRataAmount);
-                ezi.addSinglePayment(getSelected(), firstPayment, scheduleStart);
+                ezi.addSinglePayment(getSelected(), firstPayment, scheduleStart,null);
 
             }
             pp.setPaymentPeriod(newPayPeriod);
@@ -2638,7 +2638,7 @@ public class CustomersController implements Serializable {
             getSelected().setGroupPricing(getCustomersNewPlan());
             float firstPayment = new Float(proRataAmount);
             if (firstPayment > 0) {
-                ezi.addSinglePayment(current, firstPayment, scheduleStart);
+                ezi.addSinglePayment(current, firstPayment, scheduleStart,null);
             }
             ejbFacade.edit(getSelected());
 
