@@ -12,12 +12,12 @@ import au.com.manlyit.fitnesscrm.stats.classes.util.PfSelectableDataModel;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import au.com.manlyit.fitnesscrm.stats.db.InvoiceLine;
 import au.com.manlyit.fitnesscrm.stats.db.InvoiceLineType;
+import au.com.manlyit.fitnesscrm.stats.db.Item;
 import au.com.manlyit.fitnesscrm.stats.db.PaymentParameters;
 import au.com.manlyit.fitnesscrm.stats.db.Payments;
 import au.com.manlyit.fitnesscrm.stats.db.Plan;
 import au.com.manlyit.fitnesscrm.stats.db.SessionHistory;
 import au.com.manlyit.fitnesscrm.stats.db.SessionTypes;
-import au.com.manlyit.fitnesscrm.stats.webservices.Payment;
 import com.itextpdf.text.BadElementException;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
@@ -35,6 +35,7 @@ import java.io.InputStream;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.net.URL;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
@@ -170,11 +171,11 @@ public class InvoiceController implements Serializable {
             htmlInvoiceEmailEditSaveButtonText = configMapFacade.getConfig("previewHtmlInvoiceEditEmailLink");
         }
     }
-    
-     public void generatePaymentInvoice(Payments payment) {
+
+    public void generatePaymentInvoice(Payments payment) {
         try {
-            
-            Invoice invoice  = generatePaymentInvoiceBase(payment.getCustomerName(), invoiceUseSettlementDate, invoiceShowSuccessful, invoiceShowFailed, invoiceShowPending, isInvoiceShowScheduled(), invoiceStartDate, invoiceEndDate);
+
+            Invoice invoice = generatePaymentInvoiceBase(payment.getCustomerName(), invoiceUseSettlementDate, invoiceShowSuccessful, invoiceShowFailed, invoiceShowPending, isInvoiceShowScheduled(), invoiceStartDate, invoiceEndDate);
             invoice.setCreateTimestamp(new Date());
             invoice.setCreateDatetime(invoiceStartDate);
             invoice.setStatusId(1);
@@ -197,7 +198,35 @@ public class InvoiceController implements Serializable {
 
         //PrimeFaces.current().ajax().update("InvoicelistForm1");
     }
-         public Invoice generatePaymentInvoiceBase(Customers cust, boolean useSettlementDate, boolean showSuccessful, boolean showFailed, boolean showPending, boolean showScheduled, Date startDate, Date endDate) {
+
+    private Invoice generateInvoiceFromItemsListBase(Customers cust, List<Item> items) {
+
+        Invoice inv = new Invoice();
+        inv.setInvoiceLineCollection(new ArrayList<>());
+        InvoiceLineType invoiceLineType = invoiceLineTypeFacade.findAll().get(2);
+        inv.setUserId(cust);
+        BigDecimal paymentsTotal = new BigDecimal(BigInteger.ZERO);
+        for (Item item : items) {
+            InvoiceLine invoiceLineItem = new InvoiceLine(0);
+            invoiceLineItem.setAmount(item.getPrice());
+            invoiceLineItem.setDeleted(Short.MIN_VALUE);
+            invoiceLineItem.setInvoiceId(inv);
+            invoiceLineItem.setDescription(item.getItemName());
+            invoiceLineItem.setItemId(item);
+            invoiceLineItem.setQuantity(BigDecimal.ONE);
+            invoiceLineItem.setTypeId(invoiceLineType);
+            invoiceLineFacade.createAndFlushForGeneratedIdEntities(invoiceLineItem);
+            inv.getInvoiceLineCollection().add(invoiceLineItem);
+            paymentsTotal.add(item.getPrice());
+        }
+        inv.setBalance(paymentsTotal);
+        inv.setTotal(paymentsTotal);
+
+        return inv;
+
+    }
+
+    public Invoice generatePaymentInvoiceBase(Customers cust, boolean useSettlementDate, boolean showSuccessful, boolean showFailed, boolean showPending, boolean showScheduled, Date startDate, Date endDate) {
         Invoice inv = new Invoice();
         inv.setInvoiceLineCollection(new ArrayList<>());
         inv.setUserId(cust);
@@ -301,7 +330,7 @@ public class InvoiceController implements Serializable {
             il.setQuantity(new BigDecimal(1));
             il.setDescription("Payment(s)" + " --- " + ppPlanPaymentDetails);
             productsAndServicesTotal = productsAndServicesTotal.add(bankFeesTotal);
-           // productsAndServicesTotal = productsAndServicesTotal.subtract(paymentsTotal);
+            // productsAndServicesTotal = productsAndServicesTotal.subtract(paymentsTotal);
             // il.setPrice(paymentsTotal);
             il.setPrice(p.getPaymentAmount());
             paymentsTotal = paymentsTotal.negate();
@@ -456,7 +485,7 @@ public class InvoiceController implements Serializable {
             il.setQuantity(new BigDecimal(1));
             il.setDescription("Payment(s)" + " --- " + ppPlanPaymentDetails);
             productsAndServicesTotal = productsAndServicesTotal.add(bankFeesTotal);
-           // productsAndServicesTotal = productsAndServicesTotal.subtract(paymentsTotal);
+            // productsAndServicesTotal = productsAndServicesTotal.subtract(paymentsTotal);
             // il.setPrice(paymentsTotal);
             il.setPrice(p.getPaymentAmount());
             paymentsTotal = paymentsTotal.negate();
@@ -609,13 +638,13 @@ public class InvoiceController implements Serializable {
             BadElementException, DocumentException {
 
     }
-    
-    public void addBlankLineItem(){
-        
+
+    public void addBlankLineItem() {
+
         Collection<InvoiceLine> lineItems = getSelected().getInvoiceLineCollection();
         InvoiceLine il = new InvoiceLine();
         il.setAmount(BigDecimal.ZERO);
-        il.setDeleted((short)0);
+        il.setDeleted((short) 0);
         il.setInvoiceId(current);
     }
 
@@ -1175,7 +1204,7 @@ public class InvoiceController implements Serializable {
         this.htmlInvoiceEmailEditSaveButtonText = htmlInvoiceEmailEditSaveButtonText;
     }
 
-    @FacesConverter(value="invoiceControllerConverter")
+    @FacesConverter(value = "invoiceControllerConverter")
     public static class InvoiceControllerConverter implements Converter {
 
         public Object getAsObject(FacesContext facesContext, UIComponent component, String value) {
