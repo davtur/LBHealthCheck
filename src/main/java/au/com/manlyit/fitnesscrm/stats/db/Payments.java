@@ -160,6 +160,8 @@ public class Payments implements  BaseEntity,Serializable {
     @JoinColumn(name = "customer_Name", referencedColumnName = "id")
     @ManyToOne
     private Customers customerName;
+    @Column(name = "crmInvoiceId")
+    private Integer crmInvoiceId;
 
     public Payments() {
     }
@@ -356,6 +358,7 @@ public class Payments implements  BaseEntity,Serializable {
 
    
 
+   
     public String getEzidebitCustomerID() {
         return ezidebitCustomerID;
     }
@@ -426,6 +429,20 @@ public class Payments implements  BaseEntity,Serializable {
 
     public void setYourSystemReference(String yourSystemReference) {
         this.yourSystemReference = yourSystemReference;
+    }
+
+    /**
+     * @return the crmInvoiceId
+     */
+    public Integer getCrmInvoiceId() {
+        return crmInvoiceId;
+    }
+
+    /**
+     * @param crmInvoiceId the crmInvoiceId to set
+     */
+    public void setCrmInvoiceId(Integer crmInvoiceId) {
+        this.crmInvoiceId = crmInvoiceId;
     }
     
 }

@@ -2243,7 +2243,8 @@ public class PaymentBean implements Serializable {
     }
 
     private void sendInvoice(Payments payment, Payment pay) {
-        //TODO process invoice
+        //TODO process invoice after payment is successful and send to client
+        // add transaction fee and modify subtotal and amount owing
         LOGGER.log(Level.INFO, "sendInvoice - Error method not completed yet. Still TODO: ");
 
     }

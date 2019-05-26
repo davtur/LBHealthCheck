@@ -579,3 +579,14 @@ ADD CONSTRAINT `fk_email_attachments_1`
   REFERENCES `fitnessStats`.`emailQueue` (`id`)
   ON DELETE NO ACTION
   ON UPDATE NO ACTION;
+
+
+ALTER TABLE `fitnessStats`.`payments` 
+ADD COLUMN `crmInvoiceId` INT(11) NULL DEFAULT NULL AFTER `yourSystemReference`,
+ADD INDEX `fk_payments_2_idx` (`crmInvoiceId` ASC);
+ALTER TABLE `fitnessStats`.`payments` 
+ADD CONSTRAINT `fk_payments_2`
+  FOREIGN KEY (`crmInvoiceId`)
+  REFERENCES `fitnessStats`.`invoice` (`id`)
+  ON DELETE NO ACTION
+  ON UPDATE NO ACTION;

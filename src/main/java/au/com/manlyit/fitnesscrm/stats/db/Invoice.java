@@ -3,7 +3,6 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package au.com.manlyit.fitnesscrm.stats.db;
 
 import au.com.manlyit.fitnesscrm.stats.classes.util.BaseEntity;
@@ -52,24 +51,41 @@ import org.eclipse.persistence.config.CacheIsolationType;
 @Table(name = "invoice")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "Invoice.findAll", query = "SELECT i FROM Invoice i"),
-    @NamedQuery(name = "Invoice.findById", query = "SELECT i FROM Invoice i WHERE i.id = :id"),
-    @NamedQuery(name = "Invoice.findByCreateDatetime", query = "SELECT i FROM Invoice i WHERE i.createDatetime = :createDatetime"),
-    @NamedQuery(name = "Invoice.findByStatusId", query = "SELECT i FROM Invoice i WHERE i.statusId = :statusId"),
-    @NamedQuery(name = "Invoice.findByDueDate", query = "SELECT i FROM Invoice i WHERE i.dueDate = :dueDate"),
-    @NamedQuery(name = "Invoice.findByTotal", query = "SELECT i FROM Invoice i WHERE i.total = :total"),
-    @NamedQuery(name = "Invoice.findByPaymentAttempts", query = "SELECT i FROM Invoice i WHERE i.paymentAttempts = :paymentAttempts"),
-    @NamedQuery(name = "Invoice.findByBalance", query = "SELECT i FROM Invoice i WHERE i.balance = :balance"),
-    @NamedQuery(name = "Invoice.findByCarriedBalance", query = "SELECT i FROM Invoice i WHERE i.carriedBalance = :carriedBalance"),
-    @NamedQuery(name = "Invoice.findByInProcessPayment", query = "SELECT i FROM Invoice i WHERE i.inProcessPayment = :inProcessPayment"),
-    @NamedQuery(name = "Invoice.findByIsReview", query = "SELECT i FROM Invoice i WHERE i.isReview = :isReview"),
-    @NamedQuery(name = "Invoice.findByDeleted", query = "SELECT i FROM Invoice i WHERE i.deleted = :deleted"),
-    @NamedQuery(name = "Invoice.findByCustomerNotes", query = "SELECT i FROM Invoice i WHERE i.customerNotes = :customerNotes"),
-    @NamedQuery(name = "Invoice.findByPublicNumber", query = "SELECT i FROM Invoice i WHERE i.publicNumber = :publicNumber"),
-    @NamedQuery(name = "Invoice.findByLastReminder", query = "SELECT i FROM Invoice i WHERE i.lastReminder = :lastReminder"),
-    @NamedQuery(name = "Invoice.findByOverdueStep", query = "SELECT i FROM Invoice i WHERE i.overdueStep = :overdueStep"),
+    @NamedQuery(name = "Invoice.findAll", query = "SELECT i FROM Invoice i")
+    ,
+    @NamedQuery(name = "Invoice.findById", query = "SELECT i FROM Invoice i WHERE i.id = :id")
+    ,
+    @NamedQuery(name = "Invoice.findByCreateDatetime", query = "SELECT i FROM Invoice i WHERE i.createDatetime = :createDatetime")
+    ,
+    @NamedQuery(name = "Invoice.findByStatusId", query = "SELECT i FROM Invoice i WHERE i.statusId = :statusId")
+    ,
+    @NamedQuery(name = "Invoice.findByDueDate", query = "SELECT i FROM Invoice i WHERE i.dueDate = :dueDate")
+    ,
+    @NamedQuery(name = "Invoice.findByTotal", query = "SELECT i FROM Invoice i WHERE i.total = :total")
+    ,
+    @NamedQuery(name = "Invoice.findByPaymentAttempts", query = "SELECT i FROM Invoice i WHERE i.paymentAttempts = :paymentAttempts")
+    ,
+    @NamedQuery(name = "Invoice.findByBalance", query = "SELECT i FROM Invoice i WHERE i.balance = :balance")
+    ,
+    @NamedQuery(name = "Invoice.findByCarriedBalance", query = "SELECT i FROM Invoice i WHERE i.carriedBalance = :carriedBalance")
+    ,
+    @NamedQuery(name = "Invoice.findByInProcessPayment", query = "SELECT i FROM Invoice i WHERE i.inProcessPayment = :inProcessPayment")
+    ,
+    @NamedQuery(name = "Invoice.findByIsReview", query = "SELECT i FROM Invoice i WHERE i.isReview = :isReview")
+    ,
+    @NamedQuery(name = "Invoice.findByDeleted", query = "SELECT i FROM Invoice i WHERE i.deleted = :deleted")
+    ,
+    @NamedQuery(name = "Invoice.findByCustomerNotes", query = "SELECT i FROM Invoice i WHERE i.customerNotes = :customerNotes")
+    ,
+    @NamedQuery(name = "Invoice.findByPublicNumber", query = "SELECT i FROM Invoice i WHERE i.publicNumber = :publicNumber")
+    ,
+    @NamedQuery(name = "Invoice.findByLastReminder", query = "SELECT i FROM Invoice i WHERE i.lastReminder = :lastReminder")
+    ,
+    @NamedQuery(name = "Invoice.findByOverdueStep", query = "SELECT i FROM Invoice i WHERE i.overdueStep = :overdueStep")
+    ,
     @NamedQuery(name = "Invoice.findByCreateTimestamp", query = "SELECT i FROM Invoice i WHERE i.createTimestamp = :createTimestamp")})
-public class Invoice implements BaseEntity,Serializable {
+public class Invoice implements BaseEntity, Serializable {
+
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -145,8 +161,10 @@ public class Invoice implements BaseEntity,Serializable {
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     @ManyToOne
     private Customers userId;
-    @OneToMany(cascade= CascadeType.ALL,mappedBy = "invoiceId")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "invoiceId")
     private Collection<InvoiceLine> invoiceLineCollection;
+    @OneToMany(mappedBy = "crmInvoiceId")
+    private Collection<Payments> paymentsCollection;
 
     public Invoice() {
     }
@@ -363,5 +381,19 @@ public class Invoice implements BaseEntity,Serializable {
     public String toString() {
         return "au.com.manlyit.fitnesscrm.stats.db.Invoice[ id=" + id + " ]";
     }
-    
+
+    /**
+     * @return the paymentsCollection
+     */
+    public Collection<Payments> getPaymentsCollection() {
+        return paymentsCollection;
+    }
+
+    /**
+     * @param paymentsCollection the paymentsCollection to set
+     */
+    public void setPaymentsCollection(Collection<Payments> paymentsCollection) {
+        this.paymentsCollection = paymentsCollection;
+    }
+
 }
