@@ -160,7 +160,8 @@ public class Payments implements  BaseEntity,Serializable {
     @JoinColumn(name = "customer_Name", referencedColumnName = "id")
     @ManyToOne
     private Customers customerName;
-    @Column(name = "crmInvoiceId")
+    @JoinColumn(name = "crmInvoiceId")
+    @ManyToOne
     private Invoice crmInvoiceId;
 
     public Payments() {
