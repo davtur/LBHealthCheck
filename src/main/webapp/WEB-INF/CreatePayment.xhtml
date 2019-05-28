@@ -10,27 +10,46 @@
     <p:dialog id="createPaymentDialogue"  closable="true"  appendTo="@(body)"
               header="#{configMapController.getKey('AddPaymentTitle')}" widgetVar="createPaymentDialogueWidget"> 
         <h:form id="createPayment">    
-            <p:panelGrid id="addPaymentGrid1" columns="4">
-                <p:outputLabel value="#{configMapController.getKey('AddPaymentLabel_debitdate')}" for="debitDate" />
-                <p:calendar id="debitDate" pattern="dd MMM yyyy" value="#{ezidebit.paymentDebitDate}" title="#{configMapController.getKey('AddPaymentTitle_debitdate')}" required="true" requiredMessage="#{configMapController.getKey('AddPaymentRequiredMessage_debitdate')}" >
-                    <p:ajax />
-                </p:calendar>
-                <p:outputLabel value="#{configMapController.getKey('AddPaymentLabel_paymentAmount')}" for="payAmount" />
-                <p:inputText id="payAmount" value="#{ezidebit.paymentAmountInCents}" title="#{configMapController.getKey('AddPaymentTitle_paymentAmount')}" required="true" requiredMessage="#{configMapController.getKey('AddPaymentRequiredMessage_paymentAmount')}">
-                    <f:convertNumber  minFractionDigits="2"/>
-                </p:inputText>
-            </p:panelGrid>
-            <div class="ui-g-4">
-                <p:selectOneMenu   converter="itemControllerConverter" value="#{itemsController.selected}" label="Payment Description" >
-                    <f:selectItems value="#{itemController.combinedPlansAndItems}"  var="item" itemLabel="#{item.itemName}"  itemValue="#{item}"/>
-                    <p:ajax />
-                </p:selectOneMenu>
+            <div class="ui-g">
+                <div class="ui-g-12">
+                    <div class="ui-g-1">
+                        <p:outputLabel value="#{configMapController.getKey('AddPaymentLabel_debitdate')}" for="debitDate" />
+                    </div>
+                    <div class="ui-g-5">
+                        <p:calendar id="debitDate" pattern="dd MMM yyyy" value="#{ezidebit.paymentDebitDate}" title="#{configMapController.getKey('AddPaymentTitle_debitdate')}" required="true" requiredMessage="#{configMapController.getKey('AddPaymentRequiredMessage_debitdate')}" >
+                            <p:ajax />
+                        </p:calendar>
+                    </div>
+                    <div class="ui-g-1">
+                        <p:outputLabel value="#{configMapController.getKey('AddPaymentLabel_paymentAmount')}" for="payAmount" />
+                    </div>
+                    <div class="ui-g-5">
+                        <p:inputText id="payAmount" value="#{ezidebit.paymentAmountInCents}" title="#{configMapController.getKey('AddPaymentTitle_paymentAmount')}" required="true" requiredMessage="#{configMapController.getKey('AddPaymentRequiredMessage_paymentAmount')}">
+                            <f:convertNumber  minFractionDigits="2"/>
+                        </p:inputText>
+                    </div>
+                </div>
+                <div class="ui-g-12">
+                    <div class="ui-g-1">
+                        <p:outputLabel value="Product"  />
+                    </div>
+                    <div class="ui-g-5">
+                        <p:selectOneMenu  valueChangeListener="#{planController.productChange}" converter="planControllerConverter" placeholder="Select Product" value="#{planController.selected}" label="Payment Description"  >
+                           
+                            <f:selectItems value="#{planController.combinedPlansAndItems}"  var="plan" itemLabel="#{plan.planName}"  itemValue="#{plan}"/>
+                            <p:ajax update="@form"/>
+                        </p:selectOneMenu>
+                    </div>
+                    <div class="ui-g-2">
+                        <p:commandButton id="createPaymentdialogueSave"  oncomplete="PF('createPaymentDialogueWidget').hide();"  actionListener="#{ezidebit.addSinglePayment}" value="#{configMapController.getKey('AddPaymentSaveLink')}" update=":growl :tv:paymentsForm "/>                
+                    </div>
+                    <div class="ui-g-2">
+                        <p:commandButton id="createPaymentdialogueDiscard" onclick="PF('createPaymentDialogueWidget').hide()"  value="#{configMapController.getKey('AddPaymentDiscardLink')}" update=":growl"/>                
+                    </div>
+                </div>
             </div>
 
-            <p:panel>
-                <p:commandButton id="createPaymentdialogueSave"  oncomplete="PF('createPaymentDialogueWidget').hide();"  actionListener="#{ezidebit.addSinglePayment}" value="#{configMapController.getKey('AddPaymentSaveLink')}" update=":growl :tv:paymentsForm "/>                
-                <p:commandButton id="createPaymentdialogueDiscard" onclick="PF('createPaymentDialogueWidget').hide()"  value="#{configMapController.getKey('AddPaymentDiscardLink')}" update=":growl"/>                
-            </p:panel>     
+
         </h:form>
     </p:dialog>
 </ui:composition> 

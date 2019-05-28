@@ -54,7 +54,7 @@ public abstract class AbstractFacade<T> implements Serializable {
         //return getEntityManager().find(entityClass, id);
         getEntityManager().getEntityManagerFactory().getCache().evict(entityClass, thePrimaryKey);
     }
-
+    
     public void create(T entity) {
         // try {
 

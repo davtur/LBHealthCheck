@@ -3204,6 +3204,7 @@ public class EziDebitPaymentGateway implements Serializable {
     public Payments addSinglePayment(Customers cust, float paymentAmount, Date debitDate, Item item) {
         FacesContext context = FacesContext.getCurrentInstance();
         String loggedInUser = context.getExternalContext().getRemoteUser();
+        // ezidebit wants the amount as a long in cents
         Long amount = (long) (paymentAmount * (float) 100);
         // setAsyncOperationRunning(true);
         Payments paymentId = paymentBean.addNewPayment(cust, debitDate, amount, true, loggedInUser, sessionId, getDigitalKey(), futureMap, paymentBean, 0,item);
@@ -3218,8 +3219,8 @@ public class EziDebitPaymentGateway implements Serializable {
     public void addSinglePayment(ActionEvent actionEvent) {
         FacesContext context = FacesContext.getCurrentInstance();
         ItemController itemController = context.getApplication().evaluateExpressionGet(context, "#{itemController}", ItemController.class);
-        Long amount = (long) (paymentAmountInCents * (float) 100);
-        addSinglePayment(getSelectedCustomer(), amount, paymentDebitDate,itemController.getSelected());
+       
+        addSinglePayment(getSelectedCustomer(), paymentAmountInCents, paymentDebitDate,itemController.getSelected());
 
     }
 

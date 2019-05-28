@@ -204,10 +204,9 @@ public class InvoiceController implements Serializable {
         Item item = new Item(0);
         Plan plan = payment.getCustomerName().getGroupPricing();
         item.setItemName(plan.getPlanName());
-        item.setDescription(plan.getPlanDescription());
+        item.setItemDescription(plan.getPlanDescription());
         item.setItemPrice(payment.getScheduledAmount());
-        item.setDeleted(Short.MIN_VALUE);
-        item.setItemActive(Short.MAX_VALUE);
+         item.setItemActive(Short.MAX_VALUE);
         item.setItemDiscount(BigDecimal.ZERO);
         ArrayList<Item> items = new ArrayList<>();
         items.add(item);
@@ -229,7 +228,7 @@ public class InvoiceController implements Serializable {
         try {
             List<InvoiceLine> invoiceLineList = new ArrayList<>();
             for (Item item : items) {
-                InvoiceLine invoiceLineItem = newInvoiceLineItem(BigDecimal.ONE, item.getItemName(), item.getPrice(), item);
+                InvoiceLine invoiceLineItem = newInvoiceLineItem(BigDecimal.ONE, item.getItemName(), item.getItemPrice(), item);
                 invoiceLineList.add(invoiceLineItem);
             }
             inv = generateInvoiceWithLineItems(cust, invoiceLineList);

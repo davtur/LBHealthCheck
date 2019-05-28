@@ -11,6 +11,9 @@ import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.el.ELException;
 import javax.enterprise.context.SessionScoped;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
@@ -30,8 +33,7 @@ import org.primefaces.event.SelectEvent;
 @SessionScoped
 public class ItemController implements Serializable {
 
-   
-
+    private static final Logger logger = Logger.getLogger(ItemController.class.getName());
     private Item current;
     private Item selectedForDeletion;
     private DataModel items = null;
@@ -63,6 +65,7 @@ public class ItemController implements Serializable {
         return current;
     }
 
+    
     public void setSelected(Item selected) {
         if (selected != null) {
             current = selected;
@@ -106,29 +109,17 @@ public class ItemController implements Serializable {
     public void setFilteredItems(List<Item> filteredItems) {
         this.filteredItems = filteredItems;
     }
-    
-     /**
+
+    /**
      * @return the combinedPlansAndItems
      */
     public List<Item> getCombinedPlansAndItems() {
-        if(combinedPlansAndItems == null){
-          List<Item> items = ejbFacade.findAllActiveItems();
-          List<Plan> plans = planFacade.findAllPlansForSelectItems();
-            for(Plan plan:plans){
-                Item i = new Item(0);
-                i.setDescription(plan.getPlanDescription());
-                i.setItemName(plan.getPlanName());
-                i.setItemPrice(plan.getPlanPrice());
-                i.setItemDiscount(BigDecimal.ZERO);
-                i.setPrice(plan.getPlanPrice());
-                i.setItemActive(Short.MAX_VALUE);
-                items.add(i);
-            }
-            
-           combinedPlansAndItems = items; 
+        if (combinedPlansAndItems == null) {
+            List<Item> items = ejbFacade.findAllActiveItems();
+
+            combinedPlansAndItems = items;
         }
-        
-        
+
         return combinedPlansAndItems;
     }
 

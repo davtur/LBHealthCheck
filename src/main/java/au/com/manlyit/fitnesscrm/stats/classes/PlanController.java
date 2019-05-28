@@ -5,6 +5,7 @@ import au.com.manlyit.fitnesscrm.stats.classes.util.JsfUtil;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PaginationHelper;
 import au.com.manlyit.fitnesscrm.stats.beans.PlanFacade;
 import au.com.manlyit.fitnesscrm.stats.classes.util.PfSelectableDataModel;
+import au.com.manlyit.fitnesscrm.stats.db.Item;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -12,6 +13,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.el.ELException;
 import javax.enterprise.context.SessionScoped;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
@@ -41,6 +43,8 @@ public class PlanController implements Serializable {
     private PfSelectableDataModel<Plan> items = null;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.PlanFacade ejbFacade;
+    @Inject
+    private au.com.manlyit.fitnesscrm.stats.beans.ItemFacade itemFacade;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade configMapFacade;
     private PaginationHelper pagination;
@@ -246,6 +250,49 @@ public class PlanController implements Serializable {
         PrimeFaces.current().executeScript("PF('planCreateDialogue').show()");
     }
 
+    public void productChange(ValueChangeEvent vce) {
+        Object newValueObject = vce.getNewValue();
+        try {
+            if (newValueObject != null) {
+                if (newValueObject.getClass().equals(Plan.class)) {
+                    Plan selectedItem = (Plan) newValueObject;
+                    EziDebitPaymentGateway eziDebitPaymentGateway = FacesContext.getCurrentInstance().getApplication().evaluateExpressionGet(FacesContext.getCurrentInstance(), "#{ezidebit}", EziDebitPaymentGateway.class);
+                    float amount = selectedItem.getItemPrice().floatValue();
+                    eziDebitPaymentGateway.setPaymentAmountInCents(amount);
+                    setSelected(selectedItem);
+                }
+            }
+        } catch (ELException eLException) {
+            logger.log(Level.INFO, "productChange(ValueChangeEvent vce)", eLException);
+        }
+
+    }
+
+    
+    public void updateProductCatalogue(ActionEvent event) {
+
+        // delete all items from catalogue
+        List<Item> allItems = itemFacade.findAll();
+        for (Item item : allItems) {
+            itemFacade.remove(item);
+        }
+        // rebuild catalogue
+        List<Plan> plans = ejbFacade.findAllPlansForSelectItems();
+        for (Plan plan : plans) {
+            if (plan.getPlanActive() == 0 && plan.getPlanPrice().compareTo(BigDecimal.ZERO) > 0) {
+                Item i = new Item();
+                i.setItemDescription(plan.getPlanDescription());
+                i.setItemName(plan.getPlanName());
+
+                i.setItemDiscount(BigDecimal.ZERO);
+                i.setItemPrice(plan.getPlanPrice());
+                i.setItemActive((short)1);
+                itemFacade.create(i);
+            }
+        }
+
+    }
+
     public void addPlan(ActionEvent event) {
         setSubItem(false);
         PrimeFaces.current().ajax().update("formPlanCreate1");
@@ -354,6 +401,7 @@ public class PlanController implements Serializable {
     public List<Plan> getItemsAvailableAsObjects() {
         return ejbFacade.findAllPlans();
     }
+
     public List<Plan> getItemsAvailableForDisplayAsObjects() {
         return ejbFacade.findAllPlansForSelectItems();
     }
@@ -457,7 +505,7 @@ public class PlanController implements Serializable {
         this.newPlan = newPlan;
     }
 
-    @FacesConverter(value="planControllerConverter")
+    @FacesConverter(value = "planControllerConverter")
     public static class PlanControllerConverter implements Converter {
 
         @Override

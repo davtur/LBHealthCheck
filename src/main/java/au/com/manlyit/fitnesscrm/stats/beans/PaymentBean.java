@@ -517,7 +517,7 @@ public class PaymentBean implements Serializable {
                 if (item == null) {
                     il = invoiceController.newInvoiceLineItem(BigDecimal.ONE, cust.getGroupPricing().getPlanName(), cust.getGroupPricing().getPlanPrice(), null);
                 } else {
-                    il = invoiceController.newInvoiceLineItem(BigDecimal.ONE, item.getItemName(), item.getPrice(), item);
+                    il = invoiceController.newInvoiceLineItem(BigDecimal.ONE, item.getItemName(), item.getItemPrice(), item);
                 }
                 ArrayList<InvoiceLine> itemsList = new ArrayList<>();
                 itemsList.add(il);
@@ -3016,6 +3016,10 @@ public class PaymentBean implements Serializable {
                         errorMessage += eziResponse.getErrorMessage();
                         errorCode = eziResponse.getError().toString();
                     }
+                    payment.setBankReturnCode(errorCode);
+                    payment.setBankFailedReason(paymentReference);
+                    payment.setPaymentStatus(PaymentStatus.REJECTED_BY_GATEWAY.value());
+                    paymentsFacade.editAndFlush(payment);
                     pgr = new PaymentGatewayResponse(false, payment, paymentReference, errorCode, errorMessage);
 
                 }

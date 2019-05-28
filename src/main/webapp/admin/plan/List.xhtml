@@ -38,6 +38,7 @@
                             <p:outputLabel value="#{configMapController.getKey('CreatePlanPeriodTypeLabel')}" for="changePlanPeriodType" />
 
                             <p:selectOneMenu id="changePlanPeriodType" value="#{planController.newPlan.planTimePeriod}" title="#{configMapController.getKey('CreatePlanPeriodTypeTitle')}" >
+                                <f:selectItem itemValue="Z" itemLabel="No Schedule" />
                                 <f:selectItem itemValue="W" itemLabel="Weekly" />
                                 <f:selectItem itemValue="F" itemLabel="Fortnightly" />
                                 <f:selectItem itemValue="M" itemLabel="Monthly" />
@@ -46,7 +47,7 @@
                                 <f:selectItem itemValue="Q" itemLabel="Quarterly" />
                                 <f:selectItem itemValue="H" itemLabel="Half Yearly" />
                                 <f:selectItem itemValue="Y" itemLabel="Annually" />
-
+                                
                             </p:selectOneMenu>
                             <p:outputLabel value="#{configMapController.getKey('CreatePlanLabel_planDiscount')}" for="planDiscount" />
                             <p:inputText id="planDiscount"  value="#{planController.newPlan.planDiscount}" title="#{configMapController.getKey('CreatePlanTitle_planDiscount')}" >
@@ -104,6 +105,7 @@
                             <p:commandButton id="showDialogButton" value="#{configMapController.getKey('ListPlanCreateLink')}" actionListener="#{planController.addPlan}"   update=":growl"  />
                             <p:commandButton id="deleteButton" disabled="#{empty planController.selected}" value="#{configMapController.getKey('ListPlanDestroyLink')}" actionListener="#{planController.destroyFromDialogue}"  oncomplete="PF('planControllerTable').filter()" update=":growl :PlanlistForm1:plansTable:deleteButton :PlanlistForm1:plansTable:addSubItem"  />
                             <p:commandButton id="addSubItem"   disabled="#{empty planController.selected}" value="#{configMapController.getKey('ListPlanAddSubItemLink')}" actionListener="#{planController.addSubItemToPlan}"   update=":growl"  />
+                           <p:commandButton id="updateProductCatalogue"    value="Update Product Catalogue" actionListener="#{planController.updateProductCatalogue}"   update=":growl"  />
 
                            <!--  <p:commandButton id="showDialogButton"  value="#{configMapController.getKey('ListPlanCreateLink')}" onclick="PF('planCreateDialogue').show()" type="button"/> -->
                         </p:outputPanel>

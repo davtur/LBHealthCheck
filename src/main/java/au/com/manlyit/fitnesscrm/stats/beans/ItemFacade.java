@@ -46,7 +46,7 @@ public class ItemFacade extends AbstractFacade<Item> {
 
             Expression<Item> item = rt.get("parent");
             Expression<Boolean> itemActive = rt.get("itemActive");
-            cq.where(cb.and(cb.isNull(item), cb.equal(itemActive, 0)));
+            cq.where(cb.and(cb.isNull(item), cb.equal(itemActive, 1)));
 
             TypedQuery<Item> q = em.createQuery(cq);
 
