@@ -590,3 +590,16 @@ ADD CONSTRAINT `fk_payments_2`
   REFERENCES `fitnessStats`.`invoice` (`id`)
   ON DELETE NO ACTION
   ON UPDATE NO ACTION;
+
+
+ALTER TABLE `fitnessStats`.`invoice_line` 
+DROP FOREIGN KEY `invoice_line_FK_2`;
+ALTER TABLE `fitnessStats`.`invoice_line` 
+ADD INDEX `invoice_line_FK_2_idx` (`item_id` ASC),
+DROP INDEX `invoice_line_FK_2_idx` ;
+ALTER TABLE `fitnessStats`.`invoice_line` 
+ADD CONSTRAINT `invoice_line_FK_2`
+  FOREIGN KEY (`item_id`)
+  REFERENCES `fitnessStats`.`plan` (`id`)
+  ON DELETE RESTRICT
+  ON UPDATE RESTRICT;

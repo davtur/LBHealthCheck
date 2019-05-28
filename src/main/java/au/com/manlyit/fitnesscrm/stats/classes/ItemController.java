@@ -41,11 +41,9 @@ public class ItemController implements Serializable {
     private au.com.manlyit.fitnesscrm.stats.beans.ItemFacade ejbFacade;
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade configMapFacade;
-    @Inject
-    private au.com.manlyit.fitnesscrm.stats.beans.PlanFacade planFacade;
-    private PaginationHelper pagination;
+     private PaginationHelper pagination;
     private int selectedItemIndex;
-    private List<Item> combinedPlansAndItems;
+   
     private List<Item> filteredItems;
     private Item[] multiSelected;
 
@@ -110,25 +108,8 @@ public class ItemController implements Serializable {
         this.filteredItems = filteredItems;
     }
 
-    /**
-     * @return the combinedPlansAndItems
-     */
-    public List<Item> getCombinedPlansAndItems() {
-        if (combinedPlansAndItems == null) {
-            List<Item> items = ejbFacade.findAllActiveItems();
+   
 
-            combinedPlansAndItems = items;
-        }
-
-        return combinedPlansAndItems;
-    }
-
-    /**
-     * @param combinedPlansAndItems the combinedPlansAndItems to set
-     */
-    public void setCombinedPlansAndItems(List<Item> combinedPlansAndItems) {
-        this.combinedPlansAndItems = combinedPlansAndItems;
-    }
 
     /**
      * @return the multiSelected

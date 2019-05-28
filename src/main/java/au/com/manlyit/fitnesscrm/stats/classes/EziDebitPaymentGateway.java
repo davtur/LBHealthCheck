@@ -23,10 +23,10 @@ import au.com.manlyit.fitnesscrm.stats.db.CustomerState;
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import au.com.manlyit.fitnesscrm.stats.db.Invoice;
 import au.com.manlyit.fitnesscrm.stats.db.InvoiceLine;
-import au.com.manlyit.fitnesscrm.stats.db.Item;
 import au.com.manlyit.fitnesscrm.stats.db.Notes;
 import au.com.manlyit.fitnesscrm.stats.db.PaymentParameters;
 import au.com.manlyit.fitnesscrm.stats.db.Payments;
+import au.com.manlyit.fitnesscrm.stats.db.Plan;
 import au.com.manlyit.fitnesscrm.stats.webservices.ArrayOfScheduledPayment;
 import au.com.manlyit.fitnesscrm.stats.webservices.CustomerDetails;
 import au.com.manlyit.fitnesscrm.stats.webservices.EziResponseOfCustomerDetailsTHgMB7OL;
@@ -3201,15 +3201,13 @@ public class EziDebitPaymentGateway implements Serializable {
         paymentsDBListFilteredItems = null;
 
     }*/
-    public Payments addSinglePayment(Customers cust, float paymentAmount, Date debitDate, Item item) {
+    public Payments addSinglePayment(Customers cust, float paymentAmount, Date debitDate, Plan item) {
         FacesContext context = FacesContext.getCurrentInstance();
         String loggedInUser = context.getExternalContext().getRemoteUser();
         // ezidebit wants the amount as a long in cents
         Long amount = (long) (paymentAmount * (float) 100);
         // setAsyncOperationRunning(true);
-        Payments paymentId = paymentBean.addNewPayment(cust, debitDate, amount, true, loggedInUser, sessionId, getDigitalKey(), futureMap, paymentBean, 0,item);
-
-        
+        Payments paymentId = paymentBean.addNewPayment(cust, debitDate, amount, true, loggedInUser, sessionId, getDigitalKey(), futureMap, paymentBean, 0, item);
 
         paymentDBList = null;
         paymentsDBListFilteredItems = null;
@@ -3218,9 +3216,9 @@ public class EziDebitPaymentGateway implements Serializable {
 
     public void addSinglePayment(ActionEvent actionEvent) {
         FacesContext context = FacesContext.getCurrentInstance();
-        ItemController itemController = context.getApplication().evaluateExpressionGet(context, "#{itemController}", ItemController.class);
-       
-        addSinglePayment(getSelectedCustomer(), paymentAmountInCents, paymentDebitDate,itemController.getSelected());
+        PlanController planController = context.getApplication().evaluateExpressionGet(context, "#{planController}", PlanController.class);
+
+        addSinglePayment(getSelectedCustomer(), paymentAmountInCents, paymentDebitDate, planController.getSelected());
 
     }
 
@@ -3327,6 +3325,8 @@ public class EziDebitPaymentGateway implements Serializable {
 
     }
 
+    
+    
     public void updateSelectedScheduledPayment(SelectEvent event) {
         Object o = event.getObject();
         if (o != null) {
@@ -3351,6 +3351,25 @@ public class EziDebitPaymentGateway implements Serializable {
         }
     }
 
+    public void showInvoice(ActionEvent actionEvent) {
+        for (Payments p : multiSelectedScheduledPayment) {
+            if (p != null) {
+                if (multiSelectedScheduledPayment.length == 1) {
+                    FacesContext context = FacesContext.getCurrentInstance();
+                    InvoiceController controller = (InvoiceController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "invoiceController");
+                    if (p.getCrmInvoiceId() == null) {
+                        JsfUtil.addErrorMessage("Error", "No Invoice Attached To Payment");
+                    } else {
+                        controller.generateHtmlInvoicePreview(p.getCrmInvoiceId());
+                        PrimeFaces.current().executeScript("PF('previewHtmlInvoiceDialogueWidget').show()");
+                    }
+                } else {
+                    JsfUtil.addErrorMessage("Error Multiple Selected", "Only one payment invoice can be previewed at a time");
+                }
+            }
+        }
+    }
+
     private void deleteScheduledPaymentBase(Payments paymentToDelete) {
         if (paymentToDelete != null) {
             String loggedInUser = FacesContext.getCurrentInstance().getExternalContext().getRemoteUser();
@@ -3359,9 +3378,21 @@ public class EziDebitPaymentGateway implements Serializable {
                 Payments pay = paymentsFacade.findPaymentById(paymentToDelete.getId(), false);
 
                 if (pay != null) {
-                    if (pay.getPaymentStatus().contentEquals(PaymentStatus.SCHEDULED.value()) || pay.getPaymentStatus().contentEquals(PaymentStatus.WAITING.value()) || pay.getPaymentStatus().contentEquals(PaymentStatus.DELETE_REQUESTED.value()) || pay.getPaymentStatus().contentEquals(PaymentStatus.REJECTED_CUST_ON_HOLD.value()) || pay.getPaymentStatus().contentEquals(PaymentStatus.MISSING_IN_PGW.value()) || pay.getPaymentStatus().contentEquals(PaymentStatus.REJECTED_BY_GATEWAY.value())) {
+                    if (pay.getPaymentStatus().contentEquals(PaymentStatus.SCHEDULED.value())
+                            || pay.getPaymentStatus().contentEquals(PaymentStatus.WAITING.value())
+                            || pay.getPaymentStatus().contentEquals(PaymentStatus.DELETE_REQUESTED.value())
+                            || pay.getPaymentStatus().contentEquals(PaymentStatus.REJECTED_CUST_ON_HOLD.value())
+                            || pay.getPaymentStatus().contentEquals(PaymentStatus.MISSING_IN_PGW.value())
+                            || pay.getPaymentStatus().contentEquals(PaymentStatus.SENT_TO_GATEWAY.value())
+                            || pay.getPaymentStatus().contentEquals(PaymentStatus.REJECTED_BY_GATEWAY.value())) {
 
-                        if (pay.getPaymentStatus().contentEquals(PaymentStatus.MISSING_IN_PGW.value()) || pay.getPaymentStatus().contentEquals(PaymentStatus.SENT_TO_GATEWAY.value())) {
+                        if (pay.getPaymentStatus().contentEquals(PaymentStatus.MISSING_IN_PGW.value())
+                                || pay.getPaymentStatus().contentEquals(PaymentStatus.REJECTED_BY_GATEWAY.value())
+                                || pay.getPaymentStatus().contentEquals(PaymentStatus.DELETE_REQUESTED.value())
+                                || pay.getPaymentStatus().contentEquals(PaymentStatus.SENT_TO_GATEWAY.value())) {
+
+                            // paymenst dont exist in the payment gateway so just delete them from our database. 
+                            //The "Sent_To_Gateway" status should only be valid for a few seconds and convert to another status when a response is recieved
                             pay.setBankFailedReason("DELETED");
 
                             paymentDBList = null;

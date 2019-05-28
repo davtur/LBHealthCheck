@@ -15,10 +15,10 @@ and open the template in the editor.
 
     <!--<p:log />--> 
 
-    <p:dialog id="previewHtmlInvoiceDialogue" closable="false"  resizable="true" modal="false"
+    <p:dialog id="previewHtmlInvoiceDialogue" closable="false"  resizable="true" modal="false" appendTo="@(body)"
               header="#{configMapController.getKey('previewHtmlInvoiceTitle')}"  widgetVar="previewHtmlInvoiceDialogueWidget"> 
         <div class="layout-portlets-box">
-            <h:form id="previewHtmlInvoice">  
+            <h:form id="previewHtmlInvoice" styleClass="previewInvoice">  
                 <h1 class="BigTopic">#{configMapController.getKey('previewHtmlInvoice_message')}</h1>
                 
                 <div class="Container100">

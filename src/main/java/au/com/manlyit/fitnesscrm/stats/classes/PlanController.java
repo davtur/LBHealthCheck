@@ -9,6 +9,7 @@ import au.com.manlyit.fitnesscrm.stats.db.Item;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
@@ -39,6 +40,7 @@ public class PlanController implements Serializable {
     private Plan newPlan;
     private Plan selectedSubItem;
     private List<Plan> filteredSubItems;
+     private List<Plan> combinedPlansAndItems;
     private Plan selectedForDeletion;
     private PfSelectableDataModel<Plan> items = null;
     @Inject
@@ -79,6 +81,13 @@ public class PlanController implements Serializable {
 
     private PlanFacade getFacade() {
         return ejbFacade;
+    }
+    
+    /**
+     * @param combinedPlansAndItems the combinedPlansAndItems to set
+     */
+    public void setCombinedPlansAndItems(List<Plan> combinedPlansAndItems) {
+        this.combinedPlansAndItems = combinedPlansAndItems;
     }
 
     public PaginationHelper getPagination() {
@@ -257,7 +266,7 @@ public class PlanController implements Serializable {
                 if (newValueObject.getClass().equals(Plan.class)) {
                     Plan selectedItem = (Plan) newValueObject;
                     EziDebitPaymentGateway eziDebitPaymentGateway = FacesContext.getCurrentInstance().getApplication().evaluateExpressionGet(FacesContext.getCurrentInstance(), "#{ezidebit}", EziDebitPaymentGateway.class);
-                    float amount = selectedItem.getItemPrice().floatValue();
+                    float amount = selectedItem.getPlanPrice().floatValue();
                     eziDebitPaymentGateway.setPaymentAmountInCents(amount);
                     setSelected(selectedItem);
                 }
@@ -267,29 +276,27 @@ public class PlanController implements Serializable {
         }
 
     }
+ /**
+     * @return the combinedPlansAndItems
+     */
+    public List<Plan> getCombinedPlansAndItems() {
+        if (combinedPlansAndItems == null) {
+            List<Plan> items = ejbFacade.findAllPlansForSelectItems();
+            combinedPlansAndItems = new ArrayList<>();
+            for(Plan item:items){
+                if(item.getPlanPrice().compareTo(BigDecimal.ZERO) > 0){
+                    combinedPlansAndItems.add(item);
+                }
+             }
+        }
 
+        return combinedPlansAndItems;
+    }
     
     public void updateProductCatalogue(ActionEvent event) {
 
-        // delete all items from catalogue
-        List<Item> allItems = itemFacade.findAll();
-        for (Item item : allItems) {
-            itemFacade.remove(item);
-        }
-        // rebuild catalogue
-        List<Plan> plans = ejbFacade.findAllPlansForSelectItems();
-        for (Plan plan : plans) {
-            if (plan.getPlanActive() == 0 && plan.getPlanPrice().compareTo(BigDecimal.ZERO) > 0) {
-                Item i = new Item();
-                i.setItemDescription(plan.getPlanDescription());
-                i.setItemName(plan.getPlanName());
-
-                i.setItemDiscount(BigDecimal.ZERO);
-                i.setItemPrice(plan.getPlanPrice());
-                i.setItemActive((short)1);
-                itemFacade.create(i);
-            }
-        }
+   
+        combinedPlansAndItems = null;
 
     }
 

@@ -201,20 +201,13 @@ public class InvoiceController implements Serializable {
 
     private Invoice createInvoiceForDirectDebitScheduledPayment(Payments payment) {
 
-        Item item = new Item(0);
-        Plan plan = payment.getCustomerName().getGroupPricing();
-        item.setItemName(plan.getPlanName());
-        item.setItemDescription(plan.getPlanDescription());
-        item.setItemPrice(payment.getScheduledAmount());
-         item.setItemActive(Short.MAX_VALUE);
-        item.setItemDiscount(BigDecimal.ZERO);
-        ArrayList<Item> items = new ArrayList<>();
-        items.add(item);
-        return generateInvoiceFromItemsListBase(payment.getCustomerName(), items);
+        ArrayList<Plan> plans = new ArrayList<>();
+        plans.add(payment.getCustomerName().getGroupPricing());
+        return generateInvoiceFromItemsListBase(payment.getCustomerName(), plans);
 
     }
 
-    private Invoice generateInvoiceFromItemsListBase(Customers cust, List<Item> items) {
+    private Invoice generateInvoiceFromItemsListBase(Customers cust, List<Plan> items) {
         if (cust == null || items == null) {
             String customerUsername = "Customer Username is NULL";
             if (cust != null) {
@@ -224,11 +217,11 @@ public class InvoiceController implements Serializable {
             return null;
         }
         Invoice inv = null;
-        // generate line items from item list
+        // generate line plans from item list
         try {
             List<InvoiceLine> invoiceLineList = new ArrayList<>();
-            for (Item item : items) {
-                InvoiceLine invoiceLineItem = newInvoiceLineItem(BigDecimal.ONE, item.getItemName(), item.getItemPrice(), item);
+            for (Plan item : items) {
+                InvoiceLine invoiceLineItem = newInvoiceLineItem(BigDecimal.ONE, item.getPlanName(), item.getPlanPrice(), item);
                 invoiceLineList.add(invoiceLineItem);
             }
             inv = generateInvoiceWithLineItems(cust, invoiceLineList);
@@ -238,7 +231,7 @@ public class InvoiceController implements Serializable {
         return inv;
     }
 
-    public InvoiceLine newInvoiceLineItem(BigDecimal quantity, String description, BigDecimal totalPrice, Item itemReference) {
+    public InvoiceLine newInvoiceLineItem(BigDecimal quantity, String description, BigDecimal totalPrice, Plan itemReference) {
         InvoiceLineType invoiceLineType = invoiceLineTypeFacade.findAll().get(2);
         InvoiceLine invoiceLineItem = new InvoiceLine(0);
         invoiceLineItem.setAmount(totalPrice);
@@ -248,6 +241,8 @@ public class InvoiceController implements Serializable {
         invoiceLineItem.setItemId(itemReference);
         invoiceLineItem.setQuantity(quantity);
         invoiceLineItem.setTypeId(invoiceLineType);
+        invoiceLineItem.setPrice(totalPrice);
+
         return invoiceLineItem;
 
     }
@@ -263,7 +258,7 @@ public class InvoiceController implements Serializable {
             if (cust != null) {
                 customerUsername = cust.getUsername();
             }
-            logger.log(Level.SEVERE, "generateInvoiceWithLineItemsAndPayment: FAILURE for Customer username: {0}, Error:{1}", new Object[]{customerUsername,e.getMessage()});
+            logger.log(Level.SEVERE, "generateInvoiceWithLineItemsAndPayment: FAILURE for Customer username: {0}, Error:{1}", new Object[]{customerUsername, e.getMessage()});
 
         }
         return inv;
@@ -278,19 +273,33 @@ public class InvoiceController implements Serializable {
             logger.log(Level.SEVERE, "generateInvoiceLineItems: NULL Value passed to method for customer or line items list. FAILURE for Customer username: {0}", new Object[]{customerUsername});
             return null;
         }
-        Invoice inv = new Invoice();
+        Invoice inv = new Invoice(0);
         try {
             inv.setInvoiceLineCollection(new ArrayList<>());
             inv.setUserId(cust);
+            inv.setCreateDatetime(new Date());
+            inv.setCreateTimestamp(new Date());
+            inv.setStatusId(0);
+            GregorianCalendar gc = new GregorianCalendar();
+            gc.add(Calendar.DAY_OF_YEAR, 7);
+            inv.setDueDate(gc.getTime());
+            inv.setTotal(BigDecimal.ZERO);
+            inv.setPaymentAttempts(0);
+            inv.setCurrencyId(currencyFacade.find(10));
+            inv.setCarriedBalance(BigDecimal.ZERO);
+            inv.setBalance(BigDecimal.ZERO);
+            inv.setInProcessPayment((short) 1);
+            inv.setIsReview(0);
+            inv.setDeleted((short) 0);
             ejbFacade.createAndFlushForGeneratedIdEntities(inv);
             BigDecimal paymentsTotal = new BigDecimal(BigInteger.ZERO);
             for (InvoiceLine item : items) {
                 item.setInvoiceId(inv);
                 invoiceLineFacade.createAndFlushForGeneratedIdEntities(item);
                 inv.getInvoiceLineCollection().add(item);
-                paymentsTotal.add(item.getPrice());
+                paymentsTotal = paymentsTotal.add(item.getPrice());
             }
-            inv.setBalance(paymentsTotal);
+
             inv.setTotal(paymentsTotal);
         } catch (Exception e) {
             logger.log(Level.SEVERE, "generateInvoiceLineItems: FAILURE for Customer username: {0}, Plan: {1}, Error:{2}", new Object[]{cust.getUsername(), cust.getGroupPricing().getPlanName(), e.getMessage()});
@@ -430,6 +439,11 @@ public class InvoiceController implements Serializable {
         return inv;
     }
 
+    public void generateHtmlInvoicePreview(Invoice invoice) {
+        htmlInvoiceSource = generateHtmlInvoice(invoice);
+        htmlInvoiceEmailToAddress = invoice.getUserId().getEmailAddress();
+    }
+
     public void generateInvoice() {
         try {
             current = generateInvoiceForCustomer(selectedCustomer, invoiceUseSettlementDate, invoiceShowSuccessful, invoiceShowFailed, invoiceShowPending, isInvoiceShowScheduled(), invoiceStartDate, invoiceEndDate);
@@ -446,8 +460,7 @@ public class InvoiceController implements Serializable {
             getFacade().create(current);
             invoiceLineFilteredItems = null;
             updateTableData(current);
-            htmlInvoiceSource = generateHtmlInvoice(current);
-            htmlInvoiceEmailToAddress = current.getUserId().getEmailAddress();
+            generateHtmlInvoicePreview(current);
             JsfUtil.addSuccessMessage(configMapFacade.getConfig("InvoiceCreated"));
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
@@ -965,7 +978,7 @@ public class InvoiceController implements Serializable {
         if (selectedItemIndex >= 0) {
             return "View";
         } else {
-            // all items were removed - go back to list
+            // all plans were removed - go back to list
             recreateModel();
             return "List";
         }
@@ -983,7 +996,7 @@ public class InvoiceController implements Serializable {
     private void updateCurrentItem() {
         int count = getFacade().count();
         if (selectedItemIndex >= count) {
-            // selected index cannot be bigger than number of items:
+            // selected index cannot be bigger than number of plans:
             selectedItemIndex = count - 1;
             // go to previous page if last page disappeared:
             if (pagination.getPageFirstItem() >= count) {
@@ -1366,7 +1379,7 @@ public class InvoiceController implements Serializable {
      //PrimeFaces.current().ajax().update(":previewHtmlInvoiceDialogue");
      PrimeFaces.current().executeScript("PF('previewHtmlInvoiceDialogueWidget').show()");
      }*/
-    private String generateHtmlInvoice(Invoice inv) {
+    public String generateHtmlInvoice(Invoice inv) {
 
         Logger.getLogger(InvoiceController.class.getName()).log(Level.INFO, "generateHtmlInvoice: {0}", inv.getId().toString());
         String templateName = "InvoiceHtml2";
@@ -1751,10 +1764,15 @@ public class InvoiceController implements Serializable {
     }
 
     public void emailInvoice() {
+        emailInvoiceBase(htmlInvoiceSource, htmlInvoiceEmailToAddress);
+
+    }
+
+    public void emailInvoiceBase(String sourceEmailHtml, String emailAddress) {
 
         try {
-            Future<Boolean> emailSendResult = ejbPaymentBean.sendAsynchEmail(htmlInvoiceEmailToAddress, configMapFacade.getConfig("HtmlInvoiceCCEmailAddress"), configMapFacade.getConfig("HtmlInvoiceFromEmailAddress"), configMapFacade.getConfig("HtmlInvoiceEmailSubject"), htmlInvoiceSource, null, emailQueueFacade.getEmailServerProperties(), false);
-            JsfUtil.addSuccessMessage("The Invoice has been Emailed to " + htmlInvoiceEmailToAddress);
+            Future<Boolean> emailSendResult = ejbPaymentBean.sendAsynchEmail(emailAddress, configMapFacade.getConfig("HtmlInvoiceCCEmailAddress"), configMapFacade.getConfig("HtmlInvoiceFromEmailAddress"), configMapFacade.getConfig("HtmlInvoiceEmailSubject"), sourceEmailHtml, null, emailQueueFacade.getEmailServerProperties(), false);
+            JsfUtil.addSuccessMessage("The Invoice has been Emailed to " + emailAddress);
 
         } catch (Exception e) {
             JsfUtil.addSuccessMessage("Error: The Invoice has NOT been Emailed to " + current.getUserId().getEmailAddress() + ", Reason:" + e.getMessage());

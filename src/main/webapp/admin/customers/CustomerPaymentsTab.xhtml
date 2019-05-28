@@ -64,16 +64,19 @@
                         <p:commandButton id="showAddPaymentScheduleButton" rendered="#{ezidebit.waitingForPaymentDetails == false and ezidebit.customerCancelledInPaymentGateway == false and ezidebit.theCustomerProvisionedInThePaymentGateway == true}" oncomplete="PF('createPaymentScheduleDialogueWidget').show();"    value="#{configMapController.getKey('AddPaymentScheduleButtonLink')}" update=":growl "  /> 
                         <p:commandButton id="showClearScheduleButton" rendered="#{ezidebit.waitingForPaymentDetails == false and ezidebit.customerCancelledInPaymentGateway == false and ezidebit.theCustomerProvisionedInThePaymentGateway == true}" oncomplete="PF('clearScheduleDialogueWidget').show();"    value="#{configMapController.getKey('ClearScheduleButtonLink')}" update=":growl "  /> 
 
-                        <p:commandButton  id="deleteButton" process=":tv:paymentsForm:paymentsTable2" rendered="#{fitnessTestChartsController.isUserInRole('ADMIN')}"  icon="ui-icon-trash"  value="#{configMapController.getKey('Delete')}" actionListener="#{ezidebit.deleteScheduledPayment}" update=":growl :tv:paymentsForm:scheduledPaymentsTable :tv:paymentsForm:paymentsTable2 " disabled="#{empty fitnessTestChartsController.selected}"/>
+                        <p:commandButton  id="deleteButton" disabled="#{empty ezidebit.multiSelectedScheduledPayment}" process=":tv:paymentsForm:paymentsTable2" rendered="#{fitnessTestChartsController.isUserInRole('ADMIN')}"  icon="ui-icon-trash"  value="#{configMapController.getKey('Delete')}" actionListener="#{ezidebit.deleteScheduledPayment}" update=":growl :tv:paymentsForm:scheduledPaymentsTable :tv:paymentsForm:paymentsTable2 " />
                         <p:commandButton id="addNoteDialogButton2"  value="#{configMapController.getKey('ListNotesCreateLink')}" onclick="PF('notesCreateDialogue').show()" /> 
+                        <p:commandButton  id="previewHtmlInvoiceButton" disabled="#{empty ezidebit.multiSelectedScheduledPayment}" actionListener="#{ezidebit.showInvoice}"  value="#{configMapController.getKey('ListInvoiceExportHtmlInvoiceButton')}" update="growl @(.previewInvoice)" />
+
                         <h:outputText  id="testPaymentUpdate2"  value="Time:#{ezidebit.testAjaxUpdateTime}">
                             <f:convertDateTime pattern="yyyy-MM-dd hh:mm:ss.SSS" />                              
                         </h:outputText>
                     </p:outputPanel>
                 </f:facet>
                 <p:column selectionMode="multiple" />
-                              <!-- <p:ajax event="rowSelect"  listener="#{ezidebit.updateSelectedScheduledPayment}" />
-                               <p:ajax event="rowUnselect" /> -->
+                              <!--<p:ajax event="rowSelect"  listener="#{ezidebit.updateSelectedScheduledPayment}" />-->
+                <p:ajax event="rowSelect"  update="deleteButton previewHtmlInvoiceButton "/>
+                <p:ajax event="rowUnselect" update="deleteButton previewHtmlInvoiceButton "/> 
 
                 <p:column  sortBy="#{pay.paymentID}" filterBy="#{pay.paymentID}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentID')}"   >
                     <h:outputText value="#{pay.paymentID}"/>

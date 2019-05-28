@@ -12,9 +12,9 @@ import au.com.manlyit.fitnesscrm.stats.classes.util.SendHTMLEmailWithFileAttache
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import au.com.manlyit.fitnesscrm.stats.db.Invoice;
 import au.com.manlyit.fitnesscrm.stats.db.InvoiceLine;
-import au.com.manlyit.fitnesscrm.stats.db.Item;
 import au.com.manlyit.fitnesscrm.stats.db.PaymentParameters;
 import au.com.manlyit.fitnesscrm.stats.db.Payments;
+import au.com.manlyit.fitnesscrm.stats.db.Plan;
 import au.com.manlyit.fitnesscrm.stats.webservices.ArrayOfPayment;
 import au.com.manlyit.fitnesscrm.stats.webservices.ArrayOfScheduledPayment;
 import au.com.manlyit.fitnesscrm.stats.webservices.CustomerDetails;
@@ -60,6 +60,7 @@ import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import static javax.ejb.TransactionAttributeType.REQUIRES_NEW;
+import javax.el.ELException;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -90,7 +91,8 @@ public class PaymentBean implements Serializable {
     private au.com.manlyit.fitnesscrm.stats.beans.EmailTemplatesFacade ejbEmailTemplatesFacade;
     @Inject
     private PaymentsFacade paymentsFacade;
-
+    @Inject
+    private InvoiceFacade invoiceFacade;
     @Inject
     private PaymentParametersFacade ejbPaymentParametersFacade;
     @Inject
@@ -320,7 +322,7 @@ public class PaymentBean implements Serializable {
                     //if (startCal.get(Calendar.WEEK_OF_MONTH) == 1 && firstWeekOfMonth == true) {
                     if (startCal.get(Calendar.DAY_OF_MONTH) >= 1 && startCal.get(Calendar.DAY_OF_MONTH) <= 7 && firstWeekOfMonth == true) {
                         if (arePaymentsWithinLimits(limitToNumberOfPayments, paymentAmountLimitInCents, cumulativeAmountInCents, amountInCents, numberOfpayments, newDebitDate)) {
-                            bopjAdd.getJobs().add(addNewPayment(cust, newDebitDate, amountInCents, false, loggedInUser, sessionId, digitalKey, futureMap, payBean, bopjAdd.getBatchId(),null).getId());
+                            bopjAdd.getJobs().add(addNewPayment(cust, newDebitDate, amountInCents, false, loggedInUser, sessionId, digitalKey, futureMap, payBean, bopjAdd.getBatchId(), null).getId());
                             //addNewPayment(cust, newDebitDate, amountInCents, false, loggedInUser, sessionId, digitalKey, futureMap, payBean);
                             numberOfpayments++;
                         }
@@ -329,7 +331,7 @@ public class PaymentBean implements Serializable {
                     if (startCal.get(Calendar.DAY_OF_MONTH) >= 8 && startCal.get(Calendar.DAY_OF_MONTH) <= 14 && secondWeekOfMonth == true) {
                         if (arePaymentsWithinLimits(limitToNumberOfPayments, paymentAmountLimitInCents, cumulativeAmountInCents, amountInCents, numberOfpayments, newDebitDate)) {
 
-                            bopjAdd.getJobs().add(addNewPayment(cust, newDebitDate, amountInCents, false, loggedInUser, sessionId, digitalKey, futureMap, payBean, bopjAdd.getBatchId(),null).getId());
+                            bopjAdd.getJobs().add(addNewPayment(cust, newDebitDate, amountInCents, false, loggedInUser, sessionId, digitalKey, futureMap, payBean, bopjAdd.getBatchId(), null).getId());
 
                             // addNewPayment(cust, newDebitDate, amountInCents, false, loggedInUser, sessionId, digitalKey, futureMap, payBean);
                             numberOfpayments++;
@@ -338,7 +340,7 @@ public class PaymentBean implements Serializable {
                     }
                     if (startCal.get(Calendar.DAY_OF_MONTH) >= 15 && startCal.get(Calendar.DAY_OF_MONTH) <= 21 && thirdWeekOfMonth == true) {
                         if (arePaymentsWithinLimits(limitToNumberOfPayments, paymentAmountLimitInCents, cumulativeAmountInCents, amountInCents, numberOfpayments, newDebitDate)) {
-                            bopjAdd.getJobs().add(addNewPayment(cust, newDebitDate, amountInCents, false, loggedInUser, sessionId, digitalKey, futureMap, payBean, bopjAdd.getBatchId(),null).getId());
+                            bopjAdd.getJobs().add(addNewPayment(cust, newDebitDate, amountInCents, false, loggedInUser, sessionId, digitalKey, futureMap, payBean, bopjAdd.getBatchId(), null).getId());
                             //addNewPayment(cust, newDebitDate, amountInCents, false, loggedInUser, sessionId, digitalKey, futureMap, payBean);
                             numberOfpayments++;
                         }
@@ -346,7 +348,7 @@ public class PaymentBean implements Serializable {
                     }
                     if (startCal.get(Calendar.DAY_OF_MONTH) >= 22 && startCal.get(Calendar.DAY_OF_MONTH) <= 28 && fourthWeekOfMonth == true) {
                         if (arePaymentsWithinLimits(limitToNumberOfPayments, paymentAmountLimitInCents, cumulativeAmountInCents, amountInCents, numberOfpayments, newDebitDate)) {
-                            bopjAdd.getJobs().add(addNewPayment(cust, newDebitDate, amountInCents, false, loggedInUser, sessionId, digitalKey, futureMap, payBean, bopjAdd.getBatchId(),null).getId());
+                            bopjAdd.getJobs().add(addNewPayment(cust, newDebitDate, amountInCents, false, loggedInUser, sessionId, digitalKey, futureMap, payBean, bopjAdd.getBatchId(), null).getId());
                             // addNewPayment(cust, newDebitDate, amountInCents, false, loggedInUser, sessionId, digitalKey, futureMap, payBean);
                             numberOfpayments++;
                         }
@@ -367,7 +369,7 @@ public class PaymentBean implements Serializable {
                     startCal.setTime(placeholder);// set it back to correct day of month as we may have changed the day of the week.
                 } else {
                     if (arePaymentsWithinLimits(limitToNumberOfPayments, paymentAmountLimitInCents, cumulativeAmountInCents, amountInCents, numberOfpayments, newDebitDate)) {
-                        bopjAdd.getJobs().add(addNewPayment(cust, newDebitDate, amountInCents, false, loggedInUser, sessionId, digitalKey, futureMap, payBean, bopjAdd.getBatchId(),null).getId());
+                        bopjAdd.getJobs().add(addNewPayment(cust, newDebitDate, amountInCents, false, loggedInUser, sessionId, digitalKey, futureMap, payBean, bopjAdd.getBatchId(), null).getId());
                         //addNewPayment(cust, newDebitDate, amountInCents, false, loggedInUser, sessionId, digitalKey, futureMap, payBean);
                         numberOfpayments++;
                     }
@@ -485,7 +487,7 @@ public class PaymentBean implements Serializable {
         return true;
     }*/
     @TransactionAttribute(TransactionAttributeType.NEVER)
-    public Payments addNewPayment(Customers cust, Date debitDate, long amountInCents, boolean manualPayment, String user, String sessionId, String digitalKey, FutureMapEJB futureMap, PaymentBean payBean, long batchId, Item item) {
+    public Payments addNewPayment(Customers cust, Date debitDate, long amountInCents, boolean manualPayment, String user, String sessionId, String digitalKey, FutureMapEJB futureMap, PaymentBean payBean, long batchId, Plan item) {
         //String user = FacesContext.getCurrentInstance().getExternalContext().getRemoteUser();
         FacesContext context = FacesContext.getCurrentInstance();
         Payments newPayment = new Payments(-1);
@@ -517,7 +519,7 @@ public class PaymentBean implements Serializable {
                 if (item == null) {
                     il = invoiceController.newInvoiceLineItem(BigDecimal.ONE, cust.getGroupPricing().getPlanName(), cust.getGroupPricing().getPlanPrice(), null);
                 } else {
-                    il = invoiceController.newInvoiceLineItem(BigDecimal.ONE, item.getItemName(), item.getItemPrice(), item);
+                    il = invoiceController.newInvoiceLineItem(BigDecimal.ONE, item.getPlanName(), item.getPlanPrice(), item);
                 }
                 ArrayList<InvoiceLine> itemsList = new ArrayList<>();
                 itemsList.add(il);
@@ -2252,10 +2254,19 @@ public class PaymentBean implements Serializable {
         return new AsyncResult<>(pgr);
     }
 
-    private void sendInvoice(Payments payment, Payment pay) {
+    private void sendInvoice(Invoice invoice) {
         //TODO process invoice after payment is successful and send to client
         // add transaction fee and modify subtotal and amount owing
-        LOGGER.log(Level.INFO, "sendInvoice - Error method not completed yet. Still TODO: ");
+        try {
+            FacesContext context = FacesContext.getCurrentInstance();
+            InvoiceController invoiceController = context.getApplication().evaluateExpressionGet(context, "#{invoiceController}", InvoiceController.class);
+            String source = invoiceController.generateHtmlInvoice(invoice);
+            
+            invoiceController.emailInvoiceBase(source, invoice.getUserId().getEmailAddress());
+        } catch (ELException eLException) {
+            LOGGER.log(Level.WARNING, "sendInvoice - failed ",eLException);
+        }
+        LOGGER.log(Level.INFO, "sendInvoice - Completed ");
 
     }
 
@@ -2269,7 +2280,18 @@ public class PaymentBean implements Serializable {
         }
         if (processedPaymentStatus.contentEquals("S")) {
             //TODO  process successful payment
-            sendInvoice(payment, pay);
+            Invoice invoice = payment.getCrmInvoiceId();
+            if (invoice == null) {
+                LOGGER.log(Level.WARNING, "PaymentStatusUpdate -- No Invoice Attached. Invoice reference is NULL - payment id:{0},customer:{1}, Amount:{2}", new Object[]{payment.getId(), payment.getCustomerName().getUsername(), payment.getPaymentAmount().toPlainString()});
+
+            } else {
+                BigDecimal amountPaid = payment.getScheduledAmount();
+                amountPaid.negate();
+                invoice.setBalance(amountPaid);
+                invoiceFacade.edit(invoice);
+                sendInvoice(invoice);
+            }
+
             LOGGER.log(Level.INFO, "PaymentStatusUpdate -- processing Invoice for successful payment id:{0},customer:{1}, Amount:{2}", new Object[]{payment.getId(), payment.getCustomerName().getUsername(), payment.getPaymentAmount().toPlainString()});
 
         } else {
@@ -3013,14 +3035,15 @@ public class PaymentBean implements Serializable {
                     String errorMessage = "ERROR:" + paymentReference + ":";
                     String errorCode = "-1";
                     if (eziResponse.getErrorMessage() != null) {
-                        errorMessage += eziResponse.getErrorMessage();
+                        errorMessage += eziResponse.getErrorMessage().getValue();
                         errorCode = eziResponse.getError().toString();
                     }
+
+                    pgr = new PaymentGatewayResponse(false, payment, paymentReference, errorCode, errorMessage);
                     payment.setBankReturnCode(errorCode);
                     payment.setBankFailedReason(paymentReference);
                     payment.setPaymentStatus(PaymentStatus.REJECTED_BY_GATEWAY.value());
                     paymentsFacade.editAndFlush(payment);
-                    pgr = new PaymentGatewayResponse(false, payment, paymentReference, errorCode, errorMessage);
 
                 }
             } else {
@@ -3028,10 +3051,14 @@ public class PaymentBean implements Serializable {
                 String errorMessage = "ERROR:" + paymentReference + ":";
                 String errorCode = "-1";
                 if (eziResponse.getErrorMessage() != null) {
-                    errorMessage += eziResponse.getErrorMessage();
+                    errorMessage += eziResponse.getErrorMessage().getValue();
                     errorCode = eziResponse.getError().toString();
                 }
                 pgr = new PaymentGatewayResponse(false, payment, paymentReference, errorCode, errorMessage);
+                payment.setBankReturnCode(errorCode);
+                payment.setBankFailedReason(paymentReference);
+                payment.setPaymentStatus(PaymentStatus.REJECTED_BY_GATEWAY.value());
+                paymentsFacade.editAndFlush(payment);
 
             }
 

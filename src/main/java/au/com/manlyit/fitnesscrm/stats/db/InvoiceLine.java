@@ -86,7 +86,7 @@ public class InvoiceLine implements  BaseEntity,Serializable {
     private short isPercentage;
     @JoinColumn(name = "item_id", referencedColumnName = "id")
     @ManyToOne
-    private Item itemId;
+    private Plan itemId;
     @JoinColumn(name = "invoice_id", referencedColumnName = "id")
     @ManyToOne
     private Invoice invoiceId;
@@ -172,11 +172,11 @@ public class InvoiceLine implements  BaseEntity,Serializable {
         this.isPercentage = isPercentage;
     }
 
-    public Item getItemId() {
+    public Plan getItemId() {
         return itemId;
     }
 
-    public void setItemId(Item itemId) {
+    public void setItemId(Plan itemId) {
         this.itemId = itemId;
     }
 
