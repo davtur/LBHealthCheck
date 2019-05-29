@@ -17,9 +17,21 @@
                     </div>
                     <div class="ui-g-5">
                         <p:calendar id="debitDate" pattern="dd MMM yyyy" value="#{ezidebit.paymentDebitDate}" title="#{configMapController.getKey('AddPaymentTitle_debitdate')}" required="true" requiredMessage="#{configMapController.getKey('AddPaymentRequiredMessage_debitdate')}" >
-                            <p:ajax />
+                            <p:ajax update="@form"/>
                         </p:calendar>
                     </div>
+                    <div class="ui-g-1">
+                        <p:outputLabel value="Product"  />
+                    </div>
+                    <div class="ui-g-5">
+                        <p:selectOneMenu  valueChangeListener="#{planController.productChange}" converter="planControllerConverter" placeholder="Select Product" value="#{planController.selected}" label="Payment Description"  >
+                           <f:selectItem itemLabel="Select A Product"   noSelectionOption="true"   itemDisabled="true"/>
+                            <f:selectItems value="#{planController.combinedPlansAndItems}"  var="plan" itemLabel="#{plan.planName}"  itemValue="#{plan}"/>
+                            <p:ajax update="@form"/>
+                        </p:selectOneMenu>
+                    </div>
+                </div>
+                <div class="ui-g-12">
                     <div class="ui-g-1">
                         <p:outputLabel value="#{configMapController.getKey('AddPaymentLabel_paymentAmount')}" for="payAmount" />
                     </div>
@@ -28,18 +40,7 @@
                             <f:convertNumber  minFractionDigits="2"/>
                         </p:inputText>
                     </div>
-                </div>
-                <div class="ui-g-12">
-                    <div class="ui-g-1">
-                        <p:outputLabel value="Product"  />
-                    </div>
-                    <div class="ui-g-5">
-                        <p:selectOneMenu  valueChangeListener="#{planController.productChange}" converter="planControllerConverter" placeholder="Select Product" value="#{planController.selected}" label="Payment Description"  >
-                           
-                            <f:selectItems value="#{planController.combinedPlansAndItems}"  var="plan" itemLabel="#{plan.planName}"  itemValue="#{plan}"/>
-                            <p:ajax update="@form"/>
-                        </p:selectOneMenu>
-                    </div>
+                    
                     <div class="ui-g-2">
                         <p:commandButton id="createPaymentdialogueSave"  oncomplete="PF('createPaymentDialogueWidget').hide();"  actionListener="#{ezidebit.addSinglePayment}" value="#{configMapController.getKey('AddPaymentSaveLink')}" update=":growl :tv:paymentsForm "/>                
                     </div>

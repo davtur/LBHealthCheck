@@ -12,7 +12,7 @@
     </ui:define>
 
     <ui:define name="body">
-        
+
 
         <p:tabView id="tv" cache="false" prependId="false" class="layout-portlets-box" > 
             <p:ajax  event="tabChange"  listener="#{ezidebit.onTabChange}"  />  
@@ -50,10 +50,11 @@
         <ui:include src="/WEB-INF/sendEmailToCustomerDialogue.xhtml"/>
         <ui:include src="/WEB-INF/uploadPhoto.xhtml"/>
         <ui:include src="/WEB-INF/NotesPopup.xhtml"/>
-          <ui:include src="/WEB-INF/PreviewEmailInvoice.xhtml"/>
+        <ui:include src="/WEB-INF/PreviewEmailInvoice.xhtml"/>
+        <ui:include src="/WEB-INF/ViewPayment.xhtml"/>
         <ui:include src="Create.xhtml"/>
     </ui:define>
-    
+
 </ui:composition>
 
 

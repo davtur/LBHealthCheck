@@ -67,6 +67,7 @@
                         <p:commandButton  id="deleteButton" disabled="#{empty ezidebit.multiSelectedScheduledPayment}" process=":tv:paymentsForm:paymentsTable2" rendered="#{fitnessTestChartsController.isUserInRole('ADMIN')}"  icon="ui-icon-trash"  value="#{configMapController.getKey('Delete')}" actionListener="#{ezidebit.deleteScheduledPayment}" update=":growl :tv:paymentsForm:scheduledPaymentsTable :tv:paymentsForm:paymentsTable2 " />
                         <p:commandButton id="addNoteDialogButton2"  value="#{configMapController.getKey('ListNotesCreateLink')}" onclick="PF('notesCreateDialogue').show()" /> 
                         <p:commandButton  id="previewHtmlInvoiceButton" disabled="#{empty ezidebit.multiSelectedScheduledPayment}" actionListener="#{ezidebit.showInvoice}"  value="#{configMapController.getKey('ListInvoiceExportHtmlInvoiceButton')}" update="growl @(.previewInvoice)" />
+                        <p:commandButton  id="paymentDetails" disabled="#{empty ezidebit.multiSelectedScheduledPayment}" actionListener="#{ezidebit.showPaymentDetails}"  value="#{configMapController.getKey('ViewPaymentDetailsButton')}" update="growl @(.paymentDetails)" />
 
                         <h:outputText  id="testPaymentUpdate2"  value="Time:#{ezidebit.testAjaxUpdateTime}">
                             <f:convertDateTime pattern="yyyy-MM-dd hh:mm:ss.SSS" />                              

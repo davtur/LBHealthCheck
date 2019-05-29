@@ -1561,11 +1561,11 @@ public class SessionTimetableController implements Serializable {
                     Payments paymentId = eziDebitPaymentGateway.addSinglePayment(c, price, sb.getBookingTime(),null);
 
                     // add invoice
-                    InvoiceController controller = context.getApplication().evaluateExpressionGet(context, "#{invoiceController}", InvoiceController.class);
-                    InvoiceLine il = controller.newInvoiceLineItem(BigDecimal.ONE, sb.getSessionHistoryId().getSessionTemplate().getSessionTitle(), new BigDecimal(price), null);
+                    //InvoiceController controller = context.getApplication().evaluateExpressionGet(context, "#{invoiceController}", InvoiceController.class);
+                    InvoiceLine il = ejbPaymentBean.newInvoiceLineItem(BigDecimal.ONE, sb.getSessionHistoryId().getSessionTemplate().getSessionTitle(), new BigDecimal(price), null);
                     ArrayList<InvoiceLine> itemsList = new ArrayList<>();
                     itemsList.add(il);
-                    Invoice invoice = controller.generateInvoiceWithLineItemsAndPayment(c, itemsList,paymentId);
+                    Invoice invoice = ejbPaymentBean.generateInvoiceWithLineItemsAndPayment(c, itemsList,paymentId);
                     
                     
                     JsfUtil.addSuccessMessage(configMapFacade.getConfig("purchaseSessionDirectDebitPaymentProcessing"));

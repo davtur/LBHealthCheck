@@ -8,8 +8,8 @@
 
   
 
-        <p:dialog id="PaymentsViewDlg" widgetVar="PaymentsViewDialog" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('ViewPaymentsTitle')}">
-            <h:form id="PaymentsViewForm">
+        <p:dialog id="PaymentsViewDlg" widgetVar="PaymentsViewDetailsDialog" modal="true" resizable="false" appendTo="@(body)" header="#{configMapController.getKey('ViewPaymentsTitle')}">
+            <h:form id="PaymentsViewForm" styleClass="paymentDetails">
                 <h:panelGroup id="display">
                     <p:panelGrid columns="2" rendered="#{paymentsController.selected != null}">
                         <h:outputText value="#{configMapController.getKey('ViewPaymentsLabel_id')}"/>

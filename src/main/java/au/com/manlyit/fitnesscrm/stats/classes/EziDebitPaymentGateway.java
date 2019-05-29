@@ -3249,11 +3249,11 @@ public class EziDebitPaymentGateway implements Serializable {
             newPayment.setPaymentID("Cash_Payment" + "_" + newPaymentID);
             paymentsFacade.edit(newPayment);
             // add invoice todo fix description
-            InvoiceController invoiceController = context.getApplication().evaluateExpressionGet(context, "#{invoiceController}", InvoiceController.class);
-            InvoiceLine il = invoiceController.newInvoiceLineItem(BigDecimal.ONE, getSelectedCustomer().getGroupPricing().getPlanName(), getSelectedCustomer().getGroupPricing().getPlanPrice(), null);
+            //InvoiceController invoiceController = context.getApplication().evaluateExpressionGet(context, "#{invoiceController}", InvoiceController.class);
+            InvoiceLine il = paymentBean.newInvoiceLineItem(BigDecimal.ONE, getSelectedCustomer().getGroupPricing().getPlanName(), getSelectedCustomer().getGroupPricing().getPlanPrice(), null);
             ArrayList<InvoiceLine> itemsList = new ArrayList<>();
             itemsList.add(il);
-            Invoice invoice = invoiceController.generateInvoiceWithLineItemsAndPayment(getSelectedCustomer(), itemsList, newPayment);
+            Invoice invoice = paymentBean.generateInvoiceWithLineItemsAndPayment(getSelectedCustomer(), itemsList, newPayment);
             LOGGER.log(Level.INFO, "Cash/Direct Deposit Payment Created for customer {0} with paymentID: {1}", new Object[]{getSelectedCustomer().getUsername(), newPaymentID});
 
         } catch (Exception e) {
@@ -3325,8 +3325,6 @@ public class EziDebitPaymentGateway implements Serializable {
 
     }
 
-    
-    
     public void updateSelectedScheduledPayment(SelectEvent event) {
         Object o = event.getObject();
         if (o != null) {
@@ -3347,6 +3345,23 @@ public class EziDebitPaymentGateway implements Serializable {
         for (Payments p : multiSelectedScheduledPayment) {
             if (p != null) {
                 deleteScheduledPaymentBase(p);
+            }
+        }
+    }
+
+    public void showPaymentDetails(ActionEvent actionEvent) {
+        for (Payments p : multiSelectedScheduledPayment) {
+            if (p != null) {
+                if (multiSelectedScheduledPayment.length == 1) {
+                    FacesContext context = FacesContext.getCurrentInstance();
+                    PaymentsController controller = (PaymentsController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "paymentsController");
+                    controller.setSelected(p);
+                    PrimeFaces.current().ajax().update("@(.paymentDetails)");
+                    PrimeFaces.current().executeScript("PF('PaymentsViewDetailsDialog').show()");
+
+                } else {
+                    JsfUtil.addErrorMessage("Error Multiple Selected", "Only one payment can be selected for viewing details");
+                }
             }
         }
     }

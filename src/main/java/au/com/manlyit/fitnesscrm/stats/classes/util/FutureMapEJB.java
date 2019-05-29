@@ -3094,17 +3094,20 @@ public class FutureMapEJB implements Serializable {
                                 }
                             }
                             pay.setPaymentStatus(PaymentStatus.REJECTED_BY_GATEWAY.value());
-                            //paymentsFacade.editAndFlush(pay);
+                            paymentsFacade.editAndFlush(pay);
 
-                        } else if (errorMessage.contains("This customer already has two payments on this date.")) {
+                        } else if (errorMessage.contains("This customer already has 2 payments on this date.")) {
                             paymentsFacade.remove(pay);
-                            String message = "Payment ID:" + pay.getId().toString() + " for Amount:$" + pay.getPaymentAmount().toPlainString() + " on Date:" + pay.getDebitDate().toString() + " could not be added as teh customer already has two existing payments on this date!!.";
+                            String message = "Payment ID: " + pay.getId().toString() + " for Amount: $" + pay.getPaymentAmount().toPlainString() + " on Date:" + pay.getDebitDate().toString() + " Rejected: Only two DD payments are allowed per customer per day!";
                             sendMessage(sessionId, "Add Payment Error!", message);
+                            pay.setPaymentStatus(PaymentStatus.REJECTED_BY_GATEWAY.value());
+                            pay.setPaymentReference(Integer.toString(id));
+                            paymentsFacade.editAndFlush(pay);
 
                         } else {
                             pay.setPaymentStatus(PaymentStatus.REJECTED_BY_GATEWAY.value());
                             pay.setPaymentReference(Integer.toString(id));
-                            // paymentsFacade.editAndFlush(pay);
+                            paymentsFacade.editAndFlush(pay);
                         }
 
                     } else {
