@@ -12,6 +12,7 @@ import au.com.manlyit.fitnesscrm.stats.classes.util.SendHTMLEmailWithFileAttache
 import au.com.manlyit.fitnesscrm.stats.db.Customers;
 import au.com.manlyit.fitnesscrm.stats.db.Invoice;
 import au.com.manlyit.fitnesscrm.stats.db.InvoiceLine;
+import au.com.manlyit.fitnesscrm.stats.db.InvoiceLineType;
 import au.com.manlyit.fitnesscrm.stats.db.PaymentParameters;
 import au.com.manlyit.fitnesscrm.stats.db.Payments;
 import au.com.manlyit.fitnesscrm.stats.db.Plan;
@@ -33,6 +34,7 @@ import au.com.manlyit.fitnesscrm.stats.webservices.ScheduledPayment;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -94,10 +96,16 @@ public class PaymentBean implements Serializable {
     @Inject
     private InvoiceFacade invoiceFacade;
     @Inject
+    private CurrencyFacade currencyFacade;
+    @Inject
     private PaymentParametersFacade ejbPaymentParametersFacade;
     @Inject
     private FutureMapEJB futureMap;
 
+    @Inject
+    private au.com.manlyit.fitnesscrm.stats.beans.InvoiceLineTypeFacade invoiceLineTypeFacade;
+    @Inject
+    private au.com.manlyit.fitnesscrm.stats.beans.InvoiceLineFacade invoiceLineFacade;
     @Inject
     private EziDebitPaymentGateway eziDebit;
 
@@ -514,16 +522,17 @@ public class PaymentBean implements Serializable {
                 paymentsFacade.createAndFlushForGeneratedIdEntities(newPayment);// need to flush to ensure the id is generated as this onlyoccurs at flush time.
                 paymentId = newPayment.getId();
 
-                InvoiceController invoiceController = context.getApplication().evaluateExpressionGet(context, "#{invoiceController}", InvoiceController.class);
+                //InvoiceController invoiceController = context.getApplication().evaluateExpressionGet(context, "#{invoiceController}", InvoiceController.class);
                 InvoiceLine il = null;
+
                 if (item == null) {
-                    il = invoiceController.newInvoiceLineItem(BigDecimal.ONE, cust.getGroupPricing().getPlanName(), cust.getGroupPricing().getPlanPrice(), null);
+                    il = newInvoiceLineItem(BigDecimal.ONE, cust.getGroupPricing().getPlanName(), cust.getGroupPricing().getPlanPrice(), null);
                 } else {
-                    il = invoiceController.newInvoiceLineItem(BigDecimal.ONE, item.getPlanName(), item.getPlanPrice(), item);
+                    il = newInvoiceLineItem(BigDecimal.ONE, item.getPlanName(), item.getPlanPrice(), item);
                 }
                 ArrayList<InvoiceLine> itemsList = new ArrayList<>();
                 itemsList.add(il);
-                Invoice invoice = invoiceController.generateInvoiceWithLineItemsAndPayment(cust, itemsList, newPayment);
+                Invoice invoice = generateInvoiceWithLineItemsAndPayment(cust, itemsList, newPayment);
                 //int newId = newPayment.getId();
                 // if (newId != -1) {
                 //    String newPaymentID = Integer.toString(newId);
@@ -544,6 +553,85 @@ public class PaymentBean implements Serializable {
             LOGGER.log(Level.WARNING, "Logged in user is null. Add Single Payment aborted.");
         }
         return newPayment;
+    }
+
+    public Invoice generateInvoiceWithLineItemsAndPayment(Customers cust, List<InvoiceLine> items, Payments payment) {
+        Invoice inv = null;
+        try {
+            inv = generateInvoiceWithLineItems(cust, items);
+            payment.setCrmInvoiceId(inv);
+            paymentsFacade.editAndFlush(payment);
+        } catch (Exception e) {
+            String customerUsername = "Customer Username is NULL";
+            if (cust != null) {
+                customerUsername = cust.getUsername();
+            }
+            LOGGER.log(Level.SEVERE, "generateInvoiceWithLineItemsAndPayment: FAILURE for Customer username: {0}, Error:{1}", new Object[]{customerUsername, e.getMessage()});
+
+        }
+        return inv;
+    }
+
+    public Invoice generateInvoiceWithLineItems(Customers cust, List<InvoiceLine> items) {
+        if (cust == null || items == null) {
+            String customerUsername = "Customer Username is NULL";
+            if (cust != null) {
+                customerUsername = cust.getUsername();
+            }
+            LOGGER.log(Level.SEVERE, "generateInvoiceLineItems: NULL Value passed to method for customer or line items list. FAILURE for Customer username: {0}", new Object[]{customerUsername});
+            return null;
+        }
+        Invoice inv = new Invoice(0);
+        try {
+            inv.setInvoiceLineCollection(new ArrayList<>());
+            inv.setUserId(cust);
+            inv.setCreateDatetime(new Date());
+            inv.setCreateTimestamp(new Date());
+            inv.setStatusId(0);
+            GregorianCalendar gc = new GregorianCalendar();
+            gc.add(Calendar.DAY_OF_YEAR, 7);
+            inv.setDueDate(gc.getTime());
+            inv.setTotal(BigDecimal.ZERO);
+            inv.setPaymentAttempts(0);
+            inv.setCurrencyId(currencyFacade.find(10));
+            inv.setCarriedBalance(BigDecimal.ZERO);
+            inv.setBalance(BigDecimal.ZERO);
+            inv.setInProcessPayment((short) 1);
+            inv.setIsReview(0);
+            inv.setDeleted((short) 0);
+            invoiceFacade.createAndFlushForGeneratedIdEntities(inv);
+            BigDecimal paymentsTotal = new BigDecimal(BigInteger.ZERO);
+            for (InvoiceLine item : items) {
+                item.setInvoiceId(inv);
+                invoiceLineFacade.createAndFlushForGeneratedIdEntities(item);
+                inv.getInvoiceLineCollection().add(item);
+                paymentsTotal = paymentsTotal.add(item.getPrice());
+            }
+
+            inv.setTotal(paymentsTotal);
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "generateInvoiceLineItems: FAILURE for Customer username: {0}, Plan: {1}, Error:{2}", new Object[]{cust.getUsername(), cust.getGroupPricing().getPlanName(), e.getMessage()});
+
+        }
+        invoiceFacade.edit(inv);
+        return inv;
+
+    }
+
+    public InvoiceLine newInvoiceLineItem(BigDecimal quantity, String description, BigDecimal totalPrice, Plan itemReference) {
+        InvoiceLineType invoiceLineType = invoiceLineTypeFacade.findAll().get(2);
+        InvoiceLine invoiceLineItem = new InvoiceLine(0);
+        invoiceLineItem.setAmount(totalPrice);
+        invoiceLineItem.setDeleted(Short.MIN_VALUE);
+        //invoiceLineItem.setInvoiceId(inv);
+        invoiceLineItem.setDescription(description);
+        invoiceLineItem.setItemId(itemReference);
+        invoiceLineItem.setQuantity(quantity);
+        invoiceLineItem.setTypeId(invoiceLineType);
+        invoiceLineItem.setPrice(totalPrice);
+
+        return invoiceLineItem;
+
     }
 
     @Asynchronous
@@ -2261,10 +2349,10 @@ public class PaymentBean implements Serializable {
             FacesContext context = FacesContext.getCurrentInstance();
             InvoiceController invoiceController = context.getApplication().evaluateExpressionGet(context, "#{invoiceController}", InvoiceController.class);
             String source = invoiceController.generateHtmlInvoice(invoice);
-            
+
             invoiceController.emailInvoiceBase(source, invoice.getUserId().getEmailAddress());
         } catch (ELException eLException) {
-            LOGGER.log(Level.WARNING, "sendInvoice - failed ",eLException);
+            LOGGER.log(Level.WARNING, "sendInvoice - failed ", eLException);
         }
         LOGGER.log(Level.INFO, "sendInvoice - Completed ");
 
