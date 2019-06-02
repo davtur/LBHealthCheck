@@ -92,11 +92,11 @@ public class SessionTimetableController implements Serializable {
     public void setEditSelected(boolean editSelected) {
         this.editSelected = editSelected;
     }
-    
+
     private static final long serialVersionUID = 1L;
     private static final Logger LOGGER = Logger.getLogger(SessionTimetableController.class.getName());
-    private static final int DAYS_AHEAD_TO_POPULATE_TIMETABLE = 90;
-    
+    private static final int DAYS_AHEAD_TO_POPULATE_TIMETABLE = 180;
+
     private SessionTimetable current;
     private SessionTimetable selectedForDeletion;
     private SessionHistory selectedTimetableSession;
@@ -126,7 +126,7 @@ public class SessionTimetableController implements Serializable {
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.EmailTemplatesFacade ejbEmailTemplatesFacade;
     private final StringEncrypter encrypter = new StringEncrypter("(lqKdh^Gr$2F^KJHG654)");
-    
+
     @Inject
     private au.com.manlyit.fitnesscrm.stats.beans.ScheduleFacade ejbScheduleFacade;
     private PaginationHelper pagination;
@@ -152,38 +152,38 @@ public class SessionTimetableController implements Serializable {
     private Schedule selectedSchedule;
     private Customers bookingAdminCompSelectedCust;
     private Customers bookingAdminCompCancelSelectedCust;
-    
+
     public SessionTimetableController() {
     }
-    
+
     public enum TimetableSessionStatus {
         PUBLISHED(0, "Published"), HIDDEN(1, "Hidden");
         private final int value;
         private final String label;
-        
+
         private TimetableSessionStatus(int value, String label) {
             this.value = value;
             this.label = label;
         }
-        
+
         public int getValue() {
             return value;
         }
-        
+
         public String getLabel() {
             return label;
         }
     }
-    
+
     public TimetableSessionStatus[] getTimetableSessionStatusValues() {
         return TimetableSessionStatus.values();
     }
-    
+
     public static boolean isUserInRole(String roleName) {
         boolean inRole = FacesContext.getCurrentInstance().getExternalContext().isUserInRole(roleName);
         return inRole;
     }
-    
+
     public SessionTimetable getSelected() {
         if (current == null) {
             current = new SessionTimetable();
@@ -191,11 +191,11 @@ public class SessionTimetableController implements Serializable {
         }
         return current;
     }
-    
+
     public void tileEditorToggle() {
         setEditSelected(!isEditSelected());
     }
-    
+
     public MapModel getSimpleModel() {
         if (simpleModel == null) {
             simpleModel = new DefaultMapModel();
@@ -213,31 +213,31 @@ public class SessionTimetableController implements Serializable {
             //simpleModel.addOverlay(new Marker(coord4, "Kaleici"));  
 
         }
-        
+
         return simpleModel;
     }
-    
+
     public void setSelected(SessionTimetable selected) {
         if (selected != null) {
             current = selected;
             selectedItemIndex = -1;
         }
-        
+
     }
-    
+
     private SessionTimetableFacade getFacade() {
         return ejbFacade;
     }
-    
+
     public PaginationHelper getPagination() {
         if (pagination == null) {
             pagination = new PaginationHelper(1000000) {
-                
+
                 @Override
                 public int getItemsCount() {
                     return getFacade().count();
                 }
-                
+
                 @Override
                 public DataModel<SessionTimetable> createPageDataModel() {
                     return new ListDataModel<>(getFacade().findAll());
@@ -246,19 +246,19 @@ public class SessionTimetableController implements Serializable {
         }
         return pagination;
     }
-    
+
     public void populateSessions() {
-        
+
         List<SessionTimetable> sessions = ejbFacade.findAll();
-        
+
         for (SessionTimetable st : sessions) {
-            
+
             cloneSessionsFromTimetable(st, 90);
-            
+
         }
-        
+
     }
-    
+
     public void persistEvent(CrmScheduleEvent event) {
         CrmScheduleEvent ssievent = event;
         Schedule ss = new Schedule(0, ssievent.getTitle(), ssievent.getStartDate(), ssievent.getEndDate());
@@ -270,15 +270,15 @@ public class SessionTimetableController implements Serializable {
         try {
             ejbScheduleFacade.create(selectedSchedule);
             JsfUtil.addSuccessMessage(configMapFacade.getConfig("ScheduleCreated"));
-            
+
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
-            
+
         }
         ssievent.setDatabasePK(selectedSchedule.getId());
         selectedSchedule = null;
     }
-    
+
     private void deleteEvent(CrmScheduleEvent event) {
         CrmScheduleEvent ssievent = event;
         selectedSchedule = ejbScheduleFacade.find(ssievent.getDatabasePK());
@@ -288,12 +288,12 @@ public class SessionTimetableController implements Serializable {
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
         }
-        
+
     }
-    
+
     private void editEvent(ScheduleEvent event) {
         CrmScheduleEvent ssievent = null;
-        
+
         if (event != null) {
             if (event.getClass() == CrmScheduleEvent.class) {
                 ssievent = (CrmScheduleEvent) event;
@@ -304,26 +304,26 @@ public class SessionTimetableController implements Serializable {
                 ss.setSchedRemindDate(ssievent.getReminderDate());
                 ss.setSchedReminder(ssievent.isAddReminder());
                 ss.setShedAllday(ssievent.isAllDay());
-                
+
                 ss.setDataObject(ssievent.getData());
-                
+
                 selectedSchedule = ss;
                 try {
                     ejbScheduleFacade.edit(selectedSchedule);
                     JsfUtil.addSuccessMessage(configMapFacade.getConfig("ScheduleUpdated"));
-                    
+
                 } catch (Exception e) {
                     JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
-                    
+
                 }
-                
+
             }
         }
         selectedSchedule = null;
     }
-    
+
     public void timetableRowSelected(SelectEvent event) {
-        
+
     }
 
     /**
@@ -349,7 +349,7 @@ public class SessionTimetableController implements Serializable {
     public void setEvent(TimetableScheduleEvent event) {
         this.event = event;
     }
-    
+
     public void onRowSelect(SelectEvent selectEvent) {
         Object o = selectEvent.getObject();
         if (o.getClass() == SessionTimetable.class) {
@@ -357,7 +357,7 @@ public class SessionTimetableController implements Serializable {
             LOGGER.log(Level.INFO, "SessionTimetable - Row Selected, Name={0}, Date{1}, number of selected items={2}", new Object[]{st.getSessionTitle(), st.getSessiondate(), getMultiSelected().length});
         }
     }
-    
+
     public void onDoubleClickRow(SelectEvent selectEvent) {
         Object o = selectEvent.getObject();
         if (o.getClass() == SessionTimetable.class) {
@@ -366,7 +366,7 @@ public class SessionTimetableController implements Serializable {
             LOGGER.log(Level.INFO, "SessionTimetable - Row Double Clicked, Name={0}, Date{1}, number of selected items={2}", new Object[]{st.getSessionTitle(), st.getSessiondate(), getMultiSelected().length});
         }
     }
-    
+
     public void onEventSelect(SelectEvent selectEvent) {
         Object o = selectEvent;
         if (o != null) {
@@ -377,7 +377,7 @@ public class SessionTimetableController implements Serializable {
             }
         }
     }
-    
+
     public void onDateSelect(SelectEvent selectEvent) {
         Object o = selectEvent.getObject();
         if (o != null) {
@@ -403,9 +403,9 @@ public class SessionTimetableController implements Serializable {
                 LOGGER.log(Level.WARNING, "onDateSelect - the Object returned by the evenet is not a date");
             }
         }
-        
+
     }
-    
+
     public void onTimetableEventSelect(SelectEvent selectEvent) {
         Object o = selectEvent.getObject();
         if (o != null) {
@@ -432,27 +432,73 @@ public class SessionTimetableController implements Serializable {
                 LOGGER.log(Level.WARNING, "onDateSelect - the Object returned by the evenet is not a date");
             }
         }
-        
+
     }
-    
+
     private void addMessage(FacesMessage message) {
         FacesContext.getCurrentInstance().addMessage(null, message);
     }
-    
+
     public void onEventMove(ScheduleEntryMoveEvent event) {
         FacesMessage message = new FacesMessage(FacesMessage.SEVERITY_INFO, "Event moved", "Day delta:" + event.getDayDelta() + ", Minute delta:" + event.getMinuteDelta());
         editEvent(event.getScheduleEvent());
         addMessage(message);
     }
-    
+
     public void onEventResize(ScheduleEntryResizeEvent event) {
         FacesMessage message = new FacesMessage(FacesMessage.SEVERITY_INFO, "Event resized", "Day delta:" + event.getDayDelta() + ", Minute delta:" + event.getMinuteDelta());
         editEvent(event.getScheduleEvent());
         addMessage(message);
     }
-    
+
+    private void publishTimetableClassChanges(SessionTimetable st, int daysIntoFuture) {
+
+        LOGGER.log(Level.INFO, "cloneSessionsFromTimetable: Id of timetable session:{0}, name os session:{1}, days to populate into teh future:{2}", new Object[]{st.getId(), st.getSessionTitle(), daysIntoFuture});
+        GregorianCalendar startCal = new GregorianCalendar();
+        GregorianCalendar newStartCal = new GregorianCalendar();
+        GregorianCalendar endCal = new GregorianCalendar();
+        endCal.add(Calendar.DAY_OF_YEAR, daysIntoFuture);
+        GregorianCalendar templateTime = new GregorianCalendar();
+        templateTime.setTime(st.getSessiondate());
+        //update existing
+        for (SessionHistory sh : st.getSessionHistoryCollection()) {
+            startCal.setTime(sh.getSessiondate());
+            startCal.set(Calendar.HOUR_OF_DAY, templateTime.get(Calendar.HOUR_OF_DAY));
+            startCal.set(Calendar.MINUTE, templateTime.get(Calendar.MINUTE));
+            startCal.set(Calendar.SECOND, templateTime.get(Calendar.SECOND));
+            startCal.set(Calendar.MILLISECOND, templateTime.get(Calendar.MILLISECOND));
+            startCal.set(Calendar.DAY_OF_WEEK, templateTime.get(Calendar.DAY_OF_WEEK));
+            if (startCal.after(newStartCal)) {
+                newStartCal.setTime(startCal.getTime());
+            }
+        }
+        startCal.setTime(newStartCal.getTime());
+        // add new that are after existing and before daysIntoFuture
+        while (startCal.compareTo(endCal) < 0) {
+
+            while (startCal.get(Calendar.DAY_OF_WEEK) != templateTime.get(Calendar.DAY_OF_WEEK)) {
+                startCal.add(Calendar.DAY_OF_YEAR, -1);
+            }
+            SessionHistory sh = new SessionHistory(0, startCal.getTime());
+            ArrayList<SessionTrainers> ac = new ArrayList<>();
+            SessionTrainers trainers = new SessionTrainers(0);
+            trainers.setCustomerId(st.getTrainerId());
+            trainers.setSessionHistoryId(sh);
+            ac.add(trainers);
+            sh.setSessionTrainersCollection(ac);
+            sh.setSessionTemplate(st);
+            sh.setParticipantsCollection(new ArrayList<>());
+            sh.setSessionTypesId(st.getSessionTypesId());
+            sh.setComments(st.getComments());
+            sessionHistoryFacade.create(sh);
+            st.getSessionHistoryCollection().add(sh);
+            LOGGER.log(Level.INFO, "cloneSessionsFromTimetable: Creating a new session History Record.  Id of session:{0}, name of session:{1}, time of session:{2}", new Object[]{st.getId(), st.getSessionTitle(), startCal.getTime()});
+            startCal.add(Calendar.DAY_OF_YEAR, 7);
+        }
+    }
+
     private void cloneSessionsFromTimetable(SessionTimetable st, int daysIntoFuture) {
-        
+
         LOGGER.log(Level.INFO, "cloneSessionsFromTimetable: Id of timetable session:{0}, name os session:{1}, days to populate into teh future:{2}", new Object[]{st.getId(), st.getSessionTitle(), daysIntoFuture});
         GregorianCalendar startCal = new GregorianCalendar();
         GregorianCalendar endCal = new GregorianCalendar();
@@ -464,9 +510,9 @@ public class SessionTimetableController implements Serializable {
             startCal.set(Calendar.MINUTE, templateTime.get(Calendar.MINUTE));
             startCal.set(Calendar.SECOND, templateTime.get(Calendar.SECOND));
             startCal.set(Calendar.MILLISECOND, templateTime.get(Calendar.MILLISECOND));
-            
+
             while (startCal.compareTo(endCal) < 0) {
-                
+
                 while (startCal.get(Calendar.DAY_OF_WEEK) != templateTime.get(Calendar.DAY_OF_WEEK)) {
                     startCal.add(Calendar.DAY_OF_YEAR, -1);
                 }
@@ -486,7 +532,7 @@ public class SessionTimetableController implements Serializable {
                     sessionHistoryFacade.create(sh);
                     st.getSessionHistoryCollection().add(sh);
                     LOGGER.log(Level.INFO, "cloneSessionsFromTimetable:No existing session found. Creating a new one.  Id of session:{0}, name of session:{1}, time of session:{2}", new Object[]{st.getId(), st.getSessionTitle(), startCal.getTime()});
-                    
+
                 } else {
                     // future session exists 
 
@@ -530,7 +576,7 @@ public class SessionTimetableController implements Serializable {
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, "cloneSessionsFromTimetable", e);
         }
-        
+
     }
 
     /**
@@ -540,11 +586,11 @@ public class SessionTimetableController implements Serializable {
         if (eventModel == null) {
             eventModel = new LazyScheduleModel() {
                 private static final long serialVersionUID = 1L;
-                
+
                 @Override
                 public void loadEvents(Date start, Date end) {
                     clear();
-                    
+
                     List<SessionHistory> events = sessionHistoryFacade.findSessionsByDateRange(start, end, true);
                     for (SessionHistory ss : events) {
                         GregorianCalendar sessionDate = new GregorianCalendar();
@@ -558,18 +604,18 @@ public class SessionTimetableController implements Serializable {
                                 ev.setStyleClass(template.getSessionStyleClasses());
                                 ev.setData(ss);
                                 ev.setDescription(template.getComments());
-                                
+
                                 addEvent(ev);
                             }
                         }
                     }
-                    
+
                 }
             };
         }
         return eventModel;
     }
-    
+
     public List<TimetableRows> getSessionForTheWeekItems() {
         if (daysOfWeek == null) {
             try {
@@ -584,10 +630,10 @@ public class SessionTimetableController implements Serializable {
                 GregorianCalendar endCal = new GregorianCalendar();
                 endCal.setTime(startCal.getTime());
                 endCal.add(Calendar.DAY_OF_YEAR, 1);
-                
+
                 for (int index = 0; index < 7; index++) {
                     List<SessionHistory> sessions;
-                    
+
                     sessions = sessionHistoryFacade.loadDateRange(0, 100, "sessiondate", SortOrder.ASCENDING, null, startCal.getTime(), endCal.getTime(), "sessiondate");
                     if (sessions != null && sessions.isEmpty() == false) {
                         LOGGER.log(Level.INFO, "getSessionForTheWeekItems - found {0} sessions between {1} and {2}.", new Object[]{sessions.size(), startCal.getTime(), endCal.getTime()});
@@ -598,7 +644,7 @@ public class SessionTimetableController implements Serializable {
                                 sessions.remove(x - 1);
                             }
                         }
-                        
+
                     } else {
                         LOGGER.log(Level.INFO, "getSessionForTheWeekItems - found no sessions between {0} and {1}. returned list of SessionHistory objects id NULL or empty", new Object[]{startCal.getTime(), endCal.getTime()});
                     }
@@ -613,10 +659,10 @@ public class SessionTimetableController implements Serializable {
                 LOGGER.log(Level.SEVERE, "getSessionForTheWeekItems generate the timetable failed", e);
             }
         }
-        
+
         return daysOfWeek;
     }
-    
+
     public void incrementWeek() {
         GregorianCalendar startCal = new GregorianCalendar();
         startCal.setTime(getTimetableStartDate());
@@ -624,7 +670,7 @@ public class SessionTimetableController implements Serializable {
         setTimetableStartDate(startCal.getTime());
         recreateModel();
     }
-    
+
     public void decrementWeek() {
         GregorianCalendar startCal = new GregorianCalendar();
         startCal.setTime(getTimetableStartDate());
@@ -632,13 +678,13 @@ public class SessionTimetableController implements Serializable {
         setTimetableStartDate(startCal.getTime());
         recreateModel();
     }
-    
+
     public void setToCurrentWeek() {
-        
+
         setTimetableStartDate(new Date());
         recreateModel();
     }
-    
+
     public void setTimetableToSelectedDate(SelectEvent selectEvent) {
         Object o = selectEvent.getObject();
         if (o != null) {
@@ -651,7 +697,7 @@ public class SessionTimetableController implements Serializable {
             }
         }
     }
-    
+
     public String signUpFromTimetable(ActionEvent actionEvent) {
         FacesContext context = FacesContext.getCurrentInstance();
         String sessionHistoryId = context.getExternalContext().getRequestParameterMap().get("sessionHistorySignupId");
@@ -661,7 +707,7 @@ public class SessionTimetableController implements Serializable {
         }
         return "index.xhtml";
     }
-    
+
     public void bookFromTimetable(ActionEvent actionEvent) {
 
         // String sessionHistoryId = context.getExternalContext().getRequestParameterMap().get("sessionHistoryBookingId");
@@ -709,18 +755,18 @@ public class SessionTimetableController implements Serializable {
     public void setMultiSelected(SessionTimetable[] multiSelected) {
         this.multiSelected = multiSelected;
     }
-    
+
     public String prepareList() {
         recreateModel();
         return "List";
     }
-    
+
     public String prepareView() {
         //current = (SessionTimetable)getItems().getRowData();
         //selectedItemIndex = pagination.getPageFirstItem() + getItems().getRowIndex();
         return "View";
     }
-    
+
     public String prepareCreate() {
         current = new SessionTimetable();
         current.setSessiondate(new Date());
@@ -749,7 +795,43 @@ public class SessionTimetableController implements Serializable {
         selectedItemIndex = -1;
         return "Create";
     }
-    
+
+    public String prepareClone() {
+        if (getMultiSelected().length == 1) {
+            for (SessionTimetable st : getMultiSelected()) {
+                current = new SessionTimetable();
+                current.setSessiondate(st.getSessiondate());
+                //TODO add defaults in config map
+                try {
+                    current.setSessionStyleClasses(st.getSessionStyleClasses());
+                    current.setSessionTitle(st.getSessionTitle());
+                    current.setDurationMinutes(st.getDurationMinutes());
+                    current.setSessionLocationGps(st.getSessionLocationGps());
+                    current.setSessionLocationLabel(st.getSessionLocationLabel());
+                    current.setShowBookingButton(st.getShowBookingButton());
+                    current.setShowSignupButton(st.getShowSignupButton());
+                    current.setSessionCasualRate(st.getSessionCasualRate());
+                    current.setSessionMembersRate(st.getSessionMembersRate());
+                    current.setRecurranceId(st.getRecurranceId());
+                    current.setSessionTypesId(st.getSessionTypesId());
+                    current.setComments(st.getComments());
+                    current.setSessionTimetableMaxSize(st.getSessionTimetableMaxSize());
+                    current.setSessionTimetableStatus(st.getSessionTimetableStatus());
+                    current.setAdminNotes(st.getAdminNotes());
+                    current.setTrainerId(st.getTrainerId());
+                    current.setId(-1);
+                } catch (Exception e) {
+                    LOGGER.log(Level.WARNING, "SessionTimetable prepareClone", e);
+                }
+            }
+        } else {
+            JsfUtil.addErrorMessage("Error", "Please only select one class to clone!");
+
+        }
+        selectedItemIndex = -1;
+        return "Create";
+    }
+
     public String create() {
         try {
             if (current.getId() == null) {
@@ -764,7 +846,7 @@ public class SessionTimetableController implements Serializable {
             return null;
         }
     }
-    
+
     public void createDialogue(ActionEvent actionEvent) {
         try {
             current.setId(0);
@@ -774,12 +856,12 @@ public class SessionTimetableController implements Serializable {
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
         }
-        
+
     }
-    
+
     public void setSelectedForEditing() {
         if (getMultiSelected().length == 1) {
-            
+
             for (SessionTimetable st : getMultiSelected()) {
                 current = st;
             }
@@ -789,30 +871,30 @@ public class SessionTimetableController implements Serializable {
             JsfUtil.addErrorMessage("You must select only 1 row to edit!");
         }
     }
-    
+
     public String prepareEdit() {
         //current = (SessionTimetable)getItems().getRowData();
         //selectedItemIndex = pagination.getPageFirstItem() + getItems().getRowIndex();
         return "Edit";
     }
-    
+
     public void selectOneMenuValueChangeListener(ValueChangeEvent vce) {
         Object o = vce.getNewValue();
     }
-    
+
     public void selectManyMenuValueChangeListener(ValueChangeEvent vce) {
         Object o = vce.getNewValue();
     }
-    
+
     public void onEdit(RowEditEvent event) {
         SessionTimetable cm = (SessionTimetable) event.getObject();
         editSessionTimetable(cm);
     }
-    
+
     public void editDialogue() {
         editSessionTimetable(current);
     }
-    
+
     private void editSessionTimetable(SessionTimetable sessTime) {
         try {
             getFacade().edit(sessTime);
@@ -824,9 +906,9 @@ public class SessionTimetableController implements Serializable {
                 int dayOfWeek = gc.get(Calendar.DAY_OF_WEEK);
                 int hour = gc.get(Calendar.HOUR_OF_DAY);
                 int minute = gc.get(Calendar.MINUTE);
-                
+
                 Collection<SessionHistory> csh = sessTime.getSessionHistoryCollection();
-                
+
                 for (SessionHistory sessHist : csh) {
                     gc.setTime(sessHist.getSessiondate());
                     gc.set(Calendar.DAY_OF_WEEK, dayOfWeek);
@@ -842,11 +924,11 @@ public class SessionTimetableController implements Serializable {
         } catch (Exception e) {
             JsfUtil.addErrorMessage(e, "Failed to Update the Session Timetable Record!");
             LOGGER.log(Level.WARNING, "Failed to Update the Session Timetable id:{1} Record! Error:{0}", new Object[]{e, sessTime.getId()});
-            
+
         }
-        
+
     }
-    
+
     public String update() {
         try {
             getFacade().edit(current);
@@ -857,30 +939,40 @@ public class SessionTimetableController implements Serializable {
             return null;
         }
     }
-    
+
     public void unPublish() {
         for (SessionTimetable st : getMultiSelected()) {
-            st.setSessionTimetableStatus(TimetableSessionStatus.HIDDEN.getValue());
-            getFacade().edit(st);
-            //delete any future sessions so they don't show up in the timetable
-            deleteFutureChildSessions(st);
-            daysOfWeek = null;// recreate timetabel model
+            try {
+                st.setSessionTimetableStatus(TimetableSessionStatus.HIDDEN.getValue());
+                getFacade().edit(st);
+                //delete any future sessions so they don't show up in the timetable
+                deleteFutureChildSessions(st);
+                daysOfWeek = null;// recreate timetabel model
+            } catch (Exception e) {
+                LOGGER.log(Level.WARNING, "unPublish SessionTimetable class.", e);
+
+            }
         }
         //recreateModel();
     }
-    
+
     public void publish() {
-        
+
         for (SessionTimetable st : getMultiSelected()) {
-            st.setSessionTimetableStatus(TimetableSessionStatus.PUBLISHED.getValue());
-            getFacade().edit(st);
-            // add three months worth of sessions
-            cloneSessionsFromTimetable(st, DAYS_AHEAD_TO_POPULATE_TIMETABLE);
-            daysOfWeek = null;// recreate timetabel model
+            try {
+                st.setSessionTimetableStatus(TimetableSessionStatus.PUBLISHED.getValue());
+                getFacade().edit(st);
+                // add three months worth of sessions
+                //cloneSessionsFromTimetable(st, DAYS_AHEAD_TO_POPULATE_TIMETABLE);
+                publishTimetableClassChanges(st, DAYS_AHEAD_TO_POPULATE_TIMETABLE);
+                daysOfWeek = null;// recreate timetabel model
+            } catch (Exception e) {
+                LOGGER.log(Level.WARNING, "Publish SessionTimetable class.", e);
+            }
         }
         //recreateModel();
     }
-    
+
     public void destroy() {
         for (SessionTimetable st : getMultiSelected()) {
             if (st.getSessionHistoryCollection().isEmpty()) {
@@ -888,7 +980,7 @@ public class SessionTimetableController implements Serializable {
 
                 deleteFutureChildSessions(st);
                 getFacade().remove(st);
-                
+
             } else {
                 LOGGER.log(Level.WARNING, "You are trying to delete a sessiontemplate when there are sessions that still reference it. Use hide instead to remove it from the timetable ahead.");
                 JsfUtil.addErrorMessage("You are trying to delete a sessiontemplate when there are sessions that still reference it. Use the hide button instead to unpublish it from the timetable ahead.");
@@ -897,7 +989,7 @@ public class SessionTimetableController implements Serializable {
         recreateModel();
         current = null;
     }
-    
+
     public String destroyAndView() {
         performDestroy();
         recreateModel();
@@ -910,20 +1002,20 @@ public class SessionTimetableController implements Serializable {
             return "List";
         }
     }
-    
+
     public SessionTimetable getSelectedForDeletion() {
         return selectedForDeletion;
     }
-    
+
     public void setSelectedForDeletion(SessionTimetable selectedForDeletion) {
         this.selectedForDeletion = selectedForDeletion;
         current = selectedForDeletion;
-        
+
         performDestroy();
         recreateModel();
-        
+
     }
-    
+
     private void performDestroy() {
         try {
             deleteFutureChildSessions(current);
@@ -933,44 +1025,46 @@ public class SessionTimetableController implements Serializable {
             JsfUtil.addErrorMessage(e, configMapFacade.getConfig("PersistenceErrorOccured"));
         }
     }
-    
+
     private void deleteFutureChildSessions(SessionTimetable st) {
         List<SessionHistory> children = new ArrayList<>(st.getSessionHistoryCollection());
+        LOGGER.log(Level.INFO, "deleteFutureChildSessions.Removing {3} children of SessionTimetable:{0}, Id:{1},Session Date:{2}", new Object[]{st.getSessionTitle(), st.getId(), st.getSessiondate(), children.size()});
+
         try {
             for (ListIterator<SessionHistory> iterator = children.listIterator(); iterator.hasNext();) {
                 SessionHistory next = iterator.next();
                 if (next.getSessiondate().compareTo(new Date()) > 0) {
                     List<SessionBookings> sbc = new ArrayList<>(next.getSessionBookingsCollection());
-                    if (sbc != null) {
-                        if (sbc.isEmpty() == false) {
-                            // refund customers for session bookings
-                            // send cancellation email.
 
-                            try {
-                                for (ListIterator<SessionBookings> sbcIterator = sbc.listIterator(); iterator.hasNext();) {
-                                    SessionBookings sb = sbcIterator.next();
-                                    
-                                    cancelSessionBooking(sb, sbcIterator);
-                                    LOGGER.log(Level.WARNING, "Cancelling a customers session booking from a timetable unpublish action.customer:{0}, Ticket:{1},Booking Date:{2}", new Object[]{sb.getCustomerId().getUsername(), sb.getTicketId(), sb.getBookingTime()});
-                                }
-                            } catch (NoSuchElementException e) {
-                                LOGGER.log(Level.WARNING, "deleteFutureChildSessions - sbcIterator -  NoSuchElementException", e.getMessage());
-                                
+                    if (sbc.isEmpty() == false) {
+                        // refund customers for session bookings
+                        // send cancellation email.
+
+                        try {
+                            for (ListIterator<SessionBookings> sbcIterator = sbc.listIterator(); iterator.hasNext();) {
+                                SessionBookings sb = sbcIterator.next();
+
+                                cancelSessionBooking(sb, sbcIterator);
+                                LOGGER.log(Level.WARNING, "Cancelling a customers session booking from a timetable unpublish action.customer:{0}, Ticket:{1},Booking Date:{2}", new Object[]{sb.getCustomerId().getUsername(), sb.getTicketId(), sb.getBookingTime()});
                             }
+                        } catch (NoSuchElementException e) {
+                            LOGGER.log(Level.WARNING, "deleteFutureChildSessions - sbcIterator -  NoSuchElementException", e.getMessage());
+
                         }
+
                     }
                     iterator.remove();
                     sessionHistoryFacade.remove(next);
                 }
-                
+
             }
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, "deleteFutureChildSessions FAILED.  SessionTimetable:{0}, Id:{1},Session Date:{2}", new Object[]{st.getSessionTitle(), st.getId(), st.getSessiondate()});
-            
+
         }
-        
+
     }
-    
+
     private void updateCurrentItem() {
         int count = getFacade().count();
         if (selectedItemIndex >= count) {
@@ -985,14 +1079,14 @@ public class SessionTimetableController implements Serializable {
             current = getFacade().findRange(new int[]{selectedItemIndex, selectedItemIndex + 1}).get(0);
         }
     }
-    
+
     public DataModel<SessionTimetable> getItems() {
         if (items == null) {
             items = new ListDataModel<>(getFacade().findAll());
         }
         return items;
     }
-    
+
     private void recreateModel() {
         items = null;
         filteredItems = null;
@@ -1001,40 +1095,40 @@ public class SessionTimetableController implements Serializable {
         //timetable3
         eventModel = null;
     }
-    
+
     public String next() {
         getPagination().nextPage();
         recreateModel();
         return "List";
     }
-    
+
     public void handleDateSelect(SelectEvent event) {
-        
+
         Date date = (Date) event.getObject();
 
         //Add facesmessage
     }
-    
+
     public String previous() {
         getPagination().previousPage();
         recreateModel();
         return "List";
     }
-    
+
     public SelectItem[] getItemsAvailableSelectMany() {
         // file:///home/david/.netbeans/8.0/config/Templates/JSF/JSF_From_Entity_Wizard/StandardJSF/create.ftl
 
         return JsfUtil.getSelectItems(ejbFacade.findAll(), false);
     }
-    
+
     public SelectItem[] getItemsAvailableSelectOne() {
         return JsfUtil.getSelectItems(ejbFacade.findAll(), true);
     }
-    
+
     public Collection<SessionTimetable> getItemsAvailable() {
         return ejbFacade.findAll();
     }
-    
+
     public void onCancel(RowEditEvent event) {
         JsfUtil.addErrorMessage("Row Edit Cancelled");
     }
@@ -1045,7 +1139,7 @@ public class SessionTimetableController implements Serializable {
     public Date getTimetableStartDate() {
         if (timetableStartDate == null) {
             GregorianCalendar date1 = new GregorianCalendar();
-            
+
             while (date1.get(Calendar.DAY_OF_WEEK) != Calendar.MONDAY) {
                 date1.add(Calendar.DATE, -1);
             }
@@ -1126,12 +1220,12 @@ public class SessionTimetableController implements Serializable {
         this.bookingCancelButtonSessionHistory = bookingCancelButtonSessionHistory;
         this.bookingButtonSessionHistory = bookingCancelButtonSessionHistory;
         LOGGER.log(Level.INFO, "Cancel Session Button Clicked. ");
-        
+
         FacesContext context = FacesContext.getCurrentInstance();
         CustomersController controller = context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
         controller.setSignupFromBookingInProgress(false);
         cancelSession();
-        
+
     }
 
     /**
@@ -1148,12 +1242,12 @@ public class SessionTimetableController implements Serializable {
         this.bookingButtonSessionHistory = bookingButtonSessionHistory;
         FacesContext context = FacesContext.getCurrentInstance();
         CustomersController controller = context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
-        
+
         if (context.getExternalContext().getRemoteUser() != null) {
             // autheticated user
             LOGGER.log(Level.INFO, "opening  Class Booking Dialogue -- User is authenticated");
             PrimeFaces.current().executeScript("PF('bookingDialog').show();");
-            
+
             controller.setSignupFromBookingInProgress(false);
         } else {
             //unauthenticated 
@@ -1165,26 +1259,26 @@ public class SessionTimetableController implements Serializable {
             controller.setSignupFromBookingInProgress(true);
         }
     }
-    
+
     public List<Tickets> listOfCustomersValidTicketsForADate(Customers c, Date sessionDate) {
-        
+
         List<Tickets> result = ejbTicketsFacade.findCustomerTicketsValidForSessionDate(c, sessionDate, true);
-        
+
         return result;
     }
-    
+
     public List<Tickets> doesTheCustomerHaveATicketForAPtSession(Customers c, Date sessionDate) {
-        
+
         List<Tickets> result = new ArrayList<>();
         GregorianCalendar ticketStartDate = new GregorianCalendar();
         CalendarUtil.SetToLastDayOfWeek(Calendar.SUNDAY, ticketStartDate);
         CalendarUtil.SetTimeToMidnight(ticketStartDate);
-        
+
         GregorianCalendar ticketStopDate = new GregorianCalendar();
         CalendarUtil.SetToNextDayOfWeek(Calendar.SUNDAY, ticketStopDate);
         CalendarUtil.SetTimeToMidnight(ticketStopDate);
         ticketStopDate.add(Calendar.MILLISECOND, -1);
-        
+
         List<Tickets> at = ejbTicketsFacade.findCustomerTicketsValidForSessionDate(c, sessionDate, true);
         if (at != null) {
             for (Tickets t : at) {
@@ -1196,19 +1290,19 @@ public class SessionTimetableController implements Serializable {
         }
         return result;
     }
-    
+
     public List<Tickets> doesTheCustomerHaveATicketForAGroupSession(Customers c, Date sessionDate) {
-        
+
         List<Tickets> result = new ArrayList<>();
         GregorianCalendar ticketStartDate = new GregorianCalendar();
         CalendarUtil.SetToLastDayOfWeek(Calendar.SUNDAY, ticketStartDate);
         CalendarUtil.SetTimeToMidnight(ticketStartDate);
-        
+
         GregorianCalendar ticketStopDate = new GregorianCalendar();
         CalendarUtil.SetToNextDayOfWeek(Calendar.SUNDAY, ticketStopDate);
         CalendarUtil.SetTimeToMidnight(ticketStopDate);
         ticketStopDate.add(Calendar.MILLISECOND, -1);
-        
+
         List<Tickets> at = ejbTicketsFacade.findCustomerTicketsValidForSessionDate(c, sessionDate, true);
         if (at != null) {
             for (Tickets t : at) {
@@ -1220,7 +1314,7 @@ public class SessionTimetableController implements Serializable {
         }
         return result;
     }
-    
+
     private void sendBookingConfirmationEmail(SessionBookings sb, Customers cust, String templateName, String subject) {
 //valid user that wants the password reset
         //generate link and send
@@ -1247,7 +1341,7 @@ public class SessionTimetableController implements Serializable {
 
                 //String htmlText = configMapFacade.getConfig(templateName);
                 String htmlText = ejbEmailTemplatesFacade.findTemplateByName(templateName).getTemplate();
-                
+
                 htmlText = htmlText.replace(templateLinkPlaceholder, urlLink);
                 htmlText = htmlText.replace(templateUsernamePlaceholder, cust.getUsername());
                 htmlText = htmlText.replace(templateSessionBookingPlaceholder, sb.getStatusDescription());
@@ -1267,23 +1361,23 @@ public class SessionTimetableController implements Serializable {
                 } else {
                     JsfUtil.addSuccessMessage("Class Booking", configMapFacade.getConfig("BookingSuccessfulMessage"));
                 }
-                
+
                 FacesContext context = FacesContext.getCurrentInstance();
                 ActivationBean controller = context.getApplication().evaluateExpressionGet(context, "#{activationBean}", ActivationBean.class);
                 controller.setValid(true);
             } catch (UnsupportedEncodingException ex) {
                 Logger.getLogger(LoginBean.class.getName()).log(Level.SEVERE, null, ex);
             }
-            
+
         } else {
             JsfUtil.addErrorMessage("Error", configMapFacade.getConfig("PasswordResetErrorValidUsernameRequired"));
         }
-        
+
     }
-    
+
     private Properties emailServerProperties() {
         Properties props = new Properties();
-        
+
         props.put("mail.smtp.host", configMapFacade.getConfig("mail.smtp.host"));
         props.put("mail.smtp.auth", configMapFacade.getConfig("mail.smtp.auth"));
         props.put("mail.debug", configMapFacade.getConfig("mail.debug"));
@@ -1296,17 +1390,17 @@ public class SessionTimetableController implements Serializable {
         props.put("mail.smtp.sslpass", configMapFacade.getConfig("mail.smtp.sslpass"));
         props.put("mail.smtp.headerimage.url", configMapFacade.getConfig("mail.smtp.headerimage.url"));
         props.put("mail.smtp.headerimage.cid", configMapFacade.getConfig("mail.smtp.headerimage.cid"));
-        
+
         return props;
-        
+
     }
-    
+
     public boolean isSessionAlreadyBookedDataList(Customers c) {
         return isSessionAlreadyBookedBase(c, bookingButtonSessionHistory);
         // return isSessionAlreadyBookedBase(getBookingAdminCompSelectedCust());
 
     }
-    
+
     public boolean sessionAlreadyBookedSessHist(SessionHistory sh) {
         FacesContext context = FacesContext.getCurrentInstance();
         CustomersController controller = null;
@@ -1314,11 +1408,11 @@ public class SessionTimetableController implements Serializable {
             controller = context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
         } else {
             LOGGER.log(Level.WARNING, "sessionAlreadyBooked -- Faces Context is NULL");
-            
+
         }
         return isSessionAlreadyBookedBase(controller.getSelected(), sh);
     }
-    
+
     public boolean isSessionAlreadyBooked() {
         FacesContext context = FacesContext.getCurrentInstance();
         CustomersController controller = null;
@@ -1326,11 +1420,11 @@ public class SessionTimetableController implements Serializable {
             controller = context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
         } else {
             LOGGER.log(Level.WARNING, "sessionAlreadyBooked -- Faces Context is NULL");
-            
+
         }
         return isSessionAlreadyBookedBase(controller.getSelected(), bookingButtonSessionHistory);
     }
-    
+
     public int numberOfValidTickets(Customers c) {
         if (c != null && bookingButtonSessionHistory != null) {
             List<Tickets> ct = doesTheCustomerHaveATicketForAGroupSession(c, bookingButtonSessionHistory.getSessiondate());
@@ -1339,13 +1433,13 @@ public class SessionTimetableController implements Serializable {
             }
         }
         return 0;
-        
+
     }
-    
+
     public int numberOfValidPtTickets(Customers c) {
         FacesContext context = FacesContext.getCurrentInstance();
         SessionHistoryController controller = context.getApplication().evaluateExpressionGet(context, "#{sessionHistoryController}", SessionHistoryController.class);
-        
+
         if (c != null && controller.getSelected() != null) {
             List<Tickets> ct = doesTheCustomerHaveATicketForAPtSession(c, controller.getSelected().getSessiondate());
             if (ct != null) {
@@ -1353,11 +1447,11 @@ public class SessionTimetableController implements Serializable {
             }
         }
         return 0;
-        
+
     }
-    
+
     public boolean isSessionAlreadyBookedBase(Customers c, SessionHistory sh) {
-        
+
         try {
             if (c != null && sh != null) {
                 //SessionHistory sh = bookingButtonSessionHistory;
@@ -1369,36 +1463,36 @@ public class SessionTimetableController implements Serializable {
                     }
                 }
             }
-            
+
         } catch (ELException eLException) {
             LOGGER.log(Level.WARNING, "sessionAlreadyBooked", eLException.getMessage());
         }
         return false;
     }
-    
+
     public void cancelSession() {
         FacesContext context = FacesContext.getCurrentInstance();
         CustomersController controller = context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
         cancelSessionBase(controller.getSelected());
     }
-    
+
     public void cancelSessionBase(Customers c) {
-        
+
         LOGGER.log(Level.INFO, "Cancel Session button clicked..Customer Name {0} {1}", new Object[]{c.getFirstname(), c.getLastname()});
-        
+
         SessionHistory sh = bookingButtonSessionHistory;
         List<SessionBookings> sbl = new ArrayList<>(sh.getSessionBookingsCollection());
         for (ListIterator<SessionBookings> sblIterator = sbl.listIterator(); sblIterator.hasNext();) {
-            
+
             SessionBookings sbook = sblIterator.next();
-            
+
             if (sbook.getCustomerId().getId().equals(c.getId())) {
                 cancelSessionBooking(sbook, sblIterator);
             }
         }
-        
+
     }
-    
+
     private void cancelSessionBooking(SessionBookings sb, ListIterator<SessionBookings> sbli) {
         if (sb != null) {
             Tickets t = sb.getTicketId();
@@ -1409,24 +1503,24 @@ public class SessionTimetableController implements Serializable {
             FacesContext context = FacesContext.getCurrentInstance();
             ApplicationBean applicationBean = context.getApplication().evaluateExpressionGet(context, "#{applicationBean}", ApplicationBean.class);
             boolean emailsEnabled = applicationBean.isCustomerEmailsEnabled();
-            
+
             Payments pay = sb.getPaymentId();
             if (pay != null) {
                 try {
-                    
+
                     EziDebitPaymentGateway eziDebitPaymentGateway = context.getApplication().evaluateExpressionGet(context, "#{ezidebit}", EziDebitPaymentGateway.class);
-                    
+
                     LOGGER.log(Level.INFO, "Deleted payment for cancelled booking. Payment ID:{0}", new Object[]{pay.getId()});
                     paymentsFacade.remove(pay);
                     sb.setPaymentId(null);
                     sb.getCustomerId().getPaymentsCollection().remove(pay);
                     eziDebitPaymentGateway.createCombinedAuditLogAndNote(sb.getCustomerId(), pay.getCustomerName(), "PAYMENT_DELETED", "A scheduled payment missing in the gateway was deleted.", "Payment Amount:" + pay.getScheduledAmount().toPlainString() + ", Date:" + pay.getDebitDate().toString(), "DELETED");
-                    
+
                 } catch (ELException eLException) {
                     LOGGER.log(Level.INFO, "Deleted payment FAILED.. Payment ID:{0} , expetion: {1}", new Object[]{pay.getId(), eLException.getMessage()});
-                    
+
                 }
-                
+
             }
             SessionHistory sh = sb.getSessionHistoryId();
             sh.getSessionBookingsCollection().remove(sb);
@@ -1434,9 +1528,9 @@ public class SessionTimetableController implements Serializable {
             sessionHistoryFacade.edit(sh);
             ejbSessionBookingsFacade.remove(sb);
             recreateModel();
-            
+
             TicketsController ticketsController = context.getApplication().evaluateExpressionGet(context, "#{ticketsController}", TicketsController.class);
-            
+
             ticketsController.recreateModel();
             PrimeFaces instance = PrimeFaces.current();
             instance.executeScript("PF('bookingDialog').hide()");
@@ -1449,13 +1543,13 @@ public class SessionTimetableController implements Serializable {
             LOGGER.log(Level.SEVERE, "Cancel Session button clicked but teh session Booking wasnt found!!");
         }
     }
-    
+
     public void purchaseSession() {
         FacesContext context = FacesContext.getCurrentInstance();
         CustomersController controller = context.getApplication().evaluateExpressionGet(context, "#{customersController}", CustomersController.class);
         purchaseSessionBase(controller.getSelected(), false, bookingButtonSessionHistory);
     }
-    
+
     public void purchaseSessionBase(Customers c, boolean adminUser, SessionHistory sh) {
         LOGGER.log(Level.INFO, "Purchase Session button clicked.Customer Name {0} {1}, Admin user:{4}, Session Date: {2}, Session Title {3}", new Object[]{c.getFirstname(), c.getLastname(), sh.getSessiondate(), sh.getSessionTemplate().getSessionTitle(), adminUser});
         FacesContext context = FacesContext.getCurrentInstance();
@@ -1482,11 +1576,11 @@ public class SessionTimetableController implements Serializable {
             // TODO check class sizes arent full
             LOGGER.log(Level.INFO, "purchaseSession, customer  {0}  active in payment gateway - has {1} tickets available - booking session", new Object[]{c.getUsername()});
             try {
-                
+
                 Tickets t = ct.get(0);
                 t.setDateUsed(new Date());
                 ejbTicketsFacade.edit(t);
-                
+
                 sb.setTicketId(t);
                 sb.setStatus("TICKETED");
                 String description = "The " + sh.getSessionTemplate().getSessionTitle() + " class for " + sdf.format(sh.getSessiondate()) + " has been booked by " + c.getFirstname() + " " + c.getLastname() + " with ticket number " + t.getId().toString() + ".";
@@ -1504,20 +1598,20 @@ public class SessionTimetableController implements Serializable {
                 PrimeFaces instance = PrimeFaces.current();
                 instance.executeScript("PF('bookingDialog').hide()");
                 instance.ajax().update("@(.bookingFormUpdate)");
-                
+
             } catch (Exception e) {
-                
+
                 LOGGER.log(Level.SEVERE, "Book Session Failed.Cust id {0}, bookingid {1}, exception message {2}", new Object[]{c.getId(), sb.getId(), e});
-                
+
             }
         } else {
             //no tickets - free trial expired and no plan
             boolean purchaseSuccessful = purchaseProduct(c, adminUser, sb, sh.getSessionTemplate().getSessionCasualRate().floatValue(), true);
         }
     }
-    
+
     public boolean purchaseProduct(Customers c, boolean adminUser, SessionBookings sb, float price, boolean persistSessionBooking) {
-        
+
         LOGGER.log(Level.INFO, "Purchase Session button clicked.Customer Name {0} {1}", new Object[]{c.getFirstname(), c.getLastname()});
         FacesContext context = FacesContext.getCurrentInstance();
         boolean success = false;
@@ -1526,7 +1620,7 @@ public class SessionTimetableController implements Serializable {
         EziDebitPaymentGateway eziDebitPaymentGateway = context.getApplication().evaluateExpressionGet(context, "#{ezidebit}", EziDebitPaymentGateway.class);
         ApplicationBean applicationBean = context.getApplication().evaluateExpressionGet(context, "#{applicationBean}", ApplicationBean.class);
         boolean emailsEnabled = applicationBean.isCustomerEmailsEnabled();
-        
+
         LOGGER.log(Level.INFO, "purchaseSession, customer  {0}  active in payment gateway - no tickets available - sending to my details page to update plan or payments", c.getUsername());
         // is the customer already set up in the payment gateway ?
         if (c.getPaymentParametersId() == null || c.getPaymentParametersId().getStatusDescription() == null || c.getPaymentParametersId().getStatusDescription().contains("Cancelled")) {
@@ -1557,17 +1651,16 @@ public class SessionTimetableController implements Serializable {
                 if (c.getPaymentParametersId().getStatusDescription().contains("Active") || c.getPaymentParametersId().getStatusDescription().contains("New")) {
                     // customer is set up just add a payment
                     LOGGER.log(Level.INFO, "purchaseSession, customer  {0}  active in payment gateway - adding payment", c.getUsername());
-                    
-                    Payments paymentId = eziDebitPaymentGateway.addSinglePayment(c, price, sb.getBookingTime(),null);
+
+                    Payments paymentId = eziDebitPaymentGateway.addSinglePayment(c, price, sb.getBookingTime(), null);
 
                     // add invoice
                     //InvoiceController controller = context.getApplication().evaluateExpressionGet(context, "#{invoiceController}", InvoiceController.class);
                     InvoiceLine il = ejbPaymentBean.newInvoiceLineItem(BigDecimal.ONE, sb.getSessionHistoryId().getSessionTemplate().getSessionTitle(), new BigDecimal(price), null);
                     ArrayList<InvoiceLine> itemsList = new ArrayList<>();
                     itemsList.add(il);
-                    Invoice invoice = ejbPaymentBean.generateInvoiceWithLineItemsAndPayment(c, itemsList,paymentId);
-                    
-                    
+                    Invoice invoice = ejbPaymentBean.generateInvoiceWithLineItemsAndPayment(c, itemsList, paymentId);
+
                     JsfUtil.addSuccessMessage(configMapFacade.getConfig("purchaseSessionDirectDebitPaymentProcessing"));
                     sb.setPaymentId(paymentId);
                     sb.setStatus("PURCHASE-ACTIVE");
@@ -1581,7 +1674,7 @@ public class SessionTimetableController implements Serializable {
                         sendBookingConfirmationEmail(sb, c, "system.email.sessionBooking.confirmation.template", configMapFacade.getConfig("template.sessionbooking.confirmation.email.subject"));
                     }
                     recreateModel();
-                    
+
                     PrimeFaces instance = PrimeFaces.current();
                     instance.executeScript("PF('bookingDialog').hide()");
                 } else if (c.getPaymentParametersId().getStatusDescription().contains("Hold")) {
@@ -1592,7 +1685,7 @@ public class SessionTimetableController implements Serializable {
                     JsfUtil.addSuccessMessage(configMapFacade.getConfig("purchaseSessionDirectDebitPaymentProcessingFailedOnHold"));
                     sb.setStatus("PURCHASE-HOLD");
                     sb.setStatusDescription("The purchase via Direct debit failed as the customer is On-Hold");
-                    
+
                 } else if (c.getPaymentParametersId().getStatusDescription().contains("Waiting Bank Details")) {
                     // the customer has not set up their payment method
                     // notify them to contact staff or redirect to instant payment page
@@ -1668,10 +1761,10 @@ public class SessionTimetableController implements Serializable {
     public void setSelectedTimetableSession(SessionHistory selectedTimetableSession) {
         this.selectedTimetableSession = selectedTimetableSession;
     }
-    
+
     @FacesConverter(value = "sessionTimetableControllerConverter")
     public static class SessionTimetableControllerConverter implements Converter {
-        
+
         @Override
         public Object getAsObject(FacesContext facesContext, UIComponent component, String value) {
             if (value == null || value.length() == 0) {
@@ -1681,19 +1774,19 @@ public class SessionTimetableController implements Serializable {
                     getValue(facesContext.getELContext(), null, "sessionTimetableController");
             return controller.ejbFacade.find(getKey(value));
         }
-        
+
         java.lang.Integer getKey(String value) {
             java.lang.Integer key;
             key = Integer.valueOf(value);
             return key;
         }
-        
+
         String getStringKey(java.lang.Integer value) {
             StringBuilder sb = new StringBuilder();
             sb.append(value);
             return sb.toString();
         }
-        
+
         @Override
         public String getAsString(FacesContext facesContext, UIComponent component, Object object) {
             if (object == null) {
@@ -1706,7 +1799,7 @@ public class SessionTimetableController implements Serializable {
                 throw new IllegalArgumentException("object " + object + " is of type " + object.getClass().getName() + "; expected type: " + SessionTimetableController.class.getName());
             }
         }
-        
+
     }
 
     /**
@@ -1756,5 +1849,5 @@ public class SessionTimetableController implements Serializable {
         this.editBookingButtonSessionHistory = editBookingButtonSessionHistory;
         bookingButtonSessionHistory = editBookingButtonSessionHistory;
     }
-    
+
 }
