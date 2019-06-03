@@ -8,6 +8,7 @@ package au.com.manlyit.fitnesscrm.stats.classes;
 import au.com.manlyit.fitnesscrm.stats.beans.ConfigMapFacade;
 import au.com.manlyit.fitnesscrm.stats.beans.CustomerStateFacade;
 import au.com.manlyit.fitnesscrm.stats.beans.CustomersFacade;
+import au.com.manlyit.fitnesscrm.stats.beans.InvoiceFacade;
 import au.com.manlyit.fitnesscrm.stats.beans.NotesFacade;
 import au.com.manlyit.fitnesscrm.stats.beans.PaymentBean;
 import au.com.manlyit.fitnesscrm.stats.beans.PaymentsFacade;
@@ -141,6 +142,8 @@ public class EziDebitPaymentGateway implements Serializable {
     private CustomerStateFacade customerStateFacade;
     @Inject
     private NotesFacade ejbNotesFacade;
+    @Inject
+    private InvoiceFacade invoiceFacade;
     @Inject
     private PaymentsFacade paymentsFacade;
     @Inject
@@ -3370,12 +3373,20 @@ public class EziDebitPaymentGateway implements Serializable {
         for (Payments p : multiSelectedScheduledPayment) {
             if (p != null) {
                 if (multiSelectedScheduledPayment.length == 1) {
+
                     FacesContext context = FacesContext.getCurrentInstance();
                     InvoiceController controller = (InvoiceController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "invoiceController");
                     if (p.getCrmInvoiceId() == null) {
                         JsfUtil.addErrorMessage("Error", "No Invoice Attached To Payment");
                     } else {
-                        controller.generateHtmlInvoicePreview(p.getCrmInvoiceId());
+                        Invoice i = p.getCrmInvoiceId();
+                        if (p.getPaymentStatus().contentEquals(PaymentStatus.SUCESSFUL.value())) {
+                            // make sure the invoice is updated with the successful payment value
+                            
+                            i.setBalance(p.getScheduledAmount().negate());
+                            invoiceFacade.edit(i);
+                        }
+                        controller.generateHtmlInvoicePreview(i);
                         PrimeFaces.current().executeScript("PF('previewHtmlInvoiceDialogueWidget').show()");
                     }
                 } else {

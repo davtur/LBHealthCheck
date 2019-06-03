@@ -146,10 +146,10 @@
                         <h:outputText value=" #{item.id}"/>
                     </p:column>
 
-                    <p:column sortBy="#{item.firstname}" filterBy="#{item.firstname}" headerText="#{configMapController.getKey('ListCustomersTitle_firstname')}"   >
+                    <p:column sortBy="#{item.firstname}" filterBy="#{item.firstname}" filterMatchMode="contains" headerText="#{configMapController.getKey('ListCustomersTitle_firstname')}"   >
                         <h:outputText value="#{item.firstname}"/>
                     </p:column>
-                    <p:column sortBy="#{item.lastname}" filterBy="#{item.lastname}" headerText="#{configMapController.getKey('ListCustomersTitle_lastname')}"   >
+                    <p:column sortBy="#{item.lastname}" filterBy="#{item.lastname}" filterMatchMode="contains" headerText="#{configMapController.getKey('ListCustomersTitle_lastname')}"   >
                         <h:outputText value="#{item.lastname}"/>
                     </p:column>
                     <p:column sortBy="#{item.emailAddress}" filterBy="#{item.emailAddress}" visible="false" headerText="#{configMapController.getKey('ListCustomersTitle_emailAddress')}"   >

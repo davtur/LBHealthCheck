@@ -80,6 +80,7 @@ public class PaymentBean implements Serializable {
     private static final Logger LOGGER = Logger.getLogger(PaymentBean.class.getName());
     private static final String PAYMENT_GATEWAY = "EZIDEBIT";
     private static final int PAYMENT_SCHEDULE_MONTHS_AHEAD = 11;
+    private static final boolean EMAIL_INVOICE = false;
 
     private static final long serialVersionUID = 1L;
 
@@ -2349,12 +2350,15 @@ public class PaymentBean implements Serializable {
             FacesContext context = FacesContext.getCurrentInstance();
             InvoiceController invoiceController = context.getApplication().evaluateExpressionGet(context, "#{invoiceController}", InvoiceController.class);
             String source = invoiceController.generateHtmlInvoice(invoice);
-
-            invoiceController.emailInvoiceBase(source, invoice.getUserId().getEmailAddress());
+            if (EMAIL_INVOICE == true) {
+                invoiceController.emailInvoiceBase(source, invoice.getUserId().getEmailAddress());
+            } else {
+                LOGGER.log(Level.WARNING, "PaymentBean - Send Invoice ID {1} to {0} -- Email currently disabled. ", new Object[]{ invoice.getUserId().getEmailAddress(), invoice.getId()});
+            }
         } catch (ELException eLException) {
             LOGGER.log(Level.WARNING, "sendInvoice - failed ", eLException);
         }
-        LOGGER.log(Level.INFO, "sendInvoice - Completed ");
+        LOGGER.log(Level.INFO, "PaymentBean - Invoice updated with successful payment -- sendInvoice - Completed.  ");
 
     }
 

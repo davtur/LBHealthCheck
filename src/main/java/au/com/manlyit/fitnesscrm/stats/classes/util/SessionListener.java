@@ -25,11 +25,14 @@ public class SessionListener implements HttpSessionListener {
     public void sessionCreated(HttpSessionEvent event) {
         HttpSession session = event.getSession();
         
-        logger.log(Level.INFO, "Session id: {0}", session.getId());
-        logger.log(Level.INFO, "Session id: {0}", session.getId());
-        logger.log(Level.INFO, "New session: {0}", session.isNew());
+ 
+        
+        if(session.isNew()){
+            logger.log(Level.INFO, "New Session Created.The server has created a session, but the client has not yet joined. The client may have disabled cookies. Id: {0}", session.getId());
+        }else{
+            logger.log(Level.INFO, "Session Created id: {0}", session.getId());
+        }
        
-
     }
 
     @Override

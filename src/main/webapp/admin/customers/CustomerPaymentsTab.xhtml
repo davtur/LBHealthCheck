@@ -40,7 +40,7 @@
 
         <p:panel  id="paymentsTablePanel2" rendered="#{ezidebit.paymentDBList != null}" >
             <p:dataTable  id="paymentsTable2"
-
+                           
                           selection="#{ezidebit.multiSelectedScheduledPayment}" 
                           value="#{ezidebit.paymentDBList}" 
                           filteredValue="#{ezidebit.paymentsDBListFilteredItems}"  
@@ -76,8 +76,10 @@
                 </f:facet>
                 <p:column selectionMode="multiple" />
                               <!--<p:ajax event="rowSelect"  listener="#{ezidebit.updateSelectedScheduledPayment}" />-->
-                <p:ajax event="rowSelect"  update="deleteButton previewHtmlInvoiceButton "/>
-                <p:ajax event="rowUnselect" update="deleteButton previewHtmlInvoiceButton "/> 
+                <p:ajax event="rowSelect"  update="deleteButton previewHtmlInvoiceButton paymentDetails"/>
+                <p:ajax event="rowUnselect" update="deleteButton previewHtmlInvoiceButton paymentDetails"/> 
+                <p:ajax event="rowSelectCheckbox"  update="deleteButton previewHtmlInvoiceButton paymentDetails"/>
+                <p:ajax event="rowUnselectCheckbox" update="deleteButton previewHtmlInvoiceButton paymentDetails"/> 
 
                 <p:column  sortBy="#{pay.paymentID}" filterBy="#{pay.paymentID}" headerText="#{configMapController.getKey('ListPaymentsTitle_paymentID')}"   >
                     <h:outputText value="#{pay.paymentID}"/>
