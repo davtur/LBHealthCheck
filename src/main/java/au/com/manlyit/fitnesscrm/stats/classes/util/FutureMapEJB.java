@@ -958,7 +958,7 @@ public class FutureMapEJB implements Serializable {
         synchronized (issueOneWeeksTicketsLockObject) {
             try {
                 List<Tickets> at = ejbTicketsFacade.findCustomerTicketsByDateRange(c, ticketStartDate, ticketStopDate, true);
-                LOGGER.log(Level.INFO, "Issueing Tickets for Customer id {0} - {1} {2}, Plan {6}, existing total tickets for this date range = {3}, startDate {4}, StopDate {5}: ", new Object[]{c.getId(), c.getFirstname(), c.getLastname(), at.size(), ticketStartDate, ticketStopDate, c.getGroupPricing().getPlanName()});
+                LOGGER.log(Level.INFO, "Issueing Tickets for Customer id {0} - {1} {2}, Plan {6}, existing total tickets for this date range = {3}, startDate {4}, StopDate {5} ", new Object[]{c.getId(), c.getFirstname(), c.getLastname(), at.size(), ticketStartDate, ticketStopDate, c.getGroupPricing().getPlanName()});
 
                 // get the list of sub items on the plan. Sub items per week i.e. 2 group training session for two a week , 10 for unlimited etc.
                 ArrayList<Plan> planSubItems = new ArrayList<>(c.getGroupPricing().getPlanCollection());
@@ -1039,8 +1039,8 @@ public class FutureMapEJB implements Serializable {
                 CalendarUtil.SetTimeToMidnight(ticketStartDate);
 
                 GregorianCalendar ticketStopDate = new GregorianCalendar();
-                CalendarUtil.SetToNextDayOfWeek(Calendar.SUNDAY, ticketStopDate);
-                CalendarUtil.SetTimeToMidnight(ticketStopDate);
+                ticketStopDate.setTime(ticketStartDate.getTime());
+                ticketStopDate.add(Calendar.DAY_OF_YEAR, 7);
                 ticketStopDate.add(Calendar.SECOND, -1);
 
                 for (int week = 0; week < weeksAheadToPolulate; week++) {
