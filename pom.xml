@@ -6,7 +6,7 @@
 
     <groupId>au.com.manlyit</groupId>
     <artifactId>FitnessCRM</artifactId>
-    <version>8.3.0</version>
+    <version>8.3.2</version>
     <packaging>war</packaging>
 
     <name>FitnessCRM</name>
@@ -85,7 +85,7 @@
 
         <dependency>
             <groupId>org.primefaces.themes</groupId>
-            <artifactId>california</artifactId>
+            <artifactId>california-theme</artifactId>
             <version>1.0.1</version>
             <type>jar</type>
         </dependency>

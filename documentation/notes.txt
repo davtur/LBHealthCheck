@@ -220,9 +220,16 @@ MYSQL_PASSWORD:Varmints11!!
 
 
 
+## OPENSHIFT
+## to install for openshift in remote nexus
+## make sure the username and password are in ~/.m2/settings.xml under servers. The id should be nexus 
+
+mvn deploy:deploy-file -Dfile=/home/david/NetBeansProjects/libraries/primefaces-6.2.18/primefaces-6.2.18.jar -DgroupId=org.primefaces -DartifactId=primefaces -Dversion=6.2.18 -Dpackaging=jar -DgeneratePom=true -DrepositoryId=nexus -Durl=https://nexus-ci.shift.manlyit.com.au/nexus/content/repositories/releases
+
+mvn deploy:deploy-file -Dfile=/home/david/NetBeansProjects/libraries/Primefaces-purchased-themes/california-1.0.1/california-theme-1.0.1.jar -DgroupId=org.primefaces.themes -DartifactId=california-theme -Dversion=1.0.1 -Dpackaging=jar -DgeneratePom=true -DrepositoryId=nexus -Durl=https://nexus-ci.shift.manlyit.com.au/nexus/content/repositories/releases
 
 
-
+## END OPENSHIFT
 
 
 
@@ -248,7 +255,7 @@ mvn install:install-file -Dfile=path-to-your-artifact-jar
 
 mvn install:install-file -Dfile=/home/david/NetBeansProjects/libraries/primefaces-6.2.4/primefaces-6.2.4.jar -DgroupId=org.primefaces -DartifactId=primefaces -Dversion=6.2.4 -Dpackaging=jar -DgeneratePom=true -DlocalRepositoryPath=/home/david/NetBeansProjects/FitnessCRM/repo
 
-mvn install:install-file -Dfile=/home/david/NetBeansProjects/libraries/Primefaces-purchased-themes/california-1.0.1/california-theme-1.0.1.jar -DgroupId=org.primefaces.themes -DartifactId=spark -Dversion=1.0.1 -Dpackaging=jar -DgeneratePom=true -DlocalRepositoryPath=/home/david/NetBeansProjects/FitnessCRM/repo
+mvn install:install-file -Dfile=/home/david/NetBeansProjects/libraries/Primefaces-purchased-themes/california-1.0.1/california-theme-1.0.1.jar -DgroupId=org.primefaces.themes -DartifactId=california-theme -Dversion=1.0.1 -Dpackaging=jar -DgeneratePom=true -DlocalRepositoryPath=/home/david/NetBeansProjects/FitnessCRM/repo
 
 mvn install:install-file -Dfile=/home/david/NetBeansProjects/libraries/primefaces-6.2.18/primefaces-6.2.18.jar -DgroupId=org.primefaces -DartifactId=primefaces -Dversion=6.2.18 -Dpackaging=jar -DgeneratePom=true -DlocalRepositoryPath=/home/david/NetBeansProjects/FitnessCRM/repo
 

@@ -3377,18 +3377,29 @@ public class EziDebitPaymentGateway implements Serializable {
                     FacesContext context = FacesContext.getCurrentInstance();
                     InvoiceController controller = (InvoiceController) context.getApplication().getELResolver().getValue(context.getELContext(), null, "invoiceController");
                     if (p.getCrmInvoiceId() == null) {
+                        //InvoiceController invoiceController = context.getApplication().evaluateExpressionGet(context, "#{invoiceController}", InvoiceController.class);
+                        InvoiceLine il = null;
+                        Customers cust = p.getCustomerName();
+
+                        il = paymentBean.newInvoiceLineItem(BigDecimal.ONE, cust.getGroupPricing().getPlanName(), cust.getGroupPricing().getPlanPrice(), null);
+
+                        ArrayList<InvoiceLine> itemsList = new ArrayList<>();
+                        itemsList.add(il);
+                        Invoice invoice = paymentBean.generateInvoiceWithLineItemsAndPayment(cust, itemsList, p);
+
                         JsfUtil.addErrorMessage("Error", "No Invoice Attached To Payment");
-                    } else {
-                        Invoice i = p.getCrmInvoiceId();
-                        if (p.getPaymentStatus().contentEquals(PaymentStatus.SUCESSFUL.value())) {
-                            // make sure the invoice is updated with the successful payment value
-                            
-                            i.setBalance(p.getScheduledAmount().negate());
-                            invoiceFacade.edit(i);
-                        }
-                        controller.generateHtmlInvoicePreview(i);
-                        PrimeFaces.current().executeScript("PF('previewHtmlInvoiceDialogueWidget').show()");
+
                     }
+                    Invoice i = p.getCrmInvoiceId();
+                    if (p.getPaymentStatus().contentEquals(PaymentStatus.SUCESSFUL.value())) {
+                        // make sure the invoice is updated with the successful payment value
+
+                        i.setBalance(p.getScheduledAmount().negate());
+                        invoiceFacade.edit(i);
+                    }
+                    controller.generateHtmlInvoicePreview(i);
+                    PrimeFaces.current().executeScript("PF('previewHtmlInvoiceDialogueWidget').show()");
+
                 } else {
                     JsfUtil.addErrorMessage("Error Multiple Selected", "Only one payment invoice can be previewed at a time");
                 }
