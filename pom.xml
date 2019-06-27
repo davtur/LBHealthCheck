@@ -6,7 +6,7 @@
 
     <groupId>au.com.manlyit</groupId>
     <artifactId>FitnessCRM</artifactId>
-    <version>8.3.3</version>
+    <version>8.3.4</version>
     <packaging>war</packaging>
 
     <name>FitnessCRM</name>
@@ -61,6 +61,7 @@
             <version>3.6.1</version>
             <type>jar</type>
         </dependency>
+        
         <dependency>
             <groupId>javax</groupId>
             <artifactId>javaee-api</artifactId>
@@ -104,12 +105,17 @@
             <artifactId>javacv</artifactId>
             <version>1.4.1</version>
         </dependency>
-        <dependency>
+        <!--<dependency>
             <groupId>org.apache.sanselan</groupId>
             <artifactId>sanselan</artifactId>
             <version>0.97-incubator</version>
+        </dependency>-->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-imaging</artifactId>
+            <version>1.0-alpha1</version>
+            <type>jar</type>
         </dependency>
-
         <dependency>
             <groupId>xml-security</groupId>
             <artifactId>xmlsec</artifactId>

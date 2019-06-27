@@ -18,10 +18,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -48,16 +46,19 @@ import javax.faces.model.DataModel;
 import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
 import javax.imageio.ImageIO;
-import javax.imageio.stream.FileImageOutputStream;
 import javax.servlet.http.HttpServletRequest;
+import org.apache.commons.imaging.ImageReadException;
+import org.apache.commons.imaging.Imaging;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfo;
 
-import org.apache.sanselan.ImageReadException;
-import org.apache.sanselan.Sanselan;
-import org.apache.sanselan.common.IImageMetadata;
-import org.apache.sanselan.formats.jpeg.JpegImageMetadata;
-import org.apache.sanselan.formats.tiff.TiffField;
-import org.apache.sanselan.formats.tiff.constants.TagInfo;
-import org.apache.sanselan.formats.tiff.constants.TiffConstants;
+//import org.apache.sanselan.ImageReadException;
+//import org.apache.sanselan.Sanselan;
+import org.apache.commons.imaging.common.ImageMetadata;
+import org.apache.commons.imaging.formats.jpeg.JpegImageMetadata;
+import org.apache.commons.imaging.formats.tiff.TiffField;
+import org.apache.commons.imaging.formats.tiff.constants.ExifTagConstants;
+import org.apache.commons.imaging.formats.tiff.constants.GpsTagConstants;
+import org.apache.commons.imaging.formats.tiff.constants.TiffTagConstants;
 import org.primefaces.PrimeFaces;
 import org.primefaces.event.SelectEvent;
 import org.primefaces.event.FileUploadEvent;
@@ -440,27 +441,28 @@ public class CustomerImagesController implements Serializable {
     private Date getDateFromJpegMetadata(UploadedFile file) {
         Date photoDateFromMeta = null;
         try { // get meta data from photo
-            IImageMetadata metadata = Sanselan.getMetadata(file.getInputstream(), null);
+            ImageMetadata metadata = Imaging.getMetadata(file.getInputstream(), null);
             JpegImageMetadata jpegMetadata = (JpegImageMetadata) metadata;
             if (jpegMetadata != null) {
                 // print out various interesting EXIF tags.
                 //for debugging only - comment out
-                printTagValue(jpegMetadata, TiffConstants.TIFF_TAG_XRESOLUTION);
-                printTagValue(jpegMetadata, TiffConstants.TIFF_TAG_DATE_TIME);
+                printTagValue(jpegMetadata, TiffTagConstants.TIFF_TAG_XRESOLUTION);
+                printTagValue(jpegMetadata, TiffTagConstants.TIFF_TAG_DATE_TIME);
                 printTagValue(jpegMetadata,
-                        TiffConstants.EXIF_TAG_DATE_TIME_ORIGINAL);
-                printTagValue(jpegMetadata, TiffConstants.EXIF_TAG_CREATE_DATE);
-                printTagValue(jpegMetadata, TiffConstants.EXIF_TAG_ISO);
+                        ExifTagConstants.EXIF_TAG_DATE_TIME_ORIGINAL);
+                printTagValue(jpegMetadata, ExifTagConstants.EXIF_TAG_DATE_TIME_DIGITIZED);
+                printTagValue(jpegMetadata, ExifTagConstants.EXIF_TAG_ISO);
                 printTagValue(jpegMetadata,
-                        TiffConstants.EXIF_TAG_SHUTTER_SPEED_VALUE);
-                printTagValue(jpegMetadata, TiffConstants.EXIF_TAG_APERTURE_VALUE);
-                printTagValue(jpegMetadata, TiffConstants.EXIF_TAG_BRIGHTNESS_VALUE);
-                printTagValue(jpegMetadata, TiffConstants.GPS_TAG_GPS_LATITUDE_REF);
-                printTagValue(jpegMetadata, TiffConstants.GPS_TAG_GPS_LATITUDE);
-                printTagValue(jpegMetadata, TiffConstants.GPS_TAG_GPS_LONGITUDE_REF);
-                printTagValue(jpegMetadata, TiffConstants.GPS_TAG_GPS_LONGITUDE);
+                        ExifTagConstants.EXIF_TAG_SHUTTER_SPEED_VALUE);
+                printTagValue(jpegMetadata, ExifTagConstants.EXIF_TAG_APERTURE_VALUE);
+                printTagValue(jpegMetadata, ExifTagConstants.EXIF_TAG_BRIGHTNESS_VALUE);
+                printTagValue(jpegMetadata, GpsTagConstants.GPS_TAG_GPS_LATITUDE_REF);
+                printTagValue(jpegMetadata, GpsTagConstants.GPS_TAG_GPS_LATITUDE);
+                printTagValue(jpegMetadata, GpsTagConstants.GPS_TAG_GPS_LONGITUDE_REF);
+                printTagValue(jpegMetadata, GpsTagConstants.GPS_TAG_GPS_LONGITUDE);
 
-                TiffField field = jpegMetadata.findEXIFValue(TiffConstants.EXIF_TAG_DATE_TIME_ORIGINAL);
+             
+                TiffField field = jpegMetadata.findEXIFValue(ExifTagConstants.EXIF_TAG_DATE_TIME_ORIGINAL);
                 if (field == null) {
 
                     Logger.getLogger(CustomerImagesController.class.getName()).log(Level.INFO, "Photo upload date not found in EXIF data");
