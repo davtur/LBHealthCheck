@@ -530,7 +530,7 @@
             <goals> <goal>increment</goal> <goal>commit</goal> </goals> <phase>compile</phase> 
             <configuration> <autoIncrementVersion>true</autoIncrementVersion> </configuration> 
             </execution> </executions> </plugin> -->
-            <plugin>
+             <!-- <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-antrun-plugin</artifactId>
                 <version>1.8</version>
@@ -551,7 +551,7 @@
                     </execution>
                 </executions>
             </plugin>
-        </plugins>
+        </plugins>-->
         <!-- <finalName>${project.artifactId}-${project.version}.${buildNumber}</finalName>-->
  
     </build>
