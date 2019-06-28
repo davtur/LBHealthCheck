@@ -550,8 +550,8 @@
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
-        </plugins>-->
+            </plugin>-->
+        </plugins>
         <!-- <finalName>${project.artifactId}-${project.version}.${buildNumber}</finalName>-->
  
     </build>
