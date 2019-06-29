@@ -145,11 +145,11 @@
         <subsystem xmlns="urn:jboss:domain:datasources:5.0">
             <datasources>
                 <datasource jta="true" jndi-name="java:/jdbc/fitness" pool-name="fitness" enabled="true" use-java-context="true" use-ccm="false">
-                    <connection-url>jdbc:mysql://${env.MYSQL_DB_HOST}:${env.MYSQL_DB_PORT}/${env.MYSQL_DB_NAME}</connection-url>
+                    <connection-url>jdbc:mysql://${env.OPENSHIFT_MYSQL_DB_HOST}:${env.OPENSHIFT_MYSQL_DB_PORT}/${env.OPENSHIFT_MYSQL_DB_NAME}</connection-url>
                     <driver>mysql</driver>
                     <security>
-                        <user-name>${env.MYSQL_DB_USERNAME}</user-name>
-                        <password>${env.MYSQL_DB_PASSWORD}</password>
+                        <user-name>${env.OPENSHIFT_MYSQL_DB_USERNAME}</user-name>
+                        <password>${env.OPENSHIFT_MYSQL_DB_PASSWORD}</password>
                     </security>
                     <validation>
                         <check-valid-connection-sql>SELECT 1</check-valid-connection-sql>
@@ -162,11 +162,11 @@
                     </pool>
                 </datasource>
                 <datasource jta="true" jndi-name="java:/jdbc/fitness2" pool-name="fitness2" enabled="true" use-ccm="true">
-                    <connection-url>jdbc:mysql://${env.MYSQL_DB_HOST}:${env.MYSQL_DB_PORT}/${env.MYSQL_DB_NAME}</connection-url>
+                    <connection-url>jdbc:mysql://${env.OPENSHIFT_MYSQL_DB_HOST}:${env.OPENSHIFT_MYSQL_DB_PORT}/${env.OPENSHIFT_MYSQL_DB_NAME}</connection-url>
                     <driver>mysql</driver>
                     <security>
-                        <user-name>${env.MYSQL_DB_USERNAME}</user-name>
-                        <password>${env.MYSQL_DB_PASSWORD}</password>
+                        <user-name>${env.OPENSHIFT_MYSQL_DB_USERNAME}</user-name>
+                        <password>${env.OPENSHIFT_MYSQL_DB_PASSWORD}</password>
                     </security>
                     <validation>
                         <check-valid-connection-sql>SELECT 1</check-valid-connection-sql>
@@ -179,11 +179,11 @@
                     </pool>
                 </datasource>
                 <datasource jta="true" jndi-name="java:/jdbc/quartz" pool-name="quartz" enabled="true" use-ccm="true">
-                    <connection-url>jdbc:mysql://${env.MYSQL_DB_HOST}:${env.MYSQL_DB_PORT}/${env.MYSQL_DB_NAME}</connection-url>
+                    <connection-url>jdbc:mysql://${env.OPENSHIFT_MYSQL_DB_HOST}:${env.OPENSHIFT_MYSQL_DB_PORT}/${env.OPENSHIFT_MYSQL_DB_NAME}</connection-url>
                     <driver>mysql</driver>
                     <security>
-                        <user-name>${env.MYSQL_DB_USERNAME}</user-name>
-                        <password>${env.MYSQL_DB_PASSWORD}</password>
+                        <user-name>${env.OPENSHIFT_MYSQL_DB_USERNAME}</user-name>
+                        <password>${env.OPENSHIFT_MYSQL_DB_PASSWORD}</password>
                     </security>
                     <validation>
                         <check-valid-connection-sql>SELECT 1</check-valid-connection-sql>
