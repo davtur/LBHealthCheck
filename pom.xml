@@ -320,274 +320,283 @@
    
 
     </dependencies>
+    <profiles>
+        <profile>
+            <!-- When built in OpenShift the 'openshift' profile will be used when invoking mvn. -->
+            <!-- Use this profile for any OpenShift specific customization your app will need. -->
+            <!-- By default that is to put the resulting archive into the 'deployments' folder. -->
+            <!-- http://maven.apache.org/guides/mini/guide-building-for-different-environments.html -->
+            <id>openshift</id>
 
-    <build>
-        <plugins>
-            <!-- <plugin>
-                <groupId>org.wildfly.plugins</groupId>
-                <artifactId>wildfly-maven-plugin</artifactId>
-                <version>2.0.0.Final</version>
-                <executions>
-                    <execution>
-                        <id>undeploy</id>
-                        <phase>clean</phase>
-                        <goals>
-                            <goal>undeploy-artifact</goal>
-                        </goals>
+            <build>
+                <plugins>
+                    <!-- <plugin>
+                        <groupId>org.wildfly.plugins</groupId>
+                        <artifactId>wildfly-maven-plugin</artifactId>
+                        <version>2.0.0.Final</version>
+                        <executions>
+                            <execution>
+                                <id>undeploy</id>
+                                <phase>clean</phase>
+                                <goals>
+                                    <goal>undeploy-artifact</goal>
+                                </goals>
+                                <configuration>
+                                    <ignoreMissingDeployment>true</ignoreMissingDeployment>
+                                    <groupId>au.com.manlyit</groupId>
+                                    <artifactId>${project.artifactId}</artifactId>
+                                    <version>${project.version}</version>
+                                    <type>war</type>
+                                    <name>${project.artifactId}-${project.version}</name>
+                                    <match-pattern>${project.artifactId}-.*</match-pattern>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>deploy</id>
+                                <phase>install</phase>
+                                <goals>
+                                    <goal>deploy</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin> -->
+                    <!--<plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>buildnumber-maven-plugin</artifactId>
+                        <version>1.4</version>
+                        <executions>
+                            <execution>
+                                <id>buildnumber</id>
+                                <phase>validate</phase>
+                                <goals>
+                                    <goal>create</goal>
+                                </goals>
+                            </execution>
+                        </executions>
                         <configuration>
-                            <ignoreMissingDeployment>true</ignoreMissingDeployment>
-                            <groupId>au.com.manlyit</groupId>
-                            <artifactId>${project.artifactId}</artifactId>
-                            <version>${project.version}</version>
-                            <type>war</type>
-                            <name>${project.artifactId}-${project.version}</name>
-                            <match-pattern>${project.artifactId}-.*</match-pattern>
+                            <format>{0,number}</format>
+                            <items>
+                                <item>buildNumber</item>
+                            </items>                    
+                            <doCheck>false</doCheck>
+                            <doUpdate>false</doUpdate>
+                            <revisionOnScmFailure>unknownbuild</revisionOnScmFailure>   
                         </configuration>
-                    </execution>
-                    <execution>
-                        <id>deploy</id>
-                        <phase>install</phase>
-                        <goals>
-                            <goal>deploy</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin> -->
-            <!--<plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>buildnumber-maven-plugin</artifactId>
-                <version>1.4</version>
-                <executions>
-                    <execution>
-                        <id>buildnumber</id>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>create</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <format>{0,number}</format>
-                    <items>
-                        <item>buildNumber</item>
-                    </items>                    
-                    <doCheck>false</doCheck>
-                    <doUpdate>false</doUpdate>
-                    <revisionOnScmFailure>unknownbuild</revisionOnScmFailure>   
-                </configuration>
-            </plugin> --> 
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>
-                <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                    <compilerArguments>
-                        <endorseddirs>${endorsed.dir}</endorseddirs>
-                    </compilerArguments>
-                    <showDeprecation>true</showDeprecation>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.1.0</version>
-                <executions>
-                    <execution>
-                        <id>attach-javadocs</id>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
+                    </plugin> --> 
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <version>3.8.1</version>
                         <configuration>
-                            <additionalparam>-Xdoclint:none</additionalparam>
-
-                            <additionalparam>-Xdoclint:none</additionalparam>
-                            <additionalOptions>-Xdoclint:none</additionalOptions>
+                            <source>1.8</source>
+                            <target>1.8</target>
+                            <compilerArguments>
+                                <endorseddirs>${endorsed.dir}</endorseddirs>
+                            </compilerArguments>
+                            <showDeprecation>true</showDeprecation>
                         </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-deploy-plugin</artifactId>
-                <version>2.8.2</version>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>3.1.0</version>
+                        <executions>
+                            <execution>
+                                <id>attach-javadocs</id>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                                <configuration>
+                                    <additionalparam>-Xdoclint:none</additionalparam>
 
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
-                <version>3.1.0</version>
+                                    <additionalparam>-Xdoclint:none</additionalparam>
+                                    <additionalOptions>-Xdoclint:none</additionalOptions>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-deploy-plugin</artifactId>
+                        <version>2.8.2</version>
 
-            </plugin>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <version>3.1.0</version>
+
+                    </plugin>
            
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-war-plugin</artifactId>
-                <version>3.2.3</version>
-                <configuration>
-                    <archive>                   
-                        <manifest>
-                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-                            <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
-                        </manifest>
-                        <manifestEntries>
-                            <version>${project.version}</version>
-                            <buildTime>${maven.build.timestamp}</buildTime>
-                        </manifestEntries>
-                    </archive>
-                    <failOnMissingWebXml>false</failOnMissingWebXml>
-                    <webResources>
-                        <resource>
-                            <directory>src</directory>
-                            <targetPath>WEB-INF</targetPath>
-                            <includes>
-                                <include>jax-ws-catalog.xml</include>
-                                <include>wsdl/**</include>
-                            </includes>
-                        </resource>
-                        <resource>
-                            <directory>src</directory>
-                            <targetPath>WEB-INF/classes/META-INF</targetPath>
-                            <includes>
-                                <include>jax-ws-catalog.xml</include>
-                                <include>wsdl/**</include>
-                            </includes>
-                        </resource>
-                    </webResources>
-                </configuration>
-                <goals>
-                    <goal>manifest</goal>
-                </goals>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <version>3.1.1</version>
-                <executions>
-                    <execution>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>copy</goal>
-                        </goals>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-war-plugin</artifactId>
+                        <version>3.2.3</version>
                         <configuration>
-                            <outputDirectory>${endorsed.dir}</outputDirectory>
-                            <silent>true</silent>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>javax</groupId>
-                                    <artifactId>javaee-endorsed-api</artifactId>
-                                    <version>7.0</version>
-                                    <type>jar</type>
-                                </artifactItem>
-                            </artifactItems>
+                            <archive>                   
+                                <manifest>
+                                    <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                                    <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                                </manifest>
+                                <manifestEntries>
+                                    <version>${project.version}</version>
+                                    <buildTime>${maven.build.timestamp}</buildTime>
+                                </manifestEntries>
+                            </archive>
+                            <failOnMissingWebXml>false</failOnMissingWebXml>
+                            <webResources>
+                                <resource>
+                                    <directory>src</directory>
+                                    <targetPath>WEB-INF</targetPath>
+                                    <includes>
+                                        <include>jax-ws-catalog.xml</include>
+                                        <include>wsdl/**</include>
+                                    </includes>
+                                </resource>
+                                <resource>
+                                    <directory>src</directory>
+                                    <targetPath>WEB-INF/classes/META-INF</targetPath>
+                                    <includes>
+                                        <include>jax-ws-catalog.xml</include>
+                                        <include>wsdl/**</include>
+                                    </includes>
+                                </resource>
+                            </webResources>
                         </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.jvnet.jax-ws-commons</groupId>
-                <artifactId>jaxws-maven-plugin</artifactId>
-                <version>2.3.1-b20150201.1248</version>
-                <executions>
-                    <execution>
                         <goals>
-                            <goal>wsimport</goal>
+                            <goal>manifest</goal>
                         </goals>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                        <version>3.1.1</version>
+                        <executions>
+                            <execution>
+                                <phase>validate</phase>
+                                <goals>
+                                    <goal>copy</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>${endorsed.dir}</outputDirectory>
+                                    <silent>true</silent>
+                                    <artifactItems>
+                                        <artifactItem>
+                                            <groupId>javax</groupId>
+                                            <artifactId>javaee-endorsed-api</artifactId>
+                                            <version>7.0</version>
+                                            <type>jar</type>
+                                        </artifactItem>
+                                    </artifactItems>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.jvnet.jax-ws-commons</groupId>
+                        <artifactId>jaxws-maven-plugin</artifactId>
+                        <version>2.3.1-b20150201.1248</version>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>wsimport</goal>
+                                </goals>
+                                <configuration>
+                                    <wsdlFiles>
+                                        <wsdlFile>api.demo.ezidebit.com.au/v3-5/nonpci.wsdl</wsdlFile>
+                                    </wsdlFiles>
+                                    <packageName>au.com.manlyit.fitnesscrm.stats.webservices</packageName>
+                                    <vmArgs>
+                                        <vmArg>-Djavax.xml.accessExternalSchema=all</vmArg>
+                                    </vmArgs>
+                                    <wsdlLocation>https://api.demo.ezidebit.com.au/v3-5/nonpci?wsdl</wsdlLocation>
+                                    <staleFile>${project.build.directory}/jaxws/stale/nonpci.stale</staleFile>
+                                </configuration>
+                                <id>wsimport-generate-nonpci</id>
+                                <phase>generate-sources</phase>
+                            </execution>
+                        </executions>
+                        <dependencies>
+                            <dependency>
+                                <groupId>javax.xml</groupId>
+                                <artifactId>webservices-api</artifactId>
+                                <version>2.0.1</version>
+                            </dependency>
+                        </dependencies>
                         <configuration>
-                            <wsdlFiles>
-                                <wsdlFile>api.demo.ezidebit.com.au/v3-5/nonpci.wsdl</wsdlFile>
-                            </wsdlFiles>
-                            <packageName>au.com.manlyit.fitnesscrm.stats.webservices</packageName>
-                            <vmArgs>
-                                <vmArg>-Djavax.xml.accessExternalSchema=all</vmArg>
-                            </vmArgs>
-                            <wsdlLocation>https://api.demo.ezidebit.com.au/v3-5/nonpci?wsdl</wsdlLocation>
-                            <staleFile>${project.build.directory}/jaxws/stale/nonpci.stale</staleFile>
+                            <sourceDestDir>${project.build.directory}/generated-sources/jaxws-wsimport</sourceDestDir>
+                            <xnocompile>true</xnocompile>
+                            <verbose>true</verbose>
+                            <extension>true</extension>
+                            <catalog>${basedir}/src/jax-ws-catalog.xml</catalog>
                         </configuration>
-                        <id>wsimport-generate-nonpci</id>
-                        <phase>generate-sources</phase>
-                    </execution>
-                </executions>
-                <dependencies>
-                    <dependency>
-                        <groupId>javax.xml</groupId>
-                        <artifactId>webservices-api</artifactId>
-                        <version>2.0.1</version>
-                    </dependency>
-                </dependencies>
-                <configuration>
-                    <sourceDestDir>${project.build.directory}/generated-sources/jaxws-wsimport</sourceDestDir>
-                    <xnocompile>true</xnocompile>
-                    <verbose>true</verbose>
-                    <extension>true</extension>
-                    <catalog>${basedir}/src/jax-ws-catalog.xml</catalog>
-                </configuration>
-            </plugin>
+                    </plugin>
 
-            <!-- <plugin> <groupId>org.codehaus.mojo</groupId> <artifactId>autoincrement-versions-maven-plugin</artifactId> 
-            <version>2.0-SNAPSHOT</version> <executions> <execution> <id>update-pom-versions</id> 
-            <goals> <goal>increment</goal> <goal>commit</goal> </goals> <phase>compile</phase> 
-            <configuration> <autoIncrementVersion>true</autoIncrementVersion> </configuration> 
-            </execution> </executions> </plugin> -->
-             <!-- <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <version>1.8</version>
-                <executions>
-                    <execution>
-                        <phase>install</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <configuration>
-                            <target>
-                                <echo>Copy WAR to Docker Directory</echo>
-                                <copy
-                                    file="${basedir}/target/FitnessCRM-${project.version}.war"
-                                    tofile="${basedir}/docker/FitnessCRM-${project.version}.war" />
-                            </target>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>-->
-        </plugins>
-        <!-- <finalName>${project.artifactId}-${project.version}.${buildNumber}</finalName>-->
+                    <!-- <plugin> <groupId>org.codehaus.mojo</groupId> <artifactId>autoincrement-versions-maven-plugin</artifactId> 
+                    <version>2.0-SNAPSHOT</version> <executions> <execution> <id>update-pom-versions</id> 
+                    <goals> <goal>increment</goal> <goal>commit</goal> </goals> <phase>compile</phase> 
+                    <configuration> <autoIncrementVersion>true</autoIncrementVersion> </configuration> 
+                    </execution> </executions> </plugin> -->
+                    <!-- <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <version>1.8</version>
+                        <executions>
+                            <execution>
+                                <phase>install</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <echo>Copy WAR to Docker Directory</echo>
+                                        <copy
+                                            file="${basedir}/target/FitnessCRM-${project.version}.war"
+                                            tofile="${basedir}/docker/FitnessCRM-${project.version}.war" />
+                                    </target>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>-->
+                </plugins>
+                <!-- <finalName>${project.artifactId}-${project.version}.${buildNumber}</finalName>-->
  
-    </build>
-    <repositories>
-        <repository>
-            <id>unknown-jars-temp-repo</id>
-            <name>A temporary repository created by NetBeans for libraries and jars it could not identify. Please replace the dependencies in this repository with correct ones and delete this repository.</name>
-            <url>file:${project.basedir}/lib</url>
-        </repository>
-        <repository>
-            <url>http://repository.primefaces.org/</url>
-            <id>PrimeFaces-maven-lib</id>
-            <layout>default</layout>
-            <name>Repository for library PrimeFaces-maven-lib</name>
-        </repository>
-        <repository>
-            <id>project.local</id>
-            <name>project</name>
-            <url>file:${project.basedir}/repo</url>
-        </repository>
-    </repositories>
-    <pluginRepositories>
-        <!-- <pluginRepository> <id>autoincrement-versions-maven-plugin</id> <name>autoincrement-versions-maven-plugin</name> 
-        <url>http://autoincrement-versions-maven-plugin.googlecode.com/svn/repo</url> 
-        <snapshots> <enabled>true</enabled> </snapshots> </pluginRepository> -->
-    </pluginRepositories>
-    <reporting>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-checkstyle-plugin</artifactId>
-                <version>3.1.0</version>
-                <configuration>
-                    <configLocation>config/sun_checks.xml</configLocation>
-                </configuration>
-            </plugin>
-        </plugins>
-    </reporting>
+            </build>
+            <repositories>
+                <repository>
+                    <id>unknown-jars-temp-repo</id>
+                    <name>A temporary repository created by NetBeans for libraries and jars it could not identify. Please replace the dependencies in this repository with correct ones and delete this repository.</name>
+                    <url>file:${project.basedir}/lib</url>
+                </repository>
+                <repository>
+                    <url>http://repository.primefaces.org/</url>
+                    <id>PrimeFaces-maven-lib</id>
+                    <layout>default</layout>
+                    <name>Repository for library PrimeFaces-maven-lib</name>
+                </repository>
+                <repository>
+                    <id>project.local</id>
+                    <name>project</name>
+                    <url>file:${project.basedir}/repo</url>
+                </repository>
+            </repositories>
+            <pluginRepositories>
+                <!-- <pluginRepository> <id>autoincrement-versions-maven-plugin</id> <name>autoincrement-versions-maven-plugin</name> 
+                <url>http://autoincrement-versions-maven-plugin.googlecode.com/svn/repo</url> 
+                <snapshots> <enabled>true</enabled> </snapshots> </pluginRepository> -->
+            </pluginRepositories>
+            <reporting>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-checkstyle-plugin</artifactId>
+                        <version>3.1.0</version>
+                        <configuration>
+                            <configLocation>config/sun_checks.xml</configLocation>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </reporting>
+        </profile>
+    </profiles>
 </project>
