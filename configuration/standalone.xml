@@ -145,11 +145,11 @@
         <subsystem xmlns="urn:jboss:domain:datasources:5.0">
             <datasources>
                 <datasource jta="true" jndi-name="java:/jdbc/fitness" pool-name="fitness" enabled="true" use-java-context="true" use-ccm="false">
-                   <connection-url>jdbc:mysql://${env.OPENSHIFT_MYSQL_DB_HOST}:${env.OPENSHIFT_MYSQL_DB_PORT}/${env.OPENSHIFT_MYSQL_DB_NAME}</connection-url>
+                    <connection-url>jdbc:mysql://${env.MYSQL_DB_HOST}:${env.MYSQL_DB_PORT}/${env.MYSQL_DB_NAME}</connection-url>
                     <driver>mysql</driver>
                     <security>
-                      <user-name>${env.OPENSHIFT_MYSQL_DB_USERNAME}</user-name>
-                      <password>${env.OPENSHIFT_MYSQL_DB_PASSWORD}</password>
+                        <user-name>${env.MYSQL_DB_USERNAME}</user-name>
+                        <password>${env.MYSQL_DB_PASSWORD}</password>
                     </security>
                     <validation>
                         <check-valid-connection-sql>SELECT 1</check-valid-connection-sql>
@@ -159,42 +159,53 @@
                     </validation>
                     <pool>
                         <flush-strategy>IdleConnections</flush-strategy>
+                    </pool>
                 </datasource>
                 <datasource jta="true" jndi-name="java:/jdbc/fitness2" pool-name="fitness2" enabled="true" use-ccm="true">
- 		    <connection-url>${env.DB_CONNECTION_URL}</connection-url>
-                      <driver>mysql</driver>
+                    <connection-url>jdbc:mysql://${env.MYSQL_DB_HOST}:${env.MYSQL_DB_PORT}/${env.MYSQL_DB_NAME}</connection-url>
+                    <driver>mysql</driver>
                     <security>
-			<user-name>${env.MYSQL_USER}</user-name>
-                	<password>${env.MYSQL_PASSWORD}</password>
-                     </security>
+                        <user-name>${env.MYSQL_DB_USERNAME}</user-name>
+                        <password>${env.MYSQL_DB_PASSWORD}</password>
+                    </security>
                     <validation>
-                        <valid-connection-checker class-name="org.jboss.jca.adapters.jdbc.extensions.mysql.MySQLValidConnectionChecker"/>
+                        <check-valid-connection-sql>SELECT 1</check-valid-connection-sql>
                         <background-validation>true</background-validation>
-                        <exception-sorter class-name="org.jboss.jca.adapters.jdbc.extensions.mysql.MySQLExceptionSorter"/>
+                        <background-validation-millis>60000</background-validation-millis>
+                        <!--<validate-on-match>true</validate-on-match>-->
                     </validation>
+                    <pool>
+                        <flush-strategy>IdleConnections</flush-strategy>
+                    </pool>
                 </datasource>
-                <datasource jta="true" jndi-name="java:/jdbc/quartz" pool-name="quartz" enabled="true" use-ccm="true">
- 		    <connection-url>${env.DB_CONNECTION_URL}</connection-url>
-                     <driver>mysql</driver>
-                    <security>
-			<user-name>${env.MYSQL_USER}</user-name>
-                	<password>${env.MYSQL_PASSWORD}</password>
-                     </security>
-                  <validation>
-                        <valid-connection-checker class-name="org.jboss.jca.adapters.jdbc.extensions.mysql.MySQLValidConnectionChecker"/>
-                        <background-validation>true</background-validation>
-                        <exception-sorter class-name="org.jboss.jca.adapters.jdbc.extensions.mysql.MySQLExceptionSorter"/>
-                    </validation>
-                </datasource>
-                <drivers>
-		<driver name="mysql" module="com.mysql.jdbc"> 
+            </datasource>
+            <datasource jta="true" jndi-name="java:/jdbc/quartz" pool-name="quartz" enabled="true" use-ccm="true">
+                <connection-url>jdbc:mysql://${env.MYSQL_DB_HOST}:${env.MYSQL_DB_PORT}/${env.MYSQL_DB_NAME}</connection-url>
+                <driver>mysql</driver>
+                <security>
+                    <user-name>${env.MYSQL_DB_USERNAME}</user-name>
+                    <password>${env.MYSQL_DB_PASSWORD}</password>
+                </security>
+                <validation>
+                    <check-valid-connection-sql>SELECT 1</check-valid-connection-sql>
+                    <background-validation>true</background-validation>
+                    <background-validation-millis>60000</background-validation-millis>
+                    <!--<validate-on-match>true</validate-on-match>-->
+                </validation>
+                <pool>
+                    <flush-strategy>IdleConnections</flush-strategy>
+                </pool>
+            </datasource>
+        </datasource>
+        <drivers>
+            <driver name="mysql" module="com.mysql.jdbc"> 
                 <driver-class>com.mysql.jdbc.Driver</driver-class>
                 <xa-datasource-class>com.mysql.jdbc.jdbc2.optional.MysqlXADataSource</xa-datasource-class>
-            	</driver> 
-                    <driver name="h2" module="com.h2database.h2">
-                        <xa-datasource-class>org.h2.jdbcx.JdbcDataSource</xa-datasource-class>
-                    </driver>
-                </drivers>
+            </driver> 
+            <driver name="h2" module="com.h2database.h2">
+                <xa-datasource-class>org.h2.jdbcx.JdbcDataSource</xa-datasource-class>
+            </driver>
+        </drivers>
             </datasources>
         </subsystem>
         <subsystem xmlns="urn:jboss:domain:deployment-scanner:2.0">
@@ -561,4 +572,4 @@
             <remote-destination host="${env.OPENSHIFT_SMTP_HOST}" port="25"/>
         </outbound-socket-binding>
     </socket-binding-group>
-    </server>
+</server>
