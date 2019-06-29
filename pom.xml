@@ -6,7 +6,7 @@
 
     <groupId>au.com.manlyit</groupId>
     <artifactId>FitnessCRM</artifactId>
-    <version>8.3.4</version>
+    <version>8.3.5</version>
     <packaging>war</packaging>
 
     <name>FitnessCRM</name>
@@ -530,7 +530,7 @@
             <goals> <goal>increment</goal> <goal>commit</goal> </goals> <phase>compile</phase> 
             <configuration> <autoIncrementVersion>true</autoIncrementVersion> </configuration> 
             </execution> </executions> </plugin> -->
-            <plugin>
+             <!-- <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-antrun-plugin</artifactId>
                 <version>1.8</version>
@@ -550,7 +550,7 @@
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
+            </plugin>-->
         </plugins>
         <!-- <finalName>${project.artifactId}-${project.version}.${buildNumber}</finalName>-->
  

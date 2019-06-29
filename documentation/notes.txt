@@ -8,6 +8,7 @@ In a Servlet, you can get request scoped beans by:
 Bean bean = (Bean) request.getAttribute("beanName");
 and session scoped beans by:
 
+
 Bean bean = (Bean) request.getSession().getAttribute("beanName");
 and application scoped beans by:
 
