@@ -10,7 +10,7 @@
         <extension module="org.jboss.as.jaxrs"/>
         <extension module="org.jboss.as.jdr"/>
         <extension module="org.jboss.as.jmx"/>
-        <extension module="org.jboss.as.jpa"/>
+        <!--<extension module="org.jboss.as.jpa"/>-->
         <extension module="org.jboss.as.jsf"/>
         <extension module="org.jboss.as.logging"/>
         <extension module="org.jboss.as.mail"/>
