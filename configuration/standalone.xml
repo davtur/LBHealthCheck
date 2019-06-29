@@ -144,14 +144,6 @@
         <subsystem xmlns="urn:jboss:domain:core-management:1.0"/>
         <subsystem xmlns="urn:jboss:domain:datasources:5.0">
             <datasources>
-             <datasource jndi-name="java:jboss/datasources/ExampleDS" pool-name="ExampleDS" enabled="true" use-java-context="true">
-                    <connection-url>jdbc:h2:mem:test;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE</connection-url>
-                    <driver>h2</driver>
-                    <security>
-                        <user-name>sa</user-name>
-                        <password>sa</password>
-                    </security>
-                </datasource>         
                 <datasource jta="true" jndi-name="java:/jdbc/fitness" pool-name="fitness" enabled="true" use-java-context="true" use-ccm="false">
 		     <connection-url>${env.DB_CONNECTION_URL}</connection-url>
                       <driver>mysql</driver>
@@ -563,7 +555,7 @@
         <socket-binding name="txn-recovery-environment" port="4712"/>
         <socket-binding name="txn-status-manager" port="4713"/>
         <outbound-socket-binding name="mail-smtp">
-            <remote-destination host="localhost" port="25"/>
+            <remote-destination host="${env.OPENSHIFT_SMTP_HOST}" port="25"/>
         </outbound-socket-binding>
     </socket-binding-group>
     </server>
