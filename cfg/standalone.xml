@@ -33,7 +33,7 @@
     </extensions>
     <system-properties>
         <property name="ee8.preview.mode" value="true"/>
-        <property name="eclipselink.archive.factory" value="org.jipijapa.eclipselink.JBossArchiveFactoryImpl"/>
+       <!-- <property name="eclipselink.archive.factory" value="org.jipijapa.eclipselink.JBossArchiveFactoryImpl"/>-->
     </system-properties>
     <management>
         <security-realms>
