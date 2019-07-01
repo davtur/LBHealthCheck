@@ -10,7 +10,7 @@
         <extension module="org.jboss.as.jaxrs"/>
         <extension module="org.jboss.as.jdr"/>
         <extension module="org.jboss.as.jmx"/>
-       <!-- <extension module="org.jboss.as.jpa"/>-->
+      <!--  <extension module="org.jboss.as.jpa"/>-->
         <extension module="org.jboss.as.jsf"/>
         <extension module="org.jboss.as.logging"/>
         <extension module="org.jboss.as.mail"/>
@@ -33,9 +33,9 @@
     </extensions>
     <system-properties>
         <property name="ee8.preview.mode" value="true"/>
-       <property name="eclipselink.target-server" value="JBoss"/>
-       <property name="eclipselink.archive.factory" value="org.jipijapa.eclipselink.JBossArchiveFactoryImpl"/>
-       <property name="eclipselink.logging.logger" value="org.jipijapa.eclipselink.JBossLogger"/>
+        <property name="eclipselink.target-server" value="JBoss"/>
+        <property name="eclipselink.archive.factory" value="org.jipijapa.eclipselink.JBossArchiveFactoryImpl"/>
+        <property name="eclipselink.logging.logger" value="org.jipijapa.eclipselink.JBossLogger"/>
     </system-properties>
     <management>
         <security-realms>
@@ -399,7 +399,7 @@
                     <file-store passivation="true" purge="false"/>
                 </local-cache>
             </cache-container>
-            <cache-container name="hibernate" module="org.infinispan.hibernate-cache">
+            <!--  <cache-container name="hibernate" module="org.infinispan.hibernate-cache">
                 <local-cache name="entity">
                     <transaction mode="NON_XA"/>
                     <object-memory size="10000"/>
@@ -410,7 +410,7 @@
                     <expiration max-idle="100000"/>
                 </local-cache>
                 <local-cache name="timestamps"/>
-            </cache-container>
+            </cache-container>-->
         </subsystem>
         <subsystem xmlns="urn:jboss:domain:jaxrs:1.0"/>
         <subsystem xmlns="urn:jboss:domain:jca:5.0">
@@ -438,7 +438,7 @@
             <expose-expression-model/>
             <remoting-connector/>
         </subsystem>
-       <subsystem xmlns="urn:jboss:domain:jpa:1.1">
+        <subsystem xmlns="urn:jboss:domain:jpa:1.1">
             <jpa default-datasource="" default-extended-persistence-inheritance="DEEP"/>
         </subsystem>
         <subsystem xmlns="urn:jboss:domain:jsf:1.1"/>
