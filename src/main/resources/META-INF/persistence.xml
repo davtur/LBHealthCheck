@@ -72,7 +72,8 @@ xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org
         <exclude-unlisted-classes>false</exclude-unlisted-classes>
         <shared-cache-mode>ALL</shared-cache-mode>
         <properties>
-            <property name="eclipselink.logging.level" value="INFO"/>
+            <property name="eclipselink.logging.level" value="FINE"/>
+            <property name="eclipselink.logging.logger" value="JavaLogger"/>
             <!--   <property name="eclipselink.cache.coordination.protocol" value="jms"/>
             <property name="eclipselink.cache.coordination.jms.topic" value="jms/PaymentsTopic"/>
             <property name="eclipselink.cache.coordination.jms.factory" value="jms/PaymentsTopicConnectionFactory"/>
@@ -93,7 +94,8 @@ xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
         <shared-cache-mode>ALL</shared-cache-mode>
         <properties>
-            <property name="eclipselink.logging.level" value="INFO"/>
+           <property name="eclipselink.logging.level" value="FINE"/>
+            <property name="eclipselink.logging.logger" value="JavaLogger"/>
             <!--  <property name="eclipselink.cache.coordination.protocol" value="jms"/>
       <property name="eclipselink.cache.coordination.jms.topic" value="jms/PaymentsTopic"/>
       <property name="eclipselink.cache.coordination.jms.factory" value="jms/PaymentsTopicConnectionFactory"/>
