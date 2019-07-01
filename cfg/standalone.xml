@@ -33,7 +33,9 @@
     </extensions>
     <system-properties>
         <property name="ee8.preview.mode" value="true"/>
+       <property name="eclipselink.target-server" value="JBoss"/>
        <property name="eclipselink.archive.factory" value="org.jipijapa.eclipselink.JBossArchiveFactoryImpl"/>
+       <property name="eclipselink.logging.logger" value="org.jipijapa.eclipselink.JBossLogger"/>
     </system-properties>
     <management>
         <security-realms>
