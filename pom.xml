@@ -87,7 +87,7 @@
             <artifactId>jipijapa-eclipselink</artifactId>
             <version>1.0.1.Final</version>
             <type>provided</type>
-        </dependency>
+        </dependency>-->
         <!-- <dependency> <groupId>org.atmosphere</groupId> <artifactId>atmosphere-runtime</artifactId> 
         <version>2.4.6</version> <type>jar</type> <exclusions> <exclusion> <groupId>org.slf4j</groupId> 
         <artifactId>slf4j-api</artifactId> </exclusion> </exclusions> </dependency> -->
