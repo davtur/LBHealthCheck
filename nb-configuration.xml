@@ -28,5 +28,6 @@ Any value defined here will override the pom.xml file value but is only applicab
         <org-netbeans-modules-maven-jaxws._5f_C_5f_nonpci_5f_1>https://api.ezidebit.com.au/v3-5/nonpci?wsdl</org-netbeans-modules-maven-jaxws._5f_C_5f_nonpci_5f_1>
         <org-netbeans-modules-maven-jaxws._5f_C_5f_nonpci_2e_singlewsdl>https://api.demo.ezidebit.com.au/v3-5/nonpci?singleWsdl</org-netbeans-modules-maven-jaxws._5f_C_5f_nonpci_2e_singlewsdl>
         <netbeans.hint.jdkPlatform>JDK_1.8</netbeans.hint.jdkPlatform>
+        <org-netbeans-modules-maven-j2ee.netbeans_2e_hint_2e_deploy_2e_server>WildFly</org-netbeans-modules-maven-j2ee.netbeans_2e_hint_2e_deploy_2e_server>
     </properties>
 </project-shared-configuration>

@@ -2,3 +2,5 @@
 *.class
 *.war
 *.jar
+!eclipse*.jar
+!*eclipse*.jar
