@@ -1,14 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<persistence 
-    version="2.1" 
-    xmlns="http://xmlns.jcp.org/xml/ns/persistence" 
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd">
-    <persistence-unit name="FitnessStatsPU" transaction-type="JTA">
-        <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
-       
+<persistence version="2.1" xmlns="http://xmlns.jcp.org/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd">
+  <persistence-unit name="FitnessStatsPU" transaction-type="JTA">
+    <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
     <jta-data-source>java:/jdbc/fitness</jta-data-source>
-        <!--
+    <!--
            <jta-data-source>jdbc/fitness</jta-data-source>
         <class>au.com.manlyit.fitnesscrm.stats.db.Activation</class>
         <class>au.com.manlyit.fitnesscrm.stats.db.AuditLog</class>
@@ -69,35 +64,33 @@ xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org
         <class>au.com.manlyit.fitnesscrm.stats.db.Tasks</class>
         <class>au.com.manlyit.fitnesscrm.stats.db.ToDoList</class>
         <class>au.com.manlyit.fitnesscrm.stats.db.WebsiteMonitor</class>-->
-        <exclude-unlisted-classes>false</exclude-unlisted-classes>
-        <shared-cache-mode>ALL</shared-cache-mode>
-        <properties>
-            <property name="eclipselink.logging.level" value="FINE"/>
-            <property name="eclipselink.logging.logger" value="JavaLogger"/>
-            <property name="eclipselink.deploy-on-startup" value="True" />
-            <!--   <property name="eclipselink.cache.coordination.protocol" value="jms"/>
+    <exclude-unlisted-classes>false</exclude-unlisted-classes>
+    <shared-cache-mode>ALL</shared-cache-mode>
+    <properties>
+      <property name="eclipselink.logging.level" value="FINE"/>
+      <property name="eclipselink.logging.logger" value="JavaLogger"/>
+      <property name="eclipselink.deploy-on-startup" value="True"/>
+      <!--   <property name="eclipselink.cache.coordination.protocol" value="jms"/>
             <property name="eclipselink.cache.coordination.jms.topic" value="jms/PaymentsTopic"/>
             <property name="eclipselink.cache.coordination.jms.factory" value="jms/PaymentsTopicConnectionFactory"/>
                <property name="eclipselink.cache.coordination.protocol" value="jms"/>
             <property name="eclipselink.cache.coordination.jms.topic" value="jms/PaymentsTopic"/>
             <property name="eclipselink.cache.coordination.jms.factory" value="java:/ConnectionFactory"/>
             <property name="eclipselink.cache.coordination.jms.host" value="192.168.1.102:5445/" />-->
-        </properties>
-    </persistence-unit>
-    <persistence-unit name="FitnessStatsPU2" transaction-type="RESOURCE_LOCAL">
-        <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
-        <non-jta-data-source>java:/jdbc/fitness2</non-jta-data-source>
-       
-        <!--  <non-jta-data-source>jdbc/fitness2</non-jta-data-source>    -->
-   
-        <class>au.com.manlyit.fitnesscrm.stats.db.Monitoringcharts</class>
-        <class>au.com.manlyit.fitnesscrm.stats.db.WebsiteMonitor</class>
-        <exclude-unlisted-classes>true</exclude-unlisted-classes>
-        <shared-cache-mode>ALL</shared-cache-mode>
-        <properties>
-           <property name="eclipselink.logging.level" value="FINE"/>
-            <property name="eclipselink.logging.logger" value="JavaLogger"/>
-            <!--  <property name="eclipselink.cache.coordination.protocol" value="jms"/>
+    </properties>
+  </persistence-unit>
+  <persistence-unit name="FitnessStatsPU2" transaction-type="RESOURCE_LOCAL">
+    <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
+    <non-jta-data-source>java:/jdbc/fitness2</non-jta-data-source>
+    <!--  <non-jta-data-source>jdbc/fitness2</non-jta-data-source>    -->
+    <class>au.com.manlyit.fitnesscrm.stats.db.Monitoringcharts</class>
+    <class>au.com.manlyit.fitnesscrm.stats.db.WebsiteMonitor</class>
+    <exclude-unlisted-classes>true</exclude-unlisted-classes>
+    <shared-cache-mode>ALL</shared-cache-mode>
+    <properties>
+      <property name="eclipselink.logging.level" value="FINE"/>
+      <property name="eclipselink.logging.logger" value="JavaLogger"/>
+      <!--  <property name="eclipselink.cache.coordination.protocol" value="jms"/>
       <property name="eclipselink.cache.coordination.jms.topic" value="jms/PaymentsTopic"/>
       <property name="eclipselink.cache.coordination.jms.factory" value="jms/PaymentsTopicConnectionFactory"/>
          <property name="eclipselink.cache.coordination.protocol" value="jms"/>
@@ -107,6 +100,6 @@ xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org
             <property name="eclipselink.cache.coordination.jms.topic" value="jms/PaymentsTopic"/>
             <property name="eclipselink.cache.coordination.jms.factory" value="java:/ConnectionFactory"/>
             <property name="eclipselink.cache.coordination.jms.host" value="192.168.1.102:5445/" />-->
-        </properties>
-    </persistence-unit>
+    </properties>
+  </persistence-unit>
 </persistence>
