@@ -4,3 +4,4 @@
 *.jar
 !eclipse*.jar
 !*eclipse*.jar
+!mysql*.jar
