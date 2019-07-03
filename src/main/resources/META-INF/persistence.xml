@@ -73,7 +73,8 @@
       <property name="eclipselink.logging.level" value="ALL"/>
       <property name="eclipselink.logging.logger" value="JavaLogger"/>
       <property name="eclipselink.deploy-on-startup" value="True"/>
-      <!--   <property name="eclipselink.cache.coordination.protocol" value="jms"/>
+      <property name="wildfly.jpa.hibernate.search.module" value="none" />
+    	<!--   <property name="eclipselink.cache.coordination.protocol" value="jms"/>
             <property name="eclipselink.cache.coordination.jms.topic" value="jms/PaymentsTopic"/>
             <property name="eclipselink.cache.coordination.jms.factory" value="jms/PaymentsTopicConnectionFactory"/>
                <property name="eclipselink.cache.coordination.protocol" value="jms"/>
@@ -82,6 +83,10 @@
             <property name="eclipselink.cache.coordination.jms.host" value="192.168.1.102:5445/" />-->
     </properties>
   </persistence-unit>
+  
+  
+  
+  
   <persistence-unit name="FitnessStatsPU2" transaction-type="RESOURCE_LOCAL">
     <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
     
@@ -96,6 +101,7 @@
     <properties>
       <property name="eclipselink.logging.level" value="ALL"/>
       <property name="eclipselink.logging.logger" value="JavaLogger"/>
+      <property name="wildfly.jpa.hibernate.search.module" value="none" />
       <!--  <property name="eclipselink.cache.coordination.protocol" value="jms"/>
       <property name="eclipselink.cache.coordination.jms.topic" value="jms/PaymentsTopic"/>
       <property name="eclipselink.cache.coordination.jms.factory" value="jms/PaymentsTopicConnectionFactory"/>
