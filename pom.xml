@@ -350,6 +350,86 @@
 
             <build>
                 <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-war-plugin</artifactId>
+                        <version>3.2.3</version>
+                        <configuration>
+                             <warName>ROOT</warName>
+                            
+                            <webResources>
+                                <resource>
+                                    <directory>src</directory>
+                                    <targetPath>WEB-INF</targetPath>
+                                    <includes>
+                                        <include>jax-ws-catalog.xml</include>
+                                        <include>wsdl/**</include>
+                                    </includes>
+                                </resource>
+                                <resource>
+                                    <directory>src</directory>
+                                    <targetPath>WEB-INF/classes/META-INF</targetPath>
+                                    <includes>
+                                        <include>jax-ws-catalog.xml</include>
+                                        <include>wsdl/**</include>
+                                    </includes>
+                                </resource>
+                            </webResources>
+                        </configuration>
+                        
+                    </plugin>
+                     <plugin>
+                        <groupId>org.jvnet.jax-ws-commons</groupId>
+                        <artifactId>jaxws-maven-plugin</artifactId>
+                        <version>2.3.1-b20150201.1248</version>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>wsimport</goal>
+                                </goals>
+                                <configuration>
+                                    <wsdlFiles>
+                                        <wsdlFile>api.demo.ezidebit.com.au/v3-5/nonpci.wsdl</wsdlFile>
+                                    </wsdlFiles>
+                                    <packageName>au.com.manlyit.fitnesscrm.stats.webservices</packageName>
+                                    <vmArgs>
+                                        <vmArg>-Djavax.xml.accessExternalSchema=all</vmArg>
+                                    </vmArgs>
+                                    <wsdlLocation>https://api.demo.ezidebit.com.au/v3-5/nonpci?wsdl</wsdlLocation>
+                                    <staleFile>${project.build.directory}/jaxws/stale/nonpci.stale</staleFile>
+                                </configuration>
+                                <id>wsimport-generate-nonpci</id>
+                                <phase>generate-sources</phase>
+                            </execution>
+                        </executions>
+                        <dependencies>
+                            <dependency>
+                                <groupId>javax.xml</groupId>
+                                <artifactId>webservices-api</artifactId>
+                                <version>2.0.1</version>
+                            </dependency>
+                        </dependencies>
+                        <configuration>
+                            <sourceDestDir>${project.build.directory}/generated-sources/jaxws-wsimport</sourceDestDir>
+                            <xnocompile>true</xnocompile>
+                            <verbose>true</verbose>
+                            <extension>true</extension>
+                            <catalog>${basedir}/src/jax-ws-catalog.xml</catalog>
+                        </configuration>
+                    </plugin>
+                </plugins>
+                <finalName>${project.artifactId}-${project.version}.${buildNumber}</finalName>
+             </build>
+        </profile>
+
+
+
+        <profile>
+            
+            <id>default</id>
+
+            <build>
+                <plugins>
                     <!-- <plugin>
                         <groupId>org.wildfly.plugins</groupId>
                         <artifactId>wildfly-maven-plugin</artifactId>
@@ -618,5 +698,6 @@
                 </plugins>
             </reporting>
         </profile>
+
     </profiles>
 </project>
