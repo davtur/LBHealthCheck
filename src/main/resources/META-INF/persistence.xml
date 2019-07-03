@@ -74,6 +74,7 @@
       <property name="eclipselink.logging.logger" value="JavaLogger"/>
       <property name="eclipselink.deploy-on-startup" value="True"/>
       <property name="wildfly.jpa.hibernate.search.module" value="none" />
+      <property name="eclipselink.target-server" value="JBoss"/>
     	<!--   <property name="eclipselink.cache.coordination.protocol" value="jms"/>
             <property name="eclipselink.cache.coordination.jms.topic" value="jms/PaymentsTopic"/>
             <property name="eclipselink.cache.coordination.jms.factory" value="jms/PaymentsTopicConnectionFactory"/>
@@ -102,6 +103,7 @@
       <property name="eclipselink.logging.level" value="ALL"/>
       <property name="eclipselink.logging.logger" value="JavaLogger"/>
       <property name="wildfly.jpa.hibernate.search.module" value="none" />
+      <property name="eclipselink.target-server" value="JBoss"/>
       <!--  <property name="eclipselink.cache.coordination.protocol" value="jms"/>
       <property name="eclipselink.cache.coordination.jms.topic" value="jms/PaymentsTopic"/>
       <property name="eclipselink.cache.coordination.jms.factory" value="jms/PaymentsTopicConnectionFactory"/>
