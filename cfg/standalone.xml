@@ -59,6 +59,7 @@
 
                 </server-identities>
                 <authentication>
+                    <truststore path="home-manlyit.p12" relative-to="jboss.server.config.dir" keystore-password="Surf2day"/>
                     <local default-user="$local" allowed-users="*" skip-group-loading="true"/>
                     <properties path="application-users.properties" relative-to="jboss.server.config.dir"/>
                 </authentication>
@@ -152,7 +153,8 @@
             <datasources>
                 <datasource jta="true" jndi-name="java:/jdbc/fitness" pool-name="fitness" enabled="true" use-java-context="true" use-ccm="false">
                     <connection-url>jdbc:mysql://${env.OPENSHIFT_MYSQL_DB_HOST}:${env.OPENSHIFT_MYSQL_DB_PORT}/${env.OPENSHIFT_MYSQL_DB_NAME}</connection-url>
-                    <driver>mysql</driver>
+                    <driver-class>com.mysql.jdbc.Driver</driver-class>
+                    <driver>mysql-connector-java-5.1.45.jar_com.mysql.jdbc.Driver_5_1</driver>
                     <security>
                         <user-name>${env.OPENSHIFT_MYSQL_DB_USERNAME}</user-name>
                         <password>${env.OPENSHIFT_MYSQL_DB_PASSWORD}</password>
@@ -169,7 +171,8 @@
                 </datasource>
                 <datasource jta="true" jndi-name="java:/jdbc/fitness2" pool-name="fitness2" enabled="true" use-ccm="true">
                     <connection-url>jdbc:mysql://${env.OPENSHIFT_MYSQL_DB_HOST}:${env.OPENSHIFT_MYSQL_DB_PORT}/${env.OPENSHIFT_MYSQL_DB_NAME}</connection-url>
-                    <driver>mysql</driver>
+                    <driver-class>com.mysql.jdbc.Driver</driver-class>
+                    <driver>mysql-connector-java-5.1.45.jar_com.mysql.jdbc.Driver_5_1</driver>
                     <security>
                         <user-name>${env.OPENSHIFT_MYSQL_DB_USERNAME}</user-name>
                         <password>${env.OPENSHIFT_MYSQL_DB_PASSWORD}</password>
@@ -205,6 +208,7 @@
                     <driver name="mysql" module="com.mysql.jdbc"> 
                         <driver-class>com.mysql.jdbc.Driver</driver-class>
                         <xa-datasource-class>com.mysql.jdbc.jdbc2.optional.MysqlXADataSource</xa-datasource-class>
+                        <driver>mysql-connector-java-5.1.45.jar_com.mysql.jdbc.Driver_5_1</driver>
                     </driver> 
                     <driver name="h2" module="com.h2database.h2">
                         <xa-datasource-class>org.h2.jdbcx.JdbcDataSource</xa-datasource-class>
@@ -378,6 +382,23 @@
                 </mechanism-provider-filtering-sasl-server-factory>
                 <provider-sasl-server-factory name="global"/>
             </sasl>
+            <tls>
+                <key-stores>
+                    <key-store name="server">
+                        <credential-reference clear-text="Surf2day"/>
+                        <implementation type="jks"/>
+                        <file path="home-manlyit.p12" relative-to="jboss.server.config.dir"/>
+                    </key-store>
+                </key-stores>
+                <key-managers>
+                    <key-manager name="server" key-store="server">
+                        <credential-reference clear-text="Surf2day"/>
+                    </key-manager>
+                </key-managers>
+                <server-ssl-contexts>
+                    <server-ssl-context name="server" protocols="TLSv1.2" key-manager="server"/>
+                </server-ssl-contexts>
+            </tls>
         </subsystem>
         <subsystem xmlns="urn:jboss:domain:io:2.0">
             <worker name="default"/>
