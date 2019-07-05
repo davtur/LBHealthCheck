@@ -208,7 +208,6 @@
                     <driver name="mysql" module="com.mysql.jdbc"> 
                         <driver-class>com.mysql.jdbc.Driver</driver-class>
                         <xa-datasource-class>com.mysql.jdbc.jdbc2.optional.MysqlXADataSource</xa-datasource-class>
-                        <driver>mysql-connector-java-5.1.45.jar_com.mysql.jdbc.Driver_5_1</driver>
                     </driver> 
                     <driver name="h2" module="com.h2database.h2">
                         <xa-datasource-class>org.h2.jdbcx.JdbcDataSource</xa-datasource-class>
