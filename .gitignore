@@ -5,3 +5,4 @@
 !eclipse*.jar
 !*eclipse*.jar
 !mysql*.jar
+!FitnessCRM-8.3.6.war
