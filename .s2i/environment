@@ -1,1 +1,2 @@
 MYSQL_DATABASE=true
+JAVA_OPTIONS= -Xmx=1g
