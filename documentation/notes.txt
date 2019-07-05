@@ -1,4 +1,7 @@
+## startup wildfly 12 with standalone-ee8.xml
 
+BalusC commented on 2 Apr 2018 • 
+That will happen if you're deploying javaee8-jsf23 to stock WildFly 12, which runs in Java EE 7 mode. In order to enable Java EE 8 mode in WildFly 12, you need to startup WildFly 12 with standalone-ee8.xml as instructed in http://wildfly.org/news/2018/02/28/WildFly12-Final-Released
 
 
 ### accessing managed beans in a servlet ###
