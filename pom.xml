@@ -6,9 +6,8 @@
 
     <groupId>au.com.manlyit</groupId>
     <artifactId>FitnessCRM</artifactId>
-    <version>8.3.6</version>
     <packaging>war</packaging>
-
+    <version>8.3.7</version>
     <name>FitnessCRM</name>
 
     <properties>
@@ -351,6 +350,7 @@
             <id>openshift</id>
 
             <build>
+                <finalName>${project.artifactId}-${project.version}</finalName>
                 <plugins>
                      <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
@@ -370,9 +370,10 @@
                         <artifactId>maven-war-plugin</artifactId>
                         <version>3.2.3</version>
                         <configuration>
-                            
-                            
-                            <webResources>
+                            <failOnMissingWebXml>false</failOnMissingWebXml>
+                            <outputDirectory>target</outputDirectory>
+                            <warName>ROOT</warName>
+                             <webResources>
                                 <resource>
                                     <directory>src</directory>
                                     <targetPath>WEB-INF</targetPath>
@@ -391,8 +392,7 @@
                                 </resource>
                             </webResources>
                         </configuration>
-                        
-                    </plugin>
+                     </plugin>
                      <plugin>
                         <groupId>org.jvnet.jax-ws-commons</groupId>
                         <artifactId>jaxws-maven-plugin</artifactId>
@@ -433,7 +433,7 @@
                         </configuration>
                     </plugin>
                 </plugins>
-                <finalName>${project.artifactId}-${project.version}.${buildNumber}</finalName>
+                
              </build>
         </profile>
 
