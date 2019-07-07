@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-
+<!-- Dodgy Daves from/cfg directory -->
 <server xmlns="urn:jboss:domain:6.0">
     <extensions>
         <extension module="org.jboss.as.clustering.infinispan"/>
@@ -33,9 +33,7 @@
     </extensions>
     <system-properties>
         <property name="ee8.preview.mode" value="true"/>
-        <property name="eclipselink.target-server" value="JBoss"/>
         <property name="eclipselink.archive.factory" value="org.jipijapa.eclipselink.JBossArchiveFactoryImpl"/>
-        <property name="eclipselink.logging.logger" value="org.jipijapa.eclipselink.JBossLogger"/>
     </system-properties>
     <management>
         <security-realms>
@@ -147,7 +145,15 @@
         <subsystem xmlns="urn:jboss:domain:core-management:1.0"/>
         <subsystem xmlns="urn:jboss:domain:datasources:5.0">
             <datasources>
-               <datasource jta="true" jndi-name="java:/jdbc/fitness" pool-name="fitness" enabled="true" use-ccm="false">
+                <datasource jndi-name="java:jboss/datasources/ExampleDS" pool-name="ExampleDS" enabled="true" use-java-context="true">
+                    <connection-url>jdbc:h2:mem:test;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE</connection-url>
+                    <driver>h2</driver>
+                    <security>
+                        <user-name>sa</user-name>
+                        <password>sa</password>
+                    </security>
+                </datasource>
+                <datasource jta="true" jndi-name="java:/jdbc/fitness" pool-name="fitness" enabled="true" use-java-context="true" use-ccm="false">
                     <connection-url>jdbc:mysql://${env.OPENSHIFT_MYSQL_DB_HOST}:${env.OPENSHIFT_MYSQL_DB_PORT}/${env.OPENSHIFT_MYSQL_DB_NAME}</connection-url>
                     <driver-class>com.mysql.jdbc.Driver</driver-class>
                     <driver>mysql-connector-java-5.1.45.jar_com.mysql.jdbc.Driver_5_1</driver>
@@ -156,9 +162,10 @@
                         <password>${env.OPENSHIFT_MYSQL_DB_PASSWORD}</password>
                     </security>
                     <validation>
-                        <valid-connection-checker class-name="org.jboss.jca.adapters.jdbc.extensions.mysql.MySQLValidConnectionChecker"/>
+                        <check-valid-connection-sql>SELECT 1</check-valid-connection-sql>
                         <background-validation>true</background-validation>
-                        <exception-sorter class-name="org.jboss.jca.adapters.jdbc.extensions.mysql.MySQLExceptionSorter"/>
+                        <background-validation-millis>60000</background-validation-millis>
+                        <!--<validate-on-match>true</validate-on-match>-->
                     </validation>
                 </datasource>
                 <datasource jta="true" jndi-name="java:/jdbc/fitness2" pool-name="fitness2" enabled="true" use-ccm="true">
@@ -576,4 +583,7 @@
             <remote-destination host="${env.OPENSHIFT_SMTP_HOST}" port="25"/>
         </outbound-socket-binding>
     </socket-binding-group>
+    <deployments>
+        
+    </deployments>
 </server>
