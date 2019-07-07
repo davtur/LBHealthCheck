@@ -33,9 +33,7 @@
     </extensions>
     <system-properties>
         <property name="ee8.preview.mode" value="true"/>
-        <property name="eclipselink.target-server" value="JBoss"/>
         <property name="eclipselink.archive.factory" value="org.jipijapa.eclipselink.JBossArchiveFactoryImpl"/>
-        <property name="eclipselink.logging.logger" value="org.jipijapa.eclipselink.JBossLogger"/>
     </system-properties>
     <management>
         <security-realms>
@@ -50,11 +48,12 @@
             </security-realm>
             <security-realm name="ApplicationRealm">
                 <server-identities>
-                    <ssl>
-                        <keystore path="application.keystore" relative-to="jboss.server.config.dir" keystore-password="password" alias="server" key-password="password" generate-self-signed-certificate-host="localhost"/>
+                    <ssl protocol="openssl.TLSv1.2">
+                        <keystore path="home-manlyit.p12" relative-to="jboss.server.config.dir" keystore-password="Surf2day" alias="homemanlyit" key-password="Surf2day"/>
                     </ssl>
                 </server-identities>
                 <authentication>
+                    <truststore path="home-manlyit.p12" relative-to="jboss.server.config.dir" keystore-password="Surf2day"/>
                     <local default-user="$local" allowed-users="*" skip-group-loading="true"/>
                     <properties path="application-users.properties" relative-to="jboss.server.config.dir"/>
                 </authentication>
@@ -146,9 +145,18 @@
         <subsystem xmlns="urn:jboss:domain:core-management:1.0"/>
         <subsystem xmlns="urn:jboss:domain:datasources:5.0">
             <datasources>
+                <datasource jndi-name="java:jboss/datasources/ExampleDS" pool-name="ExampleDS" enabled="true" use-java-context="true">
+                    <connection-url>jdbc:h2:mem:test;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE</connection-url>
+                    <driver>h2</driver>
+                    <security>
+                        <user-name>sa</user-name>
+                        <password>sa</password>
+                    </security>
+                </datasource>
                 <datasource jta="true" jndi-name="java:/jdbc/fitness" pool-name="fitness" enabled="true" use-java-context="true" use-ccm="false">
                     <connection-url>jdbc:mysql://${env.OPENSHIFT_MYSQL_DB_HOST}:${env.OPENSHIFT_MYSQL_DB_PORT}/${env.OPENSHIFT_MYSQL_DB_NAME}</connection-url>
-                    <driver>mysql</driver>
+                    <driver-class>com.mysql.jdbc.Driver</driver-class>
+                    <driver>mysql-connector-java-5.1.45.jar_com.mysql.jdbc.Driver_5_1</driver>
                     <security>
                         <user-name>${env.OPENSHIFT_MYSQL_DB_USERNAME}</user-name>
                         <password>${env.OPENSHIFT_MYSQL_DB_PASSWORD}</password>
@@ -159,49 +167,36 @@
                         <background-validation-millis>60000</background-validation-millis>
                         <!--<validate-on-match>true</validate-on-match>-->
                     </validation>
-                    <pool>
-                        <flush-strategy>IdleConnections</flush-strategy>
-                    </pool>
                 </datasource>
                 <datasource jta="true" jndi-name="java:/jdbc/fitness2" pool-name="fitness2" enabled="true" use-ccm="true">
                     <connection-url>jdbc:mysql://${env.OPENSHIFT_MYSQL_DB_HOST}:${env.OPENSHIFT_MYSQL_DB_PORT}/${env.OPENSHIFT_MYSQL_DB_NAME}</connection-url>
-                    <driver>mysql</driver>
+                    <driver-class>com.mysql.jdbc.Driver</driver-class>
+                    <driver>mysql-connector-java-5.1.45.jar_com.mysql.jdbc.Driver_5_1</driver>
                     <security>
                         <user-name>${env.OPENSHIFT_MYSQL_DB_USERNAME}</user-name>
                         <password>${env.OPENSHIFT_MYSQL_DB_PASSWORD}</password>
                     </security>
                     <validation>
-                        <check-valid-connection-sql>SELECT 1</check-valid-connection-sql>
+                        <valid-connection-checker class-name="org.jboss.jca.adapters.jdbc.extensions.mysql.MySQLValidConnectionChecker"/>
                         <background-validation>true</background-validation>
-                        <background-validation-millis>60000</background-validation-millis>
-                        <!--<validate-on-match>true</validate-on-match>-->
+                        <exception-sorter class-name="org.jboss.jca.adapters.jdbc.extensions.mysql.MySQLExceptionSorter"/>
                     </validation>
-                    <pool>
-                        <flush-strategy>IdleConnections</flush-strategy>
-                    </pool>
                 </datasource>
                 <datasource jta="true" jndi-name="java:/jdbc/quartz" pool-name="quartz" enabled="true" use-ccm="true">
                     <connection-url>jdbc:mysql://${env.OPENSHIFT_MYSQL_DB_HOST}:${env.OPENSHIFT_MYSQL_DB_PORT}/${env.OPENSHIFT_MYSQL_DB_NAME}</connection-url>
-                    <driver>mysql</driver>
+                    <driver-class>com.mysql.jdbc.Driver</driver-class>
+                    <driver>mysql-connector-java-5.1.45.jar_com.mysql.jdbc.Driver_5_1</driver>
                     <security>
                         <user-name>${env.OPENSHIFT_MYSQL_DB_USERNAME}</user-name>
                         <password>${env.OPENSHIFT_MYSQL_DB_PASSWORD}</password>
                     </security>
                     <validation>
-                        <check-valid-connection-sql>SELECT 1</check-valid-connection-sql>
+                        <valid-connection-checker class-name="org.jboss.jca.adapters.jdbc.extensions.mysql.MySQLValidConnectionChecker"/>
                         <background-validation>true</background-validation>
-                        <background-validation-millis>60000</background-validation-millis>
-                        <!--<validate-on-match>true</validate-on-match>-->
+                        <exception-sorter class-name="org.jboss.jca.adapters.jdbc.extensions.mysql.MySQLExceptionSorter"/>
                     </validation>
-                    <pool>
-                        <flush-strategy>IdleConnections</flush-strategy>
-                    </pool>
                 </datasource>
                 <drivers>
-                    <driver name="mysql" module="com.mysql.jdbc"> 
-                        <driver-class>com.mysql.jdbc.Driver</driver-class>
-                        <xa-datasource-class>com.mysql.jdbc.jdbc2.optional.MysqlXADataSource</xa-datasource-class>
-                    </driver> 
                     <driver name="h2" module="com.h2database.h2">
                         <xa-datasource-class>org.h2.jdbcx.JdbcDataSource</xa-datasource-class>
                     </driver>
@@ -227,7 +222,6 @@
                     <managed-scheduled-executor-service name="default" jndi-name="java:jboss/ee/concurrency/scheduler/default" context-service="default" hung-task-threshold="60000" keepalive-time="3000"/>
                 </managed-scheduled-executor-services>
             </concurrent>
-            
             <default-bindings context-service="java:jboss/ee/concurrency/context/default" datasource="java:jboss/datasources/ExampleDS" managed-executor-service="java:jboss/ee/concurrency/executor/default" managed-scheduled-executor-service="java:jboss/ee/concurrency/scheduler/default" managed-thread-factory="java:jboss/ee/concurrency/factory/default"/>
         </subsystem>
         <subsystem xmlns="urn:jboss:domain:ejb3:5.0">
@@ -276,8 +270,8 @@
         <subsystem xmlns="urn:wildfly:elytron:2.0" final-providers="combined-providers" disallowed-providers="OracleUcrypto">
             <providers>
                 <aggregate-providers name="combined-providers">
-                    <providers name="elytron"/>
                     <providers name="openssl"/>
+                    <providers name="elytron"/>
                 </aggregate-providers>
                 <provider-loader name="elytron" module="org.wildfly.security.elytron"/>
                 <provider-loader name="openssl" module="org.wildfly.openssl"/>
@@ -374,6 +368,23 @@
                 </mechanism-provider-filtering-sasl-server-factory>
                 <provider-sasl-server-factory name="global"/>
             </sasl>
+            <tls>
+                <key-stores>
+                    <key-store name="server">
+                        <credential-reference clear-text="Surf2day"/>
+                        <implementation type="jks"/>
+                        <file path="home-manlyit.p12" relative-to="jboss.server.config.dir"/>
+                    </key-store>
+                </key-stores>
+                <key-managers>
+                    <key-manager name="server" key-store="server">
+                        <credential-reference clear-text="Surf2day"/>
+                    </key-manager>
+                </key-managers>
+                <server-ssl-contexts>
+                    <server-ssl-context name="server" protocols="TLSv1.2" key-manager="server"/>
+                </server-ssl-contexts>
+            </tls>
         </subsystem>
         <subsystem xmlns="urn:jboss:domain:io:2.0">
             <worker name="default"/>
@@ -557,7 +568,7 @@
             <inet-address value="${jboss.bind.address.management:127.0.0.1}"/>
         </interface>
         <interface name="public">
-            <inet-address value="${jboss.bind.address:127.0.0.1}"/>
+            <inet-address value="${jboss.bind.address:0.0.0.0}"/>
         </interface>
     </interfaces>
     <socket-binding-group name="standard-sockets" default-interface="public" port-offset="${jboss.socket.binding.port-offset:0}">
@@ -572,4 +583,7 @@
             <remote-destination host="${env.OPENSHIFT_SMTP_HOST}" port="25"/>
         </outbound-socket-binding>
     </socket-binding-group>
+    <deployments>
+        
+    </deployments>
 </server>
