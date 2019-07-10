@@ -154,7 +154,7 @@
                     </security>
                 </datasource>
                 <datasource jta="true" jndi-name="java:/jdbc/fitness" pool-name="fitness" enabled="true" use-ccm="false">
-                    <connection-url>jdbc:mysql://172.17.0.1:3306/fitnessStats</connection-url>
+                    <connection-url>jdbc:mysql://172.17.0.2:3306/fitnessStats</connection-url>
                     <driver-class>com.mysql.jdbc.Driver</driver-class>
                     <driver>mysql-connector-java-5.1.45.jar_com.mysql.jdbc.Driver_5_1</driver>
                     <security>
@@ -168,7 +168,7 @@
                     </validation>
                 </datasource>
                 <datasource jta="true" jndi-name="java:/jdbc/fitness2" pool-name="fitness2" enabled="true" use-ccm="true">
-                    <connection-url>jdbc:mysql://172.17.0.1:3306/fitnessStats</connection-url>
+                    <connection-url>jdbc:mysql://172.17.0.2:3306/fitnessStats</connection-url>
                     <driver-class>com.mysql.jdbc.Driver</driver-class>
                     <driver>mysql-connector-java-5.1.45.jar_com.mysql.jdbc.Driver_5_1</driver>
                     <security>
@@ -182,7 +182,7 @@
                     </validation>
                 </datasource>
                 <datasource jta="true" jndi-name="java:/jdbc/quartz" pool-name="quartz" enabled="true" use-ccm="true">
-                    <connection-url>jdbc:mysql://172.17.0.1:3306/fitnessStats</connection-url>
+                    <connection-url>jdbc:mysql://172.17.0.2:3306/fitnessStats</connection-url>
                     <driver-class>com.mysql.jdbc.Driver</driver-class>
                     <driver>mysql-connector-java-5.1.45.jar_com.mysql.jdbc.Driver_5_1</driver>
                     <security>
