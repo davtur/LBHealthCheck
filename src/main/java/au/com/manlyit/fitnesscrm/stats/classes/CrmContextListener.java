@@ -83,7 +83,7 @@ public final class CrmContextListener
      */
     @Override
     public void attributeRemoved(ServletContextAttributeEvent event) {
-       /* if (event != null) {
+        /* if (event != null) {
             String eventName = event.getName();
             String eventValue = "EMPTY";
             Object eventValObject = event.getValue();
@@ -147,7 +147,7 @@ public final class CrmContextListener
          System.out.println("EntityManagerFactory was NULL no need to close.");
          }*/
 
-        /*  try {
+ /*  try {
          main.setCancelled(true);
          exec.shutdown();
          exec.awaitTermination(30, TimeUnit.SECONDS);
@@ -186,14 +186,15 @@ public final class CrmContextListener
      */
     @Override
     public void contextInitialized(ServletContextEvent event) {
-        logger.log(Level.INFO, "INITIALISING CONTEXT with class contextListener1");
-        this.context = event.getServletContext();
-        logger.log(Level.INFO, "contextInitialized()");
-        this.context.setAttribute("Operations.Group", tGroup);
+        try {
+            logger.log(Level.INFO, "INITIALISING CONTEXT with class contextListener1");
+            this.context = event.getServletContext();
+            logger.log(Level.INFO, "contextInitialized()");
+            this.context.setAttribute("Operations.Group", tGroup);
 
-        //ThreadGroup tGroup = Thread.currentThread().getThreadGroup();
+            //ThreadGroup tGroup = Thread.currentThread().getThreadGroup();
 
-        /* try {
+            /* try {
          main = new MainThread();
          main.setServCtx(context);
          exec.submit(main);
@@ -201,8 +202,7 @@ public final class CrmContextListener
          } catch (RejectedExecutionException exception) {
          System.out.println(exception.getMessage());
          }*/
-        StdSchedulerFactory factory;
-        try {
+            StdSchedulerFactory factory;
 
             String configFile = context.getInitParameter("config-file");
             String shutdownPref = context.getInitParameter("shutdown-on-unload");
